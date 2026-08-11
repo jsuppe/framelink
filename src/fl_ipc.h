@@ -44,6 +44,10 @@ class Channel {
     static Channel connect(const std::string& name, uint32_t timeoutMs);
 
     bool send(MsgType type, const void* payload, size_t size);
+    // POSIX only: the ring's dma-buf fds travel as SCM_RIGHTS ancillary data,
+    // because an fd cannot be sent as a number. On Windows this is send().
+    bool sendWithFds(MsgType type, const void* payload, size_t size, const int* fds,
+                     size_t fdCount);
     bool send(MsgType type) { return send(type, nullptr, 0); }
     template <typename T>
     bool send(MsgType type, const T& value) {

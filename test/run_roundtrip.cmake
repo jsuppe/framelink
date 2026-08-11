@@ -8,8 +8,8 @@
 # checking pixels.
 
 execute_process(
-    COMMAND "${PRODUCER}" flci 400 0
-    COMMAND "${CONSUMER}" flci 20
+    COMMAND "${PRODUCER}" ${PRODUCER_ARGS}
+    COMMAND "${CONSUMER}" ${CONSUMER_ARGS}
     RESULT_VARIABLE rc
     OUTPUT_VARIABLE out
     ERROR_VARIABLE err

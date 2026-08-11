@@ -21,7 +21,11 @@ enum class MsgType : uint32_t {
     Hello = 1,      // consumer -> producer: version + adapter
     RingDesc = 2,   // consumer -> producer: the buffers, duplicated in
     FrameReady = 3, // producer -> consumer: slot N is drawn
-    Bye = 4,        // either way: orderly shutdown
+    // POSIX only. Windows recycles slots through the shared consumed fence,
+    // which the producer can poll; without a shared fence the consumer has to
+    // say so explicitly.
+    FrameReleased = 4,
+    Bye = 5,        // either way: orderly shutdown
 };
 
 #pragma pack(push, 4)
@@ -44,11 +48,24 @@ struct HelloMsg {
 
 struct RingDescMsg {
     uint32_t width, height;
-    uint32_t format;     // flFormat
+    uint32_t format;   // flFormat
     uint32_t poolSize;
-    uint64_t texture[kMaxPool];  // NT handles, valid in the RECEIVING process
-    uint64_t readyFence;         // producer signals, consumer waits
-    uint64_t consumedFence;      // consumer signals, producer waits
+
+    // Windows: NT handles already duplicated into the receiving process, plus
+    // a shared timeline fence pair.
+    uint64_t texture[kMaxPool];
+    uint64_t readyFence;    // producer signals, consumer waits
+    uint64_t consumedFence; // consumer signals, producer waits
+
+    // POSIX: the buffers themselves arrive as SCM_RIGHTS fds alongside this
+    // message - an fd cannot be sent as a number - and these describe how to
+    // interpret them. One plane only for now (BGRA8), which is why there is no
+    // per-plane dimension here.
+    uint64_t stride[kMaxPool];
+    uint64_t offset[kMaxPool];
+    uint64_t modifier; // DRM format modifier, same for every slot
+    uint32_t fourcc;   // DRM_FORMAT_*
+    uint32_t _pad;
 };
 
 struct FrameReadyMsg {

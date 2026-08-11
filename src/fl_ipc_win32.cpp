@@ -94,6 +94,13 @@ Channel Channel::connect(const std::string& name, uint32_t timeoutMs) {
     }
 }
 
+bool Channel::sendWithFds(MsgType type, const void* payload, size_t size, const int*,
+                          size_t fdCount) {
+    // Windows has no fd passing; handles are duplicated into the peer and sent
+    // as values inside the payload instead.
+    return fdCount == 0 && send(type, payload, size);
+}
+
 bool Channel::send(MsgType type, const void* payload, size_t size) {
     if (!connected_) return false;
     if (sizeof(MsgHeader) + size > kBufferSize) return false;
