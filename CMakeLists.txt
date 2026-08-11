@@ -9,6 +9,7 @@ option(FRAMELINK_BUILD_TESTS "Build the framelink self-tests" ON)
 if(WIN32)
     add_library(framelink SHARED
         src/framelink_win.cpp
+        src/framelink_slots.cpp
         src/fl_ipc_win32.cpp)
     target_link_libraries(framelink PRIVATE d3d11 dxgi)
     target_compile_definitions(framelink PRIVATE _CRT_SECURE_NO_WARNINGS)
@@ -20,10 +21,11 @@ elseif(UNIX AND NOT ANDROID)
     pkg_check_modules(DRM REQUIRED IMPORTED_TARGET libdrm)
     add_library(framelink SHARED
         src/framelink_linux.cpp
+        src/framelink_slots.cpp
         src/fl_ipc_posix.cpp)
     target_link_libraries(framelink PRIVATE PkgConfig::GBM PkgConfig::DRM pthread)
     set_target_properties(framelink PROPERTIES
-        PUBLIC_HEADER "include/framelink.h;include/framelink_dmabuf.h")
+        PUBLIC_HEADER "include/framelink.h;include/framelink_dmabuf.h;include/framelink_slots.h")
 else()
     # Android (AHardwareBuffer) is next; the wire format already accounts for it.
     message(FATAL_ERROR "framelink has no backend for this platform yet")
@@ -36,7 +38,7 @@ target_include_directories(framelink
 set_target_properties(framelink PROPERTIES VERSION ${PROJECT_VERSION})
 if(WIN32)
     set_target_properties(framelink PROPERTIES
-        PUBLIC_HEADER "include/framelink.h;include/framelink_d3d11.h")
+        PUBLIC_HEADER "include/framelink.h;include/framelink_d3d11.h;include/framelink_slots.h")
 endif()
 
 if(FRAMELINK_BUILD_TESTS)
