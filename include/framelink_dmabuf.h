@@ -29,19 +29,14 @@ FL_API flResult flImageDmabuf(flImage*, flDmabuf* out);
 // A CPU pointer to the buffer, for consumers that must read pixels - writing to
 // a v4l2loopback node, for instance, or encoding on the CPU.
 //
-// Only valid when the channel was created FL_MAP_CPU; otherwise
+// Only valid when the channel was created with FL_MAP_CPU; otherwise
 // FL_FORMAT_UNSUPPORTED, because a tiled or device-local buffer cannot be
 // meaningfully addressed byte-wise.
 FL_API flResult flImageMap(flImage*, void** pixels, uint64_t* stride);
 FL_API void     flImageUnmap(flImage*);
 
-// Pass as `poolSize`'s neighbour via flCreateChannelEx to force linear,
-// CPU-mappable allocation. Costs GPU performance, buys flImageMap.
-#define FL_MAP_CPU 0x1
-
-FL_API flResult flCreateChannelEx(const char* name, uint32_t width, uint32_t height,
-                                  flFormat format, uint32_t poolSize, uint32_t flags,
-                                  flChannel** out);
+// FL_MAP_CPU and flCreateChannelEx now live in framelink.h - the flags are not
+// dma-buf specific and a Windows consumer needs them too.
 
 #ifdef __cplusplus
 }

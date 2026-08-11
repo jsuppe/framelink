@@ -92,6 +92,33 @@ typedef struct flFrame {
 
 FL_API flResult flCreateChannel(const char* name, uint32_t width, uint32_t height,
                                 flFormat format, uint32_t poolSize, flChannel** out);
+
+// Channel flags for flCreateChannelEx.
+//
+// FL_MAP_CPU   - allocate so flImageMap works (Linux: forces a LINEAR buffer).
+//                Costs GPU performance; needed by anything that reads pixels,
+//                a v4l2loopback writer being the reason it exists.
+// FL_GPU_SYNC  - "I own both fences." The consumer waits on the ready fence and
+//                signals the consumed fence inside its OWN GPU submit:
+//
+//                  flSharedReadyFence()     -> wait at flFrame::_readyValue
+//                  flSharedConsumedFence()  -> signal the same value when your
+//                                              reads of that frame complete
+//
+//                framelink then neither blocks a thread in flAcquireFrame nor
+//                signals anything itself, and flRelease becomes bookkeeping.
+//
+//                Both halves matter. Without the wait, a compositor consuming a
+//                dozen channels would block its render thread a dozen times per
+//                frame. Without owning the signal, framelink would free the
+//                buffer from its own context while your GPU is still sampling
+//                it - the producer would overwrite a frame mid-read.
+#define FL_MAP_CPU  0x1
+#define FL_GPU_SYNC 0x2
+
+FL_API flResult flCreateChannelEx(const char* name, uint32_t width, uint32_t height,
+                                  flFormat format, uint32_t poolSize, uint32_t flags,
+                                  flChannel** out);
 FL_API flResult flAcquireFrame(flChannel*, flFrame* out, uint32_t timeoutMs);
 FL_API flResult flRelease(flChannel*, const flFrame*);
 
@@ -126,7 +153,13 @@ FL_API flResult flSubmit(flChannel*, const flBuffer*, int64_t ptsNs); // -1 = no
 //
 // The vkrender renderer is exactly this case: it composites with Vulkan and
 // signals the imported semaphore inside its frame submit.
-FL_API flResult flSharedReadyFence(flChannel*, void** handle); // borrowed
+// The channel's fences, for callers doing their own GPU synchronisation.
+// Borrowed - do not close them.
+//   ready    - the producer signals it; an FL_GPU_SYNC consumer waits on it
+//   consumed - an FL_GPU_SYNC consumer signals it; the producer waits on it
+//              before reusing a slot
+FL_API flResult flSharedReadyFence(flChannel*, void** handle);
+FL_API flResult flSharedConsumedFence(flChannel*, void** handle);
 FL_API flResult flBeginSubmit(flChannel*, const flBuffer*, uint64_t* signalValue);
 FL_API flResult flEndSubmit(flChannel*, const flBuffer*, uint64_t signalValue, int64_t ptsNs);
 

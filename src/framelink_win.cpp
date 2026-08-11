@@ -42,6 +42,7 @@ struct flImage {
 
 struct flChannel {
     bool isConsumer = false;
+    uint32_t flags = 0;
     std::string name;
 
     ComPtr<ID3D11Device> device;
@@ -307,14 +308,16 @@ FL_API const char* flResultString(flResult r) {
     return "unknown";
 }
 
-FL_API flResult flCreateChannel(const char* name, uint32_t width, uint32_t height,
-                                flFormat format, uint32_t poolSize, flChannel** out) {
+FL_API flResult flCreateChannelEx(const char* name, uint32_t width, uint32_t height,
+                                  flFormat format, uint32_t poolSize, uint32_t flags,
+                                  flChannel** out) {
     if (!name || !out || width == 0 || height == 0) return FL_INVALID;
     if (format != FL_FORMAT_BGRA8) return FL_FORMAT_UNSUPPORTED; // spike scope
     if (poolSize == 0 || poolSize > kMaxPool) return FL_INVALID;
 
     auto* ch = new flChannel();
     ch->isConsumer = true;
+    ch->flags = flags;
     ch->name = name;
     ch->device = createDevice(nullptr, false);
     if (!ch->device || !finishDeviceSetup(ch)) {
@@ -342,6 +345,11 @@ FL_API flResult flCreateChannel(const char* name, uint32_t width, uint32_t heigh
     ch->accept = std::thread(acceptLoop, ch);
     *out = ch;
     return FL_OK;
+}
+
+FL_API flResult flCreateChannel(const char* name, uint32_t width, uint32_t height,
+                                flFormat format, uint32_t poolSize, flChannel** out) {
+    return flCreateChannelEx(name, width, height, format, poolSize, 0, out);
 }
 
 FL_API flResult flOpenProducer(const char* name, flChannel** out) {
@@ -534,10 +542,15 @@ FL_API flResult flSubmit(flChannel* ch, const flBuffer* buf, int64_t ptsNs) {
 
 FL_API flResult flSharedReadyFence(flChannel* ch, void** handle) {
     if (!ch || !handle) return FL_INVALID;
-    // Producers get the handle they must signal; consumers own the fence and
-    // have no reason to ask.
-    if (ch->isConsumer) return FL_INVALID;
+    // Both roles need it now: producers signal it, and an FL_GPU_SYNC consumer
+    // waits on it in its own submit instead of blocking a thread.
     *handle = ch->readyShared;
+    return *handle ? FL_OK : FL_INTERNAL;
+}
+
+FL_API flResult flSharedConsumedFence(flChannel* ch, void** handle) {
+    if (!ch || !handle) return FL_INVALID;
+    *handle = ch->consumedShared;
     return *handle ? FL_OK : FL_INTERNAL;
 }
 
@@ -584,8 +597,11 @@ FL_API flResult flAcquireFrame(flChannel* ch, flFrame* out, uint32_t timeoutMs) 
         }
         if (got) {
             // The producer's GPU writes are not necessarily done yet; the fence
-            // is what makes this zero-copy AND correct.
-            if (ch->readyFence->GetCompletedValue() < ready) {
+            // is what makes this zero-copy AND correct. An FL_GPU_SYNC consumer
+            // waits on that fence inside its own submit, so blocking here would
+            // just be a stall it did not ask for - a compositor doing this a
+            // dozen times per frame is exactly the latency regression to avoid.
+            if (!(ch->flags & FL_GPU_SYNC) && ch->readyFence->GetCompletedValue() < ready) {
                 ch->readyFence->SetEventOnCompletion(ready, ch->waitEvent);
                 WaitForSingleObject(ch->waitEvent, 1000);
             }
@@ -605,6 +621,14 @@ FL_API flResult flAcquireFrame(flChannel* ch, flFrame* out, uint32_t timeoutMs) 
 
 FL_API flResult flRelease(flChannel* ch, const flFrame* frame) {
     if (!ch || !ch->isConsumer || !frame || frame->slot >= ch->images.size()) return FL_INVALID;
+    // FL_GPU_SYNC: the consumer signals the consumed fence itself, ordered
+    // after its own reads. Signalling here from framelink's context would tell
+    // the producer the slot is free while the consumer's GPU is still sampling
+    // it. Keep the bookkeeping, skip the signal.
+    if (ch->flags & FL_GPU_SYNC) {
+        if (frame->_readyValue > ch->consumedValue) ch->consumedValue = frame->_readyValue;
+        return FL_OK;
+    }
     // Signal THIS frame's value, not the newest one seen. Using the newest
     // (which an earlier cut of this did) tells the producer that slots are free
     // while we may still be reading them - a latent use-while-writing race that

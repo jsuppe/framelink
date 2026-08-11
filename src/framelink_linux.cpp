@@ -469,9 +469,16 @@ FL_API flResult flSubmit(flChannel* ch, const flBuffer* buf, int64_t ptsNs) {
     return r == FL_OK ? flEndSubmit(ch, buf, v, ptsNs) : r;
 }
 
+FL_API flResult flSharedConsumedFence(flChannel*, void**) {
+    return FL_FORMAT_UNSUPPORTED; // no shared fences on this backend yet
+}
+
 FL_API flResult flSharedReadyFence(flChannel*, void**) {
     // Honest refusal: there is no shared fence on this backend yet, and handing
-    // back something unusable would be worse than saying so.
+    // back something unusable would be worse than saying so. FL_GPU_SYNC is
+    // consequently a no-op here - flAcquireFrame never blocks on a fence
+    // because there is none - so a consumer written for Windows still works,
+    // it just gets this backend's weaker ordering (see the file header).
     return FL_FORMAT_UNSUPPORTED;
 }
 
