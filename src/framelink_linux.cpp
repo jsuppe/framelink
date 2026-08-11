@@ -121,6 +121,7 @@ void freeImage(flImage* img) {
 // function.
 bool handOverRing(flChannel* ch, fl::Channel& link) {
     fl::RingDescMsg rd{};
+    rd.generation = ch->info.generation;
     rd.width = ch->info.width;
     rd.height = ch->info.height;
     rd.format = (uint32_t)ch->info.format;
@@ -139,6 +140,7 @@ bool handOverRing(flChannel* ch, fl::Channel& link) {
 // Allocate (or re-allocate) the ring. Shared by channel creation and by
 // flRequestGeometry, which is the only reason it is not inline.
 bool reallocRing(flChannel* ch, uint32_t w, uint32_t h, uint32_t poolSize) {
+    ++ch->info.generation; // a new ring - anyone who imported the old one must redo it
     // Asking for RENDERING|LINEAR together is the natural thing to want and it
     // FAILS on NVIDIA's GBM backend - measured, each flag alone succeeds. Try
     // the pair, fall back to LINEAR alone.
@@ -372,6 +374,7 @@ FL_API flResult flOpenProducer(const char* name, flChannel** out) {
     }
     ch->slotBusy.assign(rd->poolSize, false);
     ch->info.version = FL_VERSION;
+    ch->info.generation = rd->generation;
     ch->info.width = rd->width;
     ch->info.height = rd->height;
     ch->info.format = (flFormat)rd->format;
@@ -398,6 +401,7 @@ static flResult importRing(flChannel* ch, const fl::RingDescMsg* rd,
         ch->images.push_back(img);
     }
     ch->slotBusy.assign(rd->poolSize, false);
+    ch->info.generation = rd->generation;
     ch->info.width = rd->width;
     ch->info.height = rd->height;
     ch->info.format = (flFormat)rd->format;

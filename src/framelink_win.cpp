@@ -117,6 +117,7 @@ bool finishDeviceSetup(flChannel* ch) {
 bool allocateRing(flChannel* ch, uint32_t w, uint32_t h, uint32_t poolSize) {
     ComPtr<ID3D11Device5> dev5;
     if (FAILED(ch->device.As(&dev5))) return false;
+    ++ch->info.generation; // a new ring - anyone who imported the old one must redo it
 
     for (uint32_t i = 0; i < poolSize; ++i) {
         D3D11_TEXTURE2D_DESC td{};
@@ -171,6 +172,7 @@ bool handOverRing(flChannel* ch, fl::Channel& link, uint32_t peerPid) {
         return false;
     }
     fl::RingDescMsg pd{};
+    pd.generation = ch->info.generation;
     pd.width = ch->info.width;
     pd.height = ch->info.height;
     pd.format = (uint32_t)ch->info.format;
@@ -442,6 +444,7 @@ FL_API flResult flOpenProducer(const char* name, flChannel** out) {
     }
 
     ch->info.version = FL_VERSION;
+    ch->info.generation = pd->generation;
     ch->info.width = pd->width;
     ch->info.height = pd->height;
     ch->info.format = (flFormat)pd->format;
@@ -477,6 +480,7 @@ static flResult importRing(flChannel* ch, const fl::RingDescMsg* pd) {
     if (FAILED(dev5->OpenSharedFence(ch->readyShared, IID_PPV_ARGS(&ch->readyFence))) ||
         FAILED(dev5->OpenSharedFence(ch->consumedShared, IID_PPV_ARGS(&ch->consumedFence))))
         return FL_INTERNAL;
+    ch->info.generation = pd->generation;
     ch->info.width = pd->width;
     ch->info.height = pd->height;
     ch->info.format = (flFormat)pd->format;

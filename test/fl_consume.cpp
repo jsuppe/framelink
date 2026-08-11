@@ -46,19 +46,40 @@ int main(int argc, char** argv) {
     ComPtr<ID3D11DeviceContext> ctx;
     dev->GetImmediateContext(&ctx);
 
-    D3D11_TEXTURE2D_DESC sd{};
-    sd.Width = W;
-    sd.Height = H;
-    sd.MipLevels = sd.ArraySize = 1;
-    sd.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-    sd.SampleDesc.Count = 1;
-    sd.Usage = D3D11_USAGE_STAGING;
-    sd.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+    // Rebuilt whenever the ring is. flChannelInfo::generation is the signal - a
+    // producer may call flRequestGeometry at any time, and every buffer the
+    // consumer had is then a different allocation. Anything that imported them
+    // (here a staging texture; in vkrender, VkImages) has to redo it.
     ComPtr<ID3D11Texture2D> staging;
-    if (FAILED(dev->CreateTexture2D(&sd, nullptr, &staging))) {
-        printf("consume: staging texture failed\n");
-        flClose(ch);
-        return 1;
+    uint64_t stagingGen = 0;
+    auto ensureStaging = [&](const flChannelInfo& in) -> bool {
+        if (staging && stagingGen == in.generation) return true;
+        D3D11_TEXTURE2D_DESC sd{};
+        sd.Width = in.width;
+        sd.Height = in.height;
+        sd.MipLevels = sd.ArraySize = 1;
+        sd.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+        sd.SampleDesc.Count = 1;
+        sd.Usage = D3D11_USAGE_STAGING;
+        sd.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+        staging.Reset();
+        if (FAILED(dev->CreateTexture2D(&sd, nullptr, &staging))) {
+            printf("consume: staging texture failed\n");
+            return false;
+        }
+        if (stagingGen)
+            printf("consume: ring is now %ux%u (gen %llu) - re-imported\n", in.width, in.height,
+                   (unsigned long long)in.generation);
+        stagingGen = in.generation;
+        return true;
+    };
+    {
+        flChannelInfo info{};
+        flQuery(ch, &info);
+        if (!ensureStaging(info)) {
+            flClose(ch);
+            return 1;
+        }
     }
 
     int verified = 0, mismatched = 0;
@@ -79,6 +100,10 @@ int main(int argc, char** argv) {
         }
         if (lastSeq && f.sequence > lastSeq + 1) skipped += f.sequence - lastSeq - 1;
         lastSeq = f.sequence;
+
+        flChannelInfo info{};
+        flQuery(ch, &info);
+        if (!ensureStaging(info)) break;
 
         ctx->CopyResource(staging.Get(), flImageD3D11(f.image));
         D3D11_MAPPED_SUBRESOURCE map{};

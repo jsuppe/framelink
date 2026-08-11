@@ -45,8 +45,24 @@ int main(int argc, char** argv) {
     }
     flChannelInfo info{};
     flQuery(ch, &info);
-    printf("produce: attached to '%s' %ux%u pool %u (geometry is the consumer's)\n", name,
-           info.width, info.height, info.poolSize);
+    printf("produce: attached to '%s' %ux%u pool %u gen %llu (geometry is the consumer's)\n",
+           name, info.width, info.height, info.poolSize,
+           (unsigned long long)info.generation);
+
+    // Ask for a size the consumer did NOT create. This is the case that
+    // matters: real producers differ and cannot be predicted - a mirroring
+    // iPad sends 752x1080 into the same slot a laptop uses for 1920x1080.
+    // flQuery afterwards is the truth, because the consumer may decline.
+    const uint64_t genBefore = info.generation;
+    r = flRequestGeometry(ch, 320, 240, FL_FORMAT_BGRA8);
+    flQuery(ch, &info);
+    printf("produce: flRequestGeometry(320x240) -> %s, ring is now %ux%u gen %llu\n",
+           flResultString(r), info.width, info.height, (unsigned long long)info.generation);
+    if (info.width != 320 || info.height != 240 || info.generation == genBefore) {
+        printf("produce: FAIL - reallocation did not take\n");
+        flClose(ch);
+        return 1;
+    }
 
     ID3D11Device* dev = flChannelD3D11Device(ch);
     ComPtr<ID3D11DeviceContext> ctx;

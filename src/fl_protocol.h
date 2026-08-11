@@ -56,6 +56,7 @@ struct RingDescMsg {
     uint32_t width, height;
     uint32_t format;   // flFormat
     uint32_t poolSize;
+    uint64_t generation; // flChannelInfo::generation - which ring this is
 
     // Windows: NT handles already duplicated into the receiving process, plus
     // a shared timeline fence pair.

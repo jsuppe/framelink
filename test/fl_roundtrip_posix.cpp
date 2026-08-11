@@ -114,11 +114,13 @@ int runProducer(const char* name, int frames) {
     // matters: real producers differ and cannot be predicted - a mirroring
     // iPad sends 752x1080 into the same slot a laptop uses for 1920x1080.
     // flQuery afterwards is the truth, because the consumer may decline.
+    const uint64_t genBefore = info.generation;
     r = flRequestGeometry(ch, 320, 240, FL_FORMAT_BGRA8);
     printf("produce: flRequestGeometry(320x240) -> %s\n", flResultString(r));
     flQuery(ch, &info);
-    printf("produce: ring is now %ux%u pool %u\n", info.width, info.height, info.poolSize);
-    if (info.width != 320 || info.height != 240) {
+    printf("produce: ring is now %ux%u pool %u gen %llu\n", info.width, info.height,
+           info.poolSize, (unsigned long long)info.generation);
+    if (info.width != 320 || info.height != 240 || info.generation == genBefore) {
         printf("produce: FAIL - reallocation did not take\n");
         flClose(ch);
         return 1;

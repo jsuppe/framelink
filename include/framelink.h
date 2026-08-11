@@ -35,7 +35,7 @@ extern "C" {
 // Bumped on any wire-format change. Peers refuse each other on mismatch rather
 // than misbehaving: shipping one side while an integrator builds the other is
 // exactly how a silent version skew becomes someone else's afternoon.
-#define FL_VERSION 1
+#define FL_VERSION 2
 
 typedef struct flChannel flChannel;
 typedef struct flImage flImage;
@@ -75,6 +75,14 @@ typedef struct flChannelInfo {
     flFormat format;
     uint32_t poolSize;
     uint8_t  adapterLUID[8]; // the GPU the frames live on
+    // Bumped every time the ring is allocated - at creation, and again on each
+    // flRequestGeometry the consumer honours. A caller that has imported the
+    // buffers into its own API (a Vulkan compositor, an encoder) must re-import
+    // when this changes: the old flImages are gone, not resized.
+    //
+    // Watching width/height instead would work today and break quietly the
+    // first time a ring is reallocated at the same size.
+    uint64_t generation;
 } flChannelInfo;
 
 // ---- consumer: owns the ring ------------------------------------------------
