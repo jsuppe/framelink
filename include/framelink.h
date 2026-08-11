@@ -127,6 +127,30 @@ FL_API flResult flCreateChannel(const char* name, uint32_t width, uint32_t heigh
 FL_API flResult flCreateChannelEx(const char* name, uint32_t width, uint32_t height,
                                   flFormat format, uint32_t poolSize, uint32_t flags,
                                   flChannel** out);
+
+// Create the ring on a SPECIFIC GPU, named by its adapter LUID. Pass NULL to
+// let framelink choose, which is what the two calls above do.
+//
+// This is not a tuning knob. A consumer that draws with its own device - a
+// Vulkan compositor importing these buffers, say - MUST allocate them on the
+// GPU that device is on, and "the first adapter DXGI enumerates" is not that
+// GPU on any laptop with both an integrated and a discrete one. Getting it
+// wrong fails the import if you are lucky.
+//
+// Take the LUID from whatever API you will draw with:
+//   Vulkan   VkPhysicalDeviceIDProperties::deviceLUID
+//   D3D11    IDXGIAdapter::GetDesc().AdapterLuid
+//
+// Producers have always done this - they open on the LUID the consumer
+// advertises, which is what makes FL_ADAPTER_MISMATCH a refusal rather than a
+// crash. This closes the same hole on the consumer's side.
+//
+// Ignored where it means nothing: on Linux the ring comes from a DRM render
+// node, and the node IS the adapter choice.
+FL_API flResult flCreateChannelOnAdapter(const char* name, uint32_t width, uint32_t height,
+                                         flFormat format, uint32_t poolSize, uint32_t flags,
+                                         const uint8_t adapterLUID[8], flChannel** out);
+
 FL_API flResult flAcquireFrame(flChannel*, flFrame* out, uint32_t timeoutMs);
 FL_API flResult flRelease(flChannel*, const flFrame*);
 

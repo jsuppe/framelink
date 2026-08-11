@@ -282,6 +282,16 @@ FL_API const char* flResultString(flResult r) {
     return "unknown";
 }
 
+// The LUID is a Windows concept. Here the ring comes from a DRM render node,
+// and which node was opened IS the adapter choice, so there is nothing to
+// select with a LUID and ignoring it is the honest behaviour rather than a
+// stub - a caller passing one gets the same channel it would have got anyway.
+FL_API flResult flCreateChannelOnAdapter(const char* name, uint32_t width, uint32_t height,
+                                         flFormat format, uint32_t poolSize, uint32_t flags,
+                                         const uint8_t*, flChannel** out) {
+    return flCreateChannelEx(name, width, height, format, poolSize, flags, out);
+}
+
 FL_API flResult flCreateChannelEx(const char* name, uint32_t width, uint32_t height,
                                   flFormat format, uint32_t poolSize, uint32_t flags,
                                   flChannel** out) {

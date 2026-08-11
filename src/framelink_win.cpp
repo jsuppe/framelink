@@ -352,9 +352,9 @@ FL_API const char* flResultString(flResult r) {
     return "unknown";
 }
 
-FL_API flResult flCreateChannelEx(const char* name, uint32_t width, uint32_t height,
-                                  flFormat format, uint32_t poolSize, uint32_t flags,
-                                  flChannel** out) {
+FL_API flResult flCreateChannelOnAdapter(const char* name, uint32_t width, uint32_t height,
+                                         flFormat format, uint32_t poolSize, uint32_t flags,
+                                         const uint8_t adapterLUID[8], flChannel** out) {
     if (!name || !out || width == 0 || height == 0) return FL_INVALID;
     if (format != FL_FORMAT_BGRA8) return FL_FORMAT_UNSUPPORTED; // spike scope
     if (poolSize == 0 || poolSize > kMaxPool) return FL_INVALID;
@@ -363,7 +363,7 @@ FL_API flResult flCreateChannelEx(const char* name, uint32_t width, uint32_t hei
     ch->isConsumer = true;
     ch->flags = flags;
     ch->name = name;
-    ch->device = createDevice(nullptr, false);
+    ch->device = createDevice(adapterLUID, adapterLUID != nullptr);
     if (!ch->device || !finishDeviceSetup(ch)) {
         flClose(ch);
         return FL_INTERNAL;
@@ -389,6 +389,12 @@ FL_API flResult flCreateChannelEx(const char* name, uint32_t width, uint32_t hei
     ch->accept = std::thread(acceptLoop, ch);
     *out = ch;
     return FL_OK;
+}
+
+FL_API flResult flCreateChannelEx(const char* name, uint32_t width, uint32_t height,
+                                  flFormat format, uint32_t poolSize, uint32_t flags,
+                                  flChannel** out) {
+    return flCreateChannelOnAdapter(name, width, height, format, poolSize, flags, nullptr, out);
 }
 
 FL_API flResult flCreateChannel(const char* name, uint32_t width, uint32_t height,
