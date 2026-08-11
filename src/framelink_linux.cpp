@@ -78,10 +78,18 @@ struct flChannel {
     int64_t pendingPts = -1;
     uint64_t sequence = 0;
 
-    // producer
+    // producer. Slot recycling is MONOTONIC, exactly like the Windows
+    // consumed fence: a FrameReleased carrying value V frees every slot whose
+    // last submit was <= V. Per-slot booleans were the first design and they
+    // LEAK under latest-wins: a consumer only ever holds the newest announced
+    // frame, so a skipped frame's slot would be released by nobody - four
+    // skips and the ring is dead, which a bursty decoder start produces in
+    // well under a second (observed: an RTSP camera at 100% ring-drop while
+    // its slower sibling ran clean).
     fl::Channel link;
     std::mutex freeMutex;
-    std::vector<bool> slotBusy;
+    std::vector<uint64_t> slotSubmitValue; // last submit counter per slot
+    uint64_t consumedValue = 0;            // everything <= this is free
     std::thread releaseRx;
 };
 
@@ -284,9 +292,11 @@ void releaseLoop(flChannel* ch) {
         if (!msg) break;
         if (msg->type != fl::MsgType::FrameReleased) continue;
         const auto* fr = msg->as<fl::FrameReadyMsg>();
-        if (!fr || fr->slot >= ch->slotBusy.size()) continue;
+        if (!fr) continue;
         std::lock_guard<std::mutex> hold(ch->freeMutex);
-        ch->slotBusy[fr->slot] = false;
+        // Monotonic: never backwards, and releasing value V frees the skipped
+        // frames before V too, which per-slot release could not.
+        if (fr->readyValue > ch->consumedValue) ch->consumedValue = fr->readyValue;
     }
 }
 
@@ -418,7 +428,9 @@ FL_API flResult flOpenProducer(const char* name, flChannel** out) {
         img->desc.offset[0] = rd->offset[i];
         ch->images.push_back(img);
     }
-    ch->slotBusy.assign(rd->poolSize, false);
+    ch->slotSubmitValue.assign(rd->poolSize, 0);
+    ch->consumedValue = 0;
+    ch->readyValue = 0;
     ch->info.version = FL_VERSION;
     ch->info.generation = rd->generation;
     ch->info.width = rd->width;
@@ -446,7 +458,9 @@ static flResult importRing(flChannel* ch, const fl::RingDescMsg* rd,
         img->desc.offset[0] = rd->offset[i];
         ch->images.push_back(img);
     }
-    ch->slotBusy.assign(rd->poolSize, false);
+    ch->slotSubmitValue.assign(rd->poolSize, 0);
+    ch->consumedValue = 0;
+    ch->readyValue = 0;
     ch->info.generation = rd->generation;
     ch->info.width = rd->width;
     ch->info.height = rd->height;
@@ -482,8 +496,15 @@ FL_API flResult flAcquireBuffer(flChannel* ch, flBuffer* out, uint32_t timeoutMs
         {
             std::lock_guard<std::mutex> hold(ch->freeMutex);
             for (size_t i = 0; i < ch->images.size(); ++i) {
-                if (!ch->slotBusy[i]) {
-                    ch->slotBusy[i] = true;
+                // Free once the consumer has promised never to read this
+                // slot's previous contents again - same rule as Windows.
+                if (ch->slotSubmitValue[i] <= ch->consumedValue) {
+                    // Pin against re-acquisition until flEndSubmit records the
+                    // real value. The consumer can never release up to a value
+                    // that was not submitted, so the sentinel is unreachable.
+                    // (Acquiring and never submitting leaks the slot until the
+                    // ring is reallocated - do not do that.)
+                    ch->slotSubmitValue[i] = UINT64_MAX;
                     out->slot = (uint32_t)i;
                     out->image = ch->images[i];
                     return FL_OK;
@@ -506,6 +527,10 @@ FL_API flResult flEndSubmit(flChannel* ch, const flBuffer* buf, uint64_t signalV
                             int64_t ptsNs) {
     if (!ch || ch->isConsumer || !buf || buf->slot >= ch->images.size()) return FL_INVALID;
     if (!ch->link.connected()) return FL_DISCONNECTED;
+    {
+        std::lock_guard<std::mutex> hold(ch->freeMutex);
+        ch->slotSubmitValue[buf->slot] = signalValue;
+    }
     fl::FrameReadyMsg fr{};
     fr.slot = buf->slot;
     fr.readyValue = signalValue;

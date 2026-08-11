@@ -35,7 +35,7 @@ extern "C" {
 // Bumped on any wire-format change. Peers refuse each other on mismatch rather
 // than misbehaving: shipping one side while an integrator builds the other is
 // exactly how a silent version skew becomes someone else's afternoon.
-#define FL_VERSION 2
+#define FL_VERSION 3
 
 typedef struct flChannel flChannel;
 typedef struct flImage flImage;
