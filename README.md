@@ -3,9 +3,9 @@
 Zero-copy GPU frames between processes. One process draws, another reads the
 **same GPU memory** — no copies, no encode, no network.
 
-Windows today. Linux (dma-buf) and Android (AHardwareBuffer) are next; the API
-and wire format are shaped for them already, and nothing platform-specific
-appears in the core header.
+**Windows** (shared NT-handle textures) and **Linux** (dma-buf over a unix
+socket) today, from one C API. Android (AHardwareBuffer) is next; nothing
+platform-specific appears in the core header.
 
 ```c
 // consumer — owns the buffers
@@ -75,12 +75,26 @@ Set `FRAMELINK_DEBUG=1` for connection diagnostics. Errors always print.
 
 ## Status
 
-Working: consumer-owned rings, one producer per channel, BGRA8, version refused
-at handshake, D3D12/Vulkan/CUDA interop via the shared handle, bounded
-back-pressure with latest-frame-wins.
+Working on **both** platforms: consumer-owned rings, one producer per channel,
+BGRA8, version refused at handshake, bounded back-pressure with
+latest-frame-wins. Windows adds a shared timeline fence pair and
+D3D12/Vulkan/CUDA interop via the shared NT handle; Linux exposes the dma-buf
+(`framelink_dmabuf.h`) for Vulkan/EGL import, plus `flImageMap` for consumers
+that must read pixels.
 
-Not yet: Linux and Android backends, `framelink_vulkan.h`, NV12/RGB10A2, access
-control, and fan-out to several consumers of one channel (today N consumers
-means N channels, so the producer writes N times).
+**Linux sync is weaker and you should know it.** There is no shared fence, so
+`flSubmit` means "I have finished writing" and a consumer has nothing to wait
+on - fine for a CPU producer or a GPU producer that flushed, not enough
+otherwise. `flSharedReadyFence` returns `FL_FORMAT_UNSUPPORTED` there rather
+than handing back something unusable.
+
+**NVIDIA note:** its GBM backend refuses `RENDERING|LINEAR` together, so a
+CPU-mappable buffer is not GPU-renderable. framelink falls back automatically
+and logs it; a GPU producer on NVIDIA should leave `FL_MAP_CPU` off and import
+the dma-buf.
+
+Not yet: Android, `framelink_vulkan.h`, NV12/RGB10A2, explicit sync on Linux,
+access control, and fan-out to several consumers of one channel (today N
+consumers means N channels, so the producer writes N times).
 
 MIT licensed.
