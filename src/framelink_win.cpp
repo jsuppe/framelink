@@ -117,7 +117,6 @@ bool finishDeviceSetup(flChannel* ch) {
 bool allocateRing(flChannel* ch, uint32_t w, uint32_t h, uint32_t poolSize) {
     ComPtr<ID3D11Device5> dev5;
     if (FAILED(ch->device.As(&dev5))) return false;
-    ++ch->info.generation; // a new ring - anyone who imported the old one must redo it
 
     for (uint32_t i = 0; i < poolSize; ++i) {
         D3D11_TEXTURE2D_DESC td{};
@@ -148,6 +147,29 @@ bool allocateRing(flChannel* ch, uint32_t w, uint32_t h, uint32_t poolSize) {
         ch->slotReadyValue.push_back(0);
     }
 
+    return true;
+}
+
+// Consumer: fresh fences, both counters back to zero.
+//
+// Called for every producer, not just the first. A producer's readyValue
+// starts at 1, so a SECOND producer on a channel whose fence already sat at 50
+// would submit "ready 1" against a fence that reads 50: every consumer wait
+// passes instantly and every slot looks free, which is a use-before-write on
+// both sides. Receivers reattach constantly - a presenter leaves, the next one
+// takes the slot - so this is the normal case, not an edge one.
+//
+// It bumps the generation for the same reason a reallocation does: the shared
+// fence handles are new, so anything that imported them (a Vulkan consumer's
+// timeline semaphores) is holding stale ones.
+bool resetSync(flChannel* ch) {
+    ComPtr<ID3D11Device5> dev5;
+    if (FAILED(ch->device.As(&dev5))) return false;
+    if (ch->readyShared) CloseHandle(ch->readyShared);
+    if (ch->consumedShared) CloseHandle(ch->consumedShared);
+    ch->readyShared = ch->consumedShared = nullptr;
+    ch->readyFence.Reset();
+    ch->consumedFence.Reset();
     if (FAILED(dev5->CreateFence(0, D3D11_FENCE_FLAG_SHARED, IID_PPV_ARGS(&ch->readyFence))) ||
         FAILED(dev5->CreateFence(0, D3D11_FENCE_FLAG_SHARED,
                                  IID_PPV_ARGS(&ch->consumedFence))))
@@ -157,6 +179,14 @@ bool allocateRing(flChannel* ch, uint32_t w, uint32_t h, uint32_t poolSize) {
         FAILED(ch->consumedFence->CreateSharedHandle(nullptr, GENERIC_ALL, nullptr,
                                                      &ch->consumedShared)))
         return false;
+    for (auto& v : ch->slotReadyValue) v = 0;
+    ch->consumedValue = 0;
+    ch->readyValue = 0;
+    {
+        std::lock_guard<std::mutex> hold(ch->pendingMutex);
+        ch->hasPending = false; // announced against the old fence
+    }
+    ++ch->info.generation;
     return true;
 }
 
@@ -233,7 +263,12 @@ void acceptLoop(flChannel* ch) {
             continue; // closing the link IS the refusal
         }
 
-        if (!handOverRing(ch, link, link.peerPid())) continue;
+        // Only ever a can-we-duplicate-into-it precheck; handOverRing opens its
+        // own. Leaking it here cost one process handle per attach, and
+        // receivers attach and detach for a living.
+        CloseHandle(peerProc);
+
+        if (!resetSync(ch) || !handOverRing(ch, link, link.peerPid())) continue;
 
         ch->peerGone = false;
         FL_LOG("framelink: producer pid %u attached to '%s'", link.peerPid(),
@@ -249,8 +284,15 @@ void acceptLoop(flChannel* ch) {
                 // and adapts, so there is nothing for it to handle.
                 if (g && g->width && g->height && g->width <= 8192 && g->height <= 8192 &&
                     (g->width != ch->info.width || g->height != ch->info.height)) {
-                    std::lock_guard<std::mutex> hold(ch->pendingMutex);
-                    ch->hasPending = false; // stale: the old ring is going away
+                    // Scoped, not held across the rebuild: resetSync takes the
+                    // same mutex, and std::mutex is not recursive. Clearing
+                    // hasPending here is enough - only this thread ever sets
+                    // it, so nothing can be announced against the old ring
+                    // between here and the new ring being live.
+                    {
+                        std::lock_guard<std::mutex> hold(ch->pendingMutex);
+                        ch->hasPending = false; // stale: the old ring is going away
+                    }
                     const uint32_t pool = (uint32_t)ch->images.size();
                     for (flImage* img : ch->images) {
                         if (img->shared) CloseHandle(img->shared);
@@ -260,7 +302,7 @@ void acceptLoop(flChannel* ch) {
                     ch->slotReadyValue.clear();
                     ch->info.width = g->width;
                     ch->info.height = g->height;
-                    if (!allocateRing(ch, g->width, g->height, pool)) {
+                    if (!allocateRing(ch, g->width, g->height, pool) || !resetSync(ch)) {
                         FL_LOG_ERR("framelink: reallocation to %ux%u failed", g->width,
                                    g->height);
                         break;
@@ -340,7 +382,7 @@ FL_API flResult flCreateChannelEx(const char* name, uint32_t width, uint32_t hei
     ch->info.format = format;
     ch->info.poolSize = poolSize;
 
-    if (!allocateRing(ch, width, height, poolSize)) {
+    if (!allocateRing(ch, width, height, poolSize) || !resetSync(ch)) {
         flClose(ch);
         return FL_INTERNAL;
     }

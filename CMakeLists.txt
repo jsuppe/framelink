@@ -73,6 +73,20 @@ if(FRAMELINK_BUILD_TESTS)
                      "-DCONSUMER_ARGS=${FL_CONSUMER_ARGS}"
                      "-DPRODUCER_ARGS=${FL_PRODUCER_ARGS}"
                      -P ${CMAKE_CURRENT_SOURCE_DIR}/test/run_roundtrip.cmake)
+
+    # Same verification across a producer detach/reattach - the case a channel
+    # sees every time one presenter leaves and the next takes the slot. It is a
+    # separate test because the failure it guards against (a fence carried over
+    # to a producer whose counter restarts at 1) looks nothing like the failure
+    # the plain round trip catches.
+    if(WIN32)
+        add_test(NAME roundtrip_reattach
+                 COMMAND ${CMAKE_COMMAND}
+                         -DCONSUMER=${FL_CONSUMER} -DPRODUCER=${FL_PRODUCER}
+                         "-DCONSUMER_ARGS=flre;20;0;1"
+                         "-DPRODUCER_ARGS=flre;400;0;1"
+                         -P ${CMAKE_CURRENT_SOURCE_DIR}/test/run_roundtrip.cmake)
+    endif()
 endif()
 
 include(GNUInstallDirs)

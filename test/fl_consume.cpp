@@ -32,6 +32,11 @@ int main(int argc, char** argv) {
     // back-pressure question gets answered: does a slow reader throttle the
     // producer, or does the producer run free and the reader sample the newest?
     const int slowMs = argc > 3 ? atoi(argv[3]) : 0;
+    // Expect the producer to detach and come back. A disconnect then stops
+    // being the end of the run, and PASS additionally requires verified frames
+    // from the SECOND producer - otherwise the test would be satisfied before
+    // the interesting part happened.
+    const bool expectReattach = argc > 4 && atoi(argv[4]) != 0;
     const uint32_t W = 256, H = 128;
 
     flChannel* ch = nullptr;
@@ -83,14 +88,25 @@ int main(int argc, char** argv) {
     }
 
     int verified = 0, mismatched = 0;
+    int verifiedAfterReattach = 0;
+    bool sawReattach = false, sawAnyFrame = false;
     uint64_t lastSeq = 0, skipped = 0;
     const DWORD deadline = GetTickCount() + 30000;
 
-    while (verified + mismatched < want && GetTickCount() < deadline) {
+    auto enough = [&]() {
+        if (!expectReattach) return verified + mismatched >= want;
+        return sawReattach && verifiedAfterReattach + mismatched >= want;
+    };
+
+    while (!enough() && GetTickCount() < deadline) {
         flFrame f{};
         r = flAcquireFrame(ch, &f, 500);
         if (r == FL_TIMEOUT) continue;
         if (r == FL_DISCONNECTED) {
+            if (expectReattach) {
+                Sleep(10); // it is coming back; the channel is ours, not its
+                continue;
+            }
             printf("consume: producer disconnected\n");
             break;
         }
@@ -103,6 +119,8 @@ int main(int argc, char** argv) {
 
         flChannelInfo info{};
         flQuery(ch, &info);
+        if (sawAnyFrame && info.generation != stagingGen) sawReattach = true;
+        sawAnyFrame = true;
         if (!ensureStaging(info)) break;
 
         ctx->CopyResource(staging.Get(), flImageD3D11(f.image));
@@ -118,6 +136,7 @@ int main(int argc, char** argv) {
                             (abs((int)px[2] - wantR) <= 1);
             if (ok) {
                 ++verified;
+                if (sawReattach) ++verifiedAfterReattach;
             } else {
                 ++mismatched;
                 printf("consume: MISMATCH pts=%d slot=%u got BGR %u,%u,%u want %u,%u,%u\n", i,
@@ -133,8 +152,12 @@ int main(int argc, char** argv) {
            mismatched, (unsigned long long)skipped);
     printf("consume: producer submitted %llu frames while we read %d\n",
            (unsigned long long)lastSeq, verified + mismatched);
+    if (expectReattach)
+        printf("consume: reattach %s, %d verified after it\n", sawReattach ? "seen" : "NOT SEEN",
+               verifiedAfterReattach);
     flClose(ch);
-    const bool pass = verified > 0 && mismatched == 0;
+    const bool pass = verified > 0 && mismatched == 0 &&
+                      (!expectReattach || (sawReattach && verifiedAfterReattach > 0));
     printf("consume: %s\n", pass ? "PASS" : "FAIL");
     return pass ? 0 : 1;
 }
