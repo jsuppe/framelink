@@ -26,14 +26,8 @@ typedef struct flDmabuf {
 
 FL_API flResult flImageDmabuf(flImage*, flDmabuf* out);
 
-// A CPU pointer to the buffer, for consumers that must read pixels - writing to
-// a v4l2loopback node, for instance, or encoding on the CPU.
-//
-// Only valid when the channel was created with FL_MAP_CPU; otherwise
-// FL_FORMAT_UNSUPPORTED, because a tiled or device-local buffer cannot be
-// meaningfully addressed byte-wise.
-FL_API flResult flImageMap(flImage*, void** pixels, uint64_t* stride);
-FL_API void     flImageUnmap(flImage*);
+// flImageMap/flImageUnmap moved to framelink.h - CPU access is not dma-buf
+// specific (Android maps through AHardwareBuffer_lock).
 
 // FL_MAP_CPU and flCreateChannelEx now live in framelink.h - the flags are not
 // dma-buf specific and a Windows consumer needs them too.

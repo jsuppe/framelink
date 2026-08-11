@@ -67,6 +67,10 @@ typedef enum flFormat {
                            // broken on NVIDIA (chroma plane offset -> device
                            // lost), so it must be validated, not assumed
     FL_FORMAT_RGB10A2 = 3, // not in the spike
+    // RGBA byte order. Exists because Android's AHardwareBuffer has no BGRA
+    // format: a channel there reports RGBA8 from flQuery, and a portable
+    // producer must write the byte order the channel says, not assume BGRA.
+    FL_FORMAT_RGBA8 = 4,
 } flFormat;
 
 typedef struct flChannelInfo {
@@ -210,6 +214,19 @@ FL_API flResult flRequestGeometry(flChannel*, uint32_t width, uint32_t height,
                                   flFormat format);
 
 // ---- both --------------------------------------------------------------------
+
+// CPU access to a buffer's pixels, for producers that draw with the CPU and
+// consumers that must read bytes (an encoder, a v4l2loopback writer). Only
+// valid on a channel created with FL_MAP_CPU; FL_FORMAT_UNSUPPORTED otherwise,
+// because a tiled or device-local buffer cannot be meaningfully addressed
+// byte-wise. Windows has no CPU path yet and always refuses.
+//
+// On Android the map/unmap pair is also the CACHE BOUNDARY
+// (AHardwareBuffer_lock/unlock): writes are not guaranteed visible to the GPU
+// until the buffer is unlocked, so flSubmit/flEndSubmit unmap automatically if
+// the producer left the buffer mapped.
+FL_API flResult flImageMap(flImage*, void** pixels, uint64_t* stride);
+FL_API void     flImageUnmap(flImage*);
 
 FL_API flResult flQuery(flChannel*, flChannelInfo* out);
 FL_API void     flClose(flChannel*);

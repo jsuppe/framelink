@@ -20,7 +20,18 @@
 #include <unistd.h>
 
 #include "framelink.h"
+#ifndef __ANDROID__
 #include "framelink_dmabuf.h"
+#endif
+
+// Android's AHardwareBuffer has no BGRA format, so the channel there is RGBA8.
+// The verification is byte-order agnostic - both sides write and read raw
+// bytes - so only the enum changes.
+#ifdef __ANDROID__
+constexpr flFormat kTestFormat = FL_FORMAT_RGBA8;
+#else
+constexpr flFormat kTestFormat = FL_FORMAT_BGRA8;
+#endif
 
 namespace {
 
@@ -33,7 +44,7 @@ void colourFor(int i, unsigned char* b, unsigned char* g, unsigned char* r) {
 int runConsumer(const char* name, int want) {
     const uint32_t W = 256, H = 128;
     flChannel* ch = nullptr;
-    flResult r = flCreateChannelEx(name, W, H, FL_FORMAT_BGRA8, 4, FL_MAP_CPU, &ch);
+    flResult r = flCreateChannelEx(name, W, H, kTestFormat, 4, FL_MAP_CPU, &ch);
     if (r != FL_OK) {
         printf("consume: flCreateChannelEx -> %s\n", flResultString(r));
         return 1;
@@ -115,7 +126,7 @@ int runProducer(const char* name, int frames) {
     // iPad sends 752x1080 into the same slot a laptop uses for 1920x1080.
     // flQuery afterwards is the truth, because the consumer may decline.
     const uint64_t genBefore = info.generation;
-    r = flRequestGeometry(ch, 320, 240, FL_FORMAT_BGRA8);
+    r = flRequestGeometry(ch, 320, 240, kTestFormat);
     printf("produce: flRequestGeometry(320x240) -> %s\n", flResultString(r));
     flQuery(ch, &info);
     printf("produce: ring is now %ux%u pool %u gen %llu\n", info.width, info.height,

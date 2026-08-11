@@ -1,40 +1,49 @@
-// framelink Linux backend. See framelink.h.
+// framelink Android backend. See framelink.h.
 //
-// The consumer allocates the ring with GBM on a render node and exports each
-// buffer as a dma-buf fd; the fds reach the producer as SCM_RIGHTS on the
-// control socket. Nothing is copied afterwards - the buffer the producer draws
-// into is the exact allocation the consumer reads, the same guarantee the
-// Windows backend makes with shared NT handles.
+// The consumer allocates the ring as AHardwareBuffers and hands each one to
+// the producer with AHardwareBuffer_sendHandleToUnixSocket - Android's blessed
+// way to move a buffer between processes without Binder. Nothing is copied
+// afterwards: the buffer the producer draws into is the exact allocation the
+// consumer samples, the same guarantee every other backend makes.
 //
-// TWO DIFFERENCES FROM WINDOWS, both deliberate and both visible to callers:
+// DIFFERENCES FROM THE LINUX BACKEND, all platform-driven:
 //
-// 1. Sync is weaker. Windows carries a shared timeline fence pair, so a
-//    consumer can wait on the GPU work that produced a frame. Here, flSubmit
-//    means "I have finished writing" and there is no fence to wait on: true for
-//    a CPU producer and for a GPU producer that flushed, not enough for one
-//    that did not. Explicit sync (DMA_BUF_IOCTL_EXPORT_SYNC_FILE, or a Vulkan
-//    timeline semaphore fd) is the next piece of work. flSharedReadyFence
-//    therefore returns FL_FORMAT_UNSUPPORTED rather than pretending.
+// 1. RGBA8, not BGRA8. AHardwareBuffer simply has no BGRA format. A channel
+//    here reports FL_FORMAT_RGBA8 from flQuery, and a portable producer writes
+//    the byte order the channel says rather than assuming.
 //
-// 2. Slot recycling is explicit. Windows lets the producer poll the shared
-//    consumed fence; with no shared fence the consumer sends FrameReleased.
+// 2. flImageMap/flImageUnmap are AHardwareBuffer_lock/unlock, and the unlock
+//    is a CACHE BOUNDARY: CPU writes are not guaranteed visible to the GPU
+//    until the buffer is unlocked. flSubmit/flEndSubmit therefore unmap
+//    automatically if the producer left the buffer mapped - forgetting the
+//    unlock must cost nothing, because the failure it causes (stale tiles on
+//    some devices, none on others) is the worst kind to debug.
+//
+// 3. The producer is SINGLE-READER by construction. The Linux backend runs a
+//    background thread for FrameReleased messages; here that thread would
+//    race AHardwareBuffer_recvHandleFromUnixSocket - which does its own
+//    recvmsg - and eat buffer handles off the socket. All producer-side
+//    receives happen on the caller's thread instead: flAcquireBuffer drains
+//    release messages non-blocking, flRequestGeometry reads until its RingDesc
+//    arrives, processing releases inline. One channel, one calling thread -
+//    which is how every producer is written anyway.
+//
+// Sync matches Linux: no shared fence. flSubmit means "I have finished
+// writing" - true for a CPU producer (the auto-unlock flushes), and a GPU
+// producer must have flushed. Slot recycling is monotonic (value V frees every
+// submit <= V), the lesson the Linux backend learned from a bursty decoder.
 
 #define FL_EXPORTS
 #include "framelink.h"
-#include "framelink_dmabuf.h"
+#include "framelink_ahb.h"
 
-#if !defined(_WIN32) && !defined(__ANDROID__)
+#ifdef __ANDROID__
 
+#include <android/hardware_buffer.h>
 #include <errno.h>
-#include <fcntl.h>
 #include <poll.h>
 #include <string.h>
-#include <sys/mman.h>
-#include <sys/stat.h>
 #include <unistd.h>
-
-#include <drm_fourcc.h>
-#include <gbm.h>
 
 #include <atomic>
 #include <mutex>
@@ -47,11 +56,9 @@
 #include "fl_protocol.h"
 
 struct flImage {
-    gbm_bo* bo = nullptr; // consumer only
-    flDmabuf desc{};
+    AHardwareBuffer* ahb = nullptr;
     void* mapped = nullptr;
-    void* mapCookie = nullptr; // gbm_bo_map cookie (consumer) or MAP_FAILED marker
-    size_t mapLength = 0;      // producer: plain mmap of the dma-buf
+    uint64_t strideBytes = 0;
 };
 
 struct flChannel {
@@ -59,9 +66,6 @@ struct flChannel {
     std::string name;
     flChannelInfo info{};
     uint32_t flags = 0;
-
-    int drmFd = -1;
-    gbm_device* gbm = nullptr;
 
     std::vector<flImage*> images;
     uint64_t readyValue = 0;
@@ -78,22 +82,7 @@ struct flChannel {
     int64_t pendingPts = -1;
     uint64_t sequence = 0;
 
-    // producer. Slot recycling is MONOTONIC, exactly like the Windows
-    // consumed fence: a FrameReleased carrying value V frees every slot whose
-    // last submit was <= V. Per-slot booleans were the first design and they
-    // LEAK under latest-wins: a consumer only ever holds the newest announced
-    // frame, so a skipped frame's slot would be released by nobody - four
-    // skips and the ring is dead, which a bursty decoder start produces in
-    // well under a second (observed: an RTSP camera at 100% ring-drop while
-    // its slower sibling ran clean).
-    //
-    // SINGLE-READER: all producer-side receives happen on the caller's thread.
-    // The first design ran a background thread for FrameReleased, and that
-    // thread RACED flRequestGeometry's recv for the RingDesc reply - whichever
-    // recvmsg the kernel picked got the message, and thread startup timing was
-    // the only reason the tests passed. flAcquireBuffer drains releases
-    // non-blocking instead, and flRequestGeometry applies them inline while
-    // waiting for its reply. One channel, one calling thread, by contract.
+    // producer (single-reader: no mutex needed, one calling thread by contract)
     fl::Channel link;
     std::vector<uint64_t> slotSubmitValue; // last submit counter per slot
     uint64_t consumedValue = 0;            // everything <= this is free
@@ -101,40 +90,44 @@ struct flChannel {
 
 namespace {
 
-uint32_t fourccFor(flFormat f) {
-    // ARGB8888 is little-endian BGRA in memory, matching FL_FORMAT_BGRA8.
-    return f == FL_FORMAT_BGRA8 ? DRM_FORMAT_ARGB8888 : 0;
-}
-
-gbm_device* openRenderNode(int* fdOut) {
-    // Render nodes only: no DRM master, no seat, works headless and inside
-    // containers - which is what a library wants.
-    for (int i = 128; i < 136; ++i) {
-        char path[64];
-        snprintf(path, sizeof(path), "/dev/dri/renderD%d", i);
-        const int fd = open(path, O_RDWR | O_CLOEXEC);
-        if (fd < 0) continue;
-        if (gbm_device* g = gbm_create_device(fd)) {
-            *fdOut = fd;
-            return g;
-        }
-        ::close(fd);
-    }
-    return nullptr;
+uint32_t ahbFormatFor(flFormat f) {
+    return f == FL_FORMAT_RGBA8 ? AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM : 0;
 }
 
 void freeImage(flImage* img) {
-    if (img->mapCookie && img->bo) gbm_bo_unmap(img->bo, img->mapCookie);
-    if (img->mapped && img->mapLength) munmap(img->mapped, img->mapLength);
-    for (uint32_t i = 0; i < img->desc.planes; ++i)
-        if (img->desc.fd[i] >= 0) ::close(img->desc.fd[i]);
-    if (img->bo) gbm_bo_destroy(img->bo);
+    if (img->mapped && img->ahb) AHardwareBuffer_unlock(img->ahb, nullptr);
+    if (img->ahb) AHardwareBuffer_release(img->ahb);
     delete img;
 }
 
-// Hand the current ring to a producer: fds as ancillary data, layout in the
-// payload. Repeated after flRequestGeometry reallocates, which is why it is a
-// function.
+// Allocate (or re-allocate) the ring.
+bool reallocRing(flChannel* ch, uint32_t w, uint32_t h, uint32_t poolSize) {
+    ++ch->info.generation; // a new ring - anyone who imported the old one must redo it
+    AHardwareBuffer_Desc desc{};
+    desc.width = w;
+    desc.height = h;
+    desc.layers = 1;
+    desc.format = ahbFormatFor(ch->info.format);
+    desc.usage = AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE;
+    if (ch->flags & FL_MAP_CPU)
+        desc.usage |= AHARDWAREBUFFER_USAGE_CPU_WRITE_OFTEN | AHARDWAREBUFFER_USAGE_CPU_READ_RARELY;
+    for (uint32_t i = 0; i < poolSize; ++i) {
+        auto* img = new flImage();
+        if (AHardwareBuffer_allocate(&desc, &img->ahb) != 0 || !img->ahb) {
+            delete img;
+            return false;
+        }
+        AHardwareBuffer_Desc got{};
+        AHardwareBuffer_describe(img->ahb, &got);
+        img->strideBytes = (uint64_t)got.stride * 4; // stride is in PIXELS
+        ch->images.push_back(img);
+    }
+    return true;
+}
+
+// Hand the current ring to a producer: the RingDesc first (payload only), then
+// each buffer through the platform's own handle-passing call. The stride
+// travels in the desc so flImageMap agrees on both sides without a re-describe.
 bool handOverRing(flChannel* ch, fl::Channel& link) {
     fl::RingDescMsg rd{};
     rd.generation = ch->info.generation;
@@ -142,65 +135,67 @@ bool handOverRing(flChannel* ch, fl::Channel& link) {
     rd.height = ch->info.height;
     rd.format = (uint32_t)ch->info.format;
     rd.poolSize = (uint32_t)ch->images.size();
-    rd.fourcc = ch->images[0]->desc.fourcc;
-    rd.modifier = ch->images[0]->desc.modifier;
-    std::vector<int> fds;
-    for (size_t i = 0; i < ch->images.size(); ++i) {
-        rd.stride[i] = ch->images[i]->desc.stride[0];
-        rd.offset[i] = ch->images[i]->desc.offset[0];
-        fds.push_back(ch->images[i]->desc.fd[0]);
-    }
-    return link.sendWithFds(fl::MsgType::RingDesc, &rd, sizeof(rd), fds.data(), fds.size());
-}
-
-// Allocate (or re-allocate) the ring. Shared by channel creation and by
-// flRequestGeometry, which is the only reason it is not inline.
-bool reallocRing(flChannel* ch, uint32_t w, uint32_t h, uint32_t poolSize) {
-    ++ch->info.generation; // a new ring - anyone who imported the old one must redo it
-    // Asking for RENDERING|LINEAR together is the natural thing to want and it
-    // FAILS on NVIDIA's GBM backend - measured, each flag alone succeeds. Try
-    // the pair, fall back to LINEAR alone.
-    const uint32_t preferred = (ch->flags & FL_MAP_CPU)
-                                   ? (GBM_BO_USE_RENDERING | GBM_BO_USE_LINEAR)
-                                   : GBM_BO_USE_RENDERING;
-    const uint32_t fallback =
-        (ch->flags & FL_MAP_CPU) ? GBM_BO_USE_LINEAR : GBM_BO_USE_RENDERING;
-    const uint32_t fourcc = fourccFor(ch->info.format);
-    for (uint32_t i = 0; i < poolSize; ++i) {
-        auto* img = new flImage();
-        img->bo = gbm_bo_create(ch->gbm, w, h, fourcc, preferred);
-        if (!img->bo && fallback != preferred) {
-            img->bo = gbm_bo_create(ch->gbm, w, h, fourcc, fallback);
-            if (img->bo && i == 0)
-                FL_LOG("framelink: RENDERING|LINEAR refused, using LINEAR only "
-                       "(CPU-mappable but may not be GPU-renderable)");
-        }
-        if (!img->bo) {
-            delete img;
+    for (size_t i = 0; i < ch->images.size(); ++i) rd.stride[i] = ch->images[i]->strideBytes;
+    if (!link.send(fl::MsgType::RingDesc, rd)) return false;
+    for (flImage* img : ch->images)
+        if (AHardwareBuffer_sendHandleToUnixSocket(img->ahb, link.pollFd()) != 0) {
+            FL_LOG_ERR("framelink: AHardwareBuffer_sendHandleToUnixSocket failed");
             return false;
         }
-        memset(&img->desc, 0, sizeof(img->desc));
-        img->desc.planes = 1;
-        img->desc.fourcc = gbm_bo_get_format(img->bo);
-        img->desc.modifier = gbm_bo_get_modifier(img->bo);
-        img->desc.fd[0] = gbm_bo_get_fd(img->bo);
-        img->desc.stride[0] = gbm_bo_get_stride(img->bo);
-        img->desc.offset[0] = gbm_bo_get_offset(img->bo, 0);
-        if (img->desc.fd[0] < 0) {
-            freeImage(img);
-            return false;
-        }
-        ch->images.push_back(img);
-    }
     return true;
 }
 
+// Producer: adopt a ring - the counterpart of handOverRing, on the SAME thread
+// that received the RingDesc (single-reader; see the file header).
+flResult importRing(flChannel* ch, const fl::RingDescMsg* rd) {
+    for (flImage* img : ch->images) freeImage(img);
+    ch->images.clear();
+    for (uint32_t i = 0; i < rd->poolSize; ++i) {
+        auto* img = new flImage();
+        if (AHardwareBuffer_recvHandleFromUnixSocket(ch->link.pollFd(), &img->ahb) != 0 ||
+            !img->ahb) {
+            delete img;
+            FL_LOG_ERR("framelink: AHardwareBuffer_recvHandleFromUnixSocket failed");
+            return FL_DISCONNECTED;
+        }
+        img->strideBytes = rd->stride[i];
+        ch->images.push_back(img);
+    }
+    ch->slotSubmitValue.assign(rd->poolSize, 0);
+    ch->consumedValue = 0;
+    ch->readyValue = 0;
+    ch->info.generation = rd->generation;
+    ch->info.width = rd->width;
+    ch->info.height = rd->height;
+    ch->info.format = (flFormat)rd->format;
+    ch->info.poolSize = rd->poolSize;
+    return FL_OK;
+}
+
+// Producer: apply one already-received control message. Called from whichever
+// producer entry point happened to be reading the socket.
+void applyRelease(flChannel* ch, const fl::Message& msg) {
+    if (msg.type != fl::MsgType::FrameReleased) return;
+    const auto* fr = msg.as<fl::FrameReadyMsg>();
+    if (!fr) return;
+    // Monotonic: releasing value V frees the skipped frames before V too.
+    if (fr->readyValue > ch->consumedValue) ch->consumedValue = fr->readyValue;
+}
+
+// Producer: drain any queued control messages without blocking.
+void drainProducerMessages(flChannel* ch) {
+    for (;;) {
+        pollfd pfd{ch->link.pollFd(), POLLIN, 0};
+        if (poll(&pfd, 1, 0) <= 0 || !(pfd.revents & POLLIN)) return;
+        auto msg = ch->link.recv();
+        if (!msg) return;
+        applyRelease(ch, *msg);
+    }
+}
+
 void acceptLoop(flChannel* ch) {
-    // ONE listener for the channel's whole life. The old per-producer
-    // Channel::listen() released the socket name while a producer was
-    // attached, so a second producer's connect() got ECONNREFUSED - "taken"
-    // was indistinguishable from "no such channel", and slot walking needs
-    // exactly that distinction (FL_BUSY vs FL_NOT_FOUND).
+    // One listener for the channel's whole life - FL_BUSY depends on it (the
+    // Linux backend's lesson; see fl::Listener).
     fl::Listener lst = fl::Listener::create(ch->name);
     if (!lst.valid()) {
         FL_LOG_ERR("framelink: cannot listen on '%s'", ch->name.c_str());
@@ -233,10 +228,8 @@ void acceptLoop(flChannel* ch) {
         }
 
         for (;;) {
-            // Wait on the producer AND the listener at once: a second
-            // producer must be told Busy NOW, not whenever the current one
-            // next sends a frame - an idle producer would leave the walker
-            // blocked indefinitely otherwise.
+            // The producer AND the listener: extras get Busy NOW, not when the
+            // current producer next sends.
             pollfd fds[2] = {{ch->peer.pollFd(), POLLIN, 0}, {lst.pollFd(), POLLIN, 0}};
             if (poll(fds, 2, -1) < 0) {
                 if (errno == EINTR) continue;
@@ -245,8 +238,6 @@ void acceptLoop(flChannel* ch) {
             if (ch->stop.load()) return;
             if (fds[1].revents & POLLIN) {
                 fl::Channel extra = lst.accept();
-                // The refusal is explicit, so flOpenProducer can answer
-                // FL_BUSY instead of misreading the closed connection.
                 if (extra.connected()) extra.send(fl::MsgType::Busy);
             }
             if (!(fds[0].revents & (POLLIN | POLLHUP | POLLERR))) continue;
@@ -256,8 +247,10 @@ void acceptLoop(flChannel* ch) {
                 const auto* g = msg->as<fl::GeometryMsg>();
                 if (g && g->width && g->height && g->width <= 8192 && g->height <= 8192 &&
                     (g->width != ch->info.width || g->height != ch->info.height)) {
-                    std::lock_guard<std::mutex> hold(ch->pendingMutex);
-                    ch->hasPending = false; // stale: the old ring is going away
+                    {
+                        std::lock_guard<std::mutex> hold(ch->pendingMutex);
+                        ch->hasPending = false; // stale: the old ring is going away
+                    }
                     const uint32_t pool = (uint32_t)ch->images.size();
                     for (flImage* img : ch->images) freeImage(img);
                     ch->images.clear();
@@ -278,8 +271,7 @@ void acceptLoop(flChannel* ch) {
             const auto* fr = msg->as<fl::FrameReadyMsg>();
             if (!fr || fr->slot >= ch->images.size()) continue;
             std::lock_guard<std::mutex> hold(ch->pendingMutex);
-            // Latest-frame-wins, as on Windows: a slow consumer must not stall
-            // the producer.
+            // Latest-frame-wins: a slow consumer must not stall the producer.
             ch->hasPending = true;
             ch->pendingSlot = fr->slot;
             ch->pendingReady = fr->readyValue;
@@ -288,27 +280,6 @@ void acceptLoop(flChannel* ch) {
         }
         ch->peerGone = true;
         if (ch->stop.load()) return;
-    }
-}
-
-// Producer: apply one already-received release message.
-void applyRelease(flChannel* ch, const fl::Message& msg) {
-    if (msg.type != fl::MsgType::FrameReleased) return;
-    const auto* fr = msg.as<fl::FrameReadyMsg>();
-    if (!fr) return;
-    // Monotonic: never backwards, and releasing value V frees the skipped
-    // frames before V too, which per-slot release could not.
-    if (fr->readyValue > ch->consumedValue) ch->consumedValue = fr->readyValue;
-}
-
-// Producer: drain queued control messages without blocking.
-void drainProducerMessages(flChannel* ch) {
-    for (;;) {
-        pollfd pfd{ch->link.pollFd(), POLLIN, 0};
-        if (poll(&pfd, 1, 0) <= 0 || !(pfd.revents & POLLIN)) return;
-        auto msg = ch->link.recv();
-        if (!msg) return;
-        applyRelease(ch, *msg);
     }
 }
 
@@ -334,10 +305,7 @@ FL_API const char* flResultString(flResult r) {
     return "unknown";
 }
 
-// The LUID is a Windows concept. Here the ring comes from a DRM render node,
-// and which node was opened IS the adapter choice, so there is nothing to
-// select with a LUID and ignoring it is the honest behaviour rather than a
-// stub - a caller passing one gets the same channel it would have got anyway.
+// One GPU on a phone; the LUID means nothing here.
 FL_API flResult flCreateChannelOnAdapter(const char* name, uint32_t width, uint32_t height,
                                          flFormat format, uint32_t poolSize, uint32_t flags,
                                          const uint8_t*, flChannel** out) {
@@ -348,7 +316,7 @@ FL_API flResult flCreateChannelEx(const char* name, uint32_t width, uint32_t hei
                                   flFormat format, uint32_t poolSize, uint32_t flags,
                                   flChannel** out) {
     if (!name || !out || !width || !height) return FL_INVALID;
-    if (!fourccFor(format)) return FL_FORMAT_UNSUPPORTED;
+    if (!ahbFormatFor(format)) return FL_FORMAT_UNSUPPORTED; // RGBA8 only - no BGRA AHB exists
     if (!poolSize || poolSize > fl::kMaxPool) return FL_INVALID;
 
     auto* ch = new flChannel();
@@ -360,13 +328,6 @@ FL_API flResult flCreateChannelEx(const char* name, uint32_t width, uint32_t hei
     ch->info.height = height;
     ch->info.format = format;
     ch->info.poolSize = poolSize;
-
-    ch->gbm = openRenderNode(&ch->drmFd);
-    if (!ch->gbm) {
-        delete ch;
-        FL_LOG_ERR("framelink: no usable /dev/dri render node");
-        return FL_INTERNAL;
-    }
 
     if (!reallocRing(ch, width, height, poolSize)) {
         flClose(ch);
@@ -395,8 +356,6 @@ FL_API flResult flOpenProducer(const char* name, flChannel** out) {
 
     auto helloMsg = ch->link.recv();
     if (helloMsg && helloMsg->type == fl::MsgType::Busy) {
-        // The channel exists; someone else has it. Tell the walker so, rather
-        // than letting a closed connection read as "no such channel".
         delete ch;
         return FL_BUSY;
     }
@@ -425,58 +384,16 @@ FL_API flResult flOpenProducer(const char* name, flChannel** out) {
     const auto* rd = ring && ring->type == fl::MsgType::RingDesc
                          ? ring->as<fl::RingDescMsg>()
                          : nullptr;
-    if (!rd || rd->poolSize == 0 || rd->poolSize > fl::kMaxPool ||
-        ring->fds.size() != rd->poolSize) {
+    if (!rd || rd->poolSize == 0 || rd->poolSize > fl::kMaxPool) {
         delete ch;
         return FL_DISCONNECTED;
     }
-    for (uint32_t i = 0; i < rd->poolSize; ++i) {
-        auto* img = new flImage();
-        img->desc.planes = 1;
-        img->desc.fourcc = rd->fourcc;
-        img->desc.modifier = rd->modifier;
-        img->desc.fd[0] = ring->fds[i]; // ours now; closed in flClose
-        img->desc.stride[0] = rd->stride[i];
-        img->desc.offset[0] = rd->offset[i];
-        ch->images.push_back(img);
-    }
-    ch->slotSubmitValue.assign(rd->poolSize, 0);
-    ch->consumedValue = 0;
-    ch->readyValue = 0;
     ch->info.version = FL_VERSION;
-    ch->info.generation = rd->generation;
-    ch->info.width = rd->width;
-    ch->info.height = rd->height;
-    ch->info.format = (flFormat)rd->format;
-    ch->info.poolSize = rd->poolSize;
-    *out = ch;
-    return FL_OK;
-}
-
-// Producer: adopt a ring description. Used at attach and after a realloc.
-static flResult importRing(flChannel* ch, const fl::RingDescMsg* rd,
-                           const std::vector<int>& fds) {
-    if (fds.size() != rd->poolSize) return FL_DISCONNECTED;
-    for (flImage* img : ch->images) freeImage(img);
-    ch->images.clear();
-    for (uint32_t i = 0; i < rd->poolSize; ++i) {
-        auto* img = new flImage();
-        img->desc.planes = 1;
-        img->desc.fourcc = rd->fourcc;
-        img->desc.modifier = rd->modifier;
-        img->desc.fd[0] = fds[i];
-        img->desc.stride[0] = rd->stride[i];
-        img->desc.offset[0] = rd->offset[i];
-        ch->images.push_back(img);
+    if (importRing(ch, rd) != FL_OK) {
+        flClose(ch);
+        return FL_DISCONNECTED;
     }
-    ch->slotSubmitValue.assign(rd->poolSize, 0);
-    ch->consumedValue = 0;
-    ch->readyValue = 0;
-    ch->info.generation = rd->generation;
-    ch->info.width = rd->width;
-    ch->info.height = rd->height;
-    ch->info.format = (flFormat)rd->format;
-    ch->info.poolSize = rd->poolSize;
+    *out = ch;
     return FL_OK;
 }
 
@@ -489,10 +406,9 @@ FL_API flResult flRequestGeometry(flChannel* ch, uint32_t width, uint32_t height
     g.height = height;
     g.format = (uint32_t)format;
     if (!ch->link.send(fl::MsgType::RequestGeometry, g)) return FL_DISCONNECTED;
-    // The consumer always answers with a RingDesc - the current one if it
-    // declined - so our view is never left stale. We are the only reader
-    // (single-reader producer; see the struct comment), so anything arriving
-    // first is a release to apply inline, never a message to lose.
+    // The consumer always answers with a RingDesc - the current ring if it
+    // declined. We are the only reader (see the file header), so anything else
+    // arriving first is a release to apply inline, never a message to lose.
     for (;;) {
         auto reply = ch->link.recv();
         if (!reply) return FL_DISCONNECTED;
@@ -502,9 +418,8 @@ FL_API flResult flRequestGeometry(flChannel* ch, uint32_t width, uint32_t height
         }
         const auto* rd = reply->type == fl::MsgType::RingDesc ? reply->as<fl::RingDescMsg>()
                                                               : nullptr;
-        if (!rd) return FL_DISCONNECTED;
-        ch->readyValue = 0;
-        return importRing(ch, rd, reply->fds);
+        if (!rd || rd->poolSize == 0 || rd->poolSize > fl::kMaxPool) return FL_DISCONNECTED;
+        return importRing(ch, rd);
     }
 }
 
@@ -514,14 +429,10 @@ FL_API flResult flAcquireBuffer(flChannel* ch, flBuffer* out, uint32_t timeoutMs
     for (uint32_t waited = 0;; waited += 2) {
         drainProducerMessages(ch);
         for (size_t i = 0; i < ch->images.size(); ++i) {
-            // Free once the consumer has promised never to read this slot's
-            // previous contents again - same rule as Windows.
             if (ch->slotSubmitValue[i] <= ch->consumedValue) {
-                // Pin against re-acquisition until flEndSubmit records the
-                // real value. The consumer can never release up to a value
-                // that was not submitted, so the sentinel is unreachable.
-                // (Acquiring and never submitting leaks the slot until the
-                // ring is reallocated - do not do that.)
+                // Pin until flEndSubmit records the real value (the sentinel is
+                // unreachable by the consumer - it can only release submitted
+                // values). Acquiring and never submitting leaks the slot.
                 ch->slotSubmitValue[i] = UINT64_MAX;
                 out->slot = (uint32_t)i;
                 out->image = ch->images[i];
@@ -544,6 +455,10 @@ FL_API flResult flEndSubmit(flChannel* ch, const flBuffer* buf, uint64_t signalV
                             int64_t ptsNs) {
     if (!ch || ch->isConsumer || !buf || buf->slot >= ch->images.size()) return FL_INVALID;
     if (!ch->link.connected()) return FL_DISCONNECTED;
+    // The cache boundary: a mapped buffer's CPU writes are not GPU-visible
+    // until unlocked. Automatic, so forgetting cannot produce the
+    // works-on-one-device failure mode.
+    flImageUnmap(buf->image);
     ch->slotSubmitValue[buf->slot] = signalValue;
     fl::FrameReadyMsg fr{};
     fr.slot = buf->slot;
@@ -563,12 +478,7 @@ FL_API flResult flSharedConsumedFence(flChannel*, void**) {
 }
 
 FL_API flResult flSharedReadyFence(flChannel*, void**) {
-    // Honest refusal: there is no shared fence on this backend yet, and handing
-    // back something unusable would be worse than saying so. FL_GPU_SYNC is
-    // consequently a no-op here - flAcquireFrame never blocks on a fence
-    // because there is none - so a consumer written for Windows still works,
-    // it just gets this backend's weaker ordering (see the file header).
-    return FL_FORMAT_UNSUPPORTED;
+    return FL_FORMAT_UNSUPPORTED; // ditto; FL_GPU_SYNC is a no-op here
 }
 
 FL_API flResult flAcquireFrame(flChannel* ch, flFrame* out, uint32_t timeoutMs) {
@@ -602,10 +512,6 @@ FL_API flResult flRelease(flChannel* ch, const flFrame* frame) {
     return ch->peer.send(fl::MsgType::FrameReleased, fr) ? FL_OK : FL_DISCONNECTED;
 }
 
-FL_API flResult flReconfigure(flChannel*, uint32_t, uint32_t, flFormat) {
-    return FL_INTERNAL; // not implemented on this backend yet
-}
-
 FL_API flResult flQuery(flChannel* ch, flChannelInfo* out) {
     if (!ch || !out) return FL_INVALID;
     *out = ch->info;
@@ -622,50 +528,41 @@ FL_API void flClose(flChannel* ch) {
         if (ch->link.connected()) ch->link.send(fl::MsgType::Bye);
     }
     for (flImage* img : ch->images) freeImage(img);
-    if (ch->gbm) gbm_device_destroy(ch->gbm);
-    if (ch->drmFd >= 0) ::close(ch->drmFd);
     delete ch;
 }
 
-// ---- dma-buf interop ---------------------------------------------------------
+// ---- AHardwareBuffer interop -------------------------------------------------
 
-FL_API flResult flImageDmabuf(flImage* img, flDmabuf* out) {
-    if (!img || !out) return FL_INVALID;
-    *out = img->desc;
-    return FL_OK;
+FL_API AHardwareBuffer* flImageAHardwareBuffer(flImage* img) {
+    return img ? img->ahb : nullptr;
 }
 
 FL_API flResult flImageMap(flImage* img, void** pixels, uint64_t* stride) {
     if (!img || !pixels) return FL_INVALID;
     if (img->mapped) {
         *pixels = img->mapped;
-        if (stride) *stride = img->desc.stride[0];
+        if (stride) *stride = img->strideBytes;
         return FL_OK;
     }
-    // Map the dma-buf directly. This works for LINEAR buffers on both sides,
-    // which is why FL_MAP_CPU forces GBM_BO_USE_LINEAR at allocation; a tiled
-    // buffer would map to bytes in an order nobody can use.
-    // The dma-buf's own size is authoritative - GBM may have padded height or
-    // stride, so width*stride would under-map and tear the last rows.
-    struct stat st;
-    if (fstat(img->desc.fd[0], &st) != 0) return FL_INTERNAL;
-    void* p = mmap(nullptr, (size_t)st.st_size, PROT_READ | PROT_WRITE, MAP_SHARED,
-                   img->desc.fd[0], 0);
-    if (p == MAP_FAILED) return FL_FORMAT_UNSUPPORTED;
+    void* p = nullptr;
+    if (AHardwareBuffer_lock(img->ahb,
+                             AHARDWAREBUFFER_USAGE_CPU_WRITE_OFTEN |
+                                 AHARDWAREBUFFER_USAGE_CPU_READ_RARELY,
+                             -1, nullptr, &p) != 0 ||
+        !p)
+        return FL_FORMAT_UNSUPPORTED; // not allocated with FL_MAP_CPU
     img->mapped = p;
-    img->mapLength = (size_t)st.st_size;
     *pixels = p;
-    if (stride) *stride = img->desc.stride[0];
+    if (stride) *stride = img->strideBytes;
     return FL_OK;
 }
 
 FL_API void flImageUnmap(flImage* img) {
     if (!img || !img->mapped) return;
-    munmap(img->mapped, img->mapLength);
+    AHardwareBuffer_unlock(img->ahb, nullptr);
     img->mapped = nullptr;
-    img->mapLength = 0;
 }
 
 } // extern "C"
 
-#endif // !_WIN32
+#endif // __ANDROID__

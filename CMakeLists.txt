@@ -26,8 +26,17 @@ elseif(UNIX AND NOT ANDROID)
     target_link_libraries(framelink PRIVATE PkgConfig::GBM PkgConfig::DRM pthread)
     set_target_properties(framelink PROPERTIES
         PUBLIC_HEADER "include/framelink.h;include/framelink_dmabuf.h;include/framelink_slots.h")
+elseif(ANDROID)
+    # Static: APK native modules embed it, and there is no system loader story
+    # for a bare shared library on Android anyway.
+    add_library(framelink STATIC
+        src/framelink_android.cpp
+        src/framelink_slots.cpp
+        src/fl_ipc_posix.cpp)
+    target_link_libraries(framelink PRIVATE android log)
+    set_target_properties(framelink PROPERTIES
+        PUBLIC_HEADER "include/framelink.h;include/framelink_ahb.h;include/framelink_slots.h")
 else()
-    # Android (AHardwareBuffer) is next; the wire format already accounts for it.
     message(FATAL_ERROR "framelink has no backend for this platform yet")
 endif()
 
