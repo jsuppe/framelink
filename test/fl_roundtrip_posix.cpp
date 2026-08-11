@@ -126,6 +126,23 @@ int runProducer(const char* name, int frames) {
         return 1;
     }
 
+    // While we are attached, a second producer must be told FL_BUSY - not
+    // FL_NOT_FOUND, which is what a closed listener used to produce and which
+    // makes an occupied slot indistinguishable from an absent consumer. A
+    // second connection from this same process is a second producer as far as
+    // the channel is concerned.
+    {
+        flChannel* second = nullptr;
+        const flResult br = flOpenProducer(name, &second);
+        printf("produce: second attach while occupied -> %s\n", flResultString(br));
+        if (second) flClose(second);
+        if (br != FL_BUSY) {
+            printf("produce: FAIL - expected FL_BUSY\n");
+            flClose(ch);
+            return 1;
+        }
+    }
+
     int submitted = 0;
     for (int i = 1; i <= frames; ++i) {
         flBuffer b{};

@@ -61,11 +61,55 @@ class Channel {
     bool connected() const { return connected_; }
     uint32_t peerPid() const { return peerPid_; } // listen() side only
 
+#ifndef _WIN32
+    // For poll()ing alongside other fds - the consumer's pump loop waits on
+    // the producer AND the listener at once. POSIX only; Windows waits on the
+    // pipe through its own machinery.
+    int pollFd() const { return (int)(intptr_t)handle_ - 1; }
+#endif
+
   private:
     void close();
     void* handle_ = nullptr; // HANDLE on Windows, int fd on POSIX
     bool connected_ = false;
     uint32_t peerPid_ = 0;
+
+#ifndef _WIN32
+    friend class Listener;
+#endif
 };
+
+#ifndef _WIN32
+// A listening socket that OUTLIVES individual producer connections. POSIX
+// only, and it exists for one reason: Channel::listen() binds afresh per
+// producer and closes the socket after one accept, so while a producer was
+// attached the name did not exist - connect() got ECONNREFUSED and "taken"
+// was indistinguishable from "no such channel". Slot walking needs exactly
+// that distinction (FL_BUSY vs FL_NOT_FOUND), so the listener stays bound for
+// the channel's whole life and extras are refused explicitly with a Busy
+// message.
+//
+// Windows does not need this: a named pipe with one instance reports
+// ERROR_PIPE_BUSY on its own.
+class Listener {
+  public:
+    Listener() = default;
+    ~Listener();
+    Listener(Listener&&) noexcept;
+    Listener& operator=(Listener&&) noexcept;
+    Listener(const Listener&) = delete;
+    Listener& operator=(const Listener&) = delete;
+
+    static Listener create(const std::string& name);
+    bool valid() const { return fd_ >= 0; }
+    int pollFd() const { return fd_; }
+    // Accept one connection. Blocking unless the caller poll()ed first.
+    Channel accept();
+    void close();
+
+  private:
+    int fd_ = -1;
+};
+#endif
 
 } // namespace fl

@@ -25,7 +25,9 @@
 
 #ifndef _WIN32
 
+#include <errno.h>
 #include <fcntl.h>
+#include <poll.h>
 #include <string.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
@@ -180,9 +182,20 @@ bool reallocRing(flChannel* ch, uint32_t w, uint32_t h, uint32_t poolSize) {
 }
 
 void acceptLoop(flChannel* ch) {
+    // ONE listener for the channel's whole life. The old per-producer
+    // Channel::listen() released the socket name while a producer was
+    // attached, so a second producer's connect() got ECONNREFUSED - "taken"
+    // was indistinguishable from "no such channel", and slot walking needs
+    // exactly that distinction (FL_BUSY vs FL_NOT_FOUND).
+    fl::Listener lst = fl::Listener::create(ch->name);
+    if (!lst.valid()) {
+        FL_LOG_ERR("framelink: cannot listen on '%s'", ch->name.c_str());
+        return;
+    }
     while (!ch->stop.load()) {
-        fl::Channel link = fl::Channel::listen(ch->name);
-        if (!link.connected() || ch->stop.load()) return;
+        fl::Channel link = lst.accept();
+        if (ch->stop.load()) return;
+        if (!link.connected()) continue;
 
         fl::HelloMsg hello{};
         hello.version = FL_VERSION;
@@ -206,6 +219,23 @@ void acceptLoop(flChannel* ch) {
         }
 
         for (;;) {
+            // Wait on the producer AND the listener at once: a second
+            // producer must be told Busy NOW, not whenever the current one
+            // next sends a frame - an idle producer would leave the walker
+            // blocked indefinitely otherwise.
+            pollfd fds[2] = {{ch->peer.pollFd(), POLLIN, 0}, {lst.pollFd(), POLLIN, 0}};
+            if (poll(fds, 2, -1) < 0) {
+                if (errno == EINTR) continue;
+                break;
+            }
+            if (ch->stop.load()) return;
+            if (fds[1].revents & POLLIN) {
+                fl::Channel extra = lst.accept();
+                // The refusal is explicit, so flOpenProducer can answer
+                // FL_BUSY instead of misreading the closed connection.
+                if (extra.connected()) extra.send(fl::MsgType::Busy);
+            }
+            if (!(fds[0].revents & (POLLIN | POLLHUP | POLLERR))) continue;
             auto msg = ch->peer.recv();
             if (!msg || msg->type == fl::MsgType::Bye) break;
             if (msg->type == fl::MsgType::RequestGeometry) {
@@ -342,6 +372,12 @@ FL_API flResult flOpenProducer(const char* name, flChannel** out) {
     }
 
     auto helloMsg = ch->link.recv();
+    if (helloMsg && helloMsg->type == fl::MsgType::Busy) {
+        // The channel exists; someone else has it. Tell the walker so, rather
+        // than letting a closed connection read as "no such channel".
+        delete ch;
+        return FL_BUSY;
+    }
     const auto* srv = helloMsg && helloMsg->type == fl::MsgType::Hello
                           ? helloMsg->as<fl::HelloMsg>()
                           : nullptr;

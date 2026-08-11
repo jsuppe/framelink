@@ -68,19 +68,50 @@ void Channel::close() {
 }
 
 Channel Channel::listen(const std::string& name) {
-    Channel ch;
+    // One-shot convenience built on Listener; the listener closes on return,
+    // so this keeps the historical semantics for callers that want them.
+    Listener lst = Listener::create(name);
+    if (!lst.valid()) return Channel();
+    return lst.accept();
+}
+
+Listener::~Listener() { close(); }
+
+Listener::Listener(Listener&& o) noexcept : fd_(o.fd_) { o.fd_ = -1; }
+
+Listener& Listener::operator=(Listener&& o) noexcept {
+    if (this != &o) {
+        close();
+        fd_ = o.fd_;
+        o.fd_ = -1;
+    }
+    return *this;
+}
+
+void Listener::close() {
+    if (fd_ >= 0) ::close(fd_);
+    fd_ = -1;
+}
+
+Listener Listener::create(const std::string& name) {
+    Listener lst;
     int srv = socket(AF_UNIX, SOCK_SEQPACKET | SOCK_CLOEXEC, 0);
-    if (srv < 0) return ch;
+    if (srv < 0) return lst;
     sockaddr_un addr;
     const size_t len = fillAddr(addr, name);
     if (bind(srv, (sockaddr*)&addr, (socklen_t)len) < 0 || ::listen(srv, 4) < 0) {
         ::close(srv);
-        return ch;
+        return lst;
     }
-    const int fd = accept4(srv, nullptr, nullptr, SOCK_CLOEXEC);
-    ::close(srv); // one producer per channel, as on Windows
-    if (fd < 0) return ch;
+    lst.fd_ = srv;
+    return lst;
+}
 
+Channel Listener::accept() {
+    Channel ch;
+    if (fd_ < 0) return ch;
+    const int fd = accept4(fd_, nullptr, nullptr, SOCK_CLOEXEC);
+    if (fd < 0) return ch;
     ucred cred{};
     socklen_t clen = sizeof(cred);
     if (getsockopt(fd, SOL_SOCKET, SO_PEERCRED, &cred, &clen) == 0) ch.peerPid_ = cred.pid;
