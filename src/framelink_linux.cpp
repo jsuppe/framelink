@@ -116,6 +116,67 @@ void freeImage(flImage* img) {
     delete img;
 }
 
+// Hand the current ring to a producer: fds as ancillary data, layout in the
+// payload. Repeated after flRequestGeometry reallocates, which is why it is a
+// function.
+bool handOverRing(flChannel* ch, fl::Channel& link) {
+    fl::RingDescMsg rd{};
+    rd.width = ch->info.width;
+    rd.height = ch->info.height;
+    rd.format = (uint32_t)ch->info.format;
+    rd.poolSize = (uint32_t)ch->images.size();
+    rd.fourcc = ch->images[0]->desc.fourcc;
+    rd.modifier = ch->images[0]->desc.modifier;
+    std::vector<int> fds;
+    for (size_t i = 0; i < ch->images.size(); ++i) {
+        rd.stride[i] = ch->images[i]->desc.stride[0];
+        rd.offset[i] = ch->images[i]->desc.offset[0];
+        fds.push_back(ch->images[i]->desc.fd[0]);
+    }
+    return link.sendWithFds(fl::MsgType::RingDesc, &rd, sizeof(rd), fds.data(), fds.size());
+}
+
+// Allocate (or re-allocate) the ring. Shared by channel creation and by
+// flRequestGeometry, which is the only reason it is not inline.
+bool reallocRing(flChannel* ch, uint32_t w, uint32_t h, uint32_t poolSize) {
+    // Asking for RENDERING|LINEAR together is the natural thing to want and it
+    // FAILS on NVIDIA's GBM backend - measured, each flag alone succeeds. Try
+    // the pair, fall back to LINEAR alone.
+    const uint32_t preferred = (ch->flags & FL_MAP_CPU)
+                                   ? (GBM_BO_USE_RENDERING | GBM_BO_USE_LINEAR)
+                                   : GBM_BO_USE_RENDERING;
+    const uint32_t fallback =
+        (ch->flags & FL_MAP_CPU) ? GBM_BO_USE_LINEAR : GBM_BO_USE_RENDERING;
+    const uint32_t fourcc = fourccFor(ch->info.format);
+    for (uint32_t i = 0; i < poolSize; ++i) {
+        auto* img = new flImage();
+        img->bo = gbm_bo_create(ch->gbm, w, h, fourcc, preferred);
+        if (!img->bo && fallback != preferred) {
+            img->bo = gbm_bo_create(ch->gbm, w, h, fourcc, fallback);
+            if (img->bo && i == 0)
+                FL_LOG("framelink: RENDERING|LINEAR refused, using LINEAR only "
+                       "(CPU-mappable but may not be GPU-renderable)");
+        }
+        if (!img->bo) {
+            delete img;
+            return false;
+        }
+        memset(&img->desc, 0, sizeof(img->desc));
+        img->desc.planes = 1;
+        img->desc.fourcc = gbm_bo_get_format(img->bo);
+        img->desc.modifier = gbm_bo_get_modifier(img->bo);
+        img->desc.fd[0] = gbm_bo_get_fd(img->bo);
+        img->desc.stride[0] = gbm_bo_get_stride(img->bo);
+        img->desc.offset[0] = gbm_bo_get_offset(img->bo, 0);
+        if (img->desc.fd[0] < 0) {
+            freeImage(img);
+            return false;
+        }
+        ch->images.push_back(img);
+    }
+    return true;
+}
+
 void acceptLoop(flChannel* ch) {
     while (!ch->stop.load()) {
         fl::Channel link = fl::Channel::listen(ch->name);
@@ -133,21 +194,7 @@ void acceptLoop(flChannel* ch) {
             continue;
         }
 
-        fl::RingDescMsg rd{};
-        rd.width = ch->info.width;
-        rd.height = ch->info.height;
-        rd.format = (uint32_t)ch->info.format;
-        rd.poolSize = (uint32_t)ch->images.size();
-        rd.fourcc = ch->images[0]->desc.fourcc;
-        rd.modifier = ch->images[0]->desc.modifier;
-        std::vector<int> fds;
-        for (size_t i = 0; i < ch->images.size(); ++i) {
-            rd.stride[i] = ch->images[i]->desc.stride[0];
-            rd.offset[i] = ch->images[i]->desc.offset[0];
-            fds.push_back(ch->images[i]->desc.fd[0]);
-        }
-        if (!link.sendWithFds(fl::MsgType::RingDesc, &rd, sizeof(rd), fds.data(), fds.size()))
-            continue;
+        if (!handOverRing(ch, link)) continue;
 
         ch->peerGone = false;
         FL_LOG("framelink: producer pid %u attached to '%s'", link.peerPid(), ch->name.c_str());
@@ -159,6 +206,28 @@ void acceptLoop(flChannel* ch) {
         for (;;) {
             auto msg = ch->peer.recv();
             if (!msg || msg->type == fl::MsgType::Bye) break;
+            if (msg->type == fl::MsgType::RequestGeometry) {
+                const auto* g = msg->as<fl::GeometryMsg>();
+                if (g && g->width && g->height && g->width <= 8192 && g->height <= 8192 &&
+                    (g->width != ch->info.width || g->height != ch->info.height)) {
+                    std::lock_guard<std::mutex> hold(ch->pendingMutex);
+                    ch->hasPending = false; // stale: the old ring is going away
+                    const uint32_t pool = (uint32_t)ch->images.size();
+                    for (flImage* img : ch->images) freeImage(img);
+                    ch->images.clear();
+                    ch->info.width = g->width;
+                    ch->info.height = g->height;
+                    if (!reallocRing(ch, g->width, g->height, pool)) {
+                        FL_LOG_ERR("framelink: reallocation to %ux%u failed", g->width,
+                                   g->height);
+                        break;
+                    }
+                    FL_LOG("framelink: '%s' reallocated to %ux%u at the producer's request",
+                           ch->name.c_str(), g->width, g->height);
+                }
+                if (!handOverRing(ch, ch->peer)) break;
+                continue;
+            }
             if (msg->type != fl::MsgType::FrameReady) continue;
             const auto* fr = msg->as<fl::FrameReadyMsg>();
             if (!fr || fr->slot >= ch->images.size()) continue;
@@ -206,6 +275,7 @@ FL_API const char* flResultString(flResult r) {
         case FL_INVALID: return "invalid argument";
         case FL_OOM: return "out of memory";
         case FL_INTERNAL: return "internal error";
+        case FL_BUSY: return "channel already has a producer";
     }
     return "unknown";
 }
@@ -234,48 +304,9 @@ FL_API flResult flCreateChannelEx(const char* name, uint32_t width, uint32_t hei
         return FL_INTERNAL;
     }
 
-    // LINEAR when the consumer needs CPU access: a tiled buffer cannot be
-    // addressed byte-wise, which is exactly what a v4l2 writer must do.
-    //
-    // Asking for RENDERING|LINEAR together is the natural thing to want and it
-    // FAILS on NVIDIA's GBM backend - measured on a 2026 driver, where each
-    // flag alone succeeds and the pair does not. So try the pair, then fall
-    // back to LINEAR alone. On Intel and AMD the pair works and the buffer
-    // stays GPU-renderable; on NVIDIA a CPU-mappable buffer is not renderable,
-    // which is a platform limit rather than a bug here - a GPU producer on
-    // NVIDIA should leave FL_MAP_CPU off and import the dma-buf instead.
-    const uint32_t preferred =
-        (flags & FL_MAP_CPU) ? (GBM_BO_USE_RENDERING | GBM_BO_USE_LINEAR)
-                             : GBM_BO_USE_RENDERING;
-    const uint32_t fallback = (flags & FL_MAP_CPU) ? GBM_BO_USE_LINEAR : GBM_BO_USE_RENDERING;
-
-    for (uint32_t i = 0; i < poolSize; ++i) {
-        auto* img = new flImage();
-        img->bo = gbm_bo_create(ch->gbm, width, height, fourccFor(format), preferred);
-        if (!img->bo && fallback != preferred) {
-            img->bo = gbm_bo_create(ch->gbm, width, height, fourccFor(format), fallback);
-            if (img->bo && i == 0)
-                FL_LOG("framelink: RENDERING|LINEAR refused, using LINEAR only "
-                       "(buffers are CPU-mappable but may not be GPU-renderable)");
-        }
-        if (!img->bo) {
-            delete img;
-            flClose(ch);
-            return FL_OOM;
-        }
-        memset(&img->desc, 0, sizeof(img->desc));
-        img->desc.planes = 1; // BGRA8
-        img->desc.fourcc = gbm_bo_get_format(img->bo);
-        img->desc.modifier = gbm_bo_get_modifier(img->bo);
-        img->desc.fd[0] = gbm_bo_get_fd(img->bo);
-        img->desc.stride[0] = gbm_bo_get_stride(img->bo);
-        img->desc.offset[0] = gbm_bo_get_offset(img->bo, 0);
-        if (img->desc.fd[0] < 0) {
-            freeImage(img);
-            flClose(ch);
-            return FL_INTERNAL;
-        }
-        ch->images.push_back(img);
+    if (!reallocRing(ch, width, height, poolSize)) {
+        flClose(ch);
+        return FL_OOM;
     }
 
     ch->accept = std::thread(acceptLoop, ch);
@@ -348,6 +379,50 @@ FL_API flResult flOpenProducer(const char* name, flChannel** out) {
     ch->releaseRx = std::thread(releaseLoop, ch);
     *out = ch;
     return FL_OK;
+}
+
+// Producer: adopt a ring description. Used at attach and after a realloc.
+static flResult importRing(flChannel* ch, const fl::RingDescMsg* rd,
+                           const std::vector<int>& fds) {
+    if (fds.size() != rd->poolSize) return FL_DISCONNECTED;
+    for (flImage* img : ch->images) freeImage(img);
+    ch->images.clear();
+    for (uint32_t i = 0; i < rd->poolSize; ++i) {
+        auto* img = new flImage();
+        img->desc.planes = 1;
+        img->desc.fourcc = rd->fourcc;
+        img->desc.modifier = rd->modifier;
+        img->desc.fd[0] = fds[i];
+        img->desc.stride[0] = rd->stride[i];
+        img->desc.offset[0] = rd->offset[i];
+        ch->images.push_back(img);
+    }
+    ch->slotBusy.assign(rd->poolSize, false);
+    ch->info.width = rd->width;
+    ch->info.height = rd->height;
+    ch->info.format = (flFormat)rd->format;
+    ch->info.poolSize = rd->poolSize;
+    return FL_OK;
+}
+
+FL_API flResult flRequestGeometry(flChannel* ch, uint32_t width, uint32_t height,
+                                  flFormat format) {
+    if (!ch || ch->isConsumer || !width || !height) return FL_INVALID;
+    if (!ch->link.connected()) return FL_DISCONNECTED;
+    fl::GeometryMsg g{};
+    g.width = width;
+    g.height = height;
+    g.format = (uint32_t)format;
+    if (!ch->link.send(fl::MsgType::RequestGeometry, g)) return FL_DISCONNECTED;
+    // The consumer always answers with a RingDesc - the current one if it
+    // declined - so our view is never left stale.
+    auto reply = ch->link.recv();
+    const auto* rd = reply && reply->type == fl::MsgType::RingDesc
+                         ? reply->as<fl::RingDescMsg>()
+                         : nullptr;
+    if (!rd) return FL_DISCONNECTED;
+    ch->readyValue = 0;
+    return importRing(ch, rd, reply->fds);
 }
 
 FL_API flResult flAcquireBuffer(flChannel* ch, flBuffer* out, uint32_t timeoutMs) {

@@ -57,6 +57,18 @@ int runConsumer(const char* name, int want) {
         if (lastSeq && f.sequence > lastSeq + 1) skipped += f.sequence - lastSeq - 1;
         lastSeq = f.sequence;
 
+        flChannelInfo now{};
+        flQuery(ch, &now);
+        if (now.width != W || now.height != H) {
+            // Only report the transition once; the point is that the consumer
+            // sees the producer's requested geometry take effect.
+            static bool said = false;
+            if (!said) {
+                printf("consume: ring is now %ux%u (producer requested it)\n", now.width,
+                       now.height);
+                said = true;
+            }
+        }
         void* px = nullptr;
         uint64_t stride = 0;
         if (flImageMap(f.image, &px, &stride) == FL_OK && px) {
@@ -97,6 +109,20 @@ int runProducer(const char* name, int frames) {
     flQuery(ch, &info);
     printf("produce: attached to '%s' %ux%u pool %u\n", name, info.width, info.height,
            info.poolSize);
+
+    // Ask for a size the consumer did NOT create. This is the case that
+    // matters: real producers differ and cannot be predicted - a mirroring
+    // iPad sends 752x1080 into the same slot a laptop uses for 1920x1080.
+    // flQuery afterwards is the truth, because the consumer may decline.
+    r = flRequestGeometry(ch, 320, 240, FL_FORMAT_BGRA8);
+    printf("produce: flRequestGeometry(320x240) -> %s\n", flResultString(r));
+    flQuery(ch, &info);
+    printf("produce: ring is now %ux%u pool %u\n", info.width, info.height, info.poolSize);
+    if (info.width != 320 || info.height != 240) {
+        printf("produce: FAIL - reallocation did not take\n");
+        flClose(ch);
+        return 1;
+    }
 
     int submitted = 0;
     for (int i = 1; i <= frames; ++i) {

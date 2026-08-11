@@ -72,8 +72,9 @@ Channel Channel::listen(const std::string& name) {
     return ch;
 }
 
-Channel Channel::connect(const std::string& name, uint32_t timeoutMs) {
+Channel Channel::connect(const std::string& name, uint32_t timeoutMs, bool* busy) {
     Channel ch;
+    if (busy) *busy = false;
     const std::wstring path = pipePath(name);
     const DWORD deadline = GetTickCount() + timeoutMs;
     for (;;) {
@@ -86,10 +87,12 @@ Channel Channel::connect(const std::string& name, uint32_t timeoutMs) {
             ch.connected_ = true;
             return ch;
         }
-        // ERROR_PIPE_BUSY means the channel exists but every instance is taken;
-        // anything else (typically FILE_NOT_FOUND) means no such channel, and
-        // the caller turns that into FL_NOT_FOUND without retrying forever.
-        if (GetLastError() != ERROR_PIPE_BUSY || GetTickCount() >= deadline) return ch;
+        // ERROR_PIPE_BUSY means the channel EXISTS but every instance is taken -
+        // i.e. it already has a producer. Anything else (typically
+        // FILE_NOT_FOUND) means no such channel. The caller needs both.
+        if (GetLastError() != ERROR_PIPE_BUSY) return ch;
+        if (busy) *busy = true;
+        if (GetTickCount() >= deadline) return ch;
         WaitNamedPipeW(path.c_str(), 50);
     }
 }

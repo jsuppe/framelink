@@ -160,6 +160,43 @@ bool allocateRing(flChannel* ch, uint32_t w, uint32_t h, uint32_t poolSize) {
 
 // Consumer: one producer, handshake then pump FrameReady. Spike scope - fan-out
 // needs the back-pressure question answered first (docs/FRAMELINK.md).
+// Duplicate the current ring into `peerPid` and describe it. Called at attach
+// and again after flRequestGeometry reallocates, which is the whole reason it
+// is a function rather than inline handshake code.
+bool handOverRing(flChannel* ch, fl::Channel& link, uint32_t peerPid) {
+    HANDLE peerProc = OpenProcess(PROCESS_DUP_HANDLE, FALSE, peerPid);
+    if (!peerProc) {
+        FL_LOG_ERR("framelink: OpenProcess(pid %u) failed", peerPid);
+        return false;
+    }
+    fl::RingDescMsg pd{};
+    pd.width = ch->info.width;
+    pd.height = ch->info.height;
+    pd.format = (uint32_t)ch->info.format;
+    pd.poolSize = (uint32_t)ch->images.size();
+    bool ok = true;
+    for (size_t i = 0; i < ch->images.size() && ok; ++i) {
+        HANDLE dup = nullptr;
+        ok = DuplicateHandle(GetCurrentProcess(), ch->images[i]->shared, peerProc, &dup, 0,
+                             FALSE, DUPLICATE_SAME_ACCESS) != 0;
+        pd.texture[i] = (uint64_t)(uintptr_t)dup;
+    }
+    HANDLE dupReady = nullptr, dupConsumed = nullptr;
+    ok = ok &&
+         DuplicateHandle(GetCurrentProcess(), ch->readyShared, peerProc, &dupReady, 0, FALSE,
+                         DUPLICATE_SAME_ACCESS) &&
+         DuplicateHandle(GetCurrentProcess(), ch->consumedShared, peerProc, &dupConsumed, 0,
+                         FALSE, DUPLICATE_SAME_ACCESS);
+    pd.readyFence = (uint64_t)(uintptr_t)dupReady;
+    pd.consumedFence = (uint64_t)(uintptr_t)dupConsumed;
+    CloseHandle(peerProc);
+    if (!ok) {
+        FL_LOG_ERR("framelink: DuplicateHandle into producer failed");
+        return false;
+    }
+    return link.send(fl::MsgType::RingDesc, pd);
+}
+
 void acceptLoop(flChannel* ch) {
     while (!ch->stop.load()) {
         fl::Channel link = fl::Channel::listen(ch->name);
@@ -193,35 +230,7 @@ void acceptLoop(flChannel* ch) {
             continue; // closing the link IS the refusal
         }
 
-        fl::RingDescMsg pd{};
-        pd.width = ch->info.width;
-        pd.height = ch->info.height;
-        pd.format = (uint32_t)ch->info.format;
-        pd.poolSize = (uint32_t)ch->images.size();
-        bool ok = true;
-        for (size_t i = 0; i < ch->images.size(); ++i) {
-            HANDLE dup = nullptr;
-            if (!DuplicateHandle(GetCurrentProcess(), ch->images[i]->shared, peerProc, &dup, 0,
-                                 FALSE, DUPLICATE_SAME_ACCESS)) {
-                ok = false;
-                break;
-            }
-            pd.texture[i] = (uint64_t)(uintptr_t)dup;
-        }
-        HANDLE dupReady = nullptr, dupConsumed = nullptr;
-        ok = ok &&
-             DuplicateHandle(GetCurrentProcess(), ch->readyShared, peerProc, &dupReady, 0, FALSE,
-                             DUPLICATE_SAME_ACCESS) &&
-             DuplicateHandle(GetCurrentProcess(), ch->consumedShared, peerProc, &dupConsumed, 0,
-                             FALSE, DUPLICATE_SAME_ACCESS);
-        pd.readyFence = (uint64_t)(uintptr_t)dupReady;
-        pd.consumedFence = (uint64_t)(uintptr_t)dupConsumed;
-        CloseHandle(peerProc);
-        if (!ok) {
-            FL_LOG_ERR("framelink: DuplicateHandle into producer failed");
-            continue;
-        }
-        if (!link.send(fl::MsgType::RingDesc, pd)) continue;
+        if (!handOverRing(ch, link, link.peerPid())) continue;
 
         ch->peerGone = false;
         FL_LOG("framelink: producer pid %u attached to '%s'", link.peerPid(),
@@ -230,6 +239,35 @@ void acceptLoop(flChannel* ch) {
         for (;;) {
             auto msg = link.recv();
             if (!msg || msg->type == fl::MsgType::Bye) break;
+            if (msg->type == fl::MsgType::RequestGeometry) {
+                const auto* g = msg->as<fl::GeometryMsg>();
+                // Honour it only when it actually differs and is sane. A
+                // refusal is silent by design: the producer re-reads flQuery
+                // and adapts, so there is nothing for it to handle.
+                if (g && g->width && g->height && g->width <= 8192 && g->height <= 8192 &&
+                    (g->width != ch->info.width || g->height != ch->info.height)) {
+                    std::lock_guard<std::mutex> hold(ch->pendingMutex);
+                    ch->hasPending = false; // stale: the old ring is going away
+                    const uint32_t pool = (uint32_t)ch->images.size();
+                    for (flImage* img : ch->images) {
+                        if (img->shared) CloseHandle(img->shared);
+                        delete img;
+                    }
+                    ch->images.clear();
+                    ch->slotReadyValue.clear();
+                    ch->info.width = g->width;
+                    ch->info.height = g->height;
+                    if (!allocateRing(ch, g->width, g->height, pool)) {
+                        FL_LOG_ERR("framelink: reallocation to %ux%u failed", g->width,
+                                   g->height);
+                        break;
+                    }
+                    FL_LOG("framelink: '%s' reallocated to %ux%u at the producer's request",
+                           ch->name.c_str(), g->width, g->height);
+                }
+                if (!handOverRing(ch, link, link.peerPid())) break;
+                continue;
+            }
             if (msg->type != fl::MsgType::FrameReady) continue;
             const auto* fr = msg->as<fl::FrameReadyMsg>();
             if (!fr || fr->slot >= ch->images.size()) continue;
@@ -264,6 +302,7 @@ FL_API const char* flResultString(flResult r) {
         case FL_INVALID: return "invalid argument";
         case FL_OOM: return "out of memory";
         case FL_INTERNAL: return "internal error";
+        case FL_BUSY: return "channel already has a producer";
     }
     return "unknown";
 }
@@ -312,10 +351,13 @@ FL_API flResult flOpenProducer(const char* name, flChannel** out) {
     ch->name = name;
     // Short timeout and no retry: a producer attaches to a channel that exists
     // or it does not. It never creates one.
-    ch->link = fl::Channel::connect(name, 2000);
+    bool busy = false;
+    // Short timeout: a producer attaches to a channel or it does not. Walking a
+    // set of slots must not take seconds per slot.
+    ch->link = fl::Channel::connect(name, 250, &busy);
     if (!ch->link.connected()) {
         delete ch;
-        return FL_NOT_FOUND;
+        return busy ? FL_BUSY : FL_NOT_FOUND;
     }
 
     // The consumer speaks first, so a version mismatch is caught before it
@@ -398,6 +440,60 @@ FL_API flResult flOpenProducer(const char* name, flChannel** out) {
     ch->info.poolSize = pd->poolSize;
     *out = ch;
     return FL_OK;
+}
+
+// Producer: replace our view of the ring from a RingDesc. Used at attach and
+// again whenever the consumer reallocates.
+static flResult importRing(flChannel* ch, const fl::RingDescMsg* pd) {
+    ComPtr<ID3D11Device1> dev1;
+    ComPtr<ID3D11Device5> dev5;
+    if (FAILED(ch->device.As(&dev1)) || FAILED(ch->device.As(&dev5))) return FL_INTERNAL;
+    for (flImage* img : ch->images) {
+        if (img->shared) CloseHandle(img->shared);
+        delete img;
+    }
+    ch->images.clear();
+    ch->slotReadyValue.clear();
+    for (uint32_t i = 0; i < pd->poolSize; ++i) {
+        auto* img = new flImage();
+        img->shared = (HANDLE)(uintptr_t)pd->texture[i];
+        if (FAILED(dev1->OpenSharedResource1(img->shared, IID_PPV_ARGS(&img->tex)))) {
+            delete img;
+            return FL_ADAPTER_MISMATCH;
+        }
+        ch->images.push_back(img);
+        ch->slotReadyValue.push_back(0);
+    }
+    ch->readyShared = (HANDLE)(uintptr_t)pd->readyFence;
+    ch->consumedShared = (HANDLE)(uintptr_t)pd->consumedFence;
+    if (FAILED(dev5->OpenSharedFence(ch->readyShared, IID_PPV_ARGS(&ch->readyFence))) ||
+        FAILED(dev5->OpenSharedFence(ch->consumedShared, IID_PPV_ARGS(&ch->consumedFence))))
+        return FL_INTERNAL;
+    ch->info.width = pd->width;
+    ch->info.height = pd->height;
+    ch->info.format = (flFormat)pd->format;
+    ch->info.poolSize = pd->poolSize;
+    return FL_OK;
+}
+
+FL_API flResult flRequestGeometry(flChannel* ch, uint32_t width, uint32_t height,
+                                  flFormat format) {
+    if (!ch || ch->isConsumer || !width || !height) return FL_INVALID;
+    if (!ch->link.connected()) return FL_DISCONNECTED;
+    fl::GeometryMsg g{};
+    g.width = width;
+    g.height = height;
+    g.format = (uint32_t)format;
+    if (!ch->link.send(fl::MsgType::RequestGeometry, g)) return FL_DISCONNECTED;
+    // The consumer always answers with a RingDesc - the current one if it
+    // declined - so the producer's view is never left stale.
+    auto reply = ch->link.recv();
+    const auto* pd = reply && reply->type == fl::MsgType::RingDesc
+                         ? reply->as<fl::RingDescMsg>()
+                         : nullptr;
+    if (!pd || pd->poolSize == 0 || pd->poolSize > kMaxPool) return FL_DISCONNECTED;
+    ch->readyValue = 0; // fences are fresh with the new ring
+    return importRing(ch, pd);
 }
 
 FL_API flResult flAcquireBuffer(flChannel* ch, flBuffer* out, uint32_t timeoutMs) {

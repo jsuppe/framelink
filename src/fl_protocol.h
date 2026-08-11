@@ -25,7 +25,13 @@ enum class MsgType : uint32_t {
     // which the producer can poll; without a shared fence the consumer has to
     // say so explicitly.
     FrameReleased = 4,
-    Bye = 5,        // either way: orderly shutdown
+    // Producer -> consumer: "I intend to send this geometry". The consumer
+    // answers with a fresh RingDesc if it reallocated, or Busy-style refusal by
+    // simply not changing anything.
+    RequestGeometry = 5,
+    // Consumer -> producer: a producer is already attached to this channel.
+    Busy = 6,
+    Bye = 7,        // either way: orderly shutdown
 };
 
 #pragma pack(push, 4)
@@ -65,6 +71,12 @@ struct RingDescMsg {
     uint64_t offset[kMaxPool];
     uint64_t modifier; // DRM format modifier, same for every slot
     uint32_t fourcc;   // DRM_FORMAT_*
+    uint32_t _pad;
+};
+
+struct GeometryMsg {
+    uint32_t width, height;
+    uint32_t format; // flFormat
     uint32_t _pad;
 };
 

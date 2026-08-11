@@ -41,7 +41,9 @@ class Channel {
     static Channel listen(const std::string& name);
     // Fails fast when the name does not exist - a producer attaches to a
     // channel or it does not; it never creates one.
-    static Channel connect(const std::string& name, uint32_t timeoutMs);
+    // `busy` (optional) distinguishes "the channel exists but is taken" from
+    // "no such channel" - the caller turns that into FL_BUSY vs FL_NOT_FOUND.
+    static Channel connect(const std::string& name, uint32_t timeoutMs, bool* busy = nullptr);
 
     bool send(MsgType type, const void* payload, size_t size);
     // POSIX only: the ring's dma-buf fds travel as SCM_RIGHTS ancillary data,

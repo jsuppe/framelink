@@ -89,8 +89,9 @@ Channel Channel::listen(const std::string& name) {
     return ch;
 }
 
-Channel Channel::connect(const std::string& name, uint32_t timeoutMs) {
+Channel Channel::connect(const std::string& name, uint32_t timeoutMs, bool* busy) {
     Channel ch;
+    if (busy) *busy = false;
     sockaddr_un addr;
     const size_t len = fillAddr(addr, name);
     const uint32_t step = 25;

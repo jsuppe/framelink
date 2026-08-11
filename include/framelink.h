@@ -49,6 +49,11 @@ typedef enum flResult {
     FL_ADAPTER_MISMATCH = 5, // producer and consumer are on different GPUs
     FL_ACCESS_DENIED = 6,
     FL_NOT_FOUND = 7,        // flOpenProducer: no such channel. It never creates.
+    // The channel exists but already has a producer. Distinct from NOT_FOUND
+    // on purpose: a caller walking a set of slot channels needs to tell "taken"
+    // from "no such channel", and reporting both as NOT_FOUND makes an
+    // exhausted set indistinguishable from a misconfigured name.
+    FL_BUSY = 11,
     FL_INVALID = 8,
     FL_OOM = 9,
     FL_INTERNAL = 10,
@@ -124,6 +129,20 @@ FL_API flResult flSubmit(flChannel*, const flBuffer*, int64_t ptsNs); // -1 = no
 FL_API flResult flSharedReadyFence(flChannel*, void** handle); // borrowed
 FL_API flResult flBeginSubmit(flChannel*, const flBuffer*, uint64_t* signalValue);
 FL_API flResult flEndSubmit(flChannel*, const flBuffer*, uint64_t signalValue, int64_t ptsNs);
+
+// State what this producer intends to send. The consumer MAY reallocate the
+// ring to match and MAY refuse; either way flQuery afterwards is the truth, so
+// callers must re-read it rather than assume.
+//
+// This is not the producer taking ownership back. It mirrors
+// ANativeWindow_setBuffersGeometry on a BufferQueue, where buffers belong to
+// the consumer and the producer may still say what it is about to draw -
+// consumer-owned means the producer does not ALLOCATE, not that it is mute.
+//
+// Needed because real producers differ and cannot be predicted: a mirroring
+// iPad sends 752x1080 while a laptop sends 1920x1080 into the same slot.
+FL_API flResult flRequestGeometry(flChannel*, uint32_t width, uint32_t height,
+                                  flFormat format);
 
 // ---- both --------------------------------------------------------------------
 
