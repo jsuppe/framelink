@@ -277,6 +277,7 @@ void acceptLoop(flChannel* ch) {
         for (;;) {
             auto msg = link.recv();
             if (!msg || msg->type == fl::MsgType::Bye) break;
+            if (ch->stop.load()) return; // flClose cancelled our I/O - leave now
             if (msg->type == fl::MsgType::RequestGeometry) {
                 const auto* g = msg->as<fl::GeometryMsg>();
                 // Honour it only when it actually differs and is sane. A
@@ -708,7 +709,22 @@ FL_API void flClose(flChannel* ch) {
         ch->stop = true;
         // Unblock ConnectNamedPipe in the accept thread by dialling ourselves.
         { fl::Channel poke = fl::Channel::connect(ch->name, 200); }
-        if (ch->accept.joinable()) ch->accept.join();
+        // The poke only reaches an accept thread WAITING for a producer. One
+        // attached to a LIVE producer is blocked in recv() on the peer pipe,
+        // which no poke touches - and a healthy producer streaming at 30 fps
+        // keeps that recv fed forever, so join() would hang the closing
+        // thread. Found by the moderator's kick: the first consumer-side
+        // close with a producer mid-stream froze the render loop solid.
+        // CancelSynchronousIo aborts the blocked ReadFile; retried, because
+        // the thread may be between I/Os when the cancel lands.
+        if (ch->accept.joinable()) {
+            HANDLE th = (HANDLE)ch->accept.native_handle();
+            for (int i = 0; i < 500; ++i) {
+                if (WaitForSingleObject(th, 10) == WAIT_OBJECT_0) break;
+                CancelSynchronousIo(th);
+            }
+            ch->accept.join();
+        }
     } else if (ch->link.connected()) {
         ch->link.send(fl::MsgType::Bye);
     }
