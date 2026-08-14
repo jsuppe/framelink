@@ -73,6 +73,53 @@ static void copyPixels(guint8* dst, gsize dstStride, const guint8* src, gsize sr
 
 #define FRAMELINK_CAPS GST_VIDEO_CAPS_MAKE("{ BGRA, RGBA }")
 
+// Reading a GBM/dma-buf CPU mapping with plain loads is catastrophically slow
+// - the mapping is write-combined, and WC reads bypass the cache one access
+// at a time. Measured on melchior (RTX 3090, LINEAR bo): 10 MB/s, 363 ms per
+// 720p frame. MOVNTDQA (SSE4.1 streaming load) is the architected way to read
+// WC memory at bandwidth; writes to the ordinary GstBuffer stay plain stores.
+// x86-only: Android's AHardwareBuffer_lock hands back a cached mapping, so
+// ARM never sees this problem.
+#if defined(__GNUC__) && defined(__x86_64__)
+#include <smmintrin.h>
+__attribute__((target("sse4.1"))) static void wcRowCopySse41(guint8* dst, const guint8* src,
+                                                             gsize bytes) {
+    gsize i = 0;
+    for (; i + 64 <= bytes; i += 64) {
+        __m128i a = _mm_stream_load_si128((__m128i*)(src + i));
+        __m128i b = _mm_stream_load_si128((__m128i*)(src + i + 16));
+        __m128i c = _mm_stream_load_si128((__m128i*)(src + i + 32));
+        __m128i d = _mm_stream_load_si128((__m128i*)(src + i + 48));
+        _mm_storeu_si128((__m128i*)(dst + i), a);
+        _mm_storeu_si128((__m128i*)(dst + i + 16), b);
+        _mm_storeu_si128((__m128i*)(dst + i + 32), c);
+        _mm_storeu_si128((__m128i*)(dst + i + 48), d);
+    }
+    for (; i + 16 <= bytes; i += 16) {
+        _mm_storeu_si128((__m128i*)(dst + i),
+                         _mm_stream_load_si128((__m128i*)(src + i)));
+    }
+    if (i < bytes) memcpy(dst + i, src + i, bytes - i);
+}
+
+static void wcCopy(guint8* dst, gsize dstStride, const guint8* src, gsize srcStride,
+                   guint width, guint height) {
+    static const gboolean sse41 = __builtin_cpu_supports("sse4.1");
+    const gsize rowBytes = (gsize)width * 4;
+    for (guint y = 0; y < height; ++y) {
+        const guint8* s = src + y * srcStride;
+        guint8* d = dst + y * dstStride;
+        if (sse41 && ((uintptr_t)s & 15) == 0) wcRowCopySse41(d, s, rowBytes);
+        else memcpy(d, s, rowBytes);
+    }
+}
+#else
+static void wcCopy(guint8* dst, gsize dstStride, const guint8* src, gsize srcStride,
+                   guint width, guint height) {
+    copyPixels(dst, dstStride, src, srcStride, width, height, FALSE);
+}
+#endif
+
 // =============================================================================
 // framelinksink
 // =============================================================================
@@ -532,8 +579,8 @@ static GstFlowReturn srcCreate(GstPushSrc* push, GstBuffer** outbuf) {
         void* pixels = NULL;
         guint64 stride = 0;
         if (flImageMap(frame.image, &pixels, &stride) == FL_OK) {
-            copyPixels(map.data, (gsize)w * 4, (const guint8*)pixels, (gsize)stride, w, h,
-                       FALSE);
+            // WC-aware copy: see wcCopy - a plain memcpy here ran at 10 MB/s.
+            wcCopy(map.data, (gsize)w * 4, (const guint8*)pixels, (gsize)stride, w, h);
             flImageUnmap(frame.image);
             filled = TRUE;
         }

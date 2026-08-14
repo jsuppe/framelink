@@ -59,6 +59,15 @@ gst-launch-1.0 framelinksrc channel=cam.scene ! videoconvert \
 - Stage 1 is deliberately the CPU path (sysmem caps): one copy per frame each
   way, portable everywhere framelink runs. Zero-copy caps (`memory:DmaBuf` on
   Linux, `memory:D3D11Memory` on Windows) are the obvious stage 2.
+- **Linux + NVIDIA: `framelinksrc` is slow today.** The GBM `FL_MAP_CPU`
+  mapping is truly uncached there - measured 10 MB/s reads (≈3 fps at 720p)
+  on an RTX 3090, and SSE4.1 streaming loads do not help (11 MB/s: UC, not
+  WC - the element still uses them since Intel iGPU maps usually are WC).
+  Writes are unaffected (2.1 GB/s measured), so `framelinksink` - the
+  producer direction - runs at full speed everywhere. The fix is for
+  framelink's Linux backend to allocate CPU-consumer rings from cached
+  memory (dma-buf system heap) instead of GBM; until then, prefer a GPU
+  consumer on NVIDIA or run CPU consumers on Intel/AMD.
 - `gst-launch-1.0` on Windows treats backslashes in property values as
   escapes - use forward slashes in `location=` paths.
 - Point `GST_PLUGIN_PATH` at the build directory (the plugin needs
