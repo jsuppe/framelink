@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 option(FRAMELINK_BUILD_TESTS "Build the framelink self-tests" ON)
+option(FRAMELINK_BUILD_GST "Build the GStreamer elements when GStreamer is found" ON)
 
 if(WIN32)
     add_library(framelink SHARED
@@ -97,6 +98,56 @@ if(FRAMELINK_BUILD_TESTS)
                          "-DCONSUMER_ARGS=flre;20;0;1"
                          "-DPRODUCER_ARGS=flre;400;0;1"
                          -P ${CMAKE_CURRENT_SOURCE_DIR}/test/run_roundtrip.cmake)
+    endif()
+endif()
+
+# --- GStreamer elements (gst/) ----------------------------------------------
+# framelinksrc + framelinksink: any GStreamer pipeline as a framelink producer
+# or consumer. Optional on purpose - the core library stays dependency-free,
+# and the plugin quietly skips itself where GStreamer is absent (Android).
+if(FRAMELINK_BUILD_GST AND NOT ANDROID)
+    set(FL_GST_FOUND FALSE)
+    if(WIN32)
+        # Official GStreamer MSVC runtime + development MSIs; the devel MSI
+        # sets GSTREAMER_1_0_ROOT_MSVC_X86_64 (same detection vkrender uses).
+        set(FL_GST_ROOT "$ENV{GSTREAMER_1_0_ROOT_MSVC_X86_64}")
+        foreach(_cand "C:/gstreamer/1.0/msvc_x86_64"
+                      "C:/Program Files/gstreamer/1.0/msvc_x86_64")
+            if(NOT FL_GST_ROOT AND EXISTS "${_cand}/lib/gstreamer-1.0.lib")
+                set(FL_GST_ROOT "${_cand}")
+            endif()
+        endforeach()
+        if(EXISTS "${FL_GST_ROOT}/lib/gstreamer-1.0.lib")
+            set(FL_GST_FOUND TRUE)
+            add_library(gstframelink MODULE gst/gstframelink.cpp)
+            target_include_directories(gstframelink PRIVATE
+                "${FL_GST_ROOT}/include/gstreamer-1.0"
+                "${FL_GST_ROOT}/include/glib-2.0"
+                "${FL_GST_ROOT}/lib/glib-2.0/include"
+                "${FL_GST_ROOT}/lib/gstreamer-1.0/include")
+            target_link_directories(gstframelink PRIVATE "${FL_GST_ROOT}/lib")
+            target_link_libraries(gstframelink PRIVATE framelink d3d11
+                gstreamer-1.0.lib gstbase-1.0.lib gstvideo-1.0.lib
+                gobject-2.0.lib glib-2.0.lib)
+            target_compile_definitions(gstframelink PRIVATE _CRT_SECURE_NO_WARNINGS)
+        endif()
+    else()
+        find_package(PkgConfig QUIET)
+        if(PkgConfig_FOUND)
+            pkg_check_modules(FL_GST QUIET IMPORTED_TARGET
+                gstreamer-1.0>=1.20 gstreamer-base-1.0 gstreamer-video-1.0)
+            if(FL_GST_FOUND)
+                add_library(gstframelink MODULE gst/gstframelink.cpp)
+                target_link_libraries(gstframelink PRIVATE framelink PkgConfig::FL_GST)
+            endif()
+        endif()
+    endif()
+    if(FL_GST_FOUND)
+        target_compile_definitions(gstframelink PRIVATE
+            PACKAGE="framelink" PACKAGE_VERSION="${PROJECT_VERSION}")
+        message(STATUS "framelink: building GStreamer elements (gstframelink)")
+    else()
+        message(STATUS "framelink: GStreamer not found - skipping the elements")
     endif()
 endif()
 
