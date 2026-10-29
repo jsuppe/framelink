@@ -158,3 +158,23 @@ install(TARGETS framelink
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+if(FRAMELINK_BUILD_TESTS)
+    add_executable(fl_nv12_layout test/fl_nv12_layout.cpp)
+    target_include_directories(fl_nv12_layout PRIVATE include src)
+    add_test(NAME nv12_layout COMMAND fl_nv12_layout)
+    if(UNIX AND NOT ANDROID)
+        add_executable(fl_nv12_roundtrip test/fl_nv12_roundtrip.cpp)
+        target_link_libraries(fl_nv12_roundtrip PRIVATE framelink PkgConfig::DRM)
+        add_test(NAME nv12_roundtrip COMMAND fl_nv12_roundtrip)
+        set_tests_properties(nv12_roundtrip PROPERTIES TIMEOUT 25)
+    endif()
+endif()
+
+if(FRAMELINK_BUILD_TESTS AND FL_GST_FOUND AND UNIX AND NOT ANDROID)
+    pkg_check_modules(FL_GST_APP REQUIRED IMPORTED_TARGET gstreamer-app-1.0)
+    add_executable(fl_gst_nv12 test/fl_gst_nv12.cpp)
+    target_link_libraries(fl_gst_nv12 PRIVATE PkgConfig::FL_GST PkgConfig::FL_GST_APP)
+    add_test(NAME gst_nv12_roundtrip COMMAND fl_gst_nv12 $<TARGET_FILE:gstframelink>)
+    set_tests_properties(gst_nv12_roundtrip PROPERTIES TIMEOUT 30)
+endif()

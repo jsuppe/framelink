@@ -32,6 +32,9 @@
 
 #include "framelink.h"
 #include "framelink_slots.h"
+#if defined(__linux__) && !defined(__ANDROID__)
+#include "framelink_dmabuf.h"
+#endif
 #ifdef _WIN32
 #include "framelink_d3d11.h"
 #endif
@@ -42,11 +45,11 @@ GST_DEBUG_CATEGORY_STATIC(framelink_debug);
 // ---- shared helpers ---------------------------------------------------------
 
 static flFormat toFlFormat(GstVideoFormat f) {
-    return f == GST_VIDEO_FORMAT_RGBA ? FL_FORMAT_RGBA8 : FL_FORMAT_BGRA8;
+    return f == GST_VIDEO_FORMAT_NV12 ? FL_FORMAT_NV12 : f == GST_VIDEO_FORMAT_RGBA ? FL_FORMAT_RGBA8 : f == GST_VIDEO_FORMAT_BGRA ? FL_FORMAT_BGRA8 : (flFormat)0;
 }
 
 static GstVideoFormat toGstFormat(flFormat f) {
-    return f == FL_FORMAT_RGBA8 ? GST_VIDEO_FORMAT_RGBA : GST_VIDEO_FORMAT_BGRA;
+    return f == FL_FORMAT_NV12 ? GST_VIDEO_FORMAT_NV12 : f == FL_FORMAT_RGBA8 ? GST_VIDEO_FORMAT_RGBA : f == FL_FORMAT_BGRA8 ? GST_VIDEO_FORMAT_BGRA : GST_VIDEO_FORMAT_UNKNOWN;
 }
 
 // Row copy between two 4-byte-per-pixel surfaces, optionally swapping R/B -
@@ -71,7 +74,11 @@ static void copyPixels(guint8* dst, gsize dstStride, const guint8* src, gsize sr
     }
 }
 
+#if defined(__linux__) && !defined(__ANDROID__)
+#define FRAMELINK_CAPS GST_VIDEO_CAPS_MAKE("{ BGRA, RGBA, NV12 }")
+#else
 #define FRAMELINK_CAPS GST_VIDEO_CAPS_MAKE("{ BGRA, RGBA }")
+#endif
 
 // Reading a GBM/dma-buf CPU mapping with plain loads is catastrophically slow
 // - the mapping is write-combined, and WC reads bypass the cache one access
@@ -201,13 +208,15 @@ static void sinkTryConnect(GstFrameLinkSink* self) {
     GST_INFO_OBJECT(self, "producing on '%s%s%u' (%ux%u %s, ring of %u)", self->channel,
                     self->slots > 0 ? "." : "", self->slots > 0 ? slotIndex : 0,
                     self->cinfo.width, self->cinfo.height,
-                    self->cinfo.format == FL_FORMAT_RGBA8 ? "RGBA" : "BGRA",
+                    gst_video_format_to_string(toGstFormat(self->cinfo.format)),
                     self->cinfo.poolSize);
 }
 
 static gboolean sinkSetCaps(GstBaseSink* base, GstCaps* caps) {
     GstFrameLinkSink* self = GST_FRAMELINK_SINK(base);
     if (!gst_video_info_from_caps(&self->vinfo, caps)) return FALSE;
+    if(GST_VIDEO_INFO_FORMAT(&self->vinfo)==GST_VIDEO_FORMAT_NV12 &&
+       ((GST_VIDEO_INFO_WIDTH(&self->vinfo)&1)||(GST_VIDEO_INFO_HEIGHT(&self->vinfo)&1)))return FALSE;
     self->haveInfo = TRUE;
     if (self->ch) {
         // Renegotiation mid-stream: state the new geometry; the consumer may
@@ -232,6 +241,15 @@ static GstFlowReturn sinkRender(GstBaseSink* base, GstBuffer* buffer) {
         }
     }
 
+    const flFormat incoming=toFlFormat(GST_VIDEO_INFO_FORMAT(&self->vinfo));
+    if(self->cinfo.width!=(guint)GST_VIDEO_INFO_WIDTH(&self->vinfo) ||
+       self->cinfo.height!=(guint)GST_VIDEO_INFO_HEIGHT(&self->vinfo) ||
+       ((incoming==FL_FORMAT_NV12 || self->cinfo.format==FL_FORMAT_NV12) && incoming!=self->cinfo.format)) {
+        GST_ELEMENT_ERROR(self,CORE,NEGOTIATION,("channel format/geometry does not match input"),
+            ("Create the consumer with matching format and geometry; no implicit YUV/RGB conversion"));
+        return GST_FLOW_NOT_NEGOTIATED;
+    }
+
     flBuffer fb = {};
     flResult r = flAcquireBuffer(self->ch, &fb, 5);
     if (r == FL_TIMEOUT || r == FL_BUSY) {
@@ -246,8 +264,8 @@ static GstFlowReturn sinkRender(GstBaseSink* base, GstBuffer* buffer) {
 
     GstVideoFrame vframe;
     if (!gst_video_frame_map(&vframe, &self->vinfo, buffer, GST_MAP_READ)) {
-        flSubmit(self->ch, &fb, -1); // hand the slot back; nothing to write
-        return GST_FLOW_OK;
+        sinkDisconnect(self); // do not publish uninitialized pixels
+        return GST_FLOW_ERROR;
     }
     const guint8* src = (const guint8*)GST_VIDEO_FRAME_PLANE_DATA(&vframe, 0);
     const gsize srcStride = GST_VIDEO_FRAME_PLANE_STRIDE(&vframe, 0);
@@ -285,6 +303,24 @@ static GstFlowReturn sinkRender(GstBaseSink* base, GstBuffer* buffer) {
 #else
     void* dst = NULL;
     guint64 dstStride = 0;
+#if defined(__linux__) && !defined(__ANDROID__)
+    if(incoming==FL_FORMAT_NV12) {
+        flMappedImage view{};
+        r=flImageMapPlanes(fb.image,&view);
+        if(r==FL_OK) {
+            wrote=view.planes==2;
+            for(guint p=0;p<2 && wrote;p++) {
+                const gint pitch=GST_VIDEO_FRAME_PLANE_STRIDE(&vframe,p);
+                if(pitch<(gint)w || view.plane[p].stride<w || view.plane[p].rows!=(p?h/2:h)) {wrote=FALSE;break;}
+                for(guint y=0;y<view.plane[p].rows;y++)
+                    memcpy((guint8*)view.plane[p].pixels+y*view.plane[p].stride,
+                           (guint8*)GST_VIDEO_FRAME_PLANE_DATA(&vframe,p)+(gsize)y*pitch,w);
+            }
+            flImageUnmap(fb.image);
+        }
+    } else
+#endif
+    {
     r = flImageMap(fb.image, &dst, &dstStride);
     if (r == FL_OK) {
         copyPixels((guint8*)dst, (gsize)dstStride, src, srcStride, w, h, swap);
@@ -300,6 +336,7 @@ static GstFlowReturn sinkRender(GstBaseSink* base, GstBuffer* buffer) {
                             ("the consumer must create its ring with FL_MAP_CPU for a "
                              "CPU producer to write into it"));
     }
+    }
 #endif
     gst_video_frame_unmap(&vframe);
 
@@ -311,7 +348,8 @@ static GstFlowReturn sinkRender(GstBaseSink* base, GstBuffer* buffer) {
             GST_INFO_OBJECT(self, "%" G_GUINT64_FORMAT " frames submitted, %" G_GUINT64_FORMAT
                             " dropped", self->submitted, self->dropped);
     } else {
-        flSubmit(self->ch, &fb, -1); // slot must go back regardless
+        sinkDisconnect(self); // Never publish a failed/partial copy.
+        return GST_FLOW_ERROR;
     }
     return GST_FLOW_OK;
 }
@@ -399,6 +437,7 @@ typedef struct _GstFrameLinkSrc {
 
     // properties: the ring THIS element allocates (it is the consumer)
     gchar* channel;
+    gchar* format;
     gint width, height, fps;
 
     flChannel* ch;
@@ -418,7 +457,7 @@ G_DEFINE_TYPE(GstFrameLinkSrc, gst_framelink_src, GST_TYPE_PUSH_SRC)
 #define GST_FRAMELINK_SRC(o) \
     (G_TYPE_CHECK_INSTANCE_CAST((o), gst_framelink_src_get_type(), GstFrameLinkSrc))
 
-enum { SRC_PROP_0, SRC_PROP_CHANNEL, SRC_PROP_WIDTH, SRC_PROP_HEIGHT, SRC_PROP_FPS };
+enum { SRC_PROP_0, SRC_PROP_CHANNEL, SRC_PROP_WIDTH, SRC_PROP_HEIGHT, SRC_PROP_FPS, SRC_PROP_FORMAT };
 
 static GstStaticPadTemplate srcTemplate =
     GST_STATIC_PAD_TEMPLATE("src", GST_PAD_SRC, GST_PAD_ALWAYS,
@@ -439,7 +478,8 @@ static GstCaps* srcMakeCaps(GstFrameLinkSrc* self) {
     const gint w = self->ch ? (gint)self->cinfo.width : self->width;
     const gint h = self->ch ? (gint)self->cinfo.height : self->height;
     const GstVideoFormat fmt =
-        self->ch ? toGstFormat(self->cinfo.format) : GST_VIDEO_FORMAT_BGRA;
+        self->ch ? toGstFormat(self->cinfo.format) : gst_video_format_from_string(self->format);
+    if(fmt==GST_VIDEO_FORMAT_UNKNOWN)return gst_caps_new_empty();
     return gst_caps_new_simple("video/x-raw", "format", G_TYPE_STRING,
                                gst_video_format_to_string(fmt), "width", G_TYPE_INT, w,
                                "height", G_TYPE_INT, h, "framerate", GST_TYPE_FRACTION,
@@ -462,7 +502,7 @@ static gboolean srcStart(GstBaseSrc* base) {
     // FL_MAP_CPU: this ring exists to be read byte-wise. Windows ignores the
     // flag (no CPU path) and the readback goes through a staging texture.
     flResult r = flCreateChannelEx(self->channel, (guint32)self->width,
-                                   (guint32)self->height, FL_FORMAT_BGRA8, 4, FL_MAP_CPU,
+                                   (guint32)self->height, toFlFormat(gst_video_format_from_string(self->format)), 4, FL_MAP_CPU,
                                    &self->ch);
     if (r != FL_OK) {
         GST_ELEMENT_ERROR(self, RESOURCE, OPEN_READ,
@@ -474,7 +514,7 @@ static gboolean srcStart(GstBaseSrc* base) {
     self->generation = self->cinfo.generation;
     GST_INFO_OBJECT(self, "channel '%s' up: %ux%u %s, ring of %u - waiting for a producer",
                     self->channel, self->cinfo.width, self->cinfo.height,
-                    self->cinfo.format == FL_FORMAT_RGBA8 ? "RGBA" : "BGRA",
+                    gst_video_format_to_string(toGstFormat(self->cinfo.format)),
                     self->cinfo.poolSize);
     return TRUE;
 }
@@ -544,7 +584,12 @@ static GstFlowReturn srcCreate(GstPushSrc* push, GstBuffer** outbuf) {
     }
 
     const guint w = self->cinfo.width, h = self->cinfo.height;
-    GstBuffer* buf = gst_buffer_new_allocate(NULL, (gsize)w * h * 4, NULL);
+    GstVideoInfo outputInfo;
+    gst_video_info_init(&outputInfo);
+    if(!gst_video_info_set_format(&outputInfo,toGstFormat(self->cinfo.format),w,h)) {
+        flRelease(self->ch,&frame);return GST_FLOW_NOT_NEGOTIATED;
+    }
+    GstBuffer* buf = gst_buffer_new_allocate(NULL, outputInfo.size, NULL);
     GstMapInfo map;
     gboolean filled = FALSE;
     if (gst_buffer_map(buf, &map, GST_MAP_WRITE)) {
@@ -576,6 +621,23 @@ static GstFlowReturn srcCreate(GstPushSrc* push, GstBuffer** outbuf) {
             ctx->Release();
         }
 #else
+#if defined(__linux__) && !defined(__ANDROID__)
+        if(self->cinfo.format==FL_FORMAT_NV12) {
+            flMappedImage view{};
+            if(flImageMapPlanes(frame.image,&view)==FL_OK) {
+                filled=view.planes==2;
+                memset(map.data,0,map.size);
+                for(guint p=0;p<2 && filled;p++) {
+                    if(view.plane[p].stride<w || view.plane[p].rows!=(p?h/2:h)) {filled=FALSE;break;}
+                    for(guint y=0;y<view.plane[p].rows;y++)
+                        memcpy(map.data+outputInfo.offset[p]+(gsize)y*outputInfo.stride[p],
+                               (guint8*)view.plane[p].pixels+y*view.plane[p].stride,w);
+                }
+                flImageUnmap(frame.image);
+            }
+        } else
+#endif
+        {
         void* pixels = NULL;
         guint64 stride = 0;
         if (flImageMap(frame.image, &pixels, &stride) == FL_OK) {
@@ -583,6 +645,7 @@ static GstFlowReturn srcCreate(GstPushSrc* push, GstBuffer** outbuf) {
             wcCopy(map.data, (gsize)w * 4, (const guint8*)pixels, (gsize)stride, w, h);
             flImageUnmap(frame.image);
             filled = TRUE;
+        }
         }
 #endif
         gst_buffer_unmap(buf, &map);
@@ -608,6 +671,11 @@ static void srcSetProperty(GObject* obj, guint id, const GValue* value, GParamSp
             g_free(self->channel);
             self->channel = g_value_dup_string(value);
             break;
+        case SRC_PROP_FORMAT:
+            if (self->ch) { GST_WARNING_OBJECT(self,"format cannot change while the channel is running"); break; }
+            g_free(self->format);
+            self->format=g_strdup(g_value_get_string(value) ? g_value_get_string(value) : "BGRA");
+            break;
         case SRC_PROP_WIDTH: self->width = g_value_get_int(value); break;
         case SRC_PROP_HEIGHT: self->height = g_value_get_int(value); break;
         case SRC_PROP_FPS: self->fps = g_value_get_int(value); break;
@@ -619,6 +687,7 @@ static void srcGetProperty(GObject* obj, guint id, GValue* value, GParamSpec* sp
     GstFrameLinkSrc* self = GST_FRAMELINK_SRC(obj);
     switch (id) {
         case SRC_PROP_CHANNEL: g_value_set_string(value, self->channel); break;
+        case SRC_PROP_FORMAT: g_value_set_string(value,self->format); break;
         case SRC_PROP_WIDTH: g_value_set_int(value, self->width); break;
         case SRC_PROP_HEIGHT: g_value_set_int(value, self->height); break;
         case SRC_PROP_FPS: g_value_set_int(value, self->fps); break;
@@ -629,6 +698,7 @@ static void srcGetProperty(GObject* obj, guint id, GValue* value, GParamSpec* sp
 static void srcFinalize(GObject* obj) {
     GstFrameLinkSrc* self = GST_FRAMELINK_SRC(obj);
     g_free(self->channel);
+    g_free(self->format);
     G_OBJECT_CLASS(gst_framelink_src_parent_class)->finalize(obj);
 }
 
@@ -648,6 +718,10 @@ static void gst_framelink_src_class_init(GstFrameLinkSrcClass* klass) {
                             "framelink channel to create (this element is the consumer "
                             "and owns the ring)",
                             "framelink", (GParamFlags)(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
+    g_object_class_install_property(
+        gobject, SRC_PROP_FORMAT,
+        g_param_spec_string("format","Format","Ring pixel format (BGRA; Linux also NV12)","BGRA",
+                         (GParamFlags)(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
     g_object_class_install_property(
         gobject, SRC_PROP_WIDTH,
         g_param_spec_int("width", "Width", "ring width to allocate", 16, 8192, 1280,
@@ -677,6 +751,7 @@ static void gst_framelink_src_class_init(GstFrameLinkSrcClass* klass) {
 
 static void gst_framelink_src_init(GstFrameLinkSrc* self) {
     self->channel = g_strdup("framelink");
+    self->format = g_strdup("BGRA");
     self->width = 1280;
     self->height = 720;
     self->fps = 30;

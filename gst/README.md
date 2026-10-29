@@ -29,7 +29,7 @@ gst-launch-1.0 ... ! framelinksink channel=mychannel
   the consumer exists, and survive the consumer restarting.
 - A full ring drops the frame - latest-wins backpressure is framelink's
   contract, so a slow consumer can never stall the pipeline.
-- Caps accept BGRA and RGBA; if the ring's byte order differs the element
+- Caps accept BGRA and RGBA (Linux also NV12); if the ring's byte order differs the element
   swizzles (Android rings are RGBA - AHardwareBuffer has no BGRA).
 - Windows writes through the channel's D3D11 device (`UpdateSubresource`);
   POSIX writes through `flImageMap`, which requires the consumer to have
@@ -53,6 +53,31 @@ gst-launch-1.0 framelinksrc channel=cam.scene ! videoconvert \
 - Live push source; buffers are timestamped on arrival.
 - No producer connected just means no frames yet - the element waits, and a
   departing producer does not end the stream (the ring belongs to us).
+
+## NV12 on Linux
+
+Start the receiver first (it owns the format and buffer allocation):
+
+```sh
+gst-launch-1.0 framelinksrc channel=nv12.demo format=NV12 width=1280 height=720 fps=30 \
+  ! videoconvert ! autovideosink
+```
+
+Then start a producer:
+
+```sh
+gst-launch-1.0 videotestsrc is-live=true \
+  ! video/x-raw,format=NV12,width=1280,height=720,framerate=30/1 \
+  ! framelinksink channel=nv12.demo
+```
+
+`format` defaults to BGRA and must be selected before starting the source.
+NV12 requires even dimensions and matching channel/input formats and sizes.
+There is no implicit RGB/YUV conversion: use `videoconvert` upstream if needed.
+Both planes are copied row-by-row, honoring their individual strides and offsets.
+This is still system-memory GStreamer I/O, not zero-copy DMA-BUF negotiation.
+Colorimetry/chroma-site metadata is not transported by FrameLink; applications
+must agree on it separately. See [the support matrix and tests](../docs/nv12.md).
 
 ## Notes
 

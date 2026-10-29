@@ -24,6 +24,21 @@ typedef struct flDmabuf {
     uint64_t modifier; // DRM format modifier; DRM_FORMAT_MOD_LINEAR when mapped
 } flDmabuf;
 
+// CPU plane access preserves each plane's actual pitch and offset. Pointers
+// remain valid until flImageUnmap; map/unmap brackets DMA-BUF cache ownership.
+// NV12: plane0 width bytes x height rows; plane1 width bytes x height/2 rows (UV).
+// Requires a linear allocation; no implicit RGB conversion or GPU synchronization.
+typedef struct flMappedPlane {
+    void* pixels;
+    uint64_t stride;
+    uint32_t rowBytes, rows;
+} flMappedPlane;
+typedef struct flMappedImage {
+    uint32_t planes;
+    flMappedPlane plane[4];
+} flMappedImage;
+FL_API flResult flImageMapPlanes(flImage*, flMappedImage* out);
+
 FL_API flResult flImageDmabuf(flImage*, flDmabuf* out);
 
 // flImageMap/flImageUnmap moved to framelink.h - CPU access is not dma-buf

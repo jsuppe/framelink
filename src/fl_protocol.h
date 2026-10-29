@@ -66,13 +66,17 @@ struct RingDescMsg {
 
     // POSIX: the buffers themselves arrive as SCM_RIGHTS fds alongside this
     // message - an fd cannot be sent as a number - and these describe how to
-    // interpret them. One plane only for now (BGRA8), which is why there is no
-    // per-plane dimension here.
+    // interpret them. These legacy single-plane fields remain for Android;
+    // Linux uses the plane arrays below.
     uint64_t stride[kMaxPool];
     uint64_t offset[kMaxPool];
     uint64_t modifier; // DRM format modifier, same for every slot
     uint32_t fourcc;   // DRM_FORMAT_*
     uint32_t _pad;
+    // v4 Linux: all plane FDs, slot-major/plane-major, each independently owned.
+    uint32_t planeCount[kMaxPool];
+    uint64_t planeStride[kMaxPool][4];
+    uint64_t planeOffset[kMaxPool][4];
 };
 
 struct GeometryMsg {

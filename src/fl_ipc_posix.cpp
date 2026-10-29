@@ -24,7 +24,7 @@ namespace fl {
 namespace {
 
 constexpr size_t kBufferSize = 64 * 1024;
-constexpr size_t kMaxFds = 16;
+constexpr size_t kMaxFds = 32;
 
 // Abstract-namespace sockets (a leading NUL) so there is no filesystem litter
 // and no stale socket file to clean up after a crash - the name disappears

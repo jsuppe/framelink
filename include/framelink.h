@@ -35,7 +35,7 @@ extern "C" {
 // Bumped on any wire-format change. Peers refuse each other on mismatch rather
 // than misbehaving: shipping one side while an integrator builds the other is
 // exactly how a silent version skew becomes someone else's afternoon.
-#define FL_VERSION 3
+#define FL_VERSION 4
 
 typedef struct flChannel flChannel;
 typedef struct flImage flImage;
@@ -63,9 +63,7 @@ FL_API const char* flResultString(flResult r); // never NULL, never allocates
 
 typedef enum flFormat {
     FL_FORMAT_BGRA8 = 1,   // the always-works path
-    FL_FORMAT_NV12 = 2,    // NOT in the spike: NV12 D3D11->Vulkan import is
-                           // broken on NVIDIA (chroma plane offset -> device
-                           // lost), so it must be validated, not assumed
+    FL_FORMAT_NV12 = 2,    // Linux: two-plane NV12, even width/height. Other backends refuse.
     FL_FORMAT_RGB10A2 = 3, // not in the spike
     // RGBA byte order. Exists because Android's AHardwareBuffer has no BGRA
     // format: a channel there reports RGBA8 from flQuery, and a portable
@@ -225,6 +223,7 @@ FL_API flResult flRequestGeometry(flChannel*, uint32_t width, uint32_t height,
 // (AHardwareBuffer_lock/unlock): writes are not guaranteed visible to the GPU
 // until the buffer is unlocked, so flSubmit/flEndSubmit unmap automatically if
 // the producer left the buffer mapped.
+// NV12 requires flImageMapPlanes (Linux interop); this single-plane API refuses NV12.
 FL_API flResult flImageMap(flImage*, void** pixels, uint64_t* stride);
 FL_API void     flImageUnmap(flImage*);
 
