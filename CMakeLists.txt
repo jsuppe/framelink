@@ -243,6 +243,30 @@ if(FRAMELINK_BUILD_TESTS AND FRAMELINK_BUILD_SAMPLES AND NOT ANDROID)
     fl_sample_case(slow "--format;nv12;--delay-ms;20;--pool;2" "--format;nv12")
     fl_sample_case(metadata "--verify;0" "")
     fl_sample_case(reconnect "--format;nv12" "--reconnect-at;4")
+    if(UNIX AND NOT ANDROID)
+        # Deterministically exercise the legal release-after-peer-death result,
+        # after the real release has relinquished ownership.
+        add_library(fl_release_disconnect_shim SHARED test/fl_release_disconnect_shim.cpp)
+        target_include_directories(fl_release_disconnect_shim PRIVATE include)
+        target_link_libraries(fl_release_disconnect_shim PRIVATE ${CMAKE_DL_LIBS})
+        add_test(NAME sample_release_disconnected COMMAND ${CMAKE_COMMAND}
+            -DPRODUCER=$<TARGET_FILE:framelink_producer>
+            -DCONSUMER=$<TARGET_FILE:framelink_consumer>
+            -DRELEASE_SHIM=$<TARGET_FILE:fl_release_disconnect_shim>
+            "-DPRODUCER_ARGS=--channel;sample-release-disconnected;--frames;200;--fps;120"
+            "-DCONSUMER_ARGS=--channel;sample-release-disconnected;--frames;12;--size;130x66;--format;nv12"
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/test/run_samples.cmake)
+        set_tests_properties(sample_release_disconnected PROPERTIES TIMEOUT 30)
+        add_test(NAME sample_consumed_disconnected COMMAND ${CMAKE_COMMAND}
+            -DPRODUCER=$<TARGET_FILE:framelink_producer>
+            -DCONSUMER=$<TARGET_FILE:framelink_consumer>
+            -DRELEASE_SHIM=$<TARGET_FILE:fl_release_disconnect_shim>
+            -DEXPECT_CONSUMED_INJECTION=1
+            "-DPRODUCER_ARGS=--channel;sample-consumed-disconnected;--frames;200;--fps;120"
+            "-DCONSUMER_ARGS=--channel;sample-consumed-disconnected;--frames;12;--size;130x66;--format;nv12;--gpu-sync;1"
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/test/run_samples.cmake)
+        set_tests_properties(sample_consumed_disconnected PROPERTIES TIMEOUT 30)
+    endif()
     fl_sample_case(geometry "--format;nv12" "--size;194x98")
     fl_sample_case(slots "--channel;sample-slots.0" "--slots;2")
     fl_sample_case(gpu_sync "--format;nv12;--gpu-sync;1" "--submit;manual")

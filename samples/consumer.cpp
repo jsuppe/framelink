@@ -69,7 +69,12 @@ int main(int argc, char **argv) {
         std::this_thread::sleep_for(std::chrono::milliseconds(o.delay));
       if (o.gpu)
         pixels.signalConsumed(ch.value, frame);
-      check(flRelease(ch.value, &frame), "release");
+      // Local ownership is relinquished even if notification discovers that
+      // the producer disconnected. Keep the channel alive for its replacement;
+      // retrying release would double-release the already retired frame.
+      const flResult released = flRelease(ch.value, &frame);
+      if (released != FL_DISCONNECTED)
+        check(released, "release");
       ++received;
       progress = Clock::now();
     }

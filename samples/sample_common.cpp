@@ -164,7 +164,11 @@ void Pixels::signalConsumed(flChannel *ch, const flFrame &f) {
   ctx->Flush();
 #else
   // Pixel verification has completed synchronously; no GPU reader remains.
-  check(flSignalConsumedSyncFd(ch,f._readyValue,-1),"consumed completion");
+  const flResult signaled = flSignalConsumedSyncFd(ch, f._readyValue, -1);
+  // Completion was recorded locally before peer notification. A dead producer
+  // needs no notification, but the caller must still release its held frame.
+  if (signaled != FL_DISCONNECTED)
+    check(signaled, "consumed completion");
 #endif
 }
 flResult Pixels::submit(flChannel *ch, const flBuffer &b, int64_t pts,

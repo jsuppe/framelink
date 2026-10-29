@@ -197,3 +197,22 @@ It is separate from `--gpu-sync`, which controls consumer-side fence ownership.
 On Android, unsupported native format/usage combinations are refused; see
 [GPU_RENDER.md](../docs/GPU_RENDER.md). Use `--map-cpu 0` when pixels need not be
 read by the CPU. The pattern verifier applies only to the sample producer.
+
+### Producer disconnect during release
+
+The consumer keeps its channel alive if `flRelease` returns `FL_DISCONNECTED`.
+The frame has already been released locally; the producer-notification send may
+race with peer shutdown. Retrying that release would be incorrect. Subsequent
+acquires wait for a replacement producer as usual, subject to the idle deadline.
+Other release errors remain fatal. This does not relax ring generation or GPU
+completion ownership checks in the library.
+
+Linux `sample_release_disconnected` deterministically injects this notification
+result after a real successful release and asserts that injection occurred.
+It tests sample recovery policy; `reconnect_held` separately tests real producer
+departure, held-storage protection, and a new generation after release.
+
+The same rule applies to POSIX `flSignalConsumedSyncFd`: a disconnected
+notification after locally recording completion is tolerated, then the sample
+still releases its held frame. `sample_consumed_disconnected` asserts both
+consumed-completion and release notification injections in GPU-sync mode.

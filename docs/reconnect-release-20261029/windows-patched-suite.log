@@ -1,0 +1,72 @@
+Test project C:/Users/jonsu/dev/framelink-nv12-20261029/build-trace
+      Start  1: roundtrip
+ 1/28 Test  #1: roundtrip ........................   Passed    0.44 sec
+      Start  2: roundtrip_reattach
+ 2/28 Test  #2: roundtrip_reattach ...............   Passed    2.67 sec
+      Start  3: nv12_layout
+ 3/28 Test  #3: nv12_layout ......................   Passed    0.01 sec
+      Start  4: gst_nv12_roundtrip
+ 4/28 Test  #4: gst_nv12_roundtrip ...............Exit code 0xc00004bc
+***Exception:   0.01 sec
+
+      Start  5: gst_rgb10a2_roundtrip
+ 5/28 Test  #5: gst_rgb10a2_roundtrip ............Exit code 0xc00004bc
+***Exception:   0.01 sec
+
+      Start  6: nv12_windows_roundtrip
+ 6/28 Test  #6: nv12_windows_roundtrip ...........   Passed    0.44 sec
+      Start  7: nv12_windows_1080p
+ 7/28 Test  #7: nv12_windows_1080p ...............   Passed    0.48 sec
+      Start  8: sample_bgra
+ 8/28 Test  #8: sample_bgra ......................   Passed    0.50 sec
+      Start  9: sample_nv12
+ 9/28 Test  #9: sample_nv12 ......................   Passed    0.47 sec
+      Start 10: sample_slow
+10/28 Test #10: sample_slow ......................   Passed    0.72 sec
+      Start 11: sample_metadata
+11/28 Test #11: sample_metadata ..................   Passed    0.47 sec
+      Start 12: sample_reconnect
+12/28 Test #12: sample_reconnect .................   Passed    0.71 sec
+      Start 13: sample_geometry
+13/28 Test #13: sample_geometry ..................   Passed    0.47 sec
+      Start 14: sample_slots
+14/28 Test #14: sample_slots .....................   Passed    0.47 sec
+      Start 15: sample_gpu_sync
+15/28 Test #15: sample_gpu_sync ..................   Passed    0.47 sec
+      Start 16: sample_invalid_cli
+16/28 Test #16: sample_invalid_cli ...............   Passed    0.01 sec
+      Start 17: sample_wrong_role
+17/28 Test #17: sample_wrong_role ................   Passed    0.01 sec
+      Start 18: sample_corruption
+18/28 Test #18: sample_corruption ................   Passed    0.56 sec
+      Start 19: disconnect_full_ring
+19/28 Test #19: disconnect_full_ring .............   Passed    0.21 sec
+      Start 20: trace_disabled
+20/28 Test #20: trace_disabled ...................   Passed    0.01 sec
+      Start 21: trace_bounded_concurrent
+21/28 Test #21: trace_bounded_concurrent .........   Passed    0.02 sec
+      Start 22: trace_thread_limit
+22/28 Test #22: trace_thread_limit ...............   Passed    0.02 sec
+      Start 23: portable_map_nv12
+23/28 Test #23: portable_map_nv12 ................   Passed    0.23 sec
+      Start 24: portable_map_rgba
+24/28 Test #24: portable_map_rgba ................   Passed    0.23 sec
+      Start 25: portable_map_bgra
+25/28 Test #25: portable_map_bgra ................   Passed    0.23 sec
+      Start 26: portable_map_rgb10a2
+26/28 Test #26: portable_map_rgb10a2 .............   Passed    0.22 sec
+      Start 27: ready_fence_timeout
+27/28 Test #27: ready_fence_timeout ..............   Passed    0.24 sec
+      Start 28: reconnect_held
+28/28 Test #28: reconnect_held ...................   Passed    0.33 sec
+
+93% tests passed, 2 tests failed out of 28
+
+Total Test time (real) =  10.67 sec
+
+The following tests FAILED:
+	  4 - gst_nv12_roundtrip (Exit code 0xc00004bc
+)
+	  5 - gst_rgb10a2_roundtrip (Exit code 0xc00004bc
+)
+Errors while running CTest
