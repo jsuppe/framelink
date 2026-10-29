@@ -97,3 +97,10 @@ must agree on it separately. See [the support matrix and tests](../docs/nv12.md)
   escapes - use forward slashes in `location=` paths.
 - Point `GST_PLUGIN_PATH` at the build directory (the plugin needs
   `framelink.dll`/`libframelink.so` findable too - same directory works).
+
+## Audio/video sessions
+
+The opt-in `preserve-timestamps` property on both elements retains agreed
+session running time; defaults retain legacy arrival/submit timestamps.
+Both pipelines must agree on clock/base and use a dedicated channel. See
+[the working separate-PCM example and timing contract](../docs/AUDIO_VIDEO.md).

@@ -365,3 +365,23 @@ if(FRAMELINK_BUILD_TESTS)
     add_test(NAME reconnect_held COMMAND fl_reconnect_held)
     set_tests_properties(reconnect_held PROPERTIES TIMEOUT 20)
 endif()
+
+# Existing GStreamer transports carry the separate PCM track; no audio core ABI.
+if(FRAMELINK_BUILD_SAMPLES AND FL_GST_FOUND AND NOT ANDROID)
+    add_executable(framelink_av_session samples/av_session.cpp)
+    if(WIN32)
+        target_include_directories(framelink_av_session PRIVATE
+            "${FL_GST_ROOT}/include/gstreamer-1.0" "${FL_GST_ROOT}/include/glib-2.0"
+            "${FL_GST_ROOT}/lib/glib-2.0/include")
+        target_link_directories(framelink_av_session PRIVATE "${FL_GST_ROOT}/lib")
+        target_link_libraries(framelink_av_session PRIVATE gstreamer-1.0.lib gstapp-1.0.lib gobject-2.0.lib glib-2.0.lib)
+    else()
+        pkg_check_modules(FL_AV_APP REQUIRED IMPORTED_TARGET gstreamer-app-1.0)
+        target_link_libraries(framelink_av_session PRIVATE PkgConfig::FL_GST PkgConfig::FL_AV_APP)
+    endif()
+    if(FRAMELINK_BUILD_TESTS)
+        add_test(NAME gst_av_session COMMAND framelink_av_session $<TARGET_FILE:gstframelink>)
+        add_test(NAME gst_av_faults COMMAND framelink_av_session $<TARGET_FILE:gstframelink> --faults)
+        set_tests_properties(gst_av_session gst_av_faults PROPERTIES TIMEOUT 25)
+    endif()
+endif()
