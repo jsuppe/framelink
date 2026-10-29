@@ -369,9 +369,9 @@ static GstFlowReturn sinkRender(GstBaseSink* base, GstBuffer* buffer) {
         if (self->preserveTimestamps) {
             pts = gst_segment_to_running_time(&GST_BASE_SINK(self)->segment,
                                               GST_FORMAT_TIME, GST_BUFFER_PTS(buffer));
-            if (!GST_CLOCK_TIME_IS_VALID(pts)) {
+            if (!GST_CLOCK_TIME_IS_VALID(pts) || pts > G_MAXINT64) {
                 sinkDisconnect(self);
-                GST_ELEMENT_ERROR(self, STREAM, FORMAT, ("valid TIME segment and PTS required"), (NULL));
+                GST_ELEMENT_ERROR(self, STREAM, FORMAT, ("valid signed-nanosecond TIME segment and PTS required"), (NULL));
                 return trace.result(GST_FLOW_ERROR);
             }
         }
@@ -601,6 +601,12 @@ static GstFlowReturn srcCreate(GstPushSrc* push, GstBuffer** outbuf) {
         if (r == FL_TIMEOUT || r == FL_DISCONNECTED) continue;
         GST_ELEMENT_ERROR(self, RESOURCE, READ, ("framelink acquire failed"),
                           ("flAcquireFrame: %s", flResultString(r)));
+        return trace.result(GST_FLOW_ERROR);
+    }
+
+    if (self->preserveTimestamps && frame.ptsNs < 0) {
+        flRelease(self->ch, &frame);
+        GST_ELEMENT_ERROR(self, STREAM, FORMAT, ("session frame has no valid timestamp"), (NULL));
         return trace.result(GST_FLOW_ERROR);
     }
 
