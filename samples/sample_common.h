@@ -45,7 +45,7 @@ struct Options {
   flFormat format = FL_FORMAT_BGRA8;
 #endif
   bool sizeSet = false, formatSet = false, verify = true, gpu = false,
-       manual = false, help = false, adapterSet = false;
+       render = false, manual = false, help = false, adapterSet = false;
 #ifdef _WIN32
   bool map = false;
 #else

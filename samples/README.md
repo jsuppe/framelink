@@ -189,3 +189,11 @@ completion FD and reports already-completed CPU reads/writes with FD `-1`.
 This is an API-contract test, not a GPU performance demonstration; the renderer's
 `vulkan_sync_fd_contract` test separately validates real GPU completion fences.
 Adapter LUID selection remains Windows-specific.
+
+### GPU-rendered sources
+
+`--gpu-render 1 --verify 0` requests a GPU-renderable ring for an external renderer.
+It is separate from `--gpu-sync`, which controls consumer-side fence ownership.
+On Android, unsupported native format/usage combinations are refused; see
+[GPU_RENDER.md](../docs/GPU_RENDER.md). Use `--map-cpu 0` when pixels need not be
+read by the CPU. The pattern verifier applies only to the sample producer.

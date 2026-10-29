@@ -133,6 +133,9 @@ FL_API flResult flCreateChannel(const char* name, uint32_t width, uint32_t heigh
 // Wait for ready normally, but retire storage explicitly after GPU reads.
 // Linux/Android: flSignalConsumedSyncFd. Windows: shared consumed fence.
 #define FL_DEFER_RELEASE 0x4
+// Require GPU-renderable allocation (Android native YUV may reject this).
+// Desktop rings already request rendering-capable storage. No CPU fallback.
+#define FL_GPU_RENDER 0x8
 
 FL_API flResult flCreateChannelEx(const char* name, uint32_t width, uint32_t height,
                                   flFormat format, uint32_t poolSize, uint32_t flags,

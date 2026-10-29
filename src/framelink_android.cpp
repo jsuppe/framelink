@@ -125,6 +125,7 @@ bool reallocRing(flChannel* ch, uint32_t w, uint32_t h, uint32_t poolSize) {
     desc.layers = 1;
     desc.format = ahbFormatFor(ch->info.format);
     desc.usage = AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE;
+    if(ch->flags & FL_GPU_RENDER)desc.usage |= AHARDWAREBUFFER_USAGE_GPU_COLOR_OUTPUT;
     if (ch->flags & FL_MAP_CPU)
         desc.usage |= AHARDWAREBUFFER_USAGE_CPU_WRITE_OFTEN | AHARDWAREBUFFER_USAGE_CPU_READ_RARELY;
     for (uint32_t i = 0; i < poolSize; ++i) {
@@ -383,6 +384,13 @@ FL_API flResult flCreateChannelEx(const char* name, uint32_t width, uint32_t hei
     if (format == FL_FORMAT_NV12 && ((width | height) & 1)) return trace.result(FL_INVALID);
     if (!poolSize || poolSize > fl::kMaxPool) return trace.result(FL_INVALID);
 
+    if(flags & FL_GPU_RENDER) {
+        AHardwareBuffer_Desc desc{};desc.width=width;desc.height=height;desc.layers=1;
+        desc.format=ahbFormatFor(format);
+        desc.usage=AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE|AHARDWAREBUFFER_USAGE_GPU_COLOR_OUTPUT;
+        if(flags & FL_MAP_CPU)desc.usage|=AHARDWAREBUFFER_USAGE_CPU_WRITE_OFTEN|AHARDWAREBUFFER_USAGE_CPU_READ_RARELY;
+        if(!AHardwareBuffer_isSupported(&desc))return trace.result(FL_FORMAT_UNSUPPORTED);
+    }
     auto* ch = new flChannel();
     ch->isConsumer = true;
     ch->name = name;

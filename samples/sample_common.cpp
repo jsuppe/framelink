@@ -14,7 +14,7 @@ void usage(bool producer) {
        "--corrupt-at FRAME\n"
        "          --submit auto|manual (manual: explicit ready completion)\n"
        "Consumer: --pool 1..8 --delay-ms N --verify 0|1 --map-cpu 0|1\n"
-       "          --gpu-sync 0|1 --adapter 16_HEX_DIGITS (adapter: Windows only)\n"
+       "          --gpu-sync 0|1 --gpu-render 0|1 --adapter 16_HEX_DIGITS (adapter: Windows only)\n"
        "Defaults: channel=framelink.sample, frames=600 producer/120 consumer, "
        "timeout=100ms, idle deadline=10000ms.\n"
        "Consumer: BGRA 640x360 pool=4 verify=1, Linux map-cpu=1. Producer: "
@@ -88,6 +88,8 @@ Options parse(int argc, char **argv, bool producer) {
       o.verify = boolean();
     else if (!producer && key == "--gpu-sync")
       o.gpu = boolean();
+    else if (!producer && key == "--gpu-render")
+      o.render = boolean();
     else if (!producer && key == "--map-cpu")
       o.map = boolean();
     else if (!producer && key == "--adapter") {

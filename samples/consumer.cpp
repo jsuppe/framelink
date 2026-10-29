@@ -19,7 +19,7 @@ int main(int argc, char **argv) {
   try {
     Channel ch;
     Pixels pixels;
-    uint32_t flags = (o.map ? FL_MAP_CPU : 0) | (o.gpu ? FL_GPU_SYNC : 0);
+    uint32_t flags = (o.map ? FL_MAP_CPU : 0) | (o.gpu ? FL_GPU_SYNC : 0) | (o.render ? FL_GPU_RENDER : 0);
     check(flCreateChannelOnAdapter(
               o.channel.c_str(), o.width, o.height, o.format, o.pool, flags,
               o.adapterSet ? o.adapter : nullptr, &ch.value),
