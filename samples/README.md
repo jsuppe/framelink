@@ -176,3 +176,43 @@ Validated on 2026-10-29: 14/14 total CTest tests passed on Linux/Melchior and
 18/18 on Windows/Caspar (RTX 5090, MSVC x64 Release). The existing NV12/GStreamer
 regressions remain included in those totals. Caspar binaries are under
 `C:\Users\jonsu\dev\framelink-nv12-20261029\build\Release`.
+
+## Platform-parity additions
+
+The samples also build on Android. Supported format options are `bgra`, `rgba`,
+`nv12` and `rgb10a2`, subject to device allocation support. Android BGRA maps
+native RGBA with swizzling; NV12 maps or normalizes native YUV420 planes.
+
+`--gpu-sync 1` and `--submit manual` now exercise explicit synchronization on
+all three platforms. On POSIX the CPU-verifying sample waits a borrowed ready
+completion FD and reports already-completed CPU reads/writes with FD `-1`.
+This is an API-contract test, not a GPU performance demonstration; the renderer's
+`vulkan_sync_fd_contract` test separately validates real GPU completion fences.
+Adapter LUID selection remains Windows-specific.
+
+### GPU-rendered sources
+
+`--gpu-render 1 --verify 0` requests a GPU-renderable ring for an external renderer.
+It is separate from `--gpu-sync`, which controls consumer-side fence ownership.
+On Android, unsupported native format/usage combinations are refused; see
+[GPU_RENDER.md](../docs/GPU_RENDER.md). Use `--map-cpu 0` when pixels need not be
+read by the CPU. The pattern verifier applies only to the sample producer.
+
+### Producer disconnect during release
+
+The consumer keeps its channel alive if `flRelease` returns `FL_DISCONNECTED`.
+The frame has already been released locally; the producer-notification send may
+race with peer shutdown. Retrying that release would be incorrect. Subsequent
+acquires wait for a replacement producer as usual, subject to the idle deadline.
+Other release errors remain fatal. This does not relax ring generation or GPU
+completion ownership checks in the library.
+
+Linux `sample_release_disconnected` deterministically injects this notification
+result after a real successful release and asserts that injection occurred.
+It tests sample recovery policy; `reconnect_held` separately tests real producer
+departure, held-storage protection, and a new generation after release.
+
+The same rule applies to POSIX `flSignalConsumedSyncFd`: a disconnected
+notification after locally recording completion is tolerated, then the sample
+still releases its held frame. `sample_consumed_disconnected` asserts both
+consumed-completion and release notification injections in GPU-sync mode.

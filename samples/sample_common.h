@@ -16,7 +16,7 @@
 #include "framelink_d3d11.h"
 #include <d3d11_4.h>
 #include <wrl/client.h>
-#else
+#elif !defined(__ANDROID__)
 #include "framelink_dmabuf.h"
 #endif
 namespace sample {
@@ -39,9 +39,13 @@ struct Options {
   uint32_t width = 640, height = 360, pool = 4, frames = 120, timeout = 100,
            deadline = 10000, fps = 60, delay = 0, slots = 0, reconnect = 0,
            corrupt = UINT32_MAX;
+#ifdef __ANDROID__
+  flFormat format = FL_FORMAT_RGBA8;
+#else
   flFormat format = FL_FORMAT_BGRA8;
+#endif
   bool sizeSet = false, formatSet = false, verify = true, gpu = false,
-       manual = false, help = false, adapterSet = false;
+       render = false, manual = false, help = false, adapterSet = false;
 #ifdef _WIN32
   bool map = false;
 #else
@@ -52,7 +56,7 @@ struct Options {
 Options parse(int argc, char **argv, bool producer);
 void usage(bool producer);
 inline const char *formatName(flFormat f) {
-  return f == FL_FORMAT_NV12 ? "NV12" : f == FL_FORMAT_BGRA8 ? "BGRA" : "other";
+  return f == FL_FORMAT_NV12 ? "NV12" : f == FL_FORMAT_BGRA8 ? "BGRA" : f == FL_FORMAT_RGBA8 ? "RGBA" : f == FL_FORMAT_RGB10A2 ? "RGB10A2" : "other";
 }
 inline void report(flChannel *ch, FILE *stream = stdout) {
   flChannelInfo i{};

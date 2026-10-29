@@ -1,0 +1,60 @@
+Internal ctest changing into directory: /tmp/framelink-reconnect-race/build
+Test project /tmp/framelink-reconnect-race/build
+      Start  1: roundtrip
+ 1/27 Test  #1: roundtrip ........................   Passed    0.20 sec
+      Start  2: nv12_layout
+ 2/27 Test  #2: nv12_layout ......................   Passed    0.00 sec
+      Start  3: nv12_roundtrip
+ 3/27 Test  #3: nv12_roundtrip ...................   Passed    0.36 sec
+      Start  4: gst_nv12_roundtrip
+ 4/27 Test  #4: gst_nv12_roundtrip ...............   Passed    0.30 sec
+      Start  5: gst_rgb10a2_roundtrip
+ 5/27 Test  #5: gst_rgb10a2_roundtrip ............   Passed    0.31 sec
+      Start  6: sample_bgra
+ 6/27 Test  #6: sample_bgra ......................   Passed    0.50 sec
+      Start  7: sample_nv12
+ 7/27 Test  #7: sample_nv12 ......................   Passed    0.20 sec
+      Start  8: sample_slow
+ 8/27 Test  #8: sample_slow ......................   Passed    0.44 sec
+      Start  9: sample_metadata
+ 9/27 Test  #9: sample_metadata ..................   Passed    0.14 sec
+      Start 10: sample_reconnect
+10/27 Test #10: sample_reconnect .................   Passed    0.29 sec
+      Start 11: sample_release_disconnected
+11/27 Test #11: sample_release_disconnected ......   Passed    0.21 sec
+      Start 12: sample_consumed_disconnected
+12/27 Test #12: sample_consumed_disconnected .....   Passed    0.20 sec
+      Start 13: sample_geometry
+13/27 Test #13: sample_geometry ..................   Passed    0.40 sec
+      Start 14: sample_slots
+14/27 Test #14: sample_slots .....................   Passed    0.47 sec
+      Start 15: sample_gpu_sync
+15/27 Test #15: sample_gpu_sync ..................   Passed    0.20 sec
+      Start 16: sample_invalid_cli
+16/27 Test #16: sample_invalid_cli ...............   Passed    0.00 sec
+      Start 17: sample_wrong_role
+17/27 Test #17: sample_wrong_role ................   Passed    0.00 sec
+      Start 18: sample_corruption
+18/27 Test #18: sample_corruption ................   Passed    0.13 sec
+      Start 19: trace_disabled
+19/27 Test #19: trace_disabled ...................   Passed    0.00 sec
+      Start 20: trace_bounded_concurrent
+20/27 Test #20: trace_bounded_concurrent .........   Passed    0.00 sec
+      Start 21: trace_thread_limit
+21/27 Test #21: trace_thread_limit ...............   Passed    0.00 sec
+      Start 22: portable_map_nv12
+22/27 Test #22: portable_map_nv12 ................   Passed    0.16 sec
+      Start 23: portable_map_rgba
+23/27 Test #23: portable_map_rgba ................   Passed    0.34 sec
+      Start 24: portable_map_bgra
+24/27 Test #24: portable_map_bgra ................   Passed    0.34 sec
+      Start 25: portable_map_rgb10a2
+25/27 Test #25: portable_map_rgb10a2 .............   Passed    0.34 sec
+      Start 26: sync_fd_contract
+26/27 Test #26: sync_fd_contract .................   Passed    0.31 sec
+      Start 27: reconnect_held
+27/27 Test #27: reconnect_held ...................   Passed    0.07 sec
+
+100% tests passed, 0 tests failed out of 27
+
+Total Test time (real) =   5.92 sec

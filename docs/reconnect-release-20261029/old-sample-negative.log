@@ -1,0 +1,38 @@
+Internal ctest changing into directory: /tmp/framelink-reconnect-race/build
+UpdateCTestConfiguration  from :/tmp/framelink-reconnect-race/build/DartConfiguration.tcl
+UpdateCTestConfiguration  from :/tmp/framelink-reconnect-race/build/DartConfiguration.tcl
+Test project /tmp/framelink-reconnect-race/build
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 11
+    Start 11: sample_release_disconnected
+
+11: Test command: /usr/bin/cmake "-DPRODUCER=/tmp/framelink-reconnect-race/build/framelink_producer" "-DCONSUMER=/tmp/framelink-reconnect-race/build/framelink_consumer" "-DRELEASE_SHIM=/tmp/framelink-reconnect-race/build/libfl_release_disconnect_shim.so" "-DPRODUCER_ARGS=--channel;sample-release-disconnected;--frames;200;--fps;120" "-DCONSUMER_ARGS=--channel;sample-release-disconnected;--frames;12;--size;130x66;--format;nv12" "-P" "/tmp/framelink-reconnect-race/test/run_samples.cmake"
+11: Working Directory: /tmp/framelink-reconnect-race/build
+11: Test timeout computed to be: 30
+11: -- channel version=5 format=NV12 size=130x66 pool=4 generation=1 adapter=0000000000000000
+11: 
+11: channel version=5 format=NV12 size=130x66 pool=4 generation=2 adapter=0000000000000000
+11: injected released-peer disconnect
+11: consumer FAIL after 0 frames: release: peer disconnected
+11: producer sent=2 timeouts=0 reconnects=0 elapsed_ms=41
+11: 
+11: CMake Error at /tmp/framelink-reconnect-race/test/run_samples.cmake:17 (message):
+11:   sample process statuses: 0;1; expected 0;0
+11: 
+11: 
+1/1 Test #11: sample_release_disconnected ......***Failed    0.05 sec
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) =   0.05 sec
+
+The following tests FAILED:
+	 11 - sample_release_disconnected (Failed)
+Errors while running CTest
+Output from these tests are in: /tmp/framelink-reconnect-race/build/Testing/Temporary/LastTest.log
+Use "--rerun-failed --output-on-failure" to re-run the failed cases verbosely.

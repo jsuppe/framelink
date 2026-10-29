@@ -1,3 +1,4 @@
+#include "framelink_trace.hpp"
 // framelink control channel, Windows named pipes.
 //
 // Message-mode pipes, so one WriteFile is one message and a partial read is an
@@ -108,12 +109,16 @@ bool Channel::peerAlive() {
 
 bool Channel::sendWithFds(MsgType type, const void* payload, size_t size, const int*,
                           size_t fdCount) {
+    fltrace::Scope trace("ipc.send", (uint64_t)(uintptr_t)this);
+    if(trace.active){ trace.event.sequence=(uint64_t)type; trace.event.slot=size; }
     // Windows has no fd passing; handles are duplicated into the peer and sent
     // as values inside the payload instead.
     return fdCount == 0 && send(type, payload, size);
 }
 
 bool Channel::send(MsgType type, const void* payload, size_t size) {
+    fltrace::Scope trace("ipc.send", (uint64_t)(uintptr_t)this);
+    if(trace.active){ trace.event.sequence=(uint64_t)type; trace.event.slot=size; }
     if (!connected_) return false;
     if (sizeof(MsgHeader) + size > kBufferSize) return false;
     uint8_t buf[kBufferSize];
@@ -132,6 +137,7 @@ bool Channel::send(MsgType type, const void* payload, size_t size) {
 }
 
 std::optional<Message> Channel::recv() {
+    fltrace::Scope trace("ipc.recv", (uint64_t)(uintptr_t)this);
     if (!connected_) return std::nullopt;
     uint8_t buf[kBufferSize];
     DWORD read = 0;

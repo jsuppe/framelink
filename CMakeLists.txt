@@ -26,7 +26,7 @@ elseif(UNIX AND NOT ANDROID)
         src/fl_ipc_posix.cpp)
     target_link_libraries(framelink PRIVATE PkgConfig::GBM PkgConfig::DRM pthread)
     set_target_properties(framelink PROPERTIES
-        PUBLIC_HEADER "include/framelink.h;include/framelink_dmabuf.h;include/framelink_slots.h")
+        PUBLIC_HEADER "include/framelink.h;include/framelink_dmabuf.h;include/framelink_slots.h;include/framelink_trace.hpp;include/framelink_sync_fd.h")
 elseif(ANDROID)
     # Static: APK native modules embed it, and there is no system loader story
     # for a bare shared library on Android anyway.
@@ -36,9 +36,15 @@ elseif(ANDROID)
         src/fl_ipc_posix.cpp)
     target_link_libraries(framelink PRIVATE android log)
     set_target_properties(framelink PROPERTIES
-        PUBLIC_HEADER "include/framelink.h;include/framelink_ahb.h;include/framelink_slots.h")
+        PUBLIC_HEADER "include/framelink.h;include/framelink_ahb.h;include/framelink_slots.h;include/framelink_trace.hpp;include/framelink_sync_fd.h")
 else()
     message(FATAL_ERROR "framelink has no backend for this platform yet")
+endif()
+
+target_sources(framelink PRIVATE src/fl_trace.cpp)
+option(FRAMELINK_DISABLE_TRACE "Compile out all tracing" OFF)
+if(FRAMELINK_DISABLE_TRACE)
+    add_compile_definitions(FL_TRACE_COMPILED_OUT)
 endif()
 
 target_include_directories(framelink
@@ -48,7 +54,7 @@ target_include_directories(framelink
 set_target_properties(framelink PROPERTIES VERSION ${PROJECT_VERSION})
 if(WIN32)
     set_target_properties(framelink PROPERTIES
-        PUBLIC_HEADER "include/framelink.h;include/framelink_d3d11.h;include/framelink_slots.h")
+        PUBLIC_HEADER "include/framelink.h;include/framelink_d3d11.h;include/framelink_slots.h;include/framelink_trace.hpp;include/framelink_sync_fd.h")
 endif()
 
 if(FRAMELINK_BUILD_TESTS)
@@ -176,7 +182,8 @@ if(FRAMELINK_BUILD_TESTS AND FL_GST_FOUND AND UNIX AND NOT ANDROID)
     add_executable(fl_gst_nv12 test/fl_gst_nv12.cpp)
     target_link_libraries(fl_gst_nv12 PRIVATE PkgConfig::FL_GST PkgConfig::FL_GST_APP)
     add_test(NAME gst_nv12_roundtrip COMMAND fl_gst_nv12 $<TARGET_FILE:gstframelink>)
-    set_tests_properties(gst_nv12_roundtrip PROPERTIES TIMEOUT 30)
+    add_test(NAME gst_rgb10a2_roundtrip COMMAND fl_gst_nv12 $<TARGET_FILE:gstframelink> rgb10a2)
+    set_tests_properties(gst_nv12_roundtrip gst_rgb10a2_roundtrip PROPERTIES TIMEOUT 30)
 endif()
 
 if(FRAMELINK_BUILD_TESTS AND FL_GST_FOUND AND WIN32)
@@ -188,7 +195,8 @@ if(FRAMELINK_BUILD_TESTS AND FL_GST_FOUND AND WIN32)
     target_link_libraries(fl_gst_nv12 PRIVATE gstreamer-1.0.lib gstapp-1.0.lib
         gstvideo-1.0.lib gobject-2.0.lib glib-2.0.lib)
     add_test(NAME gst_nv12_roundtrip COMMAND fl_gst_nv12 $<TARGET_FILE:gstframelink>)
-    set_tests_properties(gst_nv12_roundtrip PROPERTIES TIMEOUT 30)
+    add_test(NAME gst_rgb10a2_roundtrip COMMAND fl_gst_nv12 $<TARGET_FILE:gstframelink> rgb10a2)
+    set_tests_properties(gst_nv12_roundtrip gst_rgb10a2_roundtrip PROPERTIES TIMEOUT 30)
 endif()
 
 if(FRAMELINK_BUILD_TESTS AND WIN32)
@@ -210,7 +218,7 @@ if(FRAMELINK_BUILD_TESTS AND WIN32)
 endif()
 
 option(FRAMELINK_BUILD_SAMPLES "Build configurable producer/consumer validation tools" ON)
-if(FRAMELINK_BUILD_SAMPLES AND NOT ANDROID)
+if(FRAMELINK_BUILD_SAMPLES)
     foreach(role producer consumer)
         add_executable(framelink_${role} samples/${role}.cpp samples/sample_common.cpp)
         target_link_libraries(framelink_${role} PRIVATE framelink)
@@ -235,11 +243,33 @@ if(FRAMELINK_BUILD_TESTS AND FRAMELINK_BUILD_SAMPLES AND NOT ANDROID)
     fl_sample_case(slow "--format;nv12;--delay-ms;20;--pool;2" "--format;nv12")
     fl_sample_case(metadata "--verify;0" "")
     fl_sample_case(reconnect "--format;nv12" "--reconnect-at;4")
+    if(UNIX AND NOT ANDROID)
+        # Deterministically exercise the legal release-after-peer-death result,
+        # after the real release has relinquished ownership.
+        add_library(fl_release_disconnect_shim SHARED test/fl_release_disconnect_shim.cpp)
+        target_include_directories(fl_release_disconnect_shim PRIVATE include)
+        target_link_libraries(fl_release_disconnect_shim PRIVATE ${CMAKE_DL_LIBS})
+        add_test(NAME sample_release_disconnected COMMAND ${CMAKE_COMMAND}
+            -DPRODUCER=$<TARGET_FILE:framelink_producer>
+            -DCONSUMER=$<TARGET_FILE:framelink_consumer>
+            -DRELEASE_SHIM=$<TARGET_FILE:fl_release_disconnect_shim>
+            "-DPRODUCER_ARGS=--channel;sample-release-disconnected;--frames;200;--fps;120"
+            "-DCONSUMER_ARGS=--channel;sample-release-disconnected;--frames;12;--size;130x66;--format;nv12"
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/test/run_samples.cmake)
+        set_tests_properties(sample_release_disconnected PROPERTIES TIMEOUT 30)
+        add_test(NAME sample_consumed_disconnected COMMAND ${CMAKE_COMMAND}
+            -DPRODUCER=$<TARGET_FILE:framelink_producer>
+            -DCONSUMER=$<TARGET_FILE:framelink_consumer>
+            -DRELEASE_SHIM=$<TARGET_FILE:fl_release_disconnect_shim>
+            -DEXPECT_CONSUMED_INJECTION=1
+            "-DPRODUCER_ARGS=--channel;sample-consumed-disconnected;--frames;200;--fps;120"
+            "-DCONSUMER_ARGS=--channel;sample-consumed-disconnected;--frames;12;--size;130x66;--format;nv12;--gpu-sync;1"
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/test/run_samples.cmake)
+        set_tests_properties(sample_consumed_disconnected PROPERTIES TIMEOUT 30)
+    endif()
     fl_sample_case(geometry "--format;nv12" "--size;194x98")
     fl_sample_case(slots "--channel;sample-slots.0" "--slots;2")
-    if(WIN32)
-        fl_sample_case(gpu_sync "--format;nv12;--gpu-sync;1" "--submit;manual")
-    endif()
+    fl_sample_case(gpu_sync "--format;nv12;--gpu-sync;1" "--submit;manual")
     add_test(NAME sample_invalid_cli COMMAND framelink_consumer --format nv12 --size 131x66)
     set_tests_properties(sample_invalid_cli PROPERTIES WILL_FAIL TRUE)
     add_test(NAME sample_wrong_role COMMAND framelink_producer --pool 4)
@@ -260,4 +290,78 @@ if(FRAMELINK_BUILD_TESTS AND WIN32)
     target_link_libraries(fl_disconnect_win PRIVATE framelink)
     add_test(NAME disconnect_full_ring COMMAND fl_disconnect_win)
     set_tests_properties(disconnect_full_ring PROPERTIES TIMEOUT 10)
+endif()
+
+if(FRAMELINK_BUILD_TESTS)
+    add_executable(fl_trace_test test/fl_trace_test.cpp)
+    target_include_directories(fl_trace_test PRIVATE include)
+    if(UNIX AND NOT ANDROID)
+        target_link_libraries(fl_trace_test PRIVATE pthread)
+    endif()
+    add_test(NAME trace_disabled COMMAND fl_trace_test)
+    set_tests_properties(trace_disabled PROPERTIES ENVIRONMENT "FRAMELINK_TRACE=")
+    add_test(NAME trace_bounded_concurrent COMMAND fl_trace_test)
+    set_tests_properties(trace_bounded_concurrent PROPERTIES ENVIRONMENT
+        "FRAMELINK_TRACE=${CMAKE_CURRENT_BINARY_DIR}/trace-test;FRAMELINK_TRACE_EVENTS=16")
+endif()
+
+if(FRAMELINK_BUILD_TESTS)
+    add_test(NAME trace_thread_limit COMMAND fl_trace_test threads)
+    set_tests_properties(trace_thread_limit PROPERTIES ENVIRONMENT
+        "FRAMELINK_TRACE=${CMAKE_CURRENT_BINARY_DIR}/trace-threads;FRAMELINK_TRACE_EVENTS=16")
+endif()
+
+if(FRAMELINK_BUILD_TESTS)
+    add_executable(fl_portable_map test/fl_portable_map.cpp)
+    target_link_libraries(fl_portable_map PRIVATE framelink)
+    add_test(NAME portable_map_nv12 COMMAND fl_portable_map nv12)
+    add_test(NAME portable_map_rgba COMMAND fl_portable_map rgba)
+    add_test(NAME portable_map_bgra COMMAND fl_portable_map bgra)
+    add_test(NAME portable_map_rgb10a2 COMMAND fl_portable_map rgb10a2)
+    set_tests_properties(portable_map_nv12 portable_map_rgba portable_map_bgra portable_map_rgb10a2 PROPERTIES TIMEOUT 20)
+endif()
+
+if(FRAMELINK_BUILD_TESTS AND WIN32)
+    add_executable(fl_ready_timeout_win test/fl_ready_timeout_win.cpp)
+    target_link_libraries(fl_ready_timeout_win PRIVATE framelink d3d11)
+    add_test(NAME ready_fence_timeout COMMAND fl_ready_timeout_win)
+    set_tests_properties(ready_fence_timeout PROPERTIES TIMEOUT 10)
+endif()
+
+if(FRAMELINK_BUILD_TESTS AND UNIX)
+    add_executable(fl_sync_fd_test test/fl_sync_fd.cpp)
+    target_link_libraries(fl_sync_fd_test PRIVATE framelink)
+    add_test(NAME sync_fd_contract COMMAND fl_sync_fd_test)
+    set_tests_properties(sync_fd_contract PROPERTIES TIMEOUT 10)
+endif()
+
+# Android GStreamer SDK ships static libraries. Register gstframelink in the
+# APK's native initialization with GST_PLUGIN_STATIC_REGISTER(framelink).
+set(FRAMELINK_GST_ANDROID_ROOT "" CACHE PATH "GStreamer Android SDK architecture directory")
+if(ANDROID AND FRAMELINK_BUILD_GST AND FRAMELINK_GST_ANDROID_ROOT)
+    find_package(PkgConfig REQUIRED)
+    set(_fl_saved_pc_libdir "$ENV{PKG_CONFIG_LIBDIR}")
+    set(_fl_saved_pc_path "$ENV{PKG_CONFIG_PATH}")
+    set(ENV{PKG_CONFIG_LIBDIR} "${FRAMELINK_GST_ANDROID_ROOT}/lib/pkgconfig")
+    set(ENV{PKG_CONFIG_PATH} "")
+    pkg_check_modules(FL_ANDROID_GST REQUIRED gstreamer-1.0 gstreamer-base-1.0 gstreamer-video-1.0 gstreamer-app-1.0)
+    set(ENV{PKG_CONFIG_LIBDIR} "${_fl_saved_pc_libdir}")
+    set(ENV{PKG_CONFIG_PATH} "${_fl_saved_pc_path}")
+    add_library(gstframelink STATIC gst/gstframelink.cpp)
+    target_include_directories(gstframelink PUBLIC ${FL_ANDROID_GST_INCLUDE_DIRS})
+    target_compile_options(gstframelink PRIVATE ${FL_ANDROID_GST_CFLAGS_OTHER})
+    target_compile_definitions(gstframelink PRIVATE PACKAGE="framelink" PACKAGE_VERSION="${PROJECT_VERSION}")
+    target_link_libraries(gstframelink PUBLIC framelink ${FL_ANDROID_GST_STATIC_LDFLAGS})
+    if(FRAMELINK_BUILD_TESTS)
+        add_executable(fl_gst_nv12 test/fl_gst_nv12.cpp)
+        target_link_libraries(fl_gst_nv12 PRIVATE gstframelink
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstapp.a" ${FL_ANDROID_GST_STATIC_LDFLAGS})
+    endif()
+endif()
+
+if(FRAMELINK_BUILD_TESTS)
+    add_executable(fl_reconnect_held test/fl_reconnect_held.cpp)
+    target_link_libraries(fl_reconnect_held PRIVATE framelink)
+    add_test(NAME reconnect_held COMMAND fl_reconnect_held)
+    set_tests_properties(reconnect_held PROPERTIES TIMEOUT 20)
 endif()

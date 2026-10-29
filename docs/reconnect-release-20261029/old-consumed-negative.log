@@ -1,0 +1,38 @@
+Internal ctest changing into directory: /tmp/framelink-reconnect-race/build
+UpdateCTestConfiguration  from :/tmp/framelink-reconnect-race/build/DartConfiguration.tcl
+UpdateCTestConfiguration  from :/tmp/framelink-reconnect-race/build/DartConfiguration.tcl
+Test project /tmp/framelink-reconnect-race/build
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 12
+    Start 12: sample_consumed_disconnected
+
+12: Test command: /usr/bin/cmake "-DPRODUCER=/tmp/framelink-reconnect-race/build/framelink_producer" "-DCONSUMER=/tmp/framelink-reconnect-race/build/framelink_consumer" "-DRELEASE_SHIM=/tmp/framelink-reconnect-race/build/libfl_release_disconnect_shim.so" "-DEXPECT_CONSUMED_INJECTION=1" "-DPRODUCER_ARGS=--channel;sample-consumed-disconnected;--frames;200;--fps;120" "-DCONSUMER_ARGS=--channel;sample-consumed-disconnected;--frames;12;--size;130x66;--format;nv12;--gpu-sync;1" "-P" "/tmp/framelink-reconnect-race/test/run_samples.cmake"
+12: Working Directory: /tmp/framelink-reconnect-race/build
+12: Test timeout computed to be: 30
+12: -- channel version=5 format=NV12 size=130x66 pool=4 generation=1 adapter=0000000000000000
+12: 
+12: channel version=5 format=NV12 size=130x66 pool=4 generation=2 adapter=0000000000000000
+12: injected consumed-peer disconnect
+12: consumer FAIL after 0 frames: consumed completion: peer disconnected
+12: producer sent=2 timeouts=0 reconnects=0 elapsed_ms=42
+12: 
+12: CMake Error at /tmp/framelink-reconnect-race/test/run_samples.cmake:17 (message):
+12:   sample process statuses: 0;1; expected 0;0
+12: 
+12: 
+1/1 Test #12: sample_consumed_disconnected .....***Failed    0.05 sec
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) =   0.05 sec
+
+The following tests FAILED:
+	 12 - sample_consumed_disconnected (Failed)
+Errors while running CTest
+Output from these tests are in: /tmp/framelink-reconnect-race/build/Testing/Temporary/LastTest.log
+Use "--rerun-failed --output-on-failure" to re-run the failed cases verbosely.

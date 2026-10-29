@@ -34,7 +34,7 @@ extern "C" {
 // Bumped on any wire-format change. Peers refuse each other on mismatch rather
 // than misbehaving: shipping one side while an integrator builds the other is
 // exactly how a silent version skew becomes someone else's afternoon.
-#define FL_VERSION 4
+#define FL_VERSION 5
 
 typedef struct flChannel flChannel;
 typedef struct flImage flImage;
@@ -48,7 +48,9 @@ typedef enum flResult {
     FL_ADAPTER_MISMATCH = 5, // producer and consumer are on different GPUs
     FL_ACCESS_DENIED = 6,
     FL_NOT_FOUND = 7,        // flOpenProducer: no such channel. It never creates.
-    // The channel exists but already has a producer. Distinct from NOT_FOUND
+    // The channel exists but already has a producer, or old frame storage is
+    // still held / awaiting GPU retirement. Retry after the consumer releases it.
+    // Distinct from NOT_FOUND
     // on purpose: a caller walking a set of slot channels needs to tell "taken"
     // from "no such channel", and reporting both as NOT_FOUND makes an
     // exhausted set indistinguishable from a misconfigured name.
@@ -61,12 +63,12 @@ typedef enum flResult {
 FL_API const char* flResultString(flResult r); // never NULL, never allocates
 
 typedef enum flFormat {
-    FL_FORMAT_BGRA8 = 1,   // the always-works path
-    FL_FORMAT_NV12 = 2,    // Linux/Windows: NV12, even width/height. Android refuses.
-    FL_FORMAT_RGB10A2 = 3, // not in the spike
+    FL_FORMAT_BGRA8 = 1,   // Android CPU mapping swizzles native RGBA storage
+    FL_FORMAT_NV12 = 2,    // even dimensions; Android CPU view normalizes native YUV420
+    FL_FORMAT_RGB10A2 = 3, // packed R10 G10 B10 A2; allocation support is device-dependent
     // RGBA byte order. Exists because Android's AHardwareBuffer has no BGRA
-    // format: a channel there reports RGBA8 from flQuery, and a portable
-    // producer must write the byte order the channel says, not assume BGRA.
+    // format: native storage there is RGBA8 (BGRA CPU views are swizzled). A portable
+    // producer must write the mapped byte order the channel says, not assume BGRA.
     FL_FORMAT_RGBA8 = 4,
 } flFormat;
 
@@ -117,6 +119,10 @@ FL_API flResult flCreateChannel(const char* name, uint32_t width, uint32_t heigh
 //                framelink then neither blocks a thread in flAcquireFrame nor
 //                signals anything itself, and flRelease becomes bookkeeping.
 //
+//                Linux/Android: use framelink_sync_fd.h instead of timeline
+//                handles. flFrameReadySyncFd exposes readiness and
+//                flReleaseSyncFd transfers read-completion back to the producer.
+//
 //                Both halves matter. Without the wait, a compositor consuming a
 //                dozen channels would block its render thread a dozen times per
 //                frame. Without owning the signal, framelink would free the
@@ -124,6 +130,12 @@ FL_API flResult flCreateChannel(const char* name, uint32_t width, uint32_t heigh
 //                it - the producer would overwrite a frame mid-read.
 #define FL_MAP_CPU  0x1
 #define FL_GPU_SYNC 0x2
+// Wait for ready normally, but retire storage explicitly after GPU reads.
+// Linux/Android: flSignalConsumedSyncFd. Windows: shared consumed fence.
+#define FL_DEFER_RELEASE 0x4
+// Require GPU-renderable allocation (Android native YUV may reject this).
+// Desktop rings already request rendering-capable storage. No CPU fallback.
+#define FL_GPU_RENDER 0x8
 
 FL_API flResult flCreateChannelEx(const char* name, uint32_t width, uint32_t height,
                                   flFormat format, uint32_t poolSize, uint32_t flags,
@@ -212,17 +224,35 @@ FL_API flResult flRequestGeometry(flChannel*, uint32_t width, uint32_t height,
 
 // ---- both --------------------------------------------------------------------
 
+// CPU plane access preserves each plane's actual pitch and offset. Pointers
+// remain valid until flImageUnmap; map/unmap brackets DMA-BUF cache ownership.
+// NV12: plane0 width bytes x height rows; plane1 width bytes x height/2 rows (UV).
+// Linux requires linear storage. Windows uses a staging copy; Android normalizes
+// native YUV420 to NV12 and swizzles BGRA to/from native RGBA. No implicit GPU
+// completion: acquire/release and external-API synchronization still apply.
+typedef struct flMappedPlane {
+    void* pixels;
+    uint64_t stride;
+    uint32_t rowBytes, rows;
+} flMappedPlane;
+typedef struct flMappedImage {
+    uint32_t planes;
+    flMappedPlane plane[4];
+} flMappedImage;
+FL_API flResult flImageMapPlanes(flImage*, flMappedImage* out);
+
 // CPU access to a buffer's pixels, for producers that draw with the CPU and
 // consumers that must read bytes (an encoder, a v4l2loopback writer). Only
 // valid on a channel created with FL_MAP_CPU; FL_FORMAT_UNSUPPORTED otherwise,
 // because a tiled or device-local buffer cannot be meaningfully addressed
-// byte-wise. Windows has no CPU path yet and always refuses.
+// byte-wise. Windows maps staging storage (a GPU copy, not zero-copy) and uploads
+// producer writes on unmap. Android BGRA and NV12 may use CPU conversion.
 //
 // On Android the map/unmap pair is also the CACHE BOUNDARY
 // (AHardwareBuffer_lock/unlock): writes are not guaranteed visible to the GPU
 // until the buffer is unlocked, so flSubmit/flEndSubmit unmap automatically if
 // the producer left the buffer mapped.
-// NV12 requires flImageMapPlanes (Linux interop); this single-plane API refuses NV12.
+// NV12 requires flImageMapPlanes; this single-plane API refuses NV12.
 FL_API flResult flImageMap(flImage*, void** pixels, uint64_t* stride);
 FL_API void     flImageUnmap(flImage*);
 
@@ -232,6 +262,9 @@ FL_API void     flClose(flChannel*);
 // No enumeration API. A consumer knows the name it created; a producer is
 // configured with the name to attach to. Adding discovery later is easy,
 // removing it is not.
+
+// Snapshot opt-in trace to FRAMELINK_TRACE.<pid>.csv. Control thread only.
+FL_API flResult flTraceFlush(void);
 
 #ifdef __cplusplus
 }
