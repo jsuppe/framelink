@@ -246,7 +246,20 @@ void acceptLoop(flChannel* ch) {
             continue;
         }
 
-        if (!handOverRing(ch, link)) continue;
+        {
+            std::lock_guard<std::mutex> hold(ch->pendingMutex);
+            ch->sync.advance(ch->retiredValue);
+            if(ch->frameHeld || ch->retiredValue<ch->heldReady || !fl::fenceReady(ch->sync.pending)) {
+                link.send(fl::MsgType::Busy);
+                continue;
+            }
+            // A new producer starts its timeline at one. Old release values
+            // must never authorize reuse on the replacement timeline.
+            ch->hasPending=false;ch->sync.clear();
+            ch->heldReady=ch->retiredValue=0;
+            ++ch->info.generation;
+            if (!handOverRing(ch, link)) continue;
+        }
 
         ch->peerGone = false;
         FL_LOG("framelink: producer pid %u attached to '%s'", link.peerPid(), ch->name.c_str());
@@ -466,6 +479,7 @@ FL_API flResult flOpenProducer(const char* name, flChannel** out) {
     }
 
     auto ring = ch->link.recv();
+    if(ring && ring->type==fl::MsgType::Busy){delete ch;return trace.result(FL_BUSY);}
     const auto* rd = ring && ring->type == fl::MsgType::RingDesc
                          ? ring->as<fl::RingDescMsg>()
                          : nullptr;

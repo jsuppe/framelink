@@ -33,7 +33,15 @@ int main(){for(unsigned flags:{0u,(unsigned)FL_GPU_SYNC,(unsigned)FL_DEFER_RELEA
  CHECK(flAcquireBuffer(p,&b,20)==FL_TIMEOUT);
  CHECK(flRequestGeometry(p,128,64,FL_FORMAT_RGBA8)==FL_OK);
  flChannelInfo before{}; CHECK(flQuery(p,&before)==FL_OK); CHECK(before.width==64);
+ flClose(p);p=nullptr;
+ std::this_thread::sleep_for(std::chrono::milliseconds(30));
+ CHECK(flOpenProducer(name.c_str(),&p)==FL_BUSY);CHECK(!p);
  CHECK(write(consumed,&one,sizeof(one))==sizeof(one));
+ for(int i=0;i<100&&!p;i++){
+  auto r=flOpenProducer(name.c_str(),&p);CHECK(r==FL_OK || r==FL_BUSY || r==FL_DISCONNECTED);
+  std::this_thread::sleep_for(std::chrono::milliseconds(5));
+ }CHECK(p);
+ flChannelInfo reconnected{};CHECK(flQuery(p,&reconnected)==FL_OK);CHECK(reconnected.generation>before.generation);
  CHECK(flAcquireBuffer(p,&b,1000)==FL_OK);
  CHECK(flRequestGeometry(p,128,64,FL_FORMAT_RGBA8)==FL_OK);
  flChannelInfo after{}; CHECK(flQuery(p,&after)==FL_OK); CHECK(after.width==128);

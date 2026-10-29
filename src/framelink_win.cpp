@@ -279,6 +279,14 @@ void acceptLoop(flChannel* ch) {
         // receivers attach and detach for a living.
         CloseHandle(peerProc);
 
+        {
+            std::lock_guard<std::mutex> hold(ch->pendingMutex);
+            if(ch->frameHeld || ch->consumedFence->GetCompletedValue()<ch->heldReady ||
+               (ch->hasPending && ch->readyFence->GetCompletedValue()<ch->pendingReady)) {
+                link.send(fl::MsgType::Busy);
+                continue;
+            }
+        }
         if (!resetSync(ch) || !handOverRing(ch, link, link.peerPid())) continue;
 
         ch->peerGone = false;
@@ -478,6 +486,7 @@ FL_API flResult flOpenProducer(const char* name, flChannel** out) {
     memcpy(ch->info.adapterLUID, srv->adapterLUID, 8);
 
     auto poolMsg = ch->link.recv();
+    if(poolMsg && poolMsg->type==fl::MsgType::Busy){flClose(ch);return trace.result(FL_BUSY);}
     if (!poolMsg || poolMsg->type != fl::MsgType::RingDesc) {
         flClose(ch);
         return trace.result(FL_DISCONNECTED);

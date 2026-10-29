@@ -48,7 +48,9 @@ typedef enum flResult {
     FL_ADAPTER_MISMATCH = 5, // producer and consumer are on different GPUs
     FL_ACCESS_DENIED = 6,
     FL_NOT_FOUND = 7,        // flOpenProducer: no such channel. It never creates.
-    // The channel exists but already has a producer. Distinct from NOT_FOUND
+    // The channel exists but already has a producer, or old frame storage is
+    // still held / awaiting GPU retirement. Retry after the consumer releases it.
+    // Distinct from NOT_FOUND
     // on purpose: a caller walking a set of slot channels needs to tell "taken"
     // from "no such channel", and reporting both as NOT_FOUND makes an
     // exhausted set indistinguishable from a misconfigured name.
