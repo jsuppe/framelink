@@ -1,16 +1,20 @@
 #include "sample_common.h"
 #include <limits>
+#ifndef _WIN32
+#include "framelink_sync_fd.h"
+#include <poll.h>
+#endif
 namespace sample {
 void usage(bool producer) {
-  printf("FrameLink %s validation sample (Windows/Linux)\n",
+  printf("FrameLink %s validation sample (Windows/Linux/Android)\n",
          producer ? "producer" : "consumer");
   puts("Common: --channel NAME --frames N --timeout-ms N --deadline-ms N\n"
-       "        --format bgra|nv12 --size WIDTHxHEIGHT --help\n"
+       "        --format bgra|rgba|nv12|rgb10a2 --size WIDTHxHEIGHT --help\n"
        "Producer: --fps N (0=unpaced) --slots N --reconnect-at FRAME "
        "--corrupt-at FRAME\n"
-       "          --submit auto|manual (manual: Windows explicit ready fence)\n"
+       "          --submit auto|manual (manual: explicit ready completion)\n"
        "Consumer: --pool 1..8 --delay-ms N --verify 0|1 --map-cpu 0|1\n"
-       "          --gpu-sync 0|1 --adapter 16_HEX_DIGITS (last two: Windows)\n"
+       "          --gpu-sync 0|1 --adapter 16_HEX_DIGITS (adapter: Windows only)\n"
        "Defaults: channel=framelink.sample, frames=600 producer/120 consumer, "
        "timeout=100ms, idle deadline=10000ms.\n"
        "Consumer: BGRA 640x360 pool=4 verify=1, Linux map-cpu=1. Producer: "
@@ -56,8 +60,8 @@ Options parse(int argc, char **argv, bool producer) {
     else if (key == "--deadline-ms")
       o.deadline = number(v);
     else if (key == "--format") {
-      require(v == "bgra" || v == "nv12", "format must be bgra or nv12");
-      o.format = v == "nv12" ? FL_FORMAT_NV12 : FL_FORMAT_BGRA8;
+      require(v == "bgra" || v == "rgba" || v == "nv12" || v == "rgb10a2", "format must be bgra, rgba, nv12 or rgb10a2");
+      o.format = v == "rgb10a2" ? FL_FORMAT_RGB10A2 : v == "nv12" ? FL_FORMAT_NV12 : v == "rgba" ? FL_FORMAT_RGBA8 : FL_FORMAT_BGRA8;
       o.formatSet = true;
     } else if (key == "--size") {
       auto x = v.find('x');
@@ -111,8 +115,8 @@ Options parse(int argc, char **argv, bool producer) {
           "reconnect-at must be less than frames");
 #ifndef _WIN32
   require(
-      !o.gpu && !o.manual && !o.adapterSet,
-      "GPU fences, manual submit and adapter LUID selection are Windows-only");
+      !o.adapterSet,
+      "adapter LUID selection is Windows-only");
   require(producer || !o.verify || o.map,
           "Linux verification requires --map-cpu 1");
 #endif
@@ -145,6 +149,9 @@ void Pixels::waitReady(flChannel *ch, const flFrame &f) {
 #ifdef _WIN32
   require(SUCCEEDED(context(ch)->Wait(fence(ch, true).Get(), f._readyValue)),
           "GPU ready wait failed");
+#else
+  int fd=-1;check(flFrameReadySyncFd(ch,&f,&fd),"ready completion FD");
+  if(fd>=0){pollfd p{fd,POLLIN,0};require(poll(&p,1,1000)>0 && (p.revents&POLLIN),"ready completion timeout");}
 #endif
 }
 void Pixels::signalConsumed(flChannel *ch, const flFrame &f) {
@@ -153,6 +160,9 @@ void Pixels::signalConsumed(flChannel *ch, const flFrame &f) {
   require(SUCCEEDED(ctx->Signal(fence(ch, false).Get(), f._readyValue)),
           "GPU consumed signal failed");
   ctx->Flush();
+#else
+  // Pixel verification has completed synchronously; no GPU reader remains.
+  check(flSignalConsumedSyncFd(ch,f._readyValue,-1),"consumed completion");
 #endif
 }
 flResult Pixels::submit(flChannel *ch, const flBuffer &b, int64_t pts,
@@ -168,12 +178,12 @@ flResult Pixels::submit(flChannel *ch, const flBuffer &b, int64_t pts,
   ctx->Flush();
   return flEndSubmit(ch, &b, value, pts);
 #else
-  throw std::runtime_error("manual submit unsupported");
+  return flSubmitSyncFd(ch,&b,-1,pts); // CPU writes already completed
 #endif
 }
 void Pixels::write(flChannel *ch, flImage *image, const flChannelInfo &i,
                    uint64_t id, bool corrupt) {
-  require(i.format == FL_FORMAT_BGRA8 || i.format == FL_FORMAT_NV12,
+  require(i.format == FL_FORMAT_BGRA8 || i.format == FL_FORMAT_RGBA8 || i.format == FL_FORMAT_RGB10A2 || i.format == FL_FORMAT_NV12,
           "unsupported channel format");
   require(i.width >= 8, "pattern needs at least 8 pixels");
 #ifdef _WIN32
@@ -209,7 +219,7 @@ uint64_t Pixels::verify(flChannel *ch, flImage *image, const flChannelInfo &i) {
   const uint8_t *data[2]{};
   uint64_t stride[2]{};
   unsigned planes = i.format == FL_FORMAT_NV12 ? 2 : 1;
-  require(i.format == FL_FORMAT_BGRA8 || i.format == FL_FORMAT_NV12,
+  require(i.format == FL_FORMAT_BGRA8 || i.format == FL_FORMAT_RGBA8 || i.format == FL_FORMAT_RGB10A2 || i.format == FL_FORMAT_NV12,
           "unsupported verification format");
   require(i.width >= 8, "pattern needs at least 8 pixels");
 #ifdef _WIN32

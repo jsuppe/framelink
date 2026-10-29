@@ -35,7 +35,7 @@
 
 #include "framelink.h"
 #include "framelink_slots.h"
-#if defined(__linux__) && !defined(__ANDROID__)
+#if !defined(_WIN32)
 #include "framelink_dmabuf.h"
 #endif
 #ifdef _WIN32
@@ -48,11 +48,11 @@ GST_DEBUG_CATEGORY_STATIC(framelink_debug);
 // ---- shared helpers ---------------------------------------------------------
 
 static flFormat toFlFormat(GstVideoFormat f) {
-    return f == GST_VIDEO_FORMAT_NV12 ? FL_FORMAT_NV12 : f == GST_VIDEO_FORMAT_RGBA ? FL_FORMAT_RGBA8 : f == GST_VIDEO_FORMAT_BGRA ? FL_FORMAT_BGRA8 : (flFormat)0;
+    return f == GST_VIDEO_FORMAT_RGB10A2_LE ? FL_FORMAT_RGB10A2 : f == GST_VIDEO_FORMAT_NV12 ? FL_FORMAT_NV12 : f == GST_VIDEO_FORMAT_RGBA ? FL_FORMAT_RGBA8 : f == GST_VIDEO_FORMAT_BGRA ? FL_FORMAT_BGRA8 : (flFormat)0;
 }
 
 static GstVideoFormat toGstFormat(flFormat f) {
-    return f == FL_FORMAT_NV12 ? GST_VIDEO_FORMAT_NV12 : f == FL_FORMAT_RGBA8 ? GST_VIDEO_FORMAT_RGBA : f == FL_FORMAT_BGRA8 ? GST_VIDEO_FORMAT_BGRA : GST_VIDEO_FORMAT_UNKNOWN;
+    return f == FL_FORMAT_RGB10A2 ? GST_VIDEO_FORMAT_RGB10A2_LE : f == FL_FORMAT_NV12 ? GST_VIDEO_FORMAT_NV12 : f == FL_FORMAT_RGBA8 ? GST_VIDEO_FORMAT_RGBA : f == FL_FORMAT_BGRA8 ? GST_VIDEO_FORMAT_BGRA : GST_VIDEO_FORMAT_UNKNOWN;
 }
 
 // Row copy between two 4-byte-per-pixel surfaces, optionally swapping R/B -
@@ -77,8 +77,8 @@ static void copyPixels(guint8* dst, gsize dstStride, const guint8* src, gsize sr
     }
 }
 
-#if defined(_WIN32) || (defined(__linux__) && !defined(__ANDROID__))
-#define FRAMELINK_CAPS GST_VIDEO_CAPS_MAKE("{ BGRA, RGBA, NV12 }")
+#if defined(_WIN32) || defined(__linux__)
+#define FRAMELINK_CAPS GST_VIDEO_CAPS_MAKE("{ BGRA, RGBA, NV12, RGB10A2_LE }")
 #else
 #define FRAMELINK_CAPS GST_VIDEO_CAPS_MAKE("{ BGRA, RGBA }")
 #endif
@@ -248,7 +248,8 @@ static GstFlowReturn sinkRender(GstBaseSink* base, GstBuffer* buffer) {
     const flFormat incoming=toFlFormat(GST_VIDEO_INFO_FORMAT(&self->vinfo));
     if(self->cinfo.width!=(guint)GST_VIDEO_INFO_WIDTH(&self->vinfo) ||
        self->cinfo.height!=(guint)GST_VIDEO_INFO_HEIGHT(&self->vinfo) ||
-       ((incoming==FL_FORMAT_NV12 || self->cinfo.format==FL_FORMAT_NV12) && incoming!=self->cinfo.format)) {
+       ((incoming==FL_FORMAT_NV12 || self->cinfo.format==FL_FORMAT_NV12 ||
+         incoming==FL_FORMAT_RGB10A2 || self->cinfo.format==FL_FORMAT_RGB10A2) && incoming!=self->cinfo.format)) {
         GST_ELEMENT_ERROR(self,CORE,NEGOTIATION,("channel format/geometry does not match input"),
             ("Create the consumer with matching format and geometry; no implicit YUV/RGB conversion"));
         return trace.result(GST_FLOW_NOT_NEGOTIATED);
@@ -323,7 +324,7 @@ static GstFlowReturn sinkRender(GstBaseSink* base, GstBuffer* buffer) {
 #else
     void* dst = NULL;
     guint64 dstStride = 0;
-#if defined(__linux__) && !defined(__ANDROID__)
+#if !defined(_WIN32)
     if(incoming==FL_FORMAT_NV12) {
         flMappedImage view{};
         r=flImageMapPlanes(fb.image,&view);
@@ -650,7 +651,7 @@ static GstFlowReturn srcCreate(GstPushSrc* push, GstBuffer** outbuf) {
             ctx->Release();
         }
 #else
-#if defined(__linux__) && !defined(__ANDROID__)
+#if !defined(_WIN32)
         if(self->cinfo.format==FL_FORMAT_NV12) {
             flMappedImage view{};
             if(flImageMapPlanes(frame.image,&view)==FL_OK) {
@@ -749,7 +750,7 @@ static void gst_framelink_src_class_init(GstFrameLinkSrcClass* klass) {
                             "framelink", (GParamFlags)(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
     g_object_class_install_property(
         gobject, SRC_PROP_FORMAT,
-        g_param_spec_string("format","Format","Ring pixel format (BGRA or NV12 on desktop)","BGRA",
+        g_param_spec_string("format","Format","Ring pixel format (BGRA, RGBA, NV12 or RGB10A2_LE; device-dependent)","BGRA",
                          (GParamFlags)(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
     g_object_class_install_property(
         gobject, SRC_PROP_WIDTH,

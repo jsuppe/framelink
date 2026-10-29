@@ -39,6 +39,11 @@ using Microsoft::WRL::ComPtr;
 
 struct flImage {
     ComPtr<ID3D11Texture2D> tex;
+    ComPtr<ID3D11Texture2D> staging;
+    ComPtr<ID3D11DeviceContext> mapContext;
+    D3D11_MAPPED_SUBRESOURCE mapped{};
+    ~flImage() { if(mapped.pData && mapContext && staging) mapContext->Unmap(staging.Get(),0); }
+    bool producer = false;
     HANDLE shared = nullptr; // borrowed by callers; owned here
 };
 
@@ -67,6 +72,9 @@ struct flChannel {
     std::atomic<bool> peerGone{false};
     std::mutex pendingMutex;
     bool hasPending = false;
+    bool frameHeld = false;
+    uint64_t heldReady = 0;
+    uint32_t heldSlot = 0;
     uint32_t pendingSlot = 0;
     uint64_t pendingReady = 0;
     int64_t pendingPts = -1;
@@ -125,7 +133,7 @@ bool allocateRing(flChannel* ch, uint32_t w, uint32_t h, uint32_t poolSize) {
         td.Width = w;
         td.Height = h;
         td.MipLevels = td.ArraySize = 1;
-        td.Format = ch->info.format == FL_FORMAT_NV12 ? DXGI_FORMAT_NV12 : DXGI_FORMAT_B8G8R8A8_UNORM;
+        td.Format = ch->info.format == FL_FORMAT_NV12 ? DXGI_FORMAT_NV12 : ch->info.format == FL_FORMAT_RGBA8 ? DXGI_FORMAT_R8G8B8A8_UNORM : ch->info.format == FL_FORMAT_RGB10A2 ? DXGI_FORMAT_R10G10B10A2_UNORM : DXGI_FORMAT_B8G8R8A8_UNORM;
         td.SampleDesc.Count = 1;
         td.Usage = D3D11_USAGE_DEFAULT;
         td.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
@@ -187,6 +195,7 @@ bool resetSync(flChannel* ch) {
     {
         std::lock_guard<std::mutex> hold(ch->pendingMutex);
         ch->hasPending = false; // announced against the old fence
+        ch->heldReady=0;
     }
     ++ch->info.generation;
     return true;
@@ -294,6 +303,7 @@ void acceptLoop(flChannel* ch) {
                     // between here and the new ring being live.
                     {
                         std::lock_guard<std::mutex> hold(ch->pendingMutex);
+                        if(ch->frameHeld || ((ch->flags & (FL_GPU_SYNC|FL_DEFER_RELEASE)) && ch->consumedFence->GetCompletedValue()<ch->heldReady)){if(!handOverRing(ch,link,link.peerPid()))break;continue;}
                         ch->hasPending = false; // stale: the old ring is going away
                     }
                     const uint32_t pool = (uint32_t)ch->images.size();
@@ -368,7 +378,7 @@ FL_API flResult flCreateChannelOnAdapter(const char* name, uint32_t width, uint3
 
     if (!name || !out || !fl::validGeometry(width,height,format)) return trace.result(FL_INVALID);
     *out = nullptr;
-    if (format != FL_FORMAT_BGRA8 && format != FL_FORMAT_NV12) return trace.result(FL_FORMAT_UNSUPPORTED);
+    if (format != FL_FORMAT_BGRA8 && format != FL_FORMAT_RGBA8 && format != FL_FORMAT_RGB10A2 && format != FL_FORMAT_NV12) return trace.result(FL_FORMAT_UNSUPPORTED);
     if (poolSize == 0 || poolSize > kMaxPool) return trace.result(FL_INVALID);
 
     auto* ch = new flChannel();
@@ -486,6 +496,7 @@ FL_API flResult flOpenProducer(const char* name, flChannel** out) {
     }
     for (uint32_t i = 0; i < pd->poolSize; ++i) {
         auto* img = new flImage();
+        img->producer = true;
         img->shared = (HANDLE)(uintptr_t)pd->texture[i];
         if (FAILED(dev1->OpenSharedResource1(img->shared, IID_PPV_ARGS(&img->tex)))) {
             delete img;
@@ -532,6 +543,7 @@ static flResult importRing(flChannel* ch, const fl::RingDescMsg* pd) {
     ch->slotReadyValue.clear();
     for (uint32_t i = 0; i < pd->poolSize; ++i) {
         auto* img = new flImage();
+        img->producer = true;
         img->shared = (HANDLE)(uintptr_t)pd->texture[i];
         if (FAILED(dev1->OpenSharedResource1(img->shared, IID_PPV_ARGS(&img->tex)))) {
             delete img;
@@ -588,6 +600,7 @@ FL_API flResult flAcquireBuffer(flChannel* ch, flBuffer* out, uint32_t timeoutMs
             // Free once the consumer has promised never to read this slot's
             // previous contents again.
             if (ch->slotReadyValue[i] <= consumed) {
+                ch->slotReadyValue[i] = UINT64_MAX; // reserve until submit
                 out->slot = (uint32_t)i;
                 out->image = ch->images[i];
                 if(trace.active){trace.event.slot=out->slot;}
@@ -602,7 +615,7 @@ FL_API flResult flAcquireBuffer(flChannel* ch, flBuffer* out, uint32_t timeoutMs
         uint64_t oldest = UINT64_MAX;
         for (uint64_t v : ch->slotReadyValue)
             if (v > consumed && v < oldest) oldest = v;
-        if (oldest == UINT64_MAX) continue;
+        if (oldest == UINT64_MAX) { Sleep(1); continue; }
         ch->consumedFence->SetEventOnCompletion(oldest, ch->waitEvent);
         fltrace::call("wait.consumed_fence", [&]{return WaitForSingleObject(ch->waitEvent, deadline - now);});
     }
@@ -615,6 +628,7 @@ FL_API flResult flSubmit(flChannel* ch, const flBuffer* buf, int64_t ptsNs) {
     uint64_t value = 0;
     flResult r = flBeginSubmit(ch, buf, &value);
     if (r != FL_OK) return trace.result(r);
+    flImageUnmap(buf->image);
     // Correct only because the caller drew with THIS device's context.
     ch->ctx->Signal(ch->readyFence.Get(), value);
     ch->ctx->Flush(); // no Flush after Signal == intermittent hangs (M2)
@@ -676,7 +690,11 @@ FL_API flResult flAcquireFrame(flChannel* ch, flFrame* out, uint32_t timeoutMs) 
         bool got = false;
         {
             std::lock_guard<std::mutex> hold(ch->pendingMutex);
-            if (ch->hasPending) {
+            if (ch->hasPending && !ch->frameHeld &&
+                ((ch->flags & FL_GPU_SYNC) || ch->readyFence->GetCompletedValue() >= ch->pendingReady)) {
+                ch->frameHeld = true;
+                ch->heldReady = ch->pendingReady;
+                ch->heldSlot = ch->pendingSlot;
                 ch->hasPending = false;
                 slot = ch->pendingSlot;
                 ready = ch->pendingReady;
@@ -691,10 +709,6 @@ FL_API flResult flAcquireFrame(flChannel* ch, flFrame* out, uint32_t timeoutMs) 
             // waits on that fence inside its own submit, so blocking here would
             // just be a stall it did not ask for - a compositor doing this a
             // dozen times per frame is exactly the latency regression to avoid.
-            if (!(ch->flags & FL_GPU_SYNC) && ch->readyFence->GetCompletedValue() < ready) {
-                ch->readyFence->SetEventOnCompletion(ready, ch->waitEvent);
-                fltrace::call("wait.ready_fence", [&]{return WaitForSingleObject(ch->waitEvent, 1000);});
-            }
             out->slot = slot;
             out->image = ch->images[slot];
             out->ptsNs = pts;
@@ -715,11 +729,17 @@ FL_API flResult flRelease(flChannel* ch, const flFrame* frame) {
     if(trace.active && frame) {trace.event.sequence=frame->sequence;trace.event.pts=frame->ptsNs;trace.event.fence=frame->_readyValue;trace.event.slot=frame->slot;}
 
     if (!ch || !ch->isConsumer || !frame || frame->slot >= ch->images.size()) return trace.result(FL_INVALID);
+    {
+        std::lock_guard<std::mutex> hold(ch->pendingMutex);
+        if(!ch->frameHeld || frame->_readyValue!=ch->heldReady || frame->slot!=ch->heldSlot)
+            return trace.result(FL_INVALID);
+        ch->frameHeld=false;
+    }
     // FL_GPU_SYNC: the consumer signals the consumed fence itself, ordered
     // after its own reads. Signalling here from framelink's context would tell
     // the producer the slot is free while the consumer's GPU is still sampling
     // it. Keep the bookkeeping, skip the signal.
-    if (ch->flags & FL_GPU_SYNC) {
+    if (ch->flags & (FL_GPU_SYNC|FL_DEFER_RELEASE)) {
         if (frame->_readyValue > ch->consumedValue) ch->consumedValue = frame->_readyValue;
         return trace.result(FL_OK);
     }
@@ -781,6 +801,52 @@ FL_API void flClose(flChannel* ch) {
 }
 
 // ---- D3D11 interop -----------------------------------------------------------
+
+FL_API flResult flImageMapPlanes(flImage* img, flMappedImage* out) {
+    fltrace::Scope trace("flImageMapPlanes", (uint64_t)(uintptr_t)img);
+    if (!img || !out) return trace.result(FL_INVALID);
+    *out = {};
+    D3D11_TEXTURE2D_DESC desc{};
+    img->tex->GetDesc(&desc);
+    if (!img->mapped.pData) {
+        if (!img->staging) {
+            ComPtr<ID3D11Device> dev;
+            img->tex->GetDevice(&dev);
+            dev->GetImmediateContext(&img->mapContext);
+            auto staging = desc;
+            staging.Usage = D3D11_USAGE_STAGING;
+            staging.BindFlags = staging.MiscFlags = 0;
+            staging.CPUAccessFlags = D3D11_CPU_ACCESS_READ | D3D11_CPU_ACCESS_WRITE;
+            if (FAILED(dev->CreateTexture2D(&staging, nullptr, &img->staging)))
+                return trace.result(FL_FORMAT_UNSUPPORTED);
+        }
+        img->mapContext->CopyResource(img->staging.Get(), img->tex.Get());
+        if (FAILED(img->mapContext->Map(img->staging.Get(), 0, D3D11_MAP_READ_WRITE, 0, &img->mapped)))
+            return trace.result(FL_INTERNAL);
+    }
+    bool nv12 = desc.Format == DXGI_FORMAT_NV12;
+    out->planes = nv12 ? 2 : 1;
+    out->plane[0] = {img->mapped.pData, img->mapped.RowPitch, desc.Width * (nv12 ? 1u : 4u), desc.Height};
+    if (nv12) out->plane[1] = {(uint8_t*)img->mapped.pData + (size_t)img->mapped.RowPitch * desc.Height,
+                              img->mapped.RowPitch, desc.Width, desc.Height / 2};
+    return trace.result(FL_OK);
+}
+FL_API flResult flImageMap(flImage* img, void** pixels, uint64_t* stride) {
+    if (!img || !pixels) return FL_INVALID;
+    D3D11_TEXTURE2D_DESC desc{}; img->tex->GetDesc(&desc);
+    if (desc.Format == DXGI_FORMAT_NV12) return FL_FORMAT_UNSUPPORTED;
+    flMappedImage view{};
+    flResult r = flImageMapPlanes(img, &view);
+    if (r == FL_OK) { *pixels = view.plane[0].pixels; if (stride) *stride = view.plane[0].stride; }
+    return r;
+}
+FL_API void flImageUnmap(flImage* img) {
+    fltrace::Scope trace("flImageUnmap", (uint64_t)(uintptr_t)img);
+    if (!img || !img->mapped.pData) return;
+    img->mapContext->Unmap(img->staging.Get(), 0);
+    img->mapped = {};
+    if (img->producer) img->mapContext->CopyResource(img->tex.Get(), img->staging.Get());
+}
 
 FL_API ID3D11Texture2D* flImageD3D11(flImage* img) { return img ? img->tex.Get() : nullptr; }
 FL_API ID3D11Device* flChannelD3D11Device(flChannel* ch) {

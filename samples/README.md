@@ -176,3 +176,16 @@ Validated on 2026-10-29: 14/14 total CTest tests passed on Linux/Melchior and
 18/18 on Windows/Caspar (RTX 5090, MSVC x64 Release). The existing NV12/GStreamer
 regressions remain included in those totals. Caspar binaries are under
 `C:\Users\jonsu\dev\framelink-nv12-20261029\build\Release`.
+
+## Platform-parity additions
+
+The samples also build on Android. Supported format options are `bgra`, `rgba`,
+`nv12` and `rgb10a2`, subject to device allocation support. Android BGRA maps
+native RGBA with swizzling; NV12 maps or normalizes native YUV420 planes.
+
+`--gpu-sync 1` and `--submit manual` now exercise explicit synchronization on
+all three platforms. On POSIX the CPU-verifying sample waits a borrowed ready
+completion FD and reports already-completed CPU reads/writes with FD `-1`.
+This is an API-contract test, not a GPU performance demonstration; the renderer's
+`vulkan_sync_fd_contract` test separately validates real GPU completion fences.
+Adapter LUID selection remains Windows-specific.

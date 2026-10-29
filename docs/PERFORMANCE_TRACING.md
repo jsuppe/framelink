@@ -29,8 +29,9 @@ Coverage on Windows and Linux:
 
 Scopes are nested and must not be summed as independent costs. This is a bounded
 application-level audit, not hardware occupancy/cache/bandwidth or actual screen
-presentation instrumentation. Android backend operations are not instrumented
-beyond shared IPC in this change and were not tested.
+presentation instrumentation. Android backend operation, mapping and frame
+metadata tracing now matches the desktop coverage; see PLATFORM_PARITY.md for
+on-device validation and limitations.
 
 ## Enable and capture
 
@@ -115,10 +116,9 @@ FL_GPU_SYNC delivery may precede GPU completion. A pending-frame replacement is
 not automatically a visible dropped frame; presentation must be measured
 separately. At saturation, first-prefix histograms can be biased.
 
-Audit note: existing Windows flAcquireFrame's bounded ready-fence wait does not
-propagate its wait result to the API result. This patch exposes that wait result
-without changing acquisition semantics. A wait timeout must not be interpreted
-as evidence of completed GPU work merely because the outer call returned FL_OK.
+Windows flAcquireFrame now honors the caller timeout while waiting for ready
+completion and preserves the pending frame for a later acquire. FL_GPU_SYNC
+explicitly transfers readiness responsibility to the GPU consumer.
 
 ## Tests and overhead
 

@@ -9,19 +9,19 @@
 //
 // TWO DIFFERENCES FROM WINDOWS, both deliberate and both visible to callers:
 //
-// 1. Sync is weaker. Windows carries a shared timeline fence pair, so a
-//    consumer can wait on the GPU work that produced a frame. Here, flSubmit
-//    means "I have finished writing" and there is no fence to wait on: true for
-//    a CPU producer and for a GPU producer that flushed, not enough for one
-//    that did not. Explicit sync (DMA_BUF_IOCTL_EXPORT_SYNC_FILE, or a Vulkan
-//    timeline semaphore fd) is the next piece of work. flSharedReadyFence
-//    therefore returns FL_FORMAT_UNSUPPORTED rather than pretending.
+// 1. Native completion uses sync-file FDs, not Windows timeline handles.
+//    flSubmit means writes are complete; flSubmitSyncFd can hand off queued
+//    GPU work. FL_GPU_SYNC consumers import the ready FD themselves; default
+//    consumers poll it within their acquisition timeout. Deferred release
+//    keeps storage pinned until GPU reads complete.
 //
 // 2. Slot recycling is explicit. Windows lets the producer poll the shared
 //    consumed fence; with no shared fence the consumer sends FrameReleased.
 
 #define FL_EXPORTS
 #include "framelink.h"
+#include "framelink_sync_fd.h"
+#include "fl_sync_fd.hpp"
 #include "framelink_dmabuf.h"
 
 #if !defined(_WIN32) && !defined(__ANDROID__)
@@ -69,6 +69,7 @@ struct flChannel {
     gbm_device* gbm = nullptr;
 
     std::vector<flImage*> images;
+    fl::SyncFds sync;
     uint64_t readyValue = 0;
 
     // consumer
@@ -79,6 +80,9 @@ struct flChannel {
     std::mutex pendingMutex;
     bool hasPending = false;
     bool frameHeld = false;
+    uint64_t heldReady = 0;
+    uint64_t retiredValue = 0; // completed consumer GPU reads; protects geometry changes
+    uint32_t heldSlot = 0;
     uint32_t pendingSlot = 0;
     uint64_t pendingReady = 0;
     int64_t pendingPts = -1;
@@ -109,7 +113,7 @@ namespace {
 
 uint32_t fourccFor(flFormat f) {
     // ARGB8888 is little-endian BGRA in memory, matching FL_FORMAT_BGRA8.
-    return f == FL_FORMAT_BGRA8 ? DRM_FORMAT_ARGB8888 : f == FL_FORMAT_NV12 ? DRM_FORMAT_NV12 : 0;
+    return f == FL_FORMAT_BGRA8 ? DRM_FORMAT_ARGB8888 : f == FL_FORMAT_NV12 ? DRM_FORMAT_NV12 : f == FL_FORMAT_RGBA8 ? DRM_FORMAT_ABGR8888 : f == FL_FORMAT_RGB10A2 ? DRM_FORMAT_ABGR2101010 : 0;
 }
 
 gbm_device* openRenderNode(int* fdOut) {
@@ -210,6 +214,7 @@ bool reallocRing(flChannel* ch, uint32_t w, uint32_t h, uint32_t poolSize) {
     for(auto* image:ch->images)freeImage(image);
     ch->images=std::move(images);
     ch->info.width=w;ch->info.height=h;++ch->info.generation;
+    ch->heldReady=ch->retiredValue=0;ch->sync.clear();
     return true;
 }
 
@@ -275,8 +280,10 @@ void acceptLoop(flChannel* ch) {
                 if (g && g->format==(uint32_t)ch->info.format && fl::validGeometry(g->width,g->height,ch->info.format) &&
                     (g->width != ch->info.width || g->height != ch->info.height)) {
                     std::lock_guard<std::mutex> hold(ch->pendingMutex);
-                    if(ch->frameHeld){if(!handOverRing(ch,ch->peer))break;continue;}
+                    ch->sync.advance(ch->retiredValue);
+                    if(ch->frameHeld || ch->retiredValue < ch->heldReady){if(!handOverRing(ch,ch->peer))break;continue;}
                     ch->hasPending = false; // stale: the old ring is going away
+                    if(ch->sync.pending>=0)close(ch->sync.pending);ch->sync.pending=-1;
                     const uint32_t pool = (uint32_t)ch->images.size();
 
                     if (!reallocRing(ch, g->width, g->height, pool)) {
@@ -302,6 +309,9 @@ void acceptLoop(flChannel* ch) {
                     ch->sequence+1,fr->readyValue,fr->slot,fr->ptsNs,ch->hasPending?1:0};
                 fltrace::record(e); // result=1: unconsumed pending frame replaced
             }
+            if(ch->sync.pending>=0)close(ch->sync.pending);
+            ch->sync.pending=msg->fds.empty()?-1:msg->fds[0];
+            for(size_t i=1;i<msg->fds.size();i++)close(msg->fds[i]);
             ch->hasPending = true;
             ch->pendingSlot = fr->slot;
             ch->pendingReady = fr->readyValue;
@@ -320,14 +330,16 @@ void applyRelease(flChannel* ch, const fl::Message& msg) {
     if (!fr) return;
     // Monotonic: never backwards, and releasing value V frees the skipped
     // frames before V too, which per-slot release could not.
-    if (fr->readyValue > ch->consumedValue) ch->consumedValue = fr->readyValue;
+    ch->sync.releases.push_back({fr->readyValue,msg.fds.empty()?-1:msg.fds[0]});
+    for(size_t i=1;i<msg.fds.size();i++)close(msg.fds[i]);
+    ch->sync.advance(ch->consumedValue);
 }
 
 // Producer: drain queued control messages without blocking.
 void drainProducerMessages(flChannel* ch) {
     for (;;) {
         pollfd pfd{ch->link.pollFd(), POLLIN, 0};
-        if (poll(&pfd, 1, 0) <= 0 || !(pfd.revents & POLLIN)) return;
+        if (poll(&pfd, 1, 0) <= 0 || !(pfd.revents & (POLLIN | POLLHUP | POLLERR))) return;
         auto msg = ch->link.recv();
         if (!msg) return;
         applyRelease(ch, *msg);
@@ -535,6 +547,7 @@ FL_API flResult flRequestGeometry(flChannel* ch, uint32_t width, uint32_t height
             for (int fd : reply->fds) ::close(fd);
             return trace.result(FL_OK);
         }
+        ch->sync.clear();
         ch->readyValue = 0;
         flResult result=importRing(ch, rd, reply->fds);
         if(result!=FL_OK)for(int fd:reply->fds)::close(fd);
@@ -549,6 +562,8 @@ FL_API flResult flAcquireBuffer(flChannel* ch, flBuffer* out, uint32_t timeoutMs
     if (!ch->link.connected()) return trace.result(FL_DISCONNECTED);
     for (uint32_t waited = 0;; waited += 2) {
         drainProducerMessages(ch);
+        if(!ch->link.connected())return trace.result(FL_DISCONNECTED);
+        ch->sync.advance(ch->consumedValue);
         for (size_t i = 0; i < ch->images.size(); ++i) {
             // Free once the consumer has promised never to read this slot's
             // previous contents again - same rule as Windows.
@@ -606,15 +621,11 @@ FL_API flResult flSubmit(flChannel* ch, const flBuffer* buf, int64_t ptsNs) {
 }
 
 FL_API flResult flSharedConsumedFence(flChannel*, void**) {
-    return FL_FORMAT_UNSUPPORTED; // no shared fences on this backend yet
+    return FL_FORMAT_UNSUPPORTED; // use framelink_sync_fd.h for native completion FDs
 }
 
 FL_API flResult flSharedReadyFence(flChannel*, void**) {
-    // Honest refusal: there is no shared fence on this backend yet, and handing
-    // back something unusable would be worse than saying so. FL_GPU_SYNC is
-    // consequently a no-op here - flAcquireFrame never blocks on a fence
-    // because there is none - so a consumer written for Windows still works,
-    // it just gets this backend's weaker ordering (see the file header).
+    // Native sync-file FDs are exposed by framelink_sync_fd.h instead.
     return FL_FORMAT_UNSUPPORTED;
 }
 
@@ -625,8 +636,11 @@ FL_API flResult flAcquireFrame(flChannel* ch, flFrame* out, uint32_t timeoutMs) 
     for (uint32_t waited = 0;; waited += 2) {
         {
             std::lock_guard<std::mutex> hold(ch->pendingMutex);
-            if (ch->hasPending && !ch->frameHeld) {
+            if (ch->hasPending && !ch->frameHeld &&
+                ((ch->flags & FL_GPU_SYNC) || fl::fenceReady(ch->sync.pending))) {
+                ch->sync.held=ch->sync.pending;ch->sync.pending=-1;
                 ch->frameHeld=true;
+                ch->heldReady=ch->pendingReady;ch->heldSlot=ch->pendingSlot;
                 ch->hasPending = false;
                 out->slot = ch->pendingSlot;
                 out->image = ch->images[ch->pendingSlot];
@@ -643,7 +657,7 @@ FL_API flResult flAcquireFrame(flChannel* ch, flFrame* out, uint32_t timeoutMs) 
     }
 }
 
-FL_API flResult flRelease(flChannel* ch, const flFrame* frame) {
+FL_API flResult flReleaseSyncFd(flChannel* ch, const flFrame* frame, int consumedFd) {
     fltrace::Scope trace("flRelease", fltrace::id(ch ? ch->name.c_str() : nullptr));
     if(trace.active && frame) {trace.event.sequence=frame->sequence;trace.event.pts=frame->ptsNs;trace.event.fence=frame->_readyValue;trace.event.slot=frame->slot;}
 
@@ -652,13 +666,60 @@ FL_API flResult flRelease(flChannel* ch, const flFrame* frame) {
     fr.slot = frame->slot;
     fr.readyValue = frame->_readyValue;
     std::lock_guard<std::mutex> hold(ch->pendingMutex);
+    if(!ch->frameHeld || frame->_readyValue!=ch->heldReady || frame->slot!=ch->heldSlot)return trace.result(FL_INVALID);
+    int localFd=consumedFd>=0?dup(consumedFd):-1;
+    if(consumedFd>=0 && localFd<0)return trace.result(FL_INTERNAL);
+    ch->sync.releases.push_back({frame->_readyValue,localFd});
+    ch->sync.advance(ch->retiredValue);
     ch->frameHeld=false;
+    if(ch->sync.held>=0)close(ch->sync.held);ch->sync.held=-1;
     if (!ch->peer.connected()) return trace.result(FL_OK);
-    return trace.result(ch->peer.send(fl::MsgType::FrameReleased, fr) ? FL_OK : FL_DISCONNECTED);
+    return trace.result(ch->peer.sendWithFds(fl::MsgType::FrameReleased, &fr, sizeof(fr), consumedFd>=0?&consumedFd:nullptr, consumedFd>=0?1:0) ? FL_OK : FL_DISCONNECTED);
 }
 
 FL_API flResult flReconfigure(flChannel*, uint32_t, uint32_t, flFormat) {
     return FL_INTERNAL; // not implemented on this backend yet
+}
+
+FL_API flResult flRelease(flChannel* ch, const flFrame* frame) {
+    if(ch && (ch->flags & (FL_GPU_SYNC|FL_DEFER_RELEASE))) {
+        if(!ch->isConsumer || !frame)return FL_INVALID;
+        std::lock_guard<std::mutex> hold(ch->pendingMutex);
+        if(!ch->frameHeld || frame->_readyValue!=ch->heldReady || frame->slot!=ch->heldSlot)return FL_INVALID;
+        ch->frameHeld=false;
+        if(ch->sync.held>=0)close(ch->sync.held);ch->sync.held=-1;
+        return FL_OK;
+    }
+    return flReleaseSyncFd(ch,frame,-1);
+}
+FL_API flResult flSignalConsumedSyncFd(flChannel* ch,uint64_t value,int fd) {
+    if(!ch || !ch->isConsumer || !(ch->flags & (FL_GPU_SYNC|FL_DEFER_RELEASE)))return FL_INVALID;
+    std::lock_guard<std::mutex> hold(ch->pendingMutex);
+    if(value>ch->heldReady)return FL_INVALID;
+    int localFd=fd>=0?dup(fd):-1;
+    if(fd>=0 && localFd<0)return FL_INTERNAL;
+    ch->sync.releases.push_back({value,localFd});
+    ch->sync.advance(ch->retiredValue);
+    fl::FrameReadyMsg message{};message.readyValue=value;
+    return ch->peer.sendWithFds(fl::MsgType::FrameReleased,&message,sizeof(message),
+        fd>=0?&fd:nullptr,fd>=0?1:0)?FL_OK:FL_DISCONNECTED;
+}
+FL_API flResult flFrameReadySyncFd(flChannel* ch,const flFrame* frame,int* fd) {
+    if(!ch || !ch->isConsumer || !frame || !fd)return FL_INVALID;
+    std::lock_guard<std::mutex> hold(ch->pendingMutex);
+    if(!ch->frameHeld || frame->_readyValue!=ch->heldReady || frame->slot!=ch->heldSlot)return FL_INVALID;
+    *fd=ch->sync.held;return FL_OK;
+}
+FL_API flResult flSubmitSyncFd(flChannel* ch,const flBuffer* buffer,int fd,int64_t pts) {
+    fltrace::Scope trace("flSubmitSyncFd",fltrace::id(ch?ch->name.c_str():nullptr));
+    if(trace.active){trace.event.pts=pts;trace.event.slot=buffer?buffer->slot:0;}
+    if(!ch || ch->isConsumer || !buffer || buffer->slot>=ch->images.size() || buffer->image!=ch->images[buffer->slot])return FL_INVALID;
+    if(!ch->link.connected())return FL_DISCONNECTED;
+    flImageUnmap(buffer->image);
+    uint64_t value=++ch->readyValue;ch->slotSubmitValue[buffer->slot]=value;
+    if(trace.active)trace.event.fence=value;
+    fl::FrameReadyMsg fr{};fr.slot=buffer->slot;fr.readyValue=value;fr.ptsNs=pts;
+    return trace.result(ch->link.sendWithFds(fl::MsgType::FrameReady,&fr,sizeof(fr),fd>=0?&fd:nullptr,fd>=0?1:0)?FL_OK:FL_DISCONNECTED);
 }
 
 FL_API flResult flQuery(flChannel* ch, flChannelInfo* out) {

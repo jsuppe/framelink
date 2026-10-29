@@ -16,6 +16,10 @@ typedef struct AHardwareBuffer AHardwareBuffer;
 // VK_ANDROID_external_memory_android_hardware_buffer, or wrap for any API that
 // speaks AHardwareBuffer.
 //
+// Describe/query the AHB's native format for GPU import: BGRA channels use RGBA
+// native storage, NV12 channels use external-format YUV420. CPU mapping performs
+// normalization; the native handle is not a promise of NV12 byte layout.
+//
 // BORROWED - do not release it; it dies with the channel. Acquire a reference
 // (AHardwareBuffer_acquire) if you need a longer life.
 FL_API AHardwareBuffer* flImageAHardwareBuffer(flImage*);
