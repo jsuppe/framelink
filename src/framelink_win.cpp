@@ -575,6 +575,9 @@ FL_API flResult flAcquireBuffer(flChannel* ch, flBuffer* out, uint32_t timeoutMs
                 return FL_OK;
             }
         }
+        // A dead consumer cannot advance this fence. Detect it even when no
+        // free slot remains and hence no submit/write would see broken pipe.
+        if (!ch->link.peerAlive()) return FL_DISCONNECTED;
         const DWORD now = GetTickCount();
         if (now >= deadline) return FL_TIMEOUT;
         uint64_t oldest = UINT64_MAX;

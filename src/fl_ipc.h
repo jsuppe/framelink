@@ -59,6 +59,11 @@ class Channel {
     std::optional<Message> recv();
 
     bool connected() const { return connected_; }
+#ifdef _WIN32
+    // Producer-side non-consuming pipe liveness check when all ring slots are
+    // busy: no more writes occur to otherwise discover the closed reader.
+    bool peerAlive();
+#endif
     uint32_t peerPid() const { return peerPid_; } // listen() side only
 
 #ifndef _WIN32

@@ -104,3 +104,9 @@ access control, and fan-out to several consumers of one channel (today N
 consumers means N channels, so the producer writes N times).
 
 MIT licensed.
+
+## Configurable validation samples
+
+Build `framelink_producer` and `framelink_consumer` to exercise BGRA/NV12,
+geometry, pacing, ring sizes, reconnects, pixel verification and Windows GPU
+fences. See [sample commands and options](samples/README.md).

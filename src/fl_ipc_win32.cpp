@@ -97,6 +97,15 @@ Channel Channel::connect(const std::string& name, uint32_t timeoutMs, bool* busy
     }
 }
 
+bool Channel::peerAlive() {
+    if (!connected_) return false;
+    DWORD available = 0;
+    if (PeekNamedPipe((HANDLE)handle_, nullptr, 0, nullptr, &available, nullptr))
+        return true;
+    connected_ = false;
+    return false;
+}
+
 bool Channel::sendWithFds(MsgType type, const void* payload, size_t size, const int*,
                           size_t fdCount) {
     // Windows has no fd passing; handles are duplicated into the peer and sent

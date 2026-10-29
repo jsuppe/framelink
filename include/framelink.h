@@ -1,9 +1,8 @@
 // framelink - zero-copy GPU frames between processes. Portable core.
 //
-// SPIKE. This is the Windows backend only, built to test the API shape from
-// docs/FRAMELINK.md against a real consumer before committing to it. Scope is
-// deliberately narrow: one producer per channel, BGRA8 only, no broker, no
-// access control. Those are design questions, not oversights - see the doc.
+// Windows shared D3D11 textures, Linux DMA-BUF, and Android AHardwareBuffer.
+// One producer per consumer-owned channel; format/interop support is backend
+// specific (see the enum comments and platform interop headers).
 //
 // The ring belongs to the CONSUMER. A consumer calls flCreateChannel and owns
 // the buffers; producers flOpenProducer onto a channel that already exists and

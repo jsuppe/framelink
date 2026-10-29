@@ -208,3 +208,56 @@ if(FRAMELINK_BUILD_TESTS AND WIN32)
         -P ${CMAKE_CURRENT_SOURCE_DIR}/test/run_roundtrip.cmake)
     set_tests_properties(nv12_windows_1080p PROPERTIES TIMEOUT 95)
 endif()
+
+option(FRAMELINK_BUILD_SAMPLES "Build configurable producer/consumer validation tools" ON)
+if(FRAMELINK_BUILD_SAMPLES AND NOT ANDROID)
+    foreach(role producer consumer)
+        add_executable(framelink_${role} samples/${role}.cpp samples/sample_common.cpp)
+        target_link_libraries(framelink_${role} PRIVATE framelink)
+        if(WIN32)
+            target_link_libraries(framelink_${role} PRIVATE d3d11 dxgi)
+        endif()
+    endforeach()
+endif()
+
+if(FRAMELINK_BUILD_TESTS AND FRAMELINK_BUILD_SAMPLES AND NOT ANDROID)
+    function(fl_sample_case name consumer_args producer_args)
+        add_test(NAME sample_${name} COMMAND ${CMAKE_COMMAND}
+            -DPRODUCER=$<TARGET_FILE:framelink_producer>
+            -DCONSUMER=$<TARGET_FILE:framelink_consumer>
+            "-DPRODUCER_ARGS=--channel;sample-${name};--frames;200;--fps;120;${producer_args}"
+            "-DCONSUMER_ARGS=--channel;sample-${name};--frames;12;--size;130x66;${consumer_args}"
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/test/run_samples.cmake)
+        set_tests_properties(sample_${name} PROPERTIES TIMEOUT 30)
+    endfunction()
+    fl_sample_case(bgra "--format;bgra;--pool;1" "")
+    fl_sample_case(nv12 "--format;nv12;--pool;8" "--format;nv12")
+    fl_sample_case(slow "--format;nv12;--delay-ms;20;--pool;2" "--format;nv12")
+    fl_sample_case(metadata "--verify;0" "")
+    fl_sample_case(reconnect "--format;nv12" "--reconnect-at;4")
+    fl_sample_case(geometry "--format;nv12" "--size;194x98")
+    fl_sample_case(slots "--channel;sample-slots.0" "--slots;2")
+    if(WIN32)
+        fl_sample_case(gpu_sync "--format;nv12;--gpu-sync;1" "--submit;manual")
+    endif()
+    add_test(NAME sample_invalid_cli COMMAND framelink_consumer --format nv12 --size 131x66)
+    set_tests_properties(sample_invalid_cli PROPERTIES WILL_FAIL TRUE)
+    add_test(NAME sample_wrong_role COMMAND framelink_producer --pool 4)
+    set_tests_properties(sample_wrong_role PROPERTIES WILL_FAIL TRUE)
+endif()
+
+if(FRAMELINK_BUILD_TESTS AND FRAMELINK_BUILD_SAMPLES AND NOT ANDROID)
+    add_test(NAME sample_corruption COMMAND ${CMAKE_COMMAND}
+        -DPRODUCER=$<TARGET_FILE:framelink_producer> -DCONSUMER=$<TARGET_FILE:framelink_consumer>
+        "-DPRODUCER_ARGS=--channel;sample-corruption;--frames;100;--fps;10;--corrupt-at;0"
+        "-DCONSUMER_ARGS=--channel;sample-corruption;--size;130x66;--format;nv12;--frames;10"
+        -DEXPECT_CONSUMER=1 -P ${CMAKE_CURRENT_SOURCE_DIR}/test/run_samples.cmake)
+    set_tests_properties(sample_corruption PROPERTIES TIMEOUT 30)
+endif()
+
+if(FRAMELINK_BUILD_TESTS AND WIN32)
+    add_executable(fl_disconnect_win test/fl_disconnect_win.cpp)
+    target_link_libraries(fl_disconnect_win PRIVATE framelink)
+    add_test(NAME disconnect_full_ring COMMAND fl_disconnect_win)
+    set_tests_properties(disconnect_full_ring PROPERTIES TIMEOUT 10)
+endif()
