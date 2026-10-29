@@ -20,3 +20,18 @@ GStreamer 1.20+ required (host details via gst-inspect below).
   long-duration hardware audio-clock drift and power/suspend were not measured.
 
 Run instructions and exact contract: ../AUDIO_VIDEO.md.
+
+## Android native qualification
+
+Static SDK: `/home/melchior/dev/gstreamer-android/{arm64,x86_64}`, NDK28.2,
+API29 Release. Both ABIs build. Arm64 executable run as adb shell in isolated
+`/data/local/tmp/fl-av-session`; no Activity launch/replacement. GDP/TCP/core/app
+plugins registered statically with explicit gio/gstreamer-net dependencies.
+
+- Pi: 150 normal A/V pairs; skew p50/p99 0.045/0.063 ms; scheduled video lateness
+  0.119/0.269 ms. Fault test detects one missing block,40 drift blocks,one reset.
+- Mali tablet: 150 normal A/V pairs; skew p50/p99 0.132/0.405 ms; scheduled video
+  lateness12.173/42.990 ms. Correct data/timeline but **not all frames on time**.
+  Fault test detects one missing block,40 drift blocks,one reset.
+- These are native trusted-shell tests, not APK deployment, audio-device-clock
+  recovery or cross-app sandbox validation. x86_64 runtime not exercised here.

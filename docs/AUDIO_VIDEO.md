@@ -114,9 +114,12 @@ its latency figures are not a performance baseline.
   evidence in [audio-session-20261029](audio-session-20261029/).
 - Windows: portable GStreamer/C++ code and CMake wiring; runtime qualification
   must be recorded separately (never infer it from Linux).
-- Android: this example is not built as a standalone executable/APK yet. GDP/TCP
-  plugins must be packaged/registered and app sandbox/service ownership managed.
-  Existing FrameLink Android Binder integration is not bypassed by loopback TCP.
+- Android: static native fixture builds for arm64 and x86_64; normal/fault
+  runs passed on Pi and Mali tablet. Run `framelink_av_session static [--faults]`
+  from an isolated adb-shell directory. Core/app/GDP/TCP plugins are statically
+  registered. This is **not an APK or cross-app sandbox qualification**. The
+  Android native fixture explicitly rejects `--play`; actual device sinks and
+  service ownership require APK integration. No Binder security is bypassed.
 
 **Decision:** retain the image-only core and implement A/V timing at the session
 layer. Existing GStreamer audio transport is sufficient for this initial local

@@ -10,6 +10,15 @@
 #include <vector>
 #include <algorithm>
 #include <cstdlib>
+#ifdef __ANDROID__
+extern "C" {
+GST_PLUGIN_STATIC_DECLARE(framelink);
+GST_PLUGIN_STATIC_DECLARE(app);
+GST_PLUGIN_STATIC_DECLARE(coreelements);
+GST_PLUGIN_STATIC_DECLARE(gdp);
+GST_PLUGIN_STATIC_DECLARE(tcp);
+}
+#endif
 #define REQUIRE(x) do { if (!(x)) { g_printerr("FAIL line %d: %s\n", __LINE__, #x); std::exit(1); } } while (0)
 static GstElement* pipeline(const std::string& text) {
  GError* e=nullptr; auto*p=gst_parse_launch(text.c_str(),&e);
@@ -31,7 +40,16 @@ int main(int argc,char**argv) {
   else if(!strcmp(argv[i],"--play")) play=true;
   else { g_printerr("usage: %s plugin-path [--faults] [--play]\n",argv[0]);return 2; }
  }
- GError*e=nullptr;auto*plugin=gst_plugin_load_file(argv[1],&e);if(e)g_printerr("%s\n",e->message);REQUIRE(plugin);gst_object_unref(plugin);
+ GError*e=nullptr;
+#ifdef __ANDROID__
+ GST_PLUGIN_STATIC_REGISTER(framelink);GST_PLUGIN_STATIC_REGISTER(app);
+ GST_PLUGIN_STATIC_REGISTER(coreelements);GST_PLUGIN_STATIC_REGISTER(gdp);GST_PLUGIN_STATIC_REGISTER(tcp);
+ if(play){g_printerr("Android native fixture is headless; use an APK with platform sinks for --play\n");return 2;}
+ auto*plugin=gst_registry_find_plugin(gst_registry_get(),"framelink");
+#else
+ auto*plugin=gst_plugin_load_file(argv[1],&e);
+#endif
+ if(e)g_printerr("%s\n",e->message);REQUIRE(plugin);gst_object_unref(plugin);
  auto session=std::to_string(g_get_monotonic_time());auto channel="av-"+session;
  // GDP carries caps, timestamps and buffer flags; TCP is loopback only.
  // max-size-time bounds media queues; TCP's own kernel buffering is not a latency guarantee.

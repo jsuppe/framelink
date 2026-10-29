@@ -13,10 +13,10 @@ Hardware allocator/driver limitations remain limitations, not passing tests.
 2. **Implemented:** explicit shared session clock/base and opt-in video PTS
    preservation, legacy semantics unchanged; fixed PCM caps with first-sample
    timestamps, bounded application queues, no implicit transport conversion.
-3. **Linux validated:** PCM/pixel/PTS roundtrip, missing-block and increasing
+3. **Linux and native Android (Pi/tablet) validated:** PCM/pixel/PTS roundtrip, missing-block and increasing
    timestamp-drift detection, reset/discontinuity checks. Detailed evidence and
    limitations: AUDIO_VIDEO.md and audio-session-20261029/.
-4. **Qualification pending:** Windows runtime and Android packaged integration;
+4. **Qualification pending:** Windows runtime and Android APK/cross-app integration;
    actual audio-device clock recovery, long-term hardware drift, speaker/scanout
    latency and stall/reconnect policy. Do not label logical PTS tests as these.
 5. **Conditional, not automatically required:** introduce companion PCM

@@ -345,6 +345,9 @@ if(ANDROID AND FRAMELINK_BUILD_GST AND FRAMELINK_GST_ANDROID_ROOT)
     set(ENV{PKG_CONFIG_LIBDIR} "${FRAMELINK_GST_ANDROID_ROOT}/lib/pkgconfig")
     set(ENV{PKG_CONFIG_PATH} "")
     pkg_check_modules(FL_ANDROID_GST REQUIRED gstreamer-1.0 gstreamer-base-1.0 gstreamer-video-1.0 gstreamer-app-1.0)
+    if(FRAMELINK_BUILD_SAMPLES)
+        pkg_check_modules(FL_ANDROID_AV REQUIRED gio-2.0 gstreamer-net-1.0)
+    endif()
     set(ENV{PKG_CONFIG_LIBDIR} "${_fl_saved_pc_libdir}")
     set(ENV{PKG_CONFIG_PATH} "${_fl_saved_pc_path}")
     add_library(gstframelink STATIC gst/gstframelink.cpp)
@@ -384,4 +387,14 @@ if(FRAMELINK_BUILD_SAMPLES AND FL_GST_FOUND AND NOT ANDROID)
         add_test(NAME gst_av_faults COMMAND framelink_av_session $<TARGET_FILE:gstframelink> --faults)
         set_tests_properties(gst_av_session gst_av_faults PROPERTIES TIMEOUT 25)
     endif()
+endif()
+
+if(ANDROID AND FRAMELINK_BUILD_SAMPLES AND TARGET gstframelink)
+    add_executable(framelink_av_session samples/av_session.cpp)
+    target_link_libraries(framelink_av_session PRIVATE gstframelink
+        "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstapp.a"
+        "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstcoreelements.a"
+        "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstgdp.a"
+        "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgsttcp.a"
+        ${FL_ANDROID_AV_STATIC_LDFLAGS} ${FL_ANDROID_GST_STATIC_LDFLAGS})
 endif()
