@@ -233,6 +233,9 @@ FL_API void     flClose(flChannel*);
 // configured with the name to attach to. Adding discovery later is easy,
 // removing it is not.
 
+// Snapshot opt-in trace to FRAMELINK_TRACE.<pid>.csv. Control thread only.
+FL_API flResult flTraceFlush(void);
+
 #ifdef __cplusplus
 }
 #endif

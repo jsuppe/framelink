@@ -1,3 +1,4 @@
+#include "framelink_trace.hpp"
 // framelink Linux backend. See framelink.h.
 //
 // The consumer allocates the ring with GBM on a render node and exports each
@@ -296,6 +297,11 @@ void acceptLoop(flChannel* ch) {
             std::lock_guard<std::mutex> hold(ch->pendingMutex);
             // Latest-frame-wins, as on Windows: a slow consumer must not stall
             // the producer.
+            if(fltrace::enabled()) {
+                fltrace::Event e{"ipc.frame_received",fltrace::clockNs(),0,fltrace::id(ch->name.c_str()),
+                    ch->sequence+1,fr->readyValue,fr->slot,fr->ptsNs,ch->hasPending?1:0};
+                fltrace::record(e); // result=1: unconsumed pending frame replaced
+            }
             ch->hasPending = true;
             ch->pendingSlot = fr->slot;
             ch->pendingReady = fr->readyValue;
@@ -358,16 +364,22 @@ FL_API const char* flResultString(flResult r) {
 FL_API flResult flCreateChannelOnAdapter(const char* name, uint32_t width, uint32_t height,
                                          flFormat format, uint32_t poolSize, uint32_t flags,
                                          const uint8_t*, flChannel** out) {
-    return flCreateChannelEx(name, width, height, format, poolSize, flags, out);
+    fltrace::Scope trace("flCreateChannelOnAdapter",fltrace::id(name));
+    if(trace.active){trace.event.sequence=((uint64_t)width<<32)|height;trace.event.fence=(uint64_t)format;trace.event.slot=poolSize;trace.event.pts=flags;}
+
+    return trace.result(flCreateChannelEx(name, width, height, format, poolSize, flags, out));
 }
 
 FL_API flResult flCreateChannelEx(const char* name, uint32_t width, uint32_t height,
                                   flFormat format, uint32_t poolSize, uint32_t flags,
                                   flChannel** out) {
-    if (!name || !out || !fl::validGeometry(width,height,format)) return FL_INVALID;
+    fltrace::Scope trace("flCreateChannelEx",fltrace::id(name));
+    if(trace.active){trace.event.sequence=((uint64_t)width<<32)|height;trace.event.fence=(uint64_t)format;trace.event.slot=poolSize;trace.event.pts=flags;}
+
+    if (!name || !out || !fl::validGeometry(width,height,format)) return trace.result(FL_INVALID);
     *out=nullptr;
-    if (!fourccFor(format)) return FL_FORMAT_UNSUPPORTED;
-    if (!poolSize || poolSize > fl::kMaxPool) return FL_INVALID;
+    if (!fourccFor(format)) return trace.result(FL_FORMAT_UNSUPPORTED);
+    if (!poolSize || poolSize > fl::kMaxPool) return trace.result(FL_INVALID);
 
     auto* ch = new flChannel();
     ch->isConsumer = true;
@@ -383,17 +395,17 @@ FL_API flResult flCreateChannelEx(const char* name, uint32_t width, uint32_t hei
     if (!ch->gbm) {
         delete ch;
         FL_LOG_ERR("framelink: no usable /dev/dri render node");
-        return FL_INTERNAL;
+        return trace.result(FL_INTERNAL);
     }
 
     if (!reallocRing(ch, width, height, poolSize)) {
         flClose(ch);
-        return FL_OOM;
+        return trace.result(FL_OOM);
     }
 
     ch->accept = std::thread(acceptLoop, ch);
     *out = ch;
-    return FL_OK;
+    return trace.result(FL_OK);
 }
 
 FL_API flResult flCreateChannel(const char* name, uint32_t width, uint32_t height,
@@ -402,13 +414,15 @@ FL_API flResult flCreateChannel(const char* name, uint32_t width, uint32_t heigh
 }
 
 FL_API flResult flOpenProducer(const char* name, flChannel** out) {
-    if (!name || !out) return FL_INVALID;
+    fltrace::Scope trace("flOpenProducer",fltrace::id(name));
+
+    if (!name || !out) return trace.result(FL_INVALID);
     auto* ch = new flChannel();
     ch->name = name;
     ch->link = fl::Channel::connect(name, 300);
     if (!ch->link.connected()) {
         delete ch;
-        return FL_NOT_FOUND;
+        return trace.result(FL_NOT_FOUND);
     }
 
     auto helloMsg = ch->link.recv();
@@ -416,39 +430,39 @@ FL_API flResult flOpenProducer(const char* name, flChannel** out) {
         // The channel exists; someone else has it. Tell the walker so, rather
         // than letting a closed connection read as "no such channel".
         delete ch;
-        return FL_BUSY;
+        return trace.result(FL_BUSY);
     }
     const auto* srv = helloMsg && helloMsg->type == fl::MsgType::Hello
                           ? helloMsg->as<fl::HelloMsg>()
                           : nullptr;
     if (!srv) {
         delete ch;
-        return FL_DISCONNECTED;
+        return trace.result(FL_DISCONNECTED);
     }
     if (srv->version != FL_VERSION) {
         FL_LOG_ERR("framelink: channel '%s' speaks version %u, we speak %u", name,
                    srv->version, (unsigned)FL_VERSION);
         delete ch;
-        return FL_VERSION_MISMATCH;
+        return trace.result(FL_VERSION_MISMATCH);
     }
     fl::HelloMsg mine{};
     mine.version = FL_VERSION;
     mine.pid = (uint32_t)getpid();
     if (!ch->link.send(fl::MsgType::Hello, mine)) {
         delete ch;
-        return FL_INTERNAL;
+        return trace.result(FL_INTERNAL);
     }
 
     auto ring = ch->link.recv();
     const auto* rd = ring && ring->type == fl::MsgType::RingDesc
                          ? ring->as<fl::RingDescMsg>()
                          : nullptr;
-    if (!rd) { delete ch; return FL_DISCONNECTED; }
+    if (!rd) { delete ch; return trace.result(FL_DISCONNECTED); }
     flResult imported=importRing(ch,rd,ring->fds);
-    if(imported!=FL_OK){for(int fd:ring->fds)::close(fd);delete ch;return imported;}
+    if(imported!=FL_OK){for(int fd:ring->fds)::close(fd);delete ch;return trace.result(imported);}
     ch->info.version=FL_VERSION;
     *out = ch;
-    return FL_OK;
+    return trace.result(FL_OK);
 }
 
 // Producer: adopt a ring description. Used at attach and after a realloc.
@@ -492,43 +506,47 @@ static flResult importRing(flChannel* ch, const fl::RingDescMsg* rd,
 
 FL_API flResult flRequestGeometry(flChannel* ch, uint32_t width, uint32_t height,
                                   flFormat format) {
-    if (!ch || ch->isConsumer || !fl::validGeometry(width,height,format)) return FL_INVALID;
-    if(!fourccFor(format))return FL_FORMAT_UNSUPPORTED;
-    if (!ch->link.connected()) return FL_DISCONNECTED;
+    fltrace::Scope trace("flRequestGeometry", fltrace::id(ch ? ch->name.c_str() : nullptr));
+
+    if (!ch || ch->isConsumer || !fl::validGeometry(width,height,format)) return trace.result(FL_INVALID);
+    if(!fourccFor(format))return trace.result(FL_FORMAT_UNSUPPORTED);
+    if (!ch->link.connected()) return trace.result(FL_DISCONNECTED);
     fl::GeometryMsg g{};
     g.width = width;
     g.height = height;
     g.format = (uint32_t)format;
-    if (!ch->link.send(fl::MsgType::RequestGeometry, g)) return FL_DISCONNECTED;
+    if (!ch->link.send(fl::MsgType::RequestGeometry, g)) return trace.result(FL_DISCONNECTED);
     // The consumer always answers with a RingDesc - the current one if it
     // declined - so our view is never left stale. We are the only reader
     // (single-reader producer; see the struct comment), so anything arriving
     // first is a release to apply inline, never a message to lose.
     for (;;) {
         auto reply = ch->link.recv();
-        if (!reply) return FL_DISCONNECTED;
+        if (!reply) return trace.result(FL_DISCONNECTED);
         if (reply->type == fl::MsgType::FrameReleased) {
             applyRelease(ch, *reply);
             continue;
         }
         const auto* rd = reply->type == fl::MsgType::RingDesc ? reply->as<fl::RingDescMsg>()
                                                               : nullptr;
-        if (!rd) return FL_DISCONNECTED;
+        if (!rd) return trace.result(FL_DISCONNECTED);
         // A refused/no-op resize must preserve outstanding slot ownership.
         if (rd->generation == ch->info.generation) {
             for (int fd : reply->fds) ::close(fd);
-            return FL_OK;
+            return trace.result(FL_OK);
         }
         ch->readyValue = 0;
         flResult result=importRing(ch, rd, reply->fds);
         if(result!=FL_OK)for(int fd:reply->fds)::close(fd);
-        return result;
+        return trace.result(result);
     }
 }
 
 FL_API flResult flAcquireBuffer(flChannel* ch, flBuffer* out, uint32_t timeoutMs) {
-    if (!ch || ch->isConsumer || !out) return FL_INVALID;
-    if (!ch->link.connected()) return FL_DISCONNECTED;
+    fltrace::Scope trace("flAcquireBuffer", fltrace::id(ch ? ch->name.c_str() : nullptr));
+
+    if (!ch || ch->isConsumer || !out) return trace.result(FL_INVALID);
+    if (!ch->link.connected()) return trace.result(FL_DISCONNECTED);
     for (uint32_t waited = 0;; waited += 2) {
         drainProducerMessages(ch);
         for (size_t i = 0; i < ch->images.size(); ++i) {
@@ -543,37 +561,48 @@ FL_API flResult flAcquireBuffer(flChannel* ch, flBuffer* out, uint32_t timeoutMs
                 ch->slotSubmitValue[i] = UINT64_MAX;
                 out->slot = (uint32_t)i;
                 out->image = ch->images[i];
-                return FL_OK;
+                if(trace.active){trace.event.slot=out->slot;}
+                return trace.result(FL_OK);
             }
         }
-        if (waited >= timeoutMs) return FL_TIMEOUT;
+        if (waited >= timeoutMs) return trace.result(FL_TIMEOUT);
         usleep(2000);
     }
 }
 
 FL_API flResult flBeginSubmit(flChannel* ch, const flBuffer* buf, uint64_t* signalValue) {
-    if (!ch || ch->isConsumer || !buf || !signalValue) return FL_INVALID;
-    if (!ch->link.connected()) return FL_DISCONNECTED;
+    fltrace::Scope trace("flBeginSubmit", fltrace::id(ch ? ch->name.c_str() : nullptr));
+
+    if (!ch || ch->isConsumer || !buf || !signalValue) return trace.result(FL_INVALID);
+    if (!ch->link.connected()) return trace.result(FL_DISCONNECTED);
     *signalValue = ++ch->readyValue;
-    return FL_OK;
+    if(trace.active) trace.event.fence=*signalValue;
+    return trace.result(FL_OK);
 }
 
 FL_API flResult flEndSubmit(flChannel* ch, const flBuffer* buf, uint64_t signalValue,
                             int64_t ptsNs) {
-    if (!ch || ch->isConsumer || !buf || buf->slot >= ch->images.size()) return FL_INVALID;
-    if (!ch->link.connected()) return FL_DISCONNECTED;
+    fltrace::Scope trace("flEndSubmit", fltrace::id(ch ? ch->name.c_str() : nullptr));
+    if(trace.active) { trace.event.pts=ptsNs; trace.event.slot=buf?buf->slot:0; }
+    if(trace.active) trace.event.fence=signalValue;
+
+    if (!ch || ch->isConsumer || !buf || buf->slot >= ch->images.size()) return trace.result(FL_INVALID);
+    if (!ch->link.connected()) return trace.result(FL_DISCONNECTED);
     ch->slotSubmitValue[buf->slot] = signalValue;
     fl::FrameReadyMsg fr{};
     fr.slot = buf->slot;
     fr.readyValue = signalValue;
     fr.ptsNs = ptsNs;
-    return ch->link.send(fl::MsgType::FrameReady, fr) ? FL_OK : FL_DISCONNECTED;
+    return trace.result(ch->link.send(fl::MsgType::FrameReady, fr) ? FL_OK : FL_DISCONNECTED);
 }
 
 FL_API flResult flSubmit(flChannel* ch, const flBuffer* buf, int64_t ptsNs) {
+    fltrace::Scope trace("flSubmit", fltrace::id(ch ? ch->name.c_str() : nullptr));
+    if(trace.active) { trace.event.pts=ptsNs; trace.event.slot=buf?buf->slot:0; }
+
     uint64_t v = 0;
     flResult r = flBeginSubmit(ch, buf, &v);
-    return r == FL_OK ? flEndSubmit(ch, buf, v, ptsNs) : r;
+    return trace.result(r == FL_OK ? flEndSubmit(ch, buf, v, ptsNs) : r);
 }
 
 FL_API flResult flSharedConsumedFence(flChannel*, void**) {
@@ -590,7 +619,9 @@ FL_API flResult flSharedReadyFence(flChannel*, void**) {
 }
 
 FL_API flResult flAcquireFrame(flChannel* ch, flFrame* out, uint32_t timeoutMs) {
-    if (!ch || !ch->isConsumer || !out) return FL_INVALID;
+    fltrace::Scope trace("flAcquireFrame", fltrace::id(ch ? ch->name.c_str() : nullptr));
+
+    if (!ch || !ch->isConsumer || !out) return trace.result(FL_INVALID);
     for (uint32_t waited = 0;; waited += 2) {
         {
             std::lock_guard<std::mutex> hold(ch->pendingMutex);
@@ -602,24 +633,28 @@ FL_API flResult flAcquireFrame(flChannel* ch, flFrame* out, uint32_t timeoutMs) 
                 out->ptsNs = ch->pendingPts;
                 out->sequence = ch->sequence;
                 out->_readyValue = ch->pendingReady;
-                return FL_OK;
+                if(trace.active){trace.event.slot=out->slot;trace.event.sequence=out->sequence;trace.event.pts=out->ptsNs;trace.event.fence=out->_readyValue;}
+                return trace.result(FL_OK);
             }
         }
-        if (ch->peerGone.load()) return FL_DISCONNECTED;
-        if (waited >= timeoutMs) return FL_TIMEOUT;
+        if (ch->peerGone.load()) return trace.result(FL_DISCONNECTED);
+        if (waited >= timeoutMs) return trace.result(FL_TIMEOUT);
         usleep(2000);
     }
 }
 
 FL_API flResult flRelease(flChannel* ch, const flFrame* frame) {
-    if (!ch || !ch->isConsumer || !frame || frame->slot >= ch->images.size()) return FL_INVALID;
+    fltrace::Scope trace("flRelease", fltrace::id(ch ? ch->name.c_str() : nullptr));
+    if(trace.active && frame) {trace.event.sequence=frame->sequence;trace.event.pts=frame->ptsNs;trace.event.fence=frame->_readyValue;trace.event.slot=frame->slot;}
+
+    if (!ch || !ch->isConsumer || !frame || frame->slot >= ch->images.size()) return trace.result(FL_INVALID);
     fl::FrameReadyMsg fr{};
     fr.slot = frame->slot;
     fr.readyValue = frame->_readyValue;
     std::lock_guard<std::mutex> hold(ch->pendingMutex);
     ch->frameHeld=false;
-    if (!ch->peer.connected()) return FL_OK;
-    return ch->peer.send(fl::MsgType::FrameReleased, fr) ? FL_OK : FL_DISCONNECTED;
+    if (!ch->peer.connected()) return trace.result(FL_OK);
+    return trace.result(ch->peer.send(fl::MsgType::FrameReleased, fr) ? FL_OK : FL_DISCONNECTED);
 }
 
 FL_API flResult flReconfigure(flChannel*, uint32_t, uint32_t, flFormat) {
@@ -634,6 +669,7 @@ FL_API flResult flQuery(flChannel* ch, flChannelInfo* out) {
 }
 
 FL_API void flClose(flChannel* ch) {
+    fltrace::Scope trace("flClose",fltrace::id(ch?ch->name.c_str():nullptr));
     if (!ch) return;
     if (ch->isConsumer) {
         ch->stop = true;
@@ -657,10 +693,12 @@ FL_API flResult flImageDmabuf(flImage* img, flDmabuf* out) {
 }
 
 FL_API flResult flImageMapPlanes(flImage* img,flMappedImage* out) {
-    if(!img || !out)return FL_INVALID;
+    fltrace::Scope trace("flImageMapPlanes", (uint64_t)(uintptr_t)img);
+
+    if(!img || !out)return trace.result(FL_INVALID);
     *out={};
-    if(img->desc.modifier!=DRM_FORMAT_MOD_LINEAR)return FL_FORMAT_UNSUPPORTED;
-    if(img->planeView.planes){*out=img->planeView;return FL_OK;}
+    if(img->desc.modifier!=DRM_FORMAT_MOD_LINEAR)return trace.result(FL_FORMAT_UNSUPPORTED);
+    if(img->planeView.planes){*out=img->planeView;return trace.result(FL_OK);}
     uint32_t planes=img->desc.fourcc==DRM_FORMAT_NV12?2:1;
     for(uint32_t p=0;p<planes;p++) {
         uint32_t rows=p?img->height/2:img->height;
@@ -668,27 +706,30 @@ FL_API flResult flImageMapPlanes(flImage* img,flMappedImage* out) {
         struct stat st{};
         if(fstat(img->desc.fd[p],&st)!=0 || st.st_size<=0 ||
            !fl::planeFits(st.st_size,img->desc.offset[p],img->desc.stride[p],rows,bytes)) {
-            flImageUnmap(img);return FL_INVALID;
+            flImageUnmap(img);return trace.result(FL_INVALID);
         }
         void* base=mmap(nullptr,st.st_size,PROT_READ|PROT_WRITE,MAP_SHARED,img->desc.fd[p],0);
-        if(base==MAP_FAILED){flImageUnmap(img);return FL_FORMAT_UNSUPPORTED;}
+        if(base==MAP_FAILED){flImageUnmap(img);return trace.result(FL_FORMAT_UNSUPPORTED);}
         dma_buf_sync sync{DMA_BUF_SYNC_START|DMA_BUF_SYNC_RW};
         int result;do{result=ioctl(img->desc.fd[p],DMA_BUF_IOCTL_SYNC,&sync);}while(result<0 && errno==EINTR);
-        if(result<0){munmap(base,st.st_size);flImageUnmap(img);return FL_INTERNAL;}
+        if(result<0){munmap(base,st.st_size);flImageUnmap(img);return trace.result(FL_INTERNAL);}
         img->planeMaps[p]=base;img->planeLengths[p]=st.st_size;
         img->planeView.plane[p]={(char*)base+img->desc.offset[p],img->desc.stride[p],bytes,rows};
     }
-    img->planeView.planes=planes;*out=img->planeView;return FL_OK;
+    img->planeView.planes=planes;*out=img->planeView;return trace.result(FL_OK);
 }
 FL_API flResult flImageMap(flImage* img,void** pixels,uint64_t* stride) {
-    if(!img || !pixels)return FL_INVALID;
+    fltrace::Scope trace("flImageMap", (uint64_t)(uintptr_t)img);
+
+    if(!img || !pixels)return trace.result(FL_INVALID);
     *pixels=nullptr;
-    if(img->desc.fourcc==DRM_FORMAT_NV12)return FL_FORMAT_UNSUPPORTED;
+    if(img->desc.fourcc==DRM_FORMAT_NV12)return trace.result(FL_FORMAT_UNSUPPORTED);
     flMappedImage view{};flResult r=flImageMapPlanes(img,&view);
     if(r==FL_OK){*pixels=view.plane[0].pixels;if(stride)*stride=view.plane[0].stride;}
-    return r;
+    return trace.result(r);
 }
 FL_API void flImageUnmap(flImage* img) {
+    fltrace::Scope trace("flImageUnmap",(uint64_t)(uintptr_t)img);
     if(!img)return;
     for(uint32_t p=0;p<4;p++)if(img->planeMaps[p]) {
         dma_buf_sync sync{DMA_BUF_SYNC_END|DMA_BUF_SYNC_RW};

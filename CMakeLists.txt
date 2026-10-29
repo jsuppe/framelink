@@ -26,7 +26,7 @@ elseif(UNIX AND NOT ANDROID)
         src/fl_ipc_posix.cpp)
     target_link_libraries(framelink PRIVATE PkgConfig::GBM PkgConfig::DRM pthread)
     set_target_properties(framelink PROPERTIES
-        PUBLIC_HEADER "include/framelink.h;include/framelink_dmabuf.h;include/framelink_slots.h")
+        PUBLIC_HEADER "include/framelink.h;include/framelink_dmabuf.h;include/framelink_slots.h;include/framelink_trace.hpp")
 elseif(ANDROID)
     # Static: APK native modules embed it, and there is no system loader story
     # for a bare shared library on Android anyway.
@@ -36,9 +36,15 @@ elseif(ANDROID)
         src/fl_ipc_posix.cpp)
     target_link_libraries(framelink PRIVATE android log)
     set_target_properties(framelink PROPERTIES
-        PUBLIC_HEADER "include/framelink.h;include/framelink_ahb.h;include/framelink_slots.h")
+        PUBLIC_HEADER "include/framelink.h;include/framelink_ahb.h;include/framelink_slots.h;include/framelink_trace.hpp")
 else()
     message(FATAL_ERROR "framelink has no backend for this platform yet")
+endif()
+
+target_sources(framelink PRIVATE src/fl_trace.cpp)
+option(FRAMELINK_DISABLE_TRACE "Compile out all tracing" OFF)
+if(FRAMELINK_DISABLE_TRACE)
+    add_compile_definitions(FL_TRACE_COMPILED_OUT)
 endif()
 
 target_include_directories(framelink
@@ -48,7 +54,7 @@ target_include_directories(framelink
 set_target_properties(framelink PROPERTIES VERSION ${PROJECT_VERSION})
 if(WIN32)
     set_target_properties(framelink PROPERTIES
-        PUBLIC_HEADER "include/framelink.h;include/framelink_d3d11.h;include/framelink_slots.h")
+        PUBLIC_HEADER "include/framelink.h;include/framelink_d3d11.h;include/framelink_slots.h;include/framelink_trace.hpp")
 endif()
 
 if(FRAMELINK_BUILD_TESTS)
@@ -260,4 +266,23 @@ if(FRAMELINK_BUILD_TESTS AND WIN32)
     target_link_libraries(fl_disconnect_win PRIVATE framelink)
     add_test(NAME disconnect_full_ring COMMAND fl_disconnect_win)
     set_tests_properties(disconnect_full_ring PROPERTIES TIMEOUT 10)
+endif()
+
+if(FRAMELINK_BUILD_TESTS)
+    add_executable(fl_trace_test test/fl_trace_test.cpp)
+    target_include_directories(fl_trace_test PRIVATE include)
+    if(UNIX)
+        target_link_libraries(fl_trace_test PRIVATE pthread)
+    endif()
+    add_test(NAME trace_disabled COMMAND fl_trace_test)
+    set_tests_properties(trace_disabled PROPERTIES ENVIRONMENT "FRAMELINK_TRACE=")
+    add_test(NAME trace_bounded_concurrent COMMAND fl_trace_test)
+    set_tests_properties(trace_bounded_concurrent PROPERTIES ENVIRONMENT
+        "FRAMELINK_TRACE=${CMAKE_CURRENT_BINARY_DIR}/trace-test;FRAMELINK_TRACE_EVENTS=16")
+endif()
+
+if(FRAMELINK_BUILD_TESTS)
+    add_test(NAME trace_thread_limit COMMAND fl_trace_test threads)
+    set_tests_properties(trace_thread_limit PROPERTIES ENVIRONMENT
+        "FRAMELINK_TRACE=${CMAKE_CURRENT_BINARY_DIR}/trace-threads;FRAMELINK_TRACE_EVENTS=16")
 endif()

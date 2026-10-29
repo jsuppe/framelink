@@ -1,3 +1,4 @@
+#include "framelink_trace.hpp"
 // framelink control channel, POSIX (Linux, Android).
 //
 // Unix domain socket, and unlike the Windows side the descriptors matter: a
@@ -143,11 +144,15 @@ Channel Channel::connect(const std::string& name, uint32_t timeoutMs, bool* busy
 }
 
 bool Channel::send(MsgType type, const void* payload, size_t size) {
+    fltrace::Scope trace("ipc.send", (uint64_t)(uintptr_t)this);
+    if(trace.active){ trace.event.sequence=(uint64_t)type; trace.event.slot=size; }
     return sendWithFds(type, payload, size, nullptr, 0);
 }
 
 bool Channel::sendWithFds(MsgType type, const void* payload, size_t size, const int* fds,
                           size_t fdCount) {
+    fltrace::Scope trace("ipc.send", (uint64_t)(uintptr_t)this);
+    if(trace.active){ trace.event.sequence=(uint64_t)type; trace.event.slot=size; }
     if (!connected_ || fdCount > kMaxFds) return false;
     if (sizeof(MsgHeader) + size > kBufferSize) return false;
 
@@ -183,6 +188,7 @@ bool Channel::sendWithFds(MsgType type, const void* payload, size_t size, const 
 }
 
 std::optional<Message> Channel::recv() {
+    fltrace::Scope trace("ipc.recv", (uint64_t)(uintptr_t)this);
     if (!connected_) return std::nullopt;
     uint8_t buf[kBufferSize];
     iovec iov{buf, sizeof(buf)};

@@ -1,3 +1,6 @@
+#define FL_TRACE_NS gsttrace
+#define FL_TRACE_ENV "FRAMELINK_GST_TRACE"
+#include "framelink_trace.hpp"
 // GStreamer elements for framelink: the transport meets the ecosystem.
 //
 //   framelinksink  - a framelink PRODUCER. Any pipeline becomes a feed:
@@ -231,13 +234,14 @@ static gboolean sinkSetCaps(GstBaseSink* base, GstCaps* caps) {
 
 static GstFlowReturn sinkRender(GstBaseSink* base, GstBuffer* buffer) {
     GstFrameLinkSink* self = GST_FRAMELINK_SINK(base);
-    if (!self->haveInfo) return GST_FLOW_OK;
+    gsttrace::Scope trace("gst.sinkRender",gsttrace::id(self->channel));
+    if (!self->haveInfo) return trace.result(GST_FLOW_OK);
 
     if (!self->ch) {
         sinkTryConnect(self);
         if (!self->ch) {
             ++self->dropped;
-            return GST_FLOW_OK; // keep the pipeline alive until a consumer appears
+            return trace.result(GST_FLOW_OK); // keep the pipeline alive until a consumer appears
         }
     }
 
@@ -247,25 +251,25 @@ static GstFlowReturn sinkRender(GstBaseSink* base, GstBuffer* buffer) {
        ((incoming==FL_FORMAT_NV12 || self->cinfo.format==FL_FORMAT_NV12) && incoming!=self->cinfo.format)) {
         GST_ELEMENT_ERROR(self,CORE,NEGOTIATION,("channel format/geometry does not match input"),
             ("Create the consumer with matching format and geometry; no implicit YUV/RGB conversion"));
-        return GST_FLOW_NOT_NEGOTIATED;
+        return trace.result(GST_FLOW_NOT_NEGOTIATED);
     }
 
     flBuffer fb = {};
     flResult r = flAcquireBuffer(self->ch, &fb, 5);
     if (r == FL_TIMEOUT || r == FL_BUSY) {
         ++self->dropped; // ring full: the consumer is behind, latest-wins says drop
-        return GST_FLOW_OK;
+        return trace.result(GST_FLOW_OK);
     }
     if (r != FL_OK) {
         GST_WARNING_OBJECT(self, "channel lost (%s) - will redial", flResultString(r));
         sinkDisconnect(self);
-        return GST_FLOW_OK;
+        return trace.result(GST_FLOW_OK);
     }
 
     GstVideoFrame vframe;
     if (!gst_video_frame_map(&vframe, &self->vinfo, buffer, GST_MAP_READ)) {
         sinkDisconnect(self); // do not publish uninitialized pixels
-        return GST_FLOW_ERROR;
+        return trace.result(GST_FLOW_ERROR);
     }
     const guint8* src = (const guint8*)GST_VIDEO_FRAME_PLANE_DATA(&vframe, 0);
     const gsize srcStride = GST_VIDEO_FRAME_PLANE_STRIDE(&vframe, 0);
@@ -295,7 +299,7 @@ static GstFlowReturn sinkRender(GstBaseSink* base, GstBuffer* buffer) {
                 const gint pitch=GST_VIDEO_FRAME_PLANE_STRIDE(&vframe,p);
                 if(pitch<(gint)w) {
                     ctx->Release();g_byte_array_unref(scratch);
-                    gst_video_frame_unmap(&vframe);sinkDisconnect(self);return GST_FLOW_ERROR;
+                    gst_video_frame_unmap(&vframe);sinkDisconnect(self);return trace.result(GST_FLOW_ERROR);
                 }
                 for(guint y=0;y<(p?h/2:h);y++)
                     memcpy(scratch->data+(p?w*h:0)+y*w,
@@ -365,9 +369,9 @@ static GstFlowReturn sinkRender(GstBaseSink* base, GstBuffer* buffer) {
                             " dropped", self->submitted, self->dropped);
     } else {
         sinkDisconnect(self); // Never publish a failed/partial copy.
-        return GST_FLOW_ERROR;
+        return trace.result(GST_FLOW_ERROR);
     }
-    return GST_FLOW_OK;
+    return trace.result(GST_FLOW_OK);
 }
 
 static gboolean sinkStop(GstBaseSink* base) {
@@ -559,10 +563,11 @@ static gboolean srcUnlockStop(GstBaseSrc* base) {
 
 static GstFlowReturn srcCreate(GstPushSrc* push, GstBuffer** outbuf) {
     GstFrameLinkSrc* self = GST_FRAMELINK_SRC(push);
+    gsttrace::Scope trace("gst.srcCreate",gsttrace::id(self->channel));
 
     flFrame frame = {};
     for (;;) {
-        if (g_atomic_int_get(&self->flushing)) return GST_FLOW_FLUSHING;
+        if (g_atomic_int_get(&self->flushing)) return trace.result(GST_FLOW_FLUSHING);
         flResult r = flAcquireFrame(self->ch, &frame, 100);
         if (r == FL_OK) break;
         // TIMEOUT = no producer yet; DISCONNECTED = producer left, the ring
@@ -570,8 +575,10 @@ static GstFlowReturn srcCreate(GstPushSrc* push, GstBuffer** outbuf) {
         if (r == FL_TIMEOUT || r == FL_DISCONNECTED) continue;
         GST_ELEMENT_ERROR(self, RESOURCE, READ, ("framelink acquire failed"),
                           ("flAcquireFrame: %s", flResultString(r)));
-        return GST_FLOW_ERROR;
+        return trace.result(GST_FLOW_ERROR);
     }
+
+    if(trace.active){trace.event.sequence=frame.sequence;trace.event.pts=frame.ptsNs;trace.event.fence=frame._readyValue;trace.event.slot=frame.slot;}
 
     // A producer's flRequestGeometry may have reallocated OUR ring (that is
     // the consumer-owned contract: we allocate, they state intent, the library
@@ -595,7 +602,7 @@ static GstFlowReturn srcCreate(GstPushSrc* push, GstBuffer** outbuf) {
             flRelease(self->ch, &frame);
             GST_ELEMENT_ERROR(self, CORE, NEGOTIATION,
                               ("downstream refused the producer's new geometry"), (NULL));
-            return GST_FLOW_ERROR;
+            return trace.result(GST_FLOW_ERROR);
         }
     }
 
@@ -603,7 +610,7 @@ static GstFlowReturn srcCreate(GstPushSrc* push, GstBuffer** outbuf) {
     GstVideoInfo outputInfo;
     gst_video_info_init(&outputInfo);
     if(!gst_video_info_set_format(&outputInfo,toGstFormat(self->cinfo.format),w,h)) {
-        flRelease(self->ch,&frame);return GST_FLOW_NOT_NEGOTIATED;
+        flRelease(self->ch,&frame);return trace.result(GST_FLOW_NOT_NEGOTIATED);
     }
     GstBuffer* buf = gst_buffer_new_allocate(NULL, outputInfo.size, NULL);
     GstMapInfo map;
@@ -627,7 +634,7 @@ static GstFlowReturn srcCreate(GstPushSrc* push, GstBuffer** outbuf) {
             if (self->staging) {
                 ctx->CopyResource(self->staging, tex);
                 D3D11_MAPPED_SUBRESOURCE ms;
-                if (SUCCEEDED(ctx->Map(self->staging, 0, D3D11_MAP_READ, 0, &ms))) {
+                if (SUCCEEDED(gsttrace::call("gst.d3d11_readback_map", [&]{return ctx->Map(self->staging, 0, D3D11_MAP_READ, 0, &ms);}))) {
                     if(self->cinfo.format==FL_FORMAT_NV12) {
                         memset(map.data,0,map.size);
                         for(guint p=0;p<2;p++)for(guint y=0;y<(p?h/2:h);y++)
@@ -678,12 +685,12 @@ static GstFlowReturn srcCreate(GstPushSrc* push, GstBuffer** outbuf) {
         gst_buffer_unref(buf);
         GST_ELEMENT_ERROR(self, RESOURCE, READ, ("cannot read frame pixels"),
                           ("platform readback failed on '%s'", self->channel));
-        return GST_FLOW_ERROR;
+        return trace.result(GST_FLOW_ERROR);
     }
     if (self->fps > 0)
         GST_BUFFER_DURATION(buf) = gst_util_uint64_scale(GST_SECOND, 1, (guint64)self->fps);
     *outbuf = buf; // live source with do-timestamp: basesrc stamps arrival time
-    return GST_FLOW_OK;
+    return trace.result(GST_FLOW_OK);
 }
 
 static void srcSetProperty(GObject* obj, guint id, const GValue* value, GParamSpec* spec) {

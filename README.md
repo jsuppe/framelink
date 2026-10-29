@@ -110,3 +110,5 @@ MIT licensed.
 Build `framelink_producer` and `framelink_consumer` to exercise BGRA/NV12,
 geometry, pacing, ring sizes, reconnects, pixel verification and Windows GPU
 fences. See [sample commands and options](samples/README.md).
+
+For opt-in per-frame timing and bounded capture, see [performance tracing](docs/PERFORMANCE_TRACING.md).
