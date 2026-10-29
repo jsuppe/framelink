@@ -2,7 +2,15 @@
 #include <gst/app/gstappsrc.h>
 #include <gst/app/gstappsink.h>
 #include <gst/video/video.h>
+#ifdef _WIN32
+#include <windows.h>
+#include <process.h>
+#define getpid _getpid
+static void usleep(unsigned us){Sleep((us+999)/1000);}
+static void alarm(unsigned){} // CTest enforces the timeout on Windows.
+#else
 #include <unistd.h>
+#endif
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>

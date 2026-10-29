@@ -29,7 +29,7 @@ gst-launch-1.0 ... ! framelinksink channel=mychannel
   the consumer exists, and survive the consumer restarting.
 - A full ring drops the frame - latest-wins backpressure is framelink's
   contract, so a slow consumer can never stall the pipeline.
-- Caps accept BGRA and RGBA (Linux also NV12); if the ring's byte order differs the element
+- Caps accept BGRA and RGBA (Linux and Windows also NV12); if the ring's byte order differs the element
   swizzles (Android rings are RGBA - AHardwareBuffer has no BGRA).
 - Windows writes through the channel's D3D11 device (`UpdateSubresource`);
   POSIX writes through `flImageMap`, which requires the consumer to have
@@ -54,7 +54,7 @@ gst-launch-1.0 framelinksrc channel=cam.scene ! videoconvert \
 - No producer connected just means no frames yet - the element waits, and a
   departing producer does not end the stream (the ring belongs to us).
 
-## NV12 on Linux
+## NV12 on Linux and Windows
 
 Start the receiver first (it owns the format and buffer allocation):
 

@@ -178,3 +178,33 @@ if(FRAMELINK_BUILD_TESTS AND FL_GST_FOUND AND UNIX AND NOT ANDROID)
     add_test(NAME gst_nv12_roundtrip COMMAND fl_gst_nv12 $<TARGET_FILE:gstframelink>)
     set_tests_properties(gst_nv12_roundtrip PROPERTIES TIMEOUT 30)
 endif()
+
+if(FRAMELINK_BUILD_TESTS AND FL_GST_FOUND AND WIN32)
+    add_executable(fl_gst_nv12 test/fl_gst_nv12.cpp)
+    target_include_directories(fl_gst_nv12 PRIVATE
+        "${FL_GST_ROOT}/include/gstreamer-1.0" "${FL_GST_ROOT}/include/glib-2.0"
+        "${FL_GST_ROOT}/lib/glib-2.0/include")
+    target_link_directories(fl_gst_nv12 PRIVATE "${FL_GST_ROOT}/lib")
+    target_link_libraries(fl_gst_nv12 PRIVATE gstreamer-1.0.lib gstapp-1.0.lib
+        gstvideo-1.0.lib gobject-2.0.lib glib-2.0.lib)
+    add_test(NAME gst_nv12_roundtrip COMMAND fl_gst_nv12 $<TARGET_FILE:gstframelink>)
+    set_tests_properties(gst_nv12_roundtrip PROPERTIES TIMEOUT 30)
+endif()
+
+if(FRAMELINK_BUILD_TESTS AND WIN32)
+    add_executable(fl_nv12_win test/fl_nv12_win.cpp)
+    target_link_libraries(fl_nv12_win PRIVATE framelink d3d11)
+    add_test(NAME nv12_windows_roundtrip COMMAND ${CMAKE_COMMAND}
+        -DPRODUCER=$<TARGET_FILE:fl_nv12_win> -DCONSUMER=$<TARGET_FILE:fl_nv12_win>
+        "-DPRODUCER_ARGS=produce;flci-nv12" "-DCONSUMER_ARGS=consume;flci-nv12"
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test/run_roundtrip.cmake)
+    set_tests_properties(nv12_windows_roundtrip PROPERTIES TIMEOUT 95)
+endif()
+
+if(FRAMELINK_BUILD_TESTS AND WIN32)
+    add_test(NAME nv12_windows_1080p COMMAND ${CMAKE_COMMAND}
+        -DPRODUCER=$<TARGET_FILE:fl_nv12_win> -DCONSUMER=$<TARGET_FILE:fl_nv12_win>
+        "-DPRODUCER_ARGS=produce;flci-nv12-hd;1920;1080" "-DCONSUMER_ARGS=consume;flci-nv12-hd;1920;1080"
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test/run_roundtrip.cmake)
+    set_tests_properties(nv12_windows_1080p PROPERTIES TIMEOUT 95)
+endif()

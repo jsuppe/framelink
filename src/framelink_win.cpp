@@ -1,6 +1,6 @@
 // framelink Windows backend. See framelink.h.
 //
-// Shared NT-handle BGRA textures plus a shared ready/consumed fence pair. The
+// Shared NT-handle BGRA/NV12 textures plus a shared ready/consumed fence pair. The
 // consumer allocates and duplicates them into the producer; nothing is copied
 // afterwards - the texture the producer draws into is the exact allocation the
 // consumer reads.
@@ -12,6 +12,7 @@
 
 #define FL_EXPORTS
 #include "framelink.h"
+#include "fl_layout.h"
 #include "framelink_d3d11.h"
 
 #define WIN32_LEAN_AND_MEAN
@@ -123,7 +124,7 @@ bool allocateRing(flChannel* ch, uint32_t w, uint32_t h, uint32_t poolSize) {
         td.Width = w;
         td.Height = h;
         td.MipLevels = td.ArraySize = 1;
-        td.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+        td.Format = ch->info.format == FL_FORMAT_NV12 ? DXGI_FORMAT_NV12 : DXGI_FORMAT_B8G8R8A8_UNORM;
         td.SampleDesc.Count = 1;
         td.Usage = D3D11_USAGE_DEFAULT;
         td.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
@@ -283,7 +284,7 @@ void acceptLoop(flChannel* ch) {
                 // Honour it only when it actually differs and is sane. A
                 // refusal is silent by design: the producer re-reads flQuery
                 // and adapts, so there is nothing for it to handle.
-                if (g && g->width && g->height && g->width <= 8192 && g->height <= 8192 &&
+                if (g && g->format == (uint32_t)ch->info.format && fl::validGeometry(g->width,g->height,ch->info.format) &&
                     (g->width != ch->info.width || g->height != ch->info.height)) {
                     // Scoped, not held across the rebuild: resetSync takes the
                     // same mutex, and std::mutex is not recursive. Clearing
@@ -356,8 +357,9 @@ FL_API const char* flResultString(flResult r) {
 FL_API flResult flCreateChannelOnAdapter(const char* name, uint32_t width, uint32_t height,
                                          flFormat format, uint32_t poolSize, uint32_t flags,
                                          const uint8_t adapterLUID[8], flChannel** out) {
-    if (!name || !out || width == 0 || height == 0) return FL_INVALID;
-    if (format != FL_FORMAT_BGRA8) return FL_FORMAT_UNSUPPORTED; // spike scope
+    if (!name || !out || !fl::validGeometry(width,height,format)) return FL_INVALID;
+    *out = nullptr;
+    if (format != FL_FORMAT_BGRA8 && format != FL_FORMAT_NV12) return FL_FORMAT_UNSUPPORTED;
     if (poolSize == 0 || poolSize > kMaxPool) return FL_INVALID;
 
     auto* ch = new flChannel();
@@ -539,7 +541,8 @@ static flResult importRing(flChannel* ch, const fl::RingDescMsg* pd) {
 
 FL_API flResult flRequestGeometry(flChannel* ch, uint32_t width, uint32_t height,
                                   flFormat format) {
-    if (!ch || ch->isConsumer || !width || !height) return FL_INVALID;
+    if (!ch || ch->isConsumer || !fl::validGeometry(width,height,format)) return FL_INVALID;
+    if(format != ch->info.format) return FL_FORMAT_UNSUPPORTED;
     if (!ch->link.connected()) return FL_DISCONNECTED;
     fl::GeometryMsg g{};
     g.width = width;

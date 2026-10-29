@@ -74,7 +74,7 @@ static void copyPixels(guint8* dst, gsize dstStride, const guint8* src, gsize sr
     }
 }
 
-#if defined(__linux__) && !defined(__ANDROID__)
+#if defined(_WIN32) || (defined(__linux__) && !defined(__ANDROID__))
 #define FRAMELINK_CAPS GST_VIDEO_CAPS_MAKE("{ BGRA, RGBA, NV12 }")
 #else
 #define FRAMELINK_CAPS GST_VIDEO_CAPS_MAKE("{ BGRA, RGBA }")
@@ -286,7 +286,23 @@ static GstFlowReturn sinkRender(GstBaseSink* base, GstBuffer* buffer) {
         const guint8* upload = src;
         gsize uploadStride = srcStride;
         GByteArray* scratch = NULL;
-        if (swap) {
+        if (incoming == FL_FORMAT_NV12) {
+            // D3D11 upload uses one pitch for Y and UV. Repack GstVideoMeta's
+            // independently strided planes without changing their values.
+            scratch = g_byte_array_sized_new(w * h * 3 / 2);
+            g_byte_array_set_size(scratch, w * h * 3 / 2);
+            for (guint p=0;p<2;p++) {
+                const gint pitch=GST_VIDEO_FRAME_PLANE_STRIDE(&vframe,p);
+                if(pitch<(gint)w) {
+                    ctx->Release();g_byte_array_unref(scratch);
+                    gst_video_frame_unmap(&vframe);sinkDisconnect(self);return GST_FLOW_ERROR;
+                }
+                for(guint y=0;y<(p?h/2:h);y++)
+                    memcpy(scratch->data+(p?w*h:0)+y*w,
+                           (const guint8*)GST_VIDEO_FRAME_PLANE_DATA(&vframe,p)+(gsize)y*pitch,w);
+            }
+            upload=scratch->data;uploadStride=w;
+        } else if (swap) {
             scratch = g_byte_array_sized_new(w * 4 * h);
             g_byte_array_set_size(scratch, w * 4 * h);
             copyPixels(scratch->data, w * 4, src, srcStride, w, h, TRUE);
@@ -294,7 +310,7 @@ static GstFlowReturn sinkRender(GstBaseSink* base, GstBuffer* buffer) {
             uploadStride = w * 4;
         }
         D3D11_BOX box = {0, 0, 0, w, h, 1};
-        ctx->UpdateSubresource(tex, 0, &box, upload, (UINT)uploadStride,
+        ctx->UpdateSubresource(tex, 0, incoming==FL_FORMAT_NV12 ? nullptr : &box, upload, (UINT)uploadStride,
                                (UINT)(uploadStride * h));
         ctx->Release();
         if (scratch) g_byte_array_unref(scratch);
@@ -612,8 +628,14 @@ static GstFlowReturn srcCreate(GstPushSrc* push, GstBuffer** outbuf) {
                 ctx->CopyResource(self->staging, tex);
                 D3D11_MAPPED_SUBRESOURCE ms;
                 if (SUCCEEDED(ctx->Map(self->staging, 0, D3D11_MAP_READ, 0, &ms))) {
-                    copyPixels(map.data, (gsize)w * 4, (const guint8*)ms.pData, ms.RowPitch,
-                               w, h, FALSE);
+                    if(self->cinfo.format==FL_FORMAT_NV12) {
+                        memset(map.data,0,map.size);
+                        for(guint p=0;p<2;p++)for(guint y=0;y<(p?h/2:h);y++)
+                            memcpy(map.data+outputInfo.offset[p]+y*outputInfo.stride[p],
+                                   (const guint8*)ms.pData+(p?(gsize)ms.RowPitch*h:0)+(gsize)y*ms.RowPitch,w);
+                    } else {
+                        copyPixels(map.data, (gsize)w * 4, (const guint8*)ms.pData, ms.RowPitch,w,h,FALSE);
+                    }
                     ctx->Unmap(self->staging, 0);
                     filled = TRUE;
                 }
@@ -720,7 +742,7 @@ static void gst_framelink_src_class_init(GstFrameLinkSrcClass* klass) {
                             "framelink", (GParamFlags)(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
     g_object_class_install_property(
         gobject, SRC_PROP_FORMAT,
-        g_param_spec_string("format","Format","Ring pixel format (BGRA; Linux also NV12)","BGRA",
+        g_param_spec_string("format","Format","Ring pixel format (BGRA or NV12 on desktop)","BGRA",
                          (GParamFlags)(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
     g_object_class_install_property(
         gobject, SRC_PROP_WIDTH,

@@ -58,9 +58,9 @@ against your writes. Use `flSharedReadyFence` + `flBeginSubmit`/`flEndSubmit`
 and signal the fence inside your own submit. A Vulkan compositor does exactly
 this.
 
-## NV12 (Linux)
+## NV12 (Linux and Windows)
 
-Linux channels now support `FL_FORMAT_NV12`: full-resolution Y plus half-resolution
+Linux and Windows channels now support `FL_FORMAT_NV12`: full-resolution Y plus half-resolution
 interleaved UV, with even width and height. See [NV12 support](docs/nv12.md)
 for plane mapping, GStreamer examples, compatibility and tested limits.
 

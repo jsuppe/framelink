@@ -63,7 +63,7 @@ FL_API const char* flResultString(flResult r); // never NULL, never allocates
 
 typedef enum flFormat {
     FL_FORMAT_BGRA8 = 1,   // the always-works path
-    FL_FORMAT_NV12 = 2,    // Linux: two-plane NV12, even width/height. Other backends refuse.
+    FL_FORMAT_NV12 = 2,    // Linux/Windows: NV12, even width/height. Android refuses.
     FL_FORMAT_RGB10A2 = 3, // not in the spike
     // RGBA byte order. Exists because Android's AHardwareBuffer has no BGRA
     // format: a channel there reports RGBA8 from flQuery, and a portable
