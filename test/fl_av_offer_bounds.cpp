@@ -23,6 +23,12 @@ int main() {
   gst_object_unref(clock);gst_object_unref(bus);
   if(!rejected)return 3;
   AudioTimeline timeline;timeline.rate=48000;timeline.channels=2;
+  GstSegment segment;gst_segment_init(&segment,GST_FORMAT_TIME);
+  auto* event=gst_event_new_segment(&segment);
+  GstPadProbeInfo segmentInfo{};segmentInfo.type=GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM;segmentInfo.data=event;
+  const auto segmentResult=trackAudio(nullptr,&segmentInfo,&timeline);
+  gst_event_unref(event);
+  if(segmentResult!=GST_PAD_PROBE_OK)return 6;
   for(unsigned i=0;i<3;++i) {
     auto* b=gst_buffer_new_allocate(nullptr,480*4,nullptr);
     GST_BUFFER_PTS(b)=37*GST_MSECOND+i*10*GST_MSECOND;
