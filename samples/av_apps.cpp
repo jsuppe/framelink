@@ -27,7 +27,18 @@
 #include <thread>
 #include <vector>
 
+#ifdef __ANDROID__
+#include "android_static_plugins.h"
+#endif
 namespace {
+GstPlugin* loadFrameLinkPlugin(const std::string& path, GError** error) {
+#ifdef __ANDROID__
+  flRegisterAndroidPlugins();
+  return gst_registry_find_plugin(gst_registry_get(), "framelink");
+#else
+  return gst_plugin_load_file(path.c_str(), error);
+#endif
+}
 void need(bool ok, const char *what) {
   if (!ok)
     throw std::runtime_error(what);
@@ -1073,7 +1084,7 @@ int main(int argc, char **argv) {
     auto o = options(argc, argv);
     Watchdog watchdog(o.timeout);
     GError *error = nullptr;
-    auto *plugin = gst_plugin_load_file(o.plugin.c_str(), &error);
+    auto *plugin = loadFrameLinkPlugin(o.plugin, &error);
     if (error) {
       fprintf(stderr, "plugin: %s\n", error->message);
       g_error_free(error);
@@ -1172,7 +1183,7 @@ bool runPlayback(const PlaybackOptions& p,const PlaybackCallbacks& cb,const std:
     o.timeout=p.timeoutMs;o.latencyMs=p.latencyMs;o.audioSink=p.audioSink;o.stream=true;
     need(o.fps && o.width && o.height && o.timeout && o.latencyMs<=2000,"invalid playback options");
     gst_init(nullptr,nullptr);
-    GError* e=nullptr; auto* plugin=gst_plugin_load_file(o.plugin.c_str(),&e);
+    GError* e=nullptr; auto* plugin=loadFrameLinkPlugin(o.plugin,&e);
     if (e) {error=e->message;g_error_free(e);}
     need(plugin,"FrameLink plugin load");gst_object_unref(plugin);
     need(p.recoveryAttempts <= 16,"recovery attempt limit");

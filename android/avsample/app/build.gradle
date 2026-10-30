@@ -1,0 +1,19 @@
+plugins { id 'com.android.application' }
+android {
+ namespace 'dev.framelink.av'
+ compileSdk 34
+ ndkVersion '28.2.13676358'
+ defaultConfig {
+  applicationId 'dev.framelink.av'
+  minSdk 29
+  targetSdk 34
+  versionCode 1
+  versionName '0.1'
+  ndk { abiFilters 'arm64-v8a' }
+  externalNativeBuild { cmake {
+   arguments "-DFRAMELINK_GST_ANDROID_ROOT=${project.findProperty('gstAndroidRoot')}"
+   targets 'fl_av_receiver', 'fl_av_producer'
+  } }
+ }
+ externalNativeBuild { cmake { path '../CMakeLists.txt'; version '3.22.1' } }
+}
