@@ -216,3 +216,13 @@ The same rule applies to POSIX `flSignalConsumedSyncFd`: a disconnected
 notification after locally recording completion is tolerated, then the sample
 still releases its held frame. `sample_consumed_disconnected` asserts both
 consumed-completion and release notification injections in GPU-sync mode.
+
+### External decoded A/V pipeline (M5 developer handoff)
+
+`framelink_av_producer --input-pipeline FILE` accepts trusted GStreamer pipeline
+text with `@VIDEO_SINK@` / `@AUDIO_SINK@` placeholders. It sends decoded video and
+PCM to an independent streaming consumer while retaining their common timeline.
+See [Windows pipeline guide](../docs/M5_WINDOWS_PIPELINE.md) for build pins,
+reproducible MJPEG/PCM validation, and finite-CFR/live-stream limitations.
+Optional `--trace-media` compares payload SHA256, running PTS and durations; it
+maps/hashes frames and must not be used for performance qualification.
