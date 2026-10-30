@@ -433,3 +433,22 @@ if(FRAMELINK_BUILD_TESTS AND NOT ANDROID)
         ${CMAKE_CURRENT_SOURCE_DIR}/test/session_peers.py $<TARGET_FILE:fl_session_peer>)
     set_tests_properties(session_contract_peers PROPERTIES TIMEOUT 30)
 endif()
+
+# Independent desktop A/V peers. GDP PCM uses authenticated GIO streams.
+if(FRAMELINK_BUILD_SAMPLES AND FL_GST_FOUND AND NOT ANDROID)
+    foreach(_role producer consumer)
+        add_executable(framelink_av_${_role} samples/av_apps.cpp samples/av_rendezvous.cpp samples/av_auth.cpp)
+        target_link_libraries(framelink_av_${_role} PRIVATE framelink)
+        if(WIN32)
+            target_include_directories(framelink_av_${_role} PRIVATE
+                "${FL_GST_ROOT}/include/gstreamer-1.0" "${FL_GST_ROOT}/include/glib-2.0"
+                "${FL_GST_ROOT}/lib/glib-2.0/include")
+            target_link_directories(framelink_av_${_role} PRIVATE "${FL_GST_ROOT}/lib")
+            target_link_libraries(framelink_av_${_role} PRIVATE gstreamer-1.0.lib gstapp-1.0.lib gstvideo-1.0.lib gio-2.0.lib gobject-2.0.lib glib-2.0.lib advapi32 bcrypt)
+        else()
+            pkg_check_modules(FL_AV_IO REQUIRED IMPORTED_TARGET gio-2.0 gstreamer-video-1.0)
+            target_link_libraries(framelink_av_${_role} PRIVATE PkgConfig::FL_GST PkgConfig::FL_AV_APP PkgConfig::FL_AV_IO)
+        endif()
+    endforeach()
+    target_compile_definitions(framelink_av_producer PRIVATE AV_PRODUCER=1)
+endif()
