@@ -1,6 +1,7 @@
 // Local session example: FrameLink video + existing GStreamer GDP/TCP PCM.
 // No audio additions to flFrame; both pipelines use one explicit clock/epoch.
 #include <gst/gst.h>
+#include "deadline.h"
 #include <gst/app/gstappsrc.h>
 #include <gst/app/gstappsink.h>
 #include <cmath>
@@ -33,6 +34,7 @@ static GstSample* pull(GstElement*s) {
 }
 int main(int argc,char**argv) {
  gst_init(&argc,&argv);
+ SampleDeadline deadline;
  bool faults=false, play=false; unsigned frames=150;
  REQUIRE(argc>=2);
  for(int i=2;i<argc;++i) {

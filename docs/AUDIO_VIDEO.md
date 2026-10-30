@@ -18,7 +18,7 @@ build/framelink_av_session build/libgstframelink.so
 build/framelink_av_session build/libgstframelink.so --faults
 # Optional real speaker/window output (requires available device/display):
 build/framelink_av_session build/libgstframelink.so --play
-ctest --test-dir build -R gst_av --output-on-failure
+ctest --test-dir build -R 'gst_(av_|timestamp_contract)' --output-on-failure
 ```
 
 On Windows use the executable/plugin DLL paths in the selected build directory
@@ -88,7 +88,9 @@ The image ring remains bounded (four buffers); appsrc/appsink queues have two
 buffer bounds, audio queue has four blocks / 80 ms, GDP server retention has an
 eight-buffer bound. TCP kernel buffering is additional: these settings are **not
 an end-to-end latency guarantee**. Slow-consumer/disconnect handling in this
-example is a three-second receive deadline; no unbounded wait/recovery claim.
+example is a three-second receive deadline plus a 20-second whole-process
+watchdog covering blocked pushes and teardown. Timeout exits with failure; it
+does not recover the session.
 Never drop arbitrary TCP bytes to implement latest-wins audio. A production
 interactive path needs measured latency policy and controlled discontinuities;
 video and audio should not share a latest-frame-wins drop policy.
@@ -98,6 +100,12 @@ uses that clock; this is not automatic audio-device-master drift compensation.
 For long-running real playback, select the audio sink's clock (or an explicitly
 disciplined clock), measure device drift, and let the pipeline resample/schedule.
 A zero-buffer audio guarantee would be misleading.
+
+A separate `gst_timestamp_contract` regression exercises zero timestamps,
+repeated/backward timestamps and DISCONT, the largest signed timestamp,
+missing/overflow rejection, a nonzero TIME-segment start/base conversion, and
+unchanged default arrival timestamping. These are transport-contract tests,
+not audio-device or presentation-clock qualification.
 
 The sample verifies transported pixels, every PCM sample, caps, exact PTS and
 first-sample duration. Fault mode intentionally omits one audio block, injects
