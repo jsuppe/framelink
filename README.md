@@ -112,3 +112,12 @@ geometry, pacing, ring sizes, reconnects, pixel verification and Windows GPU
 fences. See [sample commands and options](samples/README.md).
 
 For opt-in per-frame timing and bounded capture, see [performance tracing](docs/PERFORMANCE_TRACING.md).
+
+### A/V session control contract
+
+The optional [`framelink_session.h`](include/framelink_session.h) helpers provide
+bounded format negotiation, a versioned configuration codec, generation checks,
+and checked clock/sample timestamp mapping. Audio remains separate from the video
+frame API. See [the A/V session contract](docs/AV_SESSION_CONTRACT.md) for lifecycle,
+authentication, queue policy, and the boundary between these helpers and the
+application's transport implementation. `session_contract` is hardware-independent.

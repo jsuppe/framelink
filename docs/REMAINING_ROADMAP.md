@@ -23,6 +23,13 @@ Tasks:
 Gate: passing checks for final revision; no pending review defects; merge verified.
 
 ## M2 — Define an interoperable A/V session contract
+
+Implementation and independent review complete; PR #3 final CI/merge pending.
+Final Linux suite 33/33 and Windows 34/34 passed. Android arm64/x86_64 builds
+and Pi/tablet contract/C11 checks passed. Two independent desktop contract peers
+validate agreement and rejection; production offer exchange, authenticated
+rendezvous and media applications remain M3/M5, not claimed implemented here.
+
 Deliverables: versioned session specification, descriptor/control API, negotiation
 state machine and contract tests; image-only flFrame API preserved.
 Tasks:

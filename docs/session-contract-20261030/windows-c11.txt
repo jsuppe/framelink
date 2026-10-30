@@ -1,0 +1,19 @@
+-- Building for: Visual Studio 17 2022
+-- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.26300.
+-- The C compiler identification is MSVC 19.44.35216.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Configuring done (1.9s)
+-- Generating done (0.0s)
+-- Build files have been written to: C:/Users/jonsu/dev/framelink-session-20261030/c11-probe/build
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  1>Checking Build System
+  Building Custom Rule C:/Users/jonsu/dev/framelink-session-20261030/c11-probe/CMakeLists.txt
+  main.c
+  session_c11.vcxproj -> C:\Users\jonsu\dev\framelink-session-20261030\c11-probe\build\Release\session_c11.exe
+  Building Custom Rule C:/Users/jonsu/dev/framelink-session-20261030/c11-probe/CMakeLists.txt
+MSVC C11 header, DLL linkage, config codec and sample timing passed

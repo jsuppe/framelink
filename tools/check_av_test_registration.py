@@ -12,7 +12,7 @@ if len(sys.argv) > 2:
     command += ["-C", sys.argv[2]]
 result = subprocess.run(command, check=True, capture_output=True, text=True)
 names = {test["name"] for test in json.loads(result.stdout)["tests"]}
-required = {"gst_av_session", "gst_av_faults", "gst_timestamp_contract"}
+required = {"gst_av_session", "gst_av_faults", "gst_timestamp_contract", "session_contract", "session_contract_c_api", "session_contract_peers"}
 missing = required - names
 if missing:
     raise SystemExit("Missing required A/V tests: " + ", ".join(sorted(missing)))

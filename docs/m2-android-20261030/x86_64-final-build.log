@@ -1,0 +1,32 @@
+-- The C compiler identification is Clang 19.0.1
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /home/melchior/Android/Sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/bin/clang - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Configuring done (0.1s)
+-- Generating done (0.0s)
+-- Build files have been written to: /tmp/fl-m2-android-x86_64
+[  7%] Built target fl_nv12_layout
+[ 14%] Built target fl_trace_test
+[ 17%] Building CXX object CMakeFiles/framelink.dir/src/framelink_session.cpp.o
+[ 21%] Linking CXX static library libframelink.a
+[ 35%] Built target framelink
+[ 42%] Building CXX object CMakeFiles/fl_session_contract.dir/test/fl_session_contract.cpp.o
+[ 42%] Building C object CMakeFiles/fl_session_c_api.dir/test/fl_session_c_api.c.o
+[ 46%] Linking CXX executable fl_roundtrip
+[ 50%] Linking CXX executable fl_reconnect_held
+[ 57%] Linking CXX executable fl_portable_map
+[ 60%] Linking CXX executable framelink_producer
+[ 57%] Linking CXX executable fl_sync_fd_test
+[ 64%] Linking CXX executable framelink_consumer
+[ 67%] Linking CXX executable fl_session_c_api
+[ 71%] Built target fl_sync_fd_test
+[ 75%] Built target fl_roundtrip
+[ 78%] Built target fl_reconnect_held
+[ 85%] Built target framelink_producer
+[ 89%] Built target fl_portable_map
+[ 89%] Built target fl_session_c_api
+[ 96%] Built target framelink_consumer
+[100%] Linking CXX executable fl_session_contract
+[100%] Built target fl_session_contract

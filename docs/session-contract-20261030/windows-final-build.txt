@@ -1,0 +1,84 @@
+-- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.26300.
+-- The C compiler identification is MSVC 19.44.35216.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- framelink: building GStreamer elements (gstframelink)
+-- Found Python3: C:/Users/jonsu/AppData/Local/Microsoft/WindowsApps/python3.13.exe (found version "3.13.14") found components: Interpreter
+-- Configuring done (3.5s)
+-- Generating done (0.3s)
+-- Build files have been written to: C:/Users/jonsu/dev/framelink-session-20261030/build
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  1>Checking Build System
+  Building Custom Rule C:/Users/jonsu/dev/framelink-session-20261030/CMakeLists.txt
+  fl_ipc_win32.cpp
+  fl_trace.cpp
+  framelink_session.cpp
+  framelink_slots.cpp
+  framelink_win.cpp
+  Generating Code...
+     Creating library C:/Users/jonsu/dev/framelink-session-20261030/build/Release/framelink.lib and object C:/Users/jonsu/dev/framelink-session-20261030/build/Release/framelink.exp
+  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-session-20261030\build\Release\framelink.dll
+  Building Custom Rule C:/Users/jonsu/dev/framelink-session-20261030/CMakeLists.txt
+  gstframelink.cpp
+     Creating library C:/Users/jonsu/dev/framelink-session-20261030/build/Release/gstframelink.lib and object C:/Users/jonsu/dev/framelink-session-20261030/build/Release/gstframelink.exp
+  gstframelink.vcxproj -> C:\Users\jonsu\dev\framelink-session-20261030\build\Release\gstframelink.dll
+  Building Custom Rule C:/Users/jonsu/dev/framelink-session-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-session-20261030/CMakeLists.txt
+  fl_consume.cpp
+  Building Custom Rule C:/Users/jonsu/dev/framelink-session-20261030/CMakeLists.txt
+  fl_disconnect_win.cpp
+  Building Custom Rule C:/Users/jonsu/dev/framelink-session-20261030/CMakeLists.txt
+  fl_ready_timeout_win.cpp
+  fl_reconnect_held.cpp
+  Building Custom Rule C:/Users/jonsu/dev/framelink-session-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-session-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-session-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-session-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-session-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-session-20261030/CMakeLists.txt
+  fl_portable_map.cpp
+  fl_produce.cpp
+  fl_gst_timestamps.cpp
+  fl_disconnect_win.vcxproj -> C:\Users\jonsu\dev\framelink-session-20261030\build\Release\fl_disconnect_win.exe
+  fl_consume.vcxproj -> C:\Users\jonsu\dev\framelink-session-20261030\build\Release\fl_consume.exe
+  Building Custom Rule C:/Users/jonsu/dev/framelink-session-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-session-20261030/CMakeLists.txt
+  fl_reconnect_held.vcxproj -> C:\Users\jonsu\dev\framelink-session-20261030\build\Release\fl_reconnect_held.exe
+  fl_session_c_api.c
+  fl_session_contract.cpp
+  Building Custom Rule C:/Users/jonsu/dev/framelink-session-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-session-20261030/CMakeLists.txt
+  fl_session_peer.cpp
+  fl_session_c_api.vcxproj -> C:\Users\jonsu\dev\framelink-session-20261030\build\Release\fl_session_c_api.exe
+  Building Custom Rule C:/Users/jonsu/dev/framelink-session-20261030/CMakeLists.txt
+  fl_trace_test.cpp
+  Building Custom Rule C:/Users/jonsu/dev/framelink-session-20261030/CMakeLists.txt
+  fl_nv12_layout.cpp
+  fl_nv12_win.cpp
+  fl_gst_nv12.cpp
+  fl_produce.vcxproj -> C:\Users\jonsu\dev\framelink-session-20261030\build\Release\fl_produce.exe
+  Building Custom Rule C:/Users/jonsu/dev/framelink-session-20261030/CMakeLists.txt
+  av_session.cpp
+  consumer.cpp
+  fl_gst_timestamps.vcxproj -> C:\Users\jonsu\dev\framelink-session-20261030\build\Release\fl_gst_timestamps.exe
+  fl_portable_map.vcxproj -> C:\Users\jonsu\dev\framelink-session-20261030\build\Release\fl_portable_map.exe
+  producer.cpp
+  fl_ready_timeout_win.vcxproj -> C:\Users\jonsu\dev\framelink-session-20261030\build\Release\fl_ready_timeout_win.exe
+  fl_session_peer.vcxproj -> C:\Users\jonsu\dev\framelink-session-20261030\build\Release\fl_session_peer.exe
+  fl_session_contract.vcxproj -> C:\Users\jonsu\dev\framelink-session-20261030\build\Release\fl_session_contract.exe
+  fl_nv12_layout.vcxproj -> C:\Users\jonsu\dev\framelink-session-20261030\build\Release\fl_nv12_layout.exe
+  fl_gst_nv12.vcxproj -> C:\Users\jonsu\dev\framelink-session-20261030\build\Release\fl_gst_nv12.exe
+  sample_common.cpp
+  fl_nv12_win.vcxproj -> C:\Users\jonsu\dev\framelink-session-20261030\build\Release\fl_nv12_win.exe
+  framelink_av_session.vcxproj -> C:\Users\jonsu\dev\framelink-session-20261030\build\Release\framelink_av_session.exe
+  fl_trace_test.vcxproj -> C:\Users\jonsu\dev\framelink-session-20261030\build\Release\fl_trace_test.exe
+  sample_common.cpp
+  Generating Code...
+  Generating Code...
+  framelink_consumer.vcxproj -> C:\Users\jonsu\dev\framelink-session-20261030\build\Release\framelink_consumer.exe
+  framelink_producer.vcxproj -> C:\Users\jonsu\dev\framelink-session-20261030\build\Release\framelink_producer.exe
+  Building Custom Rule C:/Users/jonsu/dev/framelink-session-20261030/CMakeLists.txt
