@@ -90,6 +90,50 @@ Tasks:
 - Track Pi/Cuttlefish GPU format/fence limitations and Linux physical display validation separately.
 Gate: each advertised feature has implementation plus platform evidence or explicit unsupported status.
 
+## M5a — Memory-capability negotiation and GPU-native pipeline integration
+
+Status: PLANNED, approved by Jon 2026-10-30. Separate milestone after M5 and
+before M6; existing milestone numbers remain stable. Does not expand M4.
+
+Deliverables: versioned memory/usage negotiation contract, platform capability
+adapters, GStreamer allocation integration, Windows external-pipeline example,
+and evidence identifying actual copies/conversions and unsupported paths.
+
+Tasks:
+- Define required versus preferred usage: GPU sampling/render targets, decoder
+  output, CPU read/write; do not equate API usage with physical memory residency.
+- Advertise supported resource types, format/plane layout, strides/modifiers,
+  device identity, import/export and synchronization capabilities. Map Windows
+  D3D resources, Linux DMA-BUF and Android AHardwareBuffer only where supported.
+- Negotiate a compatible allocation strategy, ownership and buffer-pool lifetime;
+  specify producer-owned versus consumer-provided allocations and bounded queues.
+- Define explicit fallback policies: allow copy/conversion or require zero-copy;
+  reject incompatible requirements clearly. Preserve legacy defaults and negotiate
+  protocol compatibility with older peers rather than silently changing behavior.
+- Connect remote consumer requirements to GStreamer caps memory features,
+  ALLOCATION queries and buffer pools; renegotiate safely after format/device or
+  session-generation changes. Preserve A/V timestamps and existing session sync.
+- Implement the Windows hardware-decoder -> GPU GstBuffer -> FrameLink sink ->
+  independent consumer renderer example; document tested decoder/adapter/format.
+- Implement CPU-readable consumer paths with explicit staging/readback where
+  required. Multiple consumers with conflicting requirements must have a defined
+  allocation/copy strategy or explicit rejection, not an implicit global preference.
+- Expose selected memory type, usage, device, mapping behavior, fallback reason,
+  and observed copy/conversion counters; distinguish transport sharing from
+  end-to-end zero-copy, and unknown residency from measured residency.
+- Add contract/unit tests for preference selection, hard requirement rejection,
+  version compatibility, malformed offers and conflicting consumer requirements.
+- Add platform integration tests for GPU-native and CPU-readable modes, forced
+  fallback/strict-zero-copy rejection, unsupported formats/device mismatch,
+  renegotiation, fencing, stale generations, cleanup and unchanged A/V timing.
+- Benchmark supported paths and publish the platform support matrix and developer
+  integration guide. Unsupported driver paths remain explicitly capability-gated.
+
+Gate: selected allocation satisfies all required usage constraints; permitted
+fallbacks are visible; strict zero-copy never silently copies. Pixel/timestamp
+correctness, safe ownership/fencing and bounded resource use pass on advertised
+platform paths. Zero-copy claims require path evidence, not merely GPU buffer type.
+
 ## M6 — Reliability, performance and observability
 Deliverables: reproducible stress/benchmark suite, opt-in tracing, measured overhead
 and release acceptance report.
@@ -114,7 +158,7 @@ Gate: a clean machine can reproduce the documented A/V workflow; all release-sco
 or explicitly capability-gated, with unqualified hardware behavior never labeled passed.
 
 ## Execution dependencies
-M1 -> M2 -> M3 -> M4 -> M5 -> M6 -> M7.
+M1 -> M2 -> M3 -> M4 -> M5 -> M5a -> M6 -> M7.
 Platform investigation and test harness development may run in parallel after M2;
 observability work can accompany implementation. Proposed soak lengths are release
 checks, not claims of already completed testing. No fixed completion dates assigned.
