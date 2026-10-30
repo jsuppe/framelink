@@ -41,7 +41,7 @@ else()
     message(FATAL_ERROR "framelink has no backend for this platform yet")
 endif()
 
-target_sources(framelink PRIVATE src/fl_trace.cpp)
+target_sources(framelink PRIVATE src/fl_trace.cpp src/framelink_session.cpp)
 option(FRAMELINK_DISABLE_TRACE "Compile out all tracing" OFF)
 if(FRAMELINK_DISABLE_TRACE)
     add_compile_definitions(FL_TRACE_COMPILED_OUT)
@@ -57,11 +57,16 @@ if(WIN32)
         PUBLIC_HEADER "include/framelink.h;include/framelink_d3d11.h;include/framelink_slots.h;include/framelink_trace.hpp;include/framelink_sync_fd.h")
 endif()
 
+set_property(TARGET framelink APPEND PROPERTY PUBLIC_HEADER include/framelink_session.h)
+
 if(FRAMELINK_BUILD_TESTS)
     # Two processes, because that is the only way to test what this library
     # does. fl_consume owns the ring and verifies pixels; fl_produce attaches
     # and draws.
     enable_testing()
+    add_executable(fl_session_contract test/fl_session_contract.cpp)
+    target_link_libraries(fl_session_contract PRIVATE framelink)
+    add_test(NAME session_contract COMMAND fl_session_contract)
     if(WIN32)
         # Separate binaries because the D3D11 path draws on the GPU, which is
         # what makes the fence wait meaningful.
