@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.20)
+project(session_c11 LANGUAGES C)
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+add_executable(session_c11 main.c)
+target_include_directories(session_c11 PRIVATE ../include)
+target_link_libraries(session_c11 PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../build/Release/framelink.lib")
