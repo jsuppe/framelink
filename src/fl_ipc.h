@@ -38,7 +38,12 @@ class Channel {
     Channel& operator=(const Channel&) = delete;
 
     // Blocks until a peer connects. The consumer (ring owner) listens.
+#ifdef _WIN32
+    // Called once after pipe creation (before blocking accept), including failure.
+    static Channel listen(const std::string& name, void (*ready)(void*, bool) = nullptr, void* context = nullptr);
+#else
     static Channel listen(const std::string& name);
+#endif
     // Fails fast when the name does not exist - a producer attaches to a
     // channel or it does not; it never creates one.
     // `busy` (optional) distinguishes "the channel exists but is taken" from

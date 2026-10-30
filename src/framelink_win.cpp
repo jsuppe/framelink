@@ -19,6 +19,7 @@
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 #include <windows.h>
+#include <future>
 
 #include <d3d11_4.h>
 #include <dxgi1_3.h>
@@ -68,6 +69,7 @@ struct flChannel {
     // --- consumer only ---
     fl::Channel peer;
     std::thread accept;
+    std::promise<bool> listenerReady;
     std::atomic<bool> stop{false};
     std::atomic<bool> peerGone{false};
     std::mutex pendingMutex;
@@ -242,8 +244,13 @@ bool handOverRing(flChannel* ch, fl::Channel& link, uint32_t peerPid) {
 }
 
 void acceptLoop(flChannel* ch) {
+    bool first = true;
     while (!ch->stop.load()) {
-        fl::Channel link = fl::Channel::listen(ch->name);
+        auto ready = [](void* context, bool ok) {
+            static_cast<flChannel*>(context)->listenerReady.set_value(ok);
+        };
+        fl::Channel link = fl::Channel::listen(ch->name, first ? +ready : nullptr, ch);
+        first = false;
         if (!link.connected()) return;
         if (ch->stop.load()) return;
 
@@ -416,7 +423,11 @@ FL_API flResult flCreateChannelOnAdapter(const char* name, uint32_t width, uint3
         flClose(ch);
         return trace.result(FL_INTERNAL);
     }
+    // Success must mean the endpoint exists, not merely that its thread was spawned.
+    // Producers intentionally fail fast for absent channels.
+    auto ready = ch->listenerReady.get_future();
     ch->accept = std::thread(acceptLoop, ch);
+    if (!ready.get()) { flClose(ch); return trace.result(FL_INTERNAL); }
     *out = ch;
     return trace.result(FL_OK);
 }
