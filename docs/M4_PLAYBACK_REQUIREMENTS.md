@@ -42,3 +42,27 @@ synchronized optical/acoustic capture. Current Linux host has only auto_null aud
 and no /dev/video device. This is an equipment qualification gap, not permission to
 claim physical lip sync from virtual-sink tests. Investigate other available targets
 and report limitations transparently. Performance budgets must be stated and measured.
+
+## Audio TIME-segment normalization (M4 integration fix)
+
+The streaming receiver observes the GDP-depayloaded audio SEGMENT events. Audio
+continuity, intentional origin offset, arrival drift and playback deadline checks
+use `gst_segment_to_running_time`, matching the video path. It does not rewrite
+buffer PTS or the segment: the audio sink independently applies the same segment
+mapping. Nonzero `start` and `base` therefore cannot introduce differential A/V
+latency in the receiver's scheduling checks.
+
+Only forward unit-rate TIME segments (`rate == applied_rate == 1`) are supported.
+Non-TIME or trick-rate segments, buffers without a segment, timestamps outside
+the segment and discontinuous running-time fail the session rather than silently
+retimestamping. A changed segment is accepted if its normalized timestamps remain
+sample-contiguous. Seek/discontinuity recovery uses the existing new-session
+path, not a per-track clock reset.
+
+Validation: `av_audio_segment` executes the production audio probe with a 5-second
+start, 2-second base and 37-ms intentional audio offset; verifies continuity,
+unchanged downstream PTS, late-deadline accounting, continuous segment rebasing
+and rejection cases. A separately compiled mutation replacing normalization with
+raw PTS fails the origin assertion. Linux fatal-warning runs of this test,
+`m4_authenticated_offsets`, and `m4_av_recovery` passed (3/3). These tests do not
+claim arbitrary external-pipeline end-to-end qualification on Windows.

@@ -538,3 +538,9 @@ if(FRAMELINK_BUILD_TESTS AND TARGET framelink_av_playback AND UNIX AND NOT ANDRO
     add_executable(fl_m4_device_slaving test/m4_device_slaving.cpp)
     target_link_libraries(fl_m4_device_slaving PRIVATE framelink_av_playback)
 endif()
+
+if(FRAMELINK_BUILD_TESTS AND TARGET framelink_av_playback)
+    add_executable(fl_audio_segment test/fl_audio_segment.cpp)
+    target_link_libraries(fl_audio_segment PRIVATE framelink_av_playback)
+    add_test(NAME av_audio_segment COMMAND fl_audio_segment)
+endif()
