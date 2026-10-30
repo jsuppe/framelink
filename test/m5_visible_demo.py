@@ -30,16 +30,16 @@ class Handler(BaseHTTPRequestHandler):
   stop.set();self.send_response(200);self.end_headers();self.wfile.write(b'Stopping only this demo')
 server=ThreadingHTTPServer(('127.0.0.1',a.port),Handler);threading.Thread(target=server.serve_forever,daemon=True).start()
 webbrowser.open('http://127.0.0.1:%d'%a.port)
-media=r/'demo-30s.avi'
+media=r/'demo-10s.avi'
 try:
  if not media.exists():
-  subprocess.run(['gst-launch-1.0.exe','-q','videotestsrc','num-buffers=1500','pattern=ball','!','video/x-raw,format=I420,width=160,height=90,framerate=50/1','!','jpegenc','!','queue','!','mux.','audiotestsrc','num-buffers=1500','samplesperbuffer=960','wave=sine','freq=440','volume=0.01','!','audio/x-raw,format=S16LE,rate=48000,channels=2','!','queue','!','mux.','avimux','name=mux','!','filesink','location='+media.as_posix()],check=True,timeout=90,creationflags=child_flags)
+  subprocess.run(['gst-launch-1.0.exe','-q','videotestsrc','num-buffers=500','pattern=ball','!','video/x-raw,format=I420,width=160,height=90,framerate=50/1','!','jpegenc','!','queue','!','mux.','audiotestsrc','num-buffers=500','samplesperbuffer=960','wave=sine','freq=440','volume=0.01','!','audio/x-raw,format=S16LE,rate=48000,channels=2','!','queue','!','mux.','avimux','name=mux','!','filesink','location='+media.as_posix()],check=True,timeout=90,creationflags=child_flags)
  for n in range(a.loops):
   if stop.is_set() or (r/'STOP').exists():break
   d=r/('run-%d-%d'%(int(time.time()),n));d.mkdir();pipeline=d/'source.pipeline';pipeline.write_text('filesrc location="'+media.as_posix()+'" ! avidemux name=d d.video_0 ! queue ! jpegdec ! videoconvert ! @VIDEO_SINK@ d.audio_0 ! queue ! audioconvert ! @AUDIO_SINK@\n')
   state.update(phase='playing',iteration=n+1,loops=a.loops,session=str(d/'session'))
   with (d/'producer.log').open('w') as pl,(d/'renderer.log').open('w') as rl:
-   producer=subprocess.Popen([str(b/'framelink_av_producer.exe'),str(b/'gstframelink.dll'),'--session',str(d/'session'),'--format','BGRA','--frames','1500','--input-pipeline',str(pipeline),'--timeout-ms','60000'],stdout=pl,stderr=subprocess.STDOUT,creationflags=child_flags)
+   producer=subprocess.Popen([str(b/'framelink_av_producer.exe'),str(b/'gstframelink.dll'),'--session',str(d/'session'),'--format','BGRA','--frames','500','--input-pipeline',str(pipeline),'--timeout-ms','60000'],stdout=pl,stderr=subprocess.STDOUT,creationflags=child_flags)
    render=subprocess.Popen([a.renderer,'--serve','m5-visible','--headless','-1','--av-exit-on-end','--control-port',str(a.renderer_port),'--av-session',str(d/'session'),'--av-plugin',str(b/'gstframelink.dll'),'--av-format','BGRA','--av-audio-sink','autoaudiosink'],cwd=d,stdout=rl,stderr=subprocess.STDOUT,creationflags=child_flags)
    children=[producer,render];deadline=time.monotonic()+90
    while any(x.poll() is None for x in children) and time.monotonic()<deadline and not stop.wait(.2) and not (r/'STOP').exists():pass
@@ -49,6 +49,7 @@ try:
     try:x.wait(timeout=5)
     except subprocess.TimeoutExpired:x.kill();x.wait()
    state['exit_codes']=[x.returncode for x in children]
+   (d/'result.json').write_text(json.dumps({'exit_codes':state['exit_codes']},indent=2))
    if any(state['exit_codes']) and not stop.is_set():state['phase']='failed';break
    state['phase']='restarting finite clip';stop.wait(1)
 finally:

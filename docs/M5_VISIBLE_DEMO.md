@@ -9,9 +9,9 @@ python test/m5_visible_demo.py --build build/Release --renderer C:/src/vkrender/
 ```
 
 The helper opens `http://127.0.0.1:18765` in the default browser, decodes a real
-30-second MJPEG/PCM AVI into the external producer, and starts a separate native
+10-second MJPEG/PCM AVI into the external producer, and starts a separate native
 renderer with WASAPI/default audio device. It loops **finite** sessions (30 loops
-is approximately 15 minutes, with session startup gaps). This is not an unbounded
+is approximately 5 minutes, with session startup gaps). This is not an unbounded
 live protocol. The tone is 440 Hz at amplitude 0.01; device volume is unchanged.
 Video is BGRA. Renderer control uses isolated port18766. Existing demos are not
 stopped. Choose different `--port`/`--renderer-port` if occupied.
@@ -28,7 +28,7 @@ Python helper itself.
 
 ## Caspar launch 2026-10-30
 
-Interactive task `FrameLink-M5-Visible-Demo` launches the helper from
+Interactive task `FrameLink-M5-Visible-Demo` runs90 loops (approximately15 minutes) and launches the helper from
 `C:/Users/jonsu/dev/framelink-m5-pipeline/visible-demo.ps1`. Restart using
 `Start-ScheduledTask -TaskName FrameLink-M5-Visible-Demo` after it has stopped.
 Existing RGB/NV12 demo PID18580 was inspected and preserved. New demo producer,
@@ -38,5 +38,5 @@ moving ball textures on cubes. Browser title and desktop screenshot confirmed
 that the page opened. This is not an audible/optical observation.
 
 Initial launch correctly hit the producer's whole-process15s deadline when
-using a60s clip. The helper was corrected to30s finite clips and60s producer
-timeout; this failed launch is not counted as a successful endurance test.
+using a60s clip. The helper was corrected to10s finite clips and60s producer
+timeout (renderer receiver also has a15s bounded session window); this failed launch is not counted as a successful endurance test.
