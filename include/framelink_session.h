@@ -45,7 +45,11 @@ typedef struct flClockMapping {
 FL_API flSessionResult flSessionNegotiate(const flSessionCapabilities* producer,
     const flSessionCapabilities* consumer, flVideoFormat* video, flAudioFormat* audio);
 FL_API flSessionResult flSessionValidate(const flSessionConfig* config);
-// Reject mismatched session identity and non-increasing generation on replacement.
+// Validate a decoded selection against BOTH actual offers (syntax alone is not
+// agreement). Accepts any exact common format; does not enforce preference order.
+FL_API flSessionResult flSessionValidateSelection(const flSessionConfig* config,
+    const flSessionCapabilities* producer, const flSessionCapabilities* consumer);
+// Reject changed session/track identities and non-increasing generation on replacement.
 FL_API flSessionResult flSessionValidateReplacement(const flSessionConfig* current,
     const flSessionConfig* next);
 // Exactly FL_SESSION_WIRE_SIZE bytes; LE integers, magic/version, zero reserved.

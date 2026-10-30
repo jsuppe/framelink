@@ -49,7 +49,9 @@ are capabilities of this particular endpoint, not merely enum values.
    and bounded offers, agree track formats and session/clock identities.
 2. **Negotiating -> configured:** owner sends the encoded configuration; peer
    checks it against the actual offers and acknowledges the *identical* config.
-   The codec validates syntax, not whether a selection appeared in either offer.
+   Use `flSessionValidateSelection` against both actual offers; decoding alone
+   validates syntax, not membership. The helper accepts any exact common format;
+   `flSessionNegotiate` supplies the deterministic default preference policy.
 3. **Configured -> ready:** allocate/open video and audio endpoints and exchange
    readiness for the same session ID and generation. Do not produce until both
    tracks and the clock mapping are ready.
@@ -67,6 +69,8 @@ session identity/generation (or bind the endpoint immutably to them). Reject
 stale replies and data. Retransmission of an identical configuration may be
 acknowledged idempotently by the adapter; `flSessionValidateReplacement` rejects
 an equal generation because it validates a *replacement*, not retransmission.
+It also rejects changed track IDs: these are stable identities within a session,
+not fields to recycle when a configuration changes.
 
 ## Wire configuration
 
@@ -150,5 +154,14 @@ pure contract library.
 `session_contract` checks negotiation, equivalent rational frame rates, malformed
 counts/formats, wire lengths/version/reserved fields, signed timestamp boundaries,
 stale generations, clock mismatches/uncertainty and cumulative audio rounding.
-This does **not** itself prove separate processes agree; the two-process M3
-integration tests are the completion gate for that behavior.
+`session_contract_peers` independently launches a proposer and an acceptor over
+harness-owned pipes. They validate and acknowledge identical configuration bytes,
+and reject an unoffered format, stale generation, changed track identity, unknown
+clock mapping, malformed wire data and a substituted acknowledgement. Capabilities
+and existing session/mapping are fixed fixture inputs; this establishes M2
+contract agreement/rejection, not dynamic offer exchange or authenticated media
+IPC. `session_contract_c_api` compiles a real C11 caller and links the exported ABI.
+
+M3 remains responsible for real producer/consumer rendezvous and negotiated media
+endpoints; M5 supplies Android application ownership/security. No media, hardware
+clock synchronization or process authentication is claimed by these CPU tests.

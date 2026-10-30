@@ -2,6 +2,7 @@
 #include "framelink_session.h"
 #include <cstring>
 #include <limits>
+#include <initializer_list>
 namespace {
 bool idValid(const flSessionId& id) { uint8_t v=0; for(auto b:id.bytes) v|=b; return v!=0; }
 bool same(const flSessionId& a,const flSessionId& b) { return !std::memcmp(a.bytes,b.bytes,16); }
@@ -40,9 +41,20 @@ flSessionResult flSessionValidate(const flSessionConfig* c) {
  if(!idValid(c->sessionId)||!idValid(c->clockId)||!c->generation||!c->videoTrackId||!c->audioTrackId||c->videoTrackId==c->audioTrackId||!videoValid(c->video)||!audioValid(c->audio)||c->epochNs<0||!c->videoQueueFrames||c->videoQueueFrames>16||!c->audioQueueMs||c->audioQueueMs>2000||!c->connectTimeoutMs||c->connectTimeoutMs>60000||!c->idleTimeoutMs||c->idleTimeoutMs>60000) return FL_SESSION_INVALID;
  return FL_SESSION_OK;
 }
+flSessionResult flSessionValidateSelection(const flSessionConfig* c,const flSessionCapabilities* p,const flSessionCapabilities* q) {
+ auto r=flSessionValidate(c); if(r!=FL_SESSION_OK)return r;
+ r=caps(p);if(r!=FL_SESSION_OK)return r;r=caps(q);if(r!=FL_SESSION_OK)return r;
+ for(const auto* offer:{p,q}) {
+  bool video=false,audio=false;
+  for(uint32_t i=0;i<offer->videoCount;i++) video|=eq(c->video,offer->video[i]);
+  for(uint32_t i=0;i<offer->audioCount;i++) audio|=eq(c->audio,offer->audio[i]);
+  if(!video||!audio)return FL_SESSION_INCOMPATIBLE;
+ }
+ return FL_SESSION_OK;
+}
 flSessionResult flSessionValidateReplacement(const flSessionConfig* c,const flSessionConfig* n) {
  auto r=flSessionValidate(c); if(r!=FL_SESSION_OK)return r; r=flSessionValidate(n); if(r!=FL_SESSION_OK)return r;
- if(!same(c->sessionId,n->sessionId))return FL_SESSION_INVALID;
+ if(!same(c->sessionId,n->sessionId)||c->videoTrackId!=n->videoTrackId||c->audioTrackId!=n->audioTrackId)return FL_SESSION_INVALID;
  return n->generation>c->generation ? FL_SESSION_OK:FL_SESSION_STALE;
 }
 flSessionResult flSessionEncode(const flSessionConfig* c,void* data,size_t size) {

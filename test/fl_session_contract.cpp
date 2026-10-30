@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <climits>
+#include <initializer_list>
 #define CHECK(x) do { if(!(x)) { std::fprintf(stderr,"line %d: %s\n",__LINE__,#x);std::exit(1); } } while(0)
 static flSessionConfig config() {
  flSessionConfig c{}; c.version=1;c.sessionId.bytes[0]=1;c.clockId.bytes[0]=2;c.generation=1;
@@ -25,6 +26,12 @@ int main() {
  CHECK(flSessionNegotiate(nullptr,&q,&v,&a)==FL_SESSION_INVALID);
  auto next=c;CHECK(flSessionValidateReplacement(&c,&next)==FL_SESSION_STALE);
  next.generation++;CHECK(flSessionValidateReplacement(&c,&next)==FL_SESSION_OK);
+ auto changedTrack=next;changedTrack.audioTrackId=3;CHECK(flSessionValidateReplacement(&c,&changedTrack)==FL_SESSION_INVALID);
+ changedTrack=next;changedTrack.videoTrackId=3;CHECK(flSessionValidateReplacement(&c,&changedTrack)==FL_SESSION_INVALID);
+ changedTrack=next;changedTrack.clockId.bytes[0]=8;CHECK(flSessionValidateReplacement(&c,&changedTrack)==FL_SESSION_OK);
+ changedTrack=c;changedTrack.generation=UINT64_MAX;next=changedTrack;next.generation=1;
+ CHECK(flSessionValidateReplacement(&changedTrack,&next)==FL_SESSION_STALE);
+ next=c;next.generation=2;
  next.sessionId.bytes[1]=1;CHECK(flSessionValidateReplacement(&c,&next)==FL_SESSION_INVALID);
  next=c;next.video.width=1919;CHECK(flSessionValidate(&next)==FL_SESSION_INVALID);
  next=c;next.audioTrackId=1;CHECK(flSessionValidate(&next)==FL_SESSION_INVALID);
@@ -32,7 +39,7 @@ int main() {
  next=c;next.generation=0;CHECK(flSessionValidate(&next)==FL_SESSION_INVALID);
  next=c;next.clockId={};CHECK(flSessionValidate(&next)==FL_SESSION_INVALID);
  unsigned char wire[FL_SESSION_WIRE_SIZE];CHECK(flSessionEncode(&c,wire,sizeof(wire))==FL_SESSION_OK);
- CHECK(wire[0]=='F'&&wire[1]=='V'&&wire[2]=='S'&&wire[3]=='1');CHECK(wire[48]==1&&wire[49]==0);
+ CHECK(wire[0]=='F'&&wire[1]=='V'&&wire[2]=='S'&&wire[3]=='1');CHECK(wire[40]==1&&wire[41]==0);
  flSessionConfig decoded{};CHECK(flSessionDecode(wire,sizeof(wire),&decoded)==FL_SESSION_OK);
  CHECK(decoded.generation==c.generation&&decoded.epochNs==c.epochNs&&decoded.audio.rate==48000&&decoded.video.width==1920);
  unsigned char again[FL_SESSION_WIRE_SIZE];CHECK(flSessionEncode(&decoded,again,sizeof(again))==FL_SESSION_OK);CHECK(!std::memcmp(wire,again,sizeof(wire)));
@@ -60,5 +67,36 @@ int main() {
  CHECK(flSessionSampleOffset(1,UINT32_MAX,&result)==FL_SESSION_INVALID);
  // Demonstrate exact cumulative timing, avoiding accumulated block-rounding drift.
  int64_t end,start;CHECK(flSessionSampleOffset(44100,44100,&end)==FL_SESSION_OK);CHECK(flSessionSampleOffset(44099,44100,&start)==FL_SESSION_OK);CHECK(end-start==22676);
+ // Invalid unselected capability entries cannot be smuggled past selection.
+ q=p;q.videoCount=2;q.video[1]=c.video;q.video[1].format=UINT32_MAX;
+ v.width=777;a.rate=777;CHECK(flSessionNegotiate(&p,&q,&v,&a)==FL_SESSION_INVALID);CHECK(v.width==777&&a.rate==777);
+ q=p;CHECK(flSessionValidateSelection(&c,&p,&q)==FL_SESSION_OK);
+ q.video[0].fpsNum=120;q.video[0].fpsDen=2;CHECK(flSessionValidateSelection(&c,&p,&q)==FL_SESSION_OK);
+ next=c;next.audio.rate=96000;CHECK(flSessionValidate(&next)==FL_SESSION_OK);
+ CHECK(flSessionValidateSelection(&next,&p,&q)==FL_SESSION_INCOMPATIBLE);
+ next=c;next.video.width=1280;CHECK(flSessionValidateSelection(&next,&p,&q)==FL_SESSION_INCOMPATIBLE);
+ q=p;q.video[0].width=1280;CHECK(flSessionValidateSelection(&c,&p,&q)==FL_SESSION_INCOMPATIBLE);
+ q=p;q.audio[1].pcm=UINT32_MAX;CHECK(flSessionValidateSelection(&c,&p,&q)==FL_SESSION_INVALID);
+ CHECK(flSessionValidateSelection(&c,nullptr,&p)==FL_SESSION_INVALID);
+ const uint32_t invalidEnums[]={0,5,UINT32_MAX};
+ for(auto value:invalidEnums){next=c;next.video.format=value;CHECK(flSessionValidate(&next)==FL_SESSION_INVALID);}
+ for(auto value:{0u,3u,UINT32_MAX}){
+  next=c;next.audio.pcm=value;CHECK(flSessionValidate(&next)==FL_SESSION_INVALID);
+  next=c;next.audio.layout=value;CHECK(flSessionValidate(&next)==FL_SESSION_INVALID);
+ }
+ for(auto value:{0u,16385u,UINT32_MAX}){
+  next=c;next.video.width=value;CHECK(flSessionValidate(&next)==FL_SESSION_INVALID);
+  next=c;next.video.height=value;CHECK(flSessionValidate(&next)==FL_SESSION_INVALID);
+ }
+ for(auto value:{0u,1000001u,UINT32_MAX}){
+  next=c;next.video.fpsNum=value;CHECK(flSessionValidate(&next)==FL_SESSION_INVALID);
+  next=c;next.video.fpsDen=value;CHECK(flSessionValidate(&next)==FL_SESSION_INVALID);
+ }
+ for(auto value:{0u,7999u,192001u,UINT32_MAX}){next=c;next.audio.rate=value;CHECK(flSessionValidate(&next)==FL_SESSION_INVALID);}
+ next=c;next.video={FL_FORMAT_RGBA8,16384,16384,1000000,1000000};next.audio.rate=192000;CHECK(flSessionValidate(&next)==FL_SESSION_OK);
+ next=c;next.epochNs=-1;CHECK(flSessionValidate(&next)==FL_SESSION_INVALID);
+ // Failed helpers never publish partial selections or timestamp values.
+ result=123;CHECK(flSessionSampleOffset(UINT64_MAX,192000,&result)==FL_SESSION_TIME_RANGE);CHECK(result==123);
+ CHECK(flSessionMapPts(&c,&m,0,INT64_MAX,&result)==FL_SESSION_TIME_RANGE);CHECK(result==123);
  std::puts("session contract: negotiation, codec, generation and clock bounds passed");
 }
