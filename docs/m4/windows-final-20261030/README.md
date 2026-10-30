@@ -30,3 +30,7 @@ was restored to the committed original afterward. This still leaves the initial
 intermittent missing-sample event unexplained.
 Final restored/unmodified test, rebuilt Release: isolated quiet repeat20/20 passed.
 The full-suite result remains46/47; later repeat success is not a causal fix.
+
+Follow-up: see `../windows-readiness-20261030/` for a reproduced Windows endpoint
+publication race, readiness-handshake fix and post-fix validation. Earlier failure
+logs here remain unchanged as historical evidence.

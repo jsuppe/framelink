@@ -1,0 +1,31 @@
+UpdateCTestConfiguration  from :C:/Users/jonsu/dev/framelink-m4-20261030/build-final/DartConfiguration.tcl
+Test project C:/Users/jonsu/dev/framelink-m4-20261030/build-final
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 44
+    Start 44: av_offer_bounds
+
+44: Test command: C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_av_offer_bounds.exe
+44: Working Directory: C:/Users/jonsu/dev/framelink-m4-20261030/build-final
+44: Test timeout computed to be: 9999879
+1/2 Test #44: av_offer_bounds ..................   Passed    0.07 sec
+test 48
+    Start 48: av_audio_segment
+
+48: Test command: C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_audio_segment.exe
+48: Working Directory: C:/Users/jonsu/dev/framelink-m4-20261030/build-final
+48: Test timeout computed to be: 9999879
+48: audio segment normalization, preserved offset, deadline and rejection tests passed
+2/2 Test #48: av_audio_segment .................   Passed    0.07 sec
+
+The following tests passed:
+	av_offer_bounds
+	av_audio_segment
+
+100% tests passed, 0 tests failed out of 2
+
+Total Test time (real) =   0.17 sec
