@@ -51,3 +51,22 @@ three seconds of playback. Neither initial failure is counted as a pass.
 
 The existing GStreamer path is viable on-device. No measurement presently
 justifies replacing it with a custom PCM pipe. Additional deployment work remains.
+
+## Cross-APK feasibility follow-up
+
+`android/binder-spike` adds isolated broker/client/impostor APKs. On the same API35
+physical tablet with SELinux **Enforcing**, all **5/5** gates passed:
+
+- Different-UID AHardwareBuffer shared-pixel roundtrip and explicit socket revoke.
+- Client process death cleanup.
+- Independent Binder owner-token process death while client retains socket: EOF.
+- Replacement grant remains usable after stale-token revoke.
+- Independently signed client rejected before any grant.
+
+See `binder-spike-evidence/`, including distinct signing certificate digests.
+This clears the connected-FD architecture feasibility question. It does **not**
+complete cross-app A/V integration: Android fd adoption and session endpoint
+provider APIs, protocol generation/lifetime rules, and end-to-end A/V tests remain.
+No new PCM transport was introduced; the spike tests the existing native
+AHardwareBuffer socket transfer primitive only. Revocation cannot invalidate
+previously transferred buffer handles; new generations must retire old allocations.

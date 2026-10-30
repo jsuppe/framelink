@@ -1,0 +1,143 @@
+> Task :broker:preBuild UP-TO-DATE
+> Task :broker:preDebugBuild UP-TO-DATE
+> Task :broker:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :broker:compileDebugAidl UP-TO-DATE
+> Task :broker:javaPreCompileDebug UP-TO-DATE
+> Task :broker:checkDebugAarMetadata UP-TO-DATE
+> Task :broker:generateDebugResValues UP-TO-DATE
+> Task :broker:mapDebugSourceSetPaths UP-TO-DATE
+> Task :broker:generateDebugResources UP-TO-DATE
+> Task :broker:mergeDebugResources UP-TO-DATE
+> Task :broker:packageDebugResources UP-TO-DATE
+> Task :broker:parseDebugLocalResources UP-TO-DATE
+> Task :broker:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :broker:extractDeepLinksDebug UP-TO-DATE
+> Task :broker:processDebugMainManifest UP-TO-DATE
+> Task :broker:processDebugManifest UP-TO-DATE
+> Task :broker:processDebugManifestForPackage UP-TO-DATE
+> Task :broker:processDebugResources UP-TO-DATE
+> Task :broker:compileDebugJavaWithJavac UP-TO-DATE
+> Task :broker:mergeDebugShaders UP-TO-DATE
+> Task :broker:compileDebugShaders NO-SOURCE
+> Task :broker:generateDebugAssets UP-TO-DATE
+> Task :broker:mergeDebugAssets UP-TO-DATE
+> Task :broker:compressDebugAssets UP-TO-DATE
+> Task :broker:processDebugJavaRes NO-SOURCE
+> Task :broker:mergeDebugJavaResource UP-TO-DATE
+> Task :broker:checkDebugDuplicateClasses UP-TO-DATE
+> Task :broker:desugarDebugFileDependencies UP-TO-DATE
+> Task :broker:mergeDebugStartupProfile UP-TO-DATE
+> Task :broker:mergeExtDexDebug UP-TO-DATE
+> Task :broker:mergeLibDexDebug UP-TO-DATE
+> Task :broker:dexBuilderDebug UP-TO-DATE
+> Task :broker:mergeProjectDexDebug UP-TO-DATE
+> Task :broker:configureCMakeDebug[arm64-v8a]
+> Task :broker:buildCMakeDebug[arm64-v8a]
+> Task :broker:mergeDebugJniLibFolders UP-TO-DATE
+> Task :broker:validateSigningDebug UP-TO-DATE
+> Task :broker:writeDebugAppMetadata UP-TO-DATE
+> Task :broker:writeDebugSigningConfigVersions UP-TO-DATE
+> Task :client:preBuild UP-TO-DATE
+> Task :client:preDebugBuild UP-TO-DATE
+> Task :client:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :client:compileDebugAidl UP-TO-DATE
+> Task :client:javaPreCompileDebug UP-TO-DATE
+> Task :client:checkDebugAarMetadata UP-TO-DATE
+> Task :client:generateDebugResValues UP-TO-DATE
+> Task :broker:mergeDebugNativeLibs
+> Task :client:mapDebugSourceSetPaths UP-TO-DATE
+> Task :client:generateDebugResources UP-TO-DATE
+> Task :client:mergeDebugResources UP-TO-DATE
+> Task :client:packageDebugResources UP-TO-DATE
+> Task :client:parseDebugLocalResources UP-TO-DATE
+> Task :client:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :client:extractDeepLinksDebug UP-TO-DATE
+> Task :client:processDebugMainManifest UP-TO-DATE
+> Task :client:processDebugManifest UP-TO-DATE
+> Task :broker:stripDebugDebugSymbols
+> Task :client:processDebugManifestForPackage UP-TO-DATE
+> Task :client:processDebugResources UP-TO-DATE
+> Task :client:compileDebugJavaWithJavac UP-TO-DATE
+> Task :client:mergeDebugShaders UP-TO-DATE
+> Task :client:compileDebugShaders NO-SOURCE
+> Task :client:generateDebugAssets UP-TO-DATE
+> Task :client:mergeDebugAssets UP-TO-DATE
+> Task :client:compressDebugAssets UP-TO-DATE
+> Task :client:processDebugJavaRes NO-SOURCE
+> Task :client:mergeDebugJavaResource UP-TO-DATE
+> Task :client:checkDebugDuplicateClasses UP-TO-DATE
+> Task :client:desugarDebugFileDependencies UP-TO-DATE
+> Task :client:mergeDebugStartupProfile UP-TO-DATE
+> Task :client:mergeExtDexDebug UP-TO-DATE
+> Task :client:mergeLibDexDebug UP-TO-DATE
+> Task :client:dexBuilderDebug UP-TO-DATE
+> Task :client:mergeProjectDexDebug UP-TO-DATE
+> Task :client:configureCMakeDebug[arm64-v8a]
+> Task :client:buildCMakeDebug[arm64-v8a]
+> Task :client:mergeDebugJniLibFolders UP-TO-DATE
+> Task :client:validateSigningDebug UP-TO-DATE
+> Task :client:writeDebugAppMetadata UP-TO-DATE
+> Task :client:writeDebugSigningConfigVersions UP-TO-DATE
+> Task :impostor:preBuild UP-TO-DATE
+> Task :impostor:preDebugBuild UP-TO-DATE
+> Task :impostor:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :impostor:compileDebugAidl UP-TO-DATE
+> Task :impostor:javaPreCompileDebug UP-TO-DATE
+> Task :impostor:checkDebugAarMetadata UP-TO-DATE
+> Task :impostor:generateDebugResValues UP-TO-DATE
+> Task :impostor:mapDebugSourceSetPaths UP-TO-DATE
+> Task :client:mergeDebugNativeLibs
+> Task :impostor:generateDebugResources UP-TO-DATE
+> Task :impostor:mergeDebugResources UP-TO-DATE
+> Task :impostor:packageDebugResources UP-TO-DATE
+> Task :impostor:parseDebugLocalResources UP-TO-DATE
+> Task :impostor:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :impostor:extractDeepLinksDebug UP-TO-DATE
+> Task :impostor:processDebugMainManifest UP-TO-DATE
+> Task :client:stripDebugDebugSymbols
+> Task :broker:packageDebug
+> Task :broker:createDebugApkListingFileRedirect UP-TO-DATE
+> Task :broker:assembleDebug
+> Task :impostor:processDebugManifest UP-TO-DATE
+> Task :impostor:processDebugManifestForPackage UP-TO-DATE
+> Task :impostor:processDebugResources UP-TO-DATE
+> Task :impostor:compileDebugJavaWithJavac UP-TO-DATE
+> Task :impostor:mergeDebugShaders UP-TO-DATE
+> Task :impostor:compileDebugShaders NO-SOURCE
+> Task :impostor:generateDebugAssets UP-TO-DATE
+> Task :impostor:mergeDebugAssets UP-TO-DATE
+> Task :impostor:compressDebugAssets UP-TO-DATE
+> Task :impostor:processDebugJavaRes NO-SOURCE
+> Task :impostor:mergeDebugJavaResource UP-TO-DATE
+> Task :impostor:checkDebugDuplicateClasses UP-TO-DATE
+> Task :impostor:desugarDebugFileDependencies UP-TO-DATE
+> Task :impostor:mergeDebugStartupProfile UP-TO-DATE
+> Task :impostor:mergeExtDexDebug UP-TO-DATE
+> Task :impostor:mergeLibDexDebug UP-TO-DATE
+> Task :impostor:dexBuilderDebug UP-TO-DATE
+> Task :impostor:mergeProjectDexDebug UP-TO-DATE
+> Task :impostor:configureCMakeDebug[arm64-v8a]
+> Task :impostor:buildCMakeDebug[arm64-v8a]
+> Task :impostor:mergeDebugJniLibFolders UP-TO-DATE
+> Task :impostor:validateSigningDebug UP-TO-DATE
+> Task :impostor:writeDebugAppMetadata UP-TO-DATE
+> Task :impostor:writeDebugSigningConfigVersions UP-TO-DATE
+> Task :client:packageDebug
+> Task :client:createDebugApkListingFileRedirect UP-TO-DATE
+> Task :client:assembleDebug
+> Task :impostor:mergeDebugNativeLibs
+> Task :impostor:stripDebugDebugSymbols
+> Task :impostor:packageDebug
+> Task :impostor:createDebugApkListingFileRedirect UP-TO-DATE
+> Task :impostor:assembleDebug
+
+[Incubating] Problems report is available at: file:///tmp/framelink-m5-android/android/binder-spike/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 789ms
+111 actionable tasks: 15 executed, 96 up-to-date

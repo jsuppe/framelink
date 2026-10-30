@@ -1,0 +1,7 @@
+--------- beginning of main
+10-30 17:37:46.901  7321  7321 I FLClient: bind=true
+10-30 17:37:46.912  7195  7212 I FLBroker: grant uid=10302 broker_uid=10301
+10-30 17:37:46.925  7321  7379 I FLClient: pixel_roundtrip=true uid=10302
+10-30 17:37:46.957  7321  7379 I FLClient: owner_death_eof=true
+10-30 17:37:46.957  7195  7212 I FLBroker: revoke uid=10302 reason=owner-death
+10-30 17:37:46.957  7195  7380 I FLBroker: transfer result=0
