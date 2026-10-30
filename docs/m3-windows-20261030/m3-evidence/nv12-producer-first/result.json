@@ -1,0 +1,32 @@
+{
+  "case": "nv12-producer-first",
+  "passed": true,
+  "results": {
+    "producer": {
+      "role": "producer",
+      "ok": true,
+      "sessions": 1,
+      "video_frames": 50,
+      "audio_blocks": 50,
+      "errors": 0,
+      "disconnects": 0
+    },
+    "consumer": {
+      "role": "consumer",
+      "ok": true,
+      "sessions": 1,
+      "video_frames": 50,
+      "audio_blocks": 50,
+      "errors": 0,
+      "disconnects": 0
+    }
+  },
+  "verified_session": {
+    "event": "session-complete",
+    "instance": "a0eece5e1205590581d27a32f4b239f7",
+    "generation": 1,
+    "format": "NV12",
+    "video_frames": 50,
+    "audio_blocks": 50
+  }
+}

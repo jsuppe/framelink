@@ -1,0 +1,32 @@
+{
+  "case": "nv12-consumer-first",
+  "passed": true,
+  "results": {
+    "consumer": {
+      "role": "consumer",
+      "ok": true,
+      "sessions": 1,
+      "video_frames": 50,
+      "audio_blocks": 50,
+      "errors": 0,
+      "disconnects": 0
+    },
+    "producer": {
+      "role": "producer",
+      "ok": true,
+      "sessions": 1,
+      "video_frames": 50,
+      "audio_blocks": 50,
+      "errors": 0,
+      "disconnects": 0
+    }
+  },
+  "verified_session": {
+    "event": "session-complete",
+    "instance": "eed74c2cdcbe603eee3bea53cf4df24d",
+    "generation": 1,
+    "format": "NV12",
+    "video_frames": 50,
+    "audio_blocks": 50
+  }
+}

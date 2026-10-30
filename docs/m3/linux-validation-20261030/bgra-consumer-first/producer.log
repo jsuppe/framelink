@@ -1,0 +1,7 @@
+{"command": ["/tmp/framelink-m3-runtime-build/framelink_av_producer", "/tmp/framelink-m3-runtime-build/libgstframelink.so", "--session", "/tmp/m3-matrix-final/bgra-consumer-first/session", "--frames", "50", "--timeout-ms", "20000", "--format", "BGRA", "--width", "160", "--height", "90", "--fps", "50", "--rate", "48000", "--channels", "2"]}
+{"event":"session-ready","instance":"af3c9be53bb44e07d908c33bd9e18063","generation":1,"format":"BGRA","video_frames":0,"audio_blocks":0}
+{"event":"media-progress","instance":"af3c9be53bb44e07d908c33bd9e18063","generation":1,"format":"BGRA","video_frames":1,"audio_blocks":1}
+{"event":"media-progress","instance":"af3c9be53bb44e07d908c33bd9e18063","generation":1,"format":"BGRA","video_frames":25,"audio_blocks":25}
+{"event":"media-progress","instance":"af3c9be53bb44e07d908c33bd9e18063","generation":1,"format":"BGRA","video_frames":50,"audio_blocks":50}
+{"event":"session-complete","instance":"af3c9be53bb44e07d908c33bd9e18063","generation":1,"format":"BGRA","video_frames":50,"audio_blocks":50}
+{"role":"producer","ok":true,"sessions":1,"video_frames":50,"audio_blocks":50,"errors":0,"disconnects":0}

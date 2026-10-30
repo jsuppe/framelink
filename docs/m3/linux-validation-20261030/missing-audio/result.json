@@ -1,0 +1,14 @@
+{
+  "case": "missing-audio",
+  "passed": true,
+  "verified_before_fault": {
+    "event": "media-progress",
+    "instance": "fd52c779b056c9c50f5e5266b587327c",
+    "generation": 1,
+    "format": "BGRA",
+    "video_frames": 1,
+    "audio_blocks": 1
+  },
+  "expected_error": "audio timeout/EOS",
+  "consumer_exit": 1
+}

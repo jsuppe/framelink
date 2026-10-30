@@ -1,0 +1,3 @@
+{"command": ["C:\\Users\\jonsu\\dev\\framelink-m3-20261030\\build\\Release\\framelink_av_producer.exe", "C:\\Users\\jonsu\\dev\\framelink-m3-20261030\\build\\Release\\gstframelink.dll", "--session", "C:\\Users\\jonsu\\dev\\framelink-m3-20261030\\m3-evidence\\peer-death\\session", "--frames", "50", "--timeout-ms", "20000", "--format", "BGRA", "--width", "160", "--height", "90", "--fps", "50", "--rate", "48000", "--channels", "2", "--sessions", "1"]}
+{"event":"session-ready","instance":"b047d4bd3c1a61e7e688570c89d9608a","generation":1,"format":"BGRA","video_frames":0,"audio_blocks":0}
+{"event":"media-progress","instance":"b047d4bd3c1a61e7e688570c89d9608a","generation":1,"format":"BGRA","video_frames":1,"audio_blocks":1}

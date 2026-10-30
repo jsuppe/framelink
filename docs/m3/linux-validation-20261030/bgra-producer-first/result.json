@@ -1,0 +1,32 @@
+{
+  "case": "bgra-producer-first",
+  "passed": true,
+  "results": {
+    "producer": {
+      "role": "producer",
+      "ok": true,
+      "sessions": 1,
+      "video_frames": 50,
+      "audio_blocks": 50,
+      "errors": 0,
+      "disconnects": 0
+    },
+    "consumer": {
+      "role": "consumer",
+      "ok": true,
+      "sessions": 1,
+      "video_frames": 50,
+      "audio_blocks": 50,
+      "errors": 0,
+      "disconnects": 0
+    }
+  },
+  "verified_session": {
+    "event": "session-complete",
+    "instance": "bc5ecad908fe30afdc544b8239496057",
+    "generation": 1,
+    "format": "BGRA",
+    "video_frames": 50,
+    "audio_blocks": 50
+  }
+}

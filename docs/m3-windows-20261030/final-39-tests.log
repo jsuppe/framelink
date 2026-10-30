@@ -1,0 +1,158 @@
+-- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.26300.
+-- framelink: building GStreamer elements (gstframelink)
+-- Configuring done (0.8s)
+-- Generating done (0.5s)
+-- Build files have been written to: C:/Users/jonsu/dev/framelink-m3-20261030/build
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  fl_ipc_win32.cpp
+  fl_trace.cpp
+  framelink_session.cpp
+  framelink_slots.cpp
+  framelink_win.cpp
+  Generating Code...
+     Creating library C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink.lib and object C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink.exp
+  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\framelink.dll
+  gstframelink.cpp
+     Creating library C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/gstframelink.lib and object C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/gstframelink.exp
+  gstframelink.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\gstframelink.dll
+  av_auth.cpp
+  av_rendezvous.cpp
+  fl_portable_map.cpp
+  fl_produce.cpp
+  fl_consume.cpp
+  fl_gst_timestamps.cpp
+  fl_nv12_layout.cpp
+  fl_disconnect_win.cpp
+  fl_gst_nv12.cpp
+  fl_nv12_win.cpp
+  av_rendezvous.cpp
+  fl_produce.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\fl_produce.exe
+  fl_nv12_layout.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\fl_nv12_layout.exe
+  test_av_rendezvous.cpp
+  fl_portable_map.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\fl_portable_map.exe
+  fl_ready_timeout_win.cpp
+  fl_reconnect_held.cpp
+  fl_session_c_api.c
+  fl_session_contract.cpp
+  fl_consume.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\fl_consume.exe
+  test_av_auth.cpp
+  fl_disconnect_win.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\fl_disconnect_win.exe
+  fl_session_c_api.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\fl_session_c_api.exe
+  fl_session_peer.cpp
+  fl_trace_test.cpp
+  fl_gst_timestamps.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\fl_gst_timestamps.exe
+  av_apps.cpp
+  fl_gst_nv12.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\fl_gst_nv12.exe
+  fl_nv12_win.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\fl_nv12_win.exe
+  fl_session_peer.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\fl_session_peer.exe
+  fl_session_contract.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\fl_session_contract.exe
+  fl_reconnect_held.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\fl_reconnect_held.exe
+  av_apps.cpp
+  av_session.cpp
+  producer.cpp
+  consumer.cpp
+  Generating Code...
+  Generating Code...
+  fl_ready_timeout_win.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\fl_ready_timeout_win.exe
+  av_auth.cpp
+  fl_av_auth.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\fl_av_auth.exe
+  av_auth.cpp
+  fl_trace_test.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\fl_trace_test.exe
+  sample_common.cpp
+  sample_common.cpp
+  av_rendezvous.cpp
+  framelink_av_session.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\framelink_av_session.exe
+  av_rendezvous.cpp
+  fl_av_rendezvous.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\fl_av_rendezvous.exe
+  Generating Code...
+  Generating Code...
+  Generating Code...
+  Generating Code...
+  framelink_av_consumer.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\framelink_av_consumer.exe
+  framelink_producer.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\framelink_producer.exe
+  framelink_consumer.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\framelink_consumer.exe
+  framelink_av_producer.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\framelink_av_producer.exe
+Test project C:/Users/jonsu/dev/framelink-m3-20261030/build
+      Start  1: session_contract
+ 1/39 Test  #1: session_contract .................   Passed    0.03 sec
+      Start  2: session_contract_c_api
+ 2/39 Test  #2: session_contract_c_api ...........   Passed    0.02 sec
+      Start  3: roundtrip
+ 3/39 Test  #3: roundtrip ........................   Passed    0.46 sec
+      Start  4: roundtrip_reattach
+ 4/39 Test  #4: roundtrip_reattach ...............   Passed    2.67 sec
+      Start  5: nv12_layout
+ 5/39 Test  #5: nv12_layout ......................   Passed    0.02 sec
+      Start  6: gst_nv12_roundtrip
+ 6/39 Test  #6: gst_nv12_roundtrip ...............   Passed    0.71 sec
+      Start  7: gst_rgb10a2_roundtrip
+ 7/39 Test  #7: gst_rgb10a2_roundtrip ............   Passed    0.69 sec
+      Start  8: nv12_windows_roundtrip
+ 8/39 Test  #8: nv12_windows_roundtrip ...........   Passed    0.45 sec
+      Start  9: nv12_windows_1080p
+ 9/39 Test  #9: nv12_windows_1080p ...............   Passed    0.49 sec
+      Start 10: sample_bgra
+10/39 Test #10: sample_bgra ......................   Passed    0.51 sec
+      Start 11: sample_nv12
+11/39 Test #11: sample_nv12 ......................   Passed    0.47 sec
+      Start 12: sample_slow
+12/39 Test #12: sample_slow ......................   Passed    0.74 sec
+      Start 13: sample_metadata
+13/39 Test #13: sample_metadata ..................   Passed    0.47 sec
+      Start 14: sample_reconnect
+14/39 Test #14: sample_reconnect .................   Passed    0.71 sec
+      Start 15: sample_geometry
+15/39 Test #15: sample_geometry ..................   Passed    0.47 sec
+      Start 16: sample_slots
+16/39 Test #16: sample_slots .....................   Passed    0.47 sec
+      Start 17: sample_gpu_sync
+17/39 Test #17: sample_gpu_sync ..................   Passed    0.48 sec
+      Start 18: sample_invalid_cli
+18/39 Test #18: sample_invalid_cli ...............   Passed    0.01 sec
+      Start 19: sample_wrong_role
+19/39 Test #19: sample_wrong_role ................   Passed    0.01 sec
+      Start 20: sample_corruption
+20/39 Test #20: sample_corruption ................   Passed    0.56 sec
+      Start 21: disconnect_full_ring
+21/39 Test #21: disconnect_full_ring .............   Passed    0.22 sec
+      Start 22: trace_disabled
+22/39 Test #22: trace_disabled ...................   Passed    0.02 sec
+      Start 23: trace_bounded_concurrent
+23/39 Test #23: trace_bounded_concurrent .........   Passed    0.01 sec
+      Start 24: trace_thread_limit
+24/39 Test #24: trace_thread_limit ...............   Passed    0.02 sec
+      Start 25: portable_map_nv12
+25/39 Test #25: portable_map_nv12 ................   Passed    0.24 sec
+      Start 26: portable_map_rgba
+26/39 Test #26: portable_map_rgba ................   Passed    0.23 sec
+      Start 27: portable_map_bgra
+27/39 Test #27: portable_map_bgra ................   Passed    0.23 sec
+      Start 28: portable_map_rgb10a2
+28/39 Test #28: portable_map_rgb10a2 .............   Passed    0.23 sec
+      Start 29: ready_fence_timeout
+29/39 Test #29: ready_fence_timeout ..............   Passed    0.26 sec
+      Start 30: reconnect_held
+30/39 Test #30: reconnect_held ...................   Passed    0.34 sec
+      Start 31: gst_av_session
+31/39 Test #31: gst_av_session ...................   Passed    3.51 sec
+      Start 32: gst_av_faults
+32/39 Test #32: gst_av_faults ....................   Passed    2.60 sec
+      Start 33: gst_timestamp_contract
+33/39 Test #33: gst_timestamp_contract ...........   Passed    1.01 sec
+      Start 34: session_contract_peers
+34/39 Test #34: session_contract_peers ...........   Passed    0.28 sec
+      Start 35: av_rendezvous
+35/39 Test #35: av_rendezvous ....................   Passed    0.04 sec
+      Start 36: av_auth
+36/39 Test #36: av_auth ..........................   Passed    0.03 sec
+      Start 37: av_producer_help
+37/39 Test #37: av_producer_help .................   Passed    0.03 sec
+      Start 38: av_consumer_help
+38/39 Test #38: av_consumer_help .................   Passed    0.03 sec
+      Start 39: m3_av_apps
+39/39 Test #39: m3_av_apps .......................   Passed   30.08 sec
+
+100% tests passed, 0 tests failed out of 39
+
+Total Test time (real) =  50.08 sec

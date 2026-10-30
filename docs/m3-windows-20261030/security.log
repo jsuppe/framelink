@@ -1,0 +1,71 @@
+-- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.26300.
+-- framelink: building GStreamer elements (gstframelink)
+-- Configuring done (0.6s)
+-- Generating done (0.3s)
+-- Build files have been written to: C:/Users/jonsu/dev/framelink-m3-20261030/build
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  1>Checking Build System
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m3-20261030/CMakeLists.txt
+  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\framelink.dll
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m3-20261030/CMakeLists.txt
+  gstframelink.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\gstframelink.dll
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m3-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m3-20261030/CMakeLists.txt
+  test_av_auth.cpp
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m3-20261030/CMakeLists.txt
+  test_av_rendezvous.cpp
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m3-20261030/CMakeLists.txt
+  fl_portable_map.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\fl_portable_map.exe
+  fl_produce.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\fl_produce.exe
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m3-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m3-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m3-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m3-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m3-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m3-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m3-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m3-20261030/CMakeLists.txt
+  fl_ready_timeout_win.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\fl_ready_timeout_win.exe
+  fl_reconnect_held.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\fl_reconnect_held.exe
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m3-20261030/CMakeLists.txt
+  fl_nv12_layout.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\fl_nv12_layout.exe
+  fl_disconnect_win.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\fl_disconnect_win.exe
+  fl_consume.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\fl_consume.exe
+  fl_nv12_win.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\fl_nv12_win.exe
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m3-20261030/CMakeLists.txt
+  fl_gst_nv12.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\fl_gst_nv12.exe
+  fl_session_c_api.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\fl_session_c_api.exe
+  fl_gst_timestamps.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\fl_gst_timestamps.exe
+  fl_session_contract.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\fl_session_contract.exe
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m3-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m3-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m3-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m3-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m3-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m3-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m3-20261030/CMakeLists.txt
+  fl_session_peer.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\fl_session_peer.exe
+  framelink_av_session.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\framelink_av_session.exe
+  fl_trace_test.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\fl_trace_test.exe
+  framelink_consumer.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\framelink_consumer.exe
+  framelink_av_consumer.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\framelink_av_consumer.exe
+  framelink_av_producer.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\framelink_av_producer.exe
+  av_auth.cpp
+  av_rendezvous.cpp
+  av_rendezvous.cpp
+  framelink_producer.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\framelink_producer.exe
+  Generating Code...
+  Generating Code...
+  fl_av_auth.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\fl_av_auth.exe
+  fl_av_rendezvous.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\fl_av_rendezvous.exe
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m3-20261030/CMakeLists.txt
+Test project C:/Users/jonsu/dev/framelink-m3-20261030/build
+    Start 35: av_rendezvous
+1/2 Test #35: av_rendezvous ....................   Passed    0.05 sec
+    Start 36: av_auth
+2/2 Test #36: av_auth ..........................   Passed    0.03 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Total Test time (real) =   0.12 sec

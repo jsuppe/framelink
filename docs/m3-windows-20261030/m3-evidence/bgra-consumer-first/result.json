@@ -1,0 +1,32 @@
+{
+  "case": "bgra-consumer-first",
+  "passed": true,
+  "results": {
+    "consumer": {
+      "role": "consumer",
+      "ok": true,
+      "sessions": 1,
+      "video_frames": 50,
+      "audio_blocks": 50,
+      "errors": 0,
+      "disconnects": 0
+    },
+    "producer": {
+      "role": "producer",
+      "ok": true,
+      "sessions": 1,
+      "video_frames": 50,
+      "audio_blocks": 50,
+      "errors": 0,
+      "disconnects": 0
+    }
+  },
+  "verified_session": {
+    "event": "session-complete",
+    "instance": "573072f7d318579117c37ef6630ea5c7",
+    "generation": 1,
+    "format": "BGRA",
+    "video_frames": 50,
+    "audio_blocks": 50
+  }
+}

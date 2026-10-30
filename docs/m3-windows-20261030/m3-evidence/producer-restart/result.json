@@ -1,0 +1,30 @@
+{
+  "case": "producer-restart",
+  "passed": true,
+  "retired_identity": {
+    "event": "media-progress",
+    "instance": "a8103fdea6b731d49017bf29dd1e6dc2",
+    "generation": 1,
+    "format": "BGRA",
+    "video_frames": 1,
+    "audio_blocks": 1
+  },
+  "verified_sessions": [
+    {
+      "event": "session-complete",
+      "instance": "c48f678734fbd082b8d8299c3ae04276",
+      "generation": 1,
+      "format": "BGRA",
+      "video_frames": 50,
+      "audio_blocks": 50
+    },
+    {
+      "event": "session-complete",
+      "instance": "be4324525b0756eb146be7373d8b0c46",
+      "generation": 1,
+      "format": "BGRA",
+      "video_frames": 50,
+      "audio_blocks": 50
+    }
+  ]
+}

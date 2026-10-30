@@ -1,0 +1,14 @@
+{
+  "case": "peer-death",
+  "passed": true,
+  "verified_before_fault": {
+    "event": "media-progress",
+    "instance": "b047d4bd3c1a61e7e688570c89d9608a",
+    "generation": 1,
+    "format": "BGRA",
+    "video_frames": 1,
+    "audio_blocks": 1
+  },
+  "expected_error": "timeout/EOS",
+  "consumer_exit": 1
+}
