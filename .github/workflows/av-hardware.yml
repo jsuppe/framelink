@@ -1,0 +1,44 @@
+# Opt-in only. Register trusted GPU machines with the framelink-gpu label first.
+# Never run fork PR code automatically on persistent self-hosted machines.
+name: A/V native hardware gate
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  linux:
+    runs-on: [self-hosted, Linux, X64, framelink-gpu]
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Configure and build
+        run: |
+          cmake -S . -B build-av -DCMAKE_BUILD_TYPE=Release -DFRAMELINK_BUILD_GST=ON -DFRAMELINK_BUILD_TESTS=ON -DFRAMELINK_BUILD_SAMPLES=ON
+          cmake --build build-av --parallel 4
+      - name: Require and run native A/V tests
+        run: |
+          python3 tools/check_av_test_registration.py build-av
+          ctest --test-dir build-av --output-on-failure --no-tests=error -R '^gst_(av_session|av_faults|timestamp_contract)$'
+  windows:
+    runs-on: [self-hosted, Windows, X64, framelink-gpu]
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Set runtime path
+        shell: pwsh
+        run: |
+          $root = $env:GSTREAMER_1_0_ROOT_MSVC_X86_64
+          if (!(Test-Path "$root\bin\gstreamer-1.0-0.dll")) { throw 'Configure GStreamer MSVC root on the hardware runner' }
+          "$root\bin" >> $env:GITHUB_PATH
+      - name: Configure
+        run: cmake -S . -B build-av -A x64 -DFRAMELINK_BUILD_GST=ON -DFRAMELINK_BUILD_TESTS=ON -DFRAMELINK_BUILD_SAMPLES=ON
+      - name: Build
+        run: cmake --build build-av --config Release --parallel 4
+      - name: Require A/V test registration
+        run: python tools/check_av_test_registration.py build-av Release
+      - name: Run native A/V tests
+        run: ctest --test-dir build-av -C Release --output-on-failure --no-tests=error -R "^gst_(av_session|av_faults|timestamp_contract)$"

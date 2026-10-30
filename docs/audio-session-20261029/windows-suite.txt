@@ -1,0 +1,65 @@
+Test project C:/Users/jonsu/dev/framelink-audio-20261030/build
+      Start  1: roundtrip
+ 1/30 Test  #1: roundtrip ........................   Passed    0.49 sec
+      Start  2: roundtrip_reattach
+ 2/30 Test  #2: roundtrip_reattach ...............   Passed    0.68 sec
+      Start  3: nv12_layout
+ 3/30 Test  #3: nv12_layout ......................   Passed    0.02 sec
+      Start  4: gst_nv12_roundtrip
+ 4/30 Test  #4: gst_nv12_roundtrip ...............   Passed    0.82 sec
+      Start  5: gst_rgb10a2_roundtrip
+ 5/30 Test  #5: gst_rgb10a2_roundtrip ............   Passed    0.68 sec
+      Start  6: nv12_windows_roundtrip
+ 6/30 Test  #6: nv12_windows_roundtrip ...........   Passed    0.46 sec
+      Start  7: nv12_windows_1080p
+ 7/30 Test  #7: nv12_windows_1080p ...............   Passed    0.49 sec
+      Start  8: sample_bgra
+ 8/30 Test  #8: sample_bgra ......................   Passed    0.52 sec
+      Start  9: sample_nv12
+ 9/30 Test  #9: sample_nv12 ......................   Passed    0.47 sec
+      Start 10: sample_slow
+10/30 Test #10: sample_slow ......................   Passed    0.72 sec
+      Start 11: sample_metadata
+11/30 Test #11: sample_metadata ..................   Passed    0.48 sec
+      Start 12: sample_reconnect
+12/30 Test #12: sample_reconnect .................   Passed    0.72 sec
+      Start 13: sample_geometry
+13/30 Test #13: sample_geometry ..................   Passed    0.48 sec
+      Start 14: sample_slots
+14/30 Test #14: sample_slots .....................   Passed    0.48 sec
+      Start 15: sample_gpu_sync
+15/30 Test #15: sample_gpu_sync ..................   Passed    0.48 sec
+      Start 16: sample_invalid_cli
+16/30 Test #16: sample_invalid_cli ...............   Passed    0.01 sec
+      Start 17: sample_wrong_role
+17/30 Test #17: sample_wrong_role ................   Passed    0.01 sec
+      Start 18: sample_corruption
+18/30 Test #18: sample_corruption ................   Passed    0.56 sec
+      Start 19: disconnect_full_ring
+19/30 Test #19: disconnect_full_ring .............   Passed    0.24 sec
+      Start 20: trace_disabled
+20/30 Test #20: trace_disabled ...................   Passed    0.02 sec
+      Start 21: trace_bounded_concurrent
+21/30 Test #21: trace_bounded_concurrent .........   Passed    0.01 sec
+      Start 22: trace_thread_limit
+22/30 Test #22: trace_thread_limit ...............   Passed    0.01 sec
+      Start 23: portable_map_nv12
+23/30 Test #23: portable_map_nv12 ................   Passed    0.25 sec
+      Start 24: portable_map_rgba
+24/30 Test #24: portable_map_rgba ................   Passed    0.24 sec
+      Start 25: portable_map_bgra
+25/30 Test #25: portable_map_bgra ................   Passed    0.24 sec
+      Start 26: portable_map_rgb10a2
+26/30 Test #26: portable_map_rgb10a2 .............   Passed    0.24 sec
+      Start 27: ready_fence_timeout
+27/30 Test #27: ready_fence_timeout ..............   Passed    0.27 sec
+      Start 28: reconnect_held
+28/30 Test #28: reconnect_held ...................   Passed    0.35 sec
+      Start 29: gst_av_session
+29/30 Test #29: gst_av_session ...................   Passed    3.50 sec
+      Start 30: gst_av_faults
+30/30 Test #30: gst_av_faults ....................   Passed    2.60 sec
+
+100% tests passed, 0 tests failed out of 30
+
+Total Test time (real) =  16.65 sec
