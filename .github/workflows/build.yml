@@ -22,7 +22,7 @@ jobs:
       - name: Require A/V test registration
         run: python3 tools/check_av_test_registration.py build
       - name: Run CPU-only regressions
-        run: ctest --test-dir build --output-on-failure --no-tests=error -R '^(session_contract|nv12_layout|sample_invalid_cli|sample_wrong_role|trace_disabled|trace_bounded_concurrent|trace_thread_limit)$'
+        run: ctest --test-dir build --output-on-failure --no-tests=error -R '^(session_contract|session_contract_c_api|session_contract_peers|nv12_layout|sample_invalid_cli|sample_wrong_role|trace_disabled|trace_bounded_concurrent|trace_thread_limit)$'
       - name: Report hardware qualification boundary
         run: echo 'A/V fixtures compiled and registered. Native GPU roundtrips require the separate hardware gate; hosted CI does not execute or qualify them.' >> "$GITHUB_STEP_SUMMARY"
   windows:
@@ -61,7 +61,7 @@ jobs:
       - name: Require A/V test registration
         run: python tools/check_av_test_registration.py build Release
       - name: Run CPU-only regressions
-        run: ctest --test-dir build -C Release --output-on-failure --no-tests=error -R "^(session_contract|nv12_layout|sample_invalid_cli|sample_wrong_role|trace_disabled|trace_bounded_concurrent|trace_thread_limit)$"
+        run: ctest --test-dir build -C Release --output-on-failure --no-tests=error -R "^(session_contract|session_contract_c_api|session_contract_peers|nv12_layout|sample_invalid_cli|sample_wrong_role|trace_disabled|trace_bounded_concurrent|trace_thread_limit)$"
       - name: Report hardware qualification boundary
         shell: pwsh
         run: "'A/V fixtures compiled and registered. Native GPU roundtrips require the separate hardware gate; hosted CI does not execute or qualify them.' >> $env:GITHUB_STEP_SUMMARY"
