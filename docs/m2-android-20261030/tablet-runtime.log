@@ -1,0 +1,10 @@
+$ adb -s A06B4AABFB07983 shell getprop ro.build.fingerprint
+TCL/8483A_FCA/Lugh_FHD_WiFi:15/AP3A.240905.015.A2/BUBI:user/release-keys
+$ adb -s A06B4AABFB07983 shell getprop ro.product.cpu.abi
+arm64-v8a
+$ adb -s A06B4AABFB07983 shell mkdir -p /data/local/tmp/fl-m2-session-20261030
+$ adb -s A06B4AABFB07983 push /tmp/fl-m2-android-arm64-v8a/fl_session_contract /data/local/tmp/fl-m2-session-20261030/fl_session_contract
+/tmp/fl-m2-android-arm64-v8a/fl_session_contract: 1 file pushed, 0 skipped. 345.8 MB/s (58200 bytes in 0.000s)
+$ adb -s A06B4AABFB07983 shell chmod 755 /data/local/tmp/fl-m2-session-20261030/fl_session_contract
+$ adb -s A06B4AABFB07983 shell /data/local/tmp/fl-m2-session-20261030/fl_session_contract
+session contract: negotiation, codec, generation and clock bounds passed

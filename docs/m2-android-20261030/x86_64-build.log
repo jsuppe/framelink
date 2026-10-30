@@ -1,0 +1,45 @@
+-- The CXX compiler identification is Clang 19.0.1
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /home/melchior/Android/Sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Configuring done (0.1s)
+-- Generating done (0.0s)
+-- Build files have been written to: /tmp/fl-m2-android-x86_64
+[  3%] Building CXX object CMakeFiles/framelink.dir/src/fl_ipc_posix.cpp.o
+[  7%] Building CXX object CMakeFiles/framelink.dir/src/framelink_slots.cpp.o
+[ 11%] Building CXX object CMakeFiles/fl_nv12_layout.dir/test/fl_nv12_layout.cpp.o
+[ 15%] Building CXX object CMakeFiles/framelink.dir/src/framelink_android.cpp.o
+[ 19%] Building CXX object CMakeFiles/framelink.dir/src/framelink_session.cpp.o
+[ 23%] Building CXX object CMakeFiles/fl_trace_test.dir/test/fl_trace_test.cpp.o
+[ 26%] Building CXX object CMakeFiles/framelink.dir/src/fl_trace.cpp.o
+[ 30%] Linking CXX executable fl_nv12_layout
+[ 30%] Built target fl_nv12_layout
+[ 34%] Linking CXX executable fl_trace_test
+[ 34%] Built target fl_trace_test
+[ 38%] Linking CXX static library libframelink.a
+[ 38%] Built target framelink
+[ 42%] Building CXX object CMakeFiles/fl_session_contract.dir/test/fl_session_contract.cpp.o
+[ 46%] Building CXX object CMakeFiles/fl_roundtrip.dir/test/fl_roundtrip_posix.cpp.o
+[ 53%] Building CXX object CMakeFiles/framelink_consumer.dir/samples/sample_common.cpp.o
+[ 50%] Building CXX object CMakeFiles/framelink_consumer.dir/samples/consumer.cpp.o
+[ 57%] Building CXX object CMakeFiles/fl_sync_fd_test.dir/test/fl_sync_fd.cpp.o
+[ 61%] Building CXX object CMakeFiles/framelink_producer.dir/samples/producer.cpp.o
+[ 65%] Building CXX object CMakeFiles/fl_reconnect_held.dir/test/fl_reconnect_held.cpp.o
+[ 69%] Building CXX object CMakeFiles/fl_portable_map.dir/test/fl_portable_map.cpp.o
+[ 73%] Linking CXX executable fl_session_contract
+[ 73%] Built target fl_session_contract
+[ 76%] Linking CXX executable fl_roundtrip
+[ 80%] Building CXX object CMakeFiles/framelink_producer.dir/samples/sample_common.cpp.o
+[ 80%] Built target fl_roundtrip
+[ 84%] Linking CXX executable fl_sync_fd_test
+[ 84%] Built target fl_sync_fd_test
+[ 88%] Linking CXX executable fl_reconnect_held
+[ 92%] Linking CXX executable fl_portable_map
+[ 92%] Built target fl_reconnect_held
+[ 92%] Built target fl_portable_map
+[ 96%] Linking CXX executable framelink_producer
+[100%] Linking CXX executable framelink_consumer
+[100%] Built target framelink_producer
+[100%] Built target framelink_consumer
