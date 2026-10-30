@@ -488,3 +488,17 @@ if(FRAMELINK_BUILD_TESTS AND TARGET framelink_av_producer)
         set_tests_properties(m3_av_apps PROPERTIES TIMEOUT 180)
     endif()
 endif()
+
+# Real transport timing checks (GPU-backed FrameLink + GDP/TCP PCM).
+# Not part of the hosted CPU-only whitelist; run on native hardware.
+if(FRAMELINK_BUILD_TESTS AND TARGET framelink_av_session AND NOT ANDROID)
+    add_executable(fl_m4_transport_timing test/m4_transport_timing.cpp)
+    target_include_directories(fl_m4_transport_timing PRIVATE $<TARGET_PROPERTY:framelink_av_session,INCLUDE_DIRECTORIES>)
+    target_link_directories(fl_m4_transport_timing PRIVATE $<TARGET_PROPERTY:framelink_av_session,LINK_DIRECTORIES>)
+    target_link_libraries(fl_m4_transport_timing PRIVATE $<TARGET_PROPERTY:framelink_av_session,LINK_LIBRARIES>)
+    add_test(NAME m4_transport_audio_lags COMMAND fl_m4_transport_timing $<TARGET_FILE:gstframelink>)
+    add_test(NAME m4_transport_audio_leads COMMAND fl_m4_transport_timing $<TARGET_FILE:gstframelink> --audio-leads)
+    add_test(NAME m4_transport_jitter_drift COMMAND fl_m4_transport_timing $<TARGET_FILE:gstframelink> --faults)
+    add_test(NAME m4_transport_negative_retimestamps COMMAND fl_m4_transport_timing $<TARGET_FILE:gstframelink> --negative)
+    set_tests_properties(m4_transport_audio_lags m4_transport_audio_leads m4_transport_jitter_drift m4_transport_negative_retimestamps PROPERTIES TIMEOUT 25)
+endif()

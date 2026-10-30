@@ -1,0 +1,14 @@
+Internal ctest changing into directory: /tmp/framelink-m4-validation-build
+Test project /tmp/framelink-m4-validation-build
+    Start 39: m4_transport_audio_lags
+1/4 Test #39: m4_transport_audio_lags ..............   Passed    0.74 sec
+    Start 40: m4_transport_audio_leads
+2/4 Test #40: m4_transport_audio_leads .............   Passed    0.52 sec
+    Start 41: m4_transport_jitter_drift
+3/4 Test #41: m4_transport_jitter_drift ............   Passed    0.77 sec
+    Start 42: m4_transport_negative_retimestamps
+4/4 Test #42: m4_transport_negative_retimestamps ...   Passed    0.19 sec
+
+100% tests passed, 0 tests failed out of 4
+
+Total Test time (real) =   2.23 sec
