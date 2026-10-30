@@ -1,0 +1,3 @@
+{"command": ["/tmp/framelink-m3-runtime-build/framelink_av_consumer", "/tmp/framelink-m3-runtime-build/libgstframelink.so", "--session", "/tmp/m3-matrix-final/consumer-restart/session", "--frames", "50", "--timeout-ms", "20000", "--format", "auto", "--width", "160", "--height", "90", "--fps", "50", "--rate", "48000", "--channels", "2", "--sessions", "2"]}
+{"event":"session-ready","instance":"782bcc079d4312865bb9bfd9e685b331","generation":1,"format":"BGRA","video_frames":0,"audio_blocks":0}
+{"event":"media-progress","instance":"782bcc079d4312865bb9bfd9e685b331","generation":1,"format":"BGRA","video_frames":1,"audio_blocks":1}

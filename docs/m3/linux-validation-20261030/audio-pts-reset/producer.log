@@ -1,0 +1,4 @@
+{"command": ["/tmp/framelink-m3-runtime-build/framelink_av_producer", "/tmp/framelink-m3-runtime-build/libgstframelink.so", "--session", "/tmp/m3-matrix-final/audio-pts-reset/session", "--frames", "50", "--timeout-ms", "20000", "--format", "BGRA", "--width", "160", "--height", "90", "--fps", "50", "--rate", "48000", "--channels", "2", "--sessions", "1", "--fault", "audio-pts-reset"]}
+{"event":"session-ready","instance":"ddfa66fadde9e44a3a3e8b1042d0a646","generation":1,"format":"BGRA","video_frames":0,"audio_blocks":0}
+{"event":"media-progress","instance":"ddfa66fadde9e44a3a3e8b1042d0a646","generation":1,"format":"BGRA","video_frames":1,"audio_blocks":1}
+FAIL: control read/disconnect

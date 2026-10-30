@@ -1,0 +1,15 @@
+{"command": ["/tmp/framelink-m3-runtime-build/framelink_av_consumer", "/tmp/framelink-m3-runtime-build/libgstframelink.so", "--session", "/tmp/m3-matrix-final/producer-restart-format-change/session", "--frames", "50", "--timeout-ms", "20000", "--format", "auto", "--width", "160", "--height", "90", "--fps", "50", "--rate", "48000", "--channels", "2", "--sessions", "2"]}
+{"event":"session-ready","instance":"e2ed9b5018ad266bffc45e563a5dbcd6","generation":1,"format":"BGRA","video_frames":0,"audio_blocks":0}
+{"event":"media-progress","instance":"e2ed9b5018ad266bffc45e563a5dbcd6","generation":1,"format":"BGRA","video_frames":1,"audio_blocks":1}
+session disconnected: video timeout/EOS
+{"event":"session-ready","instance":"1d05dca2bdde8c256b73c36e44879c0c","generation":1,"format":"NV12","video_frames":0,"audio_blocks":0}
+{"event":"media-progress","instance":"1d05dca2bdde8c256b73c36e44879c0c","generation":1,"format":"NV12","video_frames":1,"audio_blocks":1}
+{"event":"media-progress","instance":"1d05dca2bdde8c256b73c36e44879c0c","generation":1,"format":"NV12","video_frames":25,"audio_blocks":25}
+{"event":"media-progress","instance":"1d05dca2bdde8c256b73c36e44879c0c","generation":1,"format":"NV12","video_frames":50,"audio_blocks":50}
+{"event":"session-complete","instance":"1d05dca2bdde8c256b73c36e44879c0c","generation":1,"format":"NV12","video_frames":50,"audio_blocks":50}
+{"event":"session-ready","instance":"a79dcaf731544768d8a7d972e370adf4","generation":1,"format":"NV12","video_frames":0,"audio_blocks":0}
+{"event":"media-progress","instance":"a79dcaf731544768d8a7d972e370adf4","generation":1,"format":"NV12","video_frames":1,"audio_blocks":1}
+{"event":"media-progress","instance":"a79dcaf731544768d8a7d972e370adf4","generation":1,"format":"NV12","video_frames":25,"audio_blocks":25}
+{"event":"media-progress","instance":"a79dcaf731544768d8a7d972e370adf4","generation":1,"format":"NV12","video_frames":50,"audio_blocks":50}
+{"event":"session-complete","instance":"a79dcaf731544768d8a7d972e370adf4","generation":1,"format":"NV12","video_frames":50,"audio_blocks":50}
+{"role":"consumer","ok":true,"sessions":2,"video_frames":100,"audio_blocks":100,"errors":0,"disconnects":1}

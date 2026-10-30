@@ -1,0 +1,30 @@
+{
+  "case": "consumer-restart",
+  "passed": true,
+  "retired_identity": {
+    "event": "media-progress",
+    "instance": "782bcc079d4312865bb9bfd9e685b331",
+    "generation": 1,
+    "format": "BGRA",
+    "video_frames": 1,
+    "audio_blocks": 1
+  },
+  "verified_sessions": [
+    {
+      "event": "session-complete",
+      "instance": "432e221d4a74a9572d5460e27ec96827",
+      "generation": 1,
+      "format": "BGRA",
+      "video_frames": 50,
+      "audio_blocks": 50
+    },
+    {
+      "event": "session-complete",
+      "instance": "979528d35c1de596599aaebbec1ab312",
+      "generation": 1,
+      "format": "BGRA",
+      "video_frames": 50,
+      "audio_blocks": 50
+    }
+  ]
+}

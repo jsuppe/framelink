@@ -1,0 +1,4 @@
+{"command": ["/tmp/framelink-m3-runtime-build/framelink_av_consumer", "/tmp/framelink-m3-runtime-build/libgstframelink.so", "--session", "/tmp/m3-matrix-final/missing-audio/session", "--frames", "50", "--timeout-ms", "20000", "--format", "BGRA", "--width", "160", "--height", "90", "--fps", "50", "--rate", "48000", "--channels", "2", "--sessions", "1"]}
+{"event":"session-ready","instance":"fd52c779b056c9c50f5e5266b587327c","generation":1,"format":"BGRA","video_frames":0,"audio_blocks":0}
+{"event":"media-progress","instance":"fd52c779b056c9c50f5e5266b587327c","generation":1,"format":"BGRA","video_frames":1,"audio_blocks":1}
+FAIL: audio timeout/EOS

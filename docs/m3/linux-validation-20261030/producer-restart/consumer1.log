@@ -1,0 +1,15 @@
+{"command": ["/tmp/framelink-m3-runtime-build/framelink_av_consumer", "/tmp/framelink-m3-runtime-build/libgstframelink.so", "--session", "/tmp/m3-matrix-final/producer-restart/session", "--frames", "50", "--timeout-ms", "20000", "--format", "auto", "--width", "160", "--height", "90", "--fps", "50", "--rate", "48000", "--channels", "2", "--sessions", "2"]}
+{"event":"session-ready","instance":"d15f809b2a80d8f4ebd8bf9112934767","generation":1,"format":"BGRA","video_frames":0,"audio_blocks":0}
+{"event":"media-progress","instance":"d15f809b2a80d8f4ebd8bf9112934767","generation":1,"format":"BGRA","video_frames":1,"audio_blocks":1}
+session disconnected: video timeout/EOS
+{"event":"session-ready","instance":"c019f1fc2804af183efe0eb2a1e3372a","generation":1,"format":"BGRA","video_frames":0,"audio_blocks":0}
+{"event":"media-progress","instance":"c019f1fc2804af183efe0eb2a1e3372a","generation":1,"format":"BGRA","video_frames":1,"audio_blocks":1}
+{"event":"media-progress","instance":"c019f1fc2804af183efe0eb2a1e3372a","generation":1,"format":"BGRA","video_frames":25,"audio_blocks":25}
+{"event":"media-progress","instance":"c019f1fc2804af183efe0eb2a1e3372a","generation":1,"format":"BGRA","video_frames":50,"audio_blocks":50}
+{"event":"session-complete","instance":"c019f1fc2804af183efe0eb2a1e3372a","generation":1,"format":"BGRA","video_frames":50,"audio_blocks":50}
+{"event":"session-ready","instance":"57c485a60beefeab9738979250361cc8","generation":1,"format":"BGRA","video_frames":0,"audio_blocks":0}
+{"event":"media-progress","instance":"57c485a60beefeab9738979250361cc8","generation":1,"format":"BGRA","video_frames":1,"audio_blocks":1}
+{"event":"media-progress","instance":"57c485a60beefeab9738979250361cc8","generation":1,"format":"BGRA","video_frames":25,"audio_blocks":25}
+{"event":"media-progress","instance":"57c485a60beefeab9738979250361cc8","generation":1,"format":"BGRA","video_frames":50,"audio_blocks":50}
+{"event":"session-complete","instance":"57c485a60beefeab9738979250361cc8","generation":1,"format":"BGRA","video_frames":50,"audio_blocks":50}
+{"role":"consumer","ok":true,"sessions":2,"video_frames":100,"audio_blocks":100,"errors":0,"disconnects":1}

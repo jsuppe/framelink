@@ -1,0 +1,14 @@
+{
+  "case": "audio-pts-reset",
+  "passed": true,
+  "verified_before_fault": {
+    "event": "media-progress",
+    "instance": "ddfa66fadde9e44a3a3e8b1042d0a646",
+    "generation": 1,
+    "format": "BGRA",
+    "video_frames": 1,
+    "audio_blocks": 1
+  },
+  "expected_error": "audio timeline mismatch",
+  "consumer_exit": 1
+}

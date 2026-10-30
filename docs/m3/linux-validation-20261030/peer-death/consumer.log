@@ -1,0 +1,4 @@
+{"command": ["/tmp/framelink-m3-runtime-build/framelink_av_consumer", "/tmp/framelink-m3-runtime-build/libgstframelink.so", "--session", "/tmp/m3-matrix-final/peer-death/session", "--frames", "50", "--timeout-ms", "20000", "--format", "BGRA", "--width", "160", "--height", "90", "--fps", "50", "--rate", "48000", "--channels", "2", "--sessions", "1"]}
+{"event":"session-ready","instance":"29b7b69737d2e1f6e1561cb057ad798f","generation":1,"format":"BGRA","video_frames":0,"audio_blocks":0}
+{"event":"media-progress","instance":"29b7b69737d2e1f6e1561cb057ad798f","generation":1,"format":"BGRA","video_frames":1,"audio_blocks":1}
+FAIL: video timeout/EOS
