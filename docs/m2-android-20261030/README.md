@@ -2,7 +2,17 @@
 
 Source: `2839525` (session contract integrated on M1 baseline). Session API/test originated in `0a5ba51`.
 
-## Results
+## Final review-fix qualification
+
+Revalidated code `fddbf7c`, cherry-picked as `cfca345` on the same baseline.
+
+- Full native incremental/reconfigured build: arm64-v8a and x86_64 PASS.
+- `fl_session_contract`: PASS on Pi and tablet, including selection validation and stable track-ID replacement rules added by review.
+- `fl_session_c_api`: PASS on Pi and tablet, validating the public API from a C11 translation unit linked against the C++ implementation.
+- Exact output is in `*-final-build.log` and `*-final-runtime.log`.
+- x86_64 remains compile-only. Desktop independent-peer test is not registered for Android and is not claimed here.
+
+## Original baseline results
 
 - Full native CMake release build, arm64-v8a: PASS.
 - Full native CMake release build, x86_64: PASS (compile only; no x86_64 guest runtime executed).

@@ -1,0 +1,13 @@
+$ adb -s 192.168.1.124:5555 shell getprop ro.build.fingerprint
+Raspberry/aosp_rpi5/rpi5:17/CP2A.260605.016/eng.melchi:userdebug/test-keys
+$ adb -s 192.168.1.124:5555 push /tmp/fl-m2-android-arm64-v8a/fl_session_contract /data/local/tmp/fl-m2-session-20261030/fl_session_contract
+/tmp/fl-m2-android-arm64-v8a/fl_session_contract: 1 file pushed, 0 skipped. 167.4 MB/s (73368 bytes in 0.000s)
+$ adb -s 192.168.1.124:5555 shell chmod 755 /data/local/tmp/fl-m2-session-20261030/fl_session_contract
+$ adb -s 192.168.1.124:5555 shell /data/local/tmp/fl-m2-session-20261030/fl_session_contract
+session contract: negotiation, codec, generation and clock bounds passed
+fl_session_contract exit=0 PASS
+$ adb -s 192.168.1.124:5555 push /tmp/fl-m2-android-arm64-v8a/fl_session_c_api /data/local/tmp/fl-m2-session-20261030/fl_session_c_api
+/tmp/fl-m2-android-arm64-v8a/fl_session_c_api: 1 file pushed, 0 skipped. 499.9 MB/s (40432 bytes in 0.000s)
+$ adb -s 192.168.1.124:5555 shell chmod 755 /data/local/tmp/fl-m2-session-20261030/fl_session_c_api
+$ adb -s 192.168.1.124:5555 shell /data/local/tmp/fl-m2-session-20261030/fl_session_c_api
+fl_session_c_api exit=0 PASS
