@@ -44,6 +44,12 @@ Tasks:
 Gate: separately launched peers agree on formats and timeline; incompatible peers fail clearly.
 
 ## M3 — Independent producer and consumer applications
+
+Implementation/review complete; final PR #4 CI/merge gate pending. Final Linux
+38/38 and Windows39/39 passed, including ten-case startup/recovery/fault matrices.
+Optional --play exercised on Linux virtual X display + silent sink for BGRA/NV12;
+physical playback synchronization and Android application deployment remain M4/M5.
+
 Deliverables: standalone A/V producer/consumer modes, session discovery/connection,
 headless verifier and real playback option; existing video-only modes preserved.
 Tasks:
