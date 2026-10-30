@@ -13,7 +13,9 @@ Either launch order works. The producer creates the private rendezvous directory
 pre-existing directories must already be owner-only. Windows uses a current-user
 DACL. Both peers mutually prove knowledge of the private random rendezvous key
 with fresh HMAC-SHA256 challenges before exchanging configuration or GDP bytes.
-No secret is sent or logged. Other processes running as the same OS user and
+No secret is sent or logged. Audio authentication derives a per-session key
+from the root key, session identity and generation; a queued previous-session
+audio connection cannot attach to a replacement session. Other processes running as the same OS user and
 administrators are not isolated by this scheme. `--session` is a directory, not
 a public TCP address. Stale producer records are replaced only while owning the
 OS-backed lifetime lock. Persistent lock/directory are intentionally retained.
@@ -79,3 +81,7 @@ role/ok/sessions/video_frames/audio_blocks/errors/disconnects. Counters in
 consumer progress mean **verified**, not merely received. Failed partial-session
 frames do not enter final completed-session totals. Physical speaker/display
 alignment and Android APK/service ownership remain later milestones.
+
+Offers use a bounded268-byte LE control envelope with counts, eight video/audio
+slots and zero unused entries. M2 selection is validated against both actual
+offers and acknowledged byte-for-byte before media readiness.

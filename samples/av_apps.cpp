@@ -174,40 +174,76 @@ flSessionCapabilities caps(const Options &o) {
   c.video[0] = {o.format == "NV12" ? FL_FORMAT_NV12 : FL_FORMAT_BGRA8, o.width,
                 o.height, o.fps, 1};
   c.audio[0] = {FL_PCM_S16, o.rate, o.channels};
-  if (o.format == "auto") {
+  if (o.format == "auto" && !(o.width % 2) && !(o.height % 2)) {
     c.videoCount = 2;
     c.video[1] = c.video[0];
     c.video[1].format = FL_FORMAT_NV12;
   }
   return c;
 }
+// Fixed bounded offer envelope: version/counts + eight video + eight audio
+// entries. Integers are LE; unused entries must be zero, never native structs.
 void sendCaps(Conn &c, const flSessionCapabilities &a) {
-  const uint32_t v[] = {1,
-                        a.video[0].format,
-                        a.video[0].width,
-                        a.video[0].height,
-                        a.video[0].fpsNum,
-                        a.video[0].fpsDen,
-                        a.audio[0].pcm,
-                        a.audio[0].rate,
-                        a.audio[0].layout};
-  unsigned char b[36];
-  for (unsigned i = 0; i < 9; ++i)
-    GST_WRITE_UINT32_LE(b + 4 * i, v[i]);
+  unsigned char b[268]{};
+  GST_WRITE_UINT32_LE(b, a.version);
+  GST_WRITE_UINT32_LE(b + 4, a.videoCount);
+  GST_WRITE_UINT32_LE(b + 8, a.audioCount);
+  for (unsigned i = 0; i < a.videoCount; ++i) {
+    const auto &v = a.video[i];
+    const uint32_t values[] = {v.format, v.width, v.height, v.fpsNum, v.fpsDen};
+    for (unsigned j = 0; j < 5; ++j)
+      GST_WRITE_UINT32_LE(b + 12 + i * 20 + j * 4, values[j]);
+  }
+  for (unsigned i = 0; i < a.audioCount; ++i) {
+    const auto &audi = a.audio[i];
+    const uint32_t values[] = {audi.pcm, audi.rate, audi.layout};
+    for (unsigned j = 0; j < 3; ++j)
+      GST_WRITE_UINT32_LE(b + 172 + i * 12 + j * 4, values[j]);
+  }
   write(c, b, sizeof(b));
 }
 flSessionCapabilities recvCaps(Conn &c) {
-  unsigned char b[36];
+  unsigned char b[268];
   read(c, b, sizeof(b));
   flSessionCapabilities a{};
   a.version = GST_READ_UINT32_LE(b);
-  a.videoCount = a.audioCount = 1;
-  a.video[0] = {GST_READ_UINT32_LE(b + 4), GST_READ_UINT32_LE(b + 8),
-                GST_READ_UINT32_LE(b + 12), GST_READ_UINT32_LE(b + 16),
-                GST_READ_UINT32_LE(b + 20)};
-  a.audio[0] = {GST_READ_UINT32_LE(b + 24), GST_READ_UINT32_LE(b + 28),
-                GST_READ_UINT32_LE(b + 32)};
+  a.videoCount = GST_READ_UINT32_LE(b + 4);
+  a.audioCount = GST_READ_UINT32_LE(b + 8);
+  need(a.version == 1 && a.videoCount && a.videoCount <= 8 && a.audioCount &&
+           a.audioCount <= 8,
+       "invalid offer counts/version");
+  for (unsigned i = 0; i < a.videoCount; ++i) {
+    auto *p = b + 12 + i * 20;
+    a.video[i] = {GST_READ_UINT32_LE(p), GST_READ_UINT32_LE(p + 4),
+                  GST_READ_UINT32_LE(p + 8), GST_READ_UINT32_LE(p + 12),
+                  GST_READ_UINT32_LE(p + 16)};
+  }
+  for (unsigned i = 0; i < a.audioCount; ++i) {
+    auto *p = b + 172 + i * 12;
+    a.audio[i] = {GST_READ_UINT32_LE(p), GST_READ_UINT32_LE(p + 4),
+                  GST_READ_UINT32_LE(p + 8)};
+  }
+  for (unsigned i = 12 + a.videoCount * 20; i < 172; ++i)
+    need(!b[i], "nonzero unused offer video");
+  for (unsigned i = 172 + a.audioCount * 12; i < 268; ++i)
+    need(!b[i], "nonzero unused offer audio");
   return a;
+}
+av::Endpoint audioEndpoint(const av::Endpoint &root,
+                           const flSessionConfig &cfg) {
+  auto result = root;
+  auto *h = g_hmac_new(G_CHECKSUM_SHA256, root.token.data(), root.token.size());
+  const char context[] = "FrameLink audio session v1";
+  g_hmac_update(h, reinterpret_cast<const guchar *>(context), sizeof(context));
+  g_hmac_update(h, cfg.sessionId.bytes, sizeof(cfg.sessionId.bytes));
+  unsigned char generation[8];
+  GST_WRITE_UINT64_LE(generation, cfg.generation);
+  g_hmac_update(h, generation, sizeof(generation));
+  gsize size = result.token.size();
+  g_hmac_get_digest(h, result.token.data(), &size);
+  g_hmac_unref(h);
+  need(size == result.token.size(), "audio key derivation");
+  return result;
 }
 void tune(Conn &c, unsigned timeout) {
   g_socket_set_timeout(g_socket_connection_get_socket(c.p),
@@ -565,7 +601,7 @@ unsigned runProducer(const Options &o, GSocketListener *l,
   read(*control, reply, sizeof(reply));
   need(!memcmp(wire, reply, sizeof(wire)),
        "configuration acknowledgement mismatch");
-  auto audio = accept(l, ep, 'A', o.timeout);
+  auto audio = accept(l, audioEndpoint(ep, cfg), 'A', o.timeout);
   need(get(*control) == 0x5245414459ULL, "consumer not ready");
   std::string id = idHex(cfg.sessionId), channel = "av3-" + id;
   Pipeline tx;
@@ -638,7 +674,7 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep) {
   need(flSessionMapPts(&cfg, &mapping, 50 * GST_MSECOND, 0, &base) == 0,
        "clock mapping failed");
   write(*control, wire, sizeof(wire));
-  std::unique_ptr<Conn> audio(connect(ep, 'A', o.timeout));
+  std::unique_ptr<Conn> audio(connect(audioEndpoint(ep, cfg), 'A', o.timeout));
   std::string id = idHex(cfg.sessionId), channel = "av3-" + id;
   std::string vo = "appsink name=vout sync=true max-buffers=2",
               ao = "appsink name=aout sync=true max-buffers=2";
