@@ -1,0 +1,41 @@
+[
+  {
+    "case": "missing-endpoint",
+    "exit_codes": [
+      1
+    ],
+    "seconds": 1.01626266099629,
+    "no_live_endpoint": true,
+    "all_children_reaped": true
+  },
+  {
+    "case": "missing-plugin",
+    "exit_codes": [
+      1,
+      1
+    ],
+    "seconds": 0.06404902102076449,
+    "no_live_endpoint": true,
+    "all_children_reaped": true
+  },
+  {
+    "case": "unsupported-caps",
+    "exit_codes": [
+      1,
+      1
+    ],
+    "seconds": 0.06421704299282283,
+    "no_live_endpoint": true,
+    "all_children_reaped": true
+  },
+  {
+    "case": "missing-media",
+    "exit_codes": [
+      1,
+      1
+    ],
+    "seconds": 0.06421122202300467,
+    "no_live_endpoint": true,
+    "all_children_reaped": true
+  }
+]

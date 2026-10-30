@@ -1,0 +1,1 @@
+videotestsrc num-buffers=10 ! video/x-raw,format=INVALID ! @VIDEO_SINK@ audiotestsrc num-buffers=10 ! @AUDIO_SINK@
