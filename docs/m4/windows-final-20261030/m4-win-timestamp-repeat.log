@@ -1,0 +1,176 @@
+UpdateCTestConfiguration  from :C:/Users/jonsu/dev/framelink-m4-20261030/build-final/DartConfiguration.tcl
+Test project C:/Users/jonsu/dev/framelink-m4-20261030/build-final
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 33
+    Start 33: gst_timestamp_contract
+
+33: Test command: C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_gst_timestamps.exe "C:/Users/jonsu/dev/framelink-m4-20261030/build-final/Release/gstframelink.dll"
+33: Working Directory: C:/Users/jonsu/dev/framelink-m4-20261030/build-final
+33: Test timeout computed to be: 25
+33: 0:00:00.212459200      54980      35136 INFO               framelink gstframelink.cpp:564:srcStart:<framelinksrc0> channel 'pts-1341126541734-0' up: 16x16 BGRA, ring of 4 - waiting for a producer
+33: 0:00:00.235376000      54980      55020 INFO               framelink gstframelink.cpp:216:sinkTryConnect:<framelinksink0> producing on 'pts-1341126541734-00' (16x16 BGRA, ring of 4)
+33: 0:00:00.235958200      54980      55020 INFO               framelink gstframelink.cpp:381:sinkRender:<framelinksink0> 1 frames submitted, 0 dropped
+33: 0:00:00.237147600      54980      42976 INFO               framelink gstframelink.cpp:624:srcCreate:<framelinksrc0> ring reallocated: 16x16 -> 16x16 (generation 2)
+33: 0:00:00.244095700      54980      35136 INFO               framelink gstframelink.cpp:392:sinkStop:<framelinksink0> stopping: 5 submitted, 0 dropped
+33: 0:00:00.386487900      54980      35136 INFO               framelink gstframelink.cpp:564:srcStart:<framelinksrc1> channel 'pts-1341126752552-1' up: 16x16 BGRA, ring of 4 - waiting for a producer
+33: 0:00:00.405732100      54980      42976 INFO               framelink gstframelink.cpp:216:sinkTryConnect:<framelinksink1> producing on 'pts-1341126752552-10' (16x16 BGRA, ring of 4)
+33: 0:00:00.406305300      54980      42976 INFO               framelink gstframelink.cpp:381:sinkRender:<framelinksink1> 1 frames submitted, 0 dropped
+33: 0:00:00.406980900      54980      55020 INFO               framelink gstframelink.cpp:624:srcCreate:<framelinksrc1> ring reallocated: 16x16 -> 16x16 (generation 2)
+33: 0:00:00.407823100      54980      35136 INFO               framelink gstframelink.cpp:392:sinkStop:<framelinksink1> stopping: 1 submitted, 0 dropped
+33: 0:00:00.548943300      54980      35136 INFO               framelink gstframelink.cpp:564:srcStart:<framelinksrc2> channel 'pts-1341126916145-2' up: 16x16 BGRA, ring of 4 - waiting for a producer
+33: 0:00:00.568218900      54980      55020 INFO               framelink gstframelink.cpp:216:sinkTryConnect:<framelinksink2> producing on 'pts-1341126916145-20' (16x16 BGRA, ring of 4)
+33: 0:00:00.574738000      54980      55020 WARN               framelink gstframelink.cpp:374:sinkRender:<framelinksink2> error: valid signed-nanosecond TIME segment and PTS required
+33: 0:00:00.625538200      54980      35136 INFO               framelink gstframelink.cpp:392:sinkStop:<framelinksink2> stopping: 0 submitted, 0 dropped
+33: 0:00:00.765295200      54980      35136 INFO               framelink gstframelink.cpp:564:srcStart:<framelinksrc3> channel 'pts-1341127128390-3' up: 16x16 BGRA, ring of 4 - waiting for a producer
+33: 0:00:00.786301200      54980      42976 INFO               framelink gstframelink.cpp:216:sinkTryConnect:<framelinksink3> producing on 'pts-1341127128390-30' (16x16 BGRA, ring of 4)
+33: 0:00:00.786920600      54980      42976 INFO               framelink gstframelink.cpp:381:sinkRender:<framelinksink3> 1 frames submitted, 0 dropped
+33: 0:00:00.787589200      54980      55020 INFO               framelink gstframelink.cpp:624:srcCreate:<framelinksrc3> ring reallocated: 16x16 -> 16x16 (generation 2)
+33: 0:00:00.796002000      54980      42976 WARN               framelink gstframelink.cpp:374:sinkRender:<framelinksink3> error: valid signed-nanosecond TIME segment and PTS required
+33: 0:00:00.846316000      54980      35136 INFO               framelink gstframelink.cpp:392:sinkStop:<framelinksink3> stopping: 1 submitted, 0 dropped
+33: 0:00:00.989433500      54980      35136 INFO               framelink gstframelink.cpp:564:srcStart:<framelinksrc4> channel 'pts-1341127350225-4' up: 16x16 BGRA, ring of 4 - waiting for a producer
+33: 0:00:01.010377000      54980      55020 INFO               framelink gstframelink.cpp:216:sinkTryConnect:<framelinksink4> producing on 'pts-1341127350225-40' (16x16 BGRA, ring of 4)
+33: 0:00:01.016347500      54980      55020 INFO               framelink gstframelink.cpp:381:sinkRender:<framelinksink4> 1 frames submitted, 0 dropped
+33: 0:00:01.017867200      54980      42976 INFO               framelink gstframelink.cpp:624:srcCreate:<framelinksrc4> ring reallocated: 16x16 -> 16x16 (generation 2)
+33: 0:00:01.018850300      54980      35136 INFO               framelink gstframelink.cpp:392:sinkStop:<framelinksink4> stopping: 1 submitted, 0 dropped
+33: Timestamp contract: zero, repeated/backward, signed limit, overflow/missing rejection, segment mapping, default mode passed
+    Test #33: gst_timestamp_contract ...........   Passed    1.06 sec
+    Start 33: gst_timestamp_contract
+
+33: Test command: C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_gst_timestamps.exe "C:/Users/jonsu/dev/framelink-m4-20261030/build-final/Release/gstframelink.dll"
+33: Working Directory: C:/Users/jonsu/dev/framelink-m4-20261030/build-final
+33: Test timeout computed to be: 25
+33: 0:00:00.212974400      55008      54960 INFO               framelink gstframelink.cpp:564:srcStart:<framelinksrc0> channel 'pts-1341127596934-0' up: 16x16 BGRA, ring of 4 - waiting for a producer
+33: 0:00:00.234226600      55008       6968 INFO               framelink gstframelink.cpp:216:sinkTryConnect:<framelinksink0> producing on 'pts-1341127596934-00' (16x16 BGRA, ring of 4)
+33: 0:00:00.234947800      55008       6968 INFO               framelink gstframelink.cpp:381:sinkRender:<framelinksink0> 1 frames submitted, 0 dropped
+33: 0:00:00.236001600      55008      25200 INFO               framelink gstframelink.cpp:624:srcCreate:<framelinksrc0> ring reallocated: 16x16 -> 16x16 (generation 2)
+33: 0:00:00.243005700      55008      54960 INFO               framelink gstframelink.cpp:392:sinkStop:<framelinksink0> stopping: 5 submitted, 0 dropped
+33: 0:00:00.385616500      55008      54960 INFO               framelink gstframelink.cpp:564:srcStart:<framelinksrc1> channel 'pts-1341127805108-1' up: 16x16 BGRA, ring of 4 - waiting for a producer
+33: 0:00:00.405183800      55008      25200 INFO               framelink gstframelink.cpp:216:sinkTryConnect:<framelinksink1> producing on 'pts-1341127805108-10' (16x16 BGRA, ring of 4)
+33: 0:00:00.405743700      55008      25200 INFO               framelink gstframelink.cpp:381:sinkRender:<framelinksink1> 1 frames submitted, 0 dropped
+33: 0:00:00.405916200      55008       6968 INFO               framelink gstframelink.cpp:624:srcCreate:<framelinksrc1> ring reallocated: 16x16 -> 16x16 (generation 2)
+33: 0:00:00.406776500      55008      54960 INFO               framelink gstframelink.cpp:392:sinkStop:<framelinksink1> stopping: 1 submitted, 0 dropped
+33: 0:00:00.547821700      55008      54960 INFO               framelink gstframelink.cpp:564:srcStart:<framelinksrc2> channel 'pts-1341127967067-2' up: 16x16 BGRA, ring of 4 - waiting for a producer
+33: 0:00:00.567466800      55008       6968 INFO               framelink gstframelink.cpp:216:sinkTryConnect:<framelinksink2> producing on 'pts-1341127967067-20' (16x16 BGRA, ring of 4)
+33: 0:00:00.574069000      55008       6968 WARN               framelink gstframelink.cpp:374:sinkRender:<framelinksink2> error: valid signed-nanosecond TIME segment and PTS required
+33: 0:00:00.624384100      55008      54960 INFO               framelink gstframelink.cpp:392:sinkStop:<framelinksink2> stopping: 0 submitted, 0 dropped
+33: 0:00:00.765000400      55008      54960 INFO               framelink gstframelink.cpp:564:srcStart:<framelinksrc3> channel 'pts-1341128179718-3' up: 16x16 BGRA, ring of 4 - waiting for a producer
+33: 0:00:00.784335900      55008      25200 INFO               framelink gstframelink.cpp:216:sinkTryConnect:<framelinksink3> producing on 'pts-1341128179718-30' (16x16 BGRA, ring of 4)
+33: 0:00:00.784955700      55008      25200 INFO               framelink gstframelink.cpp:381:sinkRender:<framelinksink3> 1 frames submitted, 0 dropped
+33: 0:00:00.785623900      55008       6968 INFO               framelink gstframelink.cpp:624:srcCreate:<framelinksrc3> ring reallocated: 16x16 -> 16x16 (generation 2)
+33: 0:00:00.792397600      55008      25200 WARN               framelink gstframelink.cpp:374:sinkRender:<framelinksink3> error: valid signed-nanosecond TIME segment and PTS required
+33: 0:00:00.842766300      55008      54960 INFO               framelink gstframelink.cpp:392:sinkStop:<framelinksink3> stopping: 1 submitted, 0 dropped
+33: 0:00:00.979737500      55008      54960 INFO               framelink gstframelink.cpp:564:srcStart:<framelinksrc4> channel 'pts-1341128398399-4' up: 16x16 BGRA, ring of 4 - waiting for a producer
+33: 0:00:00.999517700      55008       6968 INFO               framelink gstframelink.cpp:216:sinkTryConnect:<framelinksink4> producing on 'pts-1341128398399-40' (16x16 BGRA, ring of 4)
+33: 0:00:01.000123000      55008       6968 INFO               framelink gstframelink.cpp:381:sinkRender:<framelinksink4> 1 frames submitted, 0 dropped
+33: 0:00:01.000807700      55008      25200 INFO               framelink gstframelink.cpp:624:srcCreate:<framelinksrc4> ring reallocated: 16x16 -> 16x16 (generation 2)
+33: 0:00:01.001792900      55008      54960 INFO               framelink gstframelink.cpp:392:sinkStop:<framelinksink4> stopping: 1 submitted, 0 dropped
+33: Timestamp contract: zero, repeated/backward, signed limit, overflow/missing rejection, segment mapping, default mode passed
+    Test #33: gst_timestamp_contract ...........   Passed    1.03 sec
+    Start 33: gst_timestamp_contract
+
+33: Test command: C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_gst_timestamps.exe "C:/Users/jonsu/dev/framelink-m4-20261030/build-final/Release/gstframelink.dll"
+33: Working Directory: C:/Users/jonsu/dev/framelink-m4-20261030/build-final
+33: Test timeout computed to be: 25
+33: 0:00:00.208005900      11800      51916 INFO               framelink gstframelink.cpp:564:srcStart:<framelinksrc0> channel 'pts-1341128629658-0' up: 16x16 BGRA, ring of 4 - waiting for a producer
+33: 0:00:00.228329800      11800      54684 INFO               framelink gstframelink.cpp:216:sinkTryConnect:<framelinksink0> producing on 'pts-1341128629658-00' (16x16 BGRA, ring of 4)
+33: 0:00:00.229010200      11800      54684 INFO               framelink gstframelink.cpp:381:sinkRender:<framelinksink0> 1 frames submitted, 0 dropped
+33: 0:00:00.229633400      11800      54740 INFO               framelink gstframelink.cpp:624:srcCreate:<framelinksrc0> ring reallocated: 16x16 -> 16x16 (generation 2)
+33: 0:00:00.236579400      11800      51916 INFO               framelink gstframelink.cpp:392:sinkStop:<framelinksink0> stopping: 5 submitted, 0 dropped
+33: 0:00:00.379169000      11800      51916 INFO               framelink gstframelink.cpp:564:srcStart:<framelinksrc1> channel 'pts-1341128832235-1' up: 16x16 BGRA, ring of 4 - waiting for a producer
+33: 0:00:00.398927900      11800      54740 INFO               framelink gstframelink.cpp:216:sinkTryConnect:<framelinksink1> producing on 'pts-1341128832235-10' (16x16 BGRA, ring of 4)
+33: 0:00:00.399525400      11800      54740 INFO               framelink gstframelink.cpp:381:sinkRender:<framelinksink1> 1 frames submitted, 0 dropped
+33: 0:00:00.399673100      11800      54684 INFO               framelink gstframelink.cpp:624:srcCreate:<framelinksrc1> ring reallocated: 16x16 -> 16x16 (generation 2)
+33: 0:00:00.400730700      11800      51916 INFO               framelink gstframelink.cpp:392:sinkStop:<framelinksink1> stopping: 1 submitted, 0 dropped
+33: 0:00:00.552133700      11800      51916 INFO               framelink gstframelink.cpp:564:srcStart:<framelinksrc2> channel 'pts-1341128996938-2' up: 16x16 BGRA, ring of 4 - waiting for a producer
+33: 0:00:00.572754500      11800      54684 INFO               framelink gstframelink.cpp:216:sinkTryConnect:<framelinksink2> producing on 'pts-1341128996938-20' (16x16 BGRA, ring of 4)
+33: 0:00:00.579481000      11800      54684 WARN               framelink gstframelink.cpp:374:sinkRender:<framelinksink2> error: valid signed-nanosecond TIME segment and PTS required
+33: 0:00:00.630312500      11800      51916 INFO               framelink gstframelink.cpp:392:sinkStop:<framelinksink2> stopping: 0 submitted, 0 dropped
+33: 0:00:00.771702700      11800      51916 INFO               framelink gstframelink.cpp:564:srcStart:<framelinksrc3> channel 'pts-1341129220830-3' up: 16x16 BGRA, ring of 4 - waiting for a producer
+33: 0:00:00.791661100      11800      54740 INFO               framelink gstframelink.cpp:216:sinkTryConnect:<framelinksink3> producing on 'pts-1341129220830-30' (16x16 BGRA, ring of 4)
+33: 0:00:00.792241000      11800      54740 INFO               framelink gstframelink.cpp:381:sinkRender:<framelinksink3> 1 frames submitted, 0 dropped
+33: 0:00:00.792401700      11800      54684 INFO               framelink gstframelink.cpp:624:srcCreate:<framelinksrc3> ring reallocated: 16x16 -> 16x16 (generation 2)
+33: 0:00:00.799396400      11800      54740 WARN               framelink gstframelink.cpp:374:sinkRender:<framelinksink3> error: valid signed-nanosecond TIME segment and PTS required
+33: 0:00:00.850157800      11800      51916 INFO               framelink gstframelink.cpp:392:sinkStop:<framelinksink3> stopping: 1 submitted, 0 dropped
+33: 0:00:00.989562400      11800      51916 INFO               framelink gstframelink.cpp:564:srcStart:<framelinksrc4> channel 'pts-1341129439570-4' up: 16x16 BGRA, ring of 4 - waiting for a producer
+33: 0:00:01.008253600      11800      54684 INFO               framelink gstframelink.cpp:216:sinkTryConnect:<framelinksink4> producing on 'pts-1341129439570-40' (16x16 BGRA, ring of 4)
+33: 0:00:01.008933300      11800      54684 INFO               framelink gstframelink.cpp:381:sinkRender:<framelinksink4> 1 frames submitted, 0 dropped
+33: 0:00:01.009543100      11800      54740 INFO               framelink gstframelink.cpp:624:srcCreate:<framelinksrc4> ring reallocated: 16x16 -> 16x16 (generation 2)
+33: 0:00:01.010533800      11800      51916 INFO               framelink gstframelink.cpp:392:sinkStop:<framelinksink4> stopping: 1 submitted, 0 dropped
+33: Timestamp contract: zero, repeated/backward, signed limit, overflow/missing rejection, segment mapping, default mode passed
+    Test #33: gst_timestamp_contract ...........   Passed    1.04 sec
+    Start 33: gst_timestamp_contract
+
+33: Test command: C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_gst_timestamps.exe "C:/Users/jonsu/dev/framelink-m4-20261030/build-final/Release/gstframelink.dll"
+33: Working Directory: C:/Users/jonsu/dev/framelink-m4-20261030/build-final
+33: Test timeout computed to be: 25
+33: 0:00:00.212220600      55004      54956 INFO               framelink gstframelink.cpp:564:srcStart:<framelinksrc0> channel 'pts-1341129670630-0' up: 16x16 BGRA, ring of 4 - waiting for a producer
+33: 0:00:00.236707800      55004      45040 INFO               framelink gstframelink.cpp:216:sinkTryConnect:<framelinksink0> producing on 'pts-1341129670630-00' (16x16 BGRA, ring of 4)
+33: 0:00:00.237397400      55004      45040 INFO               framelink gstframelink.cpp:381:sinkRender:<framelinksink0> 1 frames submitted, 0 dropped
+33: 0:00:00.237553400      55004      47452 INFO               framelink gstframelink.cpp:624:srcCreate:<framelinksrc0> ring reallocated: 16x16 -> 16x16 (generation 2)
+33: 0:00:00.244497300      55004      54956 INFO               framelink gstframelink.cpp:392:sinkStop:<framelinksink0> stopping: 5 submitted, 0 dropped
+33: 0:00:00.389761200      55004      54956 INFO               framelink gstframelink.cpp:564:srcStart:<framelinksrc1> channel 'pts-1341129881353-1' up: 16x16 BGRA, ring of 4 - waiting for a producer
+33: 0:00:00.409859600      55004      47452 INFO               framelink gstframelink.cpp:216:sinkTryConnect:<framelinksink1> producing on 'pts-1341129881353-10' (16x16 BGRA, ring of 4)
+33: 0:00:00.410534000      55004      47452 INFO               framelink gstframelink.cpp:381:sinkRender:<framelinksink1> 1 frames submitted, 0 dropped
+33: 0:00:00.411227100      55004      45040 INFO               framelink gstframelink.cpp:624:srcCreate:<framelinksrc1> ring reallocated: 16x16 -> 16x16 (generation 2)
+33: 0:00:00.412040000      55004      54956 INFO               framelink gstframelink.cpp:392:sinkStop:<framelinksink1> stopping: 1 submitted, 0 dropped
+33: 0:00:00.553361600      55004      54956 INFO               framelink gstframelink.cpp:564:srcStart:<framelinksrc2> channel 'pts-1341130048729-2' up: 16x16 BGRA, ring of 4 - waiting for a producer
+33: 0:00:00.572804100      55004      45040 INFO               framelink gstframelink.cpp:216:sinkTryConnect:<framelinksink2> producing on 'pts-1341130048729-20' (16x16 BGRA, ring of 4)
+33: 0:00:00.579553100      55004      45040 WARN               framelink gstframelink.cpp:374:sinkRender:<framelinksink2> error: valid signed-nanosecond TIME segment and PTS required
+33: 0:00:00.630226000      55004      54956 INFO               framelink gstframelink.cpp:392:sinkStop:<framelinksink2> stopping: 0 submitted, 0 dropped
+33: 0:00:00.769939100      55004      54956 INFO               framelink gstframelink.cpp:564:srcStart:<framelinksrc3> channel 'pts-1341130261912-3' up: 16x16 BGRA, ring of 4 - waiting for a producer
+33: 0:00:00.788699800      55004      47452 INFO               framelink gstframelink.cpp:216:sinkTryConnect:<framelinksink3> producing on 'pts-1341130261912-30' (16x16 BGRA, ring of 4)
+33: 0:00:00.789345800      55004      47452 INFO               framelink gstframelink.cpp:381:sinkRender:<framelinksink3> 1 frames submitted, 0 dropped
+33: 0:00:00.789975600      55004      45040 INFO               framelink gstframelink.cpp:624:srcCreate:<framelinksrc3> ring reallocated: 16x16 -> 16x16 (generation 2)
+33: 0:00:00.796821600      55004      47452 WARN               framelink gstframelink.cpp:374:sinkRender:<framelinksink3> error: valid signed-nanosecond TIME segment and PTS required
+33: 0:00:00.847188300      55004      54956 INFO               framelink gstframelink.cpp:392:sinkStop:<framelinksink3> stopping: 1 submitted, 0 dropped
+33: 0:00:00.984732400      55004      54956 INFO               framelink gstframelink.cpp:564:srcStart:<framelinksrc4> channel 'pts-1341130479285-4' up: 16x16 BGRA, ring of 4 - waiting for a producer
+33: 0:00:01.003925700      55004      45040 INFO               framelink gstframelink.cpp:216:sinkTryConnect:<framelinksink4> producing on 'pts-1341130479285-40' (16x16 BGRA, ring of 4)
+33: 0:00:01.004550700      55004      45040 INFO               framelink gstframelink.cpp:381:sinkRender:<framelinksink4> 1 frames submitted, 0 dropped
+33: 0:00:01.004863500      55004      47452 INFO               framelink gstframelink.cpp:624:srcCreate:<framelinksrc4> ring reallocated: 16x16 -> 16x16 (generation 2)
+33: 0:00:01.005835700      55004      54956 INFO               framelink gstframelink.cpp:392:sinkStop:<framelinksink4> stopping: 1 submitted, 0 dropped
+33: Timestamp contract: zero, repeated/backward, signed limit, overflow/missing rejection, segment mapping, default mode passed
+    Test #33: gst_timestamp_contract ...........   Passed    1.04 sec
+    Start 33: gst_timestamp_contract
+
+33: Test command: C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_gst_timestamps.exe "C:/Users/jonsu/dev/framelink-m4-20261030/build-final/Release/gstframelink.dll"
+33: Working Directory: C:/Users/jonsu/dev/framelink-m4-20261030/build-final
+33: Test timeout computed to be: 25
+33: 0:00:00.206254700      18512      15124 INFO               framelink gstframelink.cpp:564:srcStart:<framelinksrc0> channel 'pts-1341130708370-0' up: 16x16 BGRA, ring of 4 - waiting for a producer
+33: 0:00:00.226091400      18512      50896 INFO               framelink gstframelink.cpp:216:sinkTryConnect:<framelinksink0> producing on 'pts-1341130708370-00' (16x16 BGRA, ring of 4)
+33: 0:00:00.226954700      18512      50896 INFO               framelink gstframelink.cpp:381:sinkRender:<framelinksink0> 1 frames submitted, 0 dropped
+33: 0:00:00.227410100      18512      44976 INFO               framelink gstframelink.cpp:624:srcCreate:<framelinksrc0> ring reallocated: 16x16 -> 16x16 (generation 2)
+33: 0:00:00.234333400      18512      15124 INFO               framelink gstframelink.cpp:392:sinkStop:<framelinksink0> stopping: 5 submitted, 0 dropped
+33: 0:00:00.378433400      18512      15124 INFO               framelink gstframelink.cpp:564:srcStart:<framelinksrc1> channel 'pts-1341130908633-1' up: 16x16 BGRA, ring of 4 - waiting for a producer
+33: 0:00:00.397722900      18512      44976 INFO               framelink gstframelink.cpp:216:sinkTryConnect:<framelinksink1> producing on 'pts-1341130908633-10' (16x16 BGRA, ring of 4)
+33: 0:00:00.398401500      18512      44976 INFO               framelink gstframelink.cpp:381:sinkRender:<framelinksink1> 1 frames submitted, 0 dropped
+33: 0:00:00.399526900      18512      50896 INFO               framelink gstframelink.cpp:624:srcCreate:<framelinksrc1> ring reallocated: 16x16 -> 16x16 (generation 2)
+33: 0:00:00.400401300      18512      15124 INFO               framelink gstframelink.cpp:392:sinkStop:<framelinksink1> stopping: 1 submitted, 0 dropped
+33: 0:00:00.542024800      18512      15124 INFO               framelink gstframelink.cpp:564:srcStart:<framelinksrc2> channel 'pts-1341131074727-2' up: 16x16 BGRA, ring of 4 - waiting for a producer
+33: 0:00:00.561110200      18512      50896 INFO               framelink gstframelink.cpp:216:sinkTryConnect:<framelinksink2> producing on 'pts-1341131074727-20' (16x16 BGRA, ring of 4)
+33: 0:00:00.567324400      18512      50896 WARN               framelink gstframelink.cpp:374:sinkRender:<framelinksink2> error: valid signed-nanosecond TIME segment and PTS required
+33: 0:00:00.617616800      18512      15124 INFO               framelink gstframelink.cpp:392:sinkStop:<framelinksink2> stopping: 0 submitted, 0 dropped
+33: 0:00:00.755586200      18512      15124 INFO               framelink gstframelink.cpp:564:srcStart:<framelinksrc3> channel 'pts-1341131286398-3' up: 16x16 BGRA, ring of 4 - waiting for a producer
+33: 0:00:00.775058000      18512      44976 INFO               framelink gstframelink.cpp:216:sinkTryConnect:<framelinksink3> producing on 'pts-1341131286398-30' (16x16 BGRA, ring of 4)
+33: 0:00:00.775670000      18512      44976 INFO               framelink gstframelink.cpp:381:sinkRender:<framelinksink3> 1 frames submitted, 0 dropped
+33: 0:00:00.776322300      18512      50896 INFO               framelink gstframelink.cpp:624:srcCreate:<framelinksrc3> ring reallocated: 16x16 -> 16x16 (generation 2)
+33: 0:00:00.783655000      18512      44976 WARN               framelink gstframelink.cpp:374:sinkRender:<framelinksink3> error: valid signed-nanosecond TIME segment and PTS required
+33: 0:00:00.834050700      18512      15124 INFO               framelink gstframelink.cpp:392:sinkStop:<framelinksink3> stopping: 1 submitted, 0 dropped
+33: 0:00:00.974134300      18512      15124 INFO               framelink gstframelink.cpp:564:srcStart:<framelinksrc4> channel 'pts-1341131502451-4' up: 16x16 BGRA, ring of 4 - waiting for a producer
+33: 0:00:00.994087500      18512      50896 INFO               framelink gstframelink.cpp:216:sinkTryConnect:<framelinksink4> producing on 'pts-1341131502451-40' (16x16 BGRA, ring of 4)
+33: 0:00:00.994640100      18512      50896 INFO               framelink gstframelink.cpp:381:sinkRender:<framelinksink4> 1 frames submitted, 0 dropped
+33: 0:00:00.994831800      18512      44976 INFO               framelink gstframelink.cpp:624:srcCreate:<framelinksrc4> ring reallocated: 16x16 -> 16x16 (generation 2)
+33: 0:00:00.995710400      18512      15124 INFO               framelink gstframelink.cpp:392:sinkStop:<framelinksink4> stopping: 1 submitted, 0 dropped
+33: Timestamp contract: zero, repeated/backward, signed limit, overflow/missing rejection, segment mapping, default mode passed
+1/1 Test #33: gst_timestamp_contract ...........   Passed    1.03 sec
+
+The following tests passed:
+	gst_timestamp_contract
+
+100% tests passed, 0 tests failed out of 1
+
+Total Test time (real) =   5.20 sec

@@ -1,0 +1,26 @@
+UpdateCTestConfiguration  from :C:/Users/jonsu/dev/framelink-m4-20261030/build-final/DartConfiguration.tcl
+Test project C:/Users/jonsu/dev/framelink-m4-20261030/build-final
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 33
+    Start 33: gst_timestamp_contract
+
+33: Test command: C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_gst_timestamps.exe "C:/Users/jonsu/dev/framelink-m4-20261030/build-final/Release/gstframelink.dll"
+33: Working Directory: C:/Users/jonsu/dev/framelink-m4-20261030/build-final
+33: Test timeout computed to be: 25
+33: line 40: s
+    Test #33: gst_timestamp_contract ...........***Failed    3.05 sec
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) =   3.06 sec
+
+The following tests FAILED:
+	 33 - gst_timestamp_contract (Failed)
+Errors while running CTest
+Output from these tests are in: C:/Users/jonsu/dev/framelink-m4-20261030/build-final/Testing/Temporary/LastTest.log
+Use "--rerun-failed --output-on-failure" to re-run the failed cases verbosely.

@@ -1,0 +1,290 @@
+CMake is re-running because C:/Users/jonsu/dev/framelink-m4-20261030/build-final/CMakeFiles/generate.stamp is out-of-date.
+  the file 'C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt'
+  is newer than 'C:/Users/jonsu/dev/framelink-m4-20261030/build-final/CMakeFiles/generate.stamp.depend'
+  result='-1'
+-- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.26300.
+-- framelink: building GStreamer elements (gstframelink)
+-- Configuring done (0.8s)
+-- Generating done (0.3s)
+-- Build files have been written to: C:/Users/jonsu/dev/framelink-m4-20261030/build-final
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  1>Checking Build System
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  fl_ipc_win32.cpp
+  fl_trace.cpp
+  framelink_session.cpp
+  framelink_slots.cpp
+  framelink_win.cpp
+  Generating Code...
+     Creating library C:/Users/jonsu/dev/framelink-m4-20261030/build-final/Release/framelink.lib and object C:/Users/jonsu/dev/framelink-m4-20261030/build-final/Release/framelink.exp
+  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\framelink.dll
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  gstframelink.cpp
+     Creating library C:/Users/jonsu/dev/framelink-m4-20261030/build-final/Release/gstframelink.lib and object C:/Users/jonsu/dev/framelink-m4-20261030/build-final/Release/gstframelink.exp
+  gstframelink.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\gstframelink.dll
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  av_auth.cpp
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  av_apps.cpp
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  fl_gst_nv12.cpp
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  fl_gst_timestamps.cpp
+  av_rendezvous.cpp
+  fl_disconnect_win.cpp
+  m4_transport_timing.cpp
+  av_rendezvous.cpp
+  av_auth.cpp
+  fl_gst_nv12.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_gst_nv12.exe
+  fl_disconnect_win.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_disconnect_win.exe
+  fl_gst_timestamps.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_gst_timestamps.exe
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  test_av_rendezvous.cpp
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  test_av_auth.cpp
+  fl_nv12_layout.cpp
+  fl_consume.cpp
+  fl_nv12_win.cpp
+  fl_portable_map.cpp
+  av_rendezvous.cpp
+  fl_nv12_layout.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_nv12_layout.exe
+  fl_m4_transport_timing.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_m4_transport_timing.exe
+  Generating Code...
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  fl_produce.cpp
+  fl_reconnect_held.cpp
+  fl_portable_map.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_portable_map.exe
+  Generating Code...
+  fl_av_auth.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_av_auth.exe
+  fl_consume.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_consume.exe
+  fl_nv12_win.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_nv12_win.exe
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  Generating Code...
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  fl_session_c_api.c
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  fl_session_contract.cpp
+  fl_session_peer.cpp
+  fl_trace_test.cpp
+  fl_ready_timeout_win.cpp
+  av_apps.cpp
+  fl_session_c_api.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_session_c_api.exe
+  fl_produce.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_produce.exe
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  fl_reconnect_held.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_reconnect_held.exe
+  av_apps.cpp
+  fl_session_contract.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_session_contract.exe
+  fl_session_peer.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_session_peer.exe
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  av_session.cpp
+  consumer.cpp
+  framelink_av_playback.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\framelink_av_playback.lib
+  fl_av_rendezvous.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_av_rendezvous.exe
+  av_auth.cpp
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  fl_audio_segment.cpp
+  fl_av_offer_bounds.cpp
+  fl_ready_timeout_win.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_ready_timeout_win.exe
+  av_auth.cpp
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  av_rendezvous.cpp
+  fl_playback_recovery.cpp
+  producer.cpp
+  fl_audio_segment.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_audio_segment.exe
+  sample_common.cpp
+  fl_trace_test.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_trace_test.exe
+  av_rendezvous.cpp
+  framelink_av_session.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\framelink_av_session.exe
+  Generating Code...
+  sample_common.cpp
+  fl_playback_recovery.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_playback_recovery.exe
+  Generating Code...
+  Generating Code...
+  fl_av_offer_bounds.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_av_offer_bounds.exe
+  framelink_consumer.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\framelink_consumer.exe
+  Generating Code...
+  framelink_av_consumer.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\framelink_av_consumer.exe
+  framelink_av_producer.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\framelink_av_producer.exe
+  framelink_producer.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\framelink_producer.exe
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+Test project C:/Users/jonsu/dev/framelink-m4-20261030/build-final
+    Start 45: m4_av_recovery
+1/3 Test #45: m4_av_recovery ...................   Passed   10.41 sec
+    Start 46: m4_authenticated_offsets
+2/3 Test #46: m4_authenticated_offsets .........   Passed    6.52 sec
+    Start 48: av_audio_segment
+3/3 Test #48: av_audio_segment .................   Passed    0.07 sec
+
+100% tests passed, 0 tests failed out of 3
+
+Total Test time (real) =  17.03 sec
+CMake is re-running because C:/Users/jonsu/dev/vkrender-m4-20261030/build/CMakeFiles/generate.stamp is out-of-date.
+  the file 'C:/Users/jonsu/dev/vkrender-m4-20261030/CMakeLists.txt'
+  is newer than 'C:/Users/jonsu/dev/vkrender-m4-20261030/build/CMakeFiles/generate.stamp.depend'
+  result='-1'
+-- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.26300.
+CMake Deprecation Warning at C:/Users/jonsu/dev/vkrender-control-20261029/build-control/_deps/volk-src/CMakeLists.txt:1 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+
+
+-- Including Win32 support
+-- No build type selected, default to Debug
+-- framelink: building GStreamer elements (gstframelink)
+-- Configuring done (6.5s)
+-- Generating done (0.9s)
+-- Build files have been written to: C:/Users/jonsu/dev/vkrender-m4-20261030/build
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  fl_ipc_win32.cpp
+  fl_trace.cpp
+  framelink_session.cpp
+  framelink_slots.cpp
+  framelink_win.cpp
+  Generating Code...
+     Creating library C:/Users/jonsu/dev/vkrender-m4-20261030/build/framelink/Release/framelink.lib and object C:/Users/jonsu/dev/vkrender-m4-20261030/build/framelink/Release/framelink.exp
+  framelink.vcxproj -> C:\Users\jonsu\dev\vkrender-m4-20261030\build\Release\framelink.dll
+  gstframelink.cpp
+     Creating library C:/Users/jonsu/dev/vkrender-m4-20261030/build/framelink/Release/gstframelink.lib and object C:/Users/jonsu/dev/vkrender-m4-20261030/build/framelink/Release/gstframelink.exp
+  gstframelink.vcxproj -> C:\Users\jonsu\dev\vkrender-m4-20261030\build\framelink\Release\gstframelink.dll
+  Scanning sources for module dependencies...
+  OSDependent.vcxproj -> C:\Users\jonsu\dev\vkrender-control-20261029\build-control\_deps\glslang-build\glslang\OSDependent\Windows\Release\OSDependent.lib
+  GenericCodeGen.vcxproj -> C:\Users\jonsu\dev\vkrender-control-20261029\build-control\_deps\glslang-build\glslang\Release\GenericCodeGen.lib
+  glslang.vcxproj -> C:\Users\jonsu\dev\vkrender-control-20261029\build-control\_deps\glslang-build\glslang\Release\glslang.lib
+  softcam.vcxproj -> C:\Users\jonsu\dev\vkrender-m4-20261030\build\Release\softcam.dll
+  Vulkan-Module.vcxproj -> C:\Users\jonsu\dev\vkrender-control-20261029\build-control\_deps\vulkan_headers-build\Release\Vulkan-Module.lib
+  MachineIndependent.vcxproj -> C:\Users\jonsu\dev\vkrender-control-20261029\build-control\_deps\glslang-build\glslang\Release\MachineIndependent.lib
+  av_apps.cpp
+  av_apps.cpp
+  SPIRV.vcxproj -> C:\Users\jonsu\dev\vkrender-control-20261029\build-control\_deps\glslang-build\SPIRV\Release\SPIRV.lib
+  av_apps.cpp
+  framecam_win.cpp
+  av_session.cpp
+  consumer.cpp
+  producer.cpp
+  glfw.vcxproj -> C:\Users\jonsu\dev\vkrender-control-20261029\build-control\_deps\glfw-build\src\Release\glfw3.lib
+C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(538,5): warning MSB8028: The intermediate directory (glslang-default-resource-limits.dir\Release\) contains files shared from another project (glslang-default-resource-limits.vcxproj).  This can lead to incorrect clean and rebuild behavior. [C:\Users\jonsu\dev\vkrender-control-20261029\build-control\_deps\glslang-build\glslang\glslang-default-resource-limits.vcxproj]
+  glslang-default-resource-limits.vcxproj -> C:\Users\jonsu\dev\vkrender-control-20261029\build-control\_deps\glslang-build\glslang\Release\glslang-default-resource-limits.lib
+  ipc_win32.cpp
+  av_auth.cpp
+  av_auth.cpp
+  av_auth.cpp
+  sample_common.cpp
+  sample_common.cpp
+  framelink_av_session.vcxproj -> C:\Users\jonsu\dev\vkrender-m4-20261030\build\framelink\Release\framelink_av_session.exe
+  android_control.cpp
+  av_rendezvous.cpp
+  av_rendezvous.cpp
+  av_rendezvous.cpp
+  framecam.vcxproj -> C:\Users\jonsu\dev\vkrender-m4-20261030\build\Release\framecam.exe
+  volk.vcxproj -> C:\Users\jonsu\dev\vkrender-control-20261029\build-control\_deps\volk-build\Release\volk.lib
+  appliance_win.cpp
+  Generating Code...
+  Generating Code...
+  Generating Code...
+  Generating Code...
+  Generating Code...
+  vkr_common.vcxproj -> C:\Users\jonsu\dev\vkrender-m4-20261030\build\Release\vkr_common.lib
+  av_schedule_test.cpp
+  framelink_consumer.vcxproj -> C:\Users\jonsu\dev\vkrender-m4-20261030\build\framelink\Release\framelink_consumer.exe
+  framelink_producer.vcxproj -> C:\Users\jonsu\dev\vkrender-m4-20261030\build\framelink\Release\framelink_producer.exe
+  win_client_demo.cpp
+  gst_d3d11_decoder.cpp
+  vkr_av_schedule_test.vcxproj -> C:\Users\jonsu\dev\vkrender-m4-20261030\build\Release\vkr_av_schedule_test.exe
+C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(538,5): warning MSB8028: The intermediate directory (glslang-standalone.dir\Release\) contains files shared from another project (glslang-standalone.vcxproj).  This can lead to incorrect clean and rebuild behavior. [C:\Users\jonsu\dev\vkrender-control-20261029\build-control\_deps\glslang-build\StandAlone\glslang-standalone.vcxproj]
+  glslang-standalone.vcxproj -> C:\Users\jonsu\dev\vkrender-control-20261029\build-control\_deps\glslang-build\StandAlone\Release\glslang.exe
+  control_api.cpp
+  framelink_av_playback.vcxproj -> C:\Users\jonsu\dev\vkrender-m4-20261030\build\framelink\Release\framelink_av_playback.lib
+  android_surface_generations.cpp
+  framelink_av_consumer.vcxproj -> C:\Users\jonsu\dev\vkrender-m4-20261030\build\framelink\Release\framelink_av_consumer.exe
+  miracast_receiver.cpp
+  framelink_av_producer.vcxproj -> C:\Users\jonsu\dev\vkrender-m4-20261030\build\framelink\Release\framelink_av_producer.exe
+  vkr_appliance.vcxproj -> C:\Users\jonsu\dev\vkrender-m4-20261030\build\Release\vkr_appliance.exe
+  Compiling cube.vert -> SPIR-V
+  preview_mailbox.cpp
+  portable_output_check.cpp
+  C:/Users/jonsu/dev/vkrender-m4-20261030/renderer/shaders/cube.vert
+  Compiling fullscreen.vert -> SPIR-V
+  C:/Users/jonsu/dev/vkrender-m4-20261030/renderer/shaders/fullscreen.vert
+  Compiling nv12_cube.frag -> SPIR-V
+  C:/Users/jonsu/dev/vkrender-m4-20261030/renderer/shaders/nv12_cube.frag
+  Compiling nv12_planar.frag -> SPIR-V
+  main.cpp
+  C:/Users/jonsu/dev/vkrender-m4-20261030/renderer/shaders/nv12_planar.frag
+  Compiling vaporwave.frag -> SPIR-V
+  C:/Users/jonsu/dev/vkrender-m4-20261030/renderer/shaders/vaporwave.frag
+  Compiling video_ycbcr.frag -> SPIR-V
+  C:/Users/jonsu/dev/vkrender-m4-20261030/renderer/shaders/video_ycbcr.frag
+  vkr_android_surface_generations_test.vcxproj -> C:\Users\jonsu\dev\vkrender-m4-20261030\build\Release\vkr_android_surface_generations_test.exe
+  vkr_android_control_test.vcxproj -> C:\Users\jonsu\dev\vkrender-m4-20261030\build\Release\vkr_android_control_test.exe
+  rtsp_room.cpp
+  scene_layout.cpp
+  control_fixture.cpp
+  vkr_client_demo.vcxproj -> C:\Users\jonsu\dev\vkrender-m4-20261030\build\Release\vkr_client_demo.exe
+  Generating Code...
+  av_clock_contract_test.cpp
+  rtsp_win.cpp
+  vkr_preview_mailbox_test.vcxproj -> C:\Users\jonsu\dev\vkrender-m4-20261030\build\Release\vkr_preview_mailbox_test.exe
+  vkr_web.cpp
+  vkdecoder.vcxproj -> C:\Users\jonsu\dev\vkrender-m4-20261030\build\Release\vkdecoder.exe
+  pin_overlay.cpp
+  vkr_av_clock_contract_test.vcxproj -> C:\Users\jonsu\dev\vkrender-m4-20261030\build\Release\vkr_av_clock_contract_test.exe
+  vkrender_vcam_source.vcxproj -> C:\Users\jonsu\dev\vkrender-m4-20261030\build\Release\vkrender_vcam_source.dll
+  vkr_portable_output_check.vcxproj -> C:\Users\jonsu\dev\vkrender-m4-20261030\build\Release\vkr_portable_output_check.exe
+  background_pass.cpp
+  external_video_image.cpp
+  vkr_scene_layout_test.vcxproj -> C:\Users\jonsu\dev\vkrender-m4-20261030\build\Release\vkr_scene_layout_test.exe
+  Generating Code...
+  Generating Code...
+  control_api.cpp
+  civetweb.c
+  nv12_output.cpp
+  webrtc_win.cpp
+  vkr_rtsp.vcxproj -> C:\Users\jonsu\dev\vkrender-m4-20261030\build\Release\vkr_rtsp.exe
+  civetweb.c
+  whip_room.cpp
+     Creating library C:/Users/jonsu/dev/vkrender-m4-20261030/build/Release/vkr_web.lib and object C:/Users/jonsu/dev/vkrender-m4-20261030/build/Release/vkr_web.exp
+  vkr_web.vcxproj -> C:\Users\jonsu\dev\vkrender-m4-20261030\build\Release\vkr_web.exe
+  dump_util.cpp
+  vkr_control_test.vcxproj -> C:\Users\jonsu\dev\vkrender-m4-20261030\build\Release\vkr_control_test.exe
+  external_video_image.cpp
+  Generating Code...
+  vk_context.cpp
+  main.cpp
+  whip_mdns_win.c
+  nv12_output_win.cpp
+  vkr_webrtc.vcxproj -> C:\Users\jonsu\dev\vkrender-m4-20261030\build\Release\vkr_webrtc.exe
+  pin_overlay.cpp
+  Generating Code...
+  vkr_nv12_output_test.vcxproj -> C:\Users\jonsu\dev\vkrender-m4-20261030\build\Release\vkr_nv12_output_test.exe
+  Generating Code...
+  nv12_output.cpp
+  vkr_miracast.vcxproj -> C:\Users\jonsu\dev\vkrender-m4-20261030\build\Release\vkr_miracast.exe
+  portable_input.cpp
+  portable_output.cpp
+  scene_host.cpp
+  video_pass.cpp
+  vk_context.cpp
+  win_service.cpp
+  Generating Code...
+  civetweb.c
+  vkrenderer.vcxproj -> C:\Users\jonsu\dev\vkrender-m4-20261030\build\Release\vkrenderer.exe
+PASS native renderer A/V, format=BGRA, evidence=C:\Users\jonsu\AppData\Local\Temp\vkr-av-render-ecshl_ck
+PASS native renderer A/V, format=NV12, evidence=C:\Users\jonsu\AppData\Local\Temp\vkr-av-render-1k78luo5

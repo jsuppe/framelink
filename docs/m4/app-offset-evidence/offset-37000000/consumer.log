@@ -1,0 +1,4 @@
+{"command": ["/tmp/framelink-m4-playback-build/framelink_av_consumer", "/tmp/framelink-m4-playback-build/libgstframelink.so", "--session", "/tmp/framelink-m4-validation/docs/m4/app-offset-evidence/offset-37000000/session", "--frames", "80", "--timeout-ms", "5000", "--fps", "50", "--rate", "48000", "--format", "BGRA", "--stream", "--audio-sink", "fakesink"]}
+{"event":"playback-complete","audio_master":false,"video_received":23,"video_late":0,"audio_blocks":80,"audio_samples":76800,"latency_ns":100000000}
+{"event":"playback-timing","audio_first_running_pts_ns":37000000,"video_first_running_pts_ns":0,"audio_end_ns":1637000000,"video_end_ns":1600000000}
+{"role":"consumer","ok":true,"mode":"streaming","sessions":1}

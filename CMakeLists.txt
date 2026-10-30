@@ -436,18 +436,24 @@ endif()
 
 # Independent desktop A/V peers. GDP PCM uses authenticated GIO streams.
 if(FRAMELINK_BUILD_SAMPLES AND FL_GST_FOUND AND NOT ANDROID)
-    foreach(_role producer consumer)
-        add_executable(framelink_av_${_role} samples/av_apps.cpp samples/av_rendezvous.cpp samples/av_auth.cpp)
-        target_link_libraries(framelink_av_${_role} PRIVATE framelink)
+    foreach(_role producer consumer playback)
+        if(_role STREQUAL "playback")
+            add_library(framelink_av_playback STATIC samples/av_apps.cpp samples/av_rendezvous.cpp samples/av_auth.cpp)
+            target_compile_definitions(framelink_av_playback PRIVATE AV_PLAYBACK_LIBRARY=1)
+            target_include_directories(framelink_av_playback PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/samples)
+        else()
+            add_executable(framelink_av_${_role} samples/av_apps.cpp samples/av_rendezvous.cpp samples/av_auth.cpp)
+        endif()
+        target_link_libraries(framelink_av_${_role} PUBLIC framelink)
         if(WIN32)
-            target_include_directories(framelink_av_${_role} PRIVATE
+            target_include_directories(framelink_av_${_role} PUBLIC
                 "${FL_GST_ROOT}/include/gstreamer-1.0" "${FL_GST_ROOT}/include/glib-2.0"
                 "${FL_GST_ROOT}/lib/glib-2.0/include")
-            target_link_directories(framelink_av_${_role} PRIVATE "${FL_GST_ROOT}/lib")
-            target_link_libraries(framelink_av_${_role} PRIVATE gstreamer-1.0.lib gstapp-1.0.lib gstvideo-1.0.lib gio-2.0.lib gobject-2.0.lib glib-2.0.lib advapi32 bcrypt)
+            target_link_directories(framelink_av_${_role} PUBLIC "${FL_GST_ROOT}/lib")
+            target_link_libraries(framelink_av_${_role} PUBLIC gstreamer-1.0.lib gstapp-1.0.lib gstvideo-1.0.lib gio-2.0.lib gobject-2.0.lib glib-2.0.lib advapi32 bcrypt)
         else()
             pkg_check_modules(FL_AV_IO REQUIRED IMPORTED_TARGET gio-2.0 gstreamer-video-1.0)
-            target_link_libraries(framelink_av_${_role} PRIVATE PkgConfig::FL_GST PkgConfig::FL_AV_APP PkgConfig::FL_AV_IO)
+            target_link_libraries(framelink_av_${_role} PUBLIC PkgConfig::FL_GST PkgConfig::FL_AV_APP PkgConfig::FL_AV_IO)
         endif()
     endforeach()
     target_compile_definitions(framelink_av_producer PRIVATE AV_PRODUCER=1)
@@ -481,4 +487,67 @@ if(FRAMELINK_BUILD_TESTS AND TARGET framelink_av_producer)
             --plugin $<TARGET_FILE:gstframelink>)
         set_tests_properties(m3_av_apps PROPERTIES TIMEOUT 180)
     endif()
+endif()
+
+# Real transport timing checks (GPU-backed FrameLink + GDP/TCP PCM).
+# Not part of the hosted CPU-only whitelist; run on native hardware.
+if(FRAMELINK_BUILD_TESTS AND TARGET framelink_av_session AND NOT ANDROID)
+    add_executable(fl_m4_transport_timing test/m4_transport_timing.cpp)
+    target_include_directories(fl_m4_transport_timing PRIVATE $<TARGET_PROPERTY:framelink_av_session,INCLUDE_DIRECTORIES>)
+    target_link_directories(fl_m4_transport_timing PRIVATE $<TARGET_PROPERTY:framelink_av_session,LINK_DIRECTORIES>)
+    target_link_libraries(fl_m4_transport_timing PRIVATE $<TARGET_PROPERTY:framelink_av_session,LINK_LIBRARIES>)
+    add_test(NAME m4_transport_audio_lags COMMAND fl_m4_transport_timing $<TARGET_FILE:gstframelink>)
+    add_test(NAME m4_transport_audio_leads COMMAND fl_m4_transport_timing $<TARGET_FILE:gstframelink> --audio-leads)
+    add_test(NAME m4_transport_jitter_drift COMMAND fl_m4_transport_timing $<TARGET_FILE:gstframelink> --faults)
+    add_test(NAME m4_transport_negative_retimestamps COMMAND fl_m4_transport_timing $<TARGET_FILE:gstframelink> --negative)
+    set_tests_properties(m4_transport_audio_lags m4_transport_audio_leads m4_transport_jitter_drift m4_transport_negative_retimestamps PROPERTIES TIMEOUT 25)
+endif()
+
+if(FRAMELINK_BUILD_TESTS AND TARGET framelink_av_playback)
+    add_executable(fl_playback_recovery test/fl_playback_recovery.cpp)
+    target_link_libraries(fl_playback_recovery PRIVATE framelink_av_playback)
+endif()
+if(FRAMELINK_BUILD_TESTS AND TARGET framelink_av_playback)
+    add_executable(fl_av_offer_bounds test/fl_av_offer_bounds.cpp)
+    target_link_libraries(fl_av_offer_bounds PRIVATE framelink_av_playback)
+    add_test(NAME av_offer_bounds COMMAND fl_av_offer_bounds)
+    if(Python3_Interpreter_FOUND)
+        add_test(NAME m4_av_recovery COMMAND ${Python3_EXECUTABLE}
+            ${CMAKE_CURRENT_SOURCE_DIR}/test/m4_recovery.py --build $<TARGET_FILE_DIR:fl_playback_recovery>)
+        set_tests_properties(m4_av_recovery PROPERTIES TIMEOUT 90)
+    endif()
+endif()
+
+if(FRAMELINK_BUILD_TESTS AND TARGET framelink_av_producer AND Python3_Interpreter_FOUND)
+    add_test(NAME m4_authenticated_offsets COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/m4_app_offsets.py
+        $<TARGET_FILE:framelink_av_producer> $<TARGET_FILE:framelink_av_consumer>
+        $<TARGET_FILE:gstframelink>)
+    set_tests_properties(m4_authenticated_offsets PROPERTIES TIMEOUT 60)
+endif()
+
+if(FRAMELINK_BUILD_TESTS AND TARGET fl_playback_recovery AND Python3_Interpreter_FOUND)
+    add_test(NAME m4_source_drift COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/m4_source_drift.py --build $<TARGET_FILE_DIR:fl_playback_recovery>)
+    set_tests_properties(m4_source_drift PROPERTIES TIMEOUT 100)
+endif()
+
+# Optional PulseAudio mechanism probe, intentionally not an unconditional CTest:
+# requires a dedicated/null sink and does not qualify physical output timing.
+if(FRAMELINK_BUILD_TESTS AND TARGET framelink_av_playback AND UNIX AND NOT ANDROID)
+    add_executable(fl_m4_device_slaving test/m4_device_slaving.cpp)
+    target_link_libraries(fl_m4_device_slaving PRIVATE framelink_av_playback)
+endif()
+
+if(FRAMELINK_BUILD_TESTS AND TARGET framelink_av_playback)
+    add_executable(fl_audio_segment test/fl_audio_segment.cpp)
+    target_link_libraries(fl_audio_segment PRIVATE framelink_av_playback)
+    add_test(NAME av_audio_segment COMMAND fl_audio_segment)
+endif()
+
+if(FRAMELINK_BUILD_TESTS AND WIN32)
+    add_executable(fl_startup_win test/fl_startup_win.cpp)
+    target_link_libraries(fl_startup_win PRIVATE framelink)
+    add_test(NAME windows_endpoint_ready COMMAND fl_startup_win)
+    set_tests_properties(windows_endpoint_ready PROPERTIES TIMEOUT 30)
 endif()

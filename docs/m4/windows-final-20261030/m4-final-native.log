@@ -1,0 +1,18 @@
+Test project C:/Users/jonsu/dev/vkrender-m4-20261030/build
+    Start  6: control_http
+1/4 Test  #6: control_http .....................   Passed    0.54 sec
+    Start  7: control_preview_admission
+2/4 Test  #7: control_preview_admission ........   Passed    1.47 sec
+    Start 13: av_schedule
+3/4 Test #13: av_schedule ......................   Passed    0.02 sec
+    Start 14: av_clock_contract
+4/4 Test #14: av_clock_contract ................   Passed    0.09 sec
+
+100% tests passed, 0 tests failed out of 4
+
+Total Test time (real) =   2.16 sec
+PASS native renderer A/V, format=BGRA, evidence=C:\Users\jonsu\AppData\Local\Temp\vkr-av-render-82so42g1
+PASS native renderer A/V, format=NV12, evidence=C:\Users\jonsu\AppData\Local\Temp\vkr-av-render-crvdzkd6
+PASS native renderer pause/fresh-session recovery, format=BGRA, evidence=C:\Users\jonsu\AppData\Local\Temp\vkr-av-render-z1lerjaw
+PASS native renderer selected-session switch, format=BGRA, evidence=C:\Users\jonsu\AppData\Local\Temp\vkr-av-render-qj7xtlac
+PASS native renderer 10 generation switches, format=BGRA, evidence=C:\Users\jonsu\AppData\Local\Temp\vkr-av-render-ipras8c_

@@ -1,0 +1,8 @@
+status=system-clock-fallback
+{"event":"playback-metrics","peak_queue_buffers":4,"peak_queue_ns":80000000,"queue_empty_events":61,"queue_full_events":7,"late_audio_blocks":3,"arrival_drift_ns":226800487}
+status=session-reconnecting: audio playout budget exhausted: renegotiate both tracks
+status=system-clock-fallback
+{"event":"playback-metrics","peak_queue_buffers":4,"peak_queue_ns":80000000,"queue_empty_events":3,"queue_full_events":70,"late_audio_blocks":0,"arrival_drift_ns":1095148}
+{"event":"playback-complete","audio_master":false,"video_received":27,"video_late":0,"audio_blocks":75,"audio_samples":72000,"latency_ns":100000000}
+{"event":"playback-timing","audio_first_running_pts_ns":0,"video_first_running_pts_ns":0,"audio_end_ns":1500000000,"video_end_ns":1500000000}
+ok=1 sessions=2 clocks=2 ends=2 retries=1 ms=5145 error=

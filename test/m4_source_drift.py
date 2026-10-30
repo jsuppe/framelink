@@ -1,0 +1,75 @@
+#!/usr/bin/env python3
+"""Paced source drift: exact media PTS, bounded queues and real recovery.
+
+Fakesink exercises clock scheduling/backpressure, NOT physical device resampling.
+"""
+import argparse,json,pathlib,tempfile,time,subprocess,os
+from m3_apps import Peer
+p=argparse.ArgumentParser();p.add_argument('--build',required=True);p.add_argument('--output');p.add_argument('--frames',type=int,default=300);p.add_argument('--rates',default='-1000,1000,100000,-100000');p.add_argument('--skip-recovery',action='store_true');a=p.parse_args()
+assert 300<=a.frames<=2500,'frames must be 300..2500'
+frame_timeout=str(min(60000,10000+a.frames*25))
+b=pathlib.Path(a.build).resolve();ext='.exe' if os.name=='nt' else ''
+root=pathlib.Path(a.output or tempfile.mkdtemp(prefix='fl-source-drift-'));root.mkdir(parents=True,exist_ok=True)
+plugin=str(b/('gstframelink.dll' if os.name=='nt' else 'libgstframelink.so'))
+rates=list(map(int,a.rates.split(',')))
+cases=[(ppm,100) for ppm in rates]
+if -100000 in rates:cases.append((-100000,2000))
+for ppm,latency in cases:
+    d=root/(str(ppm)+'-'+str(latency));d.mkdir();peers=[]
+    common=[plugin,'--session',str(d/'session'),'--frames',str(a.frames),'--timeout-ms',frame_timeout,'--fps','50']
+    try:
+        peers.append(Peer([str(b/('framelink_av_producer'+ext))]+common+['--pacing-ppm',str(ppm),'--audio-offset-ns','37000000'],d,'producer'))
+        peers.append(Peer([str(b/('framelink_av_consumer'+ext))]+common+['--stream','--audio-sink','fakesink','--latency-ms',str(latency)],d,'consumer'))
+        end=time.monotonic()+int(frame_timeout)/1000+8
+        for peer in peers:peer.finish(end)
+        tx,rx=peers
+        metrics=[e for e in rx.events if e.get('event')=='playback-metrics']
+        assert metrics,rx.lines
+        m=metrics[-1]
+        assert m['peak_queue_buffers']<=4,m
+        # Queue admits a last buffer crossing its time threshold, at most 20ms.
+        assert m['peak_queue_ns']<=100000000,m
+        if ppm==-100000 and latency==100:
+            assert rx.process.returncode!=0,rx.lines
+            assert m['late_audio_blocks']>=3,m
+            assert any('playout budget exhausted' in l for l in rx.lines),rx.lines
+        else:
+            assert all(x.process.returncode==0 for x in peers),[x.lines for x in peers]
+            t=[e for e in rx.events if e.get('event')=='playback-timing'][-1]
+            assert t['audio_end_ns']-t['video_end_ns']==37000000,t
+            c=[e for e in rx.events if e.get('event')=='playback-complete'][-1]
+            assert c['audio_samples']==a.frames*960 and c['audio_blocks']==a.frames,c
+            if ppm==100000:
+                pacing=[e for e in tx.events if e.get('event')=='producer-pacing'][-1]
+                assert pacing['pacing_ppm']==ppm,pacing
+                assert m['queue_full_events']>0,m
+        (d/'result.json').write_text(json.dumps(m,indent=2)+'\n')
+        print(ppm,latency,'PASS',m,flush=True)
+    finally:
+        for peer in peers:peer.stop()
+# Exercise production runPlayback automatic coordinated re-anchor, not just CLI
+# detection: replace the intentionally slow clock with a healthy producer.
+if a.skip_recovery:
+    print('PASS: source pacing cases; evidence='+str(root));raise SystemExit(0)
+d=root/'recovery';d.mkdir();session=str(d/'session');procs=[]
+def launch(name,cmd):
+    f=open(d/(name+'.log'),'w');q=subprocess.Popen(cmd,stdout=f,stderr=f);procs.append((q,f));return q
+try:
+    producer=str(b/('framelink_av_producer'+ext))
+    bad=launch('slow',[producer,plugin,'--session',session,'--frames','300','--pacing-ppm','-100000','--timeout-ms','12000'])
+    consumer=launch('consumer',[str(b/('fl_playback_recovery'+ext)),plugin,session,'recover'])
+    deadline=time.monotonic()+12
+    while 'playout budget exhausted' not in (d/'consumer.log').read_text():
+        assert consumer.poll() is None,(d/'consumer.log').read_text()
+        assert time.monotonic()<deadline,'no bounded exhaustion recovery'
+        time.sleep(.02)
+    bad.terminate();bad.wait(timeout=5)
+    good=launch('healthy',[producer,plugin,'--session',session,'--frames','75','--timeout-ms','12000'])
+    assert consumer.wait(timeout=15)==0,(d/'consumer.log').read_text()
+    assert good.wait(timeout=5)==0,(d/'healthy.log').read_text()
+    print('coordinated source-drift recovery PASS',flush=True)
+finally:
+    for q,f in procs:
+        if q.poll() is None:q.terminate()
+        q.wait(timeout=5);f.close()
+print('PASS: '+str(len(cases)+1)+' source pacing/recovery scenarios; evidence='+str(root))

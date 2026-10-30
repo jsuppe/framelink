@@ -1,0 +1,2 @@
+COMMAND ['/tmp/framelink-m4-validation-build/fl_m4_transport_timing', '/tmp/framelink-m4-validation-build/libgstframelink.so', '--negative']
+NEGATIVE_CONTROL_CAUGHT: consumer arrival retimestamping changes producer PTS

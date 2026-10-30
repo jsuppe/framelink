@@ -1,0 +1,2 @@
+{"command": ["/tmp/framelink-m4-playback-build/framelink_av_consumer", "/tmp/framelink-m4-playback-build/libgstframelink.so", "--session", "/tmp/framelink-m4-validation/docs/m4/app-offset-evidence/negative-reset-37000000/session", "--frames", "80", "--timeout-ms", "5000", "--fps", "50", "--rate", "48000", "--format", "BGRA", "--stream", "--audio-sink", "fakesink"]}
+FAIL: audio discontinuity: renegotiate both tracks

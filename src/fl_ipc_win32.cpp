@@ -52,7 +52,7 @@ void Channel::close() {
     connected_ = false;
 }
 
-Channel Channel::listen(const std::string& name) {
+Channel Channel::listen(const std::string& name, void (*ready)(void*, bool), void* context) {
     Channel ch;
     // Unlimited instances: a consumer re-listens for the next producer while
     // the current one is still attached.
@@ -60,6 +60,7 @@ Channel Channel::listen(const std::string& name) {
                                    PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE | PIPE_WAIT,
                                    PIPE_UNLIMITED_INSTANCES, kBufferSize, kBufferSize, 0,
                                    nullptr);
+    if (ready) ready(context, pipe != INVALID_HANDLE_VALUE);
     if (pipe == INVALID_HANDLE_VALUE) return ch;
     BOOL ok = ConnectNamedPipe(pipe, nullptr);
     if (!ok && GetLastError() != ERROR_PIPE_CONNECTED) {
