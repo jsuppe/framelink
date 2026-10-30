@@ -19,6 +19,10 @@ struct PlaybackOptions {
   unsigned timeoutMs=15000, latencyMs=100;
   bool externalVideo=false;
   const std::atomic<bool>* mute=nullptr;
+  // Live pause suspends BOTH tracks and tears down their session. Resume
+  // negotiates a fresh identity/epoch; it is not lossless recorded-media pause.
+  const std::atomic<bool>* paused=nullptr;
+  unsigned recoveryAttempts=3;
 };
 struct PlaybackCallbacks {
   std::function<void(const flSessionConfig&, const std::string&, const PlaybackClock&)> onSession;

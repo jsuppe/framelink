@@ -196,6 +196,8 @@ flSessionCapabilities caps(const Options &o) {
 // Fixed bounded offer envelope: version/counts + eight video + eight audio
 // entries. Integers are LE; unused entries must be zero, never native structs.
 void sendCaps(Conn &c, const flSessionCapabilities &a) {
+  need(a.version == 1 && a.videoCount && a.videoCount <= 8 &&
+       a.audioCount && a.audioCount <= 8, "invalid outgoing offer counts/version");
   unsigned char b[268]{};
   GST_WRITE_UINT32_LE(b, a.version);
   GST_WRITE_UINT32_LE(b + 4, a.videoCount);
@@ -608,8 +610,37 @@ void configureAudioSlaving(GstElement* sink) {
   if (G_IS_VALUE(&value)) g_value_unset(&value);
   gst_iterator_free(it);
 }
+// A failed sink can leave an appsrc producer blocked on a full queue. Stop
+// from a separate thread (never the streaming bus callback) to release that
+// push and let the producer accept a replacement authenticated session.
+struct ProducerFailureWatch {
+  GstElement* pipeline;
+  GstBus* bus;
+  std::atomic<bool> done{false};
+  std::thread worker;
+  explicit ProducerFailureWatch(Pipeline& p):pipeline(p.p),bus(gst_element_get_bus(p.p)),worker([this]{
+    while (!done.load()) {
+      auto* message=gst_bus_timed_pop_filtered(bus,20*GST_MSECOND,GST_MESSAGE_ERROR);
+      if(message) {gst_message_unref(message);gst_element_set_state(pipeline,GST_STATE_NULL);break;}
+    }
+  }) {}
+  ~ProducerFailureWatch(){done=true;worker.join();gst_object_unref(bus);}
+};
+void checkPlaybackBus(GstBus* bus) {
+  auto* message=gst_bus_pop_filtered(bus,GstMessageType(GST_MESSAGE_ERROR|GST_MESSAGE_CLOCK_LOST));
+  if(!message) return;
+  std::string error="audio clock lost: renegotiate both tracks";
+  if(GST_MESSAGE_TYPE(message)==GST_MESSAGE_ERROR) {
+    GError* detail=nullptr;gchar* debug=nullptr;
+    gst_message_parse_error(message,&detail,&debug);
+    error=std::string("playback pipeline failure: ")+(detail?detail->message:"unknown");
+    if(detail) g_error_free(detail);g_free(debug);
+  }
+  gst_message_unref(message);
+  throw std::runtime_error(error);
+}
 struct AudioTimeline {
-  std::atomic<uint64_t> blocks{0}, samplesEnd{0};
+  std::atomic<uint64_t> blocks{0}, samplesEnd{0}, originNs{GST_CLOCK_TIME_NONE};
   std::atomic<bool> invalid{false};
   unsigned rate=48000, channels=2;
 };
@@ -620,9 +651,15 @@ GstPadProbeReturn trackAudio(GstPad*, GstPadProbeInfo* info, gpointer data) {
   auto bytes=gst_buffer_get_size(b);
   uint64_t first=t.samplesEnd.load(), count=bytes/(2*t.channels);
   int64_t expected=0,next=0;
-  if (bytes%(2*t.channels) || flSessionSampleOffset(first,t.rate,&expected)!=0 ||
-      flSessionSampleOffset(first+count,t.rate,&next)!=0 || GST_BUFFER_PTS(b)!=uint64_t(expected) ||
+  // The first producer PTS is an intentional media offset, not arrival time.
+  // Remember it for continuity checks; NEVER rewrite the downstream timestamp.
+  if (!first && t.originNs.load()==GST_CLOCK_TIME_NONE && GST_CLOCK_TIME_IS_VALID(GST_BUFFER_PTS(b)))
+    t.originNs=GST_BUFFER_PTS(b);
+  const auto origin=t.originNs.load();
+  if (!GST_CLOCK_TIME_IS_VALID(origin) || bytes%(2*t.channels) || flSessionSampleOffset(first,t.rate,&expected)!=0 ||
+      flSessionSampleOffset(first+count,t.rate,&next)!=0 || uint64_t(next)>GST_CLOCK_TIME_NONE-1-origin || GST_BUFFER_PTS(b)!=origin+uint64_t(expected) ||
       GST_BUFFER_DURATION(b)!=uint64_t(next-expected)) t.invalid=true;
+  if (t.invalid.load()) return GST_PAD_PROBE_DROP; // never schedule corrupt PCM
   t.samplesEnd=first+count; ++t.blocks;
   return GST_PAD_PROBE_OK;
 }
@@ -677,6 +714,7 @@ unsigned runProducer(const Options &o, GSocketListener *l,
           "! gdppay ! giostreamsink name=audioio sync=false async=false");
   setStream(tx, "audioio", *audio, true);
   start(tx, clock, cfg.epochNs);
+  ProducerFailureWatch failureWatch(tx);
   Handles h;
   auto *v = h.get(tx, "video"), *a = h.get(tx, "audio");
   put(*control, o.frames);
@@ -709,7 +747,7 @@ unsigned runProducer(const Options &o, GSocketListener *l,
   return o.frames;
 }
 unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
-                     const av::PlaybackCallbacks* cb=nullptr, const std::atomic<bool>* stop=nullptr, bool externalVideo=false, const std::atomic<bool>* mute=nullptr) {
+                     const av::PlaybackCallbacks* cb=nullptr, const std::atomic<bool>* stop=nullptr, bool externalVideo=false, const std::atomic<bool>* mute=nullptr, const std::atomic<bool>* paused=nullptr) {
   Options o = requested;
   std::unique_ptr<Conn> control(connect(ep, 'C', o.timeout));
   auto local = caps(o);
@@ -762,6 +800,12 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
     auto latency=uint64_t(o.latencyMs)*GST_MSECOND;
     if (cb && cb->onSession) cb->onSession(cfg,channel,av::PlaybackClock{});
     AudioReader reader(*audio,rx);
+    // Invalidate native video immediately on exit, before a device/socket's
+    // potentially slow teardown. Callback must retain clocks it needs itself.
+    struct EndNotification {
+      const av::PlaybackCallbacks* cb;
+      ~EndNotification(){if(cb && cb->onEnd)cb->onEnd();}
+    } endNotification{cb};
     put(*control,0x5245414459ULL);
     const auto frames=get(*control);
     need(frames && frames<=100000,"invalid stream length");
@@ -770,6 +814,7 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
     // its first real PCM packet negotiates the device and exposes its clock.
     while (!audioTimeline.blocks.load()) {
       need(!stop || !stop->load(),"playback cancelled");
+      need(!paused || !paused->load(),"session-paused");
       need(std::chrono::steady_clock::now()<end,"audio preroll deadline");
       g_usleep(1000);
     }
@@ -799,14 +844,17 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
 
     // An audio sink pad EOS probe reports only arrival, not audible completion;
     // drain until final media deadline on the selected shared clock instead.
-    const auto finishAt=mappedBase+frames*GST_SECOND/o.fps+latency;
+    const auto audioOrigin=audioTimeline.originNs.load();
+    const auto duration=frames*GST_SECOND/o.fps;
+    need(audioOrigin<=GST_CLOCK_TIME_NONE-1-duration-mappedBase-latency,"audio timeline overflow");
+    const auto finishAt=mappedBase+std::max(duration,audioOrigin+duration)+latency;
     while (gst_clock_get_time(selected)<finishAt || (!externalVideo && (!GST_CLOCK_TIME_IS_VALID(lastPts) || lastPts<finalPts))) {
       need(!stop || !stop->load(),"playback cancelled");
+      need(!paused || !paused->load(),"session-paused");
       g_object_set(volume,"mute",mute && mute->load(),nullptr);
       need(!audioTimeline.invalid.load(),"audio discontinuity: renegotiate both tracks");
       need(std::chrono::steady_clock::now()<end,"playback deadline");
-      auto *msg=gst_bus_pop_filtered(bus,GstMessageType(GST_MESSAGE_ERROR|GST_MESSAGE_CLOCK_LOST));
-      if (msg) { gst_message_unref(msg); throw std::runtime_error("playback error or clock lost; renegotiate session"); }
+      checkPlaybackBus(bus);
       if (!v) { g_usleep(5000); continue; }
       auto *sample=gst_app_sink_try_pull_sample(GST_APP_SINK(v),10*GST_MSECOND);
       if (!sample) continue;
@@ -821,6 +869,7 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
         if (now>due+40*GST_MSECOND) ++dropped;
         else while (due>gst_clock_get_time(selected)) {
           need(!stop || !stop->load(),"playback cancelled");
+          need(!paused || !paused->load(),"session-paused");
           need(std::chrono::steady_clock::now()<end,"playback deadline");
           g_usleep(1000);
         }
@@ -828,7 +877,6 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
     }
     need(!audioTimeline.invalid.load() && audioTimeline.samplesEnd.load()==frames*o.rate/o.fps,"incomplete/discontinuous audio");
     gst_element_set_state(rx.p,GST_STATE_NULL);
-    if (cb && cb->onEnd) cb->onEnd();
     put(*control,0x444f4e45ULL);
     printf("{\"event\":\"playback-complete\",\"audio_master\":%s,\"video_received\":%llu,\"video_late\":%llu,\"audio_blocks\":%llu,\"audio_samples\":%llu,\"latency_ns\":%llu}\n", audioMaster?"true":"false",(unsigned long long)received,(unsigned long long)dropped,(unsigned long long)audioTimeline.blocks.load(),(unsigned long long)audioTimeline.samplesEnd.load(),(unsigned long long)latency);
     return unsigned(frames);
@@ -994,6 +1042,7 @@ int main(int argc, char **argv) {
 #endif
 namespace av {
 bool runPlayback(const PlaybackOptions& p,const PlaybackCallbacks& cb,const std::atomic<bool>& stop,std::string& error) {
+  bool sessionOpen=false;
   try {
     need(!p.externalVideo || bool(cb.onClock),"native playback requires onClock callback");
     Options o; o.plugin=p.plugin; o.session=p.session; o.format=p.format;
@@ -1004,11 +1053,46 @@ bool runPlayback(const PlaybackOptions& p,const PlaybackCallbacks& cb,const std:
     GError* e=nullptr; auto* plugin=gst_plugin_load_file(o.plugin.c_str(),&e);
     if (e) {error=e->message;g_error_free(e);}
     need(plugin,"FrameLink plugin load");gst_object_unref(plugin);
-    av::Endpoint ep{};auto end=std::chrono::steady_clock::now()+std::chrono::milliseconds(o.timeout);
-    while (!av::readEndpoint(o.session,ep,error)) {
-      need(!stop.load(),"cancelled");need(std::chrono::steady_clock::now()<end,"rendezvous deadline");g_usleep(10000);
+    need(p.recoveryAttempts <= 16,"recovery attempt limit");
+    unsigned failures=0;
+    for (;;) {
+      need(!stop.load(),"playback cancelled");
+      // An intentional pause may last indefinitely, but cancellation is checked
+      // every 5 ms. Connection and active playback remain deadline bounded.
+      while (p.paused && p.paused->load()) {
+        need(!stop.load(),"playback cancelled"); g_usleep(5000);
+      }
+      av::Endpoint ep{};
+      auto end=std::chrono::steady_clock::now()+std::chrono::milliseconds(o.timeout);
+      bool ended=false;
+      auto sessionCallbacks=cb;
+      sessionCallbacks.onSession=[&](const flSessionConfig& config,const std::string& channel,const PlaybackClock& clock){
+        sessionOpen=true;if(cb.onSession)cb.onSession(config,channel,clock);
+      };
+      sessionCallbacks.onEnd=[&]{ended=true;if(sessionOpen){sessionOpen=false;if(cb.onEnd)cb.onEnd();}};
+      try {
+        while (!av::readEndpoint(o.session,ep,error)) {
+          need(!stop.load(),"playback cancelled");
+          need(!p.paused || !p.paused->load(),"session-paused");
+          need(std::chrono::steady_clock::now()<end,"rendezvous deadline");g_usleep(10000);
+        }
+        runConsumer(o,ep,&sessionCallbacks,&stop,p.externalVideo,p.mute,p.paused);
+        error.clear(); return true;
+      } catch (const std::exception& failure) {
+        // Cover setup failures before EndNotification was installed. No old
+        // clock is carried into the next session.
+        if (!ended) sessionCallbacks.onEnd();
+        error=failure.what();
+        if (stop.load()) return false;
+        if (error=="session-paused" || (p.paused && p.paused->load())) {
+          if(cb.onStatus) cb.onStatus("session-paused");
+          continue;
+        }
+        if(failures++ >= p.recoveryAttempts) return false;
+        if(cb.onStatus) cb.onStatus("session-reconnecting: "+error);
+        g_usleep(100000);
+      }
     }
-    runConsumer(o,ep,&cb,&stop,p.externalVideo,p.mute);return true;
-  } catch(const std::exception& e) {error=e.what();if(cb.onEnd)cb.onEnd();return false;}
+  } catch(const std::exception& e) {error=e.what();if(sessionOpen && cb.onEnd)cb.onEnd();return false;}
 }
 }
