@@ -34,3 +34,11 @@ or speaker/display alignment qualification is claimed by these headless tests.
 peer's output and per-case JSON result. `security.log` records both CPU tests.
 No physical playback, device switching, long-term clock drift, or Android APK
 qualification is implied; those remain later roadmap work.
+
+## Final integrated-source rerun
+
+Added CLI/CI registration `db2fbf4` and review cleanup fix `9d1eed6` on top of
+all changes above (local final source `eaaa38f`). Rebuilt all targets and ran
+**39/39 CTest tests successfully**, 50.08 seconds. This includes both CPU
+security gates, both help gates and the full ten-case `m3_av_apps` matrix.
+`final-39-tests.log` and `final-LastTest.log` retain the final build/test evidence.

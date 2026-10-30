@@ -1,0 +1,710 @@
+Start testing: Oct 30 08:13 Eastern Daylight Time
+----------------------------------------------------------
+1/39 Testing: session_contract
+1/39 Test: session_contract
+Command: "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_session_contract.exe"
+Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+"session_contract" start time: Oct 30 08:13 Eastern Daylight Time
+Output:
+----------------------------------------------------------
+session contract: negotiation, codec, generation and clock bounds passed
+<end of output>
+Test time =   0.03 sec
+----------------------------------------------------------
+Test Passed.
+"session_contract" end time: Oct 30 08:13 Eastern Daylight Time
+"session_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+2/39 Testing: session_contract_c_api
+2/39 Test: session_contract_c_api
+Command: "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_session_c_api.exe"
+Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+"session_contract_c_api" start time: Oct 30 08:13 Eastern Daylight Time
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"session_contract_c_api" end time: Oct 30 08:13 Eastern Daylight Time
+"session_contract_c_api" time elapsed: 00:00:00
+----------------------------------------------------------
+
+3/39 Testing: roundtrip
+3/39 Test: roundtrip
+Command: "C:/Program Files/CMake/bin/cmake.exe" "-DCONSUMER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_consume.exe" "-DPRODUCER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_produce.exe" "-DCONSUMER_ARGS=flci;20" "-DPRODUCER_ARGS=flci;400;0" "-P" "C:/Users/jonsu/dev/framelink-m3-20261030/test/run_roundtrip.cmake"
+Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+"roundtrip" start time: Oct 30 08:13 Eastern Daylight Time
+Output:
+----------------------------------------------------------
+-- consume: channel 'flci' 256x128 pool 4, waiting for a producer
+consume: ring is now 320x240 (gen 3) - re-imported
+consume: 20 verified, 0 mismatched, 57 skipped (latest-frame-wins)
+consume: producer submitted 80 frames while we read 20
+consume: PASS
+
+<end of output>
+Test time =   0.46 sec
+----------------------------------------------------------
+Test Passed.
+"roundtrip" end time: Oct 30 08:13 Eastern Daylight Time
+"roundtrip" time elapsed: 00:00:00
+----------------------------------------------------------
+
+4/39 Testing: roundtrip_reattach
+4/39 Test: roundtrip_reattach
+Command: "C:/Program Files/CMake/bin/cmake.exe" "-DCONSUMER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_consume.exe" "-DPRODUCER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_produce.exe" "-DCONSUMER_ARGS=flre;20;0;1" "-DPRODUCER_ARGS=flre;400;0;1" "-P" "C:/Users/jonsu/dev/framelink-m3-20261030/test/run_roundtrip.cmake"
+Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+"roundtrip_reattach" start time: Oct 30 08:13 Eastern Daylight Time
+Output:
+----------------------------------------------------------
+-- consume: channel 'flre' 256x128 pool 4, waiting for a producer
+consume: ring is now 320x240 (gen 3) - re-imported
+consume: ring is now 320x240 (gen 4) - re-imported
+consume: 70 verified, 0 mismatched, 207 skipped (latest-frame-wins)
+consume: producer submitted 280 frames while we read 70
+consume: reattach seen, 20 verified after it
+consume: PASS
+
+<end of output>
+Test time =   2.67 sec
+----------------------------------------------------------
+Test Passed.
+"roundtrip_reattach" end time: Oct 30 08:13 Eastern Daylight Time
+"roundtrip_reattach" time elapsed: 00:00:02
+----------------------------------------------------------
+
+5/39 Testing: nv12_layout
+5/39 Test: nv12_layout
+Command: "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_nv12_layout.exe"
+Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+"nv12_layout" start time: Oct 30 08:13 Eastern Daylight Time
+Output:
+----------------------------------------------------------
+NV12 geometry, padded plane bounds and overflow checks passed
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"nv12_layout" end time: Oct 30 08:13 Eastern Daylight Time
+"nv12_layout" time elapsed: 00:00:00
+----------------------------------------------------------
+
+6/39 Testing: gst_nv12_roundtrip
+6/39 Test: gst_nv12_roundtrip
+Command: "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_gst_nv12.exe" "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/gstframelink.dll"
+Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+"gst_nv12_roundtrip" start time: Oct 30 08:13 Eastern Daylight Time
+Output:
+----------------------------------------------------------
+GStreamer NV12 padded/offset byte roundtrip and mismatch rejection passed
+<end of output>
+Test time =   0.71 sec
+----------------------------------------------------------
+Test Passed.
+"gst_nv12_roundtrip" end time: Oct 30 08:13 Eastern Daylight Time
+"gst_nv12_roundtrip" time elapsed: 00:00:00
+----------------------------------------------------------
+
+7/39 Testing: gst_rgb10a2_roundtrip
+7/39 Test: gst_rgb10a2_roundtrip
+Command: "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_gst_nv12.exe" "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/gstframelink.dll" "rgb10a2"
+Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+"gst_rgb10a2_roundtrip" start time: Oct 30 08:13 Eastern Daylight Time
+Output:
+----------------------------------------------------------
+GStreamer RGB10A2_LE padded/offset byte roundtrip and mismatch rejection passed
+<end of output>
+Test time =   0.69 sec
+----------------------------------------------------------
+Test Passed.
+"gst_rgb10a2_roundtrip" end time: Oct 30 08:13 Eastern Daylight Time
+"gst_rgb10a2_roundtrip" time elapsed: 00:00:00
+----------------------------------------------------------
+
+8/39 Testing: nv12_windows_roundtrip
+8/39 Test: nv12_windows_roundtrip
+Command: "C:/Program Files/CMake/bin/cmake.exe" "-DPRODUCER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_nv12_win.exe" "-DCONSUMER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_nv12_win.exe" "-DPRODUCER_ARGS=produce;flci-nv12" "-DCONSUMER_ARGS=consume;flci-nv12" "-P" "C:/Users/jonsu/dev/framelink-m3-20261030/test/run_roundtrip.cmake"
+Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+"nv12_windows_roundtrip" start time: Oct 30 08:13 Eastern Daylight Time
+Output:
+----------------------------------------------------------
+-- 24 cross-process shared NV12 textures: every Y/UV byte and fence-ordered readback passed
+
+<end of output>
+Test time =   0.45 sec
+----------------------------------------------------------
+Test Passed.
+"nv12_windows_roundtrip" end time: Oct 30 08:13 Eastern Daylight Time
+"nv12_windows_roundtrip" time elapsed: 00:00:00
+----------------------------------------------------------
+
+9/39 Testing: nv12_windows_1080p
+9/39 Test: nv12_windows_1080p
+Command: "C:/Program Files/CMake/bin/cmake.exe" "-DPRODUCER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_nv12_win.exe" "-DCONSUMER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_nv12_win.exe" "-DPRODUCER_ARGS=produce;flci-nv12-hd;1920;1080" "-DCONSUMER_ARGS=consume;flci-nv12-hd;1920;1080" "-P" "C:/Users/jonsu/dev/framelink-m3-20261030/test/run_roundtrip.cmake"
+Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+"nv12_windows_1080p" start time: Oct 30 08:13 Eastern Daylight Time
+Output:
+----------------------------------------------------------
+-- 24 cross-process shared NV12 textures: every Y/UV byte and fence-ordered readback passed
+
+<end of output>
+Test time =   0.49 sec
+----------------------------------------------------------
+Test Passed.
+"nv12_windows_1080p" end time: Oct 30 08:13 Eastern Daylight Time
+"nv12_windows_1080p" time elapsed: 00:00:00
+----------------------------------------------------------
+
+10/39 Testing: sample_bgra
+10/39 Test: sample_bgra
+Command: "C:/Program Files/CMake/bin/cmake.exe" "-DPRODUCER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_producer.exe" "-DCONSUMER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_consumer.exe" "-DPRODUCER_ARGS=--channel;sample-bgra;--frames;200;--fps;120;" "-DCONSUMER_ARGS=--channel;sample-bgra;--frames;12;--size;130x66;--format;bgra;--pool;1" "-P" "C:/Users/jonsu/dev/framelink-m3-20261030/test/run_samples.cmake"
+Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+"sample_bgra" start time: Oct 30 08:13 Eastern Daylight Time
+Output:
+----------------------------------------------------------
+-- channel version=5 format=BGRA size=130x66 pool=1 generation=1 adapter=c57d010000000000
+consumer received=12 verified=12 pattern_gaps=0 sequence_gaps=0 timeouts=1 fps=28.64 pts_age_mean_ms=1.690 pts_age_max_ms=2.158
+
+channel version=5 format=BGRA size=130x66 pool=1 generation=2 adapter=c57d010000000000
+producer sent=13 timeouts=0 reconnects=0 elapsed_ms=451
+
+<end of output>
+Test time =   0.51 sec
+----------------------------------------------------------
+Test Passed.
+"sample_bgra" end time: Oct 30 08:13 Eastern Daylight Time
+"sample_bgra" time elapsed: 00:00:00
+----------------------------------------------------------
+
+11/39 Testing: sample_nv12
+11/39 Test: sample_nv12
+Command: "C:/Program Files/CMake/bin/cmake.exe" "-DPRODUCER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_producer.exe" "-DCONSUMER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_consumer.exe" "-DPRODUCER_ARGS=--channel;sample-nv12;--frames;200;--fps;120;--format;nv12" "-DCONSUMER_ARGS=--channel;sample-nv12;--frames;12;--size;130x66;--format;nv12;--pool;8" "-P" "C:/Users/jonsu/dev/framelink-m3-20261030/test/run_samples.cmake"
+Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+"sample_nv12" start time: Oct 30 08:13 Eastern Daylight Time
+Output:
+----------------------------------------------------------
+-- channel version=5 format=NV12 size=130x66 pool=8 generation=1 adapter=c57d010000000000
+consumer received=12 verified=12 pattern_gaps=0 sequence_gaps=0 timeouts=1 fps=28.86 pts_age_mean_ms=1.645 pts_age_max_ms=2.340
+
+channel version=5 format=NV12 size=130x66 pool=8 generation=2 adapter=c57d010000000000
+producer sent=13 timeouts=0 reconnects=0 elapsed_ms=433
+
+<end of output>
+Test time =   0.47 sec
+----------------------------------------------------------
+Test Passed.
+"sample_nv12" end time: Oct 30 08:13 Eastern Daylight Time
+"sample_nv12" time elapsed: 00:00:00
+----------------------------------------------------------
+
+12/39 Testing: sample_slow
+12/39 Test: sample_slow
+Command: "C:/Program Files/CMake/bin/cmake.exe" "-DPRODUCER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_producer.exe" "-DCONSUMER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_consumer.exe" "-DPRODUCER_ARGS=--channel;sample-slow;--frames;200;--fps;120;--format;nv12" "-DCONSUMER_ARGS=--channel;sample-slow;--frames;12;--size;130x66;--format;nv12;--delay-ms;20;--pool;2" "-P" "C:/Users/jonsu/dev/framelink-m3-20261030/test/run_samples.cmake"
+Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+"sample_slow" start time: Oct 30 08:13 Eastern Daylight Time
+Output:
+----------------------------------------------------------
+-- channel version=5 format=NV12 size=130x66 pool=2 generation=1 adapter=c57d010000000000
+consumer received=12 verified=12 pattern_gaps=0 sequence_gaps=0 timeouts=1 fps=20.19 pts_age_mean_ms=18.875 pts_age_max_ms=21.640
+
+channel version=5 format=NV12 size=130x66 pool=2 generation=2 adapter=c57d010000000000
+producer sent=14 timeouts=0 reconnects=0 elapsed_ms=698
+
+<end of output>
+Test time =   0.74 sec
+----------------------------------------------------------
+Test Passed.
+"sample_slow" end time: Oct 30 08:13 Eastern Daylight Time
+"sample_slow" time elapsed: 00:00:00
+----------------------------------------------------------
+
+13/39 Testing: sample_metadata
+13/39 Test: sample_metadata
+Command: "C:/Program Files/CMake/bin/cmake.exe" "-DPRODUCER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_producer.exe" "-DCONSUMER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_consumer.exe" "-DPRODUCER_ARGS=--channel;sample-metadata;--frames;200;--fps;120;" "-DCONSUMER_ARGS=--channel;sample-metadata;--frames;12;--size;130x66;--verify;0" "-P" "C:/Users/jonsu/dev/framelink-m3-20261030/test/run_samples.cmake"
+Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+"sample_metadata" start time: Oct 30 08:13 Eastern Daylight Time
+Output:
+----------------------------------------------------------
+-- channel version=5 format=BGRA size=130x66 pool=4 generation=1 adapter=c57d010000000000
+consumer received=12 verified=0 pattern_gaps=0 sequence_gaps=0 timeouts=1 fps=29.00 pts_age_mean_ms=1.472 pts_age_max_ms=1.953
+
+channel version=5 format=BGRA size=130x66 pool=4 generation=2 adapter=c57d010000000000
+producer sent=13 timeouts=0 reconnects=0 elapsed_ms=431
+
+<end of output>
+Test time =   0.47 sec
+----------------------------------------------------------
+Test Passed.
+"sample_metadata" end time: Oct 30 08:13 Eastern Daylight Time
+"sample_metadata" time elapsed: 00:00:00
+----------------------------------------------------------
+
+14/39 Testing: sample_reconnect
+14/39 Test: sample_reconnect
+Command: "C:/Program Files/CMake/bin/cmake.exe" "-DPRODUCER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_producer.exe" "-DCONSUMER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_consumer.exe" "-DPRODUCER_ARGS=--channel;sample-reconnect;--frames;200;--fps;120;--reconnect-at;4" "-DCONSUMER_ARGS=--channel;sample-reconnect;--frames;12;--size;130x66;--format;nv12" "-P" "C:/Users/jonsu/dev/framelink-m3-20261030/test/run_samples.cmake"
+Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+"sample_reconnect" start time: Oct 30 08:13 Eastern Daylight Time
+Output:
+----------------------------------------------------------
+-- channel version=5 format=NV12 size=130x66 pool=4 generation=1 adapter=c57d010000000000
+consumer received=12 verified=12 pattern_gaps=0 sequence_gaps=0 timeouts=21 fps=18.39 pts_age_mean_ms=1.831 pts_age_max_ms=3.898
+
+channel version=5 format=NV12 size=130x66 pool=4 generation=2 adapter=c57d010000000000
+channel version=5 format=NV12 size=130x66 pool=4 generation=3 adapter=c57d010000000000
+producer sent=13 timeouts=0 reconnects=1 elapsed_ms=670
+
+<end of output>
+Test time =   0.71 sec
+----------------------------------------------------------
+Test Passed.
+"sample_reconnect" end time: Oct 30 08:13 Eastern Daylight Time
+"sample_reconnect" time elapsed: 00:00:00
+----------------------------------------------------------
+
+15/39 Testing: sample_geometry
+15/39 Test: sample_geometry
+Command: "C:/Program Files/CMake/bin/cmake.exe" "-DPRODUCER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_producer.exe" "-DCONSUMER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_consumer.exe" "-DPRODUCER_ARGS=--channel;sample-geometry;--frames;200;--fps;120;--size;194x98" "-DCONSUMER_ARGS=--channel;sample-geometry;--frames;12;--size;130x66;--format;nv12" "-P" "C:/Users/jonsu/dev/framelink-m3-20261030/test/run_samples.cmake"
+Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+"sample_geometry" start time: Oct 30 08:13 Eastern Daylight Time
+Output:
+----------------------------------------------------------
+-- channel version=5 format=NV12 size=130x66 pool=4 generation=1 adapter=c57d010000000000
+consumer received=12 verified=12 pattern_gaps=0 sequence_gaps=0 timeouts=1 fps=28.94 pts_age_mean_ms=1.665 pts_age_max_ms=2.263
+
+channel version=5 format=NV12 size=194x98 pool=4 generation=3 adapter=c57d010000000000
+producer sent=13 timeouts=0 reconnects=0 elapsed_ms=431
+
+<end of output>
+Test time =   0.47 sec
+----------------------------------------------------------
+Test Passed.
+"sample_geometry" end time: Oct 30 08:13 Eastern Daylight Time
+"sample_geometry" time elapsed: 00:00:00
+----------------------------------------------------------
+
+16/39 Testing: sample_slots
+16/39 Test: sample_slots
+Command: "C:/Program Files/CMake/bin/cmake.exe" "-DPRODUCER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_producer.exe" "-DCONSUMER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_consumer.exe" "-DPRODUCER_ARGS=--channel;sample-slots;--frames;200;--fps;120;--slots;2" "-DCONSUMER_ARGS=--channel;sample-slots;--frames;12;--size;130x66;--channel;sample-slots.0" "-P" "C:/Users/jonsu/dev/framelink-m3-20261030/test/run_samples.cmake"
+Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+"sample_slots" start time: Oct 30 08:13 Eastern Daylight Time
+Output:
+----------------------------------------------------------
+-- channel version=5 format=BGRA size=130x66 pool=4 generation=1 adapter=c57d010000000000
+consumer received=12 verified=12 pattern_gaps=0 sequence_gaps=0 timeouts=1 fps=29.08 pts_age_mean_ms=1.600 pts_age_max_ms=2.394
+
+selected_slot=0
+channel version=5 format=BGRA size=130x66 pool=4 generation=2 adapter=c57d010000000000
+producer sent=13 timeouts=0 reconnects=0 elapsed_ms=431
+
+<end of output>
+Test time =   0.47 sec
+----------------------------------------------------------
+Test Passed.
+"sample_slots" end time: Oct 30 08:13 Eastern Daylight Time
+"sample_slots" time elapsed: 00:00:00
+----------------------------------------------------------
+
+17/39 Testing: sample_gpu_sync
+17/39 Test: sample_gpu_sync
+Command: "C:/Program Files/CMake/bin/cmake.exe" "-DPRODUCER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_producer.exe" "-DCONSUMER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_consumer.exe" "-DPRODUCER_ARGS=--channel;sample-gpu_sync;--frames;200;--fps;120;--submit;manual" "-DCONSUMER_ARGS=--channel;sample-gpu_sync;--frames;12;--size;130x66;--format;nv12;--gpu-sync;1" "-P" "C:/Users/jonsu/dev/framelink-m3-20261030/test/run_samples.cmake"
+Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+"sample_gpu_sync" start time: Oct 30 08:13 Eastern Daylight Time
+Output:
+----------------------------------------------------------
+-- channel version=5 format=NV12 size=130x66 pool=4 generation=1 adapter=c57d010000000000
+consumer received=12 verified=12 pattern_gaps=0 sequence_gaps=0 timeouts=1 fps=28.94 pts_age_mean_ms=1.653 pts_age_max_ms=2.186
+
+channel version=5 format=NV12 size=130x66 pool=4 generation=2 adapter=c57d010000000000
+producer sent=13 timeouts=0 reconnects=0 elapsed_ms=433
+
+<end of output>
+Test time =   0.48 sec
+----------------------------------------------------------
+Test Passed.
+"sample_gpu_sync" end time: Oct 30 08:13 Eastern Daylight Time
+"sample_gpu_sync" time elapsed: 00:00:00
+----------------------------------------------------------
+
+18/39 Testing: sample_invalid_cli
+18/39 Test: sample_invalid_cli
+Command: "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_consumer.exe" "--format" "nv12" "--size" "131x66"
+Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+"sample_invalid_cli" start time: Oct 30 08:13 Eastern Daylight Time
+Output:
+----------------------------------------------------------
+options: NV12 dimensions must be even
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"sample_invalid_cli" end time: Oct 30 08:13 Eastern Daylight Time
+"sample_invalid_cli" time elapsed: 00:00:00
+----------------------------------------------------------
+
+19/39 Testing: sample_wrong_role
+19/39 Test: sample_wrong_role
+Command: "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_producer.exe" "--pool" "4"
+Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+"sample_wrong_role" start time: Oct 30 08:13 Eastern Daylight Time
+Output:
+----------------------------------------------------------
+options: unknown or wrong-role option: --pool
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"sample_wrong_role" end time: Oct 30 08:13 Eastern Daylight Time
+"sample_wrong_role" time elapsed: 00:00:00
+----------------------------------------------------------
+
+20/39 Testing: sample_corruption
+20/39 Test: sample_corruption
+Command: "C:/Program Files/CMake/bin/cmake.exe" "-DPRODUCER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_producer.exe" "-DCONSUMER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_consumer.exe" "-DPRODUCER_ARGS=--channel;sample-corruption;--frames;100;--fps;10;--corrupt-at;0" "-DCONSUMER_ARGS=--channel;sample-corruption;--size;130x66;--format;nv12;--frames;10" "-DEXPECT_CONSUMER=1" "-P" "C:/Users/jonsu/dev/framelink-m3-20261030/test/run_samples.cmake"
+Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+"sample_corruption" start time: Oct 30 08:13 Eastern Daylight Time
+Output:
+----------------------------------------------------------
+-- channel version=5 format=NV12 size=130x66 pool=4 generation=1 adapter=c57d010000000000
+
+channel version=5 format=NV12 size=130x66 pool=4 generation=2 adapter=c57d010000000000
+consumer FAIL after 0 frames: pixel mismatch frame=0 plane=1 x=129 y=32
+producer sent=2 timeouts=0 reconnects=0 elapsed_ms=523
+
+<end of output>
+Test time =   0.56 sec
+----------------------------------------------------------
+Test Passed.
+"sample_corruption" end time: Oct 30 08:13 Eastern Daylight Time
+"sample_corruption" time elapsed: 00:00:00
+----------------------------------------------------------
+
+21/39 Testing: disconnect_full_ring
+21/39 Test: disconnect_full_ring
+Command: "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_disconnect_win.exe"
+Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+"disconnect_full_ring" start time: Oct 30 08:13 Eastern Daylight Time
+Output:
+----------------------------------------------------------
+full ring detects consumer disconnect without fence progress
+<end of output>
+Test time =   0.22 sec
+----------------------------------------------------------
+Test Passed.
+"disconnect_full_ring" end time: Oct 30 08:13 Eastern Daylight Time
+"disconnect_full_ring" time elapsed: 00:00:00
+----------------------------------------------------------
+
+22/39 Testing: trace_disabled
+22/39 Test: trace_disabled
+Command: "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_trace_test.exe"
+Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+"trace_disabled" start time: Oct 30 08:13 Eastern Daylight Time
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"trace_disabled" end time: Oct 30 08:13 Eastern Daylight Time
+"trace_disabled" time elapsed: 00:00:00
+----------------------------------------------------------
+
+23/39 Testing: trace_bounded_concurrent
+23/39 Test: trace_bounded_concurrent
+Command: "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_trace_test.exe"
+Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+"trace_bounded_concurrent" start time: Oct 30 08:13 Eastern Daylight Time
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"trace_bounded_concurrent" end time: Oct 30 08:13 Eastern Daylight Time
+"trace_bounded_concurrent" time elapsed: 00:00:00
+----------------------------------------------------------
+
+24/39 Testing: trace_thread_limit
+24/39 Test: trace_thread_limit
+Command: "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_trace_test.exe" "threads"
+Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+"trace_thread_limit" start time: Oct 30 08:13 Eastern Daylight Time
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"trace_thread_limit" end time: Oct 30 08:13 Eastern Daylight Time
+"trace_thread_limit" time elapsed: 00:00:00
+----------------------------------------------------------
+
+25/39 Testing: portable_map_nv12
+25/39 Test: portable_map_nv12
+Command: "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_portable_map.exe" "nv12"
+Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+"portable_map_nv12" start time: Oct 30 08:13 Eastern Daylight Time
+Output:
+----------------------------------------------------------
+Portable CPU plane mapping: 8 patterned frames verified
+<end of output>
+Test time =   0.24 sec
+----------------------------------------------------------
+Test Passed.
+"portable_map_nv12" end time: Oct 30 08:13 Eastern Daylight Time
+"portable_map_nv12" time elapsed: 00:00:00
+----------------------------------------------------------
+
+26/39 Testing: portable_map_rgba
+26/39 Test: portable_map_rgba
+Command: "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_portable_map.exe" "rgba"
+Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+"portable_map_rgba" start time: Oct 30 08:13 Eastern Daylight Time
+Output:
+----------------------------------------------------------
+Portable CPU plane mapping: 8 patterned frames verified
+<end of output>
+Test time =   0.23 sec
+----------------------------------------------------------
+Test Passed.
+"portable_map_rgba" end time: Oct 30 08:13 Eastern Daylight Time
+"portable_map_rgba" time elapsed: 00:00:00
+----------------------------------------------------------
+
+27/39 Testing: portable_map_bgra
+27/39 Test: portable_map_bgra
+Command: "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_portable_map.exe" "bgra"
+Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+"portable_map_bgra" start time: Oct 30 08:13 Eastern Daylight Time
+Output:
+----------------------------------------------------------
+Portable CPU plane mapping: 8 patterned frames verified
+<end of output>
+Test time =   0.23 sec
+----------------------------------------------------------
+Test Passed.
+"portable_map_bgra" end time: Oct 30 08:13 Eastern Daylight Time
+"portable_map_bgra" time elapsed: 00:00:00
+----------------------------------------------------------
+
+28/39 Testing: portable_map_rgb10a2
+28/39 Test: portable_map_rgb10a2
+Command: "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_portable_map.exe" "rgb10a2"
+Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+"portable_map_rgb10a2" start time: Oct 30 08:13 Eastern Daylight Time
+Output:
+----------------------------------------------------------
+Portable CPU plane mapping: 8 patterned frames verified
+<end of output>
+Test time =   0.23 sec
+----------------------------------------------------------
+Test Passed.
+"portable_map_rgb10a2" end time: Oct 30 08:13 Eastern Daylight Time
+"portable_map_rgb10a2" time elapsed: 00:00:00
+----------------------------------------------------------
+
+29/39 Testing: ready_fence_timeout
+29/39 Test: ready_fence_timeout
+Command: "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_ready_timeout_win.exe"
+Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+"ready_fence_timeout" start time: Oct 30 08:13 Eastern Daylight Time
+Output:
+----------------------------------------------------------
+Unsignaled ready fence times out; later signal preserves pending frame
+<end of output>
+Test time =   0.26 sec
+----------------------------------------------------------
+Test Passed.
+"ready_fence_timeout" end time: Oct 30 08:13 Eastern Daylight Time
+"ready_fence_timeout" time elapsed: 00:00:00
+----------------------------------------------------------
+
+30/39 Testing: reconnect_held
+30/39 Test: reconnect_held
+Command: "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_reconnect_held.exe"
+Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+"reconnect_held" start time: Oct 30 08:13 Eastern Daylight Time
+Output:
+----------------------------------------------------------
+Reconnect refuses held storage, then starts fresh generation
+<end of output>
+Test time =   0.34 sec
+----------------------------------------------------------
+Test Passed.
+"reconnect_held" end time: Oct 30 08:13 Eastern Daylight Time
+"reconnect_held" time elapsed: 00:00:00
+----------------------------------------------------------
+
+31/39 Testing: gst_av_session
+31/39 Test: gst_av_session
+Command: "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_av_session.exe" "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/gstframelink.dll"
+Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+"gst_av_session" start time: Oct 30 08:13 Eastern Daylight Time
+Output:
+----------------------------------------------------------
+session=1320043360432 clock=GstSystemClock shared-base=1320043364028000 video=150 audio=150 missing=0 drift_blocks=0 restarts=0
+app-observed pull skew ms p50=0.010 p99=1.021; video scheduled lateness ms p50=0.853 p99=2.007 (not speaker/scanout latency)
+<end of output>
+Test time =   3.51 sec
+----------------------------------------------------------
+Test Passed.
+"gst_av_session" end time: Oct 30 08:13 Eastern Daylight Time
+"gst_av_session" time elapsed: 00:00:03
+----------------------------------------------------------
+
+32/39 Testing: gst_av_faults
+32/39 Test: gst_av_faults
+Command: "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_av_session.exe" "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/gstframelink.dll" "--faults"
+Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+"gst_av_faults" start time: Oct 30 08:13 Eastern Daylight Time
+Output:
+----------------------------------------------------------
+session=1320046856429 clock=GstSystemClock shared-base=1320046859924900 video=150 audio=149 missing=1 drift_blocks=40 restarts=1
+app-observed pull skew ms p50=0.010 p99=4.008; video scheduled lateness ms p50=1.206 p99=1968.894 (not speaker/scanout latency)
+<end of output>
+Test time =   2.60 sec
+----------------------------------------------------------
+Test Passed.
+"gst_av_faults" end time: Oct 30 08:13 Eastern Daylight Time
+"gst_av_faults" time elapsed: 00:00:02
+----------------------------------------------------------
+
+33/39 Testing: gst_timestamp_contract
+33/39 Test: gst_timestamp_contract
+Command: "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_gst_timestamps.exe" "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/gstframelink.dll"
+Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+"gst_timestamp_contract" start time: Oct 30 08:13 Eastern Daylight Time
+Output:
+----------------------------------------------------------
+Timestamp contract: zero, repeated/backward, signed limit, overflow/missing rejection, segment mapping, default mode passed
+<end of output>
+Test time =   1.01 sec
+----------------------------------------------------------
+Test Passed.
+"gst_timestamp_contract" end time: Oct 30 08:13 Eastern Daylight Time
+"gst_timestamp_contract" time elapsed: 00:00:01
+----------------------------------------------------------
+
+34/39 Testing: session_contract_peers
+34/39 Test: session_contract_peers
+Command: "C:/Users/jonsu/AppData/Local/Microsoft/WindowsApps/python3.13.exe" "C:/Users/jonsu/dev/framelink-m3-20261030/test/session_peers.py" "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_session_peer.exe"
+Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+"session_contract_peers" start time: Oct 30 08:13 Eastern Daylight Time
+Output:
+----------------------------------------------------------
+agree: proposer=0, acceptor=0; contract gate passed
+unoffered: proposer=2, acceptor=2; contract gate passed
+stale: proposer=2, acceptor=2; contract gate passed
+changed-track: proposer=2, acceptor=2; contract gate passed
+unknown-clock: proposer=2, acceptor=2; contract gate passed
+malformed: proposer=2, acceptor=2; contract gate passed
+changed-ack: proposer=3, acceptor=0; contract gate passed
+<end of output>
+Test time =   0.28 sec
+----------------------------------------------------------
+Test Passed.
+"session_contract_peers" end time: Oct 30 08:13 Eastern Daylight Time
+"session_contract_peers" time elapsed: 00:00:00
+----------------------------------------------------------
+
+35/39 Testing: av_rendezvous
+35/39 Test: av_rendezvous
+Command: "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_av_rendezvous.exe"
+Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+"av_rendezvous" start time: Oct 30 08:13 Eastern Daylight Time
+Output:
+----------------------------------------------------------
+private rendezvous: agreement, owner exclusion, crash recovery, malformed data and access checks passed
+<end of output>
+Test time =   0.04 sec
+----------------------------------------------------------
+Test Passed.
+"av_rendezvous" end time: Oct 30 08:13 Eastern Daylight Time
+"av_rendezvous" time elapsed: 00:00:00
+----------------------------------------------------------
+
+36/39 Testing: av_auth
+36/39 Test: av_auth
+Command: "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_av_auth.exe"
+Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+"av_auth" start time: Oct 30 08:13 Eastern Daylight Time
+Output:
+----------------------------------------------------------
+mutual A/V authentication: success, wrong key/role, fake server and reflection rejection passed
+<end of output>
+Test time =   0.03 sec
+----------------------------------------------------------
+Test Passed.
+"av_auth" end time: Oct 30 08:13 Eastern Daylight Time
+"av_auth" time elapsed: 00:00:00
+----------------------------------------------------------
+
+37/39 Testing: av_producer_help
+37/39 Test: av_producer_help
+Command: "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_av_producer.exe" "--help"
+Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+"av_producer_help" start time: Oct 30 08:13 Eastern Daylight Time
+Output:
+----------------------------------------------------------
+Usage: framelink_av_{producer,consumer} PLUGIN --session PRIVATE_DIR
+  --frames N --format BGRA|NV12|auto --width W --height H --fps N
+  --rate N --channels 1|2 --timeout-ms N --sessions N
+  Consumer: --play (optional window and sound); producer: --fault missing-audio|audio-pts-reset
+  auto is consumer-only. See docs/M3_AV_APPS.md for bounds and recovery semantics.
+<end of output>
+Test time =   0.03 sec
+----------------------------------------------------------
+Test Passed.
+"av_producer_help" end time: Oct 30 08:13 Eastern Daylight Time
+"av_producer_help" time elapsed: 00:00:00
+----------------------------------------------------------
+
+38/39 Testing: av_consumer_help
+38/39 Test: av_consumer_help
+Command: "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_av_consumer.exe" "--help"
+Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+"av_consumer_help" start time: Oct 30 08:13 Eastern Daylight Time
+Output:
+----------------------------------------------------------
+Usage: framelink_av_{producer,consumer} PLUGIN --session PRIVATE_DIR
+  --frames N --format BGRA|NV12|auto --width W --height H --fps N
+  --rate N --channels 1|2 --timeout-ms N --sessions N
+  Consumer: --play (optional window and sound); producer: --fault missing-audio|audio-pts-reset
+  auto is consumer-only. See docs/M3_AV_APPS.md for bounds and recovery semantics.
+<end of output>
+Test time =   0.03 sec
+----------------------------------------------------------
+Test Passed.
+"av_consumer_help" end time: Oct 30 08:13 Eastern Daylight Time
+"av_consumer_help" time elapsed: 00:00:00
+----------------------------------------------------------
+
+39/39 Testing: m3_av_apps
+39/39 Test: m3_av_apps
+Command: "C:/Users/jonsu/AppData/Local/Microsoft/WindowsApps/python3.13.exe" "C:/Users/jonsu/dev/framelink-m3-20261030/test/m3_apps.py" "--producer" "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_av_producer.exe" "--consumer" "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_av_consumer.exe" "--plugin" "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/gstframelink.dll"
+Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+"m3_av_apps" start time: Oct 30 08:13 Eastern Daylight Time
+Output:
+----------------------------------------------------------
+evidence: C:\Users\jonsu\AppData\Local\Temp\framelink-m3-y82eg6_e
+{"case": "bgra-producer-first", "passed": true, "results": {"producer": {"role": "producer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}, "consumer": {"role": "consumer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}}, "verified_session": {"event": "session-complete", "instance": "6af675cb18e4410acd95f37fb1685950", "generation": 1, "format": "BGRA", "video_frames": 50, "audio_blocks": 50}}
+{"case": "bgra-consumer-first", "passed": true, "results": {"consumer": {"role": "consumer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}, "producer": {"role": "producer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}}, "verified_session": {"event": "session-complete", "instance": "432f05c1f8f1bb44139a05b6fd70e9a0", "generation": 1, "format": "BGRA", "video_frames": 50, "audio_blocks": 50}}
+{"case": "nv12-producer-first", "passed": true, "results": {"producer": {"role": "producer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}, "consumer": {"role": "consumer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}}, "verified_session": {"event": "session-complete", "instance": "57a200832f5809159e71d218144ac346", "generation": 1, "format": "NV12", "video_frames": 50, "audio_blocks": 50}}
+{"case": "nv12-consumer-first", "passed": true, "results": {"consumer": {"role": "consumer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}, "producer": {"role": "producer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}}, "verified_session": {"event": "session-complete", "instance": "59459b0123c9bbdb9336c29d0b0dd596", "generation": 1, "format": "NV12", "video_frames": 50, "audio_blocks": 50}}
+{"case": "producer-restart", "passed": true, "retired_identity": {"event": "media-progress", "instance": "c98c0c97ded5f45af31267c09ca51940", "generation": 1, "format": "BGRA", "video_frames": 1, "audio_blocks": 1}, "verified_sessions": [{"event": "session-complete", "instance": "f13a26d891d0af426655f68ae1f4a939", "generation": 1, "format": "BGRA", "video_frames": 50, "audio_blocks": 50}, {"event": "session-complete", "instance": "f63ba8f5fab7aec63b5e9c667b9a291b", "generation": 1, "format": "BGRA", "video_frames": 50, "audio_blocks": 50}]}
+{"case": "consumer-restart", "passed": true, "retired_identity": {"event": "media-progress", "instance": "e70f8dac73c8ebf128024f8c02a4da89", "generation": 1, "format": "BGRA", "video_frames": 1, "audio_blocks": 1}, "verified_sessions": [{"event": "session-complete", "instance": "5fdf7cd0cb12c4a4614060c80572395f", "generation": 1, "format": "BGRA", "video_frames": 50, "audio_blocks": 50}, {"event": "session-complete", "instance": "f37331247b5c9e38c184f0bd82157fa4", "generation": 1, "format": "BGRA", "video_frames": 50, "audio_blocks": 50}]}
+{"case": "producer-restart-format-change", "passed": true, "retired_identity": {"event": "media-progress", "instance": "5c350f94e669ea98ba550430a41400f9", "generation": 1, "format": "BGRA", "video_frames": 1, "audio_blocks": 1}, "verified_sessions": [{"event": "session-complete", "instance": "d7a204c9955f8e133ea80c29d60299a7", "generation": 1, "format": "NV12", "video_frames": 50, "audio_blocks": 50}, {"event": "session-complete", "instance": "63b7d089412860f4b0b7d29b5b683b0d", "generation": 1, "format": "NV12", "video_frames": 50, "audio_blocks": 50}]}
+{"case": "missing-audio", "passed": true, "verified_before_fault": {"event": "media-progress", "instance": "b41bc6323861d24a3f25299d4fa51b8f", "generation": 1, "format": "BGRA", "video_frames": 1, "audio_blocks": 1}, "expected_error": "audio timeout/EOS", "consumer_exit": 1}
+{"case": "audio-pts-reset", "passed": true, "verified_before_fault": {"event": "media-progress", "instance": "a222556fd78857f6303e84816124c010", "generation": 1, "format": "BGRA", "video_frames": 1, "audio_blocks": 1}, "expected_error": "audio timeline mismatch", "consumer_exit": 1}
+{"case": "peer-death", "passed": true, "verified_before_fault": {"event": "media-progress", "instance": "0bb24c6dffa528eadac14ae6dbad0c22", "generation": 1, "format": "BGRA", "video_frames": 1, "audio_blocks": 1}, "expected_error": "timeout/EOS", "consumer_exit": 1}
+<end of output>
+Test time =  30.08 sec
+----------------------------------------------------------
+Test Passed.
+"m3_av_apps" end time: Oct 30 08:14 Eastern Daylight Time
+"m3_av_apps" time elapsed: 00:00:30
+----------------------------------------------------------
+
+End testing: Oct 30 08:14 Eastern Daylight Time
