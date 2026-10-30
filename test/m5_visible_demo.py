@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Finite external-file A/V demo, isolated ports; Windows interactive task friendly."""
-import argparse, json, os, pathlib, subprocess, threading, time, urllib.request, webbrowser
+import argparse, json, os, pathlib, socket, subprocess, threading, time, urllib.request, webbrowser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 p=argparse.ArgumentParser();p.add_argument('--build',required=True);p.add_argument('--renderer',required=True);p.add_argument('--output',required=True);p.add_argument('--port',type=int,default=18765);p.add_argument('--renderer-port',type=int,default=18766);p.add_argument('--loops',type=int,default=60);a=p.parse_args()
+if not (1 <= a.loops <= 100 and 1024 <= a.port <= 65535 and 1024 <= a.renderer_port <= 65535 and a.port != a.renderer_port):p.error('require 1..100 loops and two distinct ports1024..65535')
+with socket.socket() as probe:probe.bind(('127.0.0.1',a.renderer_port))
 b=pathlib.Path(a.build).resolve();r=pathlib.Path(a.output).resolve();r.mkdir(parents=True,exist_ok=True)
 child_flags=getattr(subprocess, 'CREATE_NO_WINDOW', 0)
 stop=threading.Event();state={'phase':'preparing','physical_sync_measured':False};children=[]
