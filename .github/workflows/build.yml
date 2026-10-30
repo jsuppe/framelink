@@ -1,0 +1,67 @@
+name: build
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  linux:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libgbm-dev libdrm-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad
+      - name: Build all targets including A/V fixtures
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DFRAMELINK_BUILD_GST=ON -DFRAMELINK_BUILD_TESTS=ON -DFRAMELINK_BUILD_SAMPLES=ON
+          cmake --build build --parallel 4
+      - name: Require A/V test registration
+        run: python3 tools/check_av_test_registration.py build
+      - name: Run CPU-only regressions
+        run: ctest --test-dir build --output-on-failure --no-tests=error -R '^(nv12_layout|sample_invalid_cli|sample_wrong_role|trace_disabled|trace_bounded_concurrent|trace_thread_limit)$'
+      - name: Report hardware qualification boundary
+        run: echo 'A/V fixtures compiled and registered. Native GPU roundtrips require the separate hardware gate; hosted CI does not execute or qualify them.' >> "$GITHUB_STEP_SUMMARY"
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        id: gst-cache
+        with:
+          path: gst-msi
+          key: framelink-gstreamer-msvc-1.26.11
+      - name: Download GStreamer
+        if: steps.gst-cache.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory gst-msi -Force | Out-Null
+          curl.exe -fLsS -o gst-msi/runtime.msi https://gstreamer.freedesktop.org/data/pkg/windows/1.26.11/msvc/gstreamer-1.0-msvc-x86_64-1.26.11.msi
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          curl.exe -fLsS -o gst-msi/devel.msi https://gstreamer.freedesktop.org/data/pkg/windows/1.26.11/msvc/gstreamer-1.0-devel-msvc-x86_64-1.26.11.msi
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+      - name: Install GStreamer
+        shell: pwsh
+        run: |
+          foreach ($name in @('runtime', 'devel')) {
+            $p = Start-Process msiexec -ArgumentList '/i',"$PWD\gst-msi\$name.msi",'/qn','/norestart','ADDLOCAL=ALL' -Wait -PassThru
+            if ($p.ExitCode -notin @(0,3010)) { throw "GStreamer $name installation failed: $($p.ExitCode)" }
+          }
+          $root = @('C:\gstreamer\1.0\msvc_x86_64','C:\Program Files\gstreamer\1.0\msvc_x86_64') | Where-Object { Test-Path "$_\lib\gstreamer-1.0.lib" } | Select-Object -First 1
+          if (!$root) { throw 'GStreamer development install not found' }
+          "GSTREAMER_1_0_ROOT_MSVC_X86_64=$root" >> $env:GITHUB_ENV
+          "$root\bin" >> $env:GITHUB_PATH
+      - name: Configure
+        run: cmake -S . -B build -A x64 -DFRAMELINK_BUILD_GST=ON -DFRAMELINK_BUILD_TESTS=ON -DFRAMELINK_BUILD_SAMPLES=ON
+      - name: Build all targets including A/V fixtures
+        run: cmake --build build --config Release --parallel 4
+      - name: Require A/V test registration
+        run: python tools/check_av_test_registration.py build Release
+      - name: Run CPU-only regressions
+        run: ctest --test-dir build -C Release --output-on-failure --no-tests=error -R "^(nv12_layout|sample_invalid_cli|sample_wrong_role|trace_disabled|trace_bounded_concurrent|trace_thread_limit)$"
+      - name: Report hardware qualification boundary
+        shell: pwsh
+        run: "'A/V fixtures compiled and registered. Native GPU roundtrips require the separate hardware gate; hosted CI does not execute or qualify them.' >> $env:GITHUB_STEP_SUMMARY"
