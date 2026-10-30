@@ -7,8 +7,8 @@ PR11 integration merged. Audio prototype is implemented but not merged.
 
 ## M1 — Land the validated audio foundation
 
-Status: implementation/review and final platform checks complete; PR #2 CI and
-merge gate pending. Runtime source `180e0a2`: Linux 30/30, Windows 31/31; Android
+Status: COMPLETE. PR #2 merged 2026-10-30 as `c67cde8` after hosted
+Linux and Windows CI passed (run `41048544244`). Runtime source `180e0a2`: Linux 30/30, Windows 31/31; Android
 arm64/x86_64 builds and Pi/tablet native normal/fault checks passed. Hosted CI
 checks builds, six CPU tests and A/V test registration; GPU runtime evidence
 is from the documented real-device runs, not hosted runners.
