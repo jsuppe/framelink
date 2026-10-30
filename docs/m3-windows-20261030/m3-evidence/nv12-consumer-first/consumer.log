@@ -1,0 +1,7 @@
+{"command": ["C:\\Users\\jonsu\\dev\\framelink-m3-20261030\\build\\Release\\framelink_av_consumer.exe", "C:\\Users\\jonsu\\dev\\framelink-m3-20261030\\build\\Release\\gstframelink.dll", "--session", "C:\\Users\\jonsu\\dev\\framelink-m3-20261030\\m3-evidence\\nv12-consumer-first\\session", "--frames", "50", "--timeout-ms", "20000", "--format", "NV12", "--width", "160", "--height", "90", "--fps", "50", "--rate", "48000", "--channels", "2"]}
+{"event":"session-ready","instance":"f61396a678d36b02c58c9ea9cbd12ae8","generation":1,"format":"NV12","video_frames":0,"audio_blocks":0}
+{"event":"media-progress","instance":"f61396a678d36b02c58c9ea9cbd12ae8","generation":1,"format":"NV12","video_frames":1,"audio_blocks":1}
+{"event":"media-progress","instance":"f61396a678d36b02c58c9ea9cbd12ae8","generation":1,"format":"NV12","video_frames":25,"audio_blocks":25}
+{"event":"media-progress","instance":"f61396a678d36b02c58c9ea9cbd12ae8","generation":1,"format":"NV12","video_frames":50,"audio_blocks":50}
+{"event":"session-complete","instance":"f61396a678d36b02c58c9ea9cbd12ae8","generation":1,"format":"NV12","video_frames":50,"audio_blocks":50}
+{"role":"consumer","ok":true,"sessions":1,"video_frames":50,"audio_blocks":50,"errors":0,"disconnects":0}

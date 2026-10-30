@@ -1,0 +1,102 @@
+-- Building for: Visual Studio 17 2022
+-- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.26300.
+-- The CXX compiler identification is MSVC 19.44.35216.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- The C compiler identification is MSVC 19.44.35216.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- framelink: building GStreamer elements (gstframelink)
+-- Found Python3: C:/Users/jonsu/AppData/Local/Microsoft/WindowsApps/python3.13.exe (found version "3.13.14") found components: Interpreter
+-- Configuring done (4.8s)
+-- Generating done (0.1s)
+-- Build files have been written to: C:/Users/jonsu/dev/framelink-m3-20261030/build
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  1>Checking Build System
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m3-20261030/CMakeLists.txt
+  framelink_win.cpp
+  framelink_slots.cpp
+  fl_ipc_win32.cpp
+  fl_trace.cpp
+  framelink_session.cpp
+  Generating Code...
+     Creating library C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink.lib and object C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink.exp
+  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\framelink.dll
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m3-20261030/CMakeLists.txt
+  gstframelink.cpp
+     Creating library C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/gstframelink.lib and object C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/gstframelink.exp
+  gstframelink.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\gstframelink.dll
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m3-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m3-20261030/CMakeLists.txt
+  fl_consume.cpp
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m3-20261030/CMakeLists.txt
+  fl_disconnect_win.cpp
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m3-20261030/CMakeLists.txt
+  fl_ready_timeout_win.cpp
+  fl_reconnect_held.cpp
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m3-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m3-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m3-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m3-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m3-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m3-20261030/CMakeLists.txt
+  fl_nv12_win.cpp
+  fl_gst_timestamps.cpp
+  fl_nv12_layout.cpp
+  fl_portable_map.cpp
+  fl_disconnect_win.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\fl_disconnect_win.exe
+  fl_consume.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\fl_consume.exe
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m3-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m3-20261030/CMakeLists.txt
+  fl_nv12_layout.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\fl_nv12_layout.exe
+  fl_reconnect_held.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\fl_reconnect_held.exe
+  fl_session_c_api.c
+  fl_session_contract.cpp
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m3-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m3-20261030/CMakeLists.txt
+  fl_trace_test.cpp
+  fl_session_peer.cpp
+  fl_session_c_api.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\fl_session_c_api.exe
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m3-20261030/CMakeLists.txt
+  fl_produce.cpp
+  fl_portable_map.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\fl_portable_map.exe
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m3-20261030/CMakeLists.txt
+  av_apps.cpp
+  fl_ready_timeout_win.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\fl_ready_timeout_win.exe
+  fl_gst_timestamps.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\fl_gst_timestamps.exe
+  fl_session_contract.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\fl_session_contract.exe
+  av_apps.cpp
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m3-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m3-20261030/CMakeLists.txt
+  fl_session_peer.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\fl_session_peer.exe
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m3-20261030/CMakeLists.txt
+  av_session.cpp
+  fl_nv12_win.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\fl_nv12_win.exe
+  consumer.cpp
+  producer.cpp
+  fl_produce.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\fl_produce.exe
+  fl_gst_nv12.cpp
+  av_rendezvous.cpp
+  av_rendezvous.cpp
+C:\Users\jonsu\dev\framelink-m3-20261030\samples\av_apps.cpp(174,36): error C2397: conversion from 'flFormat' to 'uint32_t' requires a narrowing conversion [C:\Users\jonsu\dev\framelink-m3-20261030\build\framelink_av_producer.vcxproj]
+C:\Users\jonsu\dev\framelink-m3-20261030\samples\av_apps.cpp(174,36): error C2397: conversion from 'flFormat' to 'uint32_t' requires a narrowing conversion [C:\Users\jonsu\dev\framelink-m3-20261030\build\framelink_av_consumer.vcxproj]
+  fl_trace_test.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\fl_trace_test.exe
+  sample_common.cpp
+  sample_common.cpp
+  framelink_av_session.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\framelink_av_session.exe
+  av_auth.cpp
+  av_auth.cpp
+  fl_gst_nv12.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\fl_gst_nv12.exe
+  Generating Code...
+  Generating Code...
+  Generating Code...
+  Generating Code...
+  framelink_producer.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\framelink_producer.exe
+  framelink_consumer.vcxproj -> C:\Users\jonsu\dev\framelink-m3-20261030\build\Release\framelink_consumer.exe
