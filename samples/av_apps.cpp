@@ -415,6 +415,7 @@ GstPadProbeReturn traceMedia(GstPad*, GstPadProbeInfo* info, gpointer data) {
   }
   auto* b=GST_PAD_PROBE_INFO_BUFFER(info);
   if(!b)return GST_PAD_PROBE_OK;
+  const auto monotonicNs=gst_util_get_timestamp(); // opt-in probe time, before mapping/hash
   auto pts=t.haveSegment && t.segment.format==GST_FORMAT_TIME ? gst_segment_to_running_time(&t.segment,GST_FORMAT_TIME,GST_BUFFER_PTS(b)) : GST_CLOCK_TIME_NONE;
   auto* hash=g_checksum_new(G_CHECKSUM_SHA256);
   size_t bytes=0;
@@ -434,7 +435,7 @@ GstPadProbeReturn traceMedia(GstPad*, GstPadProbeInfo* info, gpointer data) {
   }
   static std::mutex output;
   {std::lock_guard<std::mutex> lock(output);
-    printf("{\"event\":\"media-trace\",\"side\":\"%s\",\"track\":\"%s\",\"pts_ns\":%llu,\"duration_ns\":%llu,\"bytes\":%llu,\"sha256\":\"%s\"}\n",t.side.c_str(),t.track.c_str(),(unsigned long long)pts,(unsigned long long)GST_BUFFER_DURATION(b),(unsigned long long)bytes,g_checksum_get_string(hash));fflush(stdout);}
+    printf("{\"event\":\"media-trace\",\"side\":\"%s\",\"track\":\"%s\",\"monotonic_ns\":%llu,\"pts_ns\":%llu,\"duration_ns\":%llu,\"bytes\":%llu,\"sha256\":\"%s\"}\n",t.side.c_str(),t.track.c_str(),(unsigned long long)monotonicNs,(unsigned long long)pts,(unsigned long long)GST_BUFFER_DURATION(b),(unsigned long long)bytes,g_checksum_get_string(hash));fflush(stdout);}
   g_checksum_free(hash);return GST_PAD_PROBE_OK;
 }
 void attachTrace(Pipeline& pipeline,const char* element,const char* padName,const char* side,const char* track) {

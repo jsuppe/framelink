@@ -1,0 +1,54 @@
+[
+  {
+    "format": "BGRA",
+    "track": "video",
+    "matched_blocks": 100,
+    "source_probe_to_receiver_probe_ms": {
+      "min": 21.188197,
+      "p50": 22.571176,
+      "p99": 23.920286,
+      "max": 499.621856
+    },
+    "includes_source_queueing_hashing_and_transport": true,
+    "presentation_measured": false
+  },
+  {
+    "format": "BGRA",
+    "track": "audio",
+    "matched_blocks": 100,
+    "source_probe_to_receiver_probe_ms": {
+      "min": 0.115071,
+      "p50": 5.950502,
+      "p99": 6.015762,
+      "max": 6.021267
+    },
+    "includes_source_queueing_hashing_and_transport": true,
+    "presentation_measured": false
+  },
+  {
+    "format": "NV12",
+    "track": "video",
+    "matched_blocks": 100,
+    "source_probe_to_receiver_probe_ms": {
+      "min": 21.055714,
+      "p50": 23.553144500000002,
+      "p99": 25.083724,
+      "max": 499.953685
+    },
+    "includes_source_queueing_hashing_and_transport": true,
+    "presentation_measured": false
+  },
+  {
+    "format": "NV12",
+    "track": "audio",
+    "matched_blocks": 100,
+    "source_probe_to_receiver_probe_ms": {
+      "min": 0.463225,
+      "p50": 5.344936000000001,
+      "p99": 5.413428,
+      "max": 5.413493
+    },
+    "includes_source_queueing_hashing_and_transport": true,
+    "presentation_measured": false
+  }
+]

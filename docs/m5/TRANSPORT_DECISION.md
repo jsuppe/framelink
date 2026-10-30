@@ -95,3 +95,30 @@ c++ -O2 test/m5_audio_copy_cost.cpp -o /tmp/m5-copy $(pkg-config --cflags --libs
 ```
 Output test requires a running PulseAudio-compatible service and module-null-sink.
 No CTest hardware gate is added: device behavior depends on the selected server.
+
+## Authenticated GIO follow-up
+`authenticated-gio-timing/` closes the previously unprofiled *path* gap with an
+opt-in monotonic timestamp at media-trace probe entry, before mapping/hashing.
+The production external decoded AVI producer and independent authenticated GIO
+consumer both pass BGRA/NV12 payload/PTS/duration validation (100 audio and 100
+video buffers each). Linux same-host `gst_util_get_timestamp` is comparable across
+these processes; cross-host values must not be subtracted without clock mapping.
+
+Audio source-probe→receiver-probe p50 is 5.951 ms BGRA / 5.345 ms NV12; p99
+6.016 / 5.413 ms. Video p50 22.571 / 23.553 ms, p99 23.920 / 25.084 ms;
+maximum ~500 ms includes startup epoch scheduling. All maxima are retained.
+These are **not pure network latency**: producer trace sits upstream of scheduled
+FrameLink sink and GDP/GIO; receiver audio trace sits downstream of depayload and
+timeline processing. Source queueing, hashing/logging perturbation and receiver
+processing are included. Audio/video arrival distributions need not match to
+preserve PTS or scheduled playback. This is a two-second characterization, not
+sustained load, physical presentation or a measured transport-only latency SLA.
+
+Reproduce after building:
+```
+python3 test/m5_external_pipeline.py --build build-m5 --output /tmp/m5-auth-trace
+python3 test/m5_trace_latency.py /tmp/m5-auth-trace
+```
+Timestamp acquisition only occurs when `--trace-media` installs the probe; no new
+per-buffer work is added in tracing-disabled operation. This trace mode hashes
+payloads and is intentionally diagnostic, not a zero-overhead performance mode.
