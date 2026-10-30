@@ -27,3 +27,19 @@ For the C11 check, copy `c11-probe/` to the repository root beside `include/`
 and `build/`, configure/build it with CMake/MSVC and run `session_c11.exe` with
 FrameLink's DLL on PATH. Source revision above applies to these results;
 subsequent review changes require a targeted rebuild/rerun.
+
+## Final review gate
+
+Tested reviewer source `fddbf7c1d9f1a6f4ec0d73629df368d5a2e4d1e3`, including
+`flSessionValidateSelection`, stable track-identity replacement rules and new
+C11/independent-peer fixtures. All targets rebuilt successfully in the same
+isolated directory; **34/34 full regressions passed**. Focused verbose run:
+**3/3 session-contract tests passed**, including the checked-in MSVC C11 API
+consumer and independent proposer/acceptor processes via Python3.13 pipes.
+
+Peer cases passed: agreement; rejection of unoffered selection, stale generation,
+changed track identity, unknown clock and malformed proposal; proposer rejection
+of changed acknowledgement. This tests contract agreement through bounded test
+pipes, not production rendezvous/security or a new media transport. Focused tests
+were also run separately to retain each expected exit code in
+`windows-final-focused.txt`; full suite and rebuild logs accompany it.

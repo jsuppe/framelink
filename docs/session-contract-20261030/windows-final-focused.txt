@@ -1,0 +1,46 @@
+UpdateCTestConfiguration  from :C:/Users/jonsu/dev/framelink-session-20261030/build/DartConfiguration.tcl
+Test project C:/Users/jonsu/dev/framelink-session-20261030/build
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 1
+    Start  1: session_contract
+
+1: Test command: C:\Users\jonsu\dev\framelink-session-20261030\build\Release\fl_session_contract.exe
+1: Working Directory: C:/Users/jonsu/dev/framelink-session-20261030/build
+1: Test timeout computed to be: 9999879
+1: session contract: negotiation, codec, generation and clock bounds passed
+1/3 Test  #1: session_contract .................   Passed    0.01 sec
+test 2
+    Start  2: session_contract_c_api
+
+2: Test command: C:\Users\jonsu\dev\framelink-session-20261030\build\Release\fl_session_c_api.exe
+2: Working Directory: C:/Users/jonsu/dev/framelink-session-20261030/build
+2: Test timeout computed to be: 9999879
+2/3 Test  #2: session_contract_c_api ...........   Passed    0.01 sec
+test 34
+    Start 34: session_contract_peers
+
+34: Test command: C:\Users\jonsu\AppData\Local\Microsoft\WindowsApps\python3.13.exe "C:/Users/jonsu/dev/framelink-session-20261030/test/session_peers.py" "C:/Users/jonsu/dev/framelink-session-20261030/build/Release/fl_session_peer.exe"
+34: Working Directory: C:/Users/jonsu/dev/framelink-session-20261030/build
+34: Test timeout computed to be: 30
+34: agree: proposer=0, acceptor=0; contract gate passed
+34: unoffered: proposer=2, acceptor=2; contract gate passed
+34: stale: proposer=2, acceptor=2; contract gate passed
+34: changed-track: proposer=2, acceptor=2; contract gate passed
+34: unknown-clock: proposer=2, acceptor=2; contract gate passed
+34: malformed: proposer=2, acceptor=2; contract gate passed
+34: changed-ack: proposer=3, acceptor=0; contract gate passed
+3/3 Test #34: session_contract_peers ...........   Passed    0.27 sec
+
+The following tests passed:
+	session_contract
+	session_contract_c_api
+	session_contract_peers
+
+100% tests passed, 0 tests failed out of 3
+
+Total Test time (real) =   0.30 sec
