@@ -19,6 +19,9 @@
 #include <gst/gst.h>
 #include <gst/video/video.h>
 #include <memory>
+#include <fstream>
+#include <sstream>
+#include <mutex>
 #include <stdexcept>
 #include <string>
 #include <thread>
@@ -34,7 +37,8 @@ void need(bool ok, const std::string &what) {
     throw std::runtime_error(what);
 }
 struct Options {
-  std::string plugin, session, format = "BGRA", fault;
+  std::string plugin, session, format = "BGRA", fault, inputPipeline;
+  bool traceMedia=false;
   unsigned frames = 150, width = 160, height = 90, fps = 50, rate = 48000,
            channels = 2, timeout = 15000, sessions = 1;
   bool play = false, stream = false;
@@ -58,6 +62,7 @@ Options options(int argc, char **argv) {
   o.plugin = argv[1];
   for (int i = 2; i < argc; ++i) {
     std::string a = argv[i];
+    if (a == "--trace-media") { o.traceMedia=true; continue; }
     if (a == "--stream") { o.stream=true; continue; }
     if (a == "--play") {
       o.play = true;
@@ -77,6 +82,7 @@ Options options(int argc, char **argv) {
            "pacing must be -200000..200000 ppm");
       o.pacingPpm=int(ppm);
     }
+    else if (a == "--input-pipeline") o.inputPipeline=v;
     else if (a == "--audio-sink") o.audioSink=v;
     else if (a == "--latency-ms") o.latencyMs=number(v);
     else if (a == "--session")
@@ -378,6 +384,62 @@ std::string audioCaps(const Options &o) {
   return "audio/x-raw,format=S16LE,layout=interleaved,rate=" +
          std::to_string(o.rate) + ",channels=" + std::to_string(o.channels) +
          ",channel-mask=(bitmask)" + (o.channels == 2 ? "0x3" : "0x4");
+}
+// Opt-in development trace: hashes canonical pixel rows (not allocator padding)
+// and PCM bytes. This is deliberately not a zero-overhead performance mode.
+struct MediaTrace {
+  std::string side, track;
+  GstSegment segment{};
+  GstCaps* caps=nullptr;
+  bool haveSegment=false;
+  ~MediaTrace(){if(caps)gst_caps_unref(caps);}
+};
+GstPadProbeReturn traceMedia(GstPad*, GstPadProbeInfo* info, gpointer data) {
+  auto& t=*static_cast<MediaTrace*>(data);
+  if(GST_PAD_PROBE_INFO_TYPE(info)&GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM) {
+    auto* e=GST_PAD_PROBE_INFO_EVENT(info);
+    if(GST_EVENT_TYPE(e)==GST_EVENT_SEGMENT){const GstSegment* s=nullptr;gst_event_parse_segment(e,&s);t.segment=*s;t.haveSegment=true;}
+    if(GST_EVENT_TYPE(e)==GST_EVENT_CAPS){GstCaps* c=nullptr;gst_event_parse_caps(e,&c);if(t.caps)gst_caps_unref(t.caps);t.caps=gst_caps_ref(c);}
+    return GST_PAD_PROBE_OK;
+  }
+  auto* b=GST_PAD_PROBE_INFO_BUFFER(info);
+  if(!b)return GST_PAD_PROBE_OK;
+  auto pts=t.haveSegment && t.segment.format==GST_FORMAT_TIME ? gst_segment_to_running_time(&t.segment,GST_FORMAT_TIME,GST_BUFFER_PTS(b)) : GST_CLOCK_TIME_NONE;
+  auto* hash=g_checksum_new(G_CHECKSUM_SHA256);
+  size_t bytes=0;
+  if(t.track=="video") {
+    GstVideoInfo vi;gst_video_info_init(&vi);GstVideoFrame f{};
+    if(t.caps && gst_video_info_from_caps(&vi,t.caps) && gst_video_frame_map(&f,&vi,b,GST_MAP_READ)) {
+      for(unsigned plane=0;plane<GST_VIDEO_INFO_N_PLANES(&vi);++plane) {
+        unsigned height=plane ? GST_VIDEO_INFO_HEIGHT(&vi)/2 : GST_VIDEO_INFO_HEIGHT(&vi);
+        unsigned width=GST_VIDEO_INFO_WIDTH(&vi)*(GST_VIDEO_INFO_FORMAT(&vi)==GST_VIDEO_FORMAT_BGRA ? 4 : 1);
+        auto* base=static_cast<const guchar*>(GST_VIDEO_FRAME_PLANE_DATA(&f,plane));
+        for(unsigned y=0;y<height;++y){g_checksum_update(hash,base+y*GST_VIDEO_FRAME_PLANE_STRIDE(&f,plane),width);bytes+=width;}
+      }
+      gst_video_frame_unmap(&f);
+    }
+  } else {
+    GstMapInfo map{};if(gst_buffer_map(b,&map,GST_MAP_READ)){g_checksum_update(hash,map.data,map.size);bytes=map.size;gst_buffer_unmap(b,&map);}
+  }
+  static std::mutex output;
+  {std::lock_guard<std::mutex> lock(output);
+    printf("{\"event\":\"media-trace\",\"side\":\"%s\",\"track\":\"%s\",\"pts_ns\":%llu,\"duration_ns\":%llu,\"bytes\":%llu,\"sha256\":\"%s\"}\n",t.side.c_str(),t.track.c_str(),(unsigned long long)pts,(unsigned long long)GST_BUFFER_DURATION(b),(unsigned long long)bytes,g_checksum_get_string(hash));fflush(stdout);}
+  g_checksum_free(hash);return GST_PAD_PROBE_OK;
+}
+void attachTrace(Pipeline& pipeline,const char* element,const char* padName,const char* side,const char* track) {
+  auto* e=named(pipeline,element);auto* pad=gst_element_get_static_pad(e,padName);gst_object_unref(e);
+  need(pad,"trace pad unavailable");
+  auto* trace=new MediaTrace;trace->side=side;trace->track=track;
+  gst_pad_add_probe(pad,GstPadProbeType(GST_PAD_PROBE_TYPE_BUFFER|GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM),traceMedia,trace,[](gpointer p){delete static_cast<MediaTrace*>(p);});gst_object_unref(pad);
+}
+std::string externalPipeline(const Options& o,const std::string& channel) {
+  std::ifstream input(o.inputPipeline);need(bool(input),"cannot read input pipeline file");
+  std::ostringstream contents;contents<<input.rdbuf();auto text=contents.str();
+  need(text.size()<=65536,"input pipeline exceeds 64 KiB");
+  auto replace=[&](const char* token,const std::string& value){auto at=text.find(token);need(at!=std::string::npos && text.find(token,at+strlen(token))==std::string::npos,"pipeline requires exactly one of each sink placeholder");text.replace(at,strlen(token),value);};
+  replace("@VIDEO_SINK@",videoCaps(o)+" ! identity name=externalvideo ! framelinksink sync=true preserve-timestamps=true channel="+channel);
+  replace("@AUDIO_SINK@",audioCaps(o)+" ! identity name=externalaudio sync=true ! queue max-size-buffers=4 max-size-bytes=0 max-size-time=80000000 ! gdppay ! giostreamsink name=audioio sync=false async=false");
+  return text;
 }
 void fillVideo(unsigned char *p, const GstVideoInfo &vi, unsigned n) {
   for (unsigned y = 0; y < GST_VIDEO_INFO_HEIGHT(&vi); ++y)
@@ -697,7 +759,7 @@ unsigned runProducer(const Options &o, GSocketListener *l,
   Pipeline tx;
   parse(
       tx,
-      "appsrc name=video is-live=true format=time block=true max-buffers=2 "
+      o.inputPipeline.empty() ? "appsrc name=video is-live=true format=time block=true max-buffers=2 "
       "caps=" +
           videoCaps(o) +
           " ! framelinksink preserve-timestamps=true channel=" + channel +
@@ -706,8 +768,27 @@ unsigned runProducer(const Options &o, GSocketListener *l,
           "max-buffers=2 caps=" +
           audioCaps(o) +
           " ! queue max-size-buffers=4 max-size-bytes=0 max-size-time=80000000 "
-          "! gdppay ! giostreamsink name=audioio sync=false async=false");
+          "! gdppay ! giostreamsink name=audioio sync=false async=false" : externalPipeline(o,channel));
   setStream(tx, "audioio", *audio, true);
+  if(!o.inputPipeline.empty()) {
+    need(streaming,"external pipeline requires consumer --stream");
+    need(o.fault.empty() && !o.pacingPpm && !o.audioOffsetNs,"synthetic fault/pacing/offset options cannot be combined with external input");
+    AudioTimeline sourceAudio;sourceAudio.pipeline=tx.p;sourceAudio.rate=o.rate;sourceAudio.channels=o.channels;
+    auto* ae=named(tx,"externalaudio");auto* ap=gst_element_get_static_pad(ae,"src");gst_object_unref(ae);
+    gst_pad_add_probe(ap,GstPadProbeType(GST_PAD_PROBE_TYPE_BUFFER|GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM),trackAudio,&sourceAudio,nullptr);gst_object_unref(ap);
+    if(o.traceMedia){attachTrace(tx,"externalvideo","src","producer","video");attachTrace(tx,"externalaudio","src","producer","audio");}
+    put(*control,o.frames);
+    event("session-ready",o,0,id);
+    start(tx,clock,cfg.epochNs);
+    auto* bus=gst_element_get_bus(tx.p);Object busOwner{G_OBJECT(bus)};
+    auto* message=gst_bus_timed_pop_filtered(bus,uint64_t(o.timeout)*GST_MSECOND,GstMessageType(GST_MESSAGE_EOS|GST_MESSAGE_ERROR));
+    need(message,"external pipeline EOS deadline");
+    const bool success=GST_MESSAGE_TYPE(message)==GST_MESSAGE_EOS;gst_message_unref(message);
+    need(success,"external pipeline failed");
+    need(!sourceAudio.invalid.load() && sourceAudio.samplesEnd.load()==uint64_t(o.frames)*o.rate/o.fps,"external audio must be contiguous and match declared duration");
+    need(get(*control)==0x444f4e45ULL,"consumer completion missing");
+    event("session-complete",o,o.frames,id);return o.frames;
+  }
   start(tx, clock, cfg.epochNs);
   ProducerFailureWatch failureWatch(tx);
   Handles h;
@@ -787,6 +868,7 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
       " preserve-timestamps=true ! appsink name=vout sync=false max-buffers=3 drop=true ";
     parse(rx, video+"appsrc name=audioio is-live=false format=bytes block=true max-buffers=4 ! gdpdepay ! "+
       audioCaps(o)+" ! identity name=timeline ! queue name=audioqueue max-size-buffers=4 max-size-bytes=0 max-size-time=80000000 ! audioconvert ! audioresample ! volume name=playvolume ! "+o.audioSink+" name=playaudio sync=true"+(o.audioSink=="fakesink" ? " async=false" : ""));
+    if(o.traceMedia){attachTrace(rx,"timeline","src","consumer","audio");if(!externalVideo)attachTrace(rx,"vout","sink","consumer","video");}
     AudioTimeline audioTimeline; audioTimeline.pipeline=rx.p; audioTimeline.rate=o.rate; audioTimeline.channels=o.channels;
     auto *identity=named(rx,"timeline");
     auto *audioPad=gst_element_get_static_pad(identity,"src");
@@ -982,6 +1064,8 @@ int main(int argc, char **argv) {
            "  Consumer: --stream --audio-sink autoaudiosink|fakesink --latency-ms N (scheduled streaming); --play (verification window/sound); producer: --fault missing-audio|audio-pts-reset\n"
            "  --audio-offset-ns 0..2000000000 (producer fixture; verifier must use same offset)\n"
            "  --pacing-ppm -200000..200000 (producer pacing injection; PTS unchanged)\n"
+           "  --input-pipeline FILE (producer; @VIDEO_SINK@ and @AUDIO_SINK@; requires streaming consumer)\n"
+           "  --trace-media (expensive payload hashes and running PTS for integration validation)\n"
            "  auto is consumer-only. See docs/M3_AV_APPS.md for bounds and recovery semantics.");
       return 0;
     }
@@ -1033,6 +1117,7 @@ int main(int argc, char **argv) {
     }
 #else
     const char *role = "consumer";
+    need(o.inputPipeline.empty(),"--input-pipeline is producer-only");
     need(o.fault.empty(), "fault injection is producer-only");
     for (unsigned attempt = 0;
          completed < o.sessions && attempt < o.sessions + 3; ++attempt) {

@@ -551,3 +551,10 @@ if(FRAMELINK_BUILD_TESTS AND WIN32)
     add_test(NAME windows_endpoint_ready COMMAND fl_startup_win)
     set_tests_properties(windows_endpoint_ready PROPERTIES TIMEOUT 30)
 endif()
+
+if(FRAMELINK_BUILD_TESTS AND TARGET framelink_av_producer AND Python3_Interpreter_FOUND)
+    add_test(NAME m5_external_pipeline COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/m5_external_pipeline.py
+        --build $<TARGET_FILE_DIR:framelink_av_producer>)
+    set_tests_properties(m5_external_pipeline PROPERTIES TIMEOUT 90 LABELS "gpu;integration")
+endif()
