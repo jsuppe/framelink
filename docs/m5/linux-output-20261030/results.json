@@ -1,0 +1,26 @@
+[
+  {
+    "case": "dedicated-null",
+    "exit_code": 0,
+    "expected_success": true
+  },
+  {
+    "case": "missing-device-server-fallback",
+    "exit_code": 0,
+    "expected_success": null
+  },
+  {
+    "case": "missing-server",
+    "exit_code": 255,
+    "expected_success": false
+  },
+  {
+    "case": "unsupported-audio-format",
+    "exit_code": 1,
+    "expected_success": false
+  },
+  {
+    "case": "dedicated-module-cleanup",
+    "passed": true
+  }
+]

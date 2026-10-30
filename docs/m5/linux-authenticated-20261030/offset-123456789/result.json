@@ -1,0 +1,29 @@
+{
+  "case": "offset-123456789",
+  "passed": true,
+  "source_audio_offset_ns": 123456789,
+  "timing": [
+    {
+      "event": "playback-timing",
+      "audio_first_running_pts_ns": 123456789,
+      "video_first_running_pts_ns": 0,
+      "audio_end_ns": 1723456789,
+      "video_end_ns": 1600000000
+    }
+  ],
+  "completion": [
+    {
+      "event": "playback-complete",
+      "audio_master": false,
+      "video_received": 23,
+      "video_late": 0,
+      "audio_blocks": 80,
+      "audio_samples": 76800,
+      "latency_ns": 100000000
+    }
+  ],
+  "exit_codes": [
+    0,
+    0
+  ]
+}
