@@ -24,7 +24,8 @@ Gate: passing checks for final revision; no pending review defects; merge verifi
 
 ## M2 — Define an interoperable A/V session contract
 
-Implementation and independent review complete; PR #3 final CI/merge pending.
+Status: COMPLETE. PR #3 merged 2026-10-30 as `1b02523` after Linux and
+Windows hosted CI passed (run `41050444424`).
 Final Linux suite 33/33 and Windows 34/34 passed. Android arm64/x86_64 builds
 and Pi/tablet contract/C11 checks passed. Two independent desktop contract peers
 validate agreement and rejection; production offer exchange, authenticated
