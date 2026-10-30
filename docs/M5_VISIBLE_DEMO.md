@@ -13,7 +13,7 @@ The helper opens `http://127.0.0.1:18765` in the default browser, decodes a real
 renderer with WASAPI/default audio device. It loops **finite** sessions (30 loops
 is approximately 5 minutes, with session startup gaps). This is not an unbounded
 live protocol. The tone is 440 Hz at amplitude 0.01; device volume is unchanged.
-Video is BGRA. Renderer control uses isolated port18766. Existing demos are not
+Video is BGRA. Renderer control uses isolated port 18766. Existing demos are not
 stopped. Choose different `--port`/`--renderer-port` if occupied.
 
 The browser is a JPEG preview, not native video scanout; its refresh rate and
@@ -28,15 +28,21 @@ Python helper itself.
 
 ## Caspar launch 2026-10-30
 
-Interactive task `FrameLink-M5-Visible-Demo` runs90 loops (approximately15 minutes) and launches the helper from
+Interactive task `FrameLink-M5-Visible-Demo` runs 90 loops (approximately 15 minutes) and launches the helper from
 `C:/Users/jonsu/dev/framelink-m5-pipeline/visible-demo.ps1`. Restart using
 `Start-ScheduledTask -TaskName FrameLink-M5-Visible-Demo` after it has stopped.
-Existing RGB/NV12 demo PID18580 was inspected and preserved. New demo producer,
-renderer, and browser ran in interactive SessionId1. HTTP status reported real
+Existing RGB/NV12 demo PID 18580 was inspected and preserved. New demo producer,
+renderer, and browser ran in interactive SessionId 1. HTTP status reported real
 audio-master selection; two JPEG captures had different SHA256s and displayed
 moving ball textures on cubes. Browser title and desktop screenshot confirmed
 that the page opened. This is not an audible/optical observation.
 
-Initial launch correctly hit the producer's whole-process15s deadline when
-using a60s clip. The helper was corrected to10s finite clips and60s producer
-timeout (renderer receiver also has a15s bounded session window); this failed launch is not counted as a successful endurance test.
+Initial launch correctly hit the producer's whole-process 15s deadline when
+using a 60s clip. The helper was corrected to 10s finite clips and 60s producer
+timeout (renderer receiver also has a 15s bounded session window); this failed launch is not counted as a successful endurance test.
+
+Final bounded-loop check: iteration 2 was playing with prior producer/renderer
+exit codes `[0,0]`. Audio-master was selected, queue maximum6, invalid PTS0,
+import failures0. Preview hashes changed across one second. Source sequence gaps
+were observed and are not hidden; this demonstration is not lossless playback
+qualification. Captured status is under `docs/m5/visible-demo/observed-status.json`.
