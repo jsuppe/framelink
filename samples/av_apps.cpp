@@ -722,39 +722,54 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
       " width="+std::to_string(o.width)+" height="+std::to_string(o.height)+
       " fps="+std::to_string(o.fps)+" format="+o.format+
       " preserve-timestamps=true ! appsink name=vout sync=false max-buffers=3 drop=true ";
-    parse(rx, video+"appsrc name=audioio is-live=true format=bytes block=true max-buffers=4 ! gdpdepay ! "+
-      audioCaps(o)+" ! identity name=timeline ! queue max-size-buffers=4 max-size-bytes=0 max-size-time=80000000 ! audioconvert ! audioresample ! volume name=playvolume ! "+o.audioSink+" name=playaudio sync=true async=false");
+    parse(rx, video+"appsrc name=audioio is-live=false format=bytes block=true max-buffers=4 ! gdpdepay ! "+
+      audioCaps(o)+" ! identity name=timeline ! queue max-size-buffers=4 max-size-bytes=0 max-size-time=80000000 ! audioconvert ! audioresample ! volume name=playvolume ! "+o.audioSink+" name=playaudio sync=true"+(o.audioSink=="fakesink" ? " async=false" : ""));
     AudioTimeline audioTimeline; audioTimeline.rate=o.rate; audioTimeline.channels=o.channels;
     auto *identity=named(rx,"timeline");
     auto *audioPad=gst_element_get_static_pad(identity,"src");
     gst_pad_add_probe(audioPad,GST_PAD_PROBE_TYPE_BUFFER,trackAudio,&audioTimeline,nullptr);
     gst_object_unref(audioPad);gst_object_unref(identity);
     need(gst_element_set_state(rx.p, GST_STATE_PAUSED)!=GST_STATE_CHANGE_FAILURE,"audio open failed");
-    auto *sink=named(rx,"playaudio");
-    auto *selected=gst_element_provide_clock(sink);
-    bool audioMaster=selected!=nullptr;
-    if (!selected) selected=GST_CLOCK(gst_object_ref(clock));
-    Object selectedOwner{G_OBJECT(selected)};
-    gst_object_unref(sink);
-    auto sysNow=gst_clock_get_time(clock), audioNow=gst_clock_get_time(selected);
-    need(base>=0 && uint64_t(base)>=sysNow,"session startup missed epoch");
-    auto mappedBase=audioNow+(uint64_t(base)-sysNow);
-    auto latency=uint64_t(o.latencyMs)*GST_MSECOND;
-    gst_pipeline_set_latency(GST_PIPELINE(rx.p),latency);
-    av::PlaybackClock timing{selected,mappedBase,latency,audioMaster};
-    if (cb && cb->onStatus) cb->onStatus(audioMaster ? "audio-clock" : "system-clock-fallback");
-    if (cb && cb->onSession) cb->onSession(cfg,channel,timing);
-    start(rx,selected,mappedBase);
-    AudioReader reader(*audio,rx);
     Handles h;
     auto *v=externalVideo ? nullptr : h.get(rx,"vout");
     auto *volume=h.get(rx,"playvolume");
+    auto *sink=h.get(rx,"playaudio");
     auto *bus=gst_element_get_bus(rx.p);
     Object busOwner{G_OBJECT(bus)};
+    auto latency=uint64_t(o.latencyMs)*GST_MSECOND;
+    if (cb && cb->onSession) cb->onSession(cfg,channel,av::PlaybackClock{});
+    AudioReader reader(*audio,rx);
     put(*control,0x5245414459ULL);
     const auto frames=get(*control);
     need(frames && frames<=100000,"invalid stream length");
     auto end=std::chrono::steady_clock::now()+std::chrono::milliseconds(o.timeout);
+    // Live video may prevent whole-pipeline preroll. Await the audio sink only;
+    // its first real PCM packet negotiates the device and exposes its clock.
+    while (!audioTimeline.blocks.load()) {
+      need(!stop || !stop->load(),"playback cancelled");
+      need(std::chrono::steady_clock::now()<end,"audio preroll deadline");
+      g_usleep(1000);
+    }
+    gst_element_get_state(sink,nullptr,nullptr,100*GST_MSECOND);
+    auto *selected=gst_element_provide_clock(sink);
+    bool audioMaster=selected!=nullptr;
+    if (!selected) selected=GST_CLOCK(gst_object_ref(clock));
+    Object selectedOwner{G_OBJECT(selected)};
+    // Joint startup re-anchor after audio preroll, never independent per-track
+    // first-arrival anchors. Original relative media PTS are unchanged.
+    auto mappedBase=gst_clock_get_time(selected)+20*GST_MSECOND;
+    auto *latencyQuery=gst_query_new_latency();
+    if (gst_element_query(rx.p,latencyQuery)) {
+      gboolean live=false; GstClockTime minimum=0, maximum=GST_CLOCK_TIME_NONE;
+      gst_query_parse_latency(latencyQuery,&live,&minimum,&maximum);
+      if (GST_CLOCK_TIME_IS_VALID(minimum)) latency=std::max(latency,uint64_t(minimum));
+    }
+    gst_query_unref(latencyQuery);
+    gst_pipeline_set_latency(GST_PIPELINE(rx.p),latency);
+    av::PlaybackClock timing{selected,mappedBase,latency,audioMaster};
+    if (cb && cb->onStatus) cb->onStatus(audioMaster ? "audio-clock" : "system-clock-fallback");
+    if (cb && cb->onClock) cb->onClock(timing);
+    start(rx,selected,mappedBase);
     uint64_t received=0,dropped=0,lastPts=GST_CLOCK_TIME_NONE;
     const uint64_t finalPts=(frames-1)*GST_SECOND/o.fps;
 
@@ -956,6 +971,7 @@ int main(int argc, char **argv) {
 namespace av {
 bool runPlayback(const PlaybackOptions& p,const PlaybackCallbacks& cb,const std::atomic<bool>& stop,std::string& error) {
   try {
+    need(!p.externalVideo || bool(cb.onClock),"native playback requires onClock callback");
     Options o; o.plugin=p.plugin; o.session=p.session; o.format=p.format;
     o.width=p.width;o.height=p.height;o.fps=p.fps;o.rate=p.rate;o.channels=p.channels;
     o.timeout=p.timeoutMs;o.latencyMs=p.latencyMs;o.audioSink=p.audioSink;o.stream=true;

@@ -22,6 +22,9 @@ struct PlaybackOptions {
 };
 struct PlaybackCallbacks {
   std::function<void(const flSessionConfig&, const std::string&, const PlaybackClock&)> onSession;
+  // onSession clock is null during setup. onClock enables presentation after
+  // audio preroll; it supplies the single shared epoch for both tracks.
+  std::function<void(const PlaybackClock&)> onClock;
   std::function<void(GstSample*, uint64_t, const PlaybackClock&)> onVideo;
   std::function<void(const std::string&)> onStatus;
   std::function<void()> onEnd;

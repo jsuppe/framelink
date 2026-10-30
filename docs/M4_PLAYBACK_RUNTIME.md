@@ -9,14 +9,19 @@ This is a checkpoint, **not full M4 qualification**.
 * `externalVideo=true` omits GStreamer video reception. The renderer exclusively
   creates the native FrameLink consumer using the supplied channel/configuration.
   No CPU image bridge is inserted. Callback must complete setup before returning.
+  `onSession` has a null clock: create native consumer but hold presentation.
+  `onClock` enables presentation after audio preroll; this callback is required
+  for native mode.
 * Audio uses GStreamer GDP, a bounded queue, conversion/resampling, volume, and a
   synchronized output sink. An audio sink-provided clock is selected if available;
   otherwise the status explicitly reports `system-clock-fallback`.
 * Both tracks use a single receiver clock/base mapping and common configured
   pipeline latency. Native video deadline is base + media running PTS + latency.
   GPU readiness fences are **not** deadlines. Clock is borrowed; ref to retain.
-* Session clock mapping is established via the existing checked exchange. Failure
-  to open/start before the negotiated epoch fails explicitly, not arrival-restamps.
+* Session clock mapping is validated by the checked exchange. After audio
+  preroll, both tracks jointly re-anchor PTS zero to one receiver clock epoch,
+  20 ms ahead plus common negotiated pipeline latency. This is explicit playback
+  startup, not two independent arrival-based anchors. Media PTS remain unchanged.
 * Optional mute is applied through the volume element. `onEnd` must retire native
   imports. Callback handlers run on the receiver worker, not the render thread.
 * Audio sample timestamp gaps/resets and clock loss fail the session explicitly.
@@ -33,9 +38,11 @@ that every generated frame was displayed. The old verifier path is unchanged.
 
 ## Verified so far
 
-Linux full pre-existing suite: 38/38. Streaming 100-frame synthetic smoke passed
+Linux full pre-existing suite: 38/38. Streaming synthetic smoke passed
 with explicit system fallback and bounded/latest-wins video reception. This is
-not physical playback qualification or a drop-free result.
+not physical playback qualification or a drop-free result. After staged preroll,
+`autoaudiosink` selected an actual PulseAudio clock and completed 50 frames;
+the host audio output is virtual, not a qualified physical speaker.
 
 ## Remaining M4 obligations
 
