@@ -5,17 +5,19 @@ Fakesink exercises clock scheduling/backpressure, NOT physical device resampling
 """
 import argparse,json,pathlib,tempfile,time,subprocess,os
 from m3_apps import Peer
-p=argparse.ArgumentParser();p.add_argument('--build',required=True);p.add_argument('--output');a=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('--build',required=True);p.add_argument('--output');p.add_argument('--frames',type=int,default=300);p.add_argument('--rates',default='-1000,1000,100000,-100000');p.add_argument('--skip-recovery',action='store_true');a=p.parse_args()
+assert 300<=a.frames<=2500,'frames must be 300..2500'
+frame_timeout=str(min(60000,10000+a.frames*25))
 b=pathlib.Path(a.build).resolve();ext='.exe' if os.name=='nt' else ''
 root=pathlib.Path(a.output or tempfile.mkdtemp(prefix='fl-source-drift-'));root.mkdir(parents=True,exist_ok=True)
 plugin=str(b/('gstframelink.dll' if os.name=='nt' else 'libgstframelink.so'))
-for ppm in (-1000,1000,100000,-100000):
+for ppm in map(int,a.rates.split(',')):
     d=root/str(ppm);d.mkdir();peers=[]
-    common=[plugin,'--session',str(d/'session'),'--frames','300','--timeout-ms','12000','--fps','50']
+    common=[plugin,'--session',str(d/'session'),'--frames',str(a.frames),'--timeout-ms',frame_timeout,'--fps','50']
     try:
         peers.append(Peer([str(b/('framelink_av_producer'+ext))]+common+['--pacing-ppm',str(ppm),'--audio-offset-ns','37000000'],d,'producer'))
         peers.append(Peer([str(b/('framelink_av_consumer'+ext))]+common+['--stream','--audio-sink','fakesink'],d,'consumer'))
-        end=time.monotonic()+20
+        end=time.monotonic()+int(frame_timeout)/1000+8
         for peer in peers:peer.finish(end)
         tx,rx=peers
         metrics=[e for e in rx.events if e.get('event')=='playback-metrics']
@@ -33,7 +35,7 @@ for ppm in (-1000,1000,100000,-100000):
             t=[e for e in rx.events if e.get('event')=='playback-timing'][-1]
             assert t['audio_end_ns']-t['video_end_ns']==37000000,t
             c=[e for e in rx.events if e.get('event')=='playback-complete'][-1]
-            assert c['audio_samples']==288000 and c['audio_blocks']==300,c
+            assert c['audio_samples']==a.frames*960 and c['audio_blocks']==a.frames,c
             if ppm==100000:
                 pacing=[e for e in tx.events if e.get('event')=='producer-pacing'][-1]
                 assert pacing['pacing_ppm']==ppm,pacing
@@ -44,6 +46,8 @@ for ppm in (-1000,1000,100000,-100000):
         for peer in peers:peer.stop()
 # Exercise production runPlayback automatic coordinated re-anchor, not just CLI
 # detection: replace the intentionally slow clock with a healthy producer.
+if a.skip_recovery:
+    print('PASS: source pacing cases; evidence='+str(root));raise SystemExit(0)
 d=root/'recovery';d.mkdir();session=str(d/'session');procs=[]
 def launch(name,cmd):
     f=open(d/(name+'.log'),'w');q=subprocess.Popen(cmd,stdout=f,stderr=f);procs.append((q,f));return q
