@@ -27,8 +27,9 @@ this does not distinguish initial missing samples from intentional initial offse
 
 ## Evidence
 
-Linux 39/39 regression tests passed before the final origin/end-notification edits.
-After those edits, `av_offer_bounds` and `m4_av_recovery` exercise:
+Linux **40/40** regression tests passed after the final origin/end-notification
+edits (49.95 s; evidence `docs/m4/recovery-20261030/linux-ctest.log`).
+`av_offer_bounds` and `m4_av_recovery` exercise:
 
 - malformed outgoing offer bounds before any socket writes;
 - a real `GST_MESSAGE_CLOCK_LOST` invokes joint-session failure policy;

@@ -1,0 +1,86 @@
+Internal ctest changing into directory: /tmp/framelink-m4-playback-build
+Test project /tmp/framelink-m4-playback-build
+      Start  1: session_contract
+ 1/40 Test  #1: session_contract .................   Passed    0.00 sec
+      Start  2: session_contract_c_api
+ 2/40 Test  #2: session_contract_c_api ...........   Passed    0.00 sec
+      Start  3: roundtrip
+ 3/40 Test  #3: roundtrip ........................   Passed    0.21 sec
+      Start  4: nv12_layout
+ 4/40 Test  #4: nv12_layout ......................   Passed    0.00 sec
+      Start  5: nv12_roundtrip
+ 5/40 Test  #5: nv12_roundtrip ...................   Passed    0.34 sec
+      Start  6: gst_nv12_roundtrip
+ 6/40 Test  #6: gst_nv12_roundtrip ...............   Passed    0.31 sec
+      Start  7: gst_rgb10a2_roundtrip
+ 7/40 Test  #7: gst_rgb10a2_roundtrip ............   Passed    0.34 sec
+      Start  8: sample_bgra
+ 8/40 Test  #8: sample_bgra ......................   Passed    0.48 sec
+      Start  9: sample_nv12
+ 9/40 Test  #9: sample_nv12 ......................   Passed    0.20 sec
+      Start 10: sample_slow
+10/40 Test #10: sample_slow ......................   Passed    0.45 sec
+      Start 11: sample_metadata
+11/40 Test #11: sample_metadata ..................   Passed    0.13 sec
+      Start 12: sample_reconnect
+12/40 Test #12: sample_reconnect .................   Passed    0.29 sec
+      Start 13: sample_release_disconnected
+13/40 Test #13: sample_release_disconnected ......   Passed    0.19 sec
+      Start 14: sample_consumed_disconnected
+14/40 Test #14: sample_consumed_disconnected .....   Passed    0.19 sec
+      Start 15: sample_geometry
+15/40 Test #15: sample_geometry ..................   Passed    0.38 sec
+      Start 16: sample_slots
+16/40 Test #16: sample_slots .....................   Passed    0.45 sec
+      Start 17: sample_gpu_sync
+17/40 Test #17: sample_gpu_sync ..................   Passed    0.19 sec
+      Start 18: sample_invalid_cli
+18/40 Test #18: sample_invalid_cli ...............   Passed    0.00 sec
+      Start 19: sample_wrong_role
+19/40 Test #19: sample_wrong_role ................   Passed    0.00 sec
+      Start 20: sample_corruption
+20/40 Test #20: sample_corruption ................   Passed    0.14 sec
+      Start 21: trace_disabled
+21/40 Test #21: trace_disabled ...................   Passed    0.01 sec
+      Start 22: trace_bounded_concurrent
+22/40 Test #22: trace_bounded_concurrent .........   Passed    0.01 sec
+      Start 23: trace_thread_limit
+23/40 Test #23: trace_thread_limit ...............   Passed    0.01 sec
+      Start 24: portable_map_nv12
+24/40 Test #24: portable_map_nv12 ................   Passed    0.15 sec
+      Start 25: portable_map_rgba
+25/40 Test #25: portable_map_rgba ................   Passed    0.32 sec
+      Start 26: portable_map_bgra
+26/40 Test #26: portable_map_bgra ................   Passed    0.32 sec
+      Start 27: portable_map_rgb10a2
+27/40 Test #27: portable_map_rgb10a2 .............   Passed    0.32 sec
+      Start 28: sync_fd_contract
+28/40 Test #28: sync_fd_contract .................   Passed    0.41 sec
+      Start 29: reconnect_held
+29/40 Test #29: reconnect_held ...................   Passed    0.07 sec
+      Start 30: gst_av_session
+30/40 Test #30: gst_av_session ...................   Passed    3.30 sec
+      Start 31: gst_av_faults
+31/40 Test #31: gst_av_faults ....................   Passed    2.53 sec
+      Start 32: gst_timestamp_contract
+32/40 Test #32: gst_timestamp_contract ...........   Passed    0.14 sec
+      Start 33: session_contract_peers
+33/40 Test #33: session_contract_peers ...........   Passed    0.04 sec
+      Start 34: av_rendezvous
+34/40 Test #34: av_rendezvous ....................   Passed    0.01 sec
+      Start 35: av_auth
+35/40 Test #35: av_auth ..........................   Passed    0.01 sec
+      Start 36: av_producer_help
+36/40 Test #36: av_producer_help .................   Passed    0.00 sec
+      Start 37: av_consumer_help
+37/40 Test #37: av_consumer_help .................   Passed    0.00 sec
+      Start 38: m3_av_apps
+38/40 Test #38: m3_av_apps .......................   Passed   28.69 sec
+      Start 39: av_offer_bounds
+39/40 Test #39: av_offer_bounds ..................   Passed    0.01 sec
+      Start 40: m4_av_recovery
+40/40 Test #40: m4_av_recovery ...................   Passed    9.24 sec
+
+100% tests passed, 0 tests failed out of 40
+
+Total Test time (real) =  49.95 sec
