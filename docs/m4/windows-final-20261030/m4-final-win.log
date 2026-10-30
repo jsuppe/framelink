@@ -1,0 +1,240 @@
+-- Building for: Visual Studio 17 2022
+-- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.26300.
+-- The CXX compiler identification is MSVC 19.44.35216.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- The C compiler identification is MSVC 19.44.35216.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- framelink: building GStreamer elements (gstframelink)
+-- Found Python3: C:/Users/jonsu/AppData/Local/Microsoft/WindowsApps/python3.13.exe (found version "3.13.14") found components: Interpreter
+-- Configuring done (5.6s)
+-- Generating done (0.2s)
+CMake Warning:
+  Manually-specified variables were not used by the project:
+
+    FRAMELINK_BUILD_GSTREAMER
+
+
+-- Build files have been written to: C:/Users/jonsu/dev/framelink-m4-20261030/build-final
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  1>Checking Build System
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  framelink_win.cpp
+  framelink_slots.cpp
+  fl_ipc_win32.cpp
+  fl_trace.cpp
+  framelink_session.cpp
+  Generating Code...
+     Creating library C:/Users/jonsu/dev/framelink-m4-20261030/build-final/Release/framelink.lib and object C:/Users/jonsu/dev/framelink-m4-20261030/build-final/Release/framelink.exp
+  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\framelink.dll
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  gstframelink.cpp
+     Creating library C:/Users/jonsu/dev/framelink-m4-20261030/build-final/Release/gstframelink.lib and object C:/Users/jonsu/dev/framelink-m4-20261030/build-final/Release/gstframelink.exp
+  gstframelink.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\gstframelink.dll
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  test_av_auth.cpp
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  av_apps.cpp
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  fl_gst_timestamps.cpp
+  m4_transport_timing.cpp
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  fl_gst_nv12.cpp
+  fl_consume.cpp
+  test_av_rendezvous.cpp
+  av_auth.cpp
+  av_rendezvous.cpp
+  av_rendezvous.cpp
+  fl_gst_timestamps.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_gst_timestamps.exe
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  fl_consume.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_consume.exe
+  fl_disconnect_win.cpp
+  fl_nv12_layout.cpp
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  fl_gst_nv12.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_gst_nv12.exe
+  fl_nv12_win.cpp
+  fl_m4_transport_timing.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_m4_transport_timing.exe
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  fl_nv12_layout.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_nv12_layout.exe
+  fl_produce.cpp
+  fl_portable_map.cpp
+  av_rendezvous.cpp
+  Generating Code...
+  av_auth.cpp
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  fl_disconnect_win.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_disconnect_win.exe
+  fl_ready_timeout_win.cpp
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  fl_reconnect_held.cpp
+  Generating Code...
+  fl_av_auth.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_av_auth.exe
+  fl_produce.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_produce.exe
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  fl_portable_map.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_portable_map.exe
+  fl_nv12_win.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_nv12_win.exe
+  Generating Code...
+  fl_session_contract.cpp
+  fl_session_c_api.c
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  fl_session_peer.cpp
+  fl_trace_test.cpp
+  fl_session_c_api.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_session_c_api.exe
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  fl_reconnect_held.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_reconnect_held.exe
+  av_apps.cpp
+  av_apps.cpp
+  av_session.cpp
+  fl_session_contract.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_session_contract.exe
+  fl_ready_timeout_win.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_ready_timeout_win.exe
+  fl_session_peer.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_session_peer.exe
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  framelink_av_playback.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\framelink_av_playback.lib
+  fl_av_rendezvous.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_av_rendezvous.exe
+  consumer.cpp
+  producer.cpp
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+  fl_playback_recovery.cpp
+  fl_av_offer_bounds.cpp
+  av_rendezvous.cpp
+  av_rendezvous.cpp
+  fl_trace_test.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_trace_test.exe
+  framelink_av_session.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\framelink_av_session.exe
+  sample_common.cpp
+  sample_common.cpp
+  av_auth.cpp
+  av_auth.cpp
+  fl_playback_recovery.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_playback_recovery.exe
+  Generating Code...
+  Generating Code...
+  Generating Code...
+  Generating Code...
+  fl_av_offer_bounds.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_av_offer_bounds.exe
+  framelink_consumer.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\framelink_consumer.exe
+  framelink_producer.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\framelink_producer.exe
+  framelink_av_producer.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\framelink_av_producer.exe
+  framelink_av_consumer.vcxproj -> C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\framelink_av_consumer.exe
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m4-20261030/CMakeLists.txt
+Test project C:/Users/jonsu/dev/framelink-m4-20261030/build-final
+      Start  1: session_contract
+ 1/47 Test  #1: session_contract .....................   Passed    0.04 sec
+      Start  2: session_contract_c_api
+ 2/47 Test  #2: session_contract_c_api ...............   Passed    0.02 sec
+      Start  3: roundtrip
+ 3/47 Test  #3: roundtrip ............................   Passed    2.61 sec
+      Start  4: roundtrip_reattach
+ 4/47 Test  #4: roundtrip_reattach ...................   Passed    0.68 sec
+      Start  5: nv12_layout
+ 5/47 Test  #5: nv12_layout ..........................   Passed    0.02 sec
+      Start  6: gst_nv12_roundtrip
+ 6/47 Test  #6: gst_nv12_roundtrip ...................   Passed    0.81 sec
+      Start  7: gst_rgb10a2_roundtrip
+ 7/47 Test  #7: gst_rgb10a2_roundtrip ................   Passed    0.70 sec
+      Start  8: nv12_windows_roundtrip
+ 8/47 Test  #8: nv12_windows_roundtrip ...............   Passed    0.47 sec
+      Start  9: nv12_windows_1080p
+ 9/47 Test  #9: nv12_windows_1080p ...................   Passed    1.21 sec
+      Start 10: sample_bgra
+10/47 Test #10: sample_bgra ..........................   Passed    0.59 sec
+      Start 11: sample_nv12
+11/47 Test #11: sample_nv12 ..........................   Passed    0.51 sec
+      Start 12: sample_slow
+12/47 Test #12: sample_slow ..........................   Passed    0.75 sec
+      Start 13: sample_metadata
+13/47 Test #13: sample_metadata ......................   Passed    0.48 sec
+      Start 14: sample_reconnect
+14/47 Test #14: sample_reconnect .....................   Passed    0.72 sec
+      Start 15: sample_geometry
+15/47 Test #15: sample_geometry ......................   Passed    0.50 sec
+      Start 16: sample_slots
+16/47 Test #16: sample_slots .........................   Passed    0.48 sec
+      Start 17: sample_gpu_sync
+17/47 Test #17: sample_gpu_sync ......................   Passed    0.48 sec
+      Start 18: sample_invalid_cli
+18/47 Test #18: sample_invalid_cli ...................   Passed    0.01 sec
+      Start 19: sample_wrong_role
+19/47 Test #19: sample_wrong_role ....................   Passed    0.01 sec
+      Start 20: sample_corruption
+20/47 Test #20: sample_corruption ....................   Passed    0.57 sec
+      Start 21: disconnect_full_ring
+21/47 Test #21: disconnect_full_ring .................   Passed    0.24 sec
+      Start 22: trace_disabled
+22/47 Test #22: trace_disabled .......................   Passed    0.02 sec
+      Start 23: trace_bounded_concurrent
+23/47 Test #23: trace_bounded_concurrent .............   Passed    0.02 sec
+      Start 24: trace_thread_limit
+24/47 Test #24: trace_thread_limit ...................   Passed    0.02 sec
+      Start 25: portable_map_nv12
+25/47 Test #25: portable_map_nv12 ....................   Passed    0.25 sec
+      Start 26: portable_map_rgba
+26/47 Test #26: portable_map_rgba ....................   Passed    0.24 sec
+      Start 27: portable_map_bgra
+27/47 Test #27: portable_map_bgra ....................   Passed    0.24 sec
+      Start 28: portable_map_rgb10a2
+28/47 Test #28: portable_map_rgb10a2 .................   Passed    0.24 sec
+      Start 29: ready_fence_timeout
+29/47 Test #29: ready_fence_timeout ..................   Passed    0.27 sec
+      Start 30: reconnect_held
+30/47 Test #30: reconnect_held .......................   Passed    0.36 sec
+      Start 31: gst_av_session
+31/47 Test #31: gst_av_session .......................   Passed    3.58 sec
+      Start 32: gst_av_faults
+32/47 Test #32: gst_av_faults ........................   Passed    2.65 sec
+      Start 33: gst_timestamp_contract
+33/47 Test #33: gst_timestamp_contract ...............***Failed    2.50 sec
+line 40: s
+
+      Start 34: session_contract_peers
+34/47 Test #34: session_contract_peers ...............   Passed    0.30 sec
+      Start 35: av_rendezvous
+35/47 Test #35: av_rendezvous ........................   Passed    0.05 sec
+      Start 36: av_auth
+36/47 Test #36: av_auth ..............................   Passed    0.08 sec
+      Start 37: av_producer_help
+37/47 Test #37: av_producer_help .....................   Passed    0.03 sec
+      Start 38: av_consumer_help
+38/47 Test #38: av_consumer_help .....................   Passed    0.03 sec
+      Start 39: m3_av_apps
+39/47 Test #39: m3_av_apps ...........................   Passed   30.62 sec
+      Start 40: m4_transport_audio_lags
+40/47 Test #40: m4_transport_audio_lags ..............   Passed    0.86 sec
+      Start 41: m4_transport_audio_leads
+41/47 Test #41: m4_transport_audio_leads .............   Passed    0.84 sec
+      Start 42: m4_transport_jitter_drift
+42/47 Test #42: m4_transport_jitter_drift ............   Passed    1.02 sec
+      Start 43: m4_transport_negative_retimestamps
+43/47 Test #43: m4_transport_negative_retimestamps ...   Passed    0.44 sec
+      Start 44: av_offer_bounds
+44/47 Test #44: av_offer_bounds ......................   Passed    0.08 sec
+      Start 45: m4_av_recovery
+45/47 Test #45: m4_av_recovery .......................   Passed   10.39 sec
+      Start 46: m4_authenticated_offsets
+46/47 Test #46: m4_authenticated_offsets .............   Passed    6.53 sec
+      Start 47: m4_source_drift
+47/47 Test #47: m4_source_drift ......................   Passed   39.38 sec
+
+98% tests passed, 1 tests failed out of 47
+
+Total Test time (real) = 113.19 sec
+
+The following tests FAILED:
+	 33 - gst_timestamp_contract (Failed)
+Errors while running CTest
