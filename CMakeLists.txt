@@ -471,3 +471,14 @@ if(FRAMELINK_BUILD_TESTS AND TARGET framelink_av_producer)
     add_test(NAME av_auth COMMAND fl_av_auth)
     set_tests_properties(av_rendezvous av_auth PROPERTIES TIMEOUT 30)
 endif()
+
+if(FRAMELINK_BUILD_TESTS AND TARGET framelink_av_producer)
+    add_test(NAME av_producer_help COMMAND framelink_av_producer --help)
+    add_test(NAME av_consumer_help COMMAND framelink_av_consumer --help)
+    if(Python3_Interpreter_FOUND)
+        add_test(NAME m3_av_apps COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/m3_apps.py
+            --producer $<TARGET_FILE:framelink_av_producer> --consumer $<TARGET_FILE:framelink_av_consumer>
+            --plugin $<TARGET_FILE:gstframelink>)
+        set_tests_properties(m3_av_apps PROPERTIES TIMEOUT 180)
+    endif()
+endif()

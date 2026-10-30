@@ -734,6 +734,14 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep) {
 } // namespace
 int main(int argc, char **argv) {
   try {
+    if (argc == 2 && (std::string(argv[1]) == "--help" || std::string(argv[1]) == "-h")) {
+      puts("Usage: framelink_av_{producer,consumer} PLUGIN --session PRIVATE_DIR\n"
+           "  --frames N --format BGRA|NV12|auto --width W --height H --fps N\n"
+           "  --rate N --channels 1|2 --timeout-ms N --sessions N\n"
+           "  Consumer: --play (optional window and sound); producer: --fault missing-audio|audio-pts-reset\n"
+           "  auto is consumer-only. See docs/M3_AV_APPS.md for bounds and recovery semantics.");
+      return 0;
+    }
     gst_init(&argc, &argv);
     auto o = options(argc, argv);
     Watchdog watchdog(o.timeout);

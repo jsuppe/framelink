@@ -20,7 +20,7 @@ jobs:
       - name: Require and run native A/V tests
         run: |
           python3 tools/check_av_test_registration.py build-av
-          ctest --test-dir build-av --output-on-failure --no-tests=error -R '^gst_(av_session|av_faults|timestamp_contract)$'
+          ctest --test-dir build-av --output-on-failure --no-tests=error -R '^(gst_(av_session|av_faults|timestamp_contract)|m3_av_apps)$'
   windows:
     runs-on: [self-hosted, Windows, X64, framelink-gpu]
     timeout-minutes: 15
@@ -41,4 +41,4 @@ jobs:
       - name: Require A/V test registration
         run: python tools/check_av_test_registration.py build-av Release
       - name: Run native A/V tests
-        run: ctest --test-dir build-av -C Release --output-on-failure --no-tests=error -R "^gst_(av_session|av_faults|timestamp_contract)$"
+        run: ctest --test-dir build-av -C Release --output-on-failure --no-tests=error -R "^(gst_(av_session|av_faults|timestamp_contract)|m3_av_apps)$"
