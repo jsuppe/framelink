@@ -585,6 +585,29 @@ struct AudioReader {
     gst_object_unref(source);
   }
 };
+// Configure the concrete GstAudioBaseSink rather than assuming the separate
+// audioresample transform performs clock slaving. With its own provided clock
+// as master no slaving is necessary; external-clock fallback uses RESAMPLE.
+void configureAudioSlaving(GstElement* sink) {
+  auto configure=[](GstElement* e) {
+    if (g_object_class_find_property(G_OBJECT_GET_CLASS(e),"slave-method"))
+      g_object_set(e,"slave-method",0,nullptr); // GST_AUDIO_BASE_SINK_SLAVE_RESAMPLE
+    if (g_object_class_find_property(G_OBJECT_GET_CLASS(e),"qos"))
+      g_object_set(e,"qos",TRUE,nullptr);
+  };
+  configure(sink);
+  if (!GST_IS_BIN(sink)) return;
+  auto *it=gst_bin_iterate_recurse(GST_BIN(sink));
+  GValue value=G_VALUE_INIT;
+  for (;;) {
+    auto result=gst_iterator_next(it,&value);
+    if (result==GST_ITERATOR_OK) {configure(GST_ELEMENT(g_value_get_object(&value)));g_value_reset(&value);}
+    else if (result==GST_ITERATOR_RESYNC) gst_iterator_resync(it);
+    else break;
+  }
+  if (G_IS_VALUE(&value)) g_value_unset(&value);
+  gst_iterator_free(it);
+}
 struct AudioTimeline {
   std::atomic<uint64_t> blocks{0}, samplesEnd{0};
   std::atomic<bool> invalid{false};
@@ -751,6 +774,7 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
       g_usleep(1000);
     }
     gst_element_get_state(sink,nullptr,nullptr,100*GST_MSECOND);
+    configureAudioSlaving(sink);
     auto *selected=gst_element_provide_clock(sink);
     bool audioMaster=selected!=nullptr;
     if (!selected) selected=GST_CLOCK(gst_object_ref(clock));

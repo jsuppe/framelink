@@ -15,6 +15,10 @@ This is a checkpoint, **not full M4 qualification**.
 * Audio uses GStreamer GDP, a bounded queue, conversion/resampling, volume, and a
   synchronized output sink. An audio sink-provided clock is selected if available;
   otherwise the status explicitly reports `system-clock-fallback`.
+  Concrete audio sinks are configured with GstAudioBaseSink RESAMPLE slaving
+  (not merely the audioresample transform). This applies when their device clock
+  differs from the selected pipeline master; own-clock audio master needs no
+  such slaving. Independent producer-clock rate adaptation remains unqualified.
 * Both tracks use a single receiver clock/base mapping and common configured
   pipeline latency. Native video deadline is base + media running PTS + latency.
   GPU readiness fences are **not** deadlines. Clock is borrowed; ref to retain.
