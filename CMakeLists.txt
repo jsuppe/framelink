@@ -525,3 +525,9 @@ if(FRAMELINK_BUILD_TESTS AND TARGET framelink_av_producer AND Python3_Interprete
         $<TARGET_FILE:gstframelink>)
     set_tests_properties(m4_authenticated_offsets PROPERTIES TIMEOUT 60)
 endif()
+
+if(FRAMELINK_BUILD_TESTS AND TARGET fl_playback_recovery AND Python3_Interpreter_FOUND)
+    add_test(NAME m4_source_drift COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/m4_source_drift.py --build $<TARGET_FILE_DIR:fl_playback_recovery>)
+    set_tests_properties(m4_source_drift PROPERTIES TIMEOUT 100)
+endif()

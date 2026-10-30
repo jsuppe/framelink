@@ -24,6 +24,14 @@ struct PlaybackOptions {
   const std::atomic<bool>* paused=nullptr;
   unsigned recoveryAttempts=3;
 };
+// Arrival/queue telemetry is not physical output timing. queueEmptyEvents
+// includes startup and EOS; it must not be labeled device underruns.
+struct PlaybackMetrics {
+  uint64_t audioBlocks=0, audioSamples=0, queueTimeNs=0, peakQueueTimeNs=0;
+  unsigned queueBuffers=0, peakQueueBuffers=0;
+  uint64_t queueEmptyEvents=0, queueFullEvents=0, lateAudioBlocks=0;
+  int64_t arrivalDriftNs=0; // (last-first arrival) - (last-first media PTS)
+};
 struct PlaybackCallbacks {
   std::function<void(const flSessionConfig&, const std::string&, const PlaybackClock&)> onSession;
   // onSession clock is null during setup. onClock enables presentation after
@@ -32,6 +40,7 @@ struct PlaybackCallbacks {
   std::function<void(GstSample*, uint64_t, const PlaybackClock&)> onVideo;
   std::function<void(const std::string&)> onStatus;
   std::function<void()> onEnd;
+  std::function<void(const PlaybackMetrics&)> onMetrics;
 };
 // Returns false with error on cancellation, EOS before completion, or failure.
 // Audio is rendered by one pipeline; no per-frame media acknowledgement.

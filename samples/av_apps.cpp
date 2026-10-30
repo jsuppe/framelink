@@ -40,6 +40,7 @@ struct Options {
   std::string audioSink="autoaudiosink";
   unsigned latencyMs=100;
   uint64_t audioOffsetNs=0;
+  int pacingPpm=0;
 };
 unsigned number(const char *s) {
   char *e = nullptr;
@@ -68,6 +69,12 @@ Options options(int argc, char **argv) {
       need(*v && end && !*end && !errno && offset>=0 && offset<=2000000000LL,
            "audio offset must be 0..2000000000 ns (video origin is zero)");
       o.audioOffsetNs=uint64_t(offset);
+    }
+    else if (a == "--pacing-ppm") {
+      char* end=nullptr;errno=0;auto ppm=strtol(v,&end,10);
+      need(*v && end && !*end && !errno && ppm>=-200000 && ppm<=200000,
+           "pacing must be -200000..200000 ppm");
+      o.pacingPpm=int(ppm);
     }
     else if (a == "--audio-sink") o.audioSink=v;
     else if (a == "--latency-ms") o.latencyMs=number(v);
@@ -648,6 +655,19 @@ void checkPlaybackBus(GstBus* bus) {
   throw std::runtime_error(error);
 }
 struct AudioTimeline {
+  GstElement* pipeline=nullptr;
+  GstClock* playbackClock=nullptr;
+  std::atomic<uint64_t> deliveryBase{0}, lateBlocks{0}, consecutiveLate{0};
+  std::atomic<bool> exhausted{false};
+  std::atomic<int64_t> arrivalDrift{0};
+  uint64_t firstArrival=0, firstMedia=0;
+  std::atomic<uint64_t> emptyEvents{0}, fullEvents{0};
+  ~AudioTimeline() {
+    // Probes/signals carry this object's address: stop before its destruction,
+    // including exceptions. Keep selected clock alive until streaming stops.
+    if(pipeline) gst_element_set_state(pipeline,GST_STATE_NULL);
+    if(playbackClock) gst_object_unref(playbackClock);
+  }
   std::atomic<uint64_t> blocks{0}, samplesEnd{0}, originNs{GST_CLOCK_TIME_NONE};
   std::atomic<bool> invalid{false};
   unsigned rate=48000, channels=2;
@@ -668,6 +688,19 @@ GstPadProbeReturn trackAudio(GstPad*, GstPadProbeInfo* info, gpointer data) {
       flSessionSampleOffset(first+count,t.rate,&next)!=0 || uint64_t(next)>GST_CLOCK_TIME_NONE-1-origin || GST_BUFFER_PTS(b)!=origin+uint64_t(expected) ||
       GST_BUFFER_DURATION(b)!=uint64_t(next-expected)) t.invalid=true;
   if (t.invalid.load()) return GST_PAD_PROBE_DROP; // never schedule corrupt PCM
+  const auto arrival=gst_util_get_timestamp();
+  if(!t.firstArrival){t.firstArrival=arrival;t.firstMedia=GST_BUFFER_PTS(b);}
+  t.arrivalDrift=int64_t(arrival-t.firstArrival)-int64_t(GST_BUFFER_PTS(b)-t.firstMedia);
+  // Acquire the published base before reading playbackClock (set before base).
+  const auto base=t.deliveryBase.load();
+  if(base) {
+    const auto due=base+GST_BUFFER_PTS(b);
+    const auto now=gst_clock_get_time(t.playbackClock);
+    if(now>due && now-due>100*GST_MSECOND) {
+      ++t.lateBlocks;
+      if(++t.consecutiveLate>=3) t.exhausted=true;
+    } else t.consecutiveLate=0;
+  }
   t.samplesEnd=first+count; ++t.blocks;
   return GST_PAD_PROBE_OK;
 }
@@ -715,6 +748,7 @@ unsigned runProducer(const Options &o, GSocketListener *l,
       "caps=" +
           videoCaps(o) +
           " ! framelinksink preserve-timestamps=true channel=" + channel +
+          (o.pacingPpm ? " sync=false" : "") +
           " appsrc name=audio is-live=true format=time block=true "
           "max-buffers=2 caps=" +
           audioCaps(o) +
@@ -727,12 +761,17 @@ unsigned runProducer(const Options &o, GSocketListener *l,
   auto *v = h.get(tx, "video"), *a = h.get(tx, "audio");
   put(*control, o.frames);
   event("session-ready", o, 0, id);
+  uint64_t maxPushNs=0;
   for (unsigned n = 0; n < o.frames; ++n) {
     uint64_t pts = uint64_t(n) * GST_SECOND / o.fps,
              next = uint64_t(n + 1) * GST_SECOND / o.fps;
     auto now = gst_clock_get_time(clock);
-    if (uint64_t(cfg.epochNs) + pts > now)
-      g_usleep((uint64_t(cfg.epochNs) + pts - now) / 1000);
+    // Only wall-clock pacing changes. PCM sample positions, A/V PTS and
+    // durations remain exact on the negotiated media timeline.
+    const auto paced=gst_util_uint64_scale(pts,1000000,1000000+o.pacingPpm);
+    if (uint64_t(cfg.epochNs) + paced > now)
+      g_usleep((uint64_t(cfg.epochNs) + paced - now) / 1000);
+    const auto pushStart=gst_util_get_timestamp();
     need(gst_app_src_push_buffer(
              GST_APP_SRC(v), makeVideo(o, n, pts, next - pts)) == GST_FLOW_OK,
          "video send failed");
@@ -744,10 +783,12 @@ unsigned runProducer(const Options &o, GSocketListener *l,
       need(gst_app_src_push_buffer(GST_APP_SRC(a), b) == GST_FLOW_OK,
            "audio send failed");
     }
+    maxPushNs=std::max(maxPushNs,gst_util_get_timestamp()-pushStart);
     if (!streaming) need(get(*control) == n + 1, "frame acknowledgement mismatch");
     if (n == 0 || (n + 1) % 25 == 0)
       event("media-progress", o, n + 1, id);
   }
+  printf("{\"event\":\"producer-pacing\",\"pacing_ppm\":%d,\"max_push_ns\":%llu}\n",o.pacingPpm,(unsigned long long)maxPushNs);
   gst_app_src_end_of_stream(GST_APP_SRC(a));
   gst_app_src_end_of_stream(GST_APP_SRC(v));
   need(get(*control) == 0x444f4e45ULL, "consumer completion missing");
@@ -792,8 +833,8 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
       " fps="+std::to_string(o.fps)+" format="+o.format+
       " preserve-timestamps=true ! appsink name=vout sync=false max-buffers=3 drop=true ";
     parse(rx, video+"appsrc name=audioio is-live=false format=bytes block=true max-buffers=4 ! gdpdepay ! "+
-      audioCaps(o)+" ! identity name=timeline ! queue max-size-buffers=4 max-size-bytes=0 max-size-time=80000000 ! audioconvert ! audioresample ! volume name=playvolume ! "+o.audioSink+" name=playaudio sync=true"+(o.audioSink=="fakesink" ? " async=false" : ""));
-    AudioTimeline audioTimeline; audioTimeline.rate=o.rate; audioTimeline.channels=o.channels;
+      audioCaps(o)+" ! identity name=timeline ! queue name=audioqueue max-size-buffers=4 max-size-bytes=0 max-size-time=80000000 ! audioconvert ! audioresample ! volume name=playvolume ! "+o.audioSink+" name=playaudio sync=true"+(o.audioSink=="fakesink" ? " async=false" : ""));
+    AudioTimeline audioTimeline; audioTimeline.pipeline=rx.p; audioTimeline.rate=o.rate; audioTimeline.channels=o.channels;
     auto *identity=named(rx,"timeline");
     auto *audioPad=gst_element_get_static_pad(identity,"src");
     gst_pad_add_probe(audioPad,GST_PAD_PROBE_TYPE_BUFFER,trackAudio,&audioTimeline,nullptr);
@@ -802,6 +843,9 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
     Handles h;
     auto *v=externalVideo ? nullptr : h.get(rx,"vout");
     auto *volume=h.get(rx,"playvolume");
+    auto *queue=h.get(rx,"audioqueue");
+    g_signal_connect(queue,"underrun",G_CALLBACK(+[](GstElement*,gpointer p){++static_cast<AudioTimeline*>(p)->emptyEvents;}),&audioTimeline);
+    g_signal_connect(queue,"overrun",G_CALLBACK(+[](GstElement*,gpointer p){++static_cast<AudioTimeline*>(p)->fullEvents;}),&audioTimeline);
     auto *sink=h.get(rx,"playaudio");
     auto *bus=gst_element_get_bus(rx.p);
     Object busOwner{G_OBJECT(bus)};
@@ -846,7 +890,26 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
     av::PlaybackClock timing{selected,mappedBase,latency,audioMaster};
     if (cb && cb->onStatus) cb->onStatus(audioMaster ? "audio-clock" : "system-clock-fallback");
     if (cb && cb->onClock) cb->onClock(timing);
+    audioTimeline.playbackClock=GST_CLOCK(gst_object_ref(selected));
+    audioTimeline.deliveryBase=mappedBase+latency;
     start(rx,selected,mappedBase);
+    av::PlaybackMetrics metrics;
+    uint64_t lastMetricsAt=0;
+    auto reportMetrics=[&](bool final=false) {
+      const auto now=gst_util_get_timestamp();
+      if(!final && now-lastMetricsAt<100*GST_MSECOND) return;
+      guint level=0;guint64 time=0;
+      g_object_get(queue,"current-level-buffers",&level,"current-level-time",&time,nullptr);
+      metrics.queueBuffers=level;metrics.queueTimeNs=time;
+      metrics.peakQueueBuffers=std::max(metrics.peakQueueBuffers,unsigned(level));
+      metrics.peakQueueTimeNs=std::max(metrics.peakQueueTimeNs,uint64_t(time));
+      metrics.audioBlocks=audioTimeline.blocks.load();metrics.audioSamples=audioTimeline.samplesEnd.load();
+      metrics.queueEmptyEvents=audioTimeline.emptyEvents.load();metrics.queueFullEvents=audioTimeline.fullEvents.load();
+      metrics.lateAudioBlocks=audioTimeline.lateBlocks.load();metrics.arrivalDriftNs=audioTimeline.arrivalDrift.load();
+      if(cb && cb->onMetrics)cb->onMetrics(metrics);
+      lastMetricsAt=now;
+      if(final) printf("{\"event\":\"playback-metrics\",\"peak_queue_buffers\":%u,\"peak_queue_ns\":%llu,\"queue_empty_events\":%llu,\"queue_full_events\":%llu,\"late_audio_blocks\":%llu,\"arrival_drift_ns\":%lld}\n",metrics.peakQueueBuffers,(unsigned long long)metrics.peakQueueTimeNs,(unsigned long long)metrics.queueEmptyEvents,(unsigned long long)metrics.queueFullEvents,(unsigned long long)metrics.lateAudioBlocks,(long long)metrics.arrivalDriftNs);
+    };
     uint64_t received=0,dropped=0,lastPts=GST_CLOCK_TIME_NONE,firstPts=GST_CLOCK_TIME_NONE;
     const uint64_t finalPts=(frames-1)*GST_SECOND/o.fps;
 
@@ -864,6 +927,11 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
       g_object_set(volume,"mute",mute && mute->load(),nullptr);
       need(!audioTimeline.invalid.load(),"audio discontinuity: renegotiate both tracks");
       need(std::chrono::steady_clock::now()<end,"playback deadline");
+      reportMetrics();
+      if(audioTimeline.exhausted.load()) {
+        reportMetrics(true);
+        throw std::runtime_error("audio playout budget exhausted: renegotiate both tracks");
+      }
       checkPlaybackBus(bus);
       if (!v) { g_usleep(5000); continue; }
       auto *sample=gst_app_sink_try_pull_sample(GST_APP_SINK(v),10*GST_MSECOND);
@@ -886,6 +954,8 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
         }
       }
     }
+    reportMetrics(true);
+    need(!audioTimeline.exhausted.load(),"audio playout budget exhausted: renegotiate both tracks");
     need(!audioTimeline.invalid.load() && audioTimeline.samplesEnd.load()==frames*o.rate/o.fps,"incomplete/discontinuous audio");
     gst_element_set_state(rx.p,GST_STATE_NULL);
     put(*control,0x444f4e45ULL);
@@ -958,6 +1028,7 @@ int main(int argc, char **argv) {
            "  --rate N --channels 1|2 --timeout-ms N --sessions N\n"
            "  Consumer: --stream --audio-sink autoaudiosink|fakesink --latency-ms N (scheduled streaming); --play (verification window/sound); producer: --fault missing-audio|audio-pts-reset\n"
            "  --audio-offset-ns 0..2000000000 (producer fixture; verifier must use same offset)\n"
+           "  --pacing-ppm -200000..200000 (producer pacing injection; PTS unchanged)\n"
            "  auto is consumer-only. See docs/M3_AV_APPS.md for bounds and recovery semantics.");
       return 0;
     }
