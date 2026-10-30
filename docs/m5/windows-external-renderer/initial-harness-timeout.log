@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "C:\Users\jonsu\dev\framelink-m5-pipeline\test\m5_external_renderer.py", line 38, in <module>
+    except OSError:pass
+    ^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\subprocess.py", line 1280, in wait
+    return self._wait(timeout=timeout)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\subprocess.py", line 1609, in _wait
+    raise TimeoutExpired(self.args, timeout)
+subprocess.TimeoutExpired: Command '['C:\\Users\\jonsu\\dev\\vkrender-m5-pipeline\\build\\Release\\vkrenderer.exe', '--serve', 'm5-missing-input', '--headless', '-1', '--av-exit-on-end', '--control-port', '55430', '--av-session', 'C:\\Users\\jonsu\\dev\\framelink-m5-pipeline\\renderer-evidence\\missing-input\\session', '--av-plugin', 'C:\\Users\\jonsu\\dev\\framelink-m5-pipeline\\build\\Release\\gstframelink.dll', '--av-format', 'BGRA', '--av-audio-sink', 'autoaudiosink']' timed out after 3 seconds

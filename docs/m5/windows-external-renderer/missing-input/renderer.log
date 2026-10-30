@@ -1,0 +1,33 @@
+[INF] renderer: device: NVIDIA GeForce RTX 5090 (headless)
+[INF] scene: 1 window(s), canvas 1280x720 (aspect 1.78). Controls: L layout, SPACE pause, -/= speed, B backdrop, 1-9 toggle stream, 0 all, ESC quit
+[INF] service: 12 framelink input slots ready ('m5-missing-input.in.0' .. 'm5-missing-input.in.11')
+[INF] control: moderation API on http://127.0.0.1:55996/api/
+0:00:00.067863900      49968      24712 WARN       wasapi2ringbuffer gstwasapi2rbuf.cpp:154:RbufCtx::Stop: WASAPI call failed: 0x88890001, AUDCLNT_E_NOT_INITIALIZED
+pipeline error: The stream is in the wrong format. (../gst-libs/gst/audio/gstaudiobasesink.c(1119): gst_audio_base_sink_wait_event (): /GstPipeline:pipeline0/GstAutoAudioSink:playaudio/GstWasapi2Sink:playaudio-actual-sink-wasapi2:
+Sink not negotiated before eos event.)
+[INF] scene: 276 frames in 5s (two-cubes, 0/0 streams in scene, 1 windows)
+[INF] service: 0 adoptions in 5s (pool 0 slots, 0 producers)
+[INF] scene: 298 frames in 5s (two-cubes, 0/0 streams in scene, 1 windows)
+[INF] service: 0 adoptions in 5s (pool 0 slots, 0 producers)
+[INF] scene: 297 frames in 5s (two-cubes, 0/0 streams in scene, 1 windows)
+[INF] service: 0 adoptions in 5s (pool 0 slots, 0 producers)
+0:00:15.139833000      49968      24712 WARN       wasapi2ringbuffer gstwasapi2rbuf.cpp:154:RbufCtx::Stop: WASAPI call failed: 0x88890001, AUDCLNT_E_NOT_INITIALIZED
+[INF] scene: 297 frames in 5s (two-cubes, 0/0 streams in scene, 1 windows)
+[INF] service: 0 adoptions in 5s (pool 0 slots, 0 producers)
+[INF] scene: 297 frames in 5s (two-cubes, 0/0 streams in scene, 1 windows)
+[INF] service: 0 adoptions in 5s (pool 0 slots, 0 producers)
+[INF] scene: 298 frames in 5s (two-cubes, 0/0 streams in scene, 1 windows)
+[INF] service: 0 adoptions in 5s (pool 0 slots, 0 producers)
+[INF] scene: 297 frames in 5s (two-cubes, 0/0 streams in scene, 1 windows)
+[INF] service: 0 adoptions in 5s (pool 0 slots, 0 producers)
+[INF] scene: 298 frames in 5s (two-cubes, 0/0 streams in scene, 1 windows)
+[INF] service: 0 adoptions in 5s (pool 0 slots, 0 producers)
+[INF] scene: 298 frames in 5s (two-cubes, 0/0 streams in scene, 1 windows)
+[INF] service: 0 adoptions in 5s (pool 0 slots, 0 producers)
+[INF] scene: 298 frames in 5s (two-cubes, 0/0 streams in scene, 1 windows)
+[INF] service: 0 adoptions in 5s (pool 0 slots, 0 producers)
+[INF] scene: 297 frames in 5s (two-cubes, 0/0 streams in scene, 1 windows)
+[INF] service: 0 adoptions in 5s (pool 0 slots, 0 producers)
+[INF] scene: 298 frames in 5s (two-cubes, 0/0 streams in scene, 1 windows)
+[INF] service: 0 adoptions in 5s (pool 0 slots, 0 producers)
+AV_RENDER due_decisions=0 hold_checks=0 late_drops=0 invalid_pts=0 status=rendezvous deadline

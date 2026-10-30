@@ -4,9 +4,9 @@
 
 FrameLink implementation commit `0335805` (based on merged M4 `ed81cbb`),
 Windows x64, MSVC Visual Studio 2022, GStreamer MSVC x86_64 **1.28.0** runtime
-and development packages. Renderer M4 baseline is `4c2ff15`; optional renderer
-commands below are integration instructions, not a claim that this test exercised
-physical display/speaker output. Python 3 is required for the test harness.
+and development packages. Renderer M4 baseline is `4c2ff15`; the external native renderer was subsequently tested offscreen with WASAPI2
+audio-clock selection (see docs/m5/windows-external-renderer). This does not
+qualify physical display/speaker timing. Python 3 is required for the test harness.
 
 This example uses a real MJPEG/PCM AVI demux/decode pipeline, not synthetic frame
 submission inside the transport. It splits that pipeline into an independently
@@ -133,3 +133,36 @@ therefore must be disabled for performance measurements. Trace reports at sink
 arrival are not scanout timestamps. The test checks full PCM, changing video,
 final-frame delivery, and exact data/timing for every received frame; dropped
 frames are reported, not concealed behind callback totals.
+
+## Proposed bounded follow-up for live input (not implemented)
+
+Do not overload the current `frames` integer with a sentinel or huge duration.
+A separately reviewed session-control version should negotiate finite/live mode
+and explicit per-track EOS. Live mode would use these bounded rules:
+
+1. Preserve the existing session ID, generation and common TIME timeline.
+2. Negotiate live/EOS capability before media; older peers reject unsupported
+   live mode rather than interpreting it as a finite frame count.
+3. Carry final video running PTS and cumulative audio sample count on graceful
+   EOS; drain both tracks to their deadlines on the common playback clock.
+4. Preserve bounded queue sizes, connection/idle deadlines and cancellation.
+   A producer crash is failure/reconnect, never an implicit successful EOS.
+5. Validate independent EOS order, source error, reconnect/new generation,
+   missing EOS, slow consumer and cancellation with negative controls.
+
+This change is separate from memory-capability negotiation (M5a), and from
+seeking or dynamic-format renegotiation. The present external-pipeline example
+remains strictly finite and must not be marketed as that future live API.
+
+## Native renderer follow-up validation
+
+`test/m5_external_renderer.py` exercises the external decoded producer against
+the independent Windows native renderer, not just the stream-verifier consumer.
+Both BGRA and NV12 passed with two changing JPEG previews, real WASAPI2 audio
+master selection and complete 300-block / 288000-sample audio. Each six-second
+source produced 67 scheduling decisions: functional rendering is verified, but
+lossless 50 fps presentation is not qualified. Source death exited with failure
+in 16.043 seconds; missing input exhausted recovery and exited with failure in
+63.129 seconds. Both released their control ports without forced termination.
+See [native renderer evidence](m5/windows-external-renderer/README.md), including
+the preserved initial harness timeout and final binary hashes.

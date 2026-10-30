@@ -1,0 +1,64 @@
+[
+  {
+    "case": "bgra",
+    "exit_codes": [
+      0,
+      0
+    ],
+    "elapsed_s": 9.715,
+    "max_due_decisions": 67,
+    "audio_master_observed": true,
+    "preview_sha256": [
+      "a0e6823958bea2d3a1ada36dd822d1f6c168a7daa52066035350dd3dde350698",
+      "cc252af524283afc47aee5ba13c9a098f0c5c64ad5a743d511536649d5cbecb6"
+    ],
+    "bounded_process_exit": true,
+    "control_port_closed": true,
+    "physical_sync_measured": false
+  },
+  {
+    "case": "nv12",
+    "exit_codes": [
+      0,
+      0
+    ],
+    "elapsed_s": 9.697,
+    "max_due_decisions": 67,
+    "audio_master_observed": true,
+    "preview_sha256": [
+      "264bf477b5a6111d3293505f0938b3e01cd52bc61dc4237b964f69c6eaca7b6f",
+      "c4bd0c8a2366f66acff616c096abb771d0efe32ab5f31c4cf4abf7fe4d56fd2d"
+    ],
+    "bounded_process_exit": true,
+    "control_port_closed": true,
+    "physical_sync_measured": false
+  },
+  {
+    "case": "source-death",
+    "exit_codes": [
+      1,
+      1
+    ],
+    "elapsed_s": 16.043,
+    "max_due_decisions": 20,
+    "audio_master_observed": true,
+    "preview_sha256": [],
+    "bounded_process_exit": true,
+    "control_port_closed": true,
+    "physical_sync_measured": false
+  },
+  {
+    "case": "missing-input",
+    "exit_codes": [
+      1,
+      1
+    ],
+    "elapsed_s": 63.129,
+    "max_due_decisions": 0,
+    "audio_master_observed": false,
+    "preview_sha256": [],
+    "bounded_process_exit": true,
+    "control_port_closed": true,
+    "physical_sync_measured": false
+  }
+]
