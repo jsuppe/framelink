@@ -112,8 +112,10 @@ its latency figures are not a performance baseline.
 
 - Linux: automated real FrameLink + GDP/TCP PCM roundtrip and fault injection;
   evidence in [audio-session-20261029](audio-session-20261029/).
-- Windows: portable GStreamer/C++ code and CMake wiring; runtime qualification
-  must be recorded separately (never infer it from Linux).
+- Windows: MSVC Release build and full 30/30 regression suite passed on Caspar;
+  normal and fault-injection A/V tests verified pixels, PCM samples and timeline.
+  Evidence is in [audio-session-20261029](audio-session-20261029/). This was
+  headless appsink validation, not speaker/physical-display synchronization.
 - Android: static native fixture builds for arm64 and x86_64; normal/fault
   runs passed on Pi and Mali tablet. Run `framelink_av_session static [--faults]`
   from an isolated adb-shell directory. Core/app/GDP/TCP plugins are statically

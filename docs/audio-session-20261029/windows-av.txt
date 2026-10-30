@@ -1,0 +1,7 @@
+gst-inspect-1.0 version 1.26.11
+GStreamer 1.26.11
+Unknown package origin
+session=1313146787340 clock=GstSystemClock shared-base=1313146854959100 video=150 audio=150 missing=0 drift_blocks=0 restarts=0
+app-observed pull skew ms p50=0.009 p99=1.015; video scheduled lateness ms p50=0.816 p99=1.973 (not speaker/scanout latency)
+session=1313150348883 clock=GstSystemClock shared-base=1313150352356300 video=150 audio=149 missing=1 drift_blocks=40 restarts=1
+app-observed pull skew ms p50=0.009 p99=4.013; video scheduled lateness ms p50=1.193 p99=1969.209 (not speaker/scanout latency)

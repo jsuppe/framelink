@@ -35,3 +35,36 @@ plugins registered statically with explicit gio/gstreamer-net dependencies.
   Fault test detects one missing block,40 drift blocks,one reset.
 - These are native trusted-shell tests, not APK deployment, audio-device-clock
   recovery or cross-app sandbox validation. x86_64 runtime not exercised here.
+
+## Windows native qualification (2026-10-30)
+
+Caspar, Windows x64, NVIDIA RTX5090, MSVC Release, GStreamer 1.26.11.
+Source revision `b498e0b`; isolated checkout/build
+`C:\Users\jonsu\dev\framelink-audio-20261030`; existing demo untouched.
+No Windows portability source changes were needed.
+
+- Full suite **30/30 passed**, including normal and fault A/V tests
+  (`windows-suite.txt`); build output retained (`windows-build.txt`).
+- Dedicated normal run: 150 video / 150 PCM blocks, no missing blocks/drift/reset;
+  representative pixels, all PCM samples, exact PTS and segment mapping checked.
+  Application pull-skew p50/p99 0.009/1.015 ms; scheduled video lateness
+  0.816/1.973 ms (`windows-av.txt`).
+- Dedicated fault run: 150 video / 149 PCM blocks; one missing block, 40 drifted
+  blocks and one reset detected. Reset deliberately schedules past timestamps;
+  fault lateness is not a performance baseline.
+- These brief runs were headless; no speaker/scanout validation or hardware-clock
+  drift compensation claim. Dedicated runs overlapped part of the regression
+  suite, so timings are observations under that load, not isolated benchmarks.
+
+Reproduce from a PowerShell shell with the installed GStreamer MSVC runtime and
+SDK (`GSTREAMER_1_0_ROOT_MSVC_X86_64` points to its root):
+
+```powershell
+cmake -S . -B build -A x64
+cmake --build build --config Release -j 8
+$gstBin = Join-Path $env:GSTREAMER_1_0_ROOT_MSVC_X86_64 "bin"
+$env:PATH = "$gstBin;$PWD\build\Release;$env:PATH"
+ctest --test-dir build -C Release --output-on-failure
+.\build\Release\framelink_av_session.exe "$PWD\build\Release\gstframelink.dll"
+.\build\Release\framelink_av_session.exe "$PWD\build\Release\gstframelink.dll" --faults
+```
