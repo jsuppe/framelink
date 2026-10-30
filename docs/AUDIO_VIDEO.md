@@ -120,7 +120,7 @@ its latency figures are not a performance baseline.
 
 - Linux: automated real FrameLink + GDP/TCP PCM roundtrip and fault injection;
   evidence in [audio-session-20261029](audio-session-20261029/).
-- Windows: MSVC Release build and full 30/30 regression suite passed on Caspar;
+- Windows: MSVC Release build and full 31/31 regression suite passed on Caspar;
   normal and fault-injection A/V tests verified pixels, PCM samples and timeline.
   Evidence is in [audio-session-20261029](audio-session-20261029/). This was
   headless appsink validation, not speaker/physical-display synchronization.

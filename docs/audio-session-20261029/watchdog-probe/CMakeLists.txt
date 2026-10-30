@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.20)
+project(watchdog_probe LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 17)
+add_executable(watchdog_probe main.cpp)
+set(GST_ROOT "$ENV{GSTREAMER_1_0_ROOT_MSVC_X86_64}")
+target_include_directories(watchdog_probe PRIVATE ../samples "${GST_ROOT}/include/glib-2.0" "${GST_ROOT}/lib/glib-2.0/include")
+target_link_directories(watchdog_probe PRIVATE "${GST_ROOT}/lib")
+target_link_libraries(watchdog_probe PRIVATE glib-2.0.lib)

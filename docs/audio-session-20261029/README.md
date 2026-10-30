@@ -68,3 +68,21 @@ ctest --test-dir build -C Release --output-on-failure
 .\build\Release\framelink_av_session.exe "$PWD\build\Release\gstframelink.dll"
 .\build\Release\framelink_av_session.exe "$PWD\build\Release\gstframelink.dll" --faults
 ```
+
+### Final Windows regression gate
+
+Source `180e0a2` rebuilt in the same isolated directory: **31/31 passed**
+(`windows-final-build.txt`, `windows-final-suite.txt`). This includes the new
+`gst_timestamp_contract`: zero/repeated/backward timestamps, signed limit,
+missing/overflow rejection, nonzero segment mapping, and legacy arrival mode.
+Both normal and fault A/V cases passed again with the new watchdog enabled.
+
+A separate negative harness includes the **unchanged production `deadline.h`**
+and blocks its main thread for 30 seconds. The watchdog printed its failure
+marker and exited **1 at 20.040311 seconds**, before the blocked operation could
+return (`windows-watchdog.txt`). This exercises timeout termination rather than
+just normal destructor cancellation. It is a synthetic blocked-operation test,
+not a claim to reproduce every possible GStreamer deadlock. Harness source is
+retained under `watchdog-probe/`; copy it beside `samples/` in an isolated source
+checkout, then configure/build with CMake/MSVC and run with GStreamer on PATH.
+Expected result is exit1 between19 and25 seconds plus the deadline failure marker.
