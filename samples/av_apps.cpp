@@ -26,6 +26,10 @@ void need(bool ok, const char *what) {
   if (!ok)
     throw std::runtime_error(what);
 }
+void need(bool ok, const std::string &what) {
+  if (!ok)
+    throw std::runtime_error(what);
+}
 struct Options {
   std::string plugin, session, format = "BGRA", fault;
   unsigned frames = 150, width = 160, height = 90, fps = 50, rate = 48000,
@@ -116,7 +120,7 @@ struct Watchdog {
 std::string randomHex(size_t bytes) {
   std::vector<unsigned char> b(bytes);
   std::string err;
-  need(av::secureRandom(b.data(), b.size(), err), err.c_str());
+  need(av::secureRandom(b.data(), b.size(), err), err);
   std::string s;
   for (auto v : b) {
     s += "0123456789abcdef"[v >> 4];
@@ -127,7 +131,7 @@ std::string randomHex(size_t bytes) {
 flSessionId randomId() {
   flSessionId id{};
   std::string e;
-  need(av::secureRandom(id.bytes, sizeof(id.bytes), e), e.c_str());
+  need(av::secureRandom(id.bytes, sizeof(id.bytes), e), e);
   return id;
 }
 struct Conn {
@@ -260,7 +264,7 @@ Conn *connect(const av::Endpoint &r, char role, unsigned timeout) {
   std::unique_ptr<Conn> c(new Conn(q));
   tune(*c, timeout);
   std::string err;
-  need(av::authenticateClient(c->p, r, role, err), err.c_str());
+  need(av::authenticateClient(c->p, r, role, err), err);
   return c.release();
 }
 struct Pipeline {
@@ -470,18 +474,21 @@ void validateAudio(GstSample *s, const Options &o, unsigned n, uint64_t pts) {
     need(GST_BUFFER_FLAG_IS_SET(b, GST_BUFFER_FLAG_DISCONT),
          "first audio missing discontinuity");
   uint64_t dur = 0;
-  auto *expected = makeAudio(o, n, pts, dur);
+  std::unique_ptr<GstBuffer, decltype(&gst_buffer_unref)> expectedOwner(
+      makeAudio(o, n, pts, dur), gst_buffer_unref);
+  auto *expected = expectedOwner.get();
   need(GST_BUFFER_PTS(b) == GST_BUFFER_PTS(expected) &&
            GST_BUFFER_DURATION(b) == dur,
        "audio timeline mismatch");
   GstMapInfo a{}, e{};
-  need(gst_buffer_map(b, &a, GST_MAP_READ) &&
-           gst_buffer_map(expected, &e, GST_MAP_READ),
-       "audio map");
+  need(gst_buffer_map(b, &a, GST_MAP_READ), "received audio map");
+  if (!gst_buffer_map(expected, &e, GST_MAP_READ)) {
+    gst_buffer_unmap(b, &a);
+    throw std::runtime_error("expected audio map");
+  }
   bool ok = a.size == e.size && !memcmp(a.data, e.data, a.size);
   gst_buffer_unmap(b, &a);
   gst_buffer_unmap(expected, &e);
-  gst_buffer_unref(expected);
   need(ok, "PCM mismatch");
   need(gst_segment_to_running_time(gst_sample_get_segment(s), GST_FORMAT_TIME,
                                    GST_BUFFER_PTS(b)) == GST_BUFFER_PTS(b),
@@ -773,9 +780,9 @@ int main(int argc, char **argv) {
     ep.port = g_inet_socket_address_get_port(G_INET_SOCKET_ADDRESS(effective));
     g_object_unref(effective);
     std::string err;
-    need(av::secureRandom(ep.token.data(), ep.token.size(), err), err.c_str());
+    need(av::secureRandom(ep.token.data(), ep.token.size(), err), err);
     av::RendezvousOwner owner;
-    need(owner.publish(o.session, ep, err), err.c_str());
+    need(owner.publish(o.session, ep, err), err);
     for (unsigned attempt = 0;
          completed < o.sessions && attempt < o.sessions + 3; ++attempt) {
       try {
