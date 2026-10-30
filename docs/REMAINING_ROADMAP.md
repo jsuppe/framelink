@@ -45,7 +45,8 @@ Gate: separately launched peers agree on formats and timeline; incompatible peer
 
 ## M3 — Independent producer and consumer applications
 
-Implementation/review complete; final PR #4 CI/merge gate pending. Final Linux
+Status: COMPLETE. PR #4 merged 2026-10-30 as `148cc05` after hosted
+Linux and Windows CI passed (run `41053902861`). Final Linux
 38/38 and Windows39/39 passed, including ten-case startup/recovery/fault matrices.
 Optional --play exercised on Linux virtual X display + silent sink for BGRA/NV12;
 physical playback synchronization and Android application deployment remain M4/M5.
