@@ -9,6 +9,7 @@
 #include <atomic>
 #include <chrono>
 #include <cmath>
+#include <cerrno>
 #include <cstdio>
 #include <cstring>
 #include <gio/gio.h>
@@ -38,6 +39,7 @@ struct Options {
   bool play = false, stream = false;
   std::string audioSink="autoaudiosink";
   unsigned latencyMs=100;
+  uint64_t audioOffsetNs=0;
 };
 unsigned number(const char *s) {
   char *e = nullptr;
@@ -61,7 +63,13 @@ Options options(int argc, char **argv) {
     }
     need(i + 1 < argc, "option requires value");
     const char *v = argv[++i];
-    if (a == "--audio-sink") o.audioSink=v;
+    if(a=="--audio-offset-ns") {
+      char* end=nullptr;errno=0;auto offset=strtoll(v,&end,10);
+      need(*v && end && !*end && !errno && offset>=0 && offset<=2000000000LL,
+           "audio offset must be 0..2000000000 ns (video origin is zero)");
+      o.audioOffsetNs=uint64_t(offset);
+    }
+    else if (a == "--audio-sink") o.audioSink=v;
     else if (a == "--latency-ms") o.latencyMs=number(v);
     else if (a == "--session")
       o.session = v;
@@ -430,7 +438,7 @@ GstBuffer *makeAudio(const Options &o, unsigned n, uint64_t pts,
   int64_t samplePts = 0;
   need(flSessionSampleOffset(first, o.rate, &samplePts) == 0,
        "sample PTS overflow");
-  GST_BUFFER_PTS(buffer) = samplePts;
+  GST_BUFFER_PTS(buffer) = uint64_t(samplePts)+o.audioOffsetNs;
   GST_BUFFER_DURATION(buffer) = dur;
   if (!n)
     GST_BUFFER_FLAG_SET(buffer, GST_BUFFER_FLAG_DISCONT);
@@ -507,8 +515,8 @@ void validateAudio(GstSample *s, const Options &o, unsigned n, uint64_t pts) {
 void event(const char *name, const Options &o, unsigned done,
            const std::string &id) {
   printf("{\"event\":\"%s\",\"instance\":\"%s\",\"generation\":1,\"format\":\"%"
-         "s\",\"video_frames\":%u,\"audio_blocks\":%u}\n",
-         name, id.c_str(), o.format.c_str(), done, done);
+         "s\",\"video_frames\":%u,\"audio_blocks\":%u,\"audio_offset_ns\":%llu}\n",
+         name, id.c_str(), o.format.c_str(), done, done,(unsigned long long)o.audioOffsetNs);
   fflush(stdout);
 }
 } // namespace
@@ -839,15 +847,17 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
     if (cb && cb->onStatus) cb->onStatus(audioMaster ? "audio-clock" : "system-clock-fallback");
     if (cb && cb->onClock) cb->onClock(timing);
     start(rx,selected,mappedBase);
-    uint64_t received=0,dropped=0,lastPts=GST_CLOCK_TIME_NONE;
+    uint64_t received=0,dropped=0,lastPts=GST_CLOCK_TIME_NONE,firstPts=GST_CLOCK_TIME_NONE;
     const uint64_t finalPts=(frames-1)*GST_SECOND/o.fps;
 
     // An audio sink pad EOS probe reports only arrival, not audible completion;
     // drain until final media deadline on the selected shared clock instead.
     const auto audioOrigin=audioTimeline.originNs.load();
     const auto duration=frames*GST_SECOND/o.fps;
+    int64_t audioDuration=0;
+    need(flSessionSampleOffset(frames*o.rate/o.fps,o.rate,&audioDuration)==0,"audio duration overflow");
     need(audioOrigin<=GST_CLOCK_TIME_NONE-1-duration-mappedBase-latency,"audio timeline overflow");
-    const auto finishAt=mappedBase+std::max(duration,audioOrigin+duration)+latency;
+    const auto finishAt=mappedBase+std::max(duration,audioOrigin+uint64_t(audioDuration))+latency;
     while (gst_clock_get_time(selected)<finishAt || (!externalVideo && (!GST_CLOCK_TIME_IS_VALID(lastPts) || lastPts<finalPts))) {
       need(!stop || !stop->load(),"playback cancelled");
       need(!paused || !paused->load(),"session-paused");
@@ -862,6 +872,7 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
       auto *b=gst_sample_get_buffer(sample);
       auto pts=gst_segment_to_running_time(gst_sample_get_segment(sample),GST_FORMAT_TIME,GST_BUFFER_PTS(b));
       if (!GST_CLOCK_TIME_IS_VALID(pts) || pts>finalPts) throw std::runtime_error("invalid video running PTS");
+      if(!GST_CLOCK_TIME_IS_VALID(firstPts))firstPts=pts;
       lastPts=pts; ++received;
       if (cb && cb->onVideo) cb->onVideo(sample,pts,timing);
       else {
@@ -879,6 +890,7 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
     gst_element_set_state(rx.p,GST_STATE_NULL);
     put(*control,0x444f4e45ULL);
     printf("{\"event\":\"playback-complete\",\"audio_master\":%s,\"video_received\":%llu,\"video_late\":%llu,\"audio_blocks\":%llu,\"audio_samples\":%llu,\"latency_ns\":%llu}\n", audioMaster?"true":"false",(unsigned long long)received,(unsigned long long)dropped,(unsigned long long)audioTimeline.blocks.load(),(unsigned long long)audioTimeline.samplesEnd.load(),(unsigned long long)latency);
+    printf("{\"event\":\"playback-timing\",\"audio_first_running_pts_ns\":%llu,\"video_first_running_pts_ns\":%llu,\"audio_end_ns\":%llu,\"video_end_ns\":%llu}\n",(unsigned long long)audioOrigin,(unsigned long long)firstPts,(unsigned long long)(audioOrigin+uint64_t(audioDuration)),(unsigned long long)duration);
     return unsigned(frames);
   }
   std::string vo = "appsink name=vout sync=true max-buffers=2",
@@ -945,6 +957,7 @@ int main(int argc, char **argv) {
            "  --frames N --format BGRA|NV12|auto --width W --height H --fps N\n"
            "  --rate N --channels 1|2 --timeout-ms N --sessions N\n"
            "  Consumer: --stream --audio-sink autoaudiosink|fakesink --latency-ms N (scheduled streaming); --play (verification window/sound); producer: --fault missing-audio|audio-pts-reset\n"
+           "  --audio-offset-ns 0..2000000000 (producer fixture; verifier must use same offset)\n"
            "  auto is consumer-only. See docs/M3_AV_APPS.md for bounds and recovery semantics.");
       return 0;
     }

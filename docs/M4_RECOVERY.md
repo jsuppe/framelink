@@ -42,3 +42,19 @@ The recovery fixture uses a fake audio sink and actual FrameLink transport, not
 physical output. Clock-loss event policy is tested; actual device unplug/reopen is
 not yet qualified. Audio sink RESAMPLE slaving is configured, but long-duration
 producer-vs-device drift compensation remains an explicit unqualified task.
+
+### Authenticated offset fixture
+`--audio-offset-ns 0..2000000000` gives generated PCM an intentional initial
+media offset while video starts at zero. A streaming consumer does not need the
+option; it accepts the producer timestamp without retimestamping. The legacy
+sample verifier needs the same option to construct its expected PCM timeline.
+Negative values are explicitly rejected because this fixture's video origin is
+zero (there are no valid negative unsigned GStreamer PTS). Transport-level
+negative-relative-offset tests use a common positive origin separately.
+
+`session-ready` reports `audio_offset_ns`. `playback-timing` reports original
+`audio_first_running_pts_ns`, actual first observed `video_first_running_pts_ns`,
+and scheduled `audio_end_ns`/`video_end_ns`. The video first value may be later
+than zero due to startup drops; UINT64_MAX means the external renderer owns video
+and the receiver has no observation. These are media timestamps, not arrival or
+physical presentation timestamps; the audio endpoint uses exact sample duration.
