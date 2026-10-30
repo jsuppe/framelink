@@ -101,13 +101,123 @@ def run_pair(args, root, fmt, first):
         results = {role: require_success(peer, role) for role, peer in peers.items()}
         if results['consumer']['video_frames'] != args.frames:
             raise AssertionError('finite frame target was not verified')
-        record = {'case': label, 'passed': True, 'results': results}
+        completions = {}
+        for role, peer in peers.items():
+            with peer.lock:
+                events = [e for e in peer.events if e.get('event') == 'session-complete']
+            if len(events) != 1:
+                raise AssertionError('missing or duplicate session completion')
+            completions[role] = events[0]
+        if completions['producer'] != completions['consumer']:
+            raise AssertionError('producer/consumer session identity disagreement')
+        record = {'case': label, 'passed': True, 'results': results,
+                  'verified_session': completions['consumer']}
         (directory / 'result.json').write_text(json.dumps(record, indent=2) + '\n')
         print(json.dumps(record), flush=True)
     finally:
         for peer in peers.values():
             peer.stop()
 
+
+def wait_progress(peer, deadline):
+    while time.monotonic() < deadline:
+        with peer.lock:
+            events = [e for e in peer.events if e.get('event') == 'media-progress'
+                      and e.get('video_frames', 0) >= 1 and e.get('audio_blocks', 0) >= 1]
+        if events:
+            return events[-1]
+        if peer.process.poll() is not None:
+            raise AssertionError('peer exited before verified traffic: ' + str(peer.log_path))
+        time.sleep(0.01)
+    raise AssertionError('no verified media before deadline')
+
+
+def command(args, directory, role, fmt, sessions=1, fault=None):
+    cmd = [getattr(args, role), args.plugin, '--session', str(directory / 'session'),
+           '--frames', str(args.frames), '--timeout-ms', str(int(args.timeout * 1000)),
+           '--format', fmt, '--width', '160', '--height', '90', '--fps', '50',
+           '--rate', '48000', '--channels', '2', '--sessions', str(sessions)]
+    if fault:
+        cmd += ['--fault', fault]
+    return cmd
+
+
+def run_recovery(args, root, killed, change_format=False):
+    label = killed + '-restart' + ('-format-change' if change_format else '')
+    directory = root / label
+    directory.mkdir()
+    peers = []
+    deadline = time.monotonic() + args.timeout + 5
+    try:
+        producer = Peer(command(args, directory, 'producer', 'BGRA', 2), directory, 'producer1')
+        consumer = Peer(command(args, directory, 'consumer', 'auto', 2), directory, 'consumer1')
+        peers += [producer, consumer]
+        old = wait_progress(consumer, deadline)
+        victim = producer if killed == 'producer' else consumer
+        survivor = consumer if killed == 'producer' else producer
+        victim.stop()
+        replacement = Peer(command(args, directory, killed,
+                           'NV12' if change_format else ('BGRA' if killed == 'producer' else 'auto'), 2),
+                           directory, killed + '2')
+        peers.append(replacement)
+        survivor.finish(deadline)
+        replacement.finish(deadline)
+        require_success(survivor, 'consumer' if killed == 'producer' else 'producer')
+        require_success(replacement, killed)
+        receiver = survivor if killed == 'producer' else replacement
+        with receiver.lock:
+            completed = [e for e in receiver.events if e.get('event') == 'session-complete']
+        assert len(completed) == 2, completed
+        identities = {(e['instance'], e['generation']) for e in completed}
+        assert len(identities) == 2 and (old['instance'], old['generation']) not in identities
+        for e in completed:
+            assert e['video_frames'] == args.frames and e['audio_blocks'] == args.frames
+            assert e['format'] == ('NV12' if change_format else 'BGRA')
+        # Both ends must acknowledge precisely the sessions whose media was verified.
+        with (replacement if killed == 'producer' else survivor).lock:
+            sender = replacement if killed == 'producer' else survivor
+            sent = {(e['instance'], e['generation']) for e in sender.events
+                    if e.get('event') == 'session-complete'}
+        assert sent == identities, (sent, identities)
+        record = {'case': label, 'passed': True, 'retired_identity': old,
+                  'verified_sessions': completed}
+        (directory / 'result.json').write_text(json.dumps(record, indent=2) + '\n')
+        print(json.dumps(record), flush=True)
+    finally:
+        for peer in peers:
+            peer.stop()
+
+
+def run_failure(args, root, fault):
+    directory = root / fault
+    directory.mkdir()
+    peers = []
+    deadline = time.monotonic() + args.timeout + 5
+    try:
+        producer = Peer(command(args, directory, 'producer', 'BGRA',
+                               fault=None if fault == 'peer-death' else fault), directory, 'producer')
+        consumer = Peer(command(args, directory, 'consumer', 'BGRA'), directory, 'consumer')
+        peers += [producer, consumer]
+        progress = wait_progress(consumer, deadline)
+        if fault == 'peer-death':
+            producer.stop()
+        consumer.finish(deadline)
+        producer.finish(deadline)
+        assert consumer.process.returncode != 0
+        with consumer.lock:
+            assert not any(e.get('ok') is True or e.get('event') == 'session-complete'
+                           for e in consumer.events)
+            log = ''.join(consumer.lines)
+        reason = ('audio timeout/EOS' if fault == 'missing-audio' else
+                  'audio timeline mismatch' if fault == 'audio-pts-reset' else 'timeout/EOS')
+        assert reason in log, log
+        record = {'case': fault, 'passed': True, 'verified_before_fault': progress,
+                  'expected_error': reason, 'consumer_exit': consumer.process.returncode}
+        (directory / 'result.json').write_text(json.dumps(record, indent=2) + '\n')
+        print(json.dumps(record), flush=True)
+    finally:
+        for peer in peers:
+            peer.stop()
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
@@ -118,14 +228,19 @@ def main():
     parser.add_argument('--frames', type=int, default=50)
     parser.add_argument('--timeout', type=float, default=20)
     args = parser.parse_args()
-    if args.frames < 1 or args.timeout <= 0:
-        parser.error('positive frames and timeout required')
+    if args.frames < 11 or args.timeout <= 0:
+        parser.error('at least 11 frames (fault occurs at frame 11) and positive timeout required')
     root = args.output or pathlib.Path(tempfile.mkdtemp(prefix='framelink-m3-'))
     root.mkdir(parents=True, exist_ok=True)
     print('evidence: ' + str(root), flush=True)
     for fmt in ('BGRA', 'NV12'):
         for first in ('producer', 'consumer'):
             run_pair(args, root, fmt, first)
+    for role in ('producer', 'consumer'):
+        run_recovery(args, root, role)
+    run_recovery(args, root, 'producer', change_format=True)
+    for fault in ('missing-audio', 'audio-pts-reset', 'peer-death'):
+        run_failure(args, root, fault)
 
 
 if __name__ == '__main__':
