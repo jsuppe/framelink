@@ -171,7 +171,7 @@ flSessionCapabilities caps(const Options &o) {
   flSessionCapabilities c{};
   c.version = 1;
   c.videoCount = c.audioCount = 1;
-  c.video[0] = {o.format == "NV12" ? FL_FORMAT_NV12 : FL_FORMAT_BGRA8, o.width,
+  c.video[0] = {static_cast<uint32_t>(o.format == "NV12" ? FL_FORMAT_NV12 : FL_FORMAT_BGRA8), o.width,
                 o.height, o.fps, 1};
   c.audio[0] = {FL_PCM_S16, o.rate, o.channels};
   if (o.format == "auto" && !(o.width % 2) && !(o.height % 2)) {
