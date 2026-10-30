@@ -12,8 +12,10 @@ User authorization: 2026-10-30; M4 only. M1–M3 are merged, M5–M7 paused.
   matching timestamps alone is not qualification. GPU fences are not presentation times.
 - Account for pipeline/device latency once, not once per stage. Distinguish render
   submission, estimated scanout and measured presentation.
-- Drift recovery must use a demonstrated clock-slaving/resampling mechanism; merely
-  adding audioresample is not evidence of compensation.
+- Source pacing recovery is explicitly bounded queue/backpressure or joint-session
+  re-anchor; seamless adaptive source resampling is not supported. Device clock
+  slaving uses GStreamer mechanisms, separately qualified on a virtual device;
+  merely adding audioresample is not evidence of compensation.
 - On discontinuity or clock loss, invalidate stale mappings and coordinate both tracks.
 - Preserve native GPU ownership for renderer FrameLink input; existing Gst source CPU
   readback is not silently substituted or described as zero-copy.
@@ -41,7 +43,9 @@ Physical flash/click validation requires an observable display and speaker plus
 synchronized optical/acoustic capture. Current Linux host has only auto_null audio
 and no /dev/video device. This is an equipment qualification gap, not permission to
 claim physical lip sync from virtual-sink tests. Investigate other available targets
-and report limitations transparently. Performance budgets must be stated and measured.
+and report limitations transparently. Physical output qualification belongs to M5;
+M4 transport preservation is not blocked on capture hardware. Performance budgets
+must be stated and measured.
 
 ## Audio TIME-segment normalization (M4 integration fix)
 

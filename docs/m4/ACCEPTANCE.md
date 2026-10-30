@@ -74,6 +74,8 @@ Independent fixtures must fail if PTS is restamped, the two epochs diverge,
 latency is applied once to only one track, stale generation is accepted, or queue
 limits are removed. Unit tests can prove scheduler policy; real pipeline tests
 must exercise that policy and output measured actual clock/sink selection.
-Linux/Windows validation must identify any hardware-unavailable skip. No blanket
-M4 completion claim while physical alignment or drift recovery remains untested;
-report implementation completion and qualification gaps separately.
+Linux/Windows validation must identify any hardware-unavailable skip. Per Jon's clarified transport boundary, physical speaker/display alignment is a
+separate M5 qualification, not a blocker for M4 transport timing preservation.
+M4 closure requires documented bounded drift/fault recovery and shared timeline
+validation; it must not claim seamless independent-source resampling or physical
+lip sync. Report those limits separately.

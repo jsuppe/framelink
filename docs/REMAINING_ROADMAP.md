@@ -69,12 +69,17 @@ clock-drift handling and measurable A/V diagnostics.
 Tasks:
 - Choose audio playback clock as default playback master; retain video-only low-latency mode.
 - Implement bounded video hold/drop behavior and explicit audio underrun/discontinuity handling.
-- Use GStreamer resampling/clock mechanisms for drift recovery instead of custom DSP.
+- Use bounded source queue/backpressure or joint-session re-anchor for source pacing
+  faults; qualify GStreamer device-clock slaving separately, without claiming
+  seamless adaptive independent-source resampling.
 - Define active audio selection/mute when multiple video sessions are visible; default one selected track.
-- Expose queue depth, drops, underruns, drift, estimated A/V offset and reconnect generation.
+- Expose queue depth, drops, arrival drift and reconnect generation; expose
+  unmeasured device underruns, oscillator drift and physical A/V skew as unavailable.
 - Test sustained drift, stalls, resume, late frames and device changes.
 - Measure actual speaker/display alignment on available hardware separately from timestamp agreement.
-Gate: fault injection demonstrates recovery and bounded queues; published measured sync results.
+Gate: fault injection demonstrates recovery and bounded queues; publish measured
+transport-offset/scheduling results. Physical speaker/display alignment remains
+a separate M5 gate under the clarified producer-to-consumer timing requirement.
 
 ## M5 — Platform deployment and transport qualification
 Deliverables: tested Linux/Windows apps, Android APK/service integration, capability
