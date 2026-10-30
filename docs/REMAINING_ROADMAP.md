@@ -64,6 +64,10 @@ Tasks:
 Gate: separate OS processes exchange synchronized A/V in either start order and recover safely.
 
 ## M4 — Playback synchronization and renderer integration
+
+Status: COMPLETE, qualified scope. FrameLink PR5 ed81cbb and renderer PR12
+4c2ff15 merged after all final CI passed. Linux47/47, renderer20/20, Windows49/49.
+Physical qualification and external decoded pipeline handoff remain M5.
 Deliverables: audio-aware renderer session input, explicit sync/latency policy,
 clock-drift handling and measurable A/V diagnostics.
 Tasks:
@@ -82,6 +86,9 @@ transport-offset/scheduling results. Physical speaker/display alignment remains
 a separate M5 gate under the clarified producer-to-consumer timing requirement.
 
 ## M5 — Platform deployment and transport qualification
+
+Status: IN PROGRESS (authorized 2026-10-30). First deliverable: Windows ordinary
+GStreamer decoded A/V pipeline -> separate FrameLink consumer example and guide.
 Deliverables: tested Linux/Windows apps, Android APK/service integration, capability
 matrix and transport decision record.
 Tasks:
