@@ -296,7 +296,17 @@ void tune(Conn &c, unsigned timeout) {
   g_socket_set_timeout(g_socket_connection_get_socket(c.p),
                        std::min(2u, std::max(1u, (timeout + 999) / 1000)));
 }
-Conn *connect(const av::Endpoint &r, char role, unsigned timeout) {
+Conn *connect(const av::Endpoint &r, char role, unsigned timeout,
+              const av::SessionProvider* provider=nullptr) {
+  if (provider) {
+    std::string err;
+    auto* q=provider->connect(r,role,timeout,err);
+    need(q,err.empty()?"broker connection failed":err);
+    std::unique_ptr<Conn> c(new Conn(q));
+    tune(*c,timeout);
+    need(av::authenticateClient(c->p,r,role,err),err);
+    return c.release();
+  }
   auto *client = g_socket_client_new();
   g_socket_client_set_timeout(
       client, std::min(2u, std::max(1u, (timeout + 999) / 1000)));
@@ -842,9 +852,9 @@ unsigned runProducer(const Options &o, GSocketListener *l,
   return o.frames;
 }
 unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
-                     const av::PlaybackCallbacks* cb=nullptr, const std::atomic<bool>* stop=nullptr, bool externalVideo=false, const std::atomic<bool>* mute=nullptr, const std::atomic<bool>* paused=nullptr) {
+                     const av::PlaybackCallbacks* cb=nullptr, const std::atomic<bool>* stop=nullptr, bool externalVideo=false, const std::atomic<bool>* mute=nullptr, const std::atomic<bool>* paused=nullptr, const av::SessionProvider* provider=nullptr) {
   Options o = requested;
-  std::unique_ptr<Conn> control(connect(ep, 'C', o.timeout));
+  std::unique_ptr<Conn> control(connect(ep, 'C', o.timeout, provider));
   auto local = caps(o);
   sendCaps(*control, local);
   auto remote = recvCaps(*control);
@@ -870,7 +880,7 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
        "clock mapping failed");
   write(*control, wire, sizeof(wire));
   put(*control, o.stream ? 1 : 0);
-  std::unique_ptr<Conn> audio(connect(audioEndpoint(ep, cfg), 'A', o.timeout));
+  std::unique_ptr<Conn> audio(connect(audioEndpoint(ep, cfg), 'A', o.timeout, provider));
   std::string id = idHex(cfg.sessionId), channel = "av3-" + id;
   if (o.stream) {
     Pipeline rx;
@@ -1178,6 +1188,7 @@ namespace av {
 bool runPlayback(const PlaybackOptions& p,const PlaybackCallbacks& cb,const std::atomic<bool>& stop,std::string& error) {
   bool sessionOpen=false;
   try {
+    need(!p.sessionProvider || (p.sessionProvider->resolve && p.sessionProvider->connect),"incomplete session provider");
     need(!p.externalVideo || bool(cb.onClock),"native playback requires onClock callback");
     Options o; o.plugin=p.plugin; o.session=p.session; o.format=p.format;
     o.width=p.width;o.height=p.height;o.fps=p.fps;o.rate=p.rate;o.channels=p.channels;
@@ -1205,12 +1216,12 @@ bool runPlayback(const PlaybackOptions& p,const PlaybackCallbacks& cb,const std:
       };
       sessionCallbacks.onEnd=[&]{ended=true;if(sessionOpen){sessionOpen=false;if(cb.onEnd)cb.onEnd();}};
       try {
-        while (!av::readEndpoint(o.session,ep,error)) {
+        while (!(p.sessionProvider ? p.sessionProvider->resolve(ep,o.timeout,error) : av::readEndpoint(o.session,ep,error))) {
           need(!stop.load(),"playback cancelled");
           need(!p.paused || !p.paused->load(),"session-paused");
           need(std::chrono::steady_clock::now()<end,"rendezvous deadline");g_usleep(10000);
         }
-        runConsumer(o,ep,&sessionCallbacks,&stop,p.externalVideo,p.mute,p.paused);
+        runConsumer(o,ep,&sessionCallbacks,&stop,p.externalVideo,p.mute,p.paused,p.sessionProvider);
         error.clear(); return true;
       } catch (const std::exception& failure) {
         // Cover setup failures before EndNotification was installed. No old

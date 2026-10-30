@@ -1,5 +1,6 @@
 #pragma once
 #include "framelink_session.h"
+#include "av_session_provider.h"
 #include <gst/gst.h>
 #include <atomic>
 #include <functional>
@@ -23,6 +24,8 @@ struct PlaybackOptions {
   // negotiates a fresh identity/epoch; it is not lossless recorded-media pause.
   const std::atomic<bool>* paused=nullptr;
   unsigned recoveryAttempts=3;
+  // Optional trusted broker adapter. Both callbacks are required.
+  const SessionProvider* sessionProvider=nullptr;
 };
 // Arrival/queue telemetry is not physical output timing. queueEmptyEvents
 // includes startup and EOS; it must not be labeled device underruns.
