@@ -30,7 +30,7 @@ struct PlaybackMetrics {
   uint64_t audioBlocks=0, audioSamples=0, queueTimeNs=0, peakQueueTimeNs=0;
   unsigned queueBuffers=0, peakQueueBuffers=0;
   uint64_t queueEmptyEvents=0, queueFullEvents=0, lateAudioBlocks=0;
-  int64_t arrivalDriftNs=0; // (last-first arrival) - (last-first media PTS)
+  int64_t arrivalDriftNs=0; // decoded PCM admission: arrival delta minus media PTS delta
 };
 struct PlaybackCallbacks {
   std::function<void(const flSessionConfig&, const std::string&, const PlaybackClock&)> onSession;

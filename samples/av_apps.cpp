@@ -694,6 +694,7 @@ GstPadProbeReturn trackAudio(GstPad*, GstPadProbeInfo* info, gpointer data) {
   // Acquire the published base before reading playbackClock (set before base).
   const auto base=t.deliveryBase.load();
   if(base) {
+    if(GST_BUFFER_PTS(b)>GST_CLOCK_TIME_NONE-1-base) {t.invalid=true;return GST_PAD_PROBE_DROP;}
     const auto due=base+GST_BUFFER_PTS(b);
     const auto now=gst_clock_get_time(t.playbackClock);
     if(now>due && now-due>100*GST_MSECOND) {

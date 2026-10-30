@@ -531,3 +531,10 @@ if(FRAMELINK_BUILD_TESTS AND TARGET fl_playback_recovery AND Python3_Interpreter
         ${CMAKE_CURRENT_SOURCE_DIR}/test/m4_source_drift.py --build $<TARGET_FILE_DIR:fl_playback_recovery>)
     set_tests_properties(m4_source_drift PROPERTIES TIMEOUT 100)
 endif()
+
+# Optional PulseAudio mechanism probe, intentionally not an unconditional CTest:
+# requires a dedicated/null sink and does not qualify physical output timing.
+if(FRAMELINK_BUILD_TESTS AND TARGET framelink_av_playback AND UNIX AND NOT ANDROID)
+    add_executable(fl_m4_device_slaving test/m4_device_slaving.cpp)
+    target_link_libraries(fl_m4_device_slaving PRIVATE framelink_av_playback)
+endif()

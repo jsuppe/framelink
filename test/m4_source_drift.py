@@ -11,12 +11,15 @@ frame_timeout=str(min(60000,10000+a.frames*25))
 b=pathlib.Path(a.build).resolve();ext='.exe' if os.name=='nt' else ''
 root=pathlib.Path(a.output or tempfile.mkdtemp(prefix='fl-source-drift-'));root.mkdir(parents=True,exist_ok=True)
 plugin=str(b/('gstframelink.dll' if os.name=='nt' else 'libgstframelink.so'))
-for ppm in map(int,a.rates.split(',')):
-    d=root/str(ppm);d.mkdir();peers=[]
+rates=list(map(int,a.rates.split(',')))
+cases=[(ppm,100) for ppm in rates]
+if -100000 in rates:cases.append((-100000,2000))
+for ppm,latency in cases:
+    d=root/(str(ppm)+'-'+str(latency));d.mkdir();peers=[]
     common=[plugin,'--session',str(d/'session'),'--frames',str(a.frames),'--timeout-ms',frame_timeout,'--fps','50']
     try:
         peers.append(Peer([str(b/('framelink_av_producer'+ext))]+common+['--pacing-ppm',str(ppm),'--audio-offset-ns','37000000'],d,'producer'))
-        peers.append(Peer([str(b/('framelink_av_consumer'+ext))]+common+['--stream','--audio-sink','fakesink'],d,'consumer'))
+        peers.append(Peer([str(b/('framelink_av_consumer'+ext))]+common+['--stream','--audio-sink','fakesink','--latency-ms',str(latency)],d,'consumer'))
         end=time.monotonic()+int(frame_timeout)/1000+8
         for peer in peers:peer.finish(end)
         tx,rx=peers
@@ -26,7 +29,7 @@ for ppm in map(int,a.rates.split(',')):
         assert m['peak_queue_buffers']<=4,m
         # Queue admits a last buffer crossing its time threshold, at most 20ms.
         assert m['peak_queue_ns']<=100000000,m
-        if ppm==-100000:
+        if ppm==-100000 and latency==100:
             assert rx.process.returncode!=0,rx.lines
             assert m['late_audio_blocks']>=3,m
             assert any('playout budget exhausted' in l for l in rx.lines),rx.lines
@@ -41,7 +44,7 @@ for ppm in map(int,a.rates.split(',')):
                 assert pacing['pacing_ppm']==ppm,pacing
                 assert m['queue_full_events']>0,m
         (d/'result.json').write_text(json.dumps(m,indent=2)+'\n')
-        print(ppm,'PASS',m,flush=True)
+        print(ppm,latency,'PASS',m,flush=True)
     finally:
         for peer in peers:peer.stop()
 # Exercise production runPlayback automatic coordinated re-anchor, not just CLI
@@ -69,4 +72,4 @@ finally:
     for q,f in procs:
         if q.poll() is None:q.terminate()
         q.wait(timeout=5);f.close()
-print('PASS: 5 source pacing/recovery scenarios; evidence='+str(root))
+print('PASS: '+str(len(cases)+1)+' source pacing/recovery scenarios; evidence='+str(root))

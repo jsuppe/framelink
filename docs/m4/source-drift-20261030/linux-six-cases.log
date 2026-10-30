@@ -1,0 +1,7 @@
+-1000 100 PASS {'event': 'playback-metrics', 'peak_queue_buffers': 4, 'peak_queue_ns': 80000000, 'queue_empty_events': 4, 'queue_full_events': 295, 'late_audio_blocks': 0, 'arrival_drift_ns': 38359952}
+1000 100 PASS {'event': 'playback-metrics', 'peak_queue_buffers': 4, 'peak_queue_ns': 80000000, 'queue_empty_events': 4, 'queue_full_events': 295, 'late_audio_blocks': 0, 'arrival_drift_ns': 38370417}
+100000 100 PASS {'event': 'playback-metrics', 'peak_queue_buffers': 4, 'peak_queue_ns': 80000000, 'queue_empty_events': 3, 'queue_full_events': 295, 'late_audio_blocks': 0, 'arrival_drift_ns': 37446068}
+-100000 100 PASS {'event': 'playback-metrics', 'peak_queue_buffers': 4, 'peak_queue_ns': 80000000, 'queue_empty_events': 59, 'queue_full_events': 22, 'late_audio_blocks': 3, 'arrival_drift_ns': 261599818}
+-100000 2000 PASS {'event': 'playback-metrics', 'peak_queue_buffers': 4, 'peak_queue_ns': 80000000, 'queue_empty_events': 4, 'queue_full_events': 295, 'late_audio_blocks': 0, 'arrival_drift_ns': 1937588083}
+coordinated source-drift recovery PASS
+PASS: 6 source pacing/recovery scenarios; evidence=/tmp/fl-drift-final
