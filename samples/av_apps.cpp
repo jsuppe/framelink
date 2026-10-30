@@ -826,11 +826,11 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
         }
       }
     }
-    need(!audioTimeline.invalid.load() && audioTimeline.blocks.load()==frames,"incomplete/discontinuous audio");
+    need(!audioTimeline.invalid.load() && audioTimeline.samplesEnd.load()==frames*o.rate/o.fps,"incomplete/discontinuous audio");
     gst_element_set_state(rx.p,GST_STATE_NULL);
     if (cb && cb->onEnd) cb->onEnd();
     put(*control,0x444f4e45ULL);
-    printf("{\"event\":\"playback-complete\",\"audio_master\":%s,\"video_received\":%llu,\"video_late\":%llu,\"latency_ns\":%llu}\n", audioMaster?"true":"false",(unsigned long long)received,(unsigned long long)dropped,(unsigned long long)latency);
+    printf("{\"event\":\"playback-complete\",\"audio_master\":%s,\"video_received\":%llu,\"video_late\":%llu,\"audio_blocks\":%llu,\"audio_samples\":%llu,\"latency_ns\":%llu}\n", audioMaster?"true":"false",(unsigned long long)received,(unsigned long long)dropped,(unsigned long long)audioTimeline.blocks.load(),(unsigned long long)audioTimeline.samplesEnd.load(),(unsigned long long)latency);
     return unsigned(frames);
   }
   std::string vo = "appsink name=vout sync=true max-buffers=2",
