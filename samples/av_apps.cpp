@@ -771,17 +771,21 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
       if (!v) { g_usleep(5000); continue; }
       auto *sample=gst_app_sink_try_pull_sample(GST_APP_SINK(v),10*GST_MSECOND);
       if (!sample) continue;
+      std::unique_ptr<GstSample, decltype(&gst_sample_unref)> sampleOwner(sample,gst_sample_unref);
       auto *b=gst_sample_get_buffer(sample);
       auto pts=gst_segment_to_running_time(gst_sample_get_segment(sample),GST_FORMAT_TIME,GST_BUFFER_PTS(b));
-      if (!GST_CLOCK_TIME_IS_VALID(pts)) { gst_sample_unref(sample); throw std::runtime_error("invalid video running PTS"); }
+      if (!GST_CLOCK_TIME_IS_VALID(pts) || pts>finalPts) throw std::runtime_error("invalid video running PTS");
       lastPts=pts; ++received;
       if (cb && cb->onVideo) cb->onVideo(sample,pts,timing);
       else {
         auto due=mappedBase+pts+latency, now=gst_clock_get_time(selected);
         if (now>due+40*GST_MSECOND) ++dropped;
-        else if (due>now) { auto id=gst_clock_new_single_shot_id(selected,due); gst_clock_id_wait(id,nullptr); gst_clock_id_unref(id); }
+        else while (due>gst_clock_get_time(selected)) {
+          need(!stop || !stop->load(),"playback cancelled");
+          need(std::chrono::steady_clock::now()<end,"playback deadline");
+          g_usleep(1000);
+        }
       }
-      gst_sample_unref(sample);
     }
     need(!audioTimeline.invalid.load() && audioTimeline.blocks.load()==frames,"incomplete/discontinuous audio");
     gst_element_set_state(rx.p,GST_STATE_NULL);
