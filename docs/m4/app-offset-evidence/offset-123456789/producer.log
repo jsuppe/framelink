@@ -1,0 +1,8 @@
+{"command": ["/tmp/framelink-m4-playback-build/framelink_av_producer", "/tmp/framelink-m4-playback-build/libgstframelink.so", "--session", "/tmp/framelink-m4-validation/docs/m4/app-offset-evidence/offset-123456789/session", "--frames", "80", "--timeout-ms", "5000", "--fps", "50", "--rate", "48000", "--format", "BGRA", "--audio-offset-ns", "123456789"]}
+{"event":"session-ready","instance":"2e83bf568360b2f68bc885135538d8a5","generation":1,"format":"BGRA","video_frames":0,"audio_blocks":0,"audio_offset_ns":123456789}
+{"event":"media-progress","instance":"2e83bf568360b2f68bc885135538d8a5","generation":1,"format":"BGRA","video_frames":1,"audio_blocks":1,"audio_offset_ns":123456789}
+{"event":"media-progress","instance":"2e83bf568360b2f68bc885135538d8a5","generation":1,"format":"BGRA","video_frames":25,"audio_blocks":25,"audio_offset_ns":123456789}
+{"event":"media-progress","instance":"2e83bf568360b2f68bc885135538d8a5","generation":1,"format":"BGRA","video_frames":50,"audio_blocks":50,"audio_offset_ns":123456789}
+{"event":"media-progress","instance":"2e83bf568360b2f68bc885135538d8a5","generation":1,"format":"BGRA","video_frames":75,"audio_blocks":75,"audio_offset_ns":123456789}
+{"event":"session-complete","instance":"2e83bf568360b2f68bc885135538d8a5","generation":1,"format":"BGRA","video_frames":80,"audio_blocks":80,"audio_offset_ns":123456789}
+{"role":"producer","ok":true,"sessions":1,"video_frames":80,"audio_blocks":80,"errors":0,"disconnects":0}

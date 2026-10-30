@@ -517,3 +517,11 @@ if(FRAMELINK_BUILD_TESTS AND TARGET framelink_av_playback)
         set_tests_properties(m4_av_recovery PROPERTIES TIMEOUT 90)
     endif()
 endif()
+
+if(FRAMELINK_BUILD_TESTS AND TARGET framelink_av_producer AND Python3_Interpreter_FOUND)
+    add_test(NAME m4_authenticated_offsets COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/m4_app_offsets.py
+        $<TARGET_FILE:framelink_av_producer> $<TARGET_FILE:framelink_av_consumer>
+        $<TARGET_FILE:gstframelink>)
+    set_tests_properties(m4_authenticated_offsets PROPERTIES TIMEOUT 60)
+endif()
