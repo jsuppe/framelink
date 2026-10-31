@@ -31,7 +31,8 @@ payloads, including integer-overflow inputs.
   expanded RingDesc, checks close-on-exec, rejects oversized send arguments and
   receives an intentionally truncated 65-descriptor message without leaking FDs.
 
-Linux targeted tests passed locally. The Android arm64-v8a library and both
+Linux full regression passed **57/57** (94.16 seconds), including both new tests;
+see `linux-ctest.log`. The Android arm64-v8a library and both
 new tests cross-compiled successfully with NDK 28.2/API 29; device execution is
 not implied. Windows must run `expanded_pool` on its supported adapter, and
 Android still needs its device allocator coverage.
