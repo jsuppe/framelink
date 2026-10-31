@@ -37,7 +37,7 @@ gradle assembleDebug -PimpostorStore=/tmp/fl-spike-untrusted.jks
 python3 qualify.py --serial DEVICE --output /tmp/binder-results
 ```
 
-The script installs three isolated packages, clears logcat, runs five gates, and
+The script installs three isolated packages, uses per-case log markers (never clears logcat), runs ten gates, and
 force-stops only these packages afterward. Wrong-signer test must fail if the
 impostor was accidentally built with the normal debug key. No keystore is committed.
 
@@ -56,3 +56,18 @@ working cross-app FrameLink A/V session. The parent still needs:
 Shutdown revokes future protocol traffic; replacement generations must retire old
 allocations rather than writing new private content into previously granted memory.
 This spike releases its AHB before revocation and does not claim remote-memory erasure.
+
+## STREAM lease extension
+
+`acquireStreams(owner)` returns two signature-authorized connected byte streams,
+control first and audio second. It is separate from `acquire`'s AHB SEQPACKET
+transport. Replacement and revoke shutdown both server ends; a stale owner cannot
+revoke a newer pair, and owner Binder death shuts down both. Device qualification
+checks role identity, active-owner-token reuse rejection, replacement/stale
+revoke, remote-owner/client-process/broker death and wrong-signer denial. Every
+new grant must use a fresh owner token; this spike does not maintain a persistent
+production generation/tombstone registry. Five-second
+native deadlines bound this spike. The test payload is role bytes, **not GDP or
+production authentication**. The portable producer-provider integration separately
+covers the real authenticated GDP/control protocol. Combining those seams with
+native video channel adoption remains a production integration task.

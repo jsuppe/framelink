@@ -5,14 +5,16 @@
 
 namespace av {
 // Adapter for an OS-authorized broker, not an alternate authentication policy.
-// Called on the playback thread. Provider outlives runPlayback; callbacks must
-// obey timeoutMs. resolve obtains a fresh lease/key after every reconnect; do not
+// Called on the producer/receiver thread. Provider outlives the synchronous
+// runBrokerProducer/runPlayback call; callbacks must obey timeoutMs. resolve obtains a fresh lease/key after every reconnect; do not
 // reuse a revoked lease/generation. connect transfers one owning reference to a
 // fresh connected STREAM connection, or returns null. C and A are distinct
 // connections. Existing HMAC (including session/generation-derived audio key)
 // is still applied by playback. A broker death callback must shutdown retained
 // duplicates to wake readers; close alone does not revoke transferred handles.
 // No filesystem access or loopback listener is required by this adapter.
+// Also used by runBrokerProducer: connect returns the SERVER end for each role.
+// The producer API applies authenticateServer; playback applies authenticateClient.
 struct SessionProvider {
   std::function<bool(Endpoint&, unsigned timeoutMs, std::string&)> resolve;
   std::function<GSocketConnection*(const Endpoint&, char role,

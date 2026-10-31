@@ -163,15 +163,22 @@ struct Watchdog {
     arm(ms+timeout); // bounded media + unchanged setup/drain grace, max 360 s
     media=true;
   }
-  Watchdog(unsigned ms) {
+  std::atomic<const char*> failure{nullptr};
+  void check() const { if(auto* reason=failure.load())throw std::runtime_error(reason); }
+  // CLI keeps its hard process guard. Embedded callers supply a nonfatal
+  // interrupt: cancel control I/O / end appsrc, then unwind on this thread.
+  Watchdog(unsigned ms, std::function<void()> interrupt={}, const std::atomic<bool>* stop=nullptr) {
     arm(ms);
-    t=std::thread([this] {
+    t=std::thread([this,interrupt,stop] {
       while (!done) {
         const auto now=g_get_monotonic_time();
         const bool idle=media.load() &&
           ((!videoEos.load() && now-videoUs.load()>int64_t(idleMs)*1000) ||
            (!audioEos.load() && now-audioUs.load()>int64_t(idleMs)*1000));
-        if (now>=deadlineUs.load() || idle) {
+        if (now>=deadlineUs.load() || idle || (stop && stop->load())) {
+          const char* reason=stop && stop->load()?"producer cancelled":idle?"media idle deadline":"producer deadline";
+          failure=reason;
+          if(interrupt){interrupt();return;}
           fprintf(stderr,"FAIL %s deadline\n",idle?"media idle":"process");
           fflush(stderr);std::_Exit(1);
         }
@@ -204,7 +211,8 @@ flSessionId randomId() {
 struct Conn {
   GSocketConnection *p = nullptr;
   Conn() = default;
-  explicit Conn(GSocketConnection *q) : p(q) {}
+  GCancellable* cancellable=nullptr; // borrowed; producer guard outlives Conn
+  explicit Conn(GSocketConnection *q, GCancellable* cancel=nullptr) : p(q),cancellable(cancel) {}
   Conn(const Conn &) = delete;
   ~Conn() {
     if (p) {
@@ -217,7 +225,7 @@ void write(Conn &c, const void *p, size_t n) {
   gsize done = 0;
   need(
       g_output_stream_write_all(g_io_stream_get_output_stream(G_IO_STREAM(c.p)),
-                                p, n, &done, nullptr, nullptr) &&
+                                p, n, &done, c.cancellable, nullptr) &&
           done == n,
       "control write/disconnect");
 }
@@ -225,7 +233,7 @@ void read(Conn &c, void *p, size_t n) {
   gsize done = 0;
   GError* error=nullptr;
   const bool ok=g_input_stream_read_all(g_io_stream_get_input_stream(G_IO_STREAM(c.p)),
-                                       p,n,&done,nullptr,&error);
+                                       p,n,&done,c.cancellable,&error);
   if(!ok || done!=n) {
     const std::string detail=error?error->message:"peer closed connection";
     if(error)g_error_free(error);
@@ -351,6 +359,31 @@ Conn *connect(const av::Endpoint &r, char role, unsigned timeout,
   need(av::authenticateClient(c->p, r, role, err), err);
   return c.release();
 }
+// Cancellation uses GLib's thread-safe primitive rather than concurrently
+// closing/shutting down the same GSocket that Conn owns. Broker revocation still
+// shutdowns its own retained FD duplicates. EOS wakes blocked appsrc writers;
+// normal stack unwinding alone closes streams and tears down the pipeline.
+struct ProducerResources {
+  GCancellable* cancellable=g_cancellable_new();
+  std::mutex mutex;
+  bool interrupted=false;
+  std::vector<GstAppSrc*> sources;
+  void add(GstElement* source) {
+    std::lock_guard<std::mutex> lock(mutex);
+    sources.push_back(GST_APP_SRC(gst_object_ref(source)));
+    if(interrupted)gst_app_src_end_of_stream(GST_APP_SRC(source));
+  }
+  void interrupt() {
+    g_cancellable_cancel(cancellable);
+    std::lock_guard<std::mutex> lock(mutex);
+    interrupted=true;
+    for(auto* source:sources)gst_app_src_end_of_stream(source);
+  }
+  ~ProducerResources() {
+    for(auto* source:sources)gst_object_unref(source);
+    g_object_unref(cancellable);
+  }
+};
 struct Pipeline {
   GstElement *p = nullptr;
   ~Pipeline() {
@@ -674,7 +707,17 @@ struct Object {
   }
 };
 std::unique_ptr<Conn> accept(GSocketListener *l, const av::Endpoint &ep,
-                             char wanted, unsigned timeout) {
+                             char wanted, unsigned timeout, const av::SessionProvider* provider=nullptr,
+                             GCancellable* cancellable=nullptr) {
+  if(provider) {
+    std::string error;
+    auto* q=provider->connect(ep,wanted,timeout,error);
+    need(q,error.empty()?"broker producer connection failed":error);
+    std::unique_ptr<Conn> c(new Conn(q,cancellable));
+    tune(*c,timeout);
+    need(av::authenticateServerCancellable(c->p,ep,wanted,error,cancellable),error);
+    return c;
+  }
   for (unsigned tries = 0; tries < 8; ++tries) {
     auto *q = g_socket_listener_accept(l, nullptr, nullptr, nullptr);
     need(q, "accept failed");
@@ -828,8 +871,10 @@ struct StartupGate {
 using av::AudioTimeline;
 using av::trackAudio;
 unsigned runProducer(const Options &o, GSocketListener *l,
-                     const av::Endpoint &ep, Watchdog& watchdog) {
-  auto control = accept(l, ep, 'C', o.timeout);
+                     const av::Endpoint &ep, Watchdog& watchdog,
+                     const av::SessionProvider* provider=nullptr,
+                     ProducerResources* resources=nullptr) {
+  auto control = accept(l, ep, 'C', o.timeout, provider,resources?resources->cancellable:nullptr);
   auto local = caps(o);
   auto remote = recvCaps(*control);
   sendCaps(*control, local);
@@ -873,7 +918,7 @@ unsigned runProducer(const Options &o, GSocketListener *l,
   // Audio/device setup is allowed the configured startup budget. The short
   // steady-state idle timeout must not expire while waiting for PRIMED/GO.
   if(coordinated)g_socket_set_timeout(g_socket_connection_get_socket(control->p),(o.timeout+999)/1000);
-  auto audio = accept(l, audioEndpoint(ep, cfg), 'A', o.timeout);
+  auto audio = accept(l, audioEndpoint(ep, cfg), 'A', o.timeout, provider,resources?resources->cancellable:nullptr);
   need(get(*control) == 0x5245414459ULL, "consumer not ready");
   std::string id = idHex(cfg.sessionId), channel = "av3-" + id;
   Pipeline tx;
@@ -926,6 +971,7 @@ unsigned runProducer(const Options &o, GSocketListener *l,
     need(get(*control)==0x474fULL,"consumer did not install playback clock");
     tune(*control,o.timeout);
     {std::lock_guard<std::mutex> lock(startup.mutex);need(!startup.expired,"startup gate deadline");}
+    watchdog.check();
     if(o.mediaRunMs)watchdog.beginMedia(o.mediaRunMs,o.timeout);
     startup.release();
     printf("{\"event\":\"startup-released\",\"epoch_ns\":%llu}\n",(unsigned long long)cfg.epochNs);
@@ -969,6 +1015,12 @@ unsigned runProducer(const Options &o, GSocketListener *l,
     need(get(*control)==0x444f4e45ULL,"consumer completion missing");
     event("session-complete",o,o.frames,id);return o.frames;
   }
+  if(resources) {
+    for(const char* name:{"video","audio"}) {
+      auto* source=named(tx,name);resources->add(source);gst_object_unref(source);
+    }
+  }
+  watchdog.check();
   start(tx, clock, cfg.epochNs);
   ProducerFailureWatch failureWatch(tx);
   Handles h;
@@ -982,6 +1034,7 @@ unsigned runProducer(const Options &o, GSocketListener *l,
   }
   uint64_t maxPushNs=0;
   for (unsigned n = 0; n < o.frames; ++n) {
+    watchdog.check();
     uint64_t pts = uint64_t(n) * GST_SECOND / o.fps,
              next = uint64_t(n + 1) * GST_SECOND / o.fps;
     auto now = gst_clock_get_time(clock);
@@ -1469,6 +1522,38 @@ int main(int argc, char **argv) {
 
 #endif
 namespace av {
+bool runBrokerProducer(const ProducerOptions& p,std::string& error) {
+  error.clear();
+  try {
+    need(p.sessionProvider && p.sessionProvider->resolve && p.sessionProvider->connect,"incomplete producer provider");
+    need(p.frames && p.frames<=100000 && p.width>=2 && p.width<=4096 &&
+         p.height>=2 && p.height<=2160 && p.fps>=13 && p.fps<=240 &&
+         p.rate>=8000 && p.rate<=192000 && (p.channels==1 || p.channels==2) &&
+         p.timeoutMs>=100 && p.timeoutMs<=60000,"invalid producer options");
+    need(p.format=="BGRA" || p.format=="NV12","invalid producer format");
+    need(p.format!="NV12" || (!(p.width%2) && !(p.height%2)),"NV12 requires even dimensions");
+    if(p.mediaRunMs)validateMediaRun(p.mediaRunMs,p.frames,p.fps);
+    need(!p.stop || !p.stop->load(),"producer cancelled");
+    Options o;o.plugin=p.plugin;o.format=p.format;o.frames=p.frames;o.width=p.width;
+    o.height=p.height;o.fps=p.fps;o.rate=p.rate;o.channels=p.channels;
+    o.timeout=p.timeoutMs;o.mediaRunMs=p.mediaRunMs;
+    gst_init(nullptr,nullptr);
+    GError* e=nullptr;auto* plugin=loadFrameLinkPlugin(o.plugin,&e);
+    std::string pluginError=e?e->message:"FrameLink plugin load";if(e)g_error_free(e);
+    need(plugin,pluginError);gst_object_unref(plugin);
+    ProducerResources resources;
+    Watchdog watchdog(o.timeout,[&]{resources.interrupt();},p.stop);
+    try {
+      Endpoint ep{};
+      const bool resolved=p.sessionProvider->resolve(ep,o.timeout,error);
+      watchdog.check();
+      need(resolved,error.empty()?"broker producer lease unavailable":error);
+      runProducer(o,nullptr,ep,watchdog,p.sessionProvider,&resources);
+      watchdog.check();
+    } catch(...) { watchdog.check();throw; }
+    error.clear();return true;
+  } catch(const std::exception& e){error=e.what();return false;}
+}
 bool runPlayback(const PlaybackOptions& p,const PlaybackCallbacks& cb,const std::atomic<bool>& stop,std::string& error) {
   bool sessionOpen=false;
   try {

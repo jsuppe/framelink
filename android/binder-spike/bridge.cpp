@@ -33,3 +33,18 @@ extern "C" JNIEXPORT jboolean JNICALL Java_dev_framelink_spike_Bridge_receive(JN
  return recv(fd,&ack,1,0)==1 && ack=='Y';
 }
 extern "C" JNIEXPORT jboolean JNICALL Java_dev_framelink_spike_Bridge_eof(JNIEnv*,jclass,jint fd){char b;return recv(fd,&b,1,0)==0;}
+
+// A byte-stream role/lease test only; real HMAC/GDP is tested by the portable
+// producer provider. Keep these test payloads out of the production adapter.
+extern "C" JNIEXPORT jboolean JNICALL Java_dev_framelink_spike_Bridge_streamServe(JNIEnv*,jclass,jint fd,jint role){
+ timeval limit{5,0};setsockopt(fd,SOL_SOCKET,SO_RCVTIMEO,&limit,sizeof(limit));setsockopt(fd,SOL_SOCKET,SO_SNDTIMEO,&limit,sizeof(limit));
+ char byte=char(role);if(send(fd,&byte,1,MSG_NOSIGNAL)!=1)return false;
+ if(recv(fd,&byte,1,0)!=1||byte!=char(role))return false;
+ return recv(fd,&byte,1,0)==0; // Hold until broker revocation/peer death/deadline.
+}
+extern "C" JNIEXPORT jboolean JNICALL Java_dev_framelink_spike_Bridge_streamReceive(JNIEnv*,jclass,jint fd,jint role){
+ timeval limit{5,0};setsockopt(fd,SOL_SOCKET,SO_RCVTIMEO,&limit,sizeof(limit));setsockopt(fd,SOL_SOCKET,SO_SNDTIMEO,&limit,sizeof(limit));
+ int type=0;socklen_t n=sizeof(type);if(getsockopt(fd,SOL_SOCKET,SO_TYPE,&type,&n)||type!=SOCK_STREAM)return false;
+ char byte=0;if(recv(fd,&byte,1,0)!=1||byte!=char(role))return false;
+ return send(fd,&byte,1,MSG_NOSIGNAL)==1;
+}

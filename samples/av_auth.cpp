@@ -7,11 +7,11 @@ using Nonce=std::array<unsigned char,32>;
 using Digest=std::array<unsigned char,32>;
 constexpr unsigned char magic[8]={'F','L','A','V','A','U','T',1};
 bool fail(std::string& error,const char* text){error=text;return false;}
-bool write(GSocketConnection* c,const void* data,size_t n,std::string& error){
- gsize done=0;return (g_output_stream_write_all(g_io_stream_get_output_stream(G_IO_STREAM(c)),data,n,&done,nullptr,nullptr)&&done==n)||fail(error,"authentication write failed");
+bool write(GSocketConnection* c,const void* data,size_t n,std::string& error,GCancellable* cancellable=nullptr){
+ gsize done=0;return (g_output_stream_write_all(g_io_stream_get_output_stream(G_IO_STREAM(c)),data,n,&done,cancellable,nullptr)&&done==n)||fail(error,"authentication write failed");
 }
-bool read(GSocketConnection* c,void* data,size_t n,std::string& error){
- gsize done=0;return (g_input_stream_read_all(g_io_stream_get_input_stream(G_IO_STREAM(c)),data,n,&done,nullptr,nullptr)&&done==n)||fail(error,"authentication read failed");
+bool read(GSocketConnection* c,void* data,size_t n,std::string& error,GCancellable* cancellable=nullptr){
+ gsize done=0;return (g_input_stream_read_all(g_io_stream_get_input_stream(G_IO_STREAM(c)),data,n,&done,cancellable,nullptr)&&done==n)||fail(error,"authentication read failed");
 }
 Digest proof(const Endpoint& e,unsigned char direction,char role,const Nonce& client,const Nonce& server){
  auto* h=g_hmac_new(G_CHECKSUM_SHA256,e.token.data(),e.token.size());
@@ -33,15 +33,19 @@ bool authenticateClient(GSocketConnection*c,const Endpoint&e,char role,std::stri
  unsigned char ok=0;
  return write(c,response.data(),response.size(),error)&&read(c,&ok,1,error)&&(ok==1||fail(error,"client authentication rejected"));
 }
-bool authenticateServer(GSocketConnection*c,const Endpoint&e,char expectedRole,std::string&error){
+bool authenticateServerCancellable(GSocketConnection*c,const Endpoint&e,char expectedRole,std::string&error,GCancellable* cancellable){
  if(!c||!roleValid(expectedRole))return fail(error,"invalid authentication role");
  unsigned char receivedMagic[8]{};char role=0;Nonce client{},server{};Digest received{};
- if(!read(c,receivedMagic,sizeof(receivedMagic),error)||memcmp(receivedMagic,magic,sizeof(magic))||!read(c,&role,1,error)||role!=expectedRole)
+ if(!read(c,receivedMagic,sizeof(receivedMagic),error,cancellable)||memcmp(receivedMagic,magic,sizeof(magic))||!read(c,&role,1,error,cancellable)||role!=expectedRole)
      return fail(error,"authentication protocol or role rejected");
- if(!read(c,client.data(),client.size(),error)||!secureRandom(server.data(),server.size(),error))return false;
+ if(!read(c,client.data(),client.size(),error,cancellable)||!secureRandom(server.data(),server.size(),error))return false;
  auto response=proof(e,'S',role,client,server);
- if(!write(c,server.data(),server.size(),error)||!write(c,response.data(),response.size(),error)||!read(c,received.data(),received.size(),error))return false;
+ if(!write(c,server.data(),server.size(),error,cancellable)||!write(c,response.data(),response.size(),error,cancellable)||!read(c,received.data(),received.size(),error,cancellable))return false;
  if(!equal(received,proof(e,'C',role,client,server)))return fail(error,"client authentication rejected");
- unsigned char ok=1;return write(c,&ok,1,error);
+ unsigned char ok=1;return write(c,&ok,1,error,cancellable);
 }
+bool authenticateServer(GSocketConnection*c,const Endpoint&e,char expectedRole,std::string&error){
+ return authenticateServerCancellable(c,e,expectedRole,error,nullptr);
+}
+
 }

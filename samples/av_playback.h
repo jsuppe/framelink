@@ -37,6 +37,26 @@ struct PlaybackOptions {
   // onSession config epoch is provisional; onClock carries the final mapping.
   PlaybackClockPolicy clockPolicy=PlaybackClockPolicy::AudioPreferred;
 };
+// One broker-owned producer session. The provider supplies server ends of two
+// distinct connected byte streams. Broker must shutdown them on revoke/stop.
+// This does not transfer the native video ring: Android still needs its video
+// ownership bridge before these APIs form a cross-UID A/V application.
+struct ProducerOptions {
+  std::string plugin, format="BGRA";
+  unsigned frames=150, width=160, height=90, fps=50, rate=48000, channels=2;
+  // Same bounds as the CLI: frames 1..100000, size 2..4096 x 2..2160,
+  // fps 13..240, timeout 100..60000 ms. Default startup remains 15 seconds.
+  unsigned timeoutMs=15000;
+  // Zero keeps whole-session timeout; otherwise exact mode-3 peer budget,
+  // 1..300000 ms, covering frames/fps without widening startup/idle limits.
+  unsigned mediaRunMs=0;
+  // Optional cooperative cancellation. Provider callbacks must still honor
+  // timeoutMs; native video setup/teardown may take that bounded interval.
+  const std::atomic<bool>* stop=nullptr;
+  const SessionProvider* sessionProvider=nullptr;
+};
+// Returns false on failure/cancel/deadline; never terminates the host process.
+bool runBrokerProducer(const ProducerOptions&, std::string& error);
 // Arrival/queue telemetry is not physical output timing. queueEmptyEvents
 // includes startup and EOS; it must not be labeled device underruns.
 struct PlaybackMetrics {

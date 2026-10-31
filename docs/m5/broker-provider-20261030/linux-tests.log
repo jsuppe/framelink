@@ -1,0 +1,16 @@
+Internal ctest changing into directory: /tmp/framelink-m5-adoption-build
+Test project /tmp/framelink-m5-adoption-build
+    Start 34: av_connected_fd
+1/5 Test #34: av_connected_fd ..................   Passed    0.00 sec
+    Start 36: av_auth
+2/5 Test #36: av_auth ..........................   Passed    0.01 sec
+    Start 39: m3_av_apps
+3/5 Test #39: m3_av_apps .......................   Passed   28.68 sec
+    Start 44: av_offer_bounds
+4/5 Test #44: av_offer_bounds ..................   Passed    0.01 sec
+    Start 50: broker_producer_stream
+5/5 Test #50: broker_producer_stream ...........   Passed    1.13 sec
+
+100% tests passed, 0 tests failed out of 5
+
+Total Test time (real) =  29.84 sec

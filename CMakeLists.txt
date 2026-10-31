@@ -615,3 +615,11 @@ if(FRAMELINK_BUILD_TESTS AND Python3_Interpreter_FOUND)
     add_test(NAME frame_accounting_negative_controls COMMAND ${Python3_EXECUTABLE}
         ${CMAKE_CURRENT_SOURCE_DIR}/test/test_frame_accounting.py)
 endif()
+
+if(FRAMELINK_BUILD_TESTS AND TARGET framelink_av_playback AND UNIX AND NOT ANDROID)
+    add_executable(fl_broker_producer test/fl_broker_producer.cpp)
+    target_link_libraries(fl_broker_producer PRIVATE framelink_av_playback)
+    add_dependencies(fl_broker_producer gstframelink)
+    add_test(NAME broker_producer_stream COMMAND fl_broker_producer $<TARGET_FILE:gstframelink>)
+    set_tests_properties(broker_producer_stream PROPERTIES TIMEOUT 40)
+endif()
