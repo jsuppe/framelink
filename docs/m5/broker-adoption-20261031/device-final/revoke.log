@@ -1,0 +1,7 @@
+
+10-31 17:01:41.600  1533  1533 I FLClient: bind=true
+10-31 17:01:41.709  1054  1300 I FLBroker: grant uid=10302 broker_uid=10301
+10-31 17:01:41.743  1533  1604 I FLClient: pixel_roundtrip=true uid=10302
+10-31 17:01:41.744  1054  1300 I FLBroker: revoke uid=10302 reason=explicit
+10-31 17:01:41.744  1054  1605 I FLBroker: transfer result=0
+10-31 17:01:41.744  1533  1604 I FLClient: revoked_eof=true

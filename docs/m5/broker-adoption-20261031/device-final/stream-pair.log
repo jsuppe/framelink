@@ -1,0 +1,12 @@
+
+10-31 17:01:40.738  1350  1350 I FLClient: bind=true
+10-31 17:01:40.845  1054  1300 I FLBroker: stream_grant uid=10302 broker_uid=10301
+10-31 17:01:40.855  1054  1300 I FLBroker: stream_revoke=setup-failed
+10-31 17:01:40.857  1054  1403 I FLBroker: stream_peer_eof=true
+10-31 17:01:40.857  1054  1300 I FLBroker: stream_revoke=replacement
+10-31 17:01:40.857  1054  1404 I FLBroker: stream_peer_eof=true
+10-31 17:01:40.859  1054  1300 I FLBroker: stream_grant uid=10302 broker_uid=10301
+10-31 17:01:40.865  1054  1405 I FLBroker: stream_peer_eof=true
+10-31 17:01:40.865  1054  1300 I FLBroker: stream_revoke=explicit
+10-31 17:01:40.865  1054  1406 I FLBroker: stream_peer_eof=true
+10-31 17:01:40.865  1350  1402 I FLClient: stream_pair_safe=true

@@ -1,0 +1,18 @@
+Internal ctest changing into directory: /tmp/framelink-m5-build
+Test project /tmp/framelink-m5-build
+    Start 41: m3_av_apps
+1/4 Test #41: m3_av_apps .......................   Passed   28.73 sec
+    Start 48: m5_finite_budget
+2/4 Test #48: m5_finite_budget .................   Passed   18.72 sec
+    Start 55: m5_startup
+3/4 Test #55: m5_startup .......................   Passed   20.95 sec
+    Start 56: m5_preconnect
+4/4 Test #56: m5_preconnect ....................   Passed   17.51 sec
+
+100% tests passed, 0 tests failed out of 4
+
+Label Time Summary:
+gpu            =  38.46 sec*proc (2 tests)
+integration    =  38.46 sec*proc (2 tests)
+
+Total Test time (real) =  85.91 sec
