@@ -57,14 +57,15 @@ struct Options {
            channels = 2, timeout = 15000, sessions = 1;
   bool play = false, stream = false;
   std::string audioSink="autoaudiosink";
-  unsigned latencyMs=100;
+  unsigned latencyMs=100, mediaRunMs=0;
   uint64_t audioOffsetNs=0;
   int pacingPpm=0;
 };
 unsigned number(const char *s) {
   char *e = nullptr;
+  errno=0;
   unsigned long n = strtoul(s, &e, 10);
-  need(*s && !*e && n <= 1000000, "invalid number");
+  need(*s && strspn(s,"0123456789")==strlen(s) && !*e && !errno && n <= 1000000, "invalid number");
   return unsigned(n);
 }
 Options options(int argc, char **argv) {
@@ -118,6 +119,7 @@ Options options(int argc, char **argv) {
       o.rate = number(v);
     else if (a == "--channels")
       o.channels = number(v);
+    else if (a == "--media-run-ms") { o.mediaRunMs=number(v); need(o.mediaRunMs && o.mediaRunMs<=300000,"media run budget must be 1..300000 ms"); }
     else if (a == "--timeout-ms")
       o.timeout = number(v);
     else if (a == "--sessions")
@@ -141,22 +143,42 @@ Options options(int argc, char **argv) {
   need(o.latencyMs <= 2000, "latency outside bounds");
   return o;
 }
+// Sample control mode 3 is opt-in finite coordinated playback. No transport ABI
+// change: the existing mode word is followed by an exact budget/echo handshake.
+void validateMediaRun(uint64_t budget, uint64_t frames, unsigned fps) {
+  need(budget && budget<=300000,"invalid finite media budget");
+  need(frames && frames<=100000 && fps>=13 && fps<=240,"invalid finite stream length/rate");
+  need((frames*1000+fps-1)/fps<=budget,"stream duration exceeds finite media budget");
+}
 struct Watchdog {
   std::atomic<bool> done{false};
   std::thread t;
-  Watchdog(unsigned ms)
-      : t([this, ms] {
-          auto end =
-              std::chrono::steady_clock::now() + std::chrono::milliseconds(ms);
-          while (!done) {
-            if (std::chrono::steady_clock::now() >= end) {
-              fprintf(stderr, "FAIL process deadline\n");
-              fflush(stderr);
-              std::_Exit(1);
-            }
-            std::this_thread::sleep_for(std::chrono::milliseconds(10));
-          }
-        }) {}
+  std::atomic<int64_t> deadlineUs{0}, videoUs{0}, audioUs{0};
+  std::atomic<bool> videoEos{false}, audioEos{false}, media{false};
+  unsigned idleMs=2000;
+  void arm(unsigned ms) { deadlineUs=g_get_monotonic_time()+int64_t(ms)*1000; }
+  void beginMedia(unsigned ms, unsigned timeout) {
+    videoUs=audioUs=g_get_monotonic_time();
+    idleMs=std::min(2u,std::max(1u,(timeout+999)/1000))*1000;
+    arm(ms+timeout); // bounded media + unchanged setup/drain grace, max 360 s
+    media=true;
+  }
+  Watchdog(unsigned ms) {
+    arm(ms);
+    t=std::thread([this] {
+      while (!done) {
+        const auto now=g_get_monotonic_time();
+        const bool idle=media.load() &&
+          ((!videoEos.load() && now-videoUs.load()>int64_t(idleMs)*1000) ||
+           (!audioEos.load() && now-audioUs.load()>int64_t(idleMs)*1000));
+        if (now>=deadlineUs.load() || idle) {
+          fprintf(stderr,"FAIL %s deadline\n",idle?"media idle":"process");
+          fflush(stderr);std::_Exit(1);
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+      }
+    });
+  }
   ~Watchdog() {
     done = true;
     t.join();
@@ -368,6 +390,20 @@ GstElement *named(Pipeline &p, const char *n) {
   auto *e = gst_bin_get_by_name(GST_BIN(p.p), n);
   need(e, "missing element");
   return e;
+}
+void watchMedia(Pipeline& pipeline,const char* element,const char* padName,Watchdog& watch,bool audio) {
+  auto* e=named(pipeline,element);auto* pad=gst_element_get_static_pad(e,padName);gst_object_unref(e);
+  struct Context { Watchdog* watch; bool audio; };
+  gst_pad_add_probe(pad,GstPadProbeType(GST_PAD_PROBE_TYPE_BUFFER|GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM),
+    [](GstPad*,GstPadProbeInfo* info,gpointer data) {
+      auto& c=*static_cast<Context*>(data);
+      if(GST_PAD_PROBE_INFO_TYPE(info)&GST_PAD_PROBE_TYPE_BUFFER)
+        (c.audio?c.watch->audioUs:c.watch->videoUs)=g_get_monotonic_time();
+      else if(GST_EVENT_TYPE(GST_PAD_PROBE_INFO_EVENT(info))==GST_EVENT_EOS)
+        (c.audio?c.watch->audioEos:c.watch->videoEos)=true;
+      return GST_PAD_PROBE_OK;
+    },new Context{&watch,audio},[](gpointer p){delete static_cast<Context*>(p);});
+  gst_object_unref(pad);
 }
 void setStream(Pipeline &p, const char *name, Conn &c, bool output) {
   auto *e = named(p, name);
@@ -792,7 +828,7 @@ struct StartupGate {
 using av::AudioTimeline;
 using av::trackAudio;
 unsigned runProducer(const Options &o, GSocketListener *l,
-                     const av::Endpoint &ep) {
+                     const av::Endpoint &ep, Watchdog& watchdog) {
   auto control = accept(l, ep, 'C', o.timeout);
   auto local = caps(o);
   auto remote = recvCaps(*control);
@@ -823,9 +859,17 @@ unsigned runProducer(const Options &o, GSocketListener *l,
   need(!memcmp(wire, reply, sizeof(wire)),
        "configuration acknowledgement mismatch");
   const auto mode = get(*control);
-  need(mode<=2, "unsupported playback mode");
+  need(mode<=3, "unsupported playback mode");
+  need((mode==3)==bool(o.mediaRunMs),"finite media budget requires matching mode-3 peer");
+  if(mode==3) {
+    const auto budget=get(*control);
+    validateMediaRun(budget,o.frames,o.fps);
+    need(budget==o.mediaRunMs,"finite media budget disagreement");
+    need(o.sessions==1 && !o.pacingPpm,"finite media mode requires one unmodified-rate session");
+    put(*control,budget);
+  }
   const bool streaming=mode!=0;
-  const bool coordinated=mode==2;
+  const bool coordinated=mode>=2;
   // Audio/device setup is allowed the configured startup budget. The short
   // steady-state idle timeout must not expire while waiting for PRIMED/GO.
   if(coordinated)g_socket_set_timeout(g_socket_connection_get_socket(control->p),(o.timeout+999)/1000);
@@ -853,6 +897,10 @@ unsigned runProducer(const Options &o, GSocketListener *l,
     gst_object_unref(videoOutput);
   }
   setStream(tx, "audioio", *audio, true);
+  if(o.mediaRunMs) {
+    watchMedia(tx,o.inputPipeline.empty()?"video":"externalvideo","src",watchdog,false);
+    watchMedia(tx,o.inputPipeline.empty()?"audio":"externalaudio","src",watchdog,true);
+  }
   StartupGate startup(o.timeout);
   if(coordinated) {
     startup.attach(tx,o.inputPipeline.empty()?"video":"externalvideo","src",false);
@@ -878,6 +926,7 @@ unsigned runProducer(const Options &o, GSocketListener *l,
     need(get(*control)==0x474fULL,"consumer did not install playback clock");
     tune(*control,o.timeout);
     {std::lock_guard<std::mutex> lock(startup.mutex);need(!startup.expired,"startup gate deadline");}
+    if(o.mediaRunMs)watchdog.beginMedia(o.mediaRunMs,o.timeout);
     startup.release();
     printf("{\"event\":\"startup-released\",\"epoch_ns\":%llu}\n",(unsigned long long)cfg.epochNs);
   };
@@ -897,7 +946,7 @@ unsigned runProducer(const Options &o, GSocketListener *l,
     completeStartup();
     auto* bus=gst_element_get_bus(tx.p);Object busOwner{G_OBJECT(bus)};
     GstMessage* message=nullptr;
-    const auto eosDeadline=g_get_monotonic_time()+gint64(o.timeout)*1000;
+    const auto eosDeadline=g_get_monotonic_time()+gint64(o.mediaRunMs+o.timeout)*1000;
     while (!message) {
       const auto remaining=eosDeadline-g_get_monotonic_time();
       need(remaining>0,"external pipeline EOS deadline");
@@ -966,7 +1015,7 @@ unsigned runProducer(const Options &o, GSocketListener *l,
   return o.frames;
 }
 unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
-                     const av::PlaybackCallbacks* cb=nullptr, const std::atomic<bool>* stop=nullptr, bool externalVideo=false, const std::atomic<bool>* mute=nullptr, const std::atomic<bool>* paused=nullptr, const av::SessionProvider* provider=nullptr) {
+                     const av::PlaybackCallbacks* cb=nullptr, const std::atomic<bool>* stop=nullptr, bool externalVideo=false, const std::atomic<bool>* mute=nullptr, const std::atomic<bool>* paused=nullptr, const av::SessionProvider* provider=nullptr, Watchdog* watchdog=nullptr) {
   Options o = requested;
   std::unique_ptr<Conn> control(connect(ep, 'C', o.timeout, provider));
   auto local = caps(o);
@@ -993,7 +1042,13 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
   need(flSessionMapPts(&cfg, &mapping, 50 * GST_MSECOND, 0, &base) == 0,
        "clock mapping failed");
   write(*control, wire, sizeof(wire));
-  put(*control, o.stream ? (o.producerClock ? 2 : 1) : 0);
+  need(!o.mediaRunMs || (o.stream && o.producerClock),"finite media budget requires coordinated streaming");
+  put(*control, o.mediaRunMs ? 3 : (o.stream ? (o.producerClock ? 2 : 1) : 0));
+  if(o.mediaRunMs) {
+    need(o.mediaRunMs<=300000,"invalid finite media budget");
+    put(*control,o.mediaRunMs);
+    need(get(*control)==o.mediaRunMs,"finite media budget disagreement");
+  }
   if(o.stream && o.producerClock)g_socket_set_timeout(g_socket_connection_get_socket(control->p),(o.timeout+999)/1000);
   std::unique_ptr<Conn> audio(connect(audioEndpoint(ep, cfg), 'A', o.timeout, provider));
   if(o.stream && o.producerClock)g_socket_set_timeout(g_socket_connection_get_socket(audio->p),(o.timeout+999)/1000);
@@ -1034,6 +1089,7 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
     put(*control,0x5245414459ULL);
     const auto frames=get(*control);
     need(frames && frames<=100000,"invalid stream length");
+    if(o.mediaRunMs)validateMediaRun(o.mediaRunMs,frames,o.fps);
     auto end=std::chrono::steady_clock::now()+std::chrono::milliseconds(o.timeout);
     // Live video may prevent whole-pipeline preroll. Await the audio sink only;
     // its first real PCM packet negotiates the device and exposes its clock.
@@ -1119,6 +1175,12 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
     audioTimeline.deliveryBase=mappedBase+latency;
     start(rx,selected,mappedBase);
     if(o.producerClock){put(*control,0x474fULL);tune(*control,o.timeout);tune(*audio,o.timeout);}
+    if(o.mediaRunMs) {
+      end=std::chrono::steady_clock::now()+std::chrono::milliseconds(o.mediaRunMs+o.timeout);
+      if(watchdog)watchdog->arm(o.mediaRunMs+o.timeout);
+    }
+    uint64_t progressSamples=audioTimeline.samplesEnd.load();
+    auto progressAt=std::chrono::steady_clock::now();
     av::PlaybackMetrics metrics;
     uint64_t lastMetricsAt=0;
     auto reportMetrics=[&](bool final=false) {
@@ -1184,6 +1246,13 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
       g_object_set(volume,"mute",mute && mute->load(),nullptr);
       need(!audioTimeline.invalid.load(),"audio discontinuity: renegotiate both tracks");
       need(std::chrono::steady_clock::now()<end,"playback deadline");
+      if(o.mediaRunMs) {
+        const auto samples=audioTimeline.samplesEnd.load();
+        if(samples!=progressSamples){progressSamples=samples;progressAt=std::chrono::steady_clock::now();}
+        need(!audioTimeline.eos.load() || samples==frames*o.rate/o.fps,"audio EOS before finite completion");
+        const auto idle=std::chrono::seconds(std::min(2u,std::max(1u,(o.timeout+999)/1000)));
+        need(samples>=frames*o.rate/o.fps || std::chrono::steady_clock::now()-progressAt<idle,"audio idle deadline");
+      }
       reportMetrics();
       if(audioTimeline.exhausted.load()) {
         reportMetrics(true);
@@ -1290,6 +1359,7 @@ int main(int argc, char **argv) {
       puts("Usage: framelink_av_{producer,consumer} PLUGIN --session PRIVATE_DIR\n"
            "  --frames N --format BGRA|NV12|auto --width W --height H --fps N\n"
            "  --rate N --channels 1|2 --timeout-ms N --sessions N\n"
+           "  --media-run-ms 1..300000 (opt-in finite coordinated streaming; matching peers)\n"
            "  Consumer: --stream --audio-sink autoaudiosink|fakesink --latency-ms N (scheduled streaming); --play (verification window/sound); producer: --fault missing-audio|audio-pts-reset\n"
            "  --audio-offset-ns 0..2000000000 (producer fixture; verifier must use same offset)\n"
            "  --pacing-ppm -200000..200000 (producer pacing injection; PTS unchanged)\n"
@@ -1301,6 +1371,12 @@ int main(int argc, char **argv) {
     }
     gst_init(&argc, &argv);
     auto o = options(argc, argv);
+    if(o.mediaRunMs) {
+      need(o.sessions==1 && !o.pacingPpm,"finite media mode requires one unmodified-rate session");
+#ifdef AV_PRODUCER
+      validateMediaRun(o.mediaRunMs,o.frames,o.fps);
+#endif
+    }
     Watchdog watchdog(o.timeout);
     GError *error = nullptr;
     auto *plugin = loadFrameLinkPlugin(o.plugin, &error);
@@ -1336,7 +1412,7 @@ int main(int argc, char **argv) {
     for (unsigned attempt = 0;
          completed < o.sessions && attempt < o.sessions + 3; ++attempt) {
       try {
-        total += runProducer(o, l, ep);
+        total += runProducer(o, l, ep, watchdog);
         ++completed;
       } catch (const std::exception &e) {
         if (o.sessions == 1)
@@ -1359,7 +1435,7 @@ int main(int argc, char **argv) {
         g_usleep(10000);
       }
       try {
-        total += runConsumer(o, ep);
+        total += runConsumer(o, ep,nullptr,nullptr,false,nullptr,nullptr,nullptr,&watchdog);
         ++completed;
       } catch (const std::exception &e) {
         if (o.sessions == 1)
@@ -1402,8 +1478,9 @@ bool runPlayback(const PlaybackOptions& p,const PlaybackCallbacks& cb,const std:
     Options o; o.plugin=p.plugin; o.session=p.session; o.format=p.format;
     o.width=p.width;o.height=p.height;o.fps=p.fps;o.rate=p.rate;o.channels=p.channels;
     o.producerClock=p.clockPolicy==av::PlaybackClockPolicy::ProducerMapped;
-    o.timeout=p.timeoutMs;o.latencyMs=p.latencyMs;o.audioSink=p.audioSink;o.stream=true;
-    need(o.fps && o.width && o.height && o.timeout && o.latencyMs<=2000,"invalid playback options");
+    o.timeout=p.timeoutMs;o.mediaRunMs=p.mediaRunMs;o.latencyMs=p.latencyMs;o.audioSink=p.audioSink;o.stream=true;
+    need(o.fps && o.width && o.height && o.timeout>=100 && o.timeout<=60000 && o.latencyMs<=2000 && o.mediaRunMs<=300000,"invalid playback options");
+    need(!o.mediaRunMs || (o.producerClock && o.fps>=13 && o.fps<=240),"finite media budget requires coordinated streaming");
     gst_init(nullptr,nullptr);
     GError* e=nullptr; auto* plugin=loadFrameLinkPlugin(o.plugin,&e);
     if (e) {error=e->message;g_error_free(e);}

@@ -20,7 +20,7 @@ struct AudioTimeline {
     if(playbackClock) gst_object_unref(playbackClock);
   }
   std::atomic<uint64_t> blocks{0}, samplesEnd{0}, originNs{GST_CLOCK_TIME_NONE};
-  std::atomic<bool> invalid{false};
+  std::atomic<bool> invalid{false}, eos{false};
   unsigned rate=48000, channels=2;
   GstSegment segment{};
   bool haveSegment=false;
@@ -29,6 +29,7 @@ inline GstPadProbeReturn trackAudio(GstPad*, GstPadProbeInfo* info, gpointer dat
   auto &t=*static_cast<AudioTimeline*>(data);
   if (GST_PAD_PROBE_INFO_TYPE(info) & GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM) {
     auto *event=GST_PAD_PROBE_INFO_EVENT(info);
+    if(GST_EVENT_TYPE(event)==GST_EVENT_EOS)t.eos=true;
     if (GST_EVENT_TYPE(event)==GST_EVENT_SEGMENT) {
       const GstSegment* segment=nullptr;
       gst_event_parse_segment(event,&segment);

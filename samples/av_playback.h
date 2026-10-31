@@ -19,6 +19,10 @@ struct PlaybackOptions {
   std::string plugin, session, format = "BGRA", audioSink = "autoaudiosink";
   unsigned width=160, height=90, fps=50, rate=48000, channels=2;
   unsigned timeoutMs=15000, latencyMs=100;
+  // Opt-in mode 3: finite media timeline budget (1..300000 ms); zero keeps
+  // legacy whole-session timeout. Requires matching producer and ProducerMapped.
+  // Startup/idle bounds stay unchanged; active deadline = budget + timeoutMs.
+  unsigned mediaRunMs=0;
   bool externalVideo=false;
   const std::atomic<bool>* mute=nullptr;
   // Live pause suspends BOTH tracks and tears down their session. Resume

@@ -538,6 +538,9 @@ if(FRAMELINK_BUILD_TESTS AND TARGET framelink_av_playback)
         add_test(NAME m4_av_recovery COMMAND ${Python3_EXECUTABLE}
             ${CMAKE_CURRENT_SOURCE_DIR}/test/m4_recovery.py --build $<TARGET_FILE_DIR:fl_playback_recovery>)
         set_tests_properties(m4_av_recovery PROPERTIES TIMEOUT 90)
+        add_test(NAME m5_finite_budget COMMAND ${Python3_EXECUTABLE}
+            ${CMAKE_CURRENT_SOURCE_DIR}/test/m5_finite_budget.py --build $<TARGET_FILE_DIR:fl_playback_recovery>)
+        set_tests_properties(m5_finite_budget PROPERTIES TIMEOUT 45)
     endif()
 endif()
 

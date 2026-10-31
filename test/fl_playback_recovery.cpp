@@ -9,6 +9,7 @@ int main(int argc,char**argv) {
   if(std::getenv("FRAMELINK_TEST_PRODUCER_CLOCK"))o.clockPolicy=av::PlaybackClockPolicy::ProducerMapped;
   std::string mode=argv[3]; o.timeoutMs=mode=="bounded"?300:8000;
   o.recoveryAttempts=mode=="bounded"?1:3;
+  if(mode=="finite-cancel") {o.mediaRunMs=70000;o.clockPolicy=av::PlaybackClockPolicy::ProducerMapped;o.recoveryAttempts=0;}
   std::atomic<bool> stop{false},paused{false};o.paused=&paused;
   std::atomic<unsigned> clocks{0},sessions{0},ends{0},retries{0},metrics{0};
   bool invalidMetrics=false;
@@ -18,10 +19,12 @@ int main(int argc,char**argv) {
   cb.onClock=[&](auto&){++clocks;};cb.onEnd=[&]{++ends;};
   cb.onStatus=[&](const std::string&s){printf("status=%s\n",s.c_str());fflush(stdout);if(s.find("session-reconnecting")==0)++retries;};
   std::thread control([&]{
-    if(mode!="pause") return;
+    if(mode!="pause" && mode!="finite-cancel") return;
     while(!clocks && !stop) std::this_thread::sleep_for(std::chrono::milliseconds(5));
     if(stop) return;
-    std::this_thread::sleep_for(std::chrono::milliseconds(150));paused=true;
+    std::this_thread::sleep_for(std::chrono::milliseconds(150));
+    if(mode=="finite-cancel"){stop=true;return;}
+    paused=true;
     std::this_thread::sleep_for(std::chrono::milliseconds(200));paused=false;
   });
   std::string error;auto start=std::chrono::steady_clock::now();
@@ -29,6 +32,7 @@ int main(int argc,char**argv) {
   auto ms=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now()-start).count();
   printf("ok=%d sessions=%u clocks=%u ends=%u retries=%u ms=%lld error=%s\n",ok,sessions.load(),clocks.load(),ends.load(),retries.load(),(long long)ms,error.c_str());
   if(invalidMetrics || (ok && !metrics)) return 1;
+  if(mode=="finite-cancel")return !(!ok && clocks==1 && ends==1 && error=="playback cancelled" && ms<3000);
   if(mode=="bounded")return !(!ok && retries==1 && ms<3000);
   if(mode=="pause")return !(ok && sessions>=2 && clocks>=2 && ends>=2);
   if(mode=="recover")return !(ok && sessions>=2 && retries>=1);
