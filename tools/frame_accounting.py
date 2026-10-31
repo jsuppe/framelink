@@ -14,13 +14,13 @@ import json
 from pathlib import Path
 
 STAGES = ('sink_receive', 'buffer_acquire', 'submit', 'ipc_receive',
-          'consumer_acquire', 'schedule', 'adopt', 'render_submit', 'gpu_complete', 'present_submit')
+          'consumer_acquire', 'schedule', 'adopt', 'render_submit', 'gpu_complete', 'present_attempt', 'present_submit')
 OPS = {'gst.frame_receive': 'sink_receive', 'gst.frame_acquired': 'buffer_acquire',
        'flEndSubmit': 'submit', 'ipc.frame_received': 'ipc_receive',
        'flAcquireFrame': 'consumer_acquire', 'av.frame_schedule': 'schedule',
        'av.frame_adopt': 'adopt',
        'av.frame_render_submit': 'render_submit', 'av.frame_gpu_complete': 'gpu_complete',
-       'av.frame_present_submit': 'present_submit'}
+       'av.frame_present_submit': 'present_attempt', 'av.frame_present_attempt': 'present_attempt'}
 
 # Last stage necessarily reached before this terminal loss. Never let a reason
 # hide missing earlier evidence. Unknown reasons are intentionally unclassified.
@@ -31,7 +31,8 @@ DROP_BOUNDARIES = {
     **dict.fromkeys(('late', 'invalid', 'generation_end', 'generation_changed'), 'consumer_acquire'),
     'import_failed': 'schedule',
 }
-SUBMISSION_STAGES = ('render_submit', 'gpu_complete', 'present_submit')
+SUBMISSION_STAGES = ('render_submit', 'gpu_complete', 'present_attempt', 'present_submit')
+PRESENT_ACCEPTED = (0, 1000001003)  # VK_SUCCESS, VK_SUBOPTIMAL_KHR
 
 
 def load_csv(paths, generation):
@@ -61,17 +62,19 @@ def load_csv(paths, generation):
             stage = 'drop'
         if stage is None:
             continue
-        if stage not in ('ipc_receive', 'drop') and result != 0 and not (stage == 'present_submit' and result == 1000001003):
+        if stage not in ('ipc_receive', 'drop', 'present_attempt') and result != 0:
             continue
         pts, channel = int(row['pts_ns']), row['channel_id']
         # PTS is a join key ONLY within this explicitly single-generation capture.
         event = dict(session=channel, generation=generation, frame_id=str(pts),
                      pts_ns=pts, time_ns=int(row['start_ns']), stage=stage,
                      sequence=int(row['sequence']))
+        if stage == 'present_attempt':
+            event['result'] = result
         if op.startswith('av.frame_'):
             if str(row['slot']) != str(generation):
                 raise ValueError('renderer generation differs from --generation; split capture by generation')
-            if stage in ('render_submit', 'gpu_complete', 'present_submit'):
+            if stage in ('render_submit', 'gpu_complete', 'present_attempt', 'present_submit'):
                 event['submission_id'] = int(row['duration_ns'])
         if stage == 'submit':
             event['time_ns'] += int(row['duration_ns'])
@@ -96,6 +99,8 @@ def load_csv(paths, generation):
             if previous and previous['frame_id'] == event['frame_id']:
                 pending.pop(channel)
         events.append(event)
+        if stage == 'present_attempt' and result in PRESENT_ACCEPTED:
+            events.append(dict(event, stage='present_submit'))
     # Legacy wrapper counts are not additional sink_receive events. Without
     # identity records we can report anonymous input deficits, not invent IDs.
     known_input = sum(e['stage'] == 'sink_receive' for e in events)
@@ -151,6 +156,8 @@ def analyze(events, required, startup_ns=1_000_000_000, end_ns=1_000_000_000, me
     submission_mismatches = []
     present_mismatches = []
     event_order_errors = []
+    present_result_errors = []
+    present_results = collections.Counter()
     intervals = collections.defaultdict(list)
     for key, rows in sorted(frames.items()):
         by_stage = collections.defaultdict(list)
@@ -161,7 +168,7 @@ def analyze(events, required, startup_ns=1_000_000_000, end_ns=1_000_000_000, me
             if len(stage_rows) > 1:
                 if stage == 'present_submit':
                     repeats += len(stage_rows) - 1
-                elif stage not in ('drop', 'render_submit', 'gpu_complete'):
+                elif stage not in ('drop', 'render_submit', 'gpu_complete', 'present_attempt'):
                     ambiguities.append({'identity': key, 'stage': stage,
                                         'count': len(stage_rows)})
         tuples = {}
@@ -176,9 +183,26 @@ def analyze(events, required, startup_ns=1_000_000_000, end_ns=1_000_000_000, me
         if 'gpu_complete' in required and submitted != tuples['gpu_complete']:
             submission_mismatches.append({'identity': key, 'submitted': dict(submitted),
                                           'completed': dict(tuples['gpu_complete'])})
-        if 'present_submit' in required and submitted != tuples['present_submit']:
+        if ('present_attempt' in required or 'present_submit' in required) and submitted != tuples['present_attempt']:
             present_mismatches.append({'identity': key, 'submitted': dict(submitted),
-                                      'presented': dict(tuples['present_submit'])})
+                                      'attempted': dict(tuples['present_attempt'])})
+        accepted = collections.Counter()
+        rejected_results = []
+        for attempt in by_stage.get('present_attempt', []):
+            result = attempt.get('result')
+            if not isinstance(result, int):
+                present_result_errors.append({'identity': key, 'reason': 'missing_present_result'})
+            elif result in PRESENT_ACCEPTED:
+                accepted[attempt.get('submission_id')] += 1
+            else:
+                rejected_results.append(result)
+            present_results[str(result)] += 1
+        if accepted != tuples['present_submit']:
+            present_result_errors.append({'identity': key, 'reason': 'accepted_attempts_disagree_with_success_records',
+                                          'accepted_attempts': dict(accepted), 'success_records': dict(tuples['present_submit'])})
+        for success in by_stage.get('present_submit', []):
+            if success.get('result') not in PRESENT_ACCEPTED:
+                present_result_errors.append({'identity': key, 'reason': 'success_record_has_rejected_result'})
         # GPU fence observation and present-call are parallel descendants of
         # queue submission, not a serial GPU-complete -> present pipeline.
         # IPC receive may precede flEndSubmit RETURN, so omit that order check.
@@ -189,7 +213,7 @@ def analyze(events, required, startup_ns=1_000_000_000, end_ns=1_000_000_000, me
                 if min(r['time_ns'] for r in by_stage[second]) < min(r['time_ns'] for r in by_stage[first]):
                     event_order_errors.append({'identity': key, 'before': first, 'after': second})
         render_times = {r.get('submission_id'): r['time_ns'] for r in by_stage.get('render_submit', [])}
-        for stage in ('gpu_complete', 'present_submit'):
+        for stage in ('gpu_complete', 'present_attempt', 'present_submit'):
             for record in by_stage.get(stage, []):
                 sub = record.get('submission_id')
                 if sub in render_times and record['time_ns'] < render_times[sub]:
@@ -215,6 +239,8 @@ def analyze(events, required, startup_ns=1_000_000_000, end_ns=1_000_000_000, me
                 outcome = 'unclassified_drop_evidence:' + '+'.join(reasons)
             else:
                 outcome = 'classified_drop:' + '+'.join(reasons)
+        elif missing == ['present_submit'] and rejected_results and not accepted:
+            outcome = 'classified_presentation_failure:' + ','.join(str(r) for r in sorted(set(rejected_results)))
         elif missing:
             outcome = 'unclassified_missing:' + ','.join(missing)
         else:
@@ -222,16 +248,17 @@ def analyze(events, required, startup_ns=1_000_000_000, end_ns=1_000_000_000, me
         phases[phase][outcome] += 1
         # These are observational edges; no fictitious GPU-complete-to-present latency.
         edges = list(zip(STAGES[:STAGES.index('render_submit')+1], STAGES[1:STAGES.index('render_submit')+1]))
-        edges += [('render_submit','gpu_complete'), ('render_submit','present_submit')]
+        edges += [('render_submit','gpu_complete'), ('render_submit','present_attempt'), ('render_submit','present_submit')]
         for a, b in edges:
             if a not in required or b not in required:
                 continue
             if a in by_stage and b in by_stage:
                 delta = min(r['time_ns'] for r in by_stage[b]) - min(r['time_ns'] for r in by_stage[a])
                 intervals[a + '->' + b].append(delta)
-        timeline = [{k: r[k] for k in ('stage', 'time_ns', 'sequence', 'submission_id', 'reason') if k in r}
+        timeline = [{k: r[k] for k in ('stage', 'time_ns', 'sequence', 'submission_id', 'reason', 'result') if k in r}
                     for r in sorted(rows, key=lambda r: r['time_ns'])]
         details.append(dict(identity=key, pts_ns=pts, phase=phase, outcome=outcome, missing=missing,
+                            rejected_present_attempts=len(rejected_results),
                             drop_evidence_missing=sorted(set(drop_evidence_missing)),
                             drop_contradictions=sorted(set(drop_contradictions)), timeline=timeline))
     for key in missing_expected:
@@ -253,14 +280,15 @@ def analyze(events, required, startup_ns=1_000_000_000, end_ns=1_000_000_000, me
                 absent_required_stages=[s for s in required if not unique[s]],
                 phases={k: dict(v) for k, v in phases.items()}, unclassified_frames=unclassified,
                 ambiguous_identities=ambiguities, gpu_submission_mismatches=submission_mismatches,
-                present_submission_mismatches=present_mismatches, event_order_errors=event_order_errors,
+                present_submission_mismatches=present_mismatches, present_result_errors=present_result_errors,
+                present_attempt_results=dict(present_results), event_order_errors=event_order_errors,
                 stage_intervals=timing, metadata=meta,
                 identity_universe='expected_manifest' if expected is not None else 'observed_only',
                 expected_frames=len(expected_map) if expected is not None else None,
                 missing_expected_identities=missing_expected, unexpected_identities=unexpected,
                 expected_pts_mismatches=expected_pts_mismatches,
                 expected_source_validated=expected is not None and not missing_expected and not unexpected and not expected_pts_mismatches,
-                accounting_complete=bool(frames) and not missing_expected and not unexpected and not expected_pts_mismatches and not unclassified and not ambiguities and not submission_mismatches and not present_mismatches and not event_order_errors and not meta.get('trace_lost_events', 0) and not meta.get('anonymous_pre_submit_deficit', 0) and not meta.get('missing_trace_footers', 0) and not meta.get('orphan_replacement_events', 0),
+                accounting_complete=bool(frames) and not missing_expected and not unexpected and not expected_pts_mismatches and not unclassified and not ambiguities and not submission_mismatches and not present_mismatches and not present_result_errors and not event_order_errors and not meta.get('trace_lost_events', 0) and not meta.get('anonymous_pre_submit_deficit', 0) and not meta.get('missing_trace_footers', 0) and not meta.get('orphan_replacement_events', 0),
                 physical_scanout_verified=False, frames=details)
 
 

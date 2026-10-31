@@ -128,3 +128,36 @@ are beside the Windows worker's raw captures in `/tmp/m5-native-accounted`.
 Seventeen tests now pass, including entirely removed expected first/middle/last
 frames, unexpected extra source identity, duplicate manifest, arbitrary PTS,
 generation resets, and observed-only scope labeling.
+
+## Presentation attempts versus successful presentation submission
+
+`av.frame_present_submit` trace records already carry the actual `VkResult` for
+every attempted scene presentation. The CSV reader now retains **all** results
+as `present_attempt`, deriving `present_submit` only for `VK_SUCCESS` (0) or
+`VK_SUBOPTIMAL_KHR` (1000001003). The latter was accepted but requires swapchain
+maintenance; `VK_ERROR_OUT_OF_DATE_KHR` (-1000001004) was rejected. The alias
+`av.frame_present_attempt` is also supported. No renderer change or GPU rerun was
+needed. JSONL records explicitly provide `stage=present_attempt`, `result`, and
+`submission_id`, plus the matching success record only when accepted.
+
+Every render submission must match a GPU completion and exactly one present
+attempt. Missing or contradictory attempt/result evidence fails. A rejected
+repeat draw is **not a terminal loss of the video frame** when another draw of
+that identity was accepted. If all draws were rejected, its outcome is
+`classified_presentation_failure:<VkResult>`: accounted, but not completed.
+The report retains numeric result histograms and per-frame rejected counts.
+These are aggregate API results for a scene submission, not per-display scanout.
+
+The intentional native resize capture has 600 expected source identities,
+553 rendered/GPU-complete identities, 552 successfully present-submitted, and
+1,189 draw attempts (1,187 success, two OUT_OF_DATE). PTS1,550,000,000 had a
+rejected draw followed by success and is complete. PTS3,583,333,333 had only a
+rejected draw and is explicitly classified as presentation failure. There are
+also 47 earlier classified drops under this injected resize workload. All600
+identities now have known outcomes; this is not a smooth-playback or zero-loss
+pass. Evidence: `resize-present-summary.json`, full report next to raw capture
+under `/tmp/m5-present-fixed-resize/1920x1080-60-NV12-av`.
+
+Twenty tests pass, including rejected-only, retry-success, missing attempt,
+SUBOPTIMAL acceptance, and contradictory result negatives. All four prior normal
+45-second captures still pass manifest and complete-accounting validation.

@@ -1,0 +1,318 @@
+{
+  "schema_version": 1,
+  "unique_frames": 600,
+  "unique_by_stage": {
+    "sink_receive": 600,
+    "buffer_acquire": 559,
+    "submit": 559,
+    "ipc_receive": 559,
+    "consumer_acquire": 555,
+    "drop": 47,
+    "schedule": 553,
+    "adopt": 553,
+    "render_submit": 553,
+    "present_attempt": 553,
+    "present_submit": 552,
+    "gpu_complete": 553
+  },
+  "repeat_present_submissions": 635,
+  "required_stages": [
+    "sink_receive",
+    "buffer_acquire",
+    "submit",
+    "ipc_receive",
+    "consumer_acquire",
+    "schedule",
+    "adopt",
+    "render_submit",
+    "gpu_complete",
+    "present_attempt",
+    "present_submit"
+  ],
+  "absent_required_stages": [],
+  "phases": {
+    "startup": {
+      "classified_drop:late": 2,
+      "complete": 51,
+      "classified_drop:pending_replaced": 3,
+      "classified_drop:ring_full": 4
+    },
+    "steady": {
+      "complete": 445,
+      "classified_drop:ring_full": 33,
+      "classified_presentation_failure:-1000001004": 1,
+      "classified_drop:pending_replaced": 1
+    },
+    "end": {
+      "complete": 56,
+      "classified_drop:ring_full": 4
+    }
+  },
+  "unclassified_frames": 0,
+  "ambiguous_identities": [],
+  "gpu_submission_mismatches": [],
+  "present_submission_mismatches": [],
+  "present_result_errors": [],
+  "present_attempt_results": {
+    "0": 1187,
+    "-1000001004": 2
+  },
+  "event_order_errors": [],
+  "stage_intervals": {
+    "sink_receive->buffer_acquire": {
+      "count": 559,
+      "min_ns": 400,
+      "max_ns": 158750400,
+      "p50_ns": 1200,
+      "p99_ns": 8980500
+    },
+    "buffer_acquire->submit": {
+      "count": 559,
+      "min_ns": 555200,
+      "max_ns": 1291400,
+      "p50_ns": 652700,
+      "p99_ns": 859000
+    },
+    "submit->ipc_receive": {
+      "count": 559,
+      "min_ns": 900,
+      "max_ns": 12400,
+      "p50_ns": 3600,
+      "p99_ns": 7300
+    },
+    "ipc_receive->consumer_acquire": {
+      "count": 555,
+      "min_ns": 4700,
+      "max_ns": 19050900,
+      "p50_ns": 7268600,
+      "p99_ns": 7932000
+    },
+    "consumer_acquire->schedule": {
+      "count": 553,
+      "min_ns": 11800,
+      "max_ns": 111525200,
+      "p50_ns": 99800800,
+      "p99_ns": 103261700
+    },
+    "schedule->adopt": {
+      "count": 553,
+      "min_ns": 2941000,
+      "max_ns": 18955900,
+      "p50_ns": 3541400,
+      "p99_ns": 8278800
+    },
+    "adopt->render_submit": {
+      "count": 553,
+      "min_ns": 203300,
+      "max_ns": 6847900,
+      "p50_ns": 224000,
+      "p99_ns": 4300300
+    },
+    "render_submit->gpu_complete": {
+      "count": 553,
+      "min_ns": 517500,
+      "max_ns": 39015400,
+      "p50_ns": 16501300,
+      "p99_ns": 20276300
+    },
+    "render_submit->present_attempt": {
+      "count": 553,
+      "min_ns": 155900,
+      "max_ns": 21442700,
+      "p50_ns": 4506100,
+      "p99_ns": 5163100
+    },
+    "render_submit->present_submit": {
+      "count": 552,
+      "min_ns": 155900,
+      "max_ns": 7609900,
+      "p50_ns": 4506100,
+      "p99_ns": 5110000
+    }
+  },
+  "metadata": {
+    "trace_lost_events": 0,
+    "legacy_sink_records_without_identity": 600,
+    "anonymous_pre_submit_deficit": 0
+  },
+  "identity_universe": "expected_manifest",
+  "expected_frames": 600,
+  "missing_expected_identities": [],
+  "unexpected_identities": [],
+  "expected_pts_mismatches": [],
+  "expected_source_validated": true,
+  "accounting_complete": true,
+  "physical_scanout_verified": false,
+  "rejected_frames": [
+    {
+      "identity": [
+        "16475250391895901933",
+        "2",
+        "1550000000"
+      ],
+      "pts_ns": 1550000000,
+      "phase": "steady",
+      "outcome": "complete",
+      "missing": [],
+      "rejected_present_attempts": 1,
+      "drop_evidence_missing": [],
+      "drop_contradictions": [],
+      "timeline": [
+        {
+          "stage": "sink_receive",
+          "time_ns": 1403870505717400,
+          "sequence": 94
+        },
+        {
+          "stage": "buffer_acquire",
+          "time_ns": 1403870505718400,
+          "sequence": 94
+        },
+        {
+          "stage": "submit",
+          "time_ns": 1403870506315800,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1403870506319800,
+          "sequence": 88
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1403870513456100,
+          "sequence": 88
+        },
+        {
+          "stage": "schedule",
+          "time_ns": 1403870613442900,
+          "sequence": 88
+        },
+        {
+          "stage": "adopt",
+          "time_ns": 1403870616744800,
+          "sequence": 88
+        },
+        {
+          "stage": "render_submit",
+          "time_ns": 1403870617816800,
+          "sequence": 88,
+          "submission_id": 267
+        },
+        {
+          "stage": "present_attempt",
+          "time_ns": 1403870621588800,
+          "sequence": 88,
+          "submission_id": 267,
+          "result": 0
+        },
+        {
+          "stage": "present_submit",
+          "time_ns": 1403870621588800,
+          "sequence": 88,
+          "submission_id": 267,
+          "result": 0
+        },
+        {
+          "stage": "render_submit",
+          "time_ns": 1403870622382500,
+          "sequence": 88,
+          "submission_id": 268
+        },
+        {
+          "stage": "present_attempt",
+          "time_ns": 1403870647114700,
+          "sequence": 88,
+          "submission_id": 268,
+          "result": -1000001004
+        },
+        {
+          "stage": "gpu_complete",
+          "time_ns": 1403870652984400,
+          "sequence": 88,
+          "submission_id": 267
+        },
+        {
+          "stage": "gpu_complete",
+          "time_ns": 1403870657913600,
+          "sequence": 88,
+          "submission_id": 268
+        }
+      ]
+    },
+    {
+      "identity": [
+        "16475250391895901933",
+        "2",
+        "3583333333"
+      ],
+      "pts_ns": 3583333333,
+      "phase": "steady",
+      "outcome": "classified_presentation_failure:-1000001004",
+      "missing": [
+        "present_submit"
+      ],
+      "rejected_present_attempts": 1,
+      "drop_evidence_missing": [],
+      "drop_contradictions": [],
+      "timeline": [
+        {
+          "stage": "sink_receive",
+          "time_ns": 1403872539327600,
+          "sequence": 216
+        },
+        {
+          "stage": "buffer_acquire",
+          "time_ns": 1403872546666500,
+          "sequence": 216
+        },
+        {
+          "stage": "submit",
+          "time_ns": 1403872547359100,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1403872547362700,
+          "sequence": 202
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1403872554955100,
+          "sequence": 202
+        },
+        {
+          "stage": "schedule",
+          "time_ns": 1403872646652200,
+          "sequence": 202
+        },
+        {
+          "stage": "adopt",
+          "time_ns": 1403872650117500,
+          "sequence": 202
+        },
+        {
+          "stage": "render_submit",
+          "time_ns": 1403872650816500,
+          "sequence": 202,
+          "submission_id": 510
+        },
+        {
+          "stage": "present_attempt",
+          "time_ns": 1403872672259200,
+          "sequence": 202,
+          "submission_id": 510,
+          "result": -1000001004
+        },
+        {
+          "stage": "gpu_complete",
+          "time_ns": 1403872682975000,
+          "sequence": 202,
+          "submission_id": 510
+        }
+      ]
+    }
+  ],
+  "evidence": "/tmp/m5-present-fixed-resize/1920x1080-60-NV12-av",
+  "scope": "Intentional native window resize,600declared60fpsinputs; present software API outcomes only, not normal-rate or scanout qualification."
+}

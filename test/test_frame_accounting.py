@@ -13,6 +13,8 @@ spec.loader.exec_module(a)
 def event(stage, frame=1, generation=1, **extra):
     if stage in a.SUBMISSION_STAGES:
         extra.setdefault('submission_id', 1)
+    if stage in ('present_attempt', 'present_submit'):
+        extra.setdefault('result', 0)
     return dict(session='video', generation=generation, frame_id=frame,
                 pts_ns=frame*1_000_000_000, time_ns=frame*1_000_000_000 + (a.STAGES.index(stage) if stage in a.STAGES else 9),
                 stage=stage, **extra)
@@ -58,6 +60,7 @@ class Accounting(unittest.TestCase):
         self.assertFalse(r['accounting_complete'])
         self.assertEqual(len(r['gpu_submission_mismatches']), 1)
         events.append(event('gpu_complete', submission_id=2))
+        events.append(event('present_attempt', submission_id=2))
         events.append(event('present_submit', submission_id=2))
         self.assertTrue(a.analyze(events, a.STAGES)['accounting_complete'])
 
@@ -77,7 +80,7 @@ class Accounting(unittest.TestCase):
         events.remove(event('present_submit', submission_id=2))
         r = a.analyze(events, a.STAGES)
         self.assertFalse(r['accounting_complete'])
-        self.assertEqual(len(r['present_submission_mismatches']), 1)
+        self.assertEqual(len(r['present_result_errors']), 1)
 
     def test_unknown_or_contradictory_drop_fails(self):
         events = [event(s) for s in a.STAGES]
@@ -127,6 +130,33 @@ class Accounting(unittest.TestCase):
         self.assertEqual(r['expected_frames'], 4)
         self.assertEqual(r['identity_universe'], 'expected_manifest')
         self.assertEqual(a.analyze(events, a.STAGES)['identity_universe'], 'observed_only')
+
+    def test_rejected_only_presentation_is_accounted_not_completed(self):
+        events = [event(s) for s in a.STAGES if s != 'present_submit']
+        next(e for e in events if e['stage']=='present_attempt')['result'] = -1000001004
+        r = a.analyze(events, a.STAGES)
+        self.assertTrue(r['accounting_complete'])
+        self.assertEqual(r['frames'][0]['outcome'], 'classified_presentation_failure:-1000001004')
+
+    def test_rejected_then_accepted_repeat_completes_frame(self):
+        events = [event(s) for s in a.STAGES if s != 'present_submit']
+        next(e for e in events if e['stage']=='present_attempt')['result'] = -1000001004
+        events.extend(event(s, submission_id=2) for s in a.SUBMISSION_STAGES)
+        r = a.analyze(events, a.STAGES)
+        self.assertTrue(r['accounting_complete'])
+        self.assertEqual(r['frames'][0]['outcome'], 'complete')
+        self.assertEqual(r['frames'][0]['rejected_present_attempts'], 1)
+        events.remove(event('present_attempt', submission_id=2))
+        self.assertFalse(a.analyze(events, a.STAGES)['accounting_complete'])
+
+    def test_suboptimal_accepted_and_contradictory_result_rejected(self):
+        events = [event(s) for s in a.STAGES]
+        for e in events:
+            if e['stage'] in ('present_attempt','present_submit'):
+                e['result'] = 1000001003
+        self.assertTrue(a.analyze(events, a.STAGES)['accounting_complete'])
+        next(e for e in events if e['stage']=='present_attempt')['result'] = -1000001004
+        self.assertFalse(a.analyze(events, a.STAGES)['accounting_complete'])
 
     def test_trace_loss_fails_closed(self):
         events = [event(s) for s in a.STAGES]
