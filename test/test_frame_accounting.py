@@ -11,6 +11,8 @@ spec.loader.exec_module(a)
 
 
 def event(stage, frame=1, generation=1, **extra):
+    if stage in a.SUBMISSION_STAGES:
+        extra.setdefault('submission_id', 1)
     return dict(session='video', generation=generation, frame_id=frame,
                 pts_ns=frame*1_000_000_000, time_ns=frame*1_000_000_000 + (a.STAGES.index(stage) if stage in a.STAGES else 9),
                 stage=stage, **extra)
@@ -34,7 +36,7 @@ class Accounting(unittest.TestCase):
 
     def test_generation_reset_and_repeated_presentation(self):
         events = [event(s, generation=g) for g in (1, 2) for s in a.STAGES]
-        events.append(event('present_submit'))
+        events.extend(event(s, submission_id=2) for s in a.SUBMISSION_STAGES)
         r = a.analyze(events, a.STAGES)
         self.assertEqual(r['unique_frames'], 2)
         self.assertEqual(r['repeat_present_submissions'], 1)
@@ -56,7 +58,39 @@ class Accounting(unittest.TestCase):
         self.assertFalse(r['accounting_complete'])
         self.assertEqual(len(r['gpu_submission_mismatches']), 1)
         events.append(event('gpu_complete', submission_id=2))
+        events.append(event('present_submit', submission_id=2))
         self.assertTrue(a.analyze(events, a.STAGES)['accounting_complete'])
+
+    def test_drop_does_not_hide_missing_predecessor(self):
+        events = [event(s) for s in a.STAGES[:a.STAGES.index('consumer_acquire')+1]]
+        events.append(event('drop', reason='late'))
+        self.assertTrue(a.analyze(events, a.STAGES)['accounting_complete'])
+        events.remove(event('sink_receive'))
+        r = a.analyze(events, a.STAGES)
+        self.assertFalse(r['accounting_complete'])
+        self.assertIn('sink_receive', r['frames'][0]['drop_evidence_missing'])
+
+    def test_removed_repeated_present_fails(self):
+        events = [event(s) for s in a.STAGES]
+        events.extend(event(s, submission_id=2) for s in a.SUBMISSION_STAGES)
+        self.assertTrue(a.analyze(events, a.STAGES)['accounting_complete'])
+        events.remove(event('present_submit', submission_id=2))
+        r = a.analyze(events, a.STAGES)
+        self.assertFalse(r['accounting_complete'])
+        self.assertEqual(len(r['present_submission_mismatches']), 1)
+
+    def test_unknown_or_contradictory_drop_fails(self):
+        events = [event(s) for s in a.STAGES]
+        events.append(event('drop', reason='ring_full'))
+        self.assertFalse(a.analyze(events, a.STAGES)['accounting_complete'])
+        self.assertFalse(a.analyze([event('sink_receive'), event('drop', reason='new_reason')], a.STAGES)['accounting_complete'])
+
+    def test_out_of_order_adopt_and_duplicate_present_fail(self):
+        events = [event(s) for s in a.STAGES]
+        next(r for r in events if r['stage']=='adopt')['time_ns'] = 0
+        self.assertFalse(a.analyze(events, a.STAGES)['accounting_complete'])
+        events = [event(s) for s in a.STAGES] + [event('present_submit')]
+        self.assertFalse(a.analyze(events, a.STAGES)['accounting_complete'])
 
     def test_trace_loss_fails_closed(self):
         events = [event(s) for s in a.STAGES]

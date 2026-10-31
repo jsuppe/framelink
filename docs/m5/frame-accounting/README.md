@@ -12,7 +12,7 @@ a zero-loss performance pass.
 JSONL fields: `session`, `generation`, `frame_id`, `pts_ns`, `time_ns`, `stage`,
 optional `reason`, optional `submission_id` for repeated GPU draws. Frame keys
 include generation; resets cannot merge identities. Stages are `sink_receive`,
-`buffer_acquire`, `submit`, `ipc_receive`, `consumer_acquire`, `schedule`,
+`buffer_acquire`, `submit`, `ipc_receive`, `consumer_acquire`, `schedule`, `adopt`,
 `render_submit`, `gpu_complete`, `present_submit`, `drop`.
 
 CSV supports one generation per channel per capture, with unique PTS per frame.
@@ -55,7 +55,7 @@ FPS averages. It does not claim that the latest corrected build still loses them
 Linux Release plugin/shared renderer compilation passed. Existing `fl_gst_sink_stats`
 was run against the newly built plugin with `FRAMELINK_GST_TRACE` enabled: 3 input
 frames, 3 explicit `no_consumer` drops; the analyzer accounts for all three.
-`no-consumer.json` is that fresh result. Ten unit/negative-control tests pass:
+`no-consumer.json` is that fresh result. Fourteen unit/negative-control tests pass:
 removing an acquisition or drop reason fails, duplicate IDs fail, trace loss
 fails, generations remain isolated, repeat presentation is distinct, a removed
 repeat GPU completion fails, IPC replacement attributes the PREVIOUS frame, truncated captures fail, and transport sequence resets fail.
@@ -63,3 +63,31 @@ repeat GPU completion fails, IPC replacement attributes the PREVIOUS frame, trun
 The Windows worker must collect the new end-to-end trace for actual performance
 qualification. `gpu_complete` is a submission fence observation, not transport
 buffer retirement: a frame may be rendered again after its earlier GPU use ends.
+
+## Hardened evidence gate
+
+A terminal drop reason no longer overrides missing predecessors: for example,
+`late` requires receipt/acquisition evidence through `consumer_acquire`, and
+`pending_replaced` requires evidence through IPC receipt. Unknown reasons and
+stages observed after a claimed terminal drop fail closed. The analyzer consumes
+`av.frame_adopt` as a separate measured stage. Each repeated render submission
+must have matching GPU-completion AND present-submission IDs when those stages
+are required; duplicate/missing submission IDs and invalid event order fail.
+The GPU-completion observation and present API call are parallel descendants of
+submission, not a fictitious sequential `gpu_complete -> present` latency.
+
+Independent recheck of the 45-second Windows BGRA1080p30 capture (renderer
+c54cf7f, FrameLink b551b63) passes this stronger gate: 1,350 contiguous sink
+ordinals/submissions, 1,349 acquisitions, 1,348 adopted/rendered/presented unique
+frames, 5,393 matched GPU/present scene submissions. Two startup drops are
+explicit (PTS0 late and PTS166666666 pending replacement); 1,290 steady and 30
+end frames complete. This is **not zero loss overall**, not 120-fps video (scene
+submissions repeat 30-fps input), and not measured physical scanout. See
+`hardened-bgra30-summary.json`; full raw capture is owned by the Windows worker
+at `/tmp/m5-native-accounted/1920x1080-30-BGRA-av`.
+
+Scope remains observed sink input, not arbitrary decoder output before the sink:
+compare against the configured producer count/ordinal manifest to prove no
+entirely missing source frames or capture tail. Missing trace files are not
+magically discoverable. Multi-window present results are aggregate software API
+outcomes; exact per-display visibility requires additional presentation evidence.

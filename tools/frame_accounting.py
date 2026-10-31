@@ -14,12 +14,24 @@ import json
 from pathlib import Path
 
 STAGES = ('sink_receive', 'buffer_acquire', 'submit', 'ipc_receive',
-          'consumer_acquire', 'schedule', 'render_submit', 'gpu_complete', 'present_submit')
+          'consumer_acquire', 'schedule', 'adopt', 'render_submit', 'gpu_complete', 'present_submit')
 OPS = {'gst.frame_receive': 'sink_receive', 'gst.frame_acquired': 'buffer_acquire',
        'flEndSubmit': 'submit', 'ipc.frame_received': 'ipc_receive',
        'flAcquireFrame': 'consumer_acquire', 'av.frame_schedule': 'schedule',
+       'av.frame_adopt': 'adopt',
        'av.frame_render_submit': 'render_submit', 'av.frame_gpu_complete': 'gpu_complete',
        'av.frame_present_submit': 'present_submit'}
+
+# Last stage necessarily reached before this terminal loss. Never let a reason
+# hide missing earlier evidence. Unknown reasons are intentionally unclassified.
+DROP_BOUNDARIES = {
+    **dict.fromkeys(('no_caps', 'no_consumer', 'negotiation', 'ring_full', 'channel_lost'), 'sink_receive'),
+    **dict.fromkeys(('map_failed', 'invalid_pitch', 'invalid_pts', 'copy_failed', 'submit_failed'), 'buffer_acquire'),
+    'pending_replaced': 'ipc_receive',
+    **dict.fromkeys(('late', 'invalid', 'generation_end', 'generation_changed'), 'consumer_acquire'),
+    'import_failed': 'schedule',
+}
+SUBMISSION_STAGES = ('render_submit', 'gpu_complete', 'present_submit')
 
 
 def load_csv(paths, generation):
@@ -112,6 +124,8 @@ def analyze(events, required, startup_ns=1_000_000_000, end_ns=1_000_000_000, me
     repeats = 0
     ambiguities = []
     submission_mismatches = []
+    present_mismatches = []
+    event_order_errors = []
     intervals = collections.defaultdict(list)
     for key, rows in sorted(frames.items()):
         by_stage = collections.defaultdict(list)
@@ -125,31 +139,77 @@ def analyze(events, required, startup_ns=1_000_000_000, end_ns=1_000_000_000, me
                 elif stage not in ('drop', 'render_submit', 'gpu_complete'):
                     ambiguities.append({'identity': key, 'stage': stage,
                                         'count': len(stage_rows)})
-        submitted = [r.get('submission_id') for r in by_stage.get('render_submit', [])]
-        completed = [r.get('submission_id') for r in by_stage.get('gpu_complete', [])]
-        if ('gpu_complete' in required and submitted and
-                collections.Counter(submitted) != collections.Counter(completed)):
-            submission_mismatches.append({'identity': key, 'submitted': submitted, 'completed': completed})
+        tuples = {}
+        for stage in SUBMISSION_STAGES:
+            records = by_stage.get(stage, [])
+            ids = [r.get('submission_id') for r in records]
+            tuples[stage] = collections.Counter(ids)
+            if records and (None in ids or len(set(ids)) != len(ids)):
+                ambiguities.append({'identity': key, 'stage': stage,
+                                    'reason': 'missing_or_duplicate_submission_id'})
+        submitted = tuples['render_submit']
+        if 'gpu_complete' in required and submitted != tuples['gpu_complete']:
+            submission_mismatches.append({'identity': key, 'submitted': dict(submitted),
+                                          'completed': dict(tuples['gpu_complete'])})
+        if 'present_submit' in required and submitted != tuples['present_submit']:
+            present_mismatches.append({'identity': key, 'submitted': dict(submitted),
+                                      'presented': dict(tuples['present_submit'])})
+        # GPU fence observation and present-call are parallel descendants of
+        # queue submission, not a serial GPU-complete -> present pipeline.
+        # IPC receive may precede flEndSubmit RETURN, so omit that order check.
+        for first, second in (('sink_receive','buffer_acquire'), ('buffer_acquire','submit'),
+                              ('consumer_acquire','schedule'), ('schedule','adopt'),
+                              ('adopt','render_submit')):
+            if first in by_stage and second in by_stage:
+                if min(r['time_ns'] for r in by_stage[second]) < min(r['time_ns'] for r in by_stage[first]):
+                    event_order_errors.append({'identity': key, 'before': first, 'after': second})
+        render_times = {r.get('submission_id'): r['time_ns'] for r in by_stage.get('render_submit', [])}
+        for stage in ('gpu_complete', 'present_submit'):
+            for record in by_stage.get(stage, []):
+                sub = record.get('submission_id')
+                if sub in render_times and record['time_ns'] < render_times[sub]:
+                    event_order_errors.append({'identity': key, 'before': 'render_submit', 'after': stage,
+                                               'submission_id': sub})
         pts = rows[0]['pts_ns']
         lo, hi = bounds[key[:2]]
         phase = 'startup' if pts < lo + startup_ns else 'end' if pts > hi - end_ns else 'steady'
         missing = [s for s in required if s not in by_stage]
         reasons = sorted({r.get('reason', 'unspecified') for r in by_stage.get('drop', [])})
+        drop_evidence_missing = []
+        drop_contradictions = []
         if reasons:
-            outcome = 'classified_drop:' + '+'.join(reasons)
+            for reason in reasons:
+                boundary = DROP_BOUNDARIES.get(reason)
+                if boundary is None:
+                    drop_evidence_missing.append('unknown_drop_reason:' + reason)
+                    continue
+                stop = STAGES.index(boundary)
+                drop_evidence_missing.extend(stage for stage in STAGES[:stop+1]
+                                             if stage in required and stage not in by_stage)
+                drop_contradictions.extend(stage for stage in STAGES[stop+1:] if stage in by_stage)
+            if drop_evidence_missing or drop_contradictions:
+                outcome = 'unclassified_drop_evidence:' + '+'.join(reasons)
+            else:
+                outcome = 'classified_drop:' + '+'.join(reasons)
         elif missing:
             outcome = 'unclassified_missing:' + ','.join(missing)
         else:
             outcome = 'complete'
         phases[phase][outcome] += 1
-        for a, b in zip(required, required[1:]):
+        # These are observational edges; no fictitious GPU-complete-to-present latency.
+        edges = list(zip(STAGES[:STAGES.index('render_submit')+1], STAGES[1:STAGES.index('render_submit')+1]))
+        edges += [('render_submit','gpu_complete'), ('render_submit','present_submit')]
+        for a, b in edges:
+            if a not in required or b not in required:
+                continue
             if a in by_stage and b in by_stage:
                 delta = min(r['time_ns'] for r in by_stage[b]) - min(r['time_ns'] for r in by_stage[a])
                 intervals[a + '->' + b].append(delta)
         timeline = [{k: r[k] for k in ('stage', 'time_ns', 'sequence', 'submission_id', 'reason') if k in r}
                     for r in sorted(rows, key=lambda r: r['time_ns'])]
         details.append(dict(identity=key, pts_ns=pts, phase=phase, outcome=outcome, missing=missing,
-                            timeline=timeline))
+                            drop_evidence_missing=sorted(set(drop_evidence_missing)),
+                            drop_contradictions=sorted(set(drop_contradictions)), timeline=timeline))
     timing = {}
     for stage, values in intervals.items():
         values.sort()
@@ -162,8 +222,9 @@ def analyze(events, required, startup_ns=1_000_000_000, end_ns=1_000_000_000, me
                 absent_required_stages=[s for s in required if not unique[s]],
                 phases={k: dict(v) for k, v in phases.items()}, unclassified_frames=unclassified,
                 ambiguous_identities=ambiguities, gpu_submission_mismatches=submission_mismatches,
+                present_submission_mismatches=present_mismatches, event_order_errors=event_order_errors,
                 stage_intervals=timing, metadata=meta,
-                accounting_complete=bool(frames) and not unclassified and not ambiguities and not submission_mismatches and not meta.get('trace_lost_events', 0) and not meta.get('anonymous_pre_submit_deficit', 0) and not meta.get('missing_trace_footers', 0) and not meta.get('orphan_replacement_events', 0),
+                accounting_complete=bool(frames) and not unclassified and not ambiguities and not submission_mismatches and not present_mismatches and not event_order_errors and not meta.get('trace_lost_events', 0) and not meta.get('anonymous_pre_submit_deficit', 0) and not meta.get('missing_trace_footers', 0) and not meta.get('orphan_replacement_events', 0),
                 physical_scanout_verified=False, frames=details)
 
 

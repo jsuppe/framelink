@@ -13,6 +13,7 @@
     "ipc_receive",
     "consumer_acquire",
     "schedule",
+    "adopt",
     "render_submit",
     "gpu_complete",
     "present_submit"
@@ -23,6 +24,7 @@
     "ipc_receive",
     "consumer_acquire",
     "schedule",
+    "adopt",
     "render_submit",
     "gpu_complete",
     "present_submit"
@@ -37,6 +39,8 @@
   "unclassified_frames": 0,
   "ambiguous_identities": [],
   "gpu_submission_mismatches": [],
+  "present_submission_mismatches": [],
+  "event_order_errors": [],
   "stage_intervals": {},
   "metadata": {
     "trace_lost_events": 0,
@@ -61,10 +65,13 @@
         "ipc_receive",
         "consumer_acquire",
         "schedule",
+        "adopt",
         "render_submit",
         "gpu_complete",
         "present_submit"
       ],
+      "drop_evidence_missing": [],
+      "drop_contradictions": [],
       "timeline": [
         {
           "stage": "sink_receive",
@@ -94,10 +101,13 @@
         "ipc_receive",
         "consumer_acquire",
         "schedule",
+        "adopt",
         "render_submit",
         "gpu_complete",
         "present_submit"
       ],
+      "drop_evidence_missing": [],
+      "drop_contradictions": [],
       "timeline": [
         {
           "stage": "sink_receive",
@@ -127,10 +137,13 @@
         "ipc_receive",
         "consumer_acquire",
         "schedule",
+        "adopt",
         "render_submit",
         "gpu_complete",
         "present_submit"
       ],
+      "drop_evidence_missing": [],
+      "drop_contradictions": [],
       "timeline": [
         {
           "stage": "sink_receive",
