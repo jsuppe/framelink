@@ -10,6 +10,7 @@ struct AudioTimeline {
   std::atomic<uint64_t> deliveryBase{0}, lateBlocks{0}, consecutiveLate{0};
   std::atomic<bool> exhausted{false};
   std::atomic<int64_t> arrivalDrift{0};
+  std::atomic<bool> resetArrival{false};
   uint64_t firstArrival=0, firstMedia=0;
   std::atomic<uint64_t> emptyEvents{0}, fullEvents{0};
   ~AudioTimeline() {
@@ -57,7 +58,7 @@ inline GstPadProbeReturn trackAudio(GstPad*, GstPadProbeInfo* info, gpointer dat
       GST_BUFFER_DURATION(b)!=uint64_t(next-expected)) t.invalid=true;
   if (t.invalid.load()) return GST_PAD_PROBE_DROP; // never schedule corrupt PCM
   const auto arrival=gst_util_get_timestamp();
-  if(!t.firstArrival){t.firstArrival=arrival;t.firstMedia=media;}
+  if(t.resetArrival.exchange(false) || !t.firstArrival){t.firstArrival=arrival;t.firstMedia=media;}
   t.arrivalDrift=int64_t(arrival-t.firstArrival)-int64_t(media-t.firstMedia);
   // Acquire the published base before reading playbackClock (set before base).
   const auto base=t.deliveryBase.load();

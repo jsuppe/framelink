@@ -9,6 +9,7 @@
 #include <array>
 #include <atomic>
 #include <chrono>
+#include <condition_variable>
 #include <cmath>
 #include <cerrno>
 #include <cstdio>
@@ -746,6 +747,42 @@ void checkPlaybackBus(GstBus* bus) {
   gst_message_unref(message);
   throw std::runtime_error(error);
 }
+// Mode 2 primes one PCM block, then gates both producer branches until the
+// consumer has opened its device and installed the shared playback epoch.
+// No video is discarded and no queue is enlarged to absorb device startup.
+struct StartupGate {
+  std::mutex mutex;
+  std::condition_variable changed;
+  bool released=false;
+  bool firstAudio=true;
+  bool expired=false;
+  unsigned timeout;
+  GstElement* pipeline=nullptr;
+  std::vector<std::pair<GstPad*,gulong>> probes;
+  explicit StartupGate(unsigned ms):timeout(ms){}
+  void release() {std::lock_guard<std::mutex> lock(mutex);released=true;changed.notify_all();}
+  ~StartupGate() {
+    release();
+    if(pipeline)gst_element_set_state(pipeline,GST_STATE_NULL);
+    for(auto& p:probes){gst_pad_remove_probe(p.first,p.second);gst_object_unref(p.first);}
+  }
+  void attach(Pipeline& pipeline,const char* element,const char* padName,bool audio) {
+    this->pipeline=pipeline.p;
+    auto* e=named(pipeline,element);auto* pad=gst_element_get_static_pad(e,padName);gst_object_unref(e);
+    struct Context {StartupGate* gate;bool audio;};
+    auto* context=new Context{this,audio};
+    auto id=gst_pad_add_probe(pad,GST_PAD_PROBE_TYPE_BUFFER,[](GstPad*,GstPadProbeInfo*,gpointer data){
+      auto& c=*static_cast<Context*>(data);auto& g=*c.gate;
+      std::unique_lock<std::mutex> lock(g.mutex);
+      if(c.audio && g.firstAudio){g.firstAudio=false;return GST_PAD_PROBE_OK;}
+      if(!g.changed.wait_for(lock,std::chrono::milliseconds(g.timeout),[&]{return g.released;})) {
+        g.expired=true;return GST_PAD_PROBE_DROP;
+      }
+      return GST_PAD_PROBE_OK;
+    },context,[](gpointer p){delete static_cast<Context*>(p);});
+    probes.emplace_back(pad,id);
+  }
+};
 using av::AudioTimeline;
 using av::trackAudio;
 unsigned runProducer(const Options &o, GSocketListener *l,
@@ -780,8 +817,9 @@ unsigned runProducer(const Options &o, GSocketListener *l,
   need(!memcmp(wire, reply, sizeof(wire)),
        "configuration acknowledgement mismatch");
   const auto mode = get(*control);
-  need(mode==0 || mode==1, "unsupported playback mode");
-  const bool streaming=mode==1;
+  need(mode<=2, "unsupported playback mode");
+  const bool streaming=mode!=0;
+  const bool coordinated=mode==2;
   auto audio = accept(l, audioEndpoint(ep, cfg), 'A', o.timeout);
   need(get(*control) == 0x5245414459ULL, "consumer not ready");
   std::string id = idHex(cfg.sessionId), channel = "av3-" + id;
@@ -799,16 +837,47 @@ unsigned runProducer(const Options &o, GSocketListener *l,
           " ! queue max-size-buffers=4 max-size-bytes=0 max-size-time=80000000 "
           "! gdppay ! giostreamsink name=audioio sync=false async=false" : externalPipeline(o,channel));
   setStream(tx, "audioio", *audio, true);
+  StartupGate startup(o.timeout);
+  if(coordinated) {
+    startup.attach(tx,o.inputPipeline.empty()?"video":"externalvideo","src",false);
+    startup.attach(tx,o.inputPipeline.empty()?"audio":"externalaudio",o.inputPipeline.empty()?"src":"sink",true);
+  }
+  auto completeStartup=[&] {
+    if(!coordinated)return;
+    need(get(*control)==0x5052494d4544ULL,"consumer did not preroll");
+    // Both branches use one new origin; media PTS and intentional A/V offsets
+    // remain untouched. The initial config epoch was provisional in mode 2.
+    cfg.epochNs=gst_clock_get_time(clock)+50*GST_MSECOND;
+    gst_element_set_base_time(tx.p,cfg.epochNs);
+    // PLAYING -> PLAYING does not redistribute a bin base time. Branches are
+    // gated, so install the new origin on every child before releasing them.
+    auto* elements=gst_bin_iterate_recurse(GST_BIN(tx.p));GValue value=G_VALUE_INIT;
+    for(;;) {
+      auto result=gst_iterator_next(elements,&value);
+      if(result==GST_ITERATOR_OK){gst_element_set_base_time(GST_ELEMENT(g_value_get_object(&value)),cfg.epochNs);g_value_reset(&value);}
+      else if(result==GST_ITERATOR_RESYNC)gst_iterator_resync(elements);else break;
+    }
+    if(G_IS_VALUE(&value))g_value_unset(&value);gst_iterator_free(elements);
+    put(*control,uint64_t(cfg.epochNs));
+    need(get(*control)==0x474fULL,"consumer did not install playback clock");
+    {std::lock_guard<std::mutex> lock(startup.mutex);need(!startup.expired,"startup gate deadline");}
+    startup.release();
+    printf("{\"event\":\"startup-released\",\"epoch_ns\":%llu}\n",(unsigned long long)cfg.epochNs);
+  };
   if(!o.inputPipeline.empty()) {
     need(streaming,"external pipeline requires consumer --stream");
     need(o.fault.empty() && !o.pacingPpm && !o.audioOffsetNs,"synthetic fault/pacing/offset options cannot be combined with external input");
     AudioTimeline sourceAudio;sourceAudio.pipeline=tx.p;sourceAudio.rate=o.rate;sourceAudio.channels=o.channels;
+    // Release blocked producer pads before sourceAudio stops its pipeline on
+    // exceptional exit; teardown must not wait for the startup gate timeout.
+    struct GateRelease {StartupGate& gate;~GateRelease(){gate.release();}} releaseOnExit{startup};
     auto* ae=named(tx,"externalaudio");auto* ap=gst_element_get_static_pad(ae,"src");gst_object_unref(ae);
     gst_pad_add_probe(ap,GstPadProbeType(GST_PAD_PROBE_TYPE_BUFFER|GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM),trackAudio,&sourceAudio,nullptr);gst_object_unref(ap);
     if(o.traceMedia){attachTrace(tx,"externalvideo","src","producer","video");attachTrace(tx,"externalaudio","src","producer","audio");}
     put(*control,o.frames);
     event("session-ready",o,0,id);
     start(tx,clock,cfg.epochNs);
+    completeStartup();
     auto* bus=gst_element_get_bus(tx.p);Object busOwner{G_OBJECT(bus)};
     GstMessage* message=nullptr;
     const auto eosDeadline=g_get_monotonic_time()+gint64(o.timeout)*1000;
@@ -840,6 +909,11 @@ unsigned runProducer(const Options &o, GSocketListener *l,
   auto *v = h.get(tx, "video"), *a = h.get(tx, "audio");
   put(*control, o.frames);
   event("session-ready", o, 0, id);
+  if(coordinated) {
+    uint64_t duration;
+    need(gst_app_src_push_buffer(GST_APP_SRC(a),makeAudio(o,0,0,duration))==GST_FLOW_OK,"audio prime failed");
+    completeStartup();
+  }
   uint64_t maxPushNs=0;
   for (unsigned n = 0; n < o.frames; ++n) {
     uint64_t pts = uint64_t(n) * GST_SECOND / o.fps,
@@ -854,7 +928,7 @@ unsigned runProducer(const Options &o, GSocketListener *l,
     need(gst_app_src_push_buffer(
              GST_APP_SRC(v), makeVideo(o, n, pts, next - pts)) == GST_FLOW_OK,
          "video send failed");
-    if (!(o.fault == "missing-audio" && n == 10)) {
+    if (!(coordinated && n==0) && !(o.fault == "missing-audio" && n == 10)) {
       uint64_t dur;
       auto *b = makeAudio(o, n, pts, dur);
       if (o.fault == "audio-pts-reset" && n == 10)
@@ -902,7 +976,7 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
   need(flSessionMapPts(&cfg, &mapping, 50 * GST_MSECOND, 0, &base) == 0,
        "clock mapping failed");
   write(*control, wire, sizeof(wire));
-  put(*control, o.stream ? 1 : 0);
+  put(*control, o.stream ? (o.producerClock ? 2 : 1) : 0);
   std::unique_ptr<Conn> audio(connect(audioEndpoint(ep, cfg), 'A', o.timeout, provider));
   std::string id = idHex(cfg.sessionId), channel = "av3-" + id;
   if (o.stream) {
@@ -950,7 +1024,30 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
       need(std::chrono::steady_clock::now()<end,"audio preroll deadline");
       g_usleep(1000);
     }
-    gst_element_get_state(sink,nullptr,nullptr,100*GST_MSECOND);
+    // Fault injection exercises device setup after the first PCM arrives.
+    if(const char* delay=g_getenv("FRAMELINK_TEST_PREROLL_DELAY_MS")) {
+      const auto ms=number(delay);need(ms<=o.timeout,"invalid preroll delay");
+      for(unsigned n=0;n<ms;++n) {
+        need(!stop || !stop->load(),"playback cancelled");
+        need(std::chrono::steady_clock::now()<end,"audio preroll deadline");
+        g_usleep(1000);
+      }
+    }
+    for(;;) {
+      auto state=gst_element_get_state(sink,nullptr,nullptr,10*GST_MSECOND);
+      need(state!=GST_STATE_CHANGE_FAILURE,"audio preroll failed");
+      if(state!=GST_STATE_CHANGE_ASYNC)break;
+      need(!stop || !stop->load(),"playback cancelled");
+      need(!paused || !paused->load(),"session-paused");
+      need(std::chrono::steady_clock::now()<end,"audio preroll deadline");
+    }
+    if(o.producerClock) {
+      put(*control,0x5052494d4544ULL);
+      const auto finalEpoch=get(*control);
+      need(finalEpoch<=uint64_t(INT64_MAX),"invalid startup epoch");
+      cfg.epochNs=int64_t(finalEpoch);
+      need(flSessionMapPts(&cfg,&mapping,50*GST_MSECOND,0,&base)==0,"startup clock mapping failed");
+    }
     const auto resampleSlaves=configureAudioSlaving(sink);
     auto* deviceClock=gst_element_provide_clock(sink);
     Object deviceClockOwner{deviceClock?G_OBJECT(deviceClock):nullptr};
@@ -977,8 +1074,12 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
     if (cb && cb->onStatus) cb->onStatus(audioMaster ? "audio-clock" : (o.producerClock ? "producer-system-clock" : "system-clock-fallback"));
     if (cb && cb->onClock) cb->onClock(timing);
     audioTimeline.playbackClock=GST_CLOCK(gst_object_ref(selected));
+    // Preroll is not clock drift; start arrival-slope diagnostics at the next
+    // post-gate PCM block while retaining the original media continuity state.
+    if(o.producerClock)audioTimeline.resetArrival=true;
     audioTimeline.deliveryBase=mappedBase+latency;
     start(rx,selected,mappedBase);
+    if(o.producerClock)put(*control,0x474fULL);
     av::PlaybackMetrics metrics;
     uint64_t lastMetricsAt=0;
     auto reportMetrics=[&](bool final=false) {

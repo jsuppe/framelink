@@ -1,10 +1,12 @@
 #include "av_playback.h"
 #include <chrono>
 #include <cstdio>
+#include <cstdlib>
 #include <thread>
 int main(int argc,char**argv) {
   if(argc!=4) return 2;
   av::PlaybackOptions o; o.plugin=argv[1];o.session=argv[2];o.audioSink="fakesink";
+  if(std::getenv("FRAMELINK_TEST_PRODUCER_CLOCK"))o.clockPolicy=av::PlaybackClockPolicy::ProducerMapped;
   std::string mode=argv[3]; o.timeoutMs=mode=="bounded"?300:8000;
   o.recoveryAttempts=mode=="bounded"?1:3;
   std::atomic<bool> stop{false},paused{false};o.paused=&paused;

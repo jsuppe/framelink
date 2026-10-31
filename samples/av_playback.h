@@ -27,8 +27,10 @@ struct PlaybackOptions {
   unsigned recoveryAttempts=3;
   // Optional trusted broker adapter. Both callbacks are required.
   const SessionProvider* sessionProvider=nullptr;
-  // ProducerMapped uses the negotiated epoch on the receiver system clock and
-  // slaves the audio device. Avoids device-clock startup stalls pacing video.
+  // ProducerMapped primes audio, then negotiates a final shared epoch on the
+  // receiver system clock and slaves the audio device. Requires mode-2 peer
+  // support (older producers reject explicitly); avoids startup catch-up bursts.
+  // onSession config epoch is provisional; onClock carries the final mapping.
   PlaybackClockPolicy clockPolicy=PlaybackClockPolicy::AudioPreferred;
 };
 // Arrival/queue telemetry is not physical output timing. queueEmptyEvents

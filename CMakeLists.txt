@@ -572,3 +572,10 @@ if(FRAMELINK_BUILD_TESTS AND TARGET framelink_av_playback AND TARGET gstframelin
     add_test(NAME gst_sink_stats COMMAND fl_gst_sink_stats $<TARGET_FILE:gstframelink>)
     set_tests_properties(gst_sink_stats PROPERTIES TIMEOUT 15)
 endif()
+
+if(FRAMELINK_BUILD_TESTS AND TARGET framelink_av_producer AND TARGET gstframelink AND Python3_Interpreter_FOUND)
+    add_test(NAME m5_startup COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/m5_startup.py
+        --build $<TARGET_FILE_DIR:framelink_av_producer>)
+    set_tests_properties(m5_startup PROPERTIES TIMEOUT 130 LABELS "gpu;integration")
+endif()
