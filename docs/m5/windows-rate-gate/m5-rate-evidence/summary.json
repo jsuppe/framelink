@@ -1,0 +1,434 @@
+[
+  {
+    "case": "m4-bgra-30",
+    "wall_seconds": 5.4111905000172555,
+    "exit_codes": [
+      0,
+      0
+    ],
+    "consumer": "channel version=5 format=BGRA size=1920x1080 pool=4 generation=1 adapter=c57d010000000000\nconsumer received=150 verified=150 pattern_gaps=0 sequence_gaps=0 timeouts=1 fps=28.00 pts_age_mean_ms=15.003 pts_age_max_ms=18.862\n",
+    "producer": "channel version=5 format=BGRA size=1920x1080 pool=4 generation=2 adapter=c57d010000000000\nproducer sent=150 timeouts=0 reconnects=0 elapsed_ms=5156\n",
+    "commands": [
+      [
+        "C:\\Users\\jonsu\\dev\\framelink-m4-20261030\\build-final\\Release\\framelink_producer.exe",
+        "--channel",
+        "rate-m4-bgra-30",
+        "--size",
+        "1920x1080",
+        "--format",
+        "bgra",
+        "--frames",
+        "150",
+        "--deadline-ms",
+        "12000",
+        "--fps",
+        "30"
+      ],
+      [
+        "C:\\Users\\jonsu\\dev\\framelink-m4-20261030\\build-final\\Release\\framelink_consumer.exe",
+        "--channel",
+        "rate-m4-bgra-30",
+        "--size",
+        "1920x1080",
+        "--format",
+        "bgra",
+        "--frames",
+        "150",
+        "--deadline-ms",
+        "12000",
+        "--gpu-sync",
+        "1",
+        "--verify",
+        "1",
+        "--map-cpu",
+        "0"
+      ]
+    ],
+    "hashes": {
+      "framelink.dll": "a65cf9d7630f19848d4644be6f33c32bbdcadbcca4c22e618cee635d7aa33f8d",
+      "framelink_av_consumer.exe": "06566df55408165295c41692727237e6083b91b1bc9f9ad64524496091c37db2",
+      "framelink_av_producer.exe": "b2271039fc490da4df3d4178f49ae31b39d11da2b16ae8afefebd87c7161259d",
+      "framelink_av_session.exe": "f6882023c07e55f35acc428c79d604f74e52645b414b3dba5e46930a4078527c",
+      "framelink_consumer.exe": "fda86f9e9f6877fb964737b3982d6336ca8e65cdb2a6c2273a94b3c993e9c273",
+      "framelink_producer.exe": "493d431706c62a081c7ea94e4166de2a89003148a27b024e6848d62175717868"
+    }
+  },
+  {
+    "case": "m5-bgra-30",
+    "wall_seconds": 5.4450729000382125,
+    "exit_codes": [
+      0,
+      0
+    ],
+    "consumer": "channel version=5 format=BGRA size=1920x1080 pool=4 generation=1 adapter=c57d010000000000\nconsumer received=150 verified=150 pattern_gaps=0 sequence_gaps=0 timeouts=2 fps=27.92 pts_age_mean_ms=15.389 pts_age_max_ms=18.813\n",
+    "producer": "channel version=5 format=BGRA size=1920x1080 pool=4 generation=2 adapter=c57d010000000000\nproducer sent=150 timeouts=0 reconnects=0 elapsed_ms=5157\n",
+    "commands": [
+      [
+        "C:\\Users\\jonsu\\dev\\framelink-m5-pipeline\\build\\Release\\framelink_producer.exe",
+        "--channel",
+        "rate-m5-bgra-30",
+        "--size",
+        "1920x1080",
+        "--format",
+        "bgra",
+        "--frames",
+        "150",
+        "--deadline-ms",
+        "12000",
+        "--fps",
+        "30"
+      ],
+      [
+        "C:\\Users\\jonsu\\dev\\framelink-m5-pipeline\\build\\Release\\framelink_consumer.exe",
+        "--channel",
+        "rate-m5-bgra-30",
+        "--size",
+        "1920x1080",
+        "--format",
+        "bgra",
+        "--frames",
+        "150",
+        "--deadline-ms",
+        "12000",
+        "--gpu-sync",
+        "1",
+        "--verify",
+        "1",
+        "--map-cpu",
+        "0"
+      ]
+    ],
+    "hashes": {
+      "framelink.dll": "7376411566ffbf848a7cce7cea473ee8cd64ae79577593fbc2dcc67e93e0ca6d",
+      "framelink_av_consumer.exe": "4aa47e36d813ad765702f93e8a9fafa4ab81dd3ea7eda48f38de38e62ae06d97",
+      "framelink_av_producer.exe": "feec06e245b5c3155a1ac4388aee63a001d5a0fa41a2d50fd7be46aefb51085b",
+      "framelink_av_session.exe": "1eacbee16fc5e2c7be0192b59c79ae0a56fb35d7320d6f45cb6ea84d85af1c4b",
+      "framelink_consumer.exe": "71b240dd06e8d1aed102fa6067d6bccceb2dd7a0d1d05a6477ec10eb83180f6d",
+      "framelink_producer.exe": "8799e4296e854f4589fa06698f8069b4b18ec8b3b6ec4f0327485415f628cd34"
+    }
+  },
+  {
+    "case": "m4-bgra-60",
+    "wall_seconds": 5.405356699833646,
+    "exit_codes": [
+      0,
+      0
+    ],
+    "consumer": "channel version=5 format=BGRA size=1920x1080 pool=4 generation=1 adapter=c57d010000000000\nconsumer received=300 verified=300 pattern_gaps=0 sequence_gaps=0 timeouts=2 fps=55.84 pts_age_mean_ms=14.599 pts_age_max_ms=18.986\n",
+    "producer": "channel version=5 format=BGRA size=1920x1080 pool=4 generation=2 adapter=c57d010000000000\nproducer sent=300 timeouts=0 reconnects=0 elapsed_ms=5157\n",
+    "commands": [
+      [
+        "C:\\Users\\jonsu\\dev\\framelink-m4-20261030\\build-final\\Release\\framelink_producer.exe",
+        "--channel",
+        "rate-m4-bgra-60",
+        "--size",
+        "1920x1080",
+        "--format",
+        "bgra",
+        "--frames",
+        "300",
+        "--deadline-ms",
+        "12000",
+        "--fps",
+        "60"
+      ],
+      [
+        "C:\\Users\\jonsu\\dev\\framelink-m4-20261030\\build-final\\Release\\framelink_consumer.exe",
+        "--channel",
+        "rate-m4-bgra-60",
+        "--size",
+        "1920x1080",
+        "--format",
+        "bgra",
+        "--frames",
+        "300",
+        "--deadline-ms",
+        "12000",
+        "--gpu-sync",
+        "1",
+        "--verify",
+        "1",
+        "--map-cpu",
+        "0"
+      ]
+    ],
+    "hashes": {
+      "framelink.dll": "a65cf9d7630f19848d4644be6f33c32bbdcadbcca4c22e618cee635d7aa33f8d",
+      "framelink_av_consumer.exe": "06566df55408165295c41692727237e6083b91b1bc9f9ad64524496091c37db2",
+      "framelink_av_producer.exe": "b2271039fc490da4df3d4178f49ae31b39d11da2b16ae8afefebd87c7161259d",
+      "framelink_av_session.exe": "f6882023c07e55f35acc428c79d604f74e52645b414b3dba5e46930a4078527c",
+      "framelink_consumer.exe": "fda86f9e9f6877fb964737b3982d6336ca8e65cdb2a6c2273a94b3c993e9c273",
+      "framelink_producer.exe": "493d431706c62a081c7ea94e4166de2a89003148a27b024e6848d62175717868"
+    }
+  },
+  {
+    "case": "m5-bgra-60",
+    "wall_seconds": 5.407516299979761,
+    "exit_codes": [
+      0,
+      0
+    ],
+    "consumer": "channel version=5 format=BGRA size=1920x1080 pool=4 generation=1 adapter=c57d010000000000\nconsumer received=300 verified=300 pattern_gaps=0 sequence_gaps=0 timeouts=1 fps=55.82 pts_age_mean_ms=14.706 pts_age_max_ms=18.547\n",
+    "producer": "channel version=5 format=BGRA size=1920x1080 pool=4 generation=2 adapter=c57d010000000000\nproducer sent=300 timeouts=0 reconnects=0 elapsed_ms=5158\n",
+    "commands": [
+      [
+        "C:\\Users\\jonsu\\dev\\framelink-m5-pipeline\\build\\Release\\framelink_producer.exe",
+        "--channel",
+        "rate-m5-bgra-60",
+        "--size",
+        "1920x1080",
+        "--format",
+        "bgra",
+        "--frames",
+        "300",
+        "--deadline-ms",
+        "12000",
+        "--fps",
+        "60"
+      ],
+      [
+        "C:\\Users\\jonsu\\dev\\framelink-m5-pipeline\\build\\Release\\framelink_consumer.exe",
+        "--channel",
+        "rate-m5-bgra-60",
+        "--size",
+        "1920x1080",
+        "--format",
+        "bgra",
+        "--frames",
+        "300",
+        "--deadline-ms",
+        "12000",
+        "--gpu-sync",
+        "1",
+        "--verify",
+        "1",
+        "--map-cpu",
+        "0"
+      ]
+    ],
+    "hashes": {
+      "framelink.dll": "7376411566ffbf848a7cce7cea473ee8cd64ae79577593fbc2dcc67e93e0ca6d",
+      "framelink_av_consumer.exe": "4aa47e36d813ad765702f93e8a9fafa4ab81dd3ea7eda48f38de38e62ae06d97",
+      "framelink_av_producer.exe": "feec06e245b5c3155a1ac4388aee63a001d5a0fa41a2d50fd7be46aefb51085b",
+      "framelink_av_session.exe": "1eacbee16fc5e2c7be0192b59c79ae0a56fb35d7320d6f45cb6ea84d85af1c4b",
+      "framelink_consumer.exe": "71b240dd06e8d1aed102fa6067d6bccceb2dd7a0d1d05a6477ec10eb83180f6d",
+      "framelink_producer.exe": "8799e4296e854f4589fa06698f8069b4b18ec8b3b6ec4f0327485415f628cd34"
+    }
+  },
+  {
+    "case": "m4-nv12-30",
+    "wall_seconds": 5.406607300043106,
+    "exit_codes": [
+      0,
+      0
+    ],
+    "consumer": "channel version=5 format=NV12 size=1920x1080 pool=4 generation=1 adapter=c57d010000000000\nconsumer received=150 verified=150 pattern_gaps=0 sequence_gaps=0 timeouts=1 fps=28.10 pts_age_mean_ms=6.616 pts_age_max_ms=8.852\n",
+    "producer": "channel version=5 format=NV12 size=1920x1080 pool=4 generation=2 adapter=c57d010000000000\nproducer sent=150 timeouts=0 reconnects=0 elapsed_ms=5155\n",
+    "commands": [
+      [
+        "C:\\Users\\jonsu\\dev\\framelink-m4-20261030\\build-final\\Release\\framelink_producer.exe",
+        "--channel",
+        "rate-m4-nv12-30",
+        "--size",
+        "1920x1080",
+        "--format",
+        "nv12",
+        "--frames",
+        "150",
+        "--deadline-ms",
+        "12000",
+        "--fps",
+        "30"
+      ],
+      [
+        "C:\\Users\\jonsu\\dev\\framelink-m4-20261030\\build-final\\Release\\framelink_consumer.exe",
+        "--channel",
+        "rate-m4-nv12-30",
+        "--size",
+        "1920x1080",
+        "--format",
+        "nv12",
+        "--frames",
+        "150",
+        "--deadline-ms",
+        "12000",
+        "--gpu-sync",
+        "1",
+        "--verify",
+        "1",
+        "--map-cpu",
+        "0"
+      ]
+    ],
+    "hashes": {
+      "framelink.dll": "a65cf9d7630f19848d4644be6f33c32bbdcadbcca4c22e618cee635d7aa33f8d",
+      "framelink_av_consumer.exe": "06566df55408165295c41692727237e6083b91b1bc9f9ad64524496091c37db2",
+      "framelink_av_producer.exe": "b2271039fc490da4df3d4178f49ae31b39d11da2b16ae8afefebd87c7161259d",
+      "framelink_av_session.exe": "f6882023c07e55f35acc428c79d604f74e52645b414b3dba5e46930a4078527c",
+      "framelink_consumer.exe": "fda86f9e9f6877fb964737b3982d6336ca8e65cdb2a6c2273a94b3c993e9c273",
+      "framelink_producer.exe": "493d431706c62a081c7ea94e4166de2a89003148a27b024e6848d62175717868"
+    }
+  },
+  {
+    "case": "m5-nv12-30",
+    "wall_seconds": 5.40737140015699,
+    "exit_codes": [
+      0,
+      0
+    ],
+    "consumer": "channel version=5 format=NV12 size=1920x1080 pool=4 generation=1 adapter=c57d010000000000\nconsumer received=150 verified=150 pattern_gaps=0 sequence_gaps=0 timeouts=1 fps=28.08 pts_age_mean_ms=6.405 pts_age_max_ms=8.857\n",
+    "producer": "channel version=5 format=NV12 size=1920x1080 pool=4 generation=2 adapter=c57d010000000000\nproducer sent=150 timeouts=0 reconnects=0 elapsed_ms=5158\n",
+    "commands": [
+      [
+        "C:\\Users\\jonsu\\dev\\framelink-m5-pipeline\\build\\Release\\framelink_producer.exe",
+        "--channel",
+        "rate-m5-nv12-30",
+        "--size",
+        "1920x1080",
+        "--format",
+        "nv12",
+        "--frames",
+        "150",
+        "--deadline-ms",
+        "12000",
+        "--fps",
+        "30"
+      ],
+      [
+        "C:\\Users\\jonsu\\dev\\framelink-m5-pipeline\\build\\Release\\framelink_consumer.exe",
+        "--channel",
+        "rate-m5-nv12-30",
+        "--size",
+        "1920x1080",
+        "--format",
+        "nv12",
+        "--frames",
+        "150",
+        "--deadline-ms",
+        "12000",
+        "--gpu-sync",
+        "1",
+        "--verify",
+        "1",
+        "--map-cpu",
+        "0"
+      ]
+    ],
+    "hashes": {
+      "framelink.dll": "7376411566ffbf848a7cce7cea473ee8cd64ae79577593fbc2dcc67e93e0ca6d",
+      "framelink_av_consumer.exe": "4aa47e36d813ad765702f93e8a9fafa4ab81dd3ea7eda48f38de38e62ae06d97",
+      "framelink_av_producer.exe": "feec06e245b5c3155a1ac4388aee63a001d5a0fa41a2d50fd7be46aefb51085b",
+      "framelink_av_session.exe": "1eacbee16fc5e2c7be0192b59c79ae0a56fb35d7320d6f45cb6ea84d85af1c4b",
+      "framelink_consumer.exe": "71b240dd06e8d1aed102fa6067d6bccceb2dd7a0d1d05a6477ec10eb83180f6d",
+      "framelink_producer.exe": "8799e4296e854f4589fa06698f8069b4b18ec8b3b6ec4f0327485415f628cd34"
+    }
+  },
+  {
+    "case": "m4-nv12-60",
+    "wall_seconds": 5.406443600077182,
+    "exit_codes": [
+      0,
+      0
+    ],
+    "consumer": "channel version=5 format=NV12 size=1920x1080 pool=4 generation=1 adapter=c57d010000000000\nconsumer received=300 verified=300 pattern_gaps=0 sequence_gaps=0 timeouts=1 fps=56.01 pts_age_mean_ms=6.573 pts_age_max_ms=8.681\n",
+    "producer": "channel version=5 format=NV12 size=1920x1080 pool=4 generation=2 adapter=c57d010000000000\nproducer sent=300 timeouts=0 reconnects=0 elapsed_ms=5157\n",
+    "commands": [
+      [
+        "C:\\Users\\jonsu\\dev\\framelink-m4-20261030\\build-final\\Release\\framelink_producer.exe",
+        "--channel",
+        "rate-m4-nv12-60",
+        "--size",
+        "1920x1080",
+        "--format",
+        "nv12",
+        "--frames",
+        "300",
+        "--deadline-ms",
+        "12000",
+        "--fps",
+        "60"
+      ],
+      [
+        "C:\\Users\\jonsu\\dev\\framelink-m4-20261030\\build-final\\Release\\framelink_consumer.exe",
+        "--channel",
+        "rate-m4-nv12-60",
+        "--size",
+        "1920x1080",
+        "--format",
+        "nv12",
+        "--frames",
+        "300",
+        "--deadline-ms",
+        "12000",
+        "--gpu-sync",
+        "1",
+        "--verify",
+        "1",
+        "--map-cpu",
+        "0"
+      ]
+    ],
+    "hashes": {
+      "framelink.dll": "a65cf9d7630f19848d4644be6f33c32bbdcadbcca4c22e618cee635d7aa33f8d",
+      "framelink_av_consumer.exe": "06566df55408165295c41692727237e6083b91b1bc9f9ad64524496091c37db2",
+      "framelink_av_producer.exe": "b2271039fc490da4df3d4178f49ae31b39d11da2b16ae8afefebd87c7161259d",
+      "framelink_av_session.exe": "f6882023c07e55f35acc428c79d604f74e52645b414b3dba5e46930a4078527c",
+      "framelink_consumer.exe": "fda86f9e9f6877fb964737b3982d6336ca8e65cdb2a6c2273a94b3c993e9c273",
+      "framelink_producer.exe": "493d431706c62a081c7ea94e4166de2a89003148a27b024e6848d62175717868"
+    }
+  },
+  {
+    "case": "m5-nv12-60",
+    "wall_seconds": 5.4063359999563545,
+    "exit_codes": [
+      0,
+      0
+    ],
+    "consumer": "channel version=5 format=NV12 size=1920x1080 pool=4 generation=1 adapter=c57d010000000000\nconsumer received=300 verified=300 pattern_gaps=0 sequence_gaps=0 timeouts=1 fps=55.99 pts_age_mean_ms=6.363 pts_age_max_ms=8.670\n",
+    "producer": "channel version=5 format=NV12 size=1920x1080 pool=4 generation=2 adapter=c57d010000000000\nproducer sent=300 timeouts=0 reconnects=0 elapsed_ms=5158\n",
+    "commands": [
+      [
+        "C:\\Users\\jonsu\\dev\\framelink-m5-pipeline\\build\\Release\\framelink_producer.exe",
+        "--channel",
+        "rate-m5-nv12-60",
+        "--size",
+        "1920x1080",
+        "--format",
+        "nv12",
+        "--frames",
+        "300",
+        "--deadline-ms",
+        "12000",
+        "--fps",
+        "60"
+      ],
+      [
+        "C:\\Users\\jonsu\\dev\\framelink-m5-pipeline\\build\\Release\\framelink_consumer.exe",
+        "--channel",
+        "rate-m5-nv12-60",
+        "--size",
+        "1920x1080",
+        "--format",
+        "nv12",
+        "--frames",
+        "300",
+        "--deadline-ms",
+        "12000",
+        "--gpu-sync",
+        "1",
+        "--verify",
+        "1",
+        "--map-cpu",
+        "0"
+      ]
+    ],
+    "hashes": {
+      "framelink.dll": "7376411566ffbf848a7cce7cea473ee8cd64ae79577593fbc2dcc67e93e0ca6d",
+      "framelink_av_consumer.exe": "4aa47e36d813ad765702f93e8a9fafa4ab81dd3ea7eda48f38de38e62ae06d97",
+      "framelink_av_producer.exe": "feec06e245b5c3155a1ac4388aee63a001d5a0fa41a2d50fd7be46aefb51085b",
+      "framelink_av_session.exe": "1eacbee16fc5e2c7be0192b59c79ae0a56fb35d7320d6f45cb6ea84d85af1c4b",
+      "framelink_consumer.exe": "71b240dd06e8d1aed102fa6067d6bccceb2dd7a0d1d05a6477ec10eb83180f6d",
+      "framelink_producer.exe": "8799e4296e854f4589fa06698f8069b4b18ec8b3b6ec4f0327485415f628cd34"
+    }
+  }
+]

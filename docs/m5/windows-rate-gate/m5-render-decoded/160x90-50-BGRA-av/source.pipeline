@@ -1,0 +1,1 @@
+filesrc location="C:/Users/jonsu/dev/framelink-m5-pipeline/visible-demo/demo-10s.avi" ! avidemux name=d d.video_0 ! queue ! jpegdec ! videoconvert ! @VIDEO_SINK@ d.audio_0 ! queue ! audioconvert ! @AUDIO_SINK@
