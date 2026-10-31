@@ -26,6 +26,7 @@
 #include <wrl/client.h>
 
 #include <atomic>
+#include <cstdlib>
 #include <cstring>
 #include <mutex>
 #include <string>
@@ -631,7 +632,23 @@ FL_API flResult flAcquireBuffer(flChannel* ch, flBuffer* out, uint32_t timeoutMs
         // free slot remains and hence no submit/write would see broken pipe.
         if (!ch->link.peerAlive()) return trace.result(FL_DISCONNECTED);
         const DWORD now = GetTickCount();
-        if (now >= deadline) return trace.result(FL_TIMEOUT);
+        if (now >= deadline) {
+            if (trace.active) {
+                static const bool ringTrace=[] {
+                    const char* flag=std::getenv("FRAMELINK_TRACE_RING");
+                    return flag && flag[0] && std::strcmp(flag,"0")!=0;
+                }();
+                if (ringTrace) {
+                    const auto at=fltrace::clockNs();
+                    fltrace::record({"ring.acquire_timeout",at,0,trace.event.object,
+                        ch->readyValue,consumed,ch->images.size(),-1,FL_TIMEOUT});
+                    for(size_t i=0;i<ch->slotReadyValue.size();++i)
+                        fltrace::record({"ring.slot_state",at,0,trace.event.object,
+                            ch->slotReadyValue[i],consumed,i,-1,FL_TIMEOUT});
+                }
+            }
+            return trace.result(FL_TIMEOUT);
+        }
         uint64_t oldest = UINT64_MAX;
         for (uint64_t v : ch->slotReadyValue)
             if (v > consumed && v < oldest) oldest = v;
