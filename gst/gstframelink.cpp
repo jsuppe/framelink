@@ -196,7 +196,7 @@ static void sinkTryConnect(GstFrameLinkSink* self) {
     if(!self->testOpenDelayed) {
         self->testOpenDelayed=TRUE;
         const char* delay=g_getenv("FRAMELINK_TEST_PRODUCER_OPEN_DELAY_MS");
-        if(delay)g_usleep(std::min(g_ascii_strtoull(delay,nullptr,10),guint64(5000))*1000);
+        if(delay)g_usleep((std::min)(g_ascii_strtoull(delay,nullptr,10),guint64(5000))*1000);
     }
     flResult r;
     guint32 slotIndex = 0;
