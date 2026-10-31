@@ -266,11 +266,13 @@ a favorable measurement window.
 the ordinary writable-buffer acquisition is not responsible for that delay.
 The common clock is already advancing. PTS zero is late, followed by catch-up
 pending replacement/ring-full losses. All observed normal-run losses in the
-four latest native cases are in startup. Fix `26f495f` now connects/imports
+four earlier native cases were in startup; the later combined repeat below
+exposes steady-state ring pressure. Fix `26f495f` connects/imports
 before the final common epoch/GO, without changing original PTS or 100 ms media
 latency. A deterministic Linux 350 ms import-delay control loses 12–13 frames
 with old lazy setup; the fixed version receives/schedules 100/100 with no late
-frames in both formats. Windows native validation is underway. This is bounded
+frames in both formats. The equivalent Windows delayed-open control also passes.
+This is bounded
 initialization, not arbitrary added playback buffering. Native driver calls
 cannot be forcibly interrupted; the deadline is checked on return and retries.
 
@@ -281,10 +283,11 @@ swapchain image. This is separate from the consumed timeline-semaphore fix.
 Fix `dbf6a45` assigns render-finished semaphores per acquired swapchain image.
 Windows native normal/resize tests now report zero validation errors. A genuine
 headless 40 ms GPU-delay plus 40 import-failure test also has zero validation
-errors and matching completion identities. The resize negative still exposes
+errors and matching completion identities. The resize negative exposed
 an accounting gap: a rejected present attempt was being filtered from analysis.
-That attempt must be retained/classified rather than claimed successful or
-silently subtracted. Good unique-frame counts do not waive a correctness failure.
+That analyzer gap is now fixed: every attempt and actual VkResult is retained;
+rejected-only frames count as losses. Good unique-frame counts do not waive a
+correctness failure.
 
 The old-retirement native renderer reproduces the same two binary-semaphore
 validation errors. This defect predates the separate timeline-retirement change;
@@ -379,8 +382,8 @@ Every independent expected identity is accounted for, without treating lost
 frames as delivered. In both 60 fps cases **all submitted frames** reach
 acquisition, adoption, GPU completion and an accepted present call. This locates
 the loss before submission, not somewhere unidentified in rendering. It does
-not yet prove whether the extra ownership is CPU-retained pending/current
-buffers, GPU completion delay, or insufficient capacity for their overlap.
+initially identify which owners filled the pool. The subsequent ownership
+probe below now establishes the omitted older GPU/retirement ownership.
 The changed start phase is important: the earlier short/45-second successes
 cannot be used to disregard this reproducible failure.
 
@@ -415,7 +418,8 @@ Added next observations, with no pool/latency policy change:
 
 Current matrix summary: [preconnected accounting](frame-accounting/preconnected-matrix-summary.json).
 Raw source/manifests are retained under `/tmp/m5-preconnected-accounted` and
-the same named Caspar directory. The targeted unchanged-config probes are running.
+the same named Caspar directory. The targeted unchanged-config probes have
+completed; their findings are recorded below.
 
 Other review results: native normal/resize and actual headless delayed-GPU tests
 report zero validation errors after the presentation-semaphore correction.
@@ -426,10 +430,53 @@ as delivered. The analyzer has **20/20 tests**, including these negatives.
 
 Linux parent regressions passed 53/53 and 22/22 before the final small fixes;
 affected reruns passed 6/6 and 8/8. Windows delayed-import preconnection passed,
-but a same-session restart test failed before playback release. A possible
-two-second control-read deadline versus four-second startup budget mismatch is
-being reproduced, not yet claimed fixed. This is a separate recovery gate.
+but a same-session restart test failed before playback release. Deterministic
+Linux reproduction establishes that both control and audio socket two-second
+idle timeouts conflict with the allowed four-second startup budget. Fix
+`c4f7c91` uses the configured budget until GO, then restores the two-second
+steady-state timeout. With a 2.3-second injected setup delay: old behavior fails
+control reads; control-only fix fails audio; both-fixed delivers 40/40 video and
+38,400 audio samples. Windows original restart qualification remains pending.
+This is a separate recovery gate.
 
 Parent owns integration/audit; Windows worker owns buffer/driver observations;
 startup worker owns recovery. No user input is needed for this work. M5 remains
 open, and later milestones are not being used to bypass the performance gate.
+
+## Ownership probe: why the producer cannot acquire a buffer
+
+The unchanged eight-slot BGRA60 probe accounts 600 expected frames: 560 delivered,
+40 producer ring-full drops. Joining producer slot-ready/consumed snapshots with
+renderer queue/current/retirement events identifies actual owners:
+
+- 37 timeouts: six future frames + one current frame + one older GPU-owned frame.
+- Three timeouts: five future frames + one current + two older GPU-owned frames.
+- Example: consumed=111, all eight slots ready112..119; current=113, pending114..119.
+  Retirement of112 was submitted16.54ms before timeout, but consumed stayed111
+  until0.306ms after it. Submitting retirement is not completing retirement.
+
+The previous nominal six-future + current + writer calculation omitted these
+older owners. It is an implementation sizing/lifetime defect, not evidence that
+the GPU lacks raw 1080p60 throughput. The pool limit is hard-coded in transport
+wire arrays and all platform backends; there is no existing larger-pool setting.
+
+A source-level bound must distinguish pending, retained current, older unfinished
+GPU reads, completed-read-but-unexecuted retirement, unacquired mailbox, and writer.
+With two GPU frame contexts and adoption before the context fence wait, the
+conservative no-burst current-order envelope is twelve slots: 6+1+2+1+1+1. This
+is a proposed conditional bound under independent review, NOT a measured minimum
+or a guarantee against arbitrary stalls or latest-wins burst loss. Preserve six
+future slots and the original100ms deadline if storage capacity changes; tying
+pending capacity to the enlarged ring would recreate the same mistake.
+
+Possible bounded corrections are a versioned larger shared pool, or separate
+renderer-owned GPU holding images with explicit copy-fence retirement. The latter
+adds a copy and must be measured honestly. Reducing media latency or quietly
+discarding due frames is not the accepted fix. Protocol compatibility, all slot
+arrays/key widths, FD limits and GPU resource limits require review before edits.
+
+The same probe run yielded NV1260=598/600 (two startup losses) and BGRA30=1350/1350.
+The earlier66ms producer stall did not recur. Signal/Flush observed maxima were
+1.362ms/0.013ms, so the narrow trace does not establish whether that historical
+stall was inside a driver call or OS descheduling. Keep that uncertainty separate
+from the now-proven ordinary-cadence buffer-budget defect.
