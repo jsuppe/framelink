@@ -650,8 +650,19 @@ FL_API flResult flSubmit(flChannel* ch, const flBuffer* buf, int64_t ptsNs) {
     if (r != FL_OK) return trace.result(r);
     flImageUnmap(buf->image);
     // Correct only because the caller drew with THIS device's context.
-    ch->ctx->Signal(ch->readyFence.Get(), value);
-    ch->ctx->Flush(); // no Flush after Signal == intermittent hangs (M2)
+    {
+        fltrace::Scope signalTrace("d3d11.signal_ready", fltrace::id(ch->name.c_str()));
+        if(signalTrace.active) { signalTrace.event.pts=ptsNs; signalTrace.event.slot=buf->slot; signalTrace.event.fence=value; }
+        signalTrace.result(ch->ctx->Signal(ch->readyFence.Get(), value));
+    }
+    {
+        // Keep the required flush. These optional wall-time scopes distinguish
+        // driver submission latency from IPC/consumer work; a long span alone
+        // cannot distinguish a blocked driver call from thread descheduling.
+        fltrace::Scope flushTrace("d3d11.flush_ready", fltrace::id(ch->name.c_str()));
+        if(flushTrace.active) { flushTrace.event.pts=ptsNs; flushTrace.event.slot=buf->slot; flushTrace.event.fence=value; }
+        ch->ctx->Flush(); // no Flush after Signal == intermittent hangs (M2)
+    }
     return trace.result(flEndSubmit(ch, buf, value, ptsNs));
 }
 
