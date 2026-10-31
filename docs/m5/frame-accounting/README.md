@@ -91,3 +91,40 @@ compare against the configured producer count/ordinal manifest to prove no
 entirely missing source frames or capture tail. Missing trace files are not
 magically discoverable. Multi-window present results are aggregate software API
 outcomes; exact per-display visibility requires additional presentation evidence.
+
+## Independent expected-source manifest
+
+Use `--expected-manifest expected-source.jsonl` to validate the complete source
+identity universe, not only observed trace identities. Each JSONL row contains
+`session`, `generation`, `pts_ns` (integer nanoseconds), and optionally `frame_id`.
+If `frame_id` is omitted it defaults to the PTS string, matching CSV correlation.
+Arbitrary/non-CFR timestamps and multiple explicit generations are supported in
+JSONL; no global frame-rate assumption is made by the analyzer.
+
+Generate this manifest independently from the source fixture or source ledger,
+**not by enumerating the observed sink trace**. Missing entire frames (including
+first/last), unexpected frames, conflicting PTS, and duplicate manifest identities
+fail. Expected endpoints anchor startup/end phases even when boundary frames are
+entirely absent. Without a manifest the report explicitly says
+`identity_universe=observed_only` and `expected_source_validated=false`.
+
+```sh
+python3 tools/frame_accounting.py --csv --generation 2 \
+  --expected-manifest expected-source.jsonl --require-complete \
+  --output accounting-with-manifest.json capture/*.csv
+```
+
+All four 45-second native Windows captures were independently reanalyzed using
+the fixture script's declared 30/60-fps counts (1,350/2,700) and original
+videotestsrc PTS `floor(i*1e9/fps)`. The trace channel hash was used only to map the
+negotiated session, never to choose expected timestamps/counts. All four pass
+source-universe validation and complete accounting; startup losses remain
+2/3/6/9 for BGRA30/NV12-30/BGRA60/NV12-60 respectively. Every steady and end frame
+is accounted as complete in these bounded captures. This does not establish
+zero loss overall, uninstrumented endurance, or physical display scanout.
+`manifest-matrix-summary.json` contains exact results. Full manifests/reports
+are beside the Windows worker's raw captures in `/tmp/m5-native-accounted`.
+
+Seventeen tests now pass, including entirely removed expected first/middle/last
+frames, unexpected extra source identity, duplicate manifest, arbitrary PTS,
+generation resets, and observed-only scope labeling.

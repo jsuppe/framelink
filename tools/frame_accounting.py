@@ -104,21 +104,46 @@ def load_csv(paths, generation):
     return events, metadata
 
 
-def analyze(events, required, startup_ns=1_000_000_000, end_ns=1_000_000_000, metadata=None):
+def analyze(events, required, startup_ns=1_000_000_000, end_ns=1_000_000_000, metadata=None, expected=None):
     frames = collections.defaultdict(list)
     for e in events:
         if e['stage'] not in STAGES + ('drop',):
             raise ValueError('unknown stage: ' + e['stage'])
         # Never merge generations, even when timestamps/sequence reset.
         frames[(str(e['session']), str(e['generation']), str(e['frame_id']))].append(e)
+    expected_map = {}
+    if expected is not None:
+        for item in expected:
+            # CSV uses original PTS as frame_id; JSONL may use explicit source IDs.
+            key = (str(item['session']), str(item['generation']), str(item.get('frame_id', item['pts_ns'])))
+            if key in expected_map:
+                raise ValueError('duplicate expected identity: ' + repr(key))
+            if not isinstance(item['pts_ns'], int):
+                raise ValueError('expected pts_ns must be an integer')
+            expected_map[key] = item['pts_ns']
     bounds = {}
+    # Expected endpoints anchor phases even if the entire first/last frame is absent.
+    for key, pts in expected_map.items():
+        lo, hi = bounds.get(key[:2], (pts, pts))
+        bounds[key[:2]] = min(lo, pts), max(hi, pts)
+    expected_sessions = {key[:2] for key in expected_map}
     for key, rows in frames.items():
         pts_values = {r['pts_ns'] for r in rows}
         if len(pts_values) != 1:
             raise ValueError('identity maps to multiple PTS: ' + repr(key))
         pts = next(iter(pts_values))
-        lo, hi = bounds.get(key[:2], (pts, pts))
-        bounds[key[:2]] = min(lo, pts), max(hi, pts)
+        if key[:2] not in expected_sessions:
+            lo, hi = bounds.get(key[:2], (pts, pts))
+            bounds[key[:2]] = min(lo, pts), max(hi, pts)
+    missing_expected = sorted(set(expected_map) - set(frames))
+    unexpected = sorted(set(frames) - set(expected_map)) if expected is not None else []
+    expected_pts_mismatches = [dict(identity=key, expected_pts_ns=expected_map[key],
+                                    observed_pts_ns=rows[0]['pts_ns'])
+                               for key, rows in frames.items()
+                               if key in expected_map and expected_map[key] != rows[0]['pts_ns']]
+    def phase_for(key, pts):
+        lo, hi = bounds[key[:2]]
+        return 'startup' if pts < lo + startup_ns else 'end' if pts > hi - end_ns else 'steady'
     phases = {p: collections.Counter() for p in ('startup', 'steady', 'end')}
     details, unique = [], collections.Counter()
     repeats = 0
@@ -171,8 +196,7 @@ def analyze(events, required, startup_ns=1_000_000_000, end_ns=1_000_000_000, me
                     event_order_errors.append({'identity': key, 'before': 'render_submit', 'after': stage,
                                                'submission_id': sub})
         pts = rows[0]['pts_ns']
-        lo, hi = bounds[key[:2]]
-        phase = 'startup' if pts < lo + startup_ns else 'end' if pts > hi - end_ns else 'steady'
+        phase = phase_for(key, pts)
         missing = [s for s in required if s not in by_stage]
         reasons = sorted({r.get('reason', 'unspecified') for r in by_stage.get('drop', [])})
         drop_evidence_missing = []
@@ -210,6 +234,13 @@ def analyze(events, required, startup_ns=1_000_000_000, end_ns=1_000_000_000, me
         details.append(dict(identity=key, pts_ns=pts, phase=phase, outcome=outcome, missing=missing,
                             drop_evidence_missing=sorted(set(drop_evidence_missing)),
                             drop_contradictions=sorted(set(drop_contradictions)), timeline=timeline))
+    for key in missing_expected:
+        pts = expected_map[key]
+        phase = phase_for(key, pts)
+        outcome = 'unclassified_absent_expected_frame'
+        phases[phase][outcome] += 1
+        details.append(dict(identity=key, pts_ns=pts, phase=phase, outcome=outcome,
+                            missing=list(required), drop_evidence_missing=[], drop_contradictions=[], timeline=[]))
     timing = {}
     for stage, values in intervals.items():
         values.sort()
@@ -224,7 +255,12 @@ def analyze(events, required, startup_ns=1_000_000_000, end_ns=1_000_000_000, me
                 ambiguous_identities=ambiguities, gpu_submission_mismatches=submission_mismatches,
                 present_submission_mismatches=present_mismatches, event_order_errors=event_order_errors,
                 stage_intervals=timing, metadata=meta,
-                accounting_complete=bool(frames) and not unclassified and not ambiguities and not submission_mismatches and not present_mismatches and not event_order_errors and not meta.get('trace_lost_events', 0) and not meta.get('anonymous_pre_submit_deficit', 0) and not meta.get('missing_trace_footers', 0) and not meta.get('orphan_replacement_events', 0),
+                identity_universe='expected_manifest' if expected is not None else 'observed_only',
+                expected_frames=len(expected_map) if expected is not None else None,
+                missing_expected_identities=missing_expected, unexpected_identities=unexpected,
+                expected_pts_mismatches=expected_pts_mismatches,
+                expected_source_validated=expected is not None and not missing_expected and not unexpected and not expected_pts_mismatches,
+                accounting_complete=bool(frames) and not missing_expected and not unexpected and not expected_pts_mismatches and not unclassified and not ambiguities and not submission_mismatches and not present_mismatches and not event_order_errors and not meta.get('trace_lost_events', 0) and not meta.get('anonymous_pre_submit_deficit', 0) and not meta.get('missing_trace_footers', 0) and not meta.get('orphan_replacement_events', 0),
                 physical_scanout_verified=False, frames=details)
 
 
@@ -234,6 +270,7 @@ def main():
     p.add_argument('--csv', action='store_true')
     p.add_argument('--generation', help='Required for CSV: one generation per channel only')
     p.add_argument('--required', default=','.join(STAGES))
+    p.add_argument('--expected-manifest', type=Path, help='Independent JSONL expected source identities and original PTS; never derive from observed trace')
     p.add_argument('--startup-ms', type=float, default=1000)
     p.add_argument('--end-ms', type=float, default=1000)
     p.add_argument('--output', type=Path)
@@ -249,7 +286,10 @@ def main():
     else:
         events = [json.loads(line) for f in args.files for line in f.read_text().splitlines() if line.strip()]
         metadata = {}
-    result = analyze(events, required, int(args.startup_ms*1e6), int(args.end_ms*1e6), metadata)
+    expected = None
+    if args.expected_manifest:
+        expected = [json.loads(line) for line in args.expected_manifest.read_text().splitlines() if line.strip()]
+    result = analyze(events, required, int(args.startup_ms*1e6), int(args.end_ms*1e6), metadata, expected)
     output = json.dumps(result, indent=2) + '\n'
     if args.output:
         args.output.write_text(output)

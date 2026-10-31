@@ -92,6 +92,42 @@ class Accounting(unittest.TestCase):
         events = [event(s) for s in a.STAGES] + [event('present_submit')]
         self.assertFalse(a.analyze(events, a.STAGES)['accounting_complete'])
 
+    def test_manifest_detects_entire_missing_first_middle_last(self):
+        events = [event(s, f) for f in range(5) for s in a.STAGES]
+        manifest = [dict(session='video', generation=1, frame_id=f, pts_ns=f*1_000_000_000) for f in range(5)]
+        self.assertTrue(a.analyze(events, a.STAGES, expected=manifest)['expected_source_validated'])
+        for frame, phase in ((0,'startup'), (2,'steady'), (4,'end')):
+            r = a.analyze([e for e in events if e['frame_id'] != frame], a.STAGES, expected=manifest)
+            self.assertFalse(r['accounting_complete'])
+            self.assertEqual(len(r['missing_expected_identities']), 1)
+            self.assertEqual(r['phases'][phase]['unclassified_absent_expected_frame'], 1)
+
+    def test_manifest_rejects_extra_duplicate_and_mismatched_pts(self):
+        events = [event(s) for s in a.STAGES]
+        item = dict(session='video', generation=1, frame_id=1, pts_ns=1_000_000_000)
+        with self.assertRaises(ValueError):
+            a.analyze(events, a.STAGES, expected=[item,item])
+        r = a.analyze(events, a.STAGES, expected=[])
+        self.assertFalse(r['accounting_complete'])
+        self.assertEqual(len(r['unexpected_identities']), 1)
+        r = a.analyze(events, a.STAGES, expected=[dict(item, pts_ns=999)])
+        self.assertFalse(r['accounting_complete'])
+        self.assertEqual(len(r['expected_pts_mismatches']), 1)
+
+    def test_manifest_arbitrary_pts_and_generation_identity(self):
+        manifest, events = [], []
+        for generation, pts in ((1,170), (2,170), (2,3927), (2,812219)):
+            manifest.append(dict(session='video', generation=generation, pts_ns=pts))
+            for stage in a.STAGES:
+                e = event(stage, frame=pts, generation=generation)
+                e['pts_ns'] = pts
+                events.append(e)
+        r = a.analyze(events, a.STAGES, expected=manifest)
+        self.assertTrue(r['accounting_complete'])
+        self.assertEqual(r['expected_frames'], 4)
+        self.assertEqual(r['identity_universe'], 'expected_manifest')
+        self.assertEqual(a.analyze(events, a.STAGES)['identity_universe'], 'observed_only')
+
     def test_trace_loss_fails_closed(self):
         events = [event(s) for s in a.STAGES]
         self.assertFalse(a.analyze(events, a.STAGES, metadata={'trace_lost_events': 1})['accounting_complete'])
