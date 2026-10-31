@@ -1,0 +1,14 @@
+Internal ctest changing into directory: /tmp/framelink-m5-producer-preconnect-build
+Test project /tmp/framelink-m5-producer-preconnect-build
+    Start 45: m4_av_recovery
+1/2 Test #45: m4_av_recovery ...................   Passed    9.16 sec
+    Start 52: m5_startup
+2/2 Test #52: m5_startup .......................   Passed   21.54 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Label Time Summary:
+gpu            =  21.54 sec*proc (1 test)
+integration    =  21.54 sec*proc (1 test)
+
+Total Test time (real) =  30.70 sec

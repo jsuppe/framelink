@@ -201,10 +201,15 @@ void write(Conn &c, const void *p, size_t n) {
 }
 void read(Conn &c, void *p, size_t n) {
   gsize done = 0;
-  need(g_input_stream_read_all(g_io_stream_get_input_stream(G_IO_STREAM(c.p)),
-                               p, n, &done, nullptr, nullptr) &&
-           done == n,
-       "control read/disconnect");
+  GError* error=nullptr;
+  const bool ok=g_input_stream_read_all(g_io_stream_get_input_stream(G_IO_STREAM(c.p)),
+                                       p,n,&done,nullptr,&error);
+  if(!ok || done!=n) {
+    const std::string detail=error?error->message:"peer closed connection";
+    if(error)g_error_free(error);
+    throw std::runtime_error("control read/disconnect: "+detail);
+  }
+  if(error)g_error_free(error);
 }
 void put(Conn &c, uint64_t n) {
   unsigned char b[8];
@@ -821,6 +826,9 @@ unsigned runProducer(const Options &o, GSocketListener *l,
   need(mode<=2, "unsupported playback mode");
   const bool streaming=mode!=0;
   const bool coordinated=mode==2;
+  // Audio/device setup is allowed the configured startup budget. The short
+  // steady-state idle timeout must not expire while waiting for PRIMED/GO.
+  if(coordinated)g_socket_set_timeout(g_socket_connection_get_socket(control->p),(o.timeout+999)/1000);
   auto audio = accept(l, audioEndpoint(ep, cfg), 'A', o.timeout);
   need(get(*control) == 0x5245414459ULL, "consumer not ready");
   std::string id = idHex(cfg.sessionId), channel = "av3-" + id;
@@ -868,6 +876,7 @@ unsigned runProducer(const Options &o, GSocketListener *l,
     if(G_IS_VALUE(&value))g_value_unset(&value);gst_iterator_free(elements);
     put(*control,uint64_t(cfg.epochNs));
     need(get(*control)==0x474fULL,"consumer did not install playback clock");
+    tune(*control,o.timeout);
     {std::lock_guard<std::mutex> lock(startup.mutex);need(!startup.expired,"startup gate deadline");}
     startup.release();
     printf("{\"event\":\"startup-released\",\"epoch_ns\":%llu}\n",(unsigned long long)cfg.epochNs);
@@ -985,7 +994,9 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
        "clock mapping failed");
   write(*control, wire, sizeof(wire));
   put(*control, o.stream ? (o.producerClock ? 2 : 1) : 0);
+  if(o.stream && o.producerClock)g_socket_set_timeout(g_socket_connection_get_socket(control->p),(o.timeout+999)/1000);
   std::unique_ptr<Conn> audio(connect(audioEndpoint(ep, cfg), 'A', o.timeout, provider));
+  if(o.stream && o.producerClock)g_socket_set_timeout(g_socket_connection_get_socket(audio->p),(o.timeout+999)/1000);
   std::string id = idHex(cfg.sessionId), channel = "av3-" + id;
   if (o.stream) {
     Pipeline rx;
@@ -1035,11 +1046,13 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
     // Fault injection exercises device setup after the first PCM arrives.
     if(const char* delay=g_getenv("FRAMELINK_TEST_PREROLL_DELAY_MS")) {
       const auto ms=number(delay);need(ms<=o.timeout,"invalid preroll delay");
+      const auto delayStart=g_get_monotonic_time();
       for(unsigned n=0;n<ms;++n) {
         need(!stop || !stop->load(),"playback cancelled");
         need(std::chrono::steady_clock::now()<end,"audio preroll deadline");
         g_usleep(1000);
       }
+      printf("{\"event\":\"startup-preroll-delay\",\"requested_ms\":%u,\"elapsed_us\":%lld}\n",ms,(long long)(g_get_monotonic_time()-delayStart));
     }
     for(;;) {
       auto state=gst_element_get_state(sink,nullptr,nullptr,10*GST_MSECOND);
@@ -1087,7 +1100,7 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
     if(o.producerClock)audioTimeline.resetArrival=true;
     audioTimeline.deliveryBase=mappedBase+latency;
     start(rx,selected,mappedBase);
-    if(o.producerClock)put(*control,0x474fULL);
+    if(o.producerClock){put(*control,0x474fULL);tune(*control,o.timeout);tune(*audio,o.timeout);}
     av::PlaybackMetrics metrics;
     uint64_t lastMetricsAt=0;
     auto reportMetrics=[&](bool final=false) {

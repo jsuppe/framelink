@@ -1,0 +1,4 @@
+FAIL: incomplete/discontinuous audio
+{"event":"playback-clock","policy":"producer","system_now_ns":252417937223700,"selected_now_ns":252417937223539,"device_now_ns":18446744073709551615,"mapped_producer_base_ns":252417987134373,"playback_base_ns":252417987134373,"latency_ns":100000000,"resample_slaves":0}
+{"event":"video-schedule-summary","received":40,"scheduled":40,"handed_off":0,"late":0,"overflow":0,"peak_pending":5,"pending_limit":8,"peak_bytes":288000,"byte_limit":134217728}
+{"event":"playback-metrics","peak_queue_buffers":0,"peak_queue_ns":0,"queue_empty_events":3,"queue_full_events":0,"late_audio_blocks":0,"arrival_drift_ns":0}

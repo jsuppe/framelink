@@ -31,17 +31,28 @@ for policy in ('producer','audio'):
 b=pathlib.Path(a.build).resolve();ext='.exe' if os.name=='nt' else ''
 plugin=b/('gstframelink.dll' if os.name=='nt' else 'libgstframelink.so')
 common=[str(plugin),'--session',str(root/'restart-session'),'--frames','40','--timeout-ms','4000']
-for attempt in ('cancel','restart'):
+for attempt in ('cancel','restart','long-preroll'):
     children=[]
+    case_common=list(common)
+    if attempt=='long-preroll':case_common[-1]='6000'
+    delay='2300' if attempt=='long-preroll' else '1500'
     started=time.monotonic()
     with (root/(attempt+'-producer.log')).open('w') as plog,(root/(attempt+'-consumer.log')).open('w') as clog:
         try:
-            producer=subprocess.Popen([str(b/('framelink_av_producer'+ext)),*common],stdout=plog,stderr=subprocess.STDOUT);children.append(producer)
-            consumer=subprocess.Popen([str(b/('framelink_av_consumer'+ext)),*common,'--stream','--clock-policy','producer','--audio-sink','fakesink'],env=dict(os.environ,FRAMELINK_TEST_PREROLL_DELAY_MS='1500'),stdout=clog,stderr=subprocess.STDOUT);children.append(consumer)
+            producer=subprocess.Popen([str(b/('framelink_av_producer'+ext)),*case_common],stdout=plog,stderr=subprocess.STDOUT);children.append(producer)
+            consumer=subprocess.Popen([str(b/('framelink_av_consumer'+ext)),*case_common,'--stream','--clock-policy','producer','--audio-sink','fakesink'],env=dict(os.environ,FRAMELINK_TEST_PREROLL_DELAY_MS=delay),stdout=clog,stderr=subprocess.STDOUT);children.append(consumer)
             if attempt=='cancel':
                 time.sleep(.75);consumer.kill();consumer.wait(timeout=2)
             codes=(producer.wait(timeout=8),consumer.wait(timeout=8))
             assert (codes[0]!=0 if attempt=='cancel' else codes==(0,0)),(attempt,codes)
+            if attempt!='cancel':
+                clog.flush()
+                rows=[json.loads(line) for line in (root/(attempt+'-consumer.log')).read_text().splitlines() if line.startswith('{')]
+                complete=next(r for r in rows if r.get('event')=='playback-complete')
+                assert complete['video_received']==40 and complete['audio_samples']==38400,complete
+                if attempt=='long-preroll':
+                    delayed=next(r for r in rows if r.get('event')=='startup-preroll-delay')
+                    assert delayed['elapsed_us']>2_000_000,delayed
             results.append(dict(case=attempt,exit_codes=codes,elapsed_seconds=time.monotonic()-started))
         finally:
             for child in children:
