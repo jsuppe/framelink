@@ -11,11 +11,12 @@
 // or disconnects.
 #pragma once
 #include <stdint.h>
+#include "framelink.h"
 
 namespace fl {
 
 constexpr uint32_t kMagic = 0x314B4C46; // "FLK1" little-endian
-constexpr uint32_t kMaxPool = 8;
+constexpr uint32_t kMaxPool = FL_MAX_POOL_SIZE;
 
 enum class MsgType : uint32_t {
     Hello = 1,      // consumer -> producer: version + adapter

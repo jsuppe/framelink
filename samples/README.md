@@ -75,7 +75,7 @@ Producer:
 
 Consumer:
 
-- `--pool 1..8`: ring size, default 4.
+- `--pool 1..16`: ring size, default 4.
 - `--delay-ms N`: hold each acquired frame for N ms before release (0..60000).
   Exercises slow-consumer/backpressure behavior.
 - `--verify 0|1`: default 1 verifies the sample's in-band identity and all active
@@ -164,7 +164,7 @@ shutdown, 1 = API/idle-timeout/pixel failure, 2 = invalid or unsupported CLI.
 
 ## Automated coverage
 
-CTest covers BGRA/NV12, pool sizes 1/2/8, slow consumers, metadata-only capture,
+CTest covers BGRA/NV12, sample pool sizes 1/2/8 and a dedicated full-16-slot ownership/recycling test, slow consumers, metadata-only capture,
 startup geometry negotiation, reconnect, slot selection, malformed/wrong-role
 CLI, and deliberate pixel corruption. Windows additionally tests manual
 submission + consumer-owned GPU fences, plus disconnection with a full ring.

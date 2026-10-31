@@ -18,6 +18,7 @@ namespace fl {
 namespace {
 
 constexpr DWORD kBufferSize = 64 * 1024;
+static_assert(sizeof(fl::MsgHeader)+sizeof(fl::RingDescMsg)<=kBufferSize,"RingDesc exceeds IPC buffer");
 
 std::wstring pipePath(const std::string& name) {
     std::wstring w(name.begin(), name.end());
@@ -121,7 +122,7 @@ bool Channel::send(MsgType type, const void* payload, size_t size) {
     fltrace::Scope trace("ipc.send", (uint64_t)(uintptr_t)this);
     if(trace.active){ trace.event.sequence=(uint64_t)type; trace.event.slot=size; }
     if (!connected_) return false;
-    if (sizeof(MsgHeader) + size > kBufferSize) return false;
+    if (size > kBufferSize - sizeof(MsgHeader) || (size && !payload)) return false;
     uint8_t buf[kBufferSize];
     auto* hdr = (MsgHeader*)buf;
     hdr->magic = kMagic;

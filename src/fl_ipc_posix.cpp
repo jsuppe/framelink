@@ -25,7 +25,8 @@ namespace fl {
 namespace {
 
 constexpr size_t kBufferSize = 64 * 1024;
-constexpr size_t kMaxFds = 32;
+constexpr size_t kMaxFds = fl::kMaxPool * 4;
+static_assert(sizeof(fl::MsgHeader)+sizeof(fl::RingDescMsg)<=kBufferSize,"RingDesc exceeds IPC buffer");
 
 // Abstract-namespace sockets (a leading NUL) so there is no filesystem litter
 // and no stale socket file to clean up after a crash - the name disappears
@@ -153,8 +154,8 @@ bool Channel::sendWithFds(MsgType type, const void* payload, size_t size, const 
                           size_t fdCount) {
     fltrace::Scope trace("ipc.send", (uint64_t)(uintptr_t)this);
     if(trace.active){ trace.event.sequence=(uint64_t)type; trace.event.slot=size; }
-    if (!connected_ || fdCount > kMaxFds) return false;
-    if (sizeof(MsgHeader) + size > kBufferSize) return false;
+    if (!connected_ || fdCount > kMaxFds || (fdCount && !fds) || (size && !payload)) return false;
+    if (size > kBufferSize - sizeof(MsgHeader)) return false;
 
     uint8_t buf[kBufferSize];
     auto* hdr = (MsgHeader*)buf;
@@ -168,7 +169,7 @@ bool Channel::sendWithFds(MsgType type, const void* payload, size_t size, const 
     msg.msg_iov = &iov;
     msg.msg_iovlen = 1;
 
-    char control[CMSG_SPACE(sizeof(int) * kMaxFds)];
+    alignas(cmsghdr) char control[CMSG_SPACE(sizeof(int) * kMaxFds)];
     if (fdCount) {
         memset(control, 0, sizeof(control));
         msg.msg_control = control;
@@ -195,30 +196,30 @@ std::optional<Message> Channel::recv() {
     msghdr msg{};
     msg.msg_iov = &iov;
     msg.msg_iovlen = 1;
-    char control[CMSG_SPACE(sizeof(int) * kMaxFds)];
+    alignas(cmsghdr) char control[CMSG_SPACE(sizeof(int) * kMaxFds)];
     msg.msg_control = control;
     msg.msg_controllen = sizeof(control);
 
     const ssize_t n = recvmsg((int)(intptr_t)handle_ - 1, &msg, MSG_CMSG_CLOEXEC);
-    if (n <= 0 || (size_t)n < sizeof(MsgHeader)) {
-        connected_ = false;
-        return std::nullopt;
-    }
-    const auto* hdr = (const MsgHeader*)buf;
-    if (hdr->magic != kMagic || sizeof(MsgHeader) + hdr->payloadSize > (size_t)n) {
-        connected_ = false;
-        return std::nullopt;
-    }
-
     Message out;
-    out.type = hdr->type;
-    out.payload.assign(buf + sizeof(MsgHeader), buf + sizeof(MsgHeader) + hdr->payloadSize);
-    for (cmsghdr* cm = CMSG_FIRSTHDR(&msg); cm; cm = CMSG_NXTHDR(&msg, cm)) {
-        if (cm->cmsg_level != SOL_SOCKET || cm->cmsg_type != SCM_RIGHTS) continue;
+    // Collect descriptors before validating payload, so malformed/truncated
+    // messages cannot leak kernel-installed SCM_RIGHTS descriptors.
+    for (cmsghdr* cm = CMSG_FIRSTHDR(&msg); n>0 && cm; cm = CMSG_NXTHDR(&msg, cm)) {
+        if (cm->cmsg_level != SOL_SOCKET || cm->cmsg_type != SCM_RIGHTS || cm->cmsg_len<CMSG_LEN(0)) continue;
         const size_t count = (cm->cmsg_len - CMSG_LEN(0)) / sizeof(int);
         const int* got = (const int*)CMSG_DATA(cm);
-        out.fds.assign(got, got + count);
+        out.fds.insert(out.fds.end(),got,got+count);
     }
+    auto reject=[&]() -> std::optional<Message> {
+        for(int fd:out.fds)::close(fd);
+        connected_=false;return std::nullopt;
+    };
+    if(n<=0 || size_t(n)<sizeof(MsgHeader) || (msg.msg_flags&(MSG_TRUNC|MSG_CTRUNC)) || out.fds.size()>kMaxFds)
+        return reject();
+    const auto* hdr = (const MsgHeader*)buf;
+    if(hdr->magic!=kMagic || hdr->payloadSize>size_t(n)-sizeof(MsgHeader))return reject();
+    out.type=hdr->type;
+    out.payload.assign(buf+sizeof(MsgHeader),buf+sizeof(MsgHeader)+hdr->payloadSize);
     return out;
 }
 

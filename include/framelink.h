@@ -34,7 +34,9 @@ extern "C" {
 // Bumped on any wire-format change. Peers refuse each other on mismatch rather
 // than misbehaving: shipping one side while an integrator builds the other is
 // exactly how a silent version skew becomes someone else's afternoon.
-#define FL_VERSION 5
+#define FL_VERSION 6
+// Maximum shared transport images; allocation defaults remain unchanged.
+#define FL_MAX_POOL_SIZE 16
 
 typedef struct flChannel flChannel;
 typedef struct flImage flImage;
