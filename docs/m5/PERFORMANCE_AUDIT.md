@@ -516,3 +516,26 @@ It is not a contradiction of the ownership traces and not proof that the origina
 budget is sufficient under all normal phase alignments. Twelve-slot and format/
 phase repeats are underway. No final full-rate, overhead or physical-scanout
 qualification is claimed from allocation tests or this first control.
+
+## Two buffers versus the scheduled playback reservoir
+
+FrameLink does not inherently require100ms latency or12 images. The application
+currently schedules a common100ms delay and retains aboutsix future60fps images
+in the shared pool. Twelve corrects capacity for that design, not a proved global
+minimum for transport. The latest eight-case matrix delivers18,900/18,900 identities
+with both8-slot controls also clean; capacity primarily removes measured waits
+in these phases. See renderer docs/m5/native-capacity-20261031.
+
+Two-image ping-pong can work when the old reader fully retires before becoming
+the next writer. Current asynchronous rendering can retain older GPU reads as
+well as current and next, so simply shrinking the existing pool cannot safely
+provide that policy. Three images can overlap more work, but also requires an
+explicit older-owner bound; it is not automatically sufficient.
+
+A smaller transport pool could use deadline-aware upstream handoff before
+acquiring the shared image, preserving original PTS and the common target. The
+100ms backlog then lives in decoder/GStreamer buffers; it has not disappeared.
+Alternatively copying into renderer-owned holding images frees transport sooner
+but adds memory/bandwidth. Reducing the common delay must treat audio and video
+coherently. Buffer capacity alone neither mandates nor eliminates playback
+latency. No two/three-image runtime qualification or default change is claimed.
