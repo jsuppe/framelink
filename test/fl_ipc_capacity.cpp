@@ -32,5 +32,20 @@ int main(){
  auto* cm=CMSG_FIRSTHDR(&msg);cm->cmsg_level=SOL_SOCKET;cm->cmsg_type=SCM_RIGHTS;cm->cmsg_len=CMSG_LEN(sizeof(int)*65);
  int descriptors[65];for(auto& v:descriptors)v=fd;memcpy(CMSG_DATA(cm),descriptors,sizeof(descriptors));
  CHECK(sendmsg(truncClient.pollFd(),&msg,MSG_NOSIGNAL)==sizeof(header));truncServer.join();close(fd);
+ // A zero-byte SEQPACKET datagram can still install SCM_RIGHTS FDs.
+ // Also cover malformed nonempty headers using the same ownership check.
+ for(unsigned mode=0;mode<3;++mode){
+  const auto badName=name+"-bad-"+std::to_string(mode);
+  int badFd=open("/dev/null",O_RDONLY|O_CLOEXEC);CHECK(badFd>=0);
+  std::promise<void> badReady;auto badFuture=badReady.get_future();
+  std::thread badServer([&]{auto c=fl::Channel::listen(badName);CHECK(c.connected());const auto before=countFds();badReady.set_value();CHECK(!c.recv());CHECK(countFds()==before);});
+  fl::Channel badClient;for(int i=0;i<100&&!badClient.connected();++i){badClient=fl::Channel::connect(badName,100);if(!badClient.connected())std::this_thread::sleep_for(std::chrono::milliseconds(5));}CHECK(badClient.connected());badFuture.wait();
+  fl::MsgHeader badHeader{};badHeader.magic=0;badHeader.type=fl::MsgType::Bye;
+  iovec badIov{&badHeader,mode==0?0:mode==1?1:sizeof(badHeader)};
+  msghdr badMsg{};badMsg.msg_iov=&badIov;badMsg.msg_iovlen=1;
+  alignas(cmsghdr) char badControl[CMSG_SPACE(sizeof(int))]{};badMsg.msg_control=badControl;badMsg.msg_controllen=sizeof(badControl);
+  auto* badCm=CMSG_FIRSTHDR(&badMsg);badCm->cmsg_level=SOL_SOCKET;badCm->cmsg_type=SCM_RIGHTS;badCm->cmsg_len=CMSG_LEN(sizeof(int));memcpy(CMSG_DATA(badCm),&badFd,sizeof(badFd));
+  CHECK(sendmsg(badClient.pollFd(),&badMsg,MSG_NOSIGNAL)==ssize_t(badIov.iov_len));badServer.join();close(badFd);
+ }
  puts("64 descriptors and expanded RingDesc pass;oversize send rejected");
 }

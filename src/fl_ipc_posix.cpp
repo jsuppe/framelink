@@ -169,7 +169,7 @@ bool Channel::sendWithFds(MsgType type, const void* payload, size_t size, const 
     msg.msg_iov = &iov;
     msg.msg_iovlen = 1;
 
-    alignas(cmsghdr) char control[CMSG_SPACE(sizeof(int) * kMaxFds)];
+    alignas(cmsghdr) char control[CMSG_SPACE(sizeof(int) * kMaxFds)]{};
     if (fdCount) {
         memset(control, 0, sizeof(control));
         msg.msg_control = control;
@@ -196,15 +196,16 @@ std::optional<Message> Channel::recv() {
     msghdr msg{};
     msg.msg_iov = &iov;
     msg.msg_iovlen = 1;
-    alignas(cmsghdr) char control[CMSG_SPACE(sizeof(int) * kMaxFds)];
+    alignas(cmsghdr) char control[CMSG_SPACE(sizeof(int) * kMaxFds)]{};
     msg.msg_control = control;
     msg.msg_controllen = sizeof(control);
 
     const ssize_t n = recvmsg((int)(intptr_t)handle_ - 1, &msg, MSG_CMSG_CLOEXEC);
     Message out;
     // Collect descriptors before validating payload, so malformed/truncated
-    // messages cannot leak kernel-installed SCM_RIGHTS descriptors.
-    for (cmsghdr* cm = CMSG_FIRSTHDR(&msg); n>0 && cm; cm = CMSG_NXTHDR(&msg, cm)) {
+    // messages cannot leak kernel-installed SCM_RIGHTS descriptors. Zero-byte
+    // SEQPACKET datagrams can carry FDs too; a negative recv installed none.
+    for (cmsghdr* cm = CMSG_FIRSTHDR(&msg); n>=0 && cm; cm = CMSG_NXTHDR(&msg, cm)) {
         if (cm->cmsg_level != SOL_SOCKET || cm->cmsg_type != SCM_RIGHTS || cm->cmsg_len<CMSG_LEN(0)) continue;
         const size_t count = (cm->cmsg_len - CMSG_LEN(0)) / sizeof(int);
         const int* got = (const int*)CMSG_DATA(cm);

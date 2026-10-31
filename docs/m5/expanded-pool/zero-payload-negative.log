@@ -1,0 +1,14 @@
+Internal ctest changing into directory: /tmp/framelink-m5-producer-preconnect-build
+Test project /tmp/framelink-m5-producer-preconnect-build
+    Start 3: ipc_expanded_capacity
+1/1 Test #3: ipc_expanded_capacity ............***Failed    0.08 sec
+line 41: countFds()==before
+
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) =   0.08 sec
+
+The following tests FAILED:
+	  3 - ipc_expanded_capacity (Failed)
+Errors while running CTest

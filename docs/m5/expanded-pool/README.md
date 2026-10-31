@@ -36,3 +36,11 @@ see `linux-ctest.log`. The Android arm64-v8a library and both
 new tests cross-compiled successfully with NDK 28.2/API 29; device execution is
 not implied. Windows must run `expanded_pool` on its supported adapter, and
 Android still needs its device allocator coverage.
+
+Follow-up ancillary review found that zero-byte SOCK_SEQPACKET datagrams can
+still carry FDs. The new zero-payload/no-leak regression fails the original
+cleanup condition (`n > 0`), recorded in `zero-payload-negative.log`. Receive
+now scans ancillary data for successful zero-byte reads too, with initialized
+control storage; negative reads are not scanned. Zero-byte, short-header and
+invalid-magic FD-bearing messages all reject without leaks. The affected
+`ipc_expanded_capacity` test passed after the correction (0.14 seconds).
