@@ -1,0 +1,9 @@
+{"command": ["C:/Users/jonsu/dev/vkrender-m5-policy-build/framelink/Release/framelink_av_producer.exe", "C:/Users/jonsu/dev/vkrender-m5-policy-build/framelink/Release/gstframelink.dll", "--session", "C:\\Users\\jonsu\\dev\\m5-policy-offsets-wasapi\\offset-123456789\\session", "--frames", "80", "--timeout-ms", "5000", "--fps", "50", "--rate", "48000", "--format", "BGRA", "--audio-offset-ns", "123456789"]}
+{"event":"session-ready","instance":"e6d04eee6443eea2695a967b83d33b8b","generation":1,"format":"BGRA","video_frames":0,"audio_blocks":0,"audio_offset_ns":123456789}
+{"event":"media-progress","instance":"e6d04eee6443eea2695a967b83d33b8b","generation":1,"format":"BGRA","video_frames":1,"audio_blocks":1,"audio_offset_ns":123456789}
+{"event":"media-progress","instance":"e6d04eee6443eea2695a967b83d33b8b","generation":1,"format":"BGRA","video_frames":25,"audio_blocks":25,"audio_offset_ns":123456789}
+{"event":"media-progress","instance":"e6d04eee6443eea2695a967b83d33b8b","generation":1,"format":"BGRA","video_frames":50,"audio_blocks":50,"audio_offset_ns":123456789}
+{"event":"media-progress","instance":"e6d04eee6443eea2695a967b83d33b8b","generation":1,"format":"BGRA","video_frames":75,"audio_blocks":75,"audio_offset_ns":123456789}
+{"event":"producer-pacing","pacing_ppm":0,"max_push_ns":100407500}
+{"event":"session-complete","instance":"e6d04eee6443eea2695a967b83d33b8b","generation":1,"format":"BGRA","video_frames":80,"audio_blocks":80,"audio_offset_ns":123456789}
+{"role":"producer","ok":true,"sessions":1,"video_frames":80,"audio_blocks":80,"errors":0,"disconnects":0}

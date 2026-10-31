@@ -1,0 +1,22 @@
+{"command": ["C:/Users/jonsu/dev/vkrender-m5-policy-build/framelink/Release/framelink_av_consumer.exe", "C:/Users/jonsu/dev/vkrender-m5-policy-build/framelink/Release/gstframelink.dll", "--session", "C:\\Users\\jonsu\\dev\\m5-policy-offsets-fakesink\\offset-37000000\\session", "--frames", "80", "--timeout-ms", "5000", "--fps", "50", "--rate", "48000", "--format", "BGRA", "--stream", "--audio-sink", "fakesink", "--clock-policy", "producer"]}
+{"event":"playback-clock","policy":"producer","system_now_ns":1372174748788200,"selected_now_ns":1372174748787900,"device_now_ns":18446744073709551615,"mapped_producer_base_ns":1372174745748750,"playback_base_ns":1372174745748750,"latency_ns":100000000,"resample_slaves":0}
+{"event":"playback-clock-sample","system_ns":1372174748865100,"selected_ns":1372174748865000,"device_ns":18446744073709551615,"audio_samples":960}
+{"event":"playback-clock-sample","system_ns":1372174851245100,"selected_ns":1372174851245000,"device_ns":18446744073709551615,"audio_samples":2880}
+{"event":"playback-clock-sample","system_ns":1372174987755300,"selected_ns":1372174987755200,"device_ns":18446744073709551615,"audio_samples":11520}
+{"event":"playback-clock-sample","system_ns":1372175107275600,"selected_ns":1372175107275600,"device_ns":18446744073709551615,"audio_samples":17280}
+{"event":"playback-clock-sample","system_ns":1372175226805900,"selected_ns":1372175226805900,"device_ns":18446744073709551615,"audio_samples":23040}
+{"event":"playback-clock-sample","system_ns":1372175346354000,"selected_ns":1372175346353900,"device_ns":18446744073709551615,"audio_samples":28800}
+{"event":"playback-clock-sample","system_ns":1372175467392800,"selected_ns":1372175467392800,"device_ns":18446744073709551615,"audio_samples":34560}
+{"event":"playback-clock-sample","system_ns":1372175585973600,"selected_ns":1372175585973500,"device_ns":18446744073709551615,"audio_samples":40320}
+{"event":"playback-clock-sample","system_ns":1372175707000800,"selected_ns":1372175707000800,"device_ns":18446744073709551615,"audio_samples":46080}
+{"event":"playback-clock-sample","system_ns":1372175827513200,"selected_ns":1372175827513100,"device_ns":18446744073709551615,"audio_samples":51840}
+{"event":"playback-clock-sample","system_ns":1372175945866500,"selected_ns":1372175945866400,"device_ns":18446744073709551615,"audio_samples":57600}
+{"event":"playback-clock-sample","system_ns":1372176067369600,"selected_ns":1372176067369600,"device_ns":18446744073709551615,"audio_samples":63360}
+{"event":"playback-clock-sample","system_ns":1372176185775600,"selected_ns":1372176185775500,"device_ns":18446744073709551615,"audio_samples":69120}
+{"event":"playback-clock-sample","system_ns":1372176306639900,"selected_ns":1372176306639800,"device_ns":18446744073709551615,"audio_samples":74880}
+{"event":"playback-clock-sample","system_ns":1372176407150000,"selected_ns":1372176407150000,"device_ns":18446744073709551615,"audio_samples":76800}
+{"event":"playback-clock-sample","system_ns":1372176483654900,"selected_ns":1372176483654900,"device_ns":18446744073709551615,"audio_samples":76800}
+{"event":"playback-metrics","peak_queue_buffers":4,"peak_queue_ns":80000000,"queue_empty_events":3,"queue_full_events":73,"late_audio_blocks":0,"arrival_drift_ns":16162100}
+{"event":"playback-complete","audio_master":false,"video_received":39,"video_late":0,"audio_blocks":80,"audio_samples":76800,"latency_ns":100000000}
+{"event":"playback-timing","audio_first_running_pts_ns":37000000,"video_first_running_pts_ns":60000000,"audio_end_ns":1637000000,"video_end_ns":1600000000}
+{"role":"consumer","ok":true,"mode":"streaming","sessions":1}

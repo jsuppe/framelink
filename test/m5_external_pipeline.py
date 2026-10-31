@@ -3,7 +3,7 @@
 Hashes trace-mode media; this is a correctness test, not a throughput benchmark.
 """
 import argparse,json,os,pathlib,subprocess,tempfile
-p=argparse.ArgumentParser();p.add_argument('--build',required=True);p.add_argument('--output');a=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('--build',required=True);p.add_argument('--output');p.add_argument('--audio-sink',default='fakesink');p.add_argument('--clock-policy',choices=['audio','producer'],default='audio');a=p.parse_args()
 b=pathlib.Path(a.build).resolve();root=pathlib.Path(a.output or tempfile.mkdtemp(prefix='fl-m5-')).resolve();root.mkdir(parents=True,exist_ok=True)
 exe='.exe' if os.name=='nt' else '';plugin=b/('gstframelink.dll' if os.name=='nt' else 'libgstframelink.so')
 media=root/'decoded-source.avi'
@@ -20,7 +20,7 @@ for fmt in ('BGRA','NV12'):
     plog=root/(fmt+'-producer.log');clog=root/(fmt+'-consumer.log')
     with plog.open('w') as pf,clog.open('w') as cf:
         producer=subprocess.Popen([str(b/('framelink_av_producer'+exe)),*args,'--input-pipeline',str(pipeline)],stdout=pf,stderr=subprocess.STDOUT)
-        consumer=subprocess.Popen([str(b/('framelink_av_consumer'+exe)),*args,'--stream','--audio-sink','fakesink'],stdout=cf,stderr=subprocess.STDOUT)
+        consumer=subprocess.Popen([str(b/('framelink_av_consumer'+exe)),*args,'--stream','--audio-sink',a.audio_sink,'--clock-policy',a.clock_policy],stdout=cf,stderr=subprocess.STDOUT)
         try:
             codes=(producer.wait(timeout=25),consumer.wait(timeout=25))
         finally:

@@ -10,7 +10,9 @@ python test/m5_visible_demo.py --build build/Release --renderer C:/src/vkrender/
 
 The helper opens `http://127.0.0.1:18765` in the default browser, decodes a real
 10-second MJPEG/PCM AVI into the external producer, and starts a separate native
-renderer with WASAPI/default audio device. It loops **finite** sessions (30 loops
+renderer with WASAPI/default audio device and `--av-clock producer`. The
+negotiated producer epoch is mapped onto the receiver system clock; the audio
+device is slaved to that common clock. `audio_master=false` is expected. It loops **finite** sessions (30 loops
 is approximately 5 minutes, with session startup gaps). This is not an unbounded
 live protocol. The tone is 440 Hz at amplitude 0.01; device volume is unchanged.
 Video is BGRA. Renderer control uses isolated port 18766. Existing demos are not

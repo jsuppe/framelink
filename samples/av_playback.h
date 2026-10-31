@@ -14,6 +14,7 @@ struct PlaybackClock {
   uint64_t baseTimeNs = 0, latencyNs = 0;
   bool audioMaster = false;
 };
+enum class PlaybackClockPolicy { AudioPreferred, ProducerMapped };
 struct PlaybackOptions {
   std::string plugin, session, format = "BGRA", audioSink = "autoaudiosink";
   unsigned width=160, height=90, fps=50, rate=48000, channels=2;
@@ -26,6 +27,9 @@ struct PlaybackOptions {
   unsigned recoveryAttempts=3;
   // Optional trusted broker adapter. Both callbacks are required.
   const SessionProvider* sessionProvider=nullptr;
+  // ProducerMapped uses the negotiated epoch on the receiver system clock and
+  // slaves the audio device. Avoids device-clock startup stalls pacing video.
+  PlaybackClockPolicy clockPolicy=PlaybackClockPolicy::AudioPreferred;
 };
 // Arrival/queue telemetry is not physical output timing. queueEmptyEvents
 // includes startup and EOS; it must not be labeled device underruns.

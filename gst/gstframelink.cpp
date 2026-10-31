@@ -148,7 +148,7 @@ typedef struct _GstFrameLinkSink {
     gboolean haveInfo;
     gint64 nextConnectUs; // lazy-connect rate limit (the consumer may not be up)
     gboolean busyWarned;
-    guint64 submitted, dropped;
+    guint64 submitted, dropped, received, ringFullDrops;
 #ifndef _WIN32
     gboolean mapRefused; // consumer ring not FL_MAP_CPU - fatal, but say why
 #endif
@@ -236,6 +236,7 @@ static gboolean sinkSetCaps(GstBaseSink* base, GstCaps* caps) {
 static GstFlowReturn sinkRender(GstBaseSink* base, GstBuffer* buffer) {
     GstFrameLinkSink* self = GST_FRAMELINK_SINK(base);
     gsttrace::Scope trace("gst.sinkRender",gsttrace::id(self->channel));
+    ++self->received;
     if (!self->haveInfo) return trace.result(GST_FLOW_OK);
 
     if (!self->ch) {
@@ -259,6 +260,7 @@ static GstFlowReturn sinkRender(GstBaseSink* base, GstBuffer* buffer) {
     flBuffer fb = {};
     flResult r = flAcquireBuffer(self->ch, &fb, 5);
     if (r == FL_TIMEOUT || r == FL_BUSY) {
+        ++self->ringFullDrops;
         ++self->dropped; // ring full: the consumer is behind, latest-wins says drop
         return trace.result(GST_FLOW_OK);
     }
@@ -375,7 +377,11 @@ static GstFlowReturn sinkRender(GstBaseSink* base, GstBuffer* buffer) {
                 return trace.result(GST_FLOW_ERROR);
             }
         }
-        flSubmit(self->ch, &fb, pts);
+        if (flSubmit(self->ch, &fb, pts) != FL_OK) {
+            ++self->dropped;
+            sinkDisconnect(self);
+            return trace.result(GST_FLOW_OK);
+        }
         if (++self->submitted % 300 == 1)
             GST_INFO_OBJECT(self, "%" G_GUINT64_FORMAT " frames submitted, %" G_GUINT64_FORMAT
                             " dropped", self->submitted, self->dropped);
@@ -384,6 +390,23 @@ static GstFlowReturn sinkRender(GstBaseSink* base, GstBuffer* buffer) {
         return trace.result(GST_FLOW_ERROR);
     }
     return trace.result(GST_FLOW_OK);
+}
+
+// EOS is serialized with render calls, so this snapshot needs no per-frame
+// reporting lock or synchronous logging. Querying GstBaseSink's generic stats
+// alone would hide frames dropped by the transport's full-ring policy.
+static gboolean sinkEvent(GstBaseSink* base, GstEvent* event) {
+    if (GST_EVENT_TYPE(event) == GST_EVENT_EOS) {
+        auto* self = GST_FRAMELINK_SINK(base);
+        auto* stats = gst_structure_new("framelink-sink-stats",
+            "received", G_TYPE_UINT64, self->received,
+            "submitted", G_TYPE_UINT64, self->submitted,
+            "dropped", G_TYPE_UINT64, self->dropped,
+            "ring-full-drops", G_TYPE_UINT64, self->ringFullDrops, NULL);
+        gst_element_post_message(GST_ELEMENT(base),
+            gst_message_new_element(GST_OBJECT(base), stats));
+    }
+    return GST_BASE_SINK_CLASS(gst_framelink_sink_parent_class)->event(base, event);
 }
 
 static gboolean sinkStop(GstBaseSink* base) {
@@ -459,6 +482,7 @@ static void gst_framelink_sink_class_init(GstFrameLinkSinkClass* klass) {
 
     basesink->set_caps = sinkSetCaps;
     basesink->render = sinkRender;
+    basesink->event = sinkEvent;
     basesink->stop = sinkStop;
 }
 

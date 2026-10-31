@@ -565,3 +565,10 @@ if(FRAMELINK_BUILD_TESTS AND TARGET framelink_av_producer AND Python3_Interprete
         --build $<TARGET_FILE_DIR:framelink_av_producer>)
     set_tests_properties(m5_external_pipeline PROPERTIES TIMEOUT 90 LABELS "gpu;integration")
 endif()
+
+if(FRAMELINK_BUILD_TESTS AND TARGET framelink_av_playback AND TARGET gstframelink)
+    add_executable(fl_gst_sink_stats test/fl_gst_sink_stats.cpp)
+    target_link_libraries(fl_gst_sink_stats PRIVATE framelink_av_playback)
+    add_test(NAME gst_sink_stats COMMAND fl_gst_sink_stats $<TARGET_FILE:gstframelink>)
+    set_tests_properties(gst_sink_stats PROPERTIES TIMEOUT 15)
+endif()

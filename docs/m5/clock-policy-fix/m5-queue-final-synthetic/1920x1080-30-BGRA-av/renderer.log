@@ -1,0 +1,72 @@
+[INF] renderer: device: NVIDIA GeForce RTX 5090 (headless)
+[INF] scene: 1 window(s), canvas 1280x720 (aspect 1.78). Controls: L layout, SPACE pause, -/= speed, B backdrop, 1-9 toggle stream, 0 all, ESC quit
+[INF] service: 12 framelink input slots ready ('1920x1080-30-BGRA-av.in.0' .. '1920x1080-30-BGRA-av.in.11')
+[INF] control: moderation API on http://127.0.0.1:61087/api/
+[INF] renderer: stream header 640x360 fmt=44, dynamic win32 surfaces
+[INF] renderer: imported win32 surface key=17 1920x1080 (1 total, zero-copy)
+[INF] service: system wake held (presentation active)
+[INF] renderer: imported win32 surface key=19 1920x1080 (2 total, zero-copy)
+[INF] renderer: imported win32 surface key=21 1920x1080 (3 total, zero-copy)
+[INF] renderer: imported win32 surface key=22 1920x1080 (4 total, zero-copy)
+[INF] renderer: imported win32 surface key=16 1920x1080 (5 total, zero-copy)
+[INF] renderer: imported win32 surface key=18 1920x1080 (6 total, zero-copy)
+[INF] renderer: imported win32 surface key=20 1920x1080 (7 total, zero-copy)
+{"event":"playback-clock","policy":"producer","system_now_ns":1372142711034800,"selected_now_ns":1372142711034600,"device_now_ns":0,"mapped_producer_base_ns":1372142701163650,"playback_base_ns":1372142701163650,"latency_ns":100000000,"resample_slaves":1}
+{"event":"playback-clock-sample","system_ns":1372142711378300,"selected_ns":1372142711378200,"device_ns":1372142711090900,"audio_samples":1600}
+{"event":"playback-clock-sample","system_ns":1372142813155800,"selected_ns":1372142813155700,"device_ns":1372142831090900,"audio_samples":6400}
+{"event":"playback-clock-sample","system_ns":1372142918364500,"selected_ns":1372142918364400,"device_ns":1372142931090900,"audio_samples":11200}
+{"event":"playback-clock-sample","system_ns":1372143020578200,"selected_ns":1372143020578100,"device_ns":1372143012487690,"audio_samples":16000}
+{"event":"playback-clock-sample","system_ns":1372143122278100,"selected_ns":1372143122278000,"device_ns":1372143122454939,"audio_samples":20800}
+{"event":"playback-clock-sample","system_ns":1372143227523000,"selected_ns":1372143227522900,"device_ns":1372143222808743,"audio_samples":25600}
+{"event":"playback-clock-sample","system_ns":1372143328260600,"selected_ns":1372143328260500,"device_ns":1372143322882144,"audio_samples":30400}
+{"event":"playback-clock-sample","system_ns":1372143428423200,"selected_ns":1372143428423100,"device_ns":1372143426812012,"audio_samples":35200}
+{"event":"playback-clock-sample","system_ns":1372143533027600,"selected_ns":1372143533027500,"device_ns":1372143535645206,"audio_samples":40000}
+{"event":"playback-clock-sample","system_ns":1372143635833500,"selected_ns":1372143635833400,"device_ns":1372143634816381,"audio_samples":44800}
+{"event":"playback-clock-sample","system_ns":1372143736096800,"selected_ns":1372143736096700,"device_ns":1372143734474379,"audio_samples":51200}
+{"event":"playback-clock-sample","system_ns":1372143841390000,"selected_ns":1372143841389900,"device_ns":1372143834292725,"audio_samples":56000}
+{"event":"playback-clock-sample","system_ns":1372143942077100,"selected_ns":1372143942077000,"device_ns":1372143943940840,"audio_samples":60800}
+{"event":"playback-clock-sample","system_ns":1372144042847200,"selected_ns":1372144042847100,"device_ns":1372144043578247,"audio_samples":65600}
+{"event":"playback-clock-sample","system_ns":1372144147610000,"selected_ns":1372144147609900,"device_ns":1372144143361044,"audio_samples":70400}
+{"event":"playback-clock-sample","system_ns":1372144250360100,"selected_ns":1372144250360000,"device_ns":1372144245353683,"audio_samples":75200}
+{"event":"playback-clock-sample","system_ns":1372144350549700,"selected_ns":1372144350549600,"device_ns":1372144344902768,"audio_samples":80000}
+{"event":"playback-clock-sample","system_ns":1372144453682800,"selected_ns":1372144453682700,"device_ns":1372144456478603,"audio_samples":84800}
+{"event":"playback-clock-sample","system_ns":1372144558845700,"selected_ns":1372144558845600,"device_ns":1372144555868689,"audio_samples":89600}
+{"event":"playback-clock-sample","system_ns":1372144663978400,"selected_ns":1372144663978300,"device_ns":1372144665403610,"audio_samples":94400}
+{"event":"playback-clock-sample","system_ns":1372144765205500,"selected_ns":1372144765205400,"device_ns":1372144764936346,"audio_samples":99200}
+{"event":"playback-clock-sample","system_ns":1372144866340100,"selected_ns":1372144866340000,"device_ns":1372144864653754,"audio_samples":104000}
+{"event":"playback-clock-sample","system_ns":1372144967001000,"selected_ns":1372144967000900,"device_ns":1372144964350277,"audio_samples":108800}
+{"event":"playback-clock-sample","system_ns":1372145068130800,"selected_ns":1372145068130700,"device_ns":1372145064034189,"audio_samples":113600}
+{"event":"playback-clock-sample","system_ns":1372145170755600,"selected_ns":1372145170755500,"device_ns":1372145163780623,"audio_samples":120000}
+{"event":"playback-clock-sample","system_ns":1372145272910000,"selected_ns":1372145272909900,"device_ns":1372145273657240,"audio_samples":124800}
+{"event":"playback-clock-sample","system_ns":1372145376010300,"selec[INF] scene: 279 frames in 5s (two-cubes, 1/1 streams in scene, 1 windows)
+[INF] service: 118 adoptions in 5s (pool 7 slots, 1 producers)
+[INF] service: display wake released (presentation idle)
+AV_RENDER due_decisions=146 hold_checks=147 late_drops=0 invalid_pts=0 status=ended
+ted_ns":1372145376010200,"device_ns":1372145374866416,"audio_samples":129600}
+{"event":"playback-clock-sample","system_ns":1372145480653900,"selected_ns":1372145480653900,"device_ns":1372145474612042,"audio_samples":134400}
+{"event":"playback-clock-sample","system_ns":1372145584138500,"selected_ns":1372145584138500,"device_ns":1372145584342343,"audio_samples":139200}
+{"event":"playback-clock-sample","system_ns":1372145685777600,"selected_ns":1372145685777500,"device_ns":1372145684162972,"audio_samples":144000}
+{"event":"playback-clock-sample","system_ns":1372145786920300,"selected_ns":1372145786920200,"device_ns":1372145785164745,"audio_samples":148800}
+{"event":"playback-clock-sample","system_ns":1372145891838800,"selected_ns":1372145891838700,"device_ns":1372145884904219,"audio_samples":153600}
+{"event":"playback-clock-sample","system_ns":1372145992470400,"selected_ns":1372145992470300,"device_ns":1372145995734628,"audio_samples":158400}
+{"event":"playback-clock-sample","system_ns":1372146092621500,"selected_ns":1372146092621400,"device_ns":1372146095315200,"audio_samples":163200}
+{"event":"playback-clock-sample","system_ns":1372146193251800,"selected_ns":1372146193251700,"device_ns":1372146195023871,"audio_samples":168000}
+{"event":"playback-clock-sample","system_ns":1372146294410800,"selected_ns":1372146294410700,"device_ns":1372146294700351,"audio_samples":172800}
+{"event":"playback-clock-sample","system_ns":1372146398118400,"selected_ns":1372146398118300,"device_ns":1372146395517757,"audio_samples":177600}
+{"event":"playback-clock-sample","system_ns":1372146500327100,"selected_ns":1372146500327000,"device_ns":1372146495173872,"audio_samples":182400}
+{"event":"playback-clock-sample","system_ns":1372146604980100,"selected_ns":1372146604980000,"device_ns":1372146604781936,"audio_samples":188800}
+{"event":"playback-clock-sample","system_ns":1372146707141300,"selected_ns":1372146707141200,"device_ns":1372146705034298,"audio_samples":193600}
+{"event":"playback-clock-sample","system_ns":1372146808863700,"selected_ns":1372146808863600,"device_ns":1372146804634967,"audio_samples":198400}
+{"event":"playback-clock-sample","system_ns":1372146908993600,"selected_ns":1372146908993500,"device_ns":1372146904271050,"audio_samples":203200}
+{"event":"playback-clock-sample","system_ns":1372147012126100,"selected_ns":1372147012126000,"device_ns":1372147013680925,"audio_samples":208000}
+{"event":"playback-clock-sample","system_ns":1372147114405100,"selected_ns":1372147114405000,"device_ns":1372147114555131,"audio_samples":212800}
+{"event":"playback-clock-sample","system_ns":1372147215066300,"selected_ns":1372147215066300,"device_ns":1372147215255941,"audio_samples":217600}
+{"event":"playback-clock-sample","system_ns":1372147316712600,"selected_ns":1372147316712600,"device_ns":1372147314805473,"audio_samples":222400}
+{"event":"playback-clock-sample","system_ns":1372147416896700,"selected_ns":1372147416896600,"device_ns":1372147414962346,"audio_samples":227200}
+{"event":"playback-clock-sample","system_ns":1372147518353600,"selected_ns":1372147518353500,"device_ns":1372147514584322,"audio_samples":232000}
+{"event":"playback-clock-sample","system_ns":1372147624218200,"selected_ns":1372147624218100,"device_ns":1372147624829222,"audio_samples":236800}
+{"event":"playback-clock-sample","system_ns":1372147729395100,"selected_ns":1372147729395000,"device_ns":1372147725628461,"audio_samples":240000}
+{"event":"playback-clock-sample","system_ns":1372147804065400,"selected_ns":1372147804065300,"device_ns":1372147805686851,"audio_samples":240000}
+{"event":"playback-metrics","peak_queue_buffers":2,"peak_queue_ns":66666667,"queue_empty_events":5,"queue_full_events":0,"late_audio_blocks":0,"arrival_drift_ns":-7399866}
+{"event":"playback-complete","audio_master":false,"video_received":0,"video_late":0,"audio_blocks":150,"audio_samples":240000,"latency_ns":100000000}
+{"event":"playback-timing","audio_first_running_pts_ns":0,"video_first_running_pts_ns":18446744073709551615,"audio_end_ns":5000000000,"video_end_ns":5000000000}

@@ -22,7 +22,7 @@ def run(args, root, offset, fault=False):
     producer = [args.producer] + common + ['--audio-offset-ns', str(offset)]
     if fault:
         producer += ['--fault', 'audio-pts-reset']
-    consumer = [args.consumer] + common + ['--stream', '--audio-sink', 'fakesink']
+    consumer = [args.consumer] + common + ['--stream', '--audio-sink', args.audio_sink, '--clock-policy',args.clock_policy]
     peers = []
     try:
         peers.append(Peer(producer, directory, 'producer'))
@@ -66,6 +66,8 @@ def main():
     p.add_argument('consumer')
     p.add_argument('plugin')
     p.add_argument('--output')
+    p.add_argument('--audio-sink',default='fakesink')
+    p.add_argument('--clock-policy',choices=['audio','producer'],default='audio')
     args = p.parse_args()
     root = pathlib.Path(args.output or tempfile.mkdtemp(prefix='m4-app-offsets-'))
     root.mkdir(parents=True, exist_ok=True)

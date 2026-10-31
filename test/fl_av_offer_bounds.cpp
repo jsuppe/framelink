@@ -3,6 +3,9 @@
 #define AV_PLAYBACK_LIBRARY 1
 #include "../samples/av_apps.cpp"
 int main() {
+  av::PlaybackOptions badClock;badClock.clockPolicy=static_cast<av::PlaybackClockPolicy>(99);
+  av::PlaybackCallbacks callbacks;std::atomic<bool> stopped{false};std::string clockError;
+  if(av::runPlayback(badClock,callbacks,stopped,clockError) || clockError!="invalid playback clock policy")return 7;
   Conn unconnected;
   for(unsigned field=0;field<3;++field) for(unsigned bad : {0u,9u,0xffffffffu}) {
     flSessionCapabilities c{};c.version=1;c.videoCount=1;c.audioCount=1;

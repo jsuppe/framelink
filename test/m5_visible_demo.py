@@ -40,7 +40,7 @@ try:
   state.update(phase='playing',iteration=n+1,loops=a.loops,session=str(d/'session'))
   with (d/'producer.log').open('w') as pl,(d/'renderer.log').open('w') as rl:
    producer=subprocess.Popen([str(b/'framelink_av_producer.exe'),str(b/'gstframelink.dll'),'--session',str(d/'session'),'--format','BGRA','--frames','500','--input-pipeline',str(pipeline),'--timeout-ms','60000'],stdout=pl,stderr=subprocess.STDOUT,creationflags=child_flags)
-   render=subprocess.Popen([a.renderer,'--serve','m5-visible','--headless','-1','--av-exit-on-end','--control-port',str(a.renderer_port),'--av-session',str(d/'session'),'--av-plugin',str(b/'gstframelink.dll'),'--av-format','BGRA','--av-audio-sink','autoaudiosink'],cwd=d,stdout=rl,stderr=subprocess.STDOUT,creationflags=child_flags)
+   render=subprocess.Popen([a.renderer,'--serve','m5-visible','--headless','-1','--av-exit-on-end','--control-port',str(a.renderer_port),'--av-session',str(d/'session'),'--av-plugin',str(b/'gstframelink.dll'),'--av-format','BGRA','--av-audio-sink','autoaudiosink','--av-clock','producer'],cwd=d,stdout=rl,stderr=subprocess.STDOUT,creationflags=child_flags)
    children=[producer,render];deadline=time.monotonic()+90
    while any(x.poll() is None for x in children) and time.monotonic()<deadline and not stop.wait(.2) and not (r/'STOP').exists():pass
    for x in children:

@@ -50,6 +50,7 @@ void need(bool ok, const std::string &what) {
 struct Options {
   std::string plugin, session, format = "BGRA", fault, inputPipeline;
   bool traceMedia=false;
+  bool producerClock=false;
   unsigned frames = 150, width = 160, height = 90, fps = 50, rate = 48000,
            channels = 2, timeout = 15000, sessions = 1;
   bool play = false, stream = false;
@@ -96,6 +97,7 @@ Options options(int argc, char **argv) {
     else if (a == "--input-pipeline") o.inputPipeline=v;
     else if (a == "--audio-sink") o.audioSink=v;
     else if (a == "--latency-ms") o.latencyMs=number(v);
+    else if (a == "--clock-policy") { need(v==std::string("producer") || v==std::string("audio"),"clock-policy must be producer or audio");o.producerClock=v==std::string("producer"); }
     else if (a == "--session")
       o.session = v;
     else if (a == "--format")
@@ -690,15 +692,19 @@ struct AudioReader {
 // Configure the concrete GstAudioBaseSink rather than assuming the separate
 // audioresample transform performs clock slaving. With its own provided clock
 // as master no slaving is necessary; external-clock fallback uses RESAMPLE.
-void configureAudioSlaving(GstElement* sink) {
-  auto configure=[](GstElement* e) {
-    if (g_object_class_find_property(G_OBJECT_GET_CLASS(e),"slave-method"))
+unsigned configureAudioSlaving(GstElement* sink) {
+  unsigned confirmed=0;
+  auto configure=[&](GstElement* e) {
+    if (g_object_class_find_property(G_OBJECT_GET_CLASS(e),"slave-method")) {
       g_object_set(e,"slave-method",0,nullptr); // GST_AUDIO_BASE_SINK_SLAVE_RESAMPLE
+      gint method=-1;g_object_get(e,"slave-method",&method,nullptr);
+      if(method==0)++confirmed;
+    }
     if (g_object_class_find_property(G_OBJECT_GET_CLASS(e),"qos"))
       g_object_set(e,"qos",TRUE,nullptr);
   };
   configure(sink);
-  if (!GST_IS_BIN(sink)) return;
+  if (!GST_IS_BIN(sink)) return confirmed;
   auto *it=gst_bin_iterate_recurse(GST_BIN(sink));
   GValue value=G_VALUE_INIT;
   for (;;) {
@@ -709,6 +715,7 @@ void configureAudioSlaving(GstElement* sink) {
   }
   if (G_IS_VALUE(&value)) g_value_unset(&value);
   gst_iterator_free(it);
+  return confirmed;
 }
 // A failed sink can leave an appsrc producer blocked on a full queue. Stop
 // from a separate thread (never the streaming bus callback) to release that
@@ -803,8 +810,24 @@ unsigned runProducer(const Options &o, GSocketListener *l,
     event("session-ready",o,0,id);
     start(tx,clock,cfg.epochNs);
     auto* bus=gst_element_get_bus(tx.p);Object busOwner{G_OBJECT(bus)};
-    auto* message=gst_bus_timed_pop_filtered(bus,uint64_t(o.timeout)*GST_MSECOND,GstMessageType(GST_MESSAGE_EOS|GST_MESSAGE_ERROR));
-    need(message,"external pipeline EOS deadline");
+    GstMessage* message=nullptr;
+    const auto eosDeadline=g_get_monotonic_time()+gint64(o.timeout)*1000;
+    while (!message) {
+      const auto remaining=eosDeadline-g_get_monotonic_time();
+      need(remaining>0,"external pipeline EOS deadline");
+      auto* next=gst_bus_timed_pop_filtered(bus,uint64_t(remaining)*1000,GstMessageType(GST_MESSAGE_EOS|GST_MESSAGE_ERROR|GST_MESSAGE_ELEMENT));
+      need(next,"external pipeline EOS deadline");
+      if (GST_MESSAGE_TYPE(next)==GST_MESSAGE_ELEMENT) {
+        const auto* stats=gst_message_get_structure(next);
+        if (stats && gst_structure_has_name(stats,"framelink-sink-stats")) {
+          guint64 received=0,submitted=0,dropped=0,full=0;
+          gst_structure_get_uint64(stats,"received",&received);gst_structure_get_uint64(stats,"submitted",&submitted);
+          gst_structure_get_uint64(stats,"dropped",&dropped);gst_structure_get_uint64(stats,"ring-full-drops",&full);
+          printf("{\"event\":\"video-transport-summary\",\"received\":%llu,\"submitted\":%llu,\"dropped\":%llu,\"ring_full_drops\":%llu}\n",(unsigned long long)received,(unsigned long long)submitted,(unsigned long long)dropped,(unsigned long long)full);
+        }
+        gst_message_unref(next);
+      } else message=next;
+    }
     const bool success=GST_MESSAGE_TYPE(message)==GST_MESSAGE_EOS;gst_message_unref(message);
     need(success,"external pipeline failed");
     need(!sourceAudio.invalid.load() && sourceAudio.samplesEnd.load()==uint64_t(o.frames)*o.rate/o.fps,"external audio must be contiguous and match declared duration");
@@ -928,14 +951,18 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
       g_usleep(1000);
     }
     gst_element_get_state(sink,nullptr,nullptr,100*GST_MSECOND);
-    configureAudioSlaving(sink);
-    auto *selected=gst_element_provide_clock(sink);
+    const auto resampleSlaves=configureAudioSlaving(sink);
+    auto* deviceClock=gst_element_provide_clock(sink);
+    Object deviceClockOwner{deviceClock?G_OBJECT(deviceClock):nullptr};
+    auto *selected=(!o.producerClock && deviceClock) ? GST_CLOCK(gst_object_ref(deviceClock)) : nullptr;
     bool audioMaster=selected!=nullptr;
     if (!selected) selected=GST_CLOCK(gst_object_ref(clock));
     Object selectedOwner{G_OBJECT(selected)};
-    // Joint startup re-anchor after audio preroll, never independent per-track
-    // first-arrival anchors. Original relative media PTS are unchanged.
-    auto mappedBase=gst_clock_get_time(selected)+20*GST_MSECOND;
+    // ProducerMapped preserves the negotiated epoch in the receiver system clock.
+    // Slave the audio device to that shared system timeline (RESAMPLE above).
+    // Device clock zero during PAUSED preroll is normal, not a fault diagnosis.
+    // Legacy AudioPreferred keeps the joint post-preroll re-anchor. Neither mode rewrites media PTS.
+    auto mappedBase=o.producerClock ? uint64_t(base) : gst_clock_get_time(selected)+20*GST_MSECOND;
     auto *latencyQuery=gst_query_new_latency();
     if (gst_element_query(rx.p,latencyQuery)) {
       gboolean live=false; GstClockTime minimum=0, maximum=GST_CLOCK_TIME_NONE;
@@ -944,8 +971,10 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
     }
     gst_query_unref(latencyQuery);
     gst_pipeline_set_latency(GST_PIPELINE(rx.p),latency);
+    printf("{\"event\":\"playback-clock\",\"policy\":\"%s\",\"system_now_ns\":%llu,\"selected_now_ns\":%llu,\"device_now_ns\":%llu,\"mapped_producer_base_ns\":%lld,\"playback_base_ns\":%llu,\"latency_ns\":%llu,\"resample_slaves\":%u}\n",o.producerClock?"producer":"audio",(unsigned long long)gst_clock_get_time(clock),(unsigned long long)gst_clock_get_time(selected),(unsigned long long)(deviceClock?gst_clock_get_time(deviceClock):GST_CLOCK_TIME_NONE),(long long)base,(unsigned long long)mappedBase,(unsigned long long)latency,resampleSlaves);
+    const bool traceClock=g_getenv("FRAMELINK_PLAYBACK_CLOCK_TRACE")!=nullptr;
     av::PlaybackClock timing{selected,mappedBase,latency,audioMaster};
-    if (cb && cb->onStatus) cb->onStatus(audioMaster ? "audio-clock" : "system-clock-fallback");
+    if (cb && cb->onStatus) cb->onStatus(audioMaster ? "audio-clock" : (o.producerClock ? "producer-system-clock" : "system-clock-fallback"));
     if (cb && cb->onClock) cb->onClock(timing);
     audioTimeline.playbackClock=GST_CLOCK(gst_object_ref(selected));
     audioTimeline.deliveryBase=mappedBase+latency;
@@ -965,6 +994,7 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
       metrics.lateAudioBlocks=audioTimeline.lateBlocks.load();metrics.arrivalDriftNs=audioTimeline.arrivalDrift.load();
       if(cb && cb->onMetrics)cb->onMetrics(metrics);
       lastMetricsAt=now;
+      if(traceClock) printf("{\"event\":\"playback-clock-sample\",\"system_ns\":%llu,\"selected_ns\":%llu,\"device_ns\":%llu,\"audio_samples\":%llu}\n",(unsigned long long)gst_clock_get_time(clock),(unsigned long long)gst_clock_get_time(selected),(unsigned long long)(deviceClock?gst_clock_get_time(deviceClock):GST_CLOCK_TIME_NONE),(unsigned long long)metrics.audioSamples);
       if(final) printf("{\"event\":\"playback-metrics\",\"peak_queue_buffers\":%u,\"peak_queue_ns\":%llu,\"queue_empty_events\":%llu,\"queue_full_events\":%llu,\"late_audio_blocks\":%llu,\"arrival_drift_ns\":%lld}\n",metrics.peakQueueBuffers,(unsigned long long)metrics.peakQueueTimeNs,(unsigned long long)metrics.queueEmptyEvents,(unsigned long long)metrics.queueFullEvents,(unsigned long long)metrics.lateAudioBlocks,(long long)metrics.arrivalDriftNs);
     };
     uint64_t received=0,dropped=0,lastPts=GST_CLOCK_TIME_NONE,firstPts=GST_CLOCK_TIME_NONE;
@@ -1087,6 +1117,7 @@ int main(int argc, char **argv) {
            "  --audio-offset-ns 0..2000000000 (producer fixture; verifier must use same offset)\n"
            "  --pacing-ppm -200000..200000 (producer pacing injection; PTS unchanged)\n"
            "  --input-pipeline FILE (producer; @VIDEO_SINK@ and @AUDIO_SINK@; requires streaming consumer)\n"
+           "  --clock-policy audio|producer (stream receiver; default audio)\n"
            "  --trace-media (expensive payload hashes and running PTS for integration validation)\n"
            "  auto is consumer-only. See docs/M3_AV_APPS.md for bounds and recovery semantics.");
       return 0;
@@ -1188,10 +1219,12 @@ namespace av {
 bool runPlayback(const PlaybackOptions& p,const PlaybackCallbacks& cb,const std::atomic<bool>& stop,std::string& error) {
   bool sessionOpen=false;
   try {
+    need(p.clockPolicy==av::PlaybackClockPolicy::AudioPreferred || p.clockPolicy==av::PlaybackClockPolicy::ProducerMapped,"invalid playback clock policy");
     need(!p.sessionProvider || (p.sessionProvider->resolve && p.sessionProvider->connect),"incomplete session provider");
     need(!p.externalVideo || bool(cb.onClock),"native playback requires onClock callback");
     Options o; o.plugin=p.plugin; o.session=p.session; o.format=p.format;
     o.width=p.width;o.height=p.height;o.fps=p.fps;o.rate=p.rate;o.channels=p.channels;
+    o.producerClock=p.clockPolicy==av::PlaybackClockPolicy::ProducerMapped;
     o.timeout=p.timeoutMs;o.latencyMs=p.latencyMs;o.audioSink=p.audioSink;o.stream=true;
     need(o.fps && o.width && o.height && o.timeout && o.latencyMs<=2000,"invalid playback options");
     gst_init(nullptr,nullptr);
