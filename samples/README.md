@@ -226,3 +226,7 @@ See [Windows pipeline guide](../docs/M5_WINDOWS_PIPELINE.md) for build pins,
 reproducible MJPEG/PCM validation, and finite-CFR/live-stream limitations.
 Optional `--trace-media` compares payload SHA256, running PTS and durations; it
 maps/hashes frames and must not be used for performance qualification.
+
+For opt-in finite A/V runs beyond the legacy process deadline, see
+[bounded finite media budgets](../docs/FINITE_MEDIA_BUDGET.md). Startup and idle
+timeouts are independent of media duration; this does not add infinite/live support.

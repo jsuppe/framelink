@@ -1,33 +1,39 @@
 # M5 performance strategy and implementation audit
 
-Review date: 2026-10-31. **M5 performance gate remains open.**
+Review date: 2026-10-31. **Final Windows native sustained gate passes on the
+measured setup; M5 platform qualification remains open.**
 
-**Last completed pre-correction matrix:** startup preconnection removed late-open losses, but
-changed the producer/display phase enough to expose ring pressure again. Both
-1080p60 formats delivered **2,521/2,700** expected frames; all **179** losses
-occurred at producer ring-full, and every submitted frame reached accepted
-presentation. Earlier steady-clean runs below are real but **not a universal
-qualification**. Subsequent ownership tracing proves the omitted older GPU
-owners. A coordinated larger-pool correction is implemented; its Windows
-full-rate qualification is in progress. See the final sections.
+Current runtime: FrameLink69d7b07 / renderer7f58e38, including reviewed startup
+resource preparation and early power ordering. Four sequential70-second native
+BGRA/NV12 1080p60 trace-on/off cases were each run once. Traced cases each deliver
+4200/4200 independent identities through GPU completion and accepted presentation:
+startup60, steady4080, drain60; measured steady present spans67.991s at59.993fps.
+Untraced cases each4200 received/submitted/due, zero ring-full/late/gaps/errors;
+aggregate proof only. All four complete3,360,000 PCM samples/channel with exact
+70s ends and zero late PCM blocks. No trace loss. No pool/latency/power tuning.
 
-Scope: the Windows FrameLink/GStreamer/native Vulkan A/V path on Caspar,
-with Linux regression and deterministic fault tests. These measurements do
-not qualify Android, the earlier Raspberry Pi camera workload, higher
-resolutions, physical scanout, or acoustic lip sync by extrapolation.
+The opt-in [finite budget](../FINITE_MEDIA_BUDGET.md) separates bounded media
+runs from unchanged15s startup and1–2s idle deadlines; compatibility, arithmetic
+bounds and negative tests are explicit. Current pair measured renderer CPU
+on-minus-off+0.412pp BGRA/+0.085pp NV12 relative to one core, not zero overhead
+or a universal estimate. Earlier+3.84/+5.42pp observations and failures remain.
 
-Initial audit revisions were FrameLink `b551b63`/`5596f58` and renderer
-`07f98cb`. Current integrated candidate is FrameLink `4c3a403` and renderer
-`6f90a84`, including the versioned pool correction and startup/review fixes.
-Historical reports below describe their own revisions, not the current code.
+[Full sustained evidence](https://github.com/jsuppe/vkrender/tree/feature/m5-platform/docs/m5/sustained-qualification-20261031)
+contains all source identities/phases, gaps/latencies, raw traces, commands,
+failures, preparation/deadline regressions and limits. Parent review pending.
+No physical scanout, cold-display-wake-after-fix, acoustic sync or Android
+qualification is inferred. Historical untraced BGRA380ms cause remains unproven.
+
+The sections below retain the causal audit and historical experiments; their
+old deficits describe those revisions, not a replacement of the current result.
 
 ## Executive conclusion
 
-There is real progress, but neither functional tests nor an average near 60 fps
-establish complete delivery. Several independent defects and policy interactions
+Neither functional tests nor an average near 60 fps establish complete
+delivery; the current gate instead accounts for every expected source identity. Several independent defects and policy interactions
 were responsible. The evidence does **not** support a blanket conclusion that
-FrameLink or the GPU cannot sustain 1080p60. It also does not yet establish that
-the complete native A/V application delivers every frame at that rate.
+FrameLink or the GPU cannot sustain 1080p60. The final measured native workload now demonstrates every expected frame at
+that rate for the full bounded run; this is not an unconditional guarantee.
 
 Three distinctions govern the remaining work:
 
@@ -532,8 +538,9 @@ pair includes diagnostic GPU-counter queries and excludes shutdown file flush;
 it is not a stripped-build comparison or proof that tracing causes/prevents the
 transients. See renderer
 [overhead evidence](https://github.com/jsuppe/vkrender/tree/feature/m5-platform/docs/m5/tracing-overhead-20261031).
-Early-loss correction and a reviewed longer-duration watchdog/test contract
-remain open. No unconditional lossless or physical-scanout qualification is made.
+Those early-loss and finite-duration gaps are addressed by the current result
+at the top of this audit. The original failed traces remain valid. No
+unconditional lossless or physical-scanout qualification is made.
 
 ## Two buffers versus the scheduled playback reservoir
 
