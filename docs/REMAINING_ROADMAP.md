@@ -1,9 +1,10 @@
 # FrameLink + renderer remaining roadmap
 
-Updated 2026-10-30. Scope: local cross-platform video/audio sessions and renderer
+Updated 2026-10-31. Scope: local cross-platform video/audio sessions and renderer
 integration. Historical cloud calling, unrelated receiver features and HDR are
-not part of this release. Completed: FrameLink GPU/video baseline and renderer
-PR11 integration merged. Audio prototype is implemented but not merged.
+not part of this release. M1–M4 are merged within their documented qualification
+scope. M5 remains in progress; M5a and subsequent milestones are not implemented
+or qualified merely by being included in this plan.
 
 ## M1 — Land the validated audio foundation
 
@@ -110,6 +111,9 @@ before M6; existing milestone numbers remain stable. Does not expand M4.
 Deliverables: versioned memory/usage negotiation contract, platform capability
 adapters, GStreamer allocation integration, Windows external-pipeline example,
 and evidence identifying actual copies/conversions and unsupported paths.
+The [multi-process boundary contract](M5A_PIPELINE_BOUNDARIES.md) records Jon's
+2026-10-31 requirement: share buffers at pipeline boundaries without an added
+playback reservoir at every hop. Pool capacity is not queued-frame latency.
 
 Tasks:
 - Define required versus preferred usage: GPU sampling/render targets, decoder
@@ -119,6 +123,20 @@ Tasks:
   D3D resources, Linux DMA-BUF and Android AHardwareBuffer only where supported.
 - Negotiate a compatible allocation strategy, ownership and buffer-pool lifetime;
   specify producer-owned versus consumer-provided allocations and bounded queues.
+- Support compatible pass-through boundaries without copying pixel payloads:
+  preserve allocation identity through import/forwarding and propagate completion
+  to the original owner only after all downstream readers finish. Reject strict
+  paths that cannot safely import or forward the resource. An intermediate stage
+  that transforms pixels may produce a new shared output; do not count that as
+  proof that the boundary itself performs no extra copy.
+- Separate transport from playback scheduling. Do not fill a pool before delivery,
+  add a fixed per-hop delay, or rebase each track's timestamps at every boundary.
+  Preserve the common media timeline; use explicit clock-domain mappings where
+  needed. The chosen final output owns presentation scheduling and A/V buffering.
+- Negotiate bounded in-flight/backpressure and drop policies separately from
+  allocation capacity; expose actual queue occupancy and buffer ownership. Test
+  two/three-image transport where supported without promising universal full rate
+  or changing the scheduled A/V demo's independent retention requirements.
 - Define explicit fallback policies: allow copy/conversion or require zero-copy;
   reject incompatible requirements clearly. Preserve legacy defaults and negotiate
   protocol compatibility with older peers rather than silently changing behavior.
@@ -138,6 +156,15 @@ Tasks:
 - Add platform integration tests for GPU-native and CPU-readable modes, forced
   fallback/strict-zero-copy rejection, unsupported formats/device mismatch,
   renegotiation, fencing, stale generations, cleanup and unchanged A/V timing.
+- Add one-boundary and multi-boundary pass-through tests using identical sources:
+  account every frame, measure residence/arrival latency at each boundary, verify
+  unchanged relative A/V PTS and no configured per-hop playback delay, and report
+  payload copies/readbacks/uploads separately from descriptor/fence exchange.
+  Include slow downstream readers, backpressure, death and safe pool reuse.
+- Report audio transport separately. Existing GDP/GIO PCM transport copies and
+  is not zero-copy; preserve its timeline without an added per-hop playback
+  reservoir. Evaluate its measured copy cost and any shared-PCM requirement
+  explicitly rather than inferring audio zero-copy from the video path.
 - Benchmark supported paths and publish the platform support matrix and developer
   integration guide. Unsupported driver paths remain explicitly capability-gated.
 
@@ -145,6 +172,10 @@ Gate: selected allocation satisfies all required usage constraints; permitted
 fallbacks are visible; strict zero-copy never silently copies. Pixel/timestamp
 correctness, safe ownership/fencing and bounded resource use pass on advertised
 platform paths. Zero-copy claims require path evidence, not merely GPU buffer type.
+Multi-hop strict pass-through must introduce no payload copy or intentional
+per-hop playback reservoir; measured transfer/wait latency and backpressure remain
+visible. This is not a claim of zero elapsed time, zero synchronization, or zero
+total pipeline buffering.
 
 ## M6 — Reliability, performance and observability
 Deliverables: reproducible stress/benchmark suite, opt-in tracing, measured overhead

@@ -499,8 +499,8 @@ Independent review found zero-byte FD-bearing packets could leak on rejection;
 `4c3a403` fixes this with a failing-old/passing-new regression plus short-header
 and bad-magic negatives.
 
-- Worker Linux full regression:57/57 passed. Parent combined build passed and
-  full suite rerun is in progress. Parent updated IPC negative:1/1 passed.
+- Worker and parent Linux full regression:57/57 passed. Parent combined build
+  passed; final affected IPC rejection/cleanup regressions:2/2 passed.
 - Parent renderer combined build and22/22 regression tests passed.
 - Android arm64 library/newtests cross-compiled; device execution not implied.
 - Windows matching v6 expanded-pool test:1/1 passed.
@@ -509,13 +509,31 @@ and bad-magic negatives.
   2301.030ms; each delivered40/40 frames and38,400 audio samples,0late. No
   startup/watchdog budget was enlarged to obtain these results.
 
-The same-binary native comparison uses `VKR_TEST_AV_POOL_SLOTS=8|12`, explicitly
-recorded with actual negotiated latency. The first8-slot BGRA60 control delivered
-2700/2700,59.999fps; preserve this clean phase alongside older failing phases.
-It is not a contradiction of the ownership traces and not proof that the original
-budget is sufficient under all normal phase alignments. Twelve-slot and format/
-phase repeats are underway. No final full-rate, overhead or physical-scanout
-qualification is claimed from allocation tests or this first control.
+The completed same-binary native comparison uses `VKR_TEST_AV_POOL_SLOTS=8|12`,
+explicitly recorded with actual negotiated latency. Eight45-second BGRA/NV12
+1080p30/60 cases accounted for18,900/18,900 source identities through accepted
+presentation and GPU completion, including both eight-slot60fps controls. The
+twelve-slot cases delivered13,500/13,500. Median BGRA acquisition wait was4.025ms
+with eight slots versus0.0003ms with twelve. Preserve the clean controls alongside
+older failing phases: they do not refute phase-sensitive ownership pressure or
+establish a universal FPS advantage for twelve slots. See renderer
+[native matrix](https://github.com/jsuppe/vkrender/tree/feature/m5-platform/docs/m5/native-capacity-20261031).
+
+Subsequent matched tracing-off/on cases exposed additional early losses. BGRA
+off received2700/submitted2691 with nine ring-full drops and a late counter of31;
+the counter is not a disjoint set of missing frame identities. NV12 on lost
+exactly three startup identities to mailbox replacement, with all steady/end
+identities delivered. BGRA on was2700/2700 by exact accounting; NV12 off was clean
+by aggregate counters only. The previously clean matrix is not a blanket pass.
+
+Enabled tracing increased renderer CPU by3.84 percentage points for BGRA and5.42
+for NV12, relative to one logical core in the5–40s window. This single sequential
+pair includes diagnostic GPU-counter queries and excludes shutdown file flush;
+it is not a stripped-build comparison or proof that tracing causes/prevents the
+transients. See renderer
+[overhead evidence](https://github.com/jsuppe/vkrender/tree/feature/m5-platform/docs/m5/tracing-overhead-20261031).
+Early-loss correction and a reviewed longer-duration watchdog/test contract
+remain open. No unconditional lossless or physical-scanout qualification is made.
 
 ## Two buffers versus the scheduled playback reservoir
 
@@ -539,3 +557,13 @@ Alternatively copying into renderer-owned holding images frees transport sooner
 but adds memory/bandwidth. Reducing the common delay must treat audio and video
 coherently. Buffer capacity alone neither mandates nor eliminates playback
 latency. No two/three-image runtime qualification or default change is claimed.
+
+## Multi-process pipeline requirement
+
+The A/V demo's scheduled reservoir must not become the default behavior of every
+FrameLink boundary. Jon clarified that the primary use is shared-buffer transport
+between processing stages, with no extra payload copy or fixed playback delay
+at each hop. M5a now has an explicit [boundary contract](../M5A_PIPELINE_BOUNDARIES.md)
+and single-/multi-boundary acceptance tests. That is planned implementation, not
+a claim that the present ordinary GStreamer sink/source or copied PCM transport
+is zero-copy. M5 startup/performance corrections continue independently.

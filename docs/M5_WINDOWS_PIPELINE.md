@@ -13,6 +13,9 @@ submission inside the transport. It splits that pipeline into an independently
 launched consumer. BGRA and NV12 pixels, PCM bytes, timestamps, and durations are
 compared across the process boundary. It uses system-memory GStreamer buffers;
 GPU allocation negotiation and decoder-to-renderer zero-copy belong to M5a.
+In particular, this sample is not yet a zero-copy intermediate pipeline boundary.
+The [M5a boundary contract](M5A_PIPELINE_BOUNDARIES.md) requires native-memory
+sink/source integration without adding the sample's playback delay at every hop.
 
 ## Build
 
