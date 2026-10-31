@@ -1,0 +1,4721 @@
+{
+  "schema_version": 1,
+  "unique_frames": 254,
+  "unique_by_stage": {
+    "submit": 254,
+    "ipc_receive": 254,
+    "consumer_acquire": 177,
+    "drop": 77
+  },
+  "repeat_present_submissions": 0,
+  "required_stages": [
+    "sink_receive",
+    "buffer_acquire",
+    "submit",
+    "ipc_receive",
+    "consumer_acquire",
+    "schedule",
+    "render_submit",
+    "gpu_complete",
+    "present_submit"
+  ],
+  "absent_required_stages": [
+    "sink_receive",
+    "buffer_acquire",
+    "schedule",
+    "render_submit",
+    "gpu_complete",
+    "present_submit"
+  ],
+  "phases": {
+    "startup": {
+      "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit": 32,
+      "classified_drop:pending_replaced": 20
+    },
+    "steady": {
+      "classified_drop:pending_replaced": 42,
+      "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit": 110
+    },
+    "end": {
+      "classified_drop:pending_replaced": 15,
+      "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit": 35
+    }
+  },
+  "unclassified_frames": 177,
+  "ambiguous_identities": [],
+  "gpu_submission_mismatches": [],
+  "stage_intervals": {
+    "submit->ipc_receive": {
+      "count": 254,
+      "min_ns": 200,
+      "max_ns": 7900,
+      "p50_ns": 3500,
+      "p99_ns": 6300
+    },
+    "ipc_receive->consumer_acquire": {
+      "count": 177,
+      "min_ns": 345000,
+      "max_ns": 16930200,
+      "p50_ns": 10044300,
+      "p99_ns": 16923300
+    }
+  },
+  "metadata": {
+    "trace_lost_events": 0,
+    "legacy_sink_records_without_identity": 300,
+    "anonymous_pre_submit_deficit": 46
+  },
+  "accounting_complete": false,
+  "physical_scanout_verified": false,
+  "frames": [
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "0"
+      ],
+      "pts_ns": 0,
+      "phase": "startup",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "100000000"
+      ],
+      "pts_ns": 100000000,
+      "phase": "startup",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "1000000000"
+      ],
+      "pts_ns": 1000000000,
+      "phase": "steady",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "1016666666"
+      ],
+      "pts_ns": 1016666666,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "1033333333"
+      ],
+      "pts_ns": 1033333333,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "1050000000"
+      ],
+      "pts_ns": 1050000000,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "1083333333"
+      ],
+      "pts_ns": 1083333333,
+      "phase": "steady",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "1100000000"
+      ],
+      "pts_ns": 1100000000,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "1116666666"
+      ],
+      "pts_ns": 1116666666,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "1133333333"
+      ],
+      "pts_ns": 1133333333,
+      "phase": "steady",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "1150000000"
+      ],
+      "pts_ns": 1150000000,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "116666666"
+      ],
+      "pts_ns": 116666666,
+      "phase": "startup",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "1166666666"
+      ],
+      "pts_ns": 1166666666,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "1200000000"
+      ],
+      "pts_ns": 1200000000,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "1216666666"
+      ],
+      "pts_ns": 1216666666,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "1233333333"
+      ],
+      "pts_ns": 1233333333,
+      "phase": "steady",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "1250000000"
+      ],
+      "pts_ns": 1250000000,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "1266666666"
+      ],
+      "pts_ns": 1266666666,
+      "phase": "steady",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "1283333333"
+      ],
+      "pts_ns": 1283333333,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "1300000000"
+      ],
+      "pts_ns": 1300000000,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "1316666666"
+      ],
+      "pts_ns": 1316666666,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "133333333"
+      ],
+      "pts_ns": 133333333,
+      "phase": "startup",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "1350000000"
+      ],
+      "pts_ns": 1350000000,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "1366666666"
+      ],
+      "pts_ns": 1366666666,
+      "phase": "steady",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "1383333333"
+      ],
+      "pts_ns": 1383333333,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "1400000000"
+      ],
+      "pts_ns": 1400000000,
+      "phase": "steady",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "1416666666"
+      ],
+      "pts_ns": 1416666666,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "1433333333"
+      ],
+      "pts_ns": 1433333333,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "1450000000"
+      ],
+      "pts_ns": 1450000000,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "1466666666"
+      ],
+      "pts_ns": 1466666666,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "150000000"
+      ],
+      "pts_ns": 150000000,
+      "phase": "startup",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "1500000000"
+      ],
+      "pts_ns": 1500000000,
+      "phase": "steady",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "1516666666"
+      ],
+      "pts_ns": 1516666666,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "1533333333"
+      ],
+      "pts_ns": 1533333333,
+      "phase": "steady",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "1550000000"
+      ],
+      "pts_ns": 1550000000,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "1566666666"
+      ],
+      "pts_ns": 1566666666,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "1583333333"
+      ],
+      "pts_ns": 1583333333,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "1616666666"
+      ],
+      "pts_ns": 1616666666,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "1650000000"
+      ],
+      "pts_ns": 1650000000,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "16666666"
+      ],
+      "pts_ns": 16666666,
+      "phase": "startup",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "166666666"
+      ],
+      "pts_ns": 166666666,
+      "phase": "startup",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "1666666666"
+      ],
+      "pts_ns": 1666666666,
+      "phase": "steady",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "1683333333"
+      ],
+      "pts_ns": 1683333333,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "1700000000"
+      ],
+      "pts_ns": 1700000000,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "1716666666"
+      ],
+      "pts_ns": 1716666666,
+      "phase": "steady",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "1733333333"
+      ],
+      "pts_ns": 1733333333,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "1750000000"
+      ],
+      "pts_ns": 1750000000,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "1766666666"
+      ],
+      "pts_ns": 1766666666,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "1800000000"
+      ],
+      "pts_ns": 1800000000,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "1816666666"
+      ],
+      "pts_ns": 1816666666,
+      "phase": "steady",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "183333333"
+      ],
+      "pts_ns": 183333333,
+      "phase": "startup",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "1833333333"
+      ],
+      "pts_ns": 1833333333,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "1850000000"
+      ],
+      "pts_ns": 1850000000,
+      "phase": "steady",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "1866666666"
+      ],
+      "pts_ns": 1866666666,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "1883333333"
+      ],
+      "pts_ns": 1883333333,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "1916666666"
+      ],
+      "pts_ns": 1916666666,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "1933333333"
+      ],
+      "pts_ns": 1933333333,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "1966666666"
+      ],
+      "pts_ns": 1966666666,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "1983333333"
+      ],
+      "pts_ns": 1983333333,
+      "phase": "steady",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "200000000"
+      ],
+      "pts_ns": 200000000,
+      "phase": "startup",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "2000000000"
+      ],
+      "pts_ns": 2000000000,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "2016666666"
+      ],
+      "pts_ns": 2016666666,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "2033333333"
+      ],
+      "pts_ns": 2033333333,
+      "phase": "steady",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "2050000000"
+      ],
+      "pts_ns": 2050000000,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "2066666666"
+      ],
+      "pts_ns": 2066666666,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "2083333333"
+      ],
+      "pts_ns": 2083333333,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "2116666666"
+      ],
+      "pts_ns": 2116666666,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "2133333333"
+      ],
+      "pts_ns": 2133333333,
+      "phase": "steady",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "2150000000"
+      ],
+      "pts_ns": 2150000000,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "216666666"
+      ],
+      "pts_ns": 216666666,
+      "phase": "startup",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "2166666666"
+      ],
+      "pts_ns": 2166666666,
+      "phase": "steady",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "2183333333"
+      ],
+      "pts_ns": 2183333333,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "2200000000"
+      ],
+      "pts_ns": 2200000000,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "2233333333"
+      ],
+      "pts_ns": 2233333333,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "2250000000"
+      ],
+      "pts_ns": 2250000000,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "2266666666"
+      ],
+      "pts_ns": 2266666666,
+      "phase": "steady",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "2283333333"
+      ],
+      "pts_ns": 2283333333,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "2300000000"
+      ],
+      "pts_ns": 2300000000,
+      "phase": "steady",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "2316666666"
+      ],
+      "pts_ns": 2316666666,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "233333333"
+      ],
+      "pts_ns": 233333333,
+      "phase": "startup",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "2333333333"
+      ],
+      "pts_ns": 2333333333,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "2350000000"
+      ],
+      "pts_ns": 2350000000,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "2383333333"
+      ],
+      "pts_ns": 2383333333,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "2416666666"
+      ],
+      "pts_ns": 2416666666,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "2433333333"
+      ],
+      "pts_ns": 2433333333,
+      "phase": "steady",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "2450000000"
+      ],
+      "pts_ns": 2450000000,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "2466666666"
+      ],
+      "pts_ns": 2466666666,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "2483333333"
+      ],
+      "pts_ns": 2483333333,
+      "phase": "steady",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "250000000"
+      ],
+      "pts_ns": 250000000,
+      "phase": "startup",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "2500000000"
+      ],
+      "pts_ns": 2500000000,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "2516666666"
+      ],
+      "pts_ns": 2516666666,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "2533333333"
+      ],
+      "pts_ns": 2533333333,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "2566666666"
+      ],
+      "pts_ns": 2566666666,
+      "phase": "steady",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "2583333333"
+      ],
+      "pts_ns": 2583333333,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "2600000000"
+      ],
+      "pts_ns": 2600000000,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "2633333333"
+      ],
+      "pts_ns": 2633333333,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "2650000000"
+      ],
+      "pts_ns": 2650000000,
+      "phase": "steady",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "266666666"
+      ],
+      "pts_ns": 266666666,
+      "phase": "startup",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "2666666666"
+      ],
+      "pts_ns": 2666666666,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "2683333333"
+      ],
+      "pts_ns": 2683333333,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "2716666666"
+      ],
+      "pts_ns": 2716666666,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "2733333333"
+      ],
+      "pts_ns": 2733333333,
+      "phase": "steady",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "2750000000"
+      ],
+      "pts_ns": 2750000000,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "2766666666"
+      ],
+      "pts_ns": 2766666666,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "2783333333"
+      ],
+      "pts_ns": 2783333333,
+      "phase": "steady",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "2800000000"
+      ],
+      "pts_ns": 2800000000,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "2816666666"
+      ],
+      "pts_ns": 2816666666,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "2833333333"
+      ],
+      "pts_ns": 2833333333,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "2866666666"
+      ],
+      "pts_ns": 2866666666,
+      "phase": "steady",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "2883333333"
+      ],
+      "pts_ns": 2883333333,
+      "phase": "steady",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "2900000000"
+      ],
+      "pts_ns": 2900000000,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "2933333333"
+      ],
+      "pts_ns": 2933333333,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "2950000000"
+      ],
+      "pts_ns": 2950000000,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "2966666666"
+      ],
+      "pts_ns": 2966666666,
+      "phase": "steady",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "2983333333"
+      ],
+      "pts_ns": 2983333333,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "300000000"
+      ],
+      "pts_ns": 300000000,
+      "phase": "startup",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "3016666666"
+      ],
+      "pts_ns": 3016666666,
+      "phase": "steady",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "3033333333"
+      ],
+      "pts_ns": 3033333333,
+      "phase": "steady",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "3050000000"
+      ],
+      "pts_ns": 3050000000,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "3066666666"
+      ],
+      "pts_ns": 3066666666,
+      "phase": "steady",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "3083333333"
+      ],
+      "pts_ns": 3083333333,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "3100000000"
+      ],
+      "pts_ns": 3100000000,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "3116666666"
+      ],
+      "pts_ns": 3116666666,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "316666666"
+      ],
+      "pts_ns": 316666666,
+      "phase": "startup",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "3183333333"
+      ],
+      "pts_ns": 3183333333,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "3200000000"
+      ],
+      "pts_ns": 3200000000,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "3216666666"
+      ],
+      "pts_ns": 3216666666,
+      "phase": "steady",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "3233333333"
+      ],
+      "pts_ns": 3233333333,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "3250000000"
+      ],
+      "pts_ns": 3250000000,
+      "phase": "steady",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "3266666666"
+      ],
+      "pts_ns": 3266666666,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "3283333333"
+      ],
+      "pts_ns": 3283333333,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "3300000000"
+      ],
+      "pts_ns": 3300000000,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "33333333"
+      ],
+      "pts_ns": 33333333,
+      "phase": "startup",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "3333333333"
+      ],
+      "pts_ns": 3333333333,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "3350000000"
+      ],
+      "pts_ns": 3350000000,
+      "phase": "steady",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "3366666666"
+      ],
+      "pts_ns": 3366666666,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "3383333333"
+      ],
+      "pts_ns": 3383333333,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "3400000000"
+      ],
+      "pts_ns": 3400000000,
+      "phase": "steady",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "3416666666"
+      ],
+      "pts_ns": 3416666666,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "3433333333"
+      ],
+      "pts_ns": 3433333333,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "3466666666"
+      ],
+      "pts_ns": 3466666666,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "3483333333"
+      ],
+      "pts_ns": 3483333333,
+      "phase": "steady",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "3500000000"
+      ],
+      "pts_ns": 3500000000,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "3516666666"
+      ],
+      "pts_ns": 3516666666,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "3533333333"
+      ],
+      "pts_ns": 3533333333,
+      "phase": "steady",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "3550000000"
+      ],
+      "pts_ns": 3550000000,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "3566666666"
+      ],
+      "pts_ns": 3566666666,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "3600000000"
+      ],
+      "pts_ns": 3600000000,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "3616666666"
+      ],
+      "pts_ns": 3616666666,
+      "phase": "steady",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "3633333333"
+      ],
+      "pts_ns": 3633333333,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "3650000000"
+      ],
+      "pts_ns": 3650000000,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "366666666"
+      ],
+      "pts_ns": 366666666,
+      "phase": "startup",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "3683333333"
+      ],
+      "pts_ns": 3683333333,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "3700000000"
+      ],
+      "pts_ns": 3700000000,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "3716666666"
+      ],
+      "pts_ns": 3716666666,
+      "phase": "steady",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "3733333333"
+      ],
+      "pts_ns": 3733333333,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "3750000000"
+      ],
+      "pts_ns": 3750000000,
+      "phase": "steady",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "3766666666"
+      ],
+      "pts_ns": 3766666666,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "3783333333"
+      ],
+      "pts_ns": 3783333333,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "3800000000"
+      ],
+      "pts_ns": 3800000000,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "383333333"
+      ],
+      "pts_ns": 383333333,
+      "phase": "startup",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "3833333333"
+      ],
+      "pts_ns": 3833333333,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "3866666666"
+      ],
+      "pts_ns": 3866666666,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "3883333333"
+      ],
+      "pts_ns": 3883333333,
+      "phase": "steady",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "3900000000"
+      ],
+      "pts_ns": 3900000000,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "3916666666"
+      ],
+      "pts_ns": 3916666666,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "3933333333"
+      ],
+      "pts_ns": 3933333333,
+      "phase": "steady",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "3950000000"
+      ],
+      "pts_ns": 3950000000,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "3966666666"
+      ],
+      "pts_ns": 3966666666,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "3983333333"
+      ],
+      "pts_ns": 3983333333,
+      "phase": "steady",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "400000000"
+      ],
+      "pts_ns": 400000000,
+      "phase": "startup",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "4016666666"
+      ],
+      "pts_ns": 4016666666,
+      "phase": "end",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "4033333333"
+      ],
+      "pts_ns": 4033333333,
+      "phase": "end",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "4050000000"
+      ],
+      "pts_ns": 4050000000,
+      "phase": "end",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "4083333333"
+      ],
+      "pts_ns": 4083333333,
+      "phase": "end",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "4100000000"
+      ],
+      "pts_ns": 4100000000,
+      "phase": "end",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "4116666666"
+      ],
+      "pts_ns": 4116666666,
+      "phase": "end",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "4133333333"
+      ],
+      "pts_ns": 4133333333,
+      "phase": "end",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "416666666"
+      ],
+      "pts_ns": 416666666,
+      "phase": "startup",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "4166666666"
+      ],
+      "pts_ns": 4166666666,
+      "phase": "end",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "4183333333"
+      ],
+      "pts_ns": 4183333333,
+      "phase": "end",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "4200000000"
+      ],
+      "pts_ns": 4200000000,
+      "phase": "end",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "4216666666"
+      ],
+      "pts_ns": 4216666666,
+      "phase": "end",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "4233333333"
+      ],
+      "pts_ns": 4233333333,
+      "phase": "end",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "4250000000"
+      ],
+      "pts_ns": 4250000000,
+      "phase": "end",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "4266666666"
+      ],
+      "pts_ns": 4266666666,
+      "phase": "end",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "4300000000"
+      ],
+      "pts_ns": 4300000000,
+      "phase": "end",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "433333333"
+      ],
+      "pts_ns": 433333333,
+      "phase": "startup",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "4333333333"
+      ],
+      "pts_ns": 4333333333,
+      "phase": "end",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "4350000000"
+      ],
+      "pts_ns": 4350000000,
+      "phase": "end",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "4366666666"
+      ],
+      "pts_ns": 4366666666,
+      "phase": "end",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "4383333333"
+      ],
+      "pts_ns": 4383333333,
+      "phase": "end",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "4400000000"
+      ],
+      "pts_ns": 4400000000,
+      "phase": "end",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "4416666666"
+      ],
+      "pts_ns": 4416666666,
+      "phase": "end",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "4433333333"
+      ],
+      "pts_ns": 4433333333,
+      "phase": "end",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "4466666666"
+      ],
+      "pts_ns": 4466666666,
+      "phase": "end",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "4483333333"
+      ],
+      "pts_ns": 4483333333,
+      "phase": "end",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "450000000"
+      ],
+      "pts_ns": 450000000,
+      "phase": "startup",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "4500000000"
+      ],
+      "pts_ns": 4500000000,
+      "phase": "end",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "4516666666"
+      ],
+      "pts_ns": 4516666666,
+      "phase": "end",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "4533333333"
+      ],
+      "pts_ns": 4533333333,
+      "phase": "end",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "4550000000"
+      ],
+      "pts_ns": 4550000000,
+      "phase": "end",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "4566666666"
+      ],
+      "pts_ns": 4566666666,
+      "phase": "end",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "4583333333"
+      ],
+      "pts_ns": 4583333333,
+      "phase": "end",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "4616666666"
+      ],
+      "pts_ns": 4616666666,
+      "phase": "end",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "4633333333"
+      ],
+      "pts_ns": 4633333333,
+      "phase": "end",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "4650000000"
+      ],
+      "pts_ns": 4650000000,
+      "phase": "end",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "466666666"
+      ],
+      "pts_ns": 466666666,
+      "phase": "startup",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "4666666666"
+      ],
+      "pts_ns": 4666666666,
+      "phase": "end",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "4683333333"
+      ],
+      "pts_ns": 4683333333,
+      "phase": "end",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "4700000000"
+      ],
+      "pts_ns": 4700000000,
+      "phase": "end",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "4716666666"
+      ],
+      "pts_ns": 4716666666,
+      "phase": "end",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "4750000000"
+      ],
+      "pts_ns": 4750000000,
+      "phase": "end",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "4766666666"
+      ],
+      "pts_ns": 4766666666,
+      "phase": "end",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "4783333333"
+      ],
+      "pts_ns": 4783333333,
+      "phase": "end",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "4800000000"
+      ],
+      "pts_ns": 4800000000,
+      "phase": "end",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "4833333333"
+      ],
+      "pts_ns": 4833333333,
+      "phase": "end",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "4850000000"
+      ],
+      "pts_ns": 4850000000,
+      "phase": "end",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "4866666666"
+      ],
+      "pts_ns": 4866666666,
+      "phase": "end",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "4883333333"
+      ],
+      "pts_ns": 4883333333,
+      "phase": "end",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "4916666666"
+      ],
+      "pts_ns": 4916666666,
+      "phase": "end",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "4933333333"
+      ],
+      "pts_ns": 4933333333,
+      "phase": "end",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "4950000000"
+      ],
+      "pts_ns": 4950000000,
+      "phase": "end",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "4966666666"
+      ],
+      "pts_ns": 4966666666,
+      "phase": "end",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "4983333333"
+      ],
+      "pts_ns": 4983333333,
+      "phase": "end",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "50000000"
+      ],
+      "pts_ns": 50000000,
+      "phase": "startup",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "500000000"
+      ],
+      "pts_ns": 500000000,
+      "phase": "startup",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "516666666"
+      ],
+      "pts_ns": 516666666,
+      "phase": "startup",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "533333333"
+      ],
+      "pts_ns": 533333333,
+      "phase": "startup",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "550000000"
+      ],
+      "pts_ns": 550000000,
+      "phase": "startup",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "583333333"
+      ],
+      "pts_ns": 583333333,
+      "phase": "startup",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "600000000"
+      ],
+      "pts_ns": 600000000,
+      "phase": "startup",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "616666666"
+      ],
+      "pts_ns": 616666666,
+      "phase": "startup",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "633333333"
+      ],
+      "pts_ns": 633333333,
+      "phase": "startup",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "66666666"
+      ],
+      "pts_ns": 66666666,
+      "phase": "startup",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "666666666"
+      ],
+      "pts_ns": 666666666,
+      "phase": "startup",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "683333333"
+      ],
+      "pts_ns": 683333333,
+      "phase": "startup",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "700000000"
+      ],
+      "pts_ns": 700000000,
+      "phase": "startup",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "716666666"
+      ],
+      "pts_ns": 716666666,
+      "phase": "startup",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "733333333"
+      ],
+      "pts_ns": 733333333,
+      "phase": "startup",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "750000000"
+      ],
+      "pts_ns": 750000000,
+      "phase": "startup",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "766666666"
+      ],
+      "pts_ns": 766666666,
+      "phase": "startup",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "783333333"
+      ],
+      "pts_ns": 783333333,
+      "phase": "startup",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "816666666"
+      ],
+      "pts_ns": 816666666,
+      "phase": "startup",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "83333333"
+      ],
+      "pts_ns": 83333333,
+      "phase": "startup",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "833333333"
+      ],
+      "pts_ns": 833333333,
+      "phase": "startup",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "850000000"
+      ],
+      "pts_ns": 850000000,
+      "phase": "startup",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "866666666"
+      ],
+      "pts_ns": 866666666,
+      "phase": "startup",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "883333333"
+      ],
+      "pts_ns": 883333333,
+      "phase": "startup",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "900000000"
+      ],
+      "pts_ns": 900000000,
+      "phase": "startup",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "933333333"
+      ],
+      "pts_ns": 933333333,
+      "phase": "startup",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "950000000"
+      ],
+      "pts_ns": 950000000,
+      "phase": "startup",
+      "outcome": "classified_drop:pending_replaced",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "966666666"
+      ],
+      "pts_ns": 966666666,
+      "phase": "startup",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15518959502485574260",
+        "saved-single-session",
+        "983333333"
+      ],
+      "pts_ns": 983333333,
+      "phase": "startup",
+      "outcome": "unclassified_missing:sink_receive,buffer_acquire,schedule,render_submit,gpu_complete,present_submit",
+      "missing": [
+        "sink_receive",
+        "buffer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    }
+  ]
+}

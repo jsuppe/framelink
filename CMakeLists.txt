@@ -583,3 +583,8 @@ if(FRAMELINK_BUILD_TESTS AND TARGET framelink_av_producer AND TARGET gstframelin
         --build $<TARGET_FILE_DIR:framelink_av_producer>)
     set_tests_properties(m5_consumer_drain PROPERTIES TIMEOUT 180 LABELS "gpu;integration")
 endif()
+
+if(FRAMELINK_BUILD_TESTS AND Python3_Interpreter_FOUND)
+    add_test(NAME frame_accounting_negative_controls COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/test_frame_accounting.py)
+endif()

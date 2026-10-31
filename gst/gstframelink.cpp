@@ -237,12 +237,27 @@ static GstFlowReturn sinkRender(GstBaseSink* base, GstBuffer* buffer) {
     GstFrameLinkSink* self = GST_FRAMELINK_SINK(base);
     gsttrace::Scope trace("gst.sinkRender",gsttrace::id(self->channel));
     ++self->received;
-    if (!self->haveInfo) return trace.result(GST_FLOW_OK);
+    // Optional identity-bearing accounting. PTS is the original media running
+    // time; received is a local ordinal, not a transport sequence. No I/O.
+    const auto account = [&](const char* op) {
+        if (!trace.active) return;
+        const GstClockTime pts = gst_segment_to_running_time(
+            &GST_BASE_SINK(self)->segment, GST_FORMAT_TIME, GST_BUFFER_PTS(buffer));
+        gsttrace::record({op, gsttrace::clockNs(), 0, gsttrace::id(self->channel),
+                          self->received, 0, 0,
+                          GST_CLOCK_TIME_IS_VALID(pts) ? (int64_t)pts : -1, 0});
+    };
+    account("gst.frame_receive");
+    if (!self->haveInfo) {
+        account("gst.frame_drop.no_caps");
+        return trace.result(GST_FLOW_OK);
+    }
 
     if (!self->ch) {
         sinkTryConnect(self);
         if (!self->ch) {
             ++self->dropped;
+            account("gst.frame_drop.no_consumer");
             return trace.result(GST_FLOW_OK); // keep the pipeline alive until a consumer appears
         }
     }
@@ -254,6 +269,7 @@ static GstFlowReturn sinkRender(GstBaseSink* base, GstBuffer* buffer) {
          incoming==FL_FORMAT_RGB10A2 || self->cinfo.format==FL_FORMAT_RGB10A2) && incoming!=self->cinfo.format)) {
         GST_ELEMENT_ERROR(self,CORE,NEGOTIATION,("channel format/geometry does not match input"),
             ("Create the consumer with matching format and geometry; no implicit YUV/RGB conversion"));
+        account("gst.frame_drop.negotiation");
         return trace.result(GST_FLOW_NOT_NEGOTIATED);
     }
 
@@ -261,17 +277,21 @@ static GstFlowReturn sinkRender(GstBaseSink* base, GstBuffer* buffer) {
     flResult r = flAcquireBuffer(self->ch, &fb, 5);
     if (r == FL_TIMEOUT || r == FL_BUSY) {
         ++self->ringFullDrops;
+        account("gst.frame_drop.ring_full");
         ++self->dropped; // ring full: the consumer is behind, latest-wins says drop
         return trace.result(GST_FLOW_OK);
     }
     if (r != FL_OK) {
+        account("gst.frame_drop.channel_lost");
         GST_WARNING_OBJECT(self, "channel lost (%s) - will redial", flResultString(r));
         sinkDisconnect(self);
         return trace.result(GST_FLOW_OK);
     }
 
+    account("gst.frame_acquired");
     GstVideoFrame vframe;
     if (!gst_video_frame_map(&vframe, &self->vinfo, buffer, GST_MAP_READ)) {
+        account("gst.frame_drop.map_failed");
         sinkDisconnect(self); // do not publish uninitialized pixels
         return trace.result(GST_FLOW_ERROR);
     }
@@ -302,6 +322,7 @@ static GstFlowReturn sinkRender(GstBaseSink* base, GstBuffer* buffer) {
             for (guint p=0;p<2;p++) {
                 const gint pitch=GST_VIDEO_FRAME_PLANE_STRIDE(&vframe,p);
                 if(pitch<(gint)w) {
+                    account("gst.frame_drop.invalid_pitch");
                     ctx->Release();g_byte_array_unref(scratch);
                     gst_video_frame_unmap(&vframe);sinkDisconnect(self);return trace.result(GST_FLOW_ERROR);
                 }
@@ -372,12 +393,14 @@ static GstFlowReturn sinkRender(GstBaseSink* base, GstBuffer* buffer) {
             pts = gst_segment_to_running_time(&GST_BASE_SINK(self)->segment,
                                               GST_FORMAT_TIME, GST_BUFFER_PTS(buffer));
             if (!GST_CLOCK_TIME_IS_VALID(pts) || pts > G_MAXINT64) {
+                account("gst.frame_drop.invalid_pts");
                 sinkDisconnect(self);
                 GST_ELEMENT_ERROR(self, STREAM, FORMAT, ("valid signed-nanosecond TIME segment and PTS required"), (NULL));
                 return trace.result(GST_FLOW_ERROR);
             }
         }
         if (flSubmit(self->ch, &fb, pts) != FL_OK) {
+            account("gst.frame_drop.submit_failed");
             ++self->dropped;
             sinkDisconnect(self);
             return trace.result(GST_FLOW_OK);
@@ -386,6 +409,7 @@ static GstFlowReturn sinkRender(GstBaseSink* base, GstBuffer* buffer) {
             GST_INFO_OBJECT(self, "%" G_GUINT64_FORMAT " frames submitted, %" G_GUINT64_FORMAT
                             " dropped", self->submitted, self->dropped);
     } else {
+        account("gst.frame_drop.copy_failed");
         sinkDisconnect(self); // Never publish a failed/partial copy.
         return trace.result(GST_FLOW_ERROR);
     }

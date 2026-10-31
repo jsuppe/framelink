@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "unique_frames": 3,
+  "unique_by_stage": {
+    "sink_receive": 3,
+    "drop": 3
+  },
+  "repeat_present_submissions": 0,
+  "required_stages": [
+    "sink_receive",
+    "buffer_acquire",
+    "submit",
+    "ipc_receive",
+    "consumer_acquire",
+    "schedule",
+    "render_submit",
+    "gpu_complete",
+    "present_submit"
+  ],
+  "absent_required_stages": [
+    "buffer_acquire",
+    "submit",
+    "ipc_receive",
+    "consumer_acquire",
+    "schedule",
+    "render_submit",
+    "gpu_complete",
+    "present_submit"
+  ],
+  "phases": {
+    "startup": {
+      "classified_drop:no_consumer": 3
+    },
+    "steady": {},
+    "end": {}
+  },
+  "unclassified_frames": 0,
+  "ambiguous_identities": [],
+  "gpu_submission_mismatches": [],
+  "stage_intervals": {},
+  "metadata": {
+    "trace_lost_events": 0,
+    "legacy_sink_records_without_identity": 3,
+    "anonymous_pre_submit_deficit": 0
+  },
+  "accounting_complete": true,
+  "physical_scanout_verified": false,
+  "frames": [
+    {
+      "identity": [
+        "15768193541585578407",
+        "0",
+        "0"
+      ],
+      "pts_ns": 0,
+      "phase": "startup",
+      "outcome": "classified_drop:no_consumer",
+      "missing": [
+        "buffer_acquire",
+        "submit",
+        "ipc_receive",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15768193541585578407",
+        "0",
+        "33333333"
+      ],
+      "pts_ns": 33333333,
+      "phase": "startup",
+      "outcome": "classified_drop:no_consumer",
+      "missing": [
+        "buffer_acquire",
+        "submit",
+        "ipc_receive",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    },
+    {
+      "identity": [
+        "15768193541585578407",
+        "0",
+        "66666666"
+      ],
+      "pts_ns": 66666666,
+      "phase": "startup",
+      "outcome": "classified_drop:no_consumer",
+      "missing": [
+        "buffer_acquire",
+        "submit",
+        "ipc_receive",
+        "consumer_acquire",
+        "schedule",
+        "render_submit",
+        "gpu_complete",
+        "present_submit"
+      ]
+    }
+  ]
+}
