@@ -1,0 +1,11 @@
+ERROR: from element /GstPipeline:pipeline0/GstFrameLinkSink:framelinksink0: FrameLink producer readiness deadline
+Additional debug info:
+/tmp/framelink-m5-producer-preconnect/gst/gstframelink.cpp(247): sinkStart (): /GstPipeline:pipeline0/GstFrameLinkSink:framelinksink0:
+Channel preconnect-missing-2503547 was not ready within 100 ms
+ERROR: pipeline doesn't want to preroll.
+ERROR: from element /GstPipeline:pipeline0/GstFrameLinkSink:framelinksink0: GStreamer error: state change failed and some element failed to post a proper error message with the reason for the failure.
+Additional debug info:
+../libs/gst/base/gstbasesink.c(5906): gst_base_sink_change_state (): /GstPipeline:pipeline0/GstFrameLinkSink:framelinksink0:
+Failed to start
+ERROR: pipeline doesn't want to preroll.
+Failed to set pipeline to PAUSED.

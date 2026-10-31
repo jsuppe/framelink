@@ -578,6 +578,10 @@ if(FRAMELINK_BUILD_TESTS AND TARGET framelink_av_producer AND TARGET gstframelin
         ${CMAKE_CURRENT_SOURCE_DIR}/test/m5_startup.py
         --build $<TARGET_FILE_DIR:framelink_av_producer>)
     set_tests_properties(m5_startup PROPERTIES TIMEOUT 130 LABELS "gpu;integration")
+    add_test(NAME m5_preconnect COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/m5_preconnect.py
+        --build $<TARGET_FILE_DIR:framelink_av_producer>)
+    set_tests_properties(m5_preconnect PROPERTIES TIMEOUT 150 LABELS "gpu;integration")
     add_test(NAME m5_consumer_drain COMMAND ${Python3_EXECUTABLE}
         ${CMAKE_CURRENT_SOURCE_DIR}/test/m5_consumer_drain.py
         --build $<TARGET_FILE_DIR:framelink_av_producer>)

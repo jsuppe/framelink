@@ -26,6 +26,7 @@
 // staging texture - the exact patterns vkrender's receivers and framecam use.
 // Zero-copy caps (memory:DmaBuf, memory:D3D11Memory) are a later stage.
 
+#include <algorithm>
 #include <gst/base/gstbasesink.h>
 #include <gst/base/gstpushsrc.h>
 #include <gst/gst.h>
@@ -148,6 +149,8 @@ typedef struct _GstFrameLinkSink {
     gboolean haveInfo;
     gint64 nextConnectUs; // lazy-connect rate limit (the consumer may not be up)
     gboolean busyWarned;
+    guint connectTimeoutMs;
+    gboolean testOpenDelayed;
     guint64 submitted, dropped, received, ringFullDrops;
 #ifndef _WIN32
     gboolean mapRefused; // consumer ring not FL_MAP_CPU - fatal, but say why
@@ -162,7 +165,7 @@ G_DEFINE_TYPE(GstFrameLinkSink, gst_framelink_sink, GST_TYPE_BASE_SINK)
 #define GST_FRAMELINK_SINK(o) \
     (G_TYPE_CHECK_INSTANCE_CAST((o), gst_framelink_sink_get_type(), GstFrameLinkSink))
 
-enum { SINK_PROP_0, SINK_PROP_CHANNEL, SINK_PROP_SLOTS, SINK_PROP_PRESERVE_TIMESTAMPS };
+enum { SINK_PROP_0, SINK_PROP_CHANNEL, SINK_PROP_SLOTS, SINK_PROP_PRESERVE_TIMESTAMPS, SINK_PROP_CONNECT_TIMEOUT };
 
 static GstStaticPadTemplate sinkTemplate =
     GST_STATIC_PAD_TEMPLATE("sink", GST_PAD_SINK, GST_PAD_ALWAYS,
@@ -188,6 +191,13 @@ static void sinkTryConnect(GstFrameLinkSink* self) {
     const flFormat fmt =
         self->haveInfo ? toFlFormat(GST_VIDEO_INFO_FORMAT(&self->vinfo)) : FL_FORMAT_BGRA8;
 
+    gsttrace::Scope openTrace("gst.producer_open",gsttrace::id(self->channel));
+    // Deterministic setup-delay fault: before import, never attached to a frame.
+    if(!self->testOpenDelayed) {
+        self->testOpenDelayed=TRUE;
+        const char* delay=g_getenv("FRAMELINK_TEST_PRODUCER_OPEN_DELAY_MS");
+        if(delay)g_usleep(std::min(g_ascii_strtoull(delay,nullptr,10),guint64(5000))*1000);
+    }
     flResult r;
     guint32 slotIndex = 0;
     if (self->slots > 0) {
@@ -197,6 +207,7 @@ static void sinkTryConnect(GstFrameLinkSink* self) {
         r = flOpenProducer(self->channel, &self->ch);
         if (r == FL_OK && w && h) flRequestGeometry(self->ch, w, h, fmt);
     }
+    openTrace.result(r);
     if (r != FL_OK) {
         // BUSY (all slots taken) is an operational condition worth one line;
         // NOT_FOUND (consumer absent) is the boring startup race - stay quiet.
@@ -214,6 +225,28 @@ static void sinkTryConnect(GstFrameLinkSink* self) {
                     self->cinfo.width, self->cinfo.height,
                     gst_video_format_to_string(toGstFormat(self->cinfo.format)),
                     self->cinfo.poolSize);
+}
+
+// Opt-in session readiness. The default remains lazy reconnect for ordinary
+// gst-launch pipelines; coordinated A/V sessions pay device import cost before
+// choosing/releasing their common playback epoch, not in the first render.
+static gboolean sinkStart(GstBaseSink* base) {
+    auto* self=GST_FRAMELINK_SINK(base);
+    self->testOpenDelayed=FALSE;
+    if(!self->connectTimeoutMs)return TRUE;
+    gsttrace::Scope readyTrace("gst.producer_preconnect",gsttrace::id(self->channel));
+    const auto deadline=g_get_monotonic_time()+gint64(self->connectTimeoutMs)*1000;
+    self->nextConnectUs=0;
+    do {
+        sinkTryConnect(self);
+        if(self->ch && g_get_monotonic_time()<=deadline)return readyTrace.result(TRUE);
+        if(g_get_monotonic_time()>=deadline)break;
+        g_usleep(1000);
+    } while(true);
+    sinkDisconnect(self);
+    GST_ELEMENT_ERROR(self,RESOURCE,OPEN_WRITE,("FrameLink producer readiness deadline"),
+                      ("Channel %s was not ready within %u ms",self->channel,self->connectTimeoutMs));
+    return readyTrace.result(FALSE);
 }
 
 static gboolean sinkSetCaps(GstBaseSink* base, GstCaps* caps) {
@@ -446,6 +479,9 @@ static gboolean sinkStop(GstBaseSink* base) {
 static void sinkSetProperty(GObject* obj, guint id, const GValue* value, GParamSpec* spec) {
     GstFrameLinkSink* self = GST_FRAMELINK_SINK(obj);
     switch (id) {
+        case SINK_PROP_CONNECT_TIMEOUT:
+            if(GST_STATE(self)>GST_STATE_READY){GST_WARNING_OBJECT(self,"connect timeout cannot change while running");break;}
+            self->connectTimeoutMs=g_value_get_uint(value);break;
         case SINK_PROP_CHANNEL:
             g_free(self->channel);
             self->channel = g_value_dup_string(value);
@@ -461,6 +497,7 @@ static void sinkSetProperty(GObject* obj, guint id, const GValue* value, GParamS
 static void sinkGetProperty(GObject* obj, guint id, GValue* value, GParamSpec* spec) {
     GstFrameLinkSink* self = GST_FRAMELINK_SINK(obj);
     switch (id) {
+        case SINK_PROP_CONNECT_TIMEOUT: g_value_set_uint(value,self->connectTimeoutMs);break;
         case SINK_PROP_CHANNEL: g_value_set_string(value, self->channel); break;
         case SINK_PROP_PRESERVE_TIMESTAMPS: g_value_set_boolean(value, self->preserveTimestamps); break;
         case SINK_PROP_SLOTS: g_value_set_int(value, self->slots); break;
@@ -506,6 +543,11 @@ static void gst_framelink_sink_class_init(GstFrameLinkSinkClass* klass) {
         "framelink");
     gst_element_class_add_static_pad_template(element, &sinkTemplate);
 
+    g_object_class_install_property(gobject,SINK_PROP_CONNECT_TIMEOUT,
+        g_param_spec_uint("connect-timeout-ms","Connection readiness timeout",
+            "Open the producer before streaming; 0 keeps lazy connection",
+            0,60000,0,(GParamFlags)(G_PARAM_READWRITE|G_PARAM_STATIC_STRINGS|GST_PARAM_MUTABLE_READY)));
+    basesink->start = sinkStart;
     basesink->set_caps = sinkSetCaps;
     basesink->render = sinkRender;
     basesink->event = sinkEvent;

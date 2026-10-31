@@ -463,7 +463,7 @@ std::string externalPipeline(const Options& o,const std::string& channel) {
   std::ostringstream contents;contents<<input.rdbuf();auto text=contents.str();
   need(text.size()<=65536,"input pipeline exceeds 64 KiB");
   auto replace=[&](const char* token,const std::string& value){auto at=text.find(token);need(at!=std::string::npos && text.find(token,at+strlen(token))==std::string::npos,"pipeline requires exactly one of each sink placeholder");text.replace(at,strlen(token),value);};
-  replace("@VIDEO_SINK@",videoCaps(o)+" ! identity name=externalvideo ! framelinksink sync=true preserve-timestamps=true channel="+channel);
+  replace("@VIDEO_SINK@",videoCaps(o)+" ! identity name=externalvideo ! framelinksink name=videooutput sync=true preserve-timestamps=true channel="+channel);
   replace("@AUDIO_SINK@",audioCaps(o)+" ! identity name=externalaudio sync=true ! queue max-size-buffers=4 max-size-bytes=0 max-size-time=80000000 ! gdppay ! giostreamsink name=audioio sync=false async=false");
   return text;
 }
@@ -830,13 +830,20 @@ unsigned runProducer(const Options &o, GSocketListener *l,
       o.inputPipeline.empty() ? "appsrc name=video is-live=true format=time block=true max-buffers=2 "
       "caps=" +
           videoCaps(o) +
-          " ! framelinksink preserve-timestamps=true channel=" + channel +
+          " ! framelinksink name=videooutput preserve-timestamps=true channel=" + channel +
           (o.pacingPpm ? " sync=false" : "") +
           " appsrc name=audio is-live=true format=time block=true "
           "max-buffers=2 caps=" +
           audioCaps(o) +
           " ! queue max-size-buffers=4 max-size-bytes=0 max-size-time=80000000 "
           "! gdppay ! giostreamsink name=audioio sync=false async=false" : externalPipeline(o,channel));
+  // READY proves the consumer has entered setup; start() waits for the actual
+  // producer resource import before the final shared epoch is selected.
+  if(coordinated && !g_getenv("FRAMELINK_TEST_LAZY_PRODUCER_OPEN")) {
+    auto* videoOutput=named(tx,"videooutput");
+    g_object_set(videoOutput,"connect-timeout-ms",o.timeout,nullptr);
+    gst_object_unref(videoOutput);
+  }
   setStream(tx, "audioio", *audio, true);
   StartupGate startup(o.timeout);
   if(coordinated) {
