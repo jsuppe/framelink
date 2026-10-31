@@ -18,9 +18,16 @@ live protocol. The tone is 440 Hz at amplitude 0.01; device volume is unchanged.
 Video is BGRA. Renderer control uses isolated port 18766. Existing demos are not
 stopped. Choose different `--port`/`--renderer-port` if occupied.
 
-The browser is a JPEG preview, not native video scanout; its refresh rate and
-additional JPEG latency do not qualify presentation smoothness or physical A/V
-sync. Audio output uses the independent renderer, not the browser.
+The default video output is now a **native Vulkan window**, not the browser.
+The browser is status/stop control only and requests no GPU readback/JPEG work.
+Use `--browser-preview` to select the previous headless diagnostic JPEG path.
+That path intentionally limits refresh to one outstanding image request, waits
+150 ms after each load, and reports completed browser JPEG loads separately.
+It is not smooth-playback qualification. Native `presentation_submission`
+counters report Vulkan present calls/errors and first/last monotonic CPU times;
+they include repeated content, and do not report physical scanout or fresh-frame
+FPS. Correlate these with source frame IDs and scheduler counters.
+Neither mode independently establishes physical A/V sync. Audio output uses the independent renderer, not the browser.
 
 Stop with the page's **Stop this demo** button, or create `visible-demo/STOP`.
 Remove that marker before restarting. The helper terminates only its own child
