@@ -1,0 +1,7 @@
+{"command": ["C:/Users/jonsu/dev/vkrender-m5-final-validation/build-final/framelink/Release/framelink_av_producer.exe", "C:/Users/jonsu/dev/vkrender-m5-final-validation/build-final/framelink/Release/gstframelink.dll", "--session", "C:\\Users\\jonsu\\dev\\m5-combined-v3-offsets\\negative-reset-37000000\\session", "--frames", "80", "--timeout-ms", "5000", "--fps", "50", "--rate", "48000", "--format", "BGRA", "--audio-offset-ns", "37000000", "--fault", "audio-pts-reset"]}
+{"event":"session-ready","instance":"7a731d02f8dff729e0a1fc1d35345091","generation":1,"format":"BGRA","video_frames":0,"audio_blocks":0,"audio_offset_ns":37000000}
+{"event":"startup-released","epoch_ns":1402268065341700}
+{"event":"media-progress","instance":"7a731d02f8dff729e0a1fc1d35345091","generation":1,"format":"BGRA","video_frames":1,"audio_blocks":1,"audio_offset_ns":37000000}
+pipeline error: Could not write to resource. (../gst/gio/gstgiobasesink.c(361): gst_gio_base_sink_render (): /GstPipeline:pipeline0/GstGioStreamSink:audioio:
+Could not write to stream: Error sending data: An established connection was aborted by the software in your host machine.)
+FAIL: video send failed
