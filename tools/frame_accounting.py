@@ -25,6 +25,7 @@ OPS = {'gst.frame_receive': 'sink_receive', 'gst.frame_acquired': 'buffer_acquir
 def load_csv(paths, generation):
     events, metadata = [], {'trace_lost_events': 0, 'legacy_sink_records_without_identity': 0}
     pending = {}
+    last_received_sequence = {}
     raw = []
     for path in paths:
         opener = gzip.open if str(path).endswith('.gz') else open
@@ -65,6 +66,10 @@ def load_csv(paths, generation):
         if stage == 'drop':
             event['reason'] = op.split('.frame_drop.', 1)[1]
         if stage == 'ipc_receive':
+            sequence = event['sequence']
+            if channel in last_received_sequence and sequence <= last_received_sequence[channel]:
+                raise ValueError('transport sequence reset/repeated; split capture by generation')
+            last_received_sequence[channel] = sequence
             if result == 1:
                 previous = pending.get(channel)
                 if previous is not None:

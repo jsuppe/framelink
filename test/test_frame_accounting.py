@@ -68,6 +68,25 @@ class Accounting(unittest.TestCase):
         with self.assertRaises(ValueError):
             a.analyze(events, a.STAGES)
 
+    def test_truncated_capture_fails_closed(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory)/'trace.csv'
+            path.write_text('thread,operation,start_ns,duration_ns,channel_id,sequence,fence,slot,pts_ns,result\n'
+                            '0,gst.frame_receive,1,0,99,1,0,0,0,0\n'
+                            '0,gst.frame_drop.no_consumer,2,0,99,1,0,0,0,0\n')
+            events, meta = a.load_csv([path], 'capture1')
+        self.assertFalse(a.analyze(events, a.STAGES, metadata=meta)['accounting_complete'])
+        self.assertEqual(meta['missing_trace_footers'], 1)
+
+    def test_sequence_reset_fails_closed(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory)/'trace.csv'
+            path.write_text('thread,operation,start_ns,duration_ns,channel_id,sequence,fence,slot,pts_ns,result\n'
+                            '0,ipc.frame_received,1,0,99,2,1,0,0,0\n'
+                            '0,ipc.frame_received,2,0,99,1,1,0,100,0\n')
+            with self.assertRaises(ValueError):
+                a.load_csv([path], 'capture1')
+
     def test_legacy_replacement_attributes_previous_not_new_frame(self):
         header = 'thread,operation,start_ns,duration_ns,channel_id,sequence,fence,slot,pts_ns,result\n'
         body = ('0,ipc.frame_received,1,0,99,1,1,0,0,0\n'

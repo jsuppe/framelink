@@ -55,10 +55,10 @@ FPS averages. It does not claim that the latest corrected build still loses them
 Linux Release plugin/shared renderer compilation passed. Existing `fl_gst_sink_stats`
 was run against the newly built plugin with `FRAMELINK_GST_TRACE` enabled: 3 input
 frames, 3 explicit `no_consumer` drops; the analyzer accounts for all three.
-`no-consumer.json` is that fresh result. Eight unit/negative-control tests pass:
+`no-consumer.json` is that fresh result. Ten unit/negative-control tests pass:
 removing an acquisition or drop reason fails, duplicate IDs fail, trace loss
 fails, generations remain isolated, repeat presentation is distinct, a removed
-repeat GPU completion fails, and IPC replacement attributes the PREVIOUS frame.
+repeat GPU completion fails, IPC replacement attributes the PREVIOUS frame, truncated captures fail, and transport sequence resets fail.
 
 The Windows worker must collect the new end-to-end trace for actual performance
 qualification. `gpu_complete` is a submission fence observation, not transport
