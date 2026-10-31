@@ -14,6 +14,7 @@
 #include <cerrno>
 #include <cstdio>
 #include <cstring>
+#include <deque>
 #include <gio/gio.h>
 #include <gst/app/gstappsink.h>
 #include <gst/app/gstappsrc.h>
@@ -984,7 +985,7 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
     std::string video = externalVideo ? "" : "framelinksrc channel="+channel+
       " width="+std::to_string(o.width)+" height="+std::to_string(o.height)+
       " fps="+std::to_string(o.fps)+" format="+o.format+
-      " preserve-timestamps=true ! appsink name=vout sync=false max-buffers=3 drop=true ";
+      " preserve-timestamps=true ! appsink name=vout sync=false max-buffers=3 drop=false ";
     parse(rx, video+"appsrc name=audioio is-live=false format=bytes block=true max-buffers=4 ! gdpdepay ! "+
       audioCaps(o)+" ! identity name=timeline ! queue name=audioqueue max-size-buffers=4 max-size-bytes=0 max-size-time=80000000 ! audioconvert ! audioresample ! volume name=playvolume ! "+o.audioSink+" name=playaudio sync=true"+(o.audioSink=="fakesink" ? " async=false" : ""));
     if(o.traceMedia){attachTrace(rx,"timeline","src","consumer","audio");if(!externalVideo)attachTrace(rx,"vout","sink","consumer","video");}
@@ -1100,6 +1101,36 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
     };
     uint64_t received=0,dropped=0,lastPts=GST_CLOCK_TIME_NONE,firstPts=GST_CLOCK_TIME_NONE;
     const uint64_t finalPts=(frames-1)*GST_SECOND/o.fps;
+    // Drain independently of presentation deadlines. Blocking here for the
+    // first frame's latency used to overflow the three-buffer appsink silently.
+    using SamplePtr=std::unique_ptr<GstSample, decltype(&gst_sample_unref)>;
+    struct PendingVideo { SamplePtr sample; uint64_t pts; size_t bytes; };
+    std::deque<PendingVideo> pending;
+    const size_t pendingLimit=size_t((latency*o.fps+GST_SECOND-1)/GST_SECOND)+3;
+    constexpr size_t pendingByteLimit=128*1024*1024;
+    size_t pendingBytes=0,peakPending=0,peakBytes=0;
+    uint64_t scheduled=0,overflow=0,handedOff=0;
+    auto videoEvent=[&](const char* stage,uint64_t pts) {
+      if(o.traceMedia) printf("{\"event\":\"video-schedule\",\"stage\":\"%s\",\"pts_ns\":%llu,\"monotonic_ns\":%llu}\n",stage,(unsigned long long)pts,(unsigned long long)gst_util_get_timestamp());
+    };
+    unsigned testPresentStallMs=0;
+    if(const char* value=g_getenv("FRAMELINK_TEST_PRESENT_STALL_MS")) {
+      testPresentStallMs=number(value);
+      need(testPresentStallMs<=o.timeout,"invalid presentation stall");
+    }
+    uint64_t stalledUntil=0;
+    auto presentDue=[&]() {
+      if(stalledUntil && gst_util_get_timestamp()<stalledUntil)return;
+      const auto now=gst_clock_get_time(selected);
+      while(!pending.empty()) {
+        const auto due=mappedBase+pending.front().pts+latency;
+        if(now<due)break;
+        if(now>due+40*GST_MSECOND){++dropped;videoEvent("late",pending.front().pts);}
+        else {++scheduled;videoEvent("scheduled",pending.front().pts);}
+        pendingBytes-=pending.front().bytes;
+        pending.pop_front();
+      }
+    };
 
     // An audio sink pad EOS probe reports only arrival, not audible completion;
     // drain until final media deadline on the selected shared clock instead.
@@ -1109,7 +1140,7 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
     need(flSessionSampleOffset(frames*o.rate/o.fps,o.rate,&audioDuration)==0,"audio duration overflow");
     need(audioOrigin<=GST_CLOCK_TIME_NONE-1-duration-mappedBase-latency,"audio timeline overflow");
     const auto finishAt=mappedBase+std::max(duration,audioOrigin+uint64_t(audioDuration))+latency;
-    while (gst_clock_get_time(selected)<finishAt || (!externalVideo && (!GST_CLOCK_TIME_IS_VALID(lastPts) || lastPts<finalPts))) {
+    while (!pending.empty() || gst_clock_get_time(selected)<finishAt || (!externalVideo && (!GST_CLOCK_TIME_IS_VALID(lastPts) || lastPts<finalPts))) {
       need(!stop || !stop->load(),"playback cancelled");
       need(!paused || !paused->load(),"session-paused");
       g_object_set(volume,"mute",mute && mute->load(),nullptr);
@@ -1122,26 +1153,33 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
       }
       checkPlaybackBus(bus);
       if (!v) { g_usleep(5000); continue; }
-      auto *sample=gst_app_sink_try_pull_sample(GST_APP_SINK(v),10*GST_MSECOND);
-      if (!sample) continue;
+      presentDue();
+      auto *sample=gst_app_sink_try_pull_sample(GST_APP_SINK(v),pending.empty()?10*GST_MSECOND:0);
+      if (!sample) { if(!pending.empty())g_usleep(1000); continue; }
       std::unique_ptr<GstSample, decltype(&gst_sample_unref)> sampleOwner(sample,gst_sample_unref);
       auto *b=gst_sample_get_buffer(sample);
       auto pts=gst_segment_to_running_time(gst_sample_get_segment(sample),GST_FORMAT_TIME,GST_BUFFER_PTS(b));
       if (!GST_CLOCK_TIME_IS_VALID(pts) || pts>finalPts) throw std::runtime_error("invalid video running PTS");
       if(!GST_CLOCK_TIME_IS_VALID(firstPts))firstPts=pts;
       lastPts=pts; ++received;
-      if (cb && cb->onVideo) cb->onVideo(sample,pts,timing);
+      if(received==20 && testPresentStallMs)
+        stalledUntil=gst_util_get_timestamp()+uint64_t(testPresentStallMs)*GST_MSECOND;
+      videoEvent("received",pts);
+      if (cb && cb->onVideo) { cb->onVideo(sample,pts,timing); ++handedOff; videoEvent("handed-off",pts); }
       else {
-        auto due=mappedBase+pts+latency, now=gst_clock_get_time(selected);
-        if (now>due+40*GST_MSECOND) ++dropped;
-        else while (due>gst_clock_get_time(selected)) {
-          need(!stop || !stop->load(),"playback cancelled");
-          need(!paused || !paused->load(),"session-paused");
-          need(std::chrono::steady_clock::now()<end,"playback deadline");
-          g_usleep(1000);
+        const auto bytes=gst_buffer_get_size(b);
+        if(pending.size()>=pendingLimit || bytes>pendingByteLimit-pendingBytes) {
+          ++overflow;videoEvent("queue-overflow",pts);
+        } else {
+          pendingBytes+=bytes;
+          pending.push_back({std::move(sampleOwner),pts,bytes});
+          peakPending=std::max(peakPending,pending.size());
+          peakBytes=std::max(peakBytes,pendingBytes);
+          presentDue();
         }
       }
     }
+    printf("{\"event\":\"video-schedule-summary\",\"received\":%llu,\"scheduled\":%llu,\"handed_off\":%llu,\"late\":%llu,\"overflow\":%llu,\"peak_pending\":%zu,\"pending_limit\":%zu,\"peak_bytes\":%zu,\"byte_limit\":%zu}\n",(unsigned long long)received,(unsigned long long)scheduled,(unsigned long long)handedOff,(unsigned long long)dropped,(unsigned long long)overflow,peakPending,pendingLimit,peakBytes,pendingByteLimit);
     reportMetrics(true);
     need(!audioTimeline.exhausted.load(),"audio playout budget exhausted: renegotiate both tracks");
     need(!audioTimeline.invalid.load() && audioTimeline.samplesEnd.load()==frames*o.rate/o.fps,"incomplete/discontinuous audio");
