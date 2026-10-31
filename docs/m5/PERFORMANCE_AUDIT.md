@@ -340,6 +340,8 @@ windows, not whole-clip losslessness, scanout, all-platform, or endurance
 qualification. Raw evidence is retained in `/tmp/m5-native-accounted` on the
 coordinator and `C:/Users/jonsu/dev/m5-native-accounted` on Caspar; the standalone
 consumer drain and the above two defects still need final combined validation.
+The raw captures, manifests, controls and validation logs are also committed in
+[vkrender's native accounting evidence](https://github.com/jsuppe/vkrender/tree/feature/m5-platform/docs/m5/native-accounted-20261031).
 
 Cadence is checked independently of count completeness. From consecutive first
 present-call-return observations for distinct steady frames, BGRA60 p50/p99/max are
