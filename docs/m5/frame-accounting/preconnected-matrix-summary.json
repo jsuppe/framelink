@@ -1,0 +1,140 @@
+[
+  {
+    "case": "1920x1080-30-BGRA-av",
+    "evidence": "/tmp/m5-preconnected-accounted/1920x1080-30-BGRA-av/accounting-with-manifest.json",
+    "accounting_complete": true,
+    "expected_source_validated": true,
+    "expected_frames": 1350,
+    "unique_by_stage": {
+      "sink_receive": 1350,
+      "buffer_acquire": 1350,
+      "submit": 1350,
+      "ipc_receive": 1350,
+      "consumer_acquire": 1349,
+      "schedule": 1349,
+      "adopt": 1349,
+      "render_submit": 1349,
+      "present_attempt": 1349,
+      "present_submit": 1349,
+      "gpu_complete": 1349,
+      "drop": 1
+    },
+    "phases": {
+      "startup": {
+        "complete": 30
+      },
+      "steady": {
+        "complete": 1289,
+        "classified_drop:pending_replaced": 1
+      },
+      "end": {
+        "complete": 30
+      }
+    },
+    "unclassified_frames": 0
+  },
+  {
+    "case": "1920x1080-30-NV12-av",
+    "evidence": "/tmp/m5-preconnected-accounted/1920x1080-30-NV12-av/accounting-with-manifest.json",
+    "accounting_complete": true,
+    "expected_source_validated": true,
+    "expected_frames": 1350,
+    "unique_by_stage": {
+      "sink_receive": 1350,
+      "buffer_acquire": 1350,
+      "submit": 1350,
+      "ipc_receive": 1350,
+      "consumer_acquire": 1350,
+      "schedule": 1350,
+      "adopt": 1350,
+      "render_submit": 1350,
+      "present_attempt": 1350,
+      "present_submit": 1350,
+      "gpu_complete": 1350
+    },
+    "phases": {
+      "startup": {
+        "complete": 30
+      },
+      "steady": {
+        "complete": 1290
+      },
+      "end": {
+        "complete": 30
+      }
+    },
+    "unclassified_frames": 0
+  },
+  {
+    "case": "1920x1080-60-BGRA-av",
+    "evidence": "/tmp/m5-preconnected-accounted/1920x1080-60-BGRA-av/accounting-with-manifest.json",
+    "accounting_complete": true,
+    "expected_source_validated": true,
+    "expected_frames": 2700,
+    "unique_by_stage": {
+      "sink_receive": 2700,
+      "buffer_acquire": 2521,
+      "submit": 2521,
+      "ipc_receive": 2521,
+      "consumer_acquire": 2521,
+      "schedule": 2521,
+      "adopt": 2521,
+      "render_submit": 2521,
+      "present_attempt": 2521,
+      "present_submit": 2521,
+      "gpu_complete": 2521,
+      "drop": 179
+    },
+    "phases": {
+      "startup": {
+        "complete": 57,
+        "classified_drop:ring_full": 3
+      },
+      "steady": {
+        "complete": 2408,
+        "classified_drop:ring_full": 172
+      },
+      "end": {
+        "classified_drop:ring_full": 4,
+        "complete": 56
+      }
+    },
+    "unclassified_frames": 0
+  },
+  {
+    "case": "1920x1080-60-NV12-av",
+    "evidence": "/tmp/m5-preconnected-accounted/1920x1080-60-NV12-av/accounting-with-manifest.json",
+    "accounting_complete": true,
+    "expected_source_validated": true,
+    "expected_frames": 2700,
+    "unique_by_stage": {
+      "sink_receive": 2700,
+      "buffer_acquire": 2521,
+      "submit": 2521,
+      "ipc_receive": 2521,
+      "consumer_acquire": 2521,
+      "schedule": 2521,
+      "adopt": 2521,
+      "render_submit": 2521,
+      "present_attempt": 2521,
+      "present_submit": 2521,
+      "gpu_complete": 2521,
+      "drop": 179
+    },
+    "phases": {
+      "startup": {
+        "complete": 56,
+        "classified_drop:ring_full": 4
+      },
+      "steady": {
+        "complete": 2408,
+        "classified_drop:ring_full": 172
+      },
+      "end": {
+        "complete": 57,
+        "classified_drop:ring_full": 3
+      }
+    },
+    "unclassified_frames": 0
+  }
+]

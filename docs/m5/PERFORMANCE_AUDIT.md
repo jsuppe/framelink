@@ -2,6 +2,13 @@
 
 Review date: 2026-10-31. **M5 performance gate remains open.**
 
+**Latest combined repeat:** startup preconnection removed late-open losses, but
+changed the producer/display phase enough to expose ring pressure again. Both
+1080p60 formats delivered **2,521/2,700** expected frames; all **179** losses
+occurred at producer ring-full, and every submitted frame reached accepted
+presentation. Earlier steady-clean runs below are real but **not a universal
+qualification**. See the final section for the current result and next probe.
+
 Scope: the Windows FrameLink/GStreamer/native Vulkan A/V path on Caspar,
 with Linux regression and deterministic fault tests. These measurements do
 not qualify Android, the earlier Raspberry Pi camera workload, higher
@@ -321,7 +328,7 @@ be added before claiming every submitted image actually appeared on the panel;
 it is not a blocker to fixing and qualifying producer-to-consumer timing and
 application-level frame delivery now.
 
-## Current execution
+## Identity-traced checkpoint before producer preconnection
 
 Four sequential native 45-second captures at the original 100 ms latency have
 completed. Hardened identity accounting passes for every independently expected
@@ -355,8 +362,74 @@ Parent integrated Linux checks passed: FrameLink **53/53**, shared renderer
 **22/22**; latest accounting tests **17/17**. These are functional/regression
 results before the two remaining fixes, not additional Windows rate evidence.
 
-Parent owns integration and final checks. Windows worker owns combined startup/
-presentation validation; startup worker owns preconnection edge-case review.
-Accounting manifest work is complete and integrated; rejected presentation
-attempt handling is being corrected. There is no missing user decision preventing this work.
-M5 remains open; later milestones are not being used to bypass the gate.
+## Latest combined result and remaining causal work
+
+Preconnection plus corrected presentation semaphores, same eight-slot ring,
+six timed pending frames and 100 ms common A/V latency, four sequential 45-second
+native Windows runs:
+
+| Input | Expected | Successfully present-submitted unique | Accounted losses |
+|---|---:|---:|---|
+| BGRA 1080p30 | 1,350 | 1,349 | One steady pending replacement after producer stall |
+| NV12 1080p30 | 1,350 | 1,350 | None |
+| BGRA 1080p60 | 2,700 | 2,521 | 179 producer ring-full (172 steady) |
+| NV12 1080p60 | 2,700 | 2,521 | 179 producer ring-full (172 steady) |
+
+Every independent expected identity is accounted for, without treating lost
+frames as delivered. In both 60 fps cases **all submitted frames** reach
+acquisition, adoption, GPU completion and an accepted present call. This locates
+the loss before submission, not somewhere unidentified in rendering. It does
+not yet prove whether the extra ownership is CPU-retained pending/current
+buffers, GPU completion delay, or insufficient capacity for their overlap.
+The changed start phase is important: the earlier short/45-second successes
+cannot be used to disregard this reproducible failure.
+
+The BGRA30 anomaly is different. One producer `flSubmit` takes 66.17 ms;
+only 3.22 ms is in end-submit/IPC, and neither begin-submit nor unmap explains
+the remaining span. The ready-fence Signal/Flush calls or thread descheduling
+are not distinguished by those older scopes. The source then catches up at
+about 6.7 ms intervals, faster than the consumer's approximately 8.3 ms polling,
+and latest-wins replaces one unacquired frame. The replacement reason is proven;
+the cause of the producer's long call still needs the narrower observations.
+
+This is precisely where **design and implementation** interact: faster average
+rendering does not make a one-pending-frame latest-wins mailbox lossless during
+a burst. A complete-delivery requirement may need bounded queued/backpressured
+delivery as an explicit alternative policy; it is not an existing magic switch.
+Do not implement that larger change before distinguishing ordinary retained-
+buffer capacity from the measured producer stall.
+
+Added next observations, with no pool/latency policy change:
+
+- Producer `d3d11.signal_ready` and `d3d11.flush_ready` wall-time subspans.
+- With `FRAMELINK_TRACE_RING=1`, acquisition timeouts snapshot the consumed
+  counter and each slot's ready value (including reserved slots).
+- With `VKR_TRACE_RETIRE=1`, renderer records consumed-fence targets, submit time,
+  observed completion and pending depth. Counter queries are separately opt-in.
+- Join these with existing slot/frame identities to count actual unique owners:
+  timed pending, unacquired mailbox, current sampled frame, earlier GPU reads,
+  and producer writing. Derive a bounded correction from that accounting;
+  do not merely increase queues until a favorable test passes.
+- Qualify across source/display phase as well as rate. A fixed 100 ms latency
+  that works only at one incidental startup phase is not a sound contract.
+
+Current matrix summary: [preconnected accounting](frame-accounting/preconnected-matrix-summary.json).
+Raw source/manifests are retained under `/tmp/m5-preconnected-accounted` and
+the same named Caspar directory. The targeted unchanged-config probes are running.
+
+Other review results: native normal/resize and actual headless delayed-GPU tests
+report zero validation errors after the presentation-semaphore correction.
+Resize rejection accounting is now explicit: 600 expected frames = 552 accepted
+unique frames + 47 earlier classified losses + one OUT_OF_DATE-only frame.
+A different frame's rejected attempt followed by success is correctly retained
+as delivered. The analyzer has **20/20 tests**, including these negatives.
+
+Linux parent regressions passed 53/53 and 22/22 before the final small fixes;
+affected reruns passed 6/6 and 8/8. Windows delayed-import preconnection passed,
+but a same-session restart test failed before playback release. A possible
+two-second control-read deadline versus four-second startup budget mismatch is
+being reproduced, not yet claimed fixed. This is a separate recovery gate.
+
+Parent owns integration/audit; Windows worker owns buffer/driver observations;
+startup worker owns recovery. No user input is needed for this work. M5 remains
+open, and later milestones are not being used to bypass the performance gate.
