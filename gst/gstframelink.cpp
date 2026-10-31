@@ -241,8 +241,10 @@ static GstFlowReturn sinkRender(GstBaseSink* base, GstBuffer* buffer) {
     // time; received is a local ordinal, not a transport sequence. No I/O.
     const auto account = [&](const char* op) {
         if (!trace.active) return;
-        const GstClockTime pts = gst_segment_to_running_time(
-            &GST_BASE_SINK(self)->segment, GST_FORMAT_TIME, GST_BUFFER_PTS(buffer));
+        const GstSegment* segment = &GST_BASE_SINK(self)->segment;
+        const GstClockTime pts = segment->format == GST_FORMAT_TIME
+            ? gst_segment_to_running_time(segment, GST_FORMAT_TIME, GST_BUFFER_PTS(buffer))
+            : GST_CLOCK_TIME_NONE;
         gsttrace::record({op, gsttrace::clockNs(), 0, gsttrace::id(self->channel),
                           self->received, 0, 0,
                           GST_CLOCK_TIME_IS_VALID(pts) ? (int64_t)pts : -1, 0});

@@ -30,6 +30,8 @@ def load_csv(paths, generation):
         opener = gzip.open if str(path).endswith('.gz') else open
         with opener(path, 'rt') as f:
             lines = f.readlines()
+        if not any(line.startswith('# dropped_events=') for line in lines):
+            metadata['missing_trace_footers'] = metadata.get('missing_trace_footers', 0) + 1
         for line in lines:
             if line.startswith('# dropped_events='):
                 values = dict(item.strip().split('=') for item in line[2:].split(','))
@@ -139,7 +141,10 @@ def analyze(events, required, startup_ns=1_000_000_000, end_ns=1_000_000_000, me
             if a in by_stage and b in by_stage:
                 delta = min(r['time_ns'] for r in by_stage[b]) - min(r['time_ns'] for r in by_stage[a])
                 intervals[a + '->' + b].append(delta)
-        details.append(dict(identity=key, pts_ns=pts, phase=phase, outcome=outcome, missing=missing))
+        timeline = [{k: r[k] for k in ('stage', 'time_ns', 'sequence', 'submission_id', 'reason') if k in r}
+                    for r in sorted(rows, key=lambda r: r['time_ns'])]
+        details.append(dict(identity=key, pts_ns=pts, phase=phase, outcome=outcome, missing=missing,
+                            timeline=timeline))
     timing = {}
     for stage, values in intervals.items():
         values.sort()
@@ -153,7 +158,7 @@ def analyze(events, required, startup_ns=1_000_000_000, end_ns=1_000_000_000, me
                 phases={k: dict(v) for k, v in phases.items()}, unclassified_frames=unclassified,
                 ambiguous_identities=ambiguities, gpu_submission_mismatches=submission_mismatches,
                 stage_intervals=timing, metadata=meta,
-                accounting_complete=bool(frames) and not unclassified and not ambiguities and not submission_mismatches and not meta.get('trace_lost_events', 0) and not meta.get('anonymous_pre_submit_deficit', 0),
+                accounting_complete=bool(frames) and not unclassified and not ambiguities and not submission_mismatches and not meta.get('trace_lost_events', 0) and not meta.get('anonymous_pre_submit_deficit', 0) and not meta.get('missing_trace_footers', 0) and not meta.get('orphan_replacement_events', 0),
                 physical_scanout_verified=False, frames=details)
 
 

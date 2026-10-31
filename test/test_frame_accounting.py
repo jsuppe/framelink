@@ -75,7 +75,7 @@ class Accounting(unittest.TestCase):
                 '0,flAcquireFrame,3,0,99,2,2,1,100,0\n')
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory)/'trace.csv'
-            path.write_text(header+body)
+            path.write_text(header+body+'# dropped_events=0,rejected_threads=0,capacity_per_thread=10\n')
             events, meta = a.load_csv([path], 'capture1')
         dropped = [e for e in events if e['stage'] == 'drop']
         self.assertEqual(len(dropped), 1)

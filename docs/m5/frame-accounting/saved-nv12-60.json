@@ -84,6 +84,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371749509515300,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371749509518900,
+          "sequence": 1
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371749511178100,
+          "sequence": 1
+        }
       ]
     },
     {
@@ -103,6 +120,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371749557101300,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371749557109200,
+          "sequence": 7
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371749564656100,
+          "sequence": 7,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -122,6 +157,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371750358210100,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371750358213600,
+          "sequence": 53
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371750367925000,
+          "sequence": 53,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -140,6 +193,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371750367921400,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371750367925000,
+          "sequence": 54
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371750373835800,
+          "sequence": 54
+        }
       ]
     },
     {
@@ -158,6 +228,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371750384796400,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371750384799600,
+          "sequence": 55
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371750399875900,
+          "sequence": 55
+        }
       ]
     },
     {
@@ -176,6 +263,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371750410851000,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371750410854200,
+          "sequence": 56
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371750425947100,
+          "sequence": 56
+        }
       ]
     },
     {
@@ -195,6 +299,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371750436896600,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371750436900400,
+          "sequence": 57
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371750450590700,
+          "sequence": 57,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -213,6 +335,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371750450584500,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371750450590700,
+          "sequence": 58
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371750451977400,
+          "sequence": 58
+        }
       ]
     },
     {
@@ -231,6 +370,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371750467063600,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371750467067100,
+          "sequence": 59
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371750478520700,
+          "sequence": 59
+        }
       ]
     },
     {
@@ -250,6 +406,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371750489475000,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371750489478300,
+          "sequence": 60
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371750501167200,
+          "sequence": 60,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -268,6 +442,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371750501163100,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371750501167200,
+          "sequence": 61
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371750505565700,
+          "sequence": 61
+        }
       ]
     },
     {
@@ -287,6 +478,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371749564653100,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371749564656100,
+          "sequence": 8
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371749572116100,
+          "sequence": 8,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -305,6 +514,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371750518211100,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371750518214700,
+          "sequence": 62
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371750531619100,
+          "sequence": 62
+        }
       ]
     },
     {
@@ -323,6 +549,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371750550739000,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371750550741800,
+          "sequence": 63
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371750557678400,
+          "sequence": 63
+        }
       ]
     },
     {
@@ -341,6 +584,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371750568682500,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371750568686000,
+          "sequence": 64
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371750583789100,
+          "sequence": 64
+        }
       ]
     },
     {
@@ -360,6 +620,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371750584480000,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371750584483800,
+          "sequence": 65
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371750600890500,
+          "sequence": 65,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -378,6 +656,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371750600887200,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371750600890500,
+          "sequence": 66
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371750610832100,
+          "sequence": 66
+        }
       ]
     },
     {
@@ -397,6 +692,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371750621769800,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371750621772800,
+          "sequence": 67
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371750634490000,
+          "sequence": 67,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -415,6 +728,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371750634484200,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371750634490000,
+          "sequence": 68
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371750637363300,
+          "sequence": 68
+        }
       ]
     },
     {
@@ -433,6 +763,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371750651457500,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371750651460800,
+          "sequence": 69
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371750663397100,
+          "sequence": 69
+        }
       ]
     },
     {
@@ -451,6 +798,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371750674350100,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371750674353700,
+          "sequence": 70
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371750689432500,
+          "sequence": 70
+        }
       ]
     },
     {
@@ -470,6 +834,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371749572112700,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371749572116100,
+          "sequence": 9
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371749579559100,
+          "sequence": 9,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -488,6 +870,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371750702417200,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371750702420700,
+          "sequence": 71
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371750715463000,
+          "sequence": 71
+        }
       ]
     },
     {
@@ -507,6 +906,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371750726445200,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371750726448700,
+          "sequence": 72
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371750733869300,
+          "sequence": 72,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -525,6 +942,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371750733865200,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371750733869300,
+          "sequence": 73
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371750742014600,
+          "sequence": 73
+        }
       ]
     },
     {
@@ -544,6 +978,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371750752974600,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371750752977700,
+          "sequence": 74
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371750768170200,
+          "sequence": 74,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -562,6 +1014,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371750768166000,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371750768170200,
+          "sequence": 75
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371750768561700,
+          "sequence": 75
+        }
       ]
     },
     {
@@ -580,6 +1049,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371750784153400,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371750784156600,
+          "sequence": 76
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371750795100300,
+          "sequence": 76
+        }
       ]
     },
     {
@@ -598,6 +1084,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371750806086400,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371750806089500,
+          "sequence": 77
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371750821668900,
+          "sequence": 77
+        }
       ]
     },
     {
@@ -616,6 +1119,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371750832650800,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371750832654200,
+          "sequence": 78
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371750848306300,
+          "sequence": 78
+        }
       ]
     },
     {
@@ -634,6 +1154,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371749579556000,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371749579559100,
+          "sequence": 10
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371749584412600,
+          "sequence": 10
+        }
       ]
     },
     {
@@ -653,6 +1190,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371750859261900,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371750859265300,
+          "sequence": 79
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371750866707300,
+          "sequence": 79,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -671,6 +1226,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371750866701900,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371750866707300,
+          "sequence": 80
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371750874801300,
+          "sequence": 80
+        }
       ]
     },
     {
@@ -690,6 +1262,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371750885834300,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371750885836800,
+          "sequence": 81
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371750900979500,
+          "sequence": 81,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -708,6 +1298,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371750900975300,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371750900979500,
+          "sequence": 82
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371750901353500,
+          "sequence": 82
+        }
       ]
     },
     {
@@ -726,6 +1333,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371750916953900,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371750916959600,
+          "sequence": 83
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371750927404300,
+          "sequence": 83
+        }
       ]
     },
     {
@@ -744,6 +1368,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371750939018600,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371750939021500,
+          "sequence": 84
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371750954939200,
+          "sequence": 84
+        }
       ]
     },
     {
@@ -762,6 +1403,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371750968997200,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371750969000900,
+          "sequence": 85
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371750980980700,
+          "sequence": 85
+        }
       ]
     },
     {
@@ -780,6 +1438,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371751001109200,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371751001112400,
+          "sequence": 86
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371751007516700,
+          "sequence": 86
+        }
       ]
     },
     {
@@ -799,6 +1474,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371749517783600,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371749517787900,
+          "sequence": 2
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371749526636600,
+          "sequence": 2,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -818,6 +1511,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371749587082300,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371749587086700,
+          "sequence": 11
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371749594590700,
+          "sequence": 11,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -837,6 +1548,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371751018231800,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371751018235200,
+          "sequence": 87
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371751033688900,
+          "sequence": 87,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -855,6 +1584,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371751033685500,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371751033688900,
+          "sequence": 88
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371751034081500,
+          "sequence": 88
+        }
       ]
     },
     {
@@ -873,6 +1619,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371751050681600,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371751050684400,
+          "sequence": 89
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371751060111200,
+          "sequence": 89
+        }
       ]
     },
     {
@@ -892,6 +1655,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371751068226300,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371751068230000,
+          "sequence": 90
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371751083766200,
+          "sequence": 90,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -910,6 +1691,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371751083763500,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371751083766200,
+          "sequence": 91
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371751087649000,
+          "sequence": 91
+        }
       ]
     },
     {
@@ -928,6 +1726,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371751101749900,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371751101753700,
+          "sequence": 92
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371751114190300,
+          "sequence": 92
+        }
       ]
     },
     {
@@ -946,6 +1761,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371751125194300,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371751125197400,
+          "sequence": 93
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371751140215700,
+          "sequence": 93
+        }
       ]
     },
     {
@@ -964,6 +1796,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371751155202600,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371751155206500,
+          "sequence": 94
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371751166739200,
+          "sequence": 94
+        }
       ]
     },
     {
@@ -983,6 +1832,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371751167406500,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371751167410700,
+          "sequence": 95
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371751184363300,
+          "sequence": 95,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -1001,6 +1868,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371749594587300,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371749594590700,
+          "sequence": 12
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371749600957500,
+          "sequence": 12
+        }
       ]
     },
     {
@@ -1019,6 +1903,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371751184359500,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371751184363300,
+          "sequence": 96
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371751193793500,
+          "sequence": 96
+        }
       ]
     },
     {
@@ -1038,6 +1939,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371751204796900,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371751204800100,
+          "sequence": 97
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371751217951000,
+          "sequence": 97,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -1056,6 +1975,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371751217947800,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371751217951000,
+          "sequence": 98
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371751219834300,
+          "sequence": 98
+        }
       ]
     },
     {
@@ -1074,6 +2010,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371751233936400,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371751233939100,
+          "sequence": 99
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371751246387900,
+          "sequence": 99
+        }
       ]
     },
     {
@@ -1092,6 +2045,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371751266987600,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371751266991400,
+          "sequence": 100
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371751272425800,
+          "sequence": 100
+        }
       ]
     },
     {
@@ -1110,6 +2080,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371751284544100,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371751284547400,
+          "sequence": 101
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371751298995100,
+          "sequence": 101
+        }
       ]
     },
     {
@@ -1128,6 +2115,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371751318127000,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371751318127900,
+          "sequence": 102
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371751326052300,
+          "sequence": 102
+        }
       ]
     },
     {
@@ -1147,6 +2151,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371751334206100,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371751334210000,
+          "sequence": 103
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371751350669000,
+          "sequence": 103,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -1166,6 +2188,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371749602173300,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371749602176600,
+          "sequence": 13
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371749612124400,
+          "sequence": 13,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -1184,6 +2224,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371751350665100,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371751350669000,
+          "sequence": 104
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371751352080900,
+          "sequence": 104
+        }
       ]
     },
     {
@@ -1202,6 +2259,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371751367196500,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371751367199800,
+          "sequence": 105
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371751378621700,
+          "sequence": 105
+        }
       ]
     },
     {
@@ -1221,6 +2295,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371751384278100,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371751384282800,
+          "sequence": 106
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371751400736300,
+          "sequence": 106,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -1239,6 +2331,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371751400733000,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371751400736300,
+          "sequence": 107
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371751405166900,
+          "sequence": 107
+        }
       ]
     },
     {
@@ -1257,6 +2366,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371751417265800,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371751417269400,
+          "sequence": 108
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371751431716200,
+          "sequence": 108
+        }
       ]
     },
     {
@@ -1275,6 +2401,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371751442737900,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371751442741200,
+          "sequence": 109
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371751457771800,
+          "sequence": 109
+        }
       ]
     },
     {
@@ -1293,6 +2436,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371751468828600,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371751468832300,
+          "sequence": 110
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371751483844100,
+          "sequence": 110
+        }
       ]
     },
     {
@@ -1312,6 +2472,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371751484532000,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371751484536600,
+          "sequence": 111
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371751500972500,
+          "sequence": 111,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -1330,6 +2508,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371751500969500,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371751500972500,
+          "sequence": 112
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371751510902600,
+          "sequence": 112
+        }
       ]
     },
     {
@@ -1349,6 +2544,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371749612120900,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371749612124400,
+          "sequence": 14
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371749619590200,
+          "sequence": 14,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -1368,6 +2581,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371751521891200,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371751521894700,
+          "sequence": 113
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371751534433200,
+          "sequence": 113,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -1386,6 +2617,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371751534429700,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371751534433200,
+          "sequence": 114
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371751537338800,
+          "sequence": 114
+        }
       ]
     },
     {
@@ -1404,6 +2652,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371751551413300,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371751551416200,
+          "sequence": 115
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371751563369300,
+          "sequence": 115
+        }
       ]
     },
     {
@@ -1422,6 +2687,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371751584561500,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371751584565000,
+          "sequence": 116
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371751589984100,
+          "sequence": 116
+        }
       ]
     },
     {
@@ -1440,6 +2722,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371751602896400,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371751602899400,
+          "sequence": 117
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371751616511600,
+          "sequence": 117
+        }
       ]
     },
     {
@@ -1459,6 +2758,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371751629396300,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371751629399500,
+          "sequence": 118
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371751636845300,
+          "sequence": 118,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -1477,6 +2794,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371751636841400,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371751636845300,
+          "sequence": 119
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371751643061100,
+          "sequence": 119
+        }
       ]
     },
     {
@@ -1496,6 +2830,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371751656581500,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371751656585000,
+          "sequence": 120
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371751668339300,
+          "sequence": 120,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -1514,6 +2866,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371751668336600,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371751668339300,
+          "sequence": 121
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371751670776500,
+          "sequence": 121
+        }
       ]
     },
     {
@@ -1533,6 +2902,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371749619586300,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371749619590200,
+          "sequence": 15
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371749627029600,
+          "sequence": 15,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -1551,6 +2938,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371751684907500,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371751684911100,
+          "sequence": 122
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371751697399700,
+          "sequence": 122
+        }
       ]
     },
     {
@@ -1569,6 +2973,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371751710377400,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371751710381000,
+          "sequence": 123
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371751724022900,
+          "sequence": 123
+        }
       ]
     },
     {
@@ -1587,6 +3008,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371751736921000,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371751736924000,
+          "sequence": 124
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371751751134000,
+          "sequence": 124
+        }
       ]
     },
     {
@@ -1605,6 +3043,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371751767231000,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371751767231200,
+          "sequence": 125
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371751777672900,
+          "sequence": 125
+        }
       ]
     },
     {
@@ -1624,6 +3079,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371751785865400,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371751785869500,
+          "sequence": 126
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371751801314700,
+          "sequence": 126,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -1642,6 +3115,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371751801312000,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371751801314700,
+          "sequence": 127
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371751804733200,
+          "sequence": 127
+        }
       ]
     },
     {
@@ -1660,6 +3150,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371751817349600,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371751817353400,
+          "sequence": 128
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371751831783200,
+          "sequence": 128
+        }
       ]
     },
     {
@@ -1679,6 +3186,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371751834422800,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371751834426700,
+          "sequence": 129
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371751850905700,
+          "sequence": 129,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -1697,6 +3222,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371749627026100,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371749627029600,
+          "sequence": 16
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371749628027100,
+          "sequence": 16
+        }
       ]
     },
     {
@@ -1715,6 +3257,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371751850902500,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371751850905700,
+          "sequence": 130
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371751858862600,
+          "sequence": 130
+        }
       ]
     },
     {
@@ -1733,6 +3292,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371751871591000,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371751871594800,
+          "sequence": 131
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371751885385500,
+          "sequence": 131
+        }
       ]
     },
     {
@@ -1751,6 +3327,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371751898136700,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371751898140100,
+          "sequence": 132
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371751912421900,
+          "sequence": 132
+        }
       ]
     },
     {
@@ -1770,6 +3363,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371751925120400,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371751925124000,
+          "sequence": 133
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371751934083100,
+          "sequence": 133,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -1788,6 +3399,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371751934079000,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371751934083100,
+          "sequence": 134
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371751938959100,
+          "sequence": 134
+        }
       ]
     },
     {
@@ -1806,6 +3434,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371751951632300,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371751951634900,
+          "sequence": 135
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371751965999300,
+          "sequence": 135
+        }
       ]
     },
     {
@@ -1824,6 +3469,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371751985053900,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371751985057300,
+          "sequence": 136
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371751993079800,
+          "sequence": 136
+        }
       ]
     },
     {
@@ -1843,6 +3505,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371752000717100,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371752000720800,
+          "sequence": 137
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371752017184800,
+          "sequence": 137,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -1861,6 +3541,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371749634495900,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371749634498800,
+          "sequence": 17
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371749644555900,
+          "sequence": 17
+        }
       ]
     },
     {
@@ -1879,6 +3576,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371752017181300,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371752017184800,
+          "sequence": 138
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371752020107600,
+          "sequence": 138
+        }
       ]
     },
     {
@@ -1897,6 +3611,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371752034237900,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371752034241400,
+          "sequence": 139
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371752047187100,
+          "sequence": 139
+        }
       ]
     },
     {
@@ -1915,6 +3646,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371752067845400,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371752067851400,
+          "sequence": 140
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371752073739700,
+          "sequence": 140
+        }
       ]
     },
     {
@@ -1934,6 +3682,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371752084502200,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371752084505000,
+          "sequence": 141
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371752100422400,
+          "sequence": 141,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -1952,6 +3718,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371752100417800,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371752100422400,
+          "sequence": 142
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371752101300000,
+          "sequence": 142
+        }
       ]
     },
     {
@@ -1970,6 +3753,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371752117931500,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371752117934400,
+          "sequence": 143
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371752127862500,
+          "sequence": 143
+        }
       ]
     },
     {
@@ -1989,6 +3789,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371752140497200,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371752140500700,
+          "sequence": 144
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371752150529100,
+          "sequence": 144,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -2007,6 +3825,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371752150525100,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371752150529100,
+          "sequence": 145
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371752154415700,
+          "sequence": 145
+        }
       ]
     },
     {
@@ -2025,6 +3860,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371752168023100,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371752168026400,
+          "sequence": 146
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371752180958400,
+          "sequence": 146
+        }
       ]
     },
     {
@@ -2043,6 +3895,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371752193566500,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371752193569900,
+          "sequence": 147
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371752207537000,
+          "sequence": 147
+        }
       ]
     },
     {
@@ -2062,6 +3931,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371752220211900,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371752220215200,
+          "sequence": 148
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371752233665500,
+          "sequence": 148,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -2081,6 +3968,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371752233660400,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371752233665500,
+          "sequence": 149
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371752251256500,
+          "sequence": 149,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -2099,6 +4004,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371752251253600,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371752251256500,
+          "sequence": 150
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371752260682200,
+          "sequence": 150
+        }
       ]
     },
     {
@@ -2117,6 +4039,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371752284785300,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371752284788900,
+          "sequence": 151
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371752287221300,
+          "sequence": 151
+        }
       ]
     },
     {
@@ -2135,6 +4074,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371752301323700,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371752301327200,
+          "sequence": 152
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371752313758800,
+          "sequence": 152
+        }
       ]
     },
     {
@@ -2154,6 +4110,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371752317890400,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371752317894700,
+          "sequence": 153
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371752334446100,
+          "sequence": 153,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -2172,6 +4146,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371752334442200,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371752334446100,
+          "sequence": 154
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371752341308700,
+          "sequence": 154
+        }
       ]
     },
     {
@@ -2191,6 +4182,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371749656814000,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371749656816700,
+          "sequence": 18
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371749667755400,
+          "sequence": 18,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -2210,6 +4219,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371752372774600,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371752372777500,
+          "sequence": 155
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371752383981000,
+          "sequence": 155,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -2229,6 +4256,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371752383977900,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371752383981000,
+          "sequence": 156
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371752400460200,
+          "sequence": 156,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -2247,6 +4292,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371752400457200,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371752400460200,
+          "sequence": 157
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371752410902300,
+          "sequence": 157
+        }
       ]
     },
     {
@@ -2266,6 +4328,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371752418057200,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371752418061100,
+          "sequence": 158
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371752434529700,
+          "sequence": 158,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -2284,6 +4364,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371752434527100,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371752434529700,
+          "sequence": 159
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371752437434100,
+          "sequence": 159
+        }
       ]
     },
     {
@@ -2302,6 +4399,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371752452545800,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371752452549300,
+          "sequence": 160
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371752464473200,
+          "sequence": 160
+        }
       ]
     },
     {
@@ -2320,6 +4434,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371752467098200,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371752467102500,
+          "sequence": 161
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371752481000700,
+          "sequence": 161
+        }
       ]
     },
     {
@@ -2338,6 +4469,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371749667751700,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371749667755400,
+          "sequence": 19
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371749672620000,
+          "sequence": 19
+        }
       ]
     },
     {
@@ -2356,6 +4504,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371752533719300,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371752533722600,
+          "sequence": 162
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371752540692200,
+          "sequence": 162
+        }
       ]
     },
     {
@@ -2374,6 +4539,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371752551842900,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371752551846100,
+          "sequence": 163
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371752567269600,
+          "sequence": 163
+        }
       ]
     },
     {
@@ -2393,6 +4575,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371752567934600,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371752567939100,
+          "sequence": 164
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371752584992000,
+          "sequence": 164,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -2411,6 +4611,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371752584988700,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371752584992000,
+          "sequence": 165
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371752595329900,
+          "sequence": 165
+        }
       ]
     },
     {
@@ -2430,6 +4647,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371752602006200,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371752602009500,
+          "sequence": 166
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371752618024700,
+          "sequence": 166,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -2448,6 +4683,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371752618021200,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371752618024700,
+          "sequence": 167
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371752622880400,
+          "sequence": 167
+        }
       ]
     },
     {
@@ -2466,6 +4718,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371752634495100,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371752634499400,
+          "sequence": 168
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371752639397000,
+          "sequence": 168
+        }
       ]
     },
     {
@@ -2484,6 +4753,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371752652295600,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371752652299100,
+          "sequence": 169
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371752666442600,
+          "sequence": 169
+        }
       ]
     },
     {
@@ -2502,6 +4788,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371749526632900,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371749526636600,
+          "sequence": 3
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371749527406500,
+          "sequence": 3
+        }
       ]
     },
     {
@@ -2520,6 +4823,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371752684900500,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371752684904000,
+          "sequence": 170
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371752692997200,
+          "sequence": 170
+        }
       ]
     },
     {
@@ -2539,6 +4859,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371752705908300,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371752705911200,
+          "sequence": 171
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371752717147400,
+          "sequence": 171,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -2557,6 +4895,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371752717142900,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371752717147400,
+          "sequence": 172
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371752720026500,
+          "sequence": 172
+        }
       ]
     },
     {
@@ -2575,6 +4930,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371752735114700,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371752735117700,
+          "sequence": 173
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371752747056000,
+          "sequence": 173
+        }
       ]
     },
     {
@@ -2594,6 +4966,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371752750693000,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371752750696700,
+          "sequence": 174
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371752767666300,
+          "sequence": 174,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -2612,6 +5002,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371752767663600,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371752767666300,
+          "sequence": 175
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371752773584600,
+          "sequence": 175
+        }
       ]
     },
     {
@@ -2630,6 +5037,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371752786544300,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371752786547700,
+          "sequence": 176
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371752800617200,
+          "sequence": 176
+        }
       ]
     },
     {
@@ -2648,6 +5072,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371752817726000,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371752817729500,
+          "sequence": 177
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371752827140000,
+          "sequence": 177
+        }
       ]
     },
     {
@@ -2667,6 +5108,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371752840147800,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371752840151300,
+          "sequence": 178
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371752851268600,
+          "sequence": 178,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -2685,6 +5144,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371752851264600,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371752851268600,
+          "sequence": 179
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371752853669200,
+          "sequence": 179
+        }
       ]
     },
     {
@@ -2703,6 +5179,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371752867778900,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371752867782300,
+          "sequence": 180
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371752880724400,
+          "sequence": 180
+        }
       ]
     },
     {
@@ -2722,6 +5215,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371752893712500,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371752893715900,
+          "sequence": 181
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371752901141200,
+          "sequence": 181,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -2740,6 +5251,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371752901136800,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371752901141200,
+          "sequence": 182
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371752907250100,
+          "sequence": 182
+        }
       ]
     },
     {
@@ -2758,6 +5286,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371752920237800,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371752920240700,
+          "sequence": 183
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371752933818600,
+          "sequence": 183
+        }
       ]
     },
     {
@@ -2776,6 +5321,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371752952267900,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371752952271500,
+          "sequence": 184
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371752960340300,
+          "sequence": 184
+        }
       ]
     },
     {
@@ -2795,6 +5357,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371752973361300,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371752973364600,
+          "sequence": 185
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371752984056800,
+          "sequence": 185,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -2813,6 +5393,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371752984054300,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371752984056800,
+          "sequence": 186
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371752987400100,
+          "sequence": 186
+        }
       ]
     },
     {
@@ -2831,6 +5428,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371753000492100,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371753000495700,
+          "sequence": 187
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371753014445700,
+          "sequence": 187
+        }
       ]
     },
     {
@@ -2850,6 +5464,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371749718729100,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371749718733600,
+          "sequence": 20
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371749733922000,
+          "sequence": 20,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -2868,6 +5500,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371753034061800,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371753034062500,
+          "sequence": 188
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371753040988500,
+          "sequence": 188
+        }
       ]
     },
     {
@@ -2886,6 +5535,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371753050620700,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371753050625700,
+          "sequence": 189
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371753067555900,
+          "sequence": 189
+        }
       ]
     },
     {
@@ -2905,6 +5571,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371753067678800,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371753067681900,
+          "sequence": 190
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371753084172500,
+          "sequence": 190,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -2923,6 +5607,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371753084168900,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371753084172500,
+          "sequence": 191
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371753095104600,
+          "sequence": 191
+        }
       ]
     },
     {
@@ -2942,6 +5643,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371753108133600,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371753108138100,
+          "sequence": 192
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371753117781600,
+          "sequence": 192,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -2960,6 +5679,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371753117778800,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371753117781600,
+          "sequence": 193
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371753121664800,
+          "sequence": 193
+        }
       ]
     },
     {
@@ -2978,6 +5714,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371753134641300,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371753134644500,
+          "sequence": 194
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371753148193400,
+          "sequence": 194
+        }
       ]
     },
     {
@@ -2996,6 +5749,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371753161254200,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371753161257900,
+          "sequence": 195
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371753175256600,
+          "sequence": 195
+        }
       ]
     },
     {
@@ -3014,6 +5784,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371749733917000,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371749733922000,
+          "sequence": 21
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371749734267000,
+          "sequence": 21
+        }
       ]
     },
     {
@@ -3032,6 +5819,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371753188290000,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371753188293600,
+          "sequence": 196
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371753202294400,
+          "sequence": 196
+        }
       ]
     },
     {
@@ -3050,6 +5854,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371753217725900,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371753217732500,
+          "sequence": 197
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371753228836500,
+          "sequence": 197
+        }
       ]
     },
     {
@@ -3069,6 +5890,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371753233996300,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371753234000700,
+          "sequence": 198
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371753251940900,
+          "sequence": 198,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -3087,6 +5926,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371753251937600,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371753251940900,
+          "sequence": 199
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371753255372400,
+          "sequence": 199
+        }
       ]
     },
     {
@@ -3105,6 +5961,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371753266983800,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371753266987500,
+          "sequence": 200
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371753282408500,
+          "sequence": 200
+        }
       ]
     },
     {
@@ -3124,6 +5997,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371753284552900,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371753284556500,
+          "sequence": 201
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371753301559100,
+          "sequence": 201,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -3142,6 +6033,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371753301555400,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371753301559100,
+          "sequence": 202
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371753309527800,
+          "sequence": 202
+        }
       ]
     },
     {
@@ -3160,6 +6068,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371753322526600,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371753322530000,
+          "sequence": 203
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371753336107800,
+          "sequence": 203
+        }
       ]
     },
     {
@@ -3178,6 +6103,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371753349107700,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371753349111000,
+          "sequence": 204
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371753362652800,
+          "sequence": 204
+        }
       ]
     },
     {
@@ -3196,6 +6138,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371749750387000,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371749750390200,
+          "sequence": 22
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371749762337900,
+          "sequence": 22
+        }
       ]
     },
     {
@@ -3215,6 +6174,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371753375620700,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371753375623500,
+          "sequence": 205
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371753383061600,
+          "sequence": 205,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -3233,6 +6210,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371753383056800,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371753383061600,
+          "sequence": 206
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371753389721000,
+          "sequence": 206
+        }
       ]
     },
     {
@@ -3251,6 +6245,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371753402721000,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371753402724500,
+          "sequence": 207
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371753416288400,
+          "sequence": 207
+        }
       ]
     },
     {
@@ -3269,6 +6280,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371753435769700,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371753435772900,
+          "sequence": 208
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371753442837000,
+          "sequence": 208
+        }
       ]
     },
     {
@@ -3288,6 +6316,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371753450981000,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371753450984600,
+          "sequence": 209
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371753468003400,
+          "sequence": 209,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -3306,6 +6352,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371753468000100,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371753468003400,
+          "sequence": 210
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371753469876100,
+          "sequence": 210
+        }
       ]
     },
     {
@@ -3324,6 +6387,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371753485182100,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371753485184800,
+          "sequence": 211
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371753497414700,
+          "sequence": 211
+        }
       ]
     },
     {
@@ -3342,6 +6422,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371749768473700,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371749768477600,
+          "sequence": 23
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371749779381500,
+          "sequence": 23
+        }
       ]
     },
     {
@@ -3360,6 +6457,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371753518067900,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371753518071300,
+          "sequence": 212
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371753524581500,
+          "sequence": 212
+        }
       ]
     },
     {
@@ -3379,6 +6493,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371753534521700,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371753534524300,
+          "sequence": 213
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371753551541100,
+          "sequence": 213,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -3398,6 +6530,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371753551537700,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371753551541100,
+          "sequence": 214
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371753567838600,
+          "sequence": 214,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -3416,6 +6566,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371753567835600,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371753567838600,
+          "sequence": 215
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371753580073000,
+          "sequence": 215
+        }
       ]
     },
     {
@@ -3435,6 +6602,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371753595948000,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371753595951400,
+          "sequence": 216
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371753603360400,
+          "sequence": 216,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -3453,6 +6638,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371753603355700,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371753603360400,
+          "sequence": 217
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371753607634800,
+          "sequence": 217
+        }
       ]
     },
     {
@@ -3471,6 +6673,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371753621034600,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371753621037500,
+          "sequence": 218
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371753635204500,
+          "sequence": 218
+        }
       ]
     },
     {
@@ -3489,6 +6708,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371753652667600,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371753652670700,
+          "sequence": 219
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371753662246200,
+          "sequence": 219
+        }
       ]
     },
     {
@@ -3508,6 +6744,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371749784509000,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371749784512200,
+          "sequence": 24
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371749801550600,
+          "sequence": 24,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -3527,6 +6781,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371753691706000,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371753691709200,
+          "sequence": 220
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371753701940300,
+          "sequence": 220,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -3545,6 +6817,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371753701936000,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371753701940300,
+          "sequence": 221
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371753705313000,
+          "sequence": 221
+        }
       ]
     },
     {
@@ -3563,6 +6852,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371753717939800,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371753717943100,
+          "sequence": 222
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371753731849600,
+          "sequence": 222
+        }
       ]
     },
     {
@@ -3582,6 +6888,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371753734003300,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371753734009000,
+          "sequence": 223
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371753750995800,
+          "sequence": 223,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -3600,6 +6924,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371753750992000,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371753750995800,
+          "sequence": 224
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371753758884800,
+          "sequence": 224
+        }
       ]
     },
     {
@@ -3619,6 +6960,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371753767990400,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371753767993300,
+          "sequence": 225
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371753783990900,
+          "sequence": 225,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -3637,6 +6996,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371753783987500,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371753783990900,
+          "sequence": 226
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371753785917100,
+          "sequence": 226
+        }
       ]
     },
     {
@@ -3655,6 +7031,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371753817027700,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371753817031500,
+          "sequence": 227
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371753829467700,
+          "sequence": 227
+        }
       ]
     },
     {
@@ -3674,6 +7067,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371753834602300,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371753834606200,
+          "sequence": 228
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371753851565600,
+          "sequence": 228,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -3692,6 +7103,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371749801547400,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371749801550600,
+          "sequence": 25
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371749807441100,
+          "sequence": 25
+        }
       ]
     },
     {
@@ -3710,6 +7138,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371753851562200,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371753851565600,
+          "sequence": 229
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371753855996400,
+          "sequence": 229
+        }
       ]
     },
     {
@@ -3728,6 +7173,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371753868820800,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371753868824300,
+          "sequence": 230
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371753883054700,
+          "sequence": 230
+        }
       ]
     },
     {
@@ -3747,6 +7209,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371753884680600,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371753884685500,
+          "sequence": 231
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371753901126100,
+          "sequence": 231,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -3765,6 +7245,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371753901122000,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371753901126100,
+          "sequence": 232
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371753910054200,
+          "sequence": 232
+        }
       ]
     },
     {
@@ -3783,6 +7280,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371753918182400,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371753918186300,
+          "sequence": 233
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371753926559200,
+          "sequence": 233
+        }
       ]
     },
     {
@@ -3801,6 +7315,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371753939281900,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371753939285000,
+          "sequence": 234
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371753953595800,
+          "sequence": 234
+        }
       ]
     },
     {
@@ -3819,6 +7350,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371753969559700,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371753969562900,
+          "sequence": 235
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371753980626100,
+          "sequence": 235
+        }
       ]
     },
     {
@@ -3838,6 +7386,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371753984279600,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371753984283500,
+          "sequence": 236
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371754000723100,
+          "sequence": 236,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -3856,6 +7422,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371754000719800,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371754000723100,
+          "sequence": 237
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371754007143100,
+          "sequence": 237
+        }
       ]
     },
     {
@@ -3874,6 +7457,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371749817109100,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371749817112800,
+          "sequence": 26
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371749824509700,
+          "sequence": 26
+        }
       ]
     },
     {
@@ -3892,6 +7492,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371754019872500,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371754019875900,
+          "sequence": 238
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371754033675200,
+          "sequence": 238
+        }
       ]
     },
     {
@@ -3911,6 +7528,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371754034297400,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371754034301300,
+          "sequence": 239
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371754051810800,
+          "sequence": 239,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -3929,6 +7564,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371754051808100,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371754051810800,
+          "sequence": 240
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371754061224100,
+          "sequence": 240
+        }
       ]
     },
     {
@@ -3947,6 +7599,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371754073882600,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371754073885300,
+          "sequence": 241
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371754088254200,
+          "sequence": 241
+        }
       ]
     },
     {
@@ -3965,6 +7634,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371754106717900,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371754106721400,
+          "sequence": 242
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371754114786100,
+          "sequence": 242
+        }
       ]
     },
     {
@@ -3984,6 +7670,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371754127434600,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371754127437300,
+          "sequence": 243
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371754134905100,
+          "sequence": 243,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -4002,6 +7706,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371754134901300,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371754134905100,
+          "sequence": 244
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371754141331200,
+          "sequence": 244
+        }
       ]
     },
     {
@@ -4020,6 +7741,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371754153972800,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371754153975700,
+          "sequence": 245
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371754167866800,
+          "sequence": 245
+        }
       ]
     },
     {
@@ -4038,6 +7776,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371754184855900,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371754184858900,
+          "sequence": 246
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371754194903200,
+          "sequence": 246
+        }
       ]
     },
     {
@@ -4057,6 +7812,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371754201041700,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371754201045600,
+          "sequence": 247
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371754218017300,
+          "sequence": 247,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -4075,6 +7848,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371754218013900,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371754218017300,
+          "sequence": 248
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371754221933100,
+          "sequence": 248
+        }
       ]
     },
     {
@@ -4093,6 +7883,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371754234617500,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371754234620500,
+          "sequence": 249
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371754248462700,
+          "sequence": 249
+        }
       ]
     },
     {
@@ -4111,6 +7918,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371754268088900,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371754268091900,
+          "sequence": 250
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371754274997400,
+          "sequence": 250
+        }
       ]
     },
     {
@@ -4129,6 +7953,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371754284628400,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371754284632200,
+          "sequence": 251
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371754301555500,
+          "sequence": 251
+        }
       ]
     },
     {
@@ -4148,6 +7989,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371754301635200,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371754301637700,
+          "sequence": 252
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371754317130400,
+          "sequence": 252,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -4166,6 +8025,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371754317128800,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371754317130400,
+          "sequence": 253
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371754329591900,
+          "sequence": 253
+        }
       ]
     },
     {
@@ -4184,6 +8060,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371754342304800,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371754342311100,
+          "sequence": 254
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371754356128300,
+          "sequence": 254
+        }
       ]
     },
     {
@@ -4203,6 +8096,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371749534498300,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371749534502000,
+          "sequence": 4
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371749542011300,
+          "sequence": 4,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -4221,6 +8132,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371749857698500,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371749857701400,
+          "sequence": 27
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371749867595700,
+          "sequence": 27
+        }
       ]
     },
     {
@@ -4240,6 +8168,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371749867722400,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371749867725600,
+          "sequence": 28
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371749883743600,
+          "sequence": 28,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -4258,6 +8204,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371749883739900,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371749883743600,
+          "sequence": 29
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371749894170800,
+          "sequence": 29
+        }
       ]
     },
     {
@@ -4276,6 +8239,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371749905227100,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371749905230300,
+          "sequence": 30
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371749920724200,
+          "sequence": 30
+        }
       ]
     },
     {
@@ -4294,6 +8274,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371749935736300,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371749935739900,
+          "sequence": 31
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371749947282500,
+          "sequence": 31
+        }
       ]
     },
     {
@@ -4313,6 +8310,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371749951446100,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371749951450700,
+          "sequence": 32
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371749967933300,
+          "sequence": 32,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -4331,6 +8346,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371749967930200,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371749967933300,
+          "sequence": 33
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371749973363200,
+          "sequence": 33
+        }
       ]
     },
     {
@@ -4349,6 +8381,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371749985571800,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371749985575200,
+          "sequence": 34
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371750000900900,
+          "sequence": 34
+        }
       ]
     },
     {
@@ -4368,6 +8417,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371749542007500,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371749542011300,
+          "sequence": 5
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371749549512400,
+          "sequence": 5,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -4386,6 +8453,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371750017007800,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371750017011200,
+          "sequence": 35
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371750027440600,
+          "sequence": 35
+        }
       ]
     },
     {
@@ -4405,6 +8489,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371750034133400,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371750034137500,
+          "sequence": 36
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371750050598300,
+          "sequence": 36,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -4423,6 +8525,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371750050595000,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371750050598300,
+          "sequence": 37
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371750053489700,
+          "sequence": 37
+        }
       ]
     },
     {
@@ -4441,6 +8560,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371750067636900,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371750067640500,
+          "sequence": 38
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371750080557300,
+          "sequence": 38
+        }
       ]
     },
     {
@@ -4460,6 +8596,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371750091602000,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371750091605600,
+          "sequence": 39
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371750101250900,
+          "sequence": 39,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -4478,6 +8632,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371750101247500,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371750101250900,
+          "sequence": 40
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371750107114900,
+          "sequence": 40
+        }
       ]
     },
     {
@@ -4496,6 +8667,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371750118118200,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371750118121200,
+          "sequence": 41
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371750133677900,
+          "sequence": 41
+        }
       ]
     },
     {
@@ -4514,6 +8702,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371750144682800,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371750144686300,
+          "sequence": 42
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371750160725000,
+          "sequence": 42
+        }
       ]
     },
     {
@@ -4533,6 +8738,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371750171712700,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371750171715800,
+          "sequence": 43
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371750184442800,
+          "sequence": 43,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -4551,6 +8774,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371749549508700,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371749549512400,
+          "sequence": 6
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371749556271600,
+          "sequence": 6
+        }
       ]
     },
     {
@@ -4569,6 +8809,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371750184439800,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371750184442800,
+          "sequence": 44
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371750187311400,
+          "sequence": 44
+        }
       ]
     },
     {
@@ -4587,6 +8844,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371750201531200,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371750201534700,
+          "sequence": 45
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371750213393700,
+          "sequence": 45
+        }
       ]
     },
     {
@@ -4606,6 +8880,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371750225914000,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371750225917500,
+          "sequence": 46
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371750233389200,
+          "sequence": 46,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -4624,6 +8916,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371750233383300,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371750233389200,
+          "sequence": 47
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371750240982600,
+          "sequence": 47
+        }
       ]
     },
     {
@@ -4642,6 +8951,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371750251964500,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371750251967600,
+          "sequence": 48
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371750267535400,
+          "sequence": 48
+        }
       ]
     },
     {
@@ -4660,6 +8986,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371750283737800,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371750283741600,
+          "sequence": 49
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371750294657400,
+          "sequence": 49
+        }
       ]
     },
     {
@@ -4679,6 +9022,24 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371750305623400,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371750305627400,
+          "sequence": 50
+        },
+        {
+          "stage": "drop",
+          "time_ns": 1371750318332500,
+          "sequence": 50,
+          "reason": "pending_replaced"
+        }
       ]
     },
     {
@@ -4697,6 +9058,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371750318329000,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371750318332500,
+          "sequence": 51
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371750321225500,
+          "sequence": 51
+        }
       ]
     },
     {
@@ -4715,6 +9093,23 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "submit",
+          "time_ns": 1371750333822700,
+          "sequence": 0
+        },
+        {
+          "stage": "ipc_receive",
+          "time_ns": 1371750333825600,
+          "sequence": 52
+        },
+        {
+          "stage": "consumer_acquire",
+          "time_ns": 1371750347271900,
+          "sequence": 52
+        }
       ]
     }
   ]

@@ -64,6 +64,19 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "sink_receive",
+          "time_ns": 251359165254841,
+          "sequence": 1
+        },
+        {
+          "stage": "drop",
+          "time_ns": 251359466324919,
+          "sequence": 1,
+          "reason": "no_consumer"
+        }
       ]
     },
     {
@@ -84,6 +97,19 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "sink_receive",
+          "time_ns": 251359466352654,
+          "sequence": 2
+        },
+        {
+          "stage": "drop",
+          "time_ns": 251359466353172,
+          "sequence": 2,
+          "reason": "no_consumer"
+        }
       ]
     },
     {
@@ -104,6 +130,19 @@
         "render_submit",
         "gpu_complete",
         "present_submit"
+      ],
+      "timeline": [
+        {
+          "stage": "sink_receive",
+          "time_ns": 251359466355929,
+          "sequence": 3
+        },
+        {
+          "stage": "drop",
+          "time_ns": 251359466355999,
+          "sequence": 3,
+          "reason": "no_consumer"
+        }
       ]
     }
   ]
