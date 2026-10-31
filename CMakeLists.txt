@@ -571,6 +571,10 @@ if(FRAMELINK_BUILD_TESTS AND TARGET framelink_av_playback AND TARGET gstframelin
     target_link_libraries(fl_gst_sink_stats PRIVATE framelink_av_playback)
     add_test(NAME gst_sink_stats COMMAND fl_gst_sink_stats $<TARGET_FILE:gstframelink>)
     set_tests_properties(gst_sink_stats PROPERTIES TIMEOUT 15)
+    add_executable(fl_gst_preconnect_slots test/fl_gst_preconnect_slots.cpp)
+    target_link_libraries(fl_gst_preconnect_slots PRIVATE framelink_av_playback framelink)
+    add_test(NAME gst_preconnect_slots COMMAND fl_gst_preconnect_slots $<TARGET_FILE:gstframelink>)
+    set_tests_properties(gst_preconnect_slots PROPERTIES TIMEOUT 20 LABELS "gpu;integration")
 endif()
 
 if(FRAMELINK_BUILD_TESTS AND TARGET framelink_av_producer AND TARGET gstframelink AND Python3_Interpreter_FOUND)

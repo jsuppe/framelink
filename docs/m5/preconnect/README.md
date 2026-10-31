@@ -49,3 +49,19 @@ readiness deadline. Existing m5_startup covers peer cancellation and restart.
 
 Not physical presentation qualification; final native Windows 45-second matrix
 belongs to the exclusive Windows validation owner.
+
+## Slot mode and repeated starts
+
+The shared `flOpenProducerSlot` helper first claims an existing exact channel,
+then requests geometry **only when both width and height are nonzero**. Thus
+pre-caps slot selection is geometry-independent on every backend; BGRA default
+format is not sent as a geometry request. The opt-in start clears cached video
+caps so a prior stream cannot resize the next consumer ring using stale geometry.
+Default lazy mode is unchanged.
+
+`gst_preconnect_slots` reuses the same sink on two NV12 slot rings, first 64x48,
+then 96x64, with fresh sources and no initial caps. It verifies each claimed ring
+retains its original geometry/format, rejects a duplicate producer, then receives
+a frame after new caps. Removing the caps reset makes the second initial geometry
+assertion fail; the fixed regression passes. This is Linux runtime evidence plus
+shared-helper source inspection, not a claim of Android/Windows execution.

@@ -234,6 +234,10 @@ static gboolean sinkStart(GstBaseSink* base) {
     auto* self=GST_FRAMELINK_SINK(base);
     self->testOpenDelayed=FALSE;
     if(!self->connectTimeoutMs)return TRUE;
+    // A previous stream's caps are not this stream's geometry. Claim the
+    // existing consumer ring unchanged; fresh CAPS will request its geometry.
+    self->haveInfo=FALSE;
+    gst_video_info_init(&self->vinfo);
     gsttrace::Scope readyTrace("gst.producer_preconnect",gsttrace::id(self->channel));
     const auto deadline=g_get_monotonic_time()+gint64(self->connectTimeoutMs)*1000;
     self->nextConnectUs=0;
