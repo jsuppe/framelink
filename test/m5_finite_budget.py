@@ -64,7 +64,8 @@ for case in ('longer-than-setup','missing-peer','mismatch','legacy-peer','early-
             if q.poll() is None:q.kill();q.wait()
         for f in files:f.close()
         (root/'results.json').write_text(json.dumps(results,indent=2)+'\n')
-for value in ('0','300001','-1','+1',' 1','1ms','18446744073709551616'):
+malformed_budgets=('', '0','300001','-1','+1',' 1','1ms','18446744073709551616')
+for value in malformed_budgets:
     run=subprocess.run([str(b/('framelink_av_producer'+ext)),plugin,'--session',str(root/'invalid'),'--media-run-ms',value],capture_output=True,text=True,timeout=2)
     assert run.returncode!=0,(value,run.stdout,run.stderr)
-print(f'finite budget: {len(results)} real-peer cases and 8 malformed CLI budgets passed')
+print(f'finite budget: {len(results)} real-peer cases and {len(malformed_budgets)} malformed CLI budgets passed')
