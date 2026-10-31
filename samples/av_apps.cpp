@@ -1047,10 +1047,20 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
     if(const char* delay=g_getenv("FRAMELINK_TEST_PREROLL_DELAY_MS")) {
       const auto ms=number(delay);need(ms<=o.timeout,"invalid preroll delay");
       const auto delayStart=g_get_monotonic_time();
-      for(unsigned n=0;n<ms;++n) {
+      const auto delayEnd=delayStart+gint64(ms)*1000;
+      // Count elapsed monotonic time, not sleep calls: Windows may round each
+      // 1 ms sleep upward, multiplying a long injected delay. Keep cancellation
+      // responsive and preserve the existing startup deadline without widening it.
+      for(;;) {
         need(!stop || !stop->load(),"playback cancelled");
-        need(std::chrono::steady_clock::now()<end,"audio preroll deadline");
-        g_usleep(1000);
+        need(!paused || !paused->load(),"session-paused");
+        const auto now=std::chrono::steady_clock::now();
+        need(now<end,"audio preroll deadline");
+        const auto remaining=delayEnd-g_get_monotonic_time();
+        if(remaining<=0)break;
+        const auto startupRemaining=std::chrono::duration_cast<std::chrono::microseconds>(end-now).count();
+        const auto sleepUs=std::min<int64_t>(10000,std::min<int64_t>(remaining,startupRemaining));
+        if(sleepUs>0)g_usleep(static_cast<gulong>(sleepUs));
       }
       printf("{\"event\":\"startup-preroll-delay\",\"requested_ms\":%u,\"elapsed_us\":%lld}\n",ms,(long long)(g_get_monotonic_time()-delayStart));
     }
