@@ -1072,6 +1072,14 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
       need(!paused || !paused->load(),"session-paused");
       need(std::chrono::steady_clock::now()<end,"audio preroll deadline");
     }
+    if(cb && cb->onPrepare) {
+      const auto remaining=std::chrono::duration_cast<std::chrono::milliseconds>(end-std::chrono::steady_clock::now()).count();
+      need(remaining>0,"native preparation deadline");
+      cb->onPrepare(static_cast<unsigned>(remaining));
+      need(!stop || !stop->load(),"playback cancelled");
+      need(!paused || !paused->load(),"session-paused");
+      need(std::chrono::steady_clock::now()<end,"native preparation deadline");
+    }
     if(o.producerClock) {
       put(*control,0x5052494d4544ULL);
       const auto finalEpoch=get(*control);

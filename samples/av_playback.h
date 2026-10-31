@@ -43,6 +43,11 @@ struct PlaybackMetrics {
 };
 struct PlaybackCallbacks {
   std::function<void(const flSessionConfig&, const std::string&, const PlaybackClock&)> onSession;
+  // Optional native resource preparation after transport/audio preroll, before
+  // PRIMED and final producer epoch in ProducerMapped mode (legacy mode has no
+  // producer gate). Must finish within remaining startup budget;
+  // may throw to fail setup. Must not read unproduced image pixels.
+  std::function<void(unsigned remainingTimeoutMs)> onPrepare;
   // onSession clock is null during setup. onClock enables presentation after
   // audio preroll; it supplies the single shared epoch for both tracks.
   std::function<void(const PlaybackClock&)> onClock;
