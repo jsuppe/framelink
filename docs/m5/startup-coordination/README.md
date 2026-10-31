@@ -65,3 +65,14 @@ lossless rendering qualification**. The standalone CPU consumer's appsink/drop
 policy schedules only about 51/100 frames even when transport delivers all100;
 this work does not relabel that separate limitation as fixed. Windows/WASAPI
 validation and independent review are required before deployment.
+
+Final Linux suite: **51/51 passed** (119.84 s); startup test rerun after teardown
+guard: **1/1 passed**. Peer death during priming exits producer in 0.79 s; restart
+on the same rendezvous completes in 2.77 s including 1500 ms injected setup.
+
+`autoaudiosink` on Linux PipeWire `auto_null` also passed both decoded formats
+with 700 ms delay:100/100 PCM blocks and100/100 received video hashes, zero late
+video. Concrete sink reports RESAMPLE readback1 and provided device clock0 in
+PAUSED; playback selects the shared system clock as intended. This is a virtual
+audio endpoint, not speaker measurement. A direct `pulsesink` CLI attempt was
+rejected by the existing allowed-sink check; successful run uses autoaudiosink.

@@ -1,0 +1,38 @@
+[
+  {
+    "case": "offset-123456789",
+    "event": "playback-complete",
+    "audio_master": false,
+    "video_received": 42,
+    "video_late": 0,
+    "audio_blocks": 80,
+    "audio_samples": 76800,
+    "latency_ns": 100000000
+  },
+  {
+    "case": "offset-123456789",
+    "event": "playback-timing",
+    "audio_first_running_pts_ns": 123456789,
+    "video_first_running_pts_ns": 0,
+    "audio_end_ns": 1723456789,
+    "video_end_ns": 1600000000
+  },
+  {
+    "case": "offset-37000000",
+    "event": "playback-complete",
+    "audio_master": false,
+    "video_received": 42,
+    "video_late": 0,
+    "audio_blocks": 80,
+    "audio_samples": 76800,
+    "latency_ns": 100000000
+  },
+  {
+    "case": "offset-37000000",
+    "event": "playback-timing",
+    "audio_first_running_pts_ns": 37000000,
+    "video_first_running_pts_ns": 0,
+    "audio_end_ns": 1637000000,
+    "video_end_ns": 1600000000
+  }
+]
