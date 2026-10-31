@@ -2,23 +2,24 @@
 
 Review date: 2026-10-31. **M5 performance gate remains open.**
 
-**Latest combined repeat:** startup preconnection removed late-open losses, but
+**Last completed pre-correction matrix:** startup preconnection removed late-open losses, but
 changed the producer/display phase enough to expose ring pressure again. Both
 1080p60 formats delivered **2,521/2,700** expected frames; all **179** losses
 occurred at producer ring-full, and every submitted frame reached accepted
 presentation. Earlier steady-clean runs below are real but **not a universal
-qualification**. See the final section for the current result and next probe.
+qualification**. Subsequent ownership tracing proves the omitted older GPU
+owners. A coordinated larger-pool correction is implemented; its Windows
+full-rate qualification is in progress. See the final sections.
 
 Scope: the Windows FrameLink/GStreamer/native Vulkan A/V path on Caspar,
 with Linux regression and deterministic fault tests. These measurements do
 not qualify Android, the earlier Raspberry Pi camera workload, higher
 resolutions, physical scanout, or acoustic lip sync by extrapolation.
 
-Code reviewed: FrameLink `b551b63` plus accounting hardening `5596f58`
-and expected-source manifest support (worker `7e8126b`);
-vkrender `07f98cb`. Later evidence must
-identify its exact revision and workload. Historical reports below describe
-their own revisions, not the current implementation.
+Initial audit revisions were FrameLink `b551b63`/`5596f58` and renderer
+`07f98cb`. Current integrated candidate is FrameLink `4c3a403` and renderer
+`6f90a84`, including the versioned pool correction and startup/review fixes.
+Historical reports below describe their own revisions, not the current code.
 
 ## Executive conclusion
 
@@ -480,3 +481,38 @@ The earlier66ms producer stall did not recur. Signal/Flush observed maxima were
 1.362ms/0.013ms, so the narrow trace does not establish whether that historical
 stall was inside a driver call or OS descheduling. Keep that uncertainty separate
 from the now-proven ordinary-cadence buffer-budget defect.
+
+## Implemented correction and current qualification
+
+FrameLink `cbe7352` introduces wire version6 and public maximum16, with defaults
+unchanged. Renderer `94da351` requests12 only for scheduled A/V, keeping the six
+future-frame limit, original timestamps,100ms common latency and late threshold.
+FrameLink-facing arrays are updated; renderer legacy protocol stays at8. Four
+slot-key bits enforce the upper limit16. See renderer
+[budget contract](https://github.com/jsuppe/vkrender/blob/feature/m5-platform/docs/m5/AV_BUFFER_BUDGET.md).
+
+Matching producer, consumer, plugin and embedded libraries must be upgraded
+together. Mixed wire versions reject before exchanging native ring resources.
+Tests reserve all16 images, force reuse of slots15/8/0 while others remain held,
+reject17, reject mismatched peers both directions, and cover64-FD POSIX transfer.
+Independent review found zero-byte FD-bearing packets could leak on rejection;
+`4c3a403` fixes this with a failing-old/passing-new regression plus short-header
+and bad-magic negatives.
+
+- Worker Linux full regression:57/57 passed. Parent combined build passed and
+  full suite rerun is in progress. Parent updated IPC negative:1/1 passed.
+- Parent renderer combined build and22/22 regression tests passed.
+- Android arm64 library/newtests cross-compiled; device execution not implied.
+- Windows matching v6 expanded-pool test:1/1 passed.
+- Windows startup/restart qualification passed after elapsed-time fault
+  correction: requested1500ms measured1501.981ms; requested2300ms measured
+  2301.030ms; each delivered40/40 frames and38,400 audio samples,0late. No
+  startup/watchdog budget was enlarged to obtain these results.
+
+The same-binary native comparison uses `VKR_TEST_AV_POOL_SLOTS=8|12`, explicitly
+recorded with actual negotiated latency. The first8-slot BGRA60 control delivered
+2700/2700,59.999fps; preserve this clean phase alongside older failing phases.
+It is not a contradiction of the ownership traces and not proof that the original
+budget is sufficient under all normal phase alignments. Twelve-slot and format/
+phase repeats are underway. No final full-rate, overhead or physical-scanout
+qualification is claimed from allocation tests or this first control.
