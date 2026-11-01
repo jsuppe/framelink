@@ -58,6 +58,8 @@
 #ifdef __ANDROID__
 #include "framelink_ahb.h"
 #include "framelink_native.h"
+#include "fl_gst_ahb_memory.hpp"
+#include "fl_gst_ahb_producer.hpp"
 #endif
 #if !defined(_WIN32)
 #include "framelink_dmabuf.h"
@@ -154,6 +156,18 @@ static void wcCopy(guint8* dst, gsize dstStride, const guint8* src, gsize srcStr
 }
 #endif
 
+#if defined(FL_GST_D3D11)
+#define FL_GST_NATIVE_SINK 1
+#define FL_SINK_MEMORY "memory:D3D11Memory"
+using NativeSinkProducer=FrameLinkD3DProducer;
+#elif defined(__ANDROID__)
+#define FL_GST_NATIVE_SINK 1
+#define FL_SINK_MEMORY "memory:FrameLinkAHardwareBuffer"
+using NativeSinkProducer=FrameLinkAhbProducer;
+#else
+#define FL_SINK_MEMORY "unsupported-native-memory"
+#endif
+
 // =============================================================================
 // framelinksink
 // =============================================================================
@@ -167,8 +181,8 @@ typedef struct _GstFrameLinkSink {
     gboolean preserveFrameMetadata;
     guint64 streamGeneration;
     gboolean nativeMemory;
-#ifdef FL_GST_D3D11
-    std::shared_ptr<FrameLinkD3DProducer>* nativeProducer;
+#ifdef FL_GST_NATIVE_SINK
+    std::shared_ptr<NativeSinkProducer>* nativeProducer;
 #endif
     gint slots;     // 0 = open `channel` directly; N = walk `channel.0..N-1`
 
@@ -201,6 +215,8 @@ enum { SINK_PROP_0, SINK_PROP_CHANNEL, SINK_PROP_SLOTS, SINK_PROP_PRESERVE_TIMES
 
 #ifdef FL_GST_D3D11
 #define FL_SINK_CAPS FRAMELINK_CAPS ";" GST_VIDEO_CAPS_MAKE_WITH_FEATURES("memory:D3D11Memory", "{ BGRA, RGBA, NV12, RGB10A2_LE }")
+#elif defined(__ANDROID__)
+#define FL_SINK_CAPS FRAMELINK_CAPS ";" GST_VIDEO_CAPS_MAKE_WITH_FEATURES("memory:FrameLinkAHardwareBuffer", "{ RGBA, RGB10A2_LE }")
 #else
 #define FL_SINK_CAPS FRAMELINK_CAPS
 #endif
@@ -209,7 +225,7 @@ static GstStaticPadTemplate sinkTemplate =
                             GST_STATIC_CAPS(FL_SINK_CAPS));
 
 static void sinkDisconnect(GstFrameLinkSink* self) {
-#ifdef FL_GST_D3D11
+#ifdef FL_GST_NATIVE_SINK
     if(self->nativeProducer){(*self->nativeProducer)->active=false;delete self->nativeProducer;self->nativeProducer=nullptr;self->ch=nullptr;}
 #endif
     if (self->ch) {
@@ -301,34 +317,44 @@ static gboolean sinkStartLegacy(GstBaseSink* base) {
 
 static gboolean sinkStart(GstBaseSink* base) {
     auto* self=GST_FRAMELINK_SINK(base);
-#ifndef FL_GST_D3D11
+#ifndef FL_GST_NATIVE_SINK
     if(self->nativeMemory){GST_ELEMENT_ERROR(self,RESOURCE,SETTINGS,("native sink is not supported by this build"),(NULL));return FALSE;}
 #else
     if(self->nativeMemory && !self->connectTimeoutMs)self->connectTimeoutMs=1000;
 #endif
     if(!sinkStartLegacy(base))return FALSE;
-#ifdef FL_GST_D3D11
+#ifdef FL_GST_NATIVE_SINK
     if(self->nativeMemory){
         if(!self->ch)return FALSE;
-        self->nativeProducer=new std::shared_ptr<FrameLinkD3DProducer>(std::make_shared<FrameLinkD3DProducer>(self->ch));
-        if(!(*self->nativeProducer)->device){sinkDisconnect(self);return FALSE;}
+        self->nativeProducer=new std::shared_ptr<NativeSinkProducer>(std::make_shared<NativeSinkProducer>(self->ch));
+        if(!(*self->nativeProducer)->valid()){sinkDisconnect(self);return FALSE;}
     }
 #endif
     return TRUE;
 }
 static gpointer sinkAcquireNative(GstFrameLinkSink* self,guint timeoutMs){
-#ifdef FL_GST_D3D11
+#ifdef FL_GST_NATIVE_SINK
     if(timeoutMs<=1000 && self->nativeMemory && self->nativeProducer && GST_STATE(self)>=GST_STATE_PAUSED)
         return (*self->nativeProducer)->acquire(timeoutMs);
 #endif
     return nullptr;
 }
+static gboolean sinkSetNativeReadyFd(GstFrameLinkSink* self,GstBuffer* buffer,gint fd){
+#ifdef __ANDROID__
+    return self->nativeMemory&&self->nativeProducer&&(*self->nativeProducer)->setReady(buffer,fd);
+#else
+    return FALSE;
+#endif
+}
 static GstCaps* sinkGetCaps(GstBaseSink* base,GstCaps* filter){
     auto* self=GST_FRAMELINK_SINK(base);
     GstCaps* caps=gst_caps_from_string(FRAMELINK_CAPS);
     if(self->nativeMemory){
-#ifdef FL_GST_D3D11
-        gst_caps_set_features(caps,0,gst_caps_features_new("memory:D3D11Memory",nullptr));
+#ifdef FL_GST_NATIVE_SINK
+#ifdef __ANDROID__
+        gst_caps_unref(caps);caps=gst_caps_from_string(GST_VIDEO_CAPS_MAKE("{ RGBA, RGB10A2_LE }"));
+#endif
+        gst_caps_set_features(caps,0,gst_caps_features_new(FL_SINK_MEMORY,nullptr));
 #else
         gst_caps_unref(caps);caps=gst_caps_new_empty();
 #endif
@@ -362,7 +388,7 @@ static gboolean sinkSetCaps(GstBaseSink* base, GstCaps* caps) {
     if(GST_VIDEO_INFO_FORMAT(&self->vinfo)==GST_VIDEO_FORMAT_NV12 &&
        ((GST_VIDEO_INFO_WIDTH(&self->vinfo)&1)||(GST_VIDEO_INFO_HEIGHT(&self->vinfo)&1)))return FALSE;
     if(self->nativeMemory){
-        if(!self->ch || !gst_caps_features_contains(gst_caps_get_features(caps,0),"memory:D3D11Memory") ||
+        if(!self->ch || !gst_caps_features_contains(gst_caps_get_features(caps,0),FL_SINK_MEMORY) ||
            GST_VIDEO_INFO_WIDTH(&self->vinfo)!=(int)self->cinfo.width || GST_VIDEO_INFO_HEIGHT(&self->vinfo)!=(int)self->cinfo.height ||
            toFlFormat(GST_VIDEO_INFO_FORMAT(&self->vinfo))!=self->cinfo.format)return FALSE;
         self->haveInfo=TRUE;return TRUE; // no in-flight pool replacement
@@ -397,7 +423,7 @@ static GstFlowReturn sinkRender(GstBaseSink* base, GstBuffer* buffer) {
     };
     account("gst.frame_receive");
     if(self->nativeMemory){
-#ifdef FL_GST_D3D11
+#ifdef FL_GST_NATIVE_SINK
         guint64 pts=g_get_monotonic_time()*1000;flFrameMetadata metadata{};bool valid=true;
         if(self->preserveFrameMetadata)valid=frameMetadataFromBuffer(buffer,&base->segment,self->streamGeneration,pts,metadata);
         else if(self->preserveTimestamps)valid=frameRunningTime(&base->segment,GST_BUFFER_PTS(buffer),pts);
@@ -704,6 +730,9 @@ static void gst_framelink_sink_class_init(GstFrameLinkSinkClass* klass) {
         GSignalFlags(G_SIGNAL_RUN_LAST|G_SIGNAL_ACTION),G_CALLBACK(sinkAdoptChannel),
         nullptr,nullptr,nullptr,G_TYPE_BOOLEAN,1,G_TYPE_POINTER);
 
+    g_signal_new_class_handler("set-native-ready-fd",G_TYPE_FROM_CLASS(klass),
+        GSignalFlags(G_SIGNAL_RUN_LAST|G_SIGNAL_ACTION),G_CALLBACK(sinkSetNativeReadyFd),
+        nullptr,nullptr,nullptr,G_TYPE_BOOLEAN,2,G_TYPE_POINTER,G_TYPE_INT);
     g_signal_new_class_handler("acquire-native-buffer",G_TYPE_FROM_CLASS(klass),
         GSignalFlags(G_SIGNAL_RUN_LAST|G_SIGNAL_ACTION),G_CALLBACK(sinkAcquireNative),
         nullptr,nullptr,nullptr,G_TYPE_POINTER,1,G_TYPE_UINT);
@@ -1020,24 +1049,6 @@ static GstBuffer* srcNativeBuffer(GstFrameLinkSrc* self,const flFrame& frame) {
 #endif
 
 #ifdef __ANDROID__
-typedef struct {GstAllocator parent;} GstFrameLinkAhbAllocator;
-typedef struct {GstAllocatorClass parent;} GstFrameLinkAhbAllocatorClass;
-struct FrameLinkAhbMemory {GstMemory memory;AHardwareBuffer* buffer;};
-G_DEFINE_TYPE(GstFrameLinkAhbAllocator,gst_framelink_ahb_allocator,GST_TYPE_ALLOCATOR)
-static gpointer ahbMap(GstMemory*,gsize,GstMapFlags){return nullptr;}
-static void ahbUnmap(GstMemory*){}
-static GstMemory* ahbCopy(GstMemory*,gssize,gssize){return nullptr;}
-static GstMemory* ahbShare(GstMemory*,gssize,gssize){return nullptr;}
-static void gst_framelink_ahb_allocator_class_init(GstFrameLinkAhbAllocatorClass* klass){
-    GST_ALLOCATOR_CLASS(klass)->free=[](GstAllocator*,GstMemory*m){
-        auto*memory=reinterpret_cast<FrameLinkAhbMemory*>(m);AHardwareBuffer_release(memory->buffer);g_free(memory);
-    };
-}
-static void gst_framelink_ahb_allocator_init(GstFrameLinkAhbAllocator* self){
-    auto*a=GST_ALLOCATOR(self);a->mem_type="FrameLinkAHardwareBuffer";
-    a->mem_map=ahbMap;a->mem_unmap=ahbUnmap;a->mem_copy=ahbCopy;a->mem_share=ahbShare;
-    GST_OBJECT_FLAG_SET(a,GST_ALLOCATOR_FLAG_CUSTOM_ALLOC);
-}
 static GstBuffer* srcNativeBuffer(GstFrameLinkSrc* self,const flFrame& frame){
     if(!self->nativeOwner)return nullptr;
     auto*ahb=flImageAHardwareBuffer(frame.image);if(!ahb)return nullptr;
@@ -1049,7 +1060,7 @@ static GstBuffer* srcNativeBuffer(GstFrameLinkSrc* self,const flFrame& frame){
     gsize bytes=gsize(d.stride)*d.height*4;
     auto*a=GST_ALLOCATOR(g_object_new(gst_framelink_ahb_allocator_get_type(),nullptr));
     auto*m=g_new0(FrameLinkAhbMemory,1);m->buffer=ahb;AHardwareBuffer_acquire(ahb);
-    gst_memory_init(&m->memory,GST_MEMORY_FLAG_NO_SHARE,a,nullptr,bytes,0,0,bytes);gst_object_unref(a);
+    gst_memory_init(&m->memory,(GstMemoryFlags)0,a,nullptr,bytes,0,0,bytes);gst_object_unref(a);
     uint64_t token=0;if(flLeaseFrame(self->ch,&frame,&token)!=FL_OK){gst_memory_unref(&m->memory);return nullptr;}
     gst_mini_object_set_qdata(GST_MINI_OBJECT(&m->memory),g_quark_from_static_string("framelink-ahb"),ahb,nullptr);
     auto*reader=new NativeSourceReader{*self->nativeOwner,token};

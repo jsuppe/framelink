@@ -158,3 +158,23 @@ FrameLinkExplicitCompletionV1 options. Upstream must use the supplied device and
 finish GPU work before abandoning unpublished buffers; it must not hold the device
 lock across acquisition. Generic decoder integration remains unqualified until
 its allocation, device, cancellation and completion behavior satisfies this contract.
+
+## Android explicit native sink
+
+Android `native-memory=true` now accepts sink-issued exact RGBA/RGB10 opaque AHB
+buffers through `acquire-native-buffer`. Before publishing, call
+`set-native-ready-fd(buffer, fd)` and check its Boolean result. The FD is borrowed
+and duplicated; `-1` explicitly declares completed writes. Missing readiness,
+invalid FD values and repeated readiness assignment reject. The producer forwards
+that fence via FrameLink; the sink does not map/copy/upload the image. Abandoned
+unpublished buffers still require completed GPU access before final release.
+This is an explicit application adapter, not a stock decoder integration or an
+Android ALLOCATION-pool implementation yet. Opaque YUV-as-NV12 remains rejected.
+
+Whole GstBuffer copies may share the same AHB GstMemory to change buffer metadata
+without copying pixels. Pixel deep-copy, partial memory subviews and implicit CPU
+maps remain unsupported. Removing NO_SHARE is essential: that flag forced a pixel
+copy during gst_buffer_make_writable; an opaque allocator refusing that copy made
+GStreamer 1.24.13's source DISCONT path dereference NULL. Both producer and source
+now test same-memory whole-buffer copies. Retaining an AHB alone still does not
+retain its FrameLink lease; retain the GstMemory/buffer through completion.

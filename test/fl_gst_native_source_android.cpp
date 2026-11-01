@@ -28,6 +28,7 @@ static void run(const char*format,bool adopt=false){
  CHECK(flAcquireBuffer(producer,&b,1000)==FL_OK&&flAcquireBuffer(producer,&other,1000)==FL_OK);fill(b);CHECK(flSubmit(producer,&b,1234567)==FL_OK);
  auto*sample=gst_app_sink_try_pull_sample(GST_APP_SINK(out),2*GST_SECOND);CHECK(sample);auto*buf=gst_sample_get_buffer(sample);CHECK(GST_BUFFER_PTS(buf)==1234567);
  CHECK(gst_caps_features_contains(gst_caps_get_features(gst_sample_get_caps(sample),0),"memory:FrameLinkAHardwareBuffer"));CHECK(gst_buffer_n_memory(buf)==1);
+ auto*copy=gst_buffer_copy(buf);CHECK(copy&&gst_buffer_peek_memory(copy,0)==gst_buffer_peek_memory(buf,0));gst_buffer_unref(copy);
  auto*mem=gst_buffer_peek_memory(buf,0);auto*ahb=gst_framelink_memory_get_hardware_buffer(mem);CHECK(ahb);
  using GetId=int(*)(const AHardwareBuffer*,uint64_t*);auto getId=(GetId)dlsym(RTLD_DEFAULT,"AHardwareBuffer_getId");CHECK(getId);uint64_t a=0,c=0;
  CHECK(getId(ahb,&a)==0&&getId(flImageAHardwareBuffer(b.image),&c)==0&&a==c);

@@ -25,6 +25,7 @@ struct FrameLinkD3DProducer : std::enable_shared_from_this<FrameLinkD3DProducer>
         if(flQuery(ch,&info)==FL_OK)device=gst_d3d11_device_new_wrapped(flChannelD3D11Device(ch));
     }
     ~FrameLinkD3DProducer(){if(device)gst_object_unref(device);flClose(channel);}
+    bool valid()const{return device!=nullptr;}
     static GQuark key(){return g_quark_from_static_string("framelink-d3d11-producer-reservation");}
     GstBuffer* acquire(guint timeoutMs){
         std::unique_lock<std::mutex> lock(mutex);

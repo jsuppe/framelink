@@ -791,4 +791,8 @@ if(ANDROID AND FRAMELINK_BUILD_TESTS AND TARGET framelink_av_session)
     add_executable(fl_gst_native_source_android test/fl_gst_native_source_android.cpp)
     target_include_directories(fl_gst_native_source_android PRIVATE $<TARGET_PROPERTY:framelink_av_session,INCLUDE_DIRECTORIES>)
     target_link_libraries(fl_gst_native_source_android PRIVATE $<TARGET_PROPERTY:framelink_av_session,LINK_LIBRARIES>)
+    add_executable(fl_gst_native_producer_android test/fl_gst_native_producer_android.cpp)
+    target_include_directories(fl_gst_native_producer_android PRIVATE $<TARGET_PROPERTY:framelink_av_session,INCLUDE_DIRECTORIES>)
+    target_link_libraries(fl_gst_native_producer_android PRIVATE $<TARGET_PROPERTY:framelink_av_session,LINK_LIBRARIES>)
+
 endif()
