@@ -199,3 +199,15 @@ rejection. Synthetic CPU mappings generate test data with DMA_BUF_IOCTL_SYNC;
 these results do not establish direct GPU-renderability of LINEAR NVIDIA memory,
 a native decoder path or actual driver-exported sync-file qualification.
 Linux/Android now share the explicit-completion ALLOCATION pool above.
+
+## Remote agreement helper (not yet production integration)
+
+`samples/av_memory_agreement.h` provides a separate opt-in, authenticated control
+exchange for both endpoint policies and an exact trusted resource-binding digest.
+It requires an already authenticated stream with finite timeout and explicitly
+negotiated extension support. Both offers and full session configuration are
+covered by directional HMAC with fresh nonces; acceptance is authenticated too.
+No session ABI change or automatic fallback is introduced. Its passing control
+tests are not production SessionProvider negotiation or native driver evidence.
+The provider must independently verify the binding against actual allocations;
+a resource-type flag, shared random label or process-local handle is insufficient.

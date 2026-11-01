@@ -800,3 +800,17 @@ if(ANDROID AND FRAMELINK_BUILD_TESTS AND TARGET framelink_av_session)
     target_link_libraries(fl_gst_native_producer_android PRIVATE $<TARGET_PROPERTY:framelink_av_session,LINK_LIBRARIES>)
 
 endif()
+
+# Explicit opt-in memory agreement is distinct from the legacy A/V session wire.
+if(FRAMELINK_BUILD_TESTS AND (TARGET framelink_av_playback OR TARGET fl_gst_native_source_android))
+    add_executable(fl_av_memory_agreement test/test_av_memory_agreement.cpp samples/av_memory_agreement.cpp samples/av_auth.cpp samples/av_rendezvous.cpp)
+    target_include_directories(fl_av_memory_agreement PRIVATE samples)
+    if(ANDROID)
+        target_link_libraries(fl_av_memory_agreement PRIVATE $<TARGET_PROPERTY:framelink_av_session,LINK_LIBRARIES>)
+        target_include_directories(fl_av_memory_agreement PRIVATE $<TARGET_PROPERTY:framelink_av_session,INCLUDE_DIRECTORIES>)
+    else()
+        target_link_libraries(fl_av_memory_agreement PRIVATE framelink_av_playback)
+    endif()
+    add_test(NAME av_memory_agreement COMMAND fl_av_memory_agreement)
+    set_tests_properties(av_memory_agreement PROPERTIES TIMEOUT 20)
+endif()
