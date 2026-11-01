@@ -1,0 +1,1 @@
+CPU-only harness capture before optional GPU consumer extension. Binary SHA256: 9cbdcf7810fc5b077b1c61a8db02e985137564bdb6bf2c87ea06365d69103ee6. All four cases use this same binary. Matched3720 frames/120warmup,1920x1080 RGBA60fps,pool2. These are intermediate CPU-native transport results; final GPU/A-V/platform gates remain open.
