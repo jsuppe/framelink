@@ -178,3 +178,22 @@ copy during gst_buffer_make_writable; an opaque allocator refusing that copy mad
 GStreamer 1.24.13's source DISCONT path dereference NULL. Both producer and source
 now test same-memory whole-buffer copies. Retaining an AHB alone still does not
 retain its FrameLink lease; retain the GstMemory/buffer through completion.
+
+## Linux explicit DMA-BUF sink
+
+Linux's native sink now mirrors the explicit Android action API with
+`memory:DMABuf` buffers. It wraps original ring allocations and requires
+`set-native-ready-fd` before publication (`-1` means writes are already complete).
+Ready fences must cover **all prior channel writes**, not merely work from an
+unrelated queue. Caller retains responsibility for correct cache ownership and
+finishing access before abandoning an unpublished buffer. The sink never maps
+or copies the payload, and cannot silently accept arbitrary external buffers.
+
+The initial adapter requires LINEAR layout and one backing DMA-BUF per image
+(possibly shared by NV12 planes). Unsupported modifiers or separate-plane objects
+reject. RGBA/NV12 are tested with exact backing-object identity, pixel/metadata
+checks, bounded original-image references, delayed readiness and missing-ready
+rejection. Synthetic CPU mappings generate test data with DMA_BUF_IOCTL_SYNC;
+these results do not establish direct GPU-renderability of LINEAR NVIDIA memory,
+a native decoder path or actual driver-exported sync-file qualification.
+ALLOCATION pools for Linux/Android remain the next integration step.

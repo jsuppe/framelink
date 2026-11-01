@@ -55,6 +55,9 @@
 #include "fl_gst_d3d11_pool.hpp"
 #endif
 #include "framelink_slots.h"
+#ifdef FL_GST_DMABUF
+#include "fl_gst_dmabuf_producer.hpp"
+#endif
 #ifdef __ANDROID__
 #include "framelink_ahb.h"
 #include "framelink_native.h"
@@ -164,6 +167,10 @@ using NativeSinkProducer=FrameLinkD3DProducer;
 #define FL_GST_NATIVE_SINK 1
 #define FL_SINK_MEMORY "memory:FrameLinkAHardwareBuffer"
 using NativeSinkProducer=FrameLinkAhbProducer;
+#elif defined(FL_GST_DMABUF)
+#define FL_GST_NATIVE_SINK 1
+#define FL_SINK_MEMORY "memory:DMABuf"
+using NativeSinkProducer=FrameLinkDmabufProducer;
 #else
 #define FL_SINK_MEMORY "unsupported-native-memory"
 #endif
@@ -217,6 +224,8 @@ enum { SINK_PROP_0, SINK_PROP_CHANNEL, SINK_PROP_SLOTS, SINK_PROP_PRESERVE_TIMES
 #define FL_SINK_CAPS FRAMELINK_CAPS ";" GST_VIDEO_CAPS_MAKE_WITH_FEATURES("memory:D3D11Memory", "{ BGRA, RGBA, NV12, RGB10A2_LE }")
 #elif defined(__ANDROID__)
 #define FL_SINK_CAPS FRAMELINK_CAPS ";" GST_VIDEO_CAPS_MAKE_WITH_FEATURES("memory:FrameLinkAHardwareBuffer", "{ RGBA, RGB10A2_LE }")
+#elif defined(FL_GST_DMABUF)
+#define FL_SINK_CAPS FRAMELINK_CAPS ";" GST_VIDEO_CAPS_MAKE_WITH_FEATURES("memory:DMABuf", "{ BGRA, RGBA, NV12, RGB10A2_LE }")
 #else
 #define FL_SINK_CAPS FRAMELINK_CAPS
 #endif
@@ -340,7 +349,7 @@ static gpointer sinkAcquireNative(GstFrameLinkSink* self,guint timeoutMs){
     return nullptr;
 }
 static gboolean sinkSetNativeReadyFd(GstFrameLinkSink* self,GstBuffer* buffer,gint fd){
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(FL_GST_DMABUF)
     return self->nativeMemory&&self->nativeProducer&&(*self->nativeProducer)->setReady(buffer,fd);
 #else
     return FALSE;
