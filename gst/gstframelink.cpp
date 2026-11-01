@@ -52,7 +52,6 @@
 #include "fl_gst_metadata.hpp"
 #ifdef FL_GST_D3D11
 #include "fl_gst_d3d11_producer.hpp"
-#include "fl_gst_d3d11_pool.hpp"
 #endif
 #include "framelink_slots.h"
 #ifdef FL_GST_DMABUF
@@ -173,6 +172,15 @@ using NativeSinkProducer=FrameLinkAhbProducer;
 using NativeSinkProducer=FrameLinkDmabufProducer;
 #else
 #define FL_SINK_MEMORY "unsupported-native-memory"
+#endif
+
+#ifdef FL_GST_NATIVE_SINK
+#include "fl_gst_native_pool.hpp"
+#ifdef FL_GST_D3D11
+#define FL_COMPLETION_CONTRACT "same-device-before-abandon-v1"
+#else
+#define FL_COMPLETION_CONTRACT "external-sync-fd-before-submit-v1"
+#endif
 #endif
 
 // =============================================================================
@@ -377,13 +385,13 @@ static gboolean sinkProposeAllocation(GstBaseSink* base,GstQuery* query){
         auto* parent=GST_BASE_SINK_CLASS(gst_framelink_sink_parent_class);
         return parent->propose_allocation?parent->propose_allocation(base,query):TRUE;
     }
-#ifdef FL_GST_D3D11
+#ifdef FL_GST_NATIVE_SINK
     const auto* structure=gst_query_get_structure(query);
     const char* contract=gst_structure_get_string(structure,"framelink-completion-contract");
-    if(!contract || strcmp(contract,"same-device-before-abandon-v1") || !self->nativeProducer)return FALSE;
+    if(!contract || strcmp(contract,FL_COMPLETION_CONTRACT) || !self->nativeProducer)return FALSE;
     GstCaps* caps=nullptr;gboolean needPool=FALSE;gst_query_parse_allocation(query,&caps,&needPool);
     if(!caps || !needPool)return FALSE;
-    auto* pool=flCreateD3DPool(*self->nativeProducer,caps,self->bufferWaitMs);if(!pool)return FALSE;
+    auto* pool=flCreateNativePool(*self->nativeProducer,caps,self->bufferWaitMs);if(!pool)return FALSE;
     GstVideoInfo vi{};gst_video_info_from_caps(&vi,caps);
     gst_query_add_allocation_pool(query,pool,(guint)vi.size,0,self->cinfo.poolSize);
     gst_query_add_allocation_meta(query,GST_VIDEO_META_API_TYPE,nullptr);gst_object_unref(pool);return TRUE;

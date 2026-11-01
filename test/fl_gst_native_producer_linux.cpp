@@ -21,9 +21,20 @@ static void run(bool nv12,bool missingReady=false){
  std::string format=nv12?"NV12":"RGBA";GError*error=nullptr;
  auto*p=gst_parse_launch(("appsrc name=in is-live=true format=time caps=video/x-raw(memory:DMABuf),format="+format+",width=64,height=32,framerate=30/1 ! framelinksink name=sink native-memory=true preserve-frame-metadata=true sync=false async=false enable-last-sample=false channel="+name).c_str(),&error);CHECK(p&&!error);
  auto*sink=gst_bin_get_by_name(GST_BIN(p),"sink");auto*in=gst_bin_get_by_name(GST_BIN(p),"in");CHECK(gst_element_set_state(p,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
- GstBuffer*b=nullptr,*other=nullptr,*blocked=nullptr;g_signal_emit_by_name(sink,"acquire-native-buffer",1000u,&b);CHECK(b);
- g_signal_emit_by_name(sink,"acquire-native-buffer",1000u,&other);CHECK(other);
- g_signal_emit_by_name(sink,"acquire-native-buffer",0u,&blocked);CHECK(!blocked);
+ auto*caps=gst_caps_from_string(("video/x-raw(memory:DMABuf),format="+format+",width=64,height=32,framerate=30/1").c_str());
+ auto*pad=gst_element_get_static_pad(sink,"sink");auto*query=gst_query_new_allocation(caps,TRUE);
+ CHECK(!gst_pad_query(pad,query));
+ gst_structure_set(gst_query_writable_structure(query),"framelink-completion-contract",G_TYPE_STRING,"unknown",nullptr);CHECK(!gst_pad_query(pad,query));
+ gst_structure_set(gst_query_writable_structure(query),"framelink-completion-contract",G_TYPE_STRING,"external-sync-fd-before-submit-v1",nullptr);
+ CHECK(gst_pad_query(pad,query)&&gst_query_get_n_allocation_pools(query)==1);
+ GstBufferPool*pool=nullptr;guint size=0,min=9,max=9;gst_query_parse_nth_allocation_pool(query,0,&pool,&size,&min,&max);CHECK(pool&&min==0&&max==2);
+ gst_query_unref(query);gst_caps_unref(caps);gst_object_unref(pad);CHECK(gst_buffer_pool_set_active(pool,TRUE));
+ GstBuffer*b=nullptr,*other=nullptr,*blocked=nullptr;
+ CHECK(gst_buffer_pool_acquire_buffer(pool,&b,nullptr)==GST_FLOW_OK);
+ CHECK(gst_buffer_pool_acquire_buffer(pool,&other,nullptr)==GST_FLOW_OK);
+ GstBufferPoolAcquireParams params{};params.flags=GST_BUFFER_POOL_ACQUIRE_FLAG_DONTWAIT;
+ CHECK(gst_buffer_pool_acquire_buffer(pool,&blocked,&params)==GST_FLOW_EOS);
+ gst_buffer_unref(other);CHECK(gst_buffer_pool_acquire_buffer(pool,&other,nullptr)==GST_FLOW_OK);
  auto*copy=gst_buffer_copy(b);CHECK(copy&&gst_buffer_peek_memory(copy,0)==gst_buffer_peek_memory(b,0));gst_buffer_unref(copy);
  auto*mem=gst_buffer_peek_memory(b,0);CHECK(gst_is_dmabuf_memory(mem));int fd=gst_dmabuf_memory_get_fd(mem);
  auto*layout=gst_buffer_get_video_meta(b);CHECK(layout);
@@ -50,9 +61,11 @@ static void run(bool nv12,bool missingReady=false){
   flMappedImage map{};CHECK(flImageMapPlanes(frame.image,&map)==FL_OK);
   for(unsigned plane=0;plane<map.planes;++plane)for(unsigned y=0;y<map.plane[plane].rows;++y)for(unsigned x=0;x<(nv12?64u:256u);++x)CHECK(((unsigned char*)map.plane[plane].pixels)[y*map.plane[plane].stride+x]==71);
   flImageUnmap(frame.image);CHECK(flRelease(c,&frame)==FL_OK);
-  g_signal_emit_by_name(sink,"acquire-native-buffer",0u,&blocked);CHECK(!blocked);
+  CHECK(gst_buffer_pool_acquire_buffer(pool,&blocked,&params)==GST_FLOW_EOS);
  }
  close(ready);gst_element_set_state(p,GST_STATE_NULL);gst_object_unref(in);gst_object_unref(sink);gst_object_unref(p);
+ CHECK(gst_buffer_pool_acquire_buffer(pool,&blocked,&params)==GST_FLOW_FLUSHING);
+ CHECK(gst_buffer_pool_set_active(pool,FALSE));gst_object_unref(pool);
  CHECK(gst_is_dmabuf_memory(gst_buffer_peek_memory(b,0)));gst_buffer_unref(b);gst_buffer_unref(other);flClose(c);
  printf("%s native DMA-BUF sink %s: bounded original allocations, explicit readiness, metadata and retained shutdown pass\n",format.c_str(),missingReady?"missing-ready negative":"roundtrip");
 }

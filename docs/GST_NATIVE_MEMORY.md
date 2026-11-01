@@ -94,8 +94,8 @@ SessionProvider's responsibilities. No named fallback is introduced.
 
 ## Remaining task 7 work
 
-- Android external-YUV/native-layout negotiation and platform native sinks.
-- Native sink allocation/pool negotiation and upstream decoder compatibility.
+- Android external-YUV/native-layout negotiation; opaque YUV is not native NV12.
+- Upstream decoder device/allocation/completion compatibility beyond explicit adapters.
 - Authenticated remote requirements, exact device/layout/generation agreement;
   enforce all endpoint permissions and reject unsupported legacy peers.
 - Full metadata opt-in is now available (see FRAME_METADATA.md); combine its
@@ -138,10 +138,10 @@ and legacy sink paths remain supported as documented above.
 
 ### Explicit-completion ALLOCATION pool
 
-The Windows native sink now answers ALLOCATION queries that request a pool AND
-set the string field `framelink-completion-contract` to
-`same-device-before-abandon-v1`. Missing/unknown contracts, mismatched geometry,
-non-D3D11/ANY memory features and incompatible pool configuration reject. This
+Native sinks answer ALLOCATION queries that request a pool AND set the string
+field `framelink-completion-contract` to `same-device-before-abandon-v1` on Windows
+or `external-sync-fd-before-submit-v1` on Linux/Android. Missing/unknown contracts,
+mismatched geometry, wrong/ANY memory features and incompatible pool configuration reject. This
 local API agreement is not authenticated remote memory/usage negotiation.
 
 The offered GstBufferPool has minimum zero and maximum equal to the existing
@@ -154,7 +154,9 @@ policy. Finalizers can release references while another acquisition waits.
 
 Sink shutdown revokes old pools (further acquisition returns FLUSHING), while
 outstanding memory retains ownership. The pool advertises VideoMeta and
-FrameLinkExplicitCompletionV1 options. Upstream must use the supplied device and
+FrameLinkExplicitCompletionV1 options. POSIX callers must set readiness before
+submission, with a fence covering all prior channel writes (or -1 only after
+completion). On Windows, upstream must use the supplied device and
 finish GPU work before abandoning unpublished buffers; it must not hold the device
 lock across acquisition. Generic decoder integration remains unqualified until
 its allocation, device, cancellation and completion behavior satisfies this contract.
@@ -168,8 +170,8 @@ and duplicated; `-1` explicitly declares completed writes. Missing readiness,
 invalid FD values and repeated readiness assignment reject. The producer forwards
 that fence via FrameLink; the sink does not map/copy/upload the image. Abandoned
 unpublished buffers still require completed GPU access before final release.
-This is an explicit application adapter, not a stock decoder integration or an
-Android ALLOCATION-pool implementation yet. Opaque YUV-as-NV12 remains rejected.
+This is an explicit application adapter, not a stock decoder integration. The
+ALLOCATION pool above also returns these same buffers. Opaque YUV-as-NV12 remains rejected.
 
 Whole GstBuffer copies may share the same AHB GstMemory to change buffer metadata
 without copying pixels. Pixel deep-copy, partial memory subviews and implicit CPU
@@ -196,4 +198,4 @@ checks, bounded original-image references, delayed readiness and missing-ready
 rejection. Synthetic CPU mappings generate test data with DMA_BUF_IOCTL_SYNC;
 these results do not establish direct GPU-renderability of LINEAR NVIDIA memory,
 a native decoder path or actual driver-exported sync-file qualification.
-ALLOCATION pools for Linux/Android remain the next integration step.
+Linux/Android now share the explicit-completion ALLOCATION pool above.

@@ -113,7 +113,7 @@ Windows decoder-to-independent-renderer example, and measured multi-hop evidence
   RGBA/NV12 and memory-subview lifetime tests passed; Windows wrapped D3D11
   original-storage/copy-negative tests2/2 pass; Android exact RGB AHB adapter
   and native-layout rejection cases pass. Full metadata propagation is validated
-  across all platforms. Windows native sink and explicit-completion ALLOCATION
+  across all platforms. Linux/Windows/Android native sinks and explicit-completion ALLOCATION
   pool are locally validated; generic decoders, Linux/Android native sinks and
   authenticated remote memory agreement remain open. Full task remains open.
 - [ ] **M5a.8 Windows GPU-decoder example:** GPU GstBuffer → FrameLink sink →
