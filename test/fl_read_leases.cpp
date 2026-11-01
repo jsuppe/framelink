@@ -41,7 +41,7 @@ struct Completion {
 };
 #endif
 static void collect(flChannel* c) {
- for(int i=0;i<1000;++i){auto r=flCollectReadLeases(c);if(r==FL_OK)return;CHECK(r==FL_BUSY);std::this_thread::sleep_for(std::chrono::milliseconds(1));}
+ for(int i=0;i<1000;++i){auto r=flCollectReadLeases(c);if(r==FL_OK)return;CHECK(r==FL_BUSY||r==FL_DISCONNECTED);std::this_thread::sleep_for(std::chrono::milliseconds(1));}
  CHECK(false);
 }
 int main() {
@@ -86,6 +86,21 @@ int main() {
  CHECK(flAcquireBuffer(p,&extra,0)==FL_TIMEOUT);
  early.signal();collect(c);
  CHECK(flAcquireBuffer(p,&extra,1000)==FL_OK && flCancelBuffer(p,&extra)==FL_OK);
+ // A disconnected producer does not cancel a downstream reader's GPU work.
+ Completion restart(c);
+ CHECK(flAcquireBuffer(p,&b,1000)==FL_OK && flSubmit(p,&b,606)==FL_OK);
+ CHECK(flAcquireFrame(c,&f,1000)==FL_OK && flLeaseFrame(c,&f,&first)==FL_OK);
+ CHECK(restart.handoff(c,first)==FL_OK);
+ flClose(p);p=nullptr;std::this_thread::sleep_for(std::chrono::milliseconds(30));
+ CHECK(flOpenProducer(name.c_str(),&p)==FL_BUSY && !p);
+ CHECK(flCollectReadLeases(c)==FL_BUSY);
+ restart.signal();collect(c);
+ for(int i=0;i<100&&!p;++i){r=flOpenProducer(name.c_str(),&p);CHECK(r==FL_OK||r==FL_BUSY||r==FL_DISCONNECTED);if(!p)std::this_thread::sleep_for(std::chrono::milliseconds(5));}
+ CHECK(p && flCompleteReadLease(c,first)==FL_INVALID);
+ CHECK(flAcquireBuffer(p,&b,1000)==FL_OK && flSubmit(p,&b,707)==FL_OK);
+ CHECK(flAcquireFrame(c,&f,1000)==FL_OK && flLeaseFrame(c,&f,&second)==FL_OK);
+ CHECK(flReadLeaseFrame(c,second,&f,&generation)==FL_OK && f.ptsNs==707);
+ CHECK(flCompleteReadLease(c,second)==FL_OK);collect(c);
  flClose(p);flClose(c);
  std::puts("native read leases: retained readers block reuse; ordered retirement and resize pass");
 }

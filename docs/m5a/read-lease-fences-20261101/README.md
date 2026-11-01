@@ -16,3 +16,8 @@ Linux/Android use deterministic eventfd readiness controls, not GPU driver-creat
 sync files. Test completes the later reader first and proves producer buffers stay
 unavailable until the earlier reader completes. Native GPU sync-file driver
 qualification and actual downstream decoder/relay integration remain separate.
+
+Lifecycle extension: Linux, Windows and Android targeted read_leases checks pass.
+A disconnected producer cannot reconnect while a deferred reader fence is held;
+after completion/collection, replacement attaches and old tokens remain invalid.
+These use separate endpoint objects in one test process, not process-kill injection.
