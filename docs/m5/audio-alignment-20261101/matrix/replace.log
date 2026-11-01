@@ -1,0 +1,19 @@
+
+11-01 07:23:22.922  6176  6176 I FLCross : bind=true
+11-01 07:23:23.461  6235  6249 I FLCross : producer-start lease=143235fa-d82b-44d8-8f11-bc6a37f7fbec uid=10304 pid=6235
+11-01 07:23:23.462  6214  6226 I FLCross : grant lease=143235fa-d82b-44d8-8f11-bc6a37f7fbec generation=1 consumer_uid=10305 broker_uid=10304
+11-01 07:23:23.481  6176  6234 I FLCross : receiver-start lease=143235fa-d82b-44d8-8f11-bc6a37f7fbec generation=1 uid=10305 pid=6176
+11-01 07:23:23.483  6176  6234 I FLCross : active_owner_reuse_rejected=true
+11-01 07:23:23.542  6176  6234 I FLCross : playback producer-system-clock
+11-01 07:23:24.187  6214  6226 I FLCross : retired lease=143235fa-d82b-44d8-8f11-bc6a37f7fbec generation=1 reason=replacement
+11-01 07:23:24.190  6214  6226 I FLCross : grant lease=507db652-e22a-4c93-964d-69a5b5f55ece generation=2 consumer_uid=10305 broker_uid=10304
+11-01 07:23:24.197  6176  6234 I FLCross : native failure: audio EOS before finite completion
+11-01 07:23:24.197  6176  6234 I FLCross : replaced-old-result lease=143235fa-d82b-44d8-8f11-bc6a37f7fbec {"ok":false,"video":16,"posts":16,"pcm_samples":28800,"uid":10305,"pid":6176}
+11-01 07:23:24.199  6176  6234 I FLCross : receiver-replacement lease=507db652-e22a-4c93-964d-69a5b5f55ece generation=2
+11-01 07:23:24.231  6235  6249 I FLCross : native failure: video send failed
+11-01 07:23:24.231  6235  6249 I FLCross : producer-result lease=143235fa-d82b-44d8-8f11-bc6a37f7fbec {"ok":false,"video":0,"posts":0,"pcm_samples":0,"uid":10304,"pid":6235}
+11-01 07:23:24.232  6235  6249 I FLCross : producer-start lease=507db652-e22a-4c93-964d-69a5b5f55ece uid=10304 pid=6235
+11-01 07:23:24.248  6176  6234 I FLCross : playback producer-system-clock
+11-01 07:23:30.505  6176  6234 I FLCross : receiver-result lease=507db652-e22a-4c93-964d-69a5b5f55ece {"ok":true,"video":180,"posts":180,"pcm_samples":288000,"uid":10305,"pid":6176}
+11-01 07:23:30.507  6214  6226 I FLCross : retired lease=507db652-e22a-4c93-964d-69a5b5f55ece generation=2 reason=explicit
+11-01 07:23:30.543  6235  6249 I FLCross : producer-result lease=507db652-e22a-4c93-964d-69a5b5f55ece {"ok":true,"video":0,"posts":0,"pcm_samples":0,"uid":10304,"pid":6235}

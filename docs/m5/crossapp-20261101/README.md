@@ -1,3 +1,7 @@
+> Follow-up: the original OpenSLES failure below now has a diagnosed alignment
+> repair and post-fix evidence in [audio-alignment-20261101](../audio-alignment-20261101/README.md).
+> This directory preserves the original observations, including failed runs.
+
 # Signed Android cross-app A/V qualification — 2026-11-01
 
 **M5 is not closed.** Parent executed this work directly and sequentially after

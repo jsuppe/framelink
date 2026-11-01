@@ -75,7 +75,7 @@ def assert_success(text, frames):
 cases = ['bgra', 'nv12', 'wrong-signer', 'wrong-key', 'unsupported-format', 'invalid-bounds', 'revoke', 'replace',
          'producer-death', 'producer-restart', 'broker-death', 'broker-restart',
          'consumer-death', 'consumer-restart', 'background', 'foreground-reopen',
-         'audio-focus', 'focus-reopen', 'audible']
+         'audio-focus', 'focus-reopen', 'audible', 'audible-nv12']
 selected = a.case or cases
 assert all(c in cases for c in selected)
 summary = []
@@ -89,14 +89,14 @@ try:
             cleanup()
         marker = 'case-' + name + '-' + uuid.uuid4().hex
         adb('shell', 'log', '-t', 'FLCrossGate', marker)
-        frames = a.frames if name in ('bgra', 'nv12', 'audible') or name.endswith(('restart', 'reopen')) else 180
+        frames = a.frames if name in ('bgra', 'nv12', 'audible', 'audible-nv12') or name.endswith(('restart', 'reopen')) else 180
         package = I if name == 'wrong-signer' else C
         cmd = ['shell', 'am', 'start', '-W', '-n', package + '/dev.framelink.cross.Viewer',
-               '--es', 'format', 'YUY2' if name == 'unsupported-format' else 'NV12' if name == 'nv12' else 'BGRA',
+               '--es', 'format', 'YUY2' if name == 'unsupported-format' else 'NV12' if name in ('nv12','audible-nv12') else 'BGRA',
                '--ei', 'frames', '0' if name == 'invalid-bounds' else str(frames), '--ei', 'fps', '30',
                '--ei', 'preroll-delay-ms', str(a.preroll_delay_ms),
                '--es', 'clock-policy', a.clock_policy,
-               '--ez', 'silent', 'false' if name in ('audible', 'audio-focus', 'focus-reopen') else 'true']
+               '--ez', 'silent', 'false' if name in ('audible', 'audible-nv12', 'audio-focus', 'focus-reopen') else 'true']
         if name == 'wrong-key':
             cmd += ['--ez', 'wrong-key', 'true']
         if a.diagnostics:
@@ -170,7 +170,14 @@ try:
             print(json.dumps(summary[-1]), flush=True)
             raise
         finally:
-            (a.out / (name + '.log')).write_text(logs(marker))
+            final_log = logs(marker)
+            (a.out / (name + '.log')).write_text(final_log)
+            if a.diagnostics and a.diagnostic_level < 0 and 'diagnostic_file_saved=true' in final_log:
+                try:
+                    trace = adb('exec-out', 'run-as', package, 'cat', 'cache/last-trace.txt')
+                    (a.out / (name + '.trace')).write_text(trace)
+                except subprocess.CalledProcessError:
+                    pass  # no native recorder after early rejection/process death
             (a.out / 'summary.json').write_text(json.dumps(summary, indent=2) + '\n')
 finally:
     cleanup()

@@ -13,13 +13,17 @@
 #include <stdexcept>
 #include <utility>
 #include <vector>
+#include <mutex>
+#include <fstream>
 namespace {
 bool diagnostics=false;
 bool bufferedDiagnostics=false;
 std::vector<std::string> diagnosticLines;
 unsigned diagnosticDropped=0;
+std::mutex diagnosticMutex;
+std::string diagnosticFile;
 void diagnostic(const std::string& text) {
- if(bufferedDiagnostics){if(diagnosticLines.size()<2048)diagnosticLines.push_back(text);else ++diagnosticDropped;}
+ if(bufferedDiagnostics){std::lock_guard<std::mutex> lock(diagnosticMutex);if(diagnosticLines.size()<4096)diagnosticLines.push_back("at_ns="+std::to_string(gst_util_get_timestamp())+" "+text);else ++diagnosticDropped;}
  else __android_log_print(ANDROID_LOG_INFO,"FLCross","%s",text.c_str());
 }
 void check(bool good,const char* text){if(!good)throw std::runtime_error(text);}
@@ -28,15 +32,20 @@ struct Window {ANativeWindow* p=nullptr;~Window(){if(p)ANativeWindow_release(p);
 struct VideoMap {GstVideoFrame f{};bool mapped=false;~VideoMap(){if(mapped)gst_video_frame_unmap(&f);}};
 unsigned char clamp(int v){return static_cast<unsigned char>(std::max(0,std::min(255,v)));}
 }
-extern "C" JNIEXPORT void JNICALL Java_dev_framelink_cross_Native_diagnostics(JNIEnv*,jclass,jint level){
+extern "C" JNIEXPORT void JNICALL Java_dev_framelink_cross_Native_diagnostics(JNIEnv* env,jclass,jint level,jstring path){
+ if(path){const char* text=env->GetStringUTFChars(path,nullptr);if(text){diagnosticFile=text;env->ReleaseStringUTFChars(path,text);}}
  gst_init(nullptr,nullptr);diagnostics=true;
  bufferedDiagnostics=level<0;
  g_setenv("FRAMELINK_AUDIO_CALIBRATION_TRACE","1",TRUE);
  gst_debug_add_log_function(+[](GstDebugCategory* category,GstDebugLevel level,const gchar*,const gchar*,gint,GObject*,GstDebugMessage* message,gpointer){
-  if(level<=gst_debug_category_get_threshold(category))__android_log_print(ANDROID_LOG_INFO,"FLGst","%s: %s",gst_debug_category_get_name(category),gst_debug_message_get(message));
+  if(level<=gst_debug_category_get_threshold(category)) {
+   const std::string line=std::string(gst_debug_category_get_name(category))+": "+gst_debug_message_get(message);
+   if(bufferedDiagnostics)diagnostic(line);
+   else __android_log_print(ANDROID_LOG_INFO,"FLGst","%s",line.c_str());
+  }
  },nullptr,nullptr);
  gst_debug_set_active(TRUE);
- for(const auto* name:{"audiobasesink","openslessink","opensles_ringbuffer"})gst_debug_set_threshold_for_name(name,static_cast<GstDebugLevel>(std::max(0,std::min(6,int(level)))));
+ for(const auto* name:{"audiobasesink","openslessink","opensles_ringbuffer"})gst_debug_set_threshold_for_name(name,static_cast<GstDebugLevel>(level==-2?5:std::max(0,std::min(6,int(level)))));
 }
 extern "C" JNIEXPORT jintArray JNICALL Java_dev_framelink_cross_Native_pair(JNIEnv* env,jclass){
  int fd[2];if(socketpair(AF_UNIX,SOCK_SEQPACKET|SOCK_CLOEXEC,0,fd))return nullptr;
@@ -130,8 +139,16 @@ extern "C" JNIEXPORT jstring JNICALL Java_dev_framelink_cross_Native_run(JNIEnv*
   }
   std::fill(endpoint.token.begin(),endpoint.token.end(),0);
  }catch(const std::exception& e){error=e.what();}
- for(const auto& line:diagnosticLines)__android_log_print(ANDROID_LOG_INFO,"FLCross","%s",line.c_str());diagnosticLines.clear();
- if(bufferedDiagnostics)__android_log_print(ANDROID_LOG_INFO,"FLCross","diagnostic_records_dropped=%u",diagnosticDropped);diagnosticDropped=0;
+ std::vector<std::string> saved;unsigned lost=0;
+ {std::lock_guard<std::mutex> lock(diagnosticMutex);saved.swap(diagnosticLines);lost=std::exchange(diagnosticDropped,0);}
+ if(bufferedDiagnostics && !diagnosticFile.empty()) {
+  std::ofstream out(diagnosticFile,std::ios::trunc);
+  for(const auto& line:saved)out<<line<<'\n';
+  out<<"diagnostic_records="<<saved.size()<<" dropped="<<lost<<'\n';out.flush();
+  __android_log_print(ANDROID_LOG_INFO,"FLCross","diagnostic_file_saved=%s",out.good()?"true":"false");
+ }
+ for(const auto& line:saved)__android_log_print(ANDROID_LOG_INFO,"FLCross","%s",line.c_str());
+ if(bufferedDiagnostics)__android_log_print(ANDROID_LOG_INFO,"FLCross","diagnostic_records_dropped=%u",lost);
  if(!error.empty())__android_log_print(ANDROID_LOG_INFO,"FLCross","native failure: %s",error.c_str());
  std::ostringstream result;result<<"{\"ok\":"<<(ok?"true":"false")<<",\"video\":"<<video<<",\"posts\":"<<posts<<",\"pcm_samples\":"<<pcm.load()<<",\"uid\":"<<getuid()<<",\"pid\":"<<getpid()<<"}";
  return env->NewStringUTF(result.str().c_str());

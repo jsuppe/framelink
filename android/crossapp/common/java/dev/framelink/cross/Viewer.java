@@ -44,7 +44,7 @@ public final class Viewer extends Activity implements SurfaceHolder.Callback {
    Bundle data=remote.acquire(owner,format,getIntent().getIntExtra("frames",90),getIntent().getIntExtra("fps",30),producerClock);
    current=new Lease(data);synchronized(lock){if(destroyed){current.close();return;}lease=current;}
    final String label=format;runOnUiThread(()->status.setText("Cross-app "+label+" • native shared video + GDP audio"));
-   if(getIntent().getBooleanExtra("diagnostics",false))Native.diagnostics(getIntent().getIntExtra("diagnostic-level",5));
+   if(getIntent().getBooleanExtra("diagnostics",false))Native.diagnostics(getIntent().getIntExtra("diagnostic-level",5),new java.io.File(getCacheDir(),"last-trace.txt").getAbsolutePath());
    if((getApplicationInfo().flags&android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE)!=0)Native.prerollDelay(getIntent().getIntExtra("preroll-delay-ms",0));
    Log.i("FLCross","receiver-start lease="+data.getString("lease")+" generation="+data.getLong("generation")+" uid="+android.os.Process.myUid()+" pid="+android.os.Process.myPid());
    if(getIntent().getBooleanExtra("wrong-key",false)){byte[] key=data.getByteArray("key");key[0]^=1;}

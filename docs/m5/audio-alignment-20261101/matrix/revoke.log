@@ -1,0 +1,11 @@
+
+11-01 07:23:20.468  6050  6050 I FLCross : bind=true
+11-01 07:23:21.017  6109  6124 I FLCross : producer-start lease=fe392184-db76-42d4-8016-aaeb1478b29c uid=10304 pid=6109
+11-01 07:23:21.017  6085  6105 I FLCross : grant lease=fe392184-db76-42d4-8016-aaeb1478b29c generation=1 consumer_uid=10305 broker_uid=10304
+11-01 07:23:21.036  6050  6108 I FLCross : receiver-start lease=fe392184-db76-42d4-8016-aaeb1478b29c generation=1 uid=10305 pid=6050
+11-01 07:23:21.098  6050  6108 I FLCross : playback producer-system-clock
+11-01 07:23:21.739  6085  6105 I FLCross : retired lease=fe392184-db76-42d4-8016-aaeb1478b29c generation=1 reason=explicit
+11-01 07:23:21.753  6050  6108 I FLCross : native failure: audio EOS before finite completion
+11-01 07:23:21.753  6050  6108 I FLCross : receiver-result lease=fe392184-db76-42d4-8016-aaeb1478b29c {"ok":false,"video":16,"posts":16,"pcm_samples":28800,"uid":10305,"pid":6050}
+11-01 07:23:21.792  6109  6124 I FLCross : native failure: video send failed
+11-01 07:23:21.792  6109  6124 I FLCross : producer-result lease=fe392184-db76-42d4-8016-aaeb1478b29c {"ok":false,"video":0,"posts":0,"pcm_samples":0,"uid":10304,"pid":6109}

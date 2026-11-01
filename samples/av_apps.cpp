@@ -2,6 +2,7 @@
 // PCM uses GStreamer's GDP over an authenticated GIO stream, not a new PCM ABI.
 #include "av_auth.h"
 #include "audio_timeline.h"
+#include "audio_alignment.h"
 #include "av_playback.h"
 #include "av_rendezvous.h"
 #include "framelink_session.h"
@@ -785,6 +786,9 @@ unsigned configureAudioSlaving(GstElement* sink) {
       g_object_set(e,"slave-method",0,nullptr); // GST_AUDIO_BASE_SINK_SLAVE_RESAMPLE
       gint method=-1;g_object_get(e,"slave-method",&method,nullptr);
       if(method==0)++confirmed;
+      auto* factory=gst_element_get_factory(e);
+      if(factory && !strcmp(gst_plugin_feature_get_name(GST_PLUGIN_FEATURE(factory)),"openslessink"))
+        need(av::protectAudioAlignment(e),"OpenSLES audio alignment guard unavailable");
     }
     if (g_object_class_find_property(G_OBJECT_GET_CLASS(e),"qos"))
       g_object_set(e,"qos",TRUE,nullptr);

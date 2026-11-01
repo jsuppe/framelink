@@ -89,21 +89,27 @@ rejection, replacement and independent peer-death/restart tests passed. Real
 AudioManager focus loss stopped both tracks; explicit reopening passed.
 See [raw evidence and precise scope](../../docs/m5/crossapp-20261101/README.md).
 
-**OpenSLES ProducerMapped playback is intermittently failing** on this device:
-several early runs stalled PCM admission and failed the existing deadline or
-completion guard. Later untraced/longer runs and the full matrix passed, but no
-root-cause fix has been established. Do not treat those passes as removal of
-this limitation or as M5 completion. Silent-sink transport validation is
-separate. Real route unplug, physical acoustic/scanout alignment and suspend are
-not qualified. x86_64 compilation does not establish emulator runtime support.
+The original **OpenSLES ProducerMapped PCM stall** was traced to negative
+forward-resampling spans during large device-clock calibration corrections.
+The OpenSLES alignment guard now treats large per-block phase changes as
+immediate discontinuities, preserving normal small-drift resampling and all
+original input PTS/PCM. The post-repair20-case matrix, BGRA10-second and NV12
+15-second runs passed; a complete saved sink trace accounts for60 render/write
+calls with no negative spans. See [repair and evidence](../../docs/m5/audio-alignment-20261101/README.md).
 
-## Diagnostics
+The explicit **audio-master diagnostic remains unqualified** on this device:
+its clock startup plus synchronous Surface waiting still loses video identities.
+Do not use it as an automatic fallback. Real route unplug, optical/acoustic
+alignment and suspend remain unqualified. x86_64 compilation does not establish
+emulator runtime support.
 
-`--ez diagnostics true --ei diagnostic-level 0` enables bounded-rate clock/queue
-records. Level5 also enables verbose GStreamer sink logging; level-1 buffers
-up to2048 diagnostic strings and prints them after the session. Normal operation
-does not collect these diagnostic records. Failure-only calibration is reported
-before teardown. Observed logging-sensitive behavior is retained in evidence.
-The PCM observer is opt-in, runs on the audio streaming thread and must be
-bounded/thread-safe; it may not modify the borrowed buffer or its timestamps.
-Observer exceptions invalidate the session rather than cross a C callback.
+Buffered diagnostics (`--diagnostics --diagnostic-level -2` in the harness)
+collect sink debug records in bounded memory and save `cache/last-trace.txt`
+after playback. The harness retrieves that private file using debug `run-as`.
+Level-1 collects receiver metrics only. Recorder loss is explicit; logcat alone
+is not an exhaustive record transport. The untraced path does not record/write
+these artifacts. Validate a saved60-frame fixture with:
+
+```sh
+python3 tools/check_android_audio_trace.py /path/to/audible.trace --frames 60
+```
