@@ -67,6 +67,11 @@ struct PlaybackMetrics {
   int64_t arrivalDriftNs=0; // decoded PCM admission: arrival delta minus media PTS delta
 };
 struct PlaybackCallbacks {
+  // Optional decoded-PCM observer, on the audio streaming thread (unlike the
+  // receiver-thread callbacks below). Borrowed buffer, original running-time
+  // PTS, before resampling. Must be bounded/thread-safe; never rewrite media.
+  // An exception invalidates the session rather than crossing the C callback.
+  std::function<void(GstBuffer*, uint64_t)> onAudio;
   std::function<void(const flSessionConfig&, const std::string&, const PlaybackClock&)> onSession;
   // Optional native resource preparation after transport/audio preroll, before
   // PRIMED and final producer epoch in ProducerMapped mode (legacy mode has no

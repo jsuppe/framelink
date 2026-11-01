@@ -1136,6 +1136,7 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
     if(!externalVideo)adoptVideo(rx,"videoinput",provider,cfg,false,o.timeout);
     if(o.traceMedia){attachTrace(rx,"timeline","src","consumer","audio");if(!externalVideo)attachTrace(rx,"vout","sink","consumer","video");}
     AudioTimeline audioTimeline; audioTimeline.pipeline=rx.p; audioTimeline.rate=o.rate; audioTimeline.channels=o.channels;
+    if(cb)audioTimeline.observe=cb->onAudio;
     auto *identity=named(rx,"timeline");
     auto *audioPad=gst_element_get_static_pad(identity,"src");
     gst_pad_add_probe(audioPad,GstPadProbeType(GST_PAD_PROBE_TYPE_BUFFER|GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM),trackAudio,&audioTimeline,nullptr);
@@ -1238,6 +1239,7 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
     gst_pipeline_set_latency(GST_PIPELINE(rx.p),latency);
     printf("{\"event\":\"playback-clock\",\"policy\":\"%s\",\"system_now_ns\":%llu,\"selected_now_ns\":%llu,\"device_now_ns\":%llu,\"mapped_producer_base_ns\":%lld,\"playback_base_ns\":%llu,\"latency_ns\":%llu,\"resample_slaves\":%u}\n",o.producerClock?"producer":"audio",(unsigned long long)gst_clock_get_time(clock),(unsigned long long)gst_clock_get_time(selected),(unsigned long long)(deviceClock?gst_clock_get_time(deviceClock):GST_CLOCK_TIME_NONE),(long long)base,(unsigned long long)mappedBase,(unsigned long long)latency,resampleSlaves);
     const bool traceClock=g_getenv("FRAMELINK_PLAYBACK_CLOCK_TRACE")!=nullptr;
+    const bool traceCalibration=g_getenv("FRAMELINK_AUDIO_CALIBRATION_TRACE")!=nullptr;
     av::PlaybackClock timing{selected,mappedBase,latency,audioMaster};
     if (cb && cb->onStatus) cb->onStatus(audioMaster ? "audio-clock" : (o.producerClock ? "producer-system-clock" : "system-clock-fallback"));
     if (cb && cb->onClock) cb->onClock(timing);
@@ -1270,9 +1272,22 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
       if(cb && cb->onMetrics)cb->onMetrics(metrics);
       lastMetricsAt=now;
       if(traceClock) printf("{\"event\":\"playback-clock-sample\",\"system_ns\":%llu,\"selected_ns\":%llu,\"device_ns\":%llu,\"audio_samples\":%llu}\n",(unsigned long long)gst_clock_get_time(clock),(unsigned long long)gst_clock_get_time(selected),(unsigned long long)(deviceClock?gst_clock_get_time(deviceClock):GST_CLOCK_TIME_NONE),(unsigned long long)metrics.audioSamples);
+      if(traceCalibration && deviceClock && cb && cb->onStatus) {
+        GstClockTime internal,external,numerator,denominator;
+        gst_clock_get_calibration(deviceClock,&internal,&external,&numerator,&denominator);
+        cb->onStatus("audio-clock-calibration internal="+std::to_string(internal)+
+          " external="+std::to_string(external)+" rate="+std::to_string(numerator)+"/"+std::to_string(denominator));
+      }
       if(final) printf("{\"event\":\"playback-metrics\",\"peak_queue_buffers\":%u,\"peak_queue_ns\":%llu,\"queue_empty_events\":%llu,\"queue_full_events\":%llu,\"late_audio_blocks\":%llu,\"arrival_drift_ns\":%lld}\n",metrics.peakQueueBuffers,(unsigned long long)metrics.peakQueueTimeNs,(unsigned long long)metrics.queueEmptyEvents,(unsigned long long)metrics.queueFullEvents,(unsigned long long)metrics.lateAudioBlocks,(long long)metrics.arrivalDriftNs);
     };
     uint64_t received=0,dropped=0,lastPts=GST_CLOCK_TIME_NONE,firstPts=GST_CLOCK_TIME_NONE;
+    auto reportAudioFailure=[&] {
+      if(!deviceClock || !cb || !cb->onStatus)return;
+      GstClockTime internal,external,num,den;
+      gst_clock_get_calibration(deviceClock,&internal,&external,&num,&den);
+      cb->onStatus("audio-failure-calibration internal="+std::to_string(internal)+
+        " external="+std::to_string(external)+" rate="+std::to_string(num)+"/"+std::to_string(den));
+    };
     const uint64_t finalPts=(frames-1)*GST_SECOND/o.fps;
     // Drain independently of presentation deadlines. Blocking here for the
     // first frame's latency used to overflow the three-buffer appsink silently.
@@ -1329,6 +1344,7 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
       reportMetrics();
       if(audioTimeline.exhausted.load()) {
         reportMetrics(true);
+        reportAudioFailure();
         throw std::runtime_error("audio playout budget exhausted: renegotiate both tracks");
       }
       checkPlaybackBus(bus);
@@ -1361,6 +1377,7 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
     }
     printf("{\"event\":\"video-schedule-summary\",\"received\":%llu,\"scheduled\":%llu,\"handed_off\":%llu,\"late\":%llu,\"overflow\":%llu,\"peak_pending\":%zu,\"pending_limit\":%zu,\"peak_bytes\":%zu,\"byte_limit\":%zu}\n",(unsigned long long)received,(unsigned long long)scheduled,(unsigned long long)handedOff,(unsigned long long)dropped,(unsigned long long)overflow,peakPending,pendingLimit,peakBytes,pendingByteLimit);
     reportMetrics(true);
+    if(audioTimeline.exhausted.load() || audioTimeline.samplesEnd.load()!=frames*o.rate/o.fps)reportAudioFailure();
     need(!audioTimeline.exhausted.load(),"audio playout budget exhausted: renegotiate both tracks");
     need(!audioTimeline.invalid.load() && audioTimeline.samplesEnd.load()==frames*o.rate/o.fps,"incomplete/discontinuous audio");
     gst_element_set_state(rx.p,GST_STATE_NULL);

@@ -1,0 +1,11 @@
+
+11-01 06:48:14.197 19963 19963 I FLCross : bind=true
+11-01 06:48:14.679 20005 20018 I FLCross : grant lease=93e30895-75e0-4d6a-9b50-e9860a5f9c28 generation=1 consumer_uid=10305 broker_uid=10304
+11-01 06:48:14.679 20027 20039 I FLCross : producer-start lease=93e30895-75e0-4d6a-9b50-e9860a5f9c28 uid=10304 pid=20027
+11-01 06:48:14.683 19963 20026 I FLCross : receiver-start lease=93e30895-75e0-4d6a-9b50-e9860a5f9c28 generation=1 uid=10305 pid=19963
+11-01 06:48:14.782 19963 20026 I FLCross : playback producer-system-clock
+11-01 06:48:17.028 19963 20026 I FLCross : native failure: incomplete/discontinuous audio
+11-01 06:48:17.029 19963 20026 I FLCross : receiver-result lease=93e30895-75e0-4d6a-9b50-e9860a5f9c28 {"ok":false,"video":60,"posts":60,"pcm_samples":36800,"uid":10305,"pid":19963}
+11-01 06:48:17.031 20005 20018 I FLCross : retired lease=93e30895-75e0-4d6a-9b50-e9860a5f9c28 generation=1 reason=explicit
+11-01 06:48:17.042 20027 20039 I FLCross : native failure: control read/disconnect: peer closed connection
+11-01 06:48:17.042 20027 20039 I FLCross : producer-result lease=93e30895-75e0-4d6a-9b50-e9860a5f9c28 {"ok":false,"video":0,"posts":0,"pcm_samples":0,"uid":10304,"pid":20027}

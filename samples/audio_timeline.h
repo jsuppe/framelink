@@ -2,6 +2,7 @@
 #include "framelink_session.h"
 #include <gst/gst.h>
 #include <atomic>
+#include <functional>
 
 namespace av {
 struct AudioTimeline {
@@ -24,6 +25,7 @@ struct AudioTimeline {
   unsigned rate=48000, channels=2;
   GstSegment segment{};
   bool haveSegment=false;
+  std::function<void(GstBuffer*, uint64_t)> observe;
 };
 inline GstPadProbeReturn trackAudio(GstPad*, GstPadProbeInfo* info, gpointer data) {
   auto &t=*static_cast<AudioTimeline*>(data);
@@ -58,6 +60,10 @@ inline GstPadProbeReturn trackAudio(GstPad*, GstPadProbeInfo* info, gpointer dat
       flSessionSampleOffset(first+count,t.rate,&next)!=0 || uint64_t(next)>GST_CLOCK_TIME_NONE-1-origin || media!=origin+uint64_t(expected) ||
       GST_BUFFER_DURATION(b)!=uint64_t(next-expected)) t.invalid=true;
   if (t.invalid.load()) return GST_PAD_PROBE_DROP; // never schedule corrupt PCM
+  if(t.observe) {
+    try {t.observe(b,media);}
+    catch(...) {t.invalid=true;return GST_PAD_PROBE_DROP;}
+  }
   const auto arrival=gst_util_get_timestamp();
   if(t.resetArrival.exchange(false) || !t.firstArrival){t.firstArrival=arrival;t.firstMedia=media;}
   t.arrivalDrift=int64_t(arrival-t.firstArrival)-int64_t(media-t.firstMedia);

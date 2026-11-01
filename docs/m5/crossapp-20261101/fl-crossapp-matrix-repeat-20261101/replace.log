@@ -1,0 +1,19 @@
+
+11-01 06:54:29.512 27128 27128 I FLCross : bind=true
+11-01 06:54:30.076 27181 27200 I FLCross : grant lease=7d264232-bba6-4cb6-a2f3-82277993e074 generation=1 consumer_uid=10305 broker_uid=10304
+11-01 06:54:30.076 27210 27227 I FLCross : producer-start lease=7d264232-bba6-4cb6-a2f3-82277993e074 uid=10304 pid=27210
+11-01 06:54:30.080 27128 27209 I FLCross : receiver-start lease=7d264232-bba6-4cb6-a2f3-82277993e074 generation=1 uid=10305 pid=27128
+11-01 06:54:30.082 27128 27209 I FLCross : active_owner_reuse_rejected=true
+11-01 06:54:30.161 27128 27209 I FLCross : playback producer-system-clock
+11-01 06:54:30.786 27181 27200 I FLCross : retired lease=7d264232-bba6-4cb6-a2f3-82277993e074 generation=1 reason=replacement
+11-01 06:54:30.791 27181 27200 I FLCross : grant lease=a0043fb7-40f6-4110-a392-dfa5c2a73357 generation=2 consumer_uid=10305 broker_uid=10304
+11-01 06:54:30.820 27128 27209 I FLCross : native failure: audio EOS before finite completion
+11-01 06:54:30.820 27128 27209 I FLCross : replaced-old-result lease=7d264232-bba6-4cb6-a2f3-82277993e074 {"ok":false,"video":16,"posts":16,"pcm_samples":28800,"uid":10305,"pid":27128}
+11-01 06:54:30.823 27128 27209 I FLCross : receiver-replacement lease=a0043fb7-40f6-4110-a392-dfa5c2a73357 generation=2
+11-01 06:54:30.851 27210 27227 I FLCross : native failure: video send failed
+11-01 06:54:30.851 27210 27227 I FLCross : producer-result lease=7d264232-bba6-4cb6-a2f3-82277993e074 {"ok":false,"video":0,"posts":0,"pcm_samples":0,"uid":10304,"pid":27210}
+11-01 06:54:30.852 27210 27227 I FLCross : producer-start lease=a0043fb7-40f6-4110-a392-dfa5c2a73357 uid=10304 pid=27210
+11-01 06:54:30.870 27128 27209 I FLCross : playback producer-system-clock
+11-01 06:54:37.128 27128 27209 I FLCross : receiver-result lease=a0043fb7-40f6-4110-a392-dfa5c2a73357 {"ok":true,"video":180,"posts":180,"pcm_samples":288000,"uid":10305,"pid":27128}
+11-01 06:54:37.132 27181 27200 I FLCross : retired lease=a0043fb7-40f6-4110-a392-dfa5c2a73357 generation=2 reason=explicit
+11-01 06:54:37.159 27210 27227 I FLCross : producer-result lease=a0043fb7-40f6-4110-a392-dfa5c2a73357 {"ok":true,"video":0,"posts":0,"pcm_samples":0,"uid":10304,"pid":27210}

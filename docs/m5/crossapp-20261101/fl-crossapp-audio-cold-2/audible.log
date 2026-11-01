@@ -1,0 +1,9 @@
+
+11-01 06:53:47.399 26158 26158 I FLCross : bind=true
+11-01 06:53:47.899 26219 26234 I FLCross : producer-start lease=55dddd75-4c93-44c5-9f44-5b3172d278e4 uid=10304 pid=26219
+11-01 06:53:47.900 26195 26215 I FLCross : grant lease=55dddd75-4c93-44c5-9f44-5b3172d278e4 generation=1 consumer_uid=10305 broker_uid=10304
+11-01 06:53:47.904 26158 26218 I FLCross : receiver-start lease=55dddd75-4c93-44c5-9f44-5b3172d278e4 generation=1 uid=10305 pid=26158
+11-01 06:53:48.004 26158 26218 I FLCross : playback producer-system-clock
+11-01 06:53:58.265 26158 26218 I FLCross : receiver-result lease=55dddd75-4c93-44c5-9f44-5b3172d278e4 {"ok":true,"video":300,"posts":300,"pcm_samples":480000,"uid":10305,"pid":26158}
+11-01 06:53:58.273 26195 26215 I FLCross : retired lease=55dddd75-4c93-44c5-9f44-5b3172d278e4 generation=1 reason=explicit
+11-01 06:53:58.293 26219 26234 I FLCross : producer-result lease=55dddd75-4c93-44c5-9f44-5b3172d278e4 {"ok":true,"video":0,"posts":0,"pcm_samples":0,"uid":10304,"pid":26219}

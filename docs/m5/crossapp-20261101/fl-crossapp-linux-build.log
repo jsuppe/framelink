@@ -1,0 +1,52 @@
+[  2%] Built target fl_nv12_layout
+[  5%] Built target fl_ipc_adopt
+[  8%] Built target fl_ipc_capacity
+[ 15%] Built target framelink
+[ 17%] Built target fl_release_disconnect_shim
+[ 20%] Built target fl_trace_test
+[ 22%] Built target fl_gst_nv12
+[ 24%] Built target framelink_av_session
+[ 26%] Built target fl_session_peer
+[ 28%] Built target fl_gst_timestamps
+[ 31%] Building CXX object CMakeFiles/framelink_av_consumer.dir/samples/av_apps.cpp.o
+[ 31%] Building CXX object CMakeFiles/framelink_av_producer.dir/samples/av_apps.cpp.o
+[ 34%] Built target fl_av_rendezvous
+[ 35%] Building CXX object CMakeFiles/framelink_av_playback.dir/samples/av_apps.cpp.o
+[ 40%] Built target fl_av_auth
+[ 44%] Built target fl_av_connected_fd
+[ 46%] Built target fl_m4_transport_timing
+[ 48%] Built target fl_session_contract
+[ 51%] Built target fl_session_c_api
+[ 54%] Built target fl_expanded_pool
+[ 56%] Built target fl_roundtrip
+[ 58%] Built target gstframelink
+[ 61%] Built target fl_nv12_roundtrip
+[ 64%] Built target framelink_producer
+[ 67%] Built target framelink_consumer
+[ 70%] Built target fl_portable_map
+[ 72%] Built target fl_sync_fd_test
+[ 74%] Built target fl_reconnect_held
+[ 75%] Linking CXX static library libframelink_av_playback.a
+[ 77%] Built target framelink_av_playback
+[ 78%] Building CXX object CMakeFiles/fl_playback_recovery.dir/test/fl_playback_recovery.cpp.o
+[ 80%] Building CXX object CMakeFiles/fl_av_offer_bounds.dir/test/fl_av_offer_bounds.cpp.o
+[ 82%] Linking CXX executable framelink_av_producer
+[ 82%] Linking CXX executable framelink_av_consumer
+[ 86%] Built target framelink_av_consumer
+[ 86%] Built target framelink_av_producer
+[ 88%] Building CXX object CMakeFiles/fl_audio_segment.dir/test/fl_audio_segment.cpp.o
+[ 88%] Linking CXX executable fl_m4_device_slaving
+[ 90%] Built target fl_m4_device_slaving
+[ 91%] Linking CXX executable fl_gst_sink_stats
+[ 92%] Built target fl_gst_sink_stats
+[ 93%] Linking CXX executable fl_gst_preconnect_slots
+[ 94%] Built target fl_gst_preconnect_slots
+[ 95%] Building CXX object CMakeFiles/fl_broker_producer.dir/test/fl_broker_producer.cpp.o
+[ 96%] Linking CXX executable fl_audio_segment
+[ 96%] Built target fl_audio_segment
+[ 97%] Linking CXX executable fl_playback_recovery
+[ 97%] Built target fl_playback_recovery
+[ 98%] Linking CXX executable fl_broker_producer
+[ 98%] Built target fl_broker_producer
+[100%] Linking CXX executable fl_av_offer_bounds
+[100%] Built target fl_av_offer_bounds

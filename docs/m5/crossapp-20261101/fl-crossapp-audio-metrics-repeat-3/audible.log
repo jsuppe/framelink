@@ -1,0 +1,31 @@
+
+11-01 06:49:22.383 20995 20995 I FLCross : bind=true
+11-01 06:49:22.851 21032 21049 I FLCross : grant lease=6b94672a-6ef6-401c-b41c-42c64479a12b generation=1 consumer_uid=10305 broker_uid=10304
+11-01 06:49:22.851 21054 21067 I FLCross : producer-start lease=6b94672a-6ef6-401c-b41c-42c64479a12b uid=10304 pid=21054
+11-01 06:49:22.869 20995 21053 I FLCross : receiver-start lease=6b94672a-6ef6-401c-b41c-42c64479a12b generation=1 uid=10305 pid=20995
+11-01 06:49:22.958 20995 21053 I FLCross : playback producer-system-clock
+11-01 06:49:22.958 20995 21053 I FLCross : clock now=3264781503503895 base=3264781552601087 latency=100000000
+11-01 06:49:22.959 20995 21053 I FLCross : audio samples=1600 late=0 queue=0 drift=0
+11-01 06:49:23.111 20995 21053 I FLCross : audio samples=6400 late=0 queue=0 drift=-517129
+11-01 06:49:23.243 20995 21053 I FLCross : audio samples=11200 late=0 queue=0 drift=-316283
+11-01 06:49:23.343 20995 21053 I FLCross : audio samples=17600 late=0 queue=0 drift=-238231
+11-01 06:49:23.476 20995 21053 I FLCross : audio samples=22400 late=0 queue=0 drift=-309000
+11-01 06:49:23.576 20995 21053 I FLCross : audio samples=27200 late=0 queue=0 drift=-753923
+11-01 06:49:23.709 20995 21053 I FLCross : audio samples=33600 late=0 queue=100000000 drift=-461103
+11-01 06:49:23.842 20995 21053 I FLCross : audio samples=36800 late=0 queue=100000000 drift=39329154
+11-01 06:49:23.942 20995 21053 I FLCross : audio samples=36800 late=0 queue=100000000 drift=39329154
+11-01 06:49:24.076 20995 21053 I FLCross : audio samples=38400 late=1 queue=100000000 drift=278383590
+11-01 06:49:24.179 20995 21053 I FLCross : audio samples=38400 late=1 queue=100000000 drift=278383590
+11-01 06:49:24.309 20995 21053 I FLCross : audio samples=38400 late=1 queue=100000000 drift=278383590
+11-01 06:49:24.409 20995 21053 I FLCross : audio samples=38400 late=1 queue=100000000 drift=278383590
+11-01 06:49:24.542 20995 21053 I FLCross : audio samples=38400 late=1 queue=100000000 drift=278383590
+11-01 06:49:24.642 20995 21053 I FLCross : audio samples=40000 late=2 queue=100000000 drift=751386563
+11-01 06:49:24.775 20995 21053 I FLCross : audio samples=40000 late=2 queue=100000000 drift=751386563
+11-01 06:49:24.875 20995 21053 I FLCross : audio samples=40000 late=2 queue=100000000 drift=751386563
+11-01 06:49:25.009 20995 21053 I FLCross : audio samples=40000 late=2 queue=100000000 drift=751386563
+11-01 06:49:25.115 20995 21053 I FLCross : audio samples=40000 late=2 queue=100000000 drift=751386563
+11-01 06:49:25.204 20995 21053 I FLCross : native failure: incomplete/discontinuous audio
+11-01 06:49:25.205 20995 21053 I FLCross : receiver-result lease=6b94672a-6ef6-401c-b41c-42c64479a12b {"ok":false,"video":60,"posts":60,"pcm_samples":40000,"uid":10305,"pid":20995}
+11-01 06:49:25.209 21032 21049 I FLCross : retired lease=6b94672a-6ef6-401c-b41c-42c64479a12b generation=1 reason=explicit
+11-01 06:49:25.228 21054 21067 I FLCross : native failure: control read/disconnect: peer closed connection
+11-01 06:49:25.229 21054 21067 I FLCross : producer-result lease=6b94672a-6ef6-401c-b41c-42c64479a12b {"ok":false,"video":0,"posts":0,"pcm_samples":0,"uid":10304,"pid":21054}

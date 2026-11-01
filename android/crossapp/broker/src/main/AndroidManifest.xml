@@ -1,0 +1,9 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+ <permission android:name="dev.framelink.cross.BIND" android:protectionLevel="signature"/>
+ <uses-permission android:name="dev.framelink.cross.BIND"/>
+ <uses-permission android:name="android.permission.INTERNET"/>
+ <application android:label="FrameLink A/V broker" android:allowBackup="false">
+  <service android:name="dev.framelink.cross.Broker" android:exported="true" android:permission="dev.framelink.cross.BIND"/>
+  <service android:name="dev.framelink.cross.Producer" android:exported="false" android:process=":producer"/>
+ </application>
+</manifest>

@@ -1,0 +1,8 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+ <uses-permission android:name="dev.framelink.cross.BIND"/>
+ <uses-permission android:name="android.permission.INTERNET"/>
+ <queries><package android:name="dev.framelink.cross.broker"/></queries>
+ <application android:label="FrameLink cross-app A/V" android:allowBackup="false">
+  <activity android:name="dev.framelink.cross.Viewer" android:exported="true"><intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter></activity>
+ </application>
+</manifest>

@@ -1,0 +1,42 @@
+[
+  {
+    "case": "consumer-death",
+    "pass": true,
+    "rejected_or_retired": true,
+    "retirement_reason": [
+      "broker-destroy"
+    ]
+  },
+  {
+    "case": "consumer-restart",
+    "pass": true,
+    "lease": "735db20a-9a18-4034-9a88-caadf1437127",
+    "ok": true,
+    "video": 60,
+    "posts": 60,
+    "pcm_samples": 96000,
+    "uid": 10305,
+    "pid": 17971
+  },
+  {
+    "case": "background",
+    "pass": true,
+    "rejected_or_retired": true
+  },
+  {
+    "case": "foreground-reopen",
+    "pass": true,
+    "lease": "1949489d-96de-4420-8ea5-83273ead982a",
+    "ok": true,
+    "video": 60,
+    "posts": 60,
+    "pcm_samples": 96000,
+    "uid": 10305,
+    "pid": 18209
+  },
+  {
+    "case": "audible",
+    "pass": false,
+    "error": "{'ok': False, 'video': 57, 'posts': 57, 'pcm_samples': 30400, 'uid': 10305, 'pid': 18322}"
+  }
+]

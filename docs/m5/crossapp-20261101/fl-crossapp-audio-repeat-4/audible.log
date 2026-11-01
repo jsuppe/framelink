@@ -1,0 +1,852 @@
+
+11-01 06:48:07.311 19717 19717 I FLCross : bind=true
+11-01 06:48:07.873 19792 19825 I FLCross : grant lease=f7d07085-fc19-444c-a0a5-71a07e1a8719 generation=1 consumer_uid=10305 broker_uid=10304
+11-01 06:48:07.874 19834 19851 I FLCross : producer-start lease=f7d07085-fc19-444c-a0a5-71a07e1a8719 uid=10304 pid=19834
+11-01 06:48:07.892 19717 19830 I FLCross : receiver-start lease=f7d07085-fc19-444c-a0a5-71a07e1a8719 generation=1 uid=10305 pid=19717
+11-01 06:48:07.960 19717 19855 I FLGst   : audiobasesink: release old ringbuffer
+11-01 06:48:07.960 19717 19855 I FLGst   : audiobasesink: time was 0:00:00.000000000
+11-01 06:48:07.960 19717 19855 I FLGst   : audiobasesink: parse caps
+11-01 06:48:07.960 19717 19855 I FLGst   : audiobasesink: acquire ringbuffer
+11-01 06:48:07.979 19717 19855 I FLGst   : audiobasesink: activate ringbuffer
+11-01 06:48:07.982 19717 19830 I FLGst   : audiobasesink: latency query
+11-01 06:48:07.983 19717 19830 I FLGst   : audiobasesink: peer or we are not live, don't care about latency
+11-01 06:48:07.983 19717 19830 I FLGst   : audiobasesink: latency query
+11-01 06:48:07.983 19717 19830 I FLGst   : audiobasesink: peer or we are not live, don't care about latency
+11-01 06:48:07.983 19717 19830 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 06:48:07.984 19717 19830 I FLCross : playback producer-system-clock
+11-01 06:48:07.984 19717 19830 I FLCross : clock now=3264706529325198 base=3264706577068044 latency=100000000
+11-01 06:48:07.984 19717 19830 I FLGst   : audiobasesink: latency query
+11-01 06:48:07.984 19717 19830 I FLGst   : audiobasesink: peer or we are not live, don't care about latency
+11-01 06:48:07.984 19717 19830 I FLGst   : audiobasesink: ringbuffer may start now
+11-01 06:48:07.985 19717 19855 I FLGst   : audiobasesink: checking preroll
+11-01 06:48:07.985 19717 19830 I FLCross : audio samples=1600 late=0 queue=0 drift=0
+11-01 06:48:07.985 19717 19855 I FLGst   : audiobasesink: possibly waiting for clock to reach 0:00:00.000000000
+11-01 06:48:08.032 19717 19855 I FLGst   : audiobasesink: clock returned 0 5124095:34:33.663208385
+11-01 06:48:08.032 19717 19855 I FLGst   : audiobasesink: latency synced
+11-01 06:48:08.032 19717 19855 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 06:48:08.039 19717 19855 I FLGst   : audiobasesink: internal time: 0:00:00.000000000 external time: 906:51:46.577068044
+11-01 06:48:08.039 19717 19855 I FLGst   : audiobasesink: Setting clock as master
+11-01 06:48:08.040 19717 19855 I FLGst   : audiobasesink: time 0:00:00.000000000, start 0:00:00.000000000, samples 1600
+11-01 06:48:08.040 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:08.040 19717 19855 I FLGst   : audiobasesink: running: start 0:00:00.000000000 - stop 0:00:00.033333333
+11-01 06:48:08.040 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:08.040 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:08.040 19717 19855 I FLGst   : audiobasesink: internal 0:00:00.000000000 external 906:51:46.577068044 1/1 = 1.000000
+11-01 06:48:08.040 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:00.100000000 - stop 0:00:00.133333333
+11-01 06:48:08.040 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:00.100000000 - stop 0:00:00.133333333
+11-01 06:48:08.040 19717 19855 I FLGst   : audiobasesink: resync after discont/resync
+11-01 06:48:08.040 19717 19855 I FLGst   : audiobasesink: rendering at 4800 1600/1600
+11-01 06:48:08.040 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:08.040 19717 19855 I FLGst   : audiobasesink: next sample expected at 6400
+11-01 06:48:08.040 19717 19868 I FLGst   : audiobasesink: processed samples: raw 1440, delay 1440, real 0, time 0:00:00.000000000
+11-01 06:48:08.060 19717 19869 I FLGst   : audiobasesink: latency query
+11-01 06:48:08.060 19717 19869 I FLGst   : audiobasesink: peer or we are not live, don't care about latency
+11-01 06:48:08.067 19717 19855 I FLGst   : audiobasesink: time 0:00:00.033333333, start 0:00:00.000000000, samples 1600
+11-01 06:48:08.068 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:08.068 19717 19855 I FLGst   : audiobasesink: running: start 0:00:00.033333333 - stop 0:00:00.066666666
+11-01 06:48:08.068 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:08.068 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:08.068 19717 19855 I FLGst   : audiobasesink: internal 0:00:00.000000000 external 906:51:46.577068044 1/1 = 1.000000
+11-01 06:48:08.068 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:00.133333333 - stop 0:00:00.166666666
+11-01 06:48:08.068 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:00.133333333 - stop 0:00:00.166666666
+11-01 06:48:08.068 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (1) < 1920
+11-01 06:48:08.068 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:08.068 19717 19855 I FLGst   : audiobasesink: rendering at 6400 1600/1599
+11-01 06:48:08.068 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:08.068 19717 19855 I FLGst   : audiobasesink: next sample expected at 7999
+11-01 06:48:08.101 19717 19855 I FLGst   : audiobasesink: time 0:00:00.066666666, start 0:00:00.000000000, samples 1600
+11-01 06:48:08.101 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:08.101 19717 19855 I FLGst   : audiobasesink: running: start 0:00:00.066666666 - stop 0:00:00.099999999
+11-01 06:48:08.101 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:08.101 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:08.101 19717 19855 I FLGst   : audiobasesink: internal 0:00:00.000000000 external 906:51:46.577068044 1/1 = 1.000000
+11-01 06:48:08.101 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:00.166666666 - stop 0:00:00.199999999
+11-01 06:48:08.101 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:00.166666666 - stop 0:00:00.199999999
+11-01 06:48:08.101 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (0) < 1920
+11-01 06:48:08.101 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:08.101 19717 19855 I FLGst   : audiobasesink: rendering at 7999 1600/1600
+11-01 06:48:08.101 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:08.102 19717 19855 I FLGst   : audiobasesink: next sample expected at 9599
+11-01 06:48:08.134 19717 19855 I FLGst   : audiobasesink: time 0:00:00.100000000, start 0:00:00.000000000, samples 1600
+11-01 06:48:08.134 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:08.134 19717 19855 I FLGst   : audiobasesink: running: start 0:00:00.100000000 - stop 0:00:00.133333333
+11-01 06:48:08.134 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:08.134 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:08.135 19717 19855 I FLGst   : audiobasesink: internal 0:00:00.000000000 external 906:51:46.577068044 1/1 = 1.000000
+11-01 06:48:08.135 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:00.200000000 - stop 0:00:00.233333333
+11-01 06:48:08.135 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:00.200000000 - stop 0:00:00.233333333
+11-01 06:48:08.135 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (-1) < 1920
+11-01 06:48:08.135 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:08.135 19717 19830 I FLCross : audio samples=6400 late=0 queue=0 drift=-74128
+11-01 06:48:08.135 19717 19855 I FLGst   : audiobasesink: rendering at 9599 1600/1601
+11-01 06:48:08.135 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:08.135 19717 19855 I FLGst   : audiobasesink: next sample expected at 11200
+11-01 06:48:08.140 19717 19868 I FLGst   : audiobasesink: processed samples: raw 4320, delay 1248, real 3072, time 0:00:00.064000000
+11-01 06:48:08.167 19717 19855 I FLGst   : audiobasesink: time 0:00:00.133333333, start 0:00:00.000000000, samples 1600
+11-01 06:48:08.168 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:08.168 19717 19855 I FLGst   : audiobasesink: running: start 0:00:00.133333333 - stop 0:00:00.166666666
+11-01 06:48:08.168 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:08.168 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:08.168 19717 19855 I FLGst   : audiobasesink: internal 0:00:00.000000000 external 906:51:46.577068044 1/1 = 1.000000
+11-01 06:48:08.168 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:00.233333333 - stop 0:00:00.266666666
+11-01 06:48:08.168 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:00.233333333 - stop 0:00:00.266666666
+11-01 06:48:08.168 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (1) < 1920
+11-01 06:48:08.168 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:08.168 19717 19855 I FLGst   : audiobasesink: rendering at 11200 1600/1599
+11-01 06:48:08.168 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:08.168 19717 19855 I FLGst   : audiobasesink: next sample expected at 12799
+11-01 06:48:08.201 19717 19855 I FLGst   : audiobasesink: time 0:00:00.166666666, start 0:00:00.000000000, samples 1600
+11-01 06:48:08.201 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:08.201 19717 19855 I FLGst   : audiobasesink: running: start 0:00:00.166666666 - stop 0:00:00.199999999
+11-01 06:48:08.201 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:08.201 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:08.201 19717 19855 I FLGst   : audiobasesink: internal 0:00:00.000000000 external 906:51:46.577068044 1/1 = 1.000000
+11-01 06:48:08.201 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:00.266666666 - stop 0:00:00.299999999
+11-01 06:48:08.201 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:00.266666666 - stop 0:00:00.299999999
+11-01 06:48:08.202 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (0) < 1920
+11-01 06:48:08.202 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:08.202 19717 19855 I FLGst   : audiobasesink: rendering at 12799 1600/1600
+11-01 06:48:08.202 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:08.202 19717 19855 I FLGst   : audiobasesink: next sample expected at 14399
+11-01 06:48:08.234 19717 19855 I FLGst   : audiobasesink: time 0:00:00.200000000, start 0:00:00.000000000, samples 1600
+11-01 06:48:08.234 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:08.234 19717 19855 I FLGst   : audiobasesink: running: start 0:00:00.200000000 - stop 0:00:00.233333333
+11-01 06:48:08.234 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:08.234 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:08.234 19717 19855 I FLGst   : audiobasesink: internal 0:00:00.000000000 external 906:51:46.577068044 1/1 = 1.000000
+11-01 06:48:08.234 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:00.300000000 - stop 0:00:00.333333333
+11-01 06:48:08.234 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:00.300000000 - stop 0:00:00.333333333
+11-01 06:48:08.234 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (-1) < 1920
+11-01 06:48:08.234 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:08.235 19717 19855 I FLGst   : audiobasesink: rendering at 14399 1600/1601
+11-01 06:48:08.235 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:08.235 19717 19855 I FLGst   : audiobasesink: next sample expected at 16000
+11-01 06:48:08.240 19717 19868 I FLGst   : audiobasesink: processed samples: raw 9120, delay 1200, real 7920, time 0:00:00.165000000
+11-01 06:48:08.267 19717 19830 I FLCross : audio samples=11200 late=0 queue=0 drift=-122051
+11-01 06:48:08.268 19717 19855 I FLGst   : audiobasesink: time 0:00:00.233333333, start 0:00:00.000000000, samples 1600
+11-01 06:48:08.268 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:08.268 19717 19855 I FLGst   : audiobasesink: running: start 0:00:00.233333333 - stop 0:00:00.266666666
+11-01 06:48:08.268 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:08.268 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:08.268 19717 19855 I FLGst   : audiobasesink: internal 0:00:00.000000000 external 906:51:46.577068044 1/1 = 1.000000
+11-01 06:48:08.268 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:00.333333333 - stop 0:00:00.366666666
+11-01 06:48:08.268 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:00.333333333 - stop 0:00:00.366666666
+11-01 06:48:08.268 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (1) < 1920
+11-01 06:48:08.268 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:08.268 19717 19855 I FLGst   : audiobasesink: rendering at 16000 1600/1599
+11-01 06:48:08.268 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:08.268 19717 19855 I FLGst   : audiobasesink: next sample expected at 17599
+11-01 06:48:08.301 19717 19855 I FLGst   : audiobasesink: time 0:00:00.266666666, start 0:00:00.000000000, samples 1600
+11-01 06:48:08.301 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:08.301 19717 19855 I FLGst   : audiobasesink: running: start 0:00:00.266666666 - stop 0:00:00.299999999
+11-01 06:48:08.301 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:08.301 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:08.301 19717 19855 I FLGst   : audiobasesink: internal 0:00:00.000000000 external 906:51:46.577068044 1/1 = 1.000000
+11-01 06:48:08.301 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:00.366666666 - stop 0:00:00.399999999
+11-01 06:48:08.301 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:00.366666666 - stop 0:00:00.399999999
+11-01 06:48:08.301 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (0) < 1920
+11-01 06:48:08.302 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:08.302 19717 19855 I FLGst   : audiobasesink: rendering at 17599 1600/1600
+11-01 06:48:08.302 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:08.302 19717 19855 I FLGst   : audiobasesink: next sample expected at 19199
+11-01 06:48:08.334 19717 19855 I FLGst   : audiobasesink: time 0:00:00.300000000, start 0:00:00.000000000, samples 1600
+11-01 06:48:08.334 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:08.334 19717 19855 I FLGst   : audiobasesink: running: start 0:00:00.300000000 - stop 0:00:00.333333333
+11-01 06:48:08.334 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:08.335 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:08.335 19717 19855 I FLGst   : audiobasesink: internal 0:00:00.000000000 external 906:51:46.577068044 1/1 = 1.000000
+11-01 06:48:08.335 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:00.400000000 - stop 0:00:00.433333333
+11-01 06:48:08.335 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:00.400000000 - stop 0:00:00.433333333
+11-01 06:48:08.335 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (-1) < 1920
+11-01 06:48:08.335 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:08.335 19717 19855 I FLGst   : audiobasesink: rendering at 19199 1600/1601
+11-01 06:48:08.335 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:08.335 19717 19855 I FLGst   : audiobasesink: next sample expected at 20800
+11-01 06:48:08.340 19717 19868 I FLGst   : audiobasesink: processed samples: raw 13920, delay 1152, real 12768, time 0:00:00.266000000
+11-01 06:48:08.367 19717 19830 I FLCross : audio samples=16000 late=0 queue=0 drift=99410
+11-01 06:48:08.370 19717 19855 I FLGst   : audiobasesink: time 0:00:00.333333333, start 0:00:00.000000000, samples 1600
+11-01 06:48:08.370 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:08.370 19717 19855 I FLGst   : audiobasesink: running: start 0:00:00.333333333 - stop 0:00:00.366666666
+11-01 06:48:08.370 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:08.370 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:08.370 19717 19855 I FLGst   : audiobasesink: internal 0:00:00.266000000 external 906:51:46.891966959 44875395442000000/40820750000000000 = 1.099328
+11-01 06:48:08.370 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:00.373733463 - stop 0:00:00.404055015
+11-01 06:48:08.370 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:00.373733463 - stop 0:00:00.404055015
+11-01 06:48:08.370 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (2861) < 1920
+11-01 06:48:08.371 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:08.371 19717 19855 I FLGst   : audiobasesink: rendering at 20800 1600/-1261
+11-01 06:48:08.371 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:08.371 19717 19855 I FLGst   : audiobasesink: next sample expected at 22061
+11-01 06:48:08.401 19717 19855 I FLGst   : audiobasesink: time 0:00:00.366666666, start 0:00:00.000000000, samples 1600
+11-01 06:48:08.401 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:08.401 19717 19855 I FLGst   : audiobasesink: running: start 0:00:00.366666666 - stop 0:00:00.399999999
+11-01 06:48:08.402 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:08.402 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:08.402 19717 19855 I FLGst   : audiobasesink: internal 0:00:00.266000000 external 906:51:46.891966959 44875395442000000/40820750000000000 = 1.099328
+11-01 06:48:08.402 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:00.404055015 - stop 0:00:00.434376568
+11-01 06:48:08.402 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:00.404055015 - stop 0:00:00.434376568
+11-01 06:48:08.402 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (2667) < 1920
+11-01 06:48:08.402 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:08.402 19717 19855 I FLGst   : audiobasesink: rendering at 22061 1600/-1067
+11-01 06:48:08.402 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:08.402 19717 19855 I FLGst   : audiobasesink: next sample expected at 23128
+11-01 06:48:08.434 19717 19855 I FLGst   : audiobasesink: time 0:00:00.400000000, start 0:00:00.000000000, samples 1600
+11-01 06:48:08.434 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:08.434 19717 19855 I FLGst   : audiobasesink: running: start 0:00:00.400000000 - stop 0:00:00.433333333
+11-01 06:48:08.434 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:08.434 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:08.435 19717 19855 I FLGst   : audiobasesink: internal 0:00:00.266000000 external 906:51:46.891966959 44875395442000000/40820750000000000 = 1.099328
+11-01 06:48:08.435 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:00.434376568 - stop 0:00:00.464698121
+11-01 06:48:08.435 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:00.434376568 - stop 0:00:00.464698121
+11-01 06:48:08.435 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (2278) < 1920
+11-01 06:48:08.435 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:08.435 19717 19855 I FLGst   : audiobasesink: rendering at 23128 1600/-678
+11-01 06:48:08.435 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:08.435 19717 19855 I FLGst   : audiobasesink: next sample expected at 23806
+11-01 06:48:08.440 19717 19868 I FLGst   : audiobasesink: processed samples: raw 18720, delay 1056, real 17664, time 0:00:00.368000000
+11-01 06:48:08.467 19717 19855 I FLGst   : audiobasesink: time 0:00:00.433333333, start 0:00:00.000000000, samples 1600
+11-01 06:48:08.467 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:08.468 19717 19855 I FLGst   : audiobasesink: running: start 0:00:00.433333333 - stop 0:00:00.466666666
+11-01 06:48:08.468 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:08.468 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:08.468 19717 19855 I FLGst   : audiobasesink: internal 0:00:00.368000000 external 906:51:46.992288417 93686383223000000/88547200000000000 = 1.058039
+11-01 06:48:08.468 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:00.479633852 - stop 0:00:00.511138679
+11-01 06:48:08.468 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:00.479633852 - stop 0:00:00.511138679
+11-01 06:48:08.468 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (784) < 1920
+11-01 06:48:08.468 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:08.468 19717 19855 I FLGst   : audiobasesink: rendering at 23806 1600/816
+11-01 06:48:08.468 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:08.468 19717 19855 I FLGst   : audiobasesink: next sample expected at 24622
+11-01 06:48:08.500 19717 19830 I FLCross : audio samples=22400 late=0 queue=0 drift=-93230
+11-01 06:48:08.501 19717 19855 I FLGst   : audiobasesink: time 0:00:00.466666666, start 0:00:00.000000000, samples 1600
+11-01 06:48:08.501 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:08.501 19717 19855 I FLGst   : audiobasesink: running: start 0:00:00.466666666 - stop 0:00:00.499999999
+11-01 06:48:08.501 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:08.501 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:08.501 19717 19855 I FLGst   : audiobasesink: internal 0:00:00.368000000 external 906:51:46.992288417 93686383223000000/88547200000000000 = 1.058039
+11-01 06:48:08.501 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:00.511138679 - stop 0:00:00.542643506
+11-01 06:48:08.501 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:00.511138679 - stop 0:00:00.542643506
+11-01 06:48:08.501 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (88) < 1920
+11-01 06:48:08.501 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:08.501 19717 19855 I FLGst   : audiobasesink: rendering at 24622 1600/1512
+11-01 06:48:08.501 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:08.501 19717 19855 I FLGst   : audiobasesink: next sample expected at 26134
+11-01 06:48:08.534 19717 19855 I FLGst   : audiobasesink: time 0:00:00.500000000, start 0:00:00.000000000, samples 1600
+11-01 06:48:08.535 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:08.535 19717 19855 I FLGst   : audiobasesink: running: start 0:00:00.500000000 - stop 0:00:00.533333333
+11-01 06:48:08.535 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:08.535 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:08.535 19717 19855 I FLGst   : audiobasesink: internal 0:00:00.368000000 external 906:51:46.992288417 93686383223000000/88547200000000000 = 1.058039
+11-01 06:48:08.535 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:00.542643507 - stop 0:00:00.574148334
+11-01 06:48:08.535 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:00.542643507 - stop 0:00:00.574148334
+11-01 06:48:08.535 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (88) < 1920
+11-01 06:48:08.535 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:08.535 19717 19855 I FLGst   : audiobasesink: rendering at 26134 1600/1512
+11-01 06:48:08.535 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:08.535 19717 19855 I FLGst   : audiobasesink: next sample expected at 27646
+11-01 06:48:08.540 19717 19868 I FLGst   : audiobasesink: processed samples: raw 23520, delay 1248, real 22272, time 0:00:00.464000000
+11-01 06:48:08.568 19717 19855 I FLGst   : audiobasesink: time 0:00:00.533333333, start 0:00:00.000000000, samples 1600
+11-01 06:48:08.568 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:08.568 19717 19855 I FLGst   : audiobasesink: running: start 0:00:00.533333333 - stop 0:00:00.566666666
+11-01 06:48:08.568 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:08.568 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:08.568 19717 19855 I FLGst   : audiobasesink: internal 0:00:00.464000000 external 906:51:47.089304220 166494030223748152/159308835102666664 = 1.045102
+11-01 06:48:08.568 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:00.579871103 - stop 0:00:00.611765907
+11-01 06:48:08.568 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:00.579871103 - stop 0:00:00.611765907
+11-01 06:48:08.568 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (-187) < 1920
+11-01 06:48:08.568 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:08.568 19717 19855 I FLGst   : audiobasesink: rendering at 27646 1600/1787
+11-01 06:48:08.568 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:08.568 19717 19855 I FLGst   : audiobasesink: next sample expected at 29433
+11-01 06:48:08.601 19717 19855 I FLGst   : audiobasesink: time 0:00:00.566666666, start 0:00:00.000000000, samples 1600
+11-01 06:48:08.601 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:08.601 19717 19855 I FLGst   : audiobasesink: running: start 0:00:00.566666666 - stop 0:00:00.599999999
+11-01 06:48:08.601 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:08.601 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:08.601 19717 19855 I FLGst   : audiobasesink: internal 0:00:00.464000000 external 906:51:47.089304220 166494030223748152/159308835102666664 = 1.045102
+11-01 06:48:08.601 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:00.611765907 - stop 0:00:00.643660711
+11-01 06:48:08.601 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:00.611765907 - stop 0:00:00.643660711
+11-01 06:48:08.601 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (69) < 1920
+11-01 06:48:08.602 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:08.602 19717 19855 I FLGst   : audiobasesink: rendering at 29433 1600/1531
+11-01 06:48:08.602 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:08.602 19717 19855 I FLGst   : audiobasesink: next sample expected at 30964
+11-01 06:48:08.634 19717 19855 I FLGst   : audiobasesink: time 0:00:00.600000000, start 0:00:00.000000000, samples 1600
+11-01 06:48:08.634 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:08.634 19717 19855 I FLGst   : audiobasesink: running: start 0:00:00.600000000 - stop 0:00:00.633333333
+11-01 06:48:08.634 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:08.634 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:08.634 19717 19855 I FLGst   : audiobasesink: internal 0:00:00.464000000 external 906:51:47.089304220 166494030223748152/159308835102666664 = 1.045102
+11-01 06:48:08.634 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:00.643660712 - stop 0:00:00.675555516
+11-01 06:48:08.634 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:00.643660712 - stop 0:00:00.675555516
+11-01 06:48:08.634 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (69) < 1920
+11-01 06:48:08.635 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:08.635 19717 19855 I FLGst   : audiobasesink: rendering at 30964 1600/1531
+11-01 06:48:08.635 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:08.635 19717 19855 I FLGst   : audiobasesink: next sample expected at 32495
+11-01 06:48:08.639 19717 19830 I FLCross : audio samples=30400 late=0 queue=0 drift=-58051
+11-01 06:48:08.640 19717 19868 I FLGst   : audiobasesink: processed samples: raw 28320, delay 1200, real 27120, time 0:00:00.565000000
+11-01 06:48:08.667 19717 19855 I FLGst   : audiobasesink: time 0:00:00.633333333, start 0:00:00.000000000, samples 1600
+11-01 06:48:08.667 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:08.668 19717 19855 I FLGst   : audiobasesink: running: start 0:00:00.633333333 - stop 0:00:00.666666666
+11-01 06:48:08.668 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:08.668 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:08.668 19717 19855 I FLGst   : audiobasesink: internal 0:00:00.565000000 external 906:51:47.190340623 269599652631831054/260641429652571428 = 1.034370
+11-01 06:48:08.668 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:00.681071390 - stop 0:00:00.713297127
+11-01 06:48:08.668 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:00.681071390 - stop 0:00:00.713297127
+11-01 06:48:08.668 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (-196) < 1920
+11-01 06:48:08.668 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:08.668 19717 19855 I FLGst   : audiobasesink: rendering at 32495 1600/1796
+11-01 06:48:08.668 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:08.668 19717 19855 I FLGst   : audiobasesink: next sample expected at 34291
+11-01 06:48:08.701 19717 19855 I FLGst   : audiobasesink: time 0:00:00.666666666, start 0:00:00.000000000, samples 1600
+11-01 06:48:08.701 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:08.701 19717 19855 I FLGst   : audiobasesink: running: start 0:00:00.666666666 - stop 0:00:00.699999999
+11-01 06:48:08.701 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:08.701 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:08.701 19717 19855 I FLGst   : audiobasesink: internal 0:00:00.565000000 external 906:51:47.190340623 269599652631831054/260641429652571428 = 1.034370
+11-01 06:48:08.701 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:00.713297127 - stop 0:00:00.745522865
+11-01 06:48:08.701 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:00.713297127 - stop 0:00:00.745522865
+11-01 06:48:08.701 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (53) < 1920
+11-01 06:48:08.701 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:08.701 19717 19855 I FLGst   : audiobasesink: rendering at 34291 1600/1547
+11-01 06:48:08.701 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:08.701 19717 19855 I FLGst   : audiobasesink: next sample expected at 35838
+11-01 06:48:08.734 19717 19855 I FLGst   : audiobasesink: time 0:00:00.700000000, start 0:00:00.000000000, samples 1600
+11-01 06:48:08.734 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:08.734 19717 19855 I FLGst   : audiobasesink: running: start 0:00:00.700000000 - stop 0:00:00.733333333
+11-01 06:48:08.734 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:08.734 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:08.734 19717 19855 I FLGst   : audiobasesink: internal 0:00:00.565000000 external 906:51:47.190340623 269599652631831054/260641429652571428 = 1.034370
+11-01 06:48:08.734 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:00.745522865 - stop 0:00:00.777748603
+11-01 06:48:08.734 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:00.745522865 - stop 0:00:00.777748603
+11-01 06:48:08.734 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (53) < 1920
+11-01 06:48:08.734 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:08.734 19717 19855 I FLGst   : audiobasesink: rendering at 35838 1600/1547
+11-01 06:48:08.735 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:08.736 19717 19855 I FLGst   : audiobasesink: next sample expected at 37385
+11-01 06:48:08.740 19717 19868 I FLGst   : audiobasesink: processed samples: raw 33120, delay 1152, real 31968, time 0:00:00.666000000
+11-01 06:48:08.767 19717 19830 I FLCross : audio samples=35200 late=0 queue=0 drift=-470051
+11-01 06:48:08.767 19717 19855 I FLGst   : audiobasesink: time 0:00:00.733333333, start 0:00:00.000000000, samples 1600
+11-01 06:48:08.768 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:08.768 19717 19855 I FLGst   : audiobasesink: running: start 0:00:00.733333333 - stop 0:00:00.766666666
+11-01 06:48:08.768 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:08.768 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:08.768 19717 19855 I FLGst   : audiobasesink: internal 0:00:00.666000000 external 906:51:47.290789702 408059412137000000/397657500000000000 = 1.026158
+11-01 06:48:08.768 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:00.782562633 - stop 0:00:00.815046260
+11-01 06:48:08.768 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:00.782562633 - stop 0:00:00.815046260
+11-01 06:48:08.768 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (-178) < 1920
+11-01 06:48:08.768 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:08.768 19717 19855 I FLGst   : audiobasesink: rendering at 37385 1600/1778
+11-01 06:48:08.768 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:08.768 19717 19855 I FLGst   : audiobasesink: next sample expected at 39163
+11-01 06:48:08.802 19717 19855 I FLGst   : audiobasesink: time 0:00:00.766666666, start 0:00:00.000000000, samples 1600
+11-01 06:48:08.802 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:08.802 19717 19855 I FLGst   : audiobasesink: running: start 0:00:00.766666666 - stop 0:00:00.799999999
+11-01 06:48:08.802 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:08.802 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:08.802 19717 19855 I FLGst   : audiobasesink: internal 0:00:00.666000000 external 906:51:47.290789702 408059412137000000/397657500000000000 = 1.026158
+11-01 06:48:08.802 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:00.815046260 - stop 0:00:00.847529888
+11-01 06:48:08.802 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:00.815046260 - stop 0:00:00.847529888
+11-01 06:48:08.802 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (41) < 1920
+11-01 06:48:08.802 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:08.802 19717 19855 I FLGst   : audiobasesink: rendering at 39163 1600/1559
+11-01 06:48:08.802 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:08.802 19717 19855 I FLGst   : audiobasesink: next sample expected at 40722
+11-01 06:48:08.835 19717 19855 I FLGst   : audiobasesink: time 0:00:00.800000000, start 0:00:00.000000000, samples 1600
+11-01 06:48:08.835 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:08.835 19717 19855 I FLGst   : audiobasesink: running: start 0:00:00.800000000 - stop 0:00:00.833333333
+11-01 06:48:08.835 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:08.835 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:08.835 19717 19855 I FLGst   : audiobasesink: internal 0:00:00.666000000 external 906:51:47.290789702 408059412137000000/397657500000000000 = 1.026158
+11-01 06:48:08.835 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:00.847529888 - stop 0:00:00.880013516
+11-01 06:48:08.835 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:00.847529888 - stop 0:00:00.880013516
+11-01 06:48:08.835 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (41) < 1920
+11-01 06:48:08.835 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:08.835 19717 19855 I FLGst   : audiobasesink: rendering at 40722 1600/1559
+11-01 06:48:08.835 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:08.835 19717 19855 I FLGst   : audiobasesink: next sample expected at 42281
+11-01 06:48:08.840 19717 19868 I FLGst   : audiobasesink: processed samples: raw 37920, delay 1056, real 36864, time 0:00:00.768000000
+11-01 06:48:08.868 19717 19855 I FLGst   : audiobasesink: time 0:00:00.833333333, start 0:00:00.000000000, samples 1600
+11-01 06:48:08.868 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:08.868 19717 19855 I FLGst   : audiobasesink: running: start 0:00:00.833333333 - stop 0:00:00.866666666
+11-01 06:48:08.868 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:08.868 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:08.868 19717 19855 I FLGst   : audiobasesink: internal 0:00:00.768000000 external 906:51:47.391551732 587308351543933800/576260225917777775 = 1.019172
+11-01 06:48:08.868 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:00.884613910 - stop 0:00:00.917320194
+11-01 06:48:08.869 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:00.884613910 - stop 0:00:00.917320194
+11-01 06:48:08.869 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (-180) < 1920
+11-01 06:48:08.869 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:08.869 19717 19855 I FLGst   : audiobasesink: rendering at 42281 1600/1780
+11-01 06:48:08.869 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:08.869 19717 19855 I FLGst   : audiobasesink: next sample expected at 44061
+11-01 06:48:08.899 19717 19830 I FLCross : audio samples=41600 late=0 queue=0 drift=743693
+11-01 06:48:08.902 19717 19855 I FLGst   : audiobasesink: time 0:00:00.866666666, start 0:00:00.000000000, samples 1600
+11-01 06:48:08.902 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:08.902 19717 19855 I FLGst   : audiobasesink: running: start 0:00:00.866666666 - stop 0:00:00.899999999
+11-01 06:48:08.902 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:08.902 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:08.902 19717 19855 I FLGst   : audiobasesink: internal 0:00:00.768000000 external 906:51:47.391551732 587308351543933800/576260225917777775 = 1.019172
+11-01 06:48:08.902 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:00.917320194 - stop 0:00:00.950026478
+11-01 06:48:08.902 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:00.917320194 - stop 0:00:00.950026478
+11-01 06:48:08.902 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (30) < 1920
+11-01 06:48:08.902 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:08.902 19717 19855 I FLGst   : audiobasesink: rendering at 44061 1600/1570
+11-01 06:48:08.902 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:08.902 19717 19855 I FLGst   : audiobasesink: next sample expected at 45631
+11-01 06:48:08.934 19717 19855 I FLGst   : audiobasesink: time 0:00:00.900000000, start 0:00:00.000000000, samples 1600
+11-01 06:48:08.934 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:08.934 19717 19855 I FLGst   : audiobasesink: running: start 0:00:00.900000000 - stop 0:00:00.933333333
+11-01 06:48:08.934 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:08.934 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:08.934 19717 19855 I FLGst   : audiobasesink: internal 0:00:00.768000000 external 906:51:47.391551732 587308351543933800/576260225917777775 = 1.019172
+11-01 06:48:08.934 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:00.950026479 - stop 0:00:00.982732764
+11-01 06:48:08.934 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:00.950026479 - stop 0:00:00.982732764
+11-01 06:48:08.934 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (30) < 1920
+11-01 06:48:08.935 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:08.935 19717 19855 I FLGst   : audiobasesink: rendering at 45631 1600/1570
+11-01 06:48:08.935 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:08.935 19717 19855 I FLGst   : audiobasesink: next sample expected at 47201
+11-01 06:48:08.940 19717 19868 I FLGst   : audiobasesink: processed samples: raw 42720, delay 1248, real 41472, time 0:00:00.864000000
+11-01 06:48:08.968 19717 19855 I FLGst   : audiobasesink: time 0:00:00.933333333, start 0:00:00.000000000, samples 1600
+11-01 06:48:08.968 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:08.968 19717 19855 I FLGst   : audiobasesink: running: start 0:00:00.933333333 - stop 0:00:00.966666666
+11-01 06:48:08.968 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:08.968 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:08.968 19717 19855 I FLGst   : audiobasesink: internal 0:00:00.864000000 external 906:51:47.487970030 809739448339000000/796288000000000000 = 1.016893
+11-01 06:48:08.968 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:00.984397508 - stop 0:00:01.017177106
+11-01 06:48:08.968 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:00.984397508 - stop 0:00:01.017177106
+11-01 06:48:08.968 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (-50) < 1920
+11-01 06:48:08.968 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:08.968 19717 19855 I FLGst   : audiobasesink: rendering at 47201 1600/1650
+11-01 06:48:08.968 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:08.968 19717 19855 I FLGst   : audiobasesink: next sample expected at 48851
+11-01 06:48:09.000 19717 19830 I FLCross : audio samples=46400 late=0 queue=0 drift=558462
+11-01 06:48:09.001 19717 19855 I FLGst   : audiobasesink: time 0:00:00.966666666, start 0:00:00.000000000, samples 1600
+11-01 06:48:09.001 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:09.001 19717 19855 I FLGst   : audiobasesink: running: start 0:00:00.966666666 - stop 0:00:00.999999999
+11-01 06:48:09.001 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:09.001 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:09.001 19717 19855 I FLGst   : audiobasesink: internal 0:00:00.864000000 external 906:51:47.487970030 809739448339000000/796288000000000000 = 1.016893
+11-01 06:48:09.001 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:01.017177106 - stop 0:00:01.049956703
+11-01 06:48:09.001 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:01.017177106 - stop 0:00:01.049956703
+11-01 06:48:09.001 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (27) < 1920
+11-01 06:48:09.001 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:09.001 19717 19855 I FLGst   : audiobasesink: rendering at 48851 1600/1573
+11-01 06:48:09.001 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:09.001 19717 19855 I FLGst   : audiobasesink: next sample expected at 50424
+11-01 06:48:09.034 19717 19855 I FLGst   : audiobasesink: time 0:00:01.000000000, start 0:00:00.000000000, samples 1600
+11-01 06:48:09.034 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:09.034 19717 19855 I FLGst   : audiobasesink: running: start 0:00:01.000000000 - stop 0:00:01.033333333
+11-01 06:48:09.034 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:09.034 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:09.034 19717 19855 I FLGst   : audiobasesink: internal 0:00:00.864000000 external 906:51:47.487970030 809739448339000000/796288000000000000 = 1.016893
+11-01 06:48:09.034 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:01.049956704 - stop 0:00:01.082736301
+11-01 06:48:09.034 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:01.049956704 - stop 0:00:01.082736301
+11-01 06:48:09.034 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (27) < 1920
+11-01 06:48:09.035 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:09.035 19717 19855 I FLGst   : audiobasesink: rendering at 50424 1600/1573
+11-01 06:48:09.035 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:09.035 19717 19855 I FLGst   : audiobasesink: next sample expected at 51997
+11-01 06:48:09.040 19717 19868 I FLGst   : audiobasesink: processed samples: raw 47520, delay 1200, real 46320, time 0:00:00.965000000
+11-01 06:48:09.067 19717 19855 I FLGst   : audiobasesink: time 0:00:01.033333333, start 0:00:00.000000000, samples 1600
+11-01 06:48:09.068 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:09.068 19717 19855 I FLGst   : audiobasesink: running: start 0:00:01.033333333 - stop 0:00:01.066666666
+11-01 06:48:09.068 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:09.068 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:09.068 19717 19855 I FLGst   : audiobasesink: internal 0:00:00.965000000 external 906:51:47.588941245 1082655659144491503/1067302552015454541 = 1.014385
+11-01 06:48:09.068 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:01.084737709 - stop 0:00:01.117598343
+11-01 06:48:09.068 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:01.084737709 - stop 0:00:01.117598343
+11-01 06:48:09.068 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (-70) < 1920
+11-01 06:48:09.068 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:09.068 19717 19855 I FLGst   : audiobasesink: rendering at 51997 1600/1670
+11-01 06:48:09.068 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:09.069 19717 19855 I FLGst   : audiobasesink: next sample expected at 53667
+11-01 06:48:09.100 19717 19830 I FLCross : audio samples=51200 late=0 queue=0 drift=22770
+11-01 06:48:09.101 19717 19855 I FLGst   : audiobasesink: time 0:00:01.066666666, start 0:00:00.000000000, samples 1600
+11-01 06:48:09.101 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:09.101 19717 19855 I FLGst   : audiobasesink: running: start 0:00:01.066666666 - stop 0:00:01.099999999
+11-01 06:48:09.101 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:09.101 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:09.101 19717 19855 I FLGst   : audiobasesink: internal 0:00:00.965000000 external 906:51:47.588941245 1082655659144491503/1067302552015454541 = 1.014385
+11-01 06:48:09.101 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:01.117598343 - stop 0:00:01.150458977
+11-01 06:48:09.101 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:01.117598343 - stop 0:00:01.150458977
+11-01 06:48:09.101 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (23) < 1920
+11-01 06:48:09.101 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:09.101 19717 19855 I FLGst   : audiobasesink: rendering at 53667 1600/1577
+11-01 06:48:09.101 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:09.101 19717 19855 I FLGst   : audiobasesink: next sample expected at 55244
+11-01 06:48:09.135 19717 19855 I FLGst   : audiobasesink: time 0:00:01.100000000, start 0:00:00.000000000, samples 1600
+11-01 06:48:09.135 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:09.135 19717 19855 I FLGst   : audiobasesink: running: start 0:00:01.100000000 - stop 0:00:01.133333333
+11-01 06:48:09.135 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:09.135 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:09.135 19717 19855 I FLGst   : audiobasesink: internal 0:00:00.965000000 external 906:51:47.588941245 1082655659144491503/1067302552015454541 = 1.014385
+11-01 06:48:09.135 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:01.150458978 - stop 0:00:01.183319612
+11-01 06:48:09.135 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:01.150458978 - stop 0:00:01.183319612
+11-01 06:48:09.135 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (22) < 1920
+11-01 06:48:09.135 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:09.135 19717 19855 I FLGst   : audiobasesink: rendering at 55244 1600/1578
+11-01 06:48:09.135 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:09.135 19717 19855 I FLGst   : audiobasesink: next sample expected at 56822
+11-01 06:48:09.140 19717 19868 I FLGst   : audiobasesink: processed samples: raw 52320, delay 1152, real 51168, time 0:00:01.066000000
+11-01 06:48:09.167 19717 19855 I FLGst   : audiobasesink: time 0:00:01.133333333, start 0:00:00.000000000, samples 1600
+11-01 06:48:09.168 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:09.168 19717 19855 I FLGst   : audiobasesink: running: start 0:00:01.133333333 - stop 0:00:01.166666666
+11-01 06:48:09.168 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:09.168 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:09.168 19717 19855 I FLGst   : audiobasesink: internal 0:00:01.066000000 external 906:51:47.689622800 1411216609461860760/1394408924961333328 = 1.012054
+11-01 06:48:09.168 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:01.185340096 - stop 0:00:01.218276426
+11-01 06:48:09.168 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:01.185340096 - stop 0:00:01.218276426
+11-01 06:48:09.168 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (-74) < 1920
+11-01 06:48:09.168 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:09.168 19717 19855 I FLGst   : audiobasesink: rendering at 56822 1600/1674
+11-01 06:48:09.168 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:09.168 19717 19855 I FLGst   : audiobasesink: next sample expected at 58496
+11-01 06:48:09.200 19717 19830 I FLCross : audio samples=56000 late=0 queue=0 drift=-6846
+11-01 06:48:09.201 19717 19855 I FLGst   : audiobasesink: time 0:00:01.166666666, start 0:00:00.000000000, samples 1600
+11-01 06:48:09.201 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:09.201 19717 19855 I FLGst   : audiobasesink: running: start 0:00:01.166666666 - stop 0:00:01.199999999
+11-01 06:48:09.201 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:09.201 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:09.201 19717 19855 I FLGst   : audiobasesink: internal 0:00:01.066000000 external 906:51:47.689622800 1411216609461860760/1394408924961333328 = 1.012054
+11-01 06:48:09.201 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:01.218276426 - stop 0:00:01.251212757
+11-01 06:48:09.201 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:01.218276426 - stop 0:00:01.251212757
+11-01 06:48:09.201 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (19) < 1920
+11-01 06:48:09.201 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:09.201 19717 19855 I FLGst   : audiobasesink: rendering at 58496 1600/1581
+11-01 06:48:09.202 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:09.202 19717 19855 I FLGst   : audiobasesink: next sample expected at 60077
+11-01 06:48:09.234 19717 19855 I FLGst   : audiobasesink: time 0:00:01.200000000, start 0:00:00.000000000, samples 1600
+11-01 06:48:09.234 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:09.234 19717 19855 I FLGst   : audiobasesink: running: start 0:00:01.200000000 - stop 0:00:01.233333333
+11-01 06:48:09.234 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:09.234 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:09.234 19717 19855 I FLGst   : audiobasesink: internal 0:00:01.066000000 external 906:51:47.689622800 1411216609461860760/1394408924961333328 = 1.012054
+11-01 06:48:09.235 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:01.251212758 - stop 0:00:01.284149089
+11-01 06:48:09.235 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:01.251212758 - stop 0:00:01.284149089
+11-01 06:48:09.235 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (19) < 1920
+11-01 06:48:09.235 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:09.235 19717 19855 I FLGst   : audiobasesink: rendering at 60077 1600/1581
+11-01 06:48:09.235 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:09.235 19717 19855 I FLGst   : audiobasesink: next sample expected at 61658
+11-01 06:48:09.240 19717 19868 I FLGst   : audiobasesink: processed samples: raw 57120, delay 1056, real 56064, time 0:00:01.168000000
+11-01 06:48:09.268 19717 19855 I FLGst   : audiobasesink: time 0:00:01.233333333, start 0:00:00.000000000, samples 1600
+11-01 06:48:09.268 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:09.268 19717 19855 I FLGst   : audiobasesink: running: start 0:00:01.233333333 - stop 0:00:01.266666666
+11-01 06:48:09.268 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:09.268 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:09.268 19717 19855 I FLGst   : audiobasesink: internal 0:00:01.168000000 external 906:51:47.790749770 1800884427714735260/1783909082606923075 = 1.009516
+11-01 06:48:09.268 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:01.286523757 - stop 0:00:01.319542886
+11-01 06:48:09.268 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:01.286523757 - stop 0:00:01.319542886
+11-01 06:48:09.268 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (-95) < 1920
+11-01 06:48:09.268 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:09.268 19717 19855 I FLGst   : audiobasesink: rendering at 61658 1600/1695
+11-01 06:48:09.268 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:09.268 19717 19855 I FLGst   : audiobasesink: next sample expected at 63353
+11-01 06:48:09.301 19717 19855 I FLGst   : audiobasesink: time 0:00:01.266666666, start 0:00:00.000000000, samples 1600
+11-01 06:48:09.301 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:09.301 19717 19855 I FLGst   : audiobasesink: running: start 0:00:01.266666666 - stop 0:00:01.299999999
+11-01 06:48:09.301 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:09.301 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:09.301 19717 19855 I FLGst   : audiobasesink: internal 0:00:01.168000000 external 906:51:47.790749770 1800884427714735260/1783909082606923075 = 1.009516
+11-01 06:48:09.301 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:01.319542886 - stop 0:00:01.352562015
+11-01 06:48:09.301 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:01.319542886 - stop 0:00:01.352562015
+11-01 06:48:09.301 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (15) < 1920
+11-01 06:48:09.301 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:09.301 19717 19855 I FLGst   : audiobasesink: rendering at 63353 1600/1585
+11-01 06:48:09.301 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:09.301 19717 19855 I FLGst   : audiobasesink: next sample expected at 64938
+11-01 06:48:09.334 19717 19830 I FLCross : audio samples=62400 late=0 queue=0 drift=-2871
+11-01 06:48:09.334 19717 19855 I FLGst   : audiobasesink: time 0:00:01.300000000, start 0:00:00.000000000, samples 1600
+11-01 06:48:09.334 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:09.334 19717 19855 I FLGst   : audiobasesink: running: start 0:00:01.300000000 - stop 0:00:01.333333333
+11-01 06:48:09.334 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:09.335 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:09.335 19717 19855 I FLGst   : audiobasesink: internal 0:00:01.168000000 external 906:51:47.790749770 1800884427714735260/1783909082606923075 = 1.009516
+11-01 06:48:09.335 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:01.352562016 - stop 0:00:01.385581145
+11-01 06:48:09.335 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:01.352562016 - stop 0:00:01.385581145
+11-01 06:48:09.335 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (16) < 1920
+11-01 06:48:09.335 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:09.336 19717 19855 I FLGst   : audiobasesink: rendering at 64938 1600/1584
+11-01 06:48:09.336 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:09.336 19717 19855 I FLGst   : audiobasesink: next sample expected at 66522
+11-01 06:48:09.340 19717 19868 I FLGst   : audiobasesink: processed samples: raw 61920, delay 1248, real 60672, time 0:00:01.264000000
+11-01 06:48:09.368 19717 19855 I FLGst   : audiobasesink: time 0:00:01.333333333, start 0:00:00.000000000, samples 1600
+11-01 06:48:09.368 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:09.368 19717 19855 I FLGst   : audiobasesink: running: start 0:00:01.333333333 - stop 0:00:01.366666666
+11-01 06:48:09.368 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:09.368 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:09.368 19717 19855 I FLGst   : audiobasesink: internal 0:00:01.264000000 external 906:51:47.887113243 2253102167233836344/2233226938460571424 = 1.008900
+11-01 06:48:09.368 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:01.386200575 - stop 0:00:01.419239866
+11-01 06:48:09.368 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:01.386200575 - stop 0:00:01.419239866
+11-01 06:48:09.368 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (-15) < 1920
+11-01 06:48:09.368 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:09.368 19717 19855 I FLGst   : audiobasesink: rendering at 66522 1600/1615
+11-01 06:48:09.368 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:09.368 19717 19855 I FLGst   : audiobasesink: next sample expected at 68137
+11-01 06:48:09.401 19717 19855 I FLGst   : audiobasesink: time 0:00:01.366666666, start 0:00:00.000000000, samples 1600
+11-01 06:48:09.401 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:09.401 19717 19855 I FLGst   : audiobasesink: running: start 0:00:01.366666666 - stop 0:00:01.399999999
+11-01 06:48:09.401 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:09.401 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:09.401 19717 19855 I FLGst   : audiobasesink: internal 0:00:01.264000000 external 906:51:47.887113243 2253102167233836344/2233226938460571424 = 1.008900
+11-01 06:48:09.402 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:01.419239866 - stop 0:00:01.452279156
+11-01 06:48:09.402 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:01.419239866 - stop 0:00:01.452279156
+11-01 06:48:09.402 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (14) < 1920
+11-01 06:48:09.402 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:09.402 19717 19855 I FLGst   : audiobasesink: rendering at 68137 1600/1586
+11-01 06:48:09.402 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:09.402 19717 19855 I FLGst   : audiobasesink: next sample expected at 69723
+11-01 06:48:09.434 19717 19830 I FLCross : audio samples=67200 late=0 queue=0 drift=343206
+11-01 06:48:09.434 19717 19855 I FLGst   : audiobasesink: time 0:00:01.400000000, start 0:00:00.000000000, samples 1600
+11-01 06:48:09.434 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:09.434 19717 19855 I FLGst   : audiobasesink: running: start 0:00:01.400000000 - stop 0:00:01.433333333
+11-01 06:48:09.434 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:09.435 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:09.435 19717 19855 I FLGst   : audiobasesink: internal 0:00:01.264000000 external 906:51:47.887113243 2253102167233836344/2233226938460571424 = 1.008900
+11-01 06:48:09.435 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:01.452279157 - stop 0:00:01.485318448
+11-01 06:48:09.435 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:01.452279157 - stop 0:00:01.485318448
+11-01 06:48:09.435 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (14) < 1920
+11-01 06:48:09.435 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:09.435 19717 19855 I FLGst   : audiobasesink: rendering at 69723 1600/1586
+11-01 06:48:09.435 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:09.435 19717 19855 I FLGst   : audiobasesink: next sample expected at 71309
+11-01 06:48:09.440 19717 19868 I FLGst   : audiobasesink: processed samples: raw 66720, delay 1200, real 65520, time 0:00:01.365000000
+11-01 06:48:09.467 19717 19855 I FLGst   : audiobasesink: time 0:00:01.433333333, start 0:00:00.000000000, samples 1600
+11-01 06:48:09.468 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:09.468 19717 19855 I FLGst   : audiobasesink: running: start 0:00:01.433333333 - stop 0:00:01.466666666
+11-01 06:48:09.468 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:09.468 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:09.468 19717 19855 I FLGst   : audiobasesink: internal 0:00:01.365000000 external 906:51:47.988140128 2775944974153538560/2753935746690666660 = 1.007992
+11-01 06:48:09.468 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:01.486291894 - stop 0:00:01.519360942
+11-01 06:48:09.468 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:01.486291894 - stop 0:00:01.519360942
+11-01 06:48:09.468 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (-33) < 1920
+11-01 06:48:09.468 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:09.468 19717 19855 I FLGst   : audiobasesink: rendering at 71309 1600/1633
+11-01 06:48:09.468 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:09.468 19717 19855 I FLGst   : audiobasesink: next sample expected at 72942
+11-01 06:48:09.501 19717 19855 I FLGst   : audiobasesink: time 0:00:01.466666666, start 0:00:00.000000000, samples 1600
+11-01 06:48:09.501 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:09.501 19717 19855 I FLGst   : audiobasesink: running: start 0:00:01.466666666 - stop 0:00:01.499999999
+11-01 06:48:09.501 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:09.501 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:09.501 19717 19855 I FLGst   : audiobasesink: internal 0:00:01.365000000 external 906:51:47.988140128 2775944974153538560/2753935746690666660 = 1.007992
+11-01 06:48:09.501 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:01.519360942 - stop 0:00:01.552429989
+11-01 06:48:09.501 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:01.519360942 - stop 0:00:01.552429989
+11-01 06:48:09.501 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (13) < 1920
+11-01 06:48:09.501 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:09.501 19717 19855 I FLGst   : audiobasesink: rendering at 72942 1600/1587
+11-01 06:48:09.502 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:09.502 19717 19855 I FLGst   : audiobasesink: next sample expected at 74529
+11-01 06:48:09.534 19717 19855 I FLGst   : audiobasesink: time 0:00:01.500000000, start 0:00:00.000000000, samples 1600
+11-01 06:48:09.534 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:09.534 19717 19855 I FLGst   : audiobasesink: running: start 0:00:01.500000000 - stop 0:00:01.533333333
+11-01 06:48:09.534 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:09.534 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:09.534 19717 19855 I FLGst   : audiobasesink: internal 0:00:01.365000000 external 906:51:47.988140128 2775944974153538560/2753935746690666660 = 1.007992
+11-01 06:48:09.535 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:01.552429990 - stop 0:00:01.585499038
+11-01 06:48:09.535 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:01.552429990 - stop 0:00:01.585499038
+11-01 06:48:09.535 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (13) < 1920
+11-01 06:48:09.535 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:09.535 19717 19855 I FLGst   : audiobasesink: rendering at 74529 1600/1587
+11-01 06:48:09.535 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:09.535 19717 19855 I FLGst   : audiobasesink: next sample expected at 76116
+11-01 06:48:09.540 19717 19868 I FLGst   : audiobasesink: processed samples: raw 71520, delay 1152, real 70368, time 0:00:01.466000000
+11-01 06:48:09.567 19717 19830 I FLCross : audio samples=73600 late=0 queue=0 drift=-87666
+11-01 06:48:09.568 19717 19855 I FLGst   : audiobasesink: time 0:00:01.533333333, start 0:00:00.000000000, samples 1600
+11-01 06:48:09.568 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:09.568 19717 19855 I FLGst   : audiobasesink: running: start 0:00:01.533333333 - stop 0:00:01.566666666
+11-01 06:48:09.568 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:09.568 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:09.568 19717 19855 I FLGst   : audiobasesink: internal 0:00:01.466000000 external 906:51:48.088883596 3374454020274000000/3351139000000000000 = 1.006957
+11-01 06:48:09.568 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:01.586678181 - stop 0:00:01.619781205
+11-01 06:48:09.568 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:01.586678181 - stop 0:00:01.619781205
+11-01 06:48:09.568 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (-44) < 1920
+11-01 06:48:09.568 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:09.568 19717 19855 I FLGst   : audiobasesink: rendering at 76116 1600/1644
+11-01 06:48:09.568 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:09.568 19717 19855 I FLGst   : audiobasesink: next sample expected at 77760
+11-01 06:48:09.601 19717 19855 I FLGst   : audiobasesink: time 0:00:01.566666666, start 0:00:00.000000000, samples 1600
+11-01 06:48:09.601 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:09.601 19717 19855 I FLGst   : audiobasesink: running: start 0:00:01.566666666 - stop 0:00:01.599999999
+11-01 06:48:09.601 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:09.601 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:09.601 19717 19855 I FLGst   : audiobasesink: internal 0:00:01.466000000 external 906:51:48.088883596 3374454020274000000/3351139000000000000 = 1.006957
+11-01 06:48:09.601 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:01.619781205 - stop 0:00:01.652884229
+11-01 06:48:09.601 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:01.619781205 - stop 0:00:01.652884229
+11-01 06:48:09.601 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (11) < 1920
+11-01 06:48:09.601 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:09.601 19717 19855 I FLGst   : audiobasesink: rendering at 77760 1600/1589
+11-01 06:48:09.601 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:09.601 19717 19855 I FLGst   : audiobasesink: next sample expected at 79349
+11-01 06:48:09.634 19717 19855 I FLGst   : audiobasesink: time 0:00:01.600000000, start 0:00:00.000000000, samples 1600
+11-01 06:48:09.634 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:09.634 19717 19855 I FLGst   : audiobasesink: running: start 0:00:01.600000000 - stop 0:00:01.633333333
+11-01 06:48:09.634 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:09.634 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:09.634 19717 19855 I FLGst   : audiobasesink: internal 0:00:01.466000000 external 906:51:48.088883596 3374454020274000000/3351139000000000000 = 1.006957
+11-01 06:48:09.634 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:01.652884230 - stop 0:00:01.685987254
+11-01 06:48:09.634 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:01.652884230 - stop 0:00:01.685987254
+11-01 06:48:09.634 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (11) < 1920
+11-01 06:48:09.634 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:09.634 19717 19855 I FLGst   : audiobasesink: rendering at 79349 1600/1589
+11-01 06:48:09.634 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:09.634 19717 19855 I FLGst   : audiobasesink: next sample expected at 80938
+11-01 06:48:09.640 19717 19868 I FLGst   : audiobasesink: processed samples: raw 76320, delay 1056, real 75264, time 0:00:01.568000000
+11-01 06:48:09.667 19717 19855 I FLGst   : audiobasesink: time 0:00:01.633333333, start 0:00:00.000000000, samples 1600
+11-01 06:48:09.667 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:09.667 19717 19855 I FLGst   : audiobasesink: running: start 0:00:01.633333333 - stop 0:00:01.666666666
+11-01 06:48:09.667 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:09.667 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:09.667 19717 19855 I FLGst   : audiobasesink: internal 0:00:01.568000000 external 906:51:48.190219247 4054536433016064225/4031539081856470575 = 1.005704
+11-01 06:48:09.667 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:01.687500456 - stop 0:00:01.720644722
+11-01 06:48:09.667 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:01.687500456 - stop 0:00:01.720644722
+11-01 06:48:09.667 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (-62) < 1920
+11-01 06:48:09.667 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:09.667 19717 19855 I FLGst   : audiobasesink: rendering at 80938 1600/1662
+11-01 06:48:09.667 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:09.667 19717 19855 I FLGst   : audiobasesink: next sample expected at 82600
+11-01 06:48:09.700 19717 19830 I FLCross : audio samples=80000 late=0 queue=0 drift=-388307
+11-01 06:48:09.701 19717 19855 I FLGst   : audiobasesink: time 0:00:01.666666666, start 0:00:00.000000000, samples 1600
+11-01 06:48:09.701 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:09.701 19717 19855 I FLGst   : audiobasesink: running: start 0:00:01.666666666 - stop 0:00:01.699999999
+11-01 06:48:09.701 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:09.701 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:09.701 19717 19855 I FLGst   : audiobasesink: internal 0:00:01.568000000 external 906:51:48.190219247 4054536433016064225/4031539081856470575 = 1.005704
+11-01 06:48:09.701 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:01.720644722 - stop 0:00:01.753788988
+11-01 06:48:09.701 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:01.720644722 - stop 0:00:01.753788988
+11-01 06:48:09.701 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (10) < 1920
+11-01 06:48:09.701 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:09.701 19717 19855 I FLGst   : audiobasesink: rendering at 82600 1600/1590
+11-01 06:48:09.701 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:09.701 19717 19855 I FLGst   : audiobasesink: next sample expected at 84190
+11-01 06:48:09.734 19717 19855 I FLGst   : audiobasesink: time 0:00:01.700000000, start 0:00:00.000000000, samples 1600
+11-01 06:48:09.734 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:09.734 19717 19855 I FLGst   : audiobasesink: running: start 0:00:01.700000000 - stop 0:00:01.733333333
+11-01 06:48:09.734 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:09.734 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:09.734 19717 19855 I FLGst   : audiobasesink: internal 0:00:01.568000000 external 906:51:48.190219247 4054536433016064225/4031539081856470575 = 1.005704
+11-01 06:48:09.734 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:01.753788989 - stop 0:00:01.786933255
+11-01 06:48:09.734 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:01.753788989 - stop 0:00:01.786933255
+11-01 06:48:09.734 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (9) < 1920
+11-01 06:48:09.734 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:09.734 19717 19855 I FLGst   : audiobasesink: rendering at 84190 1600/1591
+11-01 06:48:09.734 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:09.734 19717 19855 I FLGst   : audiobasesink: next sample expected at 85781
+11-01 06:48:09.740 19717 19868 I FLGst   : audiobasesink: processed samples: raw 81120, delay 1248, real 79872, time 0:00:01.664000000
+11-01 06:48:09.768 19717 19855 I FLGst   : audiobasesink: time 0:00:01.733333333, start 0:00:00.000000000, samples 1600
+11-01 06:48:09.768 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:09.768 19717 19855 I FLGst   : audiobasesink: running: start 0:00:01.733333333 - stop 0:00:01.766666666
+11-01 06:48:09.768 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:09.768 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:09.768 19717 19855 I FLGst   : audiobasesink: internal 0:00:01.664000000 external 906:51:48.286458267 4816203811527289090/4790152460795555550 = 1.005439
+11-01 06:48:09.768 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:01.787272688 - stop 0:00:01.820425718
+11-01 06:48:09.768 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:01.787272688 - stop 0:00:01.820425718
+11-01 06:48:09.768 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (-8) < 1920
+11-01 06:48:09.768 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:09.768 19717 19855 I FLGst   : audiobasesink: rendering at 85781 1600/1608
+11-01 06:48:09.768 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:09.768 19717 19855 I FLGst   : audiobasesink: next sample expected at 87389
+11-01 06:48:09.801 19717 19855 I FLGst   : audiobasesink: time 0:00:01.766666666, start 0:00:00.000000000, samples 1600
+11-01 06:48:09.801 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:09.801 19717 19855 I FLGst   : audiobasesink: running: start 0:00:01.766666666 - stop 0:00:01.799999999
+11-01 06:48:09.801 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:09.801 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:09.801 19717 19855 I FLGst   : audiobasesink: internal 0:00:01.664000000 external 906:51:48.286458267 4816203811527289090/4790152460795555550 = 1.005439
+11-01 06:48:09.801 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:01.820425718 - stop 0:00:01.853578747
+11-01 06:48:09.801 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:01.820425718 - stop 0:00:01.853578747
+11-01 06:48:09.801 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (9) < 1920
+11-01 06:48:09.801 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:09.801 19717 19855 I FLGst   : audiobasesink: rendering at 87389 1600/1591
+11-01 06:48:09.801 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:09.801 19717 19855 I FLGst   : audiobasesink: next sample expected at 88980
+11-01 06:48:09.834 19717 19855 I FLGst   : audiobasesink: time 0:00:01.800000000, start 0:00:00.000000000, samples 1600
+11-01 06:48:09.834 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:09.834 19717 19855 I FLGst   : audiobasesink: running: start 0:00:01.800000000 - stop 0:00:01.833333333
+11-01 06:48:09.834 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:09.834 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:09.834 19717 19855 I FLGst   : audiobasesink: internal 0:00:01.664000000 external 906:51:48.286458267 4816203811527289090/4790152460795555550 = 1.005439
+11-01 06:48:09.834 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:01.853578748 - stop 0:00:01.886731778
+11-01 06:48:09.834 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:01.853578748 - stop 0:00:01.886731778
+11-01 06:48:09.834 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (9) < 1920
+11-01 06:48:09.834 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:09.834 19717 19855 I FLGst   : audiobasesink: rendering at 88980 1600/1591
+11-01 06:48:09.834 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:09.834 19717 19855 I FLGst   : audiobasesink: next sample expected at 90571
+11-01 06:48:09.834 19717 19830 I FLCross : audio samples=88000 late=0 queue=0 drift=-475051
+11-01 06:48:09.840 19717 19868 I FLGst   : audiobasesink: processed samples: raw 85920, delay 1200, real 84720, time 0:00:01.765000000
+11-01 06:48:09.868 19717 19855 I FLGst   : audiobasesink: time 0:00:01.833333333, start 0:00:00.000000000, samples 1600
+11-01 06:48:09.868 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:09.868 19717 19855 I FLGst   : audiobasesink: running: start 0:00:01.833333333 - stop 0:00:01.866666666
+11-01 06:48:09.868 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:09.868 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:09.868 19717 19855 I FLGst   : audiobasesink: internal 0:00:01.765000000 external 906:51:48.387496006 5668885876547934284/5640558652397052624 = 1.005022
+11-01 06:48:09.868 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:01.887291217 - stop 0:00:01.920457984
+11-01 06:48:09.868 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:01.887291217 - stop 0:00:01.920457984
+11-01 06:48:09.868 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (-18) < 1920
+11-01 06:48:09.868 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:09.868 19717 19855 I FLGst   : audiobasesink: rendering at 90571 1600/1618
+11-01 06:48:09.868 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:09.868 19717 19855 I FLGst   : audiobasesink: next sample expected at 92189
+11-01 06:48:09.902 19717 19855 I FLGst   : audiobasesink: time 0:00:01.866666666, start 0:00:00.000000000, samples 1600
+11-01 06:48:09.902 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:09.902 19717 19855 I FLGst   : audiobasesink: running: start 0:00:01.866666666 - stop 0:00:01.899999999
+11-01 06:48:09.902 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:09.902 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:09.902 19717 19855 I FLGst   : audiobasesink: internal 0:00:01.765000000 external 906:51:48.387496006 5668885876547934284/5640558652397052624 = 1.005022
+11-01 06:48:09.902 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:01.920457984 - stop 0:00:01.953624752
+11-01 06:48:09.902 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:01.920457984 - stop 0:00:01.953624752
+11-01 06:48:09.902 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (8) < 1920
+11-01 06:48:09.902 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:09.902 19717 19855 I FLGst   : audiobasesink: rendering at 92189 1600/1592
+11-01 06:48:09.902 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:09.902 19717 19855 I FLGst   : audiobasesink: next sample expected at 93781
+11-01 06:48:09.934 19717 19855 I FLGst   : audiobasesink: time 0:00:01.900000000, start 0:00:00.000000000, samples 1600
+11-01 06:48:09.934 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:09.935 19717 19855 I FLGst   : audiobasesink: running: start 0:00:01.900000000 - stop 0:00:01.933333333
+11-01 06:48:09.935 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:09.935 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:09.935 19717 19855 I FLGst   : audiobasesink: internal 0:00:01.765000000 external 906:51:48.387496006 5668885876547934284/5640558652397052624 = 1.005022
+11-01 06:48:09.935 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:01.953624753 - stop 0:00:01.986791520
+11-01 06:48:09.935 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:01.953624753 - stop 0:00:01.986791520
+11-01 06:48:09.935 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (8) < 1920
+11-01 06:48:09.935 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:09.935 19717 19855 I FLGst   : audiobasesink: rendering at 93781 1600/1592
+11-01 06:48:09.935 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:09.935 19717 19855 I FLGst   : audiobasesink: next sample expected at 95373
+11-01 06:48:09.935 19717 19830 I FLCross : audio samples=92800 late=0 queue=0 drift=374487
+11-01 06:48:09.940 19717 19868 I FLGst   : audiobasesink: processed samples: raw 90720, delay 1152, real 89568, time 0:00:01.866000000
+11-01 06:48:09.968 19717 19855 I FLGst   : audiobasesink: time 0:00:01.933333333, start 0:00:00.000000000, samples 1600
+11-01 06:48:09.968 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:09.968 19717 19855 I FLGst   : audiobasesink: running: start 0:00:01.933333333 - stop 0:00:01.966666666
+11-01 06:48:09.968 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:09.968 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:09.968 19717 19855 I FLGst   : audiobasesink: internal 0:00:01.866000000 external 906:51:48.488309028 6617416034154000000/6587860550000000000 = 1.004486
+11-01 06:48:09.968 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:01.987547045 - stop 0:00:02.020731501
+11-01 06:48:09.968 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:01.987547045 - stop 0:00:02.020731501
+11-01 06:48:09.968 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (-29) < 1920
+11-01 06:48:09.968 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:09.968 19717 19855 I FLGst   : audiobasesink: rendering at 95373 1600/1629
+11-01 06:48:09.968 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:09.968 19717 19855 I FLGst   : audiobasesink: next sample expected at 97002
+11-01 06:48:10.001 19717 19855 I FLGst   : audiobasesink: time 0:00:01.966666666, start 0:00:00.000000000, samples 1600
+11-01 06:48:10.001 19717 19855 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 06:48:10.001 19717 19855 I FLGst   : audiobasesink: running: start 0:00:01.966666666 - stop 0:00:01.999999999
+11-01 06:48:10.001 19717 19855 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 06:48:10.001 19717 19855 I FLGst   : audiobasesink: adding base_time 906:51:46.577068044
+11-01 06:48:10.001 19717 19855 I FLGst   : audiobasesink: internal 0:00:01.866000000 external 906:51:48.488309028 6617416034154000000/6587860550000000000 = 1.004486
+11-01 06:48:10.001 19717 19855 I FLGst   : audiobasesink: after slaving: start 0:00:02.020731501 - stop 0:00:02.053915957
+11-01 06:48:10.001 19717 19855 I FLGst   : audiobasesink: final timestamps: start 0:00:02.020731501 - stop 0:00:02.053915957
+11-01 06:48:10.001 19717 19855 I FLGst   : audiobasesink: align with prev sample, ABS (7) < 1920
+11-01 06:48:10.001 19717 19855 I FLGst   : audiobasesink: no stop time align needed: we are slaved
+11-01 06:48:10.001 19717 19855 I FLGst   : audiobasesink: rendering at 97002 1600/1593
+11-01 06:48:10.001 19717 19855 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 06:48:10.001 19717 19855 I FLGst   : audiobasesink: next sample expected at 98595
+11-01 06:48:10.040 19717 19868 I FLGst   : audiobasesink: processed samples: raw 95520, delay 1056, real 94464, time 0:00:01.968000000
+11-01 06:48:10.066 19717 19830 I FLCross : audio samples=96000 late=0 queue=0 drift=321668
+11-01 06:48:10.140 19717 19868 I FLGst   : audiobasesink: processed samples: raw 100320, delay 1248, real 99072, time 0:00:02.064000000
+11-01 06:48:10.141 19717 19830 I FLCross : audio samples=96000 late=0 queue=0 drift=321668
+11-01 06:48:10.230 19717 19830 I FLCross : receiver-result lease=f7d07085-fc19-444c-a0a5-71a07e1a8719 {"ok":true,"video":60,"posts":60,"pcm_samples":96000,"uid":10305,"pid":19717}
+11-01 06:48:10.232 19792 19825 I FLCross : retired lease=f7d07085-fc19-444c-a0a5-71a07e1a8719 generation=1 reason=explicit
+11-01 06:48:10.246 19834 19851 I FLCross : producer-result lease=f7d07085-fc19-444c-a0a5-71a07e1a8719 {"ok":true,"video":0,"posts":0,"pcm_samples":0,"uid":10304,"pid":19834}
