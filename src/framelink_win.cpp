@@ -22,6 +22,7 @@
 #define NOMINMAX
 #include <windows.h>
 #include <future>
+#include <memory>
 
 #include <d3d11_4.h>
 #include <dxgi1_3.h>
@@ -509,6 +510,8 @@ FL_API flResult flCreateChannel(const char* name, uint32_t width, uint32_t heigh
     return flCreateChannelEx(name, width, height, format, poolSize, 0, out);
 }
 
+static flResult importRing(flChannel*, const fl::RingDescMsg*);
+
 FL_API flResult flOpenProducer(const char* name, flChannel** out) {
     fltrace::Scope trace("flOpenProducer",fltrace::id(name));
 
@@ -571,43 +574,9 @@ FL_API flResult flOpenProducer(const char* name, flChannel** out) {
         return trace.result(FL_INTERNAL);
     }
 
-    ComPtr<ID3D11Device1> dev1;
-    ComPtr<ID3D11Device5> dev5;
-    if (FAILED(ch->device.As(&dev1)) || FAILED(ch->device.As(&dev5))) {
-        flClose(ch);
-        return trace.result(FL_INTERNAL);
-    }
-    for (uint32_t i = 0; i < pd->poolSize; ++i) {
-        auto* img = new flImage();
-        img->producer = true;
-        img->shared = (HANDLE)(uintptr_t)pd->texture[i];
-        if (FAILED(dev1->OpenSharedResource1(img->shared, IID_PPV_ARGS(&img->tex)))) {
-            delete img;
-            flClose(ch);
-            return trace.result(FL_ADAPTER_MISMATCH);
-        }
-        ch->images.push_back(img);
-        ch->slotReadyValue.push_back(0);
-    }
-    // Keep the duplicated handles, not just the opened fences: a producer that
-    // draws with Vulkan or D3D12 needs the raw ready-fence handle to import as
-    // its own timeline semaphore (flSharedReadyFence). Dropping them here made
-    // flSharedReadyFence return NULL, which only showed up once the renderer -
-    // the first non-D3D11 producer - tried to use it.
-    ch->readyShared = (HANDLE)(uintptr_t)pd->readyFence;
-    ch->consumedShared = (HANDLE)(uintptr_t)pd->consumedFence;
-    if (FAILED(dev5->OpenSharedFence(ch->readyShared, IID_PPV_ARGS(&ch->readyFence))) ||
-        FAILED(dev5->OpenSharedFence(ch->consumedShared, IID_PPV_ARGS(&ch->consumedFence)))) {
-        flClose(ch);
-        return trace.result(FL_INTERNAL);
-    }
-
-    ch->info.version = FL_VERSION;
-    ch->info.generation = pd->generation;
-    ch->info.width = pd->width;
-    ch->info.height = pd->height;
-    ch->info.format = (flFormat)pd->format;
-    ch->info.poolSize = pd->poolSize;
+    auto imported=importRing(ch,pd);
+    if(imported!=FL_OK){flClose(ch);return trace.result(imported);}
+    ch->info.version=FL_VERSION;
     *out = ch;
     return trace.result(FL_OK);
 }
@@ -615,39 +584,61 @@ FL_API flResult flOpenProducer(const char* name, flChannel** out) {
 // Producer: replace our view of the ring from a RingDesc. Used at attach and
 // again whenever the consumer reallocates.
 static flResult importRing(flChannel* ch, const fl::RingDescMsg* pd) {
+    // Descriptor ownership transfers on receipt, including every failure path.
+    // Stage all imports before replacing the old ring and borrowed image identity.
+    struct Incoming {
+        const fl::RingDescMsg* pd;
+        bool transferred=false;
+        ~Incoming() {
+            if(transferred)return;
+            uint64_t handles[FL_MAX_POOL_SIZE+2]{};
+            for(uint32_t i=0;i<pd->poolSize && i<FL_MAX_POOL_SIZE;++i)handles[i]=pd->texture[i];
+            handles[FL_MAX_POOL_SIZE]=pd->readyFence;
+            handles[FL_MAX_POOL_SIZE+1]=pd->consumedFence;
+            for(size_t i=0;i<FL_MAX_POOL_SIZE+2;++i)if(handles[i]) {
+                bool duplicate=false;
+                for(size_t j=0;j<i;++j)if(handles[j]==handles[i])duplicate=true;
+                if(!duplicate)CloseHandle((HANDLE)(uintptr_t)handles[i]);
+            }
+        }
+    } incoming{pd};
+    if(!pd->poolSize || pd->poolSize>FL_MAX_POOL_SIZE ||
+       !fl::validGeometry(pd->width,pd->height,(flFormat)pd->format))return FL_INVALID;
     ComPtr<ID3D11Device1> dev1;
     ComPtr<ID3D11Device5> dev5;
-    if (FAILED(ch->device.As(&dev1)) || FAILED(ch->device.As(&dev5))) return FL_INTERNAL;
-    for (flImage* img : ch->images) {
-        if (img->shared) CloseHandle(img->shared);
-        delete img;
+    if(FAILED(ch->device.As(&dev1)) || FAILED(ch->device.As(&dev5)))return FL_INTERNAL;
+    std::vector<std::unique_ptr<flImage>> staged;
+    for(uint32_t i=0;i<pd->poolSize;++i) {
+        auto img=std::make_unique<flImage>();
+        img->producer=true;img->shared=(HANDLE)(uintptr_t)pd->texture[i];
+        if(FAILED(dev1->OpenSharedResource1(img->shared,IID_PPV_ARGS(&img->tex))))return FL_ADAPTER_MISMATCH;
+        D3D11_TEXTURE2D_DESC desc{};img->tex->GetDesc(&desc);
+        const DXGI_FORMAT expected=pd->format==FL_FORMAT_NV12?DXGI_FORMAT_NV12:
+            pd->format==FL_FORMAT_RGBA8?DXGI_FORMAT_R8G8B8A8_UNORM:
+            pd->format==FL_FORMAT_RGB10A2?DXGI_FORMAT_R10G10B10A2_UNORM:DXGI_FORMAT_B8G8R8A8_UNORM;
+        if(desc.Format!=expected || desc.Width!=pd->width || desc.Height!=pd->height || desc.ArraySize!=1 ||
+           desc.MipLevels!=1 || desc.SampleDesc.Count!=1)return FL_INVALID;
+        staged.push_back(std::move(img));
     }
-    ch->images.clear();
-    ch->slotReadyValue.clear();
-    for (uint32_t i = 0; i < pd->poolSize; ++i) {
-        auto* img = new flImage();
-        img->producer = true;
-        img->shared = (HANDLE)(uintptr_t)pd->texture[i];
-        if (FAILED(dev1->OpenSharedResource1(img->shared, IID_PPV_ARGS(&img->tex)))) {
-            delete img;
-            return FL_ADAPTER_MISMATCH;
-        }
-        ch->images.push_back(img);
-        ch->slotReadyValue.push_back(0);
-    }
+    ComPtr<ID3D11Fence> ready,consumed;
+    if(FAILED(dev5->OpenSharedFence((HANDLE)(uintptr_t)pd->readyFence,IID_PPV_ARGS(&ready))) ||
+       FAILED(dev5->OpenSharedFence((HANDLE)(uintptr_t)pd->consumedFence,IID_PPV_ARGS(&consumed))))return FL_INTERNAL;
+    // Allocate bookkeeping before committing, so old imports stay intact on error.
+    std::vector<flImage*> images;images.reserve(staged.size());
+    std::vector<uint64_t> slots(staged.size(),0);
+    for(auto& img:staged)images.push_back(img.get());
+    for(auto* img:ch->images){if(img->shared)CloseHandle(img->shared);delete img;}
     if(ch->readyShared)CloseHandle(ch->readyShared);
     if(ch->consumedShared)CloseHandle(ch->consumedShared);
-    ch->readyShared = (HANDLE)(uintptr_t)pd->readyFence;
-    ch->consumedShared = (HANDLE)(uintptr_t)pd->consumedFence;
-    if (FAILED(dev5->OpenSharedFence(ch->readyShared, IID_PPV_ARGS(&ch->readyFence))) ||
-        FAILED(dev5->OpenSharedFence(ch->consumedShared, IID_PPV_ARGS(&ch->consumedFence))))
-        return FL_INTERNAL;
-    ch->ctx->Flush(); // submit deferred destruction of replaced imports/fences
-    ch->info.generation = pd->generation;
-    ch->info.width = pd->width;
-    ch->info.height = pd->height;
-    ch->info.format = (flFormat)pd->format;
-    ch->info.poolSize = pd->poolSize;
+    ch->images=std::move(images);ch->slotReadyValue=std::move(slots);
+    for(auto& img:staged)img.release();
+    ch->readyShared=(HANDLE)(uintptr_t)pd->readyFence;
+    ch->consumedShared=(HANDLE)(uintptr_t)pd->consumedFence;
+    ch->readyFence=ready;ch->consumedFence=consumed;
+    incoming.transferred=true;
+    ch->ctx->Flush();
+    ch->info.generation=pd->generation;ch->info.width=pd->width;ch->info.height=pd->height;
+    ch->info.format=(flFormat)pd->format;ch->info.poolSize=pd->poolSize;
     return FL_OK;
 }
 
