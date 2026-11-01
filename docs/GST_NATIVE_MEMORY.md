@@ -240,3 +240,12 @@ Unknown layout/device and a busy pool fail, with no partial output.
 The owner must prevent resizing/replacement through session teardown. The real
 provider fixture verifies BGRA/NV12 with explicitly allowed CPU-copy paths;
 substituted allocations or changed device bindings reject before any media.
+
+### Android immutable RGB AHB binding adapter
+
+`av_memory_ahb.h` hashes exact API31+ AHB allocation IDs, ordered RGB descriptors
+and session configuration. Producer inspection reserves/cancels the existing
+images without touching payloads. Substitution and aliasing reject; opaque YUV
+is not accepted as exact NV12. Like external AHB pool adoption, this opt-in path
+fails on runtimes without allocation IDs. No GPU device UUID or opaque plane
+layout is invented; endpoint import/completion compatibility remains separate.
