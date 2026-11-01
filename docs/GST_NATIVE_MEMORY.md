@@ -98,6 +98,7 @@ SessionProvider's responsibilities. No named fallback is introduced.
 - Native sink allocation/pool negotiation and upstream decoder compatibility.
 - Authenticated remote requirements, exact device/layout/generation agreement;
   enforce all endpoint permissions and reject unsupported legacy peers.
-- Preserve variable duration, DTS, discontinuity and stream-generation metadata.
+- Full metadata opt-in is now available (see FRAME_METADATA.md); combine its
+  qualified timing path with downstream native decoder/GPU qualification.
 - Renegotiation and failure/reconnect tests with buffers still in flight.
 - GPU completion integration and actual cross-process native pipeline evidence.

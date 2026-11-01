@@ -49,6 +49,7 @@
 #include <string.h>
 
 #include "framelink.h"
+#include "fl_gst_metadata.hpp"
 #include "framelink_slots.h"
 #ifdef __ANDROID__
 #include "framelink_ahb.h"
@@ -159,6 +160,8 @@ typedef struct _GstFrameLinkSink {
     // properties
     gchar* channel; // exact channel name, or the slot-set prefix when slots > 0
     gboolean preserveTimestamps;
+    gboolean preserveFrameMetadata;
+    guint64 streamGeneration;
     gint slots;     // 0 = open `channel` directly; N = walk `channel.0..N-1`
 
     flChannel* ch;
@@ -186,7 +189,7 @@ G_DEFINE_TYPE(GstFrameLinkSink, gst_framelink_sink, GST_TYPE_BASE_SINK)
 #define GST_FRAMELINK_SINK(o) \
     (G_TYPE_CHECK_INSTANCE_CAST((o), gst_framelink_sink_get_type(), GstFrameLinkSink))
 
-enum { SINK_PROP_0, SINK_PROP_CHANNEL, SINK_PROP_SLOTS, SINK_PROP_PRESERVE_TIMESTAMPS, SINK_PROP_CONNECT_TIMEOUT, SINK_PROP_BUFFER_WAIT, SINK_PROP_ERROR_ON_RING_FULL };
+enum { SINK_PROP_0, SINK_PROP_CHANNEL, SINK_PROP_SLOTS, SINK_PROP_PRESERVE_TIMESTAMPS, SINK_PROP_FRAME_METADATA, SINK_PROP_CONNECT_TIMEOUT, SINK_PROP_BUFFER_WAIT, SINK_PROP_ERROR_ON_RING_FULL };
 
 static GstStaticPadTemplate sinkTemplate =
     GST_STATIC_PAD_TEMPLATE("sink", GST_PAD_SINK, GST_PAD_ALWAYS,
@@ -364,6 +367,16 @@ static GstFlowReturn sinkRender(GstBaseSink* base, GstBuffer* buffer) {
     }
 
     account("gst.frame_acquired");
+    guint64 metadataPts=0;
+    if(self->preserveFrameMetadata){
+        flFrameMetadata metadata{};
+        if(!frameMetadataFromBuffer(buffer,&GST_BASE_SINK(self)->segment,self->streamGeneration,metadataPts,metadata) ||
+           flSetFrameMetadata(self->ch,&fb,&metadata)!=FL_OK){
+            flCancelBuffer(self->ch,&fb);++self->dropped;
+            GST_ELEMENT_ERROR(self,STREAM,FORMAT,("valid supported frame metadata and TIME mapping required"),(NULL));
+            return trace.result(GST_FLOW_ERROR);
+        }
+    }
     GstVideoFrame vframe;
     if (!gst_video_frame_map(&vframe, &self->vinfo, buffer, GST_MAP_READ)) {
         ++self->dropped;
@@ -464,8 +477,8 @@ static GstFlowReturn sinkRender(GstBaseSink* base, GstBuffer* buffer) {
     if (wrote) {
         // Default monotonic submit time retains existing hop-latency semantics.
         // Explicit session mode instead carries agreed media running time.
-        guint64 pts = g_get_monotonic_time() * 1000;
-        if (self->preserveTimestamps) {
+        guint64 pts = self->preserveFrameMetadata?metadataPts:g_get_monotonic_time() * 1000;
+        if (self->preserveTimestamps && !self->preserveFrameMetadata) {
             pts = gst_segment_to_running_time(&GST_BASE_SINK(self)->segment,
                                               GST_FORMAT_TIME, GST_BUFFER_PTS(buffer));
             if (!GST_CLOCK_TIME_IS_VALID(pts) || pts > G_MAXINT64) {
@@ -480,6 +493,7 @@ static GstFlowReturn sinkRender(GstBaseSink* base, GstBuffer* buffer) {
             account("gst.frame_drop.submit_failed");
             ++self->dropped;
             sinkDisconnect(self);
+            if(self->preserveFrameMetadata){GST_ELEMENT_ERROR(self,RESOURCE,WRITE,("metadata frame publication failed"),(NULL));return trace.result(GST_FLOW_ERROR);}
             return trace.result(GST_FLOW_OK);
         }
         if (++self->submitted % 300 == 1)
@@ -498,6 +512,11 @@ static GstFlowReturn sinkRender(GstBaseSink* base, GstBuffer* buffer) {
 // reporting lock or synchronous logging. Querying GstBaseSink's generic stats
 // alone would hide frames dropped by the transport's full-ring policy.
 static gboolean sinkEvent(GstBaseSink* base, GstEvent* event) {
+    if(GST_EVENT_TYPE(event)==GST_EVENT_STREAM_START){
+        auto* self=GST_FRAMELINK_SINK(base);
+        if(self->streamGeneration==G_MAXUINT64)return FALSE;
+        ++self->streamGeneration;
+    }
     if (GST_EVENT_TYPE(event) == GST_EVENT_EOS) {
         auto* self = GST_FRAMELINK_SINK(base);
         auto* stats = gst_structure_new("framelink-sink-stats",
@@ -535,6 +554,9 @@ static void sinkSetProperty(GObject* obj, guint id, const GValue* value, GParamS
             g_free(self->channel);
             self->channel = g_value_dup_string(value);
             break;
+        case SINK_PROP_FRAME_METADATA:
+            if(GST_STATE(self)>GST_STATE_READY || self->ch){GST_WARNING_OBJECT(self,"metadata mode cannot change while allocated");break;}
+            self->preserveFrameMetadata=g_value_get_boolean(value);break;
         case SINK_PROP_PRESERVE_TIMESTAMPS:
             if (GST_STATE(self) > GST_STATE_READY) { GST_WARNING_OBJECT(self,"timestamp mode cannot change while running"); break; }
             self->preserveTimestamps = g_value_get_boolean(value); break;
@@ -550,6 +572,7 @@ static void sinkGetProperty(GObject* obj, guint id, GValue* value, GParamSpec* s
         case SINK_PROP_ERROR_ON_RING_FULL: g_value_set_boolean(value,self->errorOnRingFull);break;
         case SINK_PROP_CONNECT_TIMEOUT: g_value_set_uint(value,self->connectTimeoutMs);break;
         case SINK_PROP_CHANNEL: g_value_set_string(value, self->channel); break;
+        case SINK_PROP_FRAME_METADATA: g_value_set_boolean(value,self->preserveFrameMetadata);break;
         case SINK_PROP_PRESERVE_TIMESTAMPS: g_value_set_boolean(value, self->preserveTimestamps); break;
         case SINK_PROP_SLOTS: g_value_set_int(value, self->slots); break;
         default: G_OBJECT_WARN_INVALID_PROPERTY_ID(obj, id, spec); break;
@@ -595,6 +618,10 @@ static void gst_framelink_sink_class_init(GstFrameLinkSinkClass* klass) {
                          "free one (0 = open <channel> directly)",
                          0, 64, 0, (GParamFlags)(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
 
+    g_object_class_install_property(gobject,SINK_PROP_FRAME_METADATA,
+        g_param_spec_boolean("preserve-frame-metadata","Preserve frame metadata",
+            "Require exact running-time PTS/DTS/duration and media generation; both endpoints must opt in",
+            FALSE,(GParamFlags)(G_PARAM_READWRITE|G_PARAM_STATIC_STRINGS|GST_PARAM_MUTABLE_READY)));
     g_object_class_install_property(gobject, SINK_PROP_PRESERVE_TIMESTAMPS,
         g_param_spec_boolean("preserve-timestamps", "Preserve timestamps",
             "Opt-in agreed session running-time PTS; both pipelines must share clock and base time",
@@ -675,6 +702,8 @@ typedef struct _GstFrameLinkSrc {
 #endif
     guint64 expiredFrames;
     gboolean preserveTimestamps;
+    gboolean preserveFrameMetadata;
+    guint64 streamGeneration;
     guint64 lastPts, lastSequence;
     gboolean haveTimestamp;
 
@@ -696,7 +725,7 @@ G_DEFINE_TYPE(GstFrameLinkSrc, gst_framelink_src, GST_TYPE_PUSH_SRC)
 #define GST_FRAMELINK_SRC(o) \
     (G_TYPE_CHECK_INSTANCE_CAST((o), gst_framelink_src_get_type(), GstFrameLinkSrc))
 
-enum { SRC_PROP_0, SRC_PROP_CHANNEL, SRC_PROP_WIDTH, SRC_PROP_HEIGHT, SRC_PROP_FPS, SRC_PROP_FORMAT, SRC_PROP_PRESERVE_TIMESTAMPS, SRC_PROP_POOL_SIZE, SRC_PROP_MAX_QUEUE_AGE, SRC_PROP_EXPIRED_FRAMES, SRC_PROP_NATIVE_MEMORY };
+enum { SRC_PROP_0, SRC_PROP_CHANNEL, SRC_PROP_WIDTH, SRC_PROP_HEIGHT, SRC_PROP_FPS, SRC_PROP_FORMAT, SRC_PROP_PRESERVE_TIMESTAMPS, SRC_PROP_FRAME_METADATA, SRC_PROP_POOL_SIZE, SRC_PROP_MAX_QUEUE_AGE, SRC_PROP_EXPIRED_FRAMES, SRC_PROP_NATIVE_MEMORY };
 
 #ifdef FL_GST_DMABUF
 #define FL_SOURCE_CAPS FRAMELINK_CAPS ";" GST_VIDEO_CAPS_MAKE_WITH_FEATURES("memory:DMABuf", "{ BGRA, RGBA, NV12, RGB10A2_LE }")
@@ -731,7 +760,7 @@ static GstCaps* srcMakeCaps(GstFrameLinkSrc* self) {
     GstCaps* caps=gst_caps_new_simple("video/x-raw", "format", G_TYPE_STRING,
                                gst_video_format_to_string(fmt), "width", G_TYPE_INT, w,
                                "height", G_TYPE_INT, h, "framerate", GST_TYPE_FRACTION,
-                               self->fps, 1, NULL);
+                               self->preserveFrameMetadata?0:self->fps, 1, NULL);
     if(self->nativeMemory)gst_caps_set_features(caps,0,gst_caps_features_new(
 #ifdef _WIN32
         "memory:D3D11Memory",
@@ -775,7 +804,7 @@ static gboolean srcStart(GstBaseSrc* base) {
     // FL_MAP_CPU: this ring exists to be read byte-wise. Windows ignores the
     // flag (no CPU path) and the readback goes through a staging texture.
     flResult r = self->delegated ? (self->ch ? FL_OK : FL_DISCONNECTED) : flCreateChannelEx(self->channel, (guint32)self->width,
-                                   (guint32)self->height, toFlFormat(gst_video_format_from_string(self->format)), self->poolSize, FL_MAP_CPU|(self->nativeMemory?FL_DEFER_RELEASE:0)|(self->maxQueueAgeMs?FL_TRACK_ARRIVAL:0),
+                                   (guint32)self->height, toFlFormat(gst_video_format_from_string(self->format)), self->poolSize, FL_MAP_CPU|(self->nativeMemory?FL_DEFER_RELEASE:0)|(self->maxQueueAgeMs?FL_TRACK_ARRIVAL:0)|(self->preserveFrameMetadata?FL_REQUIRE_FRAME_METADATA:0),
                                    &self->ch);
     if (r != FL_OK) {
         GST_ELEMENT_ERROR(self, RESOURCE, OPEN_READ,
@@ -790,7 +819,7 @@ static gboolean srcStart(GstBaseSrc* base) {
     self->generation = self->cinfo.generation;
     self->haveTimestamp = FALSE;
     GST_OBJECT_LOCK(self);self->expiredFrames=0;GST_OBJECT_UNLOCK(self);
-    gst_base_src_set_do_timestamp(base, !self->preserveTimestamps);
+    gst_base_src_set_do_timestamp(base, !(self->preserveTimestamps||self->preserveFrameMetadata));
     GST_INFO_OBJECT(self, "channel '%s' up: %ux%u %s, ring of %u - waiting for a producer",
                     self->channel, self->cinfo.width, self->cinfo.height,
                     gst_video_format_to_string(toGstFormat(self->cinfo.format)),
@@ -962,9 +991,16 @@ static GstFlowReturn srcCreate(GstPushSrc* push, GstBuffer** outbuf) {
         return trace.result(GST_FLOW_ERROR);
     }
 
-    if (self->preserveTimestamps && frame.ptsNs < 0) {
+    if ((self->preserveTimestamps||self->preserveFrameMetadata) && frame.ptsNs < 0) {
         srcReleaseFrame(self, &frame);
         GST_ELEMENT_ERROR(self, STREAM, FORMAT, ("session frame has no valid timestamp"), (NULL));
+        return trace.result(GST_FLOW_ERROR);
+    }
+
+    flFrameMetadata metadata{};
+    if(self->preserveFrameMetadata && flGetFrameMetadata(self->ch,&frame,&metadata)!=FL_OK){
+        srcReleaseFrame(self,&frame);
+        GST_ELEMENT_ERROR(self,STREAM,FORMAT,("required frame metadata missing"),(NULL));
         return trace.result(GST_FLOW_ERROR);
     }
 
@@ -1087,16 +1123,27 @@ static GstFlowReturn srcCreate(GstPushSrc* push, GstBuffer** outbuf) {
         return trace.result(GST_FLOW_ERROR);
     }
     } // CPU path; native output has transferred ownership to GstMemory.
-    if (self->fps > 0)
+    if (!self->preserveFrameMetadata && self->fps > 0)
         GST_BUFFER_DURATION(buf) = gst_util_uint64_scale(GST_SECOND, 1, (guint64)self->fps);
-    if (self->preserveTimestamps) {
+    if (self->preserveTimestamps||self->preserveFrameMetadata) {
         GST_BUFFER_PTS(buf) = frame.ptsNs;
         if (!self->haveTimestamp || frame.ptsNs <= self->lastPts ||
-            frame.sequence != self->lastSequence + 1)
+            frame.sequence != self->lastSequence + 1 ||
+            (self->preserveFrameMetadata && metadata.streamGeneration!=self->streamGeneration))
             GST_BUFFER_FLAG_SET(buf, GST_BUFFER_FLAG_DISCONT);
         self->lastPts = frame.ptsNs;
         self->lastSequence = frame.sequence;
         self->haveTimestamp = TRUE;
+    }
+    if(self->preserveFrameMetadata){
+        GST_BUFFER_DTS(buf)=(metadata.flags&FL_FRAME_HAS_DTS)?metadata.dtsNs:GST_CLOCK_TIME_NONE;
+        GST_BUFFER_DURATION(buf)=(metadata.flags&FL_FRAME_HAS_DURATION)?metadata.durationNs:GST_CLOCK_TIME_NONE;
+        if(metadata.flags&FL_FRAME_DISCONT)GST_BUFFER_FLAG_SET(buf,GST_BUFFER_FLAG_DISCONT);
+        if(GST_BUFFER_FLAG_IS_SET(buf,GST_BUFFER_FLAG_DISCONT))metadata.flags|=FL_FRAME_DISCONT;
+        self->streamGeneration=metadata.streamGeneration;
+        auto* meta=(GstFrameLinkFrameMeta*)gst_buffer_add_meta(buf,frameMetaInfo(),nullptr);
+        if(!meta){gst_buffer_unref(buf);return trace.result(GST_FLOW_ERROR);}
+        meta->frame=metadata;
     }
     *outbuf = buf; // default remains arrival-time timestamping
     return trace.result(GST_FLOW_OK);
@@ -1125,6 +1172,9 @@ static void srcSetProperty(GObject* obj, guint id, const GValue* value, GParamSp
             break;
         case SRC_PROP_WIDTH: self->width = g_value_get_int(value); break;
         case SRC_PROP_HEIGHT: self->height = g_value_get_int(value); break;
+        case SRC_PROP_FRAME_METADATA:
+            if(GST_STATE(self)>GST_STATE_READY || self->ch){GST_WARNING_OBJECT(self,"metadata mode cannot change while allocated");break;}
+            self->preserveFrameMetadata=g_value_get_boolean(value);break;
         case SRC_PROP_PRESERVE_TIMESTAMPS:
             if (GST_STATE(self) > GST_STATE_READY) { GST_WARNING_OBJECT(self,"timestamp mode cannot change while running"); break; }
             self->preserveTimestamps = g_value_get_boolean(value); break;
@@ -1144,6 +1194,7 @@ static void srcGetProperty(GObject* obj, guint id, GValue* value, GParamSpec* sp
         case SRC_PROP_FORMAT: g_value_set_string(value,self->format); break;
         case SRC_PROP_WIDTH: g_value_set_int(value, self->width); break;
         case SRC_PROP_HEIGHT: g_value_set_int(value, self->height); break;
+        case SRC_PROP_FRAME_METADATA: g_value_set_boolean(value,self->preserveFrameMetadata);break;
         case SRC_PROP_PRESERVE_TIMESTAMPS: g_value_set_boolean(value, self->preserveTimestamps); break;
         case SRC_PROP_FPS: g_value_set_int(value, self->fps); break;
         default: G_OBJECT_WARN_INVALID_PROPERTY_ID(obj, id, spec); break;
@@ -1169,6 +1220,7 @@ static gboolean srcAdoptChannel(GstFrameLinkSrc* self,flChannel* channel) {
     uint32_t flags=0;if(flQueryConsumerFlags(channel,&flags)!=FL_OK)return FALSE;
     if(self->nativeMemory && (!(flags&FL_DEFER_RELEASE)||(flags&FL_GPU_SYNC)))return FALSE;
     if(self->maxQueueAgeMs && !(flags&FL_TRACK_ARRIVAL))return FALSE;
+    if(self->preserveFrameMetadata && !(flags&FL_REQUIRE_FRAME_METADATA))return FALSE;
     self->ch=channel;self->cinfo=info;self->delegated=TRUE;return TRUE;
 }
 
@@ -1223,6 +1275,10 @@ static void gst_framelink_src_class_init(GstFrameLinkSrcClass* klass) {
         g_param_spec_uint("pool-size","Transport image capacity",
             "Allocated images, not a queue-fill target or presentation delay; adopted channels retain their actual capacity",
             1,FL_MAX_POOL_SIZE,4,(GParamFlags)(G_PARAM_READWRITE|G_PARAM_STATIC_STRINGS|GST_PARAM_MUTABLE_READY)));
+    g_object_class_install_property(gobject,SRC_PROP_FRAME_METADATA,
+        g_param_spec_boolean("preserve-frame-metadata","Preserve frame metadata",
+            "Require exact running-time PTS/DTS/duration and media generation; both endpoints must opt in",
+            FALSE,(GParamFlags)(G_PARAM_READWRITE|G_PARAM_STATIC_STRINGS|GST_PARAM_MUTABLE_READY)));
     g_object_class_install_property(gobject, SRC_PROP_PRESERVE_TIMESTAMPS,
         g_param_spec_boolean("preserve-timestamps", "Preserve timestamps",
             "Opt-in agreed session running-time PTS; both pipelines must share clock and base time",

@@ -292,7 +292,7 @@ if(FRAMELINK_BUILD_GST AND NOT ANDROID)
 endif()
 
 include(GNUInstallDirs)
-install(FILES gst/framelink_native.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/framelink)
+install(FILES gst/framelink_native.h gst/framelink_meta.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/framelink)
 install(TARGETS framelink
         EXPORT framelinkTargets
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -553,6 +553,7 @@ endif()
 
 if(FRAMELINK_BUILD_TESTS AND TARGET fl_gst_nv12 AND NOT ANDROID)
     add_executable(fl_gst_timestamps test/fl_gst_timestamps.cpp)
+    target_include_directories(fl_gst_timestamps PRIVATE include)
     get_target_property(_fl_test_includes fl_gst_nv12 INCLUDE_DIRECTORIES)
     if(_fl_test_includes)
         target_include_directories(fl_gst_timestamps PRIVATE ${_fl_test_includes})
@@ -641,6 +642,12 @@ endif()
 # Real transport timing checks (GPU-backed FrameLink + GDP/TCP PCM).
 # Not part of the hosted CPU-only whitelist; run on native hardware.
 if(FRAMELINK_BUILD_TESTS AND TARGET framelink_av_session)
+    if(ANDROID)
+        add_executable(fl_gst_timestamps test/fl_gst_timestamps.cpp)
+        target_include_directories(fl_gst_timestamps PRIVATE include $<TARGET_PROPERTY:framelink_av_session,INCLUDE_DIRECTORIES>)
+        target_link_directories(fl_gst_timestamps PRIVATE $<TARGET_PROPERTY:framelink_av_session,LINK_DIRECTORIES>)
+        target_link_libraries(fl_gst_timestamps PRIVATE $<TARGET_PROPERTY:framelink_av_session,LINK_LIBRARIES>)
+    endif()
     add_executable(fl_gst_pool_policy test/fl_gst_pool_policy.cpp)
     target_include_directories(fl_gst_pool_policy PRIVATE $<TARGET_PROPERTY:framelink_av_session,INCLUDE_DIRECTORIES>)
     target_link_directories(fl_gst_pool_policy PRIVATE $<TARGET_PROPERTY:framelink_av_session,LINK_DIRECTORIES>)
