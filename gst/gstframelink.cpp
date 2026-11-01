@@ -27,6 +27,13 @@
 // Zero-copy caps (memory:DmaBuf, memory:D3D11Memory) are a later stage.
 
 #include <algorithm>
+#ifdef FL_GST_DMABUF
+#include <memory>
+#include <gst/allocators/gstdmabuf.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#endif
 #include <gst/base/gstbasesink.h>
 #include <gst/base/gstpushsrc.h>
 #include <gst/gst.h>
@@ -619,6 +626,24 @@ static void gst_framelink_sink_init(GstFrameLinkSink* self) {
 // framelinksrc
 // =============================================================================
 
+#ifdef FL_GST_DMABUF
+// Source shutdown may precede downstream GstMemory destruction. The last memory
+// reader owns the channel until its lease retires; no buffer pool is reused early.
+struct NativeSourceOwner {
+    flChannel* channel;
+    explicit NativeSourceOwner(flChannel* c):channel(c){}
+    ~NativeSourceOwner(){flClose(channel);}
+};
+struct NativeSourceReader {
+    std::shared_ptr<NativeSourceOwner> owner;
+    uint64_t token;
+    ~NativeSourceReader(){
+        flCompleteReadLease(owner->channel,token);
+        flCollectReadLeases(owner->channel);
+    }
+};
+#endif
+
 typedef struct _GstFrameLinkSrc {
     GstPushSrc parent;
 
@@ -627,6 +652,10 @@ typedef struct _GstFrameLinkSrc {
     gchar* format;
     gint width, height, fps;
     guint poolSize,maxQueueAgeMs;
+    gboolean nativeMemory;
+#ifdef FL_GST_DMABUF
+    std::shared_ptr<NativeSourceOwner>* nativeOwner;
+#endif
     guint64 expiredFrames;
     gboolean preserveTimestamps;
     guint64 lastPts, lastSequence;
@@ -650,11 +679,16 @@ G_DEFINE_TYPE(GstFrameLinkSrc, gst_framelink_src, GST_TYPE_PUSH_SRC)
 #define GST_FRAMELINK_SRC(o) \
     (G_TYPE_CHECK_INSTANCE_CAST((o), gst_framelink_src_get_type(), GstFrameLinkSrc))
 
-enum { SRC_PROP_0, SRC_PROP_CHANNEL, SRC_PROP_WIDTH, SRC_PROP_HEIGHT, SRC_PROP_FPS, SRC_PROP_FORMAT, SRC_PROP_PRESERVE_TIMESTAMPS, SRC_PROP_POOL_SIZE, SRC_PROP_MAX_QUEUE_AGE, SRC_PROP_EXPIRED_FRAMES };
+enum { SRC_PROP_0, SRC_PROP_CHANNEL, SRC_PROP_WIDTH, SRC_PROP_HEIGHT, SRC_PROP_FPS, SRC_PROP_FORMAT, SRC_PROP_PRESERVE_TIMESTAMPS, SRC_PROP_POOL_SIZE, SRC_PROP_MAX_QUEUE_AGE, SRC_PROP_EXPIRED_FRAMES, SRC_PROP_NATIVE_MEMORY };
 
+#ifdef FL_GST_DMABUF
+#define FL_SOURCE_CAPS FRAMELINK_CAPS ";" GST_VIDEO_CAPS_MAKE_WITH_FEATURES("memory:DMABuf", "{ BGRA, RGBA, NV12, RGB10A2_LE }")
+#else
+#define FL_SOURCE_CAPS FRAMELINK_CAPS
+#endif
 static GstStaticPadTemplate srcTemplate =
     GST_STATIC_PAD_TEMPLATE("src", GST_PAD_SRC, GST_PAD_ALWAYS,
-                            GST_STATIC_CAPS(FRAMELINK_CAPS));
+                            GST_STATIC_CAPS(FL_SOURCE_CAPS));
 
 #ifdef _WIN32
 static void srcDropStaging(GstFrameLinkSrc* self) {
@@ -673,10 +707,12 @@ static GstCaps* srcMakeCaps(GstFrameLinkSrc* self) {
     const GstVideoFormat fmt =
         self->ch ? toGstFormat(self->cinfo.format) : gst_video_format_from_string(self->format);
     if(fmt==GST_VIDEO_FORMAT_UNKNOWN)return gst_caps_new_empty();
-    return gst_caps_new_simple("video/x-raw", "format", G_TYPE_STRING,
+    GstCaps* caps=gst_caps_new_simple("video/x-raw", "format", G_TYPE_STRING,
                                gst_video_format_to_string(fmt), "width", G_TYPE_INT, w,
                                "height", G_TYPE_INT, h, "framerate", GST_TYPE_FRACTION,
                                self->fps, 1, NULL);
+    if(self->nativeMemory)gst_caps_set_features(caps,0,gst_caps_features_new("memory:DMABuf",nullptr));
+    return caps;
 }
 
 static GstCaps* srcGetCaps(GstBaseSrc* base, GstCaps* filter) {
@@ -692,10 +728,15 @@ static GstCaps* srcGetCaps(GstBaseSrc* base, GstCaps* filter) {
 
 static gboolean srcStart(GstBaseSrc* base) {
     GstFrameLinkSrc* self = GST_FRAMELINK_SRC(base);
+#ifndef FL_GST_DMABUF
+    if(self->nativeMemory){GST_ELEMENT_ERROR(self,RESOURCE,SETTINGS,("native-memory output is not supported by this build"),(NULL));return FALSE;}
+#else
+    if(self->nativeMemory && self->delegated){GST_ELEMENT_ERROR(self,RESOURCE,SETTINGS,("native adoption requires a negotiated lease contract; not yet supported"),(NULL));return FALSE;}
+#endif
     // FL_MAP_CPU: this ring exists to be read byte-wise. Windows ignores the
     // flag (no CPU path) and the readback goes through a staging texture.
     flResult r = self->delegated ? (self->ch ? FL_OK : FL_DISCONNECTED) : flCreateChannelEx(self->channel, (guint32)self->width,
-                                   (guint32)self->height, toFlFormat(gst_video_format_from_string(self->format)), self->poolSize, FL_MAP_CPU|(self->maxQueueAgeMs?FL_TRACK_ARRIVAL:0),
+                                   (guint32)self->height, toFlFormat(gst_video_format_from_string(self->format)), self->poolSize, FL_MAP_CPU|(self->nativeMemory?FL_DEFER_RELEASE:0)|(self->maxQueueAgeMs?FL_TRACK_ARRIVAL:0),
                                    &self->ch);
     if (r != FL_OK) {
         GST_ELEMENT_ERROR(self, RESOURCE, OPEN_READ,
@@ -704,6 +745,9 @@ static gboolean srcStart(GstBaseSrc* base) {
         return FALSE;
     }
     flQuery(self->ch, &self->cinfo);
+#ifdef FL_GST_DMABUF
+    if(self->nativeMemory)self->nativeOwner=new std::shared_ptr<NativeSourceOwner>(std::make_shared<NativeSourceOwner>(self->ch));
+#endif
     self->generation = self->cinfo.generation;
     self->haveTimestamp = FALSE;
     GST_OBJECT_LOCK(self);self->expiredFrames=0;GST_OBJECT_UNLOCK(self);
@@ -720,10 +764,10 @@ static gboolean srcStop(GstBaseSrc* base) {
 #ifdef _WIN32
     srcDropStaging(self);
 #endif
-    if (self->ch) {
-        flClose(self->ch);
-        self->ch = NULL;
-    }
+#ifdef FL_GST_DMABUF
+    if(self->nativeOwner){delete self->nativeOwner;self->nativeOwner=nullptr;self->ch=nullptr;}
+#endif
+    if (self->ch) {flClose(self->ch);self->ch=nullptr;}
     return TRUE;
 }
 
@@ -737,6 +781,43 @@ static gboolean srcUnlockStop(GstBaseSrc* base) {
     return TRUE;
 }
 
+static flResult srcReleaseFrame(GstFrameLinkSrc* self,const flFrame* frame) {
+    if(!self->nativeMemory)return flRelease(self->ch,frame);
+    uint64_t token=0;auto r=flLeaseFrame(self->ch,frame,&token);
+    if(r!=FL_OK)return r;
+    r=flCompleteReadLease(self->ch,token);
+    return r==FL_OK?flCollectReadLeases(self->ch):r;
+}
+
+#ifdef FL_GST_DMABUF
+static GstBuffer* srcNativeBuffer(GstFrameLinkSrc* self,const flFrame& frame) {
+    flDmabuf d{};
+    if(!self->nativeOwner || flImageDmabuf(frame.image,&d)!=FL_OK || d.modifier!=0)return nullptr;
+    guint planes=self->cinfo.format==FL_FORMAT_NV12?2:1;
+    if(d.planes!=planes)return nullptr;
+    struct stat first{};if(fstat(d.fd[0],&first))return nullptr;
+    gsize offsets[GST_VIDEO_MAX_PLANES]{};gint strides[GST_VIDEO_MAX_PLANES]{};gsize bytes=0;
+    for(guint i=0;i<planes;++i){
+        struct stat st{};if(fstat(d.fd[i],&st)||st.st_dev!=first.st_dev||st.st_ino!=first.st_ino)return nullptr;
+        guint rows=i?self->cinfo.height/2:self->cinfo.height;
+        if(d.stride[i]>G_MAXINT || d.offset[i]>G_MAXSIZE || !rows ||
+           d.stride[i]>(G_MAXSIZE-d.offset[i])/rows)return nullptr;
+        offsets[i]=d.offset[i];strides[i]=d.stride[i];bytes=std::max(bytes,offsets[i]+gsize(strides[i])*rows);
+    }
+    int fd=fcntl(d.fd[0],F_DUPFD_CLOEXEC,0);if(fd<0)return nullptr;
+    auto*allocator=gst_dmabuf_allocator_new();auto*mem=gst_dmabuf_allocator_alloc(allocator,fd,bytes);gst_object_unref(allocator);
+    if(!mem){close(fd);return nullptr;}
+    uint64_t token=0;if(flLeaseFrame(self->ch,&frame,&token)!=FL_OK){gst_memory_unref(mem);return nullptr;}
+    auto*reader=new NativeSourceReader{*self->nativeOwner,token};
+    gst_mini_object_set_qdata(GST_MINI_OBJECT(mem),g_quark_from_static_string("framelink-reader"),reader,
+        [](gpointer p){delete static_cast<NativeSourceReader*>(p);});
+    auto*buf=gst_buffer_new();gst_buffer_append_memory(buf,mem);
+    gst_buffer_add_video_meta_full(buf,GST_VIDEO_FRAME_FLAG_NONE,toGstFormat(self->cinfo.format),
+        self->cinfo.width,self->cinfo.height,planes,offsets,strides);
+    return buf;
+}
+#endif
+
 static GstFlowReturn srcCreate(GstPushSrc* push, GstBuffer** outbuf) {
     GstFrameLinkSrc* self = GST_FRAMELINK_SRC(push);
     gsttrace::Scope trace("gst.srcCreate",gsttrace::id(self->channel));
@@ -748,9 +829,9 @@ static GstFlowReturn srcCreate(GstPushSrc* push, GstBuffer** outbuf) {
         if (r == FL_OK) {
             if(self->maxQueueAgeMs) {
                 uint64_t age=0;auto ageResult=flFrameAgeNs(self->ch,&frame,&age);
-                if(ageResult!=FL_OK){flRelease(self->ch,&frame);GST_ELEMENT_ERROR(self,RESOURCE,SETTINGS,("Arrival tracking required by max-queue-age-ms"),(NULL));return trace.result(GST_FLOW_ERROR);}
+                if(ageResult!=FL_OK){srcReleaseFrame(self,&frame);GST_ELEMENT_ERROR(self,RESOURCE,SETTINGS,("Arrival tracking required by max-queue-age-ms"),(NULL));return trace.result(GST_FLOW_ERROR);}
                 if(age>uint64_t(self->maxQueueAgeMs)*1000000) {
-                    flRelease(self->ch,&frame);
+                    srcReleaseFrame(self,&frame);
                     GST_OBJECT_LOCK(self);++self->expiredFrames;GST_OBJECT_UNLOCK(self);
                     if(trace.active)gsttrace::record({"gst.frame_drop.expired",gsttrace::clockNs(),age,gsttrace::id(self->channel),frame.sequence,frame._readyValue,frame.slot,frame.ptsNs,0});
                     continue;
@@ -767,7 +848,7 @@ static GstFlowReturn srcCreate(GstPushSrc* push, GstBuffer** outbuf) {
     }
 
     if (self->preserveTimestamps && frame.ptsNs < 0) {
-        flRelease(self->ch, &frame);
+        srcReleaseFrame(self, &frame);
         GST_ELEMENT_ERROR(self, STREAM, FORMAT, ("session frame has no valid timestamp"), (NULL));
         return trace.result(GST_FLOW_ERROR);
     }
@@ -794,7 +875,7 @@ static GstFlowReturn srcCreate(GstPushSrc* push, GstBuffer** outbuf) {
         const gboolean ok = gst_base_src_set_caps(GST_BASE_SRC(self), caps);
         gst_caps_unref(caps);
         if (!ok) {
-            flRelease(self->ch, &frame);
+            srcReleaseFrame(self, &frame);
             GST_ELEMENT_ERROR(self, CORE, NEGOTIATION,
                               ("downstream refused the producer's new geometry"), (NULL));
             return trace.result(GST_FLOW_ERROR);
@@ -805,9 +886,17 @@ static GstFlowReturn srcCreate(GstPushSrc* push, GstBuffer** outbuf) {
     GstVideoInfo outputInfo;
     gst_video_info_init(&outputInfo);
     if(!gst_video_info_set_format(&outputInfo,toGstFormat(self->cinfo.format),w,h)) {
-        flRelease(self->ch,&frame);return trace.result(GST_FLOW_NOT_NEGOTIATED);
+        srcReleaseFrame(self,&frame);return trace.result(GST_FLOW_NOT_NEGOTIATED);
     }
-    GstBuffer* buf = gst_buffer_new_allocate(NULL, outputInfo.size, NULL);
+    GstBuffer* buf=nullptr;
+#ifdef FL_GST_DMABUF
+    if(self->nativeMemory){
+        buf=srcNativeBuffer(self,frame);
+        if(!buf){srcReleaseFrame(self,&frame);GST_ELEMENT_ERROR(self,RESOURCE,SETTINGS,("native DMA-BUF layout/lease unsupported; refusing CPU fallback"),(NULL));return trace.result(GST_FLOW_ERROR);}
+    } else
+#endif
+    {
+    buf = gst_buffer_new_allocate(NULL, outputInfo.size, NULL);
     GstMapInfo map;
     gboolean filled = FALSE;
     if (gst_buffer_map(buf, &map, GST_MAP_WRITE)) {
@@ -874,7 +963,7 @@ static GstFlowReturn srcCreate(GstPushSrc* push, GstBuffer** outbuf) {
 #endif
         gst_buffer_unmap(buf, &map);
     }
-    flRelease(self->ch, &frame);
+    srcReleaseFrame(self, &frame);
 
     if (!filled) {
         gst_buffer_unref(buf);
@@ -882,6 +971,7 @@ static GstFlowReturn srcCreate(GstPushSrc* push, GstBuffer** outbuf) {
                           ("platform readback failed on '%s'", self->channel));
         return trace.result(GST_FLOW_ERROR);
     }
+    } // CPU path; native output has transferred ownership to GstMemory.
     if (self->fps > 0)
         GST_BUFFER_DURATION(buf) = gst_util_uint64_scale(GST_SECOND, 1, (guint64)self->fps);
     if (self->preserveTimestamps) {
@@ -900,6 +990,9 @@ static GstFlowReturn srcCreate(GstPushSrc* push, GstBuffer** outbuf) {
 static void srcSetProperty(GObject* obj, guint id, const GValue* value, GParamSpec* spec) {
     GstFrameLinkSrc* self = GST_FRAMELINK_SRC(obj);
     switch (id) {
+        case SRC_PROP_NATIVE_MEMORY:
+            if(GST_STATE(self)>GST_STATE_READY || self->ch){GST_WARNING_OBJECT(self,"memory mode cannot change while allocated");break;}
+            self->nativeMemory=g_value_get_boolean(value);break;
         case SRC_PROP_MAX_QUEUE_AGE:
             if(GST_STATE(self)>GST_STATE_READY || self->ch){GST_WARNING_OBJECT(self,"age policy cannot change while allocated");break;}
             self->maxQueueAgeMs=g_value_get_uint(value);break;
@@ -928,6 +1021,7 @@ static void srcSetProperty(GObject* obj, guint id, const GValue* value, GParamSp
 static void srcGetProperty(GObject* obj, guint id, GValue* value, GParamSpec* spec) {
     GstFrameLinkSrc* self = GST_FRAMELINK_SRC(obj);
     switch (id) {
+        case SRC_PROP_NATIVE_MEMORY: g_value_set_boolean(value,self->nativeMemory);break;
         case SRC_PROP_EXPIRED_FRAMES: GST_OBJECT_LOCK(self);g_value_set_uint64(value,self->expiredFrames);GST_OBJECT_UNLOCK(self);break;
         case SRC_PROP_MAX_QUEUE_AGE: g_value_set_uint(value,self->maxQueueAgeMs);break;
         case SRC_PROP_POOL_SIZE: g_value_set_uint(value,self->ch?self->cinfo.poolSize:self->poolSize);break;
@@ -943,6 +1037,9 @@ static void srcGetProperty(GObject* obj, guint id, GValue* value, GParamSpec* sp
 
 static void srcFinalize(GObject* obj) {
     GstFrameLinkSrc* self = GST_FRAMELINK_SRC(obj);
+#ifdef FL_GST_DMABUF
+    if(self->nativeOwner){delete self->nativeOwner;self->nativeOwner=nullptr;self->ch=nullptr;}
+#endif
     if(self->ch){flClose(self->ch);self->ch=nullptr;}
     g_free(self->channel);
     g_free(self->format);
@@ -993,6 +1090,10 @@ static void gst_framelink_src_class_init(GstFrameLinkSrcClass* klass) {
         g_param_spec_int("fps", "FPS", "nominal frame rate advertised in the caps", 1, 240,
                          30, (GParamFlags)(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
 
+    g_object_class_install_property(gobject,SRC_PROP_NATIVE_MEMORY,
+        g_param_spec_boolean("native-memory","Native memory output",
+            "Opt-in Linux linear DMA-BUF output; unsupported layouts/builds fail without CPU fallback",
+            FALSE,(GParamFlags)(G_PARAM_READWRITE|G_PARAM_STATIC_STRINGS|GST_PARAM_MUTABLE_READY)));
     g_object_class_install_property(gobject,SRC_PROP_MAX_QUEUE_AGE,
         g_param_spec_uint("max-queue-age-ms","Receiver queue age limit",
             "Discard frames whose local receipt/readiness wait exceeds this age; 0 disables; never derived from media PTS",

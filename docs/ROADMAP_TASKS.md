@@ -109,6 +109,8 @@ Windows decoder-to-independent-renderer example, and measured multi-hop evidence
   unchanged A/V session timing and legacy behavior; explicitly carry variable
   duration/DTS/discontinuity and stream-generation metadata rather than deriving
   arbitrary source timing from a configured nominal FPS.
+  Partial slice: [Linux DMA-BUF source](GST_NATIVE_MEMORY.md), original-allocation
+  RGBA/NV12 and memory-subview lifetime tests passed; full task remains open.
 - [ ] **M5a.8 Windows GPU-decoder example:** GPU GstBuffer → FrameLink sink →
   separate consumer renderer, with tested decoder/adapter/formats and explicit
   CPU-readable staging/readback alternative. Qualify NV12 conversion location.
