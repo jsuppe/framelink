@@ -6,6 +6,9 @@ not part of this release. M1–M4 are merged within their documented qualificati
 scope. M5 remains in progress; M5a and subsequent milestones are not implemented
 or qualified merely by being included in this plan.
 
+For individually checkable tasks and current merge gates, see
+[the executable roadmap checklist](ROADMAP_TASKS.md).
+
 ## M1 — Land the validated audio foundation
 
 Status: COMPLETE. PR #2 merged 2026-10-30 as `c67cde8` after hosted
@@ -88,10 +91,12 @@ a separate M5 gate under the clarified producer-to-consumer timing requirement.
 
 ## M5 — Platform deployment and transport qualification
 
-Status: FINAL REVIEW / CI (authorized 2026-10-30), not yet merged. Windows
+Status: FINAL RENDERER CI / MERGE (authorized 2026-10-30). FrameLink PR #6
+merged as `ab7176e` after final Linux/Windows CI passed. Renderer PR #13 remains
+open; M5 does not close until its final checks and merge are verified. Windows
 external decoded handoff, sustained native1080p60 gate and signed Android cross-UID
 A/V are validated in their documented scope. See [capability/evidence matrix](m5/CAPABILITY_MATRIX.md)
-for supported modes and explicit exclusions; source/evidence are on PR6.
+for supported modes and explicit exclusions; FrameLink source/evidence are on master.
 Deliverables: tested Linux/Windows apps, Android APK/service integration, capability
 matrix and transport decision record.
 Tasks:
