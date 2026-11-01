@@ -1,0 +1,35 @@
+#< CLIXML
+-- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.26300.
+-- framelink: building GStreamer elements (gstframelink)
+-- Configuring done (0.8s)
+-- Generating done (0.7s)
+-- Build files have been written to: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
+  fl_native_relay_process_win.cpp
+  fl_native_relay_process_win.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_native_relay_process_win.exe
+UpdateCTestConfiguration  from :C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/DartConfiguration.tcl
+Test project C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 94
+    Start 94: native_relay_process_win
+
+94: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_native_relay_process_win.exe
+94: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+94: Test timeout computed to be: 30
+94: three-process NV12 relay16/16: exact pixels/PTS/DTS/duration, reversed pool identity, no upstream reuse while downstream held, GPU-fence completion and bounded drain passed
+1/1 Test #94: native_relay_process_win .........   Passed    0.86 sec
+
+The following tests passed:
+	native_relay_process_win
+
+100% tests passed, 0 tests failed out of 1
+
+Total Test time (real) =   0.88 sec
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04"><Obj S="progress" RefId="0"><TN RefId="0"><T>System.Management.Automation.PSCustomObject</T><T>System.Object</T></TN><MS><I64 N="SourceId">1</I64><PR N="Record"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj></Objs>
