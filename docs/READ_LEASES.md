@@ -30,5 +30,6 @@ or connection epochs reject old tokens. No wire-format change is required.
 
 Current tests qualify native ring ownership and deterministic completion ordering,
 not cross-process decoder allocation negotiation, relay, throughput or presentation.
-POSIX GPU-driver sync-file qualification remains pending; eventfd controls are not
-claimed as real GPU execution. See `m5a/read-lease-fences-20261101/`.
+Separate-process RGBA8 GPU reads and real completion-fence export now pass on
+Linux/Windows/Android; see `m5a/read-lease-gpu-20261101/`. Delayed/out-of-order
+POSIX controls still use eventfd; they are distinct from the driver test.
