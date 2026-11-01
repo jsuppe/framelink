@@ -5,7 +5,7 @@ Updated 2026-11-01. This is the checkable execution view of
 remain authoritative. Checked means implemented, reviewed and validated within
 the stated scope—not universal hardware support or physical-output qualification.
 
-Execution order: **M5 → M5a → M6 → M7**, one task at a time. No concurrent
+Remaining execution order: **M5a → M6 → M7**, one task at a time. No concurrent
 implementation/review/validation streams. Finish the current milestone before
 starting the next. Hourly reporting is not an implementation executor.
 
@@ -24,9 +24,10 @@ starting the next. Hourly reporting is not an implementation executor.
 
 ## M5 — Platform deployment and transport qualification
 
-**State: final renderer CI/merge gate active.** FrameLink PR #6 is merged as
-`ab7176e`; renderer PR #13 is not yet merged. Parent `/root` owns this gate;
-there is no user-owned or external blocker.
+**State: COMPLETE, within the documented capability scope.** FrameLink PR #6
+merged as `ab7176e`; renderer PR #13 merged as `9f74b9d` on 2026-11-01 after all
+final checks passed. No outstanding M5 implementation or merge gate; no input
+needed from Jon. Explicit unsupported/unqualified paths remain listed below.
 
 - [x] **M5.1 Desktop external pipeline handoff:** separate decoded producer and
   consumer, video/PCM/PTS checks and explicit failure/deployment checks.
@@ -47,10 +48,12 @@ there is no user-owned or external blocker.
   Retain GDP/GIO PCM transport and document its copies and deployment limits.
 - [x] **M5.7 FrameLink final review/CI/merge:** final Linux/Windows CI passed
   after deterministic audio-fixture repair; PR #6 merged.
-- [ ] **M5.8 Renderer final review/CI/merge and milestone closure:** matching
-  FrameLink pin and portable clock/scheduler/pacer/NV12 tests. Linux, Android and
-  sender passed; Windows build is pending at this checkpoint. Verify merge,
-  reconcile ledgers and close M5 before starting M5a.
+- [x] **M5.8 Renderer final review/CI/merge and milestone closure:** matching
+  FrameLink pin and portable clock/scheduler/pacer/NV12 tests. Windows runtime-path
+  CI gap repaired in `ecda871`, portable checks 13/13 on Caspar and Linux. Final
+  [hosted run41309180883](https://github.com/jsuppe/vkrender/actions/runs/41309180883)
+  passed Windows/Linux/Android/sender; PR #13 merge `9f74b9d` verified. Ledgers and
+  roadmap reconciled. Canceled earlier run remains preserved, not labeled passed.
 
 Deliverables/evidence: [capability matrix](m5/CAPABILITY_MATRIX.md),
 [final integration results](m5/final-integration-20261101/README.md),

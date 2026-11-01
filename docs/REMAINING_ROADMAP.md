@@ -2,9 +2,9 @@
 
 Updated 2026-11-01. Scope: local cross-platform video/audio sessions and renderer
 integration. Historical cloud calling, unrelated receiver features and HDR are
-not part of this release. M1–M4 are merged within their documented qualification
-scope. M5 remains in progress; M5a and subsequent milestones are not implemented
-or qualified merely by being included in this plan.
+not part of this release. M1–M5 are merged within their documented qualification
+scope. M5a and subsequent milestones are not implemented or qualified merely by
+being included in this plan.
 
 For individually checkable tasks and current merge gates, see
 [the executable roadmap checklist](ROADMAP_TASKS.md).
@@ -91,9 +91,11 @@ a separate M5 gate under the clarified producer-to-consumer timing requirement.
 
 ## M5 — Platform deployment and transport qualification
 
-Status: FINAL RENDERER CI / MERGE (authorized 2026-10-30). FrameLink PR #6
-merged as `ab7176e` after final Linux/Windows CI passed. Renderer PR #13 remains
-open; M5 does not close until its final checks and merge are verified. Windows
+Status: COMPLETE, qualified scope (2026-11-01). FrameLink PR #6 merged as
+`ab7176e` after final Linux/Windows CI41308094200 passed. Renderer PR #13 merged
+as `9f74b9d` after final Windows/Linux/Android/sender CI41309180883 passed;
+the Windows test-runtime-path correction is included and its earlier canceled
+run is retained as non-passing evidence. Both merges verified. Windows
 external decoded handoff, sustained native1080p60 gate and signed Android cross-UID
 A/V are validated in their documented scope. See [capability/evidence matrix](m5/CAPABILITY_MATRIX.md)
 for supported modes and explicit exclusions; FrameLink source/evidence are on master.

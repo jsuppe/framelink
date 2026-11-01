@@ -1,8 +1,9 @@
 # M5a: shared-buffer pipeline boundaries
 
 Status: **required design/acceptance contract, not an implementation claim**.
-Updated 2026-10-31 from Jon's clarification. M5 performance/deployment work remains
-active; this contract refines the already approved M5a milestone after M5.
+Updated 2026-11-01 from Jon's 2026-10-31 clarification. M5 is now merged within
+its documented capability scope. This contract defines the approved next M5a
+milestone; its implementation has not started.
 
 ## Intended use
 
