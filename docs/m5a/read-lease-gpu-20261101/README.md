@@ -26,3 +26,13 @@ completeness with GL_INVALID_OPERATION (0x502) on NVIDIA. External-texture sampl
 passes. Sampling support does not imply render-target support; strict usage
 negotiation must preserve that distinction. This observation is not suppressed
 or labeled a driver-generic GPU-render capability.
+
+## Abrupt producer death
+
+Both normal and producer-death cases pass on Linux, Windows and Android (2/2
+per target). Child terminates immediately after publishing its frame, bypassing
+FrameLink cleanup (_exit on POSIX, TerminateProcess on Windows). The consumer
+still imports/reads the allocation, verifies pixels and retires its native fence.
+This proves producer lifetime does not invalidate a retained consumer allocation;
+it does not cover all consumer-GPU reset/driver failure scenarios. Targeted lease
+reconnect tests separately establish replacement is refused while readers remain.

@@ -20,7 +20,7 @@
 #include <sys/wait.h>
 extern char** environ;
 #define CHECK(x) do {if(!(x)){std::fprintf(stderr,"line %d: %s EGL=%x GL=%x\n",__LINE__,#x,eglGetError(),glGetError());std::exit(1);}}while(0)
-static int producer(const char* name) {
+static int producer(const char* name,bool crash) {
  flChannel* p=nullptr;CHECK(flOpenProducer(name,&p)==FL_OK);
  flBuffer b{};CHECK(flAcquireBuffer(p,&b,1000)==FL_OK);void* data=nullptr;uint64_t stride=0;
  CHECK(flImageMap(b.image,&data,&stride)==FL_OK);
@@ -28,12 +28,14 @@ static int producer(const char* name) {
  flImageUnmap(b.image);
  flBuffer spare{},returned{};CHECK(flAcquireBuffer(p,&spare,1000)==FL_OK);
  CHECK(flSubmit(p,&b,123456)==FL_OK);
+ if(crash)_exit(99);
  CHECK(flAcquireBuffer(p,&returned,5000)==FL_OK); // waits for consumer's GPU lease
  CHECK(flCancelBuffer(p,&spare)==FL_OK && flCancelBuffer(p,&returned)==FL_OK);
  flClose(p);return 0;
 }
 int main(int argc,char** argv) {
- if(argc==3 && !std::strcmp(argv[1],"--producer"))return producer(argv[2]);
+ if(argc==3)return producer(argv[2],!std::strcmp(argv[1],"--producer-crash"));
+ bool crash=argc==2 && !std::strcmp(argv[1],"--producer-death");
  EGLDisplay display=EGL_NO_DISPLAY;
 #ifndef __ANDROID__
  auto platform=(PFNEGLGETPLATFORMDISPLAYEXTPROC)eglGetProcAddress("eglGetPlatformDisplayEXT");
@@ -60,7 +62,7 @@ int main(int argc,char** argv) {
  CHECK(createImage&&destroyImage&&bindImage&&createSync&&destroySync&&exportFence);
  std::string name="egl-lease-"+std::to_string(getpid());flChannel *c=nullptr;
  CHECK(flCreateChannelEx(name.c_str(),64,32,FL_FORMAT_RGBA8,2,FL_MAP_CPU|FL_GPU_RENDER|FL_DEFER_RELEASE,&c)==FL_OK);
- pid_t child=0;char* args[]={argv[0],const_cast<char*>("--producer"),const_cast<char*>(name.c_str()),nullptr};
+ pid_t child=0;char* args[]={argv[0],const_cast<char*>(crash?"--producer-crash":"--producer"),const_cast<char*>(name.c_str()),nullptr};
  CHECK(posix_spawn(&child,argv[0],nullptr,nullptr,args,environ)==0);
  flFrame frame{};uint64_t lease=0;CHECK(flAcquireFrame(c,&frame,1000)==FL_OK && flLeaseFrame(c,&frame,&lease)==FL_OK);
  EGLImageKHR image=EGL_NO_IMAGE_KHR;
@@ -90,11 +92,11 @@ int main(int argc,char** argv) {
  auto sync=createSync(display,EGL_SYNC_NATIVE_FENCE_ANDROID,nullptr);CHECK(sync!=EGL_NO_SYNC_KHR);glFlush();
  int fd=exportFence(display,sync);CHECK(fd>=0);
  CHECK(flCompleteReadLeaseSyncFd(c,lease,fd)==FL_OK);close(fd);destroySync(display,sync);
- bool collected=false;for(int i=0;i<2000;++i){auto r=flCollectReadLeases(c);if(r==FL_OK){collected=true;break;}CHECK(r==FL_BUSY);std::this_thread::sleep_for(std::chrono::milliseconds(1));}CHECK(collected);
+ bool collected=false;for(int i=0;i<2000;++i){auto r=flCollectReadLeases(c);if(r==FL_OK){collected=true;break;}CHECK(r==FL_BUSY || (crash && r==FL_DISCONNECTED));std::this_thread::sleep_for(std::chrono::milliseconds(1));}CHECK(collected);
  glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,output,0);unsigned char pixel[4]{};glReadPixels(0,0,1,1,GL_RGBA,GL_UNSIGNED_BYTE,pixel);CHECK(glGetError()==GL_NO_ERROR);
  CHECK(pixel[0]==17&&pixel[1]==91&&pixel[2]==203&&pixel[3]==255);
  glDeleteProgram(program);glDeleteShader(vs);glDeleteShader(fs);glDeleteFramebuffers(1,&fbo);glDeleteTextures(1,&texture);glDeleteTextures(1,&output);destroyImage(display,image);
- int status=0;CHECK(waitpid(child,&status,0)==child && WIFEXITED(status) && WEXITSTATUS(status)==0);
+ int status=0;CHECK(waitpid(child,&status,0)==child && WIFEXITED(status) && WEXITSTATUS(status)==(crash?99:0));
  flClose(c);eglMakeCurrent(display,EGL_NO_SURFACE,EGL_NO_SURFACE,EGL_NO_CONTEXT);eglDestroyContext(display,context);eglDestroySurface(display,surface);eglTerminate(display);
  puts("separate-process EGL imported-allocation GPU read, native sync-file lease retirement and pixel verification passed");
 }

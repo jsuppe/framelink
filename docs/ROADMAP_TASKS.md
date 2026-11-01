@@ -62,7 +62,7 @@ Deliverables/evidence: [capability matrix](m5/CAPABILITY_MATRIX.md),
 
 ## M5a — Native-memory negotiation and zero-copy pipeline boundaries
 
-**State: in progress; M5a.1–2 locally validated; ownership is next.** Deliverables: versioned allocation/usage
+**State: in progress; M5a.1–3 locally validated; transport/presentation separation is next.** Deliverables: versioned allocation/usage
 contract, native-memory GStreamer sink **and source**, platform adapters,
 Windows decoder-to-independent-renderer example, and measured multi-hop evidence.
 
@@ -77,12 +77,17 @@ Windows decoder-to-independent-renderer example, and measured multi-hop evidence
   [Actual-resource checks](m5a/adapters-20261101/README.md): Linux/Windows/Android
   6/6 each. Unknown native layout/device facts remain explicit; external-pool
   adoption/relay are not advertised until implemented. Driver probes remain gated.
-- [ ] **M5a.3 Pool allocation and ownership:** producer-owned vs consumer-provided
+- [x] **M5a.3 Pool allocation and ownership:** producer-owned vs consumer-provided
   allocations; preserve allocation identity and prevent premature reuse until
   every downstream CPU/GPU reader completes, including after crashes/reconnects.
   Subtask3a reservation safety locally validated: [evidence](m5a/ownership-20261101/README.md).
   Local external-pool adoption validated: [API and limits](EXTERNAL_POOLS.md).
-  Strong reader leases and distributed ownership qualification remain incomplete.
+  [Bounded reader leases](READ_LEASES.md), native completion handoff, Windows
+  transactional import cleanup and separate-process RGBA8 GPU reads now pass.
+  [GPU/lifecycle evidence](m5a/read-lease-gpu-20261101/README.md): normal and abrupt
+  producer-death cases 2/2 on Linux/Windows/Android; delayed-reader/reconnect
+  controls pass. External decoder negotiation, distributed relay and broader
+  format/device qualification remain tasks7–13, not implied by this core API gate.
 - [ ] **M5a.4 Transport/presentation separation:** preserve shared A/V PTS and
   clock mappings; no pool-fill gate, independent per-track rebasing or fixed
   playback reservoir at each hop. Final output owns presentation scheduling.
