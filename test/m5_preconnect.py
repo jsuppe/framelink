@@ -59,10 +59,20 @@ for first in ('producer','consumer'):
     assert summary['received']==summary['scheduled']==100,summary
     results.append(dict(mode='order-'+first,**summary))
 # Missing consumer cannot leave start waiting indefinitely; no injection here.
-env=dict(os.environ,GST_PLUGIN_PATH=str(b)+os.pathsep+os.environ.get('GST_PLUGIN_PATH',''))
+env=dict(os.environ,GST_PLUGIN_PATH=str(b)+os.pathsep+os.environ.get('GST_PLUGIN_PATH',''),
+         PATH=str(b)+os.pathsep+os.environ.get('PATH',''),
+         GST_REGISTRY=str(root/'plugin-registry.bin'))
 for key in ('FRAMELINK_TEST_PRODUCER_OPEN_DELAY_MS','FRAMELINK_TEST_LAZY_PRODUCER_OPEN'):env.pop(key,None)
+# Windows plugin-scanner must find framelink.dll as well as gstframelink.dll.
+# Keep discovery/blacklisting local to this test and outside the deadline sample.
+plugin_load='--gst-plugin-load='+str(plugin)
+inspect=subprocess.run(['gst-inspect-1.0'+('.exe' if os.name=='nt' else ''),plugin_load,'framelinksink'],env=env,
+                       stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,timeout=30)
+(root/'plugin-inspect.log').write_text(inspect.stdout)
+assert inspect.returncode==0,inspect.stdout
+assert str(plugin).replace('\\','/').lower() in inspect.stdout.replace('\\','/').lower(),inspect.stdout
 start=time.monotonic()
-run=subprocess.run(['gst-launch-1.0'+('.exe' if os.name=='nt' else ''),'-q','videotestsrc','num-buffers=1','!','video/x-raw,format=BGRA,width=160,height=90','!','framelinksink','channel=preconnect-missing-'+str(os.getpid()),'connect-timeout-ms=100'],env=env,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,timeout=5)
+run=subprocess.run(['gst-launch-1.0'+('.exe' if os.name=='nt' else ''),plugin_load,'-q','videotestsrc','num-buffers=1','!','video/x-raw,format=BGRA,width=160,height=90','!','framelinksink','channel=preconnect-missing-'+str(os.getpid()),'connect-timeout-ms=100'],env=env,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,timeout=5)
 assert run.returncode!=0 and 'readiness deadline' in run.stdout,run.stdout
 assert time.monotonic()-start<3,'connection deadline did not bound absent-consumer retry'
 (root/'deadline.log').write_text(run.stdout)

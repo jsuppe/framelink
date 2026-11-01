@@ -1,11 +1,13 @@
 # framelink
 
-Zero-copy GPU frames between processes. One process draws, another reads the
-**same GPU memory** — no copies, no encode, no network.
+Native shared GPU frames between processes. A native producer and consumer can
+use the **same GPU allocation** without a payload copy. CPU maps, current
+GStreamer system-memory elements and GDP audio can copy; see the capability
+matrix below rather than assuming every pipeline is zero-copy.
 
-**Windows** (shared NT-handle textures) and **Linux** (dma-buf over a unix
-socket) today, from one C API. Android (AHardwareBuffer) is next; nothing
-platform-specific appears in the core header.
+**Windows** (shared NT-handle textures), **Linux** (dma-buf over a Unix socket),
+and **Android** (AHardwareBuffer) share the core C API. Platform headers expose
+interop handles; allocation/format/fence support still depends on the driver.
 
 ```c
 // consumer — owns the buffers
@@ -33,6 +35,10 @@ for (;;) {
 
 ## The one thing to understand
 
+The sketches above omit error/cleanup handling and assume work is complete at
+submit/release. Asynchronous GPU work must use the platform ready/consumed fence
+contract; releasing a slot before its GPU reads finish is not safe.
+
 **The consumer owns the ring.** It calls `flCreateChannel` and allocates the
 buffers; producers attach and draw into them. `flOpenProducer` never creates a
 channel — it returns `FL_NOT_FOUND` if nobody is consuming.
@@ -42,9 +48,9 @@ Android's `Surface`/BufferQueue and `AImageReader`, where buffer ownership
 belongs to the consumer and is not something an API gets to choose. Designing
 it the other way ports fine to Windows and Linux, then hits a wall on Android.
 
-A consequence worth knowing: geometry is the consumer's. A producer reads
-width/height/format from `flQuery` rather than requesting them, exactly as an
-Android producer does not choose a Surface's size.
+Geometry remains consumer-owned. Producers query the accepted configuration
+with `flQuery`; `flRequestGeometry` is an advisory resize request, not permission
+to assume that dimensions or allocation generation have changed.
 
 ## Not D3D11-only
 
@@ -58,9 +64,9 @@ against your writes. Use `flSharedReadyFence` + `flBeginSubmit`/`flEndSubmit`
 and signal the fence inside your own submit. A Vulkan compositor does exactly
 this.
 
-## NV12 (Linux and Windows)
+## NV12
 
-Linux and Windows channels now support `FL_FORMAT_NV12`: full-resolution Y plus half-resolution
+Linux, Windows and supported Android allocations expose `FL_FORMAT_NV12`: full-resolution Y plus half-resolution
 interleaved UV, with even width and height. See [NV12 support](docs/nv12.md)
 for plane mapping, GStreamer examples, compatibility and tested limits.
 
@@ -81,27 +87,25 @@ Set `FRAMELINK_DEBUG=1` for connection diagnostics. Errors always print.
 
 ## Status
 
-Working on **both** platforms: consumer-owned rings, one producer per channel,
-BGRA8, version refused at handshake, bounded back-pressure with
-latest-frame-wins. Windows adds a shared timeline fence pair and
-D3D12/Vulkan/CUDA interop via the shared NT handle; Linux exposes the dma-buf
-(`framelink_dmabuf.h`) for Vulkan/EGL import, plus `flImageMap` for consumers
-that must read pixels.
-
-**Linux sync is weaker and you should know it.** There is no shared fence, so
-`flSubmit` means "I have finished writing" and a consumer has nothing to wait
-on - fine for a CPU producer or a GPU producer that flushed, not enough
-otherwise. `flSharedReadyFence` returns `FL_FORMAT_UNSUPPORTED` there rather
-than handing back something unusable.
+Consumer-owned rings, one producer per channel, bounded backpressure, version
+refusal, BGRA/RGBA/NV12/RGB10A2 and native interop are implemented with documented
+driver-dependent format limits. Windows uses shared timeline fences. Linux and
+Android expose explicit ready/consumed sync-FDs through `framelink_sync_fd.h`;
+external GPU producers must supply actual completion, not submit unfinished work.
+The Windows shared-fence API is not silently emulated on Linux/Android.
 
 **NVIDIA note:** its GBM backend refuses `RENDERING|LINEAR` together, so a
 CPU-mappable buffer is not GPU-renderable. framelink falls back automatically
 and logs it; a GPU producer on NVIDIA should leave `FL_MAP_CPU` off and import
 the dma-buf.
 
-Not yet: Android, `framelink_vulkan.h`, NV12/RGB10A2, explicit sync on Linux,
-access control, and fan-out to several consumers of one channel (today N
-consumers means N channels, so the producer writes N times).
+A/V samples, signed Android cross-app ownership and qualified platform behavior
+are described in the [M5 capability matrix](docs/m5/CAPABILITY_MATRIX.md).
+For integration, start with the [Windows decoded-pipeline guide](docs/M5_WINDOWS_PIPELINE.md)
+or [Android cross-app sample](android/crossapp/README.md).
+Native GStreamer allocation/zero-copy negotiation is planned in M5a; fan-out to
+multiple consumers of one channel is not implemented (use separate channels).
+Physical output timing and seamless device/suspend behavior are not blanket claims.
 
 MIT licensed.
 

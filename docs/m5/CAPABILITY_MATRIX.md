@@ -1,55 +1,59 @@
 # M5 platform capability / evidence matrix
 
-Snapshot: source `210bb53` plus independent external-failure harness. A pass in one
-column must not be read as parity in another. M5a memory negotiation is excluded.
+Final integration review, 2026-11-01, source `ec4d546` plus the corrected external
+failure harness. A platform pass does not imply another platform passed. M5a
+memory negotiation/native GStreamer allocation is excluded. M5 completion means
+the qualified scope below, not unrestricted platform parity.
 
 | Capability | Linux | Windows | Android |
 |---|---|---|---|
-| Authenticated separate-process A/V session | M4 + M5 app tests | M4 + external decoded pipeline | Same APK, separate producer process only |
-| External decoded GStreamer source | BGRA/NV12 MJPEG+PCM AVI; bytes/PTS/duration verified | Same fixture passed on Caspar | Not qualified |
-| PCM offset preservation | 37 ms/123.456789 ms app cases, negative reset rejected | Existing M4/M5 evidence | Receiver completion/focus lifecycle, not external source offset matrix |
-| GPU-native shared video | Existing native transport/renderer path | Existing native transport/renderer path | Existing Binder video API separate from A/V receiver |
-| GPU-native decoder-to-renderer zero-copy | Not promised; M5a | Not promised; M5a | Not promised; CPU Surface qualification path |
-| Actual platform audio API | pulsesink exercised on dedicated null sink | M4 Windows clock/playback tests; see platform evidence | OpenSLES selected, actual APK execution |
-| Physical speaker/display alignment | Not measured; no physical audio exposed | Not measured by decoded fixture | Not measured |
-| Activity lifecycle/audio focus | Not applicable | Not applicable | Background cancellation, focus callback, reopen, Surface recreation passed |
-| Cross-application session ownership | Same-user private rendezvous | Same-user ACL/private rendezvous | Unexported same-app services only; cross-UID broker still pending |
-| Missing endpoint/plugin/media, invalid raw caps | Four bounded failure cases passed; processes reaped and endpoint removed | Not yet rerun with independent failure harness | Additional device/format negatives pending |
-| Audio-route removal | Absent device may fall back on PipeWire; missing server fails | Hardware route test pending | Stop/reopen policy implemented; actual route test pending |
-| Suspend/resume | Not qualified | Not qualified here | Not qualified |
-| Background playback | Desktop process remains owner | Desktop process remains owner | Not supported by current foreground-Activity mode; cancel/reopen |
+| Authenticated separate-process A/V | M4/M5 application tests | M4/M5 and external decoded pipeline | Signed broker, separate producer process, different-UID client |
+| External decoded GStreamer input | BGRA/NV12 MJPEG + PCM AVI, bytes/PTS/duration verified | Same fixture on Caspar | Not qualified; generated source only |
+| Original PCM/video PTS | Offset and reset/drift negative controls | M4 offsets and M5 decoded fixture | Every generated pixel/PCM sample and original PTS verified cross-UID |
+| Native shared video transport | dma-buf path | D3D11 shared texture/fences | Delegated AHardwareBuffer/connected-FD ownership |
+| GPU-only decoder-to-renderer pipeline | Not promised; M5a | Not promised; M5a | Not supported by this CPU GStreamer/Surface example; M5a |
+| Platform audio API | PulseAudio API on dedicated null sink | WASAPI, finite/native A/V qualification | OpenSLES ProducerMapped with guarded resampling |
+| Video delivery/presentation | Existing native and virtual-display tests | Native BGRA/NV12 1080p60, four 70s cases; traced 4200/4200 through GPU completion and API-accepted present | 160x90/30fps; BGRA 300/300 and NV12 450/450 through accepted Surface posts |
+| Cross-application ownership | Same-user private rendezvous | Same-user ACL/private rendezvous | Signature permission, lease authentication, replacement/revoke, independent owner/peer death and fresh restart |
+| Activity/focus lifecycle | N/A | N/A | Background/focus/surface loss cancels both tracks; explicit new-session reopen |
+| Missing endpoint/plugin/media; incompatible raw caps | Corrected four-case negative matrix passed | Same four-case matrix passed on Caspar | Wrong signer/key, unsupported format and invalid bounds passed; desktop plugin/file cases not applicable to packaged source |
+| Background playback | Process owns session | Process owns session | Unsupported in foreground-Activity sample; cancel/reopen is supported |
+| Audio route removal | Missing Pulse server fails; missing device can fall back | Physical route change not qualified | Stop/reopen policy implemented; actual route-unplug qualification outstanding |
+| Suspend/resume | Seamless resume not qualified/supported | Same | Same; explicit stop/new-session restart only |
+| Physical speaker/display alignment | Unmeasured; no physical audio endpoint exposed | Unmeasured | Unmeasured |
 
-## Evidence mapping
-- `TRANSPORT_DECISION.md`: Linux arrival/CPU/copy-cost boundaries and source audit.
-- `linux-external-failures/results.json`: missing session endpoint (1.016 s), missing
-  plugin/media and incompatible raw caps (each approximately 0.064 s), all fail
-  nonzero with no remaining live endpoint and no unreaped children. Persistent
-  `.owner.lock` is intentional and not a leak. File/process cleanup is not proof
-  of GPU-driver allocation reclamation; no driver leak claim is made.
+## Evidence and important exclusions
+
+- `SUSTAINED_PARENT_REVIEW.md` and renderer sustained-qualification evidence:
+  Windows steady 59.993fps, complete traced identities; untraced aggregate counts
+  are not per-identity proof. No physical scanout, cold display-wake or acoustic
+  timing claim. These accepted captures are not new Nov1 Windows performance runs.
 - `external-pipeline-linux/`, `external-pipeline-windows/`,
-  `../M5_WINDOWS_PIPELINE.md`: decoded input payload/timestamp equivalence.
-- `ANDROID_DEPLOYMENT.md`, `android-evidence/`: Android supported mode and remaining
-  gates. Five lifecycle cases passed on TCL tablet; dual-ABI build is not x86 VM
-  runtime qualification. Keep this row updated when Android owner lands new work.
+  `../M5_WINDOWS_PIPELINE.md`: decoded source handoff and reproducible guide.
+- `ANDROID_DEPLOYMENT.md`, `connected-video-20261101/`, `crossapp-20261101/`,
+  `audio-alignment-20261101/`: signed cross-UID integration and final 20/20 device
+  matrix, dual-ABI builds, complete original PCM/PTS and saved sink-call audit.
+  Android runtime is one arm64 API35 device, not Pi or x86 Cuttlefish qualification.
+- Android explicit audio-master diagnostic remains **unqualified**: late device
+  clock startup can stall its synchronous Surface callback and lose video.
+  ProducerMapped is the qualified example default; no silent clock fallback.
+  The OpenSLES negative-forward-span defect is repaired with a real sink regression;
+  a resync can alter hardware output phase, not original transported timestamps.
+- `final-integration-20261101/`: current Linux/Windows negative tests verify the
+  intended error, bounded exit, no live endpoint and reaped children. Historical
+  `linux-external-failures/missing-media` failed while linking; it did **not** prove
+  missing-file handling. The corrected fixture reaches the file-open failure.
+  `.owner.lock` persistence is intentional; cleanup does not prove GPU-driver leak
+  freedom or long-duration resource stability (M6).
+- `TRANSPORT_DECISION.md`: retain serialized/copied GDP/GIO PCM. No measured unmet
+  requirement justifies a new PCM transport. No quantitative latency SLA is claimed.
+- Route unplug, suspend, optical/acoustic measurement and additional Android
+  hardware remain explicit qualification gaps. They are not advertised as seamless
+  supported behavior. Native GStreamer allocation/zero-copy belongs to M5a;
+  sustained soak/restart/resource release gates belong to M6/M7.
 
-## Remaining milestone decisions/gates
-1. Android cross-app authorization and real route/device/suspend coverage remain
-   functional work, not erased by same-app APK success. Product-supported background
-   cancellation is explicit; persistent background audio would require a new
-   foreground-media-service lifecycle contract.
-2. External Windows consumer rendering on actual selected endpoints must be
-   qualified separately from CPU checksum/fakesink tests.
-3. A quantitative latency budget and intended deployment load are not specified.
-   Current characterization cannot certify a latency SLA. No evidence warrants
-   replacing GStreamer PCM transport; retain it pending an actual measured gap.
-4. Linux physical scanout/audio and optical/acoustic alignment remain unqualified;
-   transport PTS preservation remains independently verifiable.
-5. No blanket all-platform qualification: advertise only the supported rows and
-   retain pending tests as pending. Parent owns final milestone closure and review.
+Reproduce desktop deployment negatives (Windows: point to `build/Release`):
 
-Reproduce independent Linux negatives:
 ```
-python3 test/m5_external_failures.py --build build-m5 --output /tmp/m5-failures
+python test/m5_external_failures.py --build build --output /tmp/m5-failures
 ```
-The harness uses native Linux binary/plugin names intentionally; Windows owner
-must port/rerun rather than infer a pass.

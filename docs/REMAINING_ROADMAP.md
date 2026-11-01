@@ -1,6 +1,6 @@
 # FrameLink + renderer remaining roadmap
 
-Updated 2026-10-31. Scope: local cross-platform video/audio sessions and renderer
+Updated 2026-11-01. Scope: local cross-platform video/audio sessions and renderer
 integration. Historical cloud calling, unrelated receiver features and HDR are
 not part of this release. M1–M4 are merged within their documented qualification
 scope. M5 remains in progress; M5a and subsequent milestones are not implemented
@@ -88,8 +88,10 @@ a separate M5 gate under the clarified producer-to-consumer timing requirement.
 
 ## M5 — Platform deployment and transport qualification
 
-Status: IN PROGRESS (authorized 2026-10-30). First deliverable: Windows ordinary
-GStreamer decoded A/V pipeline -> separate FrameLink consumer example and guide.
+Status: FINAL REVIEW / CI (authorized 2026-10-30), not yet merged. Windows
+external decoded handoff, sustained native1080p60 gate and signed Android cross-UID
+A/V are validated in their documented scope. See [capability/evidence matrix](m5/CAPABILITY_MATRIX.md)
+for supported modes and explicit exclusions; source/evidence are on PR6.
 Deliverables: tested Linux/Windows apps, Android APK/service integration, capability
 matrix and transport decision record.
 Tasks:
@@ -202,6 +204,7 @@ or explicitly capability-gated, with unqualified hardware behavior never labeled
 
 ## Execution dependencies
 M1 -> M2 -> M3 -> M4 -> M5 -> M5a -> M6 -> M7.
-Platform investigation and test harness development may run in parallel after M2;
-observability work can accompany implementation. Proposed soak lengths are release
+Jon's 2026-10-31 override requires **one task at a time**: no concurrent
+implementation/review/validation workstreams. Finish and validate the current
+task, then immediately take the next ready task in the current milestone. Proposed soak lengths are release
 checks, not claims of already completed testing. No fixed completion dates assigned.
