@@ -125,7 +125,7 @@ Local references keep both producer slot and channel alive after sink shutdown.
 Remote completion alone cannot reuse a locally-retained slot. **Before abandoning
 an unpublished buffer, finish all GPU work on it.** After publication, do not write
 through retained aliases. This explicit application adapter is not yet a generic
-GStreamer decoder pool: upstream ALLOCATION negotiation, cancellation/completion
+GStreamer decoder pool: generic decoder cancellation/completion
 integration, remote permission agreement and actual decoder compatibility remain
 open. Do not attach arbitrary decoder-owned textures and assume shared adapter
 identity makes them FrameLink allocations.
@@ -135,3 +135,26 @@ covers NV12, original texture identity, exact metadata, retained-memory reuse an
 shutdown lifetime. No full-rate or cross-process pipeline claim is made here.
 Linux and Android native sink modes still reject; their native source adapters
 and legacy sink paths remain supported as documented above.
+
+### Explicit-completion ALLOCATION pool
+
+The Windows native sink now answers ALLOCATION queries that request a pool AND
+set the string field `framelink-completion-contract` to
+`same-device-before-abandon-v1`. Missing/unknown contracts, mismatched geometry,
+non-D3D11/ANY memory features and incompatible pool configuration reject. This
+local API agreement is not authenticated remote memory/usage negotiation.
+
+The offered GstBufferPool has minimum zero and maximum equal to the existing
+FrameLink image capacity. It does not prefill a playback queue. Each acquisition
+reserves an available original image; returning the wrapper does not cache a stale
+published reservation. The native image pool persists without reallocating pixels.
+DONTWAIT exhaustion returns GST_FLOW_EOS; normal acquisition uses the sink's bounded
+buffer-wait-ms. The caller must treat exhaustion according to its agreed drop/error
+policy. Finalizers can release references while another acquisition waits.
+
+Sink shutdown revokes old pools (further acquisition returns FLUSHING), while
+outstanding memory retains ownership. The pool advertises VideoMeta and
+FrameLinkExplicitCompletionV1 options. Upstream must use the supplied device and
+finish GPU work before abandoning unpublished buffers; it must not hold the device
+lock across acquisition. Generic decoder integration remains unqualified until
+its allocation, device, cancellation and completion behavior satisfies this contract.

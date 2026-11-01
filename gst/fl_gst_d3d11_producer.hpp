@@ -5,6 +5,7 @@
 #include <gst/video/video.h>
 #include <memory>
 #include <mutex>
+#include <atomic>
 struct FrameLinkD3DProducer;
 struct FrameLinkD3DReservation {
     std::shared_ptr<FrameLinkD3DProducer> owner;
@@ -19,15 +20,25 @@ struct FrameLinkD3DProducer : std::enable_shared_from_this<FrameLinkD3DProducer>
     flChannelInfo info{};
     GstD3D11Device* device=nullptr;
     std::mutex mutex;
+    std::atomic<bool> active{true};
     explicit FrameLinkD3DProducer(flChannel* ch):channel(ch){
         if(flQuery(ch,&info)==FL_OK)device=gst_d3d11_device_new_wrapped(flChannelD3D11Device(ch));
     }
     ~FrameLinkD3DProducer(){if(device)gst_object_unref(device);flClose(channel);}
     static GQuark key(){return g_quark_from_static_string("framelink-d3d11-producer-reservation");}
     GstBuffer* acquire(guint timeoutMs){
-        std::lock_guard<std::mutex> lock(mutex);
-        if(!device)return nullptr;
-        flBuffer b{};if(flAcquireBuffer(channel,&b,timeoutMs)!=FL_OK)return nullptr;
+        std::unique_lock<std::mutex> lock(mutex);
+        if(!device || !active.load())return nullptr;
+        const auto deadline=g_get_monotonic_time()+gint64(timeoutMs)*1000;
+        flBuffer b{};
+        for(;;){
+            auto result=flAcquireBuffer(channel,&b,0);
+            if(result==FL_OK)break;
+            if(result!=FL_TIMEOUT || g_get_monotonic_time()>=deadline || !active.load())return nullptr;
+            // Let a local finalizer cancel/release while waiting for capacity.
+            lock.unlock();g_usleep(1000);lock.lock();
+            if(!active.load())return nullptr;
+        }
         uint64_t ref=0;
         if(flRetainBufferReference(channel,&b,&ref)!=FL_OK){flCancelBuffer(channel,&b);return nullptr;}
         auto* mem=gst_d3d11_allocator_alloc_wrapped(nullptr,device,flImageD3D11(b.image),0,nullptr,nullptr);
@@ -52,6 +63,7 @@ struct FrameLinkD3DProducer : std::enable_shared_from_this<FrameLinkD3DProducer>
     }
     flResult submit(GstBuffer* buffer,int64_t pts,const flFrameMetadata* metadata=nullptr){
         std::lock_guard<std::mutex> lock(mutex);
+        if(!active.load())return FL_DISCONNECTED;
         if(!buffer || gst_buffer_n_memory(buffer)!=1)return FL_INVALID;
         auto* mem=gst_buffer_peek_memory(buffer,0);
         auto* r=(FrameLinkD3DReservation*)gst_mini_object_get_qdata(GST_MINI_OBJECT(mem),key());
@@ -75,7 +87,6 @@ inline FrameLinkD3DReservation::~FrameLinkD3DReservation(){
     // Explicit producer adapter contract: before abandoning an unpublished
     // buffer, caller finishes its GPU work. Generic decoder cancellation needs
     // an upstream completion integration before it may use this adapter.
-    std::lock_guard<std::mutex> lock(owner->mutex);
-    if(!published)flCancelBuffer(owner->channel,&buffer);
+    if(!published){std::lock_guard<std::mutex> lock(owner->mutex);flCancelBuffer(owner->channel,&buffer);}
     flReleaseBufferReference(owner->channel,reference);
 }

@@ -52,6 +52,7 @@
 #include "fl_gst_metadata.hpp"
 #ifdef FL_GST_D3D11
 #include "fl_gst_d3d11_producer.hpp"
+#include "fl_gst_d3d11_pool.hpp"
 #endif
 #include "framelink_slots.h"
 #ifdef __ANDROID__
@@ -209,7 +210,7 @@ static GstStaticPadTemplate sinkTemplate =
 
 static void sinkDisconnect(GstFrameLinkSink* self) {
 #ifdef FL_GST_D3D11
-    if(self->nativeProducer){delete self->nativeProducer;self->nativeProducer=nullptr;self->ch=nullptr;}
+    if(self->nativeProducer){(*self->nativeProducer)->active=false;delete self->nativeProducer;self->nativeProducer=nullptr;self->ch=nullptr;}
 #endif
     if (self->ch) {
         flClose(self->ch);
@@ -334,6 +335,26 @@ static GstCaps* sinkGetCaps(GstBaseSink* base,GstCaps* filter){
     }
     if(filter){auto* intersect=gst_caps_intersect_full(filter,caps,GST_CAPS_INTERSECT_FIRST);gst_caps_unref(caps);return intersect;}
     return caps;
+}
+static gboolean sinkProposeAllocation(GstBaseSink* base,GstQuery* query){
+    auto* self=GST_FRAMELINK_SINK(base);
+    if(!self->nativeMemory){
+        auto* parent=GST_BASE_SINK_CLASS(gst_framelink_sink_parent_class);
+        return parent->propose_allocation?parent->propose_allocation(base,query):TRUE;
+    }
+#ifdef FL_GST_D3D11
+    const auto* structure=gst_query_get_structure(query);
+    const char* contract=gst_structure_get_string(structure,"framelink-completion-contract");
+    if(!contract || strcmp(contract,"same-device-before-abandon-v1") || !self->nativeProducer)return FALSE;
+    GstCaps* caps=nullptr;gboolean needPool=FALSE;gst_query_parse_allocation(query,&caps,&needPool);
+    if(!caps || !needPool)return FALSE;
+    auto* pool=flCreateD3DPool(*self->nativeProducer,caps,self->bufferWaitMs);if(!pool)return FALSE;
+    GstVideoInfo vi{};gst_video_info_from_caps(&vi,caps);
+    gst_query_add_allocation_pool(query,pool,(guint)vi.size,0,self->cinfo.poolSize);
+    gst_query_add_allocation_meta(query,GST_VIDEO_META_API_TYPE,nullptr);gst_object_unref(pool);return TRUE;
+#else
+    return FALSE;
+#endif
 }
 static gboolean sinkSetCaps(GstBaseSink* base, GstCaps* caps) {
     GstFrameLinkSink* self = GST_FRAMELINK_SINK(base);
@@ -730,6 +751,7 @@ static void gst_framelink_sink_class_init(GstFrameLinkSinkClass* klass) {
             "Raise an error instead of dropping when the bounded buffer wait expires",
             FALSE,(GParamFlags)(G_PARAM_READWRITE|G_PARAM_STATIC_STRINGS|GST_PARAM_MUTABLE_READY)));
     basesink->start = sinkStart;
+    basesink->propose_allocation = sinkProposeAllocation;
     basesink->get_caps = sinkGetCaps;
     basesink->set_caps = sinkSetCaps;
     basesink->render = sinkRender;

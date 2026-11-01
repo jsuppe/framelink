@@ -112,7 +112,10 @@ Windows decoder-to-independent-renderer example, and measured multi-hop evidence
   Partial slice: [Linux DMA-BUF source](GST_NATIVE_MEMORY.md), original-allocation
   RGBA/NV12 and memory-subview lifetime tests passed; Windows wrapped D3D11
   original-storage/copy-negative tests2/2 pass; Android exact RGB AHB adapter
-  and native-layout rejection cases pass. Full task remains open.
+  and native-layout rejection cases pass. Full metadata propagation is validated
+  across all platforms. Windows native sink and explicit-completion ALLOCATION
+  pool are locally validated; generic decoders, Linux/Android native sinks and
+  authenticated remote memory agreement remain open. Full task remains open.
 - [ ] **M5a.8 Windows GPU-decoder example:** GPU GstBuffer → FrameLink sink →
   separate consumer renderer, with tested decoder/adapter/formats and explicit
   CPU-readable staging/readback alternative. Qualify NV12 conversion location.

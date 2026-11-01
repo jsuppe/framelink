@@ -1,5 +1,7 @@
 #include "../gst/fl_gst_d3d11_producer.hpp"
 #include <vector>
+#include <thread>
+#include <chrono>
 #include <gst/app/gstappsrc.h>
 #include <string>
 #include <cstdio>
@@ -31,8 +33,9 @@ static void run(bool nv12){
   CHECK(((unsigned char*)mapped.plane[plane].pixels)[y*mapped.plane[plane].stride+x]==71+plane);
  flImageUnmap(frame.image);CHECK(flRelease(c,&frame)==FL_OK);
  CHECK(!owner->acquire(10)); // producer GstMemory still retained despite remote completion
- auto*retained=gst_memory_ref(mem);gst_buffer_unref(b);CHECK(!owner->acquire(10));gst_memory_unref(retained);
- auto*reused=owner->acquire(1000);CHECK(reused);
+ auto*retained=gst_memory_ref(mem);gst_buffer_unref(b);CHECK(!owner->acquire(10));
+ auto before=g_get_monotonic_time();std::thread finalizer([&]{g_usleep(20000);gst_memory_unref(retained);});
+ auto*reused=owner->acquire(1000);finalizer.join();CHECK(reused&&g_get_monotonic_time()-before<500000);
  // A copied/system allocation is not accepted, even with matching dimensions.
  auto*foreign=gst_buffer_new_allocate(nullptr,pixels.size(),nullptr);CHECK(owner->submit(foreign,1,&meta)==FL_INVALID);gst_buffer_unref(foreign);
  gst_buffer_unref(reused); // unwritten reservation cancels safely
@@ -48,7 +51,25 @@ static void sinkPipeline(){
  auto*pipeline=gst_parse_launch(("appsrc name=in is-live=true format=time caps=video/x-raw(memory:D3D11Memory),format=RGBA,width=64,height=32,framerate=30/1 ! framelinksink name=sink native-memory=true preserve-frame-metadata=true channel="+name+" sync=false async=false enable-last-sample=false").c_str(),&error);CHECK(pipeline&&!error);
  auto*sink=gst_bin_get_by_name(GST_BIN(pipeline),"sink");auto*in=gst_bin_get_by_name(GST_BIN(pipeline),"in");
  CHECK(gst_element_set_state(pipeline,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
- GstBuffer*b=nullptr;g_signal_emit_by_name(sink,"acquire-native-buffer",1000u,&b);CHECK(b);
+ auto*caps=gst_caps_from_string("video/x-raw(memory:D3D11Memory),format=RGBA,width=64,height=32,framerate=30/1");
+ auto*pad=gst_element_get_static_pad(sink,"sink");auto*query=gst_query_new_allocation(caps,TRUE);
+ CHECK(!gst_pad_query(pad,query)); // unaware upstream cannot select unsafe completion semantics
+ gst_structure_set(gst_query_writable_structure(query),"framelink-completion-contract",G_TYPE_STRING,"future-unknown-version",nullptr);
+ CHECK(!gst_pad_query(pad,query));
+ auto*wrongCaps=gst_caps_copy(caps);gst_caps_set_simple(wrongCaps,"width",G_TYPE_INT,128,nullptr);
+ auto*wrongQuery=gst_query_new_allocation(wrongCaps,TRUE);
+ gst_structure_set(gst_query_writable_structure(wrongQuery),"framelink-completion-contract",G_TYPE_STRING,"same-device-before-abandon-v1",nullptr);
+ CHECK(!gst_pad_query(pad,wrongQuery));gst_query_unref(wrongQuery);gst_caps_unref(wrongCaps);
+ gst_structure_set(gst_query_writable_structure(query),"framelink-completion-contract",G_TYPE_STRING,"same-device-before-abandon-v1",nullptr);
+ CHECK(gst_pad_query(pad,query)&&gst_query_get_n_allocation_pools(query)==1);
+ GstBufferPool*pool=nullptr;guint size=0,min=9,max=9;gst_query_parse_nth_allocation_pool(query,0,&pool,&size,&min,&max);CHECK(pool&&min==0&&max==2);
+ gst_query_unref(query);gst_caps_unref(caps);gst_object_unref(pad);CHECK(gst_buffer_pool_set_active(pool,TRUE));
+ GstBuffer*b=nullptr;CHECK(gst_buffer_pool_acquire_buffer(pool,&b,nullptr)==GST_FLOW_OK&&b);
+ GstBuffer*spare=nullptr;CHECK(gst_buffer_pool_acquire_buffer(pool,&spare,nullptr)==GST_FLOW_OK);
+ GstBuffer*blocked=nullptr;GstBufferPoolAcquireParams params{};params.flags=GST_BUFFER_POOL_ACQUIRE_FLAG_DONTWAIT;
+ CHECK(gst_buffer_pool_acquire_buffer(pool,&blocked,&params)==GST_FLOW_EOS);
+ gst_buffer_unref(spare);CHECK(gst_buffer_pool_acquire_buffer(pool,&spare,nullptr)==GST_FLOW_OK);gst_buffer_unref(spare);
+
  auto*mem=gst_buffer_peek_memory(b,0);CHECK(gst_is_d3d11_memory(mem));
  auto*texture=(ID3D11Texture2D*)gst_d3d11_memory_get_resource_handle(GST_D3D11_MEMORY_CAST(mem));
  ID3D11Device*dev=nullptr;texture->GetDevice(&dev);ID3D11DeviceContext*ctx=nullptr;dev->GetImmediateContext(&ctx);
@@ -65,6 +86,8 @@ static void sinkPipeline(){
  auto*bus=gst_element_get_bus(pipeline);auto*failure=gst_bus_timed_pop_filtered(bus,2*GST_SECOND,GST_MESSAGE_ERROR);CHECK(failure);gst_message_unref(failure);gst_object_unref(bus);
  CHECK(flAcquireFrame(c,&frame,20)==FL_TIMEOUT);
  gst_element_set_state(pipeline,GST_STATE_NULL);gst_object_unref(in);gst_object_unref(sink);gst_object_unref(pipeline);
+ CHECK(gst_buffer_pool_acquire_buffer(pool,&blocked,&params)==GST_FLOW_FLUSHING);
+ CHECK(gst_buffer_pool_set_active(pool,FALSE));gst_object_unref(pool);
  CHECK(gst_is_d3d11_memory(gst_buffer_peek_memory(b,0)));gst_buffer_unref(b);flClose(c);
  puts("native sink pipeline: exact texture pixels/metadata, foreign allocation rejection, retained buffer after stop pass");
 }
