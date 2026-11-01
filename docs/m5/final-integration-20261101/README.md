@@ -69,3 +69,25 @@ Final PR/merge state is recorded in the roadmap, not inferred from these tests.
 
 Raw log/CSV artifacts are gzip-compressed without altering bytes, including
 Windows CRLF and gst-inspect formatting. Use `gzip -dc FILE.gz` to inspect.
+
+## Controlled-clock regression correction
+
+Final hosted run41307699862 exposed a test-fixture timing race: all large-phase
+controls passed, but the small20us comparison produced1599 versus1600 output
+samples in separate wall-clock runs. The previous fixture used a real system
+clock and allowed background calibration observations, so exact sample equality
+was not deterministic. This is retained in `clock-fixture-ci-failure.log.gz`.
+
+The regression now drives GstTestClock waits explicitly, disables automatic
+master observations before its sole injected calibration change, and retains
+the actual GstAudioBaseSink resampling implementation. Exact guarded/unguarded
+small-correction equality remains required; it additionally requires output to
+differ from1600, proving small-drift resampling was not silently bypassed.
+Large-phase negative controls remain mandatory. No production audio code changed.
+
+Linux50/50 and Caspar50/50 repetitions passed with identical output across all
+runs (including1599 for both small-correction cases). A separate ASan run passed
+with leak detection disabled for external GStreamer globals; no leak claim.
+Controlled integer epochs yield unguarded-321/-1721/-1920 versus the historical
+wall-clock-320/-1720/-1919; the invariant is the invalid negative span, not those
+old rounding-dependent exact values. Test-only GStreamer-check linkage added.

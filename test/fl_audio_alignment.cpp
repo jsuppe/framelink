@@ -3,6 +3,7 @@
 #include "../samples/audio_alignment.h"
 #include <gst/app/gstappsrc.h>
 #include <gst/audio/gstaudiobasesink.h>
+#include <gst/check/gsttestclock.h>
 #include <vector>
 #include <cstdio>
 #include <cstdlib>
@@ -26,6 +27,9 @@ static void record_ring_class_init(RecordRingClass* c){
   outputs.push_back(output);*sample+=std::abs(output);
   if(outputs.size()==1){
    auto* sink=GST_AUDIO_BASE_SINK(GST_OBJECT_PARENT(b));GstClockTime i,e,n,d;
+   // We inject the only calibration change. Do not let an asynchronous master
+   // observation race it (especially at one-sample rounding boundaries).
+   gst_clock_set_master(sink->provided_clock,nullptr);
    gst_clock_get_calibration(sink->provided_clock,&i,&e,&n,&d);
    gst_clock_set_calibration(sink->provided_clock,i,e+phaseJump,n,d);
   }
@@ -51,7 +55,8 @@ static std::vector<int> run(bool guarded,unsigned samples,GstClockTime jump){
  g_object_set(source,"caps",caps,"format",GST_FORMAT_TIME,nullptr);gst_caps_unref(caps);
  gst_bin_add_many(GST_BIN(pipeline),source,sink,nullptr);REQUIRE(gst_element_link(source,sink));
  if(guarded)REQUIRE(av::protectAudioAlignment(sink));
- auto* clock=gst_system_clock_obtain();gst_pipeline_use_clock(GST_PIPELINE(pipeline),clock);gst_object_unref(clock);
+ auto* clock=gst_test_clock_new_with_start_time(0);
+ gst_pipeline_use_clock(GST_PIPELINE(pipeline),clock);
  REQUIRE(gst_element_set_state(pipeline,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
  std::vector<std::pair<GstBuffer*,guint64>> retained;
  for(unsigned n=0;n<2;++n){
@@ -63,10 +68,20 @@ static std::vector<int> run(bool guarded,unsigned samples,GstClockTime jump){
   retained.emplace_back(b,pts);
  }
  gst_app_src_end_of_stream(GST_APP_SRC(source));
- auto* bus=gst_element_get_bus(pipeline);auto* msg=gst_bus_timed_pop_filtered(bus,3*GST_SECOND,GstMessageType(GST_MESSAGE_EOS|GST_MESSAGE_ERROR));
+ auto* bus=gst_element_get_bus(pipeline);GstMessage* msg=nullptr;
+ const auto deadline=g_get_monotonic_time()+3*G_USEC_PER_SEC;
+ while(!msg && g_get_monotonic_time()<deadline){
+  msg=gst_bus_pop_filtered(bus,GstMessageType(GST_MESSAGE_EOS|GST_MESSAGE_ERROR));
+  GstClockID id=nullptr;
+  if(gst_test_clock_peek_next_pending_id(GST_TEST_CLOCK(clock),&id)){
+   auto when=gst_clock_id_get_time(id);
+   if(when>gst_clock_get_time(clock))gst_test_clock_set_time(GST_TEST_CLOCK(clock),when);
+   gst_test_clock_process_id(GST_TEST_CLOCK(clock),id); // consumes the ID ref
+  }else g_usleep(1000);
+ }
  if(msg && GST_MESSAGE_TYPE(msg)==GST_MESSAGE_ERROR){GError* e=nullptr;gst_message_parse_error(msg,&e,nullptr);fprintf(stderr,"gst: %s\n",e->message);g_error_free(e);}
  REQUIRE(msg && GST_MESSAGE_TYPE(msg)==GST_MESSAGE_EOS);
- gst_element_set_state(pipeline,GST_STATE_NULL);gst_message_unref(msg);gst_object_unref(bus);gst_object_unref(pipeline);
+ gst_element_set_state(pipeline,GST_STATE_NULL);gst_message_unref(msg);gst_object_unref(bus);gst_object_unref(pipeline);gst_object_unref(clock);
  for(auto& entry:retained){REQUIRE(GST_BUFFER_PTS(entry.first)==entry.second);REQUIRE(GST_BUFFER_DURATION(entry.first)==gst_util_uint64_scale(samples,GST_SECOND,48000));gst_buffer_unref(entry.first);}
  printf("guarded=%d samples=%u jump=%llu commits=%zu",guarded,samples,(unsigned long long)jump,outputs.size());for(auto n:outputs)printf(" %d",n);puts("");
  REQUIRE(outputs.size()==2 && outputs[0]>0);
@@ -79,5 +94,6 @@ int main(int argc,char**argv){
  for(unsigned samples:{1600u,200u,1u}){run(false,samples,40*GST_MSECOND);run(true,samples,40*GST_MSECOND);}
  const auto unguarded=run(false,1600,20*GST_USECOND),guarded=run(true,1600,20*GST_USECOND);
  REQUIRE(unguarded==guarded); // small corrections retain normal resampling
+ REQUIRE(unguarded[1]!=1600); // the small correction was actually exercised
  puts("real resampler phase-jump negative controls, variable block bounds and small-drift preservation passed");
 }
