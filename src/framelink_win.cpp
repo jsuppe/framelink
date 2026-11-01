@@ -14,6 +14,7 @@
 #define FL_EXPORTS
 #include "framelink.h"
 #include "framelink_memory.h"
+#include "fl_read_ledger.hpp"
 #include "fl_layout.h"
 #include "framelink_d3d11.h"
 
@@ -79,6 +80,7 @@ struct flChannel {
     std::atomic<bool> peerGone{false};
     std::mutex pendingMutex;
     bool hasPending = false;
+    fl::ReadLedger readers;
     bool frameHeld = false;
     uint64_t heldReady = 0;
     uint32_t heldSlot = 0;
@@ -235,7 +237,7 @@ bool resetSync(flChannel* ch) {
     {
         std::lock_guard<std::mutex> hold(ch->pendingMutex);
         ch->hasPending = false; // announced against the old fence
-        ch->heldReady=0;
+        ch->readers.resetEpoch();ch->heldReady=0;
     }
     ++ch->info.generation;
     return true;
@@ -326,7 +328,7 @@ void acceptLoop(flChannel* ch) {
 
         {
             std::lock_guard<std::mutex> hold(ch->pendingMutex);
-            if(ch->frameHeld || ch->consumedFence->GetCompletedValue()<ch->heldReady ||
+            if(!ch->readers.empty() || ch->frameHeld || ch->consumedFence->GetCompletedValue()<ch->heldReady ||
                (ch->hasPending && ch->readyFence->GetCompletedValue()<ch->pendingReady)) {
                 link.send(fl::MsgType::Busy);
                 continue;
@@ -356,7 +358,7 @@ void acceptLoop(flChannel* ch) {
                     // between here and the new ring being live.
                     {
                         std::lock_guard<std::mutex> hold(ch->pendingMutex);
-                        if(ch->frameHeld || ((ch->flags & (FL_GPU_SYNC|FL_DEFER_RELEASE)) && ch->consumedFence->GetCompletedValue()<ch->heldReady)){if(!handOverRing(ch,link,link.peerPid()))break;continue;}
+                        if(!ch->readers.empty() || ch->frameHeld || ((ch->flags & (FL_GPU_SYNC|FL_DEFER_RELEASE)) && ch->consumedFence->GetCompletedValue()<ch->heldReady)){if(!handOverRing(ch,link,link.peerPid()))break;continue;}
                         ch->hasPending = false; // stale: the old ring is going away
                     }
                     const uint32_t pool = (uint32_t)ch->images.size();
@@ -870,6 +872,7 @@ FL_API flResult flRelease(flChannel* ch, const flFrame* frame) {
     if (!ch || !ch->isConsumer || !frame || frame->slot >= ch->images.size()) return trace.result(FL_INVALID);
     {
         std::lock_guard<std::mutex> hold(ch->pendingMutex);
+        if(!ch->readers.empty())return FL_BUSY;
         if(!ch->frameHeld || frame->_readyValue!=ch->heldReady || frame->slot!=ch->heldSlot)
             return trace.result(FL_INVALID);
         ch->frameHeld=false;
@@ -896,6 +899,14 @@ FL_API flResult flRelease(flChannel* ch, const flFrame* frame) {
     ch->ctx->Flush();
     return trace.result(FL_OK);
 }
+
+
+static void releaseLeaseReadyFence(flChannel*) {}
+static flResult retireReadLeases(flChannel* ch,uint64_t value) {
+    if(FAILED(ch->ctx->Signal(ch->consumedFence.Get(),value)))return FL_INTERNAL;
+    ch->ctx->Flush();ch->consumedValue=value;return FL_OK;
+}
+#include "fl_read_api.inc"
 
 FL_API flResult flQuery(flChannel* ch, flChannelInfo* out) {
     if (!ch || !out) return FL_INVALID;

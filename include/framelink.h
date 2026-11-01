@@ -5,9 +5,9 @@
 // specific (see the enum comments and platform interop headers).
 //
 // The ring belongs to the CONSUMER. A consumer calls flCreateChannel and owns
-// the buffers; producers flOpenProducer onto a channel that already exists and
-// never allocate. That is BufferQueue/AImageReader ownership, which is what
-// Android forces and therefore what all platforms use.
+// the endpoint pool; platform factories can also adopt externally allocated
+// buffers. Producers flOpenProducer onto that existing endpoint. See the
+// platform interop headers for external allocation and lifetime contracts.
 //
 //   consumer:  flCreateChannel -> flAcquireFrame / flRelease  -> flClose
 //   producer:  flOpenProducer  -> flAcquireBuffer / flSubmit  -> flClose
@@ -278,6 +278,27 @@ FL_API void     flClose(flChannel*);
 // Snapshot opt-in trace to FRAMELINK_TRACE.<pid>.csv. Control thread only.
 FL_API flResult flTraceFlush(void);
 
+#ifdef __cplusplus
+}
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+// Optional bounded downstream read leases. Channel must use FL_DEFER_RELEASE,
+// not FL_GPU_SYNC. Acquire normally, then transfer its held frame to a lease.
+// At most FL_MAX_POOL_SIZE frames and 256 readers are retained per channel.
+// Do not mix manual consumed-fence signalling with leases. Serialize these calls
+// with other channel operations. All leases MUST finish/collect before flClose.
+FL_API flResult flLeaseFrame(flChannel*, const flFrame*, uint64_t* lease);
+FL_API flResult flRetainReadLease(flChannel*, uint64_t lease, uint64_t* retained);
+FL_API flResult flReadLeaseFrame(flChannel*, uint64_t lease, flFrame*, uint64_t* generation);
+// Call only AFTER this reader's CPU/GPU access is actually complete. This does
+// not wait on a GPU fence. Consumes token exactly once; borrowed image then expires.
+FL_API flResult flCompleteReadLease(flChannel*, uint64_t lease);
+// Publish only the completed prefix; later completions cannot release earlier
+// readers. Retry backend retirement failure here, not by completing a token twice.
+FL_API flResult flCollectReadLeases(flChannel*);
 #ifdef __cplusplus
 }
 #endif

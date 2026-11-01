@@ -37,6 +37,7 @@
 #define FL_EXPORTS
 #include "framelink.h"
 #include "framelink_memory.h"
+#include "fl_read_ledger.hpp"
 #include <dlfcn.h>
 #include "framelink_sync_fd.h"
 #include "fl_sync_fd.hpp"
@@ -96,6 +97,7 @@ struct flChannel {
     std::atomic<bool> peerGone{false};
     std::mutex pendingMutex;
     bool hasPending = false;
+    fl::ReadLedger readers;
     bool frameHeld = false;
     uint64_t heldReady = 0;
     uint64_t retiredValue = 0; // completed consumer GPU reads; protects geometry changes
@@ -178,7 +180,7 @@ bool reallocRing(flChannel* ch, uint32_t w, uint32_t h, uint32_t poolSize) {
     for(auto* old:ch->images)freeImage(old);
     ch->images=std::move(fresh);
     ch->info.width=w;ch->info.height=h;++ch->info.generation;
-    ch->heldReady=ch->retiredValue=0;ch->sync.clear();
+    ch->readers.resetEpoch();ch->heldReady=ch->retiredValue=0;ch->sync.clear();
     return true;
 }
 
@@ -310,14 +312,14 @@ void acceptLoop(flChannel* ch, fl::Channel delegated) {
         {
             std::lock_guard<std::mutex> hold(ch->pendingMutex);
             ch->sync.advance(ch->retiredValue);
-            if(ch->frameHeld || ch->retiredValue<ch->heldReady || !fl::fenceReady(ch->sync.pending)) {
+            if(!ch->readers.empty() || ch->frameHeld || ch->retiredValue<ch->heldReady || !fl::fenceReady(ch->sync.pending)) {
                 link.send(fl::MsgType::Busy);
                 continue;
             }
             // A new producer starts its timeline at one. Old release values
             // must never authorize reuse on the replacement timeline.
             ch->hasPending=false;ch->sync.clear();
-            ch->heldReady=ch->retiredValue=0;
+            ch->readers.resetEpoch();ch->heldReady=ch->retiredValue=0;
             ++ch->info.generation;
             if (!handOverRing(ch, link)) continue;
         }
@@ -744,6 +746,7 @@ FL_API flResult flReleaseSyncFd(flChannel* ch, const flFrame* frame, int consume
     fr.slot = frame->slot;
     fr.readyValue = frame->_readyValue;
     std::lock_guard<std::mutex> hold(ch->pendingMutex);
+    if(!ch->readers.empty())return FL_BUSY;
     if (!ch->frameHeld || ch->heldReady != frame->_readyValue || ch->heldSlot != frame->slot)
         return trace.result(FL_INVALID);
     int localFd=consumedFd>=0?dup(consumedFd):-1;
@@ -760,6 +763,7 @@ FL_API flResult flRelease(flChannel* ch, const flFrame* frame) {
     if(ch && (ch->flags & (FL_GPU_SYNC|FL_DEFER_RELEASE))) {
         if(!ch->isConsumer || !frame)return FL_INVALID;
         std::lock_guard<std::mutex> hold(ch->pendingMutex);
+    if(!ch->readers.empty())return FL_BUSY;
         if(!ch->frameHeld || frame->_readyValue!=ch->heldReady || frame->slot!=ch->heldSlot)return FL_INVALID;
         ch->frameHeld=false;
         if(ch->sync.held>=0)close(ch->sync.held);ch->sync.held=-1;
@@ -770,6 +774,7 @@ FL_API flResult flRelease(flChannel* ch, const flFrame* frame) {
 FL_API flResult flSignalConsumedSyncFd(flChannel* ch,uint64_t value,int fd) {
     if(!ch || !ch->isConsumer || !(ch->flags & (FL_GPU_SYNC|FL_DEFER_RELEASE)))return FL_INVALID;
     std::lock_guard<std::mutex> hold(ch->pendingMutex);
+    if(!ch->readers.empty())return FL_BUSY;
     if(value>ch->heldReady)return FL_INVALID;
     int localFd=fd>=0?dup(fd):-1;
     if(fd>=0 && localFd<0)return FL_INTERNAL;
@@ -800,6 +805,20 @@ FL_API flResult flSubmitSyncFd(flChannel* ch,const flBuffer* buffer,int fd,int64
     fl::FrameReadyMsg fr{};fr.slot=buffer->slot;fr.readyValue=value;fr.ptsNs=pts;
     return trace.result(ch->link.sendWithFds(fl::MsgType::FrameReady,&fr,sizeof(fr),fd>=0?&fd:nullptr,fd>=0?1:0)?FL_OK:FL_DISCONNECTED);
 }
+
+
+static void releaseLeaseReadyFence(flChannel* ch) {
+    if(ch->sync.held>=0)close(ch->sync.held);ch->sync.held=-1;
+}
+static flResult retireReadLeases(flChannel* ch,uint64_t value) {
+    // Readers completed synchronously before this call; no deferred fence here.
+    fl::FrameReadyMsg message{};message.readyValue=value;
+    if(ch->peer.connected() && !ch->peer.sendWithFds(fl::MsgType::FrameReleased,
+        &message,sizeof(message),nullptr,0))return FL_DISCONNECTED;
+    ch->retiredValue=value;
+    return FL_OK;
+}
+#include "fl_read_api.inc"
 
 FL_API flResult flQuery(flChannel* ch, flChannelInfo* out) {
     if (!ch || !out) return FL_INVALID;
