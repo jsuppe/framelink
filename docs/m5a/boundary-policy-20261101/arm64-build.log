@@ -1,0 +1,23 @@
+[ 11%] Building CXX object CMakeFiles/framelink.dir/src/framelink_android.cpp.o
+[ 22%] Building CXX object CMakeFiles/framelink.dir/src/framelink_slots.cpp.o
+[ 33%] Building CXX object CMakeFiles/framelink.dir/src/fl_ipc_posix.cpp.o
+[ 44%] Building CXX object CMakeFiles/framelink.dir/src/fl_trace.cpp.o
+[ 55%] Building CXX object CMakeFiles/framelink.dir/src/framelink_session.cpp.o
+[ 66%] Building CXX object CMakeFiles/framelink.dir/src/framelink_memory.cpp.o
+[ 77%] Linking CXX static library libframelink.a
+[ 77%] Built target framelink
+[ 88%] Building CXX object CMakeFiles/fl_memory_boundary.dir/test/fl_memory_boundary.cpp.o
+[100%] Linking CXX executable fl_memory_boundary
+[100%] Built target fl_memory_boundary
+[ 77%] Built target framelink
+[ 88%] Building CXX object CMakeFiles/fl_memory_contract.dir/test/fl_memory_contract.cpp.o
+[100%] Linking CXX executable fl_memory_contract
+[100%] Built target fl_memory_contract
+[ 77%] Built target framelink
+[ 88%] Building C object CMakeFiles/fl_memory_c_api.dir/test/fl_memory_c_api.c.o
+[100%] Linking CXX executable fl_memory_c_api
+[100%] Built target fl_memory_c_api
+[ 77%] Built target framelink
+[ 88%] Building CXX object CMakeFiles/fl_memory_resource.dir/test/fl_memory_resource.cpp.o
+[100%] Linking CXX executable fl_memory_resource
+[100%] Built target fl_memory_resource

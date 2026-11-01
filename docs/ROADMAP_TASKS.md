@@ -62,7 +62,7 @@ Deliverables/evidence: [capability matrix](m5/CAPABILITY_MATRIX.md),
 
 ## M5a — Native-memory negotiation and zero-copy pipeline boundaries
 
-**State: in progress; M5a.1–5 locally validated; strict/fallback negotiation is next.** Deliverables: versioned allocation/usage
+**State: in progress; M5a.1–6 locally validated; native GStreamer integration is next.** Deliverables: versioned allocation/usage
 contract, native-memory GStreamer sink **and source**, platform adapters,
 Windows decoder-to-independent-renderer example, and measured multi-hop evidence.
 
@@ -100,8 +100,10 @@ Windows decoder-to-independent-renderer example, and measured multi-hop evidence
   [Pool policy](POOL_POLICY.md): two/three-image saturation, bounded wait/drop/error,
   delayed readers, opt-in receiver age and counters. Linux7/7, Windows7/7 and
   Android policy suite/dualABI pass; no end-to-end latency or full-rate claim.
-- [ ] **M5a.6 Strict vs fallback:** explicit copy/conversion permission; strict
-  zero-copy rejects incompatible paths. Define conflicting-consumer behavior.
+- [x] **M5a.6 Strict vs fallback:** explicit copy/conversion permission; strict
+  zero-copy rejects incompatible declared paths. Conflicting consumers cannot
+  override each other. [Boundary policy](m5a/boundary-policy-20261101/README.md):
+  Linux/Windows/Android7/7 each, dualABI builds. Runtime enforcement is task7.
 - [ ] **M5a.7 Native-memory GStreamer sink and source:** remote requirements in
   caps/ALLOCATION/pools, safe renegotiation on format/device/generation changes,
   unchanged A/V session timing and legacy behavior; explicitly carry variable

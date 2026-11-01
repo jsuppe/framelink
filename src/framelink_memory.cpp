@@ -65,6 +65,43 @@ flMemoryResult flMemoryEvaluate(const flMemoryRequirements* r,
         ? FL_MEMORY_INCOMPATIBLE : FL_MEMORY_OK;
 }
 
+flMemoryResult flMemoryRequirementsCombine(const flMemoryRequirements* requirements,
+                                         size_t count, flMemoryRequirements* out) {
+    if(!requirements || !out || !count || count>FL_MEMORY_MAX_ENDPOINTS)return FL_MEMORY_INVALID;
+    flMemoryRequirements combined{};combined.version=FL_MEMORY_VERSION;
+    combined.allowedResourceTypes=FL_MEMORY_RESOURCE_ALL;
+    combined.allowedOperations=FL_MEMORY_OPERATIONS_ALL;
+    for(size_t i=0;i<count;++i) {
+        auto result=flMemoryRequirementsValidate(&requirements[i]);if(result!=FL_MEMORY_OK)return result;
+        combined.requiredUsage |= requirements[i].requiredUsage;
+        combined.preferredUsage |= requirements[i].preferredUsage;
+        combined.allowedResourceTypes &= requirements[i].allowedResourceTypes;
+        combined.allowedOperations &= requirements[i].allowedOperations;
+    }
+    if(!combined.allowedResourceTypes)return FL_MEMORY_INCOMPATIBLE;
+    *out=combined;return FL_MEMORY_OK;
+}
+
+flMemoryResult flMemoryEvaluateBoundary(const flMemoryRequirements* requirements,
+                                        const flMemoryPath* paths,size_t count,
+                                        flMemoryDecision* out) {
+    if(!requirements || !paths || !out || !count || count>FL_MEMORY_MAX_ENDPOINTS)return FL_MEMORY_INVALID;
+    uint32_t operations=0;
+    for(size_t i=0;i<count;++i) {
+        auto result=flMemoryRequirementsValidate(&requirements[i]);if(result!=FL_MEMORY_OK)return result;
+        result=flMemoryPathValidate(&paths[i]);if(result!=FL_MEMORY_OK)return result;
+        if(paths[i].resourceType!=paths[0].resourceType)return FL_MEMORY_INVALID;
+        operations |= paths[i].operations;
+    }
+    flMemoryDecision decisions[FL_MEMORY_MAX_ENDPOINTS]{};
+    auto result=FL_MEMORY_OK;
+    for(size_t i=0;i<count;++i) {
+        auto path=paths[i];path.operations=operations;
+        if(flMemoryEvaluate(&requirements[i],&path,&decisions[i])!=FL_MEMORY_OK)result=FL_MEMORY_INCOMPATIBLE;
+    }
+    std::memcpy(out,decisions,count*sizeof(*out));return result;
+}
+
 flMemoryResult flMemoryRequirementsEncode(const flMemoryRequirements* r,
                                          void* data, size_t size) {
     if (!data || size != FL_MEMORY_REQUIREMENTS_WIRE_SIZE) return FL_MEMORY_INVALID;

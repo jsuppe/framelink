@@ -1,0 +1,20 @@
+fl_memory_boundary
+boundary agreement: endpoint usages, all-participant operation consent, conflicts and bounded negatives pass
+exit=0
+fl_memory_contract
+memory policy: strict/fallback, hard/preferred usage, versions, golden wire and malformed inputs passed
+exit=0
+fl_memory_c_api
+exit=0
+fl_memory_resource 1
+resource format=1: ownership, actual metadata, strict mapping policy, pixels/PTS and unknown-field checks passed
+exit=0
+fl_memory_resource 2
+resource format=2: ownership, actual metadata, strict mapping policy, pixels/PTS and unknown-field checks passed
+exit=0
+fl_memory_resource 3
+resource format=3: ownership, actual metadata, strict mapping policy, pixels/PTS and unknown-field checks passed
+exit=0
+fl_memory_resource 4
+resource format=4: ownership, actual metadata, strict mapping policy, pixels/PTS and unknown-field checks passed
+exit=0

@@ -81,6 +81,21 @@ FL_API flMemoryResult flMemoryEvaluate(const flMemoryRequirements*,
 FL_API flMemoryResult flMemoryRequirementsEncode(const flMemoryRequirements*, void*, size_t);
 FL_API flMemoryResult flMemoryRequirementsDecode(const void*, size_t, flMemoryRequirements*);
 
+// Bounded agreement helpers for one exact candidate allocation/path. These are
+// policy evaluation, not device/layout probing or control transport.
+#define FL_MEMORY_MAX_ENDPOINTS 16u
+// Union hard usage demands/preferences; intersect resource/copy permissions.
+// Conflicting resource masks reject, never discard a participant's requirement.
+// On any failure leaves output unchanged. Does not union endpoint capabilities.
+FL_API flMemoryResult flMemoryRequirementsCombine(const flMemoryRequirements*,
+    size_t count, flMemoryRequirements* out);
+// Each endpoint keeps its own usage capabilities. All endpoints must permit the
+// UNION of boundary operations, so a copy on the producer cannot bypass a strict
+// consumer. Candidate resource types must agree; device/layout/identity agreement
+// is a separate prerequisite. Outputs count decisions on OK/INCOMPATIBLE only.
+FL_API flMemoryResult flMemoryEvaluateBoundary(const flMemoryRequirements*,
+    const flMemoryPath*, size_t count, flMemoryDecision* decisions);
+
 // Read-only facts about an actual channel image. Unknown is not unsupported:
 // only fields identified by knownFields may be used as positive evidence.
 #define FL_MEMORY_INFO_VERSION 1u

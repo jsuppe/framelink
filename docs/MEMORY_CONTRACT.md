@@ -150,3 +150,32 @@ Remote allocation negotiation and safe relay remain incomplete and unadvertised.
 cannot establish safe reuse. No claim of physical GPU residency is made.
 
 [Device and mapping validation](m5a/adapters-20261101/README.md).
+
+## M5a.6 — agreement across participants
+
+`flMemoryRequirementsCombine` computes an allocation demand from up to sixteen
+participants: hard and preferred usage are unions; resource and operation
+permissions are intersections. A conflicting resource set rejects without
+modifying the output. This is not a union of endpoint capabilities.
+
+`flMemoryEvaluateBoundary` evaluates one exact candidate against every endpoint.
+Each endpoint supplies its own demonstrated usage capabilities, while the union
+of all declared boundary payload operations must be allowed by **every**
+participant. A producer permitting upload cannot override a strict consumer;
+a consumer permitting readback cannot override a strict producer. Missing
+preferences are diagnostic only; missing hard usage always rejects. The caller
+must first establish matching allocation identity, layout, device and generation.
+Resource-type mismatch is invalid, not an invitation to choose a silent fallback.
+
+If a strict candidate fails, the caller can propose another candidate, but must
+not edit participants' hard demands or broaden their operation permissions.
+A copied/converted candidate succeeds only with explicit consent from all
+participants. Conflicting consumers reject the shared candidate; separate pools
+or transformations require a separate, explicitly agreed path. Unknown driver
+facts must be probed or rejected, never inferred from requested allocation flags.
+
+Invalid/version errors leave all decisions unchanged; valid incompatible paths
+return per-endpoint diagnostics. These bounded helpers do not perform I/O, map
+pixels, wait for fences or select a physical memory residency. Runtime protocol,
+GStreamer enforcement, legacy-peer rejection and generation-bound agreement are
+M5a.7 integration work, not established by this policy validation.
