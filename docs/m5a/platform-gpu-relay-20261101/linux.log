@@ -1,0 +1,26 @@
+Internal ctest changing into directory: /tmp/fl-m5a-gst-build
+UpdateCTestConfiguration  from :/tmp/fl-m5a-gst-build/DartConfiguration.tcl
+UpdateCTestConfiguration  from :/tmp/fl-m5a-gst-build/DartConfiguration.tcl
+Test project /tmp/fl-m5a-gst-build
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 95
+    Start 95: native_relay_process_linux
+
+95: Test command: /tmp/fl-m5a-gst-build/fl_native_relay_process_linux
+95: Working Directory: /tmp/fl-m5a-gst-build
+95: Test timeout computed to be: 30
+95: EGL vendor=NVIDIA GL vendor=NVIDIA Corporation renderer=NVIDIA GeForce RTX 3090/PCIe/SSE2
+95: three-process native EGL relay16/16: original identity, reversed slots, exact pixels/PTS/DTS/duration, no upstream reuse while downstream held, actual EGL sampling and sync-fd retirement passed
+1/1 Test #95: native_relay_process_linux .......   Passed    0.27 sec
+
+The following tests passed:
+	native_relay_process_linux
+
+100% tests passed, 0 tests failed out of 1
+
+Total Test time (real) =   0.27 sec
