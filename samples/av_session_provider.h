@@ -1,5 +1,6 @@
 #pragma once
 #include "av_rendezvous.h"
+#include "framelink_session.h"
 #include <gio/gio.h>
 #include <functional>
 
@@ -19,6 +20,14 @@ struct SessionProvider {
   std::function<bool(Endpoint&, unsigned timeoutMs, std::string&)> resolve;
   std::function<GSocketConnection*(const Endpoint&, char role,
                                   unsigned timeoutMs, std::string&)> connect;
+  // Optional native-video ownership seam, called after authenticated session
+  // negotiation. Returns a NEW owning channel of the indicated role (producer
+  // true, ring-owning consumer false), matching cfg.video. GStreamer adopts it
+  // exactly once; no named fallback/reconnect is allowed for that channel.
+  // Caller must obey timeoutMs and bind to this resolve() lease/generation.
+  // Null on failure. Not used with PlaybackOptions::externalVideo.
+  std::function<flChannel*(const flSessionConfig&, bool producer,
+                          unsigned timeoutMs, std::string&)> openVideo;
 };
 }
 

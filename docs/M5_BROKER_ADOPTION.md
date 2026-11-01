@@ -111,3 +111,28 @@ copy is introduced. CPU NV12 normalization/BGRA swizzle is unchanged.
 The signed APK SessionProvider/native-sink binding and real cross-UID A/V
 qualification are still the next task. The new native test verifies same-UID
 separate processes, not permission delegation or physical GPU/display timing.
+
+## GStreamer native channel adoption
+
+`SessionProvider::openVideo(config, producerRole, timeoutMs, error)` optionally
+returns an owning native channel matching the authenticated selection. The A/V
+host checks dimensions/format and transfers it through the elements'
+`adopt-channel` action signal before leaving NULL state. Signal signature:
+`gboolean adopt-channel(flChannel*)`; TRUE transfers ownership, FALSE leaves it
+with the caller. Callers must supply the correct producer/consumer role and
+serialize setup/state changes. This is a native application API, not a numeric
+handle intended for gst-launch strings. Finalization closes a channel adopted
+before a failed start. A stopped/revoked lease never falls back to named lookup;
+reuse needs a newly adopted channel. Existing no-provider behavior is unchanged.
+
+This changes rendezvous/ownership only. System-memory caps still copy through
+FrameLink's CPU mapping; native Gst buffer caps/zero-copy policy remain M5a.
+ProducerMapped startup still imports video before PRIMED/GO and preserves media
+PTS. Native renderer externalVideo ownership stays separate and is rejected if
+combined with this element-owned provider to avoid two owners of one ring.
+
+Fresh Linux focused tests passed3/3 (17.75s): timestamp contract, ordinary slot
+preconnect, broker producer. The latter now has14 real-peer cases including
+adopted BGRA/NV12 (all20frames delivered) and explicit native lease refusal.
+Android arm64 and x86_64 full A/V native builds passed. Signed APK wiring and
+cross-UID A/V runtime qualification follow; these are not claimed by this seam.

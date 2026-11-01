@@ -144,6 +144,7 @@ typedef struct _GstFrameLinkSink {
     gint slots;     // 0 = open `channel` directly; N = walk `channel.0..N-1`
 
     flChannel* ch;
+    gboolean delegated; // one adopted lease; never fall back to named redial
     flChannelInfo cinfo;
     GstVideoInfo vinfo;
     gboolean haveInfo;
@@ -182,6 +183,7 @@ static void sinkDisconnect(GstFrameLinkSink* self) {
 // start after the pipeline (a receiver launched at boot), die and come back
 // (renderer restart) - the sink just keeps dialling.
 static void sinkTryConnect(GstFrameLinkSink* self) {
+    if(self->ch || self->delegated)return;
     const gint64 now = g_get_monotonic_time();
     if (now < self->nextConnectUs) return;
     self->nextConnectUs = now + G_USEC_PER_SEC;
@@ -232,6 +234,11 @@ static void sinkTryConnect(GstFrameLinkSink* self) {
 // choosing/releasing their common playback epoch, not in the first render.
 static gboolean sinkStart(GstBaseSink* base) {
     auto* self=GST_FRAMELINK_SINK(base);
+    if(self->delegated) {
+        if(self->ch)return TRUE;
+        GST_ELEMENT_ERROR(self,RESOURCE,OPEN_WRITE,("Fresh broker video lease required"),(NULL));
+        return FALSE;
+    }
     self->testOpenDelayed=FALSE;
     if(!self->connectTimeoutMs)return TRUE;
     // A previous stream's caps are not this stream's geometry. Claim the
@@ -324,6 +331,7 @@ static GstFlowReturn sinkRender(GstBaseSink* base, GstBuffer* buffer) {
         account("gst.frame_drop.channel_lost");
         GST_WARNING_OBJECT(self, "channel lost (%s) - will redial", flResultString(r));
         sinkDisconnect(self);
+        if(self->delegated)return trace.result(GST_FLOW_ERROR);
         return trace.result(GST_FLOW_OK);
     }
 
@@ -511,8 +519,17 @@ static void sinkGetProperty(GObject* obj, guint id, GValue* value, GParamSpec* s
 
 static void sinkFinalize(GObject* obj) {
     GstFrameLinkSink* self = GST_FRAMELINK_SINK(obj);
+    sinkDisconnect(self); // adoption can precede PLAYING and fail during setup
     g_free(self->channel);
     G_OBJECT_CLASS(gst_framelink_sink_parent_class)->finalize(obj);
+}
+
+// Action signal accepts one OWNED producer channel only in NULL. TRUE transfers
+// ownership; FALSE leaves it with the caller. No allocation/lookup is performed.
+static gboolean sinkAdoptChannel(GstFrameLinkSink* self,flChannel* channel) {
+    if(GST_STATE(self)!=GST_STATE_NULL || self->ch || !channel)return FALSE;
+    flChannelInfo info{};if(flQuery(channel,&info)!=FL_OK)return FALSE;
+    self->ch=channel;self->cinfo=info;self->delegated=TRUE;return TRUE;
 }
 
 static void gst_framelink_sink_class_init(GstFrameLinkSinkClass* klass) {
@@ -523,6 +540,9 @@ static void gst_framelink_sink_class_init(GstFrameLinkSinkClass* klass) {
     gobject->set_property = sinkSetProperty;
     gobject->get_property = sinkGetProperty;
     gobject->finalize = sinkFinalize;
+    g_signal_new_class_handler("adopt-channel",G_TYPE_FROM_CLASS(klass),
+        GSignalFlags(G_SIGNAL_RUN_LAST|G_SIGNAL_ACTION),G_CALLBACK(sinkAdoptChannel),
+        nullptr,nullptr,nullptr,G_TYPE_BOOLEAN,1,G_TYPE_POINTER);
 
     g_object_class_install_property(
         gobject, SINK_PROP_CHANNEL,
@@ -581,6 +601,7 @@ typedef struct _GstFrameLinkSrc {
     gboolean haveTimestamp;
 
     flChannel* ch;
+    gboolean delegated;
     flChannelInfo cinfo;
     guint64 generation; // re-read geometry + renegotiate caps when it moves
     volatile gint flushing;
@@ -641,7 +662,7 @@ static gboolean srcStart(GstBaseSrc* base) {
     GstFrameLinkSrc* self = GST_FRAMELINK_SRC(base);
     // FL_MAP_CPU: this ring exists to be read byte-wise. Windows ignores the
     // flag (no CPU path) and the readback goes through a staging texture.
-    flResult r = flCreateChannelEx(self->channel, (guint32)self->width,
+    flResult r = self->delegated ? (self->ch ? FL_OK : FL_DISCONNECTED) : flCreateChannelEx(self->channel, (guint32)self->width,
                                    (guint32)self->height, toFlFormat(gst_video_format_from_string(self->format)), 4, FL_MAP_CPU,
                                    &self->ch);
     if (r != FL_OK) {
@@ -694,7 +715,7 @@ static GstFlowReturn srcCreate(GstPushSrc* push, GstBuffer** outbuf) {
         if (r == FL_OK) break;
         // TIMEOUT = no producer yet; DISCONNECTED = producer left, the ring
         // (ours) lives on and the next producer just dials in. Both mean wait.
-        if (r == FL_TIMEOUT || r == FL_DISCONNECTED) continue;
+        if (r == FL_TIMEOUT || (r == FL_DISCONNECTED && !self->delegated)) continue;
         GST_ELEMENT_ERROR(self, RESOURCE, READ, ("framelink acquire failed"),
                           ("flAcquireFrame: %s", flResultString(r)));
         return trace.result(GST_FLOW_ERROR);
@@ -868,9 +889,18 @@ static void srcGetProperty(GObject* obj, guint id, GValue* value, GParamSpec* sp
 
 static void srcFinalize(GObject* obj) {
     GstFrameLinkSrc* self = GST_FRAMELINK_SRC(obj);
+    if(self->ch){flClose(self->ch);self->ch=nullptr;}
     g_free(self->channel);
     g_free(self->format);
     G_OBJECT_CLASS(gst_framelink_src_parent_class)->finalize(obj);
+}
+
+static gboolean srcAdoptChannel(GstFrameLinkSrc* self,flChannel* channel) {
+    if(GST_STATE(self)!=GST_STATE_NULL || self->ch || !channel)return FALSE;
+    flChannelInfo info{};if(flQuery(channel,&info)!=FL_OK)return FALSE;
+    if(info.width!=(guint)self->width || info.height!=(guint)self->height ||
+       info.format!=toFlFormat(gst_video_format_from_string(self->format)))return FALSE;
+    self->ch=channel;self->cinfo=info;self->delegated=TRUE;return TRUE;
 }
 
 static void gst_framelink_src_class_init(GstFrameLinkSrcClass* klass) {
@@ -882,6 +912,9 @@ static void gst_framelink_src_class_init(GstFrameLinkSrcClass* klass) {
     gobject->set_property = srcSetProperty;
     gobject->get_property = srcGetProperty;
     gobject->finalize = srcFinalize;
+    g_signal_new_class_handler("adopt-channel",G_TYPE_FROM_CLASS(klass),
+        GSignalFlags(G_SIGNAL_RUN_LAST|G_SIGNAL_ACTION),G_CALLBACK(srcAdoptChannel),
+        nullptr,nullptr,nullptr,G_TYPE_BOOLEAN,1,G_TYPE_POINTER);
 
     g_object_class_install_property(
         gobject, SRC_PROP_CHANNEL,

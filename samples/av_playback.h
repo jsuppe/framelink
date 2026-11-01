@@ -39,8 +39,9 @@ struct PlaybackOptions {
 };
 // One broker-owned producer session. The provider supplies server ends of two
 // distinct connected byte streams. Broker must shutdown them on revoke/stop.
-// This does not transfer the native video ring: Android still needs its video
-// ownership bridge before these APIs form a cross-UID A/V application.
+// Optional SessionProvider::openVideo transfers the native channel to the
+// pipeline; without it, video keeps the existing named transport. Cross-UID
+// callers must supply authorized video ownership as well as C/A streams.
 struct ProducerOptions {
   std::string plugin, format="BGRA";
   unsigned frames=150, width=160, height=90, fps=50, rate=48000, channels=2;

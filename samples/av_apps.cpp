@@ -870,6 +870,23 @@ struct StartupGate {
 };
 using av::AudioTimeline;
 using av::trackAudio;
+void adoptVideo(Pipeline& pipeline,const char* elementName,const av::SessionProvider* provider,
+                const flSessionConfig& config,bool producer,unsigned timeout) {
+  if(!provider || !provider->openVideo)return;
+  auto* element=named(pipeline,elementName);
+  Object elementOwner{G_OBJECT(element)};
+  need(g_signal_lookup("adopt-channel",G_OBJECT_TYPE(element)),"FrameLink plugin lacks native channel adoption");
+  std::string error;
+  std::unique_ptr<flChannel,decltype(&flClose)> channel(provider->openVideo(config,producer,timeout,error),flClose);
+  need(bool(channel),error.empty()?"broker native video unavailable":error);
+  flChannelInfo info{};
+  need(flQuery(channel.get(),&info)==FL_OK && info.width==config.video.width &&
+       info.height==config.video.height && info.format==config.video.format,"broker video configuration mismatch");
+  gboolean adopted=FALSE;
+  g_signal_emit_by_name(element,"adopt-channel",channel.get(),&adopted);
+  need(adopted,"FrameLink native channel adoption rejected");
+  channel.release(); // element now owns it, including failure before PLAYING
+}
 unsigned runProducer(const Options &o, GSocketListener *l,
                      const av::Endpoint &ep, Watchdog& watchdog,
                      const av::SessionProvider* provider=nullptr,
@@ -934,6 +951,7 @@ unsigned runProducer(const Options &o, GSocketListener *l,
           audioCaps(o) +
           " ! queue max-size-buffers=4 max-size-bytes=0 max-size-time=80000000 "
           "! gdppay ! giostreamsink name=audioio sync=false async=false" : externalPipeline(o,channel));
+  adoptVideo(tx,"videooutput",provider,cfg,true,o.timeout);
   // READY proves the consumer has entered setup; start() waits for the actual
   // producer resource import before the final shared epoch is selected.
   if(coordinated && !g_getenv("FRAMELINK_TEST_LAZY_PRODUCER_OPEN")) {
@@ -1108,12 +1126,14 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
   std::string id = idHex(cfg.sessionId), channel = "av3-" + id;
   if (o.stream) {
     Pipeline rx;
-    std::string video = externalVideo ? "" : "framelinksrc channel="+channel+
+    need(!externalVideo || !provider || !provider->openVideo,"broker video adoption requires internal video receiver");
+    std::string video = externalVideo ? "" : "framelinksrc name=videoinput channel="+channel+
       " width="+std::to_string(o.width)+" height="+std::to_string(o.height)+
       " fps="+std::to_string(o.fps)+" format="+o.format+
       " preserve-timestamps=true ! appsink name=vout sync=false max-buffers=3 drop=false ";
     parse(rx, video+"appsrc name=audioio is-live=false format=bytes block=true max-buffers=4 ! gdpdepay ! "+
       audioCaps(o)+" ! identity name=timeline ! queue name=audioqueue max-size-buffers=4 max-size-bytes=0 max-size-time=80000000 ! audioconvert ! audioresample ! volume name=playvolume ! "+o.audioSink+" name=playaudio sync=true"+(o.audioSink=="fakesink" ? " async=false" : ""));
+    if(!externalVideo)adoptVideo(rx,"videoinput",provider,cfg,false,o.timeout);
     if(o.traceMedia){attachTrace(rx,"timeline","src","consumer","audio");if(!externalVideo)attachTrace(rx,"vout","sink","consumer","video");}
     AudioTimeline audioTimeline; audioTimeline.pipeline=rx.p; audioTimeline.rate=o.rate; audioTimeline.channels=o.channels;
     auto *identity=named(rx,"timeline");
