@@ -1,0 +1,26 @@
+Internal ctest changing into directory: /tmp/fl-m5a-gst-build
+UpdateCTestConfiguration  from :/tmp/fl-m5a-gst-build/DartConfiguration.tcl
+UpdateCTestConfiguration  from :/tmp/fl-m5a-gst-build/DartConfiguration.tcl
+Test project /tmp/fl-m5a-gst-build
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 91
+    Start 91: native_relay_linux
+
+91: Test command: /tmp/fl-m5a-gst-build/fl_native_relay_linux
+91: Working Directory: /tmp/fl-m5a-gst-build
+91: Test timeout computed to be: 20
+91: three-process NV12 relay16/16: exact allocation matching, pixels, PTS/DTS/duration and bounded drain passed
+91: same-allocation NV12 relay: reversed slots, exact metadata/pixels, two downstream leases prevent upstream reuse, completion releases correct allocation; zero relay payload maps/copies
+1/1 Test #91: native_relay_linux ...............   Passed    0.11 sec
+
+The following tests passed:
+	native_relay_linux
+
+100% tests passed, 0 tests failed out of 1
+
+Total Test time (real) =   0.12 sec

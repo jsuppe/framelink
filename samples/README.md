@@ -235,3 +235,6 @@ timeouts are independent of media duration; this does not add infinite/live supp
 
 See [D3D decoder example](D3D_DECODER.md) for the bounded GPU color-transform path,
 explicit CPU-readable alternative, two-image ring and checked interactive runner.
+
+See [native relay ownership](NATIVE_RELAY.md) for same-allocation forwarding without
+a payload copy, including the required downstream-completion contract and limits.

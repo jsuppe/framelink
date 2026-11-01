@@ -62,7 +62,7 @@ Deliverables/evidence: [capability matrix](m5/CAPABILITY_MATRIX.md),
 
 ## M5a — Native-memory negotiation and zero-copy pipeline boundaries
 
-**State: in progress; M5a.1–8 locally validated; pass-through relay/transform is next.** Deliverables: versioned allocation/usage
+**State: in progress; M5a.1–9 locally validated; instrumentation is next.** Deliverables: versioned allocation/usage
 contract, native-memory GStreamer sink **and source**, platform adapters,
 Windows decoder-to-independent-renderer example, and measured multi-hop evidence.
 
@@ -125,8 +125,15 @@ Windows decoder-to-independent-renderer example, and measured multi-hop evidence
   Stock decoder arrays are non-shareable (NT export0/30): raw NV12 pass-through
   remains unsupported on this decoder. Color conversion is explicit, not claimed
   as raw decoder zero-copy. No sustained-rate or physical-scanout claim.
-- [ ] **M5a.9 Pass-through relay and transform output:** forwarding the same
-  allocation across processes; distinguish required processing from boundary copies.
+- [x] **M5a.9 Pass-through relay and transform output — locally validated, not merged:**
+  bounded read-only relay retains upstream ownership until downstream completion;
+  native identity matching, reversed slots, exact timing, wrong-identity rejection,
+  slow-reader and disconnect pinning pass on Linux/Windows/Android. Linux three-
+  process NV12 test16/16 passed; Windows/Android fixtures are local ownership tests.
+  [Guide](../samples/NATIVE_RELAY.md), [evidence/remaining qualification](m5a/native-relay-20261101/README.md).
+  GPU transformed output is task8's explicit color conversion. GPU relay performance,
+  Windows/Android three-process and production broker/recovery qualification remain
+  M5a.12–13 gates; no automatic-safe-recovery claim on peer death.
 - [ ] **M5a.10 Instrumentation:** selected usage/memory/device, fallback reason,
   queue occupancy, waits, ownership and actual copies/readbacks/uploads.
 - [ ] **M5a.11 Contract/negative tests:** hard/preferred requirements, malformed
