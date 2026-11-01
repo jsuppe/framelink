@@ -3,7 +3,8 @@
 Status: **required design/acceptance contract, not an implementation claim**.
 Updated 2026-11-01 from Jon's 2026-10-31 clarification. M5 is now merged within
 its documented capability scope. This contract defines the approved next M5a
-milestone; its implementation has not started.
+milestone. M5a.1 policy helpers are now locally validated; allocation adapters,
+control-exchange and native GStreamer integration are still pending.
 
 ## Intended use
 

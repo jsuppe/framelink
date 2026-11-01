@@ -62,12 +62,15 @@ Deliverables/evidence: [capability matrix](m5/CAPABILITY_MATRIX.md),
 
 ## M5a — Native-memory negotiation and zero-copy pipeline boundaries
 
-**State: approved, not started.** Deliverables: versioned allocation/usage
+**State: in progress; M5a.1 locally validated, remaining tasks pending.** Deliverables: versioned allocation/usage
 contract, native-memory GStreamer sink **and source**, platform adapters,
 Windows decoder-to-independent-renderer example, and measured multi-hop evidence.
 
-- [ ] **M5a.1 Usage/capability contract:** required vs preferred CPU read/write,
+- [x] **M5a.1 Usage/capability contract:** required vs preferred CPU read/write,
   GPU sampling/rendering and decoder output; version compatibility and rejection.
+  [Contract](MEMORY_CONTRACT.md) and [validation](m5a/contract-20261101/README.md):
+  Linux/Windows/Android device4/4 each, dual-ABI builds and sanitizers. Local
+  policy helpers only; runtime extension exchange/adapter qualification remains.
 - [ ] **M5a.2 Platform adapters:** resource type, device/adapter identity,
   format/planes/stride/modifiers, import/export/forwarding and fence capabilities
   for supported Windows D3D, Linux DMA-BUF and Android AHardwareBuffer paths.
