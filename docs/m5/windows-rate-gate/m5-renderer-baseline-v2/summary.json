@@ -1,0 +1,234 @@
+[
+  {
+    "case": "m4-BGRA-30",
+    "wall_s": 10.465582099976018,
+    "renderer_exit": 0,
+    "commands": [
+      [
+        "C:/Program Files/gstreamer/1.0/msvc_x86_64/bin/gst-launch-1.0.exe",
+        "-q",
+        "videotestsrc",
+        "is-live=true",
+        "pattern=ball",
+        "!",
+        "video/x-raw,format=BGRA,width=1920,height=1080,framerate=30/1",
+        "!",
+        "framelinksink",
+        "channel=m4-BGRA-30.in.0",
+        "sync=true"
+      ],
+      [
+        "C:\\Users\\jonsu\\dev\\vkrender-m4-20261030\\build\\Release\\vkrenderer.exe",
+        "--serve",
+        "m4-BGRA-30",
+        "--headless",
+        "120",
+        "--control-port",
+        "0"
+      ]
+    ]
+  },
+  {
+    "case": "m5-BGRA-30",
+    "wall_s": 6.597176700131968,
+    "renderer_exit": 0,
+    "commands": [
+      [
+        "C:/Program Files/gstreamer/1.0/msvc_x86_64/bin/gst-launch-1.0.exe",
+        "-q",
+        "videotestsrc",
+        "is-live=true",
+        "pattern=ball",
+        "!",
+        "video/x-raw,format=BGRA,width=1920,height=1080,framerate=30/1",
+        "!",
+        "framelinksink",
+        "channel=m5-BGRA-30.in.0",
+        "sync=true"
+      ],
+      [
+        "C:\\Users\\jonsu\\dev\\vkrender-m5-pipeline\\build\\Release\\vkrenderer.exe",
+        "--serve",
+        "m5-BGRA-30",
+        "--headless",
+        "120",
+        "--control-port",
+        "0"
+      ]
+    ]
+  },
+  {
+    "case": "m4-BGRA-60",
+    "wall_s": 4.684914099983871,
+    "renderer_exit": 0,
+    "commands": [
+      [
+        "C:/Program Files/gstreamer/1.0/msvc_x86_64/bin/gst-launch-1.0.exe",
+        "-q",
+        "videotestsrc",
+        "is-live=true",
+        "pattern=ball",
+        "!",
+        "video/x-raw,format=BGRA,width=1920,height=1080,framerate=60/1",
+        "!",
+        "framelinksink",
+        "channel=m4-BGRA-60.in.0",
+        "sync=true"
+      ],
+      [
+        "C:\\Users\\jonsu\\dev\\vkrender-m4-20261030\\build\\Release\\vkrenderer.exe",
+        "--serve",
+        "m4-BGRA-60",
+        "--headless",
+        "120",
+        "--control-port",
+        "0"
+      ]
+    ]
+  },
+  {
+    "case": "m5-BGRA-60",
+    "wall_s": 4.694202799815685,
+    "renderer_exit": 0,
+    "commands": [
+      [
+        "C:/Program Files/gstreamer/1.0/msvc_x86_64/bin/gst-launch-1.0.exe",
+        "-q",
+        "videotestsrc",
+        "is-live=true",
+        "pattern=ball",
+        "!",
+        "video/x-raw,format=BGRA,width=1920,height=1080,framerate=60/1",
+        "!",
+        "framelinksink",
+        "channel=m5-BGRA-60.in.0",
+        "sync=true"
+      ],
+      [
+        "C:\\Users\\jonsu\\dev\\vkrender-m5-pipeline\\build\\Release\\vkrenderer.exe",
+        "--serve",
+        "m5-BGRA-60",
+        "--headless",
+        "120",
+        "--control-port",
+        "0"
+      ]
+    ]
+  },
+  {
+    "case": "m4-NV12-30",
+    "wall_s": 6.634436500025913,
+    "renderer_exit": 0,
+    "commands": [
+      [
+        "C:/Program Files/gstreamer/1.0/msvc_x86_64/bin/gst-launch-1.0.exe",
+        "-q",
+        "videotestsrc",
+        "is-live=true",
+        "pattern=ball",
+        "!",
+        "video/x-raw,format=NV12,width=1920,height=1080,framerate=30/1",
+        "!",
+        "framelinksink",
+        "channel=m4-NV12-30.in.0",
+        "sync=true"
+      ],
+      [
+        "C:\\Users\\jonsu\\dev\\vkrender-m4-20261030\\build\\Release\\vkrenderer.exe",
+        "--serve",
+        "m4-NV12-30",
+        "--headless",
+        "120",
+        "--control-port",
+        "0"
+      ]
+    ]
+  },
+  {
+    "case": "m5-NV12-30",
+    "wall_s": 6.858254799852148,
+    "renderer_exit": 0,
+    "commands": [
+      [
+        "C:/Program Files/gstreamer/1.0/msvc_x86_64/bin/gst-launch-1.0.exe",
+        "-q",
+        "videotestsrc",
+        "is-live=true",
+        "pattern=ball",
+        "!",
+        "video/x-raw,format=NV12,width=1920,height=1080,framerate=30/1",
+        "!",
+        "framelinksink",
+        "channel=m5-NV12-30.in.0",
+        "sync=true"
+      ],
+      [
+        "C:\\Users\\jonsu\\dev\\vkrender-m5-pipeline\\build\\Release\\vkrenderer.exe",
+        "--serve",
+        "m5-NV12-30",
+        "--headless",
+        "120",
+        "--control-port",
+        "0"
+      ]
+    ]
+  },
+  {
+    "case": "m4-NV12-60",
+    "wall_s": 6.115081100026146,
+    "renderer_exit": 0,
+    "commands": [
+      [
+        "C:/Program Files/gstreamer/1.0/msvc_x86_64/bin/gst-launch-1.0.exe",
+        "-q",
+        "videotestsrc",
+        "is-live=true",
+        "pattern=ball",
+        "!",
+        "video/x-raw,format=NV12,width=1920,height=1080,framerate=60/1",
+        "!",
+        "framelinksink",
+        "channel=m4-NV12-60.in.0",
+        "sync=true"
+      ],
+      [
+        "C:\\Users\\jonsu\\dev\\vkrender-m4-20261030\\build\\Release\\vkrenderer.exe",
+        "--serve",
+        "m4-NV12-60",
+        "--headless",
+        "120",
+        "--control-port",
+        "0"
+      ]
+    ]
+  },
+  {
+    "case": "m5-NV12-60",
+    "wall_s": 5.8434900001157075,
+    "renderer_exit": 0,
+    "commands": [
+      [
+        "C:/Program Files/gstreamer/1.0/msvc_x86_64/bin/gst-launch-1.0.exe",
+        "-q",
+        "videotestsrc",
+        "is-live=true",
+        "pattern=ball",
+        "!",
+        "video/x-raw,format=NV12,width=1920,height=1080,framerate=60/1",
+        "!",
+        "framelinksink",
+        "channel=m5-NV12-60.in.0",
+        "sync=true"
+      ],
+      [
+        "C:\\Users\\jonsu\\dev\\vkrender-m5-pipeline\\build\\Release\\vkrenderer.exe",
+        "--serve",
+        "m5-NV12-60",
+        "--headless",
+        "120",
+        "--control-port",
+        "0"
+      ]
+    ]
+  }
+]

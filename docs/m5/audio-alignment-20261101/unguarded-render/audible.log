@@ -1,0 +1,872 @@
+
+11-01 07:18:04.431  3850  3850 I FLCross : bind=true
+11-01 07:18:04.949  3886  3908 I FLCross : grant lease=1ac206c4-792e-46e5-9013-b887a9169346 generation=1 consumer_uid=10305 broker_uid=10304
+11-01 07:18:04.949  3914  3928 I FLCross : producer-start lease=1ac206c4-792e-46e5-9013-b887a9169346 uid=10304 pid=3914
+11-01 07:18:04.977  3850  3913 I FLCross : receiver-start lease=1ac206c4-792e-46e5-9013-b887a9169346 generation=1 uid=10305 pid=3850
+11-01 07:18:05.068  3850  3913 I FLCross : playback producer-system-clock
+11-01 07:18:07.319  3850  3913 I FLCross : opensles_ringbuffer: ringbuffer created
+11-01 07:18:07.319  3850  3913 I FLCross : opensles_ringbuffer: Found 1 output devices
+11-01 07:18:07.319  3850  3913 I FLCross : opensles_ringbuffer:   DeviceID: fffffffe
+11-01 07:18:07.319  3850  3913 I FLCross : opensles_ringbuffer: device opened
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: release old ringbuffer
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: time was 0:00:00.000000000
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: parse caps
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: acquire ringbuffer
+11-01 07:18:07.319  3850  3913 I FLCross : opensles_ringbuffer: changed volume to 0
+11-01 07:18:07.319  3850  3913 I FLCross : opensles_ringbuffer: changed mute to 0
+11-01 07:18:07.319  3850  3913 I FLCross : opensles_ringbuffer: ringbuffer acquired
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: activate ringbuffer
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: latency query
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: peer or we are not live, don't care about latency
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: latency query
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: peer or we are not live, don't care about latency
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:18:07.319  3850  3913 I FLCross : clock now=3266503613125228 base=3266503661423266 latency=100000000
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: latency query
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: peer or we are not live, don't care about latency
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: ringbuffer may start now
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: checking preroll
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: possibly waiting for clock to reach 0:00:00.000000000
+11-01 07:18:07.319  3850  3913 I FLCross : audio samples=1600 late=0 queue=0 drift=0
+11-01 07:18:07.319  3850  3913 I FLCross : audio-clock-calibration internal=0 external=0 rate=1/1
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: clock returned 0 5124095:34:33.662028040
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: latency synced
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:18:07.319  3850  3913 I FLCross : opensles_ringbuffer: ringbuffer  started
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: internal time: 0:00:00.000000000 external time: 907:21:43.661423266
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: Setting clock as master
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: time 0:00:00.000000000, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: processed samples: raw 1440, delay 1440, real 0, time 0:00:00.000000000
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: running: start 0:00:00.000000000 - stop 0:00:00.033333333
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: internal 0:00:00.000000000 external 907:21:43.661423266 1/1 = 1.000000
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:00.100000000 - stop 0:00:00.133333333
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:00.100000000 - stop 0:00:00.133333333
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: resync after discont/resync
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: rendering at 4800 1600/1600
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: next sample expected at 6400
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: time 0:00:00.033333333, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: running: start 0:00:00.033333333 - stop 0:00:00.066666666
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: internal 0:00:00.000000000 external 907:21:43.661423266 1/1 = 1.000000
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:00.133333333 - stop 0:00:00.166666666
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:00.133333333 - stop 0:00:00.166666666
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (1) < 1920
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: rendering at 6400 1600/1599
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: next sample expected at 7999
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: latency query
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: peer or we are not live, don't care about latency
+11-01 07:18:07.319  3850  3913 I FLCross : video received=0 pts=0 clock=3266503700891997 base=3266503661423266 latency=100000000
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: time 0:00:00.066666666, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: running: start 0:00:00.066666666 - stop 0:00:00.099999999
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: internal 0:00:00.000000000 external 907:21:43.661423266 1/1 = 1.000000
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:00.166666666 - stop 0:00:00.199999999
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:00.166666666 - stop 0:00:00.199999999
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (0) < 1920
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: rendering at 7999 1600/1600
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: next sample expected at 9599
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: time 0:00:00.100000000, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: running: start 0:00:00.100000000 - stop 0:00:00.133333333
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: internal 0:00:00.000000000 external 907:21:43.661423266 1/1 = 1.000000
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:00.200000000 - stop 0:00:00.233333333
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:00.200000000 - stop 0:00:00.233333333
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (-1) < 1920
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: rendering at 9599 1600/1601
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: next sample expected at 11200
+11-01 07:18:07.319  3850  3913 I FLCross : audio samples=6400 late=0 queue=0 drift=-1090667
+11-01 07:18:07.319  3850  3913 I FLCross : audio-clock-calibration internal=0 external=3266503661423266 rate=1/1
+11-01 07:18:07.319  3850  3913 I FLCross : video received=1 pts=33333333 clock=3266503766073920 base=3266503661423266 latency=100000000
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: processed samples: raw 4320, delay 1248, real 3072, time 0:00:00.064000000
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: time 0:00:00.133333333, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: running: start 0:00:00.133333333 - stop 0:00:00.166666666
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: internal 0:00:00.000000000 external 907:21:43.661423266 1/1 = 1.000000
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:00.233333333 - stop 0:00:00.266666666
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:00.233333333 - stop 0:00:00.266666666
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (1) < 1920
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: rendering at 11200 1600/1599
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: next sample expected at 12799
+11-01 07:18:07.319  3850  3913 I FLCross : video received=2 pts=66666666 clock=3266503798062151 base=3266503661423266 latency=100000000
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: time 0:00:00.166666666, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: running: start 0:00:00.166666666 - stop 0:00:00.199999999
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: internal 0:00:00.000000000 external 907:21:43.661423266 1/1 = 1.000000
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:00.266666666 - stop 0:00:00.299999999
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:00.266666666 - stop 0:00:00.299999999
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (0) < 1920
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: rendering at 12799 1600/1600
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: next sample expected at 14399
+11-01 07:18:07.319  3850  3913 I FLCross : video received=3 pts=100000000 clock=3266503831527074 base=3266503661423266 latency=100000000
+11-01 07:18:07.319  3850  3913 I FLCross : video received=4 pts=133333333 clock=3266503863055997 base=3266503661423266 latency=100000000
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: time 0:00:00.200000000, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: running: start 0:00:00.200000000 - stop 0:00:00.233333333
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: internal 0:00:00.000000000 external 907:21:43.661423266 1/1 = 1.000000
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:00.300000000 - stop 0:00:00.333333333
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:00.300000000 - stop 0:00:00.333333333
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (-1) < 1920
+11-01 07:18:07.319  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: rendering at 14399 1600/1601
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: next sample expected at 16000
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: processed samples: raw 9120, delay 1200, real 7920, time 0:00:00.165000000
+11-01 07:18:07.320  3850  3913 I FLCross : audio samples=11200 late=0 queue=0 drift=-1272898
+11-01 07:18:07.320  3850  3913 I FLCross : audio-clock-calibration internal=0 external=3266503661423266 rate=1/1
+11-01 07:18:07.320  3850  3913 I FLCross : video received=5 pts=166666666 clock=3266503896623151 base=3266503661423266 latency=100000000
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: time 0:00:00.233333333, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: running: start 0:00:00.233333333 - stop 0:00:00.266666666
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: internal 0:00:00.000000000 external 907:21:43.661423266 1/1 = 1.000000
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:00.333333333 - stop 0:00:00.366666666
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:00.333333333 - stop 0:00:00.366666666
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (1) < 1920
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: rendering at 16000 1600/1599
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: next sample expected at 17599
+11-01 07:18:07.320  3850  3913 I FLCross : video received=6 pts=200000000 clock=3266503930239997 base=3266503661423266 latency=100000000
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: time 0:00:00.266666666, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: running: start 0:00:00.266666666 - stop 0:00:00.299999999
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: internal 0:00:00.000000000 external 907:21:43.661423266 1/1 = 1.000000
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:00.366666666 - stop 0:00:00.399999999
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:00.366666666 - stop 0:00:00.399999999
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (0) < 1920
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: rendering at 17599 1600/1600
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: next sample expected at 19199
+11-01 07:18:07.320  3850  3913 I FLCross : video received=7 pts=233333333 clock=3266503963040997 base=3266503661423266 latency=100000000
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: time 0:00:00.300000000, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: running: start 0:00:00.300000000 - stop 0:00:00.333333333
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: internal 0:00:00.000000000 external 907:21:43.661423266 1/1 = 1.000000
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:00.400000000 - stop 0:00:00.433333333
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:00.400000000 - stop 0:00:00.433333333
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (-1) < 1920
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: rendering at 19199 1600/1601
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: next sample expected at 20800
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: processed samples: raw 13920, delay 1152, real 12768, time 0:00:00.266000000
+11-01 07:18:07.320  3850  3913 I FLCross : audio samples=16000 late=0 queue=0 drift=-1099052
+11-01 07:18:07.320  3850  3913 I FLCross : audio-clock-calibration internal=266000000 external=3266503976567697 rate=44874015134000000/40820750000000000
+11-01 07:18:07.320  3850  3913 I FLCross : video received=8 pts=266666666 clock=3266503997024997 base=3266503661423266 latency=100000000
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: time 0:00:00.333333333, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: running: start 0:00:00.333333333 - stop 0:00:00.366666666
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: internal 0:00:00.266000000 external 907:21:43.976567697 44874015134000000/40820750000000000 = 1.099294
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:00.373513437 - stop 0:00:00.403835922
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:00.373513437 - stop 0:00:00.403835922
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (2872) < 1920
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: rendering at 20800 1600/-1272
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: next sample expected at 22072
+11-01 07:18:07.320  3850  3913 I FLCross : video received=9 pts=300000000 clock=3266504030274459 base=3266503661423266 latency=100000000
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: time 0:00:00.366666666, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: running: start 0:00:00.366666666 - stop 0:00:00.399999999
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: internal 0:00:00.266000000 external 907:21:43.976567697 44874015134000000/40820750000000000 = 1.099294
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:00.403835922 - stop 0:00:00.434158407
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:00.403835922 - stop 0:00:00.434158407
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (2688) < 1920
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: rendering at 22072 1600/-1088
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: next sample expected at 23160
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: time 0:00:00.400000000, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: running: start 0:00:00.400000000 - stop 0:00:00.433333333
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: internal 0:00:00.266000000 external 907:21:43.976567697 44874015134000000/40820750000000000 = 1.099294
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:00.434158408 - stop 0:00:00.464480893
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:00.434158408 - stop 0:00:00.464480893
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (2321) < 1920
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: rendering at 23160 1600/-721
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: next sample expected at 23881
+11-01 07:18:07.320  3850  3913 I FLCross : video received=10 pts=333333333 clock=3266504065074459 base=3266503661423266 latency=100000000
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: processed samples: raw 18720, delay 1056, real 17664, time 0:00:00.368000000
+11-01 07:18:07.320  3850  3913 I FLCross : video received=11 pts=366666666 clock=3266504096693844 base=3266503661423266 latency=100000000
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: time 0:00:00.433333333, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: running: start 0:00:00.433333333 - stop 0:00:00.466666666
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: internal 0:00:00.368000000 external 907:21:44.076882289 93682331061000000/88547200000000000 = 1.057993
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:00.479413112 - stop 0:00:00.510919302
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:00.479413112 - stop 0:00:00.510919302
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (870) < 1920
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: rendering at 23881 1600/730
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: next sample expected at 24611
+11-01 07:18:07.320  3850  3913 I FLCross : audio samples=22400 late=0 queue=0 drift=-787154
+11-01 07:18:07.320  3850  3913 I FLCross : audio-clock-calibration internal=368000000 external=3266504076882289 rate=93682331061000000/88547200000000000
+11-01 07:18:07.320  3850  3913 I FLCross : video received=12 pts=400000000 clock=3266504130252920 base=3266503661423266 latency=100000000
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: time 0:00:00.466666666, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: running: start 0:00:00.466666666 - stop 0:00:00.499999999
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: internal 0:00:00.368000000 external 907:21:44.076882289 93682331061000000/88547200000000000 = 1.057993
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:00.510919302 - stop 0:00:00.542425492
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:00.510919302 - stop 0:00:00.542425492
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (87) < 1920
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: rendering at 24611 1600/1513
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: next sample expected at 26124
+11-01 07:18:07.320  3850  3913 I FLCross : video received=13 pts=433333333 clock=3266504163787767 base=3266503661423266 latency=100000000
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: time 0:00:00.500000000, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: running: start 0:00:00.500000000 - stop 0:00:00.533333333
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: internal 0:00:00.368000000 external 907:21:44.076882289 93682331061000000/88547200000000000 = 1.057993
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:00.542425493 - stop 0:00:00.573931682
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:00.542425493 - stop 0:00:00.573931682
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (88) < 1920
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: rendering at 26124 1600/1512
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: next sample expected at 27636
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: processed samples: raw 23520, delay 1248, real 22272, time 0:00:00.464000000
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: time 0:00:00.533333333, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: running: start 0:00:00.533333333 - stop 0:00:00.566666666
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: internal 0:00:00.464000000 external 907:21:44.173964153 166518610032774820/159308835102666664 = 1.045257
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:00.579562481 - stop 0:00:00.611452577
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:00.579562481 - stop 0:00:00.611452577
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (-182) < 1920
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.320  3850  3913 I FLCross : video received=14 pts=466666666 clock=3266504197550844 base=3266503661423266 latency=100000000
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: rendering at 27636 1600/1782
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: next sample expected at 29418
+11-01 07:18:07.320  3850  3913 I FLCross : audio samples=27200 late=0 queue=0 drift=-1022770
+11-01 07:18:07.320  3850  3913 I FLCross : audio-clock-calibration internal=464000000 external=3266504173964153 rate=166518610032774820/159308835102666664
+11-01 07:18:07.320  3850  3913 I FLCross : video received=15 pts=500000000 clock=3266504230674228 base=3266503661423266 latency=100000000
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: time 0:00:00.566666666, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: running: start 0:00:00.566666666 - stop 0:00:00.599999999
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: internal 0:00:00.464000000 external 907:21:44.173964153 166518610032774820/159308835102666664 = 1.045257
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:00.611452577 - stop 0:00:00.643342673
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:00.611452577 - stop 0:00:00.643342673
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (69) < 1920
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: rendering at 29418 1600/1531
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: next sample expected at 30949
+11-01 07:18:07.320  3850  3913 I FLCross : video received=16 pts=533333333 clock=3266504262863151 base=3266503661423266 latency=100000000
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: time 0:00:00.600000000, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: running: start 0:00:00.600000000 - stop 0:00:00.633333333
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: internal 0:00:00.464000000 external 907:21:44.173964153 166518610032774820/159308835102666664 = 1.045257
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:00.643342674 - stop 0:00:00.675232770
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:00.643342674 - stop 0:00:00.675232770
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (69) < 1920
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: rendering at 30949 1600/1531
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: next sample expected at 32480
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: processed samples: raw 28320, delay 1200, real 27120, time 0:00:00.565000000
+11-01 07:18:07.320  3850  3913 I FLCross : video received=17 pts=566666666 clock=3266504297495997 base=3266503661423266 latency=100000000
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: time 0:00:00.633333333, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: running: start 0:00:00.633333333 - stop 0:00:00.666666666
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: internal 0:00:00.565000000 external 907:21:44.274965259 269608371728829010/260641429652571428 = 1.034403
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:00.680807183 - stop 0:00:00.713031878
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:00.680807183 - stop 0:00:00.713031878
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (-198) < 1920
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: rendering at 32480 1600/1798
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: next sample expected at 34278
+11-01 07:18:07.320  3850  3913 I FLCross : audio samples=32000 late=0 queue=0 drift=975384
+11-01 07:18:07.320  3850  3913 I FLCross : audio-clock-calibration internal=565000000 external=3266504274965259 rate=269608371728829010/260641429652571428
+11-01 07:18:07.320  3850  3913 I FLCross : video received=18 pts=600000000 clock=3266504332579151 base=3266503661423266 latency=100000000
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: time 0:00:00.666666666, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: running: start 0:00:00.666666666 - stop 0:00:00.699999999
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: internal 0:00:00.565000000 external 907:21:44.274965259 269608371728829010/260641429652571428 = 1.034403
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:00.713031878 - stop 0:00:00.745256573
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:00.713031878 - stop 0:00:00.745256573
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (53) < 1920
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: rendering at 34278 1600/1547
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: next sample expected at 35825
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: time 0:00:00.700000000, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: running: start 0:00:00.700000000 - stop 0:00:00.733333333
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: internal 0:00:00.565000000 external 907:21:44.274965259 269608371728829010/260641429652571428 = 1.034403
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:00.745256574 - stop 0:00:00.777481269
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:00.745256574 - stop 0:00:00.777481269
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (53) < 1920
+11-01 07:18:07.320  3850  3913 I FLCross : video received=19 pts=633333333 clock=3266504364206151 base=3266503661423266 latency=100000000
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: rendering at 35825 1600/1547
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.320  3850  3913 I FLCross : audiobasesink: next sample expected at 37372
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: processed samples: raw 33120, delay 1152, real 31968, time 0:00:00.666000000
+11-01 07:18:07.321  3850  3913 I FLCross : video received=20 pts=666666666 clock=3266504396835997 base=3266503661423266 latency=100000000
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: time 0:00:00.733333333, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: running: start 0:00:00.733333333 - stop 0:00:00.766666666
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: internal 0:00:00.666000000 external 907:21:44.375394955 408054234916000000/397657500000000000 = 1.026145
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:00.782320451 - stop 0:00:00.814804491
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:00.782320451 - stop 0:00:00.814804491
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (-179) < 1920
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: rendering at 37372 1600/1779
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: next sample expected at 39151
+11-01 07:18:07.321  3850  3913 I FLCross : video received=21 pts=700000000 clock=3266504430522151 base=3266503661423266 latency=100000000
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: time 0:00:00.766666666, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: running: start 0:00:00.766666666 - stop 0:00:00.799999999
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: internal 0:00:00.666000000 external 907:21:44.375394955 408054234916000000/397657500000000000 = 1.026145
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:00.814804491 - stop 0:00:00.847288530
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:00.814804491 - stop 0:00:00.847288530
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (41) < 1920
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: rendering at 39151 1600/1559
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: next sample expected at 40710
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: time 0:00:00.800000000, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: running: start 0:00:00.800000000 - stop 0:00:00.833333333
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: internal 0:00:00.666000000 external 907:21:44.375394955 408054234916000000/397657500000000000 = 1.026145
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:00.847288531 - stop 0:00:00.879772571
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:00.847288531 - stop 0:00:00.879772571
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (41) < 1920
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: rendering at 40710 1600/1559
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: next sample expected at 42269
+11-01 07:18:07.321  3850  3913 I FLCross : audio samples=40000 late=0 queue=0 drift=-1278667
+11-01 07:18:07.321  3850  3913 I FLCross : audio-clock-calibration internal=666000000 external=3266504375394955 rate=408054234916000000/397657500000000000
+11-01 07:18:07.321  3850  3913 I FLCross : video received=22 pts=733333333 clock=3266504464861536 base=3266503661423266 latency=100000000
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: processed samples: raw 37920, delay 1056, real 36864, time 0:00:00.768000000
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: time 0:00:00.833333333, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: running: start 0:00:00.833333333 - stop 0:00:00.866666666
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: internal 0:00:00.768000000 external 907:21:44.476167147 587312690030916880/576260225917777775 = 1.019180
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:00.884357752 - stop 0:00:00.917063794
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:00.884357752 - stop 0:00:00.917063794
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (-180) < 1920
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: rendering at 42269 1600/1780
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: next sample expected at 44049
+11-01 07:18:07.321  3850  3913 I FLCross : video received=23 pts=766666666 clock=3266504500276074 base=3266503661423266 latency=100000000
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: time 0:00:00.866666666, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: running: start 0:00:00.866666666 - stop 0:00:00.899999999
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: internal 0:00:00.768000000 external 907:21:44.476167147 587312690030916880/576260225917777775 = 1.019180
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:00.917063794 - stop 0:00:00.949769837
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:00.917063794 - stop 0:00:00.949769837
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (30) < 1920
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: rendering at 44049 1600/1570
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: next sample expected at 45619
+11-01 07:18:07.321  3850  3913 I FLCross : video received=24 pts=800000000 clock=3266504536155459 base=3266503661423266 latency=100000000
+11-01 07:18:07.321  3850  3913 I FLCross : video received=25 pts=833333333 clock=3266504562864690 base=3266503661423266 latency=100000000
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: time 0:00:00.900000000, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: running: start 0:00:00.900000000 - stop 0:00:00.933333333
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: internal 0:00:00.768000000 external 907:21:44.476167147 587312690030916880/576260225917777775 = 1.019180
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:00.949769838 - stop 0:00:00.982475881
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:00.949769838 - stop 0:00:00.982475881
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (31) < 1920
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: rendering at 45619 1600/1569
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: next sample expected at 47188
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: processed samples: raw 42720, delay 1248, real 41472, time 0:00:00.864000000
+11-01 07:18:07.321  3850  3913 I FLCross : audio samples=44800 late=0 queue=0 drift=-1244821
+11-01 07:18:07.321  3850  3913 I FLCross : audio-clock-calibration internal=864000000 external=3266504572606246 rate=809771067184000000/796288000000000000
+11-01 07:18:07.321  3850  3913 I FLCross : video received=26 pts=866666666 clock=3266504596085844 base=3266503661423266 latency=100000000
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: time 0:00:00.933333333, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: running: start 0:00:00.933333333 - stop 0:00:00.966666666
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: internal 0:00:00.864000000 external 907:21:44.572606246 809771067184000000/796288000000000000 = 1.016932
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:00.984116492 - stop 0:00:01.016894809
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:00.984116492 - stop 0:00:01.016894809
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (-49) < 1920
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: rendering at 47188 1600/1649
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: next sample expected at 48837
+11-01 07:18:07.321  3850  3913 I FLCross : video received=27 pts=900000000 clock=3266504629394459 base=3266503661423266 latency=100000000
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: time 0:00:00.966666666, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: running: start 0:00:00.966666666 - stop 0:00:00.999999999
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: internal 0:00:00.864000000 external 907:21:44.572606246 809771067184000000/796288000000000000 = 1.016932
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:01.016894809 - stop 0:00:01.049673127
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:01.016894809 - stop 0:00:01.049673127
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (27) < 1920
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: rendering at 48837 1600/1573
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: next sample expected at 50410
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: time 0:00:01.000000000, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: running: start 0:00:01.000000000 - stop 0:00:01.033333333
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: internal 0:00:00.864000000 external 907:21:44.572606246 809771067184000000/796288000000000000 = 1.016932
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:01.049673128 - stop 0:00:01.082451445
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:01.049673128 - stop 0:00:01.082451445
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (26) < 1920
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: rendering at 50410 1600/1574
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: next sample expected at 51984
+11-01 07:18:07.321  3850  3913 I FLCross : video received=28 pts=933333333 clock=3266504668926844 base=3266503661423266 latency=100000000
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: processed samples: raw 47520, delay 1200, real 46320, time 0:00:00.965000000
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: time 0:00:01.033333333, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: running: start 0:00:01.033333333 - stop 0:00:01.066666666
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: internal 0:00:00.965000000 external 907:21:44.673624893 1082765026459610412/1067302552015454541 = 1.014487
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:01.084401879 - stop 0:00:01.117259194
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:01.084401879 - stop 0:00:01.117259194
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (-67) < 1920
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: rendering at 51984 1600/1667
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: next sample expected at 53651
+11-01 07:18:07.321  3850  3913 I FLCross : audio samples=51200 late=0 queue=0 drift=-1180077
+11-01 07:18:07.321  3850  3913 I FLCross : audio-clock-calibration internal=965000000 external=3266504673624893 rate=1082765026459610412/1067302552015454541
+11-01 07:18:07.321  3850  3913 I FLCross : video received=29 pts=966666666 clock=3266504700954844 base=3266503661423266 latency=100000000
+11-01 07:18:07.321  3850  3913 I FLCross : video received=30 pts=1000000000 clock=3266504729645920 base=3266503661423266 latency=100000000
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: time 0:00:01.066666666, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: running: start 0:00:01.066666666 - stop 0:00:01.099999999
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: internal 0:00:00.965000000 external 907:21:44.673624893 1082765026459610412/1067302552015454541 = 1.014487
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:01.117259194 - stop 0:00:01.150116508
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:01.117259194 - stop 0:00:01.150116508
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (23) < 1920
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: rendering at 53651 1600/1577
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: next sample expected at 55228
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: time 0:00:01.100000000, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: running: start 0:00:01.100000000 - stop 0:00:01.133333333
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: internal 0:00:00.965000000 external 907:21:44.673624893 1082765026459610412/1067302552015454541 = 1.014487
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:01.150116509 - stop 0:00:01.182973824
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:01.150116509 - stop 0:00:01.182973824
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (23) < 1920
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: rendering at 55228 1600/1577
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.321  3850  3913 I FLCross : video received=31 pts=1033333333 clock=3266504764255767 base=3266503661423266 latency=100000000
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: next sample expected at 56805
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: processed samples: raw 52320, delay 1152, real 51168, time 0:00:01.066000000
+11-01 07:18:07.321  3850  3913 I FLCross : video received=32 pts=1066666666 clock=3266504797287459 base=3266503661423266 latency=100000000
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: time 0:00:01.133333333, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: running: start 0:00:01.133333333 - stop 0:00:01.166666666
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: internal 0:00:01.066000000 external 907:21:44.774269414 1411272534658931584/1394408924961333328 = 1.012094
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:01.185047456 - stop 0:00:01.217982482
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:01.185047456 - stop 0:00:01.217982482
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (-77) < 1920
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: rendering at 56805 1600/1677
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: next sample expected at 58482
+11-01 07:18:07.321  3850  3913 I FLCross : audio samples=56000 late=0 queue=0 drift=-504693
+11-01 07:18:07.321  3850  3913 I FLCross : audio-clock-calibration internal=1066000000 external=3266504774269414 rate=1411272534658931584/1394408924961333328
+11-01 07:18:07.321  3850  3913 I FLCross : video received=33 pts=1100000000 clock=3266504829094151 base=3266503661423266 latency=100000000
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: time 0:00:01.166666666, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: running: start 0:00:01.166666666 - stop 0:00:01.199999999
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: internal 0:00:01.066000000 external 907:21:44.774269414 1411272534658931584/1394408924961333328 = 1.012094
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:01.217982482 - stop 0:00:01.250917507
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:01.217982482 - stop 0:00:01.250917507
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (19) < 1920
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: rendering at 58482 1600/1581
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: next sample expected at 60063
+11-01 07:18:07.321  3850  3913 I FLCross : video received=34 pts=1133333333 clock=3266504862553920 base=3266503661423266 latency=100000000
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: time 0:00:01.200000000, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: running: start 0:00:01.200000000 - stop 0:00:01.233333333
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: internal 0:00:01.066000000 external 907:21:44.774269414 1411272534658931584/1394408924961333328 = 1.012094
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:01.250917508 - stop 0:00:01.283852534
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:01.250917508 - stop 0:00:01.283852534
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (19) < 1920
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: rendering at 60063 1600/1581
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: next sample expected at 61644
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: processed samples: raw 57120, delay 1056, real 56064, time 0:00:01.168000000
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: time 0:00:01.233333333, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: running: start 0:00:01.233333333 - stop 0:00:01.266666666
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: internal 0:00:01.168000000 external 907:21:44.875393518 1800940990552779940/1783909082606923075 = 1.009548
+11-01 07:18:07.321  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:01.286234237 - stop 0:00:01.319252329
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:01.286234237 - stop 0:00:01.319252329
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (-95) < 1920
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: rendering at 61644 1600/1695
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: next sample expected at 63339
+11-01 07:18:07.322  3850  3913 I FLCross : video received=35 pts=1166666666 clock=3266504900931151 base=3266503661423266 latency=100000000
+11-01 07:18:07.322  3850  3913 I FLCross : audio samples=60800 late=0 queue=0 drift=-1104385
+11-01 07:18:07.322  3850  3913 I FLCross : audio-clock-calibration internal=1168000000 external=3266504875393518 rate=1800940990552779940/1783909082606923075
+11-01 07:18:07.322  3850  3913 I FLCross : video received=36 pts=1200000000 clock=3266504929768997 base=3266503661423266 latency=100000000
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: time 0:00:01.266666666, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: running: start 0:00:01.266666666 - stop 0:00:01.299999999
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: internal 0:00:01.168000000 external 907:21:44.875393518 1800940990552779940/1783909082606923075 = 1.009548
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:01.319252329 - stop 0:00:01.352270421
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:01.319252329 - stop 0:00:01.352270421
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (15) < 1920
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: rendering at 63339 1600/1585
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: next sample expected at 64924
+11-01 07:18:07.322  3850  3913 I FLCross : video received=37 pts=1233333333 clock=3266504962334536 base=3266503661423266 latency=100000000
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: time 0:00:01.300000000, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: running: start 0:00:01.300000000 - stop 0:00:01.333333333
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: internal 0:00:01.168000000 external 907:21:44.875393518 1800940990552779940/1783909082606923075 = 1.009548
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:01.352270422 - stop 0:00:01.385288514
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:01.352270422 - stop 0:00:01.385288514
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (16) < 1920
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: rendering at 64924 1600/1584
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: next sample expected at 66508
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: processed samples: raw 61920, delay 1248, real 60672, time 0:00:01.264000000
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: time 0:00:01.333333333, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: running: start 0:00:01.333333333 - stop 0:00:01.366666666
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: internal 0:00:01.264000000 external 907:21:44.971709122 2253045639382807776/2233226938460571424 = 1.008874
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:01.385965101 - stop 0:00:01.419005221
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:01.385965101 - stop 0:00:01.419005221
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (-18) < 1920
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: rendering at 66508 1600/1618
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: next sample expected at 68126
+11-01 07:18:07.322  3850  3913 I FLCross : video received=38 pts=1266666666 clock=3266504998054459 base=3266503661423266 latency=100000000
+11-01 07:18:07.322  3850  3913 I FLCross : audio samples=65600 late=0 queue=0 drift=-1426847
+11-01 07:18:07.322  3850  3913 I FLCross : audio-clock-calibration internal=1264000000 external=3266504971709122 rate=2253045639382807776/2233226938460571424
+11-01 07:18:07.322  3850  3913 I FLCross : video received=39 pts=1300000000 clock=3266505029802844 base=3266503661423266 latency=100000000
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: time 0:00:01.366666666, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: running: start 0:00:01.366666666 - stop 0:00:01.399999999
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: internal 0:00:01.264000000 external 907:21:44.971709122 2253045639382807776/2233226938460571424 = 1.008874
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:01.419005221 - stop 0:00:01.452045340
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:01.419005221 - stop 0:00:01.452045340
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (14) < 1920
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: rendering at 68126 1600/1586
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: next sample expected at 69712
+11-01 07:18:07.322  3850  3913 I FLCross : video received=40 pts=1333333333 clock=3266505062491997 base=3266503661423266 latency=100000000
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: time 0:00:01.400000000, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: running: start 0:00:01.400000000 - stop 0:00:01.433333333
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: internal 0:00:01.264000000 external 907:21:44.971709122 2253045639382807776/2233226938460571424 = 1.008874
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:01.452045341 - stop 0:00:01.485085461
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:01.452045341 - stop 0:00:01.485085461
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (14) < 1920
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: rendering at 69712 1600/1586
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: next sample expected at 71298
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: processed samples: raw 66720, delay 1200, real 65520, time 0:00:01.365000000
+11-01 07:18:07.322  3850  3913 I FLCross : video received=41 pts=1366666666 clock=3266505095823074 base=3266503661423266 latency=100000000
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: time 0:00:01.433333333, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: running: start 0:00:01.433333333 - stop 0:00:01.466666666
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: internal 0:00:01.365000000 external 907:21:45.072705492 2775795107120413590/2753935746690666660 = 1.007937
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:01.486089955 - stop 0:00:01.519160788
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:01.486089955 - stop 0:00:01.519160788
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (-34) < 1920
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: rendering at 71298 1600/1634
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: next sample expected at 72932
+11-01 07:18:07.322  3850  3913 I FLCross : video received=42 pts=1400000000 clock=3266505129692921 base=3266503661423266 latency=100000000
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: time 0:00:01.466666666, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: running: start 0:00:01.466666666 - stop 0:00:01.499999999
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: internal 0:00:01.365000000 external 907:21:45.072705492 2775795107120413590/2753935746690666660 = 1.007937
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:01.519160788 - stop 0:00:01.552231622
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:01.519160788 - stop 0:00:01.552231622
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (13) < 1920
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: rendering at 72932 1600/1587
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: next sample expected at 74519
+11-01 07:18:07.322  3850  3913 I FLCross : audio samples=73600 late=0 queue=33333333 drift=-1160283
+11-01 07:18:07.322  3850  3913 I FLCross : audio-clock-calibration internal=1365000000 external=3266505072705492 rate=2775795107120413590/2753935746690666660
+11-01 07:18:07.322  3850  3913 I FLCross : video received=43 pts=1433333333 clock=3266505164528921 base=3266503661423266 latency=100000000
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: time 0:00:01.500000000, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: running: start 0:00:01.500000000 - stop 0:00:01.533333333
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: internal 0:00:01.365000000 external 907:21:45.072705492 2775795107120413590/2753935746690666660 = 1.007937
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:01.552231623 - stop 0:00:01.585302456
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:01.552231623 - stop 0:00:01.585302456
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (12) < 1920
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: rendering at 74519 1600/1588
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: next sample expected at 76107
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: processed samples: raw 71520, delay 1152, real 70368, time 0:00:01.466000000
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: time 0:00:01.533333333, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: running: start 0:00:01.533333333 - stop 0:00:01.566666666
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: internal 0:00:01.466000000 external 907:21:45.173447247 3374283986041000000/3351139000000000000 = 1.006907
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:01.586477263 - stop 0:00:01.619581955
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:01.586477263 - stop 0:00:01.619581955
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (-43) < 1920
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: rendering at 76107 1600/1643
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: next sample expected at 77750
+11-01 07:18:07.322  3850  3913 I FLCross : video received=44 pts=1466666666 clock=3266505200865228 base=3266503661423266 latency=100000000
+11-01 07:18:07.322  3850  3913 I FLCross : video received=45 pts=1500000000 clock=3266505229473844 base=3266503661423266 latency=100000000
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: time 0:00:01.566666666, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: running: start 0:00:01.566666666 - stop 0:00:01.599999999
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: internal 0:00:01.466000000 external 907:21:45.173447247 3374283986041000000/3351139000000000000 = 1.006907
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:01.619581955 - stop 0:00:01.652686647
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:01.619581955 - stop 0:00:01.652686647
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (11) < 1920
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: rendering at 77750 1600/1589
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: next sample expected at 79339
+11-01 07:18:07.322  3850  3913 I FLCross : video received=46 pts=1533333333 clock=3266505263089844 base=3266503661423266 latency=100000000
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: time 0:00:01.600000000, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: running: start 0:00:01.600000000 - stop 0:00:01.633333333
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: internal 0:00:01.466000000 external 907:21:45.173447247 3374283986041000000/3351139000000000000 = 1.006907
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:01.652686648 - stop 0:00:01.685791340
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:01.652686648 - stop 0:00:01.685791340
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (11) < 1920
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: rendering at 79339 1600/1589
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: next sample expected at 80928
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: processed samples: raw 76320, delay 1056, real 75264, time 0:00:01.568000000
+11-01 07:18:07.322  3850  3913 I FLCross : audio samples=78400 late=0 queue=0 drift=-935360
+11-01 07:18:07.322  3850  3913 I FLCross : audio-clock-calibration internal=1568000000 external=3266505274792761 rate=4054387162682874385/4031539081856470575
+11-01 07:18:07.322  3850  3913 I FLCross : video received=47 pts=1566666666 clock=3266505295941305 base=3266503661423266 latency=100000000
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: time 0:00:01.633333333, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: running: start 0:00:01.633333333 - stop 0:00:01.666666666
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: internal 0:00:01.568000000 external 907:21:45.274792761 4054387162682874385/4031539081856470575 = 1.005667
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:01.687287794 - stop 0:00:01.720433280
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:01.687287794 - stop 0:00:01.720433280
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (-61) < 1920
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: rendering at 80928 1600/1661
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: next sample expected at 82589
+11-01 07:18:07.322  3850  3913 I FLCross : video received=48 pts=1600000000 clock=3266505329365228 base=3266503661423266 latency=100000000
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: time 0:00:01.666666666, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: running: start 0:00:01.666666666 - stop 0:00:01.699999999
+11-01 07:18:07.322  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: next sample expected at 90560
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: processed samples: raw 85920, delay 1200, real 84720, time 0:00:01.765000000
+11-01 07:18:07.323  3850  3913 I FLCross : video received=53 pts=1766666666 clock=3266505495712074 base=3266503661423266 latency=100000000
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: time 0:00:01.833333333, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: running: start 0:00:01.833333333 - stop 0:00:01.866666666
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: internal 0:00:01.765000000 external 907:21:45.472074378 5668729007159784704/5640558652397052624 = 1.004994
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:01.887072560 - stop 0:00:01.920240245
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:01.887072560 - stop 0:00:01.920240245
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (-19) < 1920
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: rendering at 90560 1600/1619
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: next sample expected at 92179
+11-01 07:18:07.323  3850  3913 I FLCross : audio samples=89600 late=0 queue=0 drift=-1412693
+11-01 07:18:07.323  3850  3913 I FLCross : audio-clock-calibration internal=1765000000 external=3266505472074378 rate=5668729007159784704/5640558652397052624
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: running: start 0:00:01.866666666 - stop 0:00:01.899999999
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: internal 0:00:01.765000000 external 907:21:45.472074378 5668729007159784704/5640558652397052624 = 1.004994
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:01.920240245 - stop 0:00:01.953407930
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (8) < 1920
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: rendering at 92179 1600/1592
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: next sample expected at 93771
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: time 0:00:01.900000000, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: running: start 0:00:01.900000000 - stop 0:00:01.933333333
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: internal 0:00:01.765000000 external 907:21:45.472074378 5668729007159784704/5640558652397052624 = 1.004994
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:01.953407931 - stop 0:00:01.986575617
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:01.953407931 - stop 0:00:01.986575617
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (8) < 1920
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: rendering at 93771 1600/1592
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: next sample expected at 95363
+11-01 07:18:07.323  3850  3913 I FLCross : video received=55 pts=1833333333 clock=3266505569092690 base=3266503661423266 latency=100000000
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: processed samples: raw 90720, delay 1152, real 89568, time 0:00:01.866000000
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: time 0:00:01.933333333, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: running: start 0:00:01.933333333 - stop 0:00:01.966666666
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: internal 0:00:01.866000000 external 907:21:45.572890878 6617264775489000000/6587860550000000000 = 1.004463
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:01.987324203 - stop 0:00:02.020509417
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:01.987324203 - stop 0:00:02.020509417
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (-28) < 1920
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: rendering at 95363 1600/1628
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: next sample expected at 96991
+11-01 07:18:07.323  3850  3913 I FLCross : video received=56 pts=1866666666 clock=3266505600926844 base=3266503661423266 latency=100000000
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: time 0:00:01.966666666, start 0:00:00.000000000, samples 1600
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: running: start 0:00:01.966666666 - stop 0:00:01.999999999
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: adding base_time 907:21:43.661423266
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: after slaving: start 0:00:02.020509417 - stop 0:00:02.053694631
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: final timestamps: start 0:00:02.020509417 - stop 0:00:02.053694631
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: align with prev sample, ABS (7) < 1920
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: no stop time align needed: we are slaved
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: rendering at 96991 1600/1593
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: wrote 1600 of 1600
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: next sample expected at 98584
+11-01 07:18:07.323  3850  3913 I FLCross : audio samples=96000 late=0 queue=0 drift=-1104718
+11-01 07:18:07.323  3850  3913 I FLCross : video received=57 pts=1900000000 clock=3266505634247459 base=3266503661423266 latency=100000000
+11-01 07:18:07.323  3850  3913 I FLCross : video received=58 pts=1933333333 clock=3266505663257613 base=3266503661423266 latency=100000000
+11-01 07:18:07.323  3850  3913 I FLCross : audiobasesink: processed samples: raw 95520, delay 1056, real 94464, time 0:00:01.968000000
+11-01 07:18:07.323  3850  3913 I FLCross : video received=59 pts=1966666666 clock=3266505696685613 base=3266503661423266 latency=100000000
+11-01 07:18:07.323  3850  3913 I FLCross : audio samples=96000 late=0 queue=0 drift=-1104718
+11-01 07:18:07.323  3850  3913 I FLCross : audio-clock-calibration internal=1968000000 external=3266505674385710 rate=7667879239327461448/7639160967859047616
+11-01 07:18:07.323  3850  3913 I FLCross : audio samples=96000 late=0 queue=0 drift=-1104718
+11-01 07:18:07.323  3850  3913 I FLCross : audio-clock-calibration internal=1968000000 external=3266505674385710 rate=7667879239327461448/7639160967859047616
+11-01 07:18:07.323  3850  3913 I FLCross : opensles_ringbuffer: ringbuffer   stopped
+11-01 07:18:07.323  3850  3913 I FLCross : opensles_ringbuffer: ringbuffer released
+11-01 07:18:07.323  3850  3913 I FLCross : opensles_ringbuffer: device closed
+11-01 07:18:07.323  3850  3913 I FLCross : diagnostic_records_dropped=0
+11-01 07:18:07.324  3850  3913 I FLCross : receiver-result lease=1ac206c4-792e-46e5-9013-b887a9169346 {"ok":true,"video":60,"posts":60,"pcm_samples":96000,"uid":10305,"pid":3850}
+11-01 07:18:07.326  3886  3908 I FLCross : retired lease=1ac206c4-792e-46e5-9013-b887a9169346 generation=1 reason=explicit
+11-01 07:18:07.344  3914  3928 I FLCross : producer-result lease=1ac206c4-792e-46e5-9013-b887a9169346 {"ok":true,"video":0,"posts":0,"pcm_samples":0,"uid":10304,"pid":3914}

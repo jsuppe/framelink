@@ -1,0 +1,56 @@
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5-pipeline\build\Release\framelink.dll
+  gstframelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5-pipeline\build\Release\gstframelink.dll
+  fl_av_auth.vcxproj -> C:\Users\jonsu\dev\framelink-m5-pipeline\build\Release\fl_av_auth.exe
+  fl_m4_transport_timing.vcxproj -> C:\Users\jonsu\dev\framelink-m5-pipeline\build\Release\fl_m4_transport_timing.exe
+  framelink_av_playback.vcxproj -> C:\Users\jonsu\dev\framelink-m5-pipeline\build\Release\framelink_av_playback.lib
+  fl_nv12_layout.vcxproj -> C:\Users\jonsu\dev\framelink-m5-pipeline\build\Release\fl_nv12_layout.exe
+  fl_nv12_win.vcxproj -> C:\Users\jonsu\dev\framelink-m5-pipeline\build\Release\fl_nv12_win.exe
+  fl_portable_map.vcxproj -> C:\Users\jonsu\dev\framelink-m5-pipeline\build\Release\fl_portable_map.exe
+  fl_audio_segment.vcxproj -> C:\Users\jonsu\dev\framelink-m5-pipeline\build\Release\fl_audio_segment.exe
+  fl_playback_recovery.vcxproj -> C:\Users\jonsu\dev\framelink-m5-pipeline\build\Release\fl_playback_recovery.exe
+  fl_ready_timeout_win.vcxproj -> C:\Users\jonsu\dev\framelink-m5-pipeline\build\Release\fl_ready_timeout_win.exe
+  fl_reconnect_held.vcxproj -> C:\Users\jonsu\dev\framelink-m5-pipeline\build\Release\fl_reconnect_held.exe
+  fl_disconnect_win.vcxproj -> C:\Users\jonsu\dev\framelink-m5-pipeline\build\Release\fl_disconnect_win.exe
+  fl_consume.vcxproj -> C:\Users\jonsu\dev\framelink-m5-pipeline\build\Release\fl_consume.exe
+  fl_av_rendezvous.vcxproj -> C:\Users\jonsu\dev\framelink-m5-pipeline\build\Release\fl_av_rendezvous.exe
+  fl_gst_timestamps.vcxproj -> C:\Users\jonsu\dev\framelink-m5-pipeline\build\Release\fl_gst_timestamps.exe
+  fl_gst_nv12.vcxproj -> C:\Users\jonsu\dev\framelink-m5-pipeline\build\Release\fl_gst_nv12.exe
+  fl_produce.vcxproj -> C:\Users\jonsu\dev\framelink-m5-pipeline\build\Release\fl_produce.exe
+  fl_session_c_api.vcxproj -> C:\Users\jonsu\dev\framelink-m5-pipeline\build\Release\fl_session_c_api.exe
+  fl_session_contract.vcxproj -> C:\Users\jonsu\dev\framelink-m5-pipeline\build\Release\fl_session_contract.exe
+  fl_trace_test.vcxproj -> C:\Users\jonsu\dev\framelink-m5-pipeline\build\Release\fl_trace_test.exe
+  fl_session_peer.vcxproj -> C:\Users\jonsu\dev\framelink-m5-pipeline\build\Release\fl_session_peer.exe
+  framelink_consumer.vcxproj -> C:\Users\jonsu\dev\framelink-m5-pipeline\build\Release\framelink_consumer.exe
+  fl_startup_win.vcxproj -> C:\Users\jonsu\dev\framelink-m5-pipeline\build\Release\fl_startup_win.exe
+  framelink_av_session.vcxproj -> C:\Users\jonsu\dev\framelink-m5-pipeline\build\Release\framelink_av_session.exe
+  fl_av_offer_bounds.vcxproj -> C:\Users\jonsu\dev\framelink-m5-pipeline\build\Release\fl_av_offer_bounds.exe
+  framelink_av_consumer.vcxproj -> C:\Users\jonsu\dev\framelink-m5-pipeline\build\Release\framelink_av_consumer.exe
+  framelink_av_producer.vcxproj -> C:\Users\jonsu\dev\framelink-m5-pipeline\build\Release\framelink_av_producer.exe
+  framelink_producer.vcxproj -> C:\Users\jonsu\dev\framelink-m5-pipeline\build\Release\framelink_producer.exe
+[
+  {
+    "format": "BGRA",
+    "producer_video_frames": 100,
+    "sink_arrival_video_frames": 94,
+    "scheduled_video_frames": 30,
+    "matched_audio_blocks": 100,
+    "audio_samples": 96000,
+    "late_video": 0,
+    "payload_pts_duration_preserved": true,
+    "physical_playback_qualified": false
+  },
+  {
+    "format": "NV12",
+    "producer_video_frames": 100,
+    "sink_arrival_video_frames": 94,
+    "scheduled_video_frames": 33,
+    "matched_audio_blocks": 100,
+    "audio_samples": 96000,
+    "late_video": 0,
+    "payload_pts_duration_preserved": true,
+    "physical_playback_qualified": false
+  }
+]
+C:\Users\jonsu\dev\framelink-m5-pipeline\evidence

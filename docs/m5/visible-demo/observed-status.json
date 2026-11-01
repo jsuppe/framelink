@@ -1,0 +1,42 @@
+{
+    "phase":  "playing",
+    "physical_sync_measured":  false,
+    "iteration":  2,
+    "loops":  90,
+    "session":  "C:\\Users\\jonsu\\dev\\framelink-m5-pipeline\\visible-demo\\run-1793396238-1\\session",
+    "exit_codes":  [
+                       0,
+                       0
+                   ],
+    "renderer":  {
+                     "active":  true,
+                     "audio_master":  true,
+                     "muted":  false,
+                     "paused":  false,
+                     "session_resets":  1,
+                     "due_decisions":  59,
+                     "sequence_gaps":  8,
+                     "queue_depth":  5,
+                     "max_queue_depth":  6,
+                     "hold_checks":  259,
+                     "late_drops":  0,
+                     "import_failures":  0,
+                     "invalid_pts":  0,
+                     "schedule_error_ns":  10000000,
+                     "session_generation":  1,
+                     "estimated_av_offset_ns":  null,
+                     "device_underruns":  null,
+                     "clock_drift_ppm":  null,
+                     "audio_metrics_valid":  true,
+                     "audio_blocks":  283,
+                     "audio_samples":  271680,
+                     "audio_queue_buffers":  0,
+                     "audio_queue_ns":  0,
+                     "audio_peak_queue_buffers":  0,
+                     "audio_peak_queue_ns":  0,
+                     "audio_queue_empty_events":  286,
+                     "audio_queue_full_events":  0,
+                     "late_audio_blocks":  0,
+                     "audio_arrival_drift_ns":  -10007700
+                 }
+}

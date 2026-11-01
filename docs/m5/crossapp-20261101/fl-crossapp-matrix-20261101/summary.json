@@ -1,0 +1,87 @@
+[
+  {
+    "case": "bgra",
+    "pass": true,
+    "lease": "87c914ff-bbe9-40bf-a2e8-6499bd0088bc",
+    "ok": true,
+    "video": 60,
+    "posts": 60,
+    "pcm_samples": 96000,
+    "uid": 10305,
+    "pid": 16258
+  },
+  {
+    "case": "nv12",
+    "pass": true,
+    "lease": "c460d144-d5d7-4b79-9b96-b77320e5bac5",
+    "ok": true,
+    "video": 60,
+    "posts": 60,
+    "pcm_samples": 96000,
+    "uid": 10305,
+    "pid": 16405
+  },
+  {
+    "case": "wrong-signer",
+    "pass": true,
+    "rejected": true
+  },
+  {
+    "case": "wrong-key",
+    "pass": true,
+    "rejected_or_retired": true
+  },
+  {
+    "case": "revoke",
+    "pass": true,
+    "rejected_or_retired": true
+  },
+  {
+    "case": "replace",
+    "pass": true,
+    "lease": "6eab7706-c9cf-454d-ade2-2d8947155f53",
+    "ok": true,
+    "video": 180,
+    "posts": 180,
+    "pcm_samples": 288000,
+    "uid": 10305,
+    "pid": 16883
+  },
+  {
+    "case": "producer-death",
+    "pass": true,
+    "rejected_or_retired": true
+  },
+  {
+    "case": "producer-restart",
+    "pass": true,
+    "lease": "9cc10898-45da-496d-a011-364df1219a98",
+    "ok": true,
+    "video": 60,
+    "posts": 60,
+    "pcm_samples": 96000,
+    "uid": 10305,
+    "pid": 17194
+  },
+  {
+    "case": "broker-death",
+    "pass": true,
+    "rejected_or_retired": true
+  },
+  {
+    "case": "broker-restart",
+    "pass": true,
+    "lease": "694f8c67-135f-47e8-afdc-dfd20c12523e",
+    "ok": true,
+    "video": 60,
+    "posts": 60,
+    "pcm_samples": 96000,
+    "uid": 10305,
+    "pid": 17547
+  },
+  {
+    "case": "consumer-death",
+    "pass": false,
+    "error": ""
+  }
+]

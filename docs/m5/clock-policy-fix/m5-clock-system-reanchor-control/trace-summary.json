@@ -1,0 +1,174 @@
+[
+  {
+    "case": "160x90-50-BGRA-av",
+    "operations": [
+      {
+        "file": "gst.51892.csv",
+        "operation": "gst.sinkRender",
+        "count": 500,
+        "interval_fps": 50.8033082218384,
+        "interval_p50_ms": 20.0204,
+        "interval_p99_ms": 27.1743,
+        "interval_max_ms": 33.0674,
+        "duration_p50_ms": 0.072
+      },
+      {
+        "file": "transport.51892.csv",
+        "operation": "flSubmit",
+        "count": 482,
+        "interval_fps": 48.97072196303486,
+        "interval_p50_ms": 20.0223,
+        "interval_p99_ms": 40.0702,
+        "interval_max_ms": 121.2784,
+        "duration_p50_ms": 0.0549
+      },
+      {
+        "file": "renderer.51876.csv",
+        "operation": "scene.frame_cpu",
+        "count": 639,
+        "interval_fps": 59.58742470351357,
+        "interval_p50_ms": 16.53735,
+        "interval_p99_ms": 17.5327,
+        "interval_max_ms": 39.9125,
+        "duration_p50_ms": 0.0609
+      },
+      {
+        "file": "renderer.51876.csv",
+        "operation": "service.iteration",
+        "count": 639,
+        "interval_fps": 59.58743472105464,
+        "interval_p50_ms": 16.5374,
+        "interval_p99_ms": 17.5327,
+        "interval_max_ms": 39.9125,
+        "duration_p50_ms": 16.5373
+      },
+      {
+        "file": "transport.51876.csv",
+        "operation": "flAcquireFrame",
+        "count": 475,
+        "interval_fps": 48.25810929166727,
+        "interval_p50_ms": 17.0177,
+        "interval_p99_ms": 34.0358,
+        "interval_max_ms": 118.298,
+        "duration_p50_ms": 0.0002
+      }
+    ],
+    "final_av": {
+      "active": true,
+      "audio_master": false,
+      "muted": false,
+      "paused": false,
+      "session_resets": 1,
+      "due_decisions": 475,
+      "sequence_gaps": 0,
+      "queue_depth": 0,
+      "max_queue_depth": 6,
+      "hold_checks": 120,
+      "late_drops": 0,
+      "import_failures": 0,
+      "invalid_pts": 0,
+      "schedule_error_ns": 3666900,
+      "session_generation": 1,
+      "estimated_av_offset_ns": null,
+      "device_underruns": null,
+      "clock_drift_ppm": null,
+      "audio_metrics_valid": true,
+      "audio_blocks": 500,
+      "audio_samples": 480000,
+      "audio_queue_buffers": 0,
+      "audio_queue_ns": 0,
+      "audio_peak_queue_buffers": 0,
+      "audio_peak_queue_ns": 0,
+      "audio_queue_empty_events": 504,
+      "audio_queue_full_events": 0,
+      "late_audio_blocks": 0,
+      "audio_arrival_drift_ns": -7958800
+    }
+  },
+  {
+    "case": "160x90-50-NV12-av",
+    "operations": [
+      {
+        "file": "transport.21148.csv",
+        "operation": "flAcquireFrame",
+        "count": 487,
+        "interval_fps": 49.51513627283777,
+        "interval_p50_ms": 17.0178,
+        "interval_p99_ms": 34.5467,
+        "interval_max_ms": 120.7766,
+        "duration_p50_ms": 0.0003
+      },
+      {
+        "file": "renderer.21148.csv",
+        "operation": "scene.frame_cpu",
+        "count": 637,
+        "interval_fps": 59.41140060499302,
+        "interval_p50_ms": 16.74575,
+        "interval_p99_ms": 17.8229,
+        "interval_max_ms": 39.3689,
+        "duration_p50_ms": 0.0582
+      },
+      {
+        "file": "renderer.21148.csv",
+        "operation": "service.iteration",
+        "count": 637,
+        "interval_fps": 59.411408929792586,
+        "interval_p50_ms": 16.745800000000003,
+        "interval_p99_ms": 17.8229,
+        "interval_max_ms": 39.369,
+        "duration_p50_ms": 16.7451
+      },
+      {
+        "file": "gst.31644.csv",
+        "operation": "gst.sinkRender",
+        "count": 500,
+        "interval_fps": 50.82555469777954,
+        "interval_p50_ms": 20.0282,
+        "interval_p99_ms": 24.9365,
+        "interval_max_ms": 31.5712,
+        "duration_p50_ms": 0.07325
+      },
+      {
+        "file": "transport.31644.csv",
+        "operation": "flSubmit",
+        "count": 494,
+        "interval_fps": 50.21442322628729,
+        "interval_p50_ms": 20.0299,
+        "interval_p99_ms": 24.9366,
+        "interval_max_ms": 117.8599,
+        "duration_p50_ms": 0.0559
+      }
+    ],
+    "final_av": {
+      "active": true,
+      "audio_master": false,
+      "muted": false,
+      "paused": false,
+      "session_resets": 1,
+      "due_decisions": 487,
+      "sequence_gaps": 0,
+      "queue_depth": 0,
+      "max_queue_depth": 6,
+      "hold_checks": 106,
+      "late_drops": 0,
+      "import_failures": 0,
+      "invalid_pts": 0,
+      "schedule_error_ns": 1699100,
+      "session_generation": 1,
+      "estimated_av_offset_ns": null,
+      "device_underruns": null,
+      "clock_drift_ppm": null,
+      "audio_metrics_valid": true,
+      "audio_blocks": 500,
+      "audio_samples": 480000,
+      "audio_queue_buffers": 0,
+      "audio_queue_ns": 0,
+      "audio_peak_queue_buffers": 0,
+      "audio_peak_queue_ns": 0,
+      "audio_queue_empty_events": 503,
+      "audio_queue_full_events": 0,
+      "late_audio_blocks": 0,
+      "audio_arrival_drift_ns": -6351500
+    }
+  }
+]

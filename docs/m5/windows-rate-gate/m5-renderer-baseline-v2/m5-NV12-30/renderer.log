@@ -1,0 +1,12 @@
+[INF] renderer: device: NVIDIA GeForce RTX 5090 (headless)
+[INF] scene: 1 window(s), canvas 1280x720 (aspect 1.78). Controls: L layout, SPACE pause, -/= speed, B backdrop, 1-9 toggle stream, 0 all, ESC quit
+[INF] service: 12 framelink input slots ready ('m5-NV12-30.in.0' .. 'm5-NV12-30.in.11')
+[INF] renderer: stream header 640x360 fmt=44, dynamic win32 surfaces
+[INF] renderer: created owned surface key=16 1920x1080 (shm upload path, 1 total)
+[INF] service: system wake held (presentation active)
+[INF] renderer: created owned surface key=19 1920x1080 (shm upload path, 2 total)
+[INF] renderer: created owned surface key=17 1920x1080 (shm upload path, 3 total)
+[INF] renderer: created owned surface key=18 1920x1080 (shm upload path, 4 total)
+[INF] scene: 226 frames in 5s (two-cubes, 1/1 streams in scene, 1 windows)
+[INF] service: 88 adoptions in 5s (pool 4 slots, 1 producers) hop avg 19.10 ms max 29.94 ms over 88
+[INF] renderer: wrote headless.ppm (1280x720)

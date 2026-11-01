@@ -1,0 +1,5 @@
+{"command": ["C:/Users/jonsu/dev/vkrender-m5-policy-build/framelink/Release/framelink_av_consumer.exe", "C:/Users/jonsu/dev/vkrender-m5-policy-build/framelink/Release/gstframelink.dll", "--session", "C:\\Users\\jonsu\\dev\\m5-policy-offsets-fakesink\\negative-reset-37000000\\session", "--frames", "80", "--timeout-ms", "5000", "--fps", "50", "--rate", "48000", "--format", "BGRA", "--stream", "--audio-sink", "fakesink", "--clock-policy", "producer"]}
+FAIL: audio discontinuity: renegotiate both tracks
+{"event":"playback-clock","policy":"producer","system_now_ns":1372180228435100,"selected_now_ns":1372180228434800,"device_now_ns":18446744073709551615,"mapped_producer_base_ns":1372180225306950,"playback_base_ns":1372180225306950,"latency_ns":100000000,"resample_slaves":0}
+{"event":"playback-clock-sample","system_ns":1372180228512900,"selected_ns":1372180228512800,"device_ns":18446744073709551615,"audio_samples":960}
+{"event":"playback-clock-sample","system_ns":1372180339899600,"selected_ns":1372180339899500,"device_ns":18446744073709551615,"audio_samples":2880}

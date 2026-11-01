@@ -1,0 +1,2 @@
+- auto mappedBase=o.producerClock ? uint64_t(base) : gst_clock_get_time(selected)+20*GST_MSECOND;
++ auto mappedBase=gst_clock_get_time(selected)+20*GST_MSECOND;

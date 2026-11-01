@@ -1,0 +1,27 @@
+bounded status=session-reconnecting: rendezvous deadline
+ok=0 sessions=0 clocks=0 ends=0 retries=1 ms=714 error=rendezvous deadline
+normal {"event":"playback-clock","policy":"producer","system_now_ns":234489759683356,"selected_now_ns":234489759683247,"device_now_ns":18446744073709551615,"mapped_producer_base_ns":234489809588905,"playback_base_ns":234489809588905,"latency_ns":100000000,"resample_slaves":0}
+status=producer-system-clock
+{"event":"playback-metrics","peak_queue_buffers":4,"peak_queue_ns":80000000,"queue_empty_events":3,"queue_full_events":0,"late_audio_blocks":0,"arrival_drift_ns":398362}
+{"event":"playback-complete","audio_master":false,"video_received":39,"video_late":0,"audio_blocks":75,"audio_samples":72000,"latency_ns":100000000}
+{"event":"playback-timing","audio_first_running_pts_ns":0,"video_first_running_pts_ns":0,"audio_end_ns":1500000000,"video_end_ns":1500000000}
+ok=1 sessions=1 clocks=1 ends=1 retries=0 ms=2549 error=
+pause {"event":"playback-clock","policy":"producer","system_now_ns":234492309952340,"selected_now_ns":234492309951654,"device_now_ns":18446744073709551615,"mapped_producer_base_ns":234492359545166,"playback_base_ns":234492359545166,"latency_ns":100000000,"resample_slaves":0}
+status=producer-system-clock
+status=session-paused
+{"event":"playback-clock","policy":"producer","system_now_ns":234493421482790,"selected_now_ns":234493421482632,"device_now_ns":18446744073709551615,"mapped_producer_base_ns":234493471353219,"playback_base_ns":234493471353219,"latency_ns":100000000,"resample_slaves":0}
+status=producer-system-clock
+{"event":"playback-metrics","peak_queue_buffers":4,"peak_queue_ns":80000000,"queue_empty_events":3,"queue_full_events":0,"late_audio_blocks":0,"arrival_drift_ns":-152588}
+{"event":"playback-complete","audio_master":false,"video_received":39,"video_late":0,"audio_blocks":75,"audio_samples":72000,"latency_ns":100000000}
+{"event":"playback-timing","audio_first_running_pts_ns":0,"video_first_running_pts_ns":0,"audio_end_ns":1500000000,"video_end_ns":1500000000}
+ok=1 sessions=2 clocks=2 ends=2 retries=0 ms=3651 error=
+recover {"event":"playback-clock","policy":"producer","system_now_ns":234495958619003,"selected_now_ns":234495958618854,"device_now_ns":18446744073709551615,"mapped_producer_base_ns":234496008500075,"playback_base_ns":234496008500075,"latency_ns":100000000,"resample_slaves":0}
+status=producer-system-clock
+status=session-reconnecting: audio discontinuity: renegotiate both tracks
+{"event":"playback-clock","policy":"producer","system_now_ns":234497109930623,"selected_now_ns":234497109930490,"device_now_ns":18446744073709551615,"mapped_producer_base_ns":234497159843000,"playback_base_ns":234497159843000,"latency_ns":100000000,"resample_slaves":0}
+status=producer-system-clock
+{"event":"playback-metrics","peak_queue_buffers":4,"peak_queue_ns":80000000,"queue_empty_events":3,"queue_full_events":0,"late_audio_blocks":0,"arrival_drift_ns":-8194}
+{"event":"playback-complete","audio_master":false,"video_received":39,"video_late":0,"audio_blocks":75,"audio_samples":72000,"latency_ns":100000000}
+{"event":"playback-timing","audio_first_running_pts_ns":0,"video_first_running_pts_ns":0,"audio_end_ns":1500000000,"video_end_ns":1500000000}
+ok=1 sessions=2 clocks=2 ends=2 retries=1 ms=3686 error=
+4 recovery scenarios passed

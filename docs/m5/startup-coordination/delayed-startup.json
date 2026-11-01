@@ -1,0 +1,78 @@
+[
+  {
+    "policy": "producer",
+    "returncode": 0,
+    "cases": [
+      {
+        "format": "BGRA",
+        "intact": true,
+        "stats": {
+          "event": "video-transport-summary",
+          "received": 100,
+          "submitted": 100,
+          "dropped": 0,
+          "ring_full_drops": 0
+        },
+        "received": 100
+      },
+      {
+        "format": "NV12",
+        "intact": true,
+        "stats": {
+          "event": "video-transport-summary",
+          "received": 100,
+          "submitted": 100,
+          "dropped": 0,
+          "ring_full_drops": 0
+        },
+        "received": 100
+      }
+    ]
+  },
+  {
+    "policy": "audio",
+    "returncode": 0,
+    "cases": [
+      {
+        "format": "BGRA",
+        "intact": false,
+        "stats": {
+          "event": "video-transport-summary",
+          "received": 100,
+          "submitted": 66,
+          "dropped": 34,
+          "ring_full_drops": 34
+        },
+        "received": 63
+      },
+      {
+        "format": "NV12",
+        "intact": false,
+        "stats": {
+          "event": "video-transport-summary",
+          "received": 100,
+          "submitted": 65,
+          "dropped": 35,
+          "ring_full_drops": 35
+        },
+        "received": 62
+      }
+    ]
+  },
+  {
+    "case": "cancel",
+    "exit_codes": [
+      1,
+      -9
+    ],
+    "elapsed_seconds": 0.7912305859790649
+  },
+  {
+    "case": "restart",
+    "exit_codes": [
+      0,
+      0
+    ],
+    "elapsed_seconds": 2.7734165110159665
+  }
+]

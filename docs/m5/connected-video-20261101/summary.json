@@ -1,0 +1,36 @@
+{
+  "source": "3ac38ad365e390646e27d6f3f44c469b0084f957",
+  "serial": "A06B4AABFB07983",
+  "selinux": "Enforcing",
+  "cases": [
+    {
+      "case": "socket",
+      "exit": 0
+    },
+    {
+      "case": "native",
+      "exit": 0
+    },
+    {
+      "case": "named-rgba",
+      "exit": 0
+    },
+    {
+      "case": "named-bgra",
+      "exit": 0
+    },
+    {
+      "case": "named-nv12",
+      "exit": 0
+    },
+    {
+      "case": "sync-contract",
+      "exit": 0
+    },
+    {
+      "case": "reconnect-held",
+      "exit": 0
+    }
+  ],
+  "scope": "native same-UID, including separate processes; not cross-UID AV or physical scanout"
+}

@@ -26,6 +26,7 @@
 // staging texture - the exact patterns vkrender's receivers and framecam use.
 // Zero-copy caps (memory:DmaBuf, memory:D3D11Memory) are a later stage.
 
+#include <algorithm>
 #include <gst/base/gstbasesink.h>
 #include <gst/base/gstpushsrc.h>
 #include <gst/gst.h>
@@ -143,12 +144,15 @@ typedef struct _GstFrameLinkSink {
     gint slots;     // 0 = open `channel` directly; N = walk `channel.0..N-1`
 
     flChannel* ch;
+    gboolean delegated; // one adopted lease; never fall back to named redial
     flChannelInfo cinfo;
     GstVideoInfo vinfo;
     gboolean haveInfo;
     gint64 nextConnectUs; // lazy-connect rate limit (the consumer may not be up)
     gboolean busyWarned;
-    guint64 submitted, dropped;
+    guint connectTimeoutMs;
+    gboolean testOpenDelayed;
+    guint64 submitted, dropped, received, ringFullDrops;
 #ifndef _WIN32
     gboolean mapRefused; // consumer ring not FL_MAP_CPU - fatal, but say why
 #endif
@@ -162,7 +166,7 @@ G_DEFINE_TYPE(GstFrameLinkSink, gst_framelink_sink, GST_TYPE_BASE_SINK)
 #define GST_FRAMELINK_SINK(o) \
     (G_TYPE_CHECK_INSTANCE_CAST((o), gst_framelink_sink_get_type(), GstFrameLinkSink))
 
-enum { SINK_PROP_0, SINK_PROP_CHANNEL, SINK_PROP_SLOTS, SINK_PROP_PRESERVE_TIMESTAMPS };
+enum { SINK_PROP_0, SINK_PROP_CHANNEL, SINK_PROP_SLOTS, SINK_PROP_PRESERVE_TIMESTAMPS, SINK_PROP_CONNECT_TIMEOUT };
 
 static GstStaticPadTemplate sinkTemplate =
     GST_STATIC_PAD_TEMPLATE("sink", GST_PAD_SINK, GST_PAD_ALWAYS,
@@ -179,6 +183,7 @@ static void sinkDisconnect(GstFrameLinkSink* self) {
 // start after the pipeline (a receiver launched at boot), die and come back
 // (renderer restart) - the sink just keeps dialling.
 static void sinkTryConnect(GstFrameLinkSink* self) {
+    if(self->ch || self->delegated)return;
     const gint64 now = g_get_monotonic_time();
     if (now < self->nextConnectUs) return;
     self->nextConnectUs = now + G_USEC_PER_SEC;
@@ -188,6 +193,13 @@ static void sinkTryConnect(GstFrameLinkSink* self) {
     const flFormat fmt =
         self->haveInfo ? toFlFormat(GST_VIDEO_INFO_FORMAT(&self->vinfo)) : FL_FORMAT_BGRA8;
 
+    gsttrace::Scope openTrace("gst.producer_open",gsttrace::id(self->channel));
+    // Deterministic setup-delay fault: before import, never attached to a frame.
+    if(!self->testOpenDelayed) {
+        self->testOpenDelayed=TRUE;
+        const char* delay=g_getenv("FRAMELINK_TEST_PRODUCER_OPEN_DELAY_MS");
+        if(delay)g_usleep((std::min)(g_ascii_strtoull(delay,nullptr,10),guint64(5000))*1000);
+    }
     flResult r;
     guint32 slotIndex = 0;
     if (self->slots > 0) {
@@ -197,6 +209,7 @@ static void sinkTryConnect(GstFrameLinkSink* self) {
         r = flOpenProducer(self->channel, &self->ch);
         if (r == FL_OK && w && h) flRequestGeometry(self->ch, w, h, fmt);
     }
+    openTrace.result(r);
     if (r != FL_OK) {
         // BUSY (all slots taken) is an operational condition worth one line;
         // NOT_FOUND (consumer absent) is the boring startup race - stay quiet.
@@ -214,6 +227,37 @@ static void sinkTryConnect(GstFrameLinkSink* self) {
                     self->cinfo.width, self->cinfo.height,
                     gst_video_format_to_string(toGstFormat(self->cinfo.format)),
                     self->cinfo.poolSize);
+}
+
+// Opt-in session readiness. The default remains lazy reconnect for ordinary
+// gst-launch pipelines; coordinated A/V sessions pay device import cost before
+// choosing/releasing their common playback epoch, not in the first render.
+static gboolean sinkStart(GstBaseSink* base) {
+    auto* self=GST_FRAMELINK_SINK(base);
+    if(self->delegated) {
+        if(self->ch)return TRUE;
+        GST_ELEMENT_ERROR(self,RESOURCE,OPEN_WRITE,("Fresh broker video lease required"),(NULL));
+        return FALSE;
+    }
+    self->testOpenDelayed=FALSE;
+    if(!self->connectTimeoutMs)return TRUE;
+    // A previous stream's caps are not this stream's geometry. Claim the
+    // existing consumer ring unchanged; fresh CAPS will request its geometry.
+    self->haveInfo=FALSE;
+    gst_video_info_init(&self->vinfo);
+    gsttrace::Scope readyTrace("gst.producer_preconnect",gsttrace::id(self->channel));
+    const auto deadline=g_get_monotonic_time()+gint64(self->connectTimeoutMs)*1000;
+    self->nextConnectUs=0;
+    do {
+        sinkTryConnect(self);
+        if(self->ch && g_get_monotonic_time()<=deadline)return readyTrace.result(TRUE);
+        if(g_get_monotonic_time()>=deadline)break;
+        g_usleep(1000);
+    } while(true);
+    sinkDisconnect(self);
+    GST_ELEMENT_ERROR(self,RESOURCE,OPEN_WRITE,("FrameLink producer readiness deadline"),
+                      ("Channel %s was not ready within %u ms",self->channel,self->connectTimeoutMs));
+    return readyTrace.result(FALSE);
 }
 
 static gboolean sinkSetCaps(GstBaseSink* base, GstCaps* caps) {
@@ -236,12 +280,30 @@ static gboolean sinkSetCaps(GstBaseSink* base, GstCaps* caps) {
 static GstFlowReturn sinkRender(GstBaseSink* base, GstBuffer* buffer) {
     GstFrameLinkSink* self = GST_FRAMELINK_SINK(base);
     gsttrace::Scope trace("gst.sinkRender",gsttrace::id(self->channel));
-    if (!self->haveInfo) return trace.result(GST_FLOW_OK);
+    ++self->received;
+    // Optional identity-bearing accounting. PTS is the original media running
+    // time; received is a local ordinal, not a transport sequence. No I/O.
+    const auto account = [&](const char* op) {
+        if (!trace.active) return;
+        const GstSegment* segment = &GST_BASE_SINK(self)->segment;
+        const GstClockTime pts = segment->format == GST_FORMAT_TIME
+            ? gst_segment_to_running_time(segment, GST_FORMAT_TIME, GST_BUFFER_PTS(buffer))
+            : GST_CLOCK_TIME_NONE;
+        gsttrace::record({op, gsttrace::clockNs(), 0, gsttrace::id(self->channel),
+                          self->received, 0, 0,
+                          GST_CLOCK_TIME_IS_VALID(pts) ? (int64_t)pts : -1, 0});
+    };
+    account("gst.frame_receive");
+    if (!self->haveInfo) {
+        account("gst.frame_drop.no_caps");
+        return trace.result(GST_FLOW_OK);
+    }
 
     if (!self->ch) {
         sinkTryConnect(self);
         if (!self->ch) {
             ++self->dropped;
+            account("gst.frame_drop.no_consumer");
             return trace.result(GST_FLOW_OK); // keep the pipeline alive until a consumer appears
         }
     }
@@ -253,23 +315,30 @@ static GstFlowReturn sinkRender(GstBaseSink* base, GstBuffer* buffer) {
          incoming==FL_FORMAT_RGB10A2 || self->cinfo.format==FL_FORMAT_RGB10A2) && incoming!=self->cinfo.format)) {
         GST_ELEMENT_ERROR(self,CORE,NEGOTIATION,("channel format/geometry does not match input"),
             ("Create the consumer with matching format and geometry; no implicit YUV/RGB conversion"));
+        account("gst.frame_drop.negotiation");
         return trace.result(GST_FLOW_NOT_NEGOTIATED);
     }
 
     flBuffer fb = {};
     flResult r = flAcquireBuffer(self->ch, &fb, 5);
     if (r == FL_TIMEOUT || r == FL_BUSY) {
+        ++self->ringFullDrops;
+        account("gst.frame_drop.ring_full");
         ++self->dropped; // ring full: the consumer is behind, latest-wins says drop
         return trace.result(GST_FLOW_OK);
     }
     if (r != FL_OK) {
+        account("gst.frame_drop.channel_lost");
         GST_WARNING_OBJECT(self, "channel lost (%s) - will redial", flResultString(r));
         sinkDisconnect(self);
+        if(self->delegated)return trace.result(GST_FLOW_ERROR);
         return trace.result(GST_FLOW_OK);
     }
 
+    account("gst.frame_acquired");
     GstVideoFrame vframe;
     if (!gst_video_frame_map(&vframe, &self->vinfo, buffer, GST_MAP_READ)) {
+        account("gst.frame_drop.map_failed");
         sinkDisconnect(self); // do not publish uninitialized pixels
         return trace.result(GST_FLOW_ERROR);
     }
@@ -300,6 +369,7 @@ static GstFlowReturn sinkRender(GstBaseSink* base, GstBuffer* buffer) {
             for (guint p=0;p<2;p++) {
                 const gint pitch=GST_VIDEO_FRAME_PLANE_STRIDE(&vframe,p);
                 if(pitch<(gint)w) {
+                    account("gst.frame_drop.invalid_pitch");
                     ctx->Release();g_byte_array_unref(scratch);
                     gst_video_frame_unmap(&vframe);sinkDisconnect(self);return trace.result(GST_FLOW_ERROR);
                 }
@@ -370,20 +440,44 @@ static GstFlowReturn sinkRender(GstBaseSink* base, GstBuffer* buffer) {
             pts = gst_segment_to_running_time(&GST_BASE_SINK(self)->segment,
                                               GST_FORMAT_TIME, GST_BUFFER_PTS(buffer));
             if (!GST_CLOCK_TIME_IS_VALID(pts) || pts > G_MAXINT64) {
+                account("gst.frame_drop.invalid_pts");
                 sinkDisconnect(self);
                 GST_ELEMENT_ERROR(self, STREAM, FORMAT, ("valid signed-nanosecond TIME segment and PTS required"), (NULL));
                 return trace.result(GST_FLOW_ERROR);
             }
         }
-        flSubmit(self->ch, &fb, pts);
+        if (flSubmit(self->ch, &fb, pts) != FL_OK) {
+            account("gst.frame_drop.submit_failed");
+            ++self->dropped;
+            sinkDisconnect(self);
+            return trace.result(GST_FLOW_OK);
+        }
         if (++self->submitted % 300 == 1)
             GST_INFO_OBJECT(self, "%" G_GUINT64_FORMAT " frames submitted, %" G_GUINT64_FORMAT
                             " dropped", self->submitted, self->dropped);
     } else {
+        account("gst.frame_drop.copy_failed");
         sinkDisconnect(self); // Never publish a failed/partial copy.
         return trace.result(GST_FLOW_ERROR);
     }
     return trace.result(GST_FLOW_OK);
+}
+
+// EOS is serialized with render calls, so this snapshot needs no per-frame
+// reporting lock or synchronous logging. Querying GstBaseSink's generic stats
+// alone would hide frames dropped by the transport's full-ring policy.
+static gboolean sinkEvent(GstBaseSink* base, GstEvent* event) {
+    if (GST_EVENT_TYPE(event) == GST_EVENT_EOS) {
+        auto* self = GST_FRAMELINK_SINK(base);
+        auto* stats = gst_structure_new("framelink-sink-stats",
+            "received", G_TYPE_UINT64, self->received,
+            "submitted", G_TYPE_UINT64, self->submitted,
+            "dropped", G_TYPE_UINT64, self->dropped,
+            "ring-full-drops", G_TYPE_UINT64, self->ringFullDrops, NULL);
+        gst_element_post_message(GST_ELEMENT(base),
+            gst_message_new_element(GST_OBJECT(base), stats));
+    }
+    return GST_BASE_SINK_CLASS(gst_framelink_sink_parent_class)->event(base, event);
 }
 
 static gboolean sinkStop(GstBaseSink* base) {
@@ -397,6 +491,9 @@ static gboolean sinkStop(GstBaseSink* base) {
 static void sinkSetProperty(GObject* obj, guint id, const GValue* value, GParamSpec* spec) {
     GstFrameLinkSink* self = GST_FRAMELINK_SINK(obj);
     switch (id) {
+        case SINK_PROP_CONNECT_TIMEOUT:
+            if(GST_STATE(self)>GST_STATE_READY){GST_WARNING_OBJECT(self,"connect timeout cannot change while running");break;}
+            self->connectTimeoutMs=g_value_get_uint(value);break;
         case SINK_PROP_CHANNEL:
             g_free(self->channel);
             self->channel = g_value_dup_string(value);
@@ -412,6 +509,7 @@ static void sinkSetProperty(GObject* obj, guint id, const GValue* value, GParamS
 static void sinkGetProperty(GObject* obj, guint id, GValue* value, GParamSpec* spec) {
     GstFrameLinkSink* self = GST_FRAMELINK_SINK(obj);
     switch (id) {
+        case SINK_PROP_CONNECT_TIMEOUT: g_value_set_uint(value,self->connectTimeoutMs);break;
         case SINK_PROP_CHANNEL: g_value_set_string(value, self->channel); break;
         case SINK_PROP_PRESERVE_TIMESTAMPS: g_value_set_boolean(value, self->preserveTimestamps); break;
         case SINK_PROP_SLOTS: g_value_set_int(value, self->slots); break;
@@ -421,8 +519,17 @@ static void sinkGetProperty(GObject* obj, guint id, GValue* value, GParamSpec* s
 
 static void sinkFinalize(GObject* obj) {
     GstFrameLinkSink* self = GST_FRAMELINK_SINK(obj);
+    sinkDisconnect(self); // adoption can precede PLAYING and fail during setup
     g_free(self->channel);
     G_OBJECT_CLASS(gst_framelink_sink_parent_class)->finalize(obj);
+}
+
+// Action signal accepts one OWNED producer channel only in NULL. TRUE transfers
+// ownership; FALSE leaves it with the caller. No allocation/lookup is performed.
+static gboolean sinkAdoptChannel(GstFrameLinkSink* self,flChannel* channel) {
+    if(GST_STATE(self)!=GST_STATE_NULL || self->ch || !channel)return FALSE;
+    flChannelInfo info{};if(flQuery(channel,&info)!=FL_OK)return FALSE;
+    self->ch=channel;self->cinfo=info;self->delegated=TRUE;return TRUE;
 }
 
 static void gst_framelink_sink_class_init(GstFrameLinkSinkClass* klass) {
@@ -433,6 +540,9 @@ static void gst_framelink_sink_class_init(GstFrameLinkSinkClass* klass) {
     gobject->set_property = sinkSetProperty;
     gobject->get_property = sinkGetProperty;
     gobject->finalize = sinkFinalize;
+    g_signal_new_class_handler("adopt-channel",G_TYPE_FROM_CLASS(klass),
+        GSignalFlags(G_SIGNAL_RUN_LAST|G_SIGNAL_ACTION),G_CALLBACK(sinkAdoptChannel),
+        nullptr,nullptr,nullptr,G_TYPE_BOOLEAN,1,G_TYPE_POINTER);
 
     g_object_class_install_property(
         gobject, SINK_PROP_CHANNEL,
@@ -457,8 +567,14 @@ static void gst_framelink_sink_class_init(GstFrameLinkSinkClass* klass) {
         "framelink");
     gst_element_class_add_static_pad_template(element, &sinkTemplate);
 
+    g_object_class_install_property(gobject,SINK_PROP_CONNECT_TIMEOUT,
+        g_param_spec_uint("connect-timeout-ms","Connection readiness timeout",
+            "Open the producer before streaming; 0 keeps lazy connection",
+            0,60000,0,(GParamFlags)(G_PARAM_READWRITE|G_PARAM_STATIC_STRINGS|GST_PARAM_MUTABLE_READY)));
+    basesink->start = sinkStart;
     basesink->set_caps = sinkSetCaps;
     basesink->render = sinkRender;
+    basesink->event = sinkEvent;
     basesink->stop = sinkStop;
 }
 
@@ -485,6 +601,7 @@ typedef struct _GstFrameLinkSrc {
     gboolean haveTimestamp;
 
     flChannel* ch;
+    gboolean delegated;
     flChannelInfo cinfo;
     guint64 generation; // re-read geometry + renegotiate caps when it moves
     volatile gint flushing;
@@ -545,7 +662,7 @@ static gboolean srcStart(GstBaseSrc* base) {
     GstFrameLinkSrc* self = GST_FRAMELINK_SRC(base);
     // FL_MAP_CPU: this ring exists to be read byte-wise. Windows ignores the
     // flag (no CPU path) and the readback goes through a staging texture.
-    flResult r = flCreateChannelEx(self->channel, (guint32)self->width,
+    flResult r = self->delegated ? (self->ch ? FL_OK : FL_DISCONNECTED) : flCreateChannelEx(self->channel, (guint32)self->width,
                                    (guint32)self->height, toFlFormat(gst_video_format_from_string(self->format)), 4, FL_MAP_CPU,
                                    &self->ch);
     if (r != FL_OK) {
@@ -598,7 +715,7 @@ static GstFlowReturn srcCreate(GstPushSrc* push, GstBuffer** outbuf) {
         if (r == FL_OK) break;
         // TIMEOUT = no producer yet; DISCONNECTED = producer left, the ring
         // (ours) lives on and the next producer just dials in. Both mean wait.
-        if (r == FL_TIMEOUT || r == FL_DISCONNECTED) continue;
+        if (r == FL_TIMEOUT || (r == FL_DISCONNECTED && !self->delegated)) continue;
         GST_ELEMENT_ERROR(self, RESOURCE, READ, ("framelink acquire failed"),
                           ("flAcquireFrame: %s", flResultString(r)));
         return trace.result(GST_FLOW_ERROR);
@@ -772,9 +889,18 @@ static void srcGetProperty(GObject* obj, guint id, GValue* value, GParamSpec* sp
 
 static void srcFinalize(GObject* obj) {
     GstFrameLinkSrc* self = GST_FRAMELINK_SRC(obj);
+    if(self->ch){flClose(self->ch);self->ch=nullptr;}
     g_free(self->channel);
     g_free(self->format);
     G_OBJECT_CLASS(gst_framelink_src_parent_class)->finalize(obj);
+}
+
+static gboolean srcAdoptChannel(GstFrameLinkSrc* self,flChannel* channel) {
+    if(GST_STATE(self)!=GST_STATE_NULL || self->ch || !channel)return FALSE;
+    flChannelInfo info{};if(flQuery(channel,&info)!=FL_OK)return FALSE;
+    if(info.width!=(guint)self->width || info.height!=(guint)self->height ||
+       info.format!=toFlFormat(gst_video_format_from_string(self->format)))return FALSE;
+    self->ch=channel;self->cinfo=info;self->delegated=TRUE;return TRUE;
 }
 
 static void gst_framelink_src_class_init(GstFrameLinkSrcClass* klass) {
@@ -786,6 +912,9 @@ static void gst_framelink_src_class_init(GstFrameLinkSrcClass* klass) {
     gobject->set_property = srcSetProperty;
     gobject->get_property = srcGetProperty;
     gobject->finalize = srcFinalize;
+    g_signal_new_class_handler("adopt-channel",G_TYPE_FROM_CLASS(klass),
+        GSignalFlags(G_SIGNAL_RUN_LAST|G_SIGNAL_ACTION),G_CALLBACK(srcAdoptChannel),
+        nullptr,nullptr,nullptr,G_TYPE_BOOLEAN,1,G_TYPE_POINTER);
 
     g_object_class_install_property(
         gobject, SRC_PROP_CHANNEL,

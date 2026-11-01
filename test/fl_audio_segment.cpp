@@ -29,6 +29,17 @@ int main(int argc,char**argv){
   // Same common epoch as video, retaining the intentional 37-ms audio lag.
   auto video=gst_segment_to_running_time(&s,GST_FORMAT_TIME,s.start);
   REQUIRE(t.originNs-video==37*GST_MSECOND);
+  // The optional verifier observes original media without retimestamping it.
+  av::AudioTimeline observed;segment(observed,s);unsigned observations=0;
+  observed.observe=[&](GstBuffer* b,uint64_t running){
+    REQUIRE(GST_BUFFER_PTS(b)==s.start && running==s.base);
+    REQUIRE(gst_buffer_get_size(b)==1920);++observations;
+  };
+  REQUIRE(buffer(observed,s.start)==GST_PAD_PROBE_OK && observations==1);
+  REQUIRE(observed.samplesEnd==480 && observed.blocks==1);
+  observed.observe=[](GstBuffer*,uint64_t){throw 7;};
+  REQUIRE(buffer(observed,s.start+10*GST_MSECOND)==GST_PAD_PROBE_DROP);
+  REQUIRE(observed.invalid && observed.samplesEnd==480 && observed.blocks==1);
   // Negative control: raw PTS would falsely add start-base = three seconds.
   REQUIRE((s.start+37*GST_MSECOND)-video!=37*GST_MSECOND);
   // Delivery deadlines must use running-time, not raw PTS. Force >100-ms late.

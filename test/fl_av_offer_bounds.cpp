@@ -3,6 +3,19 @@
 #define AV_PLAYBACK_LIBRARY 1
 #include "../samples/av_apps.cpp"
 int main() {
+  av::PlaybackOptions badClock;badClock.clockPolicy=static_cast<av::PlaybackClockPolicy>(99);
+  av::PlaybackCallbacks callbacks;std::atomic<bool> stopped{false};std::string clockError;
+  if(av::runPlayback(badClock,callbacks,stopped,clockError) || clockError!="invalid playback clock policy")return 7;
+  // Arithmetic is checked before multiplication, including malicious wire words.
+  validateMediaRun(70000,4200,60);
+  validateMediaRun(300000,72000,240);
+  for(const auto& args : std::vector<std::array<uint64_t,3>>{{0,4200,60},{300001,4200,60},{UINT64_MAX,4200,60},{70000,UINT64_MAX,60},{70000,4201,60},{70000,4200,0}}) {
+    try {validateMediaRun(args[0],args[1],unsigned(args[2]));return 8;}
+    catch(const std::runtime_error&) {}
+  }
+  for(const char* value : {"", "-1", "+1", " 1", "1ms", "18446744073709551616"}) {
+    try {number(value);return 9;}catch(const std::runtime_error&) {}
+  }
   Conn unconnected;
   for(unsigned field=0;field<3;++field) for(unsigned bad : {0u,9u,0xffffffffu}) {
     flSessionCapabilities c{};c.version=1;c.videoCount=1;c.audioCount=1;

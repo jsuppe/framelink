@@ -22,7 +22,7 @@ This ledger is in-progress, not a blanket parity certification.
   refused Android resize preserves producer counters and outstanding ownership.
 - Android API tracing matches desktop operation/metadata coverage.
 
-**Wire version is now 5.** Rebuild both ends together; old peers are refused.
+**Wire version is now 6.** Rebuild both ends together; old peers are refused.
 Native handle APIs are necessarily platform-specific, with equivalent ownership
 and completion contracts. Android abstract sockets remain subject to app UID /
 SELinux boundaries; renderer cross-app input uses its existing Binder Surface API.

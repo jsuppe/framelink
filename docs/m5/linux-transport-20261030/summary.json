@@ -1,0 +1,512 @@
+[
+  {
+    "mode": "baseline",
+    "iteration": 0,
+    "pairs": 100,
+    "wall_seconds_including_setup": 0.468400849,
+    "cpu_seconds_including_setup_and_pixel_pcm_verification": 0.20499,
+    "known_pcm_payload_bytes": 384000,
+    "source_timestamp_quantization_ns": 1000,
+    "presentation_measured": false,
+    "audio_source_mark_to_arrival_ms": {
+      "min": 0.114,
+      "p50": 0.5965,
+      "p95": 0.632,
+      "p99": 0.646,
+      "max": 1.898
+    },
+    "video_source_mark_to_arrival_ms": {
+      "min": 1.467,
+      "p50": 1.5855000000000001,
+      "p95": 1.644,
+      "p99": 1.77,
+      "max": 4.669
+    },
+    "fixture_summary": {
+      "verified_pairs": 100,
+      "max_offset_error_ns": 0,
+      "differential_transport_ms_p50": -0.994,
+      "differential_transport_ms_p99": -0.914,
+      "differential_transport_ms_min": -2.771,
+      "differential_transport_ms_max": -0.914,
+      "endpoint_differential_change_ms_per_media_second": 0.916162,
+      "arrival_skew_ms_p99": -0.818
+    }
+  },
+  {
+    "mode": "baseline",
+    "iteration": 1,
+    "pairs": 100,
+    "wall_seconds_including_setup": 0.470335068,
+    "cpu_seconds_including_setup_and_pixel_pcm_verification": 0.180052,
+    "known_pcm_payload_bytes": 384000,
+    "source_timestamp_quantization_ns": 1000,
+    "presentation_measured": false,
+    "audio_source_mark_to_arrival_ms": {
+      "min": 0.133,
+      "p50": 0.356,
+      "p95": 0.628,
+      "p99": 0.672,
+      "max": 1.901
+    },
+    "video_source_mark_to_arrival_ms": {
+      "min": 1.447,
+      "p50": 1.5965,
+      "p95": 1.721,
+      "p99": 1.976,
+      "max": 4.528
+    },
+    "fixture_summary": {
+      "verified_pairs": 100,
+      "max_offset_error_ns": 0,
+      "differential_transport_ms_p50": -1.235,
+      "differential_transport_ms_p99": -0.896,
+      "differential_transport_ms_min": -2.627,
+      "differential_transport_ms_max": -0.896,
+      "endpoint_differential_change_ms_per_media_second": 0.861111,
+      "arrival_skew_ms_p99": -0.799
+    }
+  },
+  {
+    "mode": "baseline",
+    "iteration": 2,
+    "pairs": 100,
+    "wall_seconds_including_setup": 0.457246061,
+    "cpu_seconds_including_setup_and_pixel_pcm_verification": 0.12305800000000003,
+    "known_pcm_payload_bytes": 384000,
+    "source_timestamp_quantization_ns": 1000,
+    "presentation_measured": false,
+    "audio_source_mark_to_arrival_ms": {
+      "min": 0.07,
+      "p50": 0.1355,
+      "p95": 0.522,
+      "p99": 0.59,
+      "max": 1.963
+    },
+    "video_source_mark_to_arrival_ms": {
+      "min": 1.469,
+      "p50": 1.581,
+      "p95": 1.678,
+      "p99": 1.861,
+      "max": 4.475
+    },
+    "fixture_summary": {
+      "verified_pairs": 100,
+      "max_offset_error_ns": 0,
+      "differential_transport_ms_p50": -1.428,
+      "differential_transport_ms_p99": -0.967,
+      "differential_transport_ms_min": -2.512,
+      "differential_transport_ms_max": -0.967,
+      "endpoint_differential_change_ms_per_media_second": 0.535354,
+      "arrival_skew_ms_p99": -0.869
+    }
+  },
+  {
+    "mode": "baseline",
+    "iteration": 3,
+    "pairs": 100,
+    "wall_seconds_including_setup": 0.447123415,
+    "cpu_seconds_including_setup_and_pixel_pcm_verification": 0.10690999999999995,
+    "known_pcm_payload_bytes": 384000,
+    "source_timestamp_quantization_ns": 1000,
+    "presentation_measured": false,
+    "audio_source_mark_to_arrival_ms": {
+      "min": 0.088,
+      "p50": 0.1975,
+      "p95": 0.285,
+      "p99": 0.32,
+      "max": 0.557
+    },
+    "video_source_mark_to_arrival_ms": {
+      "min": 1.435,
+      "p50": 1.5505,
+      "p95": 1.612,
+      "p99": 1.716,
+      "max": 2.84
+    },
+    "fixture_summary": {
+      "verified_pairs": 100,
+      "max_offset_error_ns": 0,
+      "differential_transport_ms_p50": -1.351,
+      "differential_transport_ms_p99": -1.192,
+      "differential_transport_ms_min": -2.283,
+      "differential_transport_ms_max": -1.192,
+      "endpoint_differential_change_ms_per_media_second": 0.516667,
+      "arrival_skew_ms_p99": -1.169
+    }
+  },
+  {
+    "mode": "baseline",
+    "iteration": 4,
+    "pairs": 100,
+    "wall_seconds_including_setup": 0.477863419,
+    "cpu_seconds_including_setup_and_pixel_pcm_verification": 0.23586299999999993,
+    "known_pcm_payload_bytes": 384000,
+    "source_timestamp_quantization_ns": 1000,
+    "presentation_measured": false,
+    "audio_source_mark_to_arrival_ms": {
+      "min": 0.51,
+      "p50": 0.612,
+      "p95": 0.646,
+      "p99": 0.657,
+      "max": 1.946
+    },
+    "video_source_mark_to_arrival_ms": {
+      "min": 1.534,
+      "p50": 1.605,
+      "p95": 1.647,
+      "p99": 1.732,
+      "max": 5.08
+    },
+    "fixture_summary": {
+      "verified_pairs": 100,
+      "max_offset_error_ns": 0,
+      "differential_transport_ms_p50": -0.992,
+      "differential_transport_ms_p99": -0.91,
+      "differential_transport_ms_min": -3.134,
+      "differential_transport_ms_max": -0.91,
+      "endpoint_differential_change_ms_per_media_second": 1.054545,
+      "arrival_skew_ms_p99": -0.813
+    }
+  },
+  {
+    "mode": "jitter",
+    "iteration": 0,
+    "pairs": 100,
+    "wall_seconds_including_setup": 0.716250124,
+    "cpu_seconds_including_setup_and_pixel_pcm_verification": 0.217334,
+    "known_pcm_payload_bytes": 384000,
+    "source_timestamp_quantization_ns": 1000,
+    "presentation_measured": false,
+    "audio_source_mark_to_arrival_ms": {
+      "min": 0.078,
+      "p50": 0.5615,
+      "p95": 0.64,
+      "p99": 0.649,
+      "max": 1.946
+    },
+    "video_source_mark_to_arrival_ms": {
+      "min": 0.795,
+      "p50": 1.661,
+      "p95": 3.251,
+      "p99": 3.408,
+      "max": 4.283
+    },
+    "fixture_summary": {
+      "verified_pairs": 100,
+      "max_offset_error_ns": 0,
+      "differential_transport_ms_p50": -1.413,
+      "differential_transport_ms_p99": -0.175,
+      "differential_transport_ms_min": -3.173,
+      "differential_transport_ms_max": -0.175,
+      "endpoint_differential_change_ms_per_media_second": 0.474747,
+      "arrival_skew_ms_p99": 5.474
+    }
+  },
+  {
+    "mode": "jitter",
+    "iteration": 1,
+    "pairs": 100,
+    "wall_seconds_including_setup": 0.683605297,
+    "cpu_seconds_including_setup_and_pixel_pcm_verification": 0.18728000000000006,
+    "known_pcm_payload_bytes": 384000,
+    "source_timestamp_quantization_ns": 1000,
+    "presentation_measured": false,
+    "audio_source_mark_to_arrival_ms": {
+      "min": 0.068,
+      "p50": 0.598,
+      "p95": 0.653,
+      "p99": 0.678,
+      "max": 1.977
+    },
+    "video_source_mark_to_arrival_ms": {
+      "min": 0.674,
+      "p50": 2.2065,
+      "p95": 3.288,
+      "p99": 3.317,
+      "max": 4.321
+    },
+    "fixture_summary": {
+      "verified_pairs": 100,
+      "max_offset_error_ns": 0,
+      "differential_transport_ms_p50": -1.607,
+      "differential_transport_ms_p99": -0.411,
+      "differential_transport_ms_min": -2.778,
+      "differential_transport_ms_max": -0.411,
+      "endpoint_differential_change_ms_per_media_second": 0.522727,
+      "arrival_skew_ms_p99": 5.434
+    }
+  },
+  {
+    "mode": "jitter",
+    "iteration": 2,
+    "pairs": 100,
+    "wall_seconds_including_setup": 0.708516506,
+    "cpu_seconds_including_setup_and_pixel_pcm_verification": 0.23492000000000013,
+    "known_pcm_payload_bytes": 384000,
+    "source_timestamp_quantization_ns": 1000,
+    "presentation_measured": false,
+    "audio_source_mark_to_arrival_ms": {
+      "min": 0.152,
+      "p50": 0.6145,
+      "p95": 0.663,
+      "p99": 0.681,
+      "max": 1.93
+    },
+    "video_source_mark_to_arrival_ms": {
+      "min": 1.334,
+      "p50": 2.1624999999999996,
+      "p95": 3.233,
+      "p99": 3.343,
+      "max": 3.815
+    },
+    "fixture_summary": {
+      "verified_pairs": 100,
+      "max_offset_error_ns": 0,
+      "differential_transport_ms_p50": -1.553,
+      "differential_transport_ms_p99": -0.726,
+      "differential_transport_ms_min": -2.828,
+      "differential_transport_ms_max": -0.726,
+      "endpoint_differential_change_ms_per_media_second": 0.186364,
+      "arrival_skew_ms_p99": 5.357
+    }
+  },
+  {
+    "mode": "jitter",
+    "iteration": 3,
+    "pairs": 100,
+    "wall_seconds_including_setup": 0.69833577,
+    "cpu_seconds_including_setup_and_pixel_pcm_verification": 0.2399560000000001,
+    "known_pcm_payload_bytes": 384000,
+    "source_timestamp_quantization_ns": 1000,
+    "presentation_measured": false,
+    "audio_source_mark_to_arrival_ms": {
+      "min": 0.087,
+      "p50": 0.56,
+      "p95": 0.64,
+      "p99": 0.651,
+      "max": 1.854
+    },
+    "video_source_mark_to_arrival_ms": {
+      "min": 1.331,
+      "p50": 2.282,
+      "p95": 3.734,
+      "p99": 3.875,
+      "max": 4.491
+    },
+    "fixture_summary": {
+      "verified_pairs": 100,
+      "max_offset_error_ns": 0,
+      "differential_transport_ms_p50": -2.029,
+      "differential_transport_ms_p99": -0.963,
+      "differential_transport_ms_min": -3.577,
+      "differential_transport_ms_max": -0.963,
+      "endpoint_differential_change_ms_per_media_second": 0.559091,
+      "arrival_skew_ms_p99": 4.833
+    }
+  },
+  {
+    "mode": "jitter",
+    "iteration": 4,
+    "pairs": 100,
+    "wall_seconds_including_setup": 0.716777769,
+    "cpu_seconds_including_setup_and_pixel_pcm_verification": 0.283721,
+    "known_pcm_payload_bytes": 384000,
+    "source_timestamp_quantization_ns": 1000,
+    "presentation_measured": false,
+    "audio_source_mark_to_arrival_ms": {
+      "min": 0.165,
+      "p50": 0.4075,
+      "p95": 0.649,
+      "p99": 0.697,
+      "max": 1.927
+    },
+    "video_source_mark_to_arrival_ms": {
+      "min": 1.863,
+      "p50": 2.8520000000000003,
+      "p95": 4.325,
+      "p99": 4.408,
+      "max": 5.195
+    },
+    "fixture_summary": {
+      "verified_pairs": 100,
+      "max_offset_error_ns": 0,
+      "differential_transport_ms_p50": -2.586,
+      "differential_transport_ms_p99": -1.301,
+      "differential_transport_ms_min": -4.171,
+      "differential_transport_ms_max": -1.301,
+      "endpoint_differential_change_ms_per_media_second": 0.357071,
+      "arrival_skew_ms_p99": 4.213
+    }
+  },
+  {
+    "mode": "audio-leads",
+    "iteration": 0,
+    "pairs": 100,
+    "wall_seconds_including_setup": 0.560607906,
+    "cpu_seconds_including_setup_and_pixel_pcm_verification": 0.333738,
+    "known_pcm_payload_bytes": 384000,
+    "source_timestamp_quantization_ns": 1000,
+    "presentation_measured": false,
+    "audio_source_mark_to_arrival_ms": {
+      "min": 0.516,
+      "p50": 0.6114999999999999,
+      "p95": 0.678,
+      "p99": 0.685,
+      "max": 1.866
+    },
+    "video_source_mark_to_arrival_ms": {
+      "min": 2.234,
+      "p50": 2.5134999999999996,
+      "p95": 2.583,
+      "p99": 2.6,
+      "max": 5.491
+    },
+    "fixture_summary": {
+      "verified_pairs": 100,
+      "max_offset_error_ns": 0,
+      "differential_transport_ms_p50": -1.896,
+      "differential_transport_ms_p99": -1.624,
+      "differential_transport_ms_min": -3.625,
+      "differential_transport_ms_max": -1.624,
+      "endpoint_differential_change_ms_per_media_second": 0.858586,
+      "arrival_skew_ms_p99": -1.527
+    }
+  },
+  {
+    "mode": "audio-leads",
+    "iteration": 1,
+    "pairs": 100,
+    "wall_seconds_including_setup": 0.604330891,
+    "cpu_seconds_including_setup_and_pixel_pcm_verification": 0.2828560000000002,
+    "known_pcm_payload_bytes": 384000,
+    "source_timestamp_quantization_ns": 1000,
+    "presentation_measured": false,
+    "audio_source_mark_to_arrival_ms": {
+      "min": 0.103,
+      "p50": 0.194,
+      "p95": 0.212,
+      "p99": 0.263,
+      "max": 0.511
+    },
+    "video_source_mark_to_arrival_ms": {
+      "min": 2.628,
+      "p50": 2.8255,
+      "p95": 2.958,
+      "p99": 3.004,
+      "max": 4.651
+    },
+    "fixture_summary": {
+      "verified_pairs": 100,
+      "max_offset_error_ns": 0,
+      "differential_transport_ms_p50": -2.638,
+      "differential_transport_ms_p99": -2.427,
+      "differential_transport_ms_min": -4.14,
+      "differential_transport_ms_max": -2.427,
+      "endpoint_differential_change_ms_per_media_second": 0.781313,
+      "arrival_skew_ms_p99": -2.412
+    }
+  },
+  {
+    "mode": "audio-leads",
+    "iteration": 2,
+    "pairs": 100,
+    "wall_seconds_including_setup": 0.564429889,
+    "cpu_seconds_including_setup_and_pixel_pcm_verification": 0.2950619999999998,
+    "known_pcm_payload_bytes": 384000,
+    "source_timestamp_quantization_ns": 1000,
+    "presentation_measured": false,
+    "audio_source_mark_to_arrival_ms": {
+      "min": 0.082,
+      "p50": 0.5674999999999999,
+      "p95": 0.636,
+      "p99": 0.668,
+      "max": 1.908
+    },
+    "video_source_mark_to_arrival_ms": {
+      "min": 2.243,
+      "p50": 2.5675,
+      "p95": 2.953,
+      "p99": 3.266,
+      "max": 5.391
+    },
+    "fixture_summary": {
+      "verified_pairs": 100,
+      "max_offset_error_ns": 0,
+      "differential_transport_ms_p50": -1.961,
+      "differential_transport_ms_p99": -1.643,
+      "differential_transport_ms_min": -3.483,
+      "differential_transport_ms_max": -1.643,
+      "endpoint_differential_change_ms_per_media_second": 0.454545,
+      "arrival_skew_ms_p99": -1.547
+    }
+  },
+  {
+    "mode": "audio-leads",
+    "iteration": 3,
+    "pairs": 100,
+    "wall_seconds_including_setup": 0.603863923,
+    "cpu_seconds_including_setup_and_pixel_pcm_verification": 0.26809400000000005,
+    "known_pcm_payload_bytes": 384000,
+    "source_timestamp_quantization_ns": 1000,
+    "presentation_measured": false,
+    "audio_source_mark_to_arrival_ms": {
+      "min": 0.111,
+      "p50": 0.1925,
+      "p95": 0.42,
+      "p99": 0.569,
+      "max": 1.086
+    },
+    "video_source_mark_to_arrival_ms": {
+      "min": 2.581,
+      "p50": 2.907,
+      "p95": 4.017,
+      "p99": 4.646,
+      "max": 6.486
+    },
+    "fixture_summary": {
+      "verified_pairs": 100,
+      "max_offset_error_ns": 0,
+      "differential_transport_ms_p50": -2.689,
+      "differential_transport_ms_p99": -2.122,
+      "differential_transport_ms_min": -6.315,
+      "differential_transport_ms_max": -2.122,
+      "endpoint_differential_change_ms_per_media_second": 0.465152,
+      "arrival_skew_ms_p99": -2.105
+    }
+  },
+  {
+    "mode": "audio-leads",
+    "iteration": 4,
+    "pairs": 100,
+    "wall_seconds_including_setup": 0.643722063,
+    "cpu_seconds_including_setup_and_pixel_pcm_verification": 0.29167500000000013,
+    "known_pcm_payload_bytes": 384000,
+    "source_timestamp_quantization_ns": 1000,
+    "presentation_measured": false,
+    "audio_source_mark_to_arrival_ms": {
+      "min": 0.094,
+      "p50": 0.187,
+      "p95": 0.479,
+      "p99": 2.442,
+      "max": 3.88
+    },
+    "video_source_mark_to_arrival_ms": {
+      "min": 2.67,
+      "p50": 3.0395000000000003,
+      "p95": 5.537,
+      "p99": 7.198,
+      "max": 7.755
+    },
+    "fixture_summary": {
+      "verified_pairs": 100,
+      "max_offset_error_ns": 0,
+      "differential_transport_ms_p50": -2.834,
+      "differential_transport_ms_p99": -2.316,
+      "differential_transport_ms_min": -7.606,
+      "differential_transport_ms_max": -2.316,
+      "endpoint_differential_change_ms_per_media_second": 0.273232,
+      "arrival_skew_ms_p99": -2.294
+    }
+  }
+]

@@ -1,5 +1,6 @@
 #pragma once
 #include "framelink_session.h"
+#include "av_session_provider.h"
 #include <gst/gst.h>
 #include <atomic>
 #include <functional>
@@ -13,17 +14,54 @@ struct PlaybackClock {
   uint64_t baseTimeNs = 0, latencyNs = 0;
   bool audioMaster = false;
 };
+enum class PlaybackClockPolicy { AudioPreferred, ProducerMapped, AudioPreferredCoordinated };
 struct PlaybackOptions {
   std::string plugin, session, format = "BGRA", audioSink = "autoaudiosink";
   unsigned width=160, height=90, fps=50, rate=48000, channels=2;
   unsigned timeoutMs=15000, latencyMs=100;
+  // Opt-in modes 3/5: finite media timeline budget (1..300000 ms); zero keeps
+  // legacy whole-session timeout. Requires matching producer and a coordinated policy.
+  // Startup/idle bounds stay unchanged; active deadline = budget + timeoutMs.
+  unsigned mediaRunMs=0;
   bool externalVideo=false;
   const std::atomic<bool>* mute=nullptr;
   // Live pause suspends BOTH tracks and tears down their session. Resume
   // negotiates a fresh identity/epoch; it is not lossless recorded-media pause.
   const std::atomic<bool>* paused=nullptr;
   unsigned recoveryAttempts=3;
+  // Optional trusted broker adapter. Both callbacks are required.
+  const SessionProvider* sessionProvider=nullptr;
+  // ProducerMapped primes audio, then negotiates a final shared epoch on the
+  // receiver system clock and slaves the audio device. Requires mode-2 peer
+  // support (older producers reject explicitly); avoids startup catch-up bursts.
+  // onSession config epoch is provisional; onClock carries the final mapping.
+  // AudioPreferredCoordinated uses the same bounded PRIMED/GO barrier (mode 4,
+  // or 5 with finite budget), then anchors BOTH tracks on the device clock.
+  // No media PTS is rewritten; system-clock fallback is explicit when the sink
+  // cannot provide a clock. Legacy AudioPreferred/mode 1 is unchanged.
+  PlaybackClockPolicy clockPolicy=PlaybackClockPolicy::AudioPreferred;
 };
+// One broker-owned producer session. The provider supplies server ends of two
+// distinct connected byte streams. Broker must shutdown them on revoke/stop.
+// Optional SessionProvider::openVideo transfers the native channel to the
+// pipeline; without it, video keeps the existing named transport. Cross-UID
+// callers must supply authorized video ownership as well as C/A streams.
+struct ProducerOptions {
+  std::string plugin, format="BGRA";
+  unsigned frames=150, width=160, height=90, fps=50, rate=48000, channels=2;
+  // Same bounds as the CLI: frames 1..100000, size 2..4096 x 2..2160,
+  // fps 13..240, timeout 100..60000 ms. Default startup remains 15 seconds.
+  unsigned timeoutMs=15000;
+  // Zero keeps whole-session timeout; otherwise exact finite peer budget,
+  // 1..300000 ms, covering frames/fps without widening startup/idle limits.
+  unsigned mediaRunMs=0;
+  // Optional cooperative cancellation. Provider callbacks must still honor
+  // timeoutMs; native video setup/teardown may take that bounded interval.
+  const std::atomic<bool>* stop=nullptr;
+  const SessionProvider* sessionProvider=nullptr;
+};
+// Returns false on failure/cancel/deadline; never terminates the host process.
+bool runBrokerProducer(const ProducerOptions&, std::string& error);
 // Arrival/queue telemetry is not physical output timing. queueEmptyEvents
 // includes startup and EOS; it must not be labeled device underruns.
 struct PlaybackMetrics {
@@ -33,7 +71,17 @@ struct PlaybackMetrics {
   int64_t arrivalDriftNs=0; // decoded PCM admission: arrival delta minus media PTS delta
 };
 struct PlaybackCallbacks {
+  // Optional decoded-PCM observer, on the audio streaming thread (unlike the
+  // receiver-thread callbacks below). Borrowed buffer, original running-time
+  // PTS, before resampling. Must be bounded/thread-safe; never rewrite media.
+  // An exception invalidates the session rather than crossing the C callback.
+  std::function<void(GstBuffer*, uint64_t)> onAudio;
   std::function<void(const flSessionConfig&, const std::string&, const PlaybackClock&)> onSession;
+  // Optional native resource preparation after transport/audio preroll, before
+  // PRIMED and final producer epoch in either coordinated policy (legacy mode has no
+  // producer gate). Must finish within remaining startup budget;
+  // may throw to fail setup. Must not read unproduced image pixels.
+  std::function<void(unsigned remainingTimeoutMs)> onPrepare;
   // onSession clock is null during setup. onClock enables presentation after
   // audio preroll; it supplies the single shared epoch for both tracks.
   std::function<void(const PlaybackClock&)> onClock;

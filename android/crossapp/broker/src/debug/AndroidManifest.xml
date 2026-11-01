@@ -1,0 +1,5 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"><application>
+ <receiver android:name="dev.framelink.cross.KillBroker" android:exported="true"/>
+ <receiver android:name="dev.framelink.cross.KillProducer" android:exported="true" android:process=":producer"/>
+ <receiver android:name="dev.framelink.cross.BorrowFocus" android:exported="true"/>
+</application></manifest>

@@ -13,7 +13,7 @@ void usage(bool producer) {
        "Producer: --fps N (0=unpaced) --slots N --reconnect-at FRAME "
        "--corrupt-at FRAME\n"
        "          --submit auto|manual (manual: explicit ready completion)\n"
-       "Consumer: --pool 1..8 --delay-ms N --verify 0|1 --map-cpu 0|1\n"
+       "Consumer: --pool 1..16 --delay-ms N --verify 0|1 --map-cpu 0|1\n"
        "          --gpu-sync 0|1 --gpu-render 0|1 --adapter 16_HEX_DIGITS (adapter: Windows only)\n"
        "Defaults: channel=framelink.sample, frames=600 producer/120 consumer, "
        "timeout=100ms, idle deadline=10000ms.\n"
@@ -106,7 +106,7 @@ Options parse(int argc, char **argv, bool producer) {
           "size must have width 8..8192, height 1..8192");
   require(o.format != FL_FORMAT_NV12 || (!(o.width & 1) && !(o.height & 1)),
           "NV12 dimensions must be even");
-  require(o.frames > 0 && o.pool >= 1 && o.pool <= 8 && o.deadline > 0 &&
+  require(o.frames > 0 && o.pool >= 1 && o.pool <= FL_MAX_POOL_SIZE && o.deadline > 0 &&
               o.timeout <= o.deadline,
           "invalid frames/pool/timeout/deadline");
   require(o.fps <= 10000 && o.delay <= 60000 && o.slots <= 1024,

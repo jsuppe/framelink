@@ -1,0 +1,55 @@
+[INF] renderer: validation layer enabled
+[INF] renderer: device: NVIDIA GeForce RTX 5090
+[INF] scene: 1 window(s), canvas 1280x720 (aspect 1.78). Controls: L layout, SPACE pause, -/= speed, B backdrop, 1-9 toggle stream, 0 all, ESC quit
+[INF] service: 12 framelink input slots ready ('m5-visible.in.0' .. 'm5-visible.in.11')
+[INF] control: moderation API on http://127.0.0.1:18866/api/
+Validation Error: [ VUID-vkQueueSubmit-pSignalSemaphores-00067 ] | MessageID = 0x539277af
+vkQueueSubmit(): pSubmits[0].pSignalSemaphores[0] (VkSemaphore 0x170000000017) is being signaled by VkQueue 0x1f9a13e14d0, but it may still be in use by VkSwapchainKHR 0x90000000009.
+Most recently acquired image indices: [0], 1, 2.
+(Brackets mark the last use of VkSemaphore 0x170000000017 in a presentation operation.)
+Swapchain image 0 was presented but was not re-acquired, so VkSemaphore 0x170000000017 may still be in use and cannot be safely reused with image index 2.
+Hint: See https://docs.vulkan.org/guide/latest/swapchain_semaphore_reuse.html for details on swapchain semaphore reuse. Examples of possible approaches:
+   a) Use a separate semaphore per swapchain image. Index these semaphores using the index of the acquired image.
+   b) Consider the VK_KHR_swapchain_maintenance1 extension. It allows using a VkFence with the presentation operation.
+The Vulkan spec states: Each binary semaphore element of the pSignalSemaphores member of any element of pSubmits must be unsignaled when the semaphore signal operation it defines is executed on the device (https://docs.vulkan.org/spec/latest/chapters/cmdbuffers.html#VUID-vkQueueSubmit-pSignalSemaphores-00067)
+Objects: 2
+    [0] VkSemaphore 0x170000000017
+    [1] VkQueue 0x1f9a13e14d0
+
+Validation Error: [ VUID-vkQueueSubmit-pSignalSemaphores-00067 ] | MessageID = 0x539277af
+vkQueueSubmit(): pSubmits[0].pSignalSemaphores[0] (VkSemaphore 0x1a000000001a) is being signaled by VkQueue 0x1f9a13e14d0, but it may still be in use by VkSwapchainKHR 0x90000000009.
+Most recently acquired image indices: 0, [1], 2, 0.
+(Brackets mark the last use of VkSemaphore 0x1a000000001a in a presentation operation.)
+Swapchain image 1 was presented but was not re-acquired, so VkSemaphore 0x1a000000001a may still be in use and cannot be safely reused with image index 0.
+Hint: See https://docs.vulkan.org/guide/latest/swapchain_semaphore_reuse.html for details on swapchain semaphore reuse. Examples of possible approaches:
+   a) Use a separate semaphore per swapchain image. Index these semaphores using the index of the acquired image.
+   b) Consider the VK_KHR_swapchain_maintenance1 extension. It allows using a VkFence with the presentation operation.
+The Vulkan spec states: Each binary semaphore element of the pSignalSemaphores member of any element of pSubmits must be unsignaled when the semaphore signal operation it defines is executed on the device (https://docs.vulkan.org/spec/latest/chapters/cmdbuffers.html#VUID-vkQueueSubmit-pSignalSemaphores-00067)
+Objects: 2
+    [0] VkSemaphore 0x1a000000001a
+    [1] VkQueue 0x1f9a13e14d0
+
+[INF] renderer: stream header 640x360 fmt=44, dynamic win32 surfaces
+[INF] renderer: imported win32 surface key=23 160x90 (1 total, zero-copy)
+[INF] service: display wake held (presentation active)
+[INF] renderer: imported win32 surface key=19 160x90 (2 total, zero-copy)
+[INF] renderer: imported win32 surface key=22 160x90 (3 total, zero-copy)
+[INF] renderer: imported win32 surface key=16 160x90 (4 total, zero-copy)
+[INF] renderer: imported win32 surface key=17 160x90 (5 total, zero-copy)
+[INF] renderer: imported win32 surface key=18 160x90 (6 total, zero-copy)
+[INF] renderer: imported win32 surface key=20 160x90 (7 total, zero-copy)
+[INF] renderer: imported win32 surface key=21 160x90 (8 total, zero-copy)
+[INF] service: display wake released (presentation idle)
+[INF] service: display wake held (presentation active)
+[INF] scene: 533 frames in 5s (two-cubes, 1/1 streams in scene, 1 windows)
+[INF] service: 170 adoptions in 5s (pool 8 slots, 1 producers)
+[INF] service: display wake released (presentation idle)
+[INF] service: display wake held (presentation active)
+[INF] scene: 549 frames in 5s (two-cubes, 1/1 streams in scene, 1 windows)
+[INF] service: 225 adoptions in 5s (pool 8 slots, 1 producers)
+[INF] service: display wake released (presentation idle)
+AV_RENDER due_decisions=447 hold_checks=653 late_drops=12 invalid_pts=0 status=ended
+{"event":"playback-clock","policy":"producer","system_now_ns":1402587585081100,"selected_now_ns":1402587585080900,"device_now_ns":0,"mapped_producer_base_ns":1402587634963000,"playback_base_ns":1402587634963000,"latency_ns":100000000,"resample_slaves":1}
+{"event":"playback-metrics","peak_queue_buffers":0,"peak_queue_ns":0,"queue_empty_events":503,"queue_full_events":0,"late_audio_blocks":0,"arrival_drift_ns":65500}
+{"event":"playback-complete","audio_master":false,"video_received":0,"video_late":0,"audio_blocks":500,"audio_samples":480000,"latency_ns":100000000}
+{"event":"playback-timing","audio_first_running_pts_ns":0,"video_first_running_pts_ns":18446744073709551615,"audio_end_ns":10000000000,"video_end_ns":10000000000}

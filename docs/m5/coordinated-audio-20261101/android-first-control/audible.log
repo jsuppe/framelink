@@ -1,0 +1,11 @@
+
+11-01 07:13:03.482 32356 32356 I FLCross : bind=true
+11-01 07:13:04.065 32451 32523 I FLCross : producer-start lease=4929e3ea-a8dd-4a5f-adb9-e866b095aa7f uid=10304 pid=32451
+11-01 07:13:04.065 32409 32422 I FLCross : grant lease=4929e3ea-a8dd-4a5f-adb9-e866b095aa7f generation=1 consumer_uid=10305 broker_uid=10304
+11-01 07:13:04.086 32356 32446 I FLCross : receiver-start lease=4929e3ea-a8dd-4a5f-adb9-e866b095aa7f generation=1 uid=10305 pid=32356
+11-01 07:13:04.180 32356 32446 I FLCross : playback audio-clock
+11-01 07:13:04.666 32356 32446 I FLCross : native failure: video original PTS/identity gap
+11-01 07:13:04.667 32356 32446 I FLCross : receiver-result lease=4929e3ea-a8dd-4a5f-adb9-e866b095aa7f {"ok":false,"video":5,"posts":5,"pcm_samples":19200,"uid":10305,"pid":32356}
+11-01 07:13:04.670 32409 32422 I FLCross : retired lease=4929e3ea-a8dd-4a5f-adb9-e866b095aa7f generation=1 reason=explicit
+11-01 07:13:04.703 32451 32523 I FLCross : native failure: video send failed
+11-01 07:13:04.705 32451 32523 I FLCross : producer-result lease=4929e3ea-a8dd-4a5f-adb9-e866b095aa7f {"ok":false,"video":0,"posts":0,"pcm_samples":0,"uid":10304,"pid":32451}

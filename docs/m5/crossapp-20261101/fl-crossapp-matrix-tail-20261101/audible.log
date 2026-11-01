@@ -1,0 +1,11 @@
+
+11-01 06:46:43.779 18322 18322 I FLCross : bind=true
+11-01 06:46:44.363 18358 18376 I FLCross : grant lease=33c584d3-2839-4433-87b0-04c2ef616c46 generation=1 consumer_uid=10305 broker_uid=10304
+11-01 06:46:44.363 18380 18397 I FLCross : producer-start lease=33c584d3-2839-4433-87b0-04c2ef616c46 uid=10304 pid=18380
+11-01 06:46:44.367 18322 18379 I FLCross : receiver-start lease=33c584d3-2839-4433-87b0-04c2ef616c46 generation=1 uid=10305 pid=18322
+11-01 06:46:44.523 18322 18379 I FLCross : playback producer-system-clock
+11-01 06:46:46.669 18322 18379 I FLCross : native failure: audio playout budget exhausted: renegotiate both tracks
+11-01 06:46:46.669 18322 18379 I FLCross : receiver-result lease=33c584d3-2839-4433-87b0-04c2ef616c46 {"ok":false,"video":57,"posts":57,"pcm_samples":30400,"uid":10305,"pid":18322}
+11-01 06:46:46.672 18358 18376 I FLCross : retired lease=33c584d3-2839-4433-87b0-04c2ef616c46 generation=1 reason=explicit
+11-01 06:46:46.686 18380 18397 I FLCross : native failure: audio send failed
+11-01 06:46:46.686 18380 18397 I FLCross : producer-result lease=33c584d3-2839-4433-87b0-04c2ef616c46 {"ok":false,"video":0,"posts":0,"pcm_samples":0,"uid":10304,"pid":18380}

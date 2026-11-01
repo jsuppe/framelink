@@ -1,0 +1,25 @@
+apply plugin: 'com.android.application'
+android {
+ namespace 'dev.framelink.cross'
+ compileSdk 34
+ ndkVersion '28.2.13676358'
+ defaultConfig {
+  applicationId "dev.framelink.cross.${project.name}"
+  minSdk 29
+  targetSdk 34
+  versionCode 1
+  versionName '0.1'
+  ndk { abiFilters 'arm64-v8a' }
+  externalNativeBuild { cmake {
+   arguments "-DFRAMELINK_GST_ANDROID_ROOT=${project.findProperty('gstAndroidRoot')}"
+   targets 'fl_crossapp'
+  } }
+ }
+ sourceSets { main { java.srcDirs=['../common/java']; aidl.srcDirs=['../common/aidl'] } }
+ buildFeatures { aidl true }
+ externalNativeBuild { cmake { path '../CMakeLists.txt'; version '3.22.1' } }
+ if(project.name=='impostor') {
+  signingConfigs { untrusted { storeFile file(project.findProperty('impostorStore')); storePassword 'test-only'; keyAlias 'spike'; keyPassword 'test-only' } }
+  buildTypes { debug { signingConfig signingConfigs.untrusted } }
+ }
+}

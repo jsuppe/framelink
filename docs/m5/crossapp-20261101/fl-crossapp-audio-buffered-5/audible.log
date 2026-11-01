@@ -1,0 +1,48 @@
+
+11-01 06:51:54.593 24200 24200 I FLCross : bind=true
+11-01 06:51:55.089 24238 24254 I FLCross : grant lease=eb5b30bb-df1f-444b-b793-c80c04e26b7f generation=1 consumer_uid=10305 broker_uid=10304
+11-01 06:51:55.089 24260 24274 I FLCross : producer-start lease=eb5b30bb-df1f-444b-b793-c80c04e26b7f uid=10304 pid=24260
+11-01 06:51:55.116 24200 24259 I FLCross : receiver-start lease=eb5b30bb-df1f-444b-b793-c80c04e26b7f generation=1 uid=10305 pid=24200
+11-01 06:51:55.192 24200 24259 I FLCross : playback producer-system-clock
+11-01 06:51:57.438 24200 24259 I FLCross : clock now=3264933737105135 base=3264933786244212 latency=100000000
+11-01 06:51:57.438 24200 24259 I FLCross : audio samples=1600 late=0 queue=0 drift=0
+11-01 06:51:57.438 24200 24259 I FLCross : audio-clock-calibration internal=0 external=0 rate=1/1
+11-01 06:51:57.438 24200 24259 I FLCross : audio samples=6400 late=0 queue=0 drift=-56436
+11-01 06:51:57.438 24200 24259 I FLCross : audio-clock-calibration internal=0 external=3264933786244212 rate=1/1
+11-01 06:51:57.438 24200 24259 I FLCross : audio samples=11200 late=0 queue=0 drift=585948
+11-01 06:51:57.438 24200 24259 I FLCross : audio-clock-calibration internal=0 external=3264933786244212 rate=1/1
+11-01 06:51:57.438 24200 24259 I FLCross : audio samples=19200 late=0 queue=0 drift=-386487
+11-01 06:51:57.438 24200 24259 I FLCross : audio-clock-calibration internal=266000000 external=3264934100513209 rate=44491290216000000/40242000000000000
+11-01 06:51:57.438 24200 24259 I FLCross : audio samples=24000 late=0 queue=0 drift=-570872
+11-01 06:51:57.438 24200 24259 I FLCross : audio-clock-calibration internal=368000000 external=3264934201207700 rate=93004075940000000/87481200000000000
+11-01 06:51:57.438 24200 24259 I FLCross : audio samples=30400 late=0 queue=0 drift=-648513
+11-01 06:51:57.438 24200 24259 I FLCross : audio-clock-calibration internal=469000000 external=3264934300724214 rate=166761956955186154/160198834224666666
+11-01 06:51:57.438 24200 24259 I FLCross : audio samples=35200 late=0 queue=0 drift=-516129
+11-01 06:51:57.438 24200 24259 I FLCross : audio-clock-calibration internal=666000000 external=3264934498687254 rate=407250859201000000/396580000000000000
+11-01 06:51:57.438 24200 24259 I FLCross : audio samples=40000 late=0 queue=0 drift=-501744
+11-01 06:51:57.438 24200 24259 I FLCross : audio-clock-calibration internal=768000000 external=3264934599854400 rate=585955969887990202/574188004447999996
+11-01 06:51:57.438 24200 24259 I FLCross : audio samples=48000 late=0 queue=0 drift=-577025
+11-01 06:51:57.438 24200 24259 I FLCross : audio-clock-calibration internal=869000000 external=3264934699839009 rate=810109787681000000/797690500000000000
+11-01 06:51:57.438 24200 24259 I FLCross : audio samples=52800 late=0 queue=0 drift=-309564
+11-01 06:51:57.438 24200 24259 I FLCross : audio-clock-calibration internal=965000000 external=3264934796311030 rate=1082254203066000000/1067218000000000000
+11-01 06:51:57.438 24200 24259 I FLCross : audio samples=60800 late=0 queue=0 drift=-434154
+11-01 06:51:57.438 24200 24259 I FLCross : audio-clock-calibration internal=1168000000 external=3264934998821951 rate=1798846256240998275/1780835238742769227
+11-01 06:51:57.438 24200 24259 I FLCross : audio samples=65600 late=0 queue=0 drift=-747077
+11-01 06:51:57.438 24200 24259 I FLCross : audio-clock-calibration internal=1269000000 external=3264935099097902 rate=2253383475590000000/2235135500000000000
+11-01 06:51:57.438 24200 24259 I FLCross : audio samples=70400 late=0 queue=0 drift=473000
+11-01 06:51:57.438 24200 24259 I FLCross : audio-clock-calibration internal=1365000000 external=3264935195459877 rate=2775126909725000000/2753854400000000000
+11-01 06:51:57.438 24200 24259 I FLCross : audio samples=76800 late=0 queue=0 drift=-774256
+11-01 06:51:57.438 24200 24259 I FLCross : audio-clock-calibration internal=1466000000 external=3264935296533169 rate=3372629560461000000/3349064000000000000
+11-01 06:51:57.438 24200 24259 I FLCross : audio samples=83200 late=0 queue=33333333 drift=-809129
+11-01 06:51:57.438 24200 24259 I FLCross : audio-clock-calibration internal=1568000000 external=3264935398333871 rate=4052432890800535856/4027464953479529408
+11-01 06:51:57.438 24200 24259 I FLCross : audio samples=88000 late=0 queue=0 drift=-563821
+11-01 06:51:57.438 24200 24259 I FLCross : audio-clock-calibration internal=1765000000 external=3264935595037373 rate=5668623842752845578/5640479687685473684
+11-01 06:51:57.438 24200 24259 I FLCross : audio samples=94400 late=0 queue=0 drift=-732231
+11-01 06:51:57.438 24200 24259 I FLCross : audio-clock-calibration internal=1866000000 external=3264935696093145 rate=6615866045744000000/6585286800000000000
+11-01 06:51:57.438 24200 24259 I FLCross : audio samples=96000 late=0 queue=0 drift=-349871
+11-01 06:51:57.438 24200 24259 I FLCross : audio-clock-calibration internal=1968000000 external=3264935797776652 rate=7665111590628885236/7634087166102857136
+11-01 06:51:57.438 24200 24259 I FLCross : audio samples=96000 late=0 queue=0 drift=-349871
+11-01 06:51:57.438 24200 24259 I FLCross : audio-clock-calibration internal=2069000000 external=3264935898350093 rate=8820567061365814678/8789987322256181818
+11-01 06:51:57.439 24200 24259 I FLCross : receiver-result lease=eb5b30bb-df1f-444b-b793-c80c04e26b7f {"ok":true,"video":60,"posts":60,"pcm_samples":96000,"uid":10305,"pid":24200}
+11-01 06:51:57.441 24238 24254 I FLCross : retired lease=eb5b30bb-df1f-444b-b793-c80c04e26b7f generation=1 reason=explicit
+11-01 06:51:57.455 24260 24274 I FLCross : producer-result lease=eb5b30bb-df1f-444b-b793-c80c04e26b7f {"ok":true,"video":0,"posts":0,"pcm_samples":0,"uid":10304,"pid":24260}

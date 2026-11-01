@@ -1,0 +1,128 @@
+[
+  {
+    "case": "bgra",
+    "pass": true,
+    "lease": "8dc1979c-0ffd-4271-b099-e5a82e6e0dd9",
+    "ok": true,
+    "video": 60,
+    "posts": 60,
+    "pcm_samples": 96000,
+    "uid": 10305,
+    "pid": 26426
+  },
+  {
+    "case": "nv12",
+    "pass": true,
+    "lease": "f5196a77-323e-4acc-b9e3-3f7987370ebb",
+    "ok": true,
+    "video": 60,
+    "posts": 60,
+    "pcm_samples": 96000,
+    "uid": 10305,
+    "pid": 26588
+  },
+  {
+    "case": "wrong-signer",
+    "pass": true,
+    "rejected": true
+  },
+  {
+    "case": "wrong-key",
+    "pass": true,
+    "rejected_or_retired": true
+  },
+  {
+    "case": "revoke",
+    "pass": true,
+    "rejected_or_retired": true
+  },
+  {
+    "case": "replace",
+    "pass": true,
+    "lease": "a0043fb7-40f6-4110-a392-dfa5c2a73357",
+    "ok": true,
+    "video": 180,
+    "posts": 180,
+    "pcm_samples": 288000,
+    "uid": 10305,
+    "pid": 27128
+  },
+  {
+    "case": "producer-death",
+    "pass": true,
+    "rejected_or_retired": true
+  },
+  {
+    "case": "producer-restart",
+    "pass": true,
+    "lease": "f0900e32-12c4-42fd-adb9-ed3163810229",
+    "ok": true,
+    "video": 60,
+    "posts": 60,
+    "pcm_samples": 96000,
+    "uid": 10305,
+    "pid": 27474
+  },
+  {
+    "case": "broker-death",
+    "pass": true,
+    "rejected_or_retired": true
+  },
+  {
+    "case": "broker-restart",
+    "pass": true,
+    "lease": "247389b8-9803-4edb-b23d-36fe5cac312a",
+    "ok": true,
+    "video": 60,
+    "posts": 60,
+    "pcm_samples": 96000,
+    "uid": 10305,
+    "pid": 27723
+  },
+  {
+    "case": "consumer-death",
+    "pass": true,
+    "rejected_or_retired": true,
+    "retirement_reason": [
+      "broker-destroy"
+    ]
+  },
+  {
+    "case": "consumer-restart",
+    "pass": true,
+    "lease": "ed28daa5-89b7-4ffe-91fe-65c624441eff",
+    "ok": true,
+    "video": 60,
+    "posts": 60,
+    "pcm_samples": 96000,
+    "uid": 10305,
+    "pid": 27991
+  },
+  {
+    "case": "background",
+    "pass": true,
+    "rejected_or_retired": true
+  },
+  {
+    "case": "foreground-reopen",
+    "pass": true,
+    "lease": "83cf347d-3a2f-4394-a990-f903e0b0e23f",
+    "ok": true,
+    "video": 60,
+    "posts": 60,
+    "pcm_samples": 96000,
+    "uid": 10305,
+    "pid": 28272
+  },
+  {
+    "case": "audible",
+    "pass": true,
+    "lease": "2799c642-4a3e-494f-8246-81fc65840b0a",
+    "ok": true,
+    "video": 60,
+    "posts": 60,
+    "pcm_samples": 96000,
+    "uid": 10305,
+    "pid": 28386
+  }
+]

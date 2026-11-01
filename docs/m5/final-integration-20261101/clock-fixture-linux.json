@@ -1,0 +1,7 @@
+{
+  "runs": 50,
+  "passed": 50,
+  "identical_output": true,
+  "seconds": 2.794418653997127,
+  "output": "guarded=0 samples=1600 jump=40000000 commits=2 1600 -321\nguarded=1 samples=1600 jump=40000000 commits=2 1600 1600\nguarded=0 samples=200 jump=40000000 commits=2 200 -1721\nguarded=1 samples=200 jump=40000000 commits=2 200 200\nguarded=0 samples=1 jump=40000000 commits=2 1 -1920\nguarded=1 samples=1 jump=40000000 commits=2 1 1\nguarded=0 samples=1600 jump=20000 commits=2 1600 1599\nguarded=1 samples=1600 jump=20000 commits=2 1600 1599\nreal resampler phase-jump negative controls, variable block bounds and small-drift preservation passed\n"
+}

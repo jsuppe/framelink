@@ -1,0 +1,121 @@
+{
+  "schema_version": 1,
+  "unique_frames": 1350,
+  "unique_by_stage": {
+    "sink_receive": 1350,
+    "buffer_acquire": 1350,
+    "submit": 1350,
+    "ipc_receive": 1350,
+    "consumer_acquire": 1349,
+    "drop": 2,
+    "schedule": 1348,
+    "adopt": 1348,
+    "render_submit": 1348,
+    "present_submit": 1348,
+    "gpu_complete": 1348
+  },
+  "repeat_present_submissions": 4045,
+  "required_stages": [
+    "sink_receive",
+    "buffer_acquire",
+    "submit",
+    "ipc_receive",
+    "consumer_acquire",
+    "schedule",
+    "adopt",
+    "render_submit",
+    "gpu_complete",
+    "present_submit"
+  ],
+  "absent_required_stages": [],
+  "phases": {
+    "startup": {
+      "classified_drop:late": 1,
+      "complete": 28,
+      "classified_drop:pending_replaced": 1
+    },
+    "steady": {
+      "complete": 1290
+    },
+    "end": {
+      "complete": 30
+    }
+  },
+  "unclassified_frames": 0,
+  "ambiguous_identities": [],
+  "gpu_submission_mismatches": [],
+  "present_submission_mismatches": [],
+  "event_order_errors": [],
+  "stage_intervals": {
+    "sink_receive->buffer_acquire": {
+      "count": 1350,
+      "min_ns": 500,
+      "max_ns": 158805100,
+      "p50_ns": 1000,
+      "p99_ns": 4000
+    },
+    "buffer_acquire->submit": {
+      "count": 1350,
+      "min_ns": 335500,
+      "max_ns": 1787200,
+      "p50_ns": 368100,
+      "p99_ns": 428600
+    },
+    "submit->ipc_receive": {
+      "count": 1350,
+      "min_ns": -3700,
+      "max_ns": 15500,
+      "p50_ns": 3000,
+      "p99_ns": 5900
+    },
+    "ipc_receive->consumer_acquire": {
+      "count": 1349,
+      "min_ns": 120500,
+      "max_ns": 5396300,
+      "p50_ns": 3643400,
+      "p99_ns": 4457200
+    },
+    "consumer_acquire->schedule": {
+      "count": 1348,
+      "min_ns": 1700,
+      "max_ns": 100379600,
+      "p50_ns": 100002800,
+      "p99_ns": 100246300
+    },
+    "schedule->adopt": {
+      "count": 1348,
+      "min_ns": 100,
+      "max_ns": 2493900,
+      "p50_ns": 200,
+      "p99_ns": 300
+    },
+    "adopt->render_submit": {
+      "count": 1348,
+      "min_ns": 54100,
+      "max_ns": 1145800,
+      "p50_ns": 300100,
+      "p99_ns": 488200
+    },
+    "render_submit->gpu_complete": {
+      "count": 1348,
+      "min_ns": 14094700,
+      "max_ns": 17858200,
+      "p50_ns": 16790000,
+      "p99_ns": 16923000
+    },
+    "render_submit->present_submit": {
+      "count": 1348,
+      "min_ns": 5552400,
+      "max_ns": 8356800,
+      "p50_ns": 8020000,
+      "p99_ns": 8285800
+    }
+  },
+  "metadata": {
+    "trace_lost_events": 0,
+    "legacy_sink_records_without_identity": 1350,
+    "anonymous_pre_submit_deficit": 0
+  },
+  "accounting_complete": true,
+  "physical_scanout_verified": false
+}

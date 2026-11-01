@@ -1,0 +1,1 @@
+filesrc location=/tmp/framelink-m5-no-such-media ! avidemux name=d d.video_0 ! jpegdec ! @VIDEO_SINK@ d.audio_0 ! @AUDIO_SINK@

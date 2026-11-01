@@ -1,0 +1,161 @@
+-- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.26300.
+CMake Deprecation Warning at C:/Users/jonsu/dev/vkrender-control-20261029/build-control/_deps/volk-src/CMakeLists.txt:1 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+
+
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Failed
+-- Looking for pthread_create in pthreads
+-- Looking for pthread_create in pthreads - not found
+-- Looking for pthread_create in pthread
+-- Looking for pthread_create in pthread - not found
+-- Found Threads: TRUE
+-- Including Win32 support
+-- No build type selected, default to Debug
+-- Found Python3: C:/Users/jonsu/AppData/Local/Microsoft/WindowsApps/python3.13.exe (found version "3.13.14") found components: Interpreter
+-- framelink: building GStreamer elements (gstframelink)
+-- Configuring done (6.0s)
+-- Generating done (0.3s)
+-- Build files have been written to: C:/Users/jonsu/dev/vkrender-m5-pipeline/build
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  1>Checking Build System
+  Building Custom Rule C:/Users/jonsu/dev/vkrender-control-20261029/build-control/_deps/glslang-src/glslang/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/vkrender-control-20261029/build-control/_deps/glslang-src/glslang/CMakeLists.txt
+  cmake_pch.cxx
+  ResourceLimits.cpp
+  resource_limits_c.cpp
+  Generating Code...
+  glslang-default-resource-limits.vcxproj -> C:\Users\jonsu\dev\vkrender-m5-pipeline\build\_deps\glslang-build\glslang\Release\glslang-default-resource-limits.lib
+  glslang_c_interface.cpp
+  CodeGen.cpp
+  Link.cpp
+  ossource.cpp
+  glslang_tab.cpp
+  attribute.cpp
+  Constant.cpp
+  iomapper.cpp
+  InfoSink.cpp
+  Initialize.cpp
+  IntermTraverse.cpp
+  Intermediate.cpp
+  ParseContextBase.cpp
+  ParseHelper.cpp
+  PoolAlloc.cpp
+  RemoveTree.cpp
+  Scan.cpp
+  ShaderLang.cpp
+  SpirvIntrinsics.cpp
+  SymbolTable.cpp
+  Generating Code...
+  Compiling...
+  Versions.cpp
+  intermOut.cpp
+  limits.cpp
+  linkValidate.cpp
+  parseConst.cpp
+  reflection.cpp
+  Pp.cpp
+  PpAtom.cpp
+  PpContext.cpp
+  PpScanner.cpp
+  PpTokens.cpp
+  propagateNoContraction.cpp
+  GlslangToSpv.cpp
+  InReadableOrder.cpp
+  Logger.cpp
+  SpvBuilder.cpp
+  SpvPostProcess.cpp
+  doc.cpp
+  SpvTools.cpp
+  disassemble.cpp
+  Generating Code...
+  Compiling...
+  spirv_c_interface.cpp
+  Generating Code...
+  glslang.vcxproj -> C:\Users\jonsu\dev\vkrender-m5-pipeline\build\_deps\glslang-build\glslang\Release\glslang.lib
+  Generating C:/Users/jonsu/dev/vkrender-m5-pipeline/build/include/glslang/glsl_intrinsic_header.h
+  Building Custom Rule C:/Users/jonsu/dev/vkrender-control-20261029/build-control/_deps/glslang-src/StandAlone/CMakeLists.txt
+  StandAlone.cpp
+  glslang-standalone.vcxproj -> C:\Users\jonsu\dev\vkrender-m5-pipeline\build\_deps\glslang-build\StandAlone\Release\glslang.exe
+  Compiling cube.vert -> SPIR-V
+  C:/Users/jonsu/dev/vkrender-m5-pipeline/renderer/shaders/cube.vert
+  Compiling fullscreen.vert -> SPIR-V
+  C:/Users/jonsu/dev/vkrender-m5-pipeline/renderer/shaders/fullscreen.vert
+  Compiling nv12_cube.frag -> SPIR-V
+  C:/Users/jonsu/dev/vkrender-m5-pipeline/renderer/shaders/nv12_cube.frag
+  Compiling nv12_planar.frag -> SPIR-V
+  C:/Users/jonsu/dev/vkrender-m5-pipeline/renderer/shaders/nv12_planar.frag
+  Compiling vaporwave.frag -> SPIR-V
+  C:/Users/jonsu/dev/vkrender-m5-pipeline/renderer/shaders/vaporwave.frag
+  Compiling video_ycbcr.frag -> SPIR-V
+  C:/Users/jonsu/dev/vkrender-m5-pipeline/renderer/shaders/video_ycbcr.frag
+  Building Custom Rule C:/Users/jonsu/dev/vkrender-m5-pipeline/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m5-pipeline/CMakeLists.txt
+  framelink_win.cpp
+  Building Custom Rule C:/Users/jonsu/dev/vkrender-m5-pipeline/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/vkrender-control-20261029/build-control/_deps/glfw-src/src/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/vkrender-control-20261029/build-control/_deps/volk-src/CMakeLists.txt
+  context.c
+  volk.c
+  ipc_win32.cpp
+  init.c
+  input.c
+  volk.vcxproj -> C:\Users\jonsu\dev\vkrender-m5-pipeline\build\_deps\volk-build\Release\volk.lib
+  monitor.c
+  platform.c
+  framelink_slots.cpp
+  vulkan.c
+  window.c
+  egl_context.c
+  fl_ipc_win32.cpp
+  osmesa_context.c
+  null_init.c
+  null_monitor.c
+  null_window.c
+  fl_trace.cpp
+  null_joystick.c
+  vkr_common.vcxproj -> C:\Users\jonsu\dev\vkrender-m5-pipeline\build\Release\vkr_common.lib
+  win32_module.c
+  framelink_session.cpp
+  win32_time.c
+  Generating Code...
+  win32_thread.c
+  win32_init.c
+  win32_joystick.c
+  win32_monitor.c
+  win32_window.c
+     Creating library C:/Users/jonsu/dev/vkrender-m5-pipeline/build/framelink/Release/framelink.lib and object C:/Users/jonsu/dev/vkrender-m5-pipeline/build/framelink/Release/framelink.exp
+  Generating Code...
+  framelink.vcxproj -> C:\Users\jonsu\dev\vkrender-m5-pipeline\build\Release\framelink.dll
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m5-pipeline/CMakeLists.txt
+  av_apps.cpp
+  Compiling...
+  wgl_context.c
+  Generating Code...
+  glfw.vcxproj -> C:\Users\jonsu\dev\vkrender-m5-pipeline\build\_deps\glfw-build\src\Release\glfw3.lib
+  av_rendezvous.cpp
+  av_auth.cpp
+  Generating Code...
+  framelink_av_playback.vcxproj -> C:\Users\jonsu\dev\vkrender-m5-pipeline\build\framelink\Release\framelink_av_playback.lib
+  Building Custom Rule C:/Users/jonsu/dev/vkrender-m5-pipeline/CMakeLists.txt
+  main.cpp
+  vk_context.cpp
+  external_video_image.cpp
+  video_pass.cpp
+  background_pass.cpp
+  nv12_output.cpp
+  portable_output.cpp
+  portable_input.cpp
+  dump_util.cpp
+  scene_host.cpp
+  control_api.cpp
+  win_service.cpp
+  Generating Code...
+  civetweb.c
+  vkrenderer.vcxproj -> C:\Users\jonsu\dev\vkrender-m5-pipeline\build\Release\vkrenderer.exe

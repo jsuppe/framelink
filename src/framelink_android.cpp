@@ -44,6 +44,8 @@
 
 #include <android/hardware_buffer.h>
 #include <errno.h>
+#include <fcntl.h>
+#include <sys/socket.h>
 #include <poll.h>
 #include <string.h>
 #include <unistd.h>
@@ -72,6 +74,8 @@ struct flImage {
 
 struct flChannel {
     bool isConsumer = false;
+    bool delegated = false;
+    int interruptFd = -1; // stable owning dup; shutdown wakes delegated handshake/pump
     std::string name;
     flChannelInfo info{};
     uint32_t flags = 0;
@@ -172,6 +176,10 @@ bool handOverRing(flChannel* ch, fl::Channel& link) {
 // Producer: adopt a ring - the counterpart of handOverRing, on the SAME thread
 // that received the RingDesc (single-reader; see the file header).
 flResult importRing(flChannel* ch, const fl::RingDescMsg* rd) {
+    if(!rd || !rd->generation || !rd->poolSize || rd->poolSize>fl::kMaxPool ||
+       !rd->width || !rd->height || rd->width>8192 || rd->height>8192 ||
+       !ahbFormatFor((flFormat)rd->format) ||
+       (rd->format==FL_FORMAT_NV12 && ((rd->width|rd->height)&1)))return FL_INVALID;
     if(rd->generation==ch->info.generation && !ch->images.empty()) {
         // Refused resize: drain duplicated native handles, retain slot/fence
         // counters and outstanding ownership rather than resetting the ring.
@@ -193,6 +201,12 @@ flResult importRing(flChannel* ch, const fl::RingDescMsg* rd) {
             delete img;
             FL_LOG_ERR("framelink: AHardwareBuffer_recvHandleFromUnixSocket failed");
             return FL_DISCONNECTED;
+        }
+        AHardwareBuffer_Desc native{};AHardwareBuffer_describe(img->ahb,&native);
+        if(native.width!=rd->width || native.height!=rd->height || native.layers!=1 ||
+           native.format!=ahbFormatFor((flFormat)rd->format) ||
+           rd->stride[i]!=(rd->format==FL_FORMAT_NV12 ? rd->width : uint64_t(native.stride)*4)) {
+            freeImage(img);return FL_INVALID;
         }
         img->strideBytes = rd->stride[i];
         img->format = (flFormat)rd->format;
@@ -233,25 +247,31 @@ void drainProducerMessages(flChannel* ch) {
     }
 }
 
-void acceptLoop(flChannel* ch) {
+void acceptLoop(flChannel* ch, fl::Channel delegated) {
+    struct Gone {flChannel* ch;~Gone(){ch->peerGone=true;}} gone{ch};
     // One listener for the channel's whole life - FL_BUSY depends on it (the
     // Linux backend's lesson; see fl::Listener).
-    fl::Listener lst = fl::Listener::create(ch->name);
-    if (!lst.valid()) {
+    fl::Listener lst;
+    if(!ch->delegated)lst=fl::Listener::create(ch->name);
+    if (!ch->delegated && !lst.valid()) {
         FL_LOG_ERR("framelink: cannot listen on '%s'", ch->name.c_str());
         return;
     }
     while (!ch->stop.load()) {
-        fl::Channel link = lst.accept();
+        fl::Channel link = ch->delegated ? std::move(delegated) : lst.accept();
         if (ch->stop.load()) return;
-        if (!link.connected()) continue;
+        if (!link.connected()) {if(ch->delegated)return;continue;}
 
         fl::HelloMsg hello{};
         hello.version = FL_VERSION;
         hello.pid = (uint32_t)getpid();
         if (!link.send(fl::MsgType::Hello, hello)) continue;
         auto peer = link.recv();
-        const auto* ph = peer ? peer->as<fl::HelloMsg>() : nullptr;
+        const auto* ph = peer && peer->type==fl::MsgType::Hello ? peer->as<fl::HelloMsg>() : nullptr;
+        if(peer && !peer->fds.empty()) {
+            for(int fd:peer->fds)close(fd);
+            continue;
+        }
         if (!ph || ph->version != FL_VERSION) {
             FL_LOG_ERR("framelink: refusing producer - speaks version %u, we speak %u",
                        ph ? ph->version : 0u, (unsigned)FL_VERSION);
@@ -337,7 +357,7 @@ void acceptLoop(flChannel* ch) {
             ++ch->sequence;
         }
         ch->peerGone = true;
-        if (ch->stop.load()) return;
+        if (ch->stop.load() || ch->delegated) return;
     }
 }
 
@@ -373,12 +393,13 @@ FL_API flResult flCreateChannelOnAdapter(const char* name, uint32_t width, uint3
     return trace.result(flCreateChannelEx(name, width, height, format, poolSize, flags, out));
 }
 
-FL_API flResult flCreateChannelEx(const char* name, uint32_t width, uint32_t height,
+static flResult createChannel(const char* name, uint32_t width, uint32_t height,
                                   flFormat format, uint32_t poolSize, uint32_t flags,
-                                  flChannel** out) {
+                                  flChannel** out, fl::Channel delegated, bool fromFd) {
     fltrace::Scope trace("flCreateChannelEx",fltrace::id(name));
     if(trace.active){trace.event.sequence=((uint64_t)width<<32)|height;trace.event.fence=format;trace.event.slot=poolSize;trace.event.pts=flags;}
 
+    if(out)*out=nullptr;
     if (!name || !out || !width || !height || width>8192 || height>8192) return trace.result(FL_INVALID);
     if (!ahbFormatFor(format)) return trace.result(FL_FORMAT_UNSUPPORTED); // unsupported public format
     if (format == FL_FORMAT_NV12 && ((width | height) & 1)) return trace.result(FL_INVALID);
@@ -393,6 +414,7 @@ FL_API flResult flCreateChannelEx(const char* name, uint32_t width, uint32_t hei
     }
     auto* ch = new flChannel();
     ch->isConsumer = true;
+    ch->delegated=fromFd;
     ch->name = name;
     ch->flags = flags;
     ch->info.version = FL_VERSION;
@@ -406,9 +428,28 @@ FL_API flResult flCreateChannelEx(const char* name, uint32_t width, uint32_t hei
         return trace.result(FL_OOM);
     }
 
-    ch->accept = std::thread(acceptLoop, ch);
+    if(fromFd) {
+        ch->interruptFd=fcntl(delegated.pollFd(),F_DUPFD_CLOEXEC,0);
+        if(ch->interruptFd<0){flClose(ch);return trace.result(FL_INTERNAL);}
+    }
+    try {ch->accept=std::thread(acceptLoop,ch,std::move(delegated));}
+    catch(...){flClose(ch);return trace.result(FL_INTERNAL);}
     *out = ch;
     return trace.result(FL_OK);
+}
+
+FL_API flResult flCreateChannelEx(const char* name, uint32_t width, uint32_t height,
+                                  flFormat format, uint32_t poolSize, uint32_t flags,
+                                  flChannel** out) {
+    return createChannel(name,width,height,format,poolSize,flags,out,fl::Channel{},false);
+}
+
+FL_API flResult flCreateChannelFromSocketFd(int fd, uint32_t width, uint32_t height,
+    flFormat format, uint32_t poolSize, uint32_t flags, uint32_t timeout, flChannel** out) {
+    auto link=fl::Channel::adoptConnectedFd(fd,timeout); // owns even on failure
+    if(out)*out=nullptr;
+    if(!link.connected())return FL_INVALID;
+    return createChannel("broker-video",width,height,format,poolSize,flags,out,std::move(link),true);
 }
 
 FL_API flResult flCreateChannel(const char* name, uint32_t width, uint32_t height,
@@ -416,19 +457,24 @@ FL_API flResult flCreateChannel(const char* name, uint32_t width, uint32_t heigh
     return flCreateChannelEx(name, width, height, format, poolSize, 0, out);
 }
 
-FL_API flResult flOpenProducer(const char* name, flChannel** out) {
+static flResult openProducer(const char* name, fl::Channel link, flChannel** out) {
     fltrace::Scope trace("flOpenProducer",fltrace::id(name));
 
+    if(out)*out=nullptr;
     if (!name || !out) return trace.result(FL_INVALID);
     auto* ch = new flChannel();
     ch->name = name;
-    ch->link = fl::Channel::connect(name, 300);
+    ch->link = std::move(link);
     if (!ch->link.connected()) {
         delete ch;
         return trace.result(FL_NOT_FOUND);
     }
 
     auto helloMsg = ch->link.recv();
+    if(helloMsg && !helloMsg->fds.empty()) {
+        for(int fd:helloMsg->fds)close(fd);
+        delete ch;return trace.result(FL_INVALID);
+    }
     if (helloMsg && helloMsg->type == fl::MsgType::Busy) {
         delete ch;
         return trace.result(FL_BUSY);
@@ -455,6 +501,10 @@ FL_API flResult flOpenProducer(const char* name, flChannel** out) {
     }
 
     auto ring = ch->link.recv();
+    if(ring && !ring->fds.empty()) {
+        for(int fd:ring->fds)close(fd);
+        delete ch;return trace.result(FL_INVALID);
+    }
     if(ring && ring->type==fl::MsgType::Busy){delete ch;return trace.result(FL_BUSY);}
     const auto* rd = ring && ring->type == fl::MsgType::RingDesc
                          ? ring->as<fl::RingDescMsg>()
@@ -470,6 +520,19 @@ FL_API flResult flOpenProducer(const char* name, flChannel** out) {
     }
     *out = ch;
     return trace.result(FL_OK);
+}
+
+FL_API flResult flOpenProducer(const char* name, flChannel** out) {
+    if(out)*out=nullptr;
+    if(!name || !out)return FL_INVALID;
+    return openProducer(name,fl::Channel::connect(name,300),out);
+}
+
+FL_API flResult flOpenProducerFromSocketFd(int fd, uint32_t timeout, flChannel** out) {
+    auto link=fl::Channel::adoptConnectedFd(fd,timeout);
+    if(out)*out=nullptr;
+    if(!link.connected())return FL_INVALID;
+    return openProducer("broker-video",std::move(link),out);
 }
 
 FL_API flResult flRequestGeometry(flChannel* ch, uint32_t width, uint32_t height,
@@ -675,11 +738,14 @@ FL_API void flClose(flChannel* ch) {
     if (!ch) return;
     if (ch->isConsumer) {
         ch->stop = true;
-        { fl::Channel poke = fl::Channel::connect(ch->name, 100); }
+        if(ch->delegated) {
+            if(ch->interruptFd>=0)shutdown(ch->interruptFd,SHUT_RDWR);
+        } else { fl::Channel poke = fl::Channel::connect(ch->name, 100); }
         if (ch->accept.joinable()) ch->accept.join();
     } else {
         if (ch->link.connected()) ch->link.send(fl::MsgType::Bye);
     }
+    if(ch->interruptFd>=0)close(ch->interruptFd);
     for (flImage* img : ch->images) freeImage(img);
     delete ch;
 }

@@ -1,0 +1,10 @@
+
+11-01 06:54:25.297 26806 26806 I FLCross : bind=true
+11-01 06:54:25.785 26893 26919 I FLCross : producer-start lease=f8f3b60c-c917-4cb7-b86e-878420c37266 uid=10304 pid=26893
+11-01 06:54:25.785 26857 26879 I FLCross : grant lease=f8f3b60c-c917-4cb7-b86e-878420c37266 generation=1 consumer_uid=10305 broker_uid=10304
+11-01 06:54:25.789 26806 26892 I FLCross : receiver-start lease=f8f3b60c-c917-4cb7-b86e-878420c37266 generation=1 uid=10305 pid=26806
+11-01 06:54:25.826 26806 26892 I FLCross : native failure: server authentication rejected
+11-01 06:54:25.827 26806 26892 I FLCross : receiver-result lease=f8f3b60c-c917-4cb7-b86e-878420c37266 {"ok":false,"video":0,"posts":0,"pcm_samples":0,"uid":10305,"pid":26806}
+11-01 06:54:25.829 26857 26879 I FLCross : retired lease=f8f3b60c-c917-4cb7-b86e-878420c37266 generation=1 reason=explicit
+11-01 06:54:25.838 26893 26919 I FLCross : native failure: authentication read failed
+11-01 06:54:25.838 26893 26919 I FLCross : producer-result lease=f8f3b60c-c917-4cb7-b86e-878420c37266 {"ok":false,"video":0,"posts":0,"pcm_samples":0,"uid":10304,"pid":26893}

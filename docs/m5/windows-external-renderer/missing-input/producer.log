@@ -1,0 +1,10 @@
+{"event":"session-ready","instance":"e573516f025556cd3b82cfc0e225805f","generation":1,"format":"BGRA","video_frames":0,"audio_blocks":0,"audio_offset_ns":0}
+pipeline error: Resource not found. (../plugins/elements/gstfilesrc.c(586): gst_file_src_start (): /GstPipeline:pipeline0/GstFileSrc:filesrc0:
+No such file "C:/Users/jonsu/dev/framelink-m5-pipeline/renderer-evidence-final/does-not-exist.avi")
+pipeline error: GStreamer error: state change failed and some element failed to post a proper error message with the reason for the failure. (../libs/gst/base/gstbasesrc.c(3624): gst_base_src_start (): /GstPipeline:pipeline0/GstFileSrc:filesrc0:
+Failed to start)
+pipeline error: Resource not found. (../plugins/elements/gstfilesrc.c(586): gst_file_src_start (): /GstPipeline:pipeline0/GstFileSrc:filesrc0:
+No such file "C:/Users/jonsu/dev/framelink-m5-pipeline/renderer-evidence-final/does-not-exist.avi")
+pipeline error: GStreamer error: state change failed and some element failed to post a proper error message with the reason for the failure. (../libs/gst/base/gstbasesrc.c(3624): gst_base_src_start (): /GstPipeline:pipeline0/GstFileSrc:filesrc0:
+Failed to start)
+FAIL: pipeline start

@@ -11,6 +11,7 @@
 #ifndef _WIN32
 
 #include <errno.h>
+#include <fcntl.h>
 #include <string.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
@@ -25,7 +26,8 @@ namespace fl {
 namespace {
 
 constexpr size_t kBufferSize = 64 * 1024;
-constexpr size_t kMaxFds = 32;
+constexpr size_t kMaxFds = fl::kMaxPool * 4;
+static_assert(sizeof(fl::MsgHeader)+sizeof(fl::RingDescMsg)<=kBufferSize,"RingDesc exceeds IPC buffer");
 
 // Abstract-namespace sockets (a leading NUL) so there is no filesystem litter
 // and no stale socket file to clean up after a crash - the name disappears
@@ -74,6 +76,27 @@ Channel Channel::listen(const std::string& name) {
     Listener lst = Listener::create(name);
     if (!lst.valid()) return Channel();
     return lst.accept();
+}
+
+Channel Channel::adoptConnectedFd(int fd, uint32_t timeoutMs) {
+    Channel ch;
+    struct Owned { int fd; ~Owned(){if(fd>=0)::close(fd);} } owned{fd};
+    if(fd<0 || !timeoutMs || timeoutMs>60000) return ch;
+    int type=0; socklen_t size=sizeof(type);
+    sockaddr_storage peer{}; socklen_t peerSize=sizeof(peer);
+    if(getsockopt(fd,SOL_SOCKET,SO_TYPE,&type,&size) || type!=SOCK_SEQPACKET ||
+       getpeername(fd,reinterpret_cast<sockaddr*>(&peer),&peerSize) ||
+       peer.ss_family!=AF_UNIX) return ch;
+    int flags=fcntl(fd,F_GETFD), status=fcntl(fd,F_GETFL);
+    if(flags<0 || status<0 || fcntl(fd,F_SETFD,flags|FD_CLOEXEC)<0 ||
+       fcntl(fd,F_SETFL,status & ~O_NONBLOCK)<0) return ch;
+    timeval bound{time_t(timeoutMs/1000),suseconds_t((timeoutMs%1000)*1000)};
+    if(setsockopt(fd,SOL_SOCKET,SO_RCVTIMEO,&bound,sizeof(bound)) ||
+       setsockopt(fd,SOL_SOCKET,SO_SNDTIMEO,&bound,sizeof(bound))) return ch;
+    ucred cred{};size=sizeof(cred);
+    if(getsockopt(fd,SOL_SOCKET,SO_PEERCRED,&cred,&size)==0)ch.peerPid_=cred.pid;
+    ch.handle_=(void*)(intptr_t)(fd+1);ch.connected_=true;owned.fd=-1;
+    return ch;
 }
 
 Listener::~Listener() { close(); }
@@ -153,8 +176,8 @@ bool Channel::sendWithFds(MsgType type, const void* payload, size_t size, const 
                           size_t fdCount) {
     fltrace::Scope trace("ipc.send", (uint64_t)(uintptr_t)this);
     if(trace.active){ trace.event.sequence=(uint64_t)type; trace.event.slot=size; }
-    if (!connected_ || fdCount > kMaxFds) return false;
-    if (sizeof(MsgHeader) + size > kBufferSize) return false;
+    if (!connected_ || fdCount > kMaxFds || (fdCount && !fds) || (size && !payload)) return false;
+    if (size > kBufferSize - sizeof(MsgHeader)) return false;
 
     uint8_t buf[kBufferSize];
     auto* hdr = (MsgHeader*)buf;
@@ -168,7 +191,7 @@ bool Channel::sendWithFds(MsgType type, const void* payload, size_t size, const 
     msg.msg_iov = &iov;
     msg.msg_iovlen = 1;
 
-    char control[CMSG_SPACE(sizeof(int) * kMaxFds)];
+    alignas(cmsghdr) char control[CMSG_SPACE(sizeof(int) * kMaxFds)]{};
     if (fdCount) {
         memset(control, 0, sizeof(control));
         msg.msg_control = control;
@@ -195,30 +218,31 @@ std::optional<Message> Channel::recv() {
     msghdr msg{};
     msg.msg_iov = &iov;
     msg.msg_iovlen = 1;
-    char control[CMSG_SPACE(sizeof(int) * kMaxFds)];
+    alignas(cmsghdr) char control[CMSG_SPACE(sizeof(int) * kMaxFds)]{};
     msg.msg_control = control;
     msg.msg_controllen = sizeof(control);
 
     const ssize_t n = recvmsg((int)(intptr_t)handle_ - 1, &msg, MSG_CMSG_CLOEXEC);
-    if (n <= 0 || (size_t)n < sizeof(MsgHeader)) {
-        connected_ = false;
-        return std::nullopt;
-    }
-    const auto* hdr = (const MsgHeader*)buf;
-    if (hdr->magic != kMagic || sizeof(MsgHeader) + hdr->payloadSize > (size_t)n) {
-        connected_ = false;
-        return std::nullopt;
-    }
-
     Message out;
-    out.type = hdr->type;
-    out.payload.assign(buf + sizeof(MsgHeader), buf + sizeof(MsgHeader) + hdr->payloadSize);
-    for (cmsghdr* cm = CMSG_FIRSTHDR(&msg); cm; cm = CMSG_NXTHDR(&msg, cm)) {
-        if (cm->cmsg_level != SOL_SOCKET || cm->cmsg_type != SCM_RIGHTS) continue;
+    // Collect descriptors before validating payload, so malformed/truncated
+    // messages cannot leak kernel-installed SCM_RIGHTS descriptors. Zero-byte
+    // SEQPACKET datagrams can carry FDs too; a negative recv installed none.
+    for (cmsghdr* cm = CMSG_FIRSTHDR(&msg); n>=0 && cm; cm = CMSG_NXTHDR(&msg, cm)) {
+        if (cm->cmsg_level != SOL_SOCKET || cm->cmsg_type != SCM_RIGHTS || cm->cmsg_len<CMSG_LEN(0)) continue;
         const size_t count = (cm->cmsg_len - CMSG_LEN(0)) / sizeof(int);
         const int* got = (const int*)CMSG_DATA(cm);
-        out.fds.assign(got, got + count);
+        out.fds.insert(out.fds.end(),got,got+count);
     }
+    auto reject=[&]() -> std::optional<Message> {
+        for(int fd:out.fds)::close(fd);
+        connected_=false;return std::nullopt;
+    };
+    if(n<=0 || size_t(n)<sizeof(MsgHeader) || (msg.msg_flags&(MSG_TRUNC|MSG_CTRUNC)) || out.fds.size()>kMaxFds)
+        return reject();
+    const auto* hdr = (const MsgHeader*)buf;
+    if(hdr->magic!=kMagic || hdr->payloadSize>size_t(n)-sizeof(MsgHeader))return reject();
+    out.type=hdr->type;
+    out.payload.assign(buf+sizeof(MsgHeader),buf+sizeof(MsgHeader)+hdr->payloadSize);
     return out;
 }
 

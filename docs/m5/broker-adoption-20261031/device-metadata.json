@@ -1,0 +1,27 @@
+{
+  "serial": "A06B4AABFB07983",
+  "properties": {
+    "ro.product.model": "8483A",
+    "ro.product.cpu.abi": "arm64-v8a",
+    "ro.build.version.release": "15",
+    "ro.build.version.sdk": "35",
+    "ro.build.fingerprint": "TCL/8483A_FCA/Lugh_FHD_WiFi:15/AP3A.240905.015.A2/BUBI:user/release-keys"
+  },
+  "packages": {
+    "broker": {
+      "sha256": "e0a0dbd5e000ddb4a741442f7adbef01c3d6a98c4941bc30803ac8a7531e3f89",
+      "signer": "Signer #1 certificate DN: C=US, O=Android, CN=Android Debug\nSigner #1 certificate SHA-256 digest: 19f6248adcee6e9eaea48baacd77bd5b2ca2197f3cc03334b5f1e73c440eb6ae\nSigner #1 certificate SHA-1 digest: 273556cd5e0680dae202c5fecac08ada6527e607\nSigner #1 certificate MD5 digest: 85092fc3eeb6859ef39f5944041dc575\n",
+      "remaining_pids": ""
+    },
+    "client": {
+      "sha256": "dd76b2892710c63160278b46bdde1d8f367456098d96d3855566316a416b0c59",
+      "signer": "Signer #1 certificate DN: C=US, O=Android, CN=Android Debug\nSigner #1 certificate SHA-256 digest: 19f6248adcee6e9eaea48baacd77bd5b2ca2197f3cc03334b5f1e73c440eb6ae\nSigner #1 certificate SHA-1 digest: 273556cd5e0680dae202c5fecac08ada6527e607\nSigner #1 certificate MD5 digest: 85092fc3eeb6859ef39f5944041dc575\n",
+      "remaining_pids": ""
+    },
+    "impostor": {
+      "sha256": "26ce4f7c9e684a9511446d4c651475f7a6c0a927bd633052c320de0c752bc4a5",
+      "signer": "Signer #1 certificate DN: CN=UntrustedSpike\nSigner #1 certificate SHA-256 digest: 04e138246e1f9c1b3782090af76e65186ad44e780ed6ca9ea2c58069c80ea60e\nSigner #1 certificate SHA-1 digest: 7439f7a052fb0461af00a67d4077fb6f70e246ec\nSigner #1 certificate MD5 digest: cf2d12309d9864e5b781a66d7e8d5bb6\n",
+      "remaining_pids": ""
+    }
+  }
+}

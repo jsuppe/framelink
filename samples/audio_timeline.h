@@ -2,6 +2,7 @@
 #include "framelink_session.h"
 #include <gst/gst.h>
 #include <atomic>
+#include <functional>
 
 namespace av {
 struct AudioTimeline {
@@ -10,6 +11,7 @@ struct AudioTimeline {
   std::atomic<uint64_t> deliveryBase{0}, lateBlocks{0}, consecutiveLate{0};
   std::atomic<bool> exhausted{false};
   std::atomic<int64_t> arrivalDrift{0};
+  std::atomic<bool> resetArrival{false};
   uint64_t firstArrival=0, firstMedia=0;
   std::atomic<uint64_t> emptyEvents{0}, fullEvents{0};
   ~AudioTimeline() {
@@ -19,15 +21,17 @@ struct AudioTimeline {
     if(playbackClock) gst_object_unref(playbackClock);
   }
   std::atomic<uint64_t> blocks{0}, samplesEnd{0}, originNs{GST_CLOCK_TIME_NONE};
-  std::atomic<bool> invalid{false};
+  std::atomic<bool> invalid{false}, eos{false};
   unsigned rate=48000, channels=2;
   GstSegment segment{};
   bool haveSegment=false;
+  std::function<void(GstBuffer*, uint64_t)> observe;
 };
 inline GstPadProbeReturn trackAudio(GstPad*, GstPadProbeInfo* info, gpointer data) {
   auto &t=*static_cast<AudioTimeline*>(data);
   if (GST_PAD_PROBE_INFO_TYPE(info) & GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM) {
     auto *event=GST_PAD_PROBE_INFO_EVENT(info);
+    if(GST_EVENT_TYPE(event)==GST_EVENT_EOS)t.eos=true;
     if (GST_EVENT_TYPE(event)==GST_EVENT_SEGMENT) {
       const GstSegment* segment=nullptr;
       gst_event_parse_segment(event,&segment);
@@ -56,8 +60,12 @@ inline GstPadProbeReturn trackAudio(GstPad*, GstPadProbeInfo* info, gpointer dat
       flSessionSampleOffset(first+count,t.rate,&next)!=0 || uint64_t(next)>GST_CLOCK_TIME_NONE-1-origin || media!=origin+uint64_t(expected) ||
       GST_BUFFER_DURATION(b)!=uint64_t(next-expected)) t.invalid=true;
   if (t.invalid.load()) return GST_PAD_PROBE_DROP; // never schedule corrupt PCM
+  if(t.observe) {
+    try {t.observe(b,media);}
+    catch(...) {t.invalid=true;return GST_PAD_PROBE_DROP;}
+  }
   const auto arrival=gst_util_get_timestamp();
-  if(!t.firstArrival){t.firstArrival=arrival;t.firstMedia=media;}
+  if(t.resetArrival.exchange(false) || !t.firstArrival){t.firstArrival=arrival;t.firstMedia=media;}
   t.arrivalDrift=int64_t(arrival-t.firstArrival)-int64_t(media-t.firstMedia);
   // Acquire the published base before reading playbackClock (set before base).
   const auto base=t.deliveryBase.load();

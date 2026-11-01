@@ -1,0 +1,88 @@
+[
+  {
+    "case": "1920x1080-60-NV12-av",
+    "operations": [
+      {
+        "file": "transport.47556.csv",
+        "operation": "flAcquireFrame",
+        "count": 554,
+        "interval_fps": 56.28461204660671,
+        "interval_p50_ms": 16.6726,
+        "interval_p99_ms": 25.0276,
+        "interval_max_ms": 29.5159,
+        "duration_p50_ms": 0.0001
+      },
+      {
+        "file": "transport.47096.csv",
+        "operation": "flSubmit",
+        "count": 560,
+        "interval_fps": 56.915244454996675,
+        "interval_p50_ms": 16.6721,
+        "interval_p99_ms": 26.7965,
+        "interval_max_ms": 33.6139,
+        "duration_p50_ms": 0.057
+      },
+      {
+        "file": "gst.47096.csv",
+        "operation": "gst.sinkRender",
+        "count": 600,
+        "interval_fps": 60.987894127011394,
+        "interval_p50_ms": 16.6448,
+        "interval_p99_ms": 24.524,
+        "interval_max_ms": 26.4766,
+        "duration_p50_ms": 5.16095
+      },
+      {
+        "file": "renderer.47556.csv",
+        "operation": "scene.frame_cpu",
+        "count": 1283,
+        "interval_fps": 119.30855388353996,
+        "interval_p50_ms": 8.33325,
+        "interval_p99_ms": 16.4482,
+        "interval_max_ms": 43.278,
+        "duration_p50_ms": 8.2039
+      },
+      {
+        "file": "renderer.47556.csv",
+        "operation": "service.iteration",
+        "count": 1283,
+        "interval_fps": 119.30860495910218,
+        "interval_p50_ms": 8.3329,
+        "interval_p99_ms": 16.4485,
+        "interval_max_ms": 43.2777,
+        "duration_p50_ms": 8.3328
+      }
+    ],
+    "final_av": {
+      "active": true,
+      "audio_master": false,
+      "muted": false,
+      "paused": false,
+      "session_resets": 1,
+      "due_decisions": 552,
+      "sequence_gaps": 6,
+      "queue_depth": 0,
+      "max_queue_depth": 6,
+      "hold_checks": 636,
+      "late_drops": 2,
+      "import_failures": 0,
+      "invalid_pts": 0,
+      "schedule_error_ns": 7334667,
+      "session_generation": 1,
+      "estimated_av_offset_ns": null,
+      "device_underruns": null,
+      "clock_drift_ppm": null,
+      "audio_metrics_valid": true,
+      "audio_blocks": 600,
+      "audio_samples": 480000,
+      "audio_queue_buffers": 0,
+      "audio_queue_ns": 0,
+      "audio_peak_queue_buffers": 4,
+      "audio_peak_queue_ns": 66666667,
+      "audio_queue_empty_events": 4,
+      "audio_queue_full_events": 595,
+      "late_audio_blocks": 0,
+      "audio_arrival_drift_ns": 946433
+    }
+  }
+]

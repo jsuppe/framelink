@@ -1,0 +1,156 @@
+[
+  {
+    "accounting_complete": true,
+    "expected_source_validated": true,
+    "expected_frames": 1350,
+    "unique_frames": 1350,
+    "unique_by_stage": {
+      "sink_receive": 1350,
+      "buffer_acquire": 1350,
+      "submit": 1350,
+      "ipc_receive": 1350,
+      "consumer_acquire": 1349,
+      "drop": 2,
+      "schedule": 1348,
+      "adopt": 1348,
+      "render_submit": 1348,
+      "present_submit": 1348,
+      "gpu_complete": 1348
+    },
+    "unclassified_frames": 0,
+    "missing_expected_identities": [],
+    "unexpected_identities": [],
+    "expected_pts_mismatches": [],
+    "phases": {
+      "startup": {
+        "classified_drop:late": 1,
+        "complete": 28,
+        "classified_drop:pending_replaced": 1
+      },
+      "steady": {
+        "complete": 1290
+      },
+      "end": {
+        "complete": 30
+      }
+    },
+    "case": "1920x1080-30-BGRA-av",
+    "manifest_basis": "Independent m5-native-accounted.ps1 seconds=45; m5_native_rate_probe.py n=fps*seconds; videotestsrc PTS=floor(i*1e9/fps). Trace channel hash used for session lookup only."
+  },
+  {
+    "accounting_complete": true,
+    "expected_source_validated": true,
+    "expected_frames": 1350,
+    "unique_frames": 1350,
+    "unique_by_stage": {
+      "sink_receive": 1350,
+      "buffer_acquire": 1350,
+      "submit": 1350,
+      "ipc_receive": 1350,
+      "consumer_acquire": 1348,
+      "drop": 3,
+      "schedule": 1347,
+      "adopt": 1347,
+      "render_submit": 1347,
+      "present_submit": 1347,
+      "gpu_complete": 1347
+    },
+    "unclassified_frames": 0,
+    "missing_expected_identities": [],
+    "unexpected_identities": [],
+    "expected_pts_mismatches": [],
+    "phases": {
+      "startup": {
+        "classified_drop:late": 1,
+        "classified_drop:pending_replaced": 2,
+        "complete": 27
+      },
+      "steady": {
+        "complete": 1290
+      },
+      "end": {
+        "complete": 30
+      }
+    },
+    "case": "1920x1080-30-NV12-av",
+    "manifest_basis": "Independent m5-native-accounted.ps1 seconds=45; m5_native_rate_probe.py n=fps*seconds; videotestsrc PTS=floor(i*1e9/fps). Trace channel hash used for session lookup only."
+  },
+  {
+    "accounting_complete": true,
+    "expected_source_validated": true,
+    "expected_frames": 2700,
+    "unique_frames": 2700,
+    "unique_by_stage": {
+      "sink_receive": 2700,
+      "buffer_acquire": 2699,
+      "submit": 2699,
+      "ipc_receive": 2699,
+      "consumer_acquire": 2696,
+      "drop": 6,
+      "schedule": 2694,
+      "adopt": 2694,
+      "render_submit": 2694,
+      "present_submit": 2694,
+      "gpu_complete": 2694
+    },
+    "unclassified_frames": 0,
+    "missing_expected_identities": [],
+    "unexpected_identities": [],
+    "expected_pts_mismatches": [],
+    "phases": {
+      "startup": {
+        "classified_drop:late": 2,
+        "complete": 54,
+        "classified_drop:pending_replaced": 3,
+        "classified_drop:ring_full": 1
+      },
+      "steady": {
+        "complete": 2580
+      },
+      "end": {
+        "complete": 60
+      }
+    },
+    "case": "1920x1080-60-BGRA-av",
+    "manifest_basis": "Independent m5-native-accounted.ps1 seconds=45; m5_native_rate_probe.py n=fps*seconds; videotestsrc PTS=floor(i*1e9/fps). Trace channel hash used for session lookup only."
+  },
+  {
+    "accounting_complete": true,
+    "expected_source_validated": true,
+    "expected_frames": 2700,
+    "unique_frames": 2700,
+    "unique_by_stage": {
+      "sink_receive": 2700,
+      "buffer_acquire": 2698,
+      "submit": 2698,
+      "ipc_receive": 2698,
+      "consumer_acquire": 2694,
+      "drop": 9,
+      "schedule": 2691,
+      "adopt": 2691,
+      "render_submit": 2691,
+      "present_submit": 2691,
+      "gpu_complete": 2691
+    },
+    "unclassified_frames": 0,
+    "missing_expected_identities": [],
+    "unexpected_identities": [],
+    "expected_pts_mismatches": [],
+    "phases": {
+      "startup": {
+        "classified_drop:late": 3,
+        "complete": 51,
+        "classified_drop:pending_replaced": 4,
+        "classified_drop:ring_full": 2
+      },
+      "steady": {
+        "complete": 2580
+      },
+      "end": {
+        "complete": 60
+      }
+    },
+    "case": "1920x1080-60-NV12-av",
+    "manifest_basis": "Independent m5-native-accounted.ps1 seconds=45; m5_native_rate_probe.py n=fps*seconds; videotestsrc PTS=floor(i*1e9/fps). Trace channel hash used for session lookup only."
+  }
+]

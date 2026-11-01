@@ -1,0 +1,379 @@
+Start testing: Nov 01 06:28 EST
+----------------------------------------------------------
+36/59 Testing: av_connected_fd
+36/59 Test: av_connected_fd
+Command: "/tmp/framelink-m5-build/fl_av_connected_fd"
+Directory: /tmp/framelink-m5-build
+"av_connected_fd" start time: Nov 01 06:28 EST
+Output:
+----------------------------------------------------------
+connected FD: ownership, stream validation, revoke/death EOF, auth, rotated key and role rejection passed
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"av_connected_fd" end time: Nov 01 06:28 EST
+"av_connected_fd" time elapsed: 00:00:00
+----------------------------------------------------------
+
+38/59 Testing: av_auth
+38/59 Test: av_auth
+Command: "/tmp/framelink-m5-build/fl_av_auth"
+Directory: /tmp/framelink-m5-build
+"av_auth" start time: Nov 01 06:28 EST
+Output:
+----------------------------------------------------------
+mutual A/V authentication: success, wrong key/role, fake server and reflection rejection passed
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"av_auth" end time: Nov 01 06:28 EST
+"av_auth" time elapsed: 00:00:00
+----------------------------------------------------------
+
+41/59 Testing: m3_av_apps
+41/59 Test: m3_av_apps
+Command: "/usr/bin/python3" "/tmp/framelink-m5/test/m3_apps.py" "--producer" "/tmp/framelink-m5-build/framelink_av_producer" "--consumer" "/tmp/framelink-m5-build/framelink_av_consumer" "--plugin" "/tmp/framelink-m5-build/libgstframelink.so"
+Directory: /tmp/framelink-m5-build
+"m3_av_apps" start time: Nov 01 06:28 EST
+Output:
+----------------------------------------------------------
+evidence: /tmp/framelink-m3-frpkif8k
+{"case": "bgra-producer-first", "passed": true, "results": {"producer": {"role": "producer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}, "consumer": {"role": "consumer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}}, "verified_session": {"event": "session-complete", "instance": "67be5bd17067dddff8fb6b12426cb857", "generation": 1, "format": "BGRA", "video_frames": 50, "audio_blocks": 50, "audio_offset_ns": 0}}
+{"case": "bgra-consumer-first", "passed": true, "results": {"consumer": {"role": "consumer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}, "producer": {"role": "producer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}}, "verified_session": {"event": "session-complete", "instance": "f014534d826cf184dff4d8b8eb63b8ff", "generation": 1, "format": "BGRA", "video_frames": 50, "audio_blocks": 50, "audio_offset_ns": 0}}
+{"case": "nv12-producer-first", "passed": true, "results": {"producer": {"role": "producer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}, "consumer": {"role": "consumer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}}, "verified_session": {"event": "session-complete", "instance": "dc8b9c9671196c51c03685f290a74a8f", "generation": 1, "format": "NV12", "video_frames": 50, "audio_blocks": 50, "audio_offset_ns": 0}}
+{"case": "nv12-consumer-first", "passed": true, "results": {"consumer": {"role": "consumer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}, "producer": {"role": "producer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}}, "verified_session": {"event": "session-complete", "instance": "e9dd9d6ec830e71c0589004940d337ff", "generation": 1, "format": "NV12", "video_frames": 50, "audio_blocks": 50, "audio_offset_ns": 0}}
+{"case": "producer-restart", "passed": true, "retired_identity": {"event": "media-progress", "instance": "dbd40f0fe468351b88aee7c1540f0bc5", "generation": 1, "format": "BGRA", "video_frames": 1, "audio_blocks": 1, "audio_offset_ns": 0}, "verified_sessions": [{"event": "session-complete", "instance": "262cba5292821165fe89ba3f44a212b6", "generation": 1, "format": "BGRA", "video_frames": 50, "audio_blocks": 50, "audio_offset_ns": 0}, {"event": "session-complete", "instance": "c7a5f0957e5444934655462155b376e0", "generation": 1, "format": "BGRA", "video_frames": 50, "audio_blocks": 50, "audio_offset_ns": 0}]}
+{"case": "consumer-restart", "passed": true, "retired_identity": {"event": "media-progress", "instance": "d627f2fd1c550a613b57e7f1ad248822", "generation": 1, "format": "BGRA", "video_frames": 1, "audio_blocks": 1, "audio_offset_ns": 0}, "verified_sessions": [{"event": "session-complete", "instance": "0141e11b84bfa9a75dae8df18f2c82b9", "generation": 1, "format": "BGRA", "video_frames": 50, "audio_blocks": 50, "audio_offset_ns": 0}, {"event": "session-complete", "instance": "beb54b5d76480f1fa96b16cd46b2b84c", "generation": 1, "format": "BGRA", "video_frames": 50, "audio_blocks": 50, "audio_offset_ns": 0}]}
+{"case": "producer-restart-format-change", "passed": true, "retired_identity": {"event": "media-progress", "instance": "cd63c61ab8a269abd35a4eb6276b1fc4", "generation": 1, "format": "BGRA", "video_frames": 1, "audio_blocks": 1, "audio_offset_ns": 0}, "verified_sessions": [{"event": "session-complete", "instance": "50f9ddeca7e3a3e03c8c65869eb30c1f", "generation": 1, "format": "NV12", "video_frames": 50, "audio_blocks": 50, "audio_offset_ns": 0}, {"event": "session-complete", "instance": "e167d0504b3aee6042fca04fc281fc98", "generation": 1, "format": "NV12", "video_frames": 50, "audio_blocks": 50, "audio_offset_ns": 0}]}
+{"case": "missing-audio", "passed": true, "verified_before_fault": {"event": "media-progress", "instance": "75b2059c037794052a4ea872821124a6", "generation": 1, "format": "BGRA", "video_frames": 1, "audio_blocks": 1, "audio_offset_ns": 0}, "expected_error": "audio timeout/EOS", "consumer_exit": 1}
+{"case": "audio-pts-reset", "passed": true, "verified_before_fault": {"event": "media-progress", "instance": "3e9327f715ed4e96b00331106fc51f0a", "generation": 1, "format": "BGRA", "video_frames": 1, "audio_blocks": 1, "audio_offset_ns": 0}, "expected_error": "audio timeline mismatch", "consumer_exit": 1}
+{"case": "peer-death", "passed": true, "verified_before_fault": {"event": "media-progress", "instance": "b3e87c8d621887a108a966fe0aee584e", "generation": 1, "format": "BGRA", "video_frames": 1, "audio_blocks": 1, "audio_offset_ns": 0}, "expected_error": "timeout/EOS", "consumer_exit": 1}
+<end of output>
+Test time =  28.60 sec
+----------------------------------------------------------
+Test Passed.
+"m3_av_apps" end time: Nov 01 06:29 EST
+"m3_av_apps" time elapsed: 00:00:28
+----------------------------------------------------------
+
+46/59 Testing: av_offer_bounds
+46/59 Test: av_offer_bounds
+Command: "/tmp/framelink-m5-build/fl_av_offer_bounds"
+Directory: /tmp/framelink-m5-build
+"av_offer_bounds" start time: Nov 01 06:29 EST
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"av_offer_bounds" end time: Nov 01 06:29 EST
+"av_offer_bounds" time elapsed: 00:00:00
+----------------------------------------------------------
+
+48/59 Testing: m5_finite_budget
+48/59 Test: m5_finite_budget
+Command: "/usr/bin/python3" "/tmp/framelink-m5/test/m5_finite_budget.py" "--build" "/tmp/framelink-m5-build"
+Directory: /tmp/framelink-m5-build
+"m5_finite_budget" start time: Nov 01 06:29 EST
+Output:
+----------------------------------------------------------
+{"case": "longer-than-setup", "exit_codes": [0, 0], "elapsed_seconds": 4.323783429979812}
+{"case": "missing-peer", "exit_codes": [1], "elapsed_seconds": 2.070571648015175}
+{"case": "mismatch", "exit_codes": [1, 1], "elapsed_seconds": 0.06407801603199914}
+{"case": "legacy-peer", "exit_codes": [1, 1], "elapsed_seconds": 0.06394781998824328}
+{"case": "early-eos", "exit_codes": [1, 1], "elapsed_seconds": 0.8157299540471286}
+{"case": "source-stall", "exit_codes": [1, 1], "elapsed_seconds": 2.569854249013588}
+{"case": "producer-idle", "exit_codes": [-9, 1], "elapsed_seconds": 2.3201433749636635}
+{"case": "consumer-idle", "exit_codes": [1, -9], "elapsed_seconds": 6.130684629955795}
+{"case": "cancel", "exit_codes": [1, 0], "elapsed_seconds": 0.26466565002920106}
+finite budget: 9 real-peer cases and 8 malformed CLI budgets passed
+<end of output>
+Test time =  18.79 sec
+----------------------------------------------------------
+Test Passed.
+"m5_finite_budget" end time: Nov 01 06:29 EST
+"m5_finite_budget" time elapsed: 00:00:18
+----------------------------------------------------------
+
+55/59 Testing: m5_startup
+55/59 Test: m5_startup
+Command: "/usr/bin/python3" "/tmp/framelink-m5/test/m5_startup.py" "--build" "/tmp/framelink-m5-build"
+Directory: /tmp/framelink-m5-build
+"m5_startup" start time: Nov 01 06:29 EST
+Output:
+----------------------------------------------------------
+[
+  {
+    "policy": "producer",
+    "returncode": 0,
+    "cases": [
+      {
+        "format": "BGRA",
+        "intact": true,
+        "stats": {
+          "event": "video-transport-summary",
+          "received": 100,
+          "submitted": 100,
+          "dropped": 0,
+          "ring_full_drops": 0
+        },
+        "received": 100
+      },
+      {
+        "format": "NV12",
+        "intact": true,
+        "stats": {
+          "event": "video-transport-summary",
+          "received": 100,
+          "submitted": 100,
+          "dropped": 0,
+          "ring_full_drops": 0
+        },
+        "received": 100
+      }
+    ]
+  },
+  {
+    "policy": "audio",
+    "returncode": 0,
+    "cases": [
+      {
+        "format": "BGRA",
+        "intact": false,
+        "stats": {
+          "event": "video-transport-summary",
+          "received": 100,
+          "submitted": 68,
+          "dropped": 32,
+          "ring_full_drops": 32
+        },
+        "received": 65
+      },
+      {
+        "format": "NV12",
+        "intact": false,
+        "stats": {
+          "event": "video-transport-summary",
+          "received": 100,
+          "submitted": 69,
+          "dropped": 31,
+          "ring_full_drops": 31
+        },
+        "received": 66
+      }
+    ]
+  },
+  {
+    "case": "cancel",
+    "exit_codes": [
+      1,
+      -9
+    ],
+    "elapsed_seconds": 0.7736255450290628
+  },
+  {
+    "case": "restart",
+    "exit_codes": [
+      0,
+      0
+    ],
+    "elapsed_seconds": 2.620032642967999
+  },
+  {
+    "case": "long-preroll",
+    "exit_codes": [
+      0,
+      0
+    ],
+    "elapsed_seconds": 3.422157453955151
+  }
+]
+/tmp/m5-startup-rvmi1r9o
+<end of output>
+Test time =  20.98 sec
+----------------------------------------------------------
+Test Passed.
+"m5_startup" end time: Nov 01 06:29 EST
+"m5_startup" time elapsed: 00:00:20
+----------------------------------------------------------
+
+56/59 Testing: m5_preconnect
+56/59 Test: m5_preconnect
+Command: "/usr/bin/python3" "/tmp/framelink-m5/test/m5_preconnect.py" "--build" "/tmp/framelink-m5-build"
+Directory: /tmp/framelink-m5-build
+"m5_preconnect" start time: Nov 01 06:29 EST
+Output:
+----------------------------------------------------------
+[
+  {
+    "mode": "ready",
+    "format": "BGRA",
+    "event": "video-schedule-summary",
+    "received": 100,
+    "scheduled": 100,
+    "handed_off": 0,
+    "late": 0,
+    "overflow": 0,
+    "peak_pending": 5,
+    "pending_limit": 8,
+    "peak_bytes": 288000,
+    "byte_limit": 134217728
+  },
+  {
+    "mode": "ready",
+    "format": "NV12",
+    "event": "video-schedule-summary",
+    "received": 100,
+    "scheduled": 100,
+    "handed_off": 0,
+    "late": 0,
+    "overflow": 0,
+    "peak_pending": 5,
+    "pending_limit": 8,
+    "peak_bytes": 108000,
+    "byte_limit": 134217728
+  },
+  {
+    "mode": "legacy",
+    "format": "BGRA",
+    "event": "video-schedule-summary",
+    "received": 90,
+    "scheduled": 85,
+    "handed_off": 0,
+    "late": 5,
+    "overflow": 0,
+    "peak_pending": 5,
+    "pending_limit": 8,
+    "peak_bytes": 288000,
+    "byte_limit": 134217728
+  },
+  {
+    "mode": "legacy",
+    "format": "NV12",
+    "event": "video-schedule-summary",
+    "received": 87,
+    "scheduled": 83,
+    "handed_off": 0,
+    "late": 4,
+    "overflow": 0,
+    "peak_pending": 5,
+    "pending_limit": 8,
+    "peak_bytes": 108000,
+    "byte_limit": 134217728
+  },
+  {
+    "mode": "order-producer",
+    "event": "video-schedule-summary",
+    "received": 100,
+    "scheduled": 100,
+    "handed_off": 0,
+    "late": 0,
+    "overflow": 0,
+    "peak_pending": 5,
+    "pending_limit": 8,
+    "peak_bytes": 288000,
+    "byte_limit": 134217728
+  },
+  {
+    "mode": "order-consumer",
+    "event": "video-schedule-summary",
+    "received": 100,
+    "scheduled": 100,
+    "handed_off": 0,
+    "late": 0,
+    "overflow": 0,
+    "peak_pending": 5,
+    "pending_limit": 8,
+    "peak_bytes": 288000,
+    "byte_limit": 134217728
+  }
+]
+<end of output>
+Test time =  17.48 sec
+----------------------------------------------------------
+Test Passed.
+"m5_preconnect" end time: Nov 01 06:30 EST
+"m5_preconnect" time elapsed: 00:00:17
+----------------------------------------------------------
+
+59/59 Testing: broker_producer_stream
+59/59 Test: broker_producer_stream
+Command: "/tmp/framelink-m5-build/fl_broker_producer" "/tmp/framelink-m5-build/libgstframelink.so"
+Directory: /tmp/framelink-m5-build
+"broker_producer_stream" start time: Nov 01 06:30 EST
+Output:
+----------------------------------------------------------
+bounds: 14 rejected before resolve; already-cancelled rejected
+silent peer: bounded nonfatal producer deadline; process remains alive
+{"event":"session-ready","instance":"b0b1792e59ac0b924bc5dc6d04d794d2","generation":1,"format":"BGRA","video_frames":0,"audio_blocks":0,"audio_offset_ns":0}
+{"event":"media-progress","instance":"b0b1792e59ac0b924bc5dc6d04d794d2","generation":1,"format":"BGRA","video_frames":1,"audio_blocks":1,"audio_offset_ns":0}
+{"event":"playback-clock","policy":"audio","system_now_ns":338286456193307,"selected_now_ns":338286456192860,"device_now_ns":18446744073709551615,"mapped_producer_base_ns":338286450295280,"playback_base_ns":338286475943233,"latency_ns":100000000,"resample_slaves":0}
+{"event":"producer-pacing","pacing_ppm":0,"max_push_ns":318902}
+{"event":"video-schedule-summary","received":20,"scheduled":0,"handed_off":20,"late":0,"overflow":0,"peak_pending":0,"pending_limit":8,"peak_bytes":0,"byte_limit":134217728}
+{"event":"playback-metrics","peak_queue_buffers":4,"peak_queue_ns":80000000,"queue_empty_events":4,"queue_full_events":15,"late_audio_blocks":0,"arrival_drift_ns":871150}
+{"event":"playback-complete","audio_master":false,"video_received":20,"video_late":0,"audio_blocks":20,"audio_samples":19200,"latency_ns":100000000}
+{"event":"playback-timing","audio_first_running_pts_ns":0,"video_first_running_pts_ns":0,"audio_end_ns":400000000,"video_end_ns":400000000}
+{"event":"session-complete","instance":"b0b1792e59ac0b924bc5dc6d04d794d2","generation":1,"format":"BGRA","video_frames":20,"audio_blocks":20,"audio_offset_ns":0}
+case=legacy producer=1 consumer=1 sessions=1 clocks=1 ends=1 elapsed_ms=1112 producer_ms=1111 producer_error= consumer_error=
+{"event":"session-ready","instance":"84528c99abc3fe0c070ecb3f77917096","generation":1,"format":"BGRA","video_frames":0,"audio_blocks":0,"audio_offset_ns":0}
+{"event":"playback-clock","policy":"producer","system_now_ns":338289364484707,"selected_now_ns":338289364483966,"device_now_ns":18446744073709551615,"mapped_producer_base_ns":338289414165863,"playback_base_ns":338289414165863,"latency_ns":100000000,"resample_slaves":0}
+{"event":"startup-released","epoch_ns":338289414164884}
+{"event":"media-progress","instance":"84528c99abc3fe0c070ecb3f77917096","generation":1,"format":"BGRA","video_frames":1,"audio_blocks":1,"audio_offset_ns":0}
+{"event":"producer-pacing","pacing_ppm":0,"max_push_ns":234157}
+{"event":"video-schedule-summary","received":20,"scheduled":0,"handed_off":20,"late":0,"overflow":0,"peak_pending":0,"pending_limit":8,"peak_bytes":0,"byte_limit":134217728}
+{"event":"playback-metrics","peak_queue_buffers":4,"peak_queue_ns":80000000,"queue_empty_events":4,"queue_full_events":0,"late_audio_blocks":0,"arrival_drift_ns":-69936}
+{"event":"playback-complete","audio_master":false,"video_received":20,"video_late":0,"audio_blocks":20,"audio_samples":19200,"latency_ns":100000000}
+{"event":"playback-timing","audio_first_running_pts_ns":0,"video_first_running_pts_ns":0,"audio_end_ns":400000000,"video_end_ns":400000000}
+{"event":"session-complete","instance":"84528c99abc3fe0c070ecb3f77917096","generation":1,"format":"BGRA","video_frames":20,"audio_blocks":20,"audio_offset_ns":0}
+case=coordinated-delay producer=1 consumer=1 sessions=1 clocks=1 ends=1 elapsed_ms=2961 producer_ms=2960 producer_error= consumer_error=
+{"event":"session-ready","instance":"66a929933273fbf6ed07cdc3f4ac4cc1","generation":1,"format":"BGRA","video_frames":0,"audio_blocks":0,"audio_offset_ns":0}
+{"event":"playback-clock","policy":"producer","system_now_ns":338290032919581,"selected_now_ns":338290032919012,"device_now_ns":18446744073709551615,"mapped_producer_base_ns":338290082709942,"playback_base_ns":338290082709942,"latency_ns":100000000,"resample_slaves":0}
+{"event":"startup-released","epoch_ns":338290082708649}
+{"event":"media-progress","instance":"66a929933273fbf6ed07cdc3f4ac4cc1","generation":1,"format":"BGRA","video_frames":1,"audio_blocks":1,"audio_offset_ns":0}
+{"event":"media-progress","instance":"66a929933273fbf6ed07cdc3f4ac4cc1","generation":1,"format":"BGRA","video_frames":25,"audio_blocks":25,"audio_offset_ns":0}
+{"event":"media-progress","instance":"66a929933273fbf6ed07cdc3f4ac4cc1","generation":1,"format":"BGRA","video_frames":50,"audio_blocks":50,"audio_offset_ns":0}
+{"event":"media-progress","instance":"66a929933273fbf6ed07cdc3f4ac4cc1","generation":1,"format":"BGRA","video_frames":75,"audio_blocks":75,"audio_offset_ns":0}
+{"event":"producer-pacing","pacing_ppm":0,"max_push_ns":222556}
+{"event":"video-schedule-summary","received":80,"scheduled":0,"handed_off":80,"late":0,"overflow":0,"peak_pending":0,"pending_limit":8,"peak_bytes":0,"byte_limit":134217728}
+{"event":"playback-metrics","peak_queue_buffers":4,"peak_queue_ns":80000000,"queue_empty_events":3,"queue_full_events":0,"late_audio_blocks":0,"arrival_drift_ns":-309319}
+{"event":"playback-complete","audio_master":false,"video_received":80,"video_late":0,"audio_blocks":80,"audio_samples":76800,"latency_ns":100000000}
+{"event":"playback-timing","audio_first_running_pts_ns":0,"video_first_running_pts_ns":0,"audio_end_ns":1600000000,"video_end_ns":1600000000}
+{"event":"session-complete","instance":"66a929933273fbf6ed07cdc3f4ac4cc1","generation":1,"format":"BGRA","video_frames":80,"audio_blocks":80,"audio_offset_ns":0}
+case=finite producer=1 consumer=1 sessions=1 clocks=1 ends=1 elapsed_ms=1887 producer_ms=1887 producer_error= consumer_error=
+case=wrong-key producer=0 consumer=0 sessions=0 clocks=0 ends=0 elapsed_ms=10 producer_ms=10 producer_error=authentication read failed consumer_error=server authentication rejected
+case=wrong-audio-key producer=0 consumer=0 sessions=0 clocks=0 ends=0 elapsed_ms=10 producer_ms=10 producer_error=authentication read failed consumer_error=server authentication rejected
+case=wrong-audio-role producer=0 consumer=0 sessions=0 clocks=0 ends=0 elapsed_ms=10 producer_ms=10 producer_error=authentication protocol or role rejected consumer_error=authentication read failed
+case=budget-mismatch producer=0 consumer=0 sessions=0 clocks=0 ends=0 elapsed_ms=10 producer_ms=10 producer_error=finite media budget disagreement consumer_error=control read/disconnect: peer closed connection
+{"event":"session-ready","instance":"4d89638ed4081610f1fb057dff03cd03","generation":1,"format":"BGRA","video_frames":0,"audio_blocks":0,"audio_offset_ns":0}
+case=revoke-startup producer=0 consumer=0 sessions=1 clocks=0 ends=1 elapsed_ms=30 producer_ms=30 producer_error=control read/disconnect: peer closed connection consumer_error=control write/disconnect
+{"event":"session-ready","instance":"55e32692a171eefba826eb1c07cbff95","generation":1,"format":"BGRA","video_frames":0,"audio_blocks":0,"audio_offset_ns":0}
+case=cancel-startup producer=0 consumer=0 sessions=1 clocks=0 ends=1 elapsed_ms=62 producer_ms=28 producer_error=producer cancelled consumer_error=control write/disconnect
+{"event":"session-ready","instance":"782e0c1344a58a5be47cb64086bdc407","generation":1,"format":"BGRA","video_frames":0,"audio_blocks":0,"audio_offset_ns":0}
+{"event":"playback-clock","policy":"producer","system_now_ns":338292057487609,"selected_now_ns":338292057486927,"device_now_ns":18446744073709551615,"mapped_producer_base_ns":338292107210212,"playback_base_ns":338292107210212,"latency_ns":100000000,"resample_slaves":0}
+{"event":"startup-released","epoch_ns":338292107207981}
+{"event":"media-progress","instance":"782e0c1344a58a5be47cb64086bdc407","generation":1,"format":"BGRA","video_frames":1,"audio_blocks":1,"audio_offset_ns":0}
+case=cancel-media producer=0 consumer=0 sessions=1 clocks=1 ends=1 elapsed_ms=5013 producer_ms=169 producer_error=producer cancelled consumer_error=playback deadline
+{"event":"session-ready","instance":"f3fdea5c7c4b5db471abc43a9601f89d","generation":1,"format":"BGRA","video_frames":0,"audio_blocks":0,"audio_offset_ns":0}
+{"event":"playback-clock","policy":"producer","system_now_ns":338297062977788,"selected_now_ns":338297062977686,"device_now_ns":18446744073709551615,"mapped_producer_base_ns":338297112939846,"playback_base_ns":338297112939846,"latency_ns":100000000,"resample_slaves":0}
+{"event":"startup-released","epoch_ns":338297112939818}
+{"event":"media-progress","instance":"f3fdea5c7c4b5db471abc43a9601f89d","generation":1,"format":"BGRA","video_frames":1,"audio_blocks":1,"audio_offset_ns":0}
+{"event":"media-progress","instance":"f3fdea5c7c4b5db471abc43a9601f89d","generation":1,"format":"BGRA","video_frames":25,"audio_blocks":25,"audio_offset_ns":0}
+case=media-deadline producer=0 consumer=0 sessions=1 clocks=1 ends=1 elapsed_ms=5010 producer_ms=1027 producer_error=producer deadline consumer_error=playback deadline
+broker producer: all real-peer cases passed
+<end of output>
+Test time =  16.25 sec
+----------------------------------------------------------
+Test Passed.
+"broker_producer_stream" end time: Nov 01 06:30 EST
+"broker_producer_stream" time elapsed: 00:00:16
+----------------------------------------------------------
+
+End testing: Nov 01 06:30 EST
+
+gpu =  38.46 sec*proc
+
+integration =  38.46 sec*proc
+

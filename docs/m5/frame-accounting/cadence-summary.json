@@ -1,0 +1,98 @@
+{
+  "scope": "Windows native, original100ms shared latency, fixed-retirement45s captures before startup-preconnection and present-semaphore fixes",
+  "method": "Steady complete identities only; each identity uses its earliest event time at the named stage. Consecutive intervals in original PTS order. Nearest-rank percentiles. Present-call observations are not scanout. Present-call timestamps are recorded after API return, not at submission entry or display latch.",
+  "cases": [
+    {
+      "case": "1920x1080-30-BGRA-av",
+      "evidence": "/tmp/m5-native-accounted/1920x1080-30-BGRA-av/accounting.json",
+      "steady_frames": 1290,
+      "consumer_acquire_interval_ms": {
+        "p50": 33.332,
+        "p95": 33.4189,
+        "p99": 33.5678,
+        "max": 33.6816
+      },
+      "adopt_interval_ms": {
+        "p50": 33.332,
+        "p95": 33.4193,
+        "p99": 33.5678,
+        "max": 33.6824
+      },
+      "present_submit_interval_ms": {
+        "p50": 33.3338,
+        "p95": 33.3953,
+        "p99": 33.51,
+        "max": 33.6732
+      }
+    },
+    {
+      "case": "1920x1080-30-NV12-av",
+      "evidence": "/tmp/m5-native-accounted/1920x1080-30-NV12-av/accounting.json",
+      "steady_frames": 1290,
+      "consumer_acquire_interval_ms": {
+        "p50": 33.3348,
+        "p95": 41.6896,
+        "p99": 41.8199,
+        "max": 41.8845
+      },
+      "adopt_interval_ms": {
+        "p50": 33.338,
+        "p95": 34.8364,
+        "p99": 35.3458,
+        "max": 36.1422
+      },
+      "present_submit_interval_ms": {
+        "p50": 33.3334,
+        "p95": 33.4793,
+        "p99": 33.5389,
+        "max": 33.6015
+      }
+    },
+    {
+      "case": "1920x1080-60-BGRA-av",
+      "evidence": "/tmp/m5-native-accounted/1920x1080-60-BGRA-av/accounting.json",
+      "steady_frames": 2580,
+      "consumer_acquire_interval_ms": {
+        "p50": 16.6673,
+        "p95": 16.8297,
+        "p99": 16.9335,
+        "max": 24.1486
+      },
+      "adopt_interval_ms": {
+        "p50": 16.6672,
+        "p95": 16.8572,
+        "p99": 16.9332,
+        "max": 17.5482
+      },
+      "present_submit_interval_ms": {
+        "p50": 16.6675,
+        "p95": 16.8224,
+        "p99": 16.9316,
+        "max": 16.9905
+      }
+    },
+    {
+      "case": "1920x1080-60-NV12-av",
+      "evidence": "/tmp/m5-native-accounted/1920x1080-60-NV12-av/accounting.json",
+      "steady_frames": 2580,
+      "consumer_acquire_interval_ms": {
+        "p50": 16.6662,
+        "p95": 16.8143,
+        "p99": 16.8666,
+        "max": 16.9612
+      },
+      "adopt_interval_ms": {
+        "p50": 16.667,
+        "p95": 17.2921,
+        "p99": 19.2465,
+        "max": 19.5697
+      },
+      "present_submit_interval_ms": {
+        "p50": 16.6664,
+        "p95": 16.8128,
+        "p99": 16.8672,
+        "max": 16.9603
+      }
+    }
+  ]
+}

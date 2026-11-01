@@ -1,0 +1,165 @@
+[
+  {
+    "case": "bgra",
+    "pass": true,
+    "lease": "48147e2f-42c2-4b26-b00b-866385f60857",
+    "ok": true,
+    "video": 60,
+    "posts": 60,
+    "pcm_samples": 96000,
+    "uid": 10305,
+    "pid": 5370
+  },
+  {
+    "case": "nv12",
+    "pass": true,
+    "lease": "93b73507-e584-4f25-b4a0-09def29c361f",
+    "ok": true,
+    "video": 60,
+    "posts": 60,
+    "pcm_samples": 96000,
+    "uid": 10305,
+    "pid": 5517
+  },
+  {
+    "case": "wrong-signer",
+    "pass": true,
+    "rejected": true
+  },
+  {
+    "case": "wrong-key",
+    "pass": true,
+    "rejected_or_retired": true
+  },
+  {
+    "case": "unsupported-format",
+    "pass": true,
+    "rejected": true
+  },
+  {
+    "case": "invalid-bounds",
+    "pass": true,
+    "rejected": true
+  },
+  {
+    "case": "revoke",
+    "pass": true,
+    "rejected_or_retired": true
+  },
+  {
+    "case": "replace",
+    "pass": true,
+    "lease": "507db652-e22a-4c93-964d-69a5b5f55ece",
+    "ok": true,
+    "video": 180,
+    "posts": 180,
+    "pcm_samples": 288000,
+    "uid": 10305,
+    "pid": 6176
+  },
+  {
+    "case": "producer-death",
+    "pass": true,
+    "rejected_or_retired": true
+  },
+  {
+    "case": "producer-restart",
+    "pass": true,
+    "lease": "17746678-7db6-4120-a806-211f86180021",
+    "ok": true,
+    "video": 60,
+    "posts": 60,
+    "pcm_samples": 96000,
+    "uid": 10305,
+    "pid": 6501
+  },
+  {
+    "case": "broker-death",
+    "pass": true,
+    "rejected_or_retired": true
+  },
+  {
+    "case": "broker-restart",
+    "pass": true,
+    "lease": "91c4a764-7d46-4a9e-a02f-85977d53d566",
+    "ok": true,
+    "video": 60,
+    "posts": 60,
+    "pcm_samples": 96000,
+    "uid": 10305,
+    "pid": 6754
+  },
+  {
+    "case": "consumer-death",
+    "pass": true,
+    "rejected_or_retired": true,
+    "retirement_reason": [
+      "broker-destroy"
+    ]
+  },
+  {
+    "case": "consumer-restart",
+    "pass": true,
+    "lease": "d631ca9e-7d47-4cc0-be58-624da78977d4",
+    "ok": true,
+    "video": 60,
+    "posts": 60,
+    "pcm_samples": 96000,
+    "uid": 10305,
+    "pid": 6997
+  },
+  {
+    "case": "background",
+    "pass": true,
+    "rejected_or_retired": true
+  },
+  {
+    "case": "foreground-reopen",
+    "pass": true,
+    "lease": "95d65154-0f5e-4579-a1ce-78a3eb59b680",
+    "ok": true,
+    "video": 60,
+    "posts": 60,
+    "pcm_samples": 96000,
+    "uid": 10305,
+    "pid": 7251
+  },
+  {
+    "case": "audio-focus",
+    "pass": true,
+    "rejected_or_retired": true
+  },
+  {
+    "case": "focus-reopen",
+    "pass": true,
+    "lease": "2c39cfb2-4e20-4a51-b5a8-6318fff23f0e",
+    "ok": true,
+    "video": 60,
+    "posts": 60,
+    "pcm_samples": 96000,
+    "uid": 10305,
+    "pid": 7484
+  },
+  {
+    "case": "audible",
+    "pass": true,
+    "lease": "4dda294e-871d-4ed1-b5a1-2b9edf08cc0d",
+    "ok": true,
+    "video": 60,
+    "posts": 60,
+    "pcm_samples": 96000,
+    "uid": 10305,
+    "pid": 7600
+  },
+  {
+    "case": "audible-nv12",
+    "pass": true,
+    "lease": "c0814645-5874-42ae-902a-dadeb56d934d",
+    "ok": true,
+    "video": 60,
+    "posts": 60,
+    "pcm_samples": 96000,
+    "uid": 10305,
+    "pid": 7747
+  }
+]

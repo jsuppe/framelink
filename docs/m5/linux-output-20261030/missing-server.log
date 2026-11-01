@@ -1,0 +1,5 @@
+ERROR: from element /GstPipeline:pipeline0/GstPulseSink:pulsesink0: Failed to connect: Connection refused
+Additional debug info:
+../ext/pulse/pulsesink.c(616): gst_pulseringbuffer_open_device (): /GstPipeline:pipeline0/GstPulseSink:pulsesink0
+ERROR: pipeline doesn't want to preroll.
+Failed to set pipeline to PAUSED.

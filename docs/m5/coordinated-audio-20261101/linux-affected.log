@@ -1,0 +1,365 @@
+Start testing: Nov 01 07:10 EST
+----------------------------------------------------------
+49/60 Testing: m5_finite_budget
+49/60 Test: m5_finite_budget
+Command: "/usr/bin/python3" "/tmp/framelink-m5/test/m5_finite_budget.py" "--build" "/tmp/framelink-m5-build"
+Directory: /tmp/framelink-m5-build
+"m5_finite_budget" start time: Nov 01 07:10 EST
+Output:
+----------------------------------------------------------
+{"case": "longer-than-setup", "exit_codes": [0, 0], "elapsed_seconds": 4.324403038015589}
+{"case": "missing-peer", "exit_codes": [1], "elapsed_seconds": 2.0197910919669084}
+{"case": "mismatch", "exit_codes": [1, 1], "elapsed_seconds": 0.06405811896547675}
+{"case": "legacy-peer", "exit_codes": [1, 1], "elapsed_seconds": 0.06387836200883612}
+{"case": "early-eos", "exit_codes": [1, 1], "elapsed_seconds": 0.8158818789524958}
+{"case": "source-stall", "exit_codes": [1, 1], "elapsed_seconds": 2.571715017023962}
+{"case": "producer-idle", "exit_codes": [-9, 1], "elapsed_seconds": 2.4225373649969697}
+{"case": "consumer-idle", "exit_codes": [1, -9], "elapsed_seconds": 6.131408681045286}
+{"case": "cancel", "exit_codes": [1, 0], "elapsed_seconds": 0.26451866002753377}
+finite budget: 9 real-peer cases and 8 malformed CLI budgets passed
+<end of output>
+Test time =  18.86 sec
+----------------------------------------------------------
+Test Passed.
+"m5_finite_budget" end time: Nov 01 07:11 EST
+"m5_finite_budget" time elapsed: 00:00:18
+----------------------------------------------------------
+
+56/60 Testing: m5_startup
+56/60 Test: m5_startup
+Command: "/usr/bin/python3" "/tmp/framelink-m5/test/m5_startup.py" "--build" "/tmp/framelink-m5-build"
+Directory: /tmp/framelink-m5-build
+"m5_startup" start time: Nov 01 07:11 EST
+Output:
+----------------------------------------------------------
+[
+  {
+    "policy": "producer",
+    "returncode": 0,
+    "cases": [
+      {
+        "format": "BGRA",
+        "intact": true,
+        "stats": {
+          "event": "video-transport-summary",
+          "received": 100,
+          "submitted": 100,
+          "dropped": 0,
+          "ring_full_drops": 0
+        },
+        "received": 100
+      },
+      {
+        "format": "NV12",
+        "intact": true,
+        "stats": {
+          "event": "video-transport-summary",
+          "received": 100,
+          "submitted": 100,
+          "dropped": 0,
+          "ring_full_drops": 0
+        },
+        "received": 100
+      }
+    ]
+  },
+  {
+    "policy": "audio",
+    "returncode": 0,
+    "cases": [
+      {
+        "format": "BGRA",
+        "intact": false,
+        "stats": {
+          "event": "video-transport-summary",
+          "received": 100,
+          "submitted": 68,
+          "dropped": 32,
+          "ring_full_drops": 32
+        },
+        "received": 65
+      },
+      {
+        "format": "NV12",
+        "intact": false,
+        "stats": {
+          "event": "video-transport-summary",
+          "received": 100,
+          "submitted": 68,
+          "dropped": 32,
+          "ring_full_drops": 32
+        },
+        "received": 65
+      }
+    ]
+  },
+  {
+    "case": "cancel",
+    "exit_codes": [
+      1,
+      -9
+    ],
+    "elapsed_seconds": 0.7695565780159086
+  },
+  {
+    "case": "restart",
+    "exit_codes": [
+      0,
+      0
+    ],
+    "elapsed_seconds": 2.6229841120075434
+  },
+  {
+    "case": "long-preroll",
+    "exit_codes": [
+      0,
+      0
+    ],
+    "elapsed_seconds": 3.424837627040688
+  }
+]
+/tmp/m5-startup-hm_chlm8
+<end of output>
+Test time =  21.04 sec
+----------------------------------------------------------
+Test Passed.
+"m5_startup" end time: Nov 01 07:11 EST
+"m5_startup" time elapsed: 00:00:21
+----------------------------------------------------------
+
+57/60 Testing: m5_preconnect
+57/60 Test: m5_preconnect
+Command: "/usr/bin/python3" "/tmp/framelink-m5/test/m5_preconnect.py" "--build" "/tmp/framelink-m5-build"
+Directory: /tmp/framelink-m5-build
+"m5_preconnect" start time: Nov 01 07:11 EST
+Output:
+----------------------------------------------------------
+[
+  {
+    "mode": "ready",
+    "format": "BGRA",
+    "event": "video-schedule-summary",
+    "received": 100,
+    "scheduled": 100,
+    "handed_off": 0,
+    "late": 0,
+    "overflow": 0,
+    "peak_pending": 5,
+    "pending_limit": 8,
+    "peak_bytes": 288000,
+    "byte_limit": 134217728
+  },
+  {
+    "mode": "ready",
+    "format": "NV12",
+    "event": "video-schedule-summary",
+    "received": 100,
+    "scheduled": 100,
+    "handed_off": 0,
+    "late": 0,
+    "overflow": 0,
+    "peak_pending": 5,
+    "pending_limit": 8,
+    "peak_bytes": 108000,
+    "byte_limit": 134217728
+  },
+  {
+    "mode": "legacy",
+    "format": "BGRA",
+    "event": "video-schedule-summary",
+    "received": 91,
+    "scheduled": 85,
+    "handed_off": 0,
+    "late": 6,
+    "overflow": 0,
+    "peak_pending": 5,
+    "pending_limit": 8,
+    "peak_bytes": 288000,
+    "byte_limit": 134217728
+  },
+  {
+    "mode": "legacy",
+    "format": "NV12",
+    "event": "video-schedule-summary",
+    "received": 88,
+    "scheduled": 83,
+    "handed_off": 0,
+    "late": 5,
+    "overflow": 0,
+    "peak_pending": 5,
+    "pending_limit": 8,
+    "peak_bytes": 108000,
+    "byte_limit": 134217728
+  },
+  {
+    "mode": "order-producer",
+    "event": "video-schedule-summary",
+    "received": 100,
+    "scheduled": 100,
+    "handed_off": 0,
+    "late": 0,
+    "overflow": 0,
+    "peak_pending": 5,
+    "pending_limit": 8,
+    "peak_bytes": 288000,
+    "byte_limit": 134217728
+  },
+  {
+    "mode": "order-consumer",
+    "event": "video-schedule-summary",
+    "received": 100,
+    "scheduled": 100,
+    "handed_off": 0,
+    "late": 0,
+    "overflow": 0,
+    "peak_pending": 5,
+    "pending_limit": 8,
+    "peak_bytes": 288000,
+    "byte_limit": 134217728
+  }
+]
+<end of output>
+Test time =  17.45 sec
+----------------------------------------------------------
+Test Passed.
+"m5_preconnect" end time: Nov 01 07:11 EST
+"m5_preconnect" time elapsed: 00:00:17
+----------------------------------------------------------
+
+60/60 Testing: broker_producer_stream
+60/60 Test: broker_producer_stream
+Command: "/tmp/framelink-m5-build/fl_broker_producer" "/tmp/framelink-m5-build/libgstframelink.so"
+Directory: /tmp/framelink-m5-build
+"broker_producer_stream" start time: Nov 01 07:11 EST
+Output:
+----------------------------------------------------------
+bounds: 14 rejected before resolve; already-cancelled rejected
+silent peer: bounded nonfatal producer deadline; process remains alive
+{"event":"session-ready","instance":"1fa6f459db12680afb70d959c5b31644","generation":1,"format":"BGRA","video_frames":0,"audio_blocks":0,"audio_offset_ns":0}
+{"event":"media-progress","instance":"1fa6f459db12680afb70d959c5b31644","generation":1,"format":"BGRA","video_frames":1,"audio_blocks":1,"audio_offset_ns":0}
+{"event":"playback-clock","policy":"audio","system_now_ns":340795882262470,"selected_now_ns":340795882262135,"device_now_ns":18446744073709551615,"mapped_producer_base_ns":340795876200874,"playback_base_ns":340795902112304,"latency_ns":100000000,"resample_slaves":0}
+{"event":"producer-pacing","pacing_ppm":0,"max_push_ns":337974}
+{"event":"video-schedule-summary","received":20,"scheduled":0,"handed_off":20,"late":0,"overflow":0,"peak_pending":0,"pending_limit":8,"peak_bytes":0,"byte_limit":134217728}
+{"event":"playback-metrics","peak_queue_buffers":4,"peak_queue_ns":80000000,"queue_empty_events":3,"queue_full_events":15,"late_audio_blocks":0,"arrival_drift_ns":1050188}
+{"event":"playback-complete","audio_master":false,"video_received":20,"video_late":0,"audio_blocks":20,"audio_samples":19200,"latency_ns":100000000}
+{"event":"playback-timing","audio_first_running_pts_ns":0,"video_first_running_pts_ns":0,"audio_end_ns":400000000,"video_end_ns":400000000}
+{"event":"session-complete","instance":"1fa6f459db12680afb70d959c5b31644","generation":1,"format":"BGRA","video_frames":20,"audio_blocks":20,"audio_offset_ns":0}
+case=legacy producer=1 consumer=1 sessions=1 clocks=1 ends=1 elapsed_ms=1111 producer_ms=1111 producer_error= consumer_error=
+{"event":"session-ready","instance":"6fbe26734253aedc33cd8ea739a463e8","generation":1,"format":"BGRA","video_frames":0,"audio_blocks":0,"audio_offset_ns":0}
+{"event":"playback-clock","policy":"producer","system_now_ns":340798798101981,"selected_now_ns":340798798101282,"device_now_ns":18446744073709551615,"mapped_producer_base_ns":340798847755097,"playback_base_ns":340798847755097,"latency_ns":100000000,"resample_slaves":0}
+{"event":"startup-released","epoch_ns":340798847751322}
+{"event":"media-progress","instance":"6fbe26734253aedc33cd8ea739a463e8","generation":1,"format":"BGRA","video_frames":1,"audio_blocks":1,"audio_offset_ns":0}
+{"event":"producer-pacing","pacing_ppm":0,"max_push_ns":253029}
+{"event":"video-schedule-summary","received":20,"scheduled":0,"handed_off":20,"late":0,"overflow":0,"peak_pending":0,"pending_limit":8,"peak_bytes":0,"byte_limit":134217728}
+{"event":"playback-metrics","peak_queue_buffers":4,"peak_queue_ns":80000000,"queue_empty_events":3,"queue_full_events":0,"late_audio_blocks":0,"arrival_drift_ns":-67649}
+{"event":"playback-complete","audio_master":false,"video_received":20,"video_late":0,"audio_blocks":20,"audio_samples":19200,"latency_ns":100000000}
+{"event":"playback-timing","audio_first_running_pts_ns":0,"video_first_running_pts_ns":0,"audio_end_ns":400000000,"video_end_ns":400000000}
+{"event":"session-complete","instance":"6fbe26734253aedc33cd8ea739a463e8","generation":1,"format":"BGRA","video_frames":20,"audio_blocks":20,"audio_offset_ns":0}
+case=coordinated-delay producer=1 consumer=1 sessions=1 clocks=1 ends=1 elapsed_ms=2964 producer_ms=2964 producer_error= consumer_error=
+{"event":"session-ready","instance":"3c31b97a88b5a2fb5f7331253a080d02","generation":1,"format":"BGRA","video_frames":0,"audio_blocks":0,"audio_offset_ns":0}
+{"event":"playback-clock","policy":"producer","system_now_ns":340799454458561,"selected_now_ns":340799454458368,"device_now_ns":18446744073709551615,"mapped_producer_base_ns":340799504356809,"playback_base_ns":340799504356809,"latency_ns":100000000,"resample_slaves":0}
+{"event":"startup-released","epoch_ns":340799504355912}
+{"event":"media-progress","instance":"3c31b97a88b5a2fb5f7331253a080d02","generation":1,"format":"BGRA","video_frames":1,"audio_blocks":1,"audio_offset_ns":0}
+{"event":"media-progress","instance":"3c31b97a88b5a2fb5f7331253a080d02","generation":1,"format":"BGRA","video_frames":25,"audio_blocks":25,"audio_offset_ns":0}
+{"event":"media-progress","instance":"3c31b97a88b5a2fb5f7331253a080d02","generation":1,"format":"BGRA","video_frames":50,"audio_blocks":50,"audio_offset_ns":0}
+{"event":"media-progress","instance":"3c31b97a88b5a2fb5f7331253a080d02","generation":1,"format":"BGRA","video_frames":75,"audio_blocks":75,"audio_offset_ns":0}
+{"event":"producer-pacing","pacing_ppm":0,"max_push_ns":195146}
+{"event":"video-schedule-summary","received":80,"scheduled":0,"handed_off":80,"late":0,"overflow":0,"peak_pending":0,"pending_limit":8,"peak_bytes":0,"byte_limit":134217728}
+{"event":"playback-metrics","peak_queue_buffers":4,"peak_queue_ns":80000000,"queue_empty_events":4,"queue_full_events":0,"late_audio_blocks":0,"arrival_drift_ns":-460392}
+{"event":"playback-complete","audio_master":false,"video_received":80,"video_late":0,"audio_blocks":80,"audio_samples":76800,"latency_ns":100000000}
+{"event":"playback-timing","audio_first_running_pts_ns":0,"video_first_running_pts_ns":0,"audio_end_ns":1600000000,"video_end_ns":1600000000}
+{"event":"session-complete","instance":"3c31b97a88b5a2fb5f7331253a080d02","generation":1,"format":"BGRA","video_frames":80,"audio_blocks":80,"audio_offset_ns":0}
+case=finite producer=1 consumer=1 sessions=1 clocks=1 ends=1 elapsed_ms=1859 producer_ms=1859 producer_error= consumer_error=
+case=wrong-key producer=0 consumer=0 sessions=0 clocks=0 ends=0 elapsed_ms=10 producer_ms=10 producer_error=authentication read failed consumer_error=server authentication rejected
+case=wrong-audio-key producer=0 consumer=0 sessions=0 clocks=0 ends=0 elapsed_ms=10 producer_ms=10 producer_error=authentication read failed consumer_error=server authentication rejected
+case=wrong-audio-role producer=0 consumer=0 sessions=0 clocks=0 ends=0 elapsed_ms=10 producer_ms=10 producer_error=authentication protocol or role rejected consumer_error=authentication read failed
+case=budget-mismatch producer=0 consumer=0 sessions=0 clocks=0 ends=0 elapsed_ms=10 producer_ms=10 producer_error=finite media budget disagreement consumer_error=control read/disconnect: peer closed connection
+{"event":"session-ready","instance":"37b9624e9083a100ddf45f3a1e13e4cb","generation":1,"format":"BGRA","video_frames":0,"audio_blocks":0,"audio_offset_ns":0}
+case=revoke-startup producer=0 consumer=0 sessions=1 clocks=0 ends=1 elapsed_ms=30 producer_ms=30 producer_error=control read/disconnect: peer closed connection consumer_error=control write/disconnect
+{"event":"session-ready","instance":"3c0aef3f900bf4a5fcd7a89ef6eb00a9","generation":1,"format":"BGRA","video_frames":0,"audio_blocks":0,"audio_offset_ns":0}
+case=cancel-startup producer=0 consumer=0 sessions=1 clocks=0 ends=1 elapsed_ms=54 producer_ms=22 producer_error=producer cancelled consumer_error=control write/disconnect
+{"event":"session-ready","instance":"0301fbc176d22d4082e44f11f74e5c2c","generation":1,"format":"BGRA","video_frames":0,"audio_blocks":0,"audio_offset_ns":0}
+{"event":"playback-clock","policy":"producer","system_now_ns":340801442439171,"selected_now_ns":340801442438853,"device_now_ns":18446744073709551615,"mapped_producer_base_ns":340801492331486,"playback_base_ns":340801492331486,"latency_ns":100000000,"resample_slaves":0}
+{"event":"startup-released","epoch_ns":340801492331535}
+{"event":"media-progress","instance":"0301fbc176d22d4082e44f11f74e5c2c","generation":1,"format":"BGRA","video_frames":1,"audio_blocks":1,"audio_offset_ns":0}
+case=cancel-media producer=0 consumer=0 sessions=1 clocks=1 ends=1 elapsed_ms=5010 producer_ms=164 producer_error=producer cancelled consumer_error=playback deadline
+{"event":"session-ready","instance":"4c789cb4ce353e09b8cfb769a0225e85","generation":1,"format":"BGRA","video_frames":0,"audio_blocks":0,"audio_offset_ns":0}
+{"event":"playback-clock","policy":"producer","system_now_ns":340806450325749,"selected_now_ns":340806450325644,"device_now_ns":18446744073709551615,"mapped_producer_base_ns":340806500292686,"playback_base_ns":340806500292686,"latency_ns":100000000,"resample_slaves":0}
+{"event":"startup-released","epoch_ns":340806500292261}
+{"event":"media-progress","instance":"4c789cb4ce353e09b8cfb769a0225e85","generation":1,"format":"BGRA","video_frames":1,"audio_blocks":1,"audio_offset_ns":0}
+{"event":"media-progress","instance":"4c789cb4ce353e09b8cfb769a0225e85","generation":1,"format":"BGRA","video_frames":25,"audio_blocks":25,"audio_offset_ns":0}
+case=media-deadline producer=0 consumer=0 sessions=1 clocks=1 ends=1 elapsed_ms=5011 producer_ms=1029 producer_error=producer deadline consumer_error=playback deadline
+{"event":"session-ready","instance":"fcc3df41da2ed869a40a95b0c1fc97b5","generation":1,"format":"BGRA","video_frames":0,"audio_blocks":0,"audio_offset_ns":0}
+{"event":"playback-clock","policy":"producer","system_now_ns":340811461565450,"selected_now_ns":340811461565335,"device_now_ns":18446744073709551615,"mapped_producer_base_ns":340811511527781,"playback_base_ns":340811511527781,"latency_ns":100000000,"resample_slaves":0}
+{"event":"startup-released","epoch_ns":340811511527307}
+{"event":"media-progress","instance":"fcc3df41da2ed869a40a95b0c1fc97b5","generation":1,"format":"BGRA","video_frames":1,"audio_blocks":1,"audio_offset_ns":0}
+{"event":"producer-pacing","pacing_ppm":0,"max_push_ns":186059}
+{"event":"video-schedule-summary","received":20,"scheduled":0,"handed_off":20,"late":0,"overflow":0,"peak_pending":0,"pending_limit":8,"peak_bytes":0,"byte_limit":134217728}
+{"event":"playback-metrics","peak_queue_buffers":4,"peak_queue_ns":80000000,"queue_empty_events":4,"queue_full_events":0,"late_audio_blocks":0,"arrival_drift_ns":353335}
+{"event":"playback-complete","audio_master":false,"video_received":20,"video_late":0,"audio_blocks":20,"audio_samples":19200,"latency_ns":100000000}
+{"event":"playback-timing","audio_first_running_pts_ns":0,"video_first_running_pts_ns":0,"audio_end_ns":400000000,"video_end_ns":400000000}
+{"event":"session-complete","instance":"fcc3df41da2ed869a40a95b0c1fc97b5","generation":1,"format":"BGRA","video_frames":20,"audio_blocks":20,"audio_offset_ns":0}
+case=adopt-video producer=1 consumer=1 sessions=1 clocks=1 ends=1 elapsed_ms=667 producer_ms=667 producer_error= consumer_error=
+{"event":"session-ready","instance":"d62311440f1ccf758d7c09fe7f7e8515","generation":1,"format":"NV12","video_frames":0,"audio_blocks":0,"audio_offset_ns":0}
+{"event":"playback-clock","policy":"producer","system_now_ns":340812129179391,"selected_now_ns":340812129179269,"device_now_ns":18446744073709551615,"mapped_producer_base_ns":340812179140366,"playback_base_ns":340812179140366,"latency_ns":100000000,"resample_slaves":0}
+{"event":"startup-released","epoch_ns":340812179138962}
+{"event":"media-progress","instance":"d62311440f1ccf758d7c09fe7f7e8515","generation":1,"format":"NV12","video_frames":1,"audio_blocks":1,"audio_offset_ns":0}
+{"event":"producer-pacing","pacing_ppm":0,"max_push_ns":210505}
+{"event":"video-schedule-summary","received":20,"scheduled":0,"handed_off":20,"late":0,"overflow":0,"peak_pending":0,"pending_limit":8,"peak_bytes":0,"byte_limit":134217728}
+{"event":"playback-metrics","peak_queue_buffers":4,"peak_queue_ns":80000000,"queue_empty_events":5,"queue_full_events":0,"late_audio_blocks":0,"arrival_drift_ns":541403}
+{"event":"playback-complete","audio_master":false,"video_received":20,"video_late":0,"audio_blocks":20,"audio_samples":19200,"latency_ns":100000000}
+{"event":"playback-timing","audio_first_running_pts_ns":0,"video_first_running_pts_ns":0,"audio_end_ns":400000000,"video_end_ns":400000000}
+{"event":"session-complete","instance":"d62311440f1ccf758d7c09fe7f7e8515","generation":1,"format":"NV12","video_frames":20,"audio_blocks":20,"audio_offset_ns":0}
+case=adopt-nv12 producer=1 consumer=1 sessions=1 clocks=1 ends=1 elapsed_ms=667 producer_ms=666 producer_error= consumer_error=
+case=adopt-refused producer=0 consumer=0 sessions=0 clocks=0 ends=0 elapsed_ms=10 producer_ms=10 producer_error=control read/disconnect: peer closed connection consumer_error=injected video lease refusal
+{"event":"session-ready","instance":"96044cd989c653bb2641e051f4f63308","generation":1,"format":"BGRA","video_frames":0,"audio_blocks":0,"audio_offset_ns":0}
+{"event":"playback-clock","policy":"audio","system_now_ns":340812807364013,"selected_now_ns":340812807363926,"device_now_ns":18446744073709551615,"mapped_producer_base_ns":340812857256717,"playback_base_ns":340812827320908,"latency_ns":100000000,"resample_slaves":0}
+{"event":"startup-released","epoch_ns":340812857257375}
+{"event":"media-progress","instance":"96044cd989c653bb2641e051f4f63308","generation":1,"format":"BGRA","video_frames":1,"audio_blocks":1,"audio_offset_ns":0}
+{"event":"producer-pacing","pacing_ppm":0,"max_push_ns":222361}
+{"event":"video-schedule-summary","received":20,"scheduled":0,"handed_off":20,"late":0,"overflow":0,"peak_pending":0,"pending_limit":8,"peak_bytes":0,"byte_limit":134217728}
+{"event":"playback-metrics","peak_queue_buffers":3,"peak_queue_ns":60000000,"queue_empty_events":4,"queue_full_events":0,"late_audio_blocks":0,"arrival_drift_ns":-4234}
+{"event":"playback-complete","audio_master":false,"video_received":20,"video_late":0,"audio_blocks":20,"audio_samples":19200,"latency_ns":100000000}
+{"event":"playback-timing","audio_first_running_pts_ns":0,"video_first_running_pts_ns":0,"audio_end_ns":400000000,"video_end_ns":400000000}
+{"event":"session-complete","instance":"96044cd989c653bb2641e051f4f63308","generation":1,"format":"BGRA","video_frames":20,"audio_blocks":20,"audio_offset_ns":0}
+case=audio-coordinated producer=1 consumer=1 sessions=1 clocks=1 ends=1 elapsed_ms=556 producer_ms=555 producer_error= consumer_error=
+{"event":"session-ready","instance":"ac00ed2ca19091009b6679d111d211e6","generation":1,"format":"BGRA","video_frames":0,"audio_blocks":0,"audio_offset_ns":0}
+{"event":"playback-clock","policy":"audio","system_now_ns":340815671068381,"selected_now_ns":340815671067970,"device_now_ns":18446744073709551615,"mapped_producer_base_ns":340815720723806,"playback_base_ns":340815690868443,"latency_ns":100000000,"resample_slaves":0}
+{"event":"startup-released","epoch_ns":340815720716306}
+{"event":"media-progress","instance":"ac00ed2ca19091009b6679d111d211e6","generation":1,"format":"BGRA","video_frames":1,"audio_blocks":1,"audio_offset_ns":0}
+{"event":"producer-pacing","pacing_ppm":0,"max_push_ns":217779}
+{"event":"video-schedule-summary","received":20,"scheduled":0,"handed_off":20,"late":0,"overflow":0,"peak_pending":0,"pending_limit":8,"peak_bytes":0,"byte_limit":134217728}
+{"event":"playback-metrics","peak_queue_buffers":3,"peak_queue_ns":60000000,"queue_empty_events":3,"queue_full_events":0,"late_audio_blocks":0,"arrival_drift_ns":-30492}
+{"event":"playback-complete","audio_master":false,"video_received":20,"video_late":0,"audio_blocks":20,"audio_samples":19200,"latency_ns":100000000}
+{"event":"playback-timing","audio_first_running_pts_ns":0,"video_first_running_pts_ns":0,"audio_end_ns":400000000,"video_end_ns":400000000}
+{"event":"session-complete","instance":"ac00ed2ca19091009b6679d111d211e6","generation":1,"format":"BGRA","video_frames":20,"audio_blocks":20,"audio_offset_ns":0}
+case=audio-coordinated-delay producer=1 consumer=1 sessions=1 clocks=1 ends=1 elapsed_ms=2874 producer_ms=2873 producer_error= consumer_error=
+{"event":"session-ready","instance":"7a599d7cf439f0cbd2e72aae7714966e","generation":1,"format":"BGRA","video_frames":0,"audio_blocks":0,"audio_offset_ns":0}
+{"event":"playback-clock","policy":"audio","system_now_ns":340816244808831,"selected_now_ns":340816244808560,"device_now_ns":18446744073709551615,"mapped_producer_base_ns":340816294527665,"playback_base_ns":340816264667197,"latency_ns":100000000,"resample_slaves":0}
+{"event":"startup-released","epoch_ns":340816294520672}
+{"event":"media-progress","instance":"7a599d7cf439f0cbd2e72aae7714966e","generation":1,"format":"BGRA","video_frames":1,"audio_blocks":1,"audio_offset_ns":0}
+{"event":"media-progress","instance":"7a599d7cf439f0cbd2e72aae7714966e","generation":1,"format":"BGRA","video_frames":25,"audio_blocks":25,"audio_offset_ns":0}
+{"event":"media-progress","instance":"7a599d7cf439f0cbd2e72aae7714966e","generation":1,"format":"BGRA","video_frames":50,"audio_blocks":50,"audio_offset_ns":0}
+{"event":"media-progress","instance":"7a599d7cf439f0cbd2e72aae7714966e","generation":1,"format":"BGRA","video_frames":75,"audio_blocks":75,"audio_offset_ns":0}
+{"event":"producer-pacing","pacing_ppm":0,"max_push_ns":221531}
+{"event":"video-schedule-summary","received":80,"scheduled":0,"handed_off":80,"late":0,"overflow":0,"peak_pending":0,"pending_limit":8,"peak_bytes":0,"byte_limit":134217728}
+{"event":"playback-metrics","peak_queue_buffers":3,"peak_queue_ns":60000000,"queue_empty_events":3,"queue_full_events":0,"late_audio_blocks":0,"arrival_drift_ns":-368913}
+{"event":"playback-complete","audio_master":false,"video_received":80,"video_late":0,"audio_blocks":80,"audio_samples":76800,"latency_ns":100000000}
+{"event":"playback-timing","audio_first_running_pts_ns":0,"video_first_running_pts_ns":0,"audio_end_ns":1600000000,"video_end_ns":1600000000}
+{"event":"session-complete","instance":"7a599d7cf439f0cbd2e72aae7714966e","generation":1,"format":"BGRA","video_frames":80,"audio_blocks":80,"audio_offset_ns":0}
+case=audio-coordinated-finite producer=1 consumer=1 sessions=1 clocks=1 ends=1 elapsed_ms=1768 producer_ms=1767 producer_error= consumer_error=
+broker producer: all real-peer cases passed
+<end of output>
+Test time =  22.75 sec
+----------------------------------------------------------
+Test Passed.
+"broker_producer_stream" end time: Nov 01 07:12 EST
+"broker_producer_stream" time elapsed: 00:00:22
+----------------------------------------------------------
+
+End testing: Nov 01 07:12 EST
+
+gpu =  38.49 sec*proc
+
+integration =  38.49 sec*proc
+

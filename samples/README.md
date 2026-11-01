@@ -75,7 +75,7 @@ Producer:
 
 Consumer:
 
-- `--pool 1..8`: ring size, default 4.
+- `--pool 1..16`: ring size, default 4.
 - `--delay-ms N`: hold each acquired frame for N ms before release (0..60000).
   Exercises slow-consumer/backpressure behavior.
 - `--verify 0|1`: default 1 verifies the sample's in-band identity and all active
@@ -164,7 +164,7 @@ shutdown, 1 = API/idle-timeout/pixel failure, 2 = invalid or unsupported CLI.
 
 ## Automated coverage
 
-CTest covers BGRA/NV12, pool sizes 1/2/8, slow consumers, metadata-only capture,
+CTest covers BGRA/NV12, sample pool sizes 1/2/8 and a dedicated full-16-slot ownership/recycling test, slow consumers, metadata-only capture,
 startup geometry negotiation, reconnect, slot selection, malformed/wrong-role
 CLI, and deliberate pixel corruption. Windows additionally tests manual
 submission + consumer-owned GPU fences, plus disconnection with a full ring.
@@ -216,3 +216,17 @@ The same rule applies to POSIX `flSignalConsumedSyncFd`: a disconnected
 notification after locally recording completion is tolerated, then the sample
 still releases its held frame. `sample_consumed_disconnected` asserts both
 consumed-completion and release notification injections in GPU-sync mode.
+
+### External decoded A/V pipeline (M5 developer handoff)
+
+`framelink_av_producer --input-pipeline FILE` accepts trusted GStreamer pipeline
+text with `@VIDEO_SINK@` / `@AUDIO_SINK@` placeholders. It sends decoded video and
+PCM to an independent streaming consumer while retaining their common timeline.
+See [Windows pipeline guide](../docs/M5_WINDOWS_PIPELINE.md) for build pins,
+reproducible MJPEG/PCM validation, and finite-CFR/live-stream limitations.
+Optional `--trace-media` compares payload SHA256, running PTS and durations; it
+maps/hashes frames and must not be used for performance qualification.
+
+For opt-in finite A/V runs beyond the legacy process deadline, see
+[bounded finite media budgets](../docs/FINITE_MEDIA_BUDGET.md). Startup and idle
+timeouts are independent of media duration; this does not add infinite/live support.

@@ -1,0 +1,163 @@
+# Frame accounting, not average FPS
+
+`tools/frame_accounting.py` consumes identity-bearing JSONL or existing flight
+recorder CSV/gz files. It records every observed frame's stages, explicit drop
+reason, missing/unclassified stages, startup/steady/end partition, repeated
+presentation count, and stage-delay distribution. `--require-complete` fails on
+unclassified frames, ambiguous keys, missing GPU completion for any repeated
+submission, lost trace records, or anonymous pre-submit deficits. A classified
+drop is accounted for, **not** a successful delivery. Complete accounting is not
+a zero-loss performance pass.
+
+JSONL fields: `session`, `generation`, `frame_id`, `pts_ns`, `time_ns`, `stage`,
+optional `reason`, optional `submission_id` for repeated GPU draws. Frame keys
+include generation; resets cannot merge identities. Stages are `sink_receive`,
+`buffer_acquire`, `submit`, `ipc_receive`, `consumer_acquire`, `schedule`, `adopt`,
+`render_submit`, `gpu_complete`, `present_submit`, `drop`.
+
+CSV supports one generation per channel per capture, with unique PTS per frame.
+Duplicate same-stage PTS are flagged ambiguous rather than guessed. A capture
+that spans reconnects or PTS resets must be split or exported as generation-aware
+JSONL. Renderer event generations must match `--generation`. Render/present
+repeats are supported; renderer per-submission IDs match GPU completion. The
+renderer instrumentation contract is documented in vkrender's
+`docs/m5/FRAME_ACCOUNTING.md` (commit 1217e46).
+
+```sh
+python3 tools/frame_accounting.py --csv --generation 2 \
+  --output accounting.json capture/*.csv
+python3 test/test_frame_accounting.py
+```
+
+Default startup/end windows are one second of observed media time at either
+end, with startup taking precedence for short clips. They are analysis windows,
+not assertions that losses there are acceptable. Same-host steady-clock times
+are required for cross-process intervals. Receipt can race submit-return; small
+negative intervals are possible and are reported, never clamped. No scanout or
+optical/audio-output claim follows from software present submission.
+
+## Saved evidence, not new performance measurements
+
+Input: existing `clock-policy-fix/m5-policy-synthetic-final/1920x1080-60-NV12-av`
+CSV capture (old, before the latest fixes). `saved-nv12-60.json` reports:
+
+- 300 anonymous sink wrapper calls; 254 identity-bearing submissions.
+- 46 anonymous pre-submit gaps cannot be assigned individual PTS from this old trace.
+- 254 submissions and IPC receptions, 177 consumer acquisitions.
+- 77 explicit pending-frame replacements: 20 startup, 42 steady, 15 end.
+- Missing sink identity and renderer stages remain **unclassified**; full accounting fails.
+
+This identifies the 77 losses from actual replacement flags, not subtraction of
+FPS averages. It does not claim that the latest corrected build still loses them.
+
+## Fresh instrumentation validation
+
+Linux Release plugin/shared renderer compilation passed. Existing `fl_gst_sink_stats`
+was run against the newly built plugin with `FRAMELINK_GST_TRACE` enabled: 3 input
+frames, 3 explicit `no_consumer` drops; the analyzer accounts for all three.
+`no-consumer.json` is that fresh result. Fourteen unit/negative-control tests pass:
+removing an acquisition or drop reason fails, duplicate IDs fail, trace loss
+fails, generations remain isolated, repeat presentation is distinct, a removed
+repeat GPU completion fails, IPC replacement attributes the PREVIOUS frame, truncated captures fail, and transport sequence resets fail.
+
+The Windows worker must collect the new end-to-end trace for actual performance
+qualification. `gpu_complete` is a submission fence observation, not transport
+buffer retirement: a frame may be rendered again after its earlier GPU use ends.
+
+## Hardened evidence gate
+
+A terminal drop reason no longer overrides missing predecessors: for example,
+`late` requires receipt/acquisition evidence through `consumer_acquire`, and
+`pending_replaced` requires evidence through IPC receipt. Unknown reasons and
+stages observed after a claimed terminal drop fail closed. The analyzer consumes
+`av.frame_adopt` as a separate measured stage. Each repeated render submission
+must have matching GPU-completion AND present-submission IDs when those stages
+are required; duplicate/missing submission IDs and invalid event order fail.
+The GPU-completion observation and present API call are parallel descendants of
+submission, not a fictitious sequential `gpu_complete -> present` latency.
+
+Independent recheck of the 45-second Windows BGRA1080p30 capture (renderer
+c54cf7f, FrameLink b551b63) passes this stronger gate: 1,350 contiguous sink
+ordinals/submissions, 1,349 acquisitions, 1,348 adopted/rendered/presented unique
+frames, 5,393 matched GPU/present scene submissions. Two startup drops are
+explicit (PTS0 late and PTS166666666 pending replacement); 1,290 steady and 30
+end frames complete. This is **not zero loss overall**, not 120-fps video (scene
+submissions repeat 30-fps input), and not measured physical scanout. See
+`hardened-bgra30-summary.json`; full raw capture is owned by the Windows worker
+at `/tmp/m5-native-accounted/1920x1080-30-BGRA-av`.
+
+Scope remains observed sink input, not arbitrary decoder output before the sink:
+compare against the configured producer count/ordinal manifest to prove no
+entirely missing source frames or capture tail. Missing trace files are not
+magically discoverable. Multi-window present results are aggregate software API
+outcomes; exact per-display visibility requires additional presentation evidence.
+
+## Independent expected-source manifest
+
+Use `--expected-manifest expected-source.jsonl` to validate the complete source
+identity universe, not only observed trace identities. Each JSONL row contains
+`session`, `generation`, `pts_ns` (integer nanoseconds), and optionally `frame_id`.
+If `frame_id` is omitted it defaults to the PTS string, matching CSV correlation.
+Arbitrary/non-CFR timestamps and multiple explicit generations are supported in
+JSONL; no global frame-rate assumption is made by the analyzer.
+
+Generate this manifest independently from the source fixture or source ledger,
+**not by enumerating the observed sink trace**. Missing entire frames (including
+first/last), unexpected frames, conflicting PTS, and duplicate manifest identities
+fail. Expected endpoints anchor startup/end phases even when boundary frames are
+entirely absent. Without a manifest the report explicitly says
+`identity_universe=observed_only` and `expected_source_validated=false`.
+
+```sh
+python3 tools/frame_accounting.py --csv --generation 2 \
+  --expected-manifest expected-source.jsonl --require-complete \
+  --output accounting-with-manifest.json capture/*.csv
+```
+
+All four 45-second native Windows captures were independently reanalyzed using
+the fixture script's declared 30/60-fps counts (1,350/2,700) and original
+videotestsrc PTS `floor(i*1e9/fps)`. The trace channel hash was used only to map the
+negotiated session, never to choose expected timestamps/counts. All four pass
+source-universe validation and complete accounting; startup losses remain
+2/3/6/9 for BGRA30/NV12-30/BGRA60/NV12-60 respectively. Every steady and end frame
+is accounted as complete in these bounded captures. This does not establish
+zero loss overall, uninstrumented endurance, or physical display scanout.
+`manifest-matrix-summary.json` contains exact results. Full manifests/reports
+are beside the Windows worker's raw captures in `/tmp/m5-native-accounted`.
+
+Seventeen tests now pass, including entirely removed expected first/middle/last
+frames, unexpected extra source identity, duplicate manifest, arbitrary PTS,
+generation resets, and observed-only scope labeling.
+
+## Presentation attempts versus successful presentation submission
+
+`av.frame_present_submit` trace records already carry the actual `VkResult` for
+every attempted scene presentation. The CSV reader now retains **all** results
+as `present_attempt`, deriving `present_submit` only for `VK_SUCCESS` (0) or
+`VK_SUBOPTIMAL_KHR` (1000001003). The latter was accepted but requires swapchain
+maintenance; `VK_ERROR_OUT_OF_DATE_KHR` (-1000001004) was rejected. The alias
+`av.frame_present_attempt` is also supported. No renderer change or GPU rerun was
+needed. JSONL records explicitly provide `stage=present_attempt`, `result`, and
+`submission_id`, plus the matching success record only when accepted.
+
+Every render submission must match a GPU completion and exactly one present
+attempt. Missing or contradictory attempt/result evidence fails. A rejected
+repeat draw is **not a terminal loss of the video frame** when another draw of
+that identity was accepted. If all draws were rejected, its outcome is
+`classified_presentation_failure:<VkResult>`: accounted, but not completed.
+The report retains numeric result histograms and per-frame rejected counts.
+These are aggregate API results for a scene submission, not per-display scanout.
+
+The intentional native resize capture has 600 expected source identities,
+553 rendered/GPU-complete identities, 552 successfully present-submitted, and
+1,189 draw attempts (1,187 success, two OUT_OF_DATE). PTS1,550,000,000 had a
+rejected draw followed by success and is complete. PTS3,583,333,333 had only a
+rejected draw and is explicitly classified as presentation failure. There are
+also 47 earlier classified drops under this injected resize workload. All600
+identities now have known outcomes; this is not a smooth-playback or zero-loss
+pass. Evidence: `resize-present-summary.json`, full report next to raw capture
+under `/tmp/m5-present-fixed-resize/1920x1080-60-NV12-av`.
+
+Twenty tests pass, including rejected-only, retry-success, missing attempt,
+SUBOPTIMAL acceptance, and contradictory result negatives. All four prior normal
+45-second captures still pass manifest and complete-accounting validation.
