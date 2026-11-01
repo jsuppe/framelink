@@ -72,6 +72,10 @@ class Channel {
     uint32_t peerPid() const { return peerPid_; } // listen() side only
 
 #ifndef _WIN32
+    // Own fd on every path. Only connected AF_UNIX/SEQPACKET sockets with a
+    // finite 1..60000 ms I/O bound are accepted. Authorization belongs to the
+    // broker that delegated the descriptor, not to SO_PEERCRED of a socketpair.
+    static Channel adoptConnectedFd(int fd, uint32_t timeoutMs);
     // For poll()ing alongside other fds - the consumer's pump loop waits on
     // the producer AND the listener at once. POSIX only; Windows waits on the
     // pipe through its own machinery.

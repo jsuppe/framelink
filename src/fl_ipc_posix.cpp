@@ -11,6 +11,7 @@
 #ifndef _WIN32
 
 #include <errno.h>
+#include <fcntl.h>
 #include <string.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
@@ -75,6 +76,27 @@ Channel Channel::listen(const std::string& name) {
     Listener lst = Listener::create(name);
     if (!lst.valid()) return Channel();
     return lst.accept();
+}
+
+Channel Channel::adoptConnectedFd(int fd, uint32_t timeoutMs) {
+    Channel ch;
+    struct Owned { int fd; ~Owned(){if(fd>=0)::close(fd);} } owned{fd};
+    if(fd<0 || !timeoutMs || timeoutMs>60000) return ch;
+    int type=0; socklen_t size=sizeof(type);
+    sockaddr_storage peer{}; socklen_t peerSize=sizeof(peer);
+    if(getsockopt(fd,SOL_SOCKET,SO_TYPE,&type,&size) || type!=SOCK_SEQPACKET ||
+       getpeername(fd,reinterpret_cast<sockaddr*>(&peer),&peerSize) ||
+       peer.ss_family!=AF_UNIX) return ch;
+    int flags=fcntl(fd,F_GETFD), status=fcntl(fd,F_GETFL);
+    if(flags<0 || status<0 || fcntl(fd,F_SETFD,flags|FD_CLOEXEC)<0 ||
+       fcntl(fd,F_SETFL,status & ~O_NONBLOCK)<0) return ch;
+    timeval bound{time_t(timeoutMs/1000),suseconds_t((timeoutMs%1000)*1000)};
+    if(setsockopt(fd,SOL_SOCKET,SO_RCVTIMEO,&bound,sizeof(bound)) ||
+       setsockopt(fd,SOL_SOCKET,SO_SNDTIMEO,&bound,sizeof(bound))) return ch;
+    ucred cred{};size=sizeof(cred);
+    if(getsockopt(fd,SOL_SOCKET,SO_PEERCRED,&cred,&size)==0)ch.peerPid_=cred.pid;
+    ch.handle_=(void*)(intptr_t)(fd+1);ch.connected_=true;owned.fd=-1;
+    return ch;
 }
 
 Listener::~Listener() { close(); }

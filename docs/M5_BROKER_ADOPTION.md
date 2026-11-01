@@ -81,10 +81,33 @@ markers without clearing global logcat and touches only its test packages.
 
 A real Android adapter must provision a fresh secret/lease and bind the producer
 and receiver providers in signed APK JNI, then bridge FrameLink native video
-channel ownership across app UIDs. The current video path still uses private
-pathname lookup; adopting control/audio FDs alone cannot bypass that restriction.
+channel ownership across app UIDs. The native backend's original rendezvous uses an abstract Unix socket name
+(not a filesystem pathname); Android app isolation prevents treating that name
+as an authorized cross-UID rendezvous. The new native connected-FD seam avoids
+lookup entirely, while control/audio STREAM adoption remains separate.
 Combine those seams into one actual cross-UID A/V session with shared epoch/PTS,
 finite completion, generation isolation, wrong-signer rejection, revoke and
 producer/consumer/broker death/restart tests. No SELinux/filesystem permission
 relaxation, cross-app A/V parity, physical output timing, or M5 completion is
 claimed by this adapter increment. M5a remains outside scope.
+
+## Native video connected-FD increment
+
+Android `framelink_ahb.h` now exposes `flCreateChannelFromSocketFd` and
+`flOpenProducerFromSocketFd`. Both consume the descriptor on every path, require
+connected Unix SEQPACKET sockets, set CLOEXEC/blocking and finite per-I/O bounds,
+and retain the existing FrameLink ring/ready/release protocol. The consumer
+allocates and handshakes asynchronously; the producer imports native AHB handles.
+These are one-lease channels, not automatically reconnecting named channels.
+
+The consumer retains a stable duplicate exclusively to interrupt its handshake
+and pump during close, without a descriptor-reuse race. A trusted broker must
+retain separate duplicates and shutdown them on lease death/revoke. UID/signature
+policy is the broker's responsibility; socketpair SO_PEERCRED is not delegated
+caller authentication. Native ring metadata is checked against imported AHBs.
+Acquire/release/consumed-fence rules remain mandatory; no added playback queue or
+copy is introduced. CPU NV12 normalization/BGRA swizzle is unchanged.
+
+The signed APK SessionProvider/native-sink binding and real cross-UID A/V
+qualification are still the next task. The new native test verifies same-UID
+separate processes, not permission delegation or physical GPU/display timing.
