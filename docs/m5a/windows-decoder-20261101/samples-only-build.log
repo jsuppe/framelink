@@ -1,0 +1,42 @@
+-- Building for: Visual Studio 17 2022
+-- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.26300.
+-- The CXX compiler identification is MSVC 19.44.35216.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- framelink: building GStreamer elements (gstframelink)
+-- Configuring done (2.0s)
+-- Generating done (0.1s)
+-- Build files have been written to: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build-m5a-examples-only
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  1>Checking Build System
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m5a-contract-20261101/CMakeLists.txt
+  framelink_win.cpp
+  framelink_slots.cpp
+  fl_ipc_win32.cpp
+  fl_trace.cpp
+  framelink_session.cpp
+  framelink_memory.cpp
+  Generating Code...
+     Creating library C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build-m5a-examples-only/Release/framelink.lib and object C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build-m5a-examples-only/Release/framelink.exp
+  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build-m5a-examples-only\Release\framelink.dll
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m5a-contract-20261101/CMakeLists.txt
+  d3d_decoder_probe.cpp
+  fl_d3d_decoder_probe.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build-m5a-examples-only\Release\fl_d3d_decoder_probe.exe
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build-m5a-examples-only\Release\framelink.dll
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m5a-contract-20261101/CMakeLists.txt
+  d3d_decode_producer.cpp
+  fl_d3d_decode_producer.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build-m5a-examples-only\Release\fl_d3d_decode_producer.exe
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build-m5a-examples-only\Release\framelink.dll
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m5a-contract-20261101/CMakeLists.txt
+  d3d_decode_consumer.cpp
+  fl_d3d_decode_consumer.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build-m5a-examples-only\Release\fl_d3d_decode_consumer.exe
+#< CLIXML
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04"><Obj S="progress" RefId="0"><TN RefId="0"><T>System.Management.Automation.PSCustomObject</T><T>System.Object</T></TN><MS><I64 N="SourceId">1</I64><PR N="Record"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj></Objs>

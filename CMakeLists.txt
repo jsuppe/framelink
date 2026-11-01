@@ -848,3 +848,17 @@ if(FRAMELINK_BUILD_TESTS AND (TARGET framelink_av_playback OR TARGET framelink_a
     add_test(NAME gst_policy_generation COMMAND fl_gst_policy_generation $<TARGET_FILE:gstframelink>)
     set_tests_properties(gst_policy_generation PROPERTIES TIMEOUT 20)
 endif()
+if(FRAMELINK_BUILD_SAMPLES AND FL_GST_D3D11_FOUND)
+    foreach(example decoder_probe decode_producer decode_consumer)
+        add_executable(fl_d3d_${example} samples/d3d_${example}.cpp)
+        target_compile_definitions(fl_d3d_${example} PRIVATE GST_USE_UNSTABLE_API)
+        target_include_directories(fl_d3d_${example} PRIVATE
+            "${FL_GST_ROOT}/lib/gstreamer-1.0/include"
+            "${FL_GST_ROOT}/include/gstreamer-1.0" "${FL_GST_ROOT}/include/glib-2.0"
+            "${FL_GST_ROOT}/lib/glib-2.0/include")
+        target_link_directories(fl_d3d_${example} PRIVATE "${FL_GST_ROOT}/lib")
+        target_link_libraries(fl_d3d_${example} PRIVATE framelink gstreamer-1.0.lib
+            gstapp-1.0.lib gstvideo-1.0.lib gstd3d11-1.0.lib gobject-2.0.lib
+            glib-2.0.lib dxgi user32)
+    endforeach()
+endif()

@@ -62,7 +62,7 @@ Deliverables/evidence: [capability matrix](m5/CAPABILITY_MATRIX.md),
 
 ## M5a — Native-memory negotiation and zero-copy pipeline boundaries
 
-**State: in progress; M5a.1–7 locally validated; Windows GPU-decoder example is next.** Deliverables: versioned allocation/usage
+**State: in progress; M5a.1–8 locally validated; pass-through relay/transform is next.** Deliverables: versioned allocation/usage
 contract, native-memory GStreamer sink **and source**, platform adapters,
 Windows decoder-to-independent-renderer example, and measured multi-hop evidence.
 
@@ -116,9 +116,15 @@ Windows decoder-to-independent-renderer example, and measured multi-hop evidence
   This qualifies explicit adapters, not arbitrary stock decoders/readers. Windows
   decoder, signed full native Android pipeline, multi-hop and throughput remain
   downstream qualifications; no physical-output claim.
-- [ ] **M5a.8 Windows GPU-decoder example:** GPU GstBuffer → FrameLink sink →
-  separate consumer renderer, with tested decoder/adapter/formats and explicit
-  CPU-readable staging/readback alternative. Qualify NV12 conversion location.
+- [x] **M5a.8 Windows GPU-decoder example — locally validated, not merged:**
+  RTX5090/GStreamer1.28 H.264 NV12 → GPU BGRA conversion into FrameLink-owned
+  storage → native sink → separate swapchain consumer. Explicit CPU-readable
+  download/CPU-convert/upload alternative also passed60/60 frames, GPU completions,
+  accepted presents, color-bar checks and duration checks with pool2 and zero gaps.
+  [Runner/guide](../samples/D3D_DECODER.md), [evidence](m5a/windows-decoder-20261101/README.md).
+  Stock decoder arrays are non-shareable (NT export0/30): raw NV12 pass-through
+  remains unsupported on this decoder. Color conversion is explicit, not claimed
+  as raw decoder zero-copy. No sustained-rate or physical-scanout claim.
 - [ ] **M5a.9 Pass-through relay and transform output:** forwarding the same
   allocation across processes; distinguish required processing from boundary copies.
 - [ ] **M5a.10 Instrumentation:** selected usage/memory/device, fallback reason,

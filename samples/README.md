@@ -230,3 +230,8 @@ maps/hashes frames and must not be used for performance qualification.
 For opt-in finite A/V runs beyond the legacy process deadline, see
 [bounded finite media budgets](../docs/FINITE_MEDIA_BUDGET.md). Startup and idle
 timeouts are independent of media duration; this does not add infinite/live support.
+
+## Windows hardware decoder and separate native display
+
+See [D3D decoder example](D3D_DECODER.md) for the bounded GPU color-transform path,
+explicit CPU-readable alternative, two-image ring and checked interactive runner.
