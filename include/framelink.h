@@ -181,6 +181,10 @@ typedef struct flBuffer {
 // reason an Android producer does not choose a Surface's size.
 FL_API flResult flOpenProducer(const char* name, flChannel** out);
 FL_API flResult flAcquireBuffer(flChannel*, flBuffer* out, uint32_t timeoutMs);
+// Return an acquired buffer without publishing. Caller must finish ALL access
+// first; cancellation does not wait for external GPU work. Returns FL_BUSY after
+// flBeginSubmit, FL_INVALID for a non-reserved buffer. Invalidates that borrow.
+FL_API flResult flCancelBuffer(flChannel*, const flBuffer*);
 
 // Submit, having drawn with the channel's own D3D11 device. framelink signals
 // readiness for you.
@@ -194,7 +198,10 @@ FL_API flResult flSubmit(flChannel*, const flBuffer*, int64_t ptsNs); // -1 = no
 //
 //   1. flSharedReadyFence() once, and import the handle as a timeline
 //      semaphore (Vulkan: VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_D3D12_FENCE_BIT).
-//   2. flBeginSubmit() -> the value to signal for this frame.
+//   2. flBeginSubmit() -> the value to signal for this acquired frame.
+//      Only one begin/end transaction may be open per channel (FL_BUSY otherwise).
+//      flEndSubmit must use that exact buffer/value; invalid calls do not release
+//      the reservation. Finish submitted GPU work before closing the channel.
 //   3. queue your own work, signalling that value as part of it.
 //   4. flEndSubmit() to publish the frame.
 //
@@ -218,6 +225,9 @@ FL_API flResult flEndSubmit(flChannel*, const flBuffer*, uint64_t signalValue, i
 // ANativeWindow_setBuffersGeometry on a BufferQueue, where buffers belong to
 // the consumer and the producer may still say what it is about to draw -
 // consumer-owned means the producer does not ALLOCATE, not that it is mute.
+//
+// A geometry request returns FL_BUSY while the producer has an acquired but
+// unsubmitted buffer; replacing storage would invalidate that reservation.
 //
 // Needed because real producers differ and cannot be predicted: a mirroring
 // iPad sends 752x1080 while a laptop sends 1920x1080 into the same slot.

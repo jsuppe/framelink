@@ -63,6 +63,8 @@ struct flChannel {
 
     std::vector<flImage*> images;
     std::vector<uint64_t> slotReadyValue; // producer: last value signalled per slot
+    uint32_t submittingSlot = UINT32_MAX; // exactly one begin/end transaction
+    uint64_t submittingValue = 0;
     uint64_t readyValue = 0;              // producer: monotonic submit counter
     uint64_t consumedValue = 0;           // consumer: monotonic release counter
 
@@ -193,6 +195,9 @@ bool resetSync(flChannel* ch) {
         FAILED(ch->consumedFence->CreateSharedHandle(nullptr, GENERIC_ALL, nullptr,
                                                      &ch->consumedShared)))
         return false;
+    // Reconfiguration/reattach only: retire D3D's deferred destruction queue.
+    // This is not a GPU completion promise and adds no per-frame flush.
+    ch->ctx->Flush();
     for (auto& v : ch->slotReadyValue) v = 0;
     ch->consumedValue = 0;
     ch->readyValue = 0;
@@ -574,11 +579,14 @@ static flResult importRing(flChannel* ch, const fl::RingDescMsg* pd) {
         ch->images.push_back(img);
         ch->slotReadyValue.push_back(0);
     }
+    if(ch->readyShared)CloseHandle(ch->readyShared);
+    if(ch->consumedShared)CloseHandle(ch->consumedShared);
     ch->readyShared = (HANDLE)(uintptr_t)pd->readyFence;
     ch->consumedShared = (HANDLE)(uintptr_t)pd->consumedFence;
     if (FAILED(dev5->OpenSharedFence(ch->readyShared, IID_PPV_ARGS(&ch->readyFence))) ||
         FAILED(dev5->OpenSharedFence(ch->consumedShared, IID_PPV_ARGS(&ch->consumedFence))))
         return FL_INTERNAL;
+    ch->ctx->Flush(); // submit deferred destruction of replaced imports/fences
     ch->info.generation = pd->generation;
     ch->info.width = pd->width;
     ch->info.height = pd->height;
@@ -594,6 +602,8 @@ FL_API flResult flRequestGeometry(flChannel* ch, uint32_t width, uint32_t height
     if (!ch || ch->isConsumer || !fl::validGeometry(width,height,format)) return trace.result(FL_INVALID);
     if(format != ch->info.format) return trace.result(FL_FORMAT_UNSUPPORTED);
     if (!ch->link.connected()) return trace.result(FL_DISCONNECTED);
+    for(uint64_t value:ch->slotReadyValue)
+        if(value==UINT64_MAX)return trace.result(FL_BUSY);
     fl::GeometryMsg g{};
     g.width = width;
     g.height = height;
@@ -606,6 +616,15 @@ FL_API flResult flRequestGeometry(flChannel* ch, uint32_t width, uint32_t height
                          ? reply->as<fl::RingDescMsg>()
                          : nullptr;
     if (!pd || pd->poolSize == 0 || pd->poolSize > kMaxPool) return trace.result(FL_DISCONNECTED);
+    if(pd->generation==ch->info.generation) {
+        // Refusal/no-op: these are newly duplicated handles to the SAME storage.
+        // Keep slot reservations, borrowed image identity and fence counters.
+        for(uint32_t i=0;i<pd->poolSize;i++)
+            if(pd->texture[i])CloseHandle((HANDLE)(uintptr_t)pd->texture[i]);
+        if(pd->readyFence)CloseHandle((HANDLE)(uintptr_t)pd->readyFence);
+        if(pd->consumedFence)CloseHandle((HANDLE)(uintptr_t)pd->consumedFence);
+        return trace.result(FL_OK);
+    }
     ch->readyValue = 0; // fences are fresh with the new ring
     return trace.result(importRing(ch, pd));
 }
@@ -618,6 +637,7 @@ FL_API flResult flAcquireBuffer(flChannel* ch, flBuffer* out, uint32_t timeoutMs
     const DWORD deadline = GetTickCount() + timeoutMs;
     for (;;) {
         const uint64_t consumed = ch->consumedFence->GetCompletedValue();
+        if(consumed==UINT64_MAX)return trace.result(FL_DISCONNECTED); // device removed, not all slots free
         for (size_t i = 0; i < ch->images.size(); ++i) {
             // Free once the consumer has promised never to read this slot's
             // previous contents again.
@@ -698,13 +718,31 @@ FL_API flResult flSharedConsumedFence(flChannel* ch, void** handle) {
     return *handle ? FL_OK : FL_INTERNAL;
 }
 
+FL_API flResult flCancelBuffer(flChannel* ch, const flBuffer* buf) {
+    if(!ch || ch->isConsumer || !buf || buf->slot>=ch->images.size() ||
+       buf->image!=ch->images[buf->slot] || ch->slotReadyValue[buf->slot]!=UINT64_MAX)
+        return FL_INVALID;
+    // After begin, GPU work may already target the reserved signal value.
+    if(ch->submittingValue && ch->submittingSlot==buf->slot)return FL_BUSY;
+    // Caller promises no outstanding CPU/GPU access. No implicit GPU wait.
+    flImageUnmap(buf->image);
+    ch->slotReadyValue[buf->slot]=0;
+    return FL_OK;
+}
+
 FL_API flResult flBeginSubmit(flChannel* ch, const flBuffer* buf, uint64_t* signalValue) {
     fltrace::Scope trace("flBeginSubmit", fltrace::id(ch ? ch->name.c_str() : nullptr));
 
-    if (!ch || ch->isConsumer || !buf || !signalValue || buf->slot >= ch->images.size())
-        return trace.result(FL_INVALID);
+    if (!ch || ch->isConsumer || !buf || !signalValue ||
+        buf->slot >= ch->images.size() || buf->image != ch->images[buf->slot] ||
+        ch->slotReadyValue[buf->slot] != UINT64_MAX) return trace.result(FL_INVALID);
     if (!ch->link.connected()) return trace.result(FL_DISCONNECTED);
-    *signalValue = ++ch->readyValue;
+    if (ch->submittingValue) return trace.result(FL_BUSY);
+    // UINT64_MAX is the reserved-slot sentinel, never a publishable fence value.
+    if (ch->readyValue >= UINT64_MAX-1) return trace.result(FL_INVALID);
+    ch->submittingSlot = buf->slot;
+    ch->submittingValue = ++ch->readyValue;
+    *signalValue = ch->submittingValue;
     if(trace.active) trace.event.fence=*signalValue;
     return trace.result(FL_OK);
 }
@@ -715,9 +753,13 @@ FL_API flResult flEndSubmit(flChannel* ch, const flBuffer* buf, uint64_t signalV
     if(trace.active) { trace.event.pts=ptsNs; trace.event.slot=buf?buf->slot:0; }
     if(trace.active) trace.event.fence=signalValue;
 
-    if (!ch || ch->isConsumer || !buf || buf->slot >= ch->images.size()) return trace.result(FL_INVALID);
+    if (!ch || ch->isConsumer || !buf || buf->slot >= ch->images.size() ||
+        buf->image != ch->images[buf->slot] || ch->slotReadyValue[buf->slot] != UINT64_MAX ||
+        !signalValue || signalValue != ch->submittingValue ||
+        buf->slot != ch->submittingSlot) return trace.result(FL_INVALID);
     if (!ch->link.connected()) return trace.result(FL_DISCONNECTED);
     ch->slotReadyValue[buf->slot] = signalValue;
+    ch->submittingValue = 0; ch->submittingSlot = UINT32_MAX;
 
     fl::FrameReadyMsg fr{};
     fr.slot = buf->slot;
