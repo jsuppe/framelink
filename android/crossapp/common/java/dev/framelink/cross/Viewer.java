@@ -38,32 +38,36 @@ public final class Viewer extends Activity implements SurfaceHolder.Callback {
   IBroker remote=broker;Lease current=null;IBinder currentOwner=owner;
   try{
    String format=getIntent().getStringExtra("format");if(format==null)format="BGRA";
-   Bundle data=remote.acquire(owner,format,getIntent().getIntExtra("frames",90),getIntent().getIntExtra("fps",30));
+   String policy=getIntent().getStringExtra("clock-policy");if(policy==null)policy="producer";
+   if(!policy.equals("producer")&&!policy.equals("audio"))throw new IllegalArgumentException("invalid clock policy");
+   final boolean producerClock=policy.equals("producer");
+   Bundle data=remote.acquire(owner,format,getIntent().getIntExtra("frames",90),getIntent().getIntExtra("fps",30),producerClock);
    current=new Lease(data);synchronized(lock){if(destroyed){current.close();return;}lease=current;}
    final String label=format;runOnUiThread(()->status.setText("Cross-app "+label+" • native shared video + GDP audio"));
    if(getIntent().getBooleanExtra("diagnostics",false))Native.diagnostics(getIntent().getIntExtra("diagnostic-level",5));
+   if((getApplicationInfo().flags&android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE)!=0)Native.prerollDelay(getIntent().getIntExtra("preroll-delay-ms",0));
    Log.i("FLCross","receiver-start lease="+data.getString("lease")+" generation="+data.getLong("generation")+" uid="+android.os.Process.myUid()+" pid="+android.os.Process.myPid());
    if(getIntent().getBooleanExtra("wrong-key",false)){byte[] key=data.getByteArray("key");key[0]^=1;}
    final boolean replace="replace".equals(getIntent().getStringExtra("mode"));
    final IBinder nextOwner=new Binder();
    final java.util.concurrent.CompletableFuture<Bundle> next=new java.util.concurrent.CompletableFuture<>();
    if(replace){
-    boolean rejected=false;try{Bundle invalid=remote.acquire(owner,format,data.getInt("frames"),data.getInt("fps"));new Lease(invalid).close();}catch(IllegalArgumentException expected){rejected=true;}
+    boolean rejected=false;try{Bundle invalid=remote.acquire(owner,format,data.getInt("frames"),data.getInt("fps"),producerClock);new Lease(invalid).close();}catch(IllegalArgumentException expected){rejected=true;}
     if(!rejected)throw new IllegalStateException("owner reuse accepted");
     Log.i("FLCross","active_owner_reuse_rejected=true");
    }
    if(replace || "revoke".equals(getIntent().getStringExtra("mode"))){
     final String selected=format;final int count=data.getInt("frames"),rate=data.getInt("fps");
-    new Thread(()->{try{Thread.sleep(700);if(replace)next.complete(remote.acquire(nextOwner,selected,count,rate));else remote.revoke(owner);}catch(Exception e){next.completeExceptionally(e);}},"lease-transition").start();
+    new Thread(()->{try{Thread.sleep(700);if(replace)next.complete(remote.acquire(nextOwner,selected,count,rate,producerClock));else remote.revoke(owner);}catch(Exception e){next.completeExceptionally(e);}},"lease-transition").start();
    }
-   String result=Native.run(false,current.detach(),data.getByteArray("key"),format,data.getInt("frames"),data.getInt("fps"),!getIntent().getBooleanExtra("silent",false),surface);
+   String result=Native.run(false,current.detach(),data.getByteArray("key"),format,data.getInt("frames"),data.getInt("fps"),!getIntent().getBooleanExtra("silent",false),producerClock,surface);
    if(replace){
     Log.i("FLCross","replaced-old-result lease="+data.getString("lease")+" "+result);
     current.close();data=next.get(10,java.util.concurrent.TimeUnit.SECONDS);currentOwner=nextOwner;
     remote.revoke(owner); // stale owner must not revoke the replacement
     current=new Lease(data);synchronized(lock){if(destroyed){current.close();return;}lease=current;}
     Log.i("FLCross","receiver-replacement lease="+data.getString("lease")+" generation="+data.getLong("generation"));
-    result=Native.run(false,current.detach(),data.getByteArray("key"),format,data.getInt("frames"),data.getInt("fps"),!getIntent().getBooleanExtra("silent",false),surface);
+    result=Native.run(false,current.detach(),data.getByteArray("key"),format,data.getInt("frames"),data.getInt("fps"),!getIntent().getBooleanExtra("silent",false),producerClock,surface);
    }
    Log.i("FLCross","receiver-result lease="+data.getString("lease")+" "+result);
    final String display=result;runOnUiThread(()->status.setText("FrameLink result: "+display));

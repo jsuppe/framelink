@@ -30,10 +30,10 @@ public final class Broker extends Service {
    Log.i("FLCross","retired lease="+id+" generation="+version+" reason="+reason);
   }}
   public void binderDied(){close("consumer-death");}
-  Bundle bundle(boolean producer,String format,int frames,int fps){
+  Bundle bundle(boolean producer,String format,int frames,int fps,boolean producerClock){
    Bundle b=new Bundle();b.putString("lease",id);b.putLong("generation",version);
    b.putByteArray("key",key.clone());b.putParcelableArray("fds",producer?server:client);
-   b.putString("format",format);b.putInt("frames",frames);b.putInt("fps",fps);return b;
+   b.putBoolean("producer-clock",producerClock);b.putString("format",format);b.putInt("frames",frames);b.putInt("fps",fps);return b;
   }
  }
  private final ServiceConnection producerConnection=new ServiceConnection(){
@@ -42,9 +42,10 @@ public final class Broker extends Service {
   public void onBindingDied(ComponentName name){onServiceDisconnected(name);}
  };
  private final IBroker.Stub service=new IBroker.Stub(){
-  public Bundle acquire(IBinder owner,String format,int frames,int fps)throws RemoteException {
+  public Bundle acquire(IBinder owner,String format,int frames,int fps,boolean producerClock)throws RemoteException {
    enforceCallingPermission("dev.framelink.cross.BIND","signature required");
    if(owner==null || !("BGRA".equals(format)||"NV12".equals(format)) || frames<1 || frames>18000 || fps<13 || fps>120 || (long)frames*1000>300000L*fps)throw new IllegalArgumentException("invalid bounded media request");
+   if(!producerClock && (long)frames*1000>10000L*fps)throw new IllegalArgumentException("audio-clock sample mode is bounded to ten seconds");
    synchronized(lock){
     long deadline=SystemClock.elapsedRealtime()+10000;
     while(runner==null && !closing){long left=deadline-SystemClock.elapsedRealtime();if(left<=0)throw new RemoteException("producer service deadline");try{lock.wait(left);}catch(InterruptedException e){Thread.currentThread().interrupt();throw new RemoteException("interrupted");}}
@@ -62,9 +63,9 @@ public final class Broker extends Service {
      grant.server[2]=ParcelFileDescriptor.adoptFd(nativePair[0]);grant.client[2]=ParcelFileDescriptor.adoptFd(nativePair[1]);
      for(ParcelFileDescriptor[] ends:new ParcelFileDescriptor[][]{grant.server,grant.client})for(ParcelFileDescriptor fd:ends)grant.revokers.add(ParcelFileDescriptor.dup(fd.getFileDescriptor()));
      owner.linkToDeath(grant,0);grant.linked=true;active=grant;
-     runner.start(grant.bundle(true,format,frames,fps),lifetime);
+     runner.start(grant.bundle(true,format,frames,fps,producerClock),lifetime);
      Log.i("FLCross","grant lease="+grant.id+" generation="+grant.version+" consumer_uid="+uid+" broker_uid="+android.os.Process.myUid());
-     return grant.bundle(false,format,frames,fps);
+     return grant.bundle(false,format,frames,fps,producerClock);
     }catch(Exception e){grant.close("setup-failed");throw new RemoteException("lease setup failed: "+e.getClass().getSimpleName());}
    }
   }

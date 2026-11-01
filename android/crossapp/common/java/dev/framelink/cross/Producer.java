@@ -19,7 +19,7 @@ public final class Producer extends Service {
    queue.execute(()->{
     try{
      Log.i("FLCross","producer-start lease="+data.getString("lease")+" uid="+android.os.Process.myUid()+" pid="+android.os.Process.myPid());
-     String result=Native.run(true,lease.detach(),data.getByteArray("key"),data.getString("format"),data.getInt("frames"),data.getInt("fps"),false,null);
+     String result=Native.run(true,lease.detach(),data.getByteArray("key"),data.getString("format"),data.getInt("frames"),data.getInt("fps"),false,data.getBoolean("producer-clock"),null);
      Log.i("FLCross","producer-result lease="+data.getString("lease")+" "+result);
     }catch(Exception e){Log.i("FLCross","producer-stopped lease="+data.getString("lease")+" reason="+e.getClass().getSimpleName());}
     finally{lease.close();brokerOwner.unlinkToDeath(died,0);synchronized(lock){if(active==lease)active=null;}}

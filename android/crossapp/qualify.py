@@ -19,6 +19,8 @@ p.add_argument('--case', action='append', default=[])
 p.add_argument('--diagnostics', action='store_true')
 p.add_argument('--diagnostic-level', type=int, default=5)
 p.add_argument('--frames', type=int, default=60)
+p.add_argument('--clock-policy', choices=['producer','audio'], default='producer')
+p.add_argument('--preroll-delay-ms', type=int, default=0)
 a = p.parse_args()
 a.out.mkdir(parents=True, exist_ok=True)
 B = 'dev.framelink.cross.broker'
@@ -92,6 +94,8 @@ try:
         cmd = ['shell', 'am', 'start', '-W', '-n', package + '/dev.framelink.cross.Viewer',
                '--es', 'format', 'YUY2' if name == 'unsupported-format' else 'NV12' if name == 'nv12' else 'BGRA',
                '--ei', 'frames', '0' if name == 'invalid-bounds' else str(frames), '--ei', 'fps', '30',
+               '--ei', 'preroll-delay-ms', str(a.preroll_delay_ms),
+               '--es', 'clock-policy', a.clock_policy,
                '--ez', 'silent', 'false' if name in ('audible', 'audio-focus', 'focus-reopen') else 'true']
         if name == 'wrong-key':
             cmd += ['--ez', 'wrong-key', 'true']
@@ -102,7 +106,7 @@ try:
         try:
             adb(*cmd)
             if name in ('producer-death', 'broker-death', 'consumer-death', 'background', 'audio-focus'):
-                wait(marker, lambda t: 'playback producer-system-clock' in t)
+                wait(marker, lambda t: any('playback '+x in t for x in ['producer-system-clock','audio-clock','system-clock-fallback']))
                 time.sleep(.35)
                 if name in ('producer-death', 'broker-death'):
                     receiver = 'KillProducer' if name == 'producer-death' else 'KillBroker'

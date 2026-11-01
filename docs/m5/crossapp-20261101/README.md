@@ -66,6 +66,16 @@ a random failure-rate estimate, an endurance gate, or evidence of a fix**.
 No root cause has been established. Failure-only clock calibration and opt-in
 bounded/buffered diagnostics are now available for the next failing observation.
 
+Follow-up controls: six untraced150-frame sessions with15/37/63/91/125/173ms
+injected pre-PRIMED delay all passed; the phase control did not reproduce the
+stall. An explicit legacy AudioPreferred control failed strict video identity
+verification after5 frames (17,600 PCM samples). It reported the audio device
+clock, but this protocol lacks the ProducerMapped PRIMED/GO startup barrier.
+That result is not a fix or a qualified lossless fallback. The example default
+remains ProducerMapped; both policies are explicit, with unchanged core timing
+and deadline semantics. These follow-up records live in `controls/` and are
+additional to the earlier39/3 audible observation count above.
+
 **Real ProducerMapped OpenSLES playback remains conditionally demonstrated, not
 reliably qualified.** The earlier AudioPreferred same-APK evidence remains a
 separate mode. M5 closure still needs this issue resolved or a concrete, explicit

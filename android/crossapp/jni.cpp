@@ -44,7 +44,12 @@ extern "C" JNIEXPORT jintArray JNICALL Java_dev_framelink_cross_Native_pair(JNIE
  env->SetIntArrayRegion(result,0,2,fd);return result;
 }
 extern "C" JNIEXPORT void JNICALL Java_dev_framelink_cross_Native_shutdown(JNIEnv*,jclass,jint fd){if(fd>=0)shutdown(fd,SHUT_RDWR);}
-extern "C" JNIEXPORT jstring JNICALL Java_dev_framelink_cross_Native_run(JNIEnv* env,jclass,jboolean producer,jintArray descriptors,jbyteArray key,jstring format,jint frames,jint fps,jboolean audible,jobject surface){
+extern "C" JNIEXPORT void JNICALL Java_dev_framelink_cross_Native_prerollDelay(JNIEnv*,jclass,jint ms){
+ if(ms<=0){g_unsetenv("FRAMELINK_TEST_PREROLL_DELAY_MS");return;}
+ const auto value=std::to_string(std::min(1000,int(ms)));
+ g_setenv("FRAMELINK_TEST_PREROLL_DELAY_MS",value.c_str(),TRUE);
+}
+extern "C" JNIEXPORT jstring JNICALL Java_dev_framelink_cross_Native_run(JNIEnv* env,jclass,jboolean producer,jintArray descriptors,jbyteArray key,jstring format,jint frames,jint fps,jboolean audible,jboolean producerClock,jobject surface){
  Fds fds;Window window;bool ok=false;uint64_t video=0,posts=0;std::atomic<uint64_t> pcm{0};std::string error;
  try{
   check(descriptors,"missing endpoints");fds.values.resize(env->GetArrayLength(descriptors));
@@ -67,11 +72,11 @@ extern "C" JNIEXPORT jstring JNICALL Java_dev_framelink_cross_Native_run(JNIEnv*
   };
   std::atomic<bool> stop{false};
   if(producer){
-   av::ProducerOptions p;p.plugin="static";p.format=fmt;p.frames=frames;p.fps=fps;p.mediaRunMs=budget;p.sessionProvider=&provider;p.stop=&stop;
+   av::ProducerOptions p;p.plugin="static";p.format=fmt;p.frames=frames;p.fps=fps;p.mediaRunMs=producerClock?budget:0;p.sessionProvider=&provider;p.stop=&stop;
    ok=av::runBrokerProducer(p,error);
   }else{
-   av::PlaybackOptions p;p.plugin="static";p.format=fmt;p.fps=fps;p.mediaRunMs=budget;p.sessionProvider=&provider;
-   p.clockPolicy=av::PlaybackClockPolicy::ProducerMapped;p.audioSink=audible?"openslessink":"fakesink";p.recoveryAttempts=0;
+   av::PlaybackOptions p;p.plugin="static";p.format=fmt;p.fps=fps;p.mediaRunMs=producerClock?budget:0;p.sessionProvider=&provider;
+   p.clockPolicy=producerClock?av::PlaybackClockPolicy::ProducerMapped:av::PlaybackClockPolicy::AudioPreferred;p.audioSink=audible?"openslessink":"fakesink";p.recoveryAttempts=0;
    if(surface)window.p=ANativeWindow_fromSurface(env,surface);
    if(window.p)check(ANativeWindow_setBuffersGeometry(window.p,160,90,WINDOW_FORMAT_RGBA_8888)==0,"surface geometry");
    av::PlaybackCallbacks cb;
