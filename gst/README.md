@@ -111,3 +111,9 @@ See [pool policy](../docs/POOL_POLICY.md) for pool-size, buffer-wait-ms,
 error-on-ring-full and max-queue-age-ms. Defaults preserve existing behavior.
 [Transport timing](../docs/TRANSPORT_TIMING.md) separates these bounds from final
 A/V presentation scheduling. Native zero-copy Gst integration remains pending.
+
+## Opt-in native source memory
+
+See [native source adapters and limits](../docs/GST_NATIVE_MEMORY.md). Linux
+DMA-BUF, Windows D3D11 and exact Android RGB AHB wrappers are implemented; this
+is not yet a complete native decoder/sink/remote-negotiation pipeline.

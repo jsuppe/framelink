@@ -21,13 +21,14 @@
 // of roles, stated here once so nobody re-derives it in a debugger.
 //
 // Stage 1 is the CPU path (sysmem caps): portable everywhere framelink runs.
-// Windows has no flImageMap, so the sink uploads with UpdateSubresource on
+// The legacy Windows sink uploads with UpdateSubresource on
 // the channel's own D3D11 device and the src reads back through a cached
 // staging texture - the exact patterns vkrender's receivers and framecam use.
-// Zero-copy caps (memory:DmaBuf, memory:D3D11Memory) are a later stage.
+// Native source memory is opt-in; native sink/allocation negotiation is still
+// under integration. See docs/GST_NATIVE_MEMORY.md for exact platform limits.
 
 #include <algorithm>
-#if defined(FL_GST_DMABUF) || defined(FL_GST_D3D11)
+#if defined(FL_GST_DMABUF) || defined(FL_GST_D3D11) || defined(__ANDROID__)
 #define FL_GST_NATIVE 1
 #include <memory>
 #endif
@@ -49,6 +50,10 @@
 
 #include "framelink.h"
 #include "framelink_slots.h"
+#ifdef __ANDROID__
+#include "framelink_ahb.h"
+#include "framelink_native.h"
+#endif
 #if !defined(_WIN32)
 #include "framelink_dmabuf.h"
 #endif
@@ -697,6 +702,8 @@ enum { SRC_PROP_0, SRC_PROP_CHANNEL, SRC_PROP_WIDTH, SRC_PROP_HEIGHT, SRC_PROP_F
 #define FL_SOURCE_CAPS FRAMELINK_CAPS ";" GST_VIDEO_CAPS_MAKE_WITH_FEATURES("memory:DMABuf", "{ BGRA, RGBA, NV12, RGB10A2_LE }")
 #elif defined(FL_GST_D3D11)
 #define FL_SOURCE_CAPS FRAMELINK_CAPS ";" GST_VIDEO_CAPS_MAKE_WITH_FEATURES("memory:D3D11Memory", "{ BGRA, RGBA, NV12, RGB10A2_LE }")
+#elif defined(__ANDROID__)
+#define FL_SOURCE_CAPS FRAMELINK_CAPS ";" GST_VIDEO_CAPS_MAKE_WITH_FEATURES("memory:FrameLinkAHardwareBuffer", "{ RGBA, RGB10A2_LE }")
 #else
 #define FL_SOURCE_CAPS FRAMELINK_CAPS
 #endif
@@ -728,6 +735,8 @@ static GstCaps* srcMakeCaps(GstFrameLinkSrc* self) {
     if(self->nativeMemory)gst_caps_set_features(caps,0,gst_caps_features_new(
 #ifdef _WIN32
         "memory:D3D11Memory",
+#elif defined(__ANDROID__)
+        "memory:FrameLinkAHardwareBuffer",
 #else
         "memory:DMABuf",
 #endif
@@ -752,6 +761,11 @@ static gboolean srcStart(GstBaseSrc* base) {
     if(self->nativeMemory){GST_ELEMENT_ERROR(self,RESOURCE,SETTINGS,("native-memory output is not supported by this build"),(NULL));return FALSE;}
 #else
     if(self->nativeMemory && self->delegated){GST_ELEMENT_ERROR(self,RESOURCE,SETTINGS,("native adoption requires a negotiated lease contract; not yet supported"),(NULL));return FALSE;}
+#endif
+#ifdef __ANDROID__
+    if(self->nativeMemory && strcmp(self->format,"RGBA") && strcmp(self->format,"RGB10A2_LE")){
+        GST_ELEMENT_ERROR(self,RESOURCE,SETTINGS,("native AHB output currently requires exact RGBA/RGB10 layout; opaque YUV is not NV12 bytes"),(NULL));return FALSE;
+    }
 #endif
     // FL_MAP_CPU: this ring exists to be read byte-wise. Windows ignores the
     // flag (no CPU path) and the readback goes through a staging texture.
@@ -864,6 +878,49 @@ static GstBuffer* srcNativeBuffer(GstFrameLinkSrc* self,const flFrame& frame) {
 }
 #endif
 
+#ifdef __ANDROID__
+typedef struct {GstAllocator parent;} GstFrameLinkAhbAllocator;
+typedef struct {GstAllocatorClass parent;} GstFrameLinkAhbAllocatorClass;
+struct FrameLinkAhbMemory {GstMemory memory;AHardwareBuffer* buffer;};
+G_DEFINE_TYPE(GstFrameLinkAhbAllocator,gst_framelink_ahb_allocator,GST_TYPE_ALLOCATOR)
+static gpointer ahbMap(GstMemory*,gsize,GstMapFlags){return nullptr;}
+static void ahbUnmap(GstMemory*){}
+static GstMemory* ahbCopy(GstMemory*,gssize,gssize){return nullptr;}
+static GstMemory* ahbShare(GstMemory*,gssize,gssize){return nullptr;}
+static void gst_framelink_ahb_allocator_class_init(GstFrameLinkAhbAllocatorClass* klass){
+    GST_ALLOCATOR_CLASS(klass)->free=[](GstAllocator*,GstMemory*m){
+        auto*memory=reinterpret_cast<FrameLinkAhbMemory*>(m);AHardwareBuffer_release(memory->buffer);g_free(memory);
+    };
+}
+static void gst_framelink_ahb_allocator_init(GstFrameLinkAhbAllocator* self){
+    auto*a=GST_ALLOCATOR(self);a->mem_type="FrameLinkAHardwareBuffer";
+    a->mem_map=ahbMap;a->mem_unmap=ahbUnmap;a->mem_copy=ahbCopy;a->mem_share=ahbShare;
+    GST_OBJECT_FLAG_SET(a,GST_ALLOCATOR_FLAG_CUSTOM_ALLOC);
+}
+static GstBuffer* srcNativeBuffer(GstFrameLinkSrc* self,const flFrame& frame){
+    if(!self->nativeOwner)return nullptr;
+    auto*ahb=flImageAHardwareBuffer(frame.image);if(!ahb)return nullptr;
+    AHardwareBuffer_Desc d{};AHardwareBuffer_describe(ahb,&d);
+    bool rgba=self->cinfo.format==FL_FORMAT_RGBA8&&d.format==AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM;
+    bool rgb10=self->cinfo.format==FL_FORMAT_RGB10A2&&d.format==AHARDWAREBUFFER_FORMAT_R10G10B10A2_UNORM;
+    if((!rgba&&!rgb10)||d.layers!=1||d.stride<d.width||d.stride>G_MAXINT/4||
+       d.width!=self->cinfo.width||d.height!=self->cinfo.height)return nullptr;
+    gsize bytes=gsize(d.stride)*d.height*4;
+    auto*a=GST_ALLOCATOR(g_object_new(gst_framelink_ahb_allocator_get_type(),nullptr));
+    auto*m=g_new0(FrameLinkAhbMemory,1);m->buffer=ahb;AHardwareBuffer_acquire(ahb);
+    gst_memory_init(&m->memory,GST_MEMORY_FLAG_NO_SHARE,a,nullptr,bytes,0,0,bytes);gst_object_unref(a);
+    uint64_t token=0;if(flLeaseFrame(self->ch,&frame,&token)!=FL_OK){gst_memory_unref(&m->memory);return nullptr;}
+    gst_mini_object_set_qdata(GST_MINI_OBJECT(&m->memory),g_quark_from_static_string("framelink-ahb"),ahb,nullptr);
+    auto*reader=new NativeSourceReader{*self->nativeOwner,token};
+    gst_mini_object_set_qdata(GST_MINI_OBJECT(&m->memory),g_quark_from_static_string("framelink-reader"),reader,
+        [](gpointer p){delete static_cast<NativeSourceReader*>(p);});
+    auto*buf=gst_buffer_new();gst_buffer_append_memory(buf,&m->memory);
+    gsize offsets[GST_VIDEO_MAX_PLANES]{};gint strides[GST_VIDEO_MAX_PLANES]{};strides[0]=d.stride*4;
+    gst_buffer_add_video_meta_full(buf,GST_VIDEO_FRAME_FLAG_NONE,toGstFormat(self->cinfo.format),d.width,d.height,1,offsets,strides);
+    return buf;
+}
+#endif
+
 static GstFlowReturn srcCreate(GstPushSrc* push, GstBuffer** outbuf) {
     GstFrameLinkSrc* self = GST_FRAMELINK_SRC(push);
     gsttrace::Scope trace("gst.srcCreate",gsttrace::id(self->channel));
@@ -871,6 +928,13 @@ static GstFlowReturn srcCreate(GstPushSrc* push, GstBuffer** outbuf) {
     flFrame frame = {};
     for (;;) {
         if (g_atomic_int_get(&self->flushing)) return trace.result(GST_FLOW_FLUSHING);
+        if(self->nativeMemory){
+            auto collected=flCollectReadLeases(self->ch);
+            if(collected!=FL_OK&&collected!=FL_BUSY){
+                GST_ELEMENT_ERROR(self,RESOURCE,READ,("native reader retirement failed"),("%s",flResultString(collected)));
+                return trace.result(GST_FLOW_ERROR);
+            }
+        }
         flResult r = flAcquireFrame(self->ch, &frame, 100);
         if (r == FL_OK) {
             if(self->maxQueueAgeMs) {
@@ -1138,7 +1202,7 @@ static void gst_framelink_src_class_init(GstFrameLinkSrcClass* klass) {
 
     g_object_class_install_property(gobject,SRC_PROP_NATIVE_MEMORY,
         g_param_spec_boolean("native-memory","Native memory output",
-            "Opt-in Linux linear DMA-BUF or Windows D3D11 output; unsupported paths fail without CPU fallback",
+            "Opt-in native DMA-BUF, D3D11 or exact RGB AHardwareBuffer output; unsupported paths fail without CPU fallback",
             FALSE,(GParamFlags)(G_PARAM_READWRITE|G_PARAM_STATIC_STRINGS|GST_PARAM_MUTABLE_READY)));
     g_object_class_install_property(gobject,SRC_PROP_MAX_QUEUE_AGE,
         g_param_spec_uint("max-queue-age-ms","Receiver queue age limit",

@@ -12,8 +12,7 @@ not an asynchronous all-GPU scheduling claim.
 Supported initial scope: Linux, linear modifier, one backing DMA-BUF object per
 image (including two-plane NV12 in that object). Other layouts fail explicitly;
 there is no fallback to CPU pixels. Native mode rejects sysmem-only downstream
-caps. Android native-source adapter and externally adopted native channels are not
-yet wired; those cases reject this option. Legacy defaults
+caps. Externally adopted native channels are not yet wired; those reject this option. Legacy defaults
 remain the CPU-copy path on all platforms.
 
 The source transfers each acquired frame to a bounded FrameLink reader lease.
@@ -57,9 +56,32 @@ never bypass reservations this way. A deliberate GPU-copy control is successfull
 created/read first, then rejected by that alias oracle. Setup failures fail the
 control rather than count as success.
 
+## Android source: explicit opaque AHardwareBuffer memory
+
+`native-memory=true` supports exact RGBA/RGB10 native layouts through
+`video/x-raw(memory:FrameLinkAHardwareBuffer)`. This is a FrameLink adapter, **not**
+a claim that stock GStreamer GPU elements understand AHB memory. A custom consumer
+uses `gst_framelink_memory_get_hardware_buffer` from installed
+`framelink/framelink_native.h` and retains the GstMemory until GPU completion.
+An independent AHB reference keeps storage alive but does not retain the reader
+lease; it is not a substitute for retaining the memory.
+
+The custom allocator refuses implicit CPU mapping, copy and subview operations.
+It retains the original AHB and reader lease without copying pixels. Explicit
+application-side CPU mapping is outside that zero-copy source boundary. Opaque
+Android YUV420 cannot be advertised as NV12 byte layout, and BGRA logical channels
+use RGBA native storage; those native-source requests currently fail instead of
+silently normalizing/converting them. Their legacy CPU paths remain available.
+External-YUV format negotiation/import remains an open task7 integration item.
+
+Device tests verify RGBA/RGB10 AHB allocation IDs, PTS, pixels, two-slot ownership,
+reuse and retained memory after source shutdown; implicit CPU maps and opaque
+YUV-as-NV12 requests reject. API29 builds pass for arm64/x86_64; runtime evidence
+is the API35 tablet (allocation ID oracle requires API31+), not all Android GPUs.
+
 ## Remaining task 7 work
 
-- Android native-memory source and platform native sink adapters.
+- Android external-YUV/native-layout negotiation and platform native sinks.
 - Native sink allocation/pool negotiation and upstream decoder compatibility.
 - Authenticated remote requirements, exact device/layout/generation agreement;
   enforce all endpoint permissions and reject unsupported legacy peers.

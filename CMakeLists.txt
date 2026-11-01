@@ -284,6 +284,7 @@ if(FRAMELINK_BUILD_GST AND NOT ANDROID)
 endif()
 
 include(GNUInstallDirs)
+install(FILES gst/framelink_native.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/framelink)
 install(TARGETS framelink
         EXPORT framelinkTargets
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -759,4 +760,10 @@ if(FRAMELINK_BUILD_TESTS AND TARGET framelink_av_playback AND UNIX AND NOT ANDRO
     add_dependencies(fl_broker_producer gstframelink)
     add_test(NAME broker_producer_stream COMMAND fl_broker_producer $<TARGET_FILE:gstframelink>)
     set_tests_properties(broker_producer_stream PROPERTIES TIMEOUT 40)
+endif()
+
+if(ANDROID AND FRAMELINK_BUILD_TESTS AND TARGET framelink_av_session)
+    add_executable(fl_gst_native_source_android test/fl_gst_native_source_android.cpp)
+    target_include_directories(fl_gst_native_source_android PRIVATE $<TARGET_PROPERTY:framelink_av_session,INCLUDE_DIRECTORIES>)
+    target_link_libraries(fl_gst_native_source_android PRIVATE $<TARGET_PROPERTY:framelink_av_session,LINK_LIBRARIES>)
 endif()
