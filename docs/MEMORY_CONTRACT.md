@@ -145,8 +145,8 @@ current mapping access, not authorization to modify a consumer-owned frame.
 FrameLink API support, not successful hardware semaphore probes.
 
 `interopCapabilities` currently exposes existing-ring import and borrowed native
-handle access only. External producer-pool adoption and safe relay are explicitly
-not advertised until their lifetime protocols exist. Handle duplication alone
+handle access only. Locally adopted pools also report EXTERNAL_POOL; see [external pools](EXTERNAL_POOLS.md).
+Remote allocation negotiation and safe relay remain incomplete and unadvertised. Handle duplication alone
 cannot establish safe reuse. No claim of physical GPU residency is made.
 
 [Device and mapping validation](m5a/adapters-20261101/README.md).

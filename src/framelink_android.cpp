@@ -37,6 +37,7 @@
 #define FL_EXPORTS
 #include "framelink.h"
 #include "framelink_memory.h"
+#include <dlfcn.h>
 #include "framelink_sync_fd.h"
 #include "fl_sync_fd.hpp"
 #include "framelink_ahb.h"
@@ -75,6 +76,7 @@ struct flImage {
 
 struct flChannel {
     bool isConsumer = false;
+    bool externalPool = false;
     bool delegated = false;
     int interruptFd = -1; // stable owning dup; shutdown wakes delegated handshake/pump
     std::string name;
@@ -121,6 +123,30 @@ void freeImage(flImage* img) {
     flImageUnmap(img);
     if (img->ahb) AHardwareBuffer_release(img->ahb);
     delete img;
+}
+
+flResult adoptRing(flChannel* ch, AHardwareBuffer* const* images, uint32_t count) {
+    using GetId=int(*)(const AHardwareBuffer*,uint64_t*);
+    auto getId=reinterpret_cast<GetId>(dlsym(RTLD_DEFAULT,"AHardwareBuffer_getId"));
+    if(!getId)return FL_FORMAT_UNSUPPORTED;
+    std::vector<uint64_t> ids;
+    for(uint32_t i=0;i<count;i++) {
+        if(!images[i])return FL_INVALID;
+        uint64_t id=0;if(getId(images[i],&id))return FL_INVALID;
+        for(auto previous:ids)if(previous==id)return FL_INVALID;
+        AHardwareBuffer_Desc d{};AHardwareBuffer_describe(images[i],&d);
+        if(d.width!=ch->info.width || d.height!=ch->info.height || d.layers!=1 ||
+           d.format!=ahbFormatFor(ch->info.format))return FL_FORMAT_UNSUPPORTED;
+        if((ch->flags & FL_GPU_RENDER) && !(d.usage & AHARDWAREBUFFER_USAGE_GPU_COLOR_OUTPUT))return FL_FORMAT_UNSUPPORTED;
+        if((ch->flags & FL_MAP_CPU) && (!(d.usage & AHARDWAREBUFFER_USAGE_CPU_READ_MASK) ||
+           !(d.usage & AHARDWAREBUFFER_USAGE_CPU_WRITE_MASK)))return FL_FORMAT_UNSUPPORTED;
+        auto* image=new flImage();AHardwareBuffer_acquire(images[i]);image->ahb=images[i];
+        image->format=ch->info.format;image->width=d.width;image->height=d.height;
+        image->strideBytes=ch->info.format==FL_FORMAT_NV12?d.width:uint64_t(d.stride)*4;
+        ch->images.push_back(image);ids.push_back(id);
+    }
+    ++ch->info.generation;
+    return FL_OK;
 }
 
 // Allocate (or re-allocate) the ring.
@@ -324,7 +350,7 @@ void acceptLoop(flChannel* ch, fl::Channel delegated) {
                 std::lock_guard<std::mutex> geometryLock(ch->pendingMutex);
                 ch->sync.advance(ch->retiredValue);
                 if (ch->frameHeld || ch->retiredValue < ch->heldReady) { if (!handOverRing(ch, ch->peer)) break; continue; }
-                if (g && g->width && g->height && g->width <= 8192 && g->height <= 8192 &&
+                if (!ch->externalPool && g && g->width && g->height && g->width <= 8192 && g->height <= 8192 &&
                     (g->format == (uint32_t)ch->info.format) &&
                     (ch->info.format != FL_FORMAT_NV12 || !((g->width | g->height) & 1)) &&
                     (g->width != ch->info.width || g->height != ch->info.height)) {
@@ -398,7 +424,7 @@ FL_API flResult flCreateChannelOnAdapter(const char* name, uint32_t width, uint3
 
 static flResult createChannel(const char* name, uint32_t width, uint32_t height,
                                   flFormat format, uint32_t poolSize, uint32_t flags,
-                                  flChannel** out, fl::Channel delegated, bool fromFd) {
+                                  flChannel** out, fl::Channel delegated, bool fromFd, AHardwareBuffer* const* externalImages=nullptr) {
     fltrace::Scope trace("flCreateChannelEx",fltrace::id(name));
     if(trace.active){trace.event.sequence=((uint64_t)width<<32)|height;trace.event.fence=format;trace.event.slot=poolSize;trace.event.pts=flags;}
 
@@ -408,7 +434,7 @@ static flResult createChannel(const char* name, uint32_t width, uint32_t height,
     if (format == FL_FORMAT_NV12 && ((width | height) & 1)) return trace.result(FL_INVALID);
     if (!poolSize || poolSize > fl::kMaxPool) return trace.result(FL_INVALID);
 
-    if(flags & FL_GPU_RENDER) {
+    if(!externalImages && (flags & FL_GPU_RENDER)) {
         AHardwareBuffer_Desc desc{};desc.width=width;desc.height=height;desc.layers=1;
         desc.format=ahbFormatFor(format);
         desc.usage=AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE|AHARDWAREBUFFER_USAGE_GPU_COLOR_OUTPUT;
@@ -426,10 +452,10 @@ static flResult createChannel(const char* name, uint32_t width, uint32_t height,
     ch->info.format = format;
     ch->info.poolSize = poolSize;
 
-    if (!reallocRing(ch, width, height, poolSize)) {
-        flClose(ch);
-        return trace.result(FL_OOM);
-    }
+    ch->externalPool=externalImages!=nullptr;
+    flResult allocation=externalImages?adoptRing(ch,externalImages,poolSize):
+        (reallocRing(ch,width,height,poolSize)?FL_OK:FL_OOM);
+    if(allocation!=FL_OK){flClose(ch);return trace.result(allocation);}
 
     if(fromFd) {
         ch->interruptFd=fcntl(delegated.pollFd(),F_DUPFD_CLOEXEC,0);
@@ -453,6 +479,22 @@ FL_API flResult flCreateChannelFromSocketFd(int fd, uint32_t width, uint32_t hei
     if(out)*out=nullptr;
     if(!link.connected())return FL_INVALID;
     return createChannel("broker-video",width,height,format,poolSize,flags,out,std::move(link),true);
+}
+
+FL_API flResult flCreateChannelFromHardwareBuffers(const char* name, uint32_t width,
+    uint32_t height, flFormat format, uint32_t poolSize, uint32_t flags,
+    AHardwareBuffer* const* images, flChannel** out) {
+    if(out)*out=nullptr;
+    if(!images || (flags & ~(FL_MAP_CPU|FL_GPU_SYNC|FL_DEFER_RELEASE|FL_GPU_RENDER)))return FL_INVALID;
+    return createChannel(name,width,height,format,poolSize,flags,out,fl::Channel{},false,images);
+}
+FL_API flResult flCreateChannelFromSocketFdWithHardwareBuffers(int fd, uint32_t width,
+    uint32_t height, flFormat format, uint32_t poolSize, uint32_t flags, uint32_t timeout,
+    AHardwareBuffer* const* images, flChannel** out) {
+    auto link=fl::Channel::adoptConnectedFd(fd,timeout); // consume even on validation failure
+    if(out)*out=nullptr;
+    if(!link.connected() || !images || (flags & ~(FL_MAP_CPU|FL_GPU_SYNC|FL_DEFER_RELEASE|FL_GPU_RENDER)))return FL_INVALID;
+    return createChannel("broker-external-video",width,height,format,poolSize,flags,out,std::move(link),true,images);
 }
 
 FL_API flResult flCreateChannel(const char* name, uint32_t width, uint32_t height,
@@ -811,6 +853,7 @@ FL_API flResult flImageMemoryInfo(flChannel* ch, flImage* img, flMemoryResourceI
     r.syncTransport=FL_MEMORY_SYNC_CPU_WAIT | FL_MEMORY_SYNC_FD;
     r.handleTransport=FL_MEMORY_HANDLE_AHB;
     r.interopCapabilities=FL_MEMORY_INTEROP_RING_IMPORT | FL_MEMORY_INTEROP_BORROW_NATIVE;
+    if(ch->externalPool)r.interopCapabilities|=FL_MEMORY_INTEROP_EXTERNAL_POOL;
     *out=r; return FL_OK;
 }
 

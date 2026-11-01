@@ -52,6 +52,7 @@ struct flImage {
 
 struct flChannel {
     bool isConsumer = false;
+    bool externalPool = false;
     uint32_t flags = 0;
     std::string name;
 
@@ -164,6 +165,36 @@ bool allocateRing(flChannel* ch, uint32_t w, uint32_t h, uint32_t poolSize) {
     }
 
     return true;
+}
+
+// Adopt, do not allocate/copy. One independently owned NT reference per image.
+flResult adoptRing(flChannel* ch, void* const* handles, uint32_t count) {
+    using CompareHandles = BOOL (WINAPI*)(HANDLE,HANDLE);
+    auto compare=reinterpret_cast<CompareHandles>(GetProcAddress(GetModuleHandleW(L"KernelBase.dll"),"CompareObjectHandles"));
+    if(!compare)return FL_FORMAT_UNSUPPORTED; // Cannot establish distinct slots.
+    ComPtr<ID3D11Device1> dev1;
+    if(FAILED(ch->device.As(&dev1)))return FL_INTERNAL;
+    const DXGI_FORMAT expected=ch->info.format==FL_FORMAT_NV12?DXGI_FORMAT_NV12:
+        ch->info.format==FL_FORMAT_RGBA8?DXGI_FORMAT_R8G8B8A8_UNORM:
+        ch->info.format==FL_FORMAT_RGB10A2?DXGI_FORMAT_R10G10B10A2_UNORM:DXGI_FORMAT_B8G8R8A8_UNORM;
+    for(uint32_t i=0;i<count;i++) {
+        if(!handles[i] || handles[i]==INVALID_HANDLE_VALUE)return FL_INVALID;
+        for(uint32_t j=0;j<i;j++)
+            if(compare(handles[i],handles[j]))return FL_INVALID; // Alias slots overwrite in-flight pixels.
+        auto* image=new flImage();ch->images.push_back(image);
+        if(!DuplicateHandle(GetCurrentProcess(),handles[i],GetCurrentProcess(),&image->shared,
+                            0,FALSE,DUPLICATE_SAME_ACCESS))return FL_INVALID;
+        if(FAILED(dev1->OpenSharedResource1(image->shared,IID_PPV_ARGS(&image->tex))))
+            return FL_ADAPTER_MISMATCH;
+        D3D11_TEXTURE2D_DESC d{};image->tex->GetDesc(&d);
+        if(d.Width!=ch->info.width || d.Height!=ch->info.height || d.Format!=expected ||
+           d.ArraySize!=1 || d.MipLevels!=1 || d.SampleDesc.Count!=1 ||
+           !(d.MiscFlags & D3D11_RESOURCE_MISC_SHARED_NTHANDLE))return FL_FORMAT_UNSUPPORTED;
+        if((ch->flags & FL_GPU_RENDER) && !(d.BindFlags & D3D11_BIND_RENDER_TARGET))
+            return FL_FORMAT_UNSUPPORTED;
+        ch->slotReadyValue.push_back(0);
+    }
+    return FL_OK;
 }
 
 // Consumer: fresh fences, both counters back to zero.
@@ -316,7 +347,7 @@ void acceptLoop(flChannel* ch) {
                 // Honour it only when it actually differs and is sane. A
                 // refusal is silent by design: the producer re-reads flQuery
                 // and adapts, so there is nothing for it to handle.
-                if (g && g->format == (uint32_t)ch->info.format && fl::validGeometry(g->width,g->height,ch->info.format) &&
+                if (!ch->externalPool && g && g->format == (uint32_t)ch->info.format && fl::validGeometry(g->width,g->height,ch->info.format) &&
                     (g->width != ch->info.width || g->height != ch->info.height)) {
                     // Scoped, not held across the rebuild: resetSync takes the
                     // same mutex, and std::mutex is not recursive. Clearing
@@ -392,9 +423,9 @@ FL_API const char* flResultString(flResult r) {
     return "unknown";
 }
 
-FL_API flResult flCreateChannelOnAdapter(const char* name, uint32_t width, uint32_t height,
-                                         flFormat format, uint32_t poolSize, uint32_t flags,
-                                         const uint8_t adapterLUID[8], flChannel** out) {
+static flResult createChannel(const char* name, uint32_t width, uint32_t height,
+    flFormat format, uint32_t poolSize, uint32_t flags,
+    const uint8_t adapterLUID[8], void* const* externalHandles, flChannel** out) {
     fltrace::Scope trace("flCreateChannelOnAdapter",fltrace::id(name));
     if(trace.active){trace.event.sequence=((uint64_t)width<<32)|height;trace.event.fence=(uint64_t)format;trace.event.slot=poolSize;trace.event.pts=flags;}
 
@@ -426,7 +457,11 @@ FL_API flResult flCreateChannelOnAdapter(const char* name, uint32_t width, uint3
     ch->info.format = format;
     ch->info.poolSize = poolSize;
 
-    if (!allocateRing(ch, width, height, poolSize) || !resetSync(ch)) {
+    ch->externalPool=externalHandles!=nullptr;
+    flResult allocation=externalHandles?adoptRing(ch,externalHandles,poolSize):
+        (allocateRing(ch,width,height,poolSize)?FL_OK:FL_INTERNAL);
+    if(allocation!=FL_OK){flClose(ch);return trace.result(allocation);}
+    if (!resetSync(ch)) {
         flClose(ch);
         return trace.result(FL_INTERNAL);
     }
@@ -437,6 +472,19 @@ FL_API flResult flCreateChannelOnAdapter(const char* name, uint32_t width, uint3
     if (!ready.get()) { flClose(ch); return trace.result(FL_INTERNAL); }
     *out = ch;
     return trace.result(FL_OK);
+}
+
+FL_API flResult flCreateChannelOnAdapter(const char* name, uint32_t width, uint32_t height,
+    flFormat format, uint32_t poolSize, uint32_t flags, const uint8_t adapterLUID[8], flChannel** out) {
+    return createChannel(name,width,height,format,poolSize,flags,adapterLUID,nullptr,out);
+}
+
+FL_API flResult flCreateChannelFromD3D11Handles(const char* name, uint32_t width,
+    uint32_t height, flFormat format, uint32_t poolSize, uint32_t flags,
+    const uint8_t adapterLUID[8], void* const* handles, flChannel** out) {
+    if(out)*out=nullptr;
+    if(!handles || (flags & ~(FL_MAP_CPU|FL_GPU_SYNC|FL_DEFER_RELEASE|FL_GPU_RENDER)))return FL_INVALID;
+    return createChannel(name,width,height,format,poolSize,flags,adapterLUID,handles,out);
 }
 
 FL_API flResult flCreateChannelEx(const char* name, uint32_t width, uint32_t height,
@@ -922,6 +970,7 @@ FL_API flResult flImageMemoryInfo(flChannel* ch, flImage* img, flMemoryResourceI
     r.syncTransport=FL_MEMORY_SYNC_CPU_WAIT | FL_MEMORY_SYNC_TIMELINE;
     r.handleTransport=FL_MEMORY_HANDLE_NT;
     r.interopCapabilities=FL_MEMORY_INTEROP_RING_IMPORT | FL_MEMORY_INTEROP_BORROW_NATIVE;
+    if(ch->externalPool)r.interopCapabilities|=FL_MEMORY_INTEROP_EXTERNAL_POOL;
     *out=r; return FL_OK;
 }
 

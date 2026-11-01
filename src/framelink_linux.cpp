@@ -56,6 +56,7 @@ struct flImage {
     gbm_bo* bo = nullptr; // consumer only
     flDmabuf desc{};
     uint32_t width=0,height=0;
+    bool allocationUsageKnown=false;
     uint32_t allocationUsage=0; // known only for locally allocated GBM BOs
     void* planeMaps[4]{};
     size_t planeLengths[4]{};
@@ -64,6 +65,7 @@ struct flImage {
 
 struct flChannel {
     bool isConsumer = false;
+    bool externalPool = false;
     std::string name;
     flChannelInfo info{};
     uint32_t flags = 0;
@@ -172,6 +174,50 @@ bool handOverRing(flChannel* ch, fl::Channel& link) {
     return link.sendWithFds(fl::MsgType::RingDesc, &rd, sizeof(rd), fds.data(), fds.size());
 }
 
+flResult adoptRing(flChannel* ch, const flDmabuf* input, uint32_t count) {
+    const uint32_t planes=ch->info.format==FL_FORMAT_NV12?2:1;
+    std::vector<struct stat> prior;
+    for(uint32_t i=0;i<count;i++) {
+        const auto& d=input[i];
+        if(d.planes!=planes || d.fourcc!=fourccFor(ch->info.format) ||
+           (i && d.modifier!=input[0].modifier))return FL_FORMAT_UNSUPPORTED;
+        if((ch->flags & FL_MAP_CPU) && d.modifier!=DRM_FORMAT_MOD_LINEAR)return FL_FORMAT_UNSUPPORTED;
+        gbm_import_fd_modifier_data native{};native.width=ch->info.width;native.height=ch->info.height;
+        native.format=d.fourcc;native.num_fds=planes;native.modifier=d.modifier;
+        std::vector<struct stat> current;
+        for(uint32_t p=0;p<planes;p++) {
+            const uint64_t rowBytes=ch->info.format==FL_FORMAT_NV12?ch->info.width:uint64_t(ch->info.width)*4;
+            if(d.fd[p]<0 || d.stride[p]<rowBytes || d.stride[p]>UINT32_MAX || d.offset[p]>UINT32_MAX)
+                return FL_INVALID;
+            struct stat st{};if(fstat(d.fd[p],&st))return FL_INVALID;
+            const uint64_t rows=p?ch->info.height/2:ch->info.height;
+            const uint64_t end=d.offset[p]+d.stride[p]*(rows-1)+rowBytes;
+            if(st.st_size>0 && end>uint64_t(st.st_size))return FL_INVALID;
+            for(const auto& old:prior)if(old.st_dev==st.st_dev && old.st_ino==st.st_ino)return FL_INVALID;
+            current.push_back(st);native.fds[p]=d.fd[p];native.strides[p]=uint32_t(d.stride[p]);native.offsets[p]=uint32_t(d.offset[p]);
+        }
+        auto* image=new flImage();for(auto& fd:image->desc.fd)fd=-1;
+        ch->images.push_back(image);image->width=ch->info.width;image->height=ch->info.height;
+        image->desc=d;for(auto& fd:image->desc.fd)fd=-1;
+        for(uint32_t p=0;p<planes;p++) {
+            image->desc.fd[p]=fcntl(d.fd[p],F_DUPFD_CLOEXEC,0);
+            if(image->desc.fd[p]<0)return FL_INVALID;
+        }
+        image->bo=gbm_bo_import(ch->gbm,GBM_BO_IMPORT_FD_MODIFIER,&native,
+            (ch->flags & FL_GPU_RENDER)?GBM_BO_USE_RENDERING:0);
+        if(!image->bo)return FL_FORMAT_UNSUPPORTED;
+        if(gbm_bo_get_width(image->bo)!=ch->info.width || gbm_bo_get_height(image->bo)!=ch->info.height ||
+           gbm_bo_get_format(image->bo)!=d.fourcc)return FL_FORMAT_UNSUPPORTED;
+        if(gbm_bo_get_plane_count(image->bo)!=planes)return FL_FORMAT_UNSUPPORTED;
+        for(uint32_t p=0;p<planes;p++)
+            if(gbm_bo_get_stride_for_plane(image->bo,p)!=d.stride[p] || gbm_bo_get_offset(image->bo,p)!=d.offset[p])
+                return FL_FORMAT_UNSUPPORTED;
+        prior.insert(prior.end(),current.begin(),current.end());
+    }
+    ++ch->info.generation;
+    return FL_OK;
+}
+
 // Allocate (or re-allocate) the ring. Shared by channel creation and by
 // flRequestGeometry, which is the only reason it is not inline.
 bool reallocRing(flChannel* ch, uint32_t w, uint32_t h, uint32_t poolSize) {
@@ -189,6 +235,7 @@ bool reallocRing(flChannel* ch, uint32_t w, uint32_t h, uint32_t poolSize) {
     for (uint32_t i = 0; i < poolSize; ++i) {
         auto* img = new flImage();
         img->bo = gbm_bo_create(ch->gbm, w, h, fourcc, preferred);
+        img->allocationUsageKnown = true;
         img->allocationUsage = preferred;
         if (!img->bo && fallback != preferred) {
             img->bo = gbm_bo_create(ch->gbm, w, h, fourcc, fallback);
@@ -297,7 +344,7 @@ void acceptLoop(flChannel* ch) {
             if (!msg || msg->type == fl::MsgType::Bye) break;
             if (msg->type == fl::MsgType::RequestGeometry) {
                 const auto* g = msg->as<fl::GeometryMsg>();
-                if (g && g->format==(uint32_t)ch->info.format && fl::validGeometry(g->width,g->height,ch->info.format) &&
+                if (!ch->externalPool && g && g->format==(uint32_t)ch->info.format && fl::validGeometry(g->width,g->height,ch->info.format) &&
                     (g->width != ch->info.width || g->height != ch->info.height)) {
                     std::lock_guard<std::mutex> hold(ch->pendingMutex);
                     ch->sync.advance(ch->retiredValue);
@@ -402,9 +449,9 @@ FL_API flResult flCreateChannelOnAdapter(const char* name, uint32_t width, uint3
     return trace.result(flCreateChannelEx(name, width, height, format, poolSize, flags, out));
 }
 
-FL_API flResult flCreateChannelEx(const char* name, uint32_t width, uint32_t height,
-                                  flFormat format, uint32_t poolSize, uint32_t flags,
-                                  flChannel** out) {
+static flResult createChannel(const char* name, uint32_t width, uint32_t height,
+    flFormat format, uint32_t poolSize, uint32_t flags, const flDmabuf* externalImages,
+    flChannel** out) {
     fltrace::Scope trace("flCreateChannelEx",fltrace::id(name));
     if(trace.active){trace.event.sequence=((uint64_t)width<<32)|height;trace.event.fence=(uint64_t)format;trace.event.slot=poolSize;trace.event.pts=flags;}
 
@@ -430,14 +477,26 @@ FL_API flResult flCreateChannelEx(const char* name, uint32_t width, uint32_t hei
         return trace.result(FL_INTERNAL);
     }
 
-    if (!reallocRing(ch, width, height, poolSize)) {
-        flClose(ch);
-        return trace.result(FL_OOM);
-    }
+    ch->externalPool=externalImages!=nullptr;
+    flResult allocation=externalImages?adoptRing(ch,externalImages,poolSize):
+        (reallocRing(ch,width,height,poolSize)?FL_OK:FL_OOM);
+    if(allocation!=FL_OK){flClose(ch);return trace.result(allocation);}
 
     ch->accept = std::thread(acceptLoop, ch);
     *out = ch;
     return trace.result(FL_OK);
+}
+
+FL_API flResult flCreateChannelEx(const char* name, uint32_t width, uint32_t height,
+    flFormat format, uint32_t poolSize, uint32_t flags, flChannel** out) {
+    return createChannel(name,width,height,format,poolSize,flags,nullptr,out);
+}
+FL_API flResult flCreateChannelFromDmabufs(const char* name, uint32_t width,
+    uint32_t height, flFormat format, uint32_t poolSize, uint32_t flags,
+    const flDmabuf* images, flChannel** out) {
+    if(out)*out=nullptr;
+    if(!images || (flags & ~(FL_MAP_CPU|FL_GPU_SYNC|FL_DEFER_RELEASE|FL_GPU_RENDER)))return FL_INVALID;
+    return createChannel(name,width,height,format,poolSize,flags,images,out);
 }
 
 FL_API flResult flCreateChannel(const char* name, uint32_t width, uint32_t height,
@@ -813,7 +872,7 @@ FL_API flResult flImageMemoryInfo(flChannel* ch, flImage* img, flMemoryResourceI
     for(uint32_t p=0;p<r.nativePlaneCount;p++) {
         r.planeOffset[p]=img->desc.offset[p]; r.planeStride[p]=img->desc.stride[p];
     }
-    if(img->bo) {
+    if(img->allocationUsageKnown) {
         r.nativeUsage=img->allocationUsage;
         r.knownFields|=FL_MEMORY_INFO_NATIVE_USAGE | FL_MEMORY_INFO_DIRECT_USAGE;
         if(img->allocationUsage & GBM_BO_USE_RENDERING) r.directUsage|=FL_MEMORY_GPU_RENDER;
@@ -831,6 +890,7 @@ FL_API flResult flImageMemoryInfo(flChannel* ch, flImage* img, flMemoryResourceI
     r.syncTransport=FL_MEMORY_SYNC_CPU_WAIT | FL_MEMORY_SYNC_FD;
     r.handleTransport=FL_MEMORY_HANDLE_DMABUF;
     r.interopCapabilities=FL_MEMORY_INTEROP_RING_IMPORT | FL_MEMORY_INTEROP_BORROW_NATIVE;
+    if(ch->externalPool)r.interopCapabilities|=FL_MEMORY_INTEROP_EXTERNAL_POOL;
     *out=r; return FL_OK;
 }
 

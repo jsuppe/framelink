@@ -81,7 +81,8 @@ Windows decoder-to-independent-renderer example, and measured multi-hop evidence
   allocations; preserve allocation identity and prevent premature reuse until
   every downstream CPU/GPU reader completes, including after crashes/reconnects.
   Subtask3a reservation safety locally validated: [evidence](m5a/ownership-20261101/README.md).
-  External-pool adoption and strong reader leases remain incomplete.
+  Local external-pool adoption validated: [API and limits](EXTERNAL_POOLS.md).
+  Strong reader leases and distributed ownership qualification remain incomplete.
 - [ ] **M5a.4 Transport/presentation separation:** preserve shared A/V PTS and
   clock mappings; no pool-fill gate, independent per-track rebasing or fixed
   playback reservoir at each hop. Final output owns presentation scheduling.

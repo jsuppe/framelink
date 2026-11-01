@@ -24,6 +24,22 @@ typedef struct AHardwareBuffer AHardwareBuffer;
 // (AHardwareBuffer_acquire) if you need a longer life.
 FL_API AHardwareBuffer* flImageAHardwareBuffer(flImage*);
 
+// Adopt borrowed external AHBs, retaining independent references without copying
+// pixels. Immutable matching geometry/native format, distinct allocation IDs and
+// requested CPU/render usage are required. This opt-in path requires runtime
+// AHardwareBuffer_getId (API31+); legacy allocation remains API29-compatible.
+// Original owners must obey ring acquire/submit/consumed synchronization and must
+// not bind the same allocation into independent writable rings.
+FL_API flResult flCreateChannelFromHardwareBuffers(const char* name,
+    uint32_t width, uint32_t height, flFormat format, uint32_t poolSize,
+    uint32_t flags, AHardwareBuffer* const* images, flChannel** out);
+// Same adoption using an authorized broker socket; consumes connectedFd on ALL
+// paths, just like flCreateChannelFromSocketFd. AHB input refs remain borrowed.
+FL_API flResult flCreateChannelFromSocketFdWithHardwareBuffers(int connectedFd,
+    uint32_t width, uint32_t height, flFormat format, uint32_t poolSize,
+    uint32_t flags, uint32_t ioTimeoutMs, AHardwareBuffer* const* images,
+    flChannel** out);
+
 // Android broker-owned native video transport. Each call CONSUMES connectedFd
 // on success and failure (use ParcelFileDescriptor.detachFd(), never getFd()).
 // It must be an authorized, connected AF_UNIX/SOCK_SEQPACKET endpoint, distinct

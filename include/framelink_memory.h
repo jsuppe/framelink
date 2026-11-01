@@ -128,8 +128,9 @@ typedef struct flMemoryResourceInfo {
 // Native plane offsets/strides remain unknown for opaque textures/AHBs; staging
 // or normalized CPU strides must not be substituted for native layout.
 // interopCapabilities advertises existing-ring import and borrowed native access.
-// External allocation adoption and safe downstream relay are absent until their
-// ownership protocols are implemented; duplicated handles alone do not qualify.
+// Locally adopted pools also advertise EXTERNAL_POOL. This does not establish
+// remote allocation negotiation. Safe downstream RELAY remains unadvertised;
+// duplicated handles alone do not qualify.
 // On error leaves output unchanged; an unknown requested version is rejected.
 FL_API flResult flImageMemoryInfo(flChannel*, flImage*, flMemoryResourceInfo*, size_t);
 #ifdef __cplusplus

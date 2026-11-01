@@ -12,6 +12,23 @@
 extern "C" {
 #endif
 
+// Adopt externally allocated shared textures as an immutable consumer-side ring.
+// Handles are BORROWED on input and independently duplicated on success; caller
+// may close its handles/references afterwards. No texture allocation or pixel
+// copy occurs. All resources must match geometry/format, be single-mip/slice,
+// non-MSAA shared NT textures on the selected adapter, and be distinct objects.
+// A decoder/producer may own the allocations, but once adopted ALL writers must
+// obey this ring's acquire/submit/consumed fences (native references alone do not
+// grant permission to reuse). Do not bind the same storage to independent rings.
+// This function does not transfer arbitrary handles between processes; the
+// application must first deliver authorized handles into this process.
+// Geometry requests cannot resize an external ring; create a new one after safe
+// retirement. Existing close/GPU completion rules still apply. On error *out=NULL.
+FL_API flResult flCreateChannelFromD3D11Handles(const char* name,
+    uint32_t width, uint32_t height, flFormat format, uint32_t poolSize,
+    uint32_t flags, const uint8_t adapterLUID[8], void* const* handles,
+    flChannel** out);
+
 // The texture backing an acquired image. Borrowed - do NOT Release() it; it
 // dies with the channel.
 FL_API ID3D11Texture2D* flImageD3D11(flImage*);
