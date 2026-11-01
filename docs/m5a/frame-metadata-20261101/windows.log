@@ -1,0 +1,64 @@
+#< CLIXML
+-- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.26300.
+-- framelink: building GStreamer elements (gstframelink)
+-- Configuring done (0.8s)
+-- Generating done (0.5s)
+-- Build files have been written to: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  fl_ipc_win32.cpp
+  fl_trace.cpp
+  framelink_memory.cpp
+  framelink_session.cpp
+  framelink_slots.cpp
+  framelink_win.cpp
+  Generating Code...
+     Creating library C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/framelink.lib and object C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/framelink.exp
+  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m5a-contract-20261101/CMakeLists.txt
+  fl_frame_metadata.cpp
+  fl_ipc_win32.cpp
+  Generating Code...
+  fl_frame_metadata.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_frame_metadata.exe
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m5a-contract-20261101/CMakeLists.txt
+  fl_frame_metadata_contract.cpp
+  fl_frame_metadata_contract.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_frame_metadata_contract.exe
+UpdateCTestConfiguration  from :C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/DartConfiguration.tcl
+Test project C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 2
+    Start  2: frame_metadata_contract
+
+2: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_frame_metadata_contract.exe
+2: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+2: Test timeout computed to be: 9999879
+2: metadata wire sizes, feature agreement, canonical validation and malformed messages pass
+1/2 Test  #2: frame_metadata_contract ..........   Passed    0.02 sec
+test 21
+    Start 21: frame_metadata
+
+21: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_frame_metadata.exe
+21: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+21: Test timeout computed to be: 20
+21: [framelink error] framelink: refusing producer pid 18932 - speaks version 6, we speak 6
+21: [framelink error] framelink: refusing producer pid 18932 - speaks version 6, we speak 6
+21: [framelink error] framelink: refusing producer pid 18932 - speaks version 0, we speak 6
+21: [framelink error] framelink: refusing producer pid 18932 - speaks version 0, we speak 6
+21: frame metadata: exact values, optional absence/reuse, required publication, readiness FD and legacy/unknown-required peer refusal pass
+2/2 Test #21: frame_metadata ...................   Passed    0.95 sec
+
+The following tests passed:
+	frame_metadata_contract
+	frame_metadata
+
+100% tests passed, 0 tests failed out of 2
+
+Total Test time (real) =   1.01 sec
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04"><Obj S="progress" RefId="0"><TN RefId="0"><T>System.Management.Automation.PSCustomObject</T><T>System.Object</T></TN><MS><I64 N="SourceId">1</I64><PR N="Record"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj></Objs>

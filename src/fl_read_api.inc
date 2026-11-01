@@ -53,3 +53,19 @@ FL_API flResult flQueryConsumerFlags(flChannel* ch,uint32_t* flags) {
     std::lock_guard<std::mutex> lock(ch->pendingMutex);
     *flags=ch->flags;return FL_OK;
 }
+
+FL_API flResult flSetFrameMetadata(flChannel* ch,const flBuffer* buffer,const flFrameMetadata* metadata) {
+    if(!ch || ch->isConsumer || !metadata || !metadataReservation(ch,buffer))return FL_INVALID;
+    if(ch->submittingValue)return FL_BUSY;
+    if(!(ch->peerFeatures&fl::FrameMetadataFeature))return FL_FORMAT_UNSUPPORTED;
+    auto result=fl::validateMetadata(*metadata);if(result!=FL_OK)return result;
+    ch->slotMetadata[buffer->slot]=*metadata;return FL_OK;
+}
+FL_API flResult flGetFrameMetadata(flChannel* ch,const flFrame* frame,flFrameMetadata* metadata) {
+    if(!ch || !ch->isConsumer || !frame || !metadata)return FL_INVALID;
+    std::lock_guard<std::mutex> lock(ch->pendingMutex);
+    if(!ch->frameHeld || frame->slot!=ch->heldSlot || frame->_readyValue!=ch->heldReady ||
+       frame->slot>=ch->images.size() || frame->image!=ch->images[frame->slot])return FL_INVALID;
+    if(!ch->heldMetadata.version)return FL_NOT_FOUND;
+    *metadata=ch->heldMetadata;return FL_OK;
+}

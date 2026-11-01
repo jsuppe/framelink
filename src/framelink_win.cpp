@@ -40,6 +40,7 @@
 #include "fl_ipc.h"
 #include "fl_log.h"
 #include "fl_protocol.h"
+#include "fl_metadata.hpp"
 
 using Microsoft::WRL::ComPtr;
 
@@ -62,6 +63,9 @@ struct flChannel {
     bool isConsumer = false;
     bool externalPool = false;
     uint32_t flags = 0;
+    uint32_t peerFeatures=0;
+    flFrameMetadata slotMetadata[FL_MAX_POOL_SIZE]{};
+    flFrameMetadata pendingMetadata{},heldMetadata{};
     std::string name;
 
     ComPtr<ID3D11Device> device;
@@ -314,6 +318,7 @@ void acceptLoop(flChannel* ch) {
         // might interpret differently.
         fl::HelloMsg hello{};
         hello.version = FL_VERSION;
+        hello._pad=fl::localFeatures(ch->flags);
         hello.pid = GetCurrentProcessId();
         hello.luidValid = 1;
         memcpy(hello.adapterLUID, ch->info.adapterLUID, 8);
@@ -322,8 +327,8 @@ void acceptLoop(flChannel* ch) {
             continue;
         }
         auto peerHello = link.recv();
-        const auto* ph = peerHello ? peerHello->as<fl::HelloMsg>() : nullptr;
-        if (!ph || ph->version != FL_VERSION) {
+        const auto* ph = peerHello && peerHello->type==fl::MsgType::Hello && peerHello->payload.size()==sizeof(fl::HelloMsg) ? peerHello->as<fl::HelloMsg>() : nullptr;
+        if (!ph || ph->version != FL_VERSION || !fl::compatibleFeatures(hello._pad,ph->_pad)) {
             FL_LOG_ERR("framelink: refusing producer pid %u - speaks version %u, we speak %u",
                        link.peerPid(), ph ? ph->version : 0u, (unsigned)FL_VERSION);
             CloseHandle(peerProc);
@@ -337,6 +342,7 @@ void acceptLoop(flChannel* ch) {
 
         {
             std::lock_guard<std::mutex> hold(ch->pendingMutex);
+            ch->peerFeatures=ph->_pad;
             if(!ch->readers.empty() || ch->frameHeld || ch->consumedFence->GetCompletedValue()<ch->heldReady ||
                (ch->hasPending && ch->readyFence->GetCompletedValue()<ch->pendingReady)) {
                 link.send(fl::MsgType::Busy);
@@ -390,9 +396,10 @@ void acceptLoop(flChannel* ch) {
                 if (!handOverRing(ch, link, link.peerPid())) break;
                 continue;
             }
-            if (msg->type != fl::MsgType::FrameReady) continue;
-            const auto* fr = msg->as<fl::FrameReadyMsg>();
-            if (!fr || fr->slot >= ch->images.size()) continue;
+            if (msg->type != fl::MsgType::FrameReady && msg->type!=fl::MsgType::FrameReadyMetadata) continue;
+            flFrameMetadata metadata{};
+            const auto* fr=fl::decodeFrame(*msg,(ch->flags&FL_REQUIRE_FRAME_METADATA)!=0,metadata);
+            if(!fr || fr->slot>=ch->images.size()){break;}
             std::lock_guard<std::mutex> hold(ch->pendingMutex);
             // Latest-frame-wins: a slow consumer must never stall the producer.
             if(fltrace::enabled()) {
@@ -403,7 +410,7 @@ void acceptLoop(flChannel* ch) {
             ch->hasPending = true;
             ch->pendingSlot = fr->slot;
             ch->pendingReady = fr->readyValue;
-            ch->pendingPts = fr->ptsNs;
+            ch->pendingPts = fr->ptsNs;ch->pendingMetadata=metadata;
             if(ch->flags & FL_TRACK_ARRIVAL)ch->pendingArrival=fl::arrivalNowNs();
             ++ch->sequence;
         }
@@ -495,7 +502,7 @@ FL_API flResult flCreateChannelFromD3D11Handles(const char* name, uint32_t width
     uint32_t height, flFormat format, uint32_t poolSize, uint32_t flags,
     const uint8_t adapterLUID[8], void* const* handles, flChannel** out) {
     if(out)*out=nullptr;
-    if(!handles || (flags & ~(FL_MAP_CPU|FL_GPU_SYNC|FL_DEFER_RELEASE|FL_GPU_RENDER|FL_TRACK_ARRIVAL)))return FL_INVALID;
+    if(!handles || (flags & ~(FL_MAP_CPU|FL_GPU_SYNC|FL_DEFER_RELEASE|FL_GPU_RENDER|FL_TRACK_ARRIVAL|FL_REQUIRE_FRAME_METADATA)))return FL_INVALID;
     return createChannel(name,width,height,format,poolSize,flags,adapterLUID,handles,out);
 }
 
@@ -536,7 +543,7 @@ FL_API flResult flOpenProducer(const char* name, flChannel** out) {
     // The consumer speaks first, so a version mismatch is caught before it
     // duplicates any handle to us.
     auto helloMsg = ch->link.recv();
-    const auto* srv = helloMsg && helloMsg->type == fl::MsgType::Hello
+    const auto* srv = helloMsg && helloMsg->type == fl::MsgType::Hello && helloMsg->payload.size()==sizeof(fl::HelloMsg)
                           ? helloMsg->as<fl::HelloMsg>()
                           : nullptr;
     if (!srv) {
@@ -549,8 +556,11 @@ FL_API flResult flOpenProducer(const char* name, flChannel** out) {
         delete ch;
         return trace.result(FL_VERSION_MISMATCH);
     }
+    if(!fl::compatibleFeatures(fl::localFeatures(0),srv->_pad)){delete ch;return trace.result(FL_VERSION_MISMATCH);}
+    ch->peerFeatures=srv->_pad;
     fl::HelloMsg mine{};
     mine.version = FL_VERSION;
+    mine._pad=fl::localFeatures(0);
     mine.pid = GetCurrentProcessId();
     if (!ch->link.send(fl::MsgType::Hello, mine)) {
         delete ch;
@@ -692,7 +702,7 @@ FL_API flResult flAcquireBuffer(flChannel* ch, flBuffer* out, uint32_t timeoutMs
             // Free once the consumer has promised never to read this slot's
             // previous contents again.
             if (ch->slotReadyValue[i] <= consumed) {
-                ch->slotReadyValue[i] = UINT64_MAX; // reserve until submit
+                ch->slotReadyValue[i] = UINT64_MAX;ch->slotMetadata[i]={}; // reserve until submit
                 out->slot = (uint32_t)i;
                 out->image = ch->images[i];
                 if(trace.active){trace.event.slot=out->slot;}
@@ -788,6 +798,7 @@ FL_API flResult flBeginSubmit(flChannel* ch, const flBuffer* buf, uint64_t* sign
         ch->slotReadyValue[buf->slot] != UINT64_MAX) return trace.result(FL_INVALID);
     if (!ch->link.connected()) return trace.result(FL_DISCONNECTED);
     if (ch->submittingValue) return trace.result(FL_BUSY);
+    if((ch->peerFeatures&(fl::FrameMetadataFeature<<16))&&!ch->slotMetadata[buf->slot].version)return trace.result(FL_FORMAT_UNSUPPORTED);
     // UINT64_MAX is the reserved-slot sentinel, never a publishable fence value.
     if (ch->readyValue >= UINT64_MAX-1) return trace.result(FL_INVALID);
     ch->submittingSlot = buf->slot;
@@ -815,7 +826,7 @@ FL_API flResult flEndSubmit(flChannel* ch, const flBuffer* buf, uint64_t signalV
     fr.slot = buf->slot;
     fr.readyValue = signalValue;
     fr.ptsNs = ptsNs;
-    return trace.result(ch->link.send(fl::MsgType::FrameReady, fr) ? FL_OK : FL_DISCONNECTED);
+    return trace.result(fl::sendFrame(ch->link,fr,ch->slotMetadata[buf->slot]) ? FL_OK : FL_DISCONNECTED);
 }
 
 FL_API flResult flAcquireFrame(flChannel* ch, flFrame* out, uint32_t timeoutMs) {
@@ -835,7 +846,7 @@ FL_API flResult flAcquireFrame(flChannel* ch, flFrame* out, uint32_t timeoutMs) 
                 ((ch->flags & FL_GPU_SYNC) || ch->readyFence->GetCompletedValue() >= ch->pendingReady)) {
                 ch->frameHeld = true;ch->heldArrival=ch->pendingArrival;
                 ch->heldReady = ch->pendingReady;
-                ch->heldSlot = ch->pendingSlot;
+                ch->heldSlot = ch->pendingSlot;ch->heldMetadata=ch->pendingMetadata;
                 ch->hasPending = false;
                 slot = ch->pendingSlot;
                 ready = ch->pendingReady;
@@ -933,6 +944,9 @@ FL_API flResult flCompleteReadLeaseD3D11Fence(flChannel* ch,uint64_t token,void*
     return FL_BUSY;
 }
 
+static bool metadataReservation(flChannel* ch,const flBuffer* buffer) {
+    return buffer && buffer->slot<ch->images.size() && buffer->image==ch->images[buffer->slot] && ch->slotReadyValue[buffer->slot]==UINT64_MAX;
+}
 #include "fl_read_api.inc"
 
 FL_API flResult flQuery(flChannel* ch, flChannelInfo* out) {

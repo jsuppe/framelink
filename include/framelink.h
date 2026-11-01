@@ -90,6 +90,19 @@ typedef struct flChannelInfo {
     uint64_t generation;
 } flChannelInfo;
 
+// Optional frame metadata; legacy flFrame ABI remains unchanged.
+#define FL_FRAME_METADATA_VERSION 1u
+#define FL_FRAME_HAS_DTS 0x1u
+#define FL_FRAME_HAS_DURATION 0x2u
+#define FL_FRAME_DISCONT 0x4u
+typedef struct flFrameMetadata {
+    uint32_t version, flags;
+    int64_t dtsNs; // agreed nonnegative running time when HAS_DTS
+    uint64_t durationNs;
+    uint64_t streamGeneration; // nonzero; media generation, not ring allocation ID
+    uint32_t reserved[2];
+} flFrameMetadata;
+
 // ---- consumer: owns the ring ------------------------------------------------
 
 typedef struct flFrame {
@@ -141,6 +154,8 @@ FL_API flResult flCreateChannel(const char* name, uint32_t width, uint32_t heigh
 // Opt-in receiver-local arrival age. Not media PTS or end-to-end latency.
 // When disabled, receipt does not read the clock for this feature.
 #define FL_TRACK_ARRIVAL 0x10
+// Require negotiated metadata support and metadata on every published frame.
+#define FL_REQUIRE_FRAME_METADATA 0x20
 
 FL_API flResult flCreateChannelEx(const char* name, uint32_t width, uint32_t height,
                                   flFormat format, uint32_t poolSize, uint32_t flags,
@@ -184,6 +199,14 @@ typedef struct flBuffer {
 // reason an Android producer does not choose a Surface's size.
 FL_API flResult flOpenProducer(const char* name, flChannel** out);
 FL_API flResult flAcquireBuffer(flChannel*, flBuffer* out, uint32_t timeoutMs);
+// Attach to a reserved producer buffer BEFORE BeginSubmit. All submit paths
+// preserve it. Unsupported peer rejects without consuming the reservation;
+// reacquisition clears metadata. Absent DTS/duration fields must be zero.
+FL_API flResult flSetFrameMetadata(flChannel*, const flBuffer*, const flFrameMetadata*);
+// Query exact held frame before flRelease/flLeaseFrame. Legacy absence is
+// FL_NOT_FOUND. Invalid/absent cases leave output unchanged.
+FL_API flResult flGetFrameMetadata(flChannel*, const flFrame*, flFrameMetadata*);
+
 // Return an acquired buffer without publishing. Caller must finish ALL access
 // first; cancellation does not wait for external GPU work. Returns FL_BUSY after
 // flBeginSubmit, FL_INVALID for a non-reserved buffer. Invalidates that borrow.

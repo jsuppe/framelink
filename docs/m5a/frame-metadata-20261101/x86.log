@@ -1,0 +1,18 @@
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /tmp/fl-m5a-x86
+[ 10%] Building CXX object CMakeFiles/framelink.dir/src/framelink_android.cpp.o
+[ 20%] Building CXX object CMakeFiles/framelink.dir/src/framelink_slots.cpp.o
+[ 30%] Building CXX object CMakeFiles/framelink.dir/src/fl_ipc_posix.cpp.o
+[ 40%] Building CXX object CMakeFiles/framelink.dir/src/fl_trace.cpp.o
+[ 50%] Building CXX object CMakeFiles/framelink.dir/src/framelink_session.cpp.o
+[ 60%] Building CXX object CMakeFiles/framelink.dir/src/framelink_memory.cpp.o
+[ 70%] Linking CXX static library libframelink.a
+[ 70%] Built target framelink
+[ 90%] Building CXX object CMakeFiles/fl_frame_metadata.dir/src/fl_ipc_posix.cpp.o
+[ 90%] Building CXX object CMakeFiles/fl_frame_metadata.dir/test/fl_frame_metadata.cpp.o
+[100%] Linking CXX executable fl_frame_metadata
+[100%] Built target fl_frame_metadata
+[ 50%] Building CXX object CMakeFiles/fl_frame_metadata_contract.dir/test/fl_frame_metadata_contract.cpp.o
+[100%] Linking CXX executable fl_frame_metadata_contract
+[100%] Built target fl_frame_metadata_contract
