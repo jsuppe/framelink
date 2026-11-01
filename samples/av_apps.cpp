@@ -52,7 +52,7 @@ void need(bool ok, const std::string &what) {
 struct Options {
   std::string plugin, session, format = "BGRA", fault, inputPipeline;
   bool traceMedia=false;
-  bool producerClock=false;
+  bool producerClock=false, coordinatedAudio=false;
   unsigned frames = 150, width = 160, height = 90, fps = 50, rate = 48000,
            channels = 2, timeout = 15000, sessions = 1;
   bool play = false, stream = false;
@@ -100,7 +100,7 @@ Options options(int argc, char **argv) {
     else if (a == "--input-pipeline") o.inputPipeline=v;
     else if (a == "--audio-sink") o.audioSink=v;
     else if (a == "--latency-ms") o.latencyMs=number(v);
-    else if (a == "--clock-policy") { need(v==std::string("producer") || v==std::string("audio"),"clock-policy must be producer or audio");o.producerClock=v==std::string("producer"); }
+    else if (a == "--clock-policy") { need(v==std::string("producer") || v==std::string("audio") || v==std::string("audio-coordinated"),"clock-policy must be producer, audio or audio-coordinated");o.producerClock=v==std::string("producer");o.coordinatedAudio=v==std::string("audio-coordinated"); }
     else if (a == "--session")
       o.session = v;
     else if (a == "--format")
@@ -921,9 +921,10 @@ unsigned runProducer(const Options &o, GSocketListener *l,
   need(!memcmp(wire, reply, sizeof(wire)),
        "configuration acknowledgement mismatch");
   const auto mode = get(*control);
-  need(mode<=3, "unsupported playback mode");
-  need((mode==3)==bool(o.mediaRunMs),"finite media budget requires matching mode-3 peer");
-  if(mode==3) {
+  need(mode<=5, "unsupported playback mode");
+  const bool finiteMode=mode==3 || mode==5;
+  need(finiteMode==bool(o.mediaRunMs),"finite media budget requires matching finite peer");
+  if(finiteMode) {
     const auto budget=get(*control);
     validateMediaRun(budget,o.frames,o.fps);
     need(budget==o.mediaRunMs,"finite media budget disagreement");
@@ -1113,16 +1114,19 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
   need(flSessionMapPts(&cfg, &mapping, 50 * GST_MSECOND, 0, &base) == 0,
        "clock mapping failed");
   write(*control, wire, sizeof(wire));
-  need(!o.mediaRunMs || (o.stream && o.producerClock),"finite media budget requires coordinated streaming");
-  put(*control, o.mediaRunMs ? 3 : (o.stream ? (o.producerClock ? 2 : 1) : 0));
+  const bool coordinated=o.stream && (o.producerClock || o.coordinatedAudio);
+  need(!o.mediaRunMs || coordinated,"finite media budget requires coordinated streaming");
+  // Modes 4/5 add the existing PRIMED/GO barrier to audio-master playback.
+  // Old peers reject explicitly rather than silently running without a gate.
+  put(*control, o.mediaRunMs ? (o.coordinatedAudio ? 5 : 3) : (o.stream ? (o.coordinatedAudio ? 4 : (o.producerClock ? 2 : 1)) : 0));
   if(o.mediaRunMs) {
     need(o.mediaRunMs<=300000,"invalid finite media budget");
     put(*control,o.mediaRunMs);
     need(get(*control)==o.mediaRunMs,"finite media budget disagreement");
   }
-  if(o.stream && o.producerClock)g_socket_set_timeout(g_socket_connection_get_socket(control->p),(o.timeout+999)/1000);
+  if(coordinated)g_socket_set_timeout(g_socket_connection_get_socket(control->p),(o.timeout+999)/1000);
   std::unique_ptr<Conn> audio(connect(audioEndpoint(ep, cfg), 'A', o.timeout, provider));
-  if(o.stream && o.producerClock)g_socket_set_timeout(g_socket_connection_get_socket(audio->p),(o.timeout+999)/1000);
+  if(coordinated)g_socket_set_timeout(g_socket_connection_get_socket(audio->p),(o.timeout+999)/1000);
   std::string id = idHex(cfg.sessionId), channel = "av3-" + id;
   if (o.stream) {
     Pipeline rx;
@@ -1210,7 +1214,7 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
       need(!paused || !paused->load(),"session-paused");
       need(std::chrono::steady_clock::now()<end,"native preparation deadline");
     }
-    if(o.producerClock) {
+    if(coordinated) {
       put(*control,0x5052494d4544ULL);
       const auto finalEpoch=get(*control);
       need(finalEpoch<=uint64_t(INT64_MAX),"invalid startup epoch");
@@ -1246,10 +1250,10 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
     audioTimeline.playbackClock=GST_CLOCK(gst_object_ref(selected));
     // Preroll is not clock drift; start arrival-slope diagnostics at the next
     // post-gate PCM block while retaining the original media continuity state.
-    if(o.producerClock)audioTimeline.resetArrival=true;
+    if(coordinated)audioTimeline.resetArrival=true;
     audioTimeline.deliveryBase=mappedBase+latency;
     start(rx,selected,mappedBase);
-    if(o.producerClock){put(*control,0x474fULL);tune(*control,o.timeout);tune(*audio,o.timeout);}
+    if(coordinated){put(*control,0x474fULL);tune(*control,o.timeout);tune(*audio,o.timeout);}
     if(o.mediaRunMs) {
       end=std::chrono::steady_clock::now()+std::chrono::milliseconds(o.mediaRunMs+o.timeout);
       if(watchdog)watchdog->arm(o.mediaRunMs+o.timeout);
@@ -1454,7 +1458,7 @@ int main(int argc, char **argv) {
            "  --audio-offset-ns 0..2000000000 (producer fixture; verifier must use same offset)\n"
            "  --pacing-ppm -200000..200000 (producer pacing injection; PTS unchanged)\n"
            "  --input-pipeline FILE (producer; @VIDEO_SINK@ and @AUDIO_SINK@; requires streaming consumer)\n"
-           "  --clock-policy audio|producer (stream receiver; default audio)\n"
+           "  --clock-policy audio|producer|audio-coordinated (stream receiver; default audio)\n"
            "  --trace-media (expensive payload hashes and running PTS for integration validation)\n"
            "  auto is consumer-only. See docs/M3_AV_APPS.md for bounds and recovery semantics.");
       return 0;
@@ -1594,15 +1598,16 @@ bool runBrokerProducer(const ProducerOptions& p,std::string& error) {
 bool runPlayback(const PlaybackOptions& p,const PlaybackCallbacks& cb,const std::atomic<bool>& stop,std::string& error) {
   bool sessionOpen=false;
   try {
-    need(p.clockPolicy==av::PlaybackClockPolicy::AudioPreferred || p.clockPolicy==av::PlaybackClockPolicy::ProducerMapped,"invalid playback clock policy");
+    need(p.clockPolicy==av::PlaybackClockPolicy::AudioPreferred || p.clockPolicy==av::PlaybackClockPolicy::ProducerMapped || p.clockPolicy==av::PlaybackClockPolicy::AudioPreferredCoordinated,"invalid playback clock policy");
     need(!p.sessionProvider || (p.sessionProvider->resolve && p.sessionProvider->connect),"incomplete session provider");
     need(!p.externalVideo || bool(cb.onClock),"native playback requires onClock callback");
     Options o; o.plugin=p.plugin; o.session=p.session; o.format=p.format;
     o.width=p.width;o.height=p.height;o.fps=p.fps;o.rate=p.rate;o.channels=p.channels;
     o.producerClock=p.clockPolicy==av::PlaybackClockPolicy::ProducerMapped;
+    o.coordinatedAudio=p.clockPolicy==av::PlaybackClockPolicy::AudioPreferredCoordinated;
     o.timeout=p.timeoutMs;o.mediaRunMs=p.mediaRunMs;o.latencyMs=p.latencyMs;o.audioSink=p.audioSink;o.stream=true;
     need(o.fps && o.width && o.height && o.timeout>=100 && o.timeout<=60000 && o.latencyMs<=2000 && o.mediaRunMs<=300000,"invalid playback options");
-    need(!o.mediaRunMs || (o.producerClock && o.fps>=13 && o.fps<=240),"finite media budget requires coordinated streaming");
+    need(!o.mediaRunMs || ((o.producerClock || o.coordinatedAudio) && o.fps>=13 && o.fps<=240),"finite media budget requires coordinated streaming");
     gst_init(nullptr,nullptr);
     GError* e=nullptr; auto* plugin=loadFrameLinkPlugin(o.plugin,&e);
     if (e) {error=e->message;g_error_free(e);}

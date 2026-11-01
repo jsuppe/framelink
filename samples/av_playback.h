@@ -14,13 +14,13 @@ struct PlaybackClock {
   uint64_t baseTimeNs = 0, latencyNs = 0;
   bool audioMaster = false;
 };
-enum class PlaybackClockPolicy { AudioPreferred, ProducerMapped };
+enum class PlaybackClockPolicy { AudioPreferred, ProducerMapped, AudioPreferredCoordinated };
 struct PlaybackOptions {
   std::string plugin, session, format = "BGRA", audioSink = "autoaudiosink";
   unsigned width=160, height=90, fps=50, rate=48000, channels=2;
   unsigned timeoutMs=15000, latencyMs=100;
-  // Opt-in mode 3: finite media timeline budget (1..300000 ms); zero keeps
-  // legacy whole-session timeout. Requires matching producer and ProducerMapped.
+  // Opt-in modes 3/5: finite media timeline budget (1..300000 ms); zero keeps
+  // legacy whole-session timeout. Requires matching producer and a coordinated policy.
   // Startup/idle bounds stay unchanged; active deadline = budget + timeoutMs.
   unsigned mediaRunMs=0;
   bool externalVideo=false;
@@ -35,6 +35,10 @@ struct PlaybackOptions {
   // receiver system clock and slaves the audio device. Requires mode-2 peer
   // support (older producers reject explicitly); avoids startup catch-up bursts.
   // onSession config epoch is provisional; onClock carries the final mapping.
+  // AudioPreferredCoordinated uses the same bounded PRIMED/GO barrier (mode 4,
+  // or 5 with finite budget), then anchors BOTH tracks on the device clock.
+  // No media PTS is rewritten; system-clock fallback is explicit when the sink
+  // cannot provide a clock. Legacy AudioPreferred/mode 1 is unchanged.
   PlaybackClockPolicy clockPolicy=PlaybackClockPolicy::AudioPreferred;
 };
 // One broker-owned producer session. The provider supplies server ends of two
@@ -48,7 +52,7 @@ struct ProducerOptions {
   // Same bounds as the CLI: frames 1..100000, size 2..4096 x 2..2160,
   // fps 13..240, timeout 100..60000 ms. Default startup remains 15 seconds.
   unsigned timeoutMs=15000;
-  // Zero keeps whole-session timeout; otherwise exact mode-3 peer budget,
+  // Zero keeps whole-session timeout; otherwise exact finite peer budget,
   // 1..300000 ms, covering frames/fps without widening startup/idle limits.
   unsigned mediaRunMs=0;
   // Optional cooperative cancellation. Provider callbacks must still honor
@@ -74,7 +78,7 @@ struct PlaybackCallbacks {
   std::function<void(GstBuffer*, uint64_t)> onAudio;
   std::function<void(const flSessionConfig&, const std::string&, const PlaybackClock&)> onSession;
   // Optional native resource preparation after transport/audio preroll, before
-  // PRIMED and final producer epoch in ProducerMapped mode (legacy mode has no
+  // PRIMED and final producer epoch in either coordinated policy (legacy mode has no
   // producer gate). Must finish within remaining startup budget;
   // may throw to fail setup. Must not read unproduced image pixels.
   std::function<void(unsigned remainingTimeoutMs)> onPrepare;

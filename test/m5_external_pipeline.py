@@ -3,7 +3,7 @@
 Hashes trace-mode media; this is a correctness test, not a throughput benchmark.
 """
 import argparse,json,os,pathlib,subprocess,tempfile
-p=argparse.ArgumentParser();p.add_argument('--build',required=True);p.add_argument('--output');p.add_argument('--audio-sink',default='fakesink');p.add_argument('--clock-policy',choices=['audio','producer'],default='audio');a=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('--build',required=True);p.add_argument('--output');p.add_argument('--audio-sink',default='fakesink');p.add_argument('--clock-policy',choices=['audio','producer','audio-coordinated'],default='audio');a=p.parse_args()
 b=pathlib.Path(a.build).resolve();root=pathlib.Path(a.output or tempfile.mkdtemp(prefix='fl-m5-')).resolve();root.mkdir(parents=True,exist_ok=True)
 exe='.exe' if os.name=='nt' else '';plugin=b/('gstframelink.dll' if os.name=='nt' else 'libgstframelink.so')
 media=root/'decoded-source.avi'

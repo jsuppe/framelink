@@ -40,14 +40,17 @@ BGRA/NV12, 160x90, stereo S16/48kHz, 440Hz test tone; `silent=false` selects the
 actual OpenSLES sink. Supported request bounds: 1..18000 frames, 13..120fps,
 duration <=300 seconds. These bounds are **not a throughput qualification**.
 The harness qualifies 30fps and verifies accepted Surface posts, not scanout.
-The explicit `--es clock-policy producer|audio` control selects existing core
-protocols; producer remains the example default. Legacy audio-clock sample mode
-is bounded to ten seconds within its existing15-second whole-session deadline.
-It is a diagnostic comparison, **not a qualified lossless fallback**: the first
-strict cross-app run found a video identity gap during startup. No automatic
-policy switch or timestamp rewrite is performed. The harness accepts the same
-selection as `--clock-policy`. Debug `preroll-delay-ms` uses the existing bounded
-startup fault hook; it is ignored in a non-debuggable APK.
+The explicit `--es clock-policy producer|audio` control selects the core
+ProducerMapped or AudioPreferredCoordinated protocol; producer remains the
+example default pending qualification. Both use the bounded PRIMED/GO barrier
+and finite-session budget. `audio` is now mode5 (mode4 without a finite budget),
+not legacy mode1: the producer cannot publish video while the receiver is still
+opening its sink. Both tracks use the same device-clock epoch, with explicit
+system fallback if the sink provides no clock. PTS are never rewritten, and no
+automatic policy switch occurs. Old producers reject these new modes explicitly.
+The harness accepts the same selection as `--clock-policy`. Debug
+`preroll-delay-ms` uses the existing bounded startup fault hook; it is ignored in
+a non-debuggable APK. Previous legacy-mode failed controls remain in the evidence.
 The 100ms common playback latency is a final-output scheduling policy, not a
 per-hop FrameLink buffer-fill requirement. Pool capacity4 does not imply four
 frames of transport latency.

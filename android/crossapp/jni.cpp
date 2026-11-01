@@ -36,7 +36,7 @@ extern "C" JNIEXPORT void JNICALL Java_dev_framelink_cross_Native_diagnostics(JN
   if(level<=gst_debug_category_get_threshold(category))__android_log_print(ANDROID_LOG_INFO,"FLGst","%s: %s",gst_debug_category_get_name(category),gst_debug_message_get(message));
  },nullptr,nullptr);
  gst_debug_set_active(TRUE);
- for(const auto* name:{"audiobasesink","openslessink","openslesringbuffer"})gst_debug_set_threshold_for_name(name,static_cast<GstDebugLevel>(std::max(0,std::min(6,int(level)))));
+ for(const auto* name:{"audiobasesink","openslessink","opensles_ringbuffer"})gst_debug_set_threshold_for_name(name,static_cast<GstDebugLevel>(std::max(0,std::min(6,int(level)))));
 }
 extern "C" JNIEXPORT jintArray JNICALL Java_dev_framelink_cross_Native_pair(JNIEnv* env,jclass){
  int fd[2];if(socketpair(AF_UNIX,SOCK_SEQPACKET|SOCK_CLOEXEC,0,fd))return nullptr;
@@ -72,11 +72,11 @@ extern "C" JNIEXPORT jstring JNICALL Java_dev_framelink_cross_Native_run(JNIEnv*
   };
   std::atomic<bool> stop{false};
   if(producer){
-   av::ProducerOptions p;p.plugin="static";p.format=fmt;p.frames=frames;p.fps=fps;p.mediaRunMs=producerClock?budget:0;p.sessionProvider=&provider;p.stop=&stop;
+   av::ProducerOptions p;p.plugin="static";p.format=fmt;p.frames=frames;p.fps=fps;p.mediaRunMs=budget;p.sessionProvider=&provider;p.stop=&stop;
    ok=av::runBrokerProducer(p,error);
   }else{
-   av::PlaybackOptions p;p.plugin="static";p.format=fmt;p.fps=fps;p.mediaRunMs=producerClock?budget:0;p.sessionProvider=&provider;
-   p.clockPolicy=producerClock?av::PlaybackClockPolicy::ProducerMapped:av::PlaybackClockPolicy::AudioPreferred;p.audioSink=audible?"openslessink":"fakesink";p.recoveryAttempts=0;
+   av::PlaybackOptions p;p.plugin="static";p.format=fmt;p.fps=fps;p.mediaRunMs=budget;p.sessionProvider=&provider;
+   p.clockPolicy=producerClock?av::PlaybackClockPolicy::ProducerMapped:av::PlaybackClockPolicy::AudioPreferredCoordinated;p.audioSink=audible?"openslessink":"fakesink";p.recoveryAttempts=0;
    if(surface)window.p=ANativeWindow_fromSurface(env,surface);
    if(window.p)check(ANativeWindow_setBuffersGeometry(window.p,160,90,WINDOW_FORMAT_RGBA_8888)==0,"surface geometry");
    av::PlaybackCallbacks cb;
@@ -93,7 +93,10 @@ extern "C" JNIEXPORT jstring JNICALL Java_dev_framelink_cross_Native_run(JNIEnv*
     gst_buffer_unmap(buffer,&map);check(valid,"PCM sample mismatch");pcm=first+count;
    };
    cb.onVideo=[&](GstSample* sample,uint64_t pts,const av::PlaybackClock& clock){
-    const auto n=video;check(n<unsigned(frames) && pts==n*GST_SECOND/fps,"video original PTS/identity gap");
+    const auto n=video;
+    if(diagnostics)diagnostic("video received="+std::to_string(n)+" pts="+std::to_string(pts)+" clock="+std::to_string(gst_clock_get_time(clock.clock))+" base="+std::to_string(clock.baseTimeNs)+" latency="+std::to_string(clock.latencyNs));
+    check(n<unsigned(frames),"too many video frames");
+    if(pts!=n*GST_SECOND/fps)throw std::runtime_error("video original PTS/identity gap: expected="+std::to_string(n*GST_SECOND/fps)+" actual="+std::to_string(pts));
     GstVideoInfo info{};check(gst_video_info_from_caps(&info,gst_sample_get_caps(sample)),"video caps");
     check(info.width==160 && info.height==90,"video dimensions");
     VideoMap mapped;check(gst_video_frame_map(&mapped.f,&info,gst_sample_get_buffer(sample),GST_MAP_READ),"video map");mapped.mapped=true;
@@ -108,7 +111,10 @@ extern "C" JNIEXPORT jstring JNICALL Java_dev_framelink_cross_Native_run(JNIEnv*
     ++video;
     if(window.p){
      const auto due=clock.baseTimeNs+clock.latencyNs+pts;
-     while(gst_clock_get_time(clock.clock)<due)g_usleep(1000);
+     // A stopped device clock must not strand a Surface callback beyond the
+     // session's steady-state idle bound (outer receiver checks cannot run here).
+     const auto waitEnd=g_get_monotonic_time()+2000000;
+     while(gst_clock_get_time(clock.clock)<due){check(g_get_monotonic_time()<waitEnd,"video device-clock idle deadline");g_usleep(1000);}
      ANativeWindow_Buffer out{};if(!ANativeWindow_lock(window.p,&out,nullptr)){
       for(unsigned y=0;y<90;++y)for(unsigned x=0;x<160;++x){auto* d=static_cast<uint8_t*>(out.bits)+(y*out.stride+x)*4;
        if(yuv){int l=int(pixels[y*stride+x])-16,u=int(uv[(y/2)*uvStride+(x&~1)])-128,v=int(uv[(y/2)*uvStride+(x&~1)+1])-128;

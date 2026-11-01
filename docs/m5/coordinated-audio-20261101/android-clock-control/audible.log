@@ -1,0 +1,743 @@
+
+11-01 07:13:41.135   604   604 I FLCross : bind=true
+11-01 07:13:41.629   736   749 I FLCross : producer-start lease=90f2f67b-e104-4625-b3a8-3f9bb999372c uid=10304 pid=736
+11-01 07:13:41.630   697   723 I FLCross : grant lease=90f2f67b-e104-4625-b3a8-3f9bb999372c generation=1 consumer_uid=10305 broker_uid=10304
+11-01 07:13:41.651   604   735 I FLCross : receiver-start lease=90f2f67b-e104-4625-b3a8-3f9bb999372c generation=1 uid=10305 pid=604
+11-01 07:13:41.670   604   735 I FLGst   : openslessink: engine.GetInterface(IODeviceCapabilities) unsupported(0x0000000c)
+11-01 07:13:41.680   604   735 I FLGst   : opensles_ringbuffer: ringbuffer created
+11-01 07:13:41.681   604   735 I FLGst   : opensles_ringbuffer: Found 1 output devices
+11-01 07:13:41.681   604   735 I FLGst   : opensles_ringbuffer:   DeviceID: fffffffe
+11-01 07:13:41.681   604   735 I FLGst   : opensles_ringbuffer: device opened
+11-01 07:13:41.715   604   755 I FLGst   : audiobasesink: release old ringbuffer
+11-01 07:13:41.716   604   755 I FLGst   : audiobasesink: time was 0:00:00.000000000
+11-01 07:13:41.716   604   755 I FLGst   : audiobasesink: parse caps
+11-01 07:13:41.716   604   755 I FLGst   : audiobasesink: acquire ringbuffer
+11-01 07:13:41.739   604   755 I FLGst   : opensles_ringbuffer: changed volume to 0
+11-01 07:13:41.739   604   755 I FLGst   : opensles_ringbuffer: changed mute to 0
+11-01 07:13:41.739   604   755 I FLGst   : opensles_ringbuffer: ringbuffer acquired
+11-01 07:13:41.740   604   755 I FLGst   : audiobasesink: activate ringbuffer
+11-01 07:13:41.743   604   735 I FLGst   : opensles_ringbuffer: queued samples 0 position 1 ms (0 samples) delay 0 samples
+11-01 07:13:41.743   604   735 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:13:41.743   604   735 I FLGst   : audiobasesink: latency query
+11-01 07:13:41.743   604   735 I FLGst   : audiobasesink: peer or we are not live, don't care about latency
+11-01 07:13:41.744   604   735 I FLGst   : audiobasesink: latency query
+11-01 07:13:41.744   604   735 I FLGst   : audiobasesink: peer or we are not live, don't care about latency
+11-01 07:13:41.744   604   735 I FLGst   : opensles_ringbuffer: queued samples 0 position 1 ms (0 samples) delay 0 samples
+11-01 07:13:41.744   604   735 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:13:41.744   604   735 I FLGst   : opensles_ringbuffer: queued samples 0 position 1 ms (0 samples) delay 0 samples
+11-01 07:13:41.744   604   735 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:13:41.744   604   735 I FLCross : playback audio-clock
+11-01 07:13:41.744   604   735 I FLGst   : opensles_ringbuffer: queued samples 0 position 1 ms (0 samples) delay 0 samples
+11-01 07:13:41.744   604   735 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:13:41.744   604   735 I FLCross : clock now=0 base=20000000 latency=100000000
+11-01 07:13:41.745   604   735 I FLGst   : opensles_ringbuffer: queued samples 0 position 1 ms (0 samples) delay 0 samples
+11-01 07:13:41.745   604   735 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:13:41.745   604   735 I FLGst   : audiobasesink: latency query
+11-01 07:13:41.745   604   735 I FLGst   : audiobasesink: peer or we are not live, don't care about latency
+11-01 07:13:41.745   604   735 I FLGst   : audiobasesink: ringbuffer may start now
+11-01 07:13:41.746   604   755 I FLGst   : audiobasesink: we are not slaved
+11-01 07:13:41.746   604   755 I FLGst   : audiobasesink: time 0:00:00.000000000, start 0:00:00.000000000, samples 1600
+11-01 07:13:41.746   604   755 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:13:41.746   604   755 I FLGst   : audiobasesink: running: start 0:00:00.000000000 - stop 0:00:00.033333333
+11-01 07:13:41.746   604   755 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:13:41.746   604   755 I FLGst   : audiobasesink: adding base_time 0:00:00.020000000
+11-01 07:13:41.746   604   755 I FLGst   : audiobasesink: final timestamps: start 0:00:00.120000000 - stop 0:00:00.153333333
+11-01 07:13:41.746   604   755 I FLGst   : audiobasesink: resync after discont/resync
+11-01 07:13:41.746   604   755 I FLGst   : audiobasesink: rendering at 5760 1600/1600
+11-01 07:13:41.746   604   735 I FLGst   : opensles_ringbuffer: queued samples 0 position 1 ms (0 samples) delay 0 samples
+11-01 07:13:41.746   604   755 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 07:13:41.746   604   755 I FLGst   : audiobasesink: next sample expected at 7360
+11-01 07:13:41.746   604   735 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:13:41.747   604   735 I FLCross : audio samples=1600 late=0 queue=0 drift=0
+11-01 07:13:41.747   604   735 I FLCross : audio-clock-calibration internal=0 external=0 rate=1/1
+11-01 07:13:41.747   604   735 I FLGst   : opensles_ringbuffer: queued samples 0 position 1 ms (0 samples) delay 0 samples
+11-01 07:13:41.747   604   735 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:13:41.757   604   735 I FLGst   : opensles_ringbuffer: queued samples 0 position 1 ms (0 samples) delay 0 samples
+11-01 07:13:41.757   604   735 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:13:41.758   604   735 I FLGst   : opensles_ringbuffer: queued samples 0 position 1 ms (0 samples) delay 0 samples
+11-01 07:13:41.758   604   735 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:13:41.768   604   735 I FLGst   : opensles_ringbuffer: queued samples 0 position 1 ms (0 samples) delay 0 samples
+11-01 07:13:41.768   604   735 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:13:41.768   604   735 I FLGst   : opensles_ringbuffer: queued samples 0 position 1 ms (0 samples) delay 0 samples
+11-01 07:13:41.768   604   735 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:13:41.779   604   735 I FLGst   : opensles_ringbuffer: queued samples 0 position 1 ms (0 samples) delay 0 samples
+11-01 07:13:41.779   604   735 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:13:41.779   604   735 I FLGst   : opensles_ringbuffer: queued samples 0 position 1 ms (0 samples) delay 0 samples
+11-01 07:13:41.779   604   735 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:13:41.789   604   735 I FLGst   : opensles_ringbuffer: queued samples 0 position 1 ms (0 samples) delay 0 samples
+11-01 07:13:41.789   604   735 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:13:41.789   604   735 I FLGst   : opensles_ringbuffer: queued samples 0 position 1 ms (0 samples) delay 0 samples
+11-01 07:13:41.790   604   735 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:13:41.800   604   735 I FLGst   : opensles_ringbuffer: queued samples 0 position 1 ms (0 samples) delay 0 samples
+11-01 07:13:41.800   604   735 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:13:41.800   604   735 I FLGst   : opensles_ringbuffer: queued samples 0 position 1 ms (0 samples) delay 0 samples
+11-01 07:13:41.800   604   735 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:13:41.810   604   735 I FLGst   : opensles_ringbuffer: queued samples 0 position 1 ms (0 samples) delay 0 samples
+11-01 07:13:41.810   604   735 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:13:41.811   604   735 I FLGst   : opensles_ringbuffer: queued samples 0 position 1 ms (0 samples) delay 0 samples
+11-01 07:13:41.811   604   735 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:13:41.821   604   735 I FLGst   : opensles_ringbuffer: queued samples 0 position 1 ms (0 samples) delay 0 samples
+11-01 07:13:41.821   604   735 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:13:41.821   604   735 I FLGst   : opensles_ringbuffer: queued samples 0 position 1 ms (0 samples) delay 0 samples
+11-01 07:13:41.821   604   735 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:13:41.824   604   753 I FLGst   : opensles_ringbuffer: queued samples 0 position 1 ms (0 samples) delay 0 samples
+11-01 07:13:41.825   604   753 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:13:41.825   604   767 I FLGst   : audiobasesink: latency query
+11-01 07:13:41.825   604   767 I FLGst   : audiobasesink: peer or we are not live, don't care about latency
+11-01 07:13:41.826   604   735 I FLGst   : opensles_ringbuffer: queued samples 0 position 1 ms (0 samples) delay 0 samples
+11-01 07:13:41.826   604   735 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:13:41.826   604   735 I FLCross : video received=0 pts=0 clock=0 base=20000000 latency=100000000
+11-01 07:13:41.827   604   735 I FLGst   : opensles_ringbuffer: queued samples 0 position 1 ms (0 samples) delay 0 samples
+11-01 07:13:41.827   604   735 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:13:41.828   604   754 I FLGst   : opensles_ringbuffer: queued samples 0 position 1 ms (0 samples) delay 0 samples
+11-01 07:13:41.828   604   754 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:13:41.828   604   755 I FLGst   : audiobasesink: time 0:00:00.033333333, start 0:00:00.000000000, samples 1600
+11-01 07:13:41.828   604   755 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:13:41.828   604   755 I FLGst   : audiobasesink: running: start 0:00:00.033333333 - stop 0:00:00.066666666
+11-01 07:13:41.828   604   755 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:13:41.828   604   735 I FLGst   : opensles_ringbuffer: queued samples 0 position 1 ms (0 samples) delay 0 samples
+11-01 07:13:41.828   604   755 I FLGst   : audiobasesink: adding base_time 0:00:00.020000000
+11-01 07:13:41.828   604   735 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:13:41.828   604   755 I FLGst   : audiobasesink: final timestamps: start 0:00:00.153333333 - stop 0:00:00.186666666
+11-01 07:13:41.828   604   755 I FLGst   : audiobasesink: align with prev sample, ABS (1) < 1920
+11-01 07:13:41.828   604   755 I FLGst   : audiobasesink: rendering at 7360 1600/1600
+11-01 07:13:41.829   604   755 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 07:13:41.829   604   755 I FLGst   : audiobasesink: next sample expected at 8960
+11-01 07:13:41.830   604   735 I FLGst   : opensles_ringbuffer: queued samples 0 position 1 ms (0 samples) delay 0 samples
+11-01 07:13:41.830   604   735 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:13:41.831   604   735 I FLGst   : opensles_ringbuffer: queued samples 0 position 1 ms (0 samples) delay 0 samples
+11-01 07:13:41.831   604   735 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:13:41.833   604   735 I FLGst   : opensles_ringbuffer: queued samples 0 position 1 ms (0 samples) delay 0 samples
+11-01 07:13:41.833   604   735 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:13:41.834   604   735 I FLGst   : opensles_ringbuffer: queued samples 0 position 1 ms (0 samples) delay 0 samples
+11-01 07:13:41.834   604   735 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:13:41.835   604   735 I FLGst   : opensles_ringbuffer: queued samples 0 position 1 ms (0 samples) delay 0 samples
+11-01 07:13:41.836   604   735 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:13:41.837   604   735 I FLGst   : opensles_ringbuffer: queued samples 0 position 1 ms (0 samples) delay 0 samples
+11-01 07:13:41.837   604   735 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:13:41.838   604   735 I FLGst   : opensles_ringbuffer: queued samples 0 position 1 ms (0 samples) delay 0 samples
+11-01 07:13:41.839   604   735 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:13:41.840   604   735 I FLGst   : opensles_ringbuffer: queued samples 0 position 1 ms (0 samples) delay 0 samples
+11-01 07:13:41.840   604   735 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:13:41.842   604   735 I FLGst   : opensles_ringbuffer: queued samples 0 position 1 ms (0 samples) delay 0 samples
+11-01 07:13:41.842   604   735 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:13:41.843   604   735 I FLGst   : opensles_ringbuffer: queued samples 0 position 1 ms (0 samples) delay 0 samples
+11-01 07:13:41.843   604   735 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:13:41.844   604   735 I FLGst   : opensles_ringbuffer: queued samples 0 position 1 ms (0 samples) delay 0 samples
+11-01 07:13:41.844   604   735 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:13:41.846   604   735 I FLGst   : opensles_ringbuffer: queued samples 0 position 1 ms (0 samples) delay 0 samples
+11-01 07:13:41.846   604   735 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:13:41.848   604   735 I FLGst   : opensles_ringbuffer: queued samples 0 position 1 ms (0 samples) delay 0 samples
+11-01 07:13:41.848   604   735 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:13:41.850   604   735 I FLGst   : opensles_ringbuffer: queued samples 0 position 1 ms (0 samples) delay 0 samples
+11-01 07:13:41.850   604   735 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:13:41.851   604   735 I FLGst   : opensles_ringbuffer: queued samples 0 position 1 ms (0 samples) delay 0 samples
+11-01 07:13:41.851   604   735 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:13:41.852   604   735 I FLGst   : opensles_ringbuffer: queued samples 0 position 1 ms (0 samples) delay 0 samples
+11-01 07:13:41.852   604   735 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:13:41.854   604   735 I FLGst   : opensles_ringbuffer: queued samples 0 position 1 ms (0 samples) delay 0 samples
+11-01 07:13:41.854   604   735 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:13:41.855   604   735 I FLGst   : opensles_ringbuffer: queued samples 0 position 1 ms (0 samples) delay 0 samples
+11-01 07:13:41.855   604   735 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:13:41.856   604   735 I FLGst   : opensles_ringbuffer: queued samples 0 position 1 ms (0 samples) delay 0 samples
+11-01 07:13:41.856   604   735 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:13:41.858   604   735 I FLGst   : opensles_ringbuffer: queued samples 0 position 1 ms (0 samples) delay 0 samples
+11-01 07:13:41.858   604   735 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:13:41.859   604   735 I FLGst   : opensles_ringbuffer: queued samples 0 position 1 ms (0 samples) delay 0 samples
+11-01 07:13:41.859   604   735 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:13:41.860   604   735 I FLGst   : opensles_ringbuffer: queued samples 0 position 1 ms (0 samples) delay 0 samples
+11-01 07:13:41.861   604   735 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:13:41.862   604   754 I FLGst   : opensles_ringbuffer: queued samples 0 position 1 ms (0 samples) delay 0 samples
+11-01 07:13:41.862   604   735 I FLGst   : opensles_ringbuffer: queued samples 0 position 1 ms (0 samples) delay 0 samples
+11-01 07:13:41.862   604   754 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:13:41.862   604   735 I FLGst   : audiobasesink: processed samples: raw 0, delay 0, real 0, time 0:00:00.000000000
+11-01 07:13:41.862   604   755 I FLGst   : audiobasesink: time 0:00:00.066666666, start 0:00:00.000000000, samples 1600
+11-01 07:13:41.862   604   755 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:13:41.862   604   755 I FLGst   : audiobasesink: running: start 0:00:00.066666666 - stop 0:00:00.099999999
+11-01 07:13:41.862   604   755 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:13:41.862   604   755 I FLGst   : audiobasesink: adding base_time 0:00:00.020000000
+11-01 07:13:41.862   604   755 I FLGst   : audiobasesink: final timestamps: start 0:00:00.186666666 - stop 0:00:00.219999999
+11-01 07:13:41.862   604   755 I FLGst   : audiobasesink: align with prev sample, ABS (1) < 1920
+11-01 07:13:41.862   604   755 I FLGst   : audiobasesink: rendering at 8960 1600/1600
+11-01 07:13:41.863   604   755 I FLGst   : opensles_ringbuffer: enqueue: 0xb4000078cae4a180 size 1920 segment: 0 in queue[0]
+11-01 07:13:41.871   604   755 I FLGst   : opensles_ringbuffer: ringbuffer  started
+11-01 07:13:41.871   604   765 I FLGst   : opensles_ringbuffer: enqueue: 0xb4000078cae4a900 size 1920 segment: 1 in queue[1]
+11-01 07:13:41.871   604   735 I FLGst   : opensles_ringbuffer: queued samples 960 position 0 ms (0 samples) delay 960 samples
+11-01 07:13:41.871   604   765 I FLGst   : opensles_ringbuffer: enqueue: 0xb4000078cae4b080 size 1920 segment: 2 in queue[2]
+11-01 07:13:41.871   604   735 I FLGst   : audiobasesink: processed samples: raw 480, delay 960, real 0, time 0:00:00.000000000
+11-01 07:13:41.871   604   755 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 07:13:41.871   604   755 I FLGst   : audiobasesink: next sample expected at 10560
+11-01 07:13:41.873   604   735 I FLGst   : opensles_ringbuffer: queued samples 1440 position 0 ms (0 samples) delay 1440 samples
+11-01 07:13:41.873   604   735 I FLGst   : audiobasesink: processed samples: raw 1440, delay 1440, real 0, time 0:00:00.000000000
+11-01 07:13:41.874   604   735 I FLGst   : opensles_ringbuffer: queued samples 1440 position 0 ms (0 samples) delay 1440 samples
+11-01 07:13:41.874   604   735 I FLGst   : audiobasesink: processed samples: raw 1440, delay 1440, real 0, time 0:00:00.000000000
+11-01 07:13:41.875   604   735 I FLGst   : opensles_ringbuffer: queued samples 1440 position 0 ms (0 samples) delay 1440 samples
+11-01 07:13:41.875   604   735 I FLGst   : audiobasesink: processed samples: raw 1440, delay 1440, real 0, time 0:00:00.000000000
+11-01 07:13:41.877   604   735 I FLGst   : opensles_ringbuffer: queued samples 1440 position 0 ms (0 samples) delay 1440 samples
+11-01 07:13:41.877   604   735 I FLGst   : audiobasesink: processed samples: raw 1440, delay 1440, real 0, time 0:00:00.000000000
+11-01 07:13:41.878   604   735 I FLGst   : opensles_ringbuffer: queued samples 1440 position 0 ms (0 samples) delay 1440 samples
+11-01 07:13:41.878   604   735 I FLGst   : audiobasesink: processed samples: raw 1440, delay 1440, real 0, time 0:00:00.000000000
+11-01 07:13:41.880   604   735 I FLGst   : opensles_ringbuffer: queued samples 1440 position 0 ms (0 samples) delay 1440 samples
+11-01 07:13:41.880   604   735 I FLGst   : audiobasesink: processed samples: raw 1440, delay 1440, real 0, time 0:00:00.000000000
+11-01 07:13:41.881   604   735 I FLGst   : opensles_ringbuffer: queued samples 1440 position 0 ms (0 samples) delay 1440 samples
+11-01 07:13:41.881   604   735 I FLGst   : audiobasesink: processed samples: raw 1440, delay 1440, real 0, time 0:00:00.000000000
+11-01 07:13:41.883   604   735 I FLGst   : opensles_ringbuffer: queued samples 1440 position 0 ms (0 samples) delay 1440 samples
+11-01 07:13:41.883   604   735 I FLGst   : audiobasesink: processed samples: raw 1440, delay 1440, real 0, time 0:00:00.000000000
+11-01 07:13:41.884   604   735 I FLGst   : opensles_ringbuffer: queued samples 1440 position 0 ms (0 samples) delay 1440 samples
+11-01 07:13:41.884   604   735 I FLGst   : audiobasesink: processed samples: raw 1440, delay 1440, real 0, time 0:00:00.000000000
+11-01 07:13:41.885   604   735 I FLGst   : opensles_ringbuffer: queued samples 1440 position 0 ms (0 samples) delay 1440 samples
+11-01 07:13:41.885   604   735 I FLGst   : audiobasesink: processed samples: raw 1440, delay 1440, real 0, time 0:00:00.000000000
+11-01 07:13:41.887   604   735 I FLGst   : opensles_ringbuffer: queued samples 1440 position 0 ms (0 samples) delay 1440 samples
+11-01 07:13:41.887   604   735 I FLGst   : audiobasesink: processed samples: raw 1440, delay 1440, real 0, time 0:00:00.000000000
+11-01 07:13:41.888   604   735 I FLGst   : opensles_ringbuffer: queued samples 1440 position 0 ms (0 samples) delay 1440 samples
+11-01 07:13:41.888   604   735 I FLGst   : audiobasesink: processed samples: raw 1440, delay 1440, real 0, time 0:00:00.000000000
+11-01 07:13:41.890   604   735 I FLGst   : opensles_ringbuffer: queued samples 1440 position 0 ms (0 samples) delay 1440 samples
+11-01 07:13:41.890   604   735 I FLGst   : audiobasesink: processed samples: raw 1440, delay 1440, real 0, time 0:00:00.000000000
+11-01 07:13:41.891   604   735 I FLGst   : opensles_ringbuffer: queued samples 1440 position 0 ms (0 samples) delay 1440 samples
+11-01 07:13:41.891   604   735 I FLGst   : audiobasesink: processed samples: raw 1440, delay 1440, real 0, time 0:00:00.000000000
+11-01 07:13:41.892   604   735 I FLGst   : opensles_ringbuffer: queued samples 1440 position 0 ms (0 samples) delay 1440 samples
+11-01 07:13:41.892   604   735 I FLGst   : audiobasesink: processed samples: raw 1440, delay 1440, real 0, time 0:00:00.000000000
+11-01 07:13:41.894   604   735 I FLGst   : opensles_ringbuffer: queued samples 1440 position 0 ms (0 samples) delay 1440 samples
+11-01 07:13:41.894   604   735 I FLGst   : audiobasesink: processed samples: raw 1440, delay 1440, real 0, time 0:00:00.000000000
+11-01 07:13:41.895   604   754 I FLGst   : opensles_ringbuffer: queued samples 1440 position 0 ms (0 samples) delay 1440 samples
+11-01 07:13:41.895   604   735 I FLGst   : opensles_ringbuffer: queued samples 1440 position 0 ms (0 samples) delay 1440 samples
+11-01 07:13:41.895   604   754 I FLGst   : audiobasesink: processed samples: raw 1440, delay 1440, real 0, time 0:00:00.000000000
+11-01 07:13:41.895   604   735 I FLGst   : audiobasesink: processed samples: raw 1440, delay 1440, real 0, time 0:00:00.000000000
+11-01 07:13:41.896   604   755 I FLGst   : audiobasesink: time 0:00:00.100000000, start 0:00:00.000000000, samples 1600
+11-01 07:13:41.896   604   755 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:13:41.896   604   755 I FLGst   : audiobasesink: running: start 0:00:00.100000000 - stop 0:00:00.133333333
+11-01 07:13:41.896   604   755 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:13:41.896   604   755 I FLGst   : audiobasesink: adding base_time 0:00:00.020000000
+11-01 07:13:41.896   604   755 I FLGst   : audiobasesink: final timestamps: start 0:00:00.220000000 - stop 0:00:00.253333333
+11-01 07:13:41.896   604   755 I FLGst   : audiobasesink: align with prev sample, ABS (0) < 1920
+11-01 07:13:41.896   604   755 I FLGst   : audiobasesink: rendering at 10560 1600/1600
+11-01 07:13:41.897   604   735 I FLGst   : opensles_ringbuffer: queued samples 1440 position 0 ms (0 samples) delay 1440 samples
+11-01 07:13:41.897   604   735 I FLGst   : audiobasesink: processed samples: raw 1440, delay 1440, real 0, time 0:00:00.000000000
+11-01 07:13:41.898   604   735 I FLGst   : opensles_ringbuffer: queued samples 1440 position 0 ms (0 samples) delay 1440 samples
+11-01 07:13:41.898   604   735 I FLGst   : audiobasesink: processed samples: raw 1440, delay 1440, real 0, time 0:00:00.000000000
+11-01 07:13:41.900   604   735 I FLGst   : opensles_ringbuffer: queued samples 1440 position 0 ms (0 samples) delay 1440 samples
+11-01 07:13:41.900   604   735 I FLGst   : audiobasesink: processed samples: raw 1440, delay 1440, real 0, time 0:00:00.000000000
+11-01 07:13:41.901   604   735 I FLGst   : opensles_ringbuffer: queued samples 1440 position 0 ms (0 samples) delay 1440 samples
+11-01 07:13:41.901   604   735 I FLGst   : audiobasesink: processed samples: raw 1440, delay 1440, real 0, time 0:00:00.000000000
+11-01 07:13:41.902   604   735 I FLGst   : opensles_ringbuffer: queued samples 1440 position 0 ms (0 samples) delay 1440 samples
+11-01 07:13:41.903   604   735 I FLGst   : audiobasesink: processed samples: raw 1440, delay 1440, real 0, time 0:00:00.000000000
+11-01 07:13:41.904   604   735 I FLGst   : opensles_ringbuffer: queued samples 1440 position 0 ms (0 samples) delay 1440 samples
+11-01 07:13:41.904   604   735 I FLGst   : audiobasesink: processed samples: raw 1440, delay 1440, real 0, time 0:00:00.000000000
+11-01 07:13:41.905   604   735 I FLGst   : opensles_ringbuffer: queued samples 1440 position 0 ms (0 samples) delay 1440 samples
+11-01 07:13:41.905   604   735 I FLGst   : audiobasesink: processed samples: raw 1440, delay 1440, real 0, time 0:00:00.000000000
+11-01 07:13:41.907   604   735 I FLGst   : opensles_ringbuffer: queued samples 1440 position 5 ms (240 samples) delay 1200 samples
+11-01 07:13:41.907   604   735 I FLGst   : audiobasesink: processed samples: raw 1440, delay 1200, real 240, time 0:00:00.005000000
+11-01 07:13:41.908   604   735 I FLGst   : opensles_ringbuffer: queued samples 1440 position 5 ms (240 samples) delay 1200 samples
+11-01 07:13:41.908   604   735 I FLGst   : audiobasesink: processed samples: raw 1440, delay 1200, real 240, time 0:00:00.005000000
+11-01 07:13:41.910   604   735 I FLGst   : opensles_ringbuffer: queued samples 1440 position 5 ms (240 samples) delay 1200 samples
+11-01 07:13:41.910   604   735 I FLGst   : audiobasesink: processed samples: raw 1440, delay 1200, real 240, time 0:00:00.005000000
+11-01 07:13:41.911   604   735 I FLGst   : opensles_ringbuffer: queued samples 1440 position 5 ms (240 samples) delay 1200 samples
+11-01 07:13:41.911   604   735 I FLGst   : audiobasesink: processed samples: raw 1440, delay 1200, real 240, time 0:00:00.005000000
+11-01 07:13:41.912   604   765 I FLGst   : opensles_ringbuffer: enqueue: 0xb4000078cae4b800 size 1920 segment: 3 in queue[3]
+11-01 07:13:41.912   604   735 I FLGst   : opensles_ringbuffer: queued samples 1920 position 10 ms (480 samples) delay 1440 samples
+11-01 07:13:41.912   604   735 I FLGst   : audiobasesink: processed samples: raw 1920, delay 1440, real 480, time 0:00:00.010000000
+11-01 07:13:41.914   604   735 I FLGst   : opensles_ringbuffer: queued samples 1920 position 10 ms (480 samples) delay 1440 samples
+11-01 07:13:41.914   604   735 I FLGst   : audiobasesink: processed samples: raw 1920, delay 1440, real 480, time 0:00:00.010000000
+11-01 07:13:41.915   604   735 I FLGst   : opensles_ringbuffer: queued samples 1920 position 10 ms (480 samples) delay 1440 samples
+11-01 07:13:41.915   604   735 I FLGst   : audiobasesink: processed samples: raw 1920, delay 1440, real 480, time 0:00:00.010000000
+11-01 07:13:41.916   604   735 I FLGst   : opensles_ringbuffer: queued samples 1920 position 10 ms (480 samples) delay 1440 samples
+11-01 07:13:41.917   604   735 I FLGst   : audiobasesink: processed samples: raw 1920, delay 1440, real 480, time 0:00:00.010000000
+11-01 07:13:41.918   604   735 I FLGst   : opensles_ringbuffer: queued samples 1920 position 16 ms (768 samples) delay 1152 samples
+11-01 07:13:41.918   604   735 I FLGst   : audiobasesink: processed samples: raw 1920, delay 1152, real 768, time 0:00:00.016000000
+11-01 07:13:41.919   604   735 I FLGst   : opensles_ringbuffer: queued samples 1920 position 16 ms (768 samples) delay 1152 samples
+11-01 07:13:41.919   604   735 I FLGst   : audiobasesink: processed samples: raw 1920, delay 1152, real 768, time 0:00:00.016000000
+11-01 07:13:41.921   604   735 I FLGst   : opensles_ringbuffer: queued samples 1920 position 16 ms (768 samples) delay 1152 samples
+11-01 07:13:41.921   604   735 I FLGst   : audiobasesink: processed samples: raw 1920, delay 1152, real 768, time 0:00:00.016000000
+11-01 07:13:41.922   604   735 I FLGst   : opensles_ringbuffer: queued samples 1920 position 16 ms (768 samples) delay 1152 samples
+11-01 07:13:41.922   604   735 I FLGst   : audiobasesink: processed samples: raw 1920, delay 1152, real 768, time 0:00:00.016000000
+11-01 07:13:41.923   604   765 I FLGst   : opensles_ringbuffer: enqueue: 0xb4000078cae4a180 size 1920 segment: 4 in queue[0]
+11-01 07:13:41.923   604   765 I FLGst   : opensles_ringbuffer: at position=21 ms
+11-01 07:13:41.923   604   735 I FLGst   : opensles_ringbuffer: queued samples 2400 position 21 ms (1008 samples) delay 1392 samples
+11-01 07:13:41.924   604   735 I FLGst   : audiobasesink: processed samples: raw 2400, delay 1392, real 1008, time 0:00:00.021000000
+11-01 07:13:41.925   604   735 I FLGst   : opensles_ringbuffer: queued samples 2400 position 21 ms (1008 samples) delay 1392 samples
+11-01 07:13:41.925   604   735 I FLGst   : audiobasesink: processed samples: raw 2400, delay 1392, real 1008, time 0:00:00.021000000
+11-01 07:13:41.926   604   735 I FLGst   : opensles_ringbuffer: queued samples 2400 position 21 ms (1008 samples) delay 1392 samples
+11-01 07:13:41.926   604   735 I FLGst   : audiobasesink: processed samples: raw 2400, delay 1392, real 1008, time 0:00:00.021000000
+11-01 07:13:41.928   604   735 I FLGst   : opensles_ringbuffer: queued samples 2400 position 21 ms (1008 samples) delay 1392 samples
+11-01 07:13:41.928   604   735 I FLGst   : audiobasesink: processed samples: raw 2400, delay 1392, real 1008, time 0:00:00.021000000
+11-01 07:13:41.929   604   754 I FLGst   : opensles_ringbuffer: queued samples 2400 position 26 ms (1248 samples) delay 1152 samples
+11-01 07:13:41.929   604   754 I FLGst   : audiobasesink: processed samples: raw 2400, delay 1152, real 1248, time 0:00:00.026000000
+11-01 07:13:41.929   604   735 I FLGst   : opensles_ringbuffer: queued samples 2400 position 26 ms (1248 samples) delay 1152 samples
+11-01 07:13:41.930   604   735 I FLGst   : audiobasesink: processed samples: raw 2400, delay 1152, real 1248, time 0:00:00.026000000
+11-01 07:13:41.932   604   735 I FLGst   : opensles_ringbuffer: queued samples 2400 position 26 ms (1248 samples) delay 1152 samples
+11-01 07:13:41.932   604   735 I FLGst   : audiobasesink: processed samples: raw 2400, delay 1152, real 1248, time 0:00:00.026000000
+11-01 07:13:41.933   604   735 I FLGst   : opensles_ringbuffer: queued samples 2400 position 26 ms (1248 samples) delay 1152 samples
+11-01 07:13:41.933   604   735 I FLGst   : audiobasesink: processed samples: raw 2400, delay 1152, real 1248, time 0:00:00.026000000
+11-01 07:13:41.933   604   765 I FLGst   : opensles_ringbuffer: enqueue: 0xb4000078cae4a900 size 1920 segment: 5 in queue[1]
+11-01 07:13:41.933   604   755 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 07:13:41.933   604   755 I FLGst   : audiobasesink: next sample expected at 12160
+11-01 07:13:41.934   604   755 I FLGst   : audiobasesink: time 0:00:00.133333333, start 0:00:00.000000000, samples 1600
+11-01 07:13:41.934   604   755 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:13:41.934   604   755 I FLGst   : audiobasesink: running: start 0:00:00.133333333 - stop 0:00:00.166666666
+11-01 07:13:41.934   604   755 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:13:41.934   604   755 I FLGst   : audiobasesink: adding base_time 0:00:00.020000000
+11-01 07:13:41.934   604   755 I FLGst   : audiobasesink: final timestamps: start 0:00:00.253333333 - stop 0:00:00.286666666
+11-01 07:13:41.934   604   755 I FLGst   : audiobasesink: align with prev sample, ABS (1) < 1920
+11-01 07:13:41.934   604   755 I FLGst   : audiobasesink: rendering at 12160 1600/1600
+11-01 07:13:41.934   604   735 I FLGst   : opensles_ringbuffer: queued samples 2880 position 32 ms (1536 samples) delay 1344 samples
+11-01 07:13:41.934   604   735 I FLGst   : audiobasesink: processed samples: raw 2880, delay 1344, real 1536, time 0:00:00.032000000
+11-01 07:13:41.936   604   735 I FLGst   : opensles_ringbuffer: queued samples 2880 position 32 ms (1536 samples) delay 1344 samples
+11-01 07:13:41.936   604   735 I FLGst   : audiobasesink: processed samples: raw 2880, delay 1344, real 1536, time 0:00:00.032000000
+11-01 07:13:41.937   604   735 I FLGst   : opensles_ringbuffer: queued samples 2880 position 32 ms (1536 samples) delay 1344 samples
+11-01 07:13:41.937   604   735 I FLGst   : audiobasesink: processed samples: raw 2880, delay 1344, real 1536, time 0:00:00.032000000
+11-01 07:13:41.938   604   735 I FLGst   : opensles_ringbuffer: queued samples 2880 position 32 ms (1536 samples) delay 1344 samples
+11-01 07:13:41.939   604   735 I FLGst   : audiobasesink: processed samples: raw 2880, delay 1344, real 1536, time 0:00:00.032000000
+11-01 07:13:41.940   604   735 I FLGst   : opensles_ringbuffer: queued samples 2880 position 37 ms (1776 samples) delay 1104 samples
+11-01 07:13:41.940   604   735 I FLGst   : audiobasesink: processed samples: raw 2880, delay 1104, real 1776, time 0:00:00.037000000
+11-01 07:13:41.941   604   735 I FLGst   : opensles_ringbuffer: queued samples 2880 position 37 ms (1776 samples) delay 1104 samples
+11-01 07:13:41.941   604   735 I FLGst   : audiobasesink: processed samples: raw 2880, delay 1104, real 1776, time 0:00:00.037000000
+11-01 07:13:41.943   604   735 I FLGst   : opensles_ringbuffer: queued samples 2880 position 37 ms (1776 samples) delay 1104 samples
+11-01 07:13:41.943   604   735 I FLGst   : audiobasesink: processed samples: raw 2880, delay 1104, real 1776, time 0:00:00.037000000
+11-01 07:13:41.944   604   765 I FLGst   : opensles_ringbuffer: enqueue: 0xb4000078cae4b080 size 1920 segment: 6 in queue[2]
+11-01 07:13:41.944   604   765 I FLGst   : opensles_ringbuffer: at position=42 ms
+11-01 07:13:41.944   604   735 I FLGst   : opensles_ringbuffer: queued samples 3360 position 42 ms (2016 samples) delay 1344 samples
+11-01 07:13:41.944   604   735 I FLGst   : audiobasesink: processed samples: raw 3360, delay 1344, real 2016, time 0:00:00.042000000
+11-01 07:13:41.946   604   735 I FLGst   : opensles_ringbuffer: queued samples 3360 position 42 ms (2016 samples) delay 1344 samples
+11-01 07:13:41.946   604   735 I FLGst   : audiobasesink: processed samples: raw 3360, delay 1344, real 2016, time 0:00:00.042000000
+11-01 07:13:41.948   604   735 I FLGst   : opensles_ringbuffer: queued samples 3360 position 42 ms (2016 samples) delay 1344 samples
+11-01 07:13:41.948   604   735 I FLGst   : audiobasesink: processed samples: raw 3360, delay 1344, real 2016, time 0:00:00.042000000
+11-01 07:13:41.949   604   735 I FLGst   : opensles_ringbuffer: queued samples 3360 position 42 ms (2016 samples) delay 1344 samples
+11-01 07:13:41.949   604   735 I FLGst   : audiobasesink: processed samples: raw 3360, delay 1344, real 2016, time 0:00:00.042000000
+11-01 07:13:41.950   604   735 I FLGst   : opensles_ringbuffer: queued samples 3360 position 48 ms (2304 samples) delay 1056 samples
+11-01 07:13:41.951   604   735 I FLGst   : audiobasesink: processed samples: raw 3360, delay 1056, real 2304, time 0:00:00.048000000
+11-01 07:13:41.952   604   735 I FLGst   : opensles_ringbuffer: queued samples 3360 position 48 ms (2304 samples) delay 1056 samples
+11-01 07:13:41.952   604   735 I FLGst   : audiobasesink: processed samples: raw 3360, delay 1056, real 2304, time 0:00:00.048000000
+11-01 07:13:41.953   604   735 I FLGst   : opensles_ringbuffer: queued samples 3360 position 48 ms (2304 samples) delay 1056 samples
+11-01 07:13:41.953   604   735 I FLGst   : audiobasesink: processed samples: raw 3360, delay 1056, real 2304, time 0:00:00.048000000
+11-01 07:13:41.955   604   765 I FLGst   : opensles_ringbuffer: enqueue: 0xb4000078cae4b800 size 1920 segment: 7 in queue[3]
+11-01 07:13:41.955   604   735 I FLGst   : opensles_ringbuffer: queued samples 3840 position 53 ms (2544 samples) delay 1296 samples
+11-01 07:13:41.955   604   735 I FLGst   : audiobasesink: processed samples: raw 3360, delay 1296, real 2064, time 0:00:00.043000000
+11-01 07:13:41.956   604   735 I FLGst   : opensles_ringbuffer: queued samples 3840 position 53 ms (2544 samples) delay 1296 samples
+11-01 07:13:41.956   604   735 I FLGst   : audiobasesink: processed samples: raw 3840, delay 1296, real 2544, time 0:00:00.053000000
+11-01 07:13:41.958   604   735 I FLGst   : opensles_ringbuffer: queued samples 3840 position 53 ms (2544 samples) delay 1296 samples
+11-01 07:13:41.958   604   735 I FLGst   : audiobasesink: processed samples: raw 3840, delay 1296, real 2544, time 0:00:00.053000000
+11-01 07:13:41.959   604   735 I FLGst   : opensles_ringbuffer: queued samples 3840 position 53 ms (2544 samples) delay 1296 samples
+11-01 07:13:41.959   604   735 I FLGst   : audiobasesink: processed samples: raw 3840, delay 1296, real 2544, time 0:00:00.053000000
+11-01 07:13:41.960   604   735 I FLGst   : opensles_ringbuffer: queued samples 3840 position 58 ms (2784 samples) delay 1056 samples
+11-01 07:13:41.961   604   735 I FLGst   : audiobasesink: processed samples: raw 3840, delay 1056, real 2784, time 0:00:00.058000000
+11-01 07:13:41.962   604   754 I FLGst   : opensles_ringbuffer: queued samples 3840 position 58 ms (2784 samples) delay 1056 samples
+11-01 07:13:41.962   604   735 I FLGst   : opensles_ringbuffer: queued samples 3840 position 58 ms (2784 samples) delay 1056 samples
+11-01 07:13:41.962   604   754 I FLGst   : audiobasesink: processed samples: raw 3840, delay 1056, real 2784, time 0:00:00.058000000
+11-01 07:13:41.962   604   735 I FLGst   : audiobasesink: processed samples: raw 3840, delay 1056, real 2784, time 0:00:00.058000000
+11-01 07:13:41.963   604   735 I FLGst   : opensles_ringbuffer: queued samples 3840 position 58 ms (2784 samples) delay 1056 samples
+11-01 07:13:41.963   604   735 I FLGst   : audiobasesink: processed samples: raw 3840, delay 1056, real 2784, time 0:00:00.058000000
+11-01 07:13:41.965   604   735 I FLGst   : opensles_ringbuffer: queued samples 3840 position 58 ms (2784 samples) delay 1056 samples
+11-01 07:13:41.965   604   735 I FLGst   : audiobasesink: processed samples: raw 3840, delay 1056, real 2784, time 0:00:00.058000000
+11-01 07:13:41.965   604   765 I FLGst   : opensles_ringbuffer: enqueue: 0xb4000078cae4a180 size 1920 segment: 8 in queue[0]
+11-01 07:13:41.966   604   765 I FLGst   : opensles_ringbuffer: at position=64 ms
+11-01 07:13:41.966   604   755 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 07:13:41.966   604   755 I FLGst   : audiobasesink: next sample expected at 13760
+11-01 07:13:41.966   604   735 I FLGst   : opensles_ringbuffer: queued samples 4320 position 64 ms (3072 samples) delay 1248 samples
+11-01 07:13:41.966   604   735 I FLGst   : audiobasesink: processed samples: raw 4320, delay 1248, real 3072, time 0:00:00.064000000
+11-01 07:13:41.966   604   755 I FLGst   : audiobasesink: time 0:00:00.166666666, start 0:00:00.000000000, samples 1600
+11-01 07:13:41.966   604   755 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:13:41.966   604   755 I FLGst   : audiobasesink: running: start 0:00:00.166666666 - stop 0:00:00.199999999
+11-01 07:13:41.966   604   755 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:13:41.966   604   755 I FLGst   : audiobasesink: adding base_time 0:00:00.020000000
+11-01 07:13:41.966   604   755 I FLGst   : audiobasesink: final timestamps: start 0:00:00.286666666 - stop 0:00:00.319999999
+11-01 07:13:41.967   604   755 I FLGst   : audiobasesink: align with prev sample, ABS (1) < 1920
+11-01 07:13:41.967   604   755 I FLGst   : audiobasesink: rendering at 13760 1600/1600
+11-01 07:13:41.967   604   735 I FLGst   : opensles_ringbuffer: queued samples 4320 position 64 ms (3072 samples) delay 1248 samples
+11-01 07:13:41.968   604   735 I FLGst   : audiobasesink: processed samples: raw 4320, delay 1248, real 3072, time 0:00:00.064000000
+11-01 07:13:41.969   604   735 I FLGst   : opensles_ringbuffer: queued samples 4320 position 64 ms (3072 samples) delay 1248 samples
+11-01 07:13:41.969   604   735 I FLGst   : audiobasesink: processed samples: raw 4320, delay 1248, real 3072, time 0:00:00.064000000
+11-01 07:13:41.970   604   735 I FLGst   : opensles_ringbuffer: queued samples 4320 position 64 ms (3072 samples) delay 1248 samples
+11-01 07:13:41.970   604   735 I FLGst   : audiobasesink: processed samples: raw 4320, delay 1248, real 3072, time 0:00:00.064000000
+11-01 07:13:41.971   604   765 I FLGst   : opensles_ringbuffer: enqueue: 0xb4000078cae4a900 size 1920 segment: 9 in queue[1]
+11-01 07:13:41.972   604   735 I FLGst   : opensles_ringbuffer: queued samples 4800 position 69 ms (3312 samples) delay 1488 samples
+11-01 07:13:41.972   604   735 I FLGst   : audiobasesink: processed samples: raw 4800, delay 1488, real 3312, time 0:00:00.069000000
+11-01 07:13:41.973   604   735 I FLGst   : opensles_ringbuffer: queued samples 4800 position 69 ms (3312 samples) delay 1488 samples
+11-01 07:13:41.973   604   735 I FLGst   : audiobasesink: processed samples: raw 4800, delay 1488, real 3312, time 0:00:00.069000000
+11-01 07:13:41.975   604   735 I FLGst   : opensles_ringbuffer: queued samples 4800 position 69 ms (3312 samples) delay 1488 samples
+11-01 07:13:41.975   604   735 I FLGst   : audiobasesink: processed samples: raw 4800, delay 1488, real 3312, time 0:00:00.069000000
+11-01 07:13:41.976   604   735 I FLGst   : opensles_ringbuffer: queued samples 4800 position 74 ms (3552 samples) delay 1248 samples
+11-01 07:13:41.976   604   735 I FLGst   : audiobasesink: processed samples: raw 4800, delay 1248, real 3552, time 0:00:00.074000000
+11-01 07:13:41.977   604   735 I FLGst   : opensles_ringbuffer: queued samples 4800 position 74 ms (3552 samples) delay 1248 samples
+11-01 07:13:41.977   604   735 I FLGst   : audiobasesink: processed samples: raw 4800, delay 1248, real 3552, time 0:00:00.074000000
+11-01 07:13:41.979   604   735 I FLGst   : opensles_ringbuffer: queued samples 4800 position 74 ms (3552 samples) delay 1248 samples
+11-01 07:13:41.979   604   735 I FLGst   : audiobasesink: processed samples: raw 4800, delay 1248, real 3552, time 0:00:00.074000000
+11-01 07:13:41.980   604   735 I FLGst   : opensles_ringbuffer: queued samples 4800 position 74 ms (3552 samples) delay 1248 samples
+11-01 07:13:41.980   604   735 I FLGst   : audiobasesink: processed samples: raw 4800, delay 1248, real 3552, time 0:00:00.074000000
+11-01 07:13:41.981   604   765 I FLGst   : opensles_ringbuffer: enqueue: 0xb4000078cae4b080 size 1920 segment: 10 in queue[2]
+11-01 07:13:41.982   604   765 I FLGst   : opensles_ringbuffer: at position=80 ms
+11-01 07:13:41.982   604   735 I FLGst   : opensles_ringbuffer: queued samples 5280 position 80 ms (3840 samples) delay 1440 samples
+11-01 07:13:41.982   604   735 I FLGst   : audiobasesink: processed samples: raw 5280, delay 1440, real 3840, time 0:00:00.080000000
+11-01 07:13:41.983   604   735 I FLGst   : opensles_ringbuffer: queued samples 5280 position 80 ms (3840 samples) delay 1440 samples
+11-01 07:13:41.983   604   735 I FLGst   : audiobasesink: processed samples: raw 5280, delay 1440, real 3840, time 0:00:00.080000000
+11-01 07:13:41.984   604   735 I FLGst   : opensles_ringbuffer: queued samples 5280 position 80 ms (3840 samples) delay 1440 samples
+11-01 07:13:41.985   604   735 I FLGst   : audiobasesink: processed samples: raw 5280, delay 1440, real 3840, time 0:00:00.080000000
+11-01 07:13:41.986   604   735 I FLGst   : opensles_ringbuffer: queued samples 5280 position 80 ms (3840 samples) delay 1440 samples
+11-01 07:13:41.986   604   735 I FLGst   : audiobasesink: processed samples: raw 5280, delay 1440, real 3840, time 0:00:00.080000000
+11-01 07:13:41.987   604   735 I FLGst   : opensles_ringbuffer: queued samples 5280 position 85 ms (4080 samples) delay 1200 samples
+11-01 07:13:41.987   604   735 I FLGst   : audiobasesink: processed samples: raw 5280, delay 1200, real 4080, time 0:00:00.085000000
+11-01 07:13:41.989   604   735 I FLGst   : opensles_ringbuffer: queued samples 5280 position 85 ms (4080 samples) delay 1200 samples
+11-01 07:13:41.989   604   735 I FLGst   : audiobasesink: processed samples: raw 5280, delay 1200, real 4080, time 0:00:00.085000000
+11-01 07:13:41.990   604   735 I FLGst   : opensles_ringbuffer: queued samples 5280 position 85 ms (4080 samples) delay 1200 samples
+11-01 07:13:41.990   604   735 I FLGst   : audiobasesink: processed samples: raw 5280, delay 1200, real 4080, time 0:00:00.085000000
+11-01 07:13:41.991   604   735 I FLGst   : opensles_ringbuffer: queued samples 5280 position 85 ms (4080 samples) delay 1200 samples
+11-01 07:13:41.991   604   735 I FLGst   : audiobasesink: processed samples: raw 5280, delay 1200, real 4080, time 0:00:00.085000000
+11-01 07:13:41.992   604   765 I FLGst   : opensles_ringbuffer: enqueue: 0xb4000078cae4b800 size 1920 segment: 11 in queue[3]
+11-01 07:13:41.992   604   755 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 07:13:41.992   604   755 I FLGst   : audiobasesink: next sample expected at 15360
+11-01 07:13:41.993   604   735 I FLGst   : opensles_ringbuffer: queued samples 5760 position 90 ms (4320 samples) delay 1440 samples
+11-01 07:13:41.993   604   735 I FLGst   : audiobasesink: processed samples: raw 5760, delay 1440, real 4320, time 0:00:00.090000000
+11-01 07:13:41.994   604   735 I FLGst   : opensles_ringbuffer: queued samples 5760 position 90 ms (4320 samples) delay 1440 samples
+11-01 07:13:41.994   604   735 I FLGst   : audiobasesink: processed samples: raw 5760, delay 1440, real 4320, time 0:00:00.090000000
+11-01 07:13:41.995   604   754 I FLGst   : opensles_ringbuffer: queued samples 5760 position 90 ms (4320 samples) delay 1440 samples
+11-01 07:13:41.995   604   754 I FLGst   : audiobasesink: processed samples: raw 5760, delay 1440, real 4320, time 0:00:00.090000000
+11-01 07:13:41.995   604   755 I FLGst   : audiobasesink: time 0:00:00.200000000, start 0:00:00.000000000, samples 1600
+11-01 07:13:41.995   604   755 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:13:41.995   604   755 I FLGst   : audiobasesink: running: start 0:00:00.200000000 - stop 0:00:00.233333333
+11-01 07:13:41.995   604   735 I FLGst   : opensles_ringbuffer: queued samples 5760 position 90 ms (4320 samples) delay 1440 samples
+11-01 07:13:41.996   604   755 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:13:41.996   604   735 I FLGst   : audiobasesink: processed samples: raw 5760, delay 1440, real 4320, time 0:00:00.090000000
+11-01 07:13:41.996   604   755 I FLGst   : audiobasesink: adding base_time 0:00:00.020000000
+11-01 07:13:41.996   604   755 I FLGst   : audiobasesink: final timestamps: start 0:00:00.320000000 - stop 0:00:00.353333333
+11-01 07:13:41.996   604   755 I FLGst   : audiobasesink: align with prev sample, ABS (0) < 1920
+11-01 07:13:41.996   604   755 I FLGst   : audiobasesink: rendering at 15360 1600/1600
+11-01 07:13:41.997   604   735 I FLGst   : opensles_ringbuffer: queued samples 5760 position 90 ms (4320 samples) delay 1440 samples
+11-01 07:13:41.997   604   735 I FLGst   : audiobasesink: processed samples: raw 5760, delay 1440, real 4320, time 0:00:00.090000000
+11-01 07:13:41.998   604   735 I FLGst   : opensles_ringbuffer: queued samples 5760 position 96 ms (4608 samples) delay 1152 samples
+11-01 07:13:41.998   604   735 I FLGst   : audiobasesink: processed samples: raw 5760, delay 1152, real 4608, time 0:00:00.096000000
+11-01 07:13:42.000   604   735 I FLGst   : opensles_ringbuffer: queued samples 5760 position 96 ms (4608 samples) delay 1152 samples
+11-01 07:13:42.000   604   735 I FLGst   : audiobasesink: processed samples: raw 5760, delay 1152, real 4608, time 0:00:00.096000000
+11-01 07:13:42.001   604   735 I FLGst   : opensles_ringbuffer: queued samples 5760 position 96 ms (4608 samples) delay 1152 samples
+11-01 07:13:42.001   604   735 I FLGst   : audiobasesink: processed samples: raw 5760, delay 1152, real 4608, time 0:00:00.096000000
+11-01 07:13:42.002   604   735 I FLGst   : opensles_ringbuffer: queued samples 5760 position 96 ms (4608 samples) delay 1152 samples
+11-01 07:13:42.003   604   765 I FLGst   : opensles_ringbuffer: enqueue: 0xb4000078cae4a180 size 1920 segment: 12 in queue[0]
+11-01 07:13:42.003   604   765 I FLGst   : opensles_ringbuffer: at position=101 ms
+11-01 07:13:42.003   604   735 I FLGst   : audiobasesink: processed samples: raw 5760, delay 1152, real 4608, time 0:00:00.096000000
+11-01 07:13:42.004   604   735 I FLGst   : opensles_ringbuffer: queued samples 6240 position 101 ms (4848 samples) delay 1392 samples
+11-01 07:13:42.005   604   735 I FLGst   : audiobasesink: processed samples: raw 6240, delay 1392, real 4848, time 0:00:00.101000000
+11-01 07:13:42.006   604   735 I FLGst   : opensles_ringbuffer: queued samples 6240 position 101 ms (4848 samples) delay 1392 samples
+11-01 07:13:42.006   604   735 I FLGst   : audiobasesink: processed samples: raw 6240, delay 1392, real 4848, time 0:00:00.101000000
+11-01 07:13:42.007   604   735 I FLGst   : opensles_ringbuffer: queued samples 6240 position 101 ms (4848 samples) delay 1392 samples
+11-01 07:13:42.007   604   735 I FLGst   : audiobasesink: processed samples: raw 6240, delay 1392, real 4848, time 0:00:00.101000000
+11-01 07:13:42.009   604   735 I FLGst   : opensles_ringbuffer: queued samples 6240 position 106 ms (5088 samples) delay 1152 samples
+11-01 07:13:42.009   604   735 I FLGst   : audiobasesink: processed samples: raw 6240, delay 1152, real 5088, time 0:00:00.106000000
+11-01 07:13:42.010   604   735 I FLGst   : opensles_ringbuffer: queued samples 6240 position 106 ms (5088 samples) delay 1152 samples
+11-01 07:13:42.010   604   735 I FLGst   : audiobasesink: processed samples: raw 6240, delay 1152, real 5088, time 0:00:00.106000000
+11-01 07:13:42.011   604   735 I FLGst   : opensles_ringbuffer: queued samples 6240 position 106 ms (5088 samples) delay 1152 samples
+11-01 07:13:42.011   604   735 I FLGst   : audiobasesink: processed samples: raw 6240, delay 1152, real 5088, time 0:00:00.106000000
+11-01 07:13:42.013   604   735 I FLGst   : opensles_ringbuffer: queued samples 6240 position 106 ms (5088 samples) delay 1152 samples
+11-01 07:13:42.013   604   735 I FLGst   : audiobasesink: processed samples: raw 6240, delay 1152, real 5088, time 0:00:00.106000000
+11-01 07:13:42.013   604   765 I FLGst   : opensles_ringbuffer: enqueue: 0xb4000078cae4a900 size 1920 segment: 13 in queue[1]
+11-01 07:13:42.014   604   735 I FLGst   : opensles_ringbuffer: queued samples 6720 position 112 ms (5376 samples) delay 1344 samples
+11-01 07:13:42.015   604   735 I FLGst   : audiobasesink: processed samples: raw 6720, delay 1344, real 5376, time 0:00:00.112000000
+11-01 07:13:42.016   604   735 I FLGst   : opensles_ringbuffer: queued samples 6720 position 112 ms (5376 samples) delay 1344 samples
+11-01 07:13:42.016   604   735 I FLGst   : audiobasesink: processed samples: raw 6720, delay 1344, real 5376, time 0:00:00.112000000
+11-01 07:13:42.017   604   735 I FLGst   : opensles_ringbuffer: queued samples 6720 position 112 ms (5376 samples) delay 1344 samples
+11-01 07:13:42.017   604   735 I FLGst   : audiobasesink: processed samples: raw 6720, delay 1344, real 5376, time 0:00:00.112000000
+11-01 07:13:42.019   604   735 I FLGst   : opensles_ringbuffer: queued samples 6720 position 117 ms (5616 samples) delay 1104 samples
+11-01 07:13:42.019   604   735 I FLGst   : audiobasesink: processed samples: raw 6720, delay 1104, real 5616, time 0:00:00.117000000
+11-01 07:13:42.020   604   735 I FLGst   : opensles_ringbuffer: queued samples 6720 position 117 ms (5616 samples) delay 1104 samples
+11-01 07:13:42.020   604   735 I FLGst   : audiobasesink: processed samples: raw 6720, delay 1104, real 5616, time 0:00:00.117000000
+11-01 07:13:42.021   604   735 I FLGst   : opensles_ringbuffer: queued samples 6720 position 117 ms (5616 samples) delay 1104 samples
+11-01 07:13:42.022   604   735 I FLGst   : audiobasesink: processed samples: raw 6720, delay 1104, real 5616, time 0:00:00.117000000
+11-01 07:13:42.023   604   735 I FLGst   : opensles_ringbuffer: queued samples 6720 position 117 ms (5616 samples) delay 1104 samples
+11-01 07:13:42.023   604   735 I FLGst   : audiobasesink: processed samples: raw 6720, delay 1104, real 5616, time 0:00:00.117000000
+11-01 07:13:42.024   604   765 I FLGst   : opensles_ringbuffer: enqueue: 0xb4000078cae4b080 size 1920 segment: 14 in queue[2]
+11-01 07:13:42.024   604   765 I FLGst   : opensles_ringbuffer: at position=122 ms
+11-01 07:13:42.024   604   735 I FLGst   : opensles_ringbuffer: queued samples 7200 position 122 ms (5856 samples) delay 1344 samples
+11-01 07:13:42.024   604   735 I FLGst   : audiobasesink: processed samples: raw 7200, delay 1344, real 5856, time 0:00:00.122000000
+11-01 07:13:42.028   604   735 I FLGst   : opensles_ringbuffer: queued samples 7200 position 122 ms (5856 samples) delay 1344 samples
+11-01 07:13:42.028   604   735 I FLGst   : audiobasesink: processed samples: raw 7200, delay 1344, real 5856, time 0:00:00.122000000
+11-01 07:13:42.028   604   735 I FLCross : audio samples=11200 late=0 queue=0 drift=505871
+11-01 07:13:42.028   604   735 I FLCross : audio-clock-calibration internal=0 external=0 rate=1/1
+11-01 07:13:42.028   604   735 I FLGst   : opensles_ringbuffer: queued samples 7200 position 122 ms (5856 samples) delay 1344 samples
+11-01 07:13:42.028   604   735 I FLGst   : audiobasesink: processed samples: raw 7200, delay 1344, real 5856, time 0:00:00.122000000
+11-01 07:13:42.028   604   735 I FLGst   : opensles_ringbuffer: queued samples 7200 position 122 ms (5856 samples) delay 1344 samples
+11-01 07:13:42.028   604   735 I FLGst   : audiobasesink: processed samples: raw 7200, delay 1344, real 5856, time 0:00:00.122000000
+11-01 07:13:42.029   604   735 I FLCross : video received=1 pts=33333333 clock=122000000 base=20000000 latency=100000000
+11-01 07:13:42.029   604   754 I FLGst   : opensles_ringbuffer: queued samples 7200 position 122 ms (5856 samples) delay 1344 samples
+11-01 07:13:42.029   604   754 I FLGst   : audiobasesink: processed samples: raw 7200, delay 1344, real 5856, time 0:00:00.122000000
+11-01 07:13:42.029   604   735 I FLGst   : opensles_ringbuffer: queued samples 7200 position 122 ms (5856 samples) delay 1344 samples
+11-01 07:13:42.029   604   735 I FLGst   : audiobasesink: processed samples: raw 7200, delay 1344, real 5856, time 0:00:00.122000000
+11-01 07:13:42.031   604   735 I FLGst   : opensles_ringbuffer: queued samples 7200 position 128 ms (6144 samples) delay 1056 samples
+11-01 07:13:42.031   604   735 I FLGst   : audiobasesink: processed samples: raw 7200, delay 1056, real 6144, time 0:00:00.128000000
+11-01 07:13:42.033   604   735 I FLGst   : opensles_ringbuffer: queued samples 7200 position 128 ms (6144 samples) delay 1056 samples
+11-01 07:13:42.033   604   735 I FLGst   : audiobasesink: processed samples: raw 7200, delay 1056, real 6144, time 0:00:00.128000000
+11-01 07:13:42.034   604   735 I FLGst   : opensles_ringbuffer: queued samples 7200 position 128 ms (6144 samples) delay 1056 samples
+11-01 07:13:42.034   604   735 I FLGst   : audiobasesink: processed samples: raw 7200, delay 1056, real 6144, time 0:00:00.128000000
+11-01 07:13:42.035   604   765 I FLGst   : opensles_ringbuffer: enqueue: 0xb4000078cae4b800 size 1920 segment: 15 in queue[3]
+11-01 07:13:42.035   604   755 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 07:13:42.035   604   755 I FLGst   : audiobasesink: next sample expected at 16960
+11-01 07:13:42.035   604   755 I FLGst   : audiobasesink: time 0:00:00.233333333, start 0:00:00.000000000, samples 1600
+11-01 07:13:42.035   604   755 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:13:42.035   604   755 I FLGst   : audiobasesink: running: start 0:00:00.233333333 - stop 0:00:00.266666666
+11-01 07:13:42.035   604   755 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:13:42.035   604   755 I FLGst   : audiobasesink: adding base_time 0:00:00.020000000
+11-01 07:13:42.035   604   755 I FLGst   : audiobasesink: final timestamps: start 0:00:00.353333333 - stop 0:00:00.386666666
+11-01 07:13:42.035   604   755 I FLGst   : audiobasesink: align with prev sample, ABS (1) < 1920
+11-01 07:13:42.035   604   755 I FLGst   : audiobasesink: rendering at 16960 1600/1600
+11-01 07:13:42.036   604   735 I FLGst   : opensles_ringbuffer: queued samples 7680 position 133 ms (6384 samples) delay 1296 samples
+11-01 07:13:42.036   604   735 I FLGst   : audiobasesink: processed samples: raw 7680, delay 1296, real 6384, time 0:00:00.133000000
+11-01 07:13:42.037   604   735 I FLGst   : opensles_ringbuffer: queued samples 7680 position 133 ms (6384 samples) delay 1296 samples
+11-01 07:13:42.037   604   735 I FLGst   : audiobasesink: processed samples: raw 7680, delay 1296, real 6384, time 0:00:00.133000000
+11-01 07:13:42.038   604   735 I FLGst   : opensles_ringbuffer: queued samples 7680 position 133 ms (6384 samples) delay 1296 samples
+11-01 07:13:42.038   604   735 I FLGst   : audiobasesink: processed samples: raw 7680, delay 1296, real 6384, time 0:00:00.133000000
+11-01 07:13:42.040   604   735 I FLGst   : opensles_ringbuffer: queued samples 7680 position 138 ms (6624 samples) delay 1056 samples
+11-01 07:13:42.040   604   735 I FLGst   : audiobasesink: processed samples: raw 7680, delay 1056, real 6624, time 0:00:00.138000000
+11-01 07:13:42.041   604   735 I FLGst   : opensles_ringbuffer: queued samples 7680 position 138 ms (6624 samples) delay 1056 samples
+11-01 07:13:42.041   604   735 I FLGst   : audiobasesink: processed samples: raw 7680, delay 1056, real 6624, time 0:00:00.138000000
+11-01 07:13:42.043   604   735 I FLGst   : opensles_ringbuffer: queued samples 7680 position 138 ms (6624 samples) delay 1056 samples
+11-01 07:13:42.043   604   735 I FLGst   : audiobasesink: processed samples: raw 7680, delay 1056, real 6624, time 0:00:00.138000000
+11-01 07:13:42.044   604   735 I FLGst   : opensles_ringbuffer: queued samples 7680 position 138 ms (6624 samples) delay 1056 samples
+11-01 07:13:42.044   604   735 I FLGst   : audiobasesink: processed samples: raw 7680, delay 1056, real 6624, time 0:00:00.138000000
+11-01 07:13:42.045   604   765 I FLGst   : opensles_ringbuffer: enqueue: 0xb4000078cae4a180 size 1920 segment: 16 in queue[0]
+11-01 07:13:42.045   604   735 I FLGst   : opensles_ringbuffer: queued samples 8160 position 144 ms (6912 samples) delay 1248 samples
+11-01 07:13:42.045   604   735 I FLGst   : audiobasesink: processed samples: raw 7680, delay 1248, real 6432, time 0:00:00.134000000
+11-01 07:13:42.045   604   765 I FLGst   : opensles_ringbuffer: at position=144 ms
+11-01 07:13:42.047   604   735 I FLGst   : opensles_ringbuffer: queued samples 8160 position 144 ms (6912 samples) delay 1248 samples
+11-01 07:13:42.047   604   735 I FLGst   : audiobasesink: processed samples: raw 8160, delay 1248, real 6912, time 0:00:00.144000000
+11-01 07:13:42.048   604   735 I FLGst   : opensles_ringbuffer: queued samples 8160 position 144 ms (6912 samples) delay 1248 samples
+11-01 07:13:42.048   604   735 I FLGst   : audiobasesink: processed samples: raw 8160, delay 1248, real 6912, time 0:00:00.144000000
+11-01 07:13:42.050   604   735 I FLGst   : opensles_ringbuffer: queued samples 8160 position 144 ms (6912 samples) delay 1248 samples
+11-01 07:13:42.050   604   735 I FLGst   : audiobasesink: processed samples: raw 8160, delay 1248, real 6912, time 0:00:00.144000000
+11-01 07:13:42.051   604   765 I FLGst   : opensles_ringbuffer: enqueue: 0xb4000078cae4a900 size 1920 segment: 17 in queue[1]
+11-01 07:13:42.051   604   735 I FLGst   : opensles_ringbuffer: queued samples 8640 position 149 ms (7152 samples) delay 1488 samples
+11-01 07:13:42.051   604   735 I FLGst   : audiobasesink: processed samples: raw 8640, delay 1488, real 7152, time 0:00:00.149000000
+11-01 07:13:42.052   604   735 I FLGst   : opensles_ringbuffer: queued samples 8640 position 149 ms (7152 samples) delay 1488 samples
+11-01 07:13:42.052   604   735 I FLGst   : audiobasesink: processed samples: raw 8640, delay 1488, real 7152, time 0:00:00.149000000
+11-01 07:13:42.054   604   735 I FLGst   : opensles_ringbuffer: queued samples 8640 position 149 ms (7152 samples) delay 1488 samples
+11-01 07:13:42.054   604   735 I FLGst   : audiobasesink: processed samples: raw 8640, delay 1488, real 7152, time 0:00:00.149000000
+11-01 07:13:42.055   604   735 I FLGst   : opensles_ringbuffer: queued samples 8640 position 149 ms (7152 samples) delay 1488 samples
+11-01 07:13:42.055   604   735 I FLGst   : audiobasesink: processed samples: raw 8640, delay 1488, real 7152, time 0:00:00.149000000
+11-01 07:13:42.056   604   735 I FLGst   : opensles_ringbuffer: queued samples 8640 position 154 ms (7392 samples) delay 1248 samples
+11-01 07:13:42.057   604   735 I FLGst   : audiobasesink: processed samples: raw 8640, delay 1248, real 7392, time 0:00:00.154000000
+11-01 07:13:42.059   604   735 I FLGst   : opensles_ringbuffer: queued samples 8640 position 154 ms (7392 samples) delay 1248 samples
+11-01 07:13:42.059   604   735 I FLGst   : audiobasesink: processed samples: raw 8640, delay 1248, real 7392, time 0:00:00.154000000
+11-01 07:13:42.059   604   735 I FLGst   : opensles_ringbuffer: queued samples 8640 position 154 ms (7392 samples) delay 1248 samples
+11-01 07:13:42.059   604   735 I FLGst   : audiobasesink: processed samples: raw 8640, delay 1248, real 7392, time 0:00:00.154000000
+11-01 07:13:42.059   604   735 I FLGst   : opensles_ringbuffer: queued samples 8640 position 154 ms (7392 samples) delay 1248 samples
+11-01 07:13:42.059   604   735 I FLGst   : audiobasesink: processed samples: raw 8640, delay 1248, real 7392, time 0:00:00.154000000
+11-01 07:13:42.059   604   735 I FLCross : video received=2 pts=66666666 clock=154000000 base=20000000 latency=100000000
+11-01 07:13:42.060   604   735 I FLGst   : opensles_ringbuffer: queued samples 8640 position 154 ms (7392 samples) delay 1248 samples
+11-01 07:13:42.060   604   735 I FLGst   : audiobasesink: processed samples: raw 8640, delay 1248, real 7392, time 0:00:00.154000000
+11-01 07:13:42.061   604   765 I FLGst   : opensles_ringbuffer: enqueue: 0xb4000078cae4b080 size 1920 segment: 18 in queue[2]
+11-01 07:13:42.062   604   765 I FLGst   : opensles_ringbuffer: at position=160 ms
+11-01 07:13:42.062   604   755 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 07:13:42.062   604   755 I FLGst   : audiobasesink: next sample expected at 18560
+11-01 07:13:42.062   604   754 I FLGst   : opensles_ringbuffer: queued samples 9120 position 160 ms (7680 samples) delay 1440 samples
+11-01 07:13:42.062   604   754 I FLGst   : audiobasesink: processed samples: raw 9120, delay 1440, real 7680, time 0:00:00.160000000
+11-01 07:13:42.062   604   735 I FLGst   : opensles_ringbuffer: queued samples 9120 position 160 ms (7680 samples) delay 1440 samples
+11-01 07:13:42.062   604   755 I FLGst   : audiobasesink: time 0:00:00.266666666, start 0:00:00.000000000, samples 1600
+11-01 07:13:42.062   604   735 I FLGst   : audiobasesink: processed samples: raw 9120, delay 1440, real 7680, time 0:00:00.160000000
+11-01 07:13:42.062   604   755 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:13:42.062   604   755 I FLGst   : audiobasesink: running: start 0:00:00.266666666 - stop 0:00:00.299999999
+11-01 07:13:42.062   604   755 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:13:42.062   604   755 I FLGst   : audiobasesink: adding base_time 0:00:00.020000000
+11-01 07:13:42.062   604   755 I FLGst   : audiobasesink: final timestamps: start 0:00:00.386666666 - stop 0:00:00.419999999
+11-01 07:13:42.062   604   755 I FLGst   : audiobasesink: align with prev sample, ABS (1) < 1920
+11-01 07:13:42.063   604   755 I FLGst   : audiobasesink: rendering at 18560 1600/1600
+11-01 07:13:42.063   604   735 I FLGst   : opensles_ringbuffer: queued samples 9120 position 160 ms (7680 samples) delay 1440 samples
+11-01 07:13:42.063   604   735 I FLGst   : audiobasesink: processed samples: raw 9120, delay 1440, real 7680, time 0:00:00.160000000
+11-01 07:13:42.065   604   735 I FLGst   : opensles_ringbuffer: queued samples 9120 position 160 ms (7680 samples) delay 1440 samples
+11-01 07:13:42.065   604   735 I FLGst   : audiobasesink: processed samples: raw 9120, delay 1440, real 7680, time 0:00:00.160000000
+11-01 07:13:42.066   604   735 I FLGst   : opensles_ringbuffer: queued samples 9120 position 160 ms (7680 samples) delay 1440 samples
+11-01 07:13:42.066   604   735 I FLGst   : audiobasesink: processed samples: raw 9120, delay 1440, real 7680, time 0:00:00.160000000
+11-01 07:13:42.067   604   735 I FLGst   : opensles_ringbuffer: queued samples 9120 position 165 ms (7920 samples) delay 1200 samples
+11-01 07:13:42.067   604   735 I FLGst   : audiobasesink: processed samples: raw 9120, delay 1200, real 7920, time 0:00:00.165000000
+11-01 07:13:42.069   604   735 I FLGst   : opensles_ringbuffer: queued samples 9120 position 165 ms (7920 samples) delay 1200 samples
+11-01 07:13:42.069   604   735 I FLGst   : audiobasesink: processed samples: raw 9120, delay 1200, real 7920, time 0:00:00.165000000
+11-01 07:13:42.071   604   735 I FLGst   : opensles_ringbuffer: queued samples 9120 position 165 ms (7920 samples) delay 1200 samples
+11-01 07:13:42.071   604   735 I FLGst   : audiobasesink: processed samples: raw 9120, delay 1200, real 7920, time 0:00:00.165000000
+11-01 07:13:42.072   604   735 I FLGst   : opensles_ringbuffer: queued samples 9600 position 170 ms (8160 samples) delay 1440 samples
+11-01 07:13:42.072   604   765 I FLGst   : opensles_ringbuffer: enqueue: 0xb4000078cae4b800 size 1920 segment: 19 in queue[3]
+11-01 07:13:42.072   604   735 I FLGst   : audiobasesink: processed samples: raw 9120, delay 1440, real 7680, time 0:00:00.160000000
+11-01 07:13:42.073   604   735 I FLGst   : opensles_ringbuffer: queued samples 9600 position 170 ms (8160 samples) delay 1440 samples
+11-01 07:13:42.073   604   735 I FLGst   : audiobasesink: processed samples: raw 9600, delay 1440, real 8160, time 0:00:00.170000000
+11-01 07:13:42.075   604   735 I FLGst   : opensles_ringbuffer: queued samples 9600 position 170 ms (8160 samples) delay 1440 samples
+11-01 07:13:42.075   604   735 I FLGst   : audiobasesink: processed samples: raw 9600, delay 1440, real 8160, time 0:00:00.170000000
+11-01 07:13:42.076   604   735 I FLGst   : opensles_ringbuffer: queued samples 9600 position 170 ms (8160 samples) delay 1440 samples
+11-01 07:13:42.076   604   735 I FLGst   : audiobasesink: processed samples: raw 9600, delay 1440, real 8160, time 0:00:00.170000000
+11-01 07:13:42.078   604   735 I FLGst   : opensles_ringbuffer: queued samples 9600 position 176 ms (8448 samples) delay 1152 samples
+11-01 07:13:42.078   604   735 I FLGst   : audiobasesink: processed samples: raw 9600, delay 1152, real 8448, time 0:00:00.176000000
+11-01 07:13:42.079   604   735 I FLGst   : opensles_ringbuffer: queued samples 9600 position 176 ms (8448 samples) delay 1152 samples
+11-01 07:13:42.079   604   735 I FLGst   : audiobasesink: processed samples: raw 9600, delay 1152, real 8448, time 0:00:00.176000000
+11-01 07:13:42.081   604   735 I FLGst   : opensles_ringbuffer: queued samples 9600 position 176 ms (8448 samples) delay 1152 samples
+11-01 07:13:42.081   604   735 I FLGst   : audiobasesink: processed samples: raw 9600, delay 1152, real 8448, time 0:00:00.176000000
+11-01 07:13:42.082   604   735 I FLGst   : opensles_ringbuffer: queued samples 9600 position 176 ms (8448 samples) delay 1152 samples
+11-01 07:13:42.082   604   735 I FLGst   : audiobasesink: processed samples: raw 9600, delay 1152, real 8448, time 0:00:00.176000000
+11-01 07:13:42.083   604   765 I FLGst   : opensles_ringbuffer: enqueue: 0xb4000078cae4a180 size 1920 segment: 0 in queue[0]
+11-01 07:13:42.083   604   765 I FLGst   : opensles_ringbuffer: at position=181 ms
+11-01 07:13:42.084   604   735 I FLGst   : opensles_ringbuffer: queued samples 10080 position 181 ms (8688 samples) delay 1392 samples
+11-01 07:13:42.084   604   735 I FLGst   : audiobasesink: processed samples: raw 10080, delay 1392, real 8688, time 0:00:00.181000000
+11-01 07:13:42.085   604   735 I FLGst   : opensles_ringbuffer: queued samples 10080 position 181 ms (8688 samples) delay 1392 samples
+11-01 07:13:42.085   604   735 I FLGst   : audiobasesink: processed samples: raw 10080, delay 1392, real 8688, time 0:00:00.181000000
+11-01 07:13:42.086   604   735 I FLGst   : opensles_ringbuffer: queued samples 10080 position 181 ms (8688 samples) delay 1392 samples
+11-01 07:13:42.086   604   735 I FLGst   : audiobasesink: processed samples: raw 10080, delay 1392, real 8688, time 0:00:00.181000000
+11-01 07:13:42.088   604   735 I FLGst   : opensles_ringbuffer: queued samples 10080 position 181 ms (8688 samples) delay 1392 samples
+11-01 07:13:42.088   604   735 I FLGst   : audiobasesink: processed samples: raw 10080, delay 1392, real 8688, time 0:00:00.181000000
+11-01 07:13:42.089   604   735 I FLGst   : opensles_ringbuffer: queued samples 10080 position 186 ms (8928 samples) delay 1152 samples
+11-01 07:13:42.089   604   735 I FLGst   : audiobasesink: processed samples: raw 10080, delay 1152, real 8928, time 0:00:00.186000000
+11-01 07:13:42.091   604   735 I FLGst   : opensles_ringbuffer: queued samples 10080 position 186 ms (8928 samples) delay 1152 samples
+11-01 07:13:42.091   604   735 I FLGst   : audiobasesink: processed samples: raw 10080, delay 1152, real 8928, time 0:00:00.186000000
+11-01 07:13:42.092   604   735 I FLGst   : opensles_ringbuffer: queued samples 10080 position 186 ms (8928 samples) delay 1152 samples
+11-01 07:13:42.092   604   735 I FLGst   : audiobasesink: processed samples: raw 10080, delay 1152, real 8928, time 0:00:00.186000000
+11-01 07:13:42.093   604   765 I FLGst   : opensles_ringbuffer: enqueue: 0xb4000078cae4a900 size 1920 segment: 1 in queue[1]
+11-01 07:13:42.093   604   735 I FLGst   : opensles_ringbuffer: queued samples 10560 position 192 ms (9216 samples) delay 1344 samples
+11-01 07:13:42.094   604   735 I FLGst   : audiobasesink: processed samples: raw 10080, delay 1344, real 8736, time 0:00:00.182000000
+11-01 07:13:42.094   604   755 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 07:13:42.094   604   755 I FLGst   : audiobasesink: next sample expected at 20160
+11-01 07:13:42.095   604   735 I FLGst   : opensles_ringbuffer: queued samples 10560 position 192 ms (9216 samples) delay 1344 samples
+11-01 07:13:42.095   604   735 I FLGst   : audiobasesink: processed samples: raw 10560, delay 1344, real 9216, time 0:00:00.192000000
+11-01 07:13:42.095   604   754 I FLGst   : opensles_ringbuffer: queued samples 10560 position 192 ms (9216 samples) delay 1344 samples
+11-01 07:13:42.095   604   754 I FLGst   : audiobasesink: processed samples: raw 10560, delay 1344, real 9216, time 0:00:00.192000000
+11-01 07:13:42.096   604   755 I FLGst   : audiobasesink: time 0:00:00.300000000, start 0:00:00.000000000, samples 1600
+11-01 07:13:42.097   604   755 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:13:42.097   604   755 I FLGst   : audiobasesink: running: start 0:00:00.300000000 - stop 0:00:00.333333333
+11-01 07:13:42.097   604   755 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:13:42.097   604   755 I FLGst   : audiobasesink: adding base_time 0:00:00.020000000
+11-01 07:13:42.097   604   755 I FLGst   : audiobasesink: final timestamps: start 0:00:00.420000000 - stop 0:00:00.453333333
+11-01 07:13:42.097   604   755 I FLGst   : audiobasesink: align with prev sample, ABS (0) < 1920
+11-01 07:13:42.097   604   755 I FLGst   : audiobasesink: rendering at 20160 1600/1600
+11-01 07:13:42.098   604   735 I FLGst   : opensles_ringbuffer: queued samples 10560 position 192 ms (9216 samples) delay 1344 samples
+11-01 07:13:42.098   604   735 I FLGst   : audiobasesink: processed samples: raw 10560, delay 1344, real 9216, time 0:00:00.192000000
+11-01 07:13:42.098   604   735 I FLGst   : opensles_ringbuffer: queued samples 10560 position 192 ms (9216 samples) delay 1344 samples
+11-01 07:13:42.098   604   735 I FLGst   : audiobasesink: processed samples: raw 10560, delay 1344, real 9216, time 0:00:00.192000000
+11-01 07:13:42.098   604   735 I FLGst   : opensles_ringbuffer: queued samples 10560 position 192 ms (9216 samples) delay 1344 samples
+11-01 07:13:42.098   604   735 I FLGst   : audiobasesink: processed samples: raw 10560, delay 1344, real 9216, time 0:00:00.192000000
+11-01 07:13:42.098   604   735 I FLCross : video received=3 pts=100000000 clock=192000000 base=20000000 latency=100000000
+11-01 07:13:42.099   604   735 I FLGst   : opensles_ringbuffer: queued samples 10560 position 197 ms (9456 samples) delay 1104 samples
+11-01 07:13:42.099   604   735 I FLGst   : audiobasesink: processed samples: raw 10560, delay 1104, real 9456, time 0:00:00.197000000
+11-01 07:13:42.100   604   735 I FLGst   : opensles_ringbuffer: queued samples 10560 position 197 ms (9456 samples) delay 1104 samples
+11-01 07:13:42.101   604   735 I FLGst   : audiobasesink: processed samples: raw 10560, delay 1104, real 9456, time 0:00:00.197000000
+11-01 07:13:42.102   604   735 I FLGst   : opensles_ringbuffer: queued samples 10560 position 197 ms (9456 samples) delay 1104 samples
+11-01 07:13:42.102   604   735 I FLGst   : audiobasesink: processed samples: raw 10560, delay 1104, real 9456, time 0:00:00.197000000
+11-01 07:13:42.103   604   735 I FLGst   : opensles_ringbuffer: queued samples 10560 position 197 ms (9456 samples) delay 1104 samples
+11-01 07:13:42.103   604   735 I FLGst   : audiobasesink: processed samples: raw 10560, delay 1104, real 9456, time 0:00:00.197000000
+11-01 07:13:42.104   604   765 I FLGst   : opensles_ringbuffer: enqueue: 0xb4000078cae4b080 size 1920 segment: 2 in queue[2]
+11-01 07:13:42.104   604   765 I FLGst   : opensles_ringbuffer: at position=202 ms
+11-01 07:13:42.105   604   735 I FLGst   : opensles_ringbuffer: queued samples 11040 position 202 ms (9696 samples) delay 1344 samples
+11-01 07:13:42.105   604   735 I FLGst   : audiobasesink: processed samples: raw 11040, delay 1344, real 9696, time 0:00:00.202000000
+11-01 07:13:42.106   604   735 I FLGst   : opensles_ringbuffer: queued samples 11040 position 202 ms (9696 samples) delay 1344 samples
+11-01 07:13:42.106   604   735 I FLGst   : audiobasesink: processed samples: raw 11040, delay 1344, real 9696, time 0:00:00.202000000
+11-01 07:13:42.107   604   735 I FLGst   : opensles_ringbuffer: queued samples 11040 position 202 ms (9696 samples) delay 1344 samples
+11-01 07:13:42.107   604   735 I FLGst   : audiobasesink: processed samples: raw 11040, delay 1344, real 9696, time 0:00:00.202000000
+11-01 07:13:42.109   604   735 I FLGst   : opensles_ringbuffer: queued samples 11040 position 202 ms (9696 samples) delay 1344 samples
+11-01 07:13:42.109   604   735 I FLGst   : audiobasesink: processed samples: raw 11040, delay 1344, real 9696, time 0:00:00.202000000
+11-01 07:13:42.110   604   735 I FLGst   : opensles_ringbuffer: queued samples 11040 position 208 ms (9984 samples) delay 1056 samples
+11-01 07:13:42.110   604   735 I FLGst   : audiobasesink: processed samples: raw 11040, delay 1056, real 9984, time 0:00:00.208000000
+11-01 07:13:42.112   604   735 I FLGst   : opensles_ringbuffer: queued samples 11040 position 208 ms (9984 samples) delay 1056 samples
+11-01 07:13:42.112   604   735 I FLGst   : audiobasesink: processed samples: raw 11040, delay 1056, real 9984, time 0:00:00.208000000
+11-01 07:13:42.113   604   735 I FLGst   : opensles_ringbuffer: queued samples 11040 position 208 ms (9984 samples) delay 1056 samples
+11-01 07:13:42.113   604   735 I FLGst   : audiobasesink: processed samples: raw 11040, delay 1056, real 9984, time 0:00:00.208000000
+11-01 07:13:42.114   604   735 I FLGst   : opensles_ringbuffer: queued samples 11040 position 213 ms (10224 samples) delay 816 samples
+11-01 07:13:42.114   604   765 I FLGst   : opensles_ringbuffer: enqueue: 0xb4000078cae4b800 size 1920 segment: 3 in queue[3]
+11-01 07:13:42.115   604   735 I FLGst   : audiobasesink: processed samples: raw 11040, delay 816, real 10224, time 0:00:00.213000000
+11-01 07:13:42.116   604   735 I FLGst   : opensles_ringbuffer: queued samples 11520 position 213 ms (10224 samples) delay 1296 samples
+11-01 07:13:42.117   604   735 I FLGst   : audiobasesink: processed samples: raw 11520, delay 1296, real 10224, time 0:00:00.213000000
+11-01 07:13:42.118   604   735 I FLGst   : opensles_ringbuffer: queued samples 11520 position 213 ms (10224 samples) delay 1296 samples
+11-01 07:13:42.118   604   735 I FLGst   : audiobasesink: processed samples: raw 11520, delay 1296, real 10224, time 0:00:00.213000000
+11-01 07:13:42.119   604   735 I FLGst   : opensles_ringbuffer: queued samples 11520 position 213 ms (10224 samples) delay 1296 samples
+11-01 07:13:42.120   604   735 I FLGst   : audiobasesink: processed samples: raw 11520, delay 1296, real 10224, time 0:00:00.213000000
+11-01 07:13:42.121   604   735 I FLGst   : opensles_ringbuffer: queued samples 11520 position 218 ms (10464 samples) delay 1056 samples
+11-01 07:13:42.121   604   735 I FLGst   : audiobasesink: processed samples: raw 11520, delay 1056, real 10464, time 0:00:00.218000000
+11-01 07:13:42.122   604   735 I FLGst   : opensles_ringbuffer: queued samples 11520 position 218 ms (10464 samples) delay 1056 samples
+11-01 07:13:42.123   604   735 I FLGst   : audiobasesink: processed samples: raw 11520, delay 1056, real 10464, time 0:00:00.218000000
+11-01 07:13:42.124   604   735 I FLGst   : opensles_ringbuffer: queued samples 11520 position 218 ms (10464 samples) delay 1056 samples
+11-01 07:13:42.124   604   735 I FLGst   : audiobasesink: processed samples: raw 11520, delay 1056, real 10464, time 0:00:00.218000000
+11-01 07:13:42.125   604   765 I FLGst   : opensles_ringbuffer: enqueue: 0xb4000078cae4a180 size 1920 segment: 4 in queue[0]
+11-01 07:13:42.125   604   735 I FLGst   : opensles_ringbuffer: queued samples 11520 position 224 ms (10752 samples) delay 768 samples
+11-01 07:13:42.125   604   735 I FLGst   : audiobasesink: processed samples: raw 11520, delay 768, real 10752, time 0:00:00.224000000
+11-01 07:13:42.126   604   765 I FLGst   : opensles_ringbuffer: at position=224 ms
+11-01 07:13:42.127   604   735 I FLGst   : opensles_ringbuffer: queued samples 12000 position 224 ms (10752 samples) delay 1248 samples
+11-01 07:13:42.127   604   735 I FLGst   : audiobasesink: processed samples: raw 12000, delay 1248, real 10752, time 0:00:00.224000000
+11-01 07:13:42.127   604   735 I FLGst   : opensles_ringbuffer: queued samples 12000 position 224 ms (10752 samples) delay 1248 samples
+11-01 07:13:42.127   604   735 I FLGst   : audiobasesink: processed samples: raw 12000, delay 1248, real 10752, time 0:00:00.224000000
+11-01 07:13:42.127   604   735 I FLGst   : opensles_ringbuffer: queued samples 12000 position 224 ms (10752 samples) delay 1248 samples
+11-01 07:13:42.127   604   735 I FLGst   : audiobasesink: processed samples: raw 12000, delay 1248, real 10752, time 0:00:00.224000000
+11-01 07:13:42.128   604   735 I FLCross : video received=4 pts=133333333 clock=224000000 base=20000000 latency=100000000
+11-01 07:13:42.128   604   735 I FLGst   : opensles_ringbuffer: queued samples 12000 position 224 ms (10752 samples) delay 1248 samples
+11-01 07:13:42.128   604   735 I FLGst   : audiobasesink: processed samples: raw 12000, delay 1248, real 10752, time 0:00:00.224000000
+11-01 07:13:42.128   604   754 I FLGst   : opensles_ringbuffer: queued samples 12000 position 224 ms (10752 samples) delay 1248 samples
+11-01 07:13:42.129   604   754 I FLGst   : audiobasesink: processed samples: raw 12000, delay 1248, real 10752, time 0:00:00.224000000
+11-01 07:13:42.131   604   735 I FLGst   : opensles_ringbuffer: queued samples 12000 position 229 ms (10992 samples) delay 1008 samples
+11-01 07:13:42.131   604   765 I FLGst   : opensles_ringbuffer: enqueue: 0xb4000078cae4a900 size 1920 segment: 5 in queue[1]
+11-01 07:13:42.131   604   735 I FLGst   : audiobasesink: processed samples: raw 12000, delay 1008, real 10992, time 0:00:00.229000000
+11-01 07:13:42.131   604   755 I FLGst   : audiobasesink: wrote 1600 of 1600
+11-01 07:13:42.131   604   755 I FLGst   : audiobasesink: next sample expected at 21760
+11-01 07:13:42.132   604   755 I FLGst   : audiobasesink: time 0:00:00.333333333, start 0:00:00.000000000, samples 1600
+11-01 07:13:42.132   604   755 I FLGst   : audiobasesink: sync-offset +0:00:00.100000000, render-delay 0:00:00.000000000, ts-offset +0:00:00.000000000
+11-01 07:13:42.132   604   755 I FLGst   : audiobasesink: running: start 0:00:00.333333333 - stop 0:00:00.366666666
+11-01 07:13:42.132   604   755 I FLGst   : audiobasesink: compensating for sync-offset 0:00:00.100000000
+11-01 07:13:42.132   604   755 I FLGst   : audiobasesink: adding base_time 0:00:00.020000000
+11-01 07:13:42.132   604   735 I FLGst   : opensles_ringbuffer: queued samples 12480 position 229 ms (10992 samples) delay 1488 samples
+11-01 07:13:42.132   604   755 I FLGst   : audiobasesink: final timestamps: start 0:00:00.453333333 - stop 0:00:00.486666666
+11-01 07:13:42.132   604   735 I FLGst   : audiobasesink: processed samples: raw 12480, delay 1488, real 10992, time 0:00:00.229000000
+11-01 07:13:42.132   604   755 I FLGst   : audiobasesink: align with prev sample, ABS (1) < 1920
+11-01 07:13:42.132   604   755 I FLGst   : audiobasesink: rendering at 21760 1600/1600
+11-01 07:13:42.133   604   735 I FLGst   : opensles_ringbuffer: queued samples 12480 position 229 ms (10992 samples) delay 1488 samples
+11-01 07:13:42.133   604   735 I FLGst   : audiobasesink: processed samples: raw 12480, delay 1488, real 10992, time 0:00:00.229000000
+11-01 07:13:42.134   604   735 I FLGst   : opensles_ringbuffer: queued samples 12480 position 229 ms (10992 samples) delay 1488 samples
+11-01 07:13:42.134   604   735 I FLGst   : audiobasesink: processed samples: raw 12480, delay 1488, real 10992, time 0:00:00.229000000
+11-01 07:13:42.135   604   735 I FLGst   : opensles_ringbuffer: queued samples 12480 position 229 ms (10992 samples) delay 1488 samples
+11-01 07:13:42.136   604   735 I FLGst   : audiobasesink: processed samples: raw 12480, delay 1488, real 10992, time 0:00:00.229000000
+11-01 07:13:42.137   604   735 I FLGst   : opensles_ringbuffer: queued samples 12480 position 234 ms (11232 samples) delay 1248 samples
+11-01 07:13:42.137   604   735 I FLGst   : audiobasesink: processed samples: raw 12480, delay 1248, real 11232, time 0:00:00.234000000
+11-01 07:13:42.138   604   735 I FLGst   : opensles_ringbuffer: queued samples 12480 position 234 ms (11232 samples) delay 1248 samples
+11-01 07:13:42.138   604   735 I FLGst   : audiobasesink: processed samples: raw 12480, delay 1248, real 11232, time 0:00:00.234000000
+11-01 07:13:42.139   604   735 I FLGst   : opensles_ringbuffer: queued samples 12480 position 234 ms (11232 samples) delay 1248 samples
+11-01 07:13:42.140   604   735 I FLGst   : audiobasesink: processed samples: raw 12480, delay 1248, real 11232, time 0:00:00.234000000
+11-01 07:13:42.141   604   735 I FLGst   : opensles_ringbuffer: queued samples 12480 position 234 ms (11232 samples) delay 1248 samples
+11-01 07:13:42.141   604   735 I FLGst   : audiobasesink: processed samples: raw 12480, delay 1248, real 11232, time 0:00:00.234000000
+11-01 07:13:42.141   604   765 I FLGst   : opensles_ringbuffer: enqueue: 0xb4000078cae4b080 size 1920 segment: 6 in queue[2]
+11-01 07:13:42.142   604   765 I FLGst   : opensles_ringbuffer: at position=240 ms
+11-01 07:13:42.142   604   735 I FLGst   : opensles_ringbuffer: queued samples 12960 position 240 ms (11520 samples) delay 1440 samples
+11-01 07:13:42.142   604   735 I FLGst   : audiobasesink: processed samples: raw 12960, delay 1440, real 11520, time 0:00:00.240000000
+11-01 07:13:42.143   604   735 I FLGst   : opensles_ringbuffer: queued samples 12960 position 240 ms (11520 samples) delay 1440 samples
+11-01 07:13:42.144   604   735 I FLGst   : audiobasesink: processed samples: raw 12960, delay 1440, real 11520, time 0:00:00.240000000
+11-01 07:13:42.145   604   735 I FLGst   : opensles_ringbuffer: queued samples 12960 position 240 ms (11520 samples) delay 1440 samples
+11-01 07:13:42.145   604   735 I FLGst   : audiobasesink: processed samples: raw 12960, delay 1440, real 11520, time 0:00:00.240000000
+11-01 07:13:42.146   604   735 I FLGst   : opensles_ringbuffer: queued samples 12960 position 240 ms (11520 samples) delay 1440 samples
+11-01 07:13:42.146   604   735 I FLGst   : audiobasesink: processed samples: raw 12960, delay 1440, real 11520, time 0:00:00.240000000
+11-01 07:13:42.148   604   735 I FLGst   : opensles_ringbuffer: queued samples 12960 position 245 ms (11760 samples) delay 1200 samples
+11-01 07:13:42.148   604   735 I FLGst   : audiobasesink: processed samples: raw 12960, delay 1200, real 11760, time 0:00:00.245000000
+11-01 07:13:42.149   604   735 I FLGst   : opensles_ringbuffer: queued samples 12960 position 245 ms (11760 samples) delay 1200 samples
+11-01 07:13:42.149   604   735 I FLGst   : audiobasesink: processed samples: raw 12960, delay 1200, real 11760, time 0:00:00.245000000
+11-01 07:13:42.150   604   735 I FLGst   : opensles_ringbuffer: queued samples 12960 position 245 ms (11760 samples) delay 1200 samples
+11-01 07:13:42.151   604   735 I FLGst   : audiobasesink: processed samples: raw 12960, delay 1200, real 11760, time 0:00:00.245000000
+11-01 07:13:42.152   604   765 I FLGst   : opensles_ringbuffer: enqueue: 0xb4000078cae4b800 size 1920 segment: 7 in queue[3]
+11-01 07:13:42.152   604   735 I FLGst   : opensles_ringbuffer: queued samples 12960 position 250 ms (12000 samples) delay 960 samples
+11-01 07:13:42.152   604   735 I FLGst   : audiobasesink: processed samples: raw 12960, delay 960, real 12000, time 0:00:00.250000000
+11-01 07:13:42.154   604   735 I FLGst   : opensles_ringbuffer: queued samples 13440 position 250 ms (12000 samples) delay 1440 samples
+11-01 07:13:42.154   604   735 I FLGst   : audiobasesink: processed samples: raw 13440, delay 1440, real 12000, time 0:00:00.250000000
+11-01 07:13:42.155   604   735 I FLGst   : opensles_ringbuffer: queued samples 13440 position 250 ms (12000 samples) delay 1440 samples
+11-01 07:13:42.155   604   735 I FLGst   : audiobasesink: processed samples: raw 13440, delay 1440, real 12000, time 0:00:00.250000000
+11-01 07:13:42.156   604   735 I FLGst   : opensles_ringbuffer: queued samples 13440 position 250 ms (12000 samples) delay 1440 samples
+11-01 07:13:42.156   604   735 I FLGst   : audiobasesink: processed samples: raw 13440, delay 1440, real 12000, time 0:00:00.250000000
+11-01 07:13:42.158   604   735 I FLGst   : opensles_ringbuffer: queued samples 13440 position 256 ms (12288 samples) delay 1152 samples
+11-01 07:13:42.158   604   735 I FLGst   : audiobasesink: processed samples: raw 13440, delay 1152, real 12288, time 0:00:00.256000000
+11-01 07:13:42.159   604   735 I FLGst   : opensles_ringbuffer: queued samples 13440 position 256 ms (12288 samples) delay 1152 samples
+11-01 07:13:42.160   604   735 I FLGst   : audiobasesink: processed samples: raw 13440, delay 1152, real 12288, time 0:00:00.256000000
+11-01 07:13:42.160   604   735 I FLCross : audio samples=17600 late=0 queue=0 drift=767615
+11-01 07:13:42.160   604   735 I FLCross : audio-clock-calibration internal=0 external=0 rate=1/1
+11-01 07:13:42.160   604   735 I FLGst   : opensles_ringbuffer: queued samples 13440 position 256 ms (12288 samples) delay 1152 samples
+11-01 07:13:42.160   604   735 I FLGst   : audiobasesink: processed samples: raw 13440, delay 1152, real 12288, time 0:00:00.256000000
+11-01 07:13:42.161   604   735 I FLGst   : opensles_ringbuffer: queued samples 13440 position 256 ms (12288 samples) delay 1152 samples
+11-01 07:13:42.161   604   735 I FLGst   : audiobasesink: processed samples: raw 13440, delay 1152, real 12288, time 0:00:00.256000000
+11-01 07:13:42.161   604   735 I FLCross : video received=5 pts=200000000 clock=256000000 base=20000000 latency=100000000
+11-01 07:13:42.162   604   735 I FLGst   : opensles_ringbuffer: queued samples 13440 position 256 ms (12288 samples) delay 1152 samples
+11-01 07:13:42.162   604   735 I FLGst   : audiobasesink: processed samples: raw 13440, delay 1152, real 12288, time 0:00:00.256000000
+11-01 07:13:42.162   604   754 I FLGst   : opensles_ringbuffer: queued samples 13440 position 256 ms (12288 samples) delay 1152 samples
+11-01 07:13:42.163   604   754 I FLGst   : audiobasesink: processed samples: raw 13440, delay 1152, real 12288, time 0:00:00.256000000
+11-01 07:13:42.167   604   735 I FLGst   : opensles_ringbuffer: ringbuffer  paused
+11-01 07:13:42.167   604   765 I FLGst   : opensles_ringbuffer: at position=261 ms
+11-01 07:13:42.167   604   755 I FLGst   : audiobasesink: wrote 1280 of 1600
+11-01 07:13:42.168   604   735 I FLGst   : opensles_ringbuffer: queued samples 0 position 1 ms (0 samples) delay 0 samples
+11-01 07:13:42.168   604   735 I FLGst   : audiobasesink: processed samples: raw 13440, delay 0, real 13440, time 0:00:00.280000000
+11-01 07:13:42.168   604   755 I FLGst   : audiobasesink: preroll got interrupted: -2 (flushing)
+11-01 07:13:42.170   604   735 I FLGst   : opensles_ringbuffer: ringbuffer   stopped
+11-01 07:13:42.222   604   735 I FLGst   : opensles_ringbuffer: ringbuffer released
+11-01 07:13:42.231   604   735 I FLGst   : opensles_ringbuffer: device closed
+11-01 07:13:42.234   604   735 I FLCross : native failure: video original PTS/identity gap: expected=166666666 actual=200000000
+11-01 07:13:42.235   604   735 I FLCross : receiver-result lease=90f2f67b-e104-4625-b3a8-3f9bb999372c {"ok":false,"video":5,"posts":5,"pcm_samples":19200,"uid":10305,"pid":604}
+11-01 07:13:42.237   697   723 I FLCross : retired lease=90f2f67b-e104-4625-b3a8-3f9bb999372c generation=1 reason=explicit
+11-01 07:13:42.263   736   749 I FLCross : native failure: video send failed
+11-01 07:13:42.263   736   749 I FLCross : producer-result lease=90f2f67b-e104-4625-b3a8-3f9bb999372c {"ok":false,"video":0,"posts":0,"pcm_samples":0,"uid":10304,"pid":736}

@@ -9,7 +9,7 @@ p=argparse.ArgumentParser();p.add_argument('--build',required=True);p.add_argume
 root=pathlib.Path(a.output or tempfile.mkdtemp(prefix='m5-startup-')).resolve();root.mkdir(parents=True,exist_ok=True)
 env=dict(os.environ,FRAMELINK_TEST_PREROLL_DELAY_MS='700')
 results=[]
-for policy in ('producer','audio'):
+for policy in ('producer','audio-coordinated','audio'):
     out=root/policy
     run=subprocess.run([sys.executable,str(pathlib.Path(__file__).with_name('m5_external_pipeline.py')),'--build',a.build,'--output',str(out),'--clock-policy',policy],env=env,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,timeout=60)
     (root/(policy+'.log')).write_text(run.stdout)
@@ -24,7 +24,7 @@ for policy in ('producer','audio'):
         video=[r['pts_ns'] for r in received if r.get('event')=='media-trace' and r.get('track')=='video']
         intact=stats[-1]['submitted']==100 and stats[-1]['ring_full_drops']==0 and len(set(video))==100 and min(video)==0
         cases.append(dict(format=fmt,intact=intact,stats=stats[-1],received=len(set(video))))
-    if policy=='producer':assert run.returncode==0 and len(cases)==2 and all(c['intact'] for c in cases),(run.stdout,cases)
+    if policy!='audio':assert run.returncode==0 and len(cases)==2 and all(c['intact'] for c in cases),(run.stdout,cases)
     else:assert cases and any(not c['intact'] for c in cases),('negative control failed to detect startup loss',cases)
     results.append(dict(policy=policy,returncode=run.returncode,cases=cases))
 # Peer death while the producer is gated must not strand a streaming thread.

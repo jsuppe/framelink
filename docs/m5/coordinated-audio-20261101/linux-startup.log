@@ -1,0 +1,140 @@
+Start testing: Nov 01 07:12 EST
+----------------------------------------------------------
+56/60 Testing: m5_startup
+56/60 Test: m5_startup
+Command: "/usr/bin/python3" "/tmp/framelink-m5/test/m5_startup.py" "--build" "/tmp/framelink-m5-build"
+Directory: /tmp/framelink-m5-build
+"m5_startup" start time: Nov 01 07:12 EST
+Output:
+----------------------------------------------------------
+[
+  {
+    "policy": "producer",
+    "returncode": 0,
+    "cases": [
+      {
+        "format": "BGRA",
+        "intact": true,
+        "stats": {
+          "event": "video-transport-summary",
+          "received": 100,
+          "submitted": 100,
+          "dropped": 0,
+          "ring_full_drops": 0
+        },
+        "received": 100
+      },
+      {
+        "format": "NV12",
+        "intact": true,
+        "stats": {
+          "event": "video-transport-summary",
+          "received": 100,
+          "submitted": 100,
+          "dropped": 0,
+          "ring_full_drops": 0
+        },
+        "received": 100
+      }
+    ]
+  },
+  {
+    "policy": "audio-coordinated",
+    "returncode": 0,
+    "cases": [
+      {
+        "format": "BGRA",
+        "intact": true,
+        "stats": {
+          "event": "video-transport-summary",
+          "received": 100,
+          "submitted": 100,
+          "dropped": 0,
+          "ring_full_drops": 0
+        },
+        "received": 100
+      },
+      {
+        "format": "NV12",
+        "intact": true,
+        "stats": {
+          "event": "video-transport-summary",
+          "received": 100,
+          "submitted": 100,
+          "dropped": 0,
+          "ring_full_drops": 0
+        },
+        "received": 100
+      }
+    ]
+  },
+  {
+    "policy": "audio",
+    "returncode": 0,
+    "cases": [
+      {
+        "format": "BGRA",
+        "intact": false,
+        "stats": {
+          "event": "video-transport-summary",
+          "received": 100,
+          "submitted": 68,
+          "dropped": 32,
+          "ring_full_drops": 32
+        },
+        "received": 65
+      },
+      {
+        "format": "NV12",
+        "intact": false,
+        "stats": {
+          "event": "video-transport-summary",
+          "received": 100,
+          "submitted": 68,
+          "dropped": 32,
+          "ring_full_drops": 32
+        },
+        "received": 65
+      }
+    ]
+  },
+  {
+    "case": "cancel",
+    "exit_codes": [
+      1,
+      -9
+    ],
+    "elapsed_seconds": 0.769179364957381
+  },
+  {
+    "case": "restart",
+    "exit_codes": [
+      0,
+      0
+    ],
+    "elapsed_seconds": 2.6212106950115412
+  },
+  {
+    "case": "long-preroll",
+    "exit_codes": [
+      0,
+      0
+    ],
+    "elapsed_seconds": 3.4239809620194137
+  }
+]
+/tmp/m5-startup-vvy0hkdy
+<end of output>
+Test time =  27.80 sec
+----------------------------------------------------------
+Test Passed.
+"m5_startup" end time: Nov 01 07:12 EST
+"m5_startup" time elapsed: 00:00:27
+----------------------------------------------------------
+
+End testing: Nov 01 07:12 EST
+
+gpu =  27.80 sec*proc
+
+integration =  27.80 sec*proc
+

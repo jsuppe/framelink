@@ -50,7 +50,8 @@ void session(const char* plugin,const std::string& mode) {
   int revokeControl=mode=="revoke-startup"?dup(control.fd[0]):-1;
   int revokeAudio=mode=="revoke-startup"?dup(audio.fd[0]):-1;
   const bool adopt=mode=="adopt-video" || mode=="adopt-nv12" || mode=="adopt-refused";
-  const bool expected=mode=="legacy" || mode=="coordinated-delay" || mode=="finite" || mode=="adopt-video" || mode=="adopt-nv12";
+  const bool audioCoordinated=mode.rfind("audio-coordinated",0)==0;
+  const bool expected=audioCoordinated || mode=="legacy" || mode=="coordinated-delay" || mode=="finite" || mode=="adopt-video" || mode=="adopt-nv12";
   std::atomic<unsigned> opens{0};
   auto provider=[&](int side) {
     av::SessionProvider p;
@@ -79,8 +80,9 @@ void session(const char* plugin,const std::string& mode) {
   av::ProducerOptions tx;tx.plugin=plugin;tx.frames=20;tx.timeoutMs=5000;tx.sessionProvider=&server;tx.stop=&producerStop;
   av::PlaybackOptions rx;rx.plugin=plugin;rx.audioSink="fakesink";rx.timeoutMs=5000;rx.recoveryAttempts=0;rx.sessionProvider=&client;
   if(mode!="legacy")rx.clockPolicy=av::PlaybackClockPolicy::ProducerMapped;
+  if(audioCoordinated)rx.clockPolicy=av::PlaybackClockPolicy::AudioPreferredCoordinated;
   if(mode=="adopt-nv12")tx.format=rx.format="NV12";
-  if(mode=="finite") {tx.frames=80;tx.timeoutMs=1000;tx.mediaRunMs=1600;rx.mediaRunMs=1600;}
+  if(mode=="finite" || mode=="audio-coordinated-finite") {tx.frames=80;tx.timeoutMs=1000;tx.mediaRunMs=1600;rx.mediaRunMs=1600;}
   if(mode=="budget-mismatch"){tx.mediaRunMs=1000;rx.mediaRunMs=2000;}
   if(mode=="media-deadline"){tx.frames=100;tx.timeoutMs=1000;}
   if(mode=="cancel-media")tx.frames=100;
@@ -89,11 +91,17 @@ void session(const char* plugin,const std::string& mode) {
   av::PlaybackCallbacks cb;
   cb.onSession=[&](auto&,auto&,auto&){++sessions;};
   cb.onPrepare=[&](unsigned) {
-    if(mode=="coordinated-delay")std::this_thread::sleep_for(std::chrono::milliseconds(2300));
+    if(mode=="coordinated-delay" || mode=="audio-coordinated-delay")std::this_thread::sleep_for(std::chrono::milliseconds(2300));
     if(mode=="revoke-startup") {shutdown(revokeControl,SHUT_RDWR);shutdown(revokeAudio,SHUT_RDWR);}
     if(mode=="cancel-startup") {producerStop=true;std::this_thread::sleep_for(std::chrono::milliseconds(50));}
   };
-  cb.onVideo=[&](auto*,auto,auto&){if(++frames==5 && mode=="cancel-media")producerStop=true;};
+  std::atomic<uint64_t> pcmSamples{0};
+  cb.onAudio=[&](GstBuffer* buffer,uint64_t pts){
+    CHECK(pts==pcmSamples.load()*GST_SECOND/rx.rate);
+    CHECK(gst_buffer_get_size(buffer)%(rx.channels*2)==0);
+    pcmSamples+=gst_buffer_get_size(buffer)/(rx.channels*2);
+  };
+  cb.onVideo=[&](auto*,auto pts,auto&){if(audioCoordinated)CHECK(pts==uint64_t(frames)*GST_SECOND/rx.fps);if(++frames==5 && mode=="cancel-media")producerStop=true;};
   cb.onClock=[&](auto&){++clocks;};cb.onEnd=[&]{++ends;};
   auto start=std::chrono::steady_clock::now();
   long long producerMs=0;
@@ -107,8 +115,9 @@ void session(const char* plugin,const std::string& mode) {
   if(expected)CHECK(sessions==1 && clocks==1);
   if(adopt && expected)CHECK(opens==2 && frames==tx.frames);
   if(mode=="adopt-refused")CHECK(sessions==0 && ce=="injected video lease refusal");
-  if(mode=="coordinated-delay")CHECK(ms>=2300);
-  if(mode=="finite")CHECK(ms>1000);
+  if(mode=="coordinated-delay" || mode=="audio-coordinated-delay")CHECK(ms>=2300);
+  if(audioCoordinated)CHECK(frames==tx.frames && pcmSamples==uint64_t(tx.frames)*tx.rate/tx.fps);
+  if(mode=="finite" || mode=="audio-coordinated-finite")CHECK(ms>1000);
   if(mode=="media-deadline")CHECK(pe=="producer deadline" && producerMs<2000);
   if(mode=="cancel-startup" || mode=="cancel-media")CHECK(pe=="producer cancelled" && producerMs<2000);
   if(mode=="cancel-startup" || mode=="revoke-startup")CHECK(clocks==0);
@@ -126,6 +135,6 @@ void silentPeer(const char* plugin) {
 }
 int main(int argc,char** argv) {try {
   CHECK(argc==2);bounds(argv[1]);silentPeer(argv[1]);
-  for(const char* mode:{"legacy","coordinated-delay","finite","wrong-key","wrong-audio-key","wrong-audio-role","budget-mismatch","revoke-startup","cancel-startup","cancel-media","media-deadline","adopt-video","adopt-nv12","adopt-refused"})session(argv[1],mode);
+  for(const char* mode:{"legacy","coordinated-delay","finite","wrong-key","wrong-audio-key","wrong-audio-role","budget-mismatch","revoke-startup","cancel-startup","cancel-media","media-deadline","adopt-video","adopt-nv12","adopt-refused","audio-coordinated","audio-coordinated-delay","audio-coordinated-finite"})session(argv[1],mode);
   puts("broker producer: all real-peer cases passed");return 0;
 } catch(const std::exception& e){fprintf(stderr,"FAIL: %s\n",e.what());return 1;}}
