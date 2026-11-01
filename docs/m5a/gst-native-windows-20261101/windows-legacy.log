@@ -1,0 +1,50 @@
+#< CLIXML
+-- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.26300.
+-- framelink: building GStreamer elements (gstframelink)
+-- Configuring done (0.8s)
+-- Generating done (0.5s)
+-- Build files have been written to: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
+  fl_gst_pool_policy.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_pool_policy.exe
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
+  gstframelink.cpp
+  The d3d11 library from gst-plugins-bad is unstable API and may change in future.
+  You can define GST_USE_UNSTABLE_API to avoid this warning.
+     Creating library C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.lib and object C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.exp
+  gstframelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\gstframelink.dll
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
+  framelink_av_playback.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink_av_playback.lib
+  fl_gst_sink_stats.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_sink_stats.exe
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  fl_gst_timestamps.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_timestamps.exe
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
+  fl_read_leases.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_read_leases.exe
+Test project C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+    Start  1: read_leases
+1/7 Test  #1: read_leases .........................   Passed    0.32 sec
+    Start 51: gst_timestamp_contract
+2/7 Test #51: gst_timestamp_contract ..............   Passed    1.06 sec
+    Start 58: gst_pool_policy
+3/7 Test #58: gst_pool_policy .....................   Passed    1.81 sec
+    Start 59: m5a_transport_relay
+4/7 Test #59: m5a_transport_relay .................   Passed    1.43 sec
+    Start 60: m5a_transport_relay_audio_leads
+5/7 Test #60: m5a_transport_relay_audio_leads .....   Passed    1.35 sec
+    Start 61: m5a_transport_relay_sync_negative
+6/7 Test #61: m5a_transport_relay_sync_negative ...   Passed    0.71 sec
+    Start 75: gst_sink_stats
+7/7 Test #75: gst_sink_stats ......................   Passed    0.06 sec
+
+100% tests passed, 0 tests failed out of 7
+
+Total Test time (real) =   6.76 sec
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04"><Obj S="progress" RefId="0"><TN RefId="0"><T>System.Management.Automation.PSCustomObject</T><T>System.Object</T></TN><MS><I64 N="SourceId">1</I64><PR N="Record"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj></Objs>

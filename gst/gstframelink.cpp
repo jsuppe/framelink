@@ -27,8 +27,14 @@
 // Zero-copy caps (memory:DmaBuf, memory:D3D11Memory) are a later stage.
 
 #include <algorithm>
-#ifdef FL_GST_DMABUF
+#if defined(FL_GST_DMABUF) || defined(FL_GST_D3D11)
+#define FL_GST_NATIVE 1
 #include <memory>
+#endif
+#ifdef FL_GST_D3D11
+#include <gst/d3d11/gstd3d11.h>
+#endif
+#ifdef FL_GST_DMABUF
 #include <gst/allocators/gstdmabuf.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -626,13 +632,19 @@ static void gst_framelink_sink_init(GstFrameLinkSink* self) {
 // framelinksrc
 // =============================================================================
 
-#ifdef FL_GST_DMABUF
+#ifdef FL_GST_NATIVE
 // Source shutdown may precede downstream GstMemory destruction. The last memory
 // reader owns the channel until its lease retires; no buffer pool is reused early.
 struct NativeSourceOwner {
     flChannel* channel;
+#ifdef _WIN32
+    GstD3D11Device* device;
+    explicit NativeSourceOwner(flChannel* c):channel(c),device(gst_d3d11_device_new_wrapped(flChannelD3D11Device(c))){}
+    ~NativeSourceOwner(){if(device)gst_object_unref(device);flClose(channel);}
+#else
     explicit NativeSourceOwner(flChannel* c):channel(c){}
     ~NativeSourceOwner(){flClose(channel);}
+#endif
 };
 struct NativeSourceReader {
     std::shared_ptr<NativeSourceOwner> owner;
@@ -653,7 +665,7 @@ typedef struct _GstFrameLinkSrc {
     gint width, height, fps;
     guint poolSize,maxQueueAgeMs;
     gboolean nativeMemory;
-#ifdef FL_GST_DMABUF
+#ifdef FL_GST_NATIVE
     std::shared_ptr<NativeSourceOwner>* nativeOwner;
 #endif
     guint64 expiredFrames;
@@ -683,6 +695,8 @@ enum { SRC_PROP_0, SRC_PROP_CHANNEL, SRC_PROP_WIDTH, SRC_PROP_HEIGHT, SRC_PROP_F
 
 #ifdef FL_GST_DMABUF
 #define FL_SOURCE_CAPS FRAMELINK_CAPS ";" GST_VIDEO_CAPS_MAKE_WITH_FEATURES("memory:DMABuf", "{ BGRA, RGBA, NV12, RGB10A2_LE }")
+#elif defined(FL_GST_D3D11)
+#define FL_SOURCE_CAPS FRAMELINK_CAPS ";" GST_VIDEO_CAPS_MAKE_WITH_FEATURES("memory:D3D11Memory", "{ BGRA, RGBA, NV12, RGB10A2_LE }")
 #else
 #define FL_SOURCE_CAPS FRAMELINK_CAPS
 #endif
@@ -711,7 +725,13 @@ static GstCaps* srcMakeCaps(GstFrameLinkSrc* self) {
                                gst_video_format_to_string(fmt), "width", G_TYPE_INT, w,
                                "height", G_TYPE_INT, h, "framerate", GST_TYPE_FRACTION,
                                self->fps, 1, NULL);
-    if(self->nativeMemory)gst_caps_set_features(caps,0,gst_caps_features_new("memory:DMABuf",nullptr));
+    if(self->nativeMemory)gst_caps_set_features(caps,0,gst_caps_features_new(
+#ifdef _WIN32
+        "memory:D3D11Memory",
+#else
+        "memory:DMABuf",
+#endif
+        nullptr));
     return caps;
 }
 
@@ -728,7 +748,7 @@ static GstCaps* srcGetCaps(GstBaseSrc* base, GstCaps* filter) {
 
 static gboolean srcStart(GstBaseSrc* base) {
     GstFrameLinkSrc* self = GST_FRAMELINK_SRC(base);
-#ifndef FL_GST_DMABUF
+#ifndef FL_GST_NATIVE
     if(self->nativeMemory){GST_ELEMENT_ERROR(self,RESOURCE,SETTINGS,("native-memory output is not supported by this build"),(NULL));return FALSE;}
 #else
     if(self->nativeMemory && self->delegated){GST_ELEMENT_ERROR(self,RESOURCE,SETTINGS,("native adoption requires a negotiated lease contract; not yet supported"),(NULL));return FALSE;}
@@ -745,7 +765,7 @@ static gboolean srcStart(GstBaseSrc* base) {
         return FALSE;
     }
     flQuery(self->ch, &self->cinfo);
-#ifdef FL_GST_DMABUF
+#ifdef FL_GST_NATIVE
     if(self->nativeMemory)self->nativeOwner=new std::shared_ptr<NativeSourceOwner>(std::make_shared<NativeSourceOwner>(self->ch));
 #endif
     self->generation = self->cinfo.generation;
@@ -764,7 +784,7 @@ static gboolean srcStop(GstBaseSrc* base) {
 #ifdef _WIN32
     srcDropStaging(self);
 #endif
-#ifdef FL_GST_DMABUF
+#ifdef FL_GST_NATIVE
     if(self->nativeOwner){delete self->nativeOwner;self->nativeOwner=nullptr;self->ch=nullptr;}
 #endif
     if (self->ch) {flClose(self->ch);self->ch=nullptr;}
@@ -812,6 +832,32 @@ static GstBuffer* srcNativeBuffer(GstFrameLinkSrc* self,const flFrame& frame) {
     gst_mini_object_set_qdata(GST_MINI_OBJECT(mem),g_quark_from_static_string("framelink-reader"),reader,
         [](gpointer p){delete static_cast<NativeSourceReader*>(p);});
     auto*buf=gst_buffer_new();gst_buffer_append_memory(buf,mem);
+    gst_buffer_add_video_meta_full(buf,GST_VIDEO_FRAME_FLAG_NONE,toGstFormat(self->cinfo.format),
+        self->cinfo.width,self->cinfo.height,planes,offsets,strides);
+    return buf;
+}
+#endif
+
+#ifdef FL_GST_D3D11
+static GstBuffer* srcNativeBuffer(GstFrameLinkSrc* self,const flFrame& frame) {
+    if(!self->nativeOwner || !(*self->nativeOwner)->device)return nullptr;
+    auto*tex=flImageD3D11(frame.image);if(!tex)return nullptr;
+    // size=0 asks GStreamer to probe an EMPTY staging allocation's pitch, not
+    // copy the shared image. Do not guess CPU stride from logical row width.
+    auto*mem=gst_d3d11_allocator_alloc_wrapped(nullptr,(*self->nativeOwner)->device,tex,0,nullptr,nullptr);
+    if(!mem)return nullptr;
+    guint pitch=0;if(!gst_d3d11_memory_get_resource_stride(GST_D3D11_MEMORY_CAST(mem),&pitch) || !pitch || pitch>G_MAXINT){gst_memory_unref(mem);return nullptr;}
+    uint64_t token=0;if(flLeaseFrame(self->ch,&frame,&token)!=FL_OK){gst_memory_unref(mem);return nullptr;}
+    auto*reader=new NativeSourceReader{*self->nativeOwner,token};
+    gst_mini_object_set_qdata(GST_MINI_OBJECT(mem),g_quark_from_static_string("framelink-reader"),reader,
+        [](gpointer p){delete static_cast<NativeSourceReader*>(p);});
+    // A later explicit CPU map must download current shared pixels, not return
+    // the empty staging probe. Native GPU consumers use the original texture.
+    GST_MINI_OBJECT_FLAG_SET(mem,GST_D3D11_MEMORY_TRANSFER_NEED_DOWNLOAD);
+    auto*buf=gst_buffer_new();gst_buffer_append_memory(buf,mem);
+    gsize offsets[GST_VIDEO_MAX_PLANES]{};gint strides[GST_VIDEO_MAX_PLANES]{};
+    guint planes=self->cinfo.format==FL_FORMAT_NV12?2:1;
+    strides[0]=pitch;if(planes==2){strides[1]=pitch;offsets[1]=gsize(pitch)*self->cinfo.height;}
     gst_buffer_add_video_meta_full(buf,GST_VIDEO_FRAME_FLAG_NONE,toGstFormat(self->cinfo.format),
         self->cinfo.width,self->cinfo.height,planes,offsets,strides);
     return buf;
@@ -889,10 +935,10 @@ static GstFlowReturn srcCreate(GstPushSrc* push, GstBuffer** outbuf) {
         srcReleaseFrame(self,&frame);return trace.result(GST_FLOW_NOT_NEGOTIATED);
     }
     GstBuffer* buf=nullptr;
-#ifdef FL_GST_DMABUF
+#ifdef FL_GST_NATIVE
     if(self->nativeMemory){
         buf=srcNativeBuffer(self,frame);
-        if(!buf){srcReleaseFrame(self,&frame);GST_ELEMENT_ERROR(self,RESOURCE,SETTINGS,("native DMA-BUF layout/lease unsupported; refusing CPU fallback"),(NULL));return trace.result(GST_FLOW_ERROR);}
+        if(!buf){srcReleaseFrame(self,&frame);GST_ELEMENT_ERROR(self,RESOURCE,SETTINGS,("native layout/lease unsupported; refusing CPU fallback"),(NULL));return trace.result(GST_FLOW_ERROR);}
     } else
 #endif
     {
@@ -1037,7 +1083,7 @@ static void srcGetProperty(GObject* obj, guint id, GValue* value, GParamSpec* sp
 
 static void srcFinalize(GObject* obj) {
     GstFrameLinkSrc* self = GST_FRAMELINK_SRC(obj);
-#ifdef FL_GST_DMABUF
+#ifdef FL_GST_NATIVE
     if(self->nativeOwner){delete self->nativeOwner;self->nativeOwner=nullptr;self->ch=nullptr;}
 #endif
     if(self->ch){flClose(self->ch);self->ch=nullptr;}
@@ -1092,7 +1138,7 @@ static void gst_framelink_src_class_init(GstFrameLinkSrcClass* klass) {
 
     g_object_class_install_property(gobject,SRC_PROP_NATIVE_MEMORY,
         g_param_spec_boolean("native-memory","Native memory output",
-            "Opt-in Linux linear DMA-BUF output; unsupported layouts/builds fail without CPU fallback",
+            "Opt-in Linux linear DMA-BUF or Windows D3D11 output; unsupported paths fail without CPU fallback",
             FALSE,(GParamFlags)(G_PARAM_READWRITE|G_PARAM_STATIC_STRINGS|GST_PARAM_MUTABLE_READY)));
     g_object_class_install_property(gobject,SRC_PROP_MAX_QUEUE_AGE,
         g_param_spec_uint("max-queue-age-ms","Receiver queue age limit",

@@ -12,8 +12,8 @@ not an asynchronous all-GPU scheduling claim.
 Supported initial scope: Linux, linear modifier, one backing DMA-BUF object per
 image (including two-plane NV12 in that object). Other layouts fail explicitly;
 there is no fallback to CPU pixels. Native mode rejects sysmem-only downstream
-caps. Android/Windows native-source adapters and externally adopted native
-channels are not yet wired; those cases reject this option. Legacy defaults
+caps. Android native-source adapter and externally adopted native channels are not
+yet wired; those cases reject this option. Legacy defaults
 remain the CPU-copy path on all platforms.
 
 The source transfers each acquired frame to a bounded FrameLink reader lease.
@@ -31,9 +31,35 @@ sysmem-only negotiation rejection. CPU mapping in the test verifies pixels; it
 is not performed by the native source. No decoder, native sink, cross-process
 GStreamer session, frame-rate, multi-hop or physical-output claim follows.
 
+## Windows source: opt-in D3D11Memory
+
+With the GStreamer D3D11 development library available (API 1.22+), the same
+`native-memory=true` option wraps the original texture in GstD3D11Memory and
+advertises `memory:D3D11Memory`. No payload readback/copy is performed by this
+source path. GStreamer's wrapped allocator probes an **empty** staging resource
+for CPU-accessible pitch/size; that setup cost is not a frame-payload copy and is
+not yet performance-qualified. A downstream explicit CPU map is a readback, not
+zero-copy; tests use one only to verify pixels. Builds without the D3D11 library
+retain legacy support and reject native mode.
+
+The wrapped device is the channel's device. The same retained-memory reader
+lifetime applies. Generic asynchronous/cross-device GPU consumers still need a
+proven completion handoff; these source tests do not qualify every GPU plugin.
+RGBA/NV12 source tests verify pixels, PTS, bounded reuse and retained memory after
+shutdown. GStreamer 1.24 D3D11 memory does not implement memory subviews, so the
+Windows test retains a memory reference rather than claiming Linux subview parity.
+
+NT object equality is insufficient to establish GPU allocation equality across
+independent shared-handle exports. The test uses a controlled, synchronized
+**test-only** alias mutation with no concurrent reader; the consumer observes the
+changed original allocation without another publication. Production writers must
+never bypass reservations this way. A deliberate GPU-copy control is successfully
+created/read first, then rejected by that alias oracle. Setup failures fail the
+control rather than count as success.
+
 ## Remaining task 7 work
 
-- Windows D3D11 and Android native-memory source/sink adapters.
+- Android native-memory source and platform native sink adapters.
 - Native sink allocation/pool negotiation and upstream decoder compatibility.
 - Authenticated remote requirements, exact device/layout/generation agreement;
   enforce all endpoint permissions and reject unsupported legacy peers.

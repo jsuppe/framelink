@@ -253,6 +253,11 @@ if(FRAMELINK_BUILD_GST AND NOT ANDROID)
             target_link_libraries(gstframelink PRIVATE framelink d3d11
                 gstreamer-1.0.lib gstbase-1.0.lib gstvideo-1.0.lib
                 gobject-2.0.lib glib-2.0.lib)
+            if(EXISTS "${FL_GST_ROOT}/lib/gstd3d11-1.0.lib")
+                target_link_libraries(gstframelink PRIVATE gstd3d11-1.0.lib)
+                target_compile_definitions(gstframelink PRIVATE FL_GST_D3D11=1)
+                set(FL_GST_D3D11_FOUND TRUE)
+            endif()
             target_compile_definitions(gstframelink PRIVATE _CRT_SECURE_NO_WARNINGS)
         endif()
     else()
@@ -312,6 +317,19 @@ if(FRAMELINK_BUILD_TESTS AND FL_GST_FOUND AND UNIX AND NOT ANDROID)
 endif()
 
 if(FRAMELINK_BUILD_TESTS AND FL_GST_FOUND AND WIN32)
+    if(FL_GST_D3D11_FOUND)
+    add_executable(fl_gst_native_source_win test/fl_gst_native_source_win.cpp)
+    target_include_directories(fl_gst_native_source_win PRIVATE
+        "${FL_GST_ROOT}/lib/gstreamer-1.0/include"
+        "${FL_GST_ROOT}/include/gstreamer-1.0" "${FL_GST_ROOT}/include/glib-2.0"
+        "${FL_GST_ROOT}/lib/glib-2.0/include")
+    target_link_directories(fl_gst_native_source_win PRIVATE "${FL_GST_ROOT}/lib")
+    target_link_libraries(fl_gst_native_source_win PRIVATE framelink gstreamer-1.0.lib gstapp-1.0.lib gstvideo-1.0.lib gstd3d11-1.0.lib gobject-2.0.lib glib-2.0.lib)
+    add_test(NAME gst_native_source_win COMMAND fl_gst_native_source_win $<TARGET_FILE:gstframelink>)
+    set_tests_properties(gst_native_source_win PROPERTIES TIMEOUT 20)
+    add_test(NAME gst_native_source_win_copy_negative COMMAND fl_gst_native_source_win $<TARGET_FILE:gstframelink> --copy-negative)
+    set_tests_properties(gst_native_source_win_copy_negative PROPERTIES TIMEOUT 20)
+    endif()
     add_executable(fl_gst_nv12 test/fl_gst_nv12.cpp)
     target_include_directories(fl_gst_nv12 PRIVATE
         "${FL_GST_ROOT}/include/gstreamer-1.0" "${FL_GST_ROOT}/include/glib-2.0"

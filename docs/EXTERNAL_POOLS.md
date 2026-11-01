@@ -50,3 +50,15 @@ advertise EXTERNAL_POOL locally; legacy wire peers are not sent new capability
 claims. RELAY remains unadvertised. No physical GPU-residency guarantee is made.
 
 [Local adoption and regression evidence](m5a/external-pools-20261101/README.md).
+
+## Windows allocation identity limit discovered during native Gst integration
+
+The duplicate-handle rejection compares NT object identities. Independent
+CreateSharedHandle exports can refer to one GPU allocation while having different
+NT wrapper identities. Therefore that rejection is not proof that arbitrary
+external handles describe distinct backing storage. Callers must supply genuinely
+distinct allocations from a trusted allocator; remote strict negotiation must bind
+allocator-issued allocation identities, not infer them from distinct handle values
+or NT wrappers. Broader alias-negative qualification remains an open integration
+gate. The native Gst source test uses a controlled alias oracle (test only), not
+handle inequality as zero-copy evidence.
