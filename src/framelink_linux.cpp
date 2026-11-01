@@ -965,6 +965,14 @@ FL_API flResult flImageMemoryInfo(flChannel* ch, flImage* img, flMemoryResourceI
     r.handleTransport=FL_MEMORY_HANDLE_DMABUF;
     r.interopCapabilities=FL_MEMORY_INTEROP_RING_IMPORT | FL_MEMORY_INTEROP_BORROW_NATIVE;
     if(ch->externalPool)r.interopCapabilities|=FL_MEMORY_INTEROP_EXTERNAL_POOL;
+    if(fltrace::enabled()) {
+        fltrace::Event e{};e.op="image.memory_resource";e.start=fltrace::clockNs();
+        e.object=(uint64_t)(uintptr_t)img;e.details=fltrace::Memory|fltrace::Generation;
+        e.knownFields=r.knownFields;e.generation=r.generation;e.resource=r.resourceType;e.usage=r.directUsage;e.operations=r.mapOperations;
+        if(r.knownFields&FL_MEMORY_INFO_DEVICE) {e.details|=fltrace::Device;e.deviceKind=r.deviceIdKind;
+            for(unsigned i=0;i<8;i++){e.deviceLo|=(uint64_t)r.deviceId[i]<<(8*i);e.deviceHi|=(uint64_t)r.deviceId[i+8]<<(8*i);}}
+        fltrace::record(e);
+    }
     *out=r; return FL_OK;
 }
 

@@ -22,6 +22,10 @@ for (path,op),rows in sorted(groups.items()):
     results=defaultdict(int)
     for row in rows:results[row['result']]+=1
     print(f'{path} {op}: n={len(d)} us p50={percentile(.5):.3f} p95={percentile(.95):.3f} p99={percentile(.99):.3f} max={d[-1]/1000:.3f} results={dict(results)}')
+    payload=[r for r in rows if int(r.get('details',0)) & 1]
+    if payload:print(f"  observed logical payload bytes={sum(int(r['payload_bytes']) for r in payload)}; GPU issued commands are not completion; excludes driver-internal work")
+    occupancy=[int(r['occupancy']) for r in rows if int(r.get('details',0)) & 4]
+    if occupancy:print(f"  retained frame records max={max(occupancy)} (not queued latency or reader-token count)")
     if op=='flAcquireFrame':
         channels=defaultdict(list)
         for row in rows:

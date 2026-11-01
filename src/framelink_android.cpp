@@ -926,6 +926,14 @@ FL_API flResult flImageMemoryInfo(flChannel* ch, flImage* img, flMemoryResourceI
     r.handleTransport=FL_MEMORY_HANDLE_AHB;
     r.interopCapabilities=FL_MEMORY_INTEROP_RING_IMPORT | FL_MEMORY_INTEROP_BORROW_NATIVE;
     if(ch->externalPool)r.interopCapabilities|=FL_MEMORY_INTEROP_EXTERNAL_POOL;
+    if(fltrace::enabled()) {
+        fltrace::Event e{};e.op="image.memory_resource";e.start=fltrace::clockNs();
+        e.object=(uint64_t)(uintptr_t)img;e.details=fltrace::Memory|fltrace::Generation;
+        e.knownFields=r.knownFields;e.generation=r.generation;e.resource=r.resourceType;e.usage=r.directUsage;e.operations=r.mapOperations;
+        if(r.knownFields&FL_MEMORY_INFO_DEVICE) {e.details|=fltrace::Device;e.deviceKind=r.deviceIdKind;
+            for(unsigned i=0;i<8;i++){e.deviceLo|=(uint64_t)r.deviceId[i]<<(8*i);e.deviceHi|=(uint64_t)r.deviceId[i+8]<<(8*i);}}
+        fltrace::record(e);
+    }
     *out=r; return FL_OK;
 }
 
@@ -961,6 +969,7 @@ FL_API flResult flImageMap(flImage* img, void** pixels, uint64_t* stride) {
                 const auto* src = (const uint8_t*)p;
                 dst[i] = src[i+2]; dst[i+1] = src[i+1]; dst[i+2] = src[i]; dst[i+3] = src[i+3];
             }
+        fltrace::payload("image.cpu_bgra_read",(uint64_t)(uintptr_t)img,(uint64_t)img->width*img->height*4,FL_MEMORY_COPY|FL_MEMORY_CONVERT);
         p = dst;
     }
     img->mapped = p;
@@ -1001,6 +1010,7 @@ FL_API flResult flImageMapPlanes(flImage* img, flMappedImage* out) {
                         dst[(size_t)y * img->width + x * (p ? 2 : 1)] =
                             ((const uint8_t*)plane.data)[(size_t)y * plane.rowStride + x * plane.pixelStride];
             }
+            if(!img->nativeNv12)fltrace::payload("image.cpu_yuv_read",(uint64_t)(uintptr_t)img,(uint64_t)img->width*img->height*3/2,FL_MEMORY_COPY|FL_MEMORY_CONVERT);
         }
         out->planes = 2;
         if (img->nativeNv12) {
@@ -1035,6 +1045,7 @@ FL_API void flImageUnmap(flImage* img) {
                 size_t i = y * img->strideBytes + x * 4;
                 dst[i] = src[i+2]; dst[i+1] = src[i+1]; dst[i+2] = src[i]; dst[i+3] = src[i+3];
             }
+        fltrace::payload("image.cpu_bgra_write",(uint64_t)(uintptr_t)img,(uint64_t)img->width*img->height*4,FL_MEMORY_COPY|FL_MEMORY_CONVERT);
         img->nativeMapped = nullptr;
     }
     if (img->format == FL_FORMAT_NV12 && !img->nativeNv12) {
@@ -1046,6 +1057,7 @@ FL_API void flImageUnmap(flImage* img) {
                     ((uint8_t*)plane.data)[(size_t)y * plane.rowStride + x * plane.pixelStride] =
                         src[(size_t)y * img->width + x * (p ? 2 : 1)];
         }
+        fltrace::payload("image.cpu_yuv_write",(uint64_t)(uintptr_t)img,(uint64_t)img->width*img->height*3/2,FL_MEMORY_COPY|FL_MEMORY_CONVERT);
     }
     AHardwareBuffer_unlock(img->ahb, nullptr);
     img->mapped = nullptr;

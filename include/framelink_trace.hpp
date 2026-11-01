@@ -40,10 +40,18 @@ inline uint64_t id(const char* s) noexcept {
     while (*s) { h^=(unsigned char)*s++; h*=1099511628211ull; }
     return h;
 }
+// Detail mask distinguishes an observed zero from an unavailable field.
+enum Detail : uint64_t { Payload=1, Generation=2, Occupancy=4, Token=8,
+    Memory=16, Policy=32, Device=64 };
 struct Event {
     const char* op; // static literal, never a temporary string
     uint64_t start, duration, object, sequence, fence, slot;
     int64_t pts, result;
+    uint64_t details, bytes, generation, occupancy, token;
+    uint64_t deviceLo, deviceHi;
+    uint32_t resource, usage, operations, deviceKind;
+    uint32_t missingUsage, unmetPreference, rejectedResource, forbiddenOperations;
+    uint32_t endpoint, knownFields;
 };
 struct Buffer {
     std::unique_ptr<Event[]> events;
@@ -92,19 +100,24 @@ public:
             const std::string file=path_+"."+std::to_string(pid)+".csv";
             FILE* f=std::fopen(file.c_str(),"w");
             if(!f) { std::fprintf(stderr,"trace: cannot open %s\n",file.c_str()); return false; }
-            std::fprintf(f,"# clock=steady_ns,pid=%d,origin_ns=%llu,wall_ns=%llu\n",pid,
+            std::fprintf(f,"# schema=2,clock=steady_ns,pid=%d,origin_ns=%llu,wall_ns=%llu\n",pid,
                 (unsigned long long)origin_,(unsigned long long)wall_);
-            std::fprintf(f,"thread,operation,start_ns,duration_ns,channel_id,sequence,fence,slot,pts_ns,result\n");
+            std::fprintf(f,"thread,operation,start_ns,duration_ns,channel_id,sequence,fence,slot,pts_ns,result,details,payload_bytes,generation,occupancy,token,device_lo,device_hi,resource_type,usage,operations,device_kind,missing_usage,unmet_preference,rejected_resource,forbidden_operations,endpoint,resource_known_fields\n");
             uint64_t dropped=0; size_t tid=0;
             for(auto& b:buffers_) {
                 const size_t count=b->published.load(std::memory_order_acquire);
                 for(size_t i=0;i<count;i++) {
                     const auto& e=b->events[i];
-                    std::fprintf(f,"%zu,%s,%llu,%llu,%llu,%llu,%llu,%llu,%lld,%lld\n",tid,e.op,
+                    std::fprintf(f,"%zu,%s,%llu,%llu,%llu,%llu,%llu,%llu,%lld,%lld,%llu,%llu,%llu,%llu,%llu,%llu,%llu,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u\n",tid,e.op,
                         (unsigned long long)e.start,(unsigned long long)e.duration,
                         (unsigned long long)e.object,(unsigned long long)e.sequence,
                         (unsigned long long)e.fence,(unsigned long long)e.slot,
-                        (long long)e.pts,(long long)e.result);
+                        (long long)e.pts,(long long)e.result,
+                        (unsigned long long)e.details,(unsigned long long)e.bytes,
+                        (unsigned long long)e.generation,(unsigned long long)e.occupancy,
+                        (unsigned long long)e.token,(unsigned long long)e.deviceLo,
+                        (unsigned long long)e.deviceHi,e.resource,e.usage,e.operations,e.deviceKind,
+                        e.missingUsage,e.unmetPreference,e.rejectedResource,e.forbiddenOperations,e.endpoint,e.knownFields);
                 }
                 dropped+=b->dropped.load(std::memory_order_relaxed); ++tid;
             }
@@ -129,6 +142,13 @@ inline void record(const Event& e) noexcept {
     if(n==b->capacity) { b->dropped.fetch_add(1,std::memory_order_relaxed); return; }
     b->events[n]=e;
     b->published.store(n+1,std::memory_order_release);
+}
+// Observed logical payload work, not a declaration or driver-wide copy proof.
+// GPU events mean the copy command was issued, not that GPU completion occurred.
+inline void payload(const char* op,uint64_t object,uint64_t bytes,uint32_t operations) noexcept {
+    if(!enabled())return;
+    Event e{};e.op=op;e.object=object;e.start=clockNs();
+    e.details=Payload;e.bytes=bytes;e.operations=operations;record(e);
 }
 struct Scope {
     Event event{};

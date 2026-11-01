@@ -134,8 +134,13 @@ Windows decoder-to-independent-renderer example, and measured multi-hop evidence
   GPU transformed output is task8's explicit color conversion. GPU relay performance,
   Windows/Android three-process and production broker/recovery qualification remain
   M5a.12–13 gates; no automatic-safe-recovery claim on peer death.
-- [ ] **M5a.10 Instrumentation:** selected usage/memory/device, fallback reason,
-  queue occupancy, waits, ownership and actual copies/readbacks/uploads.
+- [x] **M5a.10 Instrumentation — locally validated, not merged:** typed opt-in
+  policy/resource/device decisions, observed logical copies/uploads/readbacks and
+  retained-reader occupancy alongside existing waits/identity events. Linux11/11,
+  Windows8/8, Android8/8 and dual-ABI builds; native/legacy accounting positive and
+  missing/lost/empty negative controls. [Contract](MEMORY_TRACING.md),
+  [evidence](m5a/memory-instrumentation-20261101/README.md).
+  Enabled overhead and driver-internal work are not hidden; throughput stays task13.
 - [ ] **M5a.11 Contract/negative tests:** hard/preferred requirements, malformed
   offers, old peers, conflicting consumers and strict-copy rejection.
 - [ ] **M5a.12 Platform integration tests:** GPU-native and CPU-readable modes,

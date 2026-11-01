@@ -5,6 +5,7 @@
 #include <thread>
 #include <vector>
 #include <cstring>
+#include <sstream>
 int main(int argc,char** argv) {
     if(argc>1 && !std::strcmp(argv[1],"bench")) {
         volatile uint64_t value=0;
@@ -19,6 +20,34 @@ int main(int argc,char** argv) {
         fltrace::Scope s("disabled");
         if(s.active || !fltrace::flush())return 1;
         return 0;
+    }
+    if(argc>1 && !std::strcmp(argv[1],"details")) {
+        fltrace::Event e{};e.op="policy";e.start=1;e.details=fltrace::Policy|fltrace::Device;
+        e.deviceLo=UINT64_MAX;e.deviceHi=7;e.resource=2;e.usage=3;e.operations=4;e.deviceKind=5;
+        e.missingUsage=6;e.unmetPreference=7;e.rejectedResource=8;e.forbiddenOperations=9;
+        fltrace::record(e);
+        fltrace::payload("copy",4,1234567890123ULL,1);
+        if(!fltrace::flush())return 5;
+#ifdef _WIN32
+        int pid=_getpid();
+#else
+        int pid=getpid();
+#endif
+        std::ifstream input(std::string(std::getenv("FRAMELINK_TRACE"))+"."+std::to_string(pid)+".csv");
+        std::string line;unsigned rows=0;
+        while(std::getline(input,line)) {
+            if(line.empty()||line[0]=='#'||line.rfind("thread,",0)==0)continue;
+            std::vector<std::string> fields;std::istringstream stream(line);std::string field;
+            while(std::getline(stream,field,','))fields.push_back(field);
+            if(fields.size()!=27)return 6;
+            if(fields[1]=="policy") {
+                if(fields[10]!="96"||fields[11]!="0"||fields[15]!="18446744073709551615"||fields[24]!="9")return 7;
+            }else if(fields[1]=="copy") {
+                if(fields[10]!="1"||fields[11]!="1234567890123"||fields[19]!="1"||fields[24]!="0")return 8;
+            }else return 9;
+            ++rows;
+        }
+        return rows==2?0:10;
     }
     const bool threadLimit=argc>1 && !std::strcmp(argv[1],"threads");
     if(threadLimit) {

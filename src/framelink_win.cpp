@@ -1026,6 +1026,14 @@ FL_API flResult flImageMemoryInfo(flChannel* ch, flImage* img, flMemoryResourceI
     r.handleTransport=FL_MEMORY_HANDLE_NT;
     r.interopCapabilities=FL_MEMORY_INTEROP_RING_IMPORT | FL_MEMORY_INTEROP_BORROW_NATIVE;
     if(ch->externalPool)r.interopCapabilities|=FL_MEMORY_INTEROP_EXTERNAL_POOL;
+    if(fltrace::enabled()) {
+        fltrace::Event e{};e.op="image.memory_resource";e.start=fltrace::clockNs();
+        e.object=(uint64_t)(uintptr_t)img;e.details=fltrace::Memory|fltrace::Generation;
+        e.knownFields=r.knownFields;e.generation=r.generation;e.resource=r.resourceType;e.usage=r.directUsage;e.operations=r.mapOperations;
+        if(r.knownFields&FL_MEMORY_INFO_DEVICE) {e.details|=fltrace::Device;e.deviceKind=r.deviceIdKind;
+            for(unsigned i=0;i<8;i++){e.deviceLo|=(uint64_t)r.deviceId[i]<<(8*i);e.deviceHi|=(uint64_t)r.deviceId[i+8]<<(8*i);}}
+        fltrace::record(e);
+    }
     *out=r; return FL_OK;
 }
 
@@ -1048,6 +1056,8 @@ FL_API flResult flImageMapPlanes(flImage* img, flMappedImage* out) {
                 return trace.result(FL_FORMAT_UNSUPPORTED);
         }
         img->mapContext->CopyResource(img->staging.Get(), img->tex.Get());
+        fltrace::payload("image.gpu_readback_issued",(uint64_t)(uintptr_t)img,
+            (uint64_t)desc.Width*desc.Height*(desc.Format==DXGI_FORMAT_NV12?3:8)/2,FL_MEMORY_READBACK);
         if (FAILED(img->mapContext->Map(img->staging.Get(), 0, D3D11_MAP_READ_WRITE, 0, &img->mapped)))
             return trace.result(FL_INTERNAL);
     }
@@ -1072,7 +1082,14 @@ FL_API void flImageUnmap(flImage* img) {
     if (!img || !img->mapped.pData) return;
     img->mapContext->Unmap(img->staging.Get(), 0);
     img->mapped = {};
-    if (img->producer) img->mapContext->CopyResource(img->tex.Get(), img->staging.Get());
+    if (img->producer) {
+        img->mapContext->CopyResource(img->tex.Get(), img->staging.Get());
+        if(fltrace::enabled()) {
+            D3D11_TEXTURE2D_DESC desc{};img->tex->GetDesc(&desc);
+            fltrace::payload("image.gpu_upload_issued",(uint64_t)(uintptr_t)img,
+                (uint64_t)desc.Width*desc.Height*(desc.Format==DXGI_FORMAT_NV12?3:8)/2,FL_MEMORY_UPLOAD);
+        }
+    }
 }
 
 FL_API ID3D11Texture2D* flImageD3D11(flImage* img) { return img ? img->tex.Get() : nullptr; }

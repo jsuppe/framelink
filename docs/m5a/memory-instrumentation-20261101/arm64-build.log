@@ -1,0 +1,23 @@
+[ 50%] Building CXX object CMakeFiles/fl_trace_test.dir/test/fl_trace_test.cpp.o
+[100%] Linking CXX executable fl_trace_test
+[100%] Built target fl_trace_test
+[ 50%] Building CXX object CMakeFiles/fl_trace_compiled_out.dir/test/fl_trace_test.cpp.o
+[100%] Linking CXX executable fl_trace_compiled_out
+[100%] Built target fl_trace_compiled_out
+[  9%] Building CXX object CMakeFiles/framelink.dir/src/framelink_android.cpp.o
+[ 18%] Building CXX object CMakeFiles/framelink.dir/src/fl_ipc_posix.cpp.o
+[ 27%] Building CXX object CMakeFiles/framelink.dir/src/fl_trace.cpp.o
+[ 36%] Linking CXX static library libframelink.a
+[ 63%] Built target framelink
+[ 72%] Building CXX object CMakeFiles/gstframelink.dir/gst/gstframelink.cpp.o
+[ 81%] Linking CXX static library libgstframelink.a
+[ 81%] Built target gstframelink
+[ 90%] Linking CXX executable fl_gst_nv12
+[100%] Built target fl_gst_nv12
+[ 63%] Built target framelink
+[ 81%] Built target gstframelink
+[ 90%] Linking CXX executable fl_gst_native_producer_android
+[100%] Built target fl_gst_native_producer_android
+[ 77%] Built target framelink
+[ 88%] Linking CXX executable fl_native_relay_android
+[100%] Built target fl_native_relay_android

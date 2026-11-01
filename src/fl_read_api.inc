@@ -1,18 +1,31 @@
 // Included by each native backend after its channel and retirement helper.
+// Called while pendingMutex is held. Occupancy is retained frame records,
+// including completed readers awaiting ordered fence retirement, not token count.
+static void traceReadState(fltrace::Scope& trace,flChannel* ch,uint64_t token=0) {
+    if(!trace.active)return;
+    trace.event.details=fltrace::Generation|fltrace::Occupancy|fltrace::Token;
+    trace.event.generation=ch->info.generation;
+    trace.event.occupancy=ch->readers.size();trace.event.token=token;
+}
 FL_API flResult flLeaseFrame(flChannel* ch, const flFrame* frame, uint64_t* lease) {
+    fltrace::Scope trace("reader.acquire",fltrace::id(ch?ch->name.c_str():nullptr));
     if(!ch || !ch->isConsumer || !frame || !lease || !(ch->flags & FL_DEFER_RELEASE) ||
-       (ch->flags & FL_GPU_SYNC)) return FL_INVALID;
+       (ch->flags & FL_GPU_SYNC)) return trace.result(FL_INVALID);
     std::lock_guard<std::mutex> lock(ch->pendingMutex);
     if(!ch->frameHeld || frame->slot!=ch->heldSlot || frame->_readyValue!=ch->heldReady ||
-       frame->slot>=ch->images.size() || frame->image!=ch->images[frame->slot]) return FL_INVALID;
+       frame->slot>=ch->images.size() || frame->image!=ch->images[frame->slot]) return trace.result(FL_INVALID);
     auto r=ch->readers.acquire(ch->info.generation,*frame,*lease);
     if(r==FL_OK) { ch->frameHeld=false; releaseLeaseReadyFence(ch); }
-    return r;
+    traceReadState(trace,ch,r==FL_OK?*lease:0);
+    if(trace.active){trace.event.sequence=frame->sequence;trace.event.slot=frame->slot;trace.event.fence=frame->_readyValue;trace.event.pts=frame->ptsNs;}
+    return trace.result(r);
 }
 FL_API flResult flRetainReadLease(flChannel* ch,uint64_t lease,uint64_t* retained) {
     if(!ch || !ch->isConsumer || !retained)return FL_INVALID;
     std::lock_guard<std::mutex> lock(ch->pendingMutex);
-    return ch->readers.retain(lease,*retained);
+    fltrace::Scope trace("reader.retain",fltrace::id(ch->name.c_str()));
+    auto result=ch->readers.retain(lease,*retained);traceReadState(trace,ch,result==FL_OK?*retained:lease);
+    return trace.result(result);
 }
 FL_API flResult flReadLeaseFrame(flChannel* ch,uint64_t lease,flFrame* frame,uint64_t* generation) {
     if(!ch || !ch->isConsumer || !frame || !generation)return FL_INVALID;
@@ -24,7 +37,9 @@ FL_API flResult flCompleteReadLease(flChannel* ch,uint64_t lease) {
     std::lock_guard<std::mutex> lock(ch->pendingMutex);
     // Completion consumes the token, not the retirement operation. Retry a failed
     // retirement with flCollectReadLeases, never complete the same token twice.
-    return ch->readers.complete(lease);
+    fltrace::Scope trace("reader.complete",fltrace::id(ch->name.c_str()));
+    auto result=ch->readers.complete(lease);traceReadState(trace,ch,lease);
+    return trace.result(result);
 }
 FL_API flResult flCollectReadLeases(flChannel* ch) {
     if(!ch || !ch->isConsumer)return FL_INVALID;
@@ -35,7 +50,10 @@ FL_API flResult flCollectReadLeases(flChannel* ch) {
     if(!r.value)return ch->readers.empty()?FL_OK:FL_BUSY;
     auto result=retireReadLeases(ch,r.value);
     if(result!=FL_OK)return result;
-    return ch->readers.retired(r);
+    fltrace::Scope trace("reader.retire",fltrace::id(ch->name.c_str()));
+    auto retired=ch->readers.retired(r);traceReadState(trace,ch);
+    if(trace.active)trace.event.fence=r.value;
+    return trace.result(retired);
 }
 
 FL_API flResult flFrameAgeNs(flChannel* ch,const flFrame* frame,uint64_t* ageNs) {

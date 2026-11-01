@@ -184,10 +184,20 @@ using NativeSinkProducer=FrameLinkDmabufProducer;
 #endif
 #endif
 
-static gboolean validMemoryPolicy(const GstFrameLinkMemoryPolicy* policy,gboolean native,gboolean producer){
+static gboolean validMemoryPolicy(const GstFrameLinkMemoryPolicy* policy,gboolean native,gboolean producer,const char* channel){
     if(!policy||policy->version!=1||policy->reserved||!policy->sessionGeneration)return FALSE;
     flMemoryDecision decisions[2]{};
-    if(flMemoryEvaluateBoundary(policy->requirements,policy->paths,2,decisions)!=FL_MEMORY_OK)return FALSE;
+    const auto evaluated=flMemoryEvaluateBoundary(policy->requirements,policy->paths,2,decisions);
+    if(gsttrace::enabled())for(unsigned i=0;i<2;i++){
+        gsttrace::Event e{};e.op="gst.memory_policy_evaluation";e.start=gsttrace::clockNs();
+        e.details=gsttrace::Policy|gsttrace::Memory|gsttrace::Generation;
+        e.generation=policy->sessionGeneration;e.result=evaluated;e.endpoint=i;e.object=gsttrace::id(channel);
+        e.resource=policy->paths[i].resourceType;e.usage=policy->paths[i].supportedUsage;
+        e.operations=policy->paths[i].operations;e.missingUsage=decisions[i].missingRequiredUsage;
+        e.unmetPreference=decisions[i].unmetPreferredUsage;e.rejectedResource=decisions[i].rejectedResourceType;
+        e.forbiddenOperations=decisions[i].forbiddenOperations;gsttrace::record(e);
+    }
+    if(evaluated!=FL_MEMORY_OK)return FALSE;
 #ifdef _WIN32
     const uint32_t resource=FL_MEMORY_D3D11;
 #elif defined(__ANDROID__)
@@ -608,17 +618,20 @@ static GstFlowReturn sinkRender(GstBaseSink* base, GstBuffer* buffer) {
                     memcpy(scratch->data+(p?w*h:0)+y*w,
                            (const guint8*)GST_VIDEO_FRAME_PLANE_DATA(&vframe,p)+(gsize)y*pitch,w);
             }
+            gsttrace::payload("gst.cpu_repack",gsttrace::id(self->channel),(uint64_t)w*h*3/2,FL_MEMORY_COPY);
             upload=scratch->data;uploadStride=w;
         } else if (swap) {
             scratch = g_byte_array_sized_new(w * 4 * h);
             g_byte_array_set_size(scratch, w * 4 * h);
             copyPixels(scratch->data, w * 4, src, srcStride, w, h, TRUE);
+            gsttrace::payload("gst.cpu_convert",gsttrace::id(self->channel),(uint64_t)w*h*4,FL_MEMORY_COPY|FL_MEMORY_CONVERT);
             upload = scratch->data;
             uploadStride = w * 4;
         }
         D3D11_BOX box = {0, 0, 0, w, h, 1};
         ctx->UpdateSubresource(tex, 0, incoming==FL_FORMAT_NV12 ? nullptr : &box, upload, (UINT)uploadStride,
                                (UINT)(uploadStride * h));
+        gsttrace::payload("gst.gpu_upload_issued",gsttrace::id(self->channel),(uint64_t)w*h*(incoming==FL_FORMAT_NV12?3:8)/2,FL_MEMORY_UPLOAD);
         ctx->Release();
         if (scratch) g_byte_array_unref(scratch);
         wrote = TRUE;
@@ -638,6 +651,7 @@ static GstFlowReturn sinkRender(GstBaseSink* base, GstBuffer* buffer) {
                 for(guint y=0;y<view.plane[p].rows;y++)
                     memcpy((guint8*)view.plane[p].pixels+y*view.plane[p].stride,
                            (guint8*)GST_VIDEO_FRAME_PLANE_DATA(&vframe,p)+(gsize)y*pitch,w);
+                gsttrace::payload("gst.cpu_copy_sink",gsttrace::id(self->channel),(uint64_t)w*view.plane[p].rows,FL_MEMORY_COPY);
             }
             flImageUnmap(fb.image);
         }
@@ -647,6 +661,7 @@ static GstFlowReturn sinkRender(GstBaseSink* base, GstBuffer* buffer) {
     r = flImageMap(fb.image, &dst, &dstStride);
     if (r == FL_OK) {
         copyPixels((guint8*)dst, (gsize)dstStride, src, srcStride, w, h, swap);
+        gsttrace::payload("gst.cpu_copy_sink",gsttrace::id(self->channel),(uint64_t)w*h*4,FL_MEMORY_COPY|(swap?FL_MEMORY_CONVERT:0));
         flImageUnmap(fb.image);
         wrote = TRUE;
     } else if (r == FL_FORMAT_UNSUPPORTED && !self->mapRefused) {
@@ -791,7 +806,7 @@ static gboolean sinkAdoptChannel(GstFrameLinkSink* self,flChannel* channel) {
 }
 
 static gboolean sinkApplyMemoryPolicy(GstFrameLinkSink* self,const GstFrameLinkMemoryPolicy* policy){
-    if(GST_STATE(self)!=GST_STATE_NULL||!self->delegated||!self->ch||self->memoryPolicyApplied||!validMemoryPolicy(policy,self->nativeMemory,TRUE))return FALSE;
+    if(GST_STATE(self)!=GST_STATE_NULL||!self->delegated||!self->ch||self->memoryPolicyApplied||!validMemoryPolicy(policy,self->nativeMemory,TRUE,self->channel))return FALSE;
     flChannelInfo info{};if(flQuery(self->ch,&info)!=FL_OK)return FALSE;
     self->memoryPoolGeneration=info.generation;
     self->memoryPolicy=*policy;self->memoryPolicyApplied=TRUE;return TRUE;
@@ -1279,6 +1294,7 @@ static GstFlowReturn srcCreate(GstPushSrc* push, GstBuffer** outbuf) {
             }
             if (self->staging) {
                 ctx->CopyResource(self->staging, tex);
+                gsttrace::payload("gst.gpu_readback_issued",gsttrace::id(self->channel),(uint64_t)w*h*(self->cinfo.format==FL_FORMAT_NV12?3:8)/2,FL_MEMORY_READBACK);
                 D3D11_MAPPED_SUBRESOURCE ms;
                 if (SUCCEEDED(gsttrace::call("gst.d3d11_readback_map", [&]{return ctx->Map(self->staging, 0, D3D11_MAP_READ, 0, &ms);}))) {
                     if(self->cinfo.format==FL_FORMAT_NV12) {
@@ -1289,6 +1305,7 @@ static GstFlowReturn srcCreate(GstPushSrc* push, GstBuffer** outbuf) {
                     } else {
                         copyPixels(map.data, (gsize)w * 4, (const guint8*)ms.pData, ms.RowPitch,w,h,FALSE);
                     }
+                    gsttrace::payload("gst.cpu_copy_source",gsttrace::id(self->channel),(uint64_t)w*h*(self->cinfo.format==FL_FORMAT_NV12?3:8)/2,FL_MEMORY_COPY);
                     ctx->Unmap(self->staging, 0);
                     filled = TRUE;
                 }
@@ -1307,6 +1324,7 @@ static GstFlowReturn srcCreate(GstPushSrc* push, GstBuffer** outbuf) {
                     for(guint y=0;y<view.plane[p].rows;y++)
                         memcpy(map.data+outputInfo.offset[p]+(gsize)y*outputInfo.stride[p],
                                (guint8*)view.plane[p].pixels+y*view.plane[p].stride,w);
+                    gsttrace::payload("gst.cpu_copy_source",gsttrace::id(self->channel),(uint64_t)w*view.plane[p].rows,FL_MEMORY_COPY);
                 }
                 flImageUnmap(frame.image);
             }
@@ -1318,6 +1336,7 @@ static GstFlowReturn srcCreate(GstPushSrc* push, GstBuffer** outbuf) {
         if (flImageMap(frame.image, &pixels, &stride) == FL_OK) {
             // WC-aware copy: see wcCopy - a plain memcpy here ran at 10 MB/s.
             wcCopy(map.data, (gsize)w * 4, (const guint8*)pixels, (gsize)stride, w, h);
+            gsttrace::payload("gst.cpu_copy_source",gsttrace::id(self->channel),(uint64_t)w*h*4,FL_MEMORY_COPY);
             flImageUnmap(frame.image);
             filled = TRUE;
         }
@@ -1438,7 +1457,7 @@ static gboolean srcAdoptChannel(GstFrameLinkSrc* self,flChannel* channel) {
 }
 
 static gboolean srcApplyMemoryPolicy(GstFrameLinkSrc* self,const GstFrameLinkMemoryPolicy* policy){
-    if(GST_STATE(self)!=GST_STATE_NULL||!self->delegated||!self->ch||self->memoryPolicyApplied||!validMemoryPolicy(policy,self->nativeMemory,FALSE))return FALSE;
+    if(GST_STATE(self)!=GST_STATE_NULL||!self->delegated||!self->ch||self->memoryPolicyApplied||!validMemoryPolicy(policy,self->nativeMemory,FALSE,self->channel))return FALSE;
     flChannelInfo info{};if(flQuery(self->ch,&info)!=FL_OK)return FALSE;
     self->memoryPoolGeneration=info.generation;
     self->memoryPolicy=*policy;self->memoryPolicyApplied=TRUE;return TRUE;
