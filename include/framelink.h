@@ -271,6 +271,11 @@ FL_API flResult flImageMapPlanes(flImage*, flMappedImage* out);
 FL_API flResult flImageMap(flImage*, void** pixels, uint64_t* stride);
 FL_API void     flImageUnmap(flImage*);
 
+// Local consumer creation flags, not remote capabilities or negotiated policy.
+// Producer channels reject this query; output is unchanged on failure.
+// Useful when transferring an owning consumer to an adapter that requires
+// deferred release. Does not mutate flags or establish native import support.
+FL_API flResult flQueryConsumerFlags(flChannel*, uint32_t* flags);
 FL_API flResult flQuery(flChannel*, flChannelInfo* out);
 FL_API void     flClose(flChannel*);
 

@@ -10,10 +10,20 @@
 #include <cstring>
 #include <string>
 #define CHECK(x) do{if(!(x)){fprintf(stderr,"line %d: %s\n",__LINE__,#x);std::exit(1);}}while(0)
-static void run(const char* format){
+static void run(const char* format,bool adopt=false){
  GError*e=nullptr;
  std::string name="native-gst-"+std::to_string(g_get_monotonic_time());
- auto*p=gst_parse_launch(("framelinksrc channel="+name+" width=16 height=16 format="+std::string(format)+" pool-size=2 native-memory=true preserve-timestamps=true ! appsink name=out sync=false async=false enable-last-sample=false").c_str(),&e);CHECK(p&&!e);
+ auto*p=gst_parse_launch(("framelinksrc name=source channel="+name+" width=16 height=16 format="+std::string(format)+" pool-size=2 native-memory=true preserve-timestamps=true ! appsink name=out sync=false async=false enable-last-sample=false").c_str(),&e);CHECK(p&&!e);
+ if(adopt){
+     auto*src=gst_bin_get_by_name(GST_BIN(p),"source");
+     guint w=0,h=0;g_object_get(src,"width",&w,"height",&h,nullptr);
+     flFormat fmt=!strcmp(format,"NV12")?FL_FORMAT_NV12:!strcmp(format,"RGB10A2_LE")?FL_FORMAT_RGB10A2:FL_FORMAT_RGBA8;
+     flChannel*c=nullptr;gboolean accepted=TRUE;
+     CHECK(flCreateChannelEx(name.c_str(),w,h,fmt,2,FL_MAP_CPU,&c)==FL_OK);
+     g_signal_emit_by_name(src,"adopt-channel",c,&accepted);CHECK(!accepted);flChannelInfo info{};CHECK(flQuery(c,&info)==FL_OK);flClose(c);
+     CHECK(flCreateChannelEx(name.c_str(),w,h,fmt,2,FL_MAP_CPU|FL_DEFER_RELEASE,&c)==FL_OK);
+     g_signal_emit_by_name(src,"adopt-channel",c,&accepted);CHECK(accepted);gst_object_unref(src);
+ }
  auto*out=gst_bin_get_by_name(GST_BIN(p),"out");CHECK(gst_element_set_state(p,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
  flChannel*producer=nullptr;CHECK(flOpenProducer(name.c_str(),&producer)==FL_OK);
  flBuffer b{},other{},excess{};CHECK(flAcquireBuffer(producer,&b,1000)==FL_OK);CHECK(flAcquireBuffer(producer,&other,1000)==FL_OK);
@@ -59,7 +69,7 @@ static void run(const char* format){
 int main(int argc,char**argv){
  gst_init(&argc,&argv);CHECK(argc==2);GError*e=nullptr;
  auto*plugin=gst_plugin_load_file(argv[1],&e);CHECK(plugin&&!e);gst_object_unref(plugin);
- run("RGBA");run("NV12");
+ run("RGBA");run("NV12");run("RGBA",true);
  // Native mode never satisfies a sysmem-only downstream by silently copying.
  auto*p=gst_parse_launch("framelinksrc native-memory=true ! video/x-raw(memory:SystemMemory) ! fakesink",&e);
  CHECK(e);g_error_free(e);if(p)gst_object_unref(p);

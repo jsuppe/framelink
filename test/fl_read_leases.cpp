@@ -51,6 +51,9 @@ int main() {
  if(r!=FL_OK)return 77;
  for(int i=0;i<100&&!p;++i){r=flOpenProducer(name.c_str(),&p);CHECK(r==FL_OK||r==FL_NOT_FOUND);if(!p)std::this_thread::sleep_for(std::chrono::milliseconds(5));}
  CHECK(p);
+ uint32_t localFlags=0;CHECK(flQueryConsumerFlags(c,&localFlags)==FL_OK&&localFlags==(FL_MAP_CPU|FL_DEFER_RELEASE));
+ localFlags=123;CHECK(flQueryConsumerFlags(p,&localFlags)==FL_INVALID&&localFlags==123);
+ CHECK(flQueryConsumerFlags(nullptr,&localFlags)==FL_INVALID&&localFlags==123);
  flBuffer b{},extra{};flFrame f{};uint64_t first=0,second=0,reader=0;
  CHECK(flAcquireBuffer(p,&b,1000)==FL_OK && flSubmit(p,&b,101)==FL_OK);
  CHECK(flAcquireFrame(c,&f,1000)==FL_OK && flLeaseFrame(c,&f,&first)==FL_OK);

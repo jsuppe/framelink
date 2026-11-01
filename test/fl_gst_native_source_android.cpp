@@ -10,9 +10,19 @@
 extern "C" {GST_PLUGIN_STATIC_DECLARE(framelink);GST_PLUGIN_STATIC_DECLARE(app);GST_PLUGIN_STATIC_DECLARE(coreelements);}
 #define CHECK(x) do{if(!(x)){fprintf(stderr,"line %d: %s\n",__LINE__,#x);std::exit(1);}}while(0)
 static void fill(flBuffer&b){void*p=nullptr;uint64_t stride=0;CHECK(flImageMap(b.image,&p,&stride)==FL_OK);for(unsigned y=0;y<32;++y)memset((char*)p+y*stride,71,64*4);flImageUnmap(b.image);}
-static void run(const char*format){
+static void run(const char*format,bool adopt=false){
  GError*e=nullptr;std::string name="gst-ahb-"+std::to_string(g_get_monotonic_time());
- auto*p=gst_parse_launch(("framelinksrc channel="+name+" width=64 height=32 format="+format+" pool-size=2 native-memory=true preserve-timestamps=true ! appsink name=out sync=false async=false enable-last-sample=false").c_str(),&e);CHECK(p&&!e);
+ auto*p=gst_parse_launch(("framelinksrc name=source channel="+name+" width=64 height=32 format="+format+" pool-size=2 native-memory=true preserve-timestamps=true ! appsink name=out sync=false async=false enable-last-sample=false").c_str(),&e);CHECK(p&&!e);
+ if(adopt){
+     auto*src=gst_bin_get_by_name(GST_BIN(p),"source");
+     guint w=0,h=0;g_object_get(src,"width",&w,"height",&h,nullptr);
+     flFormat fmt=!strcmp(format,"NV12")?FL_FORMAT_NV12:!strcmp(format,"RGB10A2_LE")?FL_FORMAT_RGB10A2:FL_FORMAT_RGBA8;
+     flChannel*c=nullptr;gboolean accepted=TRUE;
+     CHECK(flCreateChannelEx(name.c_str(),w,h,fmt,2,FL_MAP_CPU,&c)==FL_OK);
+     g_signal_emit_by_name(src,"adopt-channel",c,&accepted);CHECK(!accepted);flChannelInfo info{};CHECK(flQuery(c,&info)==FL_OK);flClose(c);
+     CHECK(flCreateChannelEx(name.c_str(),w,h,fmt,2,FL_MAP_CPU|FL_DEFER_RELEASE,&c)==FL_OK);
+     g_signal_emit_by_name(src,"adopt-channel",c,&accepted);CHECK(accepted);gst_object_unref(src);
+ }
  auto*out=gst_bin_get_by_name(GST_BIN(p),"out");CHECK(gst_element_set_state(p,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
  flChannel*producer=nullptr;CHECK(flOpenProducer(name.c_str(),&producer)==FL_OK);flBuffer b{},other{},reserved{},blocked{};
  CHECK(flAcquireBuffer(producer,&b,1000)==FL_OK&&flAcquireBuffer(producer,&other,1000)==FL_OK);fill(b);CHECK(flSubmit(producer,&b,1234567)==FL_OK);
@@ -34,6 +44,6 @@ static void run(const char*format){
  CHECK(AHardwareBuffer_unlock(ahb,nullptr)==0);gst_memory_unref(retained);flCancelBuffer(producer,&reserved);flClose(producer);
  printf("%s AHB allocation ID, pixels/PTS, bounded readers and retained memory after stop pass\n",format);
 }
-int main(int argc,char**argv){gst_init(&argc,&argv);GST_PLUGIN_STATIC_REGISTER(framelink);GST_PLUGIN_STATIC_REGISTER(app);GST_PLUGIN_STATIC_REGISTER(coreelements);run("RGBA");run("RGB10A2_LE");
+int main(int argc,char**argv){gst_init(&argc,&argv);GST_PLUGIN_STATIC_REGISTER(framelink);GST_PLUGIN_STATIC_REGISTER(app);GST_PLUGIN_STATIC_REGISTER(coreelements);run("RGBA");run("RGB10A2_LE");run("RGBA",true);
  GError*e=nullptr;auto*p=gst_parse_launch("framelinksrc native-memory=true format=NV12 ! fakesink",&e);CHECK(p&&!e);CHECK(gst_element_set_state(p,GST_STATE_PLAYING)==GST_STATE_CHANGE_FAILURE);gst_element_set_state(p,GST_STATE_NULL);gst_object_unref(p);
  puts("opaque Android YUV rejected rather than advertised as native NV12 bytes");}

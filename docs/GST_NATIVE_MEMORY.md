@@ -12,7 +12,8 @@ not an asynchronous all-GPU scheduling claim.
 Supported initial scope: Linux, linear modifier, one backing DMA-BUF object per
 image (including two-plane NV12 in that object). Other layouts fail explicitly;
 there is no fallback to CPU pixels. Native mode rejects sysmem-only downstream
-caps. Externally adopted native channels are not yet wired; those reject this option. Legacy defaults
+caps. Native channels can also be transferred using `adopt-channel` subject to the
+local ownership checks below. Legacy defaults
 remain the CPU-copy path on all platforms.
 
 The source transfers each acquired frame to a bounded FrameLink reader lease.
@@ -78,6 +79,18 @@ Device tests verify RGBA/RGB10 AHB allocation IDs, PTS, pixels, two-slot ownersh
 reuse and retained memory after source shutdown; implicit CPU maps and opaque
 YUV-as-NV12 requests reject. API29 builds pass for arm64/x86_64; runtime evidence
 is the API35 tablet (allocation ID oracle requires API31+), not all Android GPUs.
+
+## Adopted channels
+
+Set native-memory before invoking `adopt-channel`. The channel must be a consumer
+with FL_DEFER_RELEASE and without FL_GPU_SYNC; native source uses normal producer
+readiness waits. An enabled arrival-age limit additionally requires
+FL_TRACK_ARRIVAL. Rejection leaves ownership with the caller; success transfers
+ownership exactly once, including failure before PLAYING. Source shutdown keeps
+outstanding native GstMemory readers alive as above. `flQueryConsumerFlags`
+reports local flags only; it is not remote negotiation or import compatibility.
+Broker authorization, fresh generation/lease binding and revocation remain the
+SessionProvider's responsibilities. No named fallback is introduced.
 
 ## Remaining task 7 work
 

@@ -760,7 +760,12 @@ static gboolean srcStart(GstBaseSrc* base) {
 #ifndef FL_GST_NATIVE
     if(self->nativeMemory){GST_ELEMENT_ERROR(self,RESOURCE,SETTINGS,("native-memory output is not supported by this build"),(NULL));return FALSE;}
 #else
-    if(self->nativeMemory && self->delegated){GST_ELEMENT_ERROR(self,RESOURCE,SETTINGS,("native adoption requires a negotiated lease contract; not yet supported"),(NULL));return FALSE;}
+    if(self->nativeMemory && self->delegated){
+        uint32_t flags=0;
+        if(!self->ch || flQueryConsumerFlags(self->ch,&flags)!=FL_OK || !(flags&FL_DEFER_RELEASE) || (flags&FL_GPU_SYNC)){
+            GST_ELEMENT_ERROR(self,RESOURCE,SETTINGS,("native adoption requires deferred release with normal readiness waits"),(NULL));return FALSE;
+        }
+    }
 #endif
 #ifdef __ANDROID__
     if(self->nativeMemory && strcmp(self->format,"RGBA") && strcmp(self->format,"RGB10A2_LE")){
@@ -1161,6 +1166,9 @@ static gboolean srcAdoptChannel(GstFrameLinkSrc* self,flChannel* channel) {
     flChannelInfo info{};if(flQuery(channel,&info)!=FL_OK)return FALSE;
     if(info.width!=(guint)self->width || info.height!=(guint)self->height ||
        info.format!=toFlFormat(gst_video_format_from_string(self->format)))return FALSE;
+    uint32_t flags=0;if(flQueryConsumerFlags(channel,&flags)!=FL_OK)return FALSE;
+    if(self->nativeMemory && (!(flags&FL_DEFER_RELEASE)||(flags&FL_GPU_SYNC)))return FALSE;
+    if(self->maxQueueAgeMs && !(flags&FL_TRACK_ARRIVAL))return FALSE;
     self->ch=channel;self->cinfo=info;self->delegated=TRUE;return TRUE;
 }
 

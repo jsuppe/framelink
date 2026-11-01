@@ -10,9 +10,19 @@
 #define CHECK(x) do{if(!(x)){fprintf(stderr,"line %d: %s\n",__LINE__,#x);std::exit(1);}}while(0)
 static void fill(flBuffer&b,bool nv12,unsigned value=71){flMappedImage m{};CHECK(flImageMapPlanes(b.image,&m)==FL_OK);for(unsigned i=0;i<m.planes;++i)for(unsigned y=0;y<m.plane[i].rows;++y)memset((char*)m.plane[i].pixels+y*m.plane[i].stride,value+i,nv12?64:256);flImageUnmap(b.image);}
 static bool copyNegative=false;
-static void run(const char*format){
+static void run(const char*format,bool adopt=false){
  bool nv12=!strcmp(format,"NV12");GError*e=nullptr;std::string name="gst-native-win-"+std::to_string(g_get_monotonic_time());
- auto*p=gst_parse_launch(("framelinksrc channel="+name+" width=64 height=32 format="+format+" pool-size=2 native-memory=true preserve-timestamps=true ! appsink name=out sync=false async=false enable-last-sample=false").c_str(),&e);CHECK(p&&!e);
+ auto*p=gst_parse_launch(("framelinksrc name=source channel="+name+" width=64 height=32 format="+format+" pool-size=2 native-memory=true preserve-timestamps=true ! appsink name=out sync=false async=false enable-last-sample=false").c_str(),&e);CHECK(p&&!e);
+ if(adopt){
+     auto*src=gst_bin_get_by_name(GST_BIN(p),"source");
+     guint w=0,h=0;g_object_get(src,"width",&w,"height",&h,nullptr);
+     flFormat fmt=!strcmp(format,"NV12")?FL_FORMAT_NV12:!strcmp(format,"RGB10A2_LE")?FL_FORMAT_RGB10A2:FL_FORMAT_RGBA8;
+     flChannel*c=nullptr;gboolean accepted=TRUE;
+     CHECK(flCreateChannelEx(name.c_str(),w,h,fmt,2,FL_MAP_CPU,&c)==FL_OK);
+     g_signal_emit_by_name(src,"adopt-channel",c,&accepted);CHECK(!accepted);flChannelInfo info{};CHECK(flQuery(c,&info)==FL_OK);flClose(c);
+     CHECK(flCreateChannelEx(name.c_str(),w,h,fmt,2,FL_MAP_CPU|FL_DEFER_RELEASE,&c)==FL_OK);
+     g_signal_emit_by_name(src,"adopt-channel",c,&accepted);CHECK(accepted);gst_object_unref(src);
+ }
  auto*out=gst_bin_get_by_name(GST_BIN(p),"out");CHECK(gst_element_set_state(p,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
  flChannel*producer=nullptr;CHECK(flOpenProducer(name.c_str(),&producer)==FL_OK);flBuffer b{},other{},reserved{},blocked{};
  CHECK(flAcquireBuffer(producer,&b,1000)==FL_OK&&flAcquireBuffer(producer,&other,1000)==FL_OK);fill(b,nv12);CHECK(flSubmit(producer,&b,1234567)==FL_OK);
@@ -58,4 +68,4 @@ static void run(const char*format){
  gst_memory_unmap(retained,&map);gst_memory_unref(retained);flCancelBuffer(producer,&reserved);flClose(producer);
  printf("%s native D3D11: same shared allocation, pixels/PTS, bounded reuse and retained memory after stop pass\n",format);
 }
-int main(int argc,char**argv){gst_init(&argc,&argv);CHECK(argc==2||argc==3);copyNegative=argc==3;GError*e=nullptr;auto*p=gst_plugin_load_file(argv[1],&e);CHECK(p&&!e);gst_object_unref(p);run("RGBA");run("NV12");}
+int main(int argc,char**argv){gst_init(&argc,&argv);CHECK(argc==2||argc==3);copyNegative=argc==3;GError*e=nullptr;auto*p=gst_plugin_load_file(argv[1],&e);CHECK(p&&!e);gst_object_unref(p);run("RGBA");run("NV12");run("RGBA",true);}

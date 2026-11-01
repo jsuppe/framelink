@@ -47,3 +47,9 @@ FL_API flResult flFrameAgeNs(flChannel* ch,const flFrame* frame,uint64_t* ageNs)
     const auto now=fl::arrivalNowNs();*ageNs=now>=ch->heldArrival?now-ch->heldArrival:0;
     return FL_OK;
 }
+
+FL_API flResult flQueryConsumerFlags(flChannel* ch,uint32_t* flags) {
+    if(!ch || !ch->isConsumer || !flags)return FL_INVALID;
+    std::lock_guard<std::mutex> lock(ch->pendingMutex);
+    *flags=ch->flags;return FL_OK;
+}
