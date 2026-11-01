@@ -50,6 +50,9 @@
 
 #include "framelink.h"
 #include "fl_gst_metadata.hpp"
+#ifdef FL_GST_D3D11
+#include "fl_gst_d3d11_producer.hpp"
+#endif
 #include "framelink_slots.h"
 #ifdef __ANDROID__
 #include "framelink_ahb.h"
@@ -162,6 +165,10 @@ typedef struct _GstFrameLinkSink {
     gboolean preserveTimestamps;
     gboolean preserveFrameMetadata;
     guint64 streamGeneration;
+    gboolean nativeMemory;
+#ifdef FL_GST_D3D11
+    std::shared_ptr<FrameLinkD3DProducer>* nativeProducer;
+#endif
     gint slots;     // 0 = open `channel` directly; N = walk `channel.0..N-1`
 
     flChannel* ch;
@@ -189,13 +196,21 @@ G_DEFINE_TYPE(GstFrameLinkSink, gst_framelink_sink, GST_TYPE_BASE_SINK)
 #define GST_FRAMELINK_SINK(o) \
     (G_TYPE_CHECK_INSTANCE_CAST((o), gst_framelink_sink_get_type(), GstFrameLinkSink))
 
-enum { SINK_PROP_0, SINK_PROP_CHANNEL, SINK_PROP_SLOTS, SINK_PROP_PRESERVE_TIMESTAMPS, SINK_PROP_FRAME_METADATA, SINK_PROP_CONNECT_TIMEOUT, SINK_PROP_BUFFER_WAIT, SINK_PROP_ERROR_ON_RING_FULL };
+enum { SINK_PROP_0, SINK_PROP_CHANNEL, SINK_PROP_SLOTS, SINK_PROP_PRESERVE_TIMESTAMPS, SINK_PROP_FRAME_METADATA, SINK_PROP_CONNECT_TIMEOUT, SINK_PROP_BUFFER_WAIT, SINK_PROP_ERROR_ON_RING_FULL, SINK_PROP_NATIVE_MEMORY };
 
+#ifdef FL_GST_D3D11
+#define FL_SINK_CAPS FRAMELINK_CAPS ";" GST_VIDEO_CAPS_MAKE_WITH_FEATURES("memory:D3D11Memory", "{ BGRA, RGBA, NV12, RGB10A2_LE }")
+#else
+#define FL_SINK_CAPS FRAMELINK_CAPS
+#endif
 static GstStaticPadTemplate sinkTemplate =
     GST_STATIC_PAD_TEMPLATE("sink", GST_PAD_SINK, GST_PAD_ALWAYS,
-                            GST_STATIC_CAPS(FRAMELINK_CAPS));
+                            GST_STATIC_CAPS(FL_SINK_CAPS));
 
 static void sinkDisconnect(GstFrameLinkSink* self) {
+#ifdef FL_GST_D3D11
+    if(self->nativeProducer){delete self->nativeProducer;self->nativeProducer=nullptr;self->ch=nullptr;}
+#endif
     if (self->ch) {
         flClose(self->ch);
         self->ch = NULL;
@@ -255,7 +270,7 @@ static void sinkTryConnect(GstFrameLinkSink* self) {
 // Opt-in session readiness. The default remains lazy reconnect for ordinary
 // gst-launch pipelines; coordinated A/V sessions pay device import cost before
 // choosing/releasing their common playback epoch, not in the first render.
-static gboolean sinkStart(GstBaseSink* base) {
+static gboolean sinkStartLegacy(GstBaseSink* base) {
     auto* self=GST_FRAMELINK_SINK(base);
     if(self->delegated) {
         if(self->ch)return TRUE;
@@ -283,11 +298,54 @@ static gboolean sinkStart(GstBaseSink* base) {
     return readyTrace.result(FALSE);
 }
 
+static gboolean sinkStart(GstBaseSink* base) {
+    auto* self=GST_FRAMELINK_SINK(base);
+#ifndef FL_GST_D3D11
+    if(self->nativeMemory){GST_ELEMENT_ERROR(self,RESOURCE,SETTINGS,("native sink is not supported by this build"),(NULL));return FALSE;}
+#else
+    if(self->nativeMemory && !self->connectTimeoutMs)self->connectTimeoutMs=1000;
+#endif
+    if(!sinkStartLegacy(base))return FALSE;
+#ifdef FL_GST_D3D11
+    if(self->nativeMemory){
+        if(!self->ch)return FALSE;
+        self->nativeProducer=new std::shared_ptr<FrameLinkD3DProducer>(std::make_shared<FrameLinkD3DProducer>(self->ch));
+        if(!(*self->nativeProducer)->device){sinkDisconnect(self);return FALSE;}
+    }
+#endif
+    return TRUE;
+}
+static gpointer sinkAcquireNative(GstFrameLinkSink* self,guint timeoutMs){
+#ifdef FL_GST_D3D11
+    if(timeoutMs<=1000 && self->nativeMemory && self->nativeProducer && GST_STATE(self)>=GST_STATE_PAUSED)
+        return (*self->nativeProducer)->acquire(timeoutMs);
+#endif
+    return nullptr;
+}
+static GstCaps* sinkGetCaps(GstBaseSink* base,GstCaps* filter){
+    auto* self=GST_FRAMELINK_SINK(base);
+    GstCaps* caps=gst_caps_from_string(FRAMELINK_CAPS);
+    if(self->nativeMemory){
+#ifdef FL_GST_D3D11
+        gst_caps_set_features(caps,0,gst_caps_features_new("memory:D3D11Memory",nullptr));
+#else
+        gst_caps_unref(caps);caps=gst_caps_new_empty();
+#endif
+    }
+    if(filter){auto* intersect=gst_caps_intersect_full(filter,caps,GST_CAPS_INTERSECT_FIRST);gst_caps_unref(caps);return intersect;}
+    return caps;
+}
 static gboolean sinkSetCaps(GstBaseSink* base, GstCaps* caps) {
     GstFrameLinkSink* self = GST_FRAMELINK_SINK(base);
     if (!gst_video_info_from_caps(&self->vinfo, caps)) return FALSE;
     if(GST_VIDEO_INFO_FORMAT(&self->vinfo)==GST_VIDEO_FORMAT_NV12 &&
        ((GST_VIDEO_INFO_WIDTH(&self->vinfo)&1)||(GST_VIDEO_INFO_HEIGHT(&self->vinfo)&1)))return FALSE;
+    if(self->nativeMemory){
+        if(!self->ch || !gst_caps_features_contains(gst_caps_get_features(caps,0),"memory:D3D11Memory") ||
+           GST_VIDEO_INFO_WIDTH(&self->vinfo)!=(int)self->cinfo.width || GST_VIDEO_INFO_HEIGHT(&self->vinfo)!=(int)self->cinfo.height ||
+           toFlFormat(GST_VIDEO_INFO_FORMAT(&self->vinfo))!=self->cinfo.format)return FALSE;
+        self->haveInfo=TRUE;return TRUE; // no in-flight pool replacement
+    }
     self->haveInfo = TRUE;
     if (self->ch) {
         // Renegotiation mid-stream: state the new geometry; the consumer may
@@ -317,6 +375,20 @@ static GstFlowReturn sinkRender(GstBaseSink* base, GstBuffer* buffer) {
                           GST_CLOCK_TIME_IS_VALID(pts) ? (int64_t)pts : -1, 0});
     };
     account("gst.frame_receive");
+    if(self->nativeMemory){
+#ifdef FL_GST_D3D11
+        guint64 pts=g_get_monotonic_time()*1000;flFrameMetadata metadata{};bool valid=true;
+        if(self->preserveFrameMetadata)valid=frameMetadataFromBuffer(buffer,&base->segment,self->streamGeneration,pts,metadata);
+        else if(self->preserveTimestamps)valid=frameRunningTime(&base->segment,GST_BUFFER_PTS(buffer),pts);
+        if(valid && self->haveInfo && self->nativeProducer && (*self->nativeProducer)->submit(buffer,pts,self->preserveFrameMetadata?&metadata:nullptr)==FL_OK){
+            ++self->submitted;account("gst.native_frame_submitted");return trace.result(GST_FLOW_OK);
+        }
+#endif
+        ++self->dropped;account("gst.frame_drop.native_rejected");
+        GST_ELEMENT_ERROR(self,STREAM,FORMAT,("native sink requires its own reserved allocation and valid metadata; no copy fallback"),(NULL));
+        return trace.result(GST_FLOW_ERROR);
+    }
+
     if (!self->haveInfo) {
         ++self->dropped;
         account("gst.frame_drop.no_caps");
@@ -550,6 +622,9 @@ static void sinkSetProperty(GObject* obj, guint id, const GValue* value, GParamS
         case SINK_PROP_CONNECT_TIMEOUT:
             if(GST_STATE(self)>GST_STATE_READY){GST_WARNING_OBJECT(self,"connect timeout cannot change while running");break;}
             self->connectTimeoutMs=g_value_get_uint(value);break;
+        case SINK_PROP_NATIVE_MEMORY:
+            if(GST_STATE(self)>GST_STATE_READY || self->ch){GST_WARNING_OBJECT(self,"native mode cannot change while allocated");break;}
+            self->nativeMemory=g_value_get_boolean(value);break;
         case SINK_PROP_CHANNEL:
             g_free(self->channel);
             self->channel = g_value_dup_string(value);
@@ -571,6 +646,7 @@ static void sinkGetProperty(GObject* obj, guint id, GValue* value, GParamSpec* s
         case SINK_PROP_BUFFER_WAIT: g_value_set_uint(value,self->bufferWaitMs);break;
         case SINK_PROP_ERROR_ON_RING_FULL: g_value_set_boolean(value,self->errorOnRingFull);break;
         case SINK_PROP_CONNECT_TIMEOUT: g_value_set_uint(value,self->connectTimeoutMs);break;
+        case SINK_PROP_NATIVE_MEMORY: g_value_set_boolean(value,self->nativeMemory);break;
         case SINK_PROP_CHANNEL: g_value_set_string(value, self->channel); break;
         case SINK_PROP_FRAME_METADATA: g_value_set_boolean(value,self->preserveFrameMetadata);break;
         case SINK_PROP_PRESERVE_TIMESTAMPS: g_value_set_boolean(value, self->preserveTimestamps); break;
@@ -591,6 +667,7 @@ static void sinkFinalize(GObject* obj) {
 static gboolean sinkAdoptChannel(GstFrameLinkSink* self,flChannel* channel) {
     if(GST_STATE(self)!=GST_STATE_NULL || self->ch || !channel)return FALSE;
     flChannelInfo info{};if(flQuery(channel,&info)!=FL_OK)return FALSE;
+    uint32_t consumerFlags=0;if(flQueryConsumerFlags(channel,&consumerFlags)==FL_OK)return FALSE;
     self->ch=channel;self->cinfo=info;self->delegated=TRUE;return TRUE;
 }
 
@@ -606,6 +683,13 @@ static void gst_framelink_sink_class_init(GstFrameLinkSinkClass* klass) {
         GSignalFlags(G_SIGNAL_RUN_LAST|G_SIGNAL_ACTION),G_CALLBACK(sinkAdoptChannel),
         nullptr,nullptr,nullptr,G_TYPE_BOOLEAN,1,G_TYPE_POINTER);
 
+    g_signal_new_class_handler("acquire-native-buffer",G_TYPE_FROM_CLASS(klass),
+        GSignalFlags(G_SIGNAL_RUN_LAST|G_SIGNAL_ACTION),G_CALLBACK(sinkAcquireNative),
+        nullptr,nullptr,nullptr,G_TYPE_POINTER,1,G_TYPE_UINT);
+    g_object_class_install_property(gobject,SINK_PROP_NATIVE_MEMORY,
+        g_param_spec_boolean("native-memory","Native producer allocations",
+            "Strict native buffers acquired from this sink; no implicit copy fallback",FALSE,
+            (GParamFlags)(G_PARAM_READWRITE|G_PARAM_STATIC_STRINGS|GST_PARAM_MUTABLE_READY)));
     g_object_class_install_property(
         gobject, SINK_PROP_CHANNEL,
         g_param_spec_string("channel", "Channel",
@@ -646,6 +730,7 @@ static void gst_framelink_sink_class_init(GstFrameLinkSinkClass* klass) {
             "Raise an error instead of dropping when the bounded buffer wait expires",
             FALSE,(GParamFlags)(G_PARAM_READWRITE|G_PARAM_STATIC_STRINGS|GST_PARAM_MUTABLE_READY)));
     basesink->start = sinkStart;
+    basesink->get_caps = sinkGetCaps;
     basesink->set_caps = sinkSetCaps;
     basesink->render = sinkRender;
     basesink->event = sinkEvent;

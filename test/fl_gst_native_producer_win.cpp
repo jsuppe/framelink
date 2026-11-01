@@ -1,0 +1,71 @@
+#include "../gst/fl_gst_d3d11_producer.hpp"
+#include <vector>
+#include <gst/app/gstappsrc.h>
+#include <string>
+#include <cstdio>
+#include <cstdlib>
+#define CHECK(x) do{if(!(x)){fprintf(stderr,"line %d: %s\n",__LINE__,#x);std::exit(1);}}while(0)
+static void run(bool nv12){
+ auto name="native-producer-"+std::to_string(g_get_monotonic_time());flChannel*c=nullptr,*p=nullptr;
+ CHECK(flCreateChannelEx(name.c_str(),64,32,nv12?FL_FORMAT_NV12:FL_FORMAT_RGBA8,2,FL_MAP_CPU|FL_REQUIRE_FRAME_METADATA,&c)==FL_OK);
+ CHECK(flOpenProducer(name.c_str(),&p)==FL_OK);auto owner=std::make_shared<FrameLinkD3DProducer>(p);CHECK(owner->device);
+ auto*b=owner->acquire(1000);auto*other=owner->acquire(1000);CHECK(b&&other&&!owner->acquire(0));
+ auto*mem=gst_buffer_peek_memory(b,0);CHECK(gst_is_d3d11_memory(mem));
+ auto*reservation=(FrameLinkD3DReservation*)gst_mini_object_get_qdata(GST_MINI_OBJECT(mem),FrameLinkD3DProducer::key());CHECK(reservation);
+ CHECK(gst_d3d11_memory_get_resource_handle(GST_D3D11_MEMORY_CAST(mem))==(ID3D11Resource*)flImageD3D11(reservation->buffer.image));
+ // Synthetic producer GPU upload creates test content. No sink boundary copy.
+ std::vector<unsigned char> pixels(64*(nv12?48:128),71);if(nv12)std::fill(pixels.begin()+64*32,pixels.end(),72);
+ ID3D11DeviceContext*ctx=nullptr;flChannelD3D11Device(p)->GetImmediateContext(&ctx);
+ gst_d3d11_device_lock(owner->device);ctx->UpdateSubresource(flImageD3D11(reservation->buffer.image),0,nullptr,pixels.data(),nv12?64:256,0);gst_d3d11_device_unlock(owner->device);ctx->Release();
+ flFrameMetadata meta{1,FL_FRAME_HAS_DTS|FL_FRAME_HAS_DURATION,123,987654,7,{}};
+ GST_MINI_OBJECT_FLAG_SET(mem,GST_D3D11_MEMORY_TRANSFER_NEED_UPLOAD);
+ CHECK(owner->submit(b,1000,&meta)==FL_FORMAT_UNSUPPORTED);
+ GST_MINI_OBJECT_FLAG_UNSET(mem,GST_D3D11_MEMORY_TRANSFER_NEED_UPLOAD);
+ auto savedSize=mem->size;mem->size-=4;CHECK(owner->submit(b,1000,&meta)==FL_INVALID);mem->size=savedSize;
+
+ CHECK(owner->submit(b,1000,&meta)==FL_OK);CHECK(owner->submit(b,1000,&meta)==FL_INVALID);
+ flFrame frame{};CHECK(flAcquireFrame(c,&frame,1000)==FL_OK&&frame.ptsNs==1000);
+ flFrameMetadata got{};CHECK(flGetFrameMetadata(c,&frame,&got)==FL_OK&&got.durationNs==987654&&got.streamGeneration==7);
+ flMappedImage mapped{};CHECK(flImageMapPlanes(frame.image,&mapped)==FL_OK);
+ for(unsigned plane=0;plane<mapped.planes;++plane)for(unsigned y=0;y<mapped.plane[plane].rows;++y)for(unsigned x=0;x<(nv12?64u:256u);++x)
+  CHECK(((unsigned char*)mapped.plane[plane].pixels)[y*mapped.plane[plane].stride+x]==71+plane);
+ flImageUnmap(frame.image);CHECK(flRelease(c,&frame)==FL_OK);
+ CHECK(!owner->acquire(10)); // producer GstMemory still retained despite remote completion
+ auto*retained=gst_memory_ref(mem);gst_buffer_unref(b);CHECK(!owner->acquire(10));gst_memory_unref(retained);
+ auto*reused=owner->acquire(1000);CHECK(reused);
+ // A copied/system allocation is not accepted, even with matching dimensions.
+ auto*foreign=gst_buffer_new_allocate(nullptr,pixels.size(),nullptr);CHECK(owner->submit(foreign,1,&meta)==FL_INVALID);gst_buffer_unref(foreign);
+ gst_buffer_unref(reused); // unwritten reservation cancels safely
+ auto*last=gst_buffer_peek_memory(other,0);gst_memory_ref(last);gst_buffer_unref(other);
+ std::weak_ptr<FrameLinkD3DProducer> weak=owner;owner.reset();CHECK(!weak.expired());
+ gst_memory_unref(last);CHECK(weak.expired());flClose(c);
+ printf("%s native producer: original texture, ready fence, exact pixels/metadata, local reference reuse and owner lifetime pass\n",nv12?"NV12":"RGBA");
+}
+static void sinkPipeline(){
+ auto name="native-sink-"+std::to_string(g_get_monotonic_time());flChannel*c=nullptr;
+ CHECK(flCreateChannelEx(name.c_str(),64,32,FL_FORMAT_RGBA8,2,FL_MAP_CPU|FL_REQUIRE_FRAME_METADATA,&c)==FL_OK);
+ GError* error=nullptr;
+ auto*pipeline=gst_parse_launch(("appsrc name=in is-live=true format=time caps=video/x-raw(memory:D3D11Memory),format=RGBA,width=64,height=32,framerate=30/1 ! framelinksink name=sink native-memory=true preserve-frame-metadata=true channel="+name+" sync=false async=false enable-last-sample=false").c_str(),&error);CHECK(pipeline&&!error);
+ auto*sink=gst_bin_get_by_name(GST_BIN(pipeline),"sink");auto*in=gst_bin_get_by_name(GST_BIN(pipeline),"in");
+ CHECK(gst_element_set_state(pipeline,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
+ GstBuffer*b=nullptr;g_signal_emit_by_name(sink,"acquire-native-buffer",1000u,&b);CHECK(b);
+ auto*mem=gst_buffer_peek_memory(b,0);CHECK(gst_is_d3d11_memory(mem));
+ auto*texture=(ID3D11Texture2D*)gst_d3d11_memory_get_resource_handle(GST_D3D11_MEMORY_CAST(mem));
+ ID3D11Device*dev=nullptr;texture->GetDevice(&dev);ID3D11DeviceContext*ctx=nullptr;dev->GetImmediateContext(&ctx);
+ std::vector<unsigned char> pixels(64*32*4,91);ctx->UpdateSubresource(texture,0,nullptr,pixels.data(),256,0);ctx->Release();dev->Release();
+ GST_BUFFER_PTS(b)=1000;GST_BUFFER_DTS(b)=900;GST_BUFFER_DURATION(b)=12345;
+ CHECK(gst_app_src_push_buffer(GST_APP_SRC(in),gst_buffer_ref(b))==GST_FLOW_OK);
+ flFrame frame{};CHECK(flAcquireFrame(c,&frame,2000)==FL_OK&&frame.ptsNs==1000);
+ flFrameMetadata meta{};CHECK(flGetFrameMetadata(c,&frame,&meta)==FL_OK&&meta.dtsNs==900&&meta.durationNs==12345);
+ flMappedImage map{};CHECK(flImageMapPlanes(frame.image,&map)==FL_OK);
+ for(unsigned y=0;y<32;++y)for(unsigned x=0;x<256;++x)CHECK(((unsigned char*)map.plane[0].pixels)[y*map.plane[0].stride+x]==91);
+ flImageUnmap(frame.image);CHECK(flRelease(c,&frame)==FL_OK);
+ auto*foreign=gst_buffer_new_allocate(nullptr,pixels.size(),nullptr);GST_BUFFER_PTS(foreign)=2000;
+ CHECK(gst_app_src_push_buffer(GST_APP_SRC(in),foreign)==GST_FLOW_OK);
+ auto*bus=gst_element_get_bus(pipeline);auto*failure=gst_bus_timed_pop_filtered(bus,2*GST_SECOND,GST_MESSAGE_ERROR);CHECK(failure);gst_message_unref(failure);gst_object_unref(bus);
+ CHECK(flAcquireFrame(c,&frame,20)==FL_TIMEOUT);
+ gst_element_set_state(pipeline,GST_STATE_NULL);gst_object_unref(in);gst_object_unref(sink);gst_object_unref(pipeline);
+ CHECK(gst_is_d3d11_memory(gst_buffer_peek_memory(b,0)));gst_buffer_unref(b);flClose(c);
+ puts("native sink pipeline: exact texture pixels/metadata, foreign allocation rejection, retained buffer after stop pass");
+}
+int main(int argc,char**argv){gst_init(&argc,&argv);run(false);run(true);CHECK(argc==2);GError*e=nullptr;auto*plugin=gst_plugin_load_file(argv[1],&e);CHECK(plugin&&!e);gst_object_unref(plugin);sinkPipeline();}

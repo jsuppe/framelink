@@ -102,3 +102,36 @@ SessionProvider's responsibilities. No named fallback is introduced.
   qualified timing path with downstream native decoder/GPU qualification.
 - Renegotiation and failure/reconnect tests with buffers still in flight.
 - GPU completion integration and actual cross-process native pipeline evidence.
+
+## Windows native sink: explicit reserved-buffer adapter
+
+With D3D11-enabled GStreamer, `framelinksink native-memory=true` accepts only
+`memory:D3D11Memory` issued by that sink's `acquire-native-buffer` action. The
+UINT timeout argument is bounded to 0..1000ms; the result is an owned `GstBuffer*`
+or NULL. Call after PAUSED/PLAYING. Stop acquisition calls before changing state.
+The native sink preconnects (default finite deadline 1000ms in this mode).
+Its format/geometry must match the existing consumer ring; live pool replacement
+is rejected. Legacy system-memory mode remains the default on all platforms.
+
+The returned memory wraps the original shared texture. Write through that texture's
+same D3D11 device/immediate context, then push the buffer. Native submission signals
+FrameLink readiness on that context; no sink-side map, pixel copy, conversion or
+upload occurs. Synthetic test uploads create the source pixels; consumer readback
+in the oracle verifies them and is not a claim of end-to-end GPU-only output.
+Pending CPU-upload flags, truncated memory, foreign allocations and duplicate
+publication reject. They never silently take the legacy upload path.
+
+Local references keep both producer slot and channel alive after sink shutdown.
+Remote completion alone cannot reuse a locally-retained slot. **Before abandoning
+an unpublished buffer, finish all GPU work on it.** After publication, do not write
+through retained aliases. This explicit application adapter is not yet a generic
+GStreamer decoder pool: upstream ALLOCATION negotiation, cancellation/completion
+integration, remote permission agreement and actual decoder compatibility remain
+open. Do not attach arbitrary decoder-owned textures and assume shared adapter
+identity makes them FrameLink allocations.
+
+The pipeline gate currently covers RGBA. The internal producer adapter additionally
+covers NV12, original texture identity, exact metadata, retained-memory reuse and
+shutdown lifetime. No full-rate or cross-process pipeline claim is made here.
+Linux and Android native sink modes still reject; their native source adapters
+and legacy sink paths remain supported as documented above.
