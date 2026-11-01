@@ -5,7 +5,7 @@ Updated 2026-11-01. This is the checkable execution view of
 remain authoritative. Checked means implemented, reviewed and validated within
 the stated scope—not universal hardware support or physical-output qualification.
 
-Remaining execution order: **M5a → M6 → M7**, one task at a time. No concurrent
+Remaining execution order: **M5a → M5b → M6 → M7**, one task at a time. No concurrent
 implementation/review/validation streams. Finish the current milestone before
 starting the next. Hourly reporting is not an implementation executor.
 
@@ -165,6 +165,60 @@ Windows decoder-to-independent-renderer example, and measured multi-hop evidence
 Acceptance: [shared-buffer boundary contract](M5A_PIPELINE_BOUNDARIES.md).
 Strict pass-through must not silently copy pixels or add intentional per-hop
 playback delay; unsupported hardware paths must reject clearly.
+
+## M5b — GStreamer audio elements and coordinated A/V sessions
+
+**State: planned, not started.** Added at Jon's request 2026-11-01. Execute
+only after M5a closes, before M6 qualifies the complete public integration path.
+Video elements remain video-only; separate audio elements share one session.
+
+Deliverables: `framelinkaudiosink`, `framelinkaudiosrc`, reusable session
+coordination, integration examples, timing/security/lifecycle tests and platform
+qualification. Initially wrap the existing PCM/GDP/GIO transport; do not introduce
+shared-memory audio or advertise A/V zero-copy. A combined convenience bin is
+optional follow-up, not an acceptance dependency.
+
+- [ ] **M5b.1 Public element/session contract:** define pad caps, supported PCM
+  formats/rates/layouts, properties, session/track identifiers, discovery/auth,
+  standalone audio mode and opt-in coordinated A/V mode. Unsupported caps fail
+  clearly; retain existing video-only application behavior.
+- [ ] **M5b.2 Reusable session coordinator:** share authenticated negotiation,
+  track readiness, common epoch/clock mapping and config generation across audio
+  and video elements. Define GstContext/API propagation and bounded missing-peer
+  behavior without requiring sample-application internals.
+- [ ] **M5b.3 Audio sink:** wrap existing bounded PCM transport, negotiate caps,
+  carry timestamps/durations/discontinuities, handle flow errors and backpressure;
+  report explicit serialization/copy costs rather than imply shared PCM.
+- [ ] **M5b.4 Audio source:** receive PCM with exact sample order and timing,
+  reconstruct buffers/caps, expose appropriate live/latency behavior and integrate
+  with standard playback sinks using the shared pipeline clock.
+- [ ] **M5b.5 Common A/V timing:** map TIME segments into one common timeline,
+  preserve intentional offsets, handle missing/invalid PTS, GAP, DISCONT, EOS,
+  flush and new segment epochs. Never independently zero audio and video origins;
+  define supported seek/rate-change behavior and reject unsupported modes.
+- [ ] **M5b.6 Lifecycle/security:** both startup orders, coordinated pause/resume,
+  track loss, cancellation, peer death/reconnect, stale generations, negotiation
+  rejection, bounded cleanup and platform endpoint permissions/authentication.
+- [ ] **M5b.7 Integration examples:** audio-only and two-process A/V GStreamer
+  examples, with Windows integration first, then Linux/Android adapters. Show
+  independent video rendering plus standard audio output, shared session setup
+  and CPU/native-video compatibility without hand-wired GDP internals.
+- [ ] **M5b.8 Automated validation:** GstTestClock/segment tests, exact PCM and
+  producer-to-consumer A/V offset checks, skew/jitter accounting, negative controls,
+  restart/failure scenarios and regression tests for existing video-only elements.
+- [ ] **M5b.9 Platform qualification:** Windows, Linux and Android builds/runtime
+  on supported targets; verify native video plus audio, audio-only, latency
+  queries, queue bounds, resource cleanup and tracing/copy accounting. Separate
+  software timing evidence from physical speaker/display alignment.
+- [ ] **M5b.10 Publish/review/merge:** element reference, copy/timing contract,
+  developer migration guide, examples, final-revision CI and reviewed evidence.
+  Feed these elements into M6's sustained/performance qualification matrix.
+
+Acceptance: a developer can split an A/V GStreamer pipeline across processes
+using the public video/audio elements and documented shared-session mechanism;
+original relative A/V timing and PCM content survive the transport, recovery is
+bounded, and audio copies/unsupported paths are explicit. Physical lip-sync and
+new shared-PCM transport are not silently included.
 
 ## M6 — Reliability, performance and observability
 

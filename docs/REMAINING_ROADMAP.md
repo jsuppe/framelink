@@ -188,6 +188,28 @@ per-hop playback reservoir; measured transfer/wait latency and backpressure rema
 visible. This is not a claim of zero elapsed time, zero synchronization, or zero
 total pipeline buffering.
 
+## M5b — GStreamer audio elements and coordinated A/V sessions
+
+Status: PLANNED, not started. Added by Jon 2026-11-01. Follows M5a; precedes
+M6 so reliability/performance qualification includes the public audio elements.
+
+Goal: developers use `framelinkaudiosink` / `framelinkaudiosrc` alongside the
+existing video-only `framelinksink` / `framelinksrc`, joined by a documented shared
+session mechanism. Keep separate media elements, one coordinated A/V timeline.
+
+Deliverables: reusable session coordinator; PCM sink/source wrappers around the
+existing GDP/GIO transport; Windows-first two-process examples and Linux/Android
+support; timestamp/segment, lifecycle, security and compatibility tests; element
+reference and measured copy/latency behavior. Do not independently rebase A/V PTS.
+Audio serialization remains explicit; shared-memory audio is not part of this
+milestone. A combined A/V convenience bin may be considered separately.
+
+Tasks and completion gates: [M5b executable checklist](ROADMAP_TASKS.md#m5b--gstreamer-audio-elements-and-coordinated-av-sessions).
+Gate: public-element integration works without sample-application internals,
+exact PCM and relative A/V timeline survive transport/recovery within declared
+bounds, supported platform tests pass, final CI/review/merge is verified.
+Physical output qualification remains separate.
+
 ## M6 — Reliability, performance and observability
 Deliverables: reproducible stress/benchmark suite, opt-in tracing, measured overhead
 and release acceptance report.
@@ -212,7 +234,7 @@ Gate: a clean machine can reproduce the documented A/V workflow; all release-sco
 or explicitly capability-gated, with unqualified hardware behavior never labeled passed.
 
 ## Execution dependencies
-M1 -> M2 -> M3 -> M4 -> M5 -> M5a -> M6 -> M7.
+M1 -> M2 -> M3 -> M4 -> M5 -> M5a -> M5b -> M6 -> M7.
 Jon's 2026-10-31 override requires **one task at a time**: no concurrent
 implementation/review/validation workstreams. Finish and validate the current
 task, then immediately take the next ready task in the current milestone. Proposed soak lengths are release
