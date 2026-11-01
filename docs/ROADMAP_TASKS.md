@@ -175,8 +175,11 @@ Video elements remain video-only; separate audio elements share one session.
 Deliverables: `framelinkaudiosink`, `framelinkaudiosrc`, reusable session
 coordination, integration examples, timing/security/lifecycle tests and platform
 qualification. Initially wrap the existing PCM/GDP/GIO transport; do not introduce
-shared-memory audio or advertise A/V zero-copy. A combined convenience bin is
-optional follow-up, not an acceptance dependency.
+shared-memory audio or advertise A/V zero-copy. Producer and consumer A/V
+convenience bins are required deliverables (approved 2026-11-01), implemented
+after the individual elements and session/timing behavior are validated. They
+expose separate audio/video pads, not a new multiplexed format; individual
+elements remain independently available.
 
 - [ ] **M5b.1 Public element/session contract:** define pad caps, supported PCM
   formats/rates/layouts, properties, session/track identifiers, discovery/auth,
@@ -206,16 +209,32 @@ optional follow-up, not an acceptance dependency.
 - [ ] **M5b.8 Automated validation:** GstTestClock/segment tests, exact PCM and
   producer-to-consumer A/V offset checks, skew/jitter accounting, negative controls,
   restart/failure scenarios and regression tests for existing video-only elements.
-- [ ] **M5b.9 Platform qualification:** Windows, Linux and Android builds/runtime
+- [ ] **M5b.9 Producer A/V bin:** compose the validated video/audio sinks with
+  the shared session coordinator; expose separate audio/video sink ghost pads and
+  one documented session configuration. Propagate caps, segments, EOS, flush,
+  state changes and errors without adding independent timestamp rebasing or a
+  hidden per-track latency reservoir. Final public element name is set in M5b.1.
+- [ ] **M5b.10 Consumer A/V bin:** compose the validated video/audio sources;
+  expose separate audio/video source ghost pads for independent downstream
+  rendering/playback. Coordinate readiness, session clocks and reconnect; do not
+  hardwire a display or audio device. Preserve native video memory negotiation.
+- [ ] **M5b.11 Bin parity and examples:** demonstrate standalone-element and
+  bin-based two-process pipelines. Test equivalent PCM/video timing and negotiated
+  memory paths, missing-track policy, startup/pause/flush/EOS, peer death/reconnect,
+  error propagation, queue bounds and cleanup. Document properties/pad names and
+  supported audio-only/video-only behavior without silently waiting forever.
+- [ ] **M5b.12 Platform qualification:** Windows, Linux and Android builds/runtime
   on supported targets; verify native video plus audio, audio-only, latency
-  queries, queue bounds, resource cleanup and tracing/copy accounting. Separate
+  queries, queue bounds, resource cleanup and tracing/copy accounting for both
+individual elements and convenience bins. Separate
   software timing evidence from physical speaker/display alignment.
-- [ ] **M5b.10 Publish/review/merge:** element reference, copy/timing contract,
+- [ ] **M5b.13 Publish/review/merge:** element reference, copy/timing contract,
   developer migration guide, examples, final-revision CI and reviewed evidence.
   Feed these elements into M6's sustained/performance qualification matrix.
 
 Acceptance: a developer can split an A/V GStreamer pipeline across processes
-using the public video/audio elements and documented shared-session mechanism;
+using either the individual public video/audio elements with shared-session
+coordination or the producer/consumer convenience bins;
 original relative A/V timing and PCM content survive the transport, recovery is
 bounded, and audio copies/unsupported paths are explicit. Physical lip-sync and
 new shared-PCM transport are not silently included.

@@ -202,7 +202,12 @@ existing GDP/GIO transport; Windows-first two-process examples and Linux/Android
 support; timestamp/segment, lifecycle, security and compatibility tests; element
 reference and measured copy/latency behavior. Do not independently rebase A/V PTS.
 Audio serialization remains explicit; shared-memory audio is not part of this
-milestone. A combined A/V convenience bin may be considered separately.
+milestone. Producer and consumer A/V convenience bins are required deliverables,
+added by Jon 2026-11-01. Implement them after validating the underlying elements;
+expose separate audio/video ghost pads and one coordinated session, not a new
+multiplexed format. The consumer bin leaves downstream rendering/playback to the
+application. Individual elements remain available; qualify both integration forms
+for timing, memory negotiation, lifecycle, bounded queues and error propagation.
 
 Tasks and completion gates: [M5b executable checklist](ROADMAP_TASKS.md#m5b--gstreamer-audio-elements-and-coordinated-av-sessions).
 Gate: public-element integration works without sample-application internals,
