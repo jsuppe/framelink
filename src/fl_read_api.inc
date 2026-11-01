@@ -69,3 +69,12 @@ FL_API flResult flGetFrameMetadata(flChannel* ch,const flFrame* frame,flFrameMet
     if(!ch->heldMetadata.version)return FL_NOT_FOUND;
     *metadata=ch->heldMetadata;return FL_OK;
 }
+
+FL_API flResult flRetainBufferReference(flChannel* ch,const flBuffer* buffer,uint64_t* reference) {
+    if(!ch || ch->isConsumer || !reference || !metadataReservation(ch,buffer))return FL_INVALID;
+    return ch->bufferReferences.retain(buffer->slot,*reference);
+}
+FL_API flResult flReleaseBufferReference(flChannel* ch,uint64_t reference) {
+    if(!ch || ch->isConsumer)return FL_INVALID;
+    return ch->bufferReferences.release(reference);
+}

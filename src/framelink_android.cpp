@@ -38,6 +38,7 @@
 #include "framelink.h"
 #include "framelink_memory.h"
 #include "fl_read_ledger.hpp"
+#include "fl_buffer_refs.hpp"
 #include "fl_arrival.hpp"
 #include <dlfcn.h>
 #include "framelink_sync_fd.h"
@@ -92,6 +93,7 @@ struct flChannel {
     flChannelInfo info{};
     uint32_t flags = 0;
     uint32_t peerFeatures=0;
+    fl::BufferReferences bufferReferences;
     flFrameMetadata slotMetadata[FL_MAX_POOL_SIZE]{};
     flFrameMetadata pendingMetadata{},heldMetadata{};
 
@@ -607,6 +609,7 @@ FL_API flResult flRequestGeometry(flChannel* ch, uint32_t width, uint32_t height
 
     if (!ch || ch->isConsumer || !width || !height) return trace.result(FL_INVALID);
     if (!ch->link.connected()) return trace.result(FL_DISCONNECTED);
+    if(!ch->bufferReferences.empty())return trace.result(FL_BUSY);
     for(uint64_t value:ch->slotSubmitValue)
         if(value==UINT64_MAX)return trace.result(FL_BUSY);
     fl::GeometryMsg g{};
@@ -641,7 +644,7 @@ FL_API flResult flAcquireBuffer(flChannel* ch, flBuffer* out, uint32_t timeoutMs
         if(!ch->link.connected())return trace.result(FL_DISCONNECTED);
         ch->sync.advance(ch->consumedValue);
         for (size_t i = 0; i < ch->images.size(); ++i) {
-            if (ch->slotSubmitValue[i] <= ch->consumedValue) {
+            if (ch->slotSubmitValue[i] <= ch->consumedValue && !ch->bufferReferences.busy((uint32_t)i)) {
                 // Pin until flEndSubmit records the real value (the sentinel is
                 // unreachable by the consumer - it can only release submitted
                 // values). Acquiring and never submitting leaks the slot.

@@ -1,0 +1,63 @@
+#< CLIXML
+-- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.26300.
+-- framelink: building GStreamer elements (gstframelink)
+-- Configuring done (0.8s)
+-- Generating done (0.6s)
+-- Build files have been written to: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
+  fl_buffer_references.cpp
+  fl_buffer_references.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_buffer_references.exe
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
+  fl_submit_ownership.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_submit_ownership.exe
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
+  fl_read_leases.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_read_leases.exe
+UpdateCTestConfiguration  from :C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/DartConfiguration.tcl
+Test project C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 1
+    Start  1: read_leases
+
+1: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_read_leases.exe
+1: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+1: Test timeout computed to be: 20
+1: native read leases: retained readers block reuse; ordered retirement and resize pass
+1/3 Test  #1: read_leases ......................   Passed    0.31 sec
+test 16
+    Start 16: buffer_references
+
+16: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_buffer_references.exe
+16: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+16: Test timeout computed to be: 20
+16: producer references: bounded 256, remote completion cannot reuse local-held slots, concurrent finalizer, cancel and resize guards pass
+2/3 Test #16: buffer_references ................   Passed    0.30 sec
+test 17
+    Start 17: submit_ownership
+
+17: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_submit_ownership.exe
+17: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+17: Test timeout computed to be: 15
+17: handles before=484 after=485
+17: handles after drain=484
+17: Producer reservations: wrong image/slot, duplicate/unmatched begin/end, forged values, geometry retention and post-release reuse passed
+3/3 Test #17: submit_ownership .................   Passed    0.56 sec
+
+The following tests passed:
+	read_leases
+	buffer_references
+	submit_ownership
+
+100% tests passed, 0 tests failed out of 3
+
+Total Test time (real) =   1.21 sec
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04"><Obj S="progress" RefId="0"><TN RefId="0"><T>System.Management.Automation.PSCustomObject</T><T>System.Object</T></TN><MS><I64 N="SourceId">1</I64><PR N="Record"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj></Objs>

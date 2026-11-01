@@ -62,3 +62,17 @@ allocator-issued allocation identities, not infer them from distinct handle valu
 or NT wrappers. Broader alias-negative qualification remains an open integration
 gate. The native Gst source test uses a controlled alias oracle (test only), not
 handle inequality as zero-copy evidence.
+
+## Producer-side native references
+
+`flRetainBufferReference` pins an acquired slot while a local wrapper retains its
+allocation. The token survives publication or cancellation. Even after remote
+consumer completion, that slot cannot be reacquired until every local token is
+released with `flReleaseBufferReference`. Registration follows serialized producer
+calls; release may run on a finalizer thread, never concurrently with channel close.
+All local CPU/GPU accesses must finish before release. Pins do not permit writes
+after publication, supply GPU completion, or keep the channel alive by themselves.
+The wrapper owner must retain the channel. A maximum 256 references bounds storage;
+geometry requests reject while any reference remains. Legacy callers need no pins.
+
+[Native ownership tests](m5a/producer-references-20261101/RESULTS.md).

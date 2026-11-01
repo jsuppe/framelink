@@ -212,6 +212,19 @@ FL_API flResult flGetFrameMetadata(flChannel*, const flFrame*, flFrameMetadata*)
 // flBeginSubmit, FL_INVALID for a non-reserved buffer. Invalidates that borrow.
 FL_API flResult flCancelBuffer(flChannel*, const flBuffer*);
 
+// Pin a RESERVED producer allocation against reuse while local native-memory
+// references remain. Register before publication, alongside serialized producer
+// calls. Up to 256 references/channel; tokens are local, opaque and single-use.
+// Does NOT grant write permission after submission or replace readiness/remote
+// consumed fences. Cancellation does not discard pins. Geometry changes return
+// FL_BUSY until all pins are released. Output unchanged on failure.
+FL_API flResult flRetainBufferReference(flChannel*, const flBuffer*, uint64_t* reference);
+// Release after ALL local CPU/GPU access through this reference has completed.
+// May run concurrently with producer calls/other releases, but NEVER with close.
+// The caller must keep the channel alive until every reference is released.
+FL_API flResult flReleaseBufferReference(flChannel*, uint64_t reference);
+
+
 // Submit, having drawn with the channel's own D3D11 device. framelink signals
 // readiness for you.
 FL_API flResult flSubmit(flChannel*, const flBuffer*, int64_t ptsNs); // -1 = no pts

@@ -22,6 +22,7 @@
 #include "framelink.h"
 #include "framelink_memory.h"
 #include "fl_read_ledger.hpp"
+#include "fl_buffer_refs.hpp"
 #include "fl_arrival.hpp"
 #include "framelink_sync_fd.h"
 #include "fl_sync_fd.hpp"
@@ -79,6 +80,7 @@ struct flChannel {
     flChannelInfo info{};
     uint32_t flags = 0;
     uint32_t peerFeatures=0;
+    fl::BufferReferences bufferReferences;
     flFrameMetadata slotMetadata[FL_MAX_POOL_SIZE]{};
     flFrameMetadata pendingMetadata{},heldMetadata{};
 
@@ -626,6 +628,7 @@ FL_API flResult flRequestGeometry(flChannel* ch, uint32_t width, uint32_t height
     if (!ch || ch->isConsumer || !fl::validGeometry(width,height,format)) return trace.result(FL_INVALID);
     if(!fourccFor(format))return trace.result(FL_FORMAT_UNSUPPORTED);
     if (!ch->link.connected()) return trace.result(FL_DISCONNECTED);
+    if(!ch->bufferReferences.empty())return trace.result(FL_BUSY);
     for(uint64_t value:ch->slotSubmitValue)
         if(value==UINT64_MAX)return trace.result(FL_BUSY);
     fl::GeometryMsg g{};
@@ -672,7 +675,7 @@ FL_API flResult flAcquireBuffer(flChannel* ch, flBuffer* out, uint32_t timeoutMs
         for (size_t i = 0; i < ch->images.size(); ++i) {
             // Free once the consumer has promised never to read this slot's
             // previous contents again - same rule as Windows.
-            if (ch->slotSubmitValue[i] <= ch->consumedValue) {
+            if (ch->slotSubmitValue[i] <= ch->consumedValue && !ch->bufferReferences.busy((uint32_t)i)) {
                 // Pin against re-acquisition until flEndSubmit records the
                 // real value. The consumer can never release up to a value
                 // that was not submitted, so the sentinel is unreachable.

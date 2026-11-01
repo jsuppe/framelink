@@ -15,6 +15,7 @@
 #include "framelink.h"
 #include "framelink_memory.h"
 #include "fl_read_ledger.hpp"
+#include "fl_buffer_refs.hpp"
 #include "fl_arrival.hpp"
 #include "fl_layout.h"
 #include "framelink_d3d11.h"
@@ -64,6 +65,7 @@ struct flChannel {
     bool externalPool = false;
     uint32_t flags = 0;
     uint32_t peerFeatures=0;
+    fl::BufferReferences bufferReferences;
     flFrameMetadata slotMetadata[FL_MAX_POOL_SIZE]{};
     flFrameMetadata pendingMetadata{},heldMetadata{};
     std::string name;
@@ -662,6 +664,7 @@ FL_API flResult flRequestGeometry(flChannel* ch, uint32_t width, uint32_t height
     if (!ch || ch->isConsumer || !fl::validGeometry(width,height,format)) return trace.result(FL_INVALID);
     if(format != ch->info.format) return trace.result(FL_FORMAT_UNSUPPORTED);
     if (!ch->link.connected()) return trace.result(FL_DISCONNECTED);
+    if(!ch->bufferReferences.empty())return trace.result(FL_BUSY);
     for(uint64_t value:ch->slotReadyValue)
         if(value==UINT64_MAX)return trace.result(FL_BUSY);
     fl::GeometryMsg g{};
@@ -701,7 +704,7 @@ FL_API flResult flAcquireBuffer(flChannel* ch, flBuffer* out, uint32_t timeoutMs
         for (size_t i = 0; i < ch->images.size(); ++i) {
             // Free once the consumer has promised never to read this slot's
             // previous contents again.
-            if (ch->slotReadyValue[i] <= consumed) {
+            if (ch->slotReadyValue[i] <= consumed && !ch->bufferReferences.busy((uint32_t)i)) {
                 ch->slotReadyValue[i] = UINT64_MAX;ch->slotMetadata[i]={}; // reserve until submit
                 out->slot = (uint32_t)i;
                 out->image = ch->images[i];
@@ -735,7 +738,7 @@ FL_API flResult flAcquireBuffer(flChannel* ch, flBuffer* out, uint32_t timeoutMs
             if (v > consumed && v < oldest) oldest = v;
         if (oldest == UINT64_MAX) { Sleep(1); continue; }
         ch->consumedFence->SetEventOnCompletion(oldest, ch->waitEvent);
-        fltrace::call("wait.consumed_fence", [&]{return WaitForSingleObject(ch->waitEvent, deadline - now);});
+        fltrace::call("wait.consumed_fence", [&]{return WaitForSingleObject(ch->waitEvent, ch->bufferReferences.empty()?deadline-now:(std::min)(DWORD(1),deadline-now));});
     }
 }
 
