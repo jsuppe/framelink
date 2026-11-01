@@ -1,6 +1,8 @@
 #pragma once
 #include "av_rendezvous.h"
 #include "framelink_session.h"
+#include "av_memory_agreement.h"
+#include <gst/gst.h>
 #include <gio/gio.h>
 #include <functional>
 
@@ -28,6 +30,13 @@ struct SessionProvider {
   // Null on failure. Not used with PlaybackOptions::externalVideo.
   std::function<flChannel*(const flSessionConfig&, bool producer,
                           unsigned timeoutMs, std::string&)> openVideo;
+  // Opt-in strict extension, before channel ownership transfers to GStreamer.
+  // Must independently bind actual pool identities/layout/device/generation and
+  // configure element memory mode while still NULL. All boundary operations
+  // (including adapter copies) must be declared. Borrowed element/channel; never
+  // close them. Requires openVideo and matching peer support; no legacy fallback.
+  std::function<bool(const flSessionConfig&,bool producer,flChannel*,GstElement*,
+                     MemoryOffer&,unsigned timeoutMs,std::string&)> configureMemory;
 };
 }
 

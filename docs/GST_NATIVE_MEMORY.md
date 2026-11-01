@@ -200,7 +200,7 @@ these results do not establish direct GPU-renderability of LINEAR NVIDIA memory,
 a native decoder path or actual driver-exported sync-file qualification.
 Linux/Android now share the explicit-completion ALLOCATION pool above.
 
-## Remote agreement helper (not yet production integration)
+## Remote agreement helper and opt-in provider seam
 
 `samples/av_memory_agreement.h` provides a separate opt-in, authenticated control
 exchange for both endpoint policies and an exact trusted resource-binding digest.
@@ -208,6 +208,21 @@ It requires an already authenticated stream with finite timeout and explicitly
 negotiated extension support. Both offers and full session configuration are
 covered by directional HMAC with fresh nonces; acceptance is authenticated too.
 No session ABI change or automatic fallback is introduced. Its passing control
-tests are not production SessionProvider negotiation or native driver evidence.
+tests alone are not native driver evidence; provider integration is described below.
 The provider must independently verify the binding against actual allocations;
 a resource-type flag, shared random label or process-local handle is insufficient.
+
+### SessionProvider integration
+
+Providers may set `configureMemory` to opt into the extension. Playback sets mode
+bit `0x100`; both peers must require it, with no legacy downgrade. The callback
+receives the borrowed native channel and still-NULL element before adoption, to
+configure memory mode and supply independently verified requirements/path/binding.
+The exchange finishes after consumer READY and producer import, before producer
+video or audio starts. Failure tears down the session. Existing providers remain
+unchanged when the callback is absent. The default synthetic CPU producer is not
+magically a native decoder: strict mode rejects its undeclared pixel copy.
+
+Current provider tests use synthetic bindings for control negatives. Real
+allocation-bound provider qualification remains open; do not use a shared label
+as a production resource binding.

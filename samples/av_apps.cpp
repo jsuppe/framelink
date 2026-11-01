@@ -875,7 +875,7 @@ struct StartupGate {
 using av::AudioTimeline;
 using av::trackAudio;
 void adoptVideo(Pipeline& pipeline,const char* elementName,const av::SessionProvider* provider,
-                const flSessionConfig& config,bool producer,unsigned timeout) {
+                const flSessionConfig& config,bool producer,unsigned timeout,av::MemoryOffer* memory=nullptr) {
   if(!provider || !provider->openVideo)return;
   auto* element=named(pipeline,elementName);
   Object elementOwner{G_OBJECT(element)};
@@ -886,6 +886,18 @@ void adoptVideo(Pipeline& pipeline,const char* elementName,const av::SessionProv
   flChannelInfo info{};
   need(flQuery(channel.get(),&info)==FL_OK && info.width==config.video.width &&
        info.height==config.video.height && info.format==config.video.format,"broker video configuration mismatch");
+  if(memory) {
+    const bool configured=provider->configureMemory && provider->configureMemory(config,producer,channel.get(),element,*memory,timeout,error);
+    need(configured,error.empty()?"memory provider rejected exact resource binding":error);
+    gboolean native=FALSE;g_object_get(element,"native-memory",&native,nullptr);
+    // The legacy element explicitly copies pixels at this boundary. It cannot
+    // be represented as a strict zero-operation path by a provider callback.
+    uint32_t mandatory=native?0:FL_MEMORY_COPY;
+#ifdef _WIN32
+    if(!native)mandatory|=producer?FL_MEMORY_UPLOAD:FL_MEMORY_READBACK;
+#endif
+    need((memory->path.operations&mandatory)==mandatory,"memory offer omits element payload operations");
+  }
   gboolean adopted=FALSE;
   g_signal_emit_by_name(element,"adopt-channel",channel.get(),&adopted);
   need(adopted,"FrameLink native channel adoption rejected");
@@ -924,8 +936,12 @@ unsigned runProducer(const Options &o, GSocketListener *l,
   read(*control, reply, sizeof(reply));
   need(!memcmp(wire, reply, sizeof(wire)),
        "configuration acknowledgement mismatch");
-  const auto mode = get(*control);
+  const auto requestedMode = get(*control);
+  const bool memoryMode=(requestedMode&0x100)!=0;
+  const auto mode=requestedMode&~uint64_t(0x100);
   need(mode<=5, "unsupported playback mode");
+  need(memoryMode==bool(provider && provider->configureMemory),"memory extension support mismatch; downgrade rejected");
+  need(!memoryMode || (provider->openVideo && mode!=0),"memory extension requires broker video and streaming");
   const bool finiteMode=mode==3 || mode==5;
   need(finiteMode==bool(o.mediaRunMs),"finite media budget requires matching finite peer");
   if(finiteMode) {
@@ -956,7 +972,9 @@ unsigned runProducer(const Options &o, GSocketListener *l,
           audioCaps(o) +
           " ! queue max-size-buffers=4 max-size-bytes=0 max-size-time=80000000 "
           "! gdppay ! giostreamsink name=audioio sync=false async=false" : externalPipeline(o,channel));
-  adoptVideo(tx,"videooutput",provider,cfg,true,o.timeout);
+  av::MemoryOffer producerMemory{},consumerMemory{};
+  adoptVideo(tx,"videooutput",provider,cfg,true,o.timeout,memoryMode?&producerMemory:nullptr);
+  if(memoryMode){std::string error;const bool agreed=av::agreeMemory(control->p,ep,cfg,true,producerMemory,consumerMemory,error);need(agreed,error);}
   // READY proves the consumer has entered setup; start() waits for the actual
   // producer resource import before the final shared epoch is selected.
   if(coordinated && !g_getenv("FRAMELINK_TEST_LAZY_PRODUCER_OPEN")) {
@@ -1122,7 +1140,9 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
   need(!o.mediaRunMs || coordinated,"finite media budget requires coordinated streaming");
   // Modes 4/5 add the existing PRIMED/GO barrier to audio-master playback.
   // Old peers reject explicitly rather than silently running without a gate.
-  put(*control, o.mediaRunMs ? (o.coordinatedAudio ? 5 : 3) : (o.stream ? (o.coordinatedAudio ? 4 : (o.producerClock ? 2 : 1)) : 0));
+  const bool memoryMode=provider && provider->configureMemory;
+  need(!memoryMode || (provider->openVideo && o.stream && !externalVideo),"memory extension requires internal broker video streaming");
+  put(*control, (o.mediaRunMs ? (o.coordinatedAudio ? 5 : 3) : (o.stream ? (o.coordinatedAudio ? 4 : (o.producerClock ? 2 : 1)) : 0)) | (memoryMode?0x100:0));
   if(o.mediaRunMs) {
     need(o.mediaRunMs<=300000,"invalid finite media budget");
     put(*control,o.mediaRunMs);
@@ -1141,7 +1161,8 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
       " preserve-timestamps=true ! appsink name=vout sync=false max-buffers=3 drop=false ";
     parse(rx, video+"appsrc name=audioio is-live=false format=bytes block=true max-buffers=4 ! gdpdepay ! "+
       audioCaps(o)+" ! identity name=timeline ! queue name=audioqueue max-size-buffers=4 max-size-bytes=0 max-size-time=80000000 ! audioconvert ! audioresample ! volume name=playvolume ! "+o.audioSink+" name=playaudio sync=true"+(o.audioSink=="fakesink" ? " async=false" : ""));
-    if(!externalVideo)adoptVideo(rx,"videoinput",provider,cfg,false,o.timeout);
+    av::MemoryOffer consumerMemory{},producerMemory{};
+    if(!externalVideo)adoptVideo(rx,"videoinput",provider,cfg,false,o.timeout,memoryMode?&consumerMemory:nullptr);
     if(o.traceMedia){attachTrace(rx,"timeline","src","consumer","audio");if(!externalVideo)attachTrace(rx,"vout","sink","consumer","video");}
     AudioTimeline audioTimeline; audioTimeline.pipeline=rx.p; audioTimeline.rate=o.rate; audioTimeline.channels=o.channels;
     if(cb)audioTimeline.observe=cb->onAudio;
@@ -1169,6 +1190,7 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
       ~EndNotification(){if(cb && cb->onEnd)cb->onEnd();}
     } endNotification{cb};
     put(*control,0x5245414459ULL);
+    if(memoryMode){std::string error;const bool agreed=av::agreeMemory(control->p,ep,cfg,false,consumerMemory,producerMemory,error);need(agreed,error);}
     const auto frames=get(*control);
     need(frames && frames<=100000,"invalid stream length");
     if(o.mediaRunMs)validateMediaRun(o.mediaRunMs,frames,o.fps);
