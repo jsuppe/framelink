@@ -1,0 +1,80 @@
+[
+  {
+    "case": "unsupported-format",
+    "native_rgba": true,
+    "pass": true,
+    "rejected": true
+  },
+  {
+    "case": "invalid-bounds",
+    "native_rgba": true,
+    "pass": true,
+    "rejected": true
+  },
+  {
+    "case": "revoke",
+    "native_rgba": true,
+    "pass": true,
+    "rejected_or_retired": true
+  },
+  {
+    "case": "replace",
+    "native_rgba": true,
+    "pass": true,
+    "lease": "99ebb53b-d9e1-404b-ad98-e3f2aa0bc6b6",
+    "ok": true,
+    "video": 180,
+    "posts": 180,
+    "pcm_samples": 288000,
+    "uid": 10305,
+    "pid": 8603
+  },
+  {
+    "case": "broker-death",
+    "native_rgba": true,
+    "pass": true,
+    "rejected_or_retired": true
+  },
+  {
+    "case": "broker-restart",
+    "native_rgba": true,
+    "pass": true,
+    "lease": "334c7d21-afc2-45ea-84dc-93adde370f0d",
+    "ok": true,
+    "video": 60,
+    "posts": 60,
+    "pcm_samples": 96000,
+    "uid": 10305,
+    "pid": 8936
+  },
+  {
+    "case": "audio-focus",
+    "native_rgba": true,
+    "pass": true,
+    "rejected_or_retired": true
+  },
+  {
+    "case": "focus-reopen",
+    "native_rgba": true,
+    "pass": true,
+    "lease": "d028d97b-3851-46bf-9aa7-eefbb4bfdd6e",
+    "ok": true,
+    "video": 60,
+    "posts": 60,
+    "pcm_samples": 96000,
+    "uid": 10305,
+    "pid": 9214
+  },
+  {
+    "case": "audible",
+    "native_rgba": true,
+    "pass": true,
+    "lease": "adf48c34-f38e-47c7-b6e1-57e3225f84f5",
+    "ok": true,
+    "video": 60,
+    "posts": 60,
+    "pcm_samples": 96000,
+    "uid": 10305,
+    "pid": 9333
+  }
+]

@@ -48,6 +48,7 @@ extern "C" JNIEXPORT void JNICALL Java_dev_framelink_cross_Native_diagnostics(JN
   }
  },nullptr,nullptr);
  gst_debug_set_active(TRUE);
+ gst_debug_set_default_threshold(GST_LEVEL_WARNING);
  for(const auto* name:{"audiobasesink","openslessink","opensles_ringbuffer"})gst_debug_set_threshold_for_name(name,static_cast<GstDebugLevel>(level==-2?5:std::max(0,std::min(6,int(level)))));
 }
 extern "C" JNIEXPORT jintArray JNICALL Java_dev_framelink_cross_Native_pair(JNIEnv* env,jclass){
@@ -97,7 +98,8 @@ extern "C" JNIEXPORT jstring JNICALL Java_dev_framelink_cross_Native_run(JNIEnv*
    if(isProducer){
     auto*parent=gst_object_get_parent(GST_OBJECT(element));auto*source=gst_bin_get_by_name(GST_BIN(parent),"video");gst_object_unref(parent);if(!source){e="native producer appsrc missing";return false;}
     auto*caps=gst_caps_from_string(("video/x-raw(memory:FrameLinkAHardwareBuffer),format=RGBA,width="+std::to_string(cfg.video.width)+",height="+std::to_string(cfg.video.height)+",framerate="+std::to_string(cfg.video.fpsNum)+"/1").c_str());gst_app_src_set_caps(GST_APP_SRC(source),caps);gst_caps_unref(caps);gst_object_unref(source);
-    g_object_set(element,"enable-last-sample",FALSE,nullptr);
+    // Native allocation is needed before the first buffer can preroll this sink.
+    g_object_set(element,"enable-last-sample",FALSE,"async",FALSE,nullptr);
    }else{
     auto*pad=gst_element_get_static_pad(element,"src");gst_pad_add_probe(pad,GST_PAD_PROBE_TYPE_QUERY_DOWNSTREAM,+[](GstPad*,GstPadProbeInfo*info,gpointer)->GstPadProbeReturn{
      auto*q=GST_PAD_PROBE_INFO_QUERY(info);if(GST_QUERY_TYPE(q)==GST_QUERY_ALLOCATION){
@@ -112,7 +114,7 @@ extern "C" JNIEXPORT jstring JNICALL Java_dev_framelink_cross_Native_run(JNIEnv*
   if(producer){
    av::ProducerOptions p;p.plugin="static";p.format=fmt;p.frames=frames;p.fps=fps;p.mediaRunMs=budget;p.sessionProvider=&provider;p.stop=&stop;
    if(nativeMode)p.videoFrame=[](GstElement*sink,unsigned n,uint64_t pts,uint64_t duration)->GstBuffer*{
-    GstBuffer*b=nullptr;g_signal_emit_by_name(sink,"acquire-native-buffer",2000u,&b);check(b,"native source pool timeout");
+    GstBuffer*b=nullptr;g_signal_emit_by_name(sink,"acquire-native-buffer",1000u,&b);check(b,"native source buffer acquisition failed");
     struct Guard{GstBuffer*b;~Guard(){if(b)gst_buffer_unref(b);}} guard{b};auto*ahb=gst_framelink_memory_get_hardware_buffer(gst_buffer_peek_memory(b,0));check(ahb,"native source AHB");AHardwareBuffer_Desc d{};AHardwareBuffer_describe(ahb,&d);void*data=nullptr;
     check(!AHardwareBuffer_lock(ahb,AHARDWAREBUFFER_USAGE_CPU_WRITE_OFTEN,-1,nullptr,&data),"native content lock");
     for(unsigned y=0;y<d.height;y++)for(unsigned x=0;x<d.width;x++){auto*v=(uint8_t*)data+(y*d.stride+x)*4;v[0]=uint8_t(n);v[1]=x;v[2]=y;v[3]=255;}

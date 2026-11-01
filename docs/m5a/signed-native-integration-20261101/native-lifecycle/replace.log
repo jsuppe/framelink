@@ -1,0 +1,19 @@
+
+11-01 17:34:01.635  8603  8603 I FLCross : bind=true
+11-01 17:34:02.127  8660  8674 I FLCross : producer-start lease=98e5d665-de18-457f-8b8f-c695a6af6cf1 uid=10304 pid=8660
+11-01 17:34:02.127  8638  8655 I FLCross : grant lease=98e5d665-de18-457f-8b8f-c695a6af6cf1 generation=1 consumer_uid=10305 broker_uid=10304
+11-01 17:34:02.148  8603  8659 I FLCross : receiver-start lease=98e5d665-de18-457f-8b8f-c695a6af6cf1 generation=1 uid=10305 pid=8603
+11-01 17:34:02.151  8603  8659 I FLCross : active_owner_reuse_rejected=true
+11-01 17:34:02.229  8603  8659 I FLCross : playback producer-system-clock
+11-01 17:34:02.854  8638  8655 I FLCross : retired lease=98e5d665-de18-457f-8b8f-c695a6af6cf1 generation=1 reason=replacement
+11-01 17:34:02.858  8638  8655 I FLCross : grant lease=99ebb53b-d9e1-404b-ad98-e3f2aa0bc6b6 generation=2 consumer_uid=10305 broker_uid=10304
+11-01 17:34:02.865  8660  8674 I FLCross : native failure: native source buffer acquisition failed
+11-01 17:34:02.865  8660  8674 I FLCross : producer-result lease=98e5d665-de18-457f-8b8f-c695a6af6cf1 {"ok":false,"video":0,"posts":0,"pcm_samples":0,"uid":10304,"pid":8660}
+11-01 17:34:02.866  8660  8674 I FLCross : producer-start lease=99ebb53b-d9e1-404b-ad98-e3f2aa0bc6b6 uid=10304 pid=8660
+11-01 17:34:02.889  8603  8659 I FLCross : native failure: audio EOS before finite completion
+11-01 17:34:02.889  8603  8659 I FLCross : replaced-old-result lease=98e5d665-de18-457f-8b8f-c695a6af6cf1 {"ok":false,"video":16,"posts":16,"pcm_samples":25600,"uid":10305,"pid":8603}
+11-01 17:34:02.891  8603  8659 I FLCross : receiver-replacement lease=99ebb53b-d9e1-404b-ad98-e3f2aa0bc6b6 generation=2
+11-01 17:34:02.909  8603  8659 I FLCross : playback producer-system-clock
+11-01 17:34:09.090  8603  8659 I FLCross : receiver-result lease=99ebb53b-d9e1-404b-ad98-e3f2aa0bc6b6 {"ok":true,"video":180,"posts":180,"pcm_samples":288000,"uid":10305,"pid":8603}
+11-01 17:34:09.092  8638  8655 I FLCross : retired lease=99ebb53b-d9e1-404b-ad98-e3f2aa0bc6b6 generation=2 reason=explicit
+11-01 17:34:09.107  8660  8674 I FLCross : producer-result lease=99ebb53b-d9e1-404b-ad98-e3f2aa0bc6b6 {"ok":true,"video":0,"posts":0,"pcm_samples":0,"uid":10304,"pid":8660}

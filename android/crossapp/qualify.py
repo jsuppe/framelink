@@ -19,6 +19,7 @@ p.add_argument('--case', action='append', default=[])
 p.add_argument('--diagnostics', action='store_true')
 p.add_argument('--diagnostic-level', type=int, default=5)
 p.add_argument('--frames', type=int, default=60)
+p.add_argument('--native-rgba', action='store_true', help='Use native RGBA AHB/EGL path for the non-NV12 cases')
 p.add_argument('--clock-policy', choices=['producer','audio'], default='producer')
 p.add_argument('--preroll-delay-ms', type=int, default=0)
 a = p.parse_args()
@@ -92,7 +93,7 @@ try:
         frames = a.frames if name in ('bgra', 'nv12', 'audible', 'audible-nv12') or name.endswith(('restart', 'reopen')) else 180
         package = I if name == 'wrong-signer' else C
         cmd = ['shell', 'am', 'start', '-W', '-n', package + '/dev.framelink.cross.Viewer',
-               '--es', 'format', 'YUY2' if name == 'unsupported-format' else 'NV12' if name in ('nv12','audible-nv12') else 'BGRA',
+               '--es', 'format', 'YUY2' if name == 'unsupported-format' else 'NV12' if name in ('nv12','audible-nv12') else 'RGBA' if a.native_rgba else 'BGRA',
                '--ei', 'frames', '0' if name == 'invalid-bounds' else str(frames), '--ei', 'fps', '30',
                '--ei', 'preroll-delay-ms', str(a.preroll_delay_ms),
                '--es', 'clock-policy', a.clock_policy,
@@ -163,10 +164,10 @@ try:
                     assert 'active_owner_reuse_rejected=true' in text and 'reason=replacement' in text
                     generations = re.findall(r'receiver-(?:start|replacement) lease=[\w-]+ generation=(\d+)', text)
                     assert len(generations) == 2 and int(generations[1]) > int(generations[0])
-            summary.append({'case': name, 'pass': True, **result})
+            summary.append({'case': name, 'native_rgba': a.native_rgba and name not in ('nv12','audible-nv12'), 'pass': True, **result})
             print(json.dumps(summary[-1]), flush=True)
         except Exception as e:
-            summary.append({'case': name, 'pass': False, 'error': str(e)})
+            summary.append({'case': name, 'native_rgba': a.native_rgba and name not in ('nv12','audible-nv12'), 'pass': False, 'error': str(e)})
             print(json.dumps(summary[-1]), flush=True)
             raise
         finally:

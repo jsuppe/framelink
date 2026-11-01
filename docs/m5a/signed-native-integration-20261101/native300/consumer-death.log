@@ -1,0 +1,9 @@
+
+11-01 17:33:21.629  7405  7405 I FLCross : bind=true
+11-01 17:33:22.116  7443  7455 I FLCross : grant lease=c8292fda-de2a-4792-99a5-d465342a5619 generation=1 consumer_uid=10305 broker_uid=10304
+11-01 17:33:22.116  7465  7482 I FLCross : producer-start lease=c8292fda-de2a-4792-99a5-d465342a5619 uid=10304 pid=7465
+11-01 17:33:22.140  7405  7464 I FLCross : receiver-start lease=c8292fda-de2a-4792-99a5-d465342a5619 generation=1 uid=10305 pid=7405
+11-01 17:33:22.218  7405  7464 I FLCross : playback producer-system-clock
+11-01 17:33:22.723  7443  7443 I FLCross : retired lease=c8292fda-de2a-4792-99a5-d465342a5619 generation=1 reason=broker-destroy
+11-01 17:33:22.745  7465  7482 I FLCross : native failure: native source buffer acquisition failed
+11-01 17:33:22.746  7465  7482 I FLCross : producer-result lease=c8292fda-de2a-4792-99a5-d465342a5619 {"ok":false,"video":0,"posts":0,"pcm_samples":0,"uid":10304,"pid":7465}

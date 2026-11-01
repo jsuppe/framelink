@@ -146,8 +146,12 @@ Windows decoder-to-independent-renderer example, and measured multi-hop evidence
   rejection, conflicting consumers, strict-copy enforcement and frozen generations.
   New15-case hostile-wire fixture includes proof reflection and forged approval;
   Linux7/7, Windows6/6, Android6/6 and dualABI. [Evidence](m5a/contract-negatives-20261101/README.md).
-- [ ] **M5a.12 Platform integration tests:** GPU-native and CPU-readable modes,
+- [x] **M5a.12 Platform integration tests (qualified paths):** GPU-native and CPU-readable modes,
   incompatible devices/layouts, renegotiation, fences, stale generations and cleanup.
+  Three-process GPU relay16/16 each Windows/Linux/Android; signed native Android
+  A/V18/18 lifecycle/security cases, exact RGBA/PTS/PCM and GPU-completion retention.
+  [Device evidence](m5a/signed-native-integration-20261101/README.md); unsupported
+  decoder/layout and physical-output limits retained. Performance remains task13.
 - [ ] **M5a.13 One-hop vs multi-hop qualification:** identical sources; account
   each identity, PTS and A/V offset; measure per-boundary residence/arrival jitter,
   payload copies, delayed readers/backpressure and safe reuse. Set numeric budgets
