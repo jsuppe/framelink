@@ -41,6 +41,10 @@ FL_API ID3D11Device* flChannelD3D11Device(flChannel*);
 // Borrowed: do NOT CloseHandle() it. This is the escape hatch that stops
 // ID3D11Texture2D in the ABI from locking integrators into D3D11.
 FL_API void* flImageSharedHandle(flImage*);
+// Retains an imported shared fence, not the caller's handle. On success the lease
+// token expires; collect waits nonblocking for this reader's fence value. Device
+// removal is an error, never permission to reuse the allocation.
+FL_API flResult flCompleteReadLeaseD3D11Fence(flChannel*, uint64_t lease, void* sharedFence, uint64_t value);
 
 #ifdef __cplusplus
 }

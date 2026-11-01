@@ -51,6 +51,11 @@ struct flImage {
     HANDLE shared = nullptr; // borrowed by callers; owned here
 };
 
+struct LeaseCompletion {
+    uint64_t token=0,value=0;
+    ComPtr<ID3D11Fence> fence;
+};
+
 struct flChannel {
     bool isConsumer = false;
     bool externalPool = false;
@@ -81,6 +86,7 @@ struct flChannel {
     std::mutex pendingMutex;
     bool hasPending = false;
     fl::ReadLedger readers;
+    std::array<LeaseCompletion,fl::ReadLedger::MaxReaders> leaseCompletions;
     bool frameHeld = false;
     uint64_t heldReady = 0;
     uint32_t heldSlot = 0;
@@ -906,6 +912,33 @@ static flResult retireReadLeases(flChannel* ch,uint64_t value) {
     if(FAILED(ch->ctx->Signal(ch->consumedFence.Get(),value)))return FL_INTERNAL;
     ch->ctx->Flush();ch->consumedValue=value;return FL_OK;
 }
+static flResult pollLeaseCompletions(flChannel* ch) {
+    for(auto& pending:ch->leaseCompletions) if(pending.token) {
+        uint64_t value=pending.fence->GetCompletedValue();
+        if(value==UINT64_MAX)return FL_DISCONNECTED; // Device loss is not completion.
+        if(value>=pending.value) {
+            auto r=ch->readers.finishDeferred(pending.token);if(r!=FL_OK)return r;
+            pending.fence.Reset();pending.token=0;pending.value=0;
+        }
+    }
+    return FL_OK;
+}
+FL_API flResult flCompleteReadLeaseD3D11Fence(flChannel* ch,uint64_t token,void* handle,uint64_t value) {
+    if(!ch || !ch->isConsumer || !handle || value==UINT64_MAX)return FL_INVALID;
+    std::lock_guard<std::mutex> lock(ch->pendingMutex);
+    flFrame frame{};uint64_t generation=0;
+    if(ch->readers.get(token,frame,generation)!=FL_OK)return FL_INVALID;
+    for(auto& pending:ch->leaseCompletions) if(!pending.token) {
+        ComPtr<ID3D11Device5> device;
+        if(FAILED(ch->device.As(&device)))return FL_FORMAT_UNSUPPORTED;
+        ComPtr<ID3D11Fence> fence;
+        if(FAILED(device->OpenSharedFence(handle,IID_PPV_ARGS(&fence))))return FL_INVALID;
+        auto r=ch->readers.defer(token);if(r!=FL_OK)return r;
+        pending.fence=fence;pending.value=value;pending.token=token;return FL_OK;
+    }
+    return FL_BUSY;
+}
+
 #include "fl_read_api.inc"
 
 FL_API flResult flQuery(flChannel* ch, flChannelInfo* out) {

@@ -29,6 +29,8 @@ FL_API flResult flCompleteReadLease(flChannel* ch,uint64_t lease) {
 FL_API flResult flCollectReadLeases(flChannel* ch) {
     if(!ch || !ch->isConsumer)return FL_INVALID;
     std::lock_guard<std::mutex> lock(ch->pendingMutex);
+    auto polled=pollLeaseCompletions(ch);
+    if(polled!=FL_OK)return polled;
     auto r=ch->readers.retirement();
     if(!r.value)return ch->readers.empty()?FL_OK:FL_BUSY;
     auto result=retireReadLeases(ch,r.value);

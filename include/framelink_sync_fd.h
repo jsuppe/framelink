@@ -17,6 +17,10 @@ FL_API flResult flReleaseSyncFd(flChannel*, const flFrame*, int consumedFd);
 // retaining its storage. Retire a monotonic watermark after ALL corresponding
 // GPU reads finish. Value must not exceed the latest acquired frame.
 FL_API flResult flSignalConsumedSyncFd(flChannel*, uint64_t value, int consumedFd);
+// Transfers a reader to a completion fence; duplicates fd, never consumes the
+// caller's fd. Token expires on success. Collect polls without blocking; storage
+// stays retained until every reader fence completes. Errors do not free storage.
+FL_API flResult flCompleteReadLeaseSyncFd(flChannel*, uint64_t lease, int fd);
 FL_API flResult flFrameReadySyncFd(flChannel*, const flFrame*, int* readyFd);
 #ifdef __cplusplus
 }

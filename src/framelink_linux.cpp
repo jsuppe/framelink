@@ -64,6 +64,12 @@ struct flImage {
     flMappedImage planeView{};
 };
 
+struct LeaseCompletion {
+    uint64_t token=0;
+    int fd=-1;
+    ~LeaseCompletion() { if(fd>=0)close(fd); }
+};
+
 struct flChannel {
     bool isConsumer = false;
     bool externalPool = false;
@@ -88,6 +94,7 @@ struct flChannel {
     std::mutex pendingMutex;
     bool hasPending = false;
     fl::ReadLedger readers;
+    std::array<LeaseCompletion,fl::ReadLedger::MaxReaders> leaseCompletions;
     bool frameHeld = false;
     uint64_t heldReady = 0;
     uint64_t retiredValue = 0; // completed consumer GPU reads; protects geometry changes
@@ -848,6 +855,33 @@ static flResult retireReadLeases(flChannel* ch,uint64_t value) {
     ch->retiredValue=value;
     return FL_OK;
 }
+static flResult pollLeaseCompletions(flChannel* ch) {
+    for(auto& pending:ch->leaseCompletions) if(pending.token) {
+        pollfd p{pending.fd,POLLIN,0};
+        int result=poll(&p,1,0);
+        if(result<0) {if(errno==EINTR)continue;return FL_INTERNAL;}
+        if(!result)continue;
+        if(p.revents & (POLLERR|POLLHUP|POLLNVAL))return FL_INTERNAL;
+        if(p.revents & POLLIN) {
+            auto r=ch->readers.finishDeferred(pending.token);if(r!=FL_OK)return r;
+            close(pending.fd);pending.fd=-1;pending.token=0;
+        }
+    }
+    return FL_OK;
+}
+FL_API flResult flCompleteReadLeaseSyncFd(flChannel* ch,uint64_t token,int fd) {
+    if(!ch || !ch->isConsumer || fd<0)return FL_INVALID;
+    std::lock_guard<std::mutex> lock(ch->pendingMutex);
+    flFrame frame{};uint64_t generation=0;
+    if(ch->readers.get(token,frame,generation)!=FL_OK)return FL_INVALID;
+    for(auto& pending:ch->leaseCompletions) if(!pending.token) {
+        int owned=fcntl(fd,F_DUPFD_CLOEXEC,0);if(owned<0)return FL_INVALID;
+        auto r=ch->readers.defer(token);if(r!=FL_OK){close(owned);return r;}
+        pending.fd=owned;pending.token=token;return FL_OK;
+    }
+    return FL_BUSY;
+}
+
 #include "fl_read_api.inc"
 
 FL_API flResult flQuery(flChannel* ch, flChannelInfo* out) {

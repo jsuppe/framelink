@@ -49,5 +49,10 @@ int main() {
         CHECK(a.complete(slots[i%FL_MAX_POOL_SIZE])==FL_INVALID);
         CHECK(a.complete(w)==FL_OK && a.retired(a.retirement())==FL_OK);
     }
+    CHECK(a.acquire(5,frame(0,1),w)==FL_OK && a.defer(w)==FL_OK);
+    CHECK(a.defer(w)==FL_INVALID && a.complete(w)==FL_INVALID);
+    CHECK(a.retain(w,x)==FL_INVALID && a.retirement().value==0);
+    CHECK(a.finishDeferred(w)==FL_OK && a.finishDeferred(w)==FL_INVALID);
+    CHECK(a.retired(a.retirement())==FL_OK);
     std::puts("read ledger: bounded ownership, out-of-order completion and stale-token checks passed");
 }

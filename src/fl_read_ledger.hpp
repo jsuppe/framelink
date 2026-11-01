@@ -15,7 +15,7 @@ public:
     struct Retirement { uint64_t generation = 0, value = 0; };
 private:
     struct Frame { flFrame frame{}; uint64_t generation = 0; size_t readers = 0; };
-    struct Reader { uint64_t token = 0; size_t frame = 0; };
+    struct Reader { uint64_t token = 0; size_t frame = 0; bool pending = false; };
     std::array<Frame, FL_MAX_POOL_SIZE> frames_{};
     std::array<Reader, MaxReaders> readers_{};
     size_t head_ = 0, count_ = 0;
@@ -28,9 +28,9 @@ private:
         }
         return 0; // Fail closed at exhaustion; never wrap into a stale token.
     }
-    Reader* find(uint64_t t) {
+    Reader* find(uint64_t t, bool pending = false) {
         if (!t) return nullptr;
-        for (auto& r : readers_) if (r.token == t) return &r;
+        for (auto& r : readers_) if (r.token == t && r.pending == pending) return &r;
         return nullptr;
     }
     flResult addReader(size_t f, uint64_t& out) {
@@ -75,6 +75,13 @@ public:
     flResult complete(uint64_t t) {
         auto* r = find(t); if (!r) return FL_INVALID;
         --frames_[r->frame].readers; *r = {}; return FL_OK;
+    }
+    flResult defer(uint64_t t) {
+        auto* r=find(t); if(!r)return FL_INVALID; r->pending=true; return FL_OK;
+    }
+    flResult finishDeferred(uint64_t t) {
+        auto* r=find(t,true); if(!r)return FL_INVALID;
+        --frames_[r->frame].readers; *r={}; return FL_OK;
     }
     Retirement retirement() const {
         Retirement result{};
