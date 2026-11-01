@@ -928,3 +928,8 @@ if(FRAMELINK_BUILD_TESTS AND UNIX AND NOT ANDROID AND TARGET PkgConfig::LEASE_EG
     add_test(NAME native_relay_process_linux COMMAND fl_native_relay_process_linux)
     set_tests_properties(native_relay_process_linux PROPERTIES TIMEOUT 30 SKIP_RETURN_CODE 77)
 endif()
+
+if(TARGET fl_broker_producer)
+    add_test(NAME broker_video_factory COMMAND fl_broker_producer $<TARGET_FILE:gstframelink> factory)
+    set_tests_properties(broker_video_factory PROPERTIES TIMEOUT 30)
+endif()

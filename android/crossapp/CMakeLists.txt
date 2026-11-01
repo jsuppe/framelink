@@ -15,4 +15,4 @@ add_library(fl_crossapp SHARED jni.cpp ${ROOT}/samples/av_apps.cpp ${ROOT}/sampl
 target_include_directories(fl_crossapp PRIVATE ../avsample ${ROOT}/samples ${AV_STATIC_INCLUDE_DIRS})
 target_compile_definitions(fl_crossapp PRIVATE AV_PLAYBACK_LIBRARY=1)
 target_link_directories(fl_crossapp PRIVATE ${AV_STATIC_LIBRARY_DIRS})
-target_link_libraries(fl_crossapp PRIVATE gstframelink "-Wl,--start-group" ${AV_STATIC_LIBRARIES} "-Wl,--end-group" android log OpenSLES)
+target_link_libraries(fl_crossapp PRIVATE gstframelink "-Wl,--start-group" ${AV_STATIC_LIBRARIES} "-Wl,--end-group" android log OpenSLES EGL GLESv2)

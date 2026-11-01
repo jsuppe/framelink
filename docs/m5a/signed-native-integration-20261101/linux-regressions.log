@@ -1,0 +1,231 @@
+Start testing: Nov 01 17:08 EST
+----------------------------------------------------------
+63/96 Testing: m3_av_apps
+63/96 Test: m3_av_apps
+Command: "/usr/bin/python3" "/tmp/framelink-m5a/test/m3_apps.py" "--producer" "/tmp/fl-m5a-gst-build/framelink_av_producer" "--consumer" "/tmp/fl-m5a-gst-build/framelink_av_consumer" "--plugin" "/tmp/fl-m5a-gst-build/libgstframelink.so"
+Directory: /tmp/fl-m5a-gst-build
+"m3_av_apps" start time: Nov 01 17:08 EST
+Output:
+----------------------------------------------------------
+evidence: /tmp/framelink-m3-665add8l
+{"case": "bgra-producer-first", "passed": true, "results": {"producer": {"role": "producer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}, "consumer": {"role": "consumer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}}, "verified_session": {"event": "session-complete", "instance": "857cc8322a9797c6f6e4d20828cc3495", "generation": 1, "format": "BGRA", "video_frames": 50, "audio_blocks": 50, "audio_offset_ns": 0}}
+{"case": "bgra-consumer-first", "passed": true, "results": {"consumer": {"role": "consumer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}, "producer": {"role": "producer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}}, "verified_session": {"event": "session-complete", "instance": "1c41834a454089019e97310635e54932", "generation": 1, "format": "BGRA", "video_frames": 50, "audio_blocks": 50, "audio_offset_ns": 0}}
+{"case": "nv12-producer-first", "passed": true, "results": {"producer": {"role": "producer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}, "consumer": {"role": "consumer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}}, "verified_session": {"event": "session-complete", "instance": "df2ecb7141c0f10236aa52e3666e9cc3", "generation": 1, "format": "NV12", "video_frames": 50, "audio_blocks": 50, "audio_offset_ns": 0}}
+{"case": "nv12-consumer-first", "passed": true, "results": {"consumer": {"role": "consumer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}, "producer": {"role": "producer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}}, "verified_session": {"event": "session-complete", "instance": "f0166aed0756ab19e518f7f4459b262f", "generation": 1, "format": "NV12", "video_frames": 50, "audio_blocks": 50, "audio_offset_ns": 0}}
+{"case": "producer-restart", "passed": true, "retired_identity": {"event": "media-progress", "instance": "5d3fd47f1270daea3e7e746340a54bc5", "generation": 1, "format": "BGRA", "video_frames": 1, "audio_blocks": 1, "audio_offset_ns": 0}, "verified_sessions": [{"event": "session-complete", "instance": "6b481357f6172592014d8fcdc4742e77", "generation": 1, "format": "BGRA", "video_frames": 50, "audio_blocks": 50, "audio_offset_ns": 0}, {"event": "session-complete", "instance": "0a0201a3bb9f84bfe842a3f4faaac890", "generation": 1, "format": "BGRA", "video_frames": 50, "audio_blocks": 50, "audio_offset_ns": 0}]}
+{"case": "consumer-restart", "passed": true, "retired_identity": {"event": "media-progress", "instance": "f8bb9212354f47d0766e18d1e61260c8", "generation": 1, "format": "BGRA", "video_frames": 1, "audio_blocks": 1, "audio_offset_ns": 0}, "verified_sessions": [{"event": "session-complete", "instance": "1072a5fb16785767969eb79c72d3225b", "generation": 1, "format": "BGRA", "video_frames": 50, "audio_blocks": 50, "audio_offset_ns": 0}, {"event": "session-complete", "instance": "ecd247f6f8ce80666d46ebefed0d508c", "generation": 1, "format": "BGRA", "video_frames": 50, "audio_blocks": 50, "audio_offset_ns": 0}]}
+{"case": "producer-restart-format-change", "passed": true, "retired_identity": {"event": "media-progress", "instance": "1295e1087c590cd7d5da94ef9aee59fb", "generation": 1, "format": "BGRA", "video_frames": 1, "audio_blocks": 1, "audio_offset_ns": 0}, "verified_sessions": [{"event": "session-complete", "instance": "43ffe34e3dc519942b49ac772b8d4cf3", "generation": 1, "format": "NV12", "video_frames": 50, "audio_blocks": 50, "audio_offset_ns": 0}, {"event": "session-complete", "instance": "46c721503796956a89d9b4ec25bd5cda", "generation": 1, "format": "NV12", "video_frames": 50, "audio_blocks": 50, "audio_offset_ns": 0}]}
+{"case": "missing-audio", "passed": true, "verified_before_fault": {"event": "media-progress", "instance": "68da9cd212b1da9b337903be1992d172", "generation": 1, "format": "BGRA", "video_frames": 1, "audio_blocks": 1, "audio_offset_ns": 0}, "expected_error": "audio timeout/EOS", "consumer_exit": 1}
+{"case": "audio-pts-reset", "passed": true, "verified_before_fault": {"event": "media-progress", "instance": "df20053d4bde4295e118690f41d79d1b", "generation": 1, "format": "BGRA", "video_frames": 1, "audio_blocks": 1, "audio_offset_ns": 0}, "expected_error": "audio timeline mismatch", "consumer_exit": 1}
+{"case": "peer-death", "passed": true, "verified_before_fault": {"event": "media-progress", "instance": "afbeda8214736aa25b47e2cbc2cef8a6", "generation": 1, "format": "BGRA", "video_frames": 1, "audio_blocks": 1, "audio_offset_ns": 0}, "expected_error": "timeout/EOS", "consumer_exit": 1}
+<end of output>
+Test time =  28.69 sec
+----------------------------------------------------------
+Test Passed.
+"m3_av_apps" end time: Nov 01 17:09 EST
+"m3_av_apps" time elapsed: 00:00:28
+----------------------------------------------------------
+
+86/96 Testing: broker_producer_stream
+86/96 Test: broker_producer_stream
+Command: "/tmp/fl-m5a-gst-build/fl_broker_producer" "/tmp/fl-m5a-gst-build/libgstframelink.so"
+Directory: /tmp/fl-m5a-gst-build
+"broker_producer_stream" start time: Nov 01 17:09 EST
+Output:
+----------------------------------------------------------
+bounds: 14 rejected before resolve; already-cancelled rejected
+silent peer: bounded nonfatal producer deadline; process remains alive
+{"event":"session-ready","instance":"2903e54e815d4b59a6da18567f405a1a","generation":1,"format":"BGRA","video_frames":0,"audio_blocks":0,"audio_offset_ns":0}
+{"event":"media-progress","instance":"2903e54e815d4b59a6da18567f405a1a","generation":1,"format":"BGRA","video_frames":1,"audio_blocks":1,"audio_offset_ns":0}
+{"event":"playback-clock","policy":"audio","system_now_ns":376643014382554,"selected_now_ns":376643014382444,"device_now_ns":18446744073709551615,"mapped_producer_base_ns":376643011388445,"playback_base_ns":376643034323544,"latency_ns":100000000,"resample_slaves":0}
+{"event":"producer-pacing","pacing_ppm":0,"max_push_ns":201002}
+{"event":"video-schedule-summary","received":20,"scheduled":0,"handed_off":20,"late":0,"overflow":0,"peak_pending":0,"pending_limit":8,"peak_bytes":0,"byte_limit":134217728}
+{"event":"playback-metrics","peak_queue_buffers":4,"peak_queue_ns":80000000,"queue_empty_events":3,"queue_full_events":15,"late_audio_blocks":0,"arrival_drift_ns":1154895}
+{"event":"playback-complete","audio_master":false,"video_received":20,"video_late":0,"audio_blocks":20,"audio_samples":19200,"latency_ns":100000000}
+{"event":"playback-timing","audio_first_running_pts_ns":0,"video_first_running_pts_ns":0,"audio_end_ns":400000000,"video_end_ns":400000000}
+{"event":"session-complete","instance":"2903e54e815d4b59a6da18567f405a1a","generation":1,"format":"BGRA","video_frames":20,"audio_blocks":20,"audio_offset_ns":0}
+case=legacy producer=1 consumer=1 sessions=1 clocks=1 ends=1 elapsed_ms=1112 producer_ms=1112 producer_error= consumer_error=
+{"event":"session-ready","instance":"4a419cbc533f9ad3476c6696f5890d14","generation":1,"format":"BGRA","video_frames":0,"audio_blocks":0,"audio_offset_ns":0}
+{"event":"playback-clock","policy":"producer","system_now_ns":376645926035134,"selected_now_ns":376645926035016,"device_now_ns":18446744073709551615,"mapped_producer_base_ns":376645975926173,"playback_base_ns":376645975926173,"latency_ns":100000000,"resample_slaves":0}
+{"event":"startup-released","epoch_ns":376645975928265}
+{"event":"media-progress","instance":"4a419cbc533f9ad3476c6696f5890d14","generation":1,"format":"BGRA","video_frames":1,"audio_blocks":1,"audio_offset_ns":0}
+{"event":"producer-pacing","pacing_ppm":0,"max_push_ns":191205}
+{"event":"video-schedule-summary","received":20,"scheduled":0,"handed_off":20,"late":0,"overflow":0,"peak_pending":0,"pending_limit":8,"peak_bytes":0,"byte_limit":134217728}
+{"event":"playback-metrics","peak_queue_buffers":4,"peak_queue_ns":80000000,"queue_empty_events":4,"queue_full_events":0,"late_audio_blocks":0,"arrival_drift_ns":319835}
+{"event":"playback-complete","audio_master":false,"video_received":20,"video_late":0,"audio_blocks":20,"audio_samples":19200,"latency_ns":100000000}
+{"event":"playback-timing","audio_first_running_pts_ns":0,"video_first_running_pts_ns":0,"audio_end_ns":400000000,"video_end_ns":400000000}
+{"event":"session-complete","instance":"4a419cbc533f9ad3476c6696f5890d14","generation":1,"format":"BGRA","video_frames":20,"audio_blocks":20,"audio_offset_ns":0}
+case=coordinated-delay producer=1 consumer=1 sessions=1 clocks=1 ends=1 elapsed_ms=2966 producer_ms=2966 producer_error= consumer_error=
+{"event":"session-ready","instance":"b90e8f66bb2ccc873dcd625e986f7635","generation":1,"format":"BGRA","video_frames":0,"audio_blocks":0,"audio_offset_ns":0}
+{"event":"playback-clock","policy":"producer","system_now_ns":376646599849479,"selected_now_ns":376646599848791,"device_now_ns":18446744073709551615,"mapped_producer_base_ns":376646649561299,"playback_base_ns":376646649561299,"latency_ns":100000000,"resample_slaves":0}
+{"event":"startup-released","epoch_ns":376646649558187}
+{"event":"media-progress","instance":"b90e8f66bb2ccc873dcd625e986f7635","generation":1,"format":"BGRA","video_frames":1,"audio_blocks":1,"audio_offset_ns":0}
+{"event":"media-progress","instance":"b90e8f66bb2ccc873dcd625e986f7635","generation":1,"format":"BGRA","video_frames":25,"audio_blocks":25,"audio_offset_ns":0}
+{"event":"media-progress","instance":"b90e8f66bb2ccc873dcd625e986f7635","generation":1,"format":"BGRA","video_frames":50,"audio_blocks":50,"audio_offset_ns":0}
+{"event":"media-progress","instance":"b90e8f66bb2ccc873dcd625e986f7635","generation":1,"format":"BGRA","video_frames":75,"audio_blocks":75,"audio_offset_ns":0}
+{"event":"producer-pacing","pacing_ppm":0,"max_push_ns":208463}
+{"event":"video-schedule-summary","received":80,"scheduled":0,"handed_off":80,"late":0,"overflow":0,"peak_pending":0,"pending_limit":8,"peak_bytes":0,"byte_limit":134217728}
+{"event":"playback-metrics","peak_queue_buffers":4,"peak_queue_ns":80000000,"queue_empty_events":3,"queue_full_events":0,"late_audio_blocks":0,"arrival_drift_ns":463424}
+{"event":"playback-complete","audio_master":false,"video_received":80,"video_late":0,"audio_blocks":80,"audio_samples":76800,"latency_ns":100000000}
+{"event":"playback-timing","audio_first_running_pts_ns":0,"video_first_running_pts_ns":0,"audio_end_ns":1600000000,"video_end_ns":1600000000}
+{"event":"session-complete","instance":"b90e8f66bb2ccc873dcd625e986f7635","generation":1,"format":"BGRA","video_frames":80,"audio_blocks":80,"audio_offset_ns":0}
+case=finite producer=1 consumer=1 sessions=1 clocks=1 ends=1 elapsed_ms=1881 producer_ms=1881 producer_error= consumer_error=
+case=wrong-key producer=0 consumer=0 sessions=0 clocks=0 ends=0 elapsed_ms=10 producer_ms=10 producer_error=authentication read failed consumer_error=server authentication rejected
+case=wrong-audio-key producer=0 consumer=0 sessions=0 clocks=0 ends=0 elapsed_ms=10 producer_ms=10 producer_error=authentication read failed consumer_error=server authentication rejected
+case=wrong-audio-role producer=0 consumer=0 sessions=0 clocks=0 ends=0 elapsed_ms=10 producer_ms=10 producer_error=authentication protocol or role rejected consumer_error=authentication read failed
+case=budget-mismatch producer=0 consumer=0 sessions=0 clocks=0 ends=0 elapsed_ms=10 producer_ms=10 producer_error=finite media budget disagreement consumer_error=control read/disconnect: peer closed connection
+{"event":"session-ready","instance":"cb143afc684e1ffe3626770a358745dc","generation":1,"format":"BGRA","video_frames":0,"audio_blocks":0,"audio_offset_ns":0}
+case=revoke-startup producer=0 consumer=0 sessions=1 clocks=0 ends=1 elapsed_ms=30 producer_ms=30 producer_error=control read/disconnect: peer closed connection consumer_error=control write/disconnect
+{"event":"session-ready","instance":"92708d4650f0956ebf757a9a75055d7a","generation":1,"format":"BGRA","video_frames":0,"audio_blocks":0,"audio_offset_ns":0}
+case=cancel-startup producer=0 consumer=0 sessions=1 clocks=0 ends=1 elapsed_ms=53 producer_ms=22 producer_error=producer cancelled consumer_error=control write/disconnect
+{"event":"session-ready","instance":"1cd335506ae863ea039488a013c12b35","generation":1,"format":"BGRA","video_frames":0,"audio_blocks":0,"audio_offset_ns":0}
+{"event":"playback-clock","policy":"producer","system_now_ns":376648597591000,"selected_now_ns":376648597590887,"device_now_ns":18446744073709551615,"mapped_producer_base_ns":376648647515837,"playback_base_ns":376648647515837,"latency_ns":100000000,"resample_slaves":0}
+{"event":"startup-released","epoch_ns":376648647515305}
+{"event":"media-progress","instance":"1cd335506ae863ea039488a013c12b35","generation":1,"format":"BGRA","video_frames":1,"audio_blocks":1,"audio_offset_ns":0}
+case=cancel-media producer=0 consumer=0 sessions=1 clocks=1 ends=1 elapsed_ms=5008 producer_ms=162 producer_error=producer cancelled consumer_error=playback deadline
+{"event":"session-ready","instance":"f42a49163bfb46ca5fb735daf6da7ee5","generation":1,"format":"BGRA","video_frames":0,"audio_blocks":0,"audio_offset_ns":0}
+{"event":"playback-clock","policy":"producer","system_now_ns":376653607161005,"selected_now_ns":376653607160907,"device_now_ns":18446744073709551615,"mapped_producer_base_ns":376653657125695,"playback_base_ns":376653657125695,"latency_ns":100000000,"resample_slaves":0}
+{"event":"startup-released","epoch_ns":376653657125182}
+{"event":"media-progress","instance":"f42a49163bfb46ca5fb735daf6da7ee5","generation":1,"format":"BGRA","video_frames":1,"audio_blocks":1,"audio_offset_ns":0}
+{"event":"media-progress","instance":"f42a49163bfb46ca5fb735daf6da7ee5","generation":1,"format":"BGRA","video_frames":25,"audio_blocks":25,"audio_offset_ns":0}
+case=media-deadline producer=0 consumer=0 sessions=1 clocks=1 ends=1 elapsed_ms=5011 producer_ms=1029 producer_error=producer deadline consumer_error=playback deadline
+{"event":"session-ready","instance":"d7bf1ab963522714186731fa192827b4","generation":1,"format":"BGRA","video_frames":0,"audio_blocks":0,"audio_offset_ns":0}
+{"event":"playback-clock","policy":"producer","system_now_ns":376658618050429,"selected_now_ns":376658618050327,"device_now_ns":18446744073709551615,"mapped_producer_base_ns":376658667993523,"playback_base_ns":376658667993523,"latency_ns":100000000,"resample_slaves":0}
+{"event":"startup-released","epoch_ns":376658667992821}
+{"event":"media-progress","instance":"d7bf1ab963522714186731fa192827b4","generation":1,"format":"BGRA","video_frames":1,"audio_blocks":1,"audio_offset_ns":0}
+{"event":"producer-pacing","pacing_ppm":0,"max_push_ns":191426}
+{"event":"video-schedule-summary","received":20,"scheduled":0,"handed_off":20,"late":0,"overflow":0,"peak_pending":0,"pending_limit":8,"peak_bytes":0,"byte_limit":134217728}
+{"event":"playback-metrics","peak_queue_buffers":4,"peak_queue_ns":80000000,"queue_empty_events":4,"queue_full_events":0,"late_audio_blocks":0,"arrival_drift_ns":-213714}
+{"event":"playback-complete","audio_master":false,"video_received":20,"video_late":0,"audio_blocks":20,"audio_samples":19200,"latency_ns":100000000}
+{"event":"playback-timing","audio_first_running_pts_ns":0,"video_first_running_pts_ns":0,"audio_end_ns":400000000,"video_end_ns":400000000}
+{"event":"session-complete","instance":"d7bf1ab963522714186731fa192827b4","generation":1,"format":"BGRA","video_frames":20,"audio_blocks":20,"audio_offset_ns":0}
+case=adopt-video producer=1 consumer=1 sessions=1 clocks=1 ends=1 elapsed_ms=657 producer_ms=656 producer_error= consumer_error=
+{"event":"session-ready","instance":"c19deb5f1d28ce9debbb62b0208b58d8","generation":1,"format":"NV12","video_frames":0,"audio_blocks":0,"audio_offset_ns":0}
+{"event":"playback-clock","policy":"producer","system_now_ns":376659283441629,"selected_now_ns":376659283440921,"device_now_ns":18446744073709551615,"mapped_producer_base_ns":376659333162006,"playback_base_ns":376659333162006,"latency_ns":100000000,"resample_slaves":0}
+{"event":"startup-released","epoch_ns":376659333159548}
+{"event":"media-progress","instance":"c19deb5f1d28ce9debbb62b0208b58d8","generation":1,"format":"NV12","video_frames":1,"audio_blocks":1,"audio_offset_ns":0}
+{"event":"producer-pacing","pacing_ppm":0,"max_push_ns":214821}
+{"event":"video-schedule-summary","received":20,"scheduled":0,"handed_off":20,"late":0,"overflow":0,"peak_pending":0,"pending_limit":8,"peak_bytes":0,"byte_limit":134217728}
+{"event":"playback-metrics","peak_queue_buffers":4,"peak_queue_ns":80000000,"queue_empty_events":3,"queue_full_events":0,"late_audio_blocks":0,"arrival_drift_ns":-13377}
+{"event":"playback-complete","audio_master":false,"video_received":20,"video_late":0,"audio_blocks":20,"audio_samples":19200,"latency_ns":100000000}
+{"event":"playback-timing","audio_first_running_pts_ns":0,"video_first_running_pts_ns":0,"audio_end_ns":400000000,"video_end_ns":400000000}
+{"event":"session-complete","instance":"c19deb5f1d28ce9debbb62b0208b58d8","generation":1,"format":"NV12","video_frames":20,"audio_blocks":20,"audio_offset_ns":0}
+case=adopt-nv12 producer=1 consumer=1 sessions=1 clocks=1 ends=1 elapsed_ms=678 producer_ms=678 producer_error= consumer_error=
+case=adopt-refused producer=0 consumer=0 sessions=0 clocks=0 ends=0 elapsed_ms=10 producer_ms=10 producer_error=control read/disconnect: peer closed connection consumer_error=injected video lease refusal
+{"event":"session-ready","instance":"57c03a74edf3a10304c71eafc939eb0f","generation":1,"format":"BGRA","video_frames":0,"audio_blocks":0,"audio_offset_ns":0}
+{"event":"playback-clock","policy":"audio","system_now_ns":376659971395656,"selected_now_ns":376659971395372,"device_now_ns":18446744073709551615,"mapped_producer_base_ns":376660021095773,"playback_base_ns":376659991248687,"latency_ns":100000000,"resample_slaves":0}
+{"event":"startup-released","epoch_ns":376660021095227}
+{"event":"media-progress","instance":"57c03a74edf3a10304c71eafc939eb0f","generation":1,"format":"BGRA","video_frames":1,"audio_blocks":1,"audio_offset_ns":0}
+{"event":"producer-pacing","pacing_ppm":0,"max_push_ns":221673}
+{"event":"video-schedule-summary","received":20,"scheduled":0,"handed_off":20,"late":0,"overflow":0,"peak_pending":0,"pending_limit":8,"peak_bytes":0,"byte_limit":134217728}
+{"event":"playback-metrics","peak_queue_buffers":3,"peak_queue_ns":60000000,"queue_empty_events":3,"queue_full_events":0,"late_audio_blocks":0,"arrival_drift_ns":49104}
+{"event":"playback-complete","audio_master":false,"video_received":20,"video_late":0,"audio_blocks":20,"audio_samples":19200,"latency_ns":100000000}
+{"event":"playback-timing","audio_first_running_pts_ns":0,"video_first_running_pts_ns":0,"audio_end_ns":400000000,"video_end_ns":400000000}
+{"event":"session-complete","instance":"57c03a74edf3a10304c71eafc939eb0f","generation":1,"format":"BGRA","video_frames":20,"audio_blocks":20,"audio_offset_ns":0}
+case=audio-coordinated producer=1 consumer=1 sessions=1 clocks=1 ends=1 elapsed_ms=576 producer_ms=576 producer_error= consumer_error=
+{"event":"session-ready","instance":"80c7e3300852bfc29ba3396d5ab4a76f","generation":1,"format":"BGRA","video_frames":0,"audio_blocks":0,"audio_offset_ns":0}
+{"event":"playback-clock","policy":"audio","system_now_ns":376662849336935,"selected_now_ns":376662849336675,"device_now_ns":18446744073709551615,"mapped_producer_base_ns":376662898966255,"playback_base_ns":376662869171096,"latency_ns":100000000,"resample_slaves":0}
+{"event":"startup-released","epoch_ns":376662898987070}
+{"event":"media-progress","instance":"80c7e3300852bfc29ba3396d5ab4a76f","generation":1,"format":"BGRA","video_frames":1,"audio_blocks":1,"audio_offset_ns":0}
+{"event":"producer-pacing","pacing_ppm":0,"max_push_ns":226029}
+{"event":"video-schedule-summary","received":20,"scheduled":0,"handed_off":20,"late":0,"overflow":0,"peak_pending":0,"pending_limit":8,"peak_bytes":0,"byte_limit":134217728}
+{"event":"playback-metrics","peak_queue_buffers":3,"peak_queue_ns":60000000,"queue_empty_events":3,"queue_full_events":0,"late_audio_blocks":0,"arrival_drift_ns":-94648}
+{"event":"playback-complete","audio_master":false,"video_received":20,"video_late":0,"audio_blocks":20,"audio_samples":19200,"latency_ns":100000000}
+{"event":"playback-timing","audio_first_running_pts_ns":0,"video_first_running_pts_ns":0,"audio_end_ns":400000000,"video_end_ns":400000000}
+{"event":"session-complete","instance":"80c7e3300852bfc29ba3396d5ab4a76f","generation":1,"format":"BGRA","video_frames":20,"audio_blocks":20,"audio_offset_ns":0}
+case=audio-coordinated-delay producer=1 consumer=1 sessions=1 clocks=1 ends=1 elapsed_ms=2874 producer_ms=2874 producer_error= consumer_error=
+{"event":"session-ready","instance":"a0b0ef5afd729d8f121faf0eea7375f2","generation":1,"format":"BGRA","video_frames":0,"audio_blocks":0,"audio_offset_ns":0}
+{"event":"playback-clock","policy":"audio","system_now_ns":376663415568416,"selected_now_ns":376663415568373,"device_now_ns":18446744073709551615,"mapped_producer_base_ns":376663465498214,"playback_base_ns":376663435544038,"latency_ns":100000000,"resample_slaves":0}
+{"event":"startup-released","epoch_ns":376663465491788}
+{"event":"media-progress","instance":"a0b0ef5afd729d8f121faf0eea7375f2","generation":1,"format":"BGRA","video_frames":1,"audio_blocks":1,"audio_offset_ns":0}
+{"event":"media-progress","instance":"a0b0ef5afd729d8f121faf0eea7375f2","generation":1,"format":"BGRA","video_frames":25,"audio_blocks":25,"audio_offset_ns":0}
+{"event":"media-progress","instance":"a0b0ef5afd729d8f121faf0eea7375f2","generation":1,"format":"BGRA","video_frames":50,"audio_blocks":50,"audio_offset_ns":0}
+{"event":"media-progress","instance":"a0b0ef5afd729d8f121faf0eea7375f2","generation":1,"format":"BGRA","video_frames":75,"audio_blocks":75,"audio_offset_ns":0}
+{"event":"producer-pacing","pacing_ppm":0,"max_push_ns":194833}
+{"event":"video-schedule-summary","received":80,"scheduled":0,"handed_off":80,"late":0,"overflow":0,"peak_pending":0,"pending_limit":8,"peak_bytes":0,"byte_limit":134217728}
+{"event":"playback-metrics","peak_queue_buffers":3,"peak_queue_ns":60000000,"queue_empty_events":5,"queue_full_events":0,"late_audio_blocks":0,"arrival_drift_ns":551540}
+{"event":"playback-complete","audio_master":false,"video_received":80,"video_late":0,"audio_blocks":80,"audio_samples":76800,"latency_ns":100000000}
+{"event":"playback-timing","audio_first_running_pts_ns":0,"video_first_running_pts_ns":0,"audio_end_ns":1600000000,"video_end_ns":1600000000}
+{"event":"session-complete","instance":"a0b0ef5afd729d8f121faf0eea7375f2","generation":1,"format":"BGRA","video_frames":80,"audio_blocks":80,"audio_offset_ns":0}
+case=audio-coordinated-finite producer=1 consumer=1 sessions=1 clocks=1 ends=1 elapsed_ms=1760 producer_ms=1760 producer_error= consumer_error=
+broker producer: all real-peer cases passed
+<end of output>
+Test time =  22.78 sec
+----------------------------------------------------------
+Test Passed.
+"broker_producer_stream" end time: Nov 01 17:09 EST
+"broker_producer_stream" time elapsed: 00:00:22
+----------------------------------------------------------
+
+87/96 Testing: broker_memory_extension
+87/96 Test: broker_memory_extension
+Command: "/tmp/fl-m5a-gst-build/fl_broker_producer" "/tmp/fl-m5a-gst-build/libgstframelink.so" "memory"
+Directory: /tmp/fl-m5a-gst-build
+"broker_memory_extension" start time: Nov 01 17:09 EST
+Output:
+----------------------------------------------------------
+{"event":"session-ready","instance":"ccd736cebfa68b8e7ac1998b6fc8f8a8","generation":1,"format":"BGRA","video_frames":0,"audio_blocks":0,"audio_offset_ns":0}
+{"event":"playback-clock","policy":"producer","system_now_ns":376665191124314,"selected_now_ns":376665191124197,"device_now_ns":18446744073709551615,"mapped_producer_base_ns":376665241038036,"playback_base_ns":376665241038036,"latency_ns":100000000,"resample_slaves":0}
+{"event":"startup-released","epoch_ns":376665241038037}
+{"event":"media-progress","instance":"ccd736cebfa68b8e7ac1998b6fc8f8a8","generation":1,"format":"BGRA","video_frames":1,"audio_blocks":1,"audio_offset_ns":0}
+{"event":"producer-pacing","pacing_ppm":0,"max_push_ns":253478}
+{"event":"video-schedule-summary","received":20,"scheduled":0,"handed_off":20,"late":0,"overflow":0,"peak_pending":0,"pending_limit":8,"peak_bytes":0,"byte_limit":134217728}
+{"event":"playback-metrics","peak_queue_buffers":4,"peak_queue_ns":80000000,"queue_empty_events":4,"queue_full_events":0,"late_audio_blocks":0,"arrival_drift_ns":-235043}
+{"event":"playback-complete","audio_master":false,"video_received":20,"video_late":0,"audio_blocks":20,"audio_samples":19200,"latency_ns":100000000}
+{"event":"playback-timing","audio_first_running_pts_ns":0,"video_first_running_pts_ns":0,"audio_end_ns":400000000,"video_end_ns":400000000}
+{"event":"session-complete","instance":"ccd736cebfa68b8e7ac1998b6fc8f8a8","generation":1,"format":"BGRA","video_frames":20,"audio_blocks":20,"audio_offset_ns":0}
+case=memory-copy producer=1 consumer=1 sessions=1 clocks=1 ends=1 elapsed_ms=685 producer_ms=685 producer_error= consumer_error=
+case=memory-strict producer=0 consumer=0 sessions=1 clocks=0 ends=1 elapsed_ms=10 producer_ms=10 producer_error=memory requirements or exact resource binding incompatible consumer_error=memory requirements or exact resource binding incompatible
+case=memory-binding producer=0 consumer=0 sessions=1 clocks=0 ends=1 elapsed_ms=10 producer_ms=10 producer_error=memory requirements or exact resource binding incompatible consumer_error=memory requirements or exact resource binding incompatible
+case=memory-hidden-copy producer=0 consumer=0 sessions=0 clocks=0 ends=0 elapsed_ms=111 producer_ms=111 producer_error=control read/disconnect: peer closed connection consumer_error=memory offer omits element payload operations
+case=memory-server-only producer=0 consumer=0 sessions=0 clocks=0 ends=0 elapsed_ms=2003 producer_ms=10 producer_error=memory extension support mismatch; downgrade rejected consumer_error=authentication read failed
+case=memory-client-only producer=0 consumer=0 sessions=0 clocks=0 ends=0 elapsed_ms=2003 producer_ms=10 producer_error=memory extension support mismatch; downgrade rejected consumer_error=authentication read failed
+broker memory extension controls passed
+<end of output>
+Test time =   4.83 sec
+----------------------------------------------------------
+Test Passed.
+"broker_memory_extension" end time: Nov 01 17:09 EST
+"broker_memory_extension" time elapsed: 00:00:04
+----------------------------------------------------------
+
+89/96 Testing: broker_memory_binding
+89/96 Test: broker_memory_binding
+Command: "/tmp/fl-m5a-gst-build/fl_broker_memory_binding" "/tmp/fl-m5a-gst-build/libgstframelink.so"
+Directory: /tmp/fl-m5a-gst-build
+"broker_memory_binding" start time: Nov 01 17:09 EST
+Output:
+----------------------------------------------------------
+{"event":"session-ready","instance":"dc888cbe6e38ecb945eed26467647fd4","generation":1,"format":"BGRA","video_frames":0,"audio_blocks":0,"audio_offset_ns":0}
+{"event":"playback-clock","policy":"producer","system_now_ns":376670023430304,"selected_now_ns":376670023430192,"device_now_ns":18446744073709551615,"mapped_producer_base_ns":376670073349409,"playback_base_ns":376670073349409,"latency_ns":100000000,"resample_slaves":0}
+{"event":"startup-released","epoch_ns":376670073348220}
+{"event":"media-progress","instance":"dc888cbe6e38ecb945eed26467647fd4","generation":1,"format":"BGRA","video_frames":1,"audio_blocks":1,"audio_offset_ns":0}
+{"event":"producer-pacing","pacing_ppm":0,"max_push_ns":193333}
+{"event":"video-schedule-summary","received":20,"scheduled":0,"handed_off":20,"late":0,"overflow":0,"peak_pending":0,"pending_limit":8,"peak_bytes":0,"byte_limit":134217728}
+{"event":"playback-metrics","peak_queue_buffers":4,"peak_queue_ns":80000000,"queue_empty_events":4,"queue_full_events":0,"late_audio_blocks":0,"arrival_drift_ns":165424}
+{"event":"playback-complete","audio_master":false,"video_received":20,"video_late":0,"audio_blocks":20,"audio_samples":19200,"latency_ns":100000000}
+{"event":"playback-timing","audio_first_running_pts_ns":0,"video_first_running_pts_ns":0,"audio_end_ns":400000000,"video_end_ns":400000000}
+{"event":"session-complete","instance":"dc888cbe6e38ecb945eed26467647fd4","generation":1,"format":"BGRA","video_frames":20,"audio_blocks":20,"audio_offset_ns":0}
+actual DMA-BUF binding BGRA mismatch=0 producer=1 consumer=1 frames=20 pcm=19200 errors=/
+{"event":"session-ready","instance":"674ea99402c697fa9a437a5f55c56404","generation":1,"format":"NV12","video_frames":0,"audio_blocks":0,"audio_offset_ns":0}
+{"event":"playback-clock","policy":"producer","system_now_ns":376670690971938,"selected_now_ns":376670690971823,"device_now_ns":18446744073709551615,"mapped_producer_base_ns":376670740928823,"playback_base_ns":376670740928823,"latency_ns":100000000,"resample_slaves":0}
+{"event":"startup-released","epoch_ns":376670740928395}
+{"event":"media-progress","instance":"674ea99402c697fa9a437a5f55c56404","generation":1,"format":"NV12","video_frames":1,"audio_blocks":1,"audio_offset_ns":0}
+{"event":"producer-pacing","pacing_ppm":0,"max_push_ns":208010}
+{"event":"video-schedule-summary","received":20,"scheduled":0,"handed_off":20,"late":0,"overflow":0,"peak_pending":0,"pending_limit":8,"peak_bytes":0,"byte_limit":134217728}
+{"event":"playback-metrics","peak_queue_buffers":4,"peak_queue_ns":80000000,"queue_empty_events":4,"queue_full_events":0,"late_audio_blocks":0,"arrival_drift_ns":405052}
+{"event":"playback-complete","audio_master":false,"video_received":20,"video_late":0,"audio_blocks":20,"audio_samples":19200,"latency_ns":100000000}
+{"event":"playback-timing","audio_first_running_pts_ns":0,"video_first_running_pts_ns":0,"audio_end_ns":400000000,"video_end_ns":400000000}
+{"event":"session-complete","instance":"674ea99402c697fa9a437a5f55c56404","generation":1,"format":"NV12","video_frames":20,"audio_blocks":20,"audio_offset_ns":0}
+actual DMA-BUF binding NV12 mismatch=0 producer=1 consumer=1 frames=20 pcm=19200 errors=/
+actual DMA-BUF binding BGRA mismatch=1 producer=0 consumer=0 frames=0 pcm=0 errors=memory requirements or exact resource binding incompatible/memory requirements or exact resource binding incompatible
+actual DMA-BUF binding BGRA mismatch=2 producer=0 consumer=0 frames=0 pcm=0 errors=memory requirements or exact resource binding incompatible/memory requirements or exact resource binding incompatible
+<end of output>
+Test time =   1.38 sec
+----------------------------------------------------------
+Test Passed.
+"broker_memory_binding" end time: Nov 01 17:09 EST
+"broker_memory_binding" time elapsed: 00:00:01
+----------------------------------------------------------
+
+End testing: Nov 01 17:09 EST

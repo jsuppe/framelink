@@ -62,6 +62,7 @@ struct Options {
   unsigned latencyMs=100, mediaRunMs=0;
   uint64_t audioOffsetNs=0;
   int pacingPpm=0;
+  std::function<GstBuffer*(GstElement*,unsigned,uint64_t,uint64_t)> videoFrame;
 };
 unsigned number(const char *s) {
   char *e = nullptr;
@@ -135,7 +136,7 @@ Options options(int argc, char **argv) {
            (o.channels == 1 || o.channels == 2) && o.timeout >= 100 &&
            o.timeout <= 60000 && o.sessions && o.sessions <= 100,
        "option outside bounds");
-  need((o.format == "BGRA" || o.format == "NV12" || o.format == "auto") &&
+  need((o.format == "BGRA" || o.format == "RGBA" || o.format == "NV12" || o.format == "auto") &&
            (o.format != "NV12" || (!(o.width % 2) && !(o.height % 2))),
        "unsupported video format/dimensions");
   need(o.fault.empty() || o.fault == "missing-audio" ||
@@ -257,7 +258,7 @@ flSessionCapabilities caps(const Options &o) {
   flSessionCapabilities c{};
   c.version = 1;
   c.videoCount = c.audioCount = 1;
-  c.video[0] = {static_cast<uint32_t>(o.format == "NV12" ? FL_FORMAT_NV12 : FL_FORMAT_BGRA8), o.width,
+  c.video[0] = {static_cast<uint32_t>(o.format == "NV12" ? FL_FORMAT_NV12 : o.format=="RGBA"?FL_FORMAT_RGBA8:FL_FORMAT_BGRA8), o.width,
                 o.height, o.fps, 1};
   c.audio[0] = {FL_PCM_S16, o.rate, o.channels};
   if (o.format == "auto" && !(o.width % 2) && !(o.height % 2)) {
@@ -571,7 +572,7 @@ void fillVideo(unsigned char *p, const GstVideoInfo &vi, unsigned n) {
 GstBuffer *makeVideo(const Options &o, unsigned n, uint64_t pts, uint64_t dur) {
   GstVideoInfo vi{};
   gst_video_info_set_format(
-      &vi, o.format == "NV12" ? GST_VIDEO_FORMAT_NV12 : GST_VIDEO_FORMAT_BGRA,
+      &vi, o.format == "NV12" ? GST_VIDEO_FORMAT_NV12 : o.format=="RGBA"?GST_VIDEO_FORMAT_RGBA:GST_VIDEO_FORMAT_BGRA,
       o.width, o.height);
   auto *b = gst_buffer_new_allocate(nullptr, vi.size, nullptr);
   GstMapInfo m{};
@@ -631,7 +632,7 @@ void validateVideo(GstSample *s, const Options &o, unsigned n, uint64_t pts) {
   need(unsigned(vi.width) == o.width && unsigned(vi.height) == o.height &&
            GST_VIDEO_INFO_FORMAT(&vi) == (o.format == "NV12"
                                               ? GST_VIDEO_FORMAT_NV12
-                                              : GST_VIDEO_FORMAT_BGRA),
+                                              : o.format=="RGBA"?GST_VIDEO_FORMAT_RGBA:GST_VIDEO_FORMAT_BGRA),
        "video format mismatch");
   GstMapInfo m{};
   need(gst_buffer_map(b, &m, GST_MAP_READ), "map received video");
@@ -1075,6 +1076,7 @@ unsigned runProducer(const Options &o, GSocketListener *l,
   ProducerFailureWatch failureWatch(tx);
   Handles h;
   auto *v = h.get(tx, "video"), *a = h.get(tx, "audio");
+  auto* output=o.videoFrame?h.get(tx,"videooutput"):nullptr;
   put(*control, o.frames);
   event("session-ready", o, 0, id);
   if(coordinated) {
@@ -1094,9 +1096,12 @@ unsigned runProducer(const Options &o, GSocketListener *l,
     if (uint64_t(cfg.epochNs) + paced > now)
       g_usleep((uint64_t(cfg.epochNs) + paced - now) / 1000);
     const auto pushStart=gst_util_get_timestamp();
-    need(gst_app_src_push_buffer(
-             GST_APP_SRC(v), makeVideo(o, n, pts, next - pts)) == GST_FLOW_OK,
-         "video send failed");
+    auto* video=o.videoFrame?o.videoFrame(output,n,pts,next-pts):makeVideo(o,n,pts,next-pts);
+    need(video,"video source adapter failed");
+    if(GST_BUFFER_PTS(video)!=pts || GST_BUFFER_DURATION(video)!=next-pts) {
+      gst_buffer_unref(video);throw std::runtime_error("video source adapter changed media timing");
+    }
+    need(gst_app_src_push_buffer(GST_APP_SRC(v),video)==GST_FLOW_OK,"video send failed");
     if (!(coordinated && n==0) && !(o.fault == "missing-audio" && n == 10)) {
       uint64_t dur;
       auto *b = makeAudio(o, n, pts, dur);
@@ -1138,7 +1143,7 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
   need(flSessionDecode(wire, sizeof(wire), &cfg) == 0 &&
            flSessionValidateSelection(&cfg, &remote, &local) == 0,
        "invalid/unoffered configuration");
-  o.format = cfg.video.format == FL_FORMAT_NV12 ? "NV12" : "BGRA";
+  o.format = cfg.video.format == FL_FORMAT_NV12 ? "NV12" : cfg.video.format==FL_FORMAT_RGBA8?"RGBA":"BGRA";
   flClockMapping mapping{cfg.clockId, randomId(), int64_t(source),
                          int64_t(t0 + (t1 - t0) / 2), (t1 - t0 + 1) / 2};
   int64_t base = 0;
@@ -1606,13 +1611,13 @@ bool runBrokerProducer(const ProducerOptions& p,std::string& error) {
          p.height>=2 && p.height<=2160 && p.fps>=13 && p.fps<=240 &&
          p.rate>=8000 && p.rate<=192000 && (p.channels==1 || p.channels==2) &&
          p.timeoutMs>=100 && p.timeoutMs<=60000,"invalid producer options");
-    need(p.format=="BGRA" || p.format=="NV12","invalid producer format");
+    need(p.format=="BGRA" || p.format=="RGBA" || p.format=="NV12","invalid producer format");
     need(p.format!="NV12" || (!(p.width%2) && !(p.height%2)),"NV12 requires even dimensions");
     if(p.mediaRunMs)validateMediaRun(p.mediaRunMs,p.frames,p.fps);
     need(!p.stop || !p.stop->load(),"producer cancelled");
     Options o;o.plugin=p.plugin;o.format=p.format;o.frames=p.frames;o.width=p.width;
     o.height=p.height;o.fps=p.fps;o.rate=p.rate;o.channels=p.channels;
-    o.timeout=p.timeoutMs;o.mediaRunMs=p.mediaRunMs;
+    o.timeout=p.timeoutMs;o.mediaRunMs=p.mediaRunMs;o.videoFrame=p.videoFrame;
     gst_init(nullptr,nullptr);
     GError* e=nullptr;auto* plugin=loadFrameLinkPlugin(o.plugin,&e);
     std::string pluginError=e?e->message:"FrameLink plugin load";if(e)g_error_free(e);
