@@ -226,3 +226,17 @@ magically a native decoder: strict mode rejects its undeclared pixel copy.
 Current provider tests use synthetic bindings for control negatives. Real
 allocation-bound provider qualification remains open; do not use a shared label
 as a production resource binding.
+
+### Linux immutable-pool binding adapter
+
+`av_memory_dmabuf.h` binds an owner-supplied immutable DMA-BUF pool to the
+producer's actual imported descriptors using kernel backing-object identities
+and exact layouts. The producer snapshot temporarily reserves all images and
+cancels those reservations without mapping payloads. The caller must supply its
+verified actual import/render-device identity: a transport-only producer has no
+GPU device to discover. This adapter does not establish GPU import compatibility.
+Unknown layout/device and a busy pool fail, with no partial output.
+
+The owner must prevent resizing/replacement through session teardown. The real
+provider fixture verifies BGRA/NV12 with explicitly allowed CPU-copy paths;
+substituted allocations or changed device bindings reject before any media.

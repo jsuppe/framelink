@@ -1,0 +1,48 @@
+Internal ctest changing into directory: /tmp/fl-m5a-gst-build
+UpdateCTestConfiguration  from :/tmp/fl-m5a-gst-build/DartConfiguration.tcl
+UpdateCTestConfiguration  from :/tmp/fl-m5a-gst-build/DartConfiguration.tcl
+Test project /tmp/fl-m5a-gst-build
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 89
+    Start 89: broker_memory_binding
+
+89: Test command: /tmp/fl-m5a-gst-build/fl_broker_memory_binding "/tmp/fl-m5a-gst-build/libgstframelink.so"
+89: Working Directory: /tmp/fl-m5a-gst-build
+89: Test timeout computed to be: 30
+89: {"event":"session-ready","instance":"1fc7c1d0ca68f9730e1038afd5042210","generation":1,"format":"BGRA","video_frames":0,"audio_blocks":0,"audio_offset_ns":0}
+89: {"event":"playback-clock","policy":"producer","system_now_ns":373929573230789,"selected_now_ns":373929573230672,"device_now_ns":18446744073709551615,"mapped_producer_base_ns":373929623144761,"playback_base_ns":373929623144761,"latency_ns":100000000,"resample_slaves":0}
+89: {"event":"startup-released","epoch_ns":373929623144432}
+89: {"event":"media-progress","instance":"1fc7c1d0ca68f9730e1038afd5042210","generation":1,"format":"BGRA","video_frames":1,"audio_blocks":1,"audio_offset_ns":0}
+89: {"event":"producer-pacing","pacing_ppm":0,"max_push_ns":194933}
+89: {"event":"video-schedule-summary","received":20,"scheduled":0,"handed_off":20,"late":0,"overflow":0,"peak_pending":0,"pending_limit":8,"peak_bytes":0,"byte_limit":134217728}
+89: {"event":"playback-metrics","peak_queue_buffers":4,"peak_queue_ns":80000000,"queue_empty_events":4,"queue_full_events":0,"late_audio_blocks":0,"arrival_drift_ns":416247}
+89: {"event":"playback-complete","audio_master":false,"video_received":20,"video_late":0,"audio_blocks":20,"audio_samples":19200,"latency_ns":100000000}
+89: {"event":"playback-timing","audio_first_running_pts_ns":0,"video_first_running_pts_ns":0,"audio_end_ns":400000000,"video_end_ns":400000000}
+89: {"event":"session-complete","instance":"1fc7c1d0ca68f9730e1038afd5042210","generation":1,"format":"BGRA","video_frames":20,"audio_blocks":20,"audio_offset_ns":0}
+89: actual DMA-BUF binding BGRA mismatch=0 producer=1 consumer=1 frames=20 pcm=19200 errors=/
+89: {"event":"session-ready","instance":"53088d7b2aa4e4241fd9a62e15282e05","generation":1,"format":"NV12","video_frames":0,"audio_blocks":0,"audio_offset_ns":0}
+89: {"event":"playback-clock","policy":"producer","system_now_ns":373930259146944,"selected_now_ns":373930259146261,"device_now_ns":18446744073709551615,"mapped_producer_base_ns":373930308810905,"playback_base_ns":373930308810905,"latency_ns":100000000,"resample_slaves":0}
+89: {"event":"startup-released","epoch_ns":373930308808981}
+89: {"event":"media-progress","instance":"53088d7b2aa4e4241fd9a62e15282e05","generation":1,"format":"NV12","video_frames":1,"audio_blocks":1,"audio_offset_ns":0}
+89: {"event":"producer-pacing","pacing_ppm":0,"max_push_ns":241247}
+89: {"event":"video-schedule-summary","received":20,"scheduled":0,"handed_off":20,"late":0,"overflow":0,"peak_pending":0,"pending_limit":8,"peak_bytes":0,"byte_limit":134217728}
+89: {"event":"playback-metrics","peak_queue_buffers":4,"peak_queue_ns":80000000,"queue_empty_events":3,"queue_full_events":0,"late_audio_blocks":0,"arrival_drift_ns":-4269}
+89: {"event":"playback-complete","audio_master":false,"video_received":20,"video_late":0,"audio_blocks":20,"audio_samples":19200,"latency_ns":100000000}
+89: {"event":"playback-timing","audio_first_running_pts_ns":0,"video_first_running_pts_ns":0,"audio_end_ns":400000000,"video_end_ns":400000000}
+89: {"event":"session-complete","instance":"53088d7b2aa4e4241fd9a62e15282e05","generation":1,"format":"NV12","video_frames":20,"audio_blocks":20,"audio_offset_ns":0}
+89: actual DMA-BUF binding NV12 mismatch=0 producer=1 consumer=1 frames=20 pcm=19200 errors=/
+89: actual DMA-BUF binding BGRA mismatch=1 producer=0 consumer=0 frames=0 pcm=0 errors=memory requirements or exact resource binding incompatible/memory requirements or exact resource binding incompatible
+89: actual DMA-BUF binding BGRA mismatch=2 producer=0 consumer=0 frames=0 pcm=0 errors=memory requirements or exact resource binding incompatible/memory requirements or exact resource binding incompatible
+1/1 Test #89: broker_memory_binding ............   Passed    1.40 sec
+
+The following tests passed:
+	broker_memory_binding
+
+100% tests passed, 0 tests failed out of 1
+
+Total Test time (real) =   1.40 sec
