@@ -141,8 +141,11 @@ Windows decoder-to-independent-renderer example, and measured multi-hop evidence
   missing/lost/empty negative controls. [Contract](MEMORY_TRACING.md),
   [evidence](m5a/memory-instrumentation-20261101/README.md).
   Enabled overhead and driver-internal work are not hidden; throughput stays task13.
-- [ ] **M5a.11 Contract/negative tests:** hard/preferred requirements, malformed
-  offers, old peers, conflicting consumers and strict-copy rejection.
+- [x] **M5a.11 Contract/negative tests — locally validated, not merged:**
+  hard/preferred requirements, malformed offers, asymmetric extension/old-peer
+  rejection, conflicting consumers, strict-copy enforcement and frozen generations.
+  New15-case hostile-wire fixture includes proof reflection and forged approval;
+  Linux7/7, Windows6/6, Android6/6 and dualABI. [Evidence](m5a/contract-negatives-20261101/README.md).
 - [ ] **M5a.12 Platform integration tests:** GPU-native and CPU-readable modes,
   incompatible devices/layouts, renegotiation, fences, stale generations and cleanup.
 - [ ] **M5a.13 One-hop vs multi-hop qualification:** identical sources; account

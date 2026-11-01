@@ -1,0 +1,114 @@
+Internal ctest changing into directory: /tmp/fl-m5a-gst-build
+UpdateCTestConfiguration  from :/tmp/fl-m5a-gst-build/DartConfiguration.tcl
+UpdateCTestConfiguration  from :/tmp/fl-m5a-gst-build/DartConfiguration.tcl
+Test project /tmp/fl-m5a-gst-build
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 8
+    Start  8: memory_boundary
+
+8: Test command: /tmp/fl-m5a-gst-build/fl_memory_boundary
+8: Working Directory: /tmp/fl-m5a-gst-build
+8: Test timeout computed to be: 10
+8: boundary agreement: endpoint usages, all-participant operation consent, conflicts and bounded negatives pass
+1/7 Test  #8: memory_boundary ..................   Passed    0.00 sec
+test 9
+    Start  9: memory_contract
+
+9: Test command: /tmp/fl-m5a-gst-build/fl_memory_contract
+9: Working Directory: /tmp/fl-m5a-gst-build
+9: Test timeout computed to be: 10
+9: memory policy: strict/fallback, hard/preferred usage, versions, golden wire and malformed inputs passed
+2/7 Test  #9: memory_contract ..................   Passed    0.00 sec
+test 10
+    Start 10: memory_contract_c_api
+
+10: Test command: /tmp/fl-m5a-gst-build/fl_memory_c_api
+10: Working Directory: /tmp/fl-m5a-gst-build
+10: Test timeout computed to be: 10
+3/7 Test #10: memory_contract_c_api ............   Passed    0.00 sec
+test 87
+    Start 87: broker_memory_extension
+
+87: Test command: /tmp/fl-m5a-gst-build/fl_broker_producer "/tmp/fl-m5a-gst-build/libgstframelink.so" "memory"
+87: Working Directory: /tmp/fl-m5a-gst-build
+87: Test timeout computed to be: 45
+87: {"event":"session-ready","instance":"dd93a147a7e5f9b4bc859c3ea65158ce","generation":1,"format":"BGRA","video_frames":0,"audio_blocks":0,"audio_offset_ns":0}
+87: {"event":"playback-clock","policy":"producer","system_now_ns":375877893926980,"selected_now_ns":375877893926845,"device_now_ns":18446744073709551615,"mapped_producer_base_ns":375877943888076,"playback_base_ns":375877943888076,"latency_ns":100000000,"resample_slaves":0}
+87: {"event":"startup-released","epoch_ns":375877943888121}
+87: {"event":"media-progress","instance":"dd93a147a7e5f9b4bc859c3ea65158ce","generation":1,"format":"BGRA","video_frames":1,"audio_blocks":1,"audio_offset_ns":0}
+87: {"event":"producer-pacing","pacing_ppm":0,"max_push_ns":236928}
+87: {"event":"video-schedule-summary","received":20,"scheduled":0,"handed_off":20,"late":0,"overflow":0,"peak_pending":0,"pending_limit":8,"peak_bytes":0,"byte_limit":134217728}
+87: {"event":"playback-metrics","peak_queue_buffers":4,"peak_queue_ns":80000000,"queue_empty_events":5,"queue_full_events":0,"late_audio_blocks":0,"arrival_drift_ns":-47025}
+87: {"event":"playback-complete","audio_master":false,"video_received":20,"video_late":0,"audio_blocks":20,"audio_samples":19200,"latency_ns":100000000}
+87: {"event":"playback-timing","audio_first_running_pts_ns":0,"video_first_running_pts_ns":0,"audio_end_ns":400000000,"video_end_ns":400000000}
+87: {"event":"session-complete","instance":"dd93a147a7e5f9b4bc859c3ea65158ce","generation":1,"format":"BGRA","video_frames":20,"audio_blocks":20,"audio_offset_ns":0}
+87: case=memory-copy producer=1 consumer=1 sessions=1 clocks=1 ends=1 elapsed_ms=685 producer_ms=685 producer_error= consumer_error=
+87: case=memory-strict producer=0 consumer=0 sessions=1 clocks=0 ends=1 elapsed_ms=10 producer_ms=10 producer_error=memory requirements or exact resource binding incompatible consumer_error=memory requirements or exact resource binding incompatible
+87: case=memory-binding producer=0 consumer=0 sessions=1 clocks=0 ends=1 elapsed_ms=10 producer_ms=10 producer_error=memory requirements or exact resource binding incompatible consumer_error=memory requirements or exact resource binding incompatible
+87: case=memory-hidden-copy producer=0 consumer=0 sessions=0 clocks=0 ends=0 elapsed_ms=111 producer_ms=111 producer_error=control read/disconnect: peer closed connection consumer_error=memory offer omits element payload operations
+87: case=memory-server-only producer=0 consumer=0 sessions=0 clocks=0 ends=0 elapsed_ms=2003 producer_ms=10 producer_error=memory extension support mismatch; downgrade rejected consumer_error=authentication read failed
+87: case=memory-client-only producer=0 consumer=0 sessions=0 clocks=0 ends=0 elapsed_ms=2003 producer_ms=10 producer_error=memory extension support mismatch; downgrade rejected consumer_error=authentication read failed
+87: broker memory extension controls passed
+4/7 Test #87: broker_memory_extension ..........   Passed    4.83 sec
+test 88
+    Start 88: av_memory_agreement
+
+88: Test command: /tmp/fl-m5a-gst-build/fl_av_memory_agreement
+88: Working Directory: /tmp/fl-m5a-gst-build
+88: Test timeout computed to be: 20
+88: authenticated memory agreement: exact binding, both-endpoint policy, explicit fallback, session/key mismatch, invalid offer and unchanged-output negatives pass
+5/7 Test #88: av_memory_agreement ..............   Passed    0.01 sec
+test 90
+    Start 90: gst_policy_generation
+
+90: Test command: /tmp/fl-m5a-gst-build/fl_gst_policy_generation "/tmp/fl-m5a-gst-build/libgstframelink.so"
+90: Working Directory: /tmp/fl-m5a-gst-build
+90: Test timeout computed to be: 20
+90: legacy pool generation: renegotiates as before
+90: authenticated pool generation: fails closed before new-pool frame
+90: authenticated pool changed before start: rejected
+90: authenticated sink generation rejected before start
+90: authenticated sink generation rejected before submit
+90: native reader policy missing contract rejected before delivery
+90: native reader policy explicit completion/usage accepted
+6/7 Test #90: gst_policy_generation ............   Passed    0.53 sec
+test 94
+    Start 94: av_memory_adversarial
+
+94: Test command: /tmp/fl-m5a-gst-build/fl_av_memory_adversarial
+94: Working Directory: /tmp/fl-m5a-gst-build
+94: Test timeout computed to be: 30
+94: PASS truncated-legacy (bounded, unchanged output on rejection)
+94: PASS role (bounded, unchanged output on rejection)
+94: PASS reserved (bounded, unchanged output on rejection)
+94: PASS zero-nonce (bounded, unchanged output on rejection)
+94: PASS requirements-magic (bounded, unchanged output on rejection)
+94: PASS requirements-version (bounded, unchanged output on rejection)
+94: PASS path-version (bounded, unchanged output on rejection)
+94: PASS multi-resource (bounded, unchanged output on rejection)
+94: PASS unknown-operation (bounded, unchanged output on rejection)
+94: PASS zero-binding (bounded, unchanged output on rejection)
+94: PASS bad-proof (bounded, unchanged output on rejection)
+94: PASS reflection (bounded, unchanged output on rejection)
+94: PASS bad-approval (bounded, unchanged output on rejection)
+94: PASS strict-copy-approval (bounded, unchanged output on rejection)
+94: PASS valid-control (bounded, unchanged output on rejection)
+7/7 Test #94: av_memory_adversarial ............   Passed    0.02 sec
+
+The following tests passed:
+	memory_boundary
+	memory_contract
+	memory_contract_c_api
+	broker_memory_extension
+	av_memory_agreement
+	gst_policy_generation
+	av_memory_adversarial
+
+100% tests passed, 0 tests failed out of 7
+
+Total Test time (real) =   5.40 sec
