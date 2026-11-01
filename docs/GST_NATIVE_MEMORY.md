@@ -249,3 +249,16 @@ images without touching payloads. Substitution and aliasing reject; opaque YUV
 is not accepted as exact NV12. Like external AHB pool adoption, this opt-in path
 fails on runtimes without allocation IDs. No GPU device UUID or opaque plane
 layout is invented; endpoint import/completion compatibility remains separate.
+
+### Windows canonical-export binding adapter
+
+`av_memory_d3d11.h` requires trusted allocator-issued IDs and authorized duplicates
+of ONE canonical NT export per allocation. It checks the producer's imported
+handle against that canonical reference, and binds actual texture descriptors,
+adapter LUID and session. DuplicateHandle copies work; swapping another texture
+under the same claimed allocator ID rejects. No numeric handle is hashed.
+
+This deliberately does not equate independent CreateSharedHandle exports. The
+trusted allocator must maintain the canonical export/ID mapping and immutable pool;
+it cannot be reconstructed from arbitrary producer-supplied labels. General relay
+and full broker/GStreamer qualification remain separate from these adapter tests.

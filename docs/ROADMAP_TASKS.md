@@ -114,8 +114,10 @@ Windows decoder-to-independent-renderer example, and measured multi-hop evidence
   original-storage/copy-negative tests2/2 pass; Android exact RGB AHB adapter
   and native-layout rejection cases pass. Full metadata propagation is validated
   across all platforms. Linux/Windows/Android native sinks and explicit-completion ALLOCATION
-  pool are locally validated; generic decoders, Linux/Android native sinks and
-  authenticated remote memory agreement remain open. Full task remains open.
+  pools are locally validated. Authenticated SessionProvider opt-in gating and
+  actual Linux/Android/Windows binding adapters now have targeted evidence.
+  Applying remote policy to ALLOCATION requests and final native pipeline/generation
+  qualification remain open. The GPU decoder example belongs to task8.
 - [ ] **M5a.8 Windows GPU-decoder example:** GPU GstBuffer → FrameLink sink →
   separate consumer renderer, with tested decoder/adapter/formats and explicit
   CPU-readable staging/readback alternative. Qualify NV12 conversion location.
