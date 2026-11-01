@@ -13,6 +13,7 @@
 
 #define FL_EXPORTS
 #include "framelink.h"
+#include "framelink_memory.h"
 #include "fl_layout.h"
 #include "framelink_d3d11.h"
 
@@ -849,6 +850,38 @@ FL_API void flClose(flChannel* ch) {
 }
 
 // ---- D3D11 interop -----------------------------------------------------------
+
+FL_API flResult flImageMemoryInfo(flChannel* ch, flImage* img, flMemoryResourceInfo* out, size_t size) {
+    if(!ch || !img || !out || size!=sizeof(*out)) return FL_INVALID;
+    if(out->version!=FL_MEMORY_INFO_VERSION) return FL_VERSION_MISMATCH;
+    bool member=false; for(auto* image:ch->images) if(image==img) member=true;
+    if(!member || !img->tex) return FL_INVALID;
+    D3D11_TEXTURE2D_DESC d{}; img->tex->GetDesc(&d);
+    flMemoryResourceInfo r{}; r.version=FL_MEMORY_INFO_VERSION;
+    r.resourceType=FL_MEMORY_D3D11; r.logicalFormat=ch->info.format;
+    r.width=d.Width; r.height=d.Height; r.nativeFormat=d.Format;
+    r.nativeUsage=d.BindFlags; r.generation=ch->info.generation;
+    r.knownFields=FL_MEMORY_INFO_NATIVE_USAGE | FL_MEMORY_INFO_DIRECT_USAGE | FL_MEMORY_INFO_MAP_OPERATIONS;
+    if(d.BindFlags & D3D11_BIND_SHADER_RESOURCE) r.directUsage|=FL_MEMORY_GPU_SAMPLE;
+    if(d.BindFlags & D3D11_BIND_RENDER_TARGET) r.directUsage|=FL_MEMORY_GPU_RENDER;
+    if(d.BindFlags & D3D11_BIND_DECODER) r.directUsage|=FL_MEMORY_DECODER_OUTPUT;
+    r.mapOperations=FL_MEMORY_COPY | FL_MEMORY_READBACK;
+    if(img->producer) r.mapOperations|=FL_MEMORY_UPLOAD;
+    if(img->mapped.pData) {
+        r.knownFields|=FL_MEMORY_INFO_MAPPED_USAGE;
+        r.mappedUsage=FL_MEMORY_CPU_READ | (img->producer ? FL_MEMORY_CPU_WRITE : 0);
+    }
+    ComPtr<ID3D11Device> device; img->tex->GetDevice(&device);
+    ComPtr<IDXGIDevice> dxgi; ComPtr<IDXGIAdapter> adapter; DXGI_ADAPTER_DESC a{};
+    if(SUCCEEDED(device.As(&dxgi)) && SUCCEEDED(dxgi->GetAdapter(&adapter)) && SUCCEEDED(adapter->GetDesc(&a))) {
+        r.knownFields|=FL_MEMORY_INFO_DEVICE; r.deviceIdKind=FL_MEMORY_DEVICE_DXGI_LUID;
+        std::memcpy(r.deviceId,&a.AdapterLuid,sizeof(a.AdapterLuid));
+    }
+    r.syncTransport=FL_MEMORY_SYNC_CPU_WAIT | FL_MEMORY_SYNC_TIMELINE;
+    r.handleTransport=FL_MEMORY_HANDLE_NT;
+    r.interopCapabilities=FL_MEMORY_INTEROP_RING_IMPORT | FL_MEMORY_INTEROP_BORROW_NATIVE;
+    *out=r; return FL_OK;
+}
 
 FL_API flResult flImageMapPlanes(flImage* img, flMappedImage* out) {
     fltrace::Scope trace("flImageMapPlanes", (uint64_t)(uintptr_t)img);

@@ -36,6 +36,7 @@
 
 #define FL_EXPORTS
 #include "framelink.h"
+#include "framelink_memory.h"
 #include "framelink_sync_fd.h"
 #include "fl_sync_fd.hpp"
 #include "framelink_ahb.h"
@@ -751,6 +752,36 @@ FL_API void flClose(flChannel* ch) {
 }
 
 // ---- AHardwareBuffer interop -------------------------------------------------
+
+FL_API flResult flImageMemoryInfo(flChannel* ch, flImage* img, flMemoryResourceInfo* out, size_t size) {
+    if(!ch || !img || !out || size!=sizeof(*out)) return FL_INVALID;
+    if(out->version!=FL_MEMORY_INFO_VERSION) return FL_VERSION_MISMATCH;
+    bool member=false; for(auto* image:ch->images) if(image==img) member=true;
+    if(!member || !img->ahb) return FL_INVALID;
+    AHardwareBuffer_Desc d{}; AHardwareBuffer_describe(img->ahb,&d);
+    flMemoryResourceInfo r{}; r.version=FL_MEMORY_INFO_VERSION;
+    r.resourceType=FL_MEMORY_AHB; r.logicalFormat=img->format;
+    r.width=d.width; r.height=d.height; r.nativeFormat=d.format;
+    r.nativeUsage=d.usage; r.generation=ch->info.generation;
+    r.knownFields=FL_MEMORY_INFO_NATIVE_USAGE | FL_MEMORY_INFO_DIRECT_USAGE;
+    if(d.usage & AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE) r.directUsage|=FL_MEMORY_GPU_SAMPLE;
+    if(d.usage & AHARDWAREBUFFER_USAGE_GPU_COLOR_OUTPUT) r.directUsage|=FL_MEMORY_GPU_RENDER;
+    if(img->format!=FL_FORMAT_NV12 || img->mapped) {
+        r.knownFields|=FL_MEMORY_INFO_MAP_OPERATIONS;
+        if(img->format==FL_FORMAT_BGRA8 || (img->format==FL_FORMAT_NV12 && !img->nativeNv12))
+            r.mapOperations=FL_MEMORY_COPY | FL_MEMORY_CONVERT;
+    }
+    if(img->mapped) {
+        r.knownFields|=FL_MEMORY_INFO_MAPPED_USAGE;
+        r.mappedUsage=FL_MEMORY_CPU_READ | FL_MEMORY_CPU_WRITE;
+    }
+    // AHB descriptors expose neither a portable GPU identity nor GPU plane
+    // offsets/modifiers. Do not substitute normalized/locked CPU plane layouts.
+    r.syncTransport=FL_MEMORY_SYNC_CPU_WAIT | FL_MEMORY_SYNC_FD;
+    r.handleTransport=FL_MEMORY_HANDLE_AHB;
+    r.interopCapabilities=FL_MEMORY_INTEROP_RING_IMPORT | FL_MEMORY_INTEROP_BORROW_NATIVE;
+    *out=r; return FL_OK;
+}
 
 FL_API AHardwareBuffer* flImageAHardwareBuffer(flImage* img) {
     return img ? img->ahb : nullptr;

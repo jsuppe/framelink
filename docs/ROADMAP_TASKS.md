@@ -62,7 +62,7 @@ Deliverables/evidence: [capability matrix](m5/CAPABILITY_MATRIX.md),
 
 ## M5a — Native-memory negotiation and zero-copy pipeline boundaries
 
-**State: in progress; M5a.1 locally validated, remaining tasks pending.** Deliverables: versioned allocation/usage
+**State: in progress; M5a.1–2 locally validated; ownership is next.** Deliverables: versioned allocation/usage
 contract, native-memory GStreamer sink **and source**, platform adapters,
 Windows decoder-to-independent-renderer example, and measured multi-hop evidence.
 
@@ -71,9 +71,12 @@ Windows decoder-to-independent-renderer example, and measured multi-hop evidence
   [Contract](MEMORY_CONTRACT.md) and [validation](m5a/contract-20261101/README.md):
   Linux/Windows/Android device4/4 each, dual-ABI builds and sanitizers. Local
   policy helpers only; runtime extension exchange/adapter qualification remains.
-- [ ] **M5a.2 Platform adapters:** resource type, device/adapter identity,
+- [x] **M5a.2 Platform adapters:** resource type, device/adapter identity,
   format/planes/stride/modifiers, import/export/forwarding and fence capabilities
   for supported Windows D3D, Linux DMA-BUF and Android AHardwareBuffer paths.
+  [Actual-resource checks](m5a/adapters-20261101/README.md): Linux/Windows/Android
+  6/6 each. Unknown native layout/device facts remain explicit; external-pool
+  adoption/relay are not advertised until implemented. Driver probes remain gated.
 - [ ] **M5a.3 Pool allocation and ownership:** producer-owned vs consumer-provided
   allocations; preserve allocation identity and prevent premature reuse until
   every downstream CPU/GPU reader completes, including after crashes/reconnects.

@@ -80,6 +80,58 @@ FL_API flMemoryResult flMemoryEvaluate(const flMemoryRequirements*,
 // must negotiate this extension explicitly; no strict downgrade to legacy peers.
 FL_API flMemoryResult flMemoryRequirementsEncode(const flMemoryRequirements*, void*, size_t);
 FL_API flMemoryResult flMemoryRequirementsDecode(const void*, size_t, flMemoryRequirements*);
+
+// Read-only facts about an actual channel image. Unknown is not unsupported:
+// only fields identified by knownFields may be used as positive evidence.
+#define FL_MEMORY_INFO_VERSION 1u
+#define FL_MEMORY_INFO_NATIVE_USAGE 0x01u
+#define FL_MEMORY_INFO_PLANE_LAYOUT 0x02u
+#define FL_MEMORY_INFO_DEVICE       0x04u
+#define FL_MEMORY_INFO_DIRECT_USAGE 0x08u
+#define FL_MEMORY_INFO_MAPPED_USAGE 0x10u
+#define FL_MEMORY_INFO_MAP_OPERATIONS 0x20u
+#define FL_MEMORY_INFO_MODIFIER     0x40u
+#define FL_MEMORY_DEVICE_DXGI_LUID 1u
+#define FL_MEMORY_DEVICE_DRM_NODE  2u
+#define FL_MEMORY_SYNC_CPU_WAIT   0x01u
+#define FL_MEMORY_SYNC_TIMELINE   0x02u
+#define FL_MEMORY_SYNC_FD         0x04u
+#define FL_MEMORY_HANDLE_NT       1u
+#define FL_MEMORY_HANDLE_DMABUF   2u
+#define FL_MEMORY_HANDLE_AHB      3u
+// Operations supported by the current FrameLink API, not arbitrary driver imports.
+#define FL_MEMORY_INTEROP_RING_IMPORT    0x01u
+#define FL_MEMORY_INTEROP_BORROW_NATIVE  0x02u
+#define FL_MEMORY_INTEROP_EXTERNAL_POOL  0x04u
+#define FL_MEMORY_INTEROP_RELAY          0x08u
+typedef struct flMemoryResourceInfo {
+    uint32_t version;
+    uint32_t resourceType, logicalFormat, width, height, nativeFormat;
+    uint32_t knownFields, nativePlaneCount;
+    uint64_t nativeUsage, modifier;
+    uint64_t planeOffset[4], planeStride[4];
+    uint32_t directUsage, mappedUsage, mapOperations, deviceIdKind;
+    uint8_t deviceId[16];
+    uint32_t syncTransport, handleTransport;
+    uint32_t interopCapabilities, reserved;
+    uint64_t generation;
+} flMemoryResourceInfo;
+// Set out->version=FL_MEMORY_INFO_VERSION and pass sizeof(*out). Image must be
+// borrowed from this live channel; caller obeys its existing threading/lifetime
+// contract. No allocation/map/GPU wait occurs. Native usage is not proof of
+// external Vulkan/EGL/decoder import compatibility or physical residency.
+// mappedUsage is known only during a successful CPU mapping. mapOperations
+// describes the complete map/unmap path (including producer upload), not just
+// a pointer lookup; check its known bit, especially for unmapped Android YUV.
+// syncTransport describes FrameLink protocol/API support, not driver-exported
+// semaphore qualification. No handles are transferred or ownership extended.
+// Native plane offsets/strides remain unknown for opaque textures/AHBs; staging
+// or normalized CPU strides must not be substituted for native layout.
+// interopCapabilities advertises existing-ring import and borrowed native access.
+// External allocation adoption and safe downstream relay are absent until their
+// ownership protocols are implemented; duplicated handles alone do not qualify.
+// On error leaves output unchanged; an unknown requested version is rejected.
+FL_API flResult flImageMemoryInfo(flChannel*, flImage*, flMemoryResourceInfo*, size_t);
 #ifdef __cplusplus
 }
 #endif

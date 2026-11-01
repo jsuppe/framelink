@@ -116,3 +116,37 @@ common A/V timeline; native buffer readiness is a separate synchronization fact.
 Tasks M5a.2 onward supply exact platform capabilities, allocation selection,
 ownership/forwarding, actual control exchange and GStreamer integration. Nothing
 in this task changes the supported runtime path matrix by itself.
+
+## Actual resource facts (M5a.2)
+
+`flImageMemoryInfo(channel, image, &info, sizeof(info))`, with version1, inspects
+an image belonging to that live channel. Call under existing channel threading
+and borrowed-image lifetime rules. Queries neither map nor wait for the GPU.
+Unknown fields are not evidence of either support or incompatibility: check
+`knownFields`. A strict path needing an unknown fact must probe or reject, not
+assume it. No native handles or additional ownership are returned.
+
+- Windows: actual DXGI format/D3D11 BindFlags, adapter LUID, shared NT handle
+  protocol and timeline synchronization. CPU mapping stages a copy/readback;
+  producer unmap also uploads. Native texture plane layout remains unknown.
+- Linux: exported DMA-BUF fourcc, plane offsets/strides and modifier; local GBM
+  allocation flags and DRM node identity. Received legacy descriptors omit
+  allocation flags/device, so imported-image queries leave those unknown.
+  DRM identity bytes0..3/4..7 are little-endian major/minor; others zero.
+- Android: actual AHB native format/usage and AHB/sync-FD transport. BGRA CPU
+  mapping converts/copies; NV12 normalization cost is known only while mapped.
+  Device identity and GPU plane layout are unknown, not inferred from CPU strides.
+
+Device IDs are local OS domains, not portable wire identifiers. Windows bytes0..7
+are the DXGI LUID; remaining bytes zero. `directUsage` reports native allocation
+facts only, not arbitrary API import compatibility. `mappedUsage` describes
+current mapping access, not authorization to modify a consumer-owned frame.
+`mapOperations` covers the whole map/unmap path. Sync transport flags describe
+FrameLink API support, not successful hardware semaphore probes.
+
+`interopCapabilities` currently exposes existing-ring import and borrowed native
+handle access only. External producer-pool adoption and safe relay are explicitly
+not advertised until their lifetime protocols exist. Handle duplication alone
+cannot establish safe reuse. No claim of physical GPU residency is made.
+
+[Device and mapping validation](m5a/adapters-20261101/README.md).

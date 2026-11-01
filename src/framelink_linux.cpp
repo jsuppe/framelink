@@ -20,6 +20,7 @@
 
 #define FL_EXPORTS
 #include "framelink.h"
+#include "framelink_memory.h"
 #include "framelink_sync_fd.h"
 #include "fl_sync_fd.hpp"
 #include "framelink_dmabuf.h"
@@ -32,6 +33,7 @@
 #include <string.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
+#include <sys/sysmacros.h>
 #include <sys/ioctl.h>
 #include <linux/dma-buf.h>
 #include "fl_layout.h"
@@ -54,6 +56,7 @@ struct flImage {
     gbm_bo* bo = nullptr; // consumer only
     flDmabuf desc{};
     uint32_t width=0,height=0;
+    uint32_t allocationUsage=0; // known only for locally allocated GBM BOs
     void* planeMaps[4]{};
     size_t planeLengths[4]{};
     flMappedImage planeView{};
@@ -184,8 +187,10 @@ bool reallocRing(flChannel* ch, uint32_t w, uint32_t h, uint32_t poolSize) {
     for (uint32_t i = 0; i < poolSize; ++i) {
         auto* img = new flImage();
         img->bo = gbm_bo_create(ch->gbm, w, h, fourcc, preferred);
+        img->allocationUsage = preferred;
         if (!img->bo && fallback != preferred) {
             img->bo = gbm_bo_create(ch->gbm, w, h, fourcc, fallback);
+            img->allocationUsage = fallback;
             if (img->bo && i == 0)
                 FL_LOG("framelink: RENDERING|LINEAR refused, using LINEAR only "
                        "(CPU-mappable but may not be GPU-renderable)");
@@ -760,6 +765,43 @@ FL_API void flClose(flChannel* ch) {
 }
 
 // ---- dma-buf interop ---------------------------------------------------------
+
+FL_API flResult flImageMemoryInfo(flChannel* ch, flImage* img, flMemoryResourceInfo* out, size_t size) {
+    if (!ch || !img || !out || size != sizeof(*out)) return FL_INVALID;
+    if (out->version != FL_MEMORY_INFO_VERSION) return FL_VERSION_MISMATCH;
+    bool member=false; for (auto* image:ch->images) if(image==img) member=true;
+    if(!member) return FL_INVALID;
+    flMemoryResourceInfo r{}; r.version=FL_MEMORY_INFO_VERSION;
+    r.resourceType=FL_MEMORY_DMABUF; r.logicalFormat=ch->info.format;
+    r.width=img->width; r.height=img->height; r.generation=ch->info.generation;
+    r.nativeFormat=img->desc.fourcc; r.modifier=img->desc.modifier;
+    r.nativePlaneCount=img->desc.planes;
+    if(!r.nativePlaneCount || r.nativePlaneCount>4) return FL_INVALID;
+    r.knownFields=FL_MEMORY_INFO_PLANE_LAYOUT | FL_MEMORY_INFO_MAP_OPERATIONS;
+    if(img->desc.modifier!=DRM_FORMAT_MOD_INVALID) r.knownFields|=FL_MEMORY_INFO_MODIFIER;
+    for(uint32_t p=0;p<r.nativePlaneCount;p++) {
+        r.planeOffset[p]=img->desc.offset[p]; r.planeStride[p]=img->desc.stride[p];
+    }
+    if(img->bo) {
+        r.nativeUsage=img->allocationUsage;
+        r.knownFields|=FL_MEMORY_INFO_NATIVE_USAGE | FL_MEMORY_INFO_DIRECT_USAGE;
+        if(img->allocationUsage & GBM_BO_USE_RENDERING) r.directUsage|=FL_MEMORY_GPU_RENDER;
+    }
+    if(img->planeView.planes) {
+        r.knownFields|=FL_MEMORY_INFO_MAPPED_USAGE;
+        r.mappedUsage=FL_MEMORY_CPU_READ | FL_MEMORY_CPU_WRITE;
+    }
+    struct stat st{};
+    if(ch->drmFd>=0 && fstat(ch->drmFd,&st)==0 && S_ISCHR(st.st_mode)) {
+        r.knownFields|=FL_MEMORY_INFO_DEVICE; r.deviceIdKind=FL_MEMORY_DEVICE_DRM_NODE;
+        uint32_t values[]={uint32_t(major(st.st_rdev)),uint32_t(minor(st.st_rdev))};
+        for(unsigned n=0;n<2;n++) for(unsigned b=0;b<4;b++) r.deviceId[n*4+b]=uint8_t(values[n]>>(8*b));
+    }
+    r.syncTransport=FL_MEMORY_SYNC_CPU_WAIT | FL_MEMORY_SYNC_FD;
+    r.handleTransport=FL_MEMORY_HANDLE_DMABUF;
+    r.interopCapabilities=FL_MEMORY_INTEROP_RING_IMPORT | FL_MEMORY_INTEROP_BORROW_NATIVE;
+    *out=r; return FL_OK;
+}
 
 FL_API flResult flImageDmabuf(flImage* img, flDmabuf* out) {
     if (!img || !out) return FL_INVALID;
