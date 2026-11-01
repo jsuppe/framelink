@@ -37,3 +37,13 @@ FL_API flResult flCollectReadLeases(flChannel* ch) {
     if(result!=FL_OK)return result;
     return ch->readers.retired(r);
 }
+
+FL_API flResult flFrameAgeNs(flChannel* ch,const flFrame* frame,uint64_t* ageNs) {
+    if(!ch || !ch->isConsumer || !frame || !ageNs)return FL_INVALID;
+    if(!(ch->flags & FL_TRACK_ARRIVAL))return FL_FORMAT_UNSUPPORTED;
+    std::lock_guard<std::mutex> lock(ch->pendingMutex);
+    if(!ch->frameHeld || frame->slot!=ch->heldSlot || frame->_readyValue!=ch->heldReady ||
+       frame->slot>=ch->images.size() || frame->image!=ch->images[frame->slot])return FL_INVALID;
+    const auto now=fl::arrivalNowNs();*ageNs=now>=ch->heldArrival?now-ch->heldArrival:0;
+    return FL_OK;
+}

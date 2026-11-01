@@ -138,6 +138,9 @@ FL_API flResult flCreateChannel(const char* name, uint32_t width, uint32_t heigh
 // Require GPU-renderable allocation (Android native YUV may reject this).
 // Desktop rings already request rendering-capable storage. No CPU fallback.
 #define FL_GPU_RENDER 0x8
+// Opt-in receiver-local arrival age. Not media PTS or end-to-end latency.
+// When disabled, receipt does not read the clock for this feature.
+#define FL_TRACK_ARRIVAL 0x10
 
 FL_API flResult flCreateChannelEx(const char* name, uint32_t width, uint32_t height,
                                   flFormat format, uint32_t poolSize, uint32_t flags,
@@ -299,6 +302,16 @@ FL_API flResult flCompleteReadLease(flChannel*, uint64_t lease);
 // Publish only the completed prefix; later completions cannot release earlier
 // readers. Retry backend retirement failure here, not by completing a token twice.
 FL_API flResult flCollectReadLeases(flChannel*);
+#ifdef __cplusplus
+}
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+// Age since the receiver accepted this frame announcement, including readiness
+// wait. Requires FL_TRACK_ARRIVAL and a currently held unmodified flFrame.
+FL_API flResult flFrameAgeNs(flChannel*, const flFrame*, uint64_t* ageNs);
 #ifdef __cplusplus
 }
 #endif

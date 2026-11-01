@@ -603,6 +603,12 @@ endif()
 # Real transport timing checks (GPU-backed FrameLink + GDP/TCP PCM).
 # Not part of the hosted CPU-only whitelist; run on native hardware.
 if(FRAMELINK_BUILD_TESTS AND TARGET framelink_av_session)
+    add_executable(fl_gst_pool_policy test/fl_gst_pool_policy.cpp)
+    target_include_directories(fl_gst_pool_policy PRIVATE $<TARGET_PROPERTY:framelink_av_session,INCLUDE_DIRECTORIES>)
+    target_link_directories(fl_gst_pool_policy PRIVATE $<TARGET_PROPERTY:framelink_av_session,LINK_DIRECTORIES>)
+    target_link_libraries(fl_gst_pool_policy PRIVATE framelink $<TARGET_PROPERTY:framelink_av_session,LINK_LIBRARIES>)
+    add_test(NAME gst_pool_policy COMMAND fl_gst_pool_policy $<TARGET_FILE:gstframelink>)
+    set_tests_properties(gst_pool_policy PROPERTIES TIMEOUT 30)
     add_executable(fl_m4_transport_timing test/m4_transport_timing.cpp)
     target_include_directories(fl_m4_transport_timing PRIVATE $<TARGET_PROPERTY:framelink_av_session,INCLUDE_DIRECTORIES>)
     target_link_directories(fl_m4_transport_timing PRIVATE $<TARGET_PROPERTY:framelink_av_session,LINK_DIRECTORIES>)

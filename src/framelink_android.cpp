@@ -38,6 +38,7 @@
 #include "framelink.h"
 #include "framelink_memory.h"
 #include "fl_read_ledger.hpp"
+#include "fl_arrival.hpp"
 #include <dlfcn.h>
 #include "framelink_sync_fd.h"
 #include "fl_sync_fd.hpp"
@@ -112,6 +113,7 @@ struct flChannel {
     uint32_t pendingSlot = 0;
     uint64_t pendingReady = 0;
     int64_t pendingPts = -1;
+    uint64_t pendingArrival=0,heldArrival=0;
     uint64_t sequence = 0;
 
     // producer (single-reader: no mutex needed, one calling thread by contract)
@@ -392,6 +394,7 @@ void acceptLoop(flChannel* ch, fl::Channel delegated) {
             ch->pendingSlot = fr->slot;
             ch->pendingReady = fr->readyValue;
             ch->pendingPts = fr->ptsNs;
+            if(ch->flags & FL_TRACK_ARRIVAL)ch->pendingArrival=fl::arrivalNowNs();
             ++ch->sequence;
         }
         ch->peerGone = true;
@@ -494,7 +497,7 @@ FL_API flResult flCreateChannelFromHardwareBuffers(const char* name, uint32_t wi
     uint32_t height, flFormat format, uint32_t poolSize, uint32_t flags,
     AHardwareBuffer* const* images, flChannel** out) {
     if(out)*out=nullptr;
-    if(!images || (flags & ~(FL_MAP_CPU|FL_GPU_SYNC|FL_DEFER_RELEASE|FL_GPU_RENDER)))return FL_INVALID;
+    if(!images || (flags & ~(FL_MAP_CPU|FL_GPU_SYNC|FL_DEFER_RELEASE|FL_GPU_RENDER|FL_TRACK_ARRIVAL)))return FL_INVALID;
     return createChannel(name,width,height,format,poolSize,flags,out,fl::Channel{},false,images);
 }
 FL_API flResult flCreateChannelFromSocketFdWithHardwareBuffers(int fd, uint32_t width,
@@ -502,7 +505,7 @@ FL_API flResult flCreateChannelFromSocketFdWithHardwareBuffers(int fd, uint32_t 
     AHardwareBuffer* const* images, flChannel** out) {
     auto link=fl::Channel::adoptConnectedFd(fd,timeout); // consume even on validation failure
     if(out)*out=nullptr;
-    if(!link.connected() || !images || (flags & ~(FL_MAP_CPU|FL_GPU_SYNC|FL_DEFER_RELEASE|FL_GPU_RENDER)))return FL_INVALID;
+    if(!link.connected() || !images || (flags & ~(FL_MAP_CPU|FL_GPU_SYNC|FL_DEFER_RELEASE|FL_GPU_RENDER|FL_TRACK_ARRIVAL)))return FL_INVALID;
     return createChannel("broker-external-video",width,height,format,poolSize,flags,out,std::move(link),true,images);
 }
 
@@ -725,7 +728,7 @@ FL_API flResult flAcquireFrame(flChannel* ch, flFrame* out, uint32_t timeoutMs) 
             if (ch->hasPending && !ch->frameHeld &&
                 ((ch->flags & FL_GPU_SYNC) || fl::fenceReady(ch->sync.pending))) {
                 ch->sync.held=ch->sync.pending;ch->sync.pending=-1;
-                ch->frameHeld = true;
+                ch->frameHeld = true;ch->heldArrival=ch->pendingArrival;
                 ch->heldReady = ch->pendingReady;
                 ch->heldSlot = ch->pendingSlot;
                 ch->hasPending = false;

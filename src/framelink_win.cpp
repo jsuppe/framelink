@@ -15,6 +15,7 @@
 #include "framelink.h"
 #include "framelink_memory.h"
 #include "fl_read_ledger.hpp"
+#include "fl_arrival.hpp"
 #include "fl_layout.h"
 #include "framelink_d3d11.h"
 
@@ -94,6 +95,7 @@ struct flChannel {
     uint32_t pendingSlot = 0;
     uint64_t pendingReady = 0;
     int64_t pendingPts = -1;
+    uint64_t pendingArrival=0,heldArrival=0;
     uint64_t sequence = 0;
 
     // --- producer only ---
@@ -402,6 +404,7 @@ void acceptLoop(flChannel* ch) {
             ch->pendingSlot = fr->slot;
             ch->pendingReady = fr->readyValue;
             ch->pendingPts = fr->ptsNs;
+            if(ch->flags & FL_TRACK_ARRIVAL)ch->pendingArrival=fl::arrivalNowNs();
             ++ch->sequence;
         }
         ch->peerGone = true;
@@ -492,7 +495,7 @@ FL_API flResult flCreateChannelFromD3D11Handles(const char* name, uint32_t width
     uint32_t height, flFormat format, uint32_t poolSize, uint32_t flags,
     const uint8_t adapterLUID[8], void* const* handles, flChannel** out) {
     if(out)*out=nullptr;
-    if(!handles || (flags & ~(FL_MAP_CPU|FL_GPU_SYNC|FL_DEFER_RELEASE|FL_GPU_RENDER)))return FL_INVALID;
+    if(!handles || (flags & ~(FL_MAP_CPU|FL_GPU_SYNC|FL_DEFER_RELEASE|FL_GPU_RENDER|FL_TRACK_ARRIVAL)))return FL_INVALID;
     return createChannel(name,width,height,format,poolSize,flags,adapterLUID,handles,out);
 }
 
@@ -830,7 +833,7 @@ FL_API flResult flAcquireFrame(flChannel* ch, flFrame* out, uint32_t timeoutMs) 
             std::lock_guard<std::mutex> hold(ch->pendingMutex);
             if (ch->hasPending && !ch->frameHeld &&
                 ((ch->flags & FL_GPU_SYNC) || ch->readyFence->GetCompletedValue() >= ch->pendingReady)) {
-                ch->frameHeld = true;
+                ch->frameHeld = true;ch->heldArrival=ch->pendingArrival;
                 ch->heldReady = ch->pendingReady;
                 ch->heldSlot = ch->pendingSlot;
                 ch->hasPending = false;
