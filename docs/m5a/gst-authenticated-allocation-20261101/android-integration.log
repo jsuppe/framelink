@@ -1,0 +1,22 @@
+fl_gst_native_producer_android
+RGBA native AHB sink roundtrip: bounded original allocations, explicit readiness, metadata and retained shutdown pass
+RGB10A2_LE native AHB sink roundtrip: bounded original allocations, explicit readiness, metadata and retained shutdown pass
+RGBA native AHB sink missing-ready negative: bounded original allocations, explicit readiness, metadata and retained shutdown pass
+
+fl_gst_native_source_android
+RGBA AHB allocation ID, pixels/PTS, bounded readers and retained memory after stop pass
+RGB10A2_LE AHB allocation ID, pixels/PTS, bounded readers and retained memory after stop pass
+RGBA AHB allocation ID, pixels/PTS, bounded readers and retained memory after stop pass
+opaque Android YUV rejected rather than advertised as native NV12 bytes
+
+fl_gst_policy_generation
+legacy pool generation: renegotiates as before
+authenticated pool generation: fails closed before new-pool frame
+native reader policy missing contract rejected before delivery
+native reader policy explicit completion/usage accepted
+
+fl_gst_pool_policy
+2/3 image capacities: bounded drop, bounded error, delayed-reader recovery and exact loss accounting pass
+
+fl_gst_timestamps
+Timestamp contract: zero, repeated/backward, signed limit, overflow/missing rejection, segment mapping, variable metadata, generation relay, default mode passed

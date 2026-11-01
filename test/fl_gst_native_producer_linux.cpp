@@ -15,17 +15,19 @@
 #include <cstdlib>
 
 #define CHECK(x) do{if(!(x)){fprintf(stderr,"line %d: %s\n",__LINE__,#x);std::exit(1);}}while(0)
+#include "gst_memory_policy_fixture.h"
 static void run(bool nv12,bool missingReady=false){
  auto name="native-dmabuf-sink-"+std::to_string(g_get_monotonic_time());flChannel*c=nullptr;
  CHECK(flCreateChannelEx(name.c_str(),64,32,nv12?FL_FORMAT_NV12:FL_FORMAT_RGBA8,2,FL_MAP_CPU|FL_REQUIRE_FRAME_METADATA,&c)==FL_OK);
  std::string format=nv12?"NV12":"RGBA";GError*error=nullptr;
  auto*p=gst_parse_launch(("appsrc name=in is-live=true format=time caps=video/x-raw(memory:DMABuf),format="+format+",width=64,height=32,framerate=30/1 ! framelinksink name=sink native-memory=true preserve-frame-metadata=true sync=false async=false enable-last-sample=false channel="+name).c_str(),&error);CHECK(p&&!error);
- auto*sink=gst_bin_get_by_name(GST_BIN(p),"sink");auto*in=gst_bin_get_by_name(GST_BIN(p),"in");CHECK(gst_element_set_state(p,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
+ auto*sink=gst_bin_get_by_name(GST_BIN(p),"sink");auto*in=gst_bin_get_by_name(GST_BIN(p),"in");testBindNativePolicy(sink,name,FL_MEMORY_DMABUF);CHECK(gst_element_set_state(p,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
  auto*caps=gst_caps_from_string(("video/x-raw(memory:DMABuf),format="+format+",width=64,height=32,framerate=30/1").c_str());
- auto*pad=gst_element_get_static_pad(sink,"sink");auto*query=gst_query_new_allocation(caps,TRUE);
+ auto*pad=gst_element_get_static_pad(sink,"sink");auto*query=gst_query_new_allocation(caps,TRUE);testQueryMemoryRequirements(query,true);
  CHECK(!gst_pad_query(pad,query));
  gst_structure_set(gst_query_writable_structure(query),"framelink-completion-contract",G_TYPE_STRING,"unknown",nullptr);CHECK(!gst_pad_query(pad,query));
  gst_structure_set(gst_query_writable_structure(query),"framelink-completion-contract",G_TYPE_STRING,"external-sync-fd-before-submit-v1",nullptr);
+ testPolicyQueryNegatives(pad,query);
  CHECK(gst_pad_query(pad,query)&&gst_query_get_n_allocation_pools(query)==1);
  GstBufferPool*pool=nullptr;guint size=0,min=9,max=9;gst_query_parse_nth_allocation_pool(query,0,&pool,&size,&min,&max);CHECK(pool&&min==0&&max==2);
  gst_query_unref(query);gst_caps_unref(caps);gst_object_unref(pad);CHECK(gst_buffer_pool_set_active(pool,TRUE));

@@ -7,6 +7,7 @@
 #include <cstdio>
 #include <cstdlib>
 #define CHECK(x) do{if(!(x)){fprintf(stderr,"line %d: %s\n",__LINE__,#x);std::exit(1);}}while(0)
+#include "gst_memory_policy_fixture.h"
 static void run(bool nv12){
  auto name="native-producer-"+std::to_string(g_get_monotonic_time());flChannel*c=nullptr,*p=nullptr;
  CHECK(flCreateChannelEx(name.c_str(),64,32,nv12?FL_FORMAT_NV12:FL_FORMAT_RGBA8,2,FL_MAP_CPU|FL_REQUIRE_FRAME_METADATA,&c)==FL_OK);
@@ -50,17 +51,18 @@ static void sinkPipeline(){
  GError* error=nullptr;
  auto*pipeline=gst_parse_launch(("appsrc name=in is-live=true format=time caps=video/x-raw(memory:D3D11Memory),format=RGBA,width=64,height=32,framerate=30/1 ! framelinksink name=sink native-memory=true preserve-frame-metadata=true channel="+name+" sync=false async=false enable-last-sample=false").c_str(),&error);CHECK(pipeline&&!error);
  auto*sink=gst_bin_get_by_name(GST_BIN(pipeline),"sink");auto*in=gst_bin_get_by_name(GST_BIN(pipeline),"in");
- CHECK(gst_element_set_state(pipeline,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
+ testBindNativePolicy(sink,name,FL_MEMORY_D3D11);CHECK(gst_element_set_state(pipeline,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
  auto*caps=gst_caps_from_string("video/x-raw(memory:D3D11Memory),format=RGBA,width=64,height=32,framerate=30/1");
- auto*pad=gst_element_get_static_pad(sink,"sink");auto*query=gst_query_new_allocation(caps,TRUE);
+ auto*pad=gst_element_get_static_pad(sink,"sink");auto*query=gst_query_new_allocation(caps,TRUE);testQueryMemoryRequirements(query,true);
  CHECK(!gst_pad_query(pad,query)); // unaware upstream cannot select unsafe completion semantics
  gst_structure_set(gst_query_writable_structure(query),"framelink-completion-contract",G_TYPE_STRING,"future-unknown-version",nullptr);
  CHECK(!gst_pad_query(pad,query));
  auto*wrongCaps=gst_caps_copy(caps);gst_caps_set_simple(wrongCaps,"width",G_TYPE_INT,128,nullptr);
- auto*wrongQuery=gst_query_new_allocation(wrongCaps,TRUE);
+ auto*wrongQuery=gst_query_new_allocation(wrongCaps,TRUE);testQueryMemoryRequirements(wrongQuery,true);
  gst_structure_set(gst_query_writable_structure(wrongQuery),"framelink-completion-contract",G_TYPE_STRING,"same-device-before-abandon-v1",nullptr);
  CHECK(!gst_pad_query(pad,wrongQuery));gst_query_unref(wrongQuery);gst_caps_unref(wrongCaps);
  gst_structure_set(gst_query_writable_structure(query),"framelink-completion-contract",G_TYPE_STRING,"same-device-before-abandon-v1",nullptr);
+ testPolicyQueryNegatives(pad,query);
  CHECK(gst_pad_query(pad,query)&&gst_query_get_n_allocation_pools(query)==1);
  GstBufferPool*pool=nullptr;guint size=0,min=9,max=9;gst_query_parse_nth_allocation_pool(query,0,&pool,&size,&min,&max);CHECK(pool&&min==0&&max==2);
  gst_query_unref(query);gst_caps_unref(caps);gst_object_unref(pad);CHECK(gst_buffer_pool_set_active(pool,TRUE));

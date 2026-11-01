@@ -50,6 +50,7 @@
 
 #include "framelink.h"
 #include "fl_gst_metadata.hpp"
+#include "framelink_memory_policy.h"
 #ifdef FL_GST_D3D11
 #include "fl_gst_d3d11_producer.hpp"
 #endif
@@ -183,6 +184,34 @@ using NativeSinkProducer=FrameLinkDmabufProducer;
 #endif
 #endif
 
+static gboolean validMemoryPolicy(const GstFrameLinkMemoryPolicy* policy,gboolean native,gboolean producer){
+    if(!policy||policy->version!=1||policy->reserved||!policy->sessionGeneration)return FALSE;
+    flMemoryDecision decisions[2]{};
+    if(flMemoryEvaluateBoundary(policy->requirements,policy->paths,2,decisions)!=FL_MEMORY_OK)return FALSE;
+#ifdef _WIN32
+    const uint32_t resource=FL_MEMORY_D3D11;
+#elif defined(__ANDROID__)
+    const uint32_t resource=FL_MEMORY_AHB;
+#else
+    const uint32_t resource=FL_MEMORY_DMABUF;
+#endif
+    if(policy->paths[0].resourceType!=resource)return FALSE;
+    uint32_t mandatory=native?0:FL_MEMORY_COPY;
+#ifdef _WIN32
+    if(!native)mandatory|=producer?FL_MEMORY_UPLOAD:FL_MEMORY_READBACK;
+#endif
+    return (policy->paths[0].operations&mandatory)==mandatory;
+}
+static gboolean allocationMemoryPolicy(GstQuery* query,const GstFrameLinkMemoryPolicy& policy){
+    const GValue* value=gst_structure_get_value(gst_query_get_structure(query),"framelink-memory-requirements");
+    if(!value||!G_VALUE_HOLDS(value,G_TYPE_BYTES))return FALSE;
+    auto* bytes=(GBytes*)g_value_get_boxed(value);if(!bytes)return FALSE;gsize size=0;auto* data=g_bytes_get_data(bytes,&size);
+    flMemoryRequirements requirements[3]={policy.requirements[0],policy.requirements[1],{}};
+    if(flMemoryRequirementsDecode(data,size,&requirements[2])!=FL_MEMORY_OK)return FALSE;
+    flMemoryPath paths[3]={policy.paths[0],policy.paths[1],policy.paths[0]};flMemoryDecision decisions[3]{};
+    return flMemoryEvaluateBoundary(requirements,paths,3,decisions)==FL_MEMORY_OK;
+}
+
 // =============================================================================
 // framelinksink
 // =============================================================================
@@ -196,6 +225,9 @@ typedef struct _GstFrameLinkSink {
     gboolean preserveFrameMetadata;
     guint64 streamGeneration;
     gboolean nativeMemory;
+    gboolean memoryPolicyApplied;
+    guint64 memoryPoolGeneration;
+    GstFrameLinkMemoryPolicy memoryPolicy;
 #ifdef FL_GST_NATIVE_SINK
     std::shared_ptr<NativeSinkProducer>* nativeProducer;
 #endif
@@ -340,6 +372,12 @@ static gboolean sinkStart(GstBaseSink* base) {
     if(self->nativeMemory && !self->connectTimeoutMs)self->connectTimeoutMs=1000;
 #endif
     if(!sinkStartLegacy(base))return FALSE;
+    if(self->memoryPolicyApplied){
+        flChannelInfo info{};
+        if(flQuery(self->ch,&info)!=FL_OK || info.generation!=self->memoryPoolGeneration){
+            GST_ELEMENT_ERROR(self,CORE,NEGOTIATION,("authenticated pool generation changed before start"),(NULL));return FALSE;
+        }
+    }
 #ifdef FL_GST_NATIVE_SINK
     if(self->nativeMemory){
         if(!self->ch)return FALSE;
@@ -391,8 +429,13 @@ static gboolean sinkProposeAllocation(GstBaseSink* base,GstQuery* query){
     if(!contract || strcmp(contract,FL_COMPLETION_CONTRACT) || !self->nativeProducer)return FALSE;
     GstCaps* caps=nullptr;gboolean needPool=FALSE;gst_query_parse_allocation(query,&caps,&needPool);
     if(!caps || !needPool)return FALSE;
+    if(self->memoryPolicyApplied&&!allocationMemoryPolicy(query,self->memoryPolicy))return FALSE;
     auto* pool=flCreateNativePool(*self->nativeProducer,caps,self->bufferWaitMs);if(!pool)return FALSE;
     GstVideoInfo vi{};gst_video_info_from_caps(&vi,caps);
+    if(self->memoryPolicyApplied)gst_structure_set(gst_query_writable_structure(query),
+        "framelink-selected-resource-type",G_TYPE_UINT,self->memoryPolicy.paths[0].resourceType,
+        "framelink-boundary-operations",G_TYPE_UINT,self->memoryPolicy.paths[0].operations|self->memoryPolicy.paths[1].operations,
+        "framelink-session-generation",G_TYPE_UINT64,self->memoryPolicy.sessionGeneration,nullptr);
     gst_query_add_allocation_pool(query,pool,(guint)vi.size,0,self->cinfo.poolSize);
     gst_query_add_allocation_meta(query,GST_VIDEO_META_API_TYPE,nullptr);gst_object_unref(pool);return TRUE;
 #else
@@ -404,6 +447,8 @@ static gboolean sinkSetCaps(GstBaseSink* base, GstCaps* caps) {
     if (!gst_video_info_from_caps(&self->vinfo, caps)) return FALSE;
     if(GST_VIDEO_INFO_FORMAT(&self->vinfo)==GST_VIDEO_FORMAT_NV12 &&
        ((GST_VIDEO_INFO_WIDTH(&self->vinfo)&1)||(GST_VIDEO_INFO_HEIGHT(&self->vinfo)&1)))return FALSE;
+    if(self->memoryPolicyApplied && (!self->ch || GST_VIDEO_INFO_WIDTH(&self->vinfo)!=(int)self->cinfo.width ||
+       GST_VIDEO_INFO_HEIGHT(&self->vinfo)!=(int)self->cinfo.height || toFlFormat(GST_VIDEO_INFO_FORMAT(&self->vinfo))!=self->cinfo.format))return FALSE;
     if(self->nativeMemory){
         if(!self->ch || !gst_caps_features_contains(gst_caps_get_features(caps,0),FL_SINK_MEMORY) ||
            GST_VIDEO_INFO_WIDTH(&self->vinfo)!=(int)self->cinfo.width || GST_VIDEO_INFO_HEIGHT(&self->vinfo)!=(int)self->cinfo.height ||
@@ -439,6 +484,14 @@ static GstFlowReturn sinkRender(GstBaseSink* base, GstBuffer* buffer) {
                           GST_CLOCK_TIME_IS_VALID(pts) ? (int64_t)pts : -1, 0});
     };
     account("gst.frame_receive");
+    if(self->memoryPolicyApplied){
+        flChannelInfo info{};
+        if(!self->ch || flQuery(self->ch,&info)!=FL_OK || info.generation!=self->memoryPoolGeneration){
+            ++self->dropped;account("gst.frame_drop.policy_generation");
+            GST_ELEMENT_ERROR(self,CORE,NEGOTIATION,("authenticated pool generation changed; fresh session agreement required"),(NULL));
+            return trace.result(GST_FLOW_NOT_NEGOTIATED);
+        }
+    }
     if(self->nativeMemory){
 #ifdef FL_GST_NATIVE_SINK
         guint64 pts=g_get_monotonic_time()*1000;flFrameMetadata metadata{};bool valid=true;
@@ -676,6 +729,7 @@ static gboolean sinkStop(GstBaseSink* base) {
 
 static void sinkSetProperty(GObject* obj, guint id, const GValue* value, GParamSpec* spec) {
     GstFrameLinkSink* self = GST_FRAMELINK_SINK(obj);
+    if(self->memoryPolicyApplied){GST_WARNING_OBJECT(self,"authenticated session properties are immutable; create a new element/session");return;}
     switch (id) {
         case SINK_PROP_BUFFER_WAIT:
             if(GST_STATE(self)>GST_STATE_READY){GST_WARNING_OBJECT(self,"buffer wait cannot change while running");break;}
@@ -688,6 +742,7 @@ static void sinkSetProperty(GObject* obj, guint id, const GValue* value, GParamS
             self->connectTimeoutMs=g_value_get_uint(value);break;
         case SINK_PROP_NATIVE_MEMORY:
             if(GST_STATE(self)>GST_STATE_READY || self->ch){GST_WARNING_OBJECT(self,"native mode cannot change while allocated");break;}
+            if(self->memoryPolicyApplied){GST_WARNING_OBJECT(self,"native-memory is frozen by authenticated policy");return;}
             self->nativeMemory=g_value_get_boolean(value);break;
         case SINK_PROP_CHANNEL:
             g_free(self->channel);
@@ -729,10 +784,17 @@ static void sinkFinalize(GObject* obj) {
 // Action signal accepts one OWNED producer channel only in NULL. TRUE transfers
 // ownership; FALSE leaves it with the caller. No allocation/lookup is performed.
 static gboolean sinkAdoptChannel(GstFrameLinkSink* self,flChannel* channel) {
-    if(GST_STATE(self)!=GST_STATE_NULL || self->ch || !channel)return FALSE;
+    if(GST_STATE(self)!=GST_STATE_NULL || self->ch || !channel || self->memoryPolicyApplied)return FALSE;
     flChannelInfo info{};if(flQuery(channel,&info)!=FL_OK)return FALSE;
     uint32_t consumerFlags=0;if(flQueryConsumerFlags(channel,&consumerFlags)==FL_OK)return FALSE;
     self->ch=channel;self->cinfo=info;self->delegated=TRUE;return TRUE;
+}
+
+static gboolean sinkApplyMemoryPolicy(GstFrameLinkSink* self,const GstFrameLinkMemoryPolicy* policy){
+    if(GST_STATE(self)!=GST_STATE_NULL||!self->delegated||!self->ch||self->memoryPolicyApplied||!validMemoryPolicy(policy,self->nativeMemory,TRUE))return FALSE;
+    flChannelInfo info{};if(flQuery(self->ch,&info)!=FL_OK)return FALSE;
+    self->memoryPoolGeneration=info.generation;
+    self->memoryPolicy=*policy;self->memoryPolicyApplied=TRUE;return TRUE;
 }
 
 static void gst_framelink_sink_class_init(GstFrameLinkSinkClass* klass) {
@@ -743,6 +805,9 @@ static void gst_framelink_sink_class_init(GstFrameLinkSinkClass* klass) {
     gobject->set_property = sinkSetProperty;
     gobject->get_property = sinkGetProperty;
     gobject->finalize = sinkFinalize;
+    g_signal_new_class_handler("apply-memory-policy",G_TYPE_FROM_CLASS(klass),
+        GSignalFlags(G_SIGNAL_RUN_LAST|G_SIGNAL_ACTION),G_CALLBACK(sinkApplyMemoryPolicy),
+        nullptr,nullptr,nullptr,G_TYPE_BOOLEAN,1,G_TYPE_POINTER);
     g_signal_new_class_handler("adopt-channel",G_TYPE_FROM_CLASS(klass),
         GSignalFlags(G_SIGNAL_RUN_LAST|G_SIGNAL_ACTION),G_CALLBACK(sinkAdoptChannel),
         nullptr,nullptr,nullptr,G_TYPE_BOOLEAN,1,G_TYPE_POINTER);
@@ -850,6 +915,9 @@ typedef struct _GstFrameLinkSrc {
     gint width, height, fps;
     guint poolSize,maxQueueAgeMs;
     gboolean nativeMemory;
+    gboolean memoryPolicyApplied;
+    guint64 memoryPoolGeneration;
+    GstFrameLinkMemoryPolicy memoryPolicy;
 #ifdef FL_GST_NATIVE
     std::shared_ptr<NativeSourceOwner>* nativeOwner;
 #endif
@@ -965,7 +1033,10 @@ static gboolean srcStart(GstBaseSrc* base) {
                           ("flCreateChannelEx: %s", flResultString(r)));
         return FALSE;
     }
-    flQuery(self->ch, &self->cinfo);
+    if(flQuery(self->ch, &self->cinfo)!=FL_OK)return FALSE;
+    if(self->memoryPolicyApplied && self->cinfo.generation!=self->memoryPoolGeneration){
+        GST_ELEMENT_ERROR(self,CORE,NEGOTIATION,("authenticated pool generation changed before start"),(NULL));return FALSE;
+    }
 #ifdef FL_GST_NATIVE
     if(self->nativeMemory)self->nativeOwner=new std::shared_ptr<NativeSourceOwner>(std::make_shared<NativeSourceOwner>(self->ch));
 #endif
@@ -1148,6 +1219,11 @@ static GstFlowReturn srcCreate(GstPushSrc* push, GstBuffer** outbuf) {
     flChannelInfo now = {};
     flQuery(self->ch, &now);
     if (now.generation != self->generation) {
+        if(self->memoryPolicyApplied){
+            srcReleaseFrame(self,&frame);
+            GST_ELEMENT_ERROR(self,CORE,NEGOTIATION,("authenticated pool generation changed; fresh session agreement required"),(NULL));
+            return trace.result(GST_FLOW_ERROR);
+        }
         GST_INFO_OBJECT(self, "ring reallocated: %ux%u -> %ux%u (generation %" G_GUINT64_FORMAT
                         ")", self->cinfo.width, self->cinfo.height, now.width, now.height,
                         now.generation);
@@ -1286,9 +1362,11 @@ static GstFlowReturn srcCreate(GstPushSrc* push, GstBuffer** outbuf) {
 
 static void srcSetProperty(GObject* obj, guint id, const GValue* value, GParamSpec* spec) {
     GstFrameLinkSrc* self = GST_FRAMELINK_SRC(obj);
+    if(self->memoryPolicyApplied){GST_WARNING_OBJECT(self,"authenticated session properties are immutable; create a new element/session");return;}
     switch (id) {
         case SRC_PROP_NATIVE_MEMORY:
             if(GST_STATE(self)>GST_STATE_READY || self->ch){GST_WARNING_OBJECT(self,"memory mode cannot change while allocated");break;}
+            if(self->memoryPolicyApplied){GST_WARNING_OBJECT(self,"native-memory is frozen by authenticated policy");return;}
             self->nativeMemory=g_value_get_boolean(value);break;
         case SRC_PROP_MAX_QUEUE_AGE:
             if(GST_STATE(self)>GST_STATE_READY || self->ch){GST_WARNING_OBJECT(self,"age policy cannot change while allocated");break;}
@@ -1348,7 +1426,7 @@ static void srcFinalize(GObject* obj) {
 }
 
 static gboolean srcAdoptChannel(GstFrameLinkSrc* self,flChannel* channel) {
-    if(GST_STATE(self)!=GST_STATE_NULL || self->ch || !channel)return FALSE;
+    if(GST_STATE(self)!=GST_STATE_NULL || self->ch || !channel || self->memoryPolicyApplied)return FALSE;
     flChannelInfo info{};if(flQuery(channel,&info)!=FL_OK)return FALSE;
     if(info.width!=(guint)self->width || info.height!=(guint)self->height ||
        info.format!=toFlFormat(gst_video_format_from_string(self->format)))return FALSE;
@@ -1359,15 +1437,39 @@ static gboolean srcAdoptChannel(GstFrameLinkSrc* self,flChannel* channel) {
     self->ch=channel;self->cinfo=info;self->delegated=TRUE;return TRUE;
 }
 
+static gboolean srcApplyMemoryPolicy(GstFrameLinkSrc* self,const GstFrameLinkMemoryPolicy* policy){
+    if(GST_STATE(self)!=GST_STATE_NULL||!self->delegated||!self->ch||self->memoryPolicyApplied||!validMemoryPolicy(policy,self->nativeMemory,FALSE))return FALSE;
+    flChannelInfo info{};if(flQuery(self->ch,&info)!=FL_OK)return FALSE;
+    self->memoryPoolGeneration=info.generation;
+    self->memoryPolicy=*policy;self->memoryPolicyApplied=TRUE;return TRUE;
+}
+
+static gboolean srcDecideAllocation(GstBaseSrc* base,GstQuery* query){
+    auto*self=GST_FRAMELINK_SRC(base);
+    if(self->nativeMemory&&self->memoryPolicyApplied){
+        const char* contract=gst_structure_get_string(gst_query_get_structure(query),"framelink-reader-completion-contract");
+        if(!contract||strcmp(contract,"retain-memory-until-gpu-complete-v1")||!allocationMemoryPolicy(query,self->memoryPolicy)){
+            GST_ELEMENT_ERROR(self,CORE,NEGOTIATION,("native reader memory/completion contract missing or incompatible"),(NULL));
+            return FALSE;
+        }
+    }
+    auto*parent=GST_BASE_SRC_CLASS(gst_framelink_src_parent_class);
+    return parent->decide_allocation?parent->decide_allocation(base,query):TRUE;
+}
+
 static void gst_framelink_src_class_init(GstFrameLinkSrcClass* klass) {
     GObjectClass* gobject = G_OBJECT_CLASS(klass);
     GstElementClass* element = GST_ELEMENT_CLASS(klass);
     GstBaseSrcClass* basesrc = GST_BASE_SRC_CLASS(klass);
     GstPushSrcClass* pushsrc = GST_PUSH_SRC_CLASS(klass);
 
+    basesrc->decide_allocation=srcDecideAllocation;
     gobject->set_property = srcSetProperty;
     gobject->get_property = srcGetProperty;
     gobject->finalize = srcFinalize;
+    g_signal_new_class_handler("apply-memory-policy",G_TYPE_FROM_CLASS(klass),
+        GSignalFlags(G_SIGNAL_RUN_LAST|G_SIGNAL_ACTION),G_CALLBACK(srcApplyMemoryPolicy),
+        nullptr,nullptr,nullptr,G_TYPE_BOOLEAN,1,G_TYPE_POINTER);
     g_signal_new_class_handler("adopt-channel",G_TYPE_FROM_CLASS(klass),
         GSignalFlags(G_SIGNAL_RUN_LAST|G_SIGNAL_ACTION),G_CALLBACK(srcAdoptChannel),
         nullptr,nullptr,nullptr,G_TYPE_BOOLEAN,1,G_TYPE_POINTER);

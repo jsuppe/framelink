@@ -1,6 +1,7 @@
 // Independent A/V sample peers. GPU/image transport remains FrameLink;
 // PCM uses GStreamer's GDP over an authenticated GIO stream, not a new PCM ABI.
 #include "av_auth.h"
+#include "../gst/framelink_memory_policy.h"
 #include "audio_timeline.h"
 #include "audio_alignment.h"
 #include "av_playback.h"
@@ -903,6 +904,14 @@ void adoptVideo(Pipeline& pipeline,const char* elementName,const av::SessionProv
   need(adopted,"FrameLink native channel adoption rejected");
   channel.release(); // element now owns it, including failure before PLAYING
 }
+void applyMemoryPolicy(Pipeline& pipeline,const char* name,const flSessionConfig& cfg,const av::MemoryOffer& local,const av::MemoryOffer& remote){
+  auto* element=named(pipeline,name);Object owner{G_OBJECT(element)};
+  need(g_signal_lookup("apply-memory-policy",G_OBJECT_TYPE(element)),"plugin lacks authenticated memory policy application");
+  GstFrameLinkMemoryPolicy policy{};policy.version=1;policy.sessionGeneration=cfg.generation;
+  policy.requirements[0]=local.requirements;policy.requirements[1]=remote.requirements;
+  policy.paths[0]=local.path;policy.paths[1]=remote.path;gboolean applied=FALSE;
+  g_signal_emit_by_name(element,"apply-memory-policy",&policy,&applied);need(applied,"element rejected authenticated memory policy");
+}
 unsigned runProducer(const Options &o, GSocketListener *l,
                      const av::Endpoint &ep, Watchdog& watchdog,
                      const av::SessionProvider* provider=nullptr,
@@ -974,7 +983,7 @@ unsigned runProducer(const Options &o, GSocketListener *l,
           "! gdppay ! giostreamsink name=audioio sync=false async=false" : externalPipeline(o,channel));
   av::MemoryOffer producerMemory{},consumerMemory{};
   adoptVideo(tx,"videooutput",provider,cfg,true,o.timeout,memoryMode?&producerMemory:nullptr);
-  if(memoryMode){std::string error;const bool agreed=av::agreeMemory(control->p,ep,cfg,true,producerMemory,consumerMemory,error);need(agreed,error);}
+  if(memoryMode){std::string error;const bool agreed=av::agreeMemory(control->p,ep,cfg,true,producerMemory,consumerMemory,error);need(agreed,error);applyMemoryPolicy(tx,"videooutput",cfg,producerMemory,consumerMemory);}
   // READY proves the consumer has entered setup; start() waits for the actual
   // producer resource import before the final shared epoch is selected.
   if(coordinated && !g_getenv("FRAMELINK_TEST_LAZY_PRODUCER_OPEN")) {
@@ -1170,7 +1179,7 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
     auto *audioPad=gst_element_get_static_pad(identity,"src");
     gst_pad_add_probe(audioPad,GstPadProbeType(GST_PAD_PROBE_TYPE_BUFFER|GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM),trackAudio,&audioTimeline,nullptr);
     gst_object_unref(audioPad);gst_object_unref(identity);
-    need(gst_element_set_state(rx.p, GST_STATE_PAUSED)!=GST_STATE_CHANGE_FAILURE,"audio open failed");
+    if(!memoryMode)need(gst_element_set_state(rx.p, GST_STATE_PAUSED)!=GST_STATE_CHANGE_FAILURE,"audio open failed");
     Handles h;
     auto *v=externalVideo ? nullptr : h.get(rx,"vout");
     auto *volume=h.get(rx,"playvolume");
@@ -1190,7 +1199,7 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
       ~EndNotification(){if(cb && cb->onEnd)cb->onEnd();}
     } endNotification{cb};
     put(*control,0x5245414459ULL);
-    if(memoryMode){std::string error;const bool agreed=av::agreeMemory(control->p,ep,cfg,false,consumerMemory,producerMemory,error);need(agreed,error);}
+    if(memoryMode){std::string error;const bool agreed=av::agreeMemory(control->p,ep,cfg,false,consumerMemory,producerMemory,error);need(agreed,error);applyMemoryPolicy(rx,"videoinput",cfg,consumerMemory,producerMemory);need(gst_element_set_state(rx.p,GST_STATE_PAUSED)!=GST_STATE_CHANGE_FAILURE,"audio open failed");}
     const auto frames=get(*control);
     need(frames && frames<=100000,"invalid stream length");
     if(o.mediaRunMs)validateMediaRun(o.mediaRunMs,frames,o.fps);

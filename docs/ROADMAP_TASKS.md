@@ -62,7 +62,7 @@ Deliverables/evidence: [capability matrix](m5/CAPABILITY_MATRIX.md),
 
 ## M5a — Native-memory negotiation and zero-copy pipeline boundaries
 
-**State: in progress; M5a.1–6 locally validated; native GStreamer integration is next.** Deliverables: versioned allocation/usage
+**State: in progress; M5a.1–7 locally validated; Windows GPU-decoder example is next.** Deliverables: versioned allocation/usage
 contract, native-memory GStreamer sink **and source**, platform adapters,
 Windows decoder-to-independent-renderer example, and measured multi-hop evidence.
 
@@ -104,20 +104,18 @@ Windows decoder-to-independent-renderer example, and measured multi-hop evidence
   zero-copy rejects incompatible declared paths. Conflicting consumers cannot
   override each other. [Boundary policy](m5a/boundary-policy-20261101/README.md):
   Linux/Windows/Android7/7 each, dualABI builds. Runtime enforcement is task7.
-- [ ] **M5a.7 Native-memory GStreamer sink and source:** remote requirements in
-  caps/ALLOCATION/pools, safe renegotiation on format/device/generation changes,
-  unchanged A/V session timing and legacy behavior; explicitly carry variable
-  duration/DTS/discontinuity and stream-generation metadata rather than deriving
-  arbitrary source timing from a configured nominal FPS.
-  Partial slice: [Linux DMA-BUF source](GST_NATIVE_MEMORY.md), original-allocation
-  RGBA/NV12 and memory-subview lifetime tests passed; Windows wrapped D3D11
-  original-storage/copy-negative tests2/2 pass; Android exact RGB AHB adapter
-  and native-layout rejection cases pass. Full metadata propagation is validated
-  across all platforms. Linux/Windows/Android native sinks and explicit-completion ALLOCATION
-  pools are locally validated. Authenticated SessionProvider opt-in gating and
-  actual Linux/Android/Windows binding adapters now have targeted evidence.
-  Applying remote policy to ALLOCATION requests and final native pipeline/generation
-  qualification remain open. The GPU decoder example belongs to task8.
+- [x] **M5a.7 Native-memory GStreamer sink and source — locally validated, not merged:**
+  explicit Linux DMA-BUF, Windows D3D11 and Android RGB AHB source/sink adapters;
+  bounded ALLOCATION pools with writer/reader completion contracts; authenticated
+  SessionProvider policies and actual platform binding adapters. Remote requirements
+  are applied to ALLOCATION; properties and pool generation are frozen. Changed pools
+  reject before startup/delivery/submission and require a fresh session, while legacy
+  resize remains unchanged. Variable PTS/DTS/duration/discontinuity/generation and
+  legacy behavior are tested. See [final policy evidence](m5a/gst-authenticated-allocation-20261101/README.md)
+  and [native adapter contracts](GST_NATIVE_MEMORY.md).
+  This qualifies explicit adapters, not arbitrary stock decoders/readers. Windows
+  decoder, signed full native Android pipeline, multi-hop and throughput remain
+  downstream qualifications; no physical-output claim.
 - [ ] **M5a.8 Windows GPU-decoder example:** GPU GstBuffer → FrameLink sink →
   separate consumer renderer, with tested decoder/adapter/formats and explicit
   CPU-readable staging/readback alternative. Qualify NV12 conversion location.

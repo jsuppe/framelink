@@ -262,3 +262,24 @@ This deliberately does not equate independent CreateSharedHandle exports. The
 trusted allocator must maintain the canonical export/ID mapping and immutable pool;
 it cannot be reconstructed from arbitrary producer-supplied labels. General relay
 and full broker/GStreamer qualification remain separate from these adapter tests.
+
+### Applying authenticated policy to GStreamer
+
+After `configureMemory` and authenticated offer exchange, SessionProvider applies
+`GstFrameLinkMemoryPolicy` using `apply-memory-policy` while the adopted element
+is NULL. The trusted caller must have verified the actual immutable resource pool;
+the action itself does not authenticate arbitrary callers. Properties and actual
+pool generation are frozen. Reconnect/reallocation requires a fresh agreement and
+new element; source/sink reject stale generations before media acceptance.
+
+A policy-bound native ALLOCATION query requires `framelink-memory-requirements`
+(`G_TYPE_BYTES`, encoded requirements). Upstream requirements are evaluated with
+both authenticated endpoint requirements. Existing platform-specific writer
+completion contracts are still mandatory. The response exposes selected resource,
+operation mask and session generation. A native reader must additionally supply
+`framelink-reader-completion-contract=retain-memory-until-gpu-complete-v1` and its
+usage requirements. This promise requires real integration: releasing the buffer
+while GPU access continues violates the contract. Unknown stock readers reject.
+
+Legacy unbound paths retain their previous behavior. See
+[memory-policy evidence](m5a/gst-authenticated-allocation-20261101/README.md).
