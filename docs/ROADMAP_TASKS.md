@@ -177,7 +177,7 @@ playback delay; unsupported hardware paths must reject clearly.
 
 ## M5b — GStreamer audio elements and coordinated A/V sessions
 
-**State: in progress; tasks1–6 locally validated; task7 integration examples next.** Added at Jon's request 2026-11-01. Execute
+**State: in progress; tasks1–7 locally validated; task8 automated validation next.** Added at Jon's request 2026-11-01. Execute
 only after M5a closes, before M6 qualifies the complete public integration path.
 Video elements remain video-only; separate audio elements share one session.
 
@@ -224,10 +224,14 @@ elements remain independently available.
   [Closure matrix](m5b/lifecycle-security/README.md) with [fatal propagation](m5b/fatal-propagation/README.md)
   and [reconnect](m5b/reconnect/README.md): Linux105/105 serial, Windows10/10,
   timeline20/20 on Linux/Windows/Android. Automatic in-element reconnect is not provided.
-- [ ] **M5b.7 Integration examples:** audio-only and two-process A/V GStreamer
+- [x] **M5b.7 Integration examples:** audio-only and two-process A/V GStreamer
   examples, with Windows integration first, then Linux/Android adapters. Show
   independent video rendering plus standard audio output, shared session setup
   and CPU/native-video compatibility without hand-wired GDP internals.
+  [Guide](../samples/GST_AV_EXAMPLE.md), [evidence](m5b/examples/README.md): public
+  one-call A/V setup, clock, ready and drain helpers; two-process example 30/30 on
+  Linux/Windows/Android, Windows display mode, Linux107/107 serial. Five defects
+  fixed with negative controls. CPU rings only; native memory stays M5a-qualified.
 - [ ] **M5b.8 Automated validation:** GstTestClock/segment tests, exact PCM and
   producer-to-consumer A/V offset checks, skew/jitter accounting, negative controls,
   restart/failure scenarios and regression tests for existing video-only elements.

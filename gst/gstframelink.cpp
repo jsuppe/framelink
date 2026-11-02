@@ -29,6 +29,7 @@
 
 #include <algorithm>
 #include "framelink_session_transport.h"
+#include "fl_gst_session_internal.h"
 #if defined(FL_GST_DMABUF) || defined(FL_GST_D3D11) || defined(__ANDROID__)
 #define FL_GST_NATIVE 1
 #include <memory>
@@ -1001,7 +1002,7 @@ typedef struct _GstFrameLinkSrc {
     GstBuffer* pendingDelivery;
     FlGstSession* session; flSessionConfig sessionConfig; gboolean sessionRegistered;
     guint64 sessionFrames;gint64 sessionLastPts;
-    FlGstVideoEvent pendingGaps[32];guint pendingGapCount;
+    FlGstVideoEvent pendingGaps[32];guint pendingGapCount;gboolean videoEndSeen;
 
     // properties: the ring THIS element allocates (it is the consumer)
     gchar* channel;
@@ -1109,7 +1110,7 @@ static gboolean srcStart(GstBaseSrc* base) {
             GST_ELEMENT_ERROR(self,RESOURCE,SETTINGS,("coordinated video requires matching adopted allocation/session"),(NULL));return FALSE;
         }
         if(!self->sessionRegistered){if(fl_gst_session_register_track(self->session,FL_GST_TRACK_VIDEO)!=FL_GST_SESSION_READY)return FALSE;self->sessionRegistered=TRUE;}
-        self->preserveTimestamps=TRUE;self->preserveFrameMetadata=TRUE;self->streamGeneration=self->sessionConfig.generation;self->sessionFrames=0;self->sessionLastPts=-1;self->pendingGapCount=0;
+        self->preserveTimestamps=TRUE;self->preserveFrameMetadata=TRUE;self->streamGeneration=self->sessionConfig.generation;self->sessionFrames=0;self->sessionLastPts=-1;self->pendingGapCount=0;self->videoEndSeen=FALSE;
     }
 #ifndef FL_GST_NATIVE
     if(self->nativeMemory){GST_ELEMENT_ERROR(self,RESOURCE,SETTINGS,("native-memory output is not supported by this build"),(NULL));return FALSE;}
@@ -1313,6 +1314,12 @@ static GstFlowReturn srcCreateImpl(GstPushSrc* push, GstBuffer** outbuf) {
                 return trace.result(GST_FLOW_ERROR);
             }
         }
+        // Video-only sessions have no audio terminal record; take the producer's
+        // END accounting from the ordered event stream without consuming it.
+        if(self->session&&!self->sessionConfig.audioTrackId&&!self->videoEndSeen){FlGstVideoEvent end{};
+            if(fl_gst_session_peek_video_end(self->session,self->sessionConfig.generation,&end)==FL_GST_SESSION_READY){
+                if(fl_gst_session_video_eos(self->session,self->sessionConfig.generation,end.afterFrames,end.afterFrames?gint64(end.ptsNs):-1)!=FL_GST_SESSION_READY){GST_ELEMENT_ERROR(self,STREAM,FAILED,("invalid coordinated video END record"),(NULL));return GST_FLOW_ERROR;}
+                self->videoEndSeen=TRUE;}}
         if(self->session){guint64 frames=0;gint64 pts=-1;auto end=fl_gst_session_wait_video_eos(self->session,self->sessionConfig.generation,0,&frames,&pts);
             if(end==FL_GST_SESSION_READY&&self->sessionFrames>=frames){if(self->sessionFrames!=frames||self->sessionLastPts!=pts){GST_ELEMENT_ERROR(self,STREAM,FAILED,("video terminal accounting mismatch"),(NULL));return GST_FLOW_ERROR;}if(!srcVideoEvents(self,FL_GST_VIDEO_END,pts<0?0:guint64(pts))||!srcEmitGaps(self)){GST_ELEMENT_ERROR(self,STREAM,FAILED,("video terminal event ordering failed"),(NULL));return GST_FLOW_ERROR;}return GST_FLOW_EOS;}
         }

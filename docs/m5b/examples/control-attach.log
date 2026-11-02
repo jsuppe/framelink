@@ -1,0 +1,46 @@
+PASS av-rgba-consumer-first producer=0 consumer=0 elapsed=3.70s {"event": "verify", "tracks": "av", "format": "RGBA", "frames": 90, "expected_frames": 90, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.056, "lag_max_ms": 150.194, "latency_ms": 150, "result": "pass"}
+FAIL av-rgba-producer-first producer=1 consumer=1 elapsed=0.55s {"event": "verify", "tracks": "av", "format": "RGBA", "frames": 0, "expected_frames": 90, "samples": 0, "expected_samples": 144000, "lag_min_ms": 0.0, "lag_max_ms": 0.0, "latency_ms": 150, "result": "fail", "reason": "video frame count"}
+--- producer stderr
+producer: waiting for consumer on /tmp/fl-m5b-example-42hqozxx/session
+giostreamsink0: Could not write to resource.
+../gst/gio/gstgiobasesink.c(360): gst_gio_base_sink_render (): /GstPipeline:pipeline0/GstFrameLinkAudioSink:framelinkaudiosink0/GstGioStreamSink:giostreamsink0:
+Could not write to stream: Error sending data: Broken pipe
+producer: failed
+
+--- consumer stderr
+consumer: connecting to /tmp/fl-m5b-example-42hqozxx/session
+video: authenticated pool generation changed; fresh session agreement required
+/tmp/framelink-m5a/gst/gstframelink.cpp(1374): srcCreateImpl (): /GstPipeline:pipeline0/GstFrameLinkSrc:video
+consumer: failed
+
+FAIL av-nv12 producer=1 consumer=1 elapsed=0.55s {"event": "verify", "tracks": "av", "format": "NV12", "frames": 0, "expected_frames": 90, "samples": 0, "expected_samples": 144000, "lag_min_ms": 0.0, "lag_max_ms": 0.0, "latency_ms": 150, "result": "fail", "reason": "video frame count"}
+--- producer stderr
+producer: waiting for consumer on /tmp/fl-m5b-example-8zor6jv2/session
+giostreamsink0: Could not write to resource.
+../gst/gio/gstgiobasesink.c(360): gst_gio_base_sink_render (): /GstPipeline:pipeline0/GstFrameLinkAudioSink:framelinkaudiosink0/GstGioStreamSink:giostreamsink0:
+Could not write to stream: Error sending data: Broken pipe
+producer: failed
+
+--- consumer stderr
+consumer: connecting to /tmp/fl-m5b-example-8zor6jv2/session
+video: authenticated pool generation changed; fresh session agreement required
+/tmp/framelink-m5a/gst/gstframelink.cpp(1374): srcCreateImpl (): /GstPipeline:pipeline0/GstFrameLinkSrc:video
+consumer: failed
+
+FAIL video-bgra producer=1 consumer=1 elapsed=0.61s {"event": "verify", "tracks": "video", "format": "BGRA", "frames": 0, "expected_frames": 90, "samples": 0, "expected_samples": 0, "lag_min_ms": 0.0, "lag_max_ms": 0.0, "latency_ms": 150, "result": "fail", "reason": "video frame count"}
+--- producer stderr
+producer: waiting for consumer on /tmp/fl-m5b-example-jaduw265/session
+videotestsrc0: Internal data stream error.
+../libs/gst/base/gstbasesrc.c(3177): gst_base_src_loop (): /GstPipeline:pipeline0/GstVideoTestSrc:videotestsrc0:
+streaming stopped, reason error (-5)
+producer: failed
+
+--- consumer stderr
+consumer: connecting to /tmp/fl-m5b-example-jaduw265/session
+video: authenticated pool generation changed; fresh session agreement required
+/tmp/framelink-m5a/gst/gstframelink.cpp(1374): srcCreateImpl (): /GstPipeline:pipeline0/GstFrameLinkSrc:video
+consumer: failed
+
+PASS audio-only producer=0 consumer=0 elapsed=3.68s {"event": "verify", "tracks": "audio", "format": "RGBA", "frames": 0, "expected_frames": 0, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.058, "lag_max_ms": 150.187, "latency_ms": 150, "result": "pass"}
+PASS negative-track-mismatch producer=1 consumer=1 elapsed=0.33s 
+m5b gst A/V example: 3/6 cases passed

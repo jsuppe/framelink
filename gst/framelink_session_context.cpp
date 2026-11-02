@@ -178,4 +178,5 @@ static std::shared_ptr<FlGstEventChannel> eventChannel(FlGstSession*s,guint64 ge
 }
 gboolean fl_gst_session_has_event_stream(FlGstSession*s,guint64 generation){return bool(eventChannel(s,generation));}
 FlGstSessionResult fl_gst_session_send_video_event(FlGstSession*s,guint64 generation,const FlGstVideoEvent*event){auto channel=eventChannel(s,generation);return channel&&event?channel->send(*event):FL_GST_SESSION_INVALID;}
+FlGstSessionResult fl_gst_session_peek_video_end(FlGstSession*s,guint64 generation,FlGstVideoEvent*event){auto channel=eventChannel(s,generation);if(!channel||!event)return FL_GST_SESSION_INVALID;return channel->peekEnd(event)?FL_GST_SESSION_READY:FL_GST_SESSION_TIMEOUT;}
 FlGstSessionResult fl_gst_session_receive_video_event(FlGstSession*s,guint64 generation,guint timeout,FlGstVideoEvent*event){auto channel=eventChannel(s,generation);return channel?channel->receive(timeout,event):FL_GST_SESSION_INVALID;}

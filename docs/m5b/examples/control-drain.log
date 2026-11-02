@@ -1,0 +1,50 @@
+FAIL av-rgba-consumer-first producer=0 consumer=1 elapsed=3.53s {"event": "verify", "tracks": "av", "format": "RGBA", "frames": 86, "expected_frames": 90, "samples": 136800, "expected_samples": 144000, "lag_min_ms": 150.055, "lag_max_ms": 150.232, "latency_ms": 150, "result": "fail", "reason": "video frame count"}
+--- producer stderr
+producer: waiting for consumer on /tmp/fl-m5b-example-l2k0amga/session
+producer: finished
+
+--- consumer stderr
+consumer: connecting to /tmp/fl-m5b-example-l2k0amga/session
+video: framelink acquire failed
+/tmp/framelink-m5a/gst/gstframelink.cpp(1343): srcCreateImpl (): /GstPipeline:pipeline0/GstFrameLinkSrc:video:
+flAcquireFrame: peer disconnected
+consumer: failed
+
+FAIL av-rgba-producer-first producer=0 consumer=1 elapsed=3.52s {"event": "verify", "tracks": "av", "format": "RGBA", "frames": 86, "expected_frames": 90, "samples": 136800, "expected_samples": 144000, "lag_min_ms": 150.017, "lag_max_ms": 150.2, "latency_ms": 150, "result": "fail", "reason": "video frame count"}
+--- producer stderr
+producer: waiting for consumer on /tmp/fl-m5b-example-wiqbp9lt/session
+producer: finished
+
+--- consumer stderr
+consumer: connecting to /tmp/fl-m5b-example-wiqbp9lt/session
+video: framelink acquire failed
+/tmp/framelink-m5a/gst/gstframelink.cpp(1343): srcCreateImpl (): /GstPipeline:pipeline0/GstFrameLinkSrc:video:
+flAcquireFrame: peer disconnected
+consumer: failed
+
+FAIL av-nv12 producer=0 consumer=1 elapsed=3.53s {"event": "verify", "tracks": "av", "format": "NV12", "frames": 86, "expected_frames": 90, "samples": 136800, "expected_samples": 144000, "lag_min_ms": 150.055, "lag_max_ms": 150.234, "latency_ms": 150, "result": "fail", "reason": "video frame count"}
+--- producer stderr
+producer: waiting for consumer on /tmp/fl-m5b-example-2rtw6br4/session
+producer: finished
+
+--- consumer stderr
+consumer: connecting to /tmp/fl-m5b-example-2rtw6br4/session
+video: framelink acquire failed
+/tmp/framelink-m5a/gst/gstframelink.cpp(1343): srcCreateImpl (): /GstPipeline:pipeline0/GstFrameLinkSrc:video:
+flAcquireFrame: peer disconnected
+consumer: failed
+
+FAIL video-bgra producer=0 consumer=1 elapsed=3.51s {"event": "verify", "tracks": "video", "format": "BGRA", "frames": 85, "expected_frames": 90, "samples": 0, "expected_samples": 0, "lag_min_ms": 150.057, "lag_max_ms": 150.217, "latency_ms": 150, "result": "fail", "reason": "video frame count"}
+--- producer stderr
+producer: waiting for consumer on /tmp/fl-m5b-example-jer1qtyg/session
+producer: finished
+
+--- consumer stderr
+consumer: connecting to /tmp/fl-m5b-example-jer1qtyg/session
+video: coordinated video idle deadline, cancellation or stale generation
+/tmp/framelink-m5a/gst/gstframelink.cpp(1308): srcCreateImpl (): /GstPipeline:pipeline0/GstFrameLinkSrc:video
+consumer: failed
+
+PASS audio-only producer=0 consumer=0 elapsed=3.68s {"event": "verify", "tracks": "audio", "format": "RGBA", "frames": 0, "expected_frames": 0, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.056, "lag_max_ms": 150.22, "latency_ms": 150, "result": "pass"}
+PASS negative-track-mismatch producer=1 consumer=1 elapsed=0.33s 
+m5b gst A/V example: 2/6 cases passed

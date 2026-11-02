@@ -50,6 +50,13 @@ public:
   std::array<guint8,64> wire{};memcpy(wire.data(),"FLEVT001",8);GST_WRITE_UINT64_BE(wire.data()+8,generation_);GST_WRITE_UINT32_BE(wire.data()+16,e.kind);GST_WRITE_UINT64_BE(wire.data()+24,e.afterFrames);GST_WRITE_UINT64_BE(wire.data()+32,e.ptsNs);GST_WRITE_UINT64_BE(wire.data()+40,e.durationNs);GST_WRITE_UINT64_BE(wire.data()+48,++sent_);
   GError*error=nullptr;bool ok=g_output_stream_write_all(g_io_stream_get_output_stream(G_IO_STREAM(stream_)),wire.data(),wire.size(),nullptr,cancel_,&error);g_clear_error(&error);if(!ok){fail();return FL_GST_SESSION_CANCELLED;}return FL_GST_SESSION_READY;
  }
+ // Non-consuming lookup of a queued END record (video-only sessions learn the
+ // producer's terminal accounting from it without disturbing event order).
+ bool peekEnd(FlGstVideoEvent*out){
+  if(producer_||!out)return false;std::lock_guard<std::mutex> lock(mutex_);
+  for(const auto&e:events_)if(e.kind==FL_GST_VIDEO_END){*out=e;return true;}
+  return false;
+ }
  FlGstSessionResult receive(guint timeout,FlGstVideoEvent*out){
   if(producer_||!out||timeout>60000)return FL_GST_SESSION_INVALID;
   std::unique_lock<std::mutex> lock(mutex_);

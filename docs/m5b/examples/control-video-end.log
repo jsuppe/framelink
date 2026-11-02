@@ -1,0 +1,17 @@
+PASS av-rgba-consumer-first producer=0 consumer=0 elapsed=3.70s {"event": "verify", "tracks": "av", "format": "RGBA", "frames": 90, "expected_frames": 90, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.015, "lag_max_ms": 150.23, "latency_ms": 150, "result": "pass"}
+PASS av-rgba-producer-first producer=0 consumer=0 elapsed=3.69s {"event": "verify", "tracks": "av", "format": "RGBA", "frames": 90, "expected_frames": 90, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.05, "lag_max_ms": 150.28, "latency_ms": 150, "result": "pass"}
+PASS av-nv12 producer=0 consumer=0 elapsed=3.70s {"event": "verify", "tracks": "av", "format": "NV12", "frames": 90, "expected_frames": 90, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.053, "lag_max_ms": 150.193, "latency_ms": 150, "result": "pass"}
+FAIL video-bgra producer=1 consumer=1 elapsed=11.45s {"event": "verify", "tracks": "video", "format": "BGRA", "frames": 90, "expected_frames": 90, "samples": 0, "expected_samples": 0, "lag_min_ms": 150.056, "lag_max_ms": 150.185, "latency_ms": 150, "result": "fail"}
+--- producer stderr
+producer: waiting for consumer on /tmp/fl-m5b-example-3gg3k0na/session
+finish: consumer did not report drain before the deadline
+producer: failed
+
+--- consumer stderr
+consumer: connecting to /tmp/fl-m5b-example-3gg3k0na/session
+timed out waiting for EOS
+consumer: failed
+
+PASS audio-only producer=0 consumer=0 elapsed=3.68s {"event": "verify", "tracks": "audio", "format": "RGBA", "frames": 0, "expected_frames": 0, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.056, "lag_max_ms": 150.192, "latency_ms": 150, "result": "pass"}
+PASS negative-track-mismatch producer=1 consumer=1 elapsed=0.33s 
+m5b gst A/V example: 5/6 cases passed

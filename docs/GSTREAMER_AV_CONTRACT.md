@@ -1,8 +1,9 @@
 # M5b public GStreamer A/V contract
 
-Status: tasks1–6 locally validated on the M5b development branch. Public audio
-sink/source, coordinated timing and lifecycle/security are implemented; examples
-and A/V bins remain unfinished. See [lifecycle closure](m5b/lifecycle-security/README.md). Existing `framelinksink`/`framelinksrc` remain video
+Status: tasks1–7 locally validated on the M5b development branch. Public audio
+sink/source, coordinated timing, lifecycle/security and two-process examples are
+implemented; automated matrix and A/V bins remain unfinished. See
+[examples](m5b/examples/README.md) and [lifecycle closure](m5b/lifecycle-security/README.md). Existing `framelinksink`/`framelinksrc` remain video
 only. No compatibility claim follows from this design document alone.
 
 ## Public surface
