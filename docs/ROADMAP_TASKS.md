@@ -177,7 +177,7 @@ playback delay; unsupported hardware paths must reject clearly.
 
 ## M5b — GStreamer audio elements and coordinated A/V sessions
 
-**State: in progress; tasks1–5 locally validated; task6 lifecycle/security active.** Added at Jon's request 2026-11-01. Execute
+**State: in progress; tasks1–6 locally validated; task7 integration examples next.** Added at Jon's request 2026-11-01. Execute
 only after M5a closes, before M6 qualifies the complete public integration path.
 Video elements remain video-only; separate audio elements share one session.
 
@@ -218,15 +218,12 @@ elements remain independently available.
   [Timing acceptance](m5b/timing-controls/README.md): common offsets, GAP/barriers,
   flush invalidation, empty EOS, unsupported rates and fresh generation mappings.
   Actual reconnect/pause lifecycle remains task6.
-- [ ] **M5b.6 Lifecycle/security:** both startup orders, coordinated pause/resume,
+- [x] **M5b.6 Lifecycle/security:** both startup orders, coordinated pause/resume,
   track loss, cancellation, peer death/reconnect, stale generations, negotiation
   rejection, bounded cleanup and platform endpoint permissions/authentication.
-  Partial evidence: [pause/context](m5b/lifecycle-pause/README.md),
-  [in-flight pause](m5b/inflight-pause/README.md), [rapid audio pause](m5b/rapid-audio-pause/README.md),
-  [fatal-error propagation and peer death](m5b/fatal-propagation/README.md):
-  [reconnect on a fresh generation](m5b/reconnect/README.md): Linux105/105 serial,
-  timeline20/20 on Linux/Windows/Android. Remaining task6 audit: negotiation
-  rejection and endpoint permission coverage against the public elements.
+  [Closure matrix](m5b/lifecycle-security/README.md) with [fatal propagation](m5b/fatal-propagation/README.md)
+  and [reconnect](m5b/reconnect/README.md): Linux105/105 serial, Windows10/10,
+  timeline20/20 on Linux/Windows/Android. Automatic in-element reconnect is not provided.
 - [ ] **M5b.7 Integration examples:** audio-only and two-process A/V GStreamer
   examples, with Windows integration first, then Linux/Android adapters. Show
   independent video rendering plus standard audio output, shared session setup

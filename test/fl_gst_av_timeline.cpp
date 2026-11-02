@@ -171,7 +171,8 @@ static void reconnect(){
   std::string name="m5b-reconnect-"+std::to_string(generation)+"-"+std::to_string(g_get_monotonic_time());flChannel*consumer=nullptr,*producer=nullptr;
   CHECK(flCreateChannelEx(name.c_str(),32,16,FL_FORMAT_RGBA8,2,FL_MAP_CPU|FL_REQUIRE_FRAME_METADATA,&consumer)==FL_OK);CHECK(flOpenProducer(name.c_str(),&producer)==FL_OK);
   gboolean adopted=FALSE;g_signal_emit_by_name(vs,"adopt-channel",producer,&adopted);CHECK(adopted);g_signal_emit_by_name(vr,"adopt-channel",consumer,&adopted);CHECK(adopted);
-  playing(rx,generation);playing(tx,generation);
+  // Generation1 starts consumer-first, generation2 producer-first.
+  if(generation==1){playing(rx,generation);playing(tx,generation);}else{playing(tx,generation);g_usleep(50000);playing(rx,generation);}
   const guint frames=generation==1?3:6;
   for(guint n=0;n<frames;n++){
    push(vin,32*16*4,guint8(n+10*generation),5*GST_SECOND+n*20000000,20000000,5*GST_SECOND,1.0,n==0);
@@ -219,6 +220,22 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
   gst_element_set_context(element,wrong);gst_context_unref(wrong);
   CHECK(gst_element_set_state(element,GST_STATE_PAUSED)==GST_STATE_CHANGE_FAILURE);
   gst_element_set_state(element,GST_STATE_NULL);gst_object_unref(element);
+ }
+ // Track-set mismatch: an element's requested tracks must equal the negotiated
+ // session's track set in both directions; no silent audio-only downgrade.
+ for(int avSession=0;avSession<2;avSession++){
+  auto*session=fl_gst_session_new(avSession?3:2);flSessionConfig c{};c.version=2;c.sessionId.bytes[0]=9;c.clockId.bytes[0]=2;c.generation=1;c.audioTrackId=2;c.audio={FL_PCM_S16,48000,2};c.audioQueueMs=80;c.connectTimeoutMs=2000;c.idleTimeoutMs=2000;
+  flSessionCapabilities caps{};caps.version=2;caps.audioCount=1;caps.audio[0]=c.audio;
+  if(avSession){c.videoTrackId=1;c.video={FL_FORMAT_RGBA8,32,16,50,1};c.videoQueueFrames=2;caps.videoCount=1;caps.video[0]=c.video;}
+  CHECK(fl_gst_session_configure(session,&c,&caps,&caps)==FL_GST_SESSION_READY);
+  for(const char*name:{"framelinkaudiosink","framelinkaudiosrc"}){
+   auto*element=gst_element_factory_make(name,nullptr);CHECK(element);g_object_set(element,"tracks",avSession?"audio":"av",nullptr);
+   auto*context=fl_gst_session_create_context(session);gst_element_set_context(element,context);gst_context_unref(context);
+   CHECK(gst_element_set_state(element,GST_STATE_READY)==GST_STATE_CHANGE_FAILURE);
+   gst_element_set_state(element,GST_STATE_NULL);gst_object_unref(element);
+  }
+  flSessionConfig out{};CHECK(fl_gst_session_get_config(session,&out)==FL_GST_SESSION_READY&&bool(out.videoTrackId)==bool(avSession));
+  g_object_unref(session);
  }
  run(false);run(true);run(false,1);run(false,2);run(false,3);run(false,4);run(false,5);reconnect();run(false,0,true);run(true,0,true);run(false,0,true,true);run(false,0,true,false,1);run(false,0,true,false,2);run(false,0,true,false,3);puts("coordinated public A/V: distinct TIME segments, one receiver mapping, exact +/-37ms offset, pixels/PCM/DTS/duration/generation passed");return 0;
 }
