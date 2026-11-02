@@ -39,8 +39,8 @@ prevents deallocation; it does not establish permission to overwrite.
 Geometry requests do not replace external storage. Query the actual unchanged
 configuration, or retire the old channel safely and create a new external ring.
 All outstanding GPU access must finish before close/reconfiguration under the
-existing API contract. Pending native references do not solve downstream reader
-accounting; generation-safe reader leases are the next ownership subtask.
+existing API contract. Pending native references do not solve downstream reader accounting; use the
+implemented generation-safe reader leases/completion contract in READ_LEASES.md.
 
 The caller must deliver authorized native handles into the consumer's process
 first. Factories do not broker arbitrary handles from another process, negotiate
@@ -59,8 +59,8 @@ NT wrapper identities. Therefore that rejection is not proof that arbitrary
 external handles describe distinct backing storage. Callers must supply genuinely
 distinct allocations from a trusted allocator; remote strict negotiation must bind
 allocator-issued allocation identities, not infer them from distinct handle values
-or NT wrappers. Broader alias-negative qualification remains an open integration
-gate. The native Gst source test uses a controlled alias oracle (test only), not
+or NT wrappers. The canonical-export binding adapter is documented in GST_NATIVE_MEMORY.md;
+arbitrary independent exports still cannot establish distinct storage. The native Gst source test uses a controlled alias oracle (test only), not
 handle inequality as zero-copy evidence.
 
 ## Producer-side native references

@@ -16,9 +16,9 @@ GStreamer native-memory support or runtime zero-copy qualification. Public API:
 - Requirement messages belong inside the authenticated session/generation's
   control exchange. They contain policy, not authentication, handles, allocation
   identity or a new clock. They must not be appended to the legacy session wire.
-- Provider/control/GStreamer wiring is later M5a work. These helpers do not yet
-  exchange messages, detect legacy peers, authorize allocations or change runtime
-  paths. Their API and tests are groundwork for that integration.
+- These pure helpers do not themselves exchange/authenticate messages or change
+  runtime paths. The implemented authenticated provider/GStreamer integration is
+  documented separately in GST_NATIVE_MEMORY.md; callers must opt into it.
 
 ## Required and preferred usage
 
@@ -146,7 +146,9 @@ FrameLink API support, not successful hardware semaphore probes.
 
 `interopCapabilities` currently exposes existing-ring import and borrowed native
 handle access only. Locally adopted pools also report EXTERNAL_POOL; see [external pools](EXTERNAL_POOLS.md).
-Remote allocation negotiation and safe relay remain incomplete and unadvertised. Handle duplication alone
+The generic RELAY capability remains unadvertised: safe forwarding requires the
+explicit negotiated bindings/completion contract in GST_NATIVE_MEMORY.md and
+samples/NATIVE_RELAY.md, not a resource-query bit. Handle duplication alone
 cannot establish safe reuse. No claim of physical GPU residency is made.
 
 [Device and mapping validation](m5a/adapters-20261101/README.md).

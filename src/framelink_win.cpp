@@ -701,10 +701,15 @@ FL_API flResult flAcquireBuffer(flChannel* ch, flBuffer* out, uint32_t timeoutMs
     for (;;) {
         const uint64_t consumed = ch->consumedFence->GetCompletedValue();
         if(consumed==UINT64_MAX)return trace.result(FL_DISCONNECTED); // device removed, not all slots free
+        bool localBlocked = false;
         for (size_t i = 0; i < ch->images.size(); ++i) {
             // Free once the consumer has promised never to read this slot's
             // previous contents again.
-            if (ch->slotReadyValue[i] <= consumed && !ch->bufferReferences.busy((uint32_t)i)) {
+            if (ch->slotReadyValue[i] <= consumed) {
+                if (ch->bufferReferences.busy((uint32_t)i)) {
+                    localBlocked = true;
+                    continue;
+                }
                 ch->slotReadyValue[i] = UINT64_MAX;ch->slotMetadata[i]={}; // reserve until submit
                 out->slot = (uint32_t)i;
                 out->image = ch->images[i];
@@ -733,12 +738,17 @@ FL_API flResult flAcquireBuffer(flChannel* ch, flBuffer* out, uint32_t timeoutMs
             }
             return trace.result(FL_TIMEOUT);
         }
+        // Preserve what prevented reuse during this scan. Re-reading empty()
+        // here can miss a finalizer release between the scan and wait, then
+        // sleep on an unrelated outstanding remote fence for the full timeout.
+        // Poll local finalizers without accumulating repeated GPU event requests.
+        if (localBlocked) { Sleep(1); continue; }
         uint64_t oldest = UINT64_MAX;
         for (uint64_t v : ch->slotReadyValue)
             if (v > consumed && v < oldest) oldest = v;
         if (oldest == UINT64_MAX) { Sleep(1); continue; }
         ch->consumedFence->SetEventOnCompletion(oldest, ch->waitEvent);
-        fltrace::call("wait.consumed_fence", [&]{return WaitForSingleObject(ch->waitEvent, ch->bufferReferences.empty()?deadline-now:(std::min)(DWORD(1),deadline-now));});
+        fltrace::call("wait.consumed_fence", [&]{return WaitForSingleObject(ch->waitEvent, deadline-now);});
     }
 }
 

@@ -1,4 +1,10 @@
-# Native GStreamer memory integration (M5a.7 — partial)
+# Native GStreamer memory integration (qualified explicit adapters)
+
+Current scope: explicit native sources/sinks, completion-aware ALLOCATION pools,
+authenticated memory agreement and allocation bindings are locally validated.
+The supported decoder, signed Android and multi-process GPU evidence is linked
+in [the task checklist](ROADMAP_TASKS.md) and [performance report](m5a/multihop-performance-20261101/README.md).
+This is not generic compatibility with every decoder/GPU plugin.
 
 ## Linux source: opt-in linear DMA-BUF
 
@@ -21,9 +27,8 @@ The GstMemory finalizer completes the reader; shared memory subviews retain the
 parent and therefore the lease. The channel remains alive after source shutdown
 until the last exported memory reader finishes. Downstream must retain the
 GstMemory until all asynchronous GPU access has completed—dropping its final
-reference before GPU completion violates this contract. Native fence handoff
-and platform allocator integration for general GPU consumers remain subsequent
-M5a.7 work. This is not permission to reuse a frame while a GPU reads it.
+reference before GPU completion violates this contract. Explicit completion/pool adapters are documented below. General GPU consumers
+remain unsupported unless they honor that completion contract. This is not permission to reuse a frame while a GPU reads it.
 
 Validation checks RGBA/NV12 allocation identity via DMA-BUF fstat, exact pixels,
 PTS, two-slot saturation, retained memory-subview lifetime after shutdown, and
@@ -73,7 +78,7 @@ application-side CPU mapping is outside that zero-copy source boundary. Opaque
 Android YUV420 cannot be advertised as NV12 byte layout, and BGRA logical channels
 use RGBA native storage; those native-source requests currently fail instead of
 silently normalizing/converting them. Their legacy CPU paths remain available.
-External-YUV format negotiation/import remains an open task7 integration item.
+External-YUV/native-layout import remains unsupported by these explicit adapters.
 
 Device tests verify RGBA/RGB10 AHB allocation IDs, PTS, pixels, two-slot ownership,
 reuse and retained memory after source shutdown; implicit CPU maps and opaque
@@ -92,16 +97,14 @@ reports local flags only; it is not remote negotiation or import compatibility.
 Broker authorization, fresh generation/lease binding and revocation remain the
 SessionProvider's responsibilities. No named fallback is introduced.
 
-## Remaining task 7 work
+## Supported integration versus remaining limits
 
-- Android external-YUV/native-layout negotiation; opaque YUV is not native NV12.
-- Upstream decoder device/allocation/completion compatibility beyond explicit adapters.
-- Authenticated remote requirements, exact device/layout/generation agreement;
-  enforce all endpoint permissions and reject unsupported legacy peers.
-- Full metadata opt-in is now available (see FRAME_METADATA.md); combine its
-  qualified timing path with downstream native decoder/GPU qualification.
-- Renegotiation and failure/reconnect tests with buffers still in flight.
-- GPU completion integration and actual cross-process native pipeline evidence.
+Authenticated requirements, immutable pool/device/generation bindings, metadata,
+explicit completion and frozen-policy rejection are implemented below. Tasks8–13
+qualify supported decoder, lifecycle and multi-process paths. Opaque Android YUV
+is not NV12; arbitrary decoder cancellation/completion and other external layouts
+remain unqualified. Renegotiation requires a fresh native session/pool generation,
+not mutation of live in-flight allocations. See the evidence links above.
 
 ## Windows native sink: explicit reserved-buffer adapter
 
@@ -125,16 +128,16 @@ Local references keep both producer slot and channel alive after sink shutdown.
 Remote completion alone cannot reuse a locally-retained slot. **Before abandoning
 an unpublished buffer, finish all GPU work on it.** After publication, do not write
 through retained aliases. This explicit application adapter is not yet a generic
-GStreamer decoder pool: generic decoder cancellation/completion
-integration, remote permission agreement and actual decoder compatibility remain
-open. Do not attach arbitrary decoder-owned textures and assume shared adapter
+GStreamer decoder pool: generic decoder cancellation/completion remains
+unqualified. Authenticated remote agreement is described below; the supported
+Windows decoder conversion example is in samples/D3D_DECODER.md. Do not attach arbitrary decoder-owned textures and assume shared adapter
 identity makes them FrameLink allocations.
 
 The pipeline gate currently covers RGBA. The internal producer adapter additionally
 covers NV12, original texture identity, exact metadata, retained-memory reuse and
 shutdown lifetime. No full-rate or cross-process pipeline claim is made here.
-Linux and Android native sink modes still reject; their native source adapters
-and legacy sink paths remain supported as documented above.
+Linux and Android explicit native sinks are described below; legacy CPU modes
+remain the defaults.
 
 ### Explicit-completion ALLOCATION pool
 
@@ -223,9 +226,9 @@ video or audio starts. Failure tears down the session. Existing providers remain
 unchanged when the callback is absent. The default synthetic CPU producer is not
 magically a native decoder: strict mode rejects its undeclared pixel copy.
 
-Current provider tests use synthetic bindings for control negatives. Real
-allocation-bound provider qualification remains open; do not use a shared label
-as a production resource binding.
+Control-negative tests use synthetic bindings. Actual allocation-bound adapters
+and their qualification follow below; never use an arbitrary shared label as a
+production resource binding.
 
 ### Linux immutable-pool binding adapter
 
