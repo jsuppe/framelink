@@ -16,7 +16,7 @@ typedef struct {
  guint rate,channels,queueMs,connectMs,idleMs;
  gboolean localSession;
  flSessionConfig config;
- gboolean registered,failed,haveSegment;
+ gboolean registered,failed,haveSegment,drainEmptyHeader;
  GstSegment segment;
  guint64 blocks,bytes,samples,totalSamples,origin;
 } GstFrameLinkAudioSink;
@@ -204,6 +204,17 @@ static void gst_framelink_audio_sink_init(GstFrameLinkAudioSink*s){
  // GDP forwards EOS locally without serializing it. Send an explicit
  // terminal record after queue drain, then preserve local EOS. GDP stores event
  // types in 16 bits; the receiver recognizes this private record by name/schema.
+ // gdppay only releases its initial event/header queue from its chain
+ // function. For an empty stream, use an internal zero-size trigger and drop
+ // its serialized BUFFER packet here: no fabricated PCM crosses the wire.
+ auto*payOutput=gst_element_get_static_pad(s->pay,"src");
+ gst_pad_add_probe(payOutput,GST_PAD_PROBE_TYPE_BUFFER,
+  [](GstPad*,GstPadProbeInfo*info,gpointer data)->GstPadProbeReturn{
+   auto*self=static_cast<GstFrameLinkAudioSink*>(data);if(!self->drainEmptyHeader)return GST_PAD_PROBE_OK;
+   guint8 header[10]{};auto*b=GST_PAD_PROBE_INFO_BUFFER(info);
+   if(gst_buffer_extract(b,0,header,sizeof header)==sizeof header&&GST_READ_UINT16_BE(header+4)==1&&GST_READ_UINT32_BE(header+6)==0)return GST_PAD_PROBE_DROP;
+   return GST_PAD_PROBE_OK;
+  },s,nullptr);gst_object_unref(payOutput);
  auto*terminal=gst_element_get_static_pad(s->pay,"sink");
  gst_pad_add_probe(terminal,GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM,
   [](GstPad*pad,GstPadProbeInfo*info,gpointer data)->GstPadProbeReturn{
@@ -211,10 +222,21 @@ static void gst_framelink_audio_sink_init(GstFrameLinkAudioSink*s){
    if(GST_EVENT_TYPE(GST_PAD_PROBE_INFO_EVENT(info))==GST_EVENT_EOS&&!self->failed){
     guint64 videoFrames=0;gint64 videoLastPts=-1;
     if(self->config.videoTrackId&&fl_gst_session_wait_video_eos(self->session,self->config.generation,self->config.idleTimeoutMs,&videoFrames,&videoLastPts)!=FL_GST_SESSION_READY)return reject(self,"required video EOS missing or cancelled");
+    if(!self->blocks){
+     auto*segment=gst_pad_get_sticky_event(pad,GST_EVENT_SEGMENT,0);
+     if(segment)gst_event_unref(segment);
+     else {GstSegment empty;gst_segment_init(&empty,GST_FORMAT_TIME);if(!gst_pad_send_event(pad,gst_event_new_segment(&empty)))return reject(self,"empty stream segment rejected");}
+    }
     auto*marker=gst_event_new_custom(GST_EVENT_CUSTOM_DOWNSTREAM,gst_structure_new("framelink-audio-eos",
      "version",G_TYPE_UINT,1u,"generation",G_TYPE_UINT64,self->config.generation,
      "blocks",G_TYPE_UINT64,self->blocks,"pcm-bytes",G_TYPE_UINT64,self->bytes,"video-frames",G_TYPE_UINT64,videoFrames,"video-last-pts",G_TYPE_INT64,videoLastPts,nullptr));
     if(!gst_pad_send_event(pad,marker))return reject(self,"audio terminal record could not be sent");
+    if(!self->blocks){
+     self->drainEmptyHeader=TRUE;
+     auto*trigger=gst_buffer_new();GST_BUFFER_PTS(trigger)=0;GST_BUFFER_DURATION(trigger)=0;
+     auto flow=gst_pad_chain(pad,trigger);self->drainEmptyHeader=FALSE;
+     if(flow!=GST_FLOW_OK)return reject(self,"empty audio terminal headers could not be drained");
+    }
    }return GST_PAD_PROBE_OK;
   },s,nullptr);gst_object_unref(terminal);
  auto*pad=gst_element_get_static_pad(s->filter,"sink");

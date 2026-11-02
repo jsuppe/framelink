@@ -28,7 +28,7 @@ static void push(GstElement*source,guint size,guint8 value,GstClockTime pts,GstC
  GstSegment segment;gst_segment_init(&segment,GST_FORMAT_TIME);segment.start=start;segment.position=start;segment.base=500000000;
  auto*caps=gst_app_src_get_caps(GST_APP_SRC(source));auto*sample=gst_sample_new(b,caps,&segment,nullptr);CHECK(gst_app_src_push_sample(GST_APP_SRC(source),sample)==GST_FLOW_OK);gst_sample_unref(sample);gst_caps_unref(caps);gst_buffer_unref(b);
 }
-static void run(bool audioLeads,int negative=0,bool gap=false){
+static void run(bool audioLeads,int negative=0,bool gap=false,bool empty=false){
  Pair audio,events;auto*sender=fl_gst_session_new(3);auto*receiver=fl_gst_session_new(3);
  flSessionConfig c{};c.version=2;c.sessionId.bytes[0]=1;c.clockId.bytes[0]=2;c.generation=1;c.videoTrackId=1;c.audioTrackId=2;c.video={FL_FORMAT_RGBA8,32,16,50,1};c.videoQueueFrames=2;c.audio={FL_PCM_S16,48000,2};c.audioQueueMs=80;c.connectTimeoutMs=2000;c.idleTimeoutMs=2000;
  flSessionCapabilities caps{};caps.version=2;caps.videoCount=caps.audioCount=1;caps.video[0]=c.video;caps.audio[0]=c.audio;
@@ -45,7 +45,7 @@ static void run(bool audioLeads,int negative=0,bool gap=false){
  auto*vin=gst_bin_get_by_name(GST_BIN(tx),"vin");auto*ain=gst_bin_get_by_name(GST_BIN(tx),"ain");auto*vout=gst_bin_get_by_name(GST_BIN(rx),"vout");auto*aout=gst_bin_get_by_name(GST_BIN(rx),"aout");
  guint64 videoGap[2]={GST_CLOCK_TIME_NONE,0};auto*pad=gst_element_get_static_pad(vout,"sink");gst_pad_add_probe(pad,GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM,[](GstPad*,GstPadProbeInfo*i,gpointer data)->GstPadProbeReturn{if(GST_EVENT_TYPE(GST_PAD_PROBE_INFO_EVENT(i))==GST_EVENT_GAP){auto*out=static_cast<guint64*>(data);gst_event_parse_gap(GST_PAD_PROBE_INFO_EVENT(i),&out[0],&out[1]);}return GST_PAD_PROBE_OK;},videoGap,nullptr);gst_object_unref(pad);
  CHECK(gst_element_set_state(rx,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);CHECK(gst_element_set_state(tx,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
- for(guint n=0;n<10;n++){
+ for(guint n=0;n<(empty?0u:10u);n++){
   auto voffset=audioLeads?37000000u:0u,aoffset=audioLeads?0u:37000000u;
   if(gap&&n==5){for(auto*in:{vin,ain}){auto*pad=gst_element_get_static_pad(in,"src");CHECK(gst_pad_push_event(pad,gst_event_new_gap((in==vin?5:2)*GST_SECOND+(in==vin?voffset:aoffset)+n*20000000,40000000)));gst_object_unref(pad);}}
   guint64 shift=gap&&n>=5?40000000:0;
@@ -70,5 +70,5 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
 #else
  CHECK(argc>1);GError*error=nullptr;auto*p=gst_plugin_load_file(argv[1],&error);if(error)fprintf(stderr,"%s\n",error->message);CHECK(p&&!error);gst_object_unref(p);
 #endif
- run(false);run(true);run(false,1);run(false,2);run(false,0,true);run(true,0,true);puts("coordinated public A/V: distinct TIME segments, one receiver mapping, exact +/-37ms offset, pixels/PCM/DTS/duration/generation passed");return 0;
+ run(false);run(true);run(false,1);run(false,2);run(false,0,true);run(true,0,true);run(false,0,true,true);puts("coordinated public A/V: distinct TIME segments, one receiver mapping, exact +/-37ms offset, pixels/PCM/DTS/duration/generation passed");return 0;
 }

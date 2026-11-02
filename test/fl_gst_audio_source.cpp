@@ -22,7 +22,7 @@ struct Pair {
  ~Pair(){g_io_stream_close(G_IO_STREAM(client),nullptr,nullptr);g_io_stream_close(G_IO_STREAM(server),nullptr,nullptr);g_object_unref(client);g_object_unref(server);}
 };
 static GstElement* parse(const char*text){GError*error=nullptr;auto*p=gst_parse_launch(text,&error);if(error)fprintf(stderr,"parse: %s\n",error->message);CHECK(p&&!error);return p;}
-static void run(guint format,guint channels,guint rate,int negative,bool segmented=false){
+static void run(guint format,guint channels,guint rate,int negative,bool segmented=false,bool empty=false){
  Pair pair;auto*sender=fl_gst_session_new(2);auto*receiver=fl_gst_session_new(2);
  flSessionConfig cfg{};cfg.version=2;cfg.sessionId.bytes[0]=1;cfg.clockId.bytes[0]=2;cfg.generation=1;cfg.audioTrackId=2;
  cfg.audio={format,rate,channels};cfg.audioQueueMs=80;cfg.connectTimeoutMs=1000;cfg.idleTimeoutMs=1000;
@@ -57,7 +57,7 @@ static void run(guint format,guint channels,guint rate,int negative,bool segment
  if(segmented){auto*pad=gst_element_get_static_pad(output,"sink");gst_pad_add_probe(pad,GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM,[](GstPad*,GstPadProbeInfo*i,gpointer p)->GstPadProbeReturn{if(GST_EVENT_TYPE(GST_PAD_PROBE_INFO_EVENT(i))==GST_EVENT_GAP){auto*values=static_cast<guint64*>(p);gst_event_parse_gap(GST_PAD_PROBE_INFO_EVENT(i),&values[0],&values[1]);}return GST_PAD_PROBE_OK;},observedGap,nullptr);gst_object_unref(pad);}
  const guint samples=segmented?1000:rate/100,bytes=samples*channels*(format==FL_PCM_S16?2:4);
  std::vector<guint8> expected(bytes);for(guint i=0;i<bytes;i++)expected[i]=guint8(i*31);
- for(guint n=0;n<(negative?1u:5u);n++){
+ for(guint n=0;n<(empty?0u:negative?1u:5u);n++){
   guint size=negative==2?bytes*9:negative==4?bytes-1:bytes;auto*b=gst_buffer_new_allocate(nullptr,size,nullptr);
   if(size==bytes)gst_buffer_fill(b,0,expected.data(),bytes);
   guint64 delta=gst_util_uint64_scale(guint64(n)*samples,GST_SECOND,rate),next=gst_util_uint64_scale(guint64(n+1)*samples,GST_SECOND,rate);
@@ -75,6 +75,7 @@ static void run(guint format,guint channels,guint rate,int negative,bool segment
  auto*bus=gst_element_get_bus(tx);
  if(negative){auto*error=gst_bus_timed_pop_filtered(bus,2*GST_SECOND,GST_MESSAGE_ERROR);CHECK(error);gst_message_unref(error);}
  else {CHECK(gst_app_src_end_of_stream(GST_APP_SRC(source))==GST_FLOW_OK);auto*done=gst_bus_timed_pop_filtered(bus,2*GST_SECOND,GstMessageType(GST_MESSAGE_EOS|GST_MESSAGE_ERROR));CHECK(done);if(GST_MESSAGE_TYPE(done)==GST_MESSAGE_ERROR){GError*e=nullptr;gst_message_parse_error(done,&e,nullptr);fprintf(stderr,"pipeline error %s\n",e->message);}CHECK(GST_MESSAGE_TYPE(done)==GST_MESSAGE_EOS);gst_message_unref(done);}
+ if(empty)CHECK(!gst_app_sink_try_pull_sample(GST_APP_SINK(output),0));
  if(!negative){auto*rb=gst_element_get_bus(rx);auto*m=gst_bus_timed_pop_filtered(rb,2*GST_SECOND,GstMessageType(GST_MESSAGE_EOS|GST_MESSAGE_ERROR));CHECK(m&&GST_MESSAGE_TYPE(m)==GST_MESSAGE_EOS);gst_message_unref(m);gst_object_unref(rb);}
  gst_object_unref(bus);gst_element_set_state(tx,GST_STATE_NULL);gst_element_set_state(rx,GST_STATE_NULL);
  gst_object_unref(source);gst_object_unref(transport);gst_object_unref(input);gst_object_unref(output);gst_object_unref(tx);gst_object_unref(rx);g_object_unref(sender);g_object_unref(receiver);
@@ -126,6 +127,7 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
 #endif
  for(guint format:{guint(FL_PCM_S16),guint(FL_PCM_F32)})for(guint channels:{1u,2u})run(format,channels,44100,0);
  run(FL_PCM_F32,2,44100,0,true);
+ run(FL_PCM_S16,2,48000,0,false,true);
  local(true,false,false);local(false,false,false);local(true,true,false);local(true,false,true);
  for(int mode=0;mode<4;mode++)hostile(mode);
  puts("public audio source: exact four PCM formats/layouts, incremental packet delivery before EOS, both startup orders, live latency, missing-peer and cancellation passed");return 0;
