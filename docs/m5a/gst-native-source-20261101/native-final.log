@@ -1,0 +1,27 @@
+Internal ctest changing into directory: /tmp/fl-m5a-gst-build
+UpdateCTestConfiguration  from :/tmp/fl-m5a-gst-build/DartConfiguration.tcl
+UpdateCTestConfiguration  from :/tmp/fl-m5a-gst-build/DartConfiguration.tcl
+Test project /tmp/fl-m5a-gst-build
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 25
+    Start 25: gst_native_source
+
+25: Test command: /tmp/fl-m5a-gst-build/fl_gst_native_source "/tmp/fl-m5a-gst-build/libgstframelink.so"
+25: Working Directory: /tmp/fl-m5a-gst-build
+25: Test timeout computed to be: 15
+25: native DMA-BUF source: original allocation identity, PTS, pixels, bounded ownership and memory-subview lifetime after shutdown pass
+25: native DMA-BUF source: original allocation identity, PTS, pixels, bounded ownership and memory-subview lifetime after shutdown pass
+25: sysmem-only downstream rejected: no silent fallback
+1/1 Test #25: gst_native_source ................   Passed    0.24 sec
+
+The following tests passed:
+	gst_native_source
+
+100% tests passed, 0 tests failed out of 1
+
+Total Test time (real) =   0.24 sec

@@ -1,0 +1,13 @@
+
+11-01 22:05:44.226 31554 31554 I FLCross : bind=true
+11-01 22:05:44.850 31589 31605 I FLCross : grant lease=be026806-5392-40ec-a7fe-645e9c0aadf4 generation=1 consumer_uid=10305 broker_uid=10304
+11-01 22:05:44.851 31613 31629 I FLCross : producer-start lease=be026806-5392-40ec-a7fe-645e9c0aadf4 uid=10304 pid=31613
+11-01 22:05:44.870 31554 31612 I FLCross : receiver-start lease=be026806-5392-40ec-a7fe-645e9c0aadf4 generation=1 uid=10305 pid=31554
+11-01 22:05:44.945 31554 31612 I FLCross : playback producer-system-clock
+11-01 22:05:46.307 31554 31554 I FLCross : stop=surface-destroyed
+11-01 22:05:46.324 31554 31612 I FLCross : native failure: native surface swap
+11-01 22:05:46.326 31554 31612 I FLCross : receiver-result lease=be026806-5392-40ec-a7fe-645e9c0aadf4 {"ok":false,"video":36,"posts":36,"pcm_samples":60800,"uid":10305,"pid":31554}
+11-01 22:05:46.332 31554 31554 I FLCross : stop=background
+11-01 22:05:46.336 31589 31605 I FLCross : retired lease=be026806-5392-40ec-a7fe-645e9c0aadf4 generation=1 reason=explicit
+11-01 22:05:46.342 31613 31629 I FLCross : native failure: native source buffer acquisition failed
+11-01 22:05:46.343 31613 31629 I FLCross : producer-result lease=be026806-5392-40ec-a7fe-645e9c0aadf4 {"ok":false,"video":0,"posts":0,"pcm_samples":0,"uid":10304,"pid":31613}

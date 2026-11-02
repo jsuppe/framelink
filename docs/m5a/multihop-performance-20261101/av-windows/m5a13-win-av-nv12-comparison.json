@@ -1,0 +1,75 @@
+{
+  "cases": [
+    {
+      "prefix": "/tmp/m5a13-win-av-nv12-1-on",
+      "total_identities": 3720,
+      "measured_identities": 3600,
+      "fresh_fps": 60.000111264446396,
+      "source_marker_to_arrival_ms": {
+        "p50": 1.7457,
+        "p95": 2.7269,
+        "p99": 2.7462,
+        "max": 3.6159
+      },
+      "consumer_hold_ms": {
+        "p50": 2.0229,
+        "p95": 2.0343,
+        "p99": 2.5279,
+        "max": 2.5671
+      },
+      "producer_acquire_wait_ms": {
+        "p50": 0.0008,
+        "p95": 0.0009,
+        "p99": 0.001,
+        "max": 0.0074
+      },
+      "delivery_interval_ms": {
+        "p50": 16.0044,
+        "p95": 18.0057,
+        "p99": 18.51,
+        "max": 19.6348
+      },
+      "rate_pass": true,
+      "gpu_completion_verified_by_csv": false,
+      "pcm_qualified": false
+    },
+    {
+      "prefix": "/tmp/m5a13-win-av-nv12-2-on",
+      "total_identities": 3720,
+      "measured_identities": 3600,
+      "fresh_fps": 59.999299046810854,
+      "source_marker_to_arrival_ms": {
+        "p50": 3.7355,
+        "p95": 4.7284,
+        "p99": 4.7544,
+        "max": 5.245
+      },
+      "consumer_hold_ms": {
+        "p50": 2.0229,
+        "p95": 2.035,
+        "p99": 2.0475,
+        "max": 2.5432
+      },
+      "producer_acquire_wait_ms": {
+        "p50": 0.0008,
+        "p95": 0.0009,
+        "p99": 0.001,
+        "max": 0.0107
+      },
+      "delivery_interval_ms": {
+        "p50": 16.0035,
+        "p95": 18.0065,
+        "p99": 18.5094,
+        "max": 19.5173
+      },
+      "rate_pass": true,
+      "gpu_completion_verified_by_csv": false,
+      "pcm_qualified": false
+    }
+  ],
+  "comparison": {
+    "second_minus_first_p95_ms": 2.0014999999999996,
+    "budget_ms": 16.666666666666668,
+    "pass": true
+  }
+}

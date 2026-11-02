@@ -1,0 +1,344 @@
+Start testing: Nov 01 22:02 EST
+----------------------------------------------------------
+74/97 Testing: m4_av_recovery
+74/97 Test: m4_av_recovery
+Command: "/usr/bin/python3" "/tmp/framelink-m5a/test/m4_recovery.py" "--build" "/tmp/fl-m5a-gst-build"
+Directory: /tmp/fl-m5a-gst-build
+"m4_av_recovery" start time: Nov 01 22:02 EST
+Output:
+----------------------------------------------------------
+bounded status=session-reconnecting: rendezvous deadline
+ok=0 sessions=0 clocks=0 ends=0 retries=1 ms=716 error=rendezvous deadline
+normal {"event":"playback-clock","policy":"audio","system_now_ns":394210686387539,"selected_now_ns":394210686387192,"device_now_ns":18446744073709551615,"mapped_producer_base_ns":394210680213881,"playback_base_ns":394210706198141,"latency_ns":100000000,"resample_slaves":0}
+status=system-clock-fallback
+{"event":"video-schedule-summary","received":75,"scheduled":75,"handed_off":0,"late":0,"overflow":0,"peak_pending":7,"pending_limit":8,"peak_bytes":403200,"byte_limit":134217728}
+{"event":"playback-metrics","peak_queue_buffers":4,"peak_queue_ns":80000000,"queue_empty_events":4,"queue_full_events":70,"late_audio_blocks":0,"arrival_drift_ns":1023171}
+{"event":"playback-complete","audio_master":false,"video_received":75,"video_late":0,"audio_blocks":75,"audio_samples":72000,"latency_ns":100000000}
+{"event":"playback-timing","audio_first_running_pts_ns":0,"video_first_running_pts_ns":0,"audio_end_ns":1500000000,"video_end_ns":1500000000}
+ok=1 sessions=1 clocks=1 ends=1 retries=0 ms=2225 error=
+pause {"event":"playback-clock","policy":"audio","system_now_ns":394212915184826,"selected_now_ns":394212915184441,"device_now_ns":18446744073709551615,"mapped_producer_base_ns":394212908987056,"playback_base_ns":394212934978334,"latency_ns":100000000,"resample_slaves":0}
+status=system-clock-fallback
+status=session-paused
+{"event":"playback-clock","policy":"audio","system_now_ns":394213778194394,"selected_now_ns":394213778193985,"device_now_ns":18446744073709551615,"mapped_producer_base_ns":394213774924936,"playback_base_ns":394213798028634,"latency_ns":100000000,"resample_slaves":0}
+status=system-clock-fallback
+{"event":"video-schedule-summary","received":75,"scheduled":75,"handed_off":0,"late":0,"overflow":0,"peak_pending":7,"pending_limit":8,"peak_bytes":403200,"byte_limit":134217728}
+{"event":"playback-metrics","peak_queue_buffers":4,"peak_queue_ns":80000000,"queue_empty_events":3,"queue_full_events":70,"late_audio_blocks":0,"arrival_drift_ns":464572}
+{"event":"playback-complete","audio_master":false,"video_received":75,"video_late":0,"audio_blocks":75,"audio_samples":72000,"latency_ns":100000000}
+{"event":"playback-timing","audio_first_running_pts_ns":0,"video_first_running_pts_ns":0,"audio_end_ns":1500000000,"video_end_ns":1500000000}
+ok=1 sessions=2 clocks=2 ends=2 retries=0 ms=3092 error=
+recover {"event":"playback-clock","policy":"audio","system_now_ns":394216022423769,"selected_now_ns":394216022423726,"device_now_ns":18446744073709551615,"mapped_producer_base_ns":394216020487016,"playback_base_ns":394216042388921,"latency_ns":100000000,"resample_slaves":0}
+status=system-clock-fallback
+status=session-reconnecting: audio discontinuity: renegotiate both tracks
+{"event":"playback-clock","policy":"audio","system_now_ns":394216826505522,"selected_now_ns":394216826505465,"device_now_ns":18446744073709551615,"mapped_producer_base_ns":394216824414637,"playback_base_ns":394216846475780,"latency_ns":100000000,"resample_slaves":0}
+status=system-clock-fallback
+{"event":"video-schedule-summary","received":75,"scheduled":75,"handed_off":0,"late":0,"overflow":0,"peak_pending":6,"pending_limit":8,"peak_bytes":345600,"byte_limit":134217728}
+{"event":"playback-metrics","peak_queue_buffers":4,"peak_queue_ns":80000000,"queue_empty_events":4,"queue_full_events":70,"late_audio_blocks":0,"arrival_drift_ns":865551}
+{"event":"playback-complete","audio_master":false,"video_received":75,"video_late":0,"audio_blocks":75,"audio_samples":72000,"latency_ns":100000000}
+{"event":"playback-timing","audio_first_running_pts_ns":0,"video_first_running_pts_ns":0,"audio_end_ns":1500000000,"video_end_ns":1500000000}
+ok=1 sessions=2 clocks=2 ends=2 retries=1 ms=3032 error=
+4 recovery scenarios passed
+<end of output>
+Test time =   9.14 sec
+----------------------------------------------------------
+Test Passed.
+"m4_av_recovery" end time: Nov 01 22:02 EST
+"m4_av_recovery" time elapsed: 00:00:09
+----------------------------------------------------------
+
+77/97 Testing: m4_source_drift
+77/97 Test: m4_source_drift
+Command: "/usr/bin/python3" "/tmp/framelink-m5a/test/m4_source_drift.py" "--build" "/tmp/fl-m5a-gst-build"
+Directory: /tmp/fl-m5a-gst-build
+"m4_source_drift" start time: Nov 01 22:02 EST
+Output:
+----------------------------------------------------------
+-1000 100 PASS {'event': 'playback-metrics', 'peak_queue_buffers': 4, 'peak_queue_ns': 80000000, 'queue_empty_events': 4, 'queue_full_events': 295, 'late_audio_blocks': 0, 'arrival_drift_ns': 37747705}
+1000 100 PASS {'event': 'playback-metrics', 'peak_queue_buffers': 4, 'peak_queue_ns': 80000000, 'queue_empty_events': 3, 'queue_full_events': 295, 'late_audio_blocks': 0, 'arrival_drift_ns': 38104770}
+100000 100 PASS {'event': 'playback-metrics', 'peak_queue_buffers': 4, 'peak_queue_ns': 80000000, 'queue_empty_events': 4, 'queue_full_events': 295, 'late_audio_blocks': 0, 'arrival_drift_ns': 37450718}
+-100000 100 PASS {'event': 'playback-metrics', 'peak_queue_buffers': 4, 'peak_queue_ns': 80000000, 'queue_empty_events': 62, 'queue_full_events': 21, 'late_audio_blocks': 3, 'arrival_drift_ns': 261968871}
+-100000 2000 PASS {'event': 'playback-metrics', 'peak_queue_buffers': 4, 'peak_queue_ns': 80000000, 'queue_empty_events': 3, 'queue_full_events': 295, 'late_audio_blocks': 0, 'arrival_drift_ns': 1937362000}
+coordinated source-drift recovery PASS
+PASS: 6 source pacing/recovery scenarios; evidence=/tmp/fl-source-drift-dlzkk7fv
+<end of output>
+Test time =  37.79 sec
+----------------------------------------------------------
+Test Passed.
+"m4_source_drift" end time: Nov 01 22:02 EST
+"m4_source_drift" time elapsed: 00:00:37
+----------------------------------------------------------
+
+82/97 Testing: m5_startup
+82/97 Test: m5_startup
+Command: "/usr/bin/python3" "/tmp/framelink-m5a/test/m5_startup.py" "--build" "/tmp/fl-m5a-gst-build"
+Directory: /tmp/fl-m5a-gst-build
+"m5_startup" start time: Nov 01 22:02 EST
+Output:
+----------------------------------------------------------
+[
+  {
+    "policy": "producer",
+    "returncode": 0,
+    "cases": [
+      {
+        "format": "BGRA",
+        "intact": true,
+        "stats": {
+          "event": "video-transport-summary",
+          "received": 100,
+          "submitted": 100,
+          "dropped": 0,
+          "ring_full_drops": 0
+        },
+        "received": 100
+      },
+      {
+        "format": "NV12",
+        "intact": true,
+        "stats": {
+          "event": "video-transport-summary",
+          "received": 100,
+          "submitted": 100,
+          "dropped": 0,
+          "ring_full_drops": 0
+        },
+        "received": 100
+      }
+    ]
+  },
+  {
+    "policy": "audio-coordinated",
+    "returncode": 0,
+    "cases": [
+      {
+        "format": "BGRA",
+        "intact": true,
+        "stats": {
+          "event": "video-transport-summary",
+          "received": 100,
+          "submitted": 100,
+          "dropped": 0,
+          "ring_full_drops": 0
+        },
+        "received": 100
+      },
+      {
+        "format": "NV12",
+        "intact": true,
+        "stats": {
+          "event": "video-transport-summary",
+          "received": 100,
+          "submitted": 100,
+          "dropped": 0,
+          "ring_full_drops": 0
+        },
+        "received": 100
+      }
+    ]
+  },
+  {
+    "policy": "audio",
+    "returncode": 0,
+    "cases": [
+      {
+        "format": "BGRA",
+        "intact": false,
+        "stats": {
+          "event": "video-transport-summary",
+          "received": 100,
+          "submitted": 68,
+          "dropped": 32,
+          "ring_full_drops": 32
+        },
+        "received": 65
+      },
+      {
+        "format": "NV12",
+        "intact": false,
+        "stats": {
+          "event": "video-transport-summary",
+          "received": 100,
+          "submitted": 68,
+          "dropped": 32,
+          "ring_full_drops": 32
+        },
+        "received": 65
+      }
+    ]
+  },
+  {
+    "case": "cancel",
+    "exit_codes": [
+      1,
+      -9
+    ],
+    "elapsed_seconds": 0.7738483479479328
+  },
+  {
+    "case": "restart",
+    "exit_codes": [
+      0,
+      0
+    ],
+    "elapsed_seconds": 2.623423205979634
+  },
+  {
+    "case": "long-preroll",
+    "exit_codes": [
+      0,
+      0
+    ],
+    "elapsed_seconds": 3.4230325359967537
+  },
+  {
+    "case": "producer-stall",
+    "exit_codes": [
+      0,
+      0
+    ],
+    "elapsed_seconds": 2.623163450974971
+  }
+]
+/tmp/m5-startup-0uv_kwwz
+<end of output>
+Test time =  31.78 sec
+----------------------------------------------------------
+Test Passed.
+"m5_startup" end time: Nov 01 22:03 EST
+"m5_startup" time elapsed: 00:00:31
+----------------------------------------------------------
+
+84/97 Testing: m5_consumer_drain
+84/97 Test: m5_consumer_drain
+Command: "/usr/bin/python3" "/tmp/framelink-m5a/test/m5_consumer_drain.py" "--build" "/tmp/fl-m5a-gst-build"
+Directory: /tmp/fl-m5a-gst-build
+"m5_consumer_drain" start time: Nov 01 22:03 EST
+Output:
+----------------------------------------------------------
+[
+  {
+    "case": "startup",
+    "format": "BGRA",
+    "event": "video-schedule-summary",
+    "received": 100,
+    "scheduled": 100,
+    "handed_off": 0,
+    "late": 0,
+    "overflow": 0,
+    "peak_pending": 5,
+    "pending_limit": 8,
+    "peak_bytes": 288000,
+    "byte_limit": 134217728
+  },
+  {
+    "case": "startup",
+    "format": "NV12",
+    "event": "video-schedule-summary",
+    "received": 100,
+    "scheduled": 100,
+    "handed_off": 0,
+    "late": 0,
+    "overflow": 0,
+    "peak_pending": 5,
+    "pending_limit": 8,
+    "peak_bytes": 108000,
+    "byte_limit": 134217728
+  },
+  {
+    "case": "steady",
+    "format": "BGRA",
+    "event": "video-schedule-summary",
+    "received": 100,
+    "scheduled": 100,
+    "handed_off": 0,
+    "late": 0,
+    "overflow": 0,
+    "peak_pending": 5,
+    "pending_limit": 8,
+    "peak_bytes": 288000,
+    "byte_limit": 134217728
+  },
+  {
+    "case": "steady",
+    "format": "NV12",
+    "event": "video-schedule-summary",
+    "received": 100,
+    "scheduled": 100,
+    "handed_off": 0,
+    "late": 0,
+    "overflow": 0,
+    "peak_pending": 5,
+    "pending_limit": 8,
+    "peak_bytes": 108000,
+    "byte_limit": 134217728
+  },
+  {
+    "case": "stall",
+    "format": "BGRA",
+    "event": "video-schedule-summary",
+    "received": 100,
+    "scheduled": 71,
+    "handed_off": 0,
+    "late": 8,
+    "overflow": 21,
+    "peak_pending": 8,
+    "pending_limit": 8,
+    "peak_bytes": 460800,
+    "byte_limit": 134217728
+  },
+  {
+    "case": "stall",
+    "format": "NV12",
+    "event": "video-schedule-summary",
+    "received": 100,
+    "scheduled": 71,
+    "handed_off": 0,
+    "late": 8,
+    "overflow": 21,
+    "peak_pending": 8,
+    "pending_limit": 8,
+    "peak_bytes": 172800,
+    "byte_limit": 134217728
+  },
+  {
+    "case": "restart",
+    "format": "BGRA",
+    "event": "video-schedule-summary",
+    "received": 100,
+    "scheduled": 100,
+    "handed_off": 0,
+    "late": 0,
+    "overflow": 0,
+    "peak_pending": 5,
+    "pending_limit": 8,
+    "peak_bytes": 288000,
+    "byte_limit": 134217728
+  },
+  {
+    "case": "restart",
+    "format": "NV12",
+    "event": "video-schedule-summary",
+    "received": 100,
+    "scheduled": 100,
+    "handed_off": 0,
+    "late": 0,
+    "overflow": 0,
+    "peak_pending": 5,
+    "pending_limit": 8,
+    "peak_bytes": 108000,
+    "byte_limit": 134217728
+  }
+]
+<end of output>
+Test time =  25.70 sec
+----------------------------------------------------------
+Test Passed.
+"m5_consumer_drain" end time: Nov 01 22:03 EST
+"m5_consumer_drain" time elapsed: 00:00:25
+----------------------------------------------------------
+
+End testing: Nov 01 22:03 EST
+
+gpu =  57.48 sec*proc
+
+integration =  57.48 sec*proc
+

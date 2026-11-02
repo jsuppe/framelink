@@ -1,0 +1,37 @@
+{
+  "cases": [
+    {
+      "prefix": "/tmp/m5a13-android-delayed",
+      "total_identities": 300,
+      "measured_identities": 270,
+      "fresh_fps": 59.96693192422986,
+      "source_marker_to_arrival_ms": {
+        "p50": 2.956308,
+        "p95": 4.690154,
+        "p99": 6.539692,
+        "max": 89.172692
+      },
+      "consumer_hold_ms": {
+        "p50": 5.809,
+        "p95": 8.237847,
+        "p99": 8.872616,
+        "max": 107.660846
+      },
+      "producer_acquire_wait_ms": {
+        "p50": 0.086769,
+        "p95": 0.171385,
+        "p99": 7.045769,
+        "max": 83.978846
+      },
+      "delivery_interval_ms": {
+        "p50": 16.543,
+        "p95": 19.152,
+        "p99": 20.46423,
+        "max": 110.897538
+      },
+      "rate_pass": true,
+      "gpu_completion_verified_by_csv": false,
+      "pcm_qualified": false
+    }
+  ]
+}

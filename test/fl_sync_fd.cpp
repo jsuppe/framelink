@@ -43,6 +43,8 @@ int main(){for(unsigned flags:{0u,(unsigned)FL_GPU_SYNC,(unsigned)FL_DEFER_RELEA
  }CHECK(p);
  flChannelInfo reconnected{};CHECK(flQuery(p,&reconnected)==FL_OK);CHECK(reconnected.generation>before.generation);
  CHECK(flAcquireBuffer(p,&b,1000)==FL_OK);
+ CHECK(flRequestGeometry(p,128,64,FL_FORMAT_RGBA8)==FL_BUSY);
+ CHECK(flCancelBuffer(p,&b)==FL_OK);
  CHECK(flRequestGeometry(p,128,64,FL_FORMAT_RGBA8)==FL_OK);
  flChannelInfo after{}; CHECK(flQuery(p,&after)==FL_OK); CHECK(after.width==128);
  close(ready);close(consumed);flClose(p);flClose(c);

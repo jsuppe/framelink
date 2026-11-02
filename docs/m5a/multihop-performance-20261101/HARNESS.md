@@ -1,0 +1,65 @@
+# Native transport comparison harness
+
+`fl_native_boundary_benchmark` is a two-allocation CPU-readable RGBA workload.
+It forks/execs a paced producer and, for two boundaries, a read-only same-allocation
+relay. Only startup and terminal-drain control handshakes exist; none per frame.
+Producer cadence is absolute steady-clock60Hz. Every allocation's original image
+identity, PTS/DTS/duration and generation remain unchanged. The source fills all
+logical image bytes; consumer checks embedded identity/timing and sampled pixels.
+Native allocation identity matching is inherited from the GPU relay fixture.
+
+The timestamp embedded by the source is a **CPU-write marker before unmap and
+submit**, not a GPU-ready timestamp. Marker-to-arrival includes unmap/cache work,
+submission and transport. Trace joins separately measure submit-entry to acquire-
+return. Consumer map/verification/release cost is reported separately. No claims
+of GPU completion, presentation, PCM delivery or driver-internal copies follow.
+
+Default3720 frames,120 warmup,1920x1080,60fps. Set `FL_BENCH_HOPS=1` then2 and a
+unique `FL_BENCH_OUT` prefix per case. CSV writes happen after terminal drain.
+`FL_BENCH_DELAY_US` and `FL_BENCH_DELAY_FRAME` inject final-reader delay. A missing
+or repeated identity aborts the run; it cannot be hidden by an average FPS number.
+Use `tools/check_boundary_benchmark.py ONE_PREFIX TWO_PREFIX` for the declared
+nominal rate and extra-boundary p95 gates. A delayed-reader workload is not a
+nominal no-drop run; record its outcome separately. A source that falls behind
+must still meet measured delivery rate to pass.
+
+Trace with `FRAMELINK_TRACE=PREFIX` and bounded `FRAMELINK_TRACE_EVENTS=1048576`.
+Confirm every file's zero-loss footer and exact channel/fence/PTS joins. Enabled
+recorder reservation/memory and exit flush are separate overhead, not hidden from
+qualification. Multi-hop PCM and GPU-output timing remain additional task13 gates.
+
+Optional `FL_BENCH_GPU=1` selects an EGL GPU consumer instead of CPU mapping. It
+samples each original shared allocation into a private full-resolution FBO,
+attaches a native completion fence to the reader lease, and checks a32-byte header
+plus a color pixel from that private output. Imports/shaders/output resources are
+cached, not recreated every frame. This deliberate verification readback is
+outside the shared source path. Consumer retirement timestamp is recorded after
+fence retirement, before private-output readback. No shared input CPU map is
+permitted in GPU mode; source CPU pattern generation remains explicit.
+
+Build/runtime qualification of this optional path is recorded separately from
+CPU-only results. Neither mode carries PCM; existing A/V timing tests must not be
+misrepresented as simultaneous PCM qualification of this benchmark.
+
+GPU setup now primes one original allocation through the shader/private FBO and
+completes a private readback before producer startup. This removes first-use
+shader/FBO costs from the paced workload without a per-frame handshake. The
+Android cold setup previously replaced pending frame1 with frame2: first GPU
+completion was about30ms after acquire and private verification added9ms.
+That cold-start failure is retained, not counted as steady-state qualification.
+The Linux evidence predates priming and remains tied to its recorded binary.
+
+Windows uses `fl_native_boundary_benchmark_win` with `FL_BENCH_FORMAT=BGRA|NV12`
+and the same timing/pool controls. It performs a GPU copy from the original
+shared texture into a private staging verification texture, retires the input
+reader lease on a D3D11 fence, then maps only that private output. This is a GPU
+copy consumer, not shader rendering or display presentation. The entire logical
+private image readback is accounted (width*height*4 for BGRA, *3/2 for NV12).
+Source CPU mapping/staging upload is explicit; relay performs no payload mapping.
+
+Windows benchmark completion events use `FL_BENCH_TRACE` (capacity variable
+`FL_BENCH_TRACE_EVENTS`) separately from `FRAMELINK_TRACE`. The executable and
+DLL have distinct inline recorders; sharing a prefix would overwrite one file at
+exit. Analyze core process traces plus `--completion-files CLIENT.csv`, with
+`--producer-map-operation flImageMapPlanes --private-readback-bytes BYTES`.
+Missing client completion evidence fails qualification, even if core traces pass.

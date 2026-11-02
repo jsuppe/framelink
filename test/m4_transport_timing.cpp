@@ -48,14 +48,16 @@ struct Arrivals {
 int main(int argc,char**argv) {
  gst_init(&argc,&argv);
  SampleDeadline deadline;
- bool faults=false, play=false, negative=false; unsigned frames=100;
+ bool faults=false, play=false, negative=false, relay=false, relaySyncNegative=false; unsigned frames=100;
  gint64 offset=37*GST_MSECOND;
  REQUIRE(argc>=2);
  for(int i=2;i<argc;++i) {
-  if(!strcmp(argv[i],"--faults")) faults=true;
+  if(!strcmp(argv[i],"--relay"))relay=true;
+  else if(!strcmp(argv[i],"--relay-sync-negative")){relay=true;relaySyncNegative=true;}
+  else if(!strcmp(argv[i],"--faults")) faults=true;
   else if(!strcmp(argv[i],"--negative")) negative=true;
   else if(!strcmp(argv[i],"--audio-leads")) offset=-37*GST_MSECOND;
-  else { g_printerr("usage: %s plugin-path [--faults] [--audio-leads] [--negative]\n",argv[0]);return 2; }
+  else { g_printerr("usage: %s plugin-path [--faults] [--audio-leads] [--negative] [--relay] [--relay-sync-negative]\n",argv[0]);return 2; }
  }
  GError*e=nullptr;
 #ifdef __ANDROID__
@@ -76,20 +78,31 @@ int main(int argc,char**argv) {
  auto start=[&](GstElement*p){gst_pipeline_use_clock(GST_PIPELINE(p),clock);gst_element_set_start_time(p,GST_CLOCK_TIME_NONE);gst_element_set_base_time(p,base);REQUIRE(gst_element_set_state(p,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);};
  start(tx);auto*server=gst_bin_get_by_name(GST_BIN(tx),"server");gint port=0;
  for(int i=0;i<100&&!port;++i){g_object_get(server,"current-port",&port,nullptr);g_usleep(10000);}REQUIRE(port>0);
- std::string vo="appsink name=vout sync=false max-buffers=2",ao="appsink name=aout sync=false max-buffers=2";
+ GstElement* middle=nullptr;
+ auto receiveChannel=channel;
+ if(relay) {
+  receiveChannel=channel+"-second";
+  middle=pipeline("framelinksrc channel="+channel+" width=160 height=90 fps=50 preserve-timestamps=true ! framelinksink name=hop channel="+receiveChannel+" preserve-timestamps=true sync="+std::string(relaySyncNegative?"true":"false")+
+   " tcpclientsrc host=127.0.0.1 port="+std::to_string(port)+" ! gdpdepay ! gdppay ! tcpserversink name=relayserver host=127.0.0.1 port=0 sync=false buffers-max=8");
+  start(middle);auto* relayserver=gst_bin_get_by_name(GST_BIN(middle),"relayserver");port=0;
+  for(int i=0;i<100&&!port;++i){g_object_get(relayserver,"current-port",&port,nullptr);g_usleep(10000);}REQUIRE(port>0);gst_object_unref(relayserver);
+ }
+ std::string vo="appsink name=vout sync=false async=false max-buffers=2",ao="appsink name=aout sync=false async=false max-buffers=2";
  if(play){vo="tee name=vt vt. ! queue max-size-buffers=2 ! videoconvert ! autovideosink sync=true vt. ! queue max-size-buffers=2 ! "+vo;
  ao="tee name=at at. ! queue max-size-buffers=4 ! audioconvert ! audioresample ! autoaudiosink sync=true at. ! queue max-size-buffers=4 ! "+ao;}
- auto*rx=pipeline("framelinksrc channel="+channel+" width=160 height=90 fps=50 preserve-timestamps="+std::string(negative?"false":"true")+" ! "+vo+
+ auto*rx=pipeline("framelinksrc channel="+receiveChannel+" width=160 height=90 fps=50 preserve-timestamps="+std::string(negative?"false":"true")+" ! "+vo+
   " tcpclientsrc host=127.0.0.1 port="+std::to_string(port)+" ! gdpdepay ! audio/x-raw,format=S16LE,layout=interleaved,rate=48000,channels=2,channel-mask=(bitmask)0x3 ! "+ao);
  start(rx);
  auto*v=gst_bin_get_by_name(GST_BIN(tx),"video");auto*a=gst_bin_get_by_name(GST_BIN(tx),"audio");auto*vs=gst_bin_get_by_name(GST_BIN(rx),"vout");auto*as=gst_bin_get_by_name(GST_BIN(rx),"aout");
- Arrivals av,aa;
+ Arrivals av,aa,middleVideo;
+ if(middle){auto* hop=gst_bin_get_by_name(GST_BIN(middle),"hop");auto* pad=gst_element_get_static_pad(hop,"sink");gst_pad_add_probe(pad,GST_PAD_PROBE_TYPE_BUFFER,Arrivals::probe,&middleVideo,nullptr);gst_object_unref(pad);gst_object_unref(hop);}
+
  for(auto pair:{std::make_pair(vs,&av),std::make_pair(as,&aa)}){
   auto* pad=gst_element_get_static_pad(pair.first,"sink");
   gst_pad_add_probe(pad,GST_PAD_PROBE_TYPE_BUFFER,Arrivals::probe,pair.second,nullptr);gst_object_unref(pad);
  }
  g_usleep(150000); // allow loopback accept; not part of measured stream
- const guint64 epoch=gst_clock_get_time(clock)-base+100*GST_MSECOND,step=20*GST_MSECOND;
+ const guint64 epoch=gst_clock_get_time(clock)-base+(relay?120*GST_SECOND:100*GST_MSECOND),step=20*GST_MSECOND;
  std::vector<double> differential, arrivalSkew;
  unsigned missed=0,drift=0,discont=0;guint64 lastAudio=0;std::vector<double>skew,lateness;
  for(unsigned n=0;n<frames;++n){
@@ -107,15 +120,25 @@ int main(int argc,char**argv) {
    for(unsigned i=0;i<960;++i){gint16 sample=gint16(6000*std::sin(2*3.141592653589793*440*(n*960+i)/48000));for(unsigned c=0;c<2;++c)GST_WRITE_UINT16_LE(m.data+4*i+2*c,sample);}
    gst_buffer_unmap(ab,&m);if(faults&&n==100)GST_BUFFER_FLAG_SET(ab,GST_BUFFER_FLAG_DISCONT);
    REQUIRE(gst_app_src_push_buffer(GST_APP_SRC(a),ab)==GST_FLOW_OK);}
+  if(relaySyncNegative) {
+   REQUIRE(!gst_app_sink_try_pull_sample(GST_APP_SINK(vs),200*GST_MSECOND));
+   REQUIRE(middleVideo.at(pts)>0); // prove video reached the scheduling boundary
+   auto* audioSample=pull(as);REQUIRE(GST_BUFFER_PTS(gst_sample_get_buffer(audioSample))==apt);gst_sample_unref(audioSample);
+   g_print("NEGATIVE_CONTROL_CAUGHT: intermediate sync=true schedules future media instead of transporting immediately\n");
+   gst_element_set_state(tx,GST_STATE_NULL);gst_element_set_state(middle,GST_STATE_NULL);gst_element_set_state(rx,GST_STATE_NULL);
+   for(auto* p:{v,a,vs,as,server,tx,middle,rx})gst_object_unref(p);gst_object_unref(clock);return 0;
+  }
   auto*sv=pull(vs);auto*bv=gst_sample_get_buffer(sv);
   if(negative){
    REQUIRE(GST_BUFFER_PTS(bv)!=pts);
    g_print("NEGATIVE_CONTROL_CAUGHT: consumer arrival retimestamping changes producer PTS\n");
    gst_sample_unref(sv);
    gst_element_set_state(tx,GST_STATE_NULL);gst_element_set_state(rx,GST_STATE_NULL);
+   if(middle){gst_element_set_state(middle,GST_STATE_NULL);gst_object_unref(middle);}
    for(auto*p:{v,a,vs,as,server,tx,rx})gst_object_unref(p);gst_object_unref(clock);return 0;
   }
   REQUIRE(GST_BUFFER_PTS(bv)==pts);
+  if(relay){REQUIRE(GST_BUFFER_DURATION(bv)==step);REQUIRE(g_get_monotonic_time()*1000-sentVideo<2*GST_SECOND);}
   REQUIRE(gst_segment_to_running_time(gst_sample_get_segment(sv),GST_FORMAT_TIME,GST_BUFFER_PTS(bv))==pts);
   REQUIRE(gst_buffer_map(bv,&m,GST_MAP_READ));REQUIRE(m.data[0]==guint8(n)&&m.data[1]==0&&m.data[2]==0&&m.data[3]==255);gst_buffer_unmap(bv,&m);
   if(false){REQUIRE(GST_BUFFER_FLAG_IS_SET(bv,GST_BUFFER_FLAG_DISCONT));++discont;}
@@ -146,5 +169,6 @@ int main(int argc,char**argv) {
  std::sort(differential.begin(),differential.end());std::sort(arrivalSkew.begin(),arrivalSkew.end());
  g_print("{\"verified_pairs\":%u,\"max_offset_error_ns\":0,\"differential_transport_ms_p50\":%.6f,\"differential_transport_ms_p99\":%.6f,\"differential_transport_ms_min\":%.6f,\"differential_transport_ms_max\":%.6f,\"endpoint_differential_change_ms_per_media_second\":%.6f,\"arrival_skew_ms_p99\":%.6f}\n",frames,differential[frames/2],differential[frames*99/100],differential.front(),differential.back(),trend,arrivalSkew[frames*99/100]);
  gst_element_set_state(tx,GST_STATE_NULL);gst_element_set_state(rx,GST_STATE_NULL);
+ if(middle){gst_element_set_state(middle,GST_STATE_NULL);gst_object_unref(middle);}
  for(auto*p:{v,a,vs,as,server,tx,rx})gst_object_unref(p);gst_object_unref(clock);
 }

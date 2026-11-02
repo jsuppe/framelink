@@ -3,8 +3,8 @@
 Updated 2026-11-01. Scope: local cross-platform video/audio sessions and renderer
 integration. Historical cloud calling, unrelated receiver features and HDR are
 not part of this release. M1–M5 are merged within their documented qualification
-scope. M5a and subsequent milestones are not implemented or qualified merely by
-being included in this plan.
+scope. M5a is active; tasks1–14 are locally validated within documented scope, final integration/merge pending. Remaining
+M5a tasks and later milestones are not implemented/qualified merely by being planned.
 
 For individually checkable tasks and current merge gates, see
 [the executable roadmap checklist](ROADMAP_TASKS.md).
@@ -114,7 +114,10 @@ Gate: each advertised feature has implementation plus platform evidence or expli
 
 ## M5a — Memory-capability negotiation and GPU-native pipeline integration
 
-Status: PLANNED, approved by Jon 2026-10-30. Separate milestone after M5 and
+Status: FINAL INTEGRATION, execution authorized 2026-11-01. Tasks1–14 locally
+validated within the documented platform/performance limits. Final task15 review,
+CI and merge remain pending in PR7; see ROADMAP_TASKS.md.
+Separate milestone after M5 and
 before M6; existing milestone numbers remain stable. Does not expand M4.
 
 Deliverables: versioned memory/usage negotiation contract, platform capability
@@ -186,6 +189,33 @@ per-hop playback reservoir; measured transfer/wait latency and backpressure rema
 visible. This is not a claim of zero elapsed time, zero synchronization, or zero
 total pipeline buffering.
 
+## M5b — GStreamer audio elements and coordinated A/V sessions
+
+Status: PLANNED, not started. Added by Jon 2026-11-01. Follows M5a; precedes
+M6 so reliability/performance qualification includes the public audio elements.
+
+Goal: developers use `framelinkaudiosink` / `framelinkaudiosrc` alongside the
+existing video-only `framelinksink` / `framelinksrc`, joined by a documented shared
+session mechanism. Keep separate media elements, one coordinated A/V timeline.
+
+Deliverables: reusable session coordinator; PCM sink/source wrappers around the
+existing GDP/GIO transport; Windows-first two-process examples and Linux/Android
+support; timestamp/segment, lifecycle, security and compatibility tests; element
+reference and measured copy/latency behavior. Do not independently rebase A/V PTS.
+Audio serialization remains explicit; shared-memory audio is not part of this
+milestone. Producer and consumer A/V convenience bins are required deliverables,
+added by Jon 2026-11-01. Implement them after validating the underlying elements;
+expose separate audio/video ghost pads and one coordinated session, not a new
+multiplexed format. The consumer bin leaves downstream rendering/playback to the
+application. Individual elements remain available; qualify both integration forms
+for timing, memory negotiation, lifecycle, bounded queues and error propagation.
+
+Tasks and completion gates: [M5b executable checklist](ROADMAP_TASKS.md#m5b--gstreamer-audio-elements-and-coordinated-av-sessions).
+Gate: public-element integration works without sample-application internals,
+exact PCM and relative A/V timeline survive transport/recovery within declared
+bounds, supported platform tests pass, final CI/review/merge is verified.
+Physical output qualification remains separate.
+
 ## M6 — Reliability, performance and observability
 Deliverables: reproducible stress/benchmark suite, opt-in tracing, measured overhead
 and release acceptance report.
@@ -210,7 +240,7 @@ Gate: a clean machine can reproduce the documented A/V workflow; all release-sco
 or explicitly capability-gated, with unqualified hardware behavior never labeled passed.
 
 ## Execution dependencies
-M1 -> M2 -> M3 -> M4 -> M5 -> M5a -> M6 -> M7.
+M1 -> M2 -> M3 -> M4 -> M5 -> M5a -> M5b -> M6 -> M7.
 Jon's 2026-10-31 override requires **one task at a time**: no concurrent
 implementation/review/validation workstreams. Finish and validate the current
 task, then immediately take the next ready task in the current milestone. Proposed soak lengths are release

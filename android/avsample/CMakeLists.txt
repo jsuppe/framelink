@@ -12,7 +12,7 @@ set(ENV{PKG_CONFIG_LIBDIR} "${FRAMELINK_GST_ANDROID_ROOT}/lib/pkgconfig:${FRAMEL
 set(ENV{PKG_CONFIG_PATH} "")
 pkg_check_modules(AV REQUIRED gio-2.0 gstreamer-audio-1.0 gstapp gstcoreelements gstgdp gsttcp gstgio gstaudioconvert gstaudioresample gstvolume gstopensles)
 foreach(role receiver producer)
- add_library(fl_av_${role} SHARED jni.cpp ${ROOT}/samples/av_apps.cpp ${ROOT}/samples/av_auth.cpp ${ROOT}/samples/av_rendezvous.cpp)
+ add_library(fl_av_${role} SHARED jni.cpp ${ROOT}/samples/av_apps.cpp ${ROOT}/samples/av_memory_agreement.cpp ${ROOT}/samples/av_auth.cpp ${ROOT}/samples/av_rendezvous.cpp)
  target_include_directories(fl_av_${role} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${ROOT}/samples ${AV_STATIC_INCLUDE_DIRS})
  target_link_directories(fl_av_${role} PRIVATE ${AV_STATIC_LIBRARY_DIRS})
  target_link_libraries(fl_av_${role} PRIVATE gstframelink "-Wl,--start-group" ${AV_STATIC_LIBRARIES} "-Wl,--end-group" android log OpenSLES)

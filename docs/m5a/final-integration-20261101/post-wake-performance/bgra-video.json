@@ -1,0 +1,37 @@
+{
+  "cases": [
+    {
+      "prefix": "/tmp/m5a13-win-post-wake-bgra-2-on",
+      "total_identities": 3720,
+      "measured_identities": 3600,
+      "fresh_fps": 59.997925028693395,
+      "source_marker_to_arrival_ms": {
+        "p50": 4.0204,
+        "p95": 4.5349,
+        "p99": 5.027,
+        "max": 5.1457
+      },
+      "consumer_hold_ms": {
+        "p50": 2.0229,
+        "p95": 2.0342,
+        "p99": 2.0526,
+        "max": 3.5397
+      },
+      "producer_acquire_wait_ms": {
+        "p50": 0.0008,
+        "p95": 0.0009,
+        "p99": 0.0009,
+        "max": 0.0097
+      },
+      "delivery_interval_ms": {
+        "p50": 16.0037,
+        "p95": 18.0072,
+        "p99": 18.5062,
+        "max": 19.5145
+      },
+      "rate_pass": true,
+      "gpu_completion_verified_by_csv": false,
+      "pcm_qualified": false
+    }
+  ]
+}

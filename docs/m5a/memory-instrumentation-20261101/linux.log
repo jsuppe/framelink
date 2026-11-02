@@ -1,0 +1,28 @@
+Internal ctest changing into directory: /tmp/fl-m5a-gst-build
+Test project /tmp/fl-m5a-gst-build
+      Start  3: read_leases
+ 1/11 Test  #3: read_leases ......................   Passed    0.09 sec
+      Start 17: memory_resource_1
+ 2/11 Test #17: memory_resource_1 ................   Passed    0.04 sec
+      Start 28: gst_native_producer_linux
+ 3/11 Test #28: gst_native_producer_linux ........   Passed    0.09 sec
+      Start 29: gst_native_source
+ 4/11 Test #29: gst_native_source ................   Passed    0.46 sec
+      Start 30: gst_nv12_roundtrip
+ 5/11 Test #30: gst_nv12_roundtrip ...............   Passed    0.32 sec
+      Start 45: trace_disabled
+ 6/11 Test #45: trace_disabled ...................   Passed    0.01 sec
+      Start 46: trace_bounded_concurrent
+ 7/11 Test #46: trace_bounded_concurrent .........   Passed    0.01 sec
+      Start 47: trace_thread_limit
+ 8/11 Test #47: trace_thread_limit ...............   Passed    0.01 sec
+      Start 91: native_relay_linux
+ 9/11 Test #91: native_relay_linux ...............   Passed    0.12 sec
+      Start 92: trace_details
+10/11 Test #92: trace_details ....................   Passed    0.00 sec
+      Start 93: trace_compiled_out
+11/11 Test #93: trace_compiled_out ...............   Passed    0.00 sec
+
+100% tests passed, 0 tests failed out of 11
+
+Total Test time (real) =   1.16 sec

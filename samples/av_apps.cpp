@@ -1,6 +1,7 @@
 // Independent A/V sample peers. GPU/image transport remains FrameLink;
 // PCM uses GStreamer's GDP over an authenticated GIO stream, not a new PCM ABI.
 #include "av_auth.h"
+#include "../gst/framelink_memory_policy.h"
 #include "audio_timeline.h"
 #include "audio_alignment.h"
 #include "av_playback.h"
@@ -61,6 +62,7 @@ struct Options {
   unsigned latencyMs=100, mediaRunMs=0;
   uint64_t audioOffsetNs=0;
   int pacingPpm=0;
+  std::function<GstBuffer*(GstElement*,unsigned,uint64_t,uint64_t)> videoFrame;
 };
 unsigned number(const char *s) {
   char *e = nullptr;
@@ -134,7 +136,7 @@ Options options(int argc, char **argv) {
            (o.channels == 1 || o.channels == 2) && o.timeout >= 100 &&
            o.timeout <= 60000 && o.sessions && o.sessions <= 100,
        "option outside bounds");
-  need((o.format == "BGRA" || o.format == "NV12" || o.format == "auto") &&
+  need((o.format == "BGRA" || o.format == "RGBA" || o.format == "NV12" || o.format == "auto") &&
            (o.format != "NV12" || (!(o.width % 2) && !(o.height % 2))),
        "unsupported video format/dimensions");
   need(o.fault.empty() || o.fault == "missing-audio" ||
@@ -256,7 +258,7 @@ flSessionCapabilities caps(const Options &o) {
   flSessionCapabilities c{};
   c.version = 1;
   c.videoCount = c.audioCount = 1;
-  c.video[0] = {static_cast<uint32_t>(o.format == "NV12" ? FL_FORMAT_NV12 : FL_FORMAT_BGRA8), o.width,
+  c.video[0] = {static_cast<uint32_t>(o.format == "NV12" ? FL_FORMAT_NV12 : o.format=="RGBA"?FL_FORMAT_RGBA8:FL_FORMAT_BGRA8), o.width,
                 o.height, o.fps, 1};
   c.audio[0] = {FL_PCM_S16, o.rate, o.channels};
   if (o.format == "auto" && !(o.width % 2) && !(o.height % 2)) {
@@ -570,7 +572,7 @@ void fillVideo(unsigned char *p, const GstVideoInfo &vi, unsigned n) {
 GstBuffer *makeVideo(const Options &o, unsigned n, uint64_t pts, uint64_t dur) {
   GstVideoInfo vi{};
   gst_video_info_set_format(
-      &vi, o.format == "NV12" ? GST_VIDEO_FORMAT_NV12 : GST_VIDEO_FORMAT_BGRA,
+      &vi, o.format == "NV12" ? GST_VIDEO_FORMAT_NV12 : o.format=="RGBA"?GST_VIDEO_FORMAT_RGBA:GST_VIDEO_FORMAT_BGRA,
       o.width, o.height);
   auto *b = gst_buffer_new_allocate(nullptr, vi.size, nullptr);
   GstMapInfo m{};
@@ -630,7 +632,7 @@ void validateVideo(GstSample *s, const Options &o, unsigned n, uint64_t pts) {
   need(unsigned(vi.width) == o.width && unsigned(vi.height) == o.height &&
            GST_VIDEO_INFO_FORMAT(&vi) == (o.format == "NV12"
                                               ? GST_VIDEO_FORMAT_NV12
-                                              : GST_VIDEO_FORMAT_BGRA),
+                                              : o.format=="RGBA"?GST_VIDEO_FORMAT_RGBA:GST_VIDEO_FORMAT_BGRA),
        "video format mismatch");
   GstMapInfo m{};
   need(gst_buffer_map(b, &m, GST_MAP_READ), "map received video");
@@ -817,15 +819,48 @@ struct ProducerFailureWatch {
   std::thread worker;
   explicit ProducerFailureWatch(Pipeline& p):pipeline(p.p),bus(gst_element_get_bus(p.p)),worker([this]{
     while (!done.load()) {
-      auto* message=gst_bus_timed_pop_filtered(bus,20*GST_MSECOND,GST_MESSAGE_ERROR);
-      if(message) {gst_message_unref(message);gst_element_set_state(pipeline,GST_STATE_NULL);break;}
+      auto* message=gst_bus_timed_pop_filtered(bus,20*GST_MSECOND,
+          GstMessageType(GST_MESSAGE_ERROR|GST_MESSAGE_ELEMENT));
+      if(!message) continue;
+      if(GST_MESSAGE_TYPE(message)==GST_MESSAGE_ERROR) {
+        gst_message_unref(message);gst_element_set_state(pipeline,GST_STATE_NULL);break;
+      }
+      // EOS statistics are serialized with the sink render calls. Preserve
+      // them here instead of letting an ERROR-only bus filter discard them:
+      // appsrc push success is not evidence of transport submission.
+      const auto* stats=gst_message_get_structure(message);
+      if(stats && gst_structure_has_name(stats,"framelink-sink-stats")) {
+        guint64 received=0,submitted=0,dropped=0,full=0;
+        gst_structure_get_uint64(stats,"received",&received);
+        gst_structure_get_uint64(stats,"submitted",&submitted);
+        gst_structure_get_uint64(stats,"dropped",&dropped);
+        gst_structure_get_uint64(stats,"ring-full-drops",&full);
+        printf("{\"event\":\"video-transport-summary\",\"received\":%llu,\"submitted\":%llu,\"dropped\":%llu,\"ring_full_drops\":%llu}\n",
+            (unsigned long long)received,(unsigned long long)submitted,
+            (unsigned long long)dropped,(unsigned long long)full);
+      }
+      gst_message_unref(message);
     }
   }) {}
   ~ProducerFailureWatch(){done=true;worker.join();gst_object_unref(bus);}
 };
 void checkPlaybackBus(GstBus* bus) {
-  auto* message=gst_bus_pop_filtered(bus,GstMessageType(GST_MESSAGE_ERROR|GST_MESSAGE_CLOCK_LOST));
+  auto* message=gst_bus_pop_filtered(bus,GstMessageType(GST_MESSAGE_ERROR|GST_MESSAGE_CLOCK_LOST|GST_MESSAGE_ELEMENT));
   if(!message) return;
+  if(GST_MESSAGE_TYPE(message)==GST_MESSAGE_ELEMENT) {
+    const auto* gap=gst_message_get_structure(message);
+    if(gap && gst_structure_has_name(gap,"framelink-source-sequence-gap")) {
+      guint64 previous=0,sequence=0,missing=0,pts=0;
+      gst_structure_get_uint64(gap,"previous-sequence",&previous);
+      gst_structure_get_uint64(gap,"sequence",&sequence);
+      gst_structure_get_uint64(gap,"missing",&missing);
+      gst_structure_get_uint64(gap,"pts-ns",&pts);
+      printf("{\"event\":\"video-source-sequence-gap\",\"previous_sequence\":%llu,\"sequence\":%llu,\"missing\":%llu,\"pts_ns\":%llu}\n",
+          (unsigned long long)previous,(unsigned long long)sequence,
+          (unsigned long long)missing,(unsigned long long)pts);
+    }
+    gst_message_unref(message);return;
+  }
   std::string error="audio clock lost: renegotiate both tracks";
   if(GST_MESSAGE_TYPE(message)==GST_MESSAGE_ERROR) {
     GError* detail=nullptr;gchar* debug=nullptr;
@@ -875,7 +910,7 @@ struct StartupGate {
 using av::AudioTimeline;
 using av::trackAudio;
 void adoptVideo(Pipeline& pipeline,const char* elementName,const av::SessionProvider* provider,
-                const flSessionConfig& config,bool producer,unsigned timeout) {
+                const flSessionConfig& config,bool producer,unsigned timeout,av::MemoryOffer* memory=nullptr) {
   if(!provider || !provider->openVideo)return;
   auto* element=named(pipeline,elementName);
   Object elementOwner{G_OBJECT(element)};
@@ -886,10 +921,30 @@ void adoptVideo(Pipeline& pipeline,const char* elementName,const av::SessionProv
   flChannelInfo info{};
   need(flQuery(channel.get(),&info)==FL_OK && info.width==config.video.width &&
        info.height==config.video.height && info.format==config.video.format,"broker video configuration mismatch");
+  if(memory) {
+    const bool configured=provider->configureMemory && provider->configureMemory(config,producer,channel.get(),element,*memory,timeout,error);
+    need(configured,error.empty()?"memory provider rejected exact resource binding":error);
+    gboolean native=FALSE;g_object_get(element,"native-memory",&native,nullptr);
+    // The legacy element explicitly copies pixels at this boundary. It cannot
+    // be represented as a strict zero-operation path by a provider callback.
+    uint32_t mandatory=native?0:FL_MEMORY_COPY;
+#ifdef _WIN32
+    if(!native)mandatory|=producer?FL_MEMORY_UPLOAD:FL_MEMORY_READBACK;
+#endif
+    need((memory->path.operations&mandatory)==mandatory,"memory offer omits element payload operations");
+  }
   gboolean adopted=FALSE;
   g_signal_emit_by_name(element,"adopt-channel",channel.get(),&adopted);
   need(adopted,"FrameLink native channel adoption rejected");
   channel.release(); // element now owns it, including failure before PLAYING
+}
+void applyMemoryPolicy(Pipeline& pipeline,const char* name,const flSessionConfig& cfg,const av::MemoryOffer& local,const av::MemoryOffer& remote){
+  auto* element=named(pipeline,name);Object owner{G_OBJECT(element)};
+  need(g_signal_lookup("apply-memory-policy",G_OBJECT_TYPE(element)),"plugin lacks authenticated memory policy application");
+  GstFrameLinkMemoryPolicy policy{};policy.version=1;policy.sessionGeneration=cfg.generation;
+  policy.requirements[0]=local.requirements;policy.requirements[1]=remote.requirements;
+  policy.paths[0]=local.path;policy.paths[1]=remote.path;gboolean applied=FALSE;
+  g_signal_emit_by_name(element,"apply-memory-policy",&policy,&applied);need(applied,"element rejected authenticated memory policy");
 }
 unsigned runProducer(const Options &o, GSocketListener *l,
                      const av::Endpoint &ep, Watchdog& watchdog,
@@ -924,8 +979,12 @@ unsigned runProducer(const Options &o, GSocketListener *l,
   read(*control, reply, sizeof(reply));
   need(!memcmp(wire, reply, sizeof(wire)),
        "configuration acknowledgement mismatch");
-  const auto mode = get(*control);
+  const auto requestedMode = get(*control);
+  const bool memoryMode=(requestedMode&0x100)!=0;
+  const auto mode=requestedMode&~uint64_t(0x100);
   need(mode<=5, "unsupported playback mode");
+  need(memoryMode==bool(provider && provider->configureMemory),"memory extension support mismatch; downgrade rejected");
+  need(!memoryMode || (provider->openVideo && mode!=0),"memory extension requires broker video and streaming");
   const bool finiteMode=mode==3 || mode==5;
   need(finiteMode==bool(o.mediaRunMs),"finite media budget requires matching finite peer");
   if(finiteMode) {
@@ -956,7 +1015,9 @@ unsigned runProducer(const Options &o, GSocketListener *l,
           audioCaps(o) +
           " ! queue max-size-buffers=4 max-size-bytes=0 max-size-time=80000000 "
           "! gdppay ! giostreamsink name=audioio sync=false async=false" : externalPipeline(o,channel));
-  adoptVideo(tx,"videooutput",provider,cfg,true,o.timeout);
+  av::MemoryOffer producerMemory{},consumerMemory{};
+  adoptVideo(tx,"videooutput",provider,cfg,true,o.timeout,memoryMode?&producerMemory:nullptr);
+  if(memoryMode){std::string error;const bool agreed=av::agreeMemory(control->p,ep,cfg,true,producerMemory,consumerMemory,error);need(agreed,error);applyMemoryPolicy(tx,"videooutput",cfg,producerMemory,consumerMemory);}
   // READY proves the consumer has entered setup; start() waits for the actual
   // producer resource import before the final shared epoch is selected.
   if(coordinated && !g_getenv("FRAMELINK_TEST_LAZY_PRODUCER_OPEN")) {
@@ -1048,6 +1109,7 @@ unsigned runProducer(const Options &o, GSocketListener *l,
   ProducerFailureWatch failureWatch(tx);
   Handles h;
   auto *v = h.get(tx, "video"), *a = h.get(tx, "audio");
+  auto* output=o.videoFrame?h.get(tx,"videooutput"):nullptr;
   put(*control, o.frames);
   event("session-ready", o, 0, id);
   if(coordinated) {
@@ -1055,7 +1117,12 @@ unsigned runProducer(const Options &o, GSocketListener *l,
     need(gst_app_src_push_buffer(GST_APP_SRC(a),makeAudio(o,0,0,duration))==GST_FLOW_OK,"audio prime failed");
     completeStartup();
   }
-  uint64_t maxPushNs=0;
+  uint64_t maxPushNs=0,maxWakeLagNs=0,lastDispatchNs=0,catchupHolds=0;
+  unsigned testProducerStallMs=0;
+  if(const char* value=g_getenv("FRAMELINK_TEST_PRODUCER_STALL_MS")) {
+    testProducerStallMs=number(value);
+    need(testProducerStallMs<=1000 && testProducerStallMs<=o.timeout,"invalid producer test stall");
+  }
   for (unsigned n = 0; n < o.frames; ++n) {
     watchdog.check();
     uint64_t pts = uint64_t(n) * GST_SECOND / o.fps,
@@ -1064,12 +1131,28 @@ unsigned runProducer(const Options &o, GSocketListener *l,
     // Only wall-clock pacing changes. PCM sample positions, A/V PTS and
     // durations remain exact on the negotiated media timeline.
     const auto paced=gst_util_uint64_scale(pts,1000000,1000000+o.pacingPpm);
-    if (uint64_t(cfg.epochNs) + paced > now)
-      g_usleep((uint64_t(cfg.epochNs) + paced - now) / 1000);
+    auto dispatchAt=uint64_t(cfg.epochNs)+paced;
+    // A delayed wake must not turn several overdue synthetic frames into an
+    // unbounded catch-up burst at the latest-frame transport. Recover toward
+    // the original epoch at at most 2x the configured rate. No PTS is changed,
+    // and on-time frames incur no extra wait or per-hop playback reservoir.
+    const auto minimumInterval=gst_util_uint64_scale(next-pts,1000000,1000000+o.pacingPpm)/2;
+    if(lastDispatchNs && lastDispatchNs+minimumInterval>dispatchAt) {
+      dispatchAt=lastDispatchNs+minimumInterval;++catchupHolds;
+    }
+    if (dispatchAt > now)g_usleep((dispatchAt-now)/1000);
+    if(n==20 && testProducerStallMs)g_usleep(uint64_t(testProducerStallMs)*1000);
+    const auto woke=gst_clock_get_time(clock);
+    lastDispatchNs=woke;
+    if(woke>uint64_t(cfg.epochNs)+paced)
+      maxWakeLagNs=std::max(maxWakeLagNs,woke-uint64_t(cfg.epochNs)-paced);
     const auto pushStart=gst_util_get_timestamp();
-    need(gst_app_src_push_buffer(
-             GST_APP_SRC(v), makeVideo(o, n, pts, next - pts)) == GST_FLOW_OK,
-         "video send failed");
+    auto* video=o.videoFrame?o.videoFrame(output,n,pts,next-pts):makeVideo(o,n,pts,next-pts);
+    need(video,"video source adapter failed");
+    if(GST_BUFFER_PTS(video)!=pts || GST_BUFFER_DURATION(video)!=next-pts) {
+      gst_buffer_unref(video);throw std::runtime_error("video source adapter changed media timing");
+    }
+    need(gst_app_src_push_buffer(GST_APP_SRC(v),video)==GST_FLOW_OK,"video send failed");
     if (!(coordinated && n==0) && !(o.fault == "missing-audio" && n == 10)) {
       uint64_t dur;
       auto *b = makeAudio(o, n, pts, dur);
@@ -1083,7 +1166,7 @@ unsigned runProducer(const Options &o, GSocketListener *l,
     if (n == 0 || (n + 1) % 25 == 0)
       event("media-progress", o, n + 1, id);
   }
-  printf("{\"event\":\"producer-pacing\",\"pacing_ppm\":%d,\"max_push_ns\":%llu}\n",o.pacingPpm,(unsigned long long)maxPushNs);
+  printf("{\"event\":\"producer-pacing\",\"pacing_ppm\":%d,\"max_push_ns\":%llu,\"max_wake_lag_ns\":%llu,\"catchup_holds\":%llu}\n",o.pacingPpm,(unsigned long long)maxPushNs,(unsigned long long)maxWakeLagNs,(unsigned long long)catchupHolds);
   gst_app_src_end_of_stream(GST_APP_SRC(a));
   gst_app_src_end_of_stream(GST_APP_SRC(v));
   need(get(*control) == 0x444f4e45ULL, "consumer completion missing");
@@ -1111,7 +1194,7 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
   need(flSessionDecode(wire, sizeof(wire), &cfg) == 0 &&
            flSessionValidateSelection(&cfg, &remote, &local) == 0,
        "invalid/unoffered configuration");
-  o.format = cfg.video.format == FL_FORMAT_NV12 ? "NV12" : "BGRA";
+  o.format = cfg.video.format == FL_FORMAT_NV12 ? "NV12" : cfg.video.format==FL_FORMAT_RGBA8?"RGBA":"BGRA";
   flClockMapping mapping{cfg.clockId, randomId(), int64_t(source),
                          int64_t(t0 + (t1 - t0) / 2), (t1 - t0 + 1) / 2};
   int64_t base = 0;
@@ -1122,7 +1205,9 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
   need(!o.mediaRunMs || coordinated,"finite media budget requires coordinated streaming");
   // Modes 4/5 add the existing PRIMED/GO barrier to audio-master playback.
   // Old peers reject explicitly rather than silently running without a gate.
-  put(*control, o.mediaRunMs ? (o.coordinatedAudio ? 5 : 3) : (o.stream ? (o.coordinatedAudio ? 4 : (o.producerClock ? 2 : 1)) : 0));
+  const bool memoryMode=provider && provider->configureMemory;
+  need(!memoryMode || (provider->openVideo && o.stream && !externalVideo),"memory extension requires internal broker video streaming");
+  put(*control, (o.mediaRunMs ? (o.coordinatedAudio ? 5 : 3) : (o.stream ? (o.coordinatedAudio ? 4 : (o.producerClock ? 2 : 1)) : 0)) | (memoryMode?0x100:0));
   if(o.mediaRunMs) {
     need(o.mediaRunMs<=300000,"invalid finite media budget");
     put(*control,o.mediaRunMs);
@@ -1141,7 +1226,8 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
       " preserve-timestamps=true ! appsink name=vout sync=false max-buffers=3 drop=false ";
     parse(rx, video+"appsrc name=audioio is-live=false format=bytes block=true max-buffers=4 ! gdpdepay ! "+
       audioCaps(o)+" ! identity name=timeline ! queue name=audioqueue max-size-buffers=4 max-size-bytes=0 max-size-time=80000000 ! audioconvert ! audioresample ! volume name=playvolume ! "+o.audioSink+" name=playaudio sync=true"+(o.audioSink=="fakesink" ? " async=false" : ""));
-    if(!externalVideo)adoptVideo(rx,"videoinput",provider,cfg,false,o.timeout);
+    av::MemoryOffer consumerMemory{},producerMemory{};
+    if(!externalVideo)adoptVideo(rx,"videoinput",provider,cfg,false,o.timeout,memoryMode?&consumerMemory:nullptr);
     if(o.traceMedia){attachTrace(rx,"timeline","src","consumer","audio");if(!externalVideo)attachTrace(rx,"vout","sink","consumer","video");}
     AudioTimeline audioTimeline; audioTimeline.pipeline=rx.p; audioTimeline.rate=o.rate; audioTimeline.channels=o.channels;
     if(cb)audioTimeline.observe=cb->onAudio;
@@ -1149,7 +1235,7 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
     auto *audioPad=gst_element_get_static_pad(identity,"src");
     gst_pad_add_probe(audioPad,GstPadProbeType(GST_PAD_PROBE_TYPE_BUFFER|GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM),trackAudio,&audioTimeline,nullptr);
     gst_object_unref(audioPad);gst_object_unref(identity);
-    need(gst_element_set_state(rx.p, GST_STATE_PAUSED)!=GST_STATE_CHANGE_FAILURE,"audio open failed");
+    if(!memoryMode)need(gst_element_set_state(rx.p, GST_STATE_PAUSED)!=GST_STATE_CHANGE_FAILURE,"audio open failed");
     Handles h;
     auto *v=externalVideo ? nullptr : h.get(rx,"vout");
     auto *volume=h.get(rx,"playvolume");
@@ -1169,6 +1255,7 @@ unsigned runConsumer(const Options &requested, const av::Endpoint &ep,
       ~EndNotification(){if(cb && cb->onEnd)cb->onEnd();}
     } endNotification{cb};
     put(*control,0x5245414459ULL);
+    if(memoryMode){std::string error;const bool agreed=av::agreeMemory(control->p,ep,cfg,false,consumerMemory,producerMemory,error);need(agreed,error);applyMemoryPolicy(rx,"videoinput",cfg,consumerMemory,producerMemory);need(gst_element_set_state(rx.p,GST_STATE_PAUSED)!=GST_STATE_CHANGE_FAILURE,"audio open failed");}
     const auto frames=get(*control);
     need(frames && frames<=100000,"invalid stream length");
     if(o.mediaRunMs)validateMediaRun(o.mediaRunMs,frames,o.fps);
@@ -1575,13 +1662,13 @@ bool runBrokerProducer(const ProducerOptions& p,std::string& error) {
          p.height>=2 && p.height<=2160 && p.fps>=13 && p.fps<=240 &&
          p.rate>=8000 && p.rate<=192000 && (p.channels==1 || p.channels==2) &&
          p.timeoutMs>=100 && p.timeoutMs<=60000,"invalid producer options");
-    need(p.format=="BGRA" || p.format=="NV12","invalid producer format");
+    need(p.format=="BGRA" || p.format=="RGBA" || p.format=="NV12","invalid producer format");
     need(p.format!="NV12" || (!(p.width%2) && !(p.height%2)),"NV12 requires even dimensions");
     if(p.mediaRunMs)validateMediaRun(p.mediaRunMs,p.frames,p.fps);
     need(!p.stop || !p.stop->load(),"producer cancelled");
     Options o;o.plugin=p.plugin;o.format=p.format;o.frames=p.frames;o.width=p.width;
     o.height=p.height;o.fps=p.fps;o.rate=p.rate;o.channels=p.channels;
-    o.timeout=p.timeoutMs;o.mediaRunMs=p.mediaRunMs;
+    o.timeout=p.timeoutMs;o.mediaRunMs=p.mediaRunMs;o.videoFrame=p.videoFrame;
     gst_init(nullptr,nullptr);
     GError* e=nullptr;auto* plugin=loadFrameLinkPlugin(o.plugin,&e);
     std::string pluginError=e?e->message:"FrameLink plugin load";if(e)g_error_free(e);

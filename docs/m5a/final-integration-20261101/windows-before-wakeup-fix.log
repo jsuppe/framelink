@@ -1,0 +1,405 @@
+#< CLIXML
+-- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.26300.
+-- framelink: building GStreamer elements (gstframelink)
+-- Configuring done (0.8s)
+-- Generating done (0.7s)
+-- Build files have been written to: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  fl_ipc_win32.cpp
+  fl_trace.cpp
+  framelink_memory.cpp
+  framelink_session.cpp
+  framelink_slots.cpp
+  framelink_win.cpp
+  Generating Code...
+     Creating library C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/framelink.lib and object C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/framelink.exp
+  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
+  gstframelink.cpp
+  The d3d11 library from gst-plugins-bad is unstable API and may change in future.
+  You can define GST_USE_UNSTABLE_API to avoid this warning.
+     Creating library C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.lib and object C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.exp
+  gstframelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\gstframelink.dll
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m5a-contract-20261101/CMakeLists.txt
+  av_apps.cpp
+  fl_buffer_references.cpp
+  test_av_rendezvous.cpp
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m5a-contract-20261101/CMakeLists.txt
+  fl_consume.cpp
+  av_auth.cpp
+  d3d_decode_consumer.cpp
+  av_rendezvous.cpp
+  fl_buffer_references.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_buffer_references.exe
+  d3d_decode_producer.cpp
+  fl_consume.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_consume.exe
+  av_auth.cpp
+  d3d_decoder_probe.cpp
+  av_rendezvous.cpp
+  test_av_auth.cpp
+  fl_d3d_decode_consumer.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_d3d_decode_consumer.exe
+  av_memory_agreement.cpp
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m5a-contract-20261101/CMakeLists.txt
+  Generating Code...
+  fl_disconnect_win.cpp
+  av_rendezvous.cpp
+  Generating Code...
+  fl_d3d_decode_producer.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_d3d_decode_producer.exe
+  fl_ipc_win32.cpp
+  fl_external_pool_win.cpp
+  fl_d3d_decoder_probe.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_d3d_decoder_probe.exe
+  fl_ipc_win32.cpp
+  fl_disconnect_win.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_disconnect_win.exe
+  Generating Code...
+  fl_av_auth.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_av_auth.exe
+  fl_av_rendezvous.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_av_rendezvous.exe
+  fl_frame_metadata_contract.cpp
+  fl_expanded_pool.cpp
+  fl_gst_native_producer_win.cpp
+  fl_frame_metadata.cpp
+  Generating Code...
+  The d3d11 library from gst-plugins-bad is unstable API and may change in future.
+  You can define GST_USE_UNSTABLE_API to avoid this warning.
+  Generating Code...
+  fl_external_pool_win.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_external_pool_win.exe
+  fl_frame_metadata_contract.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_frame_metadata_contract.exe
+  fl_gst_native_source_win.cpp
+  fl_gst_nv12.cpp
+  fl_expanded_pool.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_expanded_pool.exe
+  fl_gst_pool_policy.cpp
+  fl_frame_metadata.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_frame_metadata.exe
+  fl_gst_timestamps.cpp
+  framelink_av_playback.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink_av_playback.lib
+  The d3d11 library from gst-plugins-bad is unstable API and may change in future.
+  You can define GST_USE_UNSTABLE_API to avoid this warning.
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m5a-contract-20261101/CMakeLists.txt
+  fl_gst_native_producer_win.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_native_producer_win.exe
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m5a-contract-20261101/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m5a-contract-20261101/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m5a-contract-20261101/CMakeLists.txt
+  fl_gst_nv12.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_nv12.exe
+  fl_audio_alignment.cpp
+  fl_gst_sink_stats.cpp
+  av_auth.cpp
+  fl_gst_pool_policy.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_pool_policy.exe
+  fl_d3d_memory_binding.cpp
+  fl_gst_preconnect_slots.cpp
+  fl_gst_native_source_win.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_native_source_win.exe
+  fl_gst_timestamps.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_timestamps.exe
+  av_memory_agreement.cpp
+  fl_gst_sink_stats.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_sink_stats.exe
+  fl_ipc_win32.cpp
+  fl_av_offer_bounds.cpp
+  fl_audio_alignment.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_audio_alignment.exe
+  av_auth.cpp
+  av_rendezvous.cpp
+  fl_audio_segment.cpp
+  fl_trace.cpp
+  av_memory_agreement.cpp
+  test_av_memory_adversarial.cpp
+  framelink_memory.cpp
+  fl_audio_segment.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_audio_segment.exe
+  fl_import_failure_win.cpp
+  av_rendezvous.cpp
+  fl_gst_preconnect_slots.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_preconnect_slots.exe
+  m4_transport_timing.cpp
+  fl_d3d_memory_binding.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_d3d_memory_binding.exe
+  fl_gst_policy_generation.cpp
+  Generating Code...
+  test_av_memory_agreement.cpp
+  fl_gst_policy_generation.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_policy_generation.exe
+  fl_av_memory_adversarial.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_av_memory_adversarial.exe
+  fl_memory_boundary.cpp
+  fl_memory_c_api.c
+  Generating Code...
+  Generating Code...
+  fl_av_offer_bounds.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_av_offer_bounds.exe
+  fl_memory_c_api.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_memory_c_api.exe
+  fl_m4_transport_timing.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_m4_transport_timing.exe
+  fl_memory_contract.cpp
+  fl_native_boundary_benchmark_win.cpp
+  fl_native_relay_process_win.cpp
+  fl_memory_resource.cpp
+  fl_memory_boundary.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_memory_boundary.exe
+  fl_memory_contract.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_memory_contract.exe
+  fl_native_relay_win.cpp
+  fl_av_memory_agreement.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_av_memory_agreement.exe
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m5a-contract-20261101/CMakeLists.txt
+  fl_memory_resource.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_memory_resource.exe
+  fl_nv12_layout.cpp
+     Creating library C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/fl_import_failure_win.lib and object C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/fl_import_failure_win.exp
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m5a-contract-20261101/CMakeLists.txt
+  fl_import_failure_win.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_import_failure_win.exe
+  fl_nv12_win.cpp
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m5a-contract-20261101/CMakeLists.txt
+  fl_nv12_layout.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_nv12_layout.exe
+  fl_playback_recovery.cpp
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m5a-contract-20261101/CMakeLists.txt
+  fl_portable_map.cpp
+  fl_native_relay_process_win.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_native_relay_process_win.exe
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m5a-contract-20261101/CMakeLists.txt
+  fl_produce.cpp
+  fl_nv12_win.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_nv12_win.exe
+  fl_native_relay_win.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_native_relay_win.exe
+  fl_read_lease_d3d11.cpp
+  fl_read_leases.cpp
+  fl_portable_map.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_portable_map.exe
+  fl_read_ledger.cpp
+  fl_playback_recovery.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_playback_recovery.exe
+  fl_ready_timeout_win.cpp
+  fl_reconnect_held.cpp
+  fl_produce.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_produce.exe
+  fl_native_boundary_benchmark_win.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_native_boundary_benchmark_win.exe
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m5a-contract-20261101/CMakeLists.txt
+  fl_session_c_api.c
+  fl_read_ledger.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_read_ledger.exe
+  fl_reconnect_held.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_reconnect_held.exe
+  fl_session_c_api.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_session_c_api.exe
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m5a-contract-20261101/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m5a-contract-20261101/CMakeLists.txt
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m5a-contract-20261101/CMakeLists.txt
+  fl_session_contract.cpp
+  fl_read_lease_d3d11.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_read_lease_d3d11.exe
+  fl_session_peer.cpp
+  fl_startup_win.cpp
+  fl_read_leases.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_read_leases.exe
+  fl_submit_ownership.cpp
+  fl_trace_test.cpp
+  fl_session_peer.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_session_peer.exe
+  fl_trace_test.cpp
+  fl_session_contract.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_session_contract.exe
+  av_apps.cpp
+  fl_startup_win.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_startup_win.exe
+  fl_ready_timeout_win.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_ready_timeout_win.exe
+  av_apps.cpp
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m5a-contract-20261101/CMakeLists.txt
+  av_session.cpp
+  fl_submit_ownership.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_submit_ownership.exe
+  fl_trace_compiled_out.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_trace_compiled_out.exe
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m5a-contract-20261101/CMakeLists.txt
+  consumer.cpp
+  av_auth.cpp
+  fl_trace_test.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_trace_test.exe
+  producer.cpp
+  framelink_av_session.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink_av_session.exe
+  av_auth.cpp
+  av_memory_agreement.cpp
+  av_memory_agreement.cpp
+  av_rendezvous.cpp
+  sample_common.cpp
+  sample_common.cpp
+  av_rendezvous.cpp
+  Generating Code...
+  Generating Code...
+  Generating Code...
+  Generating Code...
+  framelink_consumer.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink_consumer.exe
+  framelink_producer.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink_producer.exe
+  framelink_av_consumer.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink_av_consumer.exe
+  framelink_av_producer.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink_av_producer.exe
+  Building Custom Rule C:/Users/jonsu/dev/framelink-m5a-contract-20261101/CMakeLists.txt
+Test project C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+      Start  1: read_leases
+ 1/95 Test  #1: read_leases ...........................   Passed    0.35 sec
+      Start  2: frame_metadata_contract
+ 2/95 Test  #2: frame_metadata_contract ...............   Passed    0.02 sec
+      Start  3: read_ledger
+ 3/95 Test  #3: read_ledger ...........................   Passed    0.06 sec
+      Start  4: session_contract
+ 4/95 Test  #4: session_contract ......................   Passed    0.02 sec
+      Start  5: session_contract_c_api
+ 5/95 Test  #5: session_contract_c_api ................   Passed    0.02 sec
+      Start  6: memory_boundary
+ 6/95 Test  #6: memory_boundary .......................   Passed    0.02 sec
+      Start  7: memory_contract
+ 7/95 Test  #7: memory_contract .......................   Passed    0.02 sec
+      Start  8: memory_contract_c_api
+ 8/95 Test  #8: memory_contract_c_api .................   Passed    0.02 sec
+      Start  9: read_lease_d3d11
+ 9/95 Test  #9: read_lease_d3d11 ......................   Passed    0.40 sec
+      Start 10: read_lease_d3d11_producer_death
+10/95 Test #10: read_lease_d3d11_producer_death .......   Passed    0.37 sec
+      Start 11: import_failure_win
+11/95 Test #11: import_failure_win ....................   Passed    0.22 sec
+      Start 12: external_pool_1
+12/95 Test #12: external_pool_1 .......................   Passed    0.28 sec
+      Start 13: external_pool_2
+13/95 Test #13: external_pool_2 .......................   Passed    0.27 sec
+      Start 14: external_pool_3
+14/95 Test #14: external_pool_3 .......................   Passed    0.27 sec
+      Start 15: external_pool_4
+15/95 Test #15: external_pool_4 .......................   Passed    0.30 sec
+      Start 16: buffer_references
+16/95 Test #16: buffer_references .....................***Failed    1.30 sec
+line 29: std::chrono::steady_clock::now()-started<std::chrono::milliseconds(500)
+
+      Start 17: submit_ownership
+17/95 Test #17: submit_ownership ......................   Passed    0.58 sec
+      Start 18: memory_resource_1
+18/95 Test #18: memory_resource_1 .....................   Passed    0.22 sec
+      Start 19: memory_resource_2
+19/95 Test #19: memory_resource_2 .....................   Passed    0.20 sec
+      Start 20: memory_resource_3
+20/95 Test #20: memory_resource_3 .....................   Passed    0.20 sec
+      Start 21: memory_resource_4
+21/95 Test #21: memory_resource_4 .....................   Passed    0.20 sec
+      Start 22: frame_metadata
+22/95 Test #22: frame_metadata ........................   Passed    0.91 sec
+      Start 23: expanded_pool
+23/95 Test #23: expanded_pool .........................   Passed    0.41 sec
+      Start 24: roundtrip
+24/95 Test #24: roundtrip .............................   Passed    2.46 sec
+      Start 25: roundtrip_reattach
+25/95 Test #25: roundtrip_reattach ....................   Passed    2.67 sec
+      Start 26: nv12_layout
+26/95 Test #26: nv12_layout ...........................   Passed    0.02 sec
+      Start 27: gst_native_producer_win
+27/95 Test #27: gst_native_producer_win ...............   Passed    0.71 sec
+      Start 28: gst_native_source_win
+28/95 Test #28: gst_native_source_win .................   Passed    1.80 sec
+      Start 29: gst_native_source_win_copy_negative
+29/95 Test #29: gst_native_source_win_copy_negative ...   Passed    0.25 sec
+      Start 30: gst_nv12_roundtrip
+30/95 Test #30: gst_nv12_roundtrip ....................   Passed    0.70 sec
+      Start 31: gst_rgb10a2_roundtrip
+31/95 Test #31: gst_rgb10a2_roundtrip .................   Passed    0.69 sec
+      Start 32: nv12_windows_roundtrip
+32/95 Test #32: nv12_windows_roundtrip ................   Passed    0.45 sec
+      Start 33: nv12_windows_1080p
+33/95 Test #33: nv12_windows_1080p ....................   Passed    0.49 sec
+      Start 34: sample_bgra
+34/95 Test #34: sample_bgra ...........................   Passed    0.52 sec
+      Start 35: sample_nv12
+35/95 Test #35: sample_nv12 ...........................   Passed    0.48 sec
+      Start 36: sample_slow
+36/95 Test #36: sample_slow ...........................   Passed    0.72 sec
+      Start 37: sample_metadata
+37/95 Test #37: sample_metadata .......................   Passed    0.47 sec
+      Start 38: sample_reconnect
+38/95 Test #38: sample_reconnect ......................   Passed    0.71 sec
+      Start 39: sample_geometry
+39/95 Test #39: sample_geometry .......................   Passed    0.47 sec
+      Start 40: sample_slots
+40/95 Test #40: sample_slots ..........................   Passed    0.47 sec
+      Start 41: sample_gpu_sync
+41/95 Test #41: sample_gpu_sync .......................   Passed    0.47 sec
+      Start 42: sample_invalid_cli
+42/95 Test #42: sample_invalid_cli ....................   Passed    0.01 sec
+      Start 43: sample_wrong_role
+43/95 Test #43: sample_wrong_role .....................   Passed    0.01 sec
+      Start 44: sample_corruption
+44/95 Test #44: sample_corruption .....................   Passed    0.56 sec
+      Start 45: disconnect_full_ring
+45/95 Test #45: disconnect_full_ring ..................   Passed    0.22 sec
+      Start 46: trace_disabled
+46/95 Test #46: trace_disabled ........................   Passed    0.02 sec
+      Start 47: trace_bounded_concurrent
+47/95 Test #47: trace_bounded_concurrent ..............   Passed    0.02 sec
+      Start 48: trace_thread_limit
+48/95 Test #48: trace_thread_limit ....................   Passed    0.02 sec
+      Start 49: portable_map_nv12
+49/95 Test #49: portable_map_nv12 .....................   Passed    0.23 sec
+      Start 50: portable_map_rgba
+50/95 Test #50: portable_map_rgba .....................   Passed    0.22 sec
+      Start 51: portable_map_bgra
+51/95 Test #51: portable_map_bgra .....................   Passed    0.22 sec
+      Start 52: portable_map_rgb10a2
+52/95 Test #52: portable_map_rgb10a2 ..................   Passed    0.22 sec
+      Start 53: ready_fence_timeout
+53/95 Test #53: ready_fence_timeout ...................   Passed    0.23 sec
+      Start 54: reconnect_held
+54/95 Test #54: reconnect_held ........................   Passed    0.30 sec
+      Start 55: gst_av_session
+55/95 Test #55: gst_av_session ........................   Passed    3.52 sec
+      Start 56: gst_av_faults
+56/95 Test #56: gst_av_faults .........................   Passed    2.63 sec
+      Start 57: gst_timestamp_contract
+57/95 Test #57: gst_timestamp_contract ................   Passed    1.72 sec
+      Start 58: session_contract_peers
+58/95 Test #58: session_contract_peers ................   Passed    0.26 sec
+      Start 59: av_rendezvous
+59/95 Test #59: av_rendezvous .........................   Passed    0.05 sec
+      Start 60: av_auth
+60/95 Test #60: av_auth ...............................   Passed    0.03 sec
+      Start 61: av_producer_help
+61/95 Test #61: av_producer_help ......................   Passed    0.03 sec
+      Start 62: av_consumer_help
+62/95 Test #62: av_consumer_help ......................   Passed    0.03 sec
+      Start 63: m3_av_apps
+63/95 Test #63: m3_av_apps ............................   Passed   30.18 sec
+      Start 64: gst_pool_policy
+64/95 Test #64: gst_pool_policy .......................   Passed    1.84 sec
+      Start 65: m5a_transport_relay
+65/95 Test #65: m5a_transport_relay ...................   Passed    1.38 sec
+      Start 66: m5a_transport_relay_audio_leads
+66/95 Test #66: m5a_transport_relay_audio_leads .......   Passed    1.40 sec
+      Start 67: m5a_transport_relay_sync_negative
+67/95 Test #67: m5a_transport_relay_sync_negative .....   Passed    0.71 sec
+      Start 68: m4_transport_audio_lags
+68/95 Test #68: m4_transport_audio_lags ...............   Passed    0.82 sec
+      Start 69: m4_transport_audio_leads
+69/95 Test #69: m4_transport_audio_leads ..............   Passed    0.82 sec
+      Start 70: m4_transport_jitter_drift
+70/95 Test #70: m4_transport_jitter_drift .............   Passed    1.03 sec
+      Start 71: m4_transport_negative_retimestamps
+71/95 Test #71: m4_transport_negative_retimestamps ....   Passed    0.43 sec
+      Start 72: audio_alignment
+72/95 Test #72: audio_alignment .......................   Passed    0.15 sec
+      Start 73: av_offer_bounds
+73/95 Test #73: av_offer_bounds .......................   Passed    0.08 sec
+      Start 74: m4_av_recovery
+74/95 Test #74: m4_av_recovery ........................   Passed   10.29 sec
+      Start 75: m5_finite_budget
+75/95 Test #75: m5_finite_budget ......................   Passed   18.69 sec
+      Start 76: m4_authenticated_offsets
+76/95 Test #76: m4_authenticated_offsets ..............   Passed    6.42 sec
+      Start 77: m4_source_drift
+77/95 Test #77: m4_source_drift .......................   Passed   39.15 sec
+      Start 78: av_audio_segment
+78/95 Test #78: av_audio_segment ......................   Passed    0.07 sec
+      Start 79: windows_endpoint_ready
+79/95 Test #79: windows_endpoint_ready ................   Passed    1.92 sec
+      Start 80: m5_external_pipeline
+80/95 Test #80: m5_external_pipeline ..................   Passed    6.43 sec
+      Start 81: gst_sink_stats
+81/95 Test #81: gst_sink_stats ........................   Passed    0.08 sec
+      Start 82: gst_preconnect_slots
+82/95 Test #82: gst_preconnect_slots ..................   Passed    0.93 sec
+      Start 83: m5_startup
+83/95 Test #83: m5_startup ............................   Passed   31.36 sec
+      Start 84: m5_preconnect
+84/95 Test #84: m5_preconnect .........................   Passed   25.57 sec
+      Start 85: m5_consumer_drain
+85/95 Test #85: m5_consumer_drain .....................   Passed   28.64 sec
+      Start 86: frame_accounting_negative_controls
+86/95 Test #86: frame_accounting_negative_controls ....   Passed    0.33 sec
+      Start 87: av_memory_agreement
+87/95 Test #87: av_memory_agreement ...................   Passed    0.04 sec
+      Start 88: d3d_memory_binding
+88/95 Test #88: d3d_memory_binding ....................   Passed    0.42 sec
+      Start 89: gst_policy_generation
+89/95 Test #89: gst_policy_generation .................   Passed    2.56 sec
+      Start 90: native_relay_win
+90/95 Test #90: native_relay_win ......................   Passed    0.52 sec
+      Start 91: trace_details
+91/95 Test #91: trace_details .........................   Passed    0.01 sec
+      Start 92: trace_compiled_out
+92/95 Test #92: trace_compiled_out ....................   Passed    0.02 sec
+      Start 93: av_memory_adversarial
+93/95 Test #93: av_memory_adversarial .................   Passed    0.04 sec
+      Start 94: native_relay_process_win
+94/95 Test #94: native_relay_process_win ..............   Passed    0.84 sec
+      Start 95: boundary_av_analyzer
+95/95 Test #95: boundary_av_analyzer ..................   Passed    0.73 sec
+
+99% tests passed, 1 tests failed out of 95
+
+Label Time Summary:
+gpu            =  93.33 sec*proc (6 tests)
+integration    =  93.33 sec*proc (6 tests)
+
+Total Test time (real) = 246.30 sec
+
+The following tests FAILED:
+	 16 - buffer_references (Failed)
+Errors while running CTest
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04"><Obj S="progress" RefId="0"><TN RefId="0"><T>System.Management.Automation.PSCustomObject</T><T>System.Object</T></TN><MS><I64 N="SourceId">1</I64><PR N="Record"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj></Objs>

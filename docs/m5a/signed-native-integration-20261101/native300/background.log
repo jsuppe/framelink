@@ -1,0 +1,13 @@
+
+11-01 17:33:35.468  7731  7731 I FLCross : bind=true
+11-01 17:33:35.947  7767  7784 I FLCross : grant lease=21da2547-5855-49aa-b92d-fcf446d32574 generation=1 consumer_uid=10305 broker_uid=10304
+11-01 17:33:35.947  7789  7803 I FLCross : producer-start lease=21da2547-5855-49aa-b92d-fcf446d32574 uid=10304 pid=7789
+11-01 17:33:35.967  7731  7788 I FLCross : receiver-start lease=21da2547-5855-49aa-b92d-fcf446d32574 generation=1 uid=10305 pid=7731
+11-01 17:33:36.041  7731  7788 I FLCross : playback producer-system-clock
+11-01 17:33:37.089  7731  7731 I FLCross : stop=surface-destroyed
+11-01 17:33:37.104  7731  7788 I FLCross : native failure: native GPU completion failed; allocation quarantined until restart
+11-01 17:33:37.104  7731  7788 I FLCross : receiver-result lease=21da2547-5855-49aa-b92d-fcf446d32574 {"ok":false,"video":27,"posts":27,"pcm_samples":46400,"uid":10305,"pid":7731}
+11-01 17:33:37.118  7767  7784 I FLCross : retired lease=21da2547-5855-49aa-b92d-fcf446d32574 generation=1 reason=explicit
+11-01 17:33:37.118  7731  7731 I FLCross : stop=background
+11-01 17:33:37.122  7789  7803 I FLCross : native failure: native source buffer acquisition failed
+11-01 17:33:37.122  7789  7803 I FLCross : producer-result lease=21da2547-5855-49aa-b92d-fcf446d32574 {"ok":false,"video":0,"posts":0,"pcm_samples":0,"uid":10304,"pid":7789}

@@ -49,9 +49,10 @@ void session(const char* plugin,const std::string& mode) {
   Pair control,audio;av::Endpoint root{};root.token.fill(0x42);
   int revokeControl=mode=="revoke-startup"?dup(control.fd[0]):-1;
   int revokeAudio=mode=="revoke-startup"?dup(audio.fd[0]):-1;
-  const bool adopt=mode=="adopt-video" || mode=="adopt-nv12" || mode=="adopt-refused";
+  const bool memory=mode.rfind("memory-",0)==0;
+  const bool adopt=memory || mode=="adopt-video" || mode=="adopt-nv12" || mode=="adopt-refused";
   const bool audioCoordinated=mode.rfind("audio-coordinated",0)==0;
-  const bool expected=audioCoordinated || mode=="legacy" || mode=="coordinated-delay" || mode=="finite" || mode=="adopt-video" || mode=="adopt-nv12";
+  const bool expected=mode=="factory-rgba" || mode=="memory-copy" || audioCoordinated || mode=="legacy" || mode=="coordinated-delay" || mode=="finite" || mode=="adopt-video" || mode=="adopt-nv12";
   std::atomic<unsigned> opens{0};
   auto provider=[&](int side) {
     av::SessionProvider p;
@@ -73,6 +74,18 @@ void session(const char* plugin,const std::string& mode) {
         flCreateChannelEx(name.c_str(),cfg.video.width,cfg.video.height,flFormat(cfg.video.format),4,FL_MAP_CPU,&channel);
       CHECK(result==FL_OK);return channel;
     };
+    if(memory && !(mode=="memory-server-only"&&side==1) && !(mode=="memory-client-only"&&side==0))
+      p.configureMemory=[&,side](const flSessionConfig&,bool,flChannel*,GstElement*,av::MemoryOffer& offer,unsigned,std::string&) {
+        // Synthetic provider binding exercises control flow only. It is NOT an
+        // allocation-identity oracle; native provider qualification is separate.
+        flMemoryRequirementsInit(&offer.requirements);
+        offer.requirements.allowedOperations=mode=="memory-strict"?0:FL_MEMORY_COPY;
+        offer.path.version=1;offer.path.resourceType=FL_MEMORY_DMABUF;
+        offer.path.operations=mode=="memory-hidden-copy"?0:FL_MEMORY_COPY;
+        offer.resourceBinding[0]=42;
+        if(mode=="memory-binding"&&side==1)offer.resourceBinding[1]=1;
+        return true;
+      };
     return p;
   };
   auto server=provider(0),client=provider(1);
@@ -86,6 +99,17 @@ void session(const char* plugin,const std::string& mode) {
   if(mode=="budget-mismatch"){tx.mediaRunMs=1000;rx.mediaRunMs=2000;}
   if(mode=="media-deadline"){tx.frames=100;tx.timeoutMs=1000;}
   if(mode=="cancel-media")tx.frames=100;
+  if(mode.rfind("factory-",0)==0){
+    tx.format=rx.format="RGBA";
+    tx.videoFrame=[&](GstElement* sink,unsigned n,uint64_t pts,uint64_t duration)->GstBuffer*{
+      CHECK(sink && GST_IS_ELEMENT(sink));
+      if(mode=="factory-missing")return nullptr;
+      if(mode=="factory-throws")throw std::runtime_error("injected source failure");
+      auto*b=gst_buffer_new_allocate(nullptr,tx.width*tx.height*4,nullptr);GstMapInfo map{};CHECK(gst_buffer_map(b,&map,GST_MAP_WRITE));
+      for(unsigned y=0;y<tx.height;y++)for(unsigned x=0;x<tx.width;x++){auto*v=map.data+(y*tx.width+x)*4;v[0]=n;v[1]=x;v[2]=y;v[3]=255;}gst_buffer_unmap(b,&map);
+      GST_BUFFER_PTS(b)=pts+(mode=="factory-pts"?1:0);GST_BUFFER_DURATION(b)=duration+(mode=="factory-duration"?1:0);return b;
+    };
+  }
   bool produced=false,received=false;std::string pe,ce;
   unsigned sessions=0,clocks=0,ends=0,frames=0;
   av::PlaybackCallbacks cb;
@@ -101,7 +125,10 @@ void session(const char* plugin,const std::string& mode) {
     CHECK(gst_buffer_get_size(buffer)%(rx.channels*2)==0);
     pcmSamples+=gst_buffer_get_size(buffer)/(rx.channels*2);
   };
-  cb.onVideo=[&](auto*,auto pts,auto&){if(audioCoordinated)CHECK(pts==uint64_t(frames)*GST_SECOND/rx.fps);if(++frames==5 && mode=="cancel-media")producerStop=true;};
+  cb.onVideo=[&](GstSample* sample,auto pts,auto&){if(mode=="factory-rgba"){
+    CHECK(pts==uint64_t(frames)*GST_SECOND/rx.fps);GstMapInfo map{};CHECK(gst_buffer_map(gst_sample_get_buffer(sample),&map,GST_MAP_READ));CHECK(map.size==tx.width*tx.height*4);
+    for(unsigned y=0;y<tx.height;y++)for(unsigned x=0;x<tx.width;x++){auto*v=map.data+(y*tx.width+x)*4;CHECK(v[0]==frames&&v[1]==x&&v[2]==y&&v[3]==255);}gst_buffer_unmap(gst_sample_get_buffer(sample),&map);
+  }if(audioCoordinated)CHECK(pts==uint64_t(frames)*GST_SECOND/rx.fps);if(++frames==5 && mode=="cancel-media")producerStop=true;};
   cb.onClock=[&](auto&){++clocks;};cb.onEnd=[&]{++ends;};
   auto start=std::chrono::steady_clock::now();
   long long producerMs=0;
@@ -112,6 +139,11 @@ void session(const char* plugin,const std::string& mode) {
   printf("case=%s producer=%d consumer=%d sessions=%u clocks=%u ends=%u elapsed_ms=%lld producer_ms=%lld producer_error=%s consumer_error=%s\n",mode.c_str(),produced,received,sessions,clocks,ends,(long long)ms,producerMs,pe.c_str(),ce.c_str());
   CHECK(produced==expected && received==expected);
   CHECK(ends==sessions);
+  if(mode.rfind("factory-",0)==0){
+    if(expected)CHECK(frames==tx.frames && pcmSamples==uint64_t(tx.frames)*tx.rate/tx.fps);
+    else CHECK(frames==0 && (pe=="video source adapter failed" || pe=="injected source failure" || pe=="video source adapter changed media timing"));
+  }
+  if(memory && !expected)CHECK(frames==0 && pcmSamples==0 && clocks==0);
   if(expected)CHECK(sessions==1 && clocks==1);
   if(adopt && expected)CHECK(opens==2 && frames==tx.frames);
   if(mode=="adopt-refused")CHECK(sessions==0 && ce=="injected video lease refusal");
@@ -134,7 +166,10 @@ void silentPeer(const char* plugin) {
   puts("silent peer: bounded nonfatal producer deadline; process remains alive");
 }
 int main(int argc,char** argv) {try {
-  CHECK(argc==2);bounds(argv[1]);silentPeer(argv[1]);
+  CHECK(argc==2 || argc==3);
+  if(argc==3 && std::string(argv[2])=="factory"){for(const char* mode:{"factory-rgba","factory-missing","factory-throws","factory-pts","factory-duration"})session(argv[1],mode);puts("source adapter controls passed");return 0;}
+  if(argc==3){for(const char* mode:{"memory-copy","memory-strict","memory-binding","memory-hidden-copy","memory-server-only","memory-client-only"})session(argv[1],mode);puts("broker memory extension controls passed");return 0;}
+  bounds(argv[1]);silentPeer(argv[1]);
   for(const char* mode:{"legacy","coordinated-delay","finite","wrong-key","wrong-audio-key","wrong-audio-role","budget-mismatch","revoke-startup","cancel-startup","cancel-media","media-deadline","adopt-video","adopt-nv12","adopt-refused","audio-coordinated","audio-coordinated-delay","audio-coordinated-finite"})session(argv[1],mode);
   puts("broker producer: all real-peer cases passed");return 0;
 } catch(const std::exception& e){fprintf(stderr,"FAIL: %s\n",e.what());return 1;}}

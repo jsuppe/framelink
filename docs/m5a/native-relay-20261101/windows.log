@@ -1,0 +1,35 @@
+#< CLIXML
+-- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.26300.
+-- framelink: building GStreamer elements (gstframelink)
+-- Configuring done (0.8s)
+-- Generating done (0.6s)
+-- Build files have been written to: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
+  fl_native_relay_win.cpp
+  fl_native_relay_win.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_native_relay_win.exe
+UpdateCTestConfiguration  from :C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/DartConfiguration.tcl
+Test project C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 90
+    Start 90: native_relay_win
+
+90: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_native_relay_win.exe
+90: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+90: Test timeout computed to be: 20
+90: same canonical-NT NV12 relay: reversed slots, identity rejection, exact pixels/metadata, downstream leases prevent upstream reuse and bounded completion passed
+1/1 Test #90: native_relay_win .................   Passed    0.52 sec
+
+The following tests passed:
+	native_relay_win
+
+100% tests passed, 0 tests failed out of 1
+
+Total Test time (real) =   0.55 sec
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04"><Obj S="progress" RefId="0"><TN RefId="0"><T>System.Management.Automation.PSCustomObject</T><T>System.Object</T></TN><MS><I64 N="SourceId">1</I64><PR N="Record"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj></Objs>

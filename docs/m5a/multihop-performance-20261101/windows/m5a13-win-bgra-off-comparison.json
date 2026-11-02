@@ -1,0 +1,75 @@
+{
+  "cases": [
+    {
+      "prefix": "/tmp/m5a13-win-final-bgra-1-off",
+      "total_identities": 3720,
+      "measured_identities": 3600,
+      "fresh_fps": 59.99825629963436,
+      "source_marker_to_arrival_ms": {
+        "p50": 2.3964,
+        "p95": 2.5399,
+        "p99": 3.0343,
+        "max": 3.0553
+      },
+      "consumer_hold_ms": {
+        "p50": 2.0231,
+        "p95": 2.0358,
+        "p99": 2.5344,
+        "max": 3.5314
+      },
+      "producer_acquire_wait_ms": {
+        "p50": 0.0006,
+        "p95": 0.0006,
+        "p99": 0.0007,
+        "max": 0.0151
+      },
+      "delivery_interval_ms": {
+        "p50": 16.0042,
+        "p95": 18.0042,
+        "p99": 18.5075,
+        "max": 19.5021
+      },
+      "rate_pass": true,
+      "gpu_completion_verified_by_csv": false,
+      "pcm_qualified": false
+    },
+    {
+      "prefix": "/tmp/m5a13-win-final-bgra-2-off",
+      "total_identities": 3720,
+      "measured_identities": 3600,
+      "fresh_fps": 59.99861137973507,
+      "source_marker_to_arrival_ms": {
+        "p50": 4.0227,
+        "p95": 4.5368,
+        "p99": 5.011,
+        "max": 5.0618
+      },
+      "consumer_hold_ms": {
+        "p50": 2.0226,
+        "p95": 2.0351,
+        "p99": 2.5274,
+        "max": 3.5281
+      },
+      "producer_acquire_wait_ms": {
+        "p50": 0.0006,
+        "p95": 0.0007,
+        "p99": 0.0007,
+        "max": 0.0063
+      },
+      "delivery_interval_ms": {
+        "p50": 16.0037,
+        "p95": 18.0057,
+        "p99": 18.5081,
+        "max": 20.507
+      },
+      "rate_pass": true,
+      "gpu_completion_verified_by_csv": false,
+      "pcm_qualified": false
+    }
+  ],
+  "comparison": {
+    "second_minus_first_p95_ms": 1.9969000000000006,
+    "budget_ms": 16.666666666666668,
+    "pass": true
+  }
+}

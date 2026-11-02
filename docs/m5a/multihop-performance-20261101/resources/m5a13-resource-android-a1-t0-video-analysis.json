@@ -1,0 +1,37 @@
+{
+  "cases": [
+    {
+      "prefix": "/tmp/m5a13-resource-android-a1-t0",
+      "total_identities": 300,
+      "measured_identities": 240,
+      "fresh_fps": 59.96627182237961,
+      "source_marker_to_arrival_ms": {
+        "p50": 2.86277,
+        "p95": 4.390538,
+        "p99": 4.992,
+        "max": 5.416
+      },
+      "consumer_hold_ms": {
+        "p50": 6.484,
+        "p95": 8.026154,
+        "p99": 8.607385,
+        "max": 9.492616
+      },
+      "producer_acquire_wait_ms": {
+        "p50": 0.081539,
+        "p95": 0.142461,
+        "p99": 0.207,
+        "max": 0.209846
+      },
+      "delivery_interval_ms": {
+        "p50": 16.518385,
+        "p95": 19.010461,
+        "p99": 19.516385,
+        "max": 19.908308
+      },
+      "rate_pass": true,
+      "gpu_completion_verified_by_csv": false,
+      "pcm_qualified": false
+    }
+  ]
+}

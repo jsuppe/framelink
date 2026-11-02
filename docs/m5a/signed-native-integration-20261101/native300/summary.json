@@ -1,0 +1,74 @@
+[
+  {
+    "case": "bgra",
+    "pass": true,
+    "lease": "0398932a-8dfb-4010-88b9-9031b7511a4a",
+    "ok": true,
+    "video": 300,
+    "posts": 300,
+    "pcm_samples": 480000,
+    "uid": 10305,
+    "pid": 6820
+  },
+  {
+    "case": "producer-death",
+    "pass": true,
+    "rejected_or_retired": true
+  },
+  {
+    "case": "producer-restart",
+    "pass": true,
+    "lease": "ee2a0aa8-9562-41f2-a1cf-8f8fb45ac0e4",
+    "ok": true,
+    "video": 300,
+    "posts": 300,
+    "pcm_samples": 480000,
+    "uid": 10305,
+    "pid": 7197
+  },
+  {
+    "case": "consumer-death",
+    "pass": true,
+    "rejected_or_retired": true,
+    "retirement_reason": [
+      "broker-destroy"
+    ]
+  },
+  {
+    "case": "consumer-restart",
+    "pass": true,
+    "lease": "976fbcdb-183c-4b99-9307-774cd212b3ae",
+    "ok": true,
+    "video": 300,
+    "posts": 300,
+    "pcm_samples": 480000,
+    "uid": 10305,
+    "pid": 7537
+  },
+  {
+    "case": "background",
+    "pass": true,
+    "rejected_or_retired": true
+  },
+  {
+    "case": "foreground-reopen",
+    "pass": true,
+    "lease": "096fd532-9e11-4ba5-968e-1ff8b5a5c3f3",
+    "ok": true,
+    "video": 300,
+    "posts": 300,
+    "pcm_samples": 480000,
+    "uid": 10305,
+    "pid": 7862
+  },
+  {
+    "case": "wrong-key",
+    "pass": true,
+    "rejected_or_retired": true
+  },
+  {
+    "case": "wrong-signer",
+    "pass": true,
+    "rejected": true
+  }
+]

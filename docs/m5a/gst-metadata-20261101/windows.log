@@ -1,0 +1,79 @@
+#< CLIXML
+-- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.26300.
+-- framelink: building GStreamer elements (gstframelink)
+-- Configuring done (0.8s)
+-- Generating done (0.5s)
+-- Build files have been written to: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
+  gstframelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\gstframelink.dll
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  fl_gst_timestamps.cpp
+  fl_gst_timestamps.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_timestamps.exe
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
+  fl_gst_native_source_win.cpp
+  The d3d11 library from gst-plugins-bad is unstable API and may change in future.
+  You can define GST_USE_UNSTABLE_API to avoid this warning.
+  fl_gst_native_source_win.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_native_source_win.exe
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
+  fl_gst_pool_policy.cpp
+  fl_gst_pool_policy.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_pool_policy.exe
+UpdateCTestConfiguration  from :C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/DartConfiguration.tcl
+Test project C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 26
+    Start 26: gst_native_source_win
+
+26: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_native_source_win.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
+26: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+26: Test timeout computed to be: 20
+26: RGBA native D3D11: same shared allocation, pixels/PTS, bounded reuse and retained memory after stop pass
+26: NV12 native D3D11: same shared allocation, pixels/PTS, bounded reuse and retained memory after stop pass
+26: RGBA native D3D11: same shared allocation, pixels/PTS, bounded reuse and retained memory after stop pass
+1/4 Test #26: gst_native_source_win .................   Passed    1.82 sec
+test 27
+    Start 27: gst_native_source_win_copy_negative
+
+27: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_native_source_win.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll" "--copy-negative"
+27: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+27: Test timeout computed to be: 20
+27: deliberate GPU copy rejected by allocation-alias oracle after successful setup
+2/4 Test #27: gst_native_source_win_copy_negative ...   Passed    0.25 sec
+test 55
+    Start 55: gst_timestamp_contract
+
+55: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_timestamps.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
+55: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+55: Test timeout computed to be: 25
+55: Timestamp contract: zero, repeated/backward, signed limit, overflow/missing rejection, segment mapping, variable metadata, generation relay, default mode passed
+3/4 Test #55: gst_timestamp_contract ................   Passed    1.71 sec
+test 62
+    Start 62: gst_pool_policy
+
+62: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_pool_policy.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
+62: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+62: Test timeout computed to be: 30
+62: 2/3 image capacities: bounded drop, bounded error, delayed-reader recovery and exact loss accounting pass
+4/4 Test #62: gst_pool_policy .......................   Passed    1.83 sec
+
+The following tests passed:
+	gst_native_source_win
+	gst_native_source_win_copy_negative
+	gst_timestamp_contract
+	gst_pool_policy
+
+100% tests passed, 0 tests failed out of 4
+
+Total Test time (real) =   5.67 sec
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04"><Obj S="progress" RefId="0"><TN RefId="0"><T>System.Management.Automation.PSCustomObject</T><T>System.Object</T></TN><MS><I64 N="SourceId">1</I64><PR N="Record"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj></Objs>

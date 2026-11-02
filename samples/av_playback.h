@@ -59,6 +59,12 @@ struct ProducerOptions {
   // timeoutMs; native video setup/teardown may take that bounded interval.
   const std::atomic<bool>* stop=nullptr;
   const SessionProvider* sessionProvider=nullptr;
+  // Optional source-content adapter. Called on the producer thread after setup;
+  // borrowed sink, returns one OWNED buffer or nullptr/throws to fail the session.
+  // Must preserve the supplied PTS/duration and obey negotiated native readiness.
+  // The provider configures matching caps/allocation policy before startup. No
+  // implicit map, copy or fallback is introduced by this callback.
+  std::function<GstBuffer*(GstElement*,unsigned,uint64_t,uint64_t)> videoFrame;
 };
 // Returns false on failure/cancel/deadline; never terminates the host process.
 bool runBrokerProducer(const ProducerOptions&, std::string& error);

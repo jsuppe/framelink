@@ -20,6 +20,10 @@
 
 #define FL_EXPORTS
 #include "framelink.h"
+#include "framelink_memory.h"
+#include "fl_read_ledger.hpp"
+#include "fl_buffer_refs.hpp"
+#include "fl_arrival.hpp"
 #include "framelink_sync_fd.h"
 #include "fl_sync_fd.hpp"
 #include "framelink_dmabuf.h"
@@ -32,6 +36,7 @@
 #include <string.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
+#include <sys/sysmacros.h>
 #include <sys/ioctl.h>
 #include <linux/dma-buf.h>
 #include "fl_layout.h"
@@ -49,27 +54,43 @@
 #include "fl_ipc.h"
 #include "fl_log.h"
 #include "fl_protocol.h"
+#include "fl_metadata.hpp"
 
 struct flImage {
     gbm_bo* bo = nullptr; // consumer only
     flDmabuf desc{};
     uint32_t width=0,height=0;
+    bool allocationUsageKnown=false;
+    uint32_t allocationUsage=0; // known only for locally allocated GBM BOs
     void* planeMaps[4]{};
     size_t planeLengths[4]{};
     flMappedImage planeView{};
 };
 
+struct LeaseCompletion {
+    uint64_t token=0;
+    int fd=-1;
+    ~LeaseCompletion() { if(fd>=0)close(fd); }
+};
+
 struct flChannel {
     bool isConsumer = false;
+    bool externalPool = false;
     std::string name;
     flChannelInfo info{};
     uint32_t flags = 0;
+    uint32_t peerFeatures=0;
+    fl::BufferReferences bufferReferences;
+    flFrameMetadata slotMetadata[FL_MAX_POOL_SIZE]{};
+    flFrameMetadata pendingMetadata{},heldMetadata{};
 
     int drmFd = -1;
     gbm_device* gbm = nullptr;
 
     std::vector<flImage*> images;
     fl::SyncFds sync;
+    uint32_t submittingSlot = UINT32_MAX; // exactly one begin/end transaction
+    uint64_t submittingValue = 0;
     uint64_t readyValue = 0;
 
     // consumer
@@ -79,6 +100,8 @@ struct flChannel {
     std::atomic<bool> peerGone{false};
     std::mutex pendingMutex;
     bool hasPending = false;
+    fl::ReadLedger readers;
+    std::array<LeaseCompletion,fl::ReadLedger::MaxReaders> leaseCompletions;
     bool frameHeld = false;
     uint64_t heldReady = 0;
     uint64_t retiredValue = 0; // completed consumer GPU reads; protects geometry changes
@@ -86,6 +109,7 @@ struct flChannel {
     uint32_t pendingSlot = 0;
     uint64_t pendingReady = 0;
     int64_t pendingPts = -1;
+    uint64_t pendingArrival=0,heldArrival=0;
     uint64_t sequence = 0;
 
     // producer. Slot recycling is MONOTONIC, exactly like the Windows
@@ -167,6 +191,50 @@ bool handOverRing(flChannel* ch, fl::Channel& link) {
     return link.sendWithFds(fl::MsgType::RingDesc, &rd, sizeof(rd), fds.data(), fds.size());
 }
 
+flResult adoptRing(flChannel* ch, const flDmabuf* input, uint32_t count) {
+    const uint32_t planes=ch->info.format==FL_FORMAT_NV12?2:1;
+    std::vector<struct stat> prior;
+    for(uint32_t i=0;i<count;i++) {
+        const auto& d=input[i];
+        if(d.planes!=planes || d.fourcc!=fourccFor(ch->info.format) ||
+           (i && d.modifier!=input[0].modifier))return FL_FORMAT_UNSUPPORTED;
+        if((ch->flags & FL_MAP_CPU) && d.modifier!=DRM_FORMAT_MOD_LINEAR)return FL_FORMAT_UNSUPPORTED;
+        gbm_import_fd_modifier_data native{};native.width=ch->info.width;native.height=ch->info.height;
+        native.format=d.fourcc;native.num_fds=planes;native.modifier=d.modifier;
+        std::vector<struct stat> current;
+        for(uint32_t p=0;p<planes;p++) {
+            const uint64_t rowBytes=ch->info.format==FL_FORMAT_NV12?ch->info.width:uint64_t(ch->info.width)*4;
+            if(d.fd[p]<0 || d.stride[p]<rowBytes || d.stride[p]>UINT32_MAX || d.offset[p]>UINT32_MAX)
+                return FL_INVALID;
+            struct stat st{};if(fstat(d.fd[p],&st))return FL_INVALID;
+            const uint64_t rows=p?ch->info.height/2:ch->info.height;
+            const uint64_t end=d.offset[p]+d.stride[p]*(rows-1)+rowBytes;
+            if(st.st_size>0 && end>uint64_t(st.st_size))return FL_INVALID;
+            for(const auto& old:prior)if(old.st_dev==st.st_dev && old.st_ino==st.st_ino)return FL_INVALID;
+            current.push_back(st);native.fds[p]=d.fd[p];native.strides[p]=uint32_t(d.stride[p]);native.offsets[p]=uint32_t(d.offset[p]);
+        }
+        auto* image=new flImage();for(auto& fd:image->desc.fd)fd=-1;
+        ch->images.push_back(image);image->width=ch->info.width;image->height=ch->info.height;
+        image->desc=d;for(auto& fd:image->desc.fd)fd=-1;
+        for(uint32_t p=0;p<planes;p++) {
+            image->desc.fd[p]=fcntl(d.fd[p],F_DUPFD_CLOEXEC,0);
+            if(image->desc.fd[p]<0)return FL_INVALID;
+        }
+        image->bo=gbm_bo_import(ch->gbm,GBM_BO_IMPORT_FD_MODIFIER,&native,
+            (ch->flags & FL_GPU_RENDER)?GBM_BO_USE_RENDERING:0);
+        if(!image->bo)return FL_FORMAT_UNSUPPORTED;
+        if(gbm_bo_get_width(image->bo)!=ch->info.width || gbm_bo_get_height(image->bo)!=ch->info.height ||
+           gbm_bo_get_format(image->bo)!=d.fourcc)return FL_FORMAT_UNSUPPORTED;
+        if(gbm_bo_get_plane_count(image->bo)!=planes)return FL_FORMAT_UNSUPPORTED;
+        for(uint32_t p=0;p<planes;p++)
+            if(gbm_bo_get_stride_for_plane(image->bo,p)!=d.stride[p] || gbm_bo_get_offset(image->bo,p)!=d.offset[p])
+                return FL_FORMAT_UNSUPPORTED;
+        prior.insert(prior.end(),current.begin(),current.end());
+    }
+    ++ch->info.generation;
+    return FL_OK;
+}
+
 // Allocate (or re-allocate) the ring. Shared by channel creation and by
 // flRequestGeometry, which is the only reason it is not inline.
 bool reallocRing(flChannel* ch, uint32_t w, uint32_t h, uint32_t poolSize) {
@@ -184,8 +252,11 @@ bool reallocRing(flChannel* ch, uint32_t w, uint32_t h, uint32_t poolSize) {
     for (uint32_t i = 0; i < poolSize; ++i) {
         auto* img = new flImage();
         img->bo = gbm_bo_create(ch->gbm, w, h, fourcc, preferred);
+        img->allocationUsageKnown = true;
+        img->allocationUsage = preferred;
         if (!img->bo && fallback != preferred) {
             img->bo = gbm_bo_create(ch->gbm, w, h, fourcc, fallback);
+            img->allocationUsage = fallback;
             if (img->bo && i == 0)
                 FL_LOG("framelink: RENDERING|LINEAR refused, using LINEAR only "
                        "(CPU-mappable but may not be GPU-renderable)");
@@ -214,7 +285,7 @@ bool reallocRing(flChannel* ch, uint32_t w, uint32_t h, uint32_t poolSize) {
     for(auto* image:ch->images)freeImage(image);
     ch->images=std::move(images);
     ch->info.width=w;ch->info.height=h;++ch->info.generation;
-    ch->heldReady=ch->retiredValue=0;ch->sync.clear();
+    ch->readers.resetEpoch();ch->heldReady=ch->retiredValue=0;ch->sync.clear();
     return true;
 }
 
@@ -236,11 +307,13 @@ void acceptLoop(flChannel* ch) {
 
         fl::HelloMsg hello{};
         hello.version = FL_VERSION;
+        hello._pad=fl::localFeatures(ch->flags);
         hello.pid = (uint32_t)getpid();
         if (!link.send(fl::MsgType::Hello, hello)) continue;
         auto peer = link.recv();
-        const auto* ph = peer ? peer->as<fl::HelloMsg>() : nullptr;
-        if (!ph || ph->version != FL_VERSION) {
+        if(peer && !peer->fds.empty()){for(int fd:peer->fds)close(fd);continue;}
+        const auto* ph = peer && peer->type==fl::MsgType::Hello && peer->payload.size()==sizeof(fl::HelloMsg) ? peer->as<fl::HelloMsg>() : nullptr;
+        if (!ph || ph->version != FL_VERSION || !fl::compatibleFeatures(hello._pad,ph->_pad)) {
             FL_LOG_ERR("framelink: refusing producer - speaks version %u, we speak %u",
                        ph ? ph->version : 0u, (unsigned)FL_VERSION);
             continue;
@@ -249,14 +322,14 @@ void acceptLoop(flChannel* ch) {
         {
             std::lock_guard<std::mutex> hold(ch->pendingMutex);
             ch->sync.advance(ch->retiredValue);
-            if(ch->frameHeld || ch->retiredValue<ch->heldReady || !fl::fenceReady(ch->sync.pending)) {
+            if(!ch->readers.empty() || ch->frameHeld || ch->retiredValue<ch->heldReady || !fl::fenceReady(ch->sync.pending)) {
                 link.send(fl::MsgType::Busy);
                 continue;
             }
             // A new producer starts its timeline at one. Old release values
             // must never authorize reuse on the replacement timeline.
             ch->hasPending=false;ch->sync.clear();
-            ch->heldReady=ch->retiredValue=0;
+            ch->readers.resetEpoch();ch->heldReady=ch->retiredValue=0;ch->peerFeatures=ph->_pad;
             ++ch->info.generation;
             if (!handOverRing(ch, link)) continue;
         }
@@ -290,11 +363,11 @@ void acceptLoop(flChannel* ch) {
             if (!msg || msg->type == fl::MsgType::Bye) break;
             if (msg->type == fl::MsgType::RequestGeometry) {
                 const auto* g = msg->as<fl::GeometryMsg>();
-                if (g && g->format==(uint32_t)ch->info.format && fl::validGeometry(g->width,g->height,ch->info.format) &&
+                if (!ch->externalPool && g && g->format==(uint32_t)ch->info.format && fl::validGeometry(g->width,g->height,ch->info.format) &&
                     (g->width != ch->info.width || g->height != ch->info.height)) {
                     std::lock_guard<std::mutex> hold(ch->pendingMutex);
                     ch->sync.advance(ch->retiredValue);
-                    if(ch->frameHeld || ch->retiredValue < ch->heldReady){if(!handOverRing(ch,ch->peer))break;continue;}
+                    if(!ch->readers.empty() || ch->frameHeld || ch->retiredValue < ch->heldReady){if(!handOverRing(ch,ch->peer))break;continue;}
                     ch->hasPending = false; // stale: the old ring is going away
                     if(ch->sync.pending>=0)close(ch->sync.pending);ch->sync.pending=-1;
                     const uint32_t pool = (uint32_t)ch->images.size();
@@ -311,9 +384,10 @@ void acceptLoop(flChannel* ch) {
                 if (!handOverRing(ch, ch->peer)) break;
                 continue;
             }
-            if (msg->type != fl::MsgType::FrameReady) continue;
-            const auto* fr = msg->as<fl::FrameReadyMsg>();
-            if (!fr || fr->slot >= ch->images.size()) continue;
+            if (msg->type != fl::MsgType::FrameReady && msg->type!=fl::MsgType::FrameReadyMetadata) continue;
+            flFrameMetadata metadata{};
+            const auto* fr=fl::decodeFrame(*msg,(ch->flags&FL_REQUIRE_FRAME_METADATA)!=0,metadata);
+            if(!fr || fr->slot>=ch->images.size()){for(int fd:msg->fds)close(fd);break;}
             std::lock_guard<std::mutex> hold(ch->pendingMutex);
             // Latest-frame-wins, as on Windows: a slow consumer must not stall
             // the producer.
@@ -328,7 +402,8 @@ void acceptLoop(flChannel* ch) {
             ch->hasPending = true;
             ch->pendingSlot = fr->slot;
             ch->pendingReady = fr->readyValue;
-            ch->pendingPts = fr->ptsNs;
+            ch->pendingPts = fr->ptsNs;ch->pendingMetadata=metadata;
+            if(ch->flags & FL_TRACK_ARRIVAL)ch->pendingArrival=fl::arrivalNowNs();
             ++ch->sequence;
         }
         ch->peerGone = true;
@@ -395,9 +470,9 @@ FL_API flResult flCreateChannelOnAdapter(const char* name, uint32_t width, uint3
     return trace.result(flCreateChannelEx(name, width, height, format, poolSize, flags, out));
 }
 
-FL_API flResult flCreateChannelEx(const char* name, uint32_t width, uint32_t height,
-                                  flFormat format, uint32_t poolSize, uint32_t flags,
-                                  flChannel** out) {
+static flResult createChannel(const char* name, uint32_t width, uint32_t height,
+    flFormat format, uint32_t poolSize, uint32_t flags, const flDmabuf* externalImages,
+    flChannel** out) {
     fltrace::Scope trace("flCreateChannelEx",fltrace::id(name));
     if(trace.active){trace.event.sequence=((uint64_t)width<<32)|height;trace.event.fence=(uint64_t)format;trace.event.slot=poolSize;trace.event.pts=flags;}
 
@@ -423,14 +498,26 @@ FL_API flResult flCreateChannelEx(const char* name, uint32_t width, uint32_t hei
         return trace.result(FL_INTERNAL);
     }
 
-    if (!reallocRing(ch, width, height, poolSize)) {
-        flClose(ch);
-        return trace.result(FL_OOM);
-    }
+    ch->externalPool=externalImages!=nullptr;
+    flResult allocation=externalImages?adoptRing(ch,externalImages,poolSize):
+        (reallocRing(ch,width,height,poolSize)?FL_OK:FL_OOM);
+    if(allocation!=FL_OK){flClose(ch);return trace.result(allocation);}
 
     ch->accept = std::thread(acceptLoop, ch);
     *out = ch;
     return trace.result(FL_OK);
+}
+
+FL_API flResult flCreateChannelEx(const char* name, uint32_t width, uint32_t height,
+    flFormat format, uint32_t poolSize, uint32_t flags, flChannel** out) {
+    return createChannel(name,width,height,format,poolSize,flags,nullptr,out);
+}
+FL_API flResult flCreateChannelFromDmabufs(const char* name, uint32_t width,
+    uint32_t height, flFormat format, uint32_t poolSize, uint32_t flags,
+    const flDmabuf* images, flChannel** out) {
+    if(out)*out=nullptr;
+    if(!images || (flags & ~(FL_MAP_CPU|FL_GPU_SYNC|FL_DEFER_RELEASE|FL_GPU_RENDER|FL_TRACK_ARRIVAL|FL_REQUIRE_FRAME_METADATA)))return FL_INVALID;
+    return createChannel(name,width,height,format,poolSize,flags,images,out);
 }
 
 FL_API flResult flCreateChannel(const char* name, uint32_t width, uint32_t height,
@@ -451,13 +538,14 @@ FL_API flResult flOpenProducer(const char* name, flChannel** out) {
     }
 
     auto helloMsg = ch->link.recv();
+    if(helloMsg && !helloMsg->fds.empty()){for(int fd:helloMsg->fds)close(fd);delete ch;return trace.result(FL_INVALID);}
     if (helloMsg && helloMsg->type == fl::MsgType::Busy) {
         // The channel exists; someone else has it. Tell the walker so, rather
         // than letting a closed connection read as "no such channel".
         delete ch;
         return trace.result(FL_BUSY);
     }
-    const auto* srv = helloMsg && helloMsg->type == fl::MsgType::Hello
+    const auto* srv = helloMsg && helloMsg->type == fl::MsgType::Hello && helloMsg->payload.size()==sizeof(fl::HelloMsg)
                           ? helloMsg->as<fl::HelloMsg>()
                           : nullptr;
     if (!srv) {
@@ -470,8 +558,11 @@ FL_API flResult flOpenProducer(const char* name, flChannel** out) {
         delete ch;
         return trace.result(FL_VERSION_MISMATCH);
     }
+    if(!fl::compatibleFeatures(fl::localFeatures(0),srv->_pad)){delete ch;return trace.result(FL_VERSION_MISMATCH);}
+    ch->peerFeatures=srv->_pad;
     fl::HelloMsg mine{};
     mine.version = FL_VERSION;
+    mine._pad=fl::localFeatures(0);
     mine.pid = (uint32_t)getpid();
     if (!ch->link.send(fl::MsgType::Hello, mine)) {
         delete ch;
@@ -537,6 +628,9 @@ FL_API flResult flRequestGeometry(flChannel* ch, uint32_t width, uint32_t height
     if (!ch || ch->isConsumer || !fl::validGeometry(width,height,format)) return trace.result(FL_INVALID);
     if(!fourccFor(format))return trace.result(FL_FORMAT_UNSUPPORTED);
     if (!ch->link.connected()) return trace.result(FL_DISCONNECTED);
+    if(!ch->bufferReferences.empty())return trace.result(FL_BUSY);
+    for(uint64_t value:ch->slotSubmitValue)
+        if(value==UINT64_MAX)return trace.result(FL_BUSY);
     fl::GeometryMsg g{};
     g.width = width;
     g.height = height;
@@ -581,13 +675,13 @@ FL_API flResult flAcquireBuffer(flChannel* ch, flBuffer* out, uint32_t timeoutMs
         for (size_t i = 0; i < ch->images.size(); ++i) {
             // Free once the consumer has promised never to read this slot's
             // previous contents again - same rule as Windows.
-            if (ch->slotSubmitValue[i] <= ch->consumedValue) {
+            if (ch->slotSubmitValue[i] <= ch->consumedValue && !ch->bufferReferences.busy((uint32_t)i)) {
                 // Pin against re-acquisition until flEndSubmit records the
                 // real value. The consumer can never release up to a value
                 // that was not submitted, so the sentinel is unreachable.
                 // (Acquiring and never submitting leaks the slot until the
                 // ring is reallocated - do not do that.)
-                ch->slotSubmitValue[i] = UINT64_MAX;
+                ch->slotSubmitValue[i] = UINT64_MAX;ch->slotMetadata[i]={};
                 out->slot = (uint32_t)i;
                 out->image = ch->images[i];
                 if(trace.active){trace.event.slot=out->slot;}
@@ -599,12 +693,32 @@ FL_API flResult flAcquireBuffer(flChannel* ch, flBuffer* out, uint32_t timeoutMs
     }
 }
 
+FL_API flResult flCancelBuffer(flChannel* ch, const flBuffer* buf) {
+    if(!ch || ch->isConsumer || !buf || buf->slot>=ch->images.size() ||
+       buf->image!=ch->images[buf->slot] || ch->slotSubmitValue[buf->slot]!=UINT64_MAX)
+        return FL_INVALID;
+    // After begin, GPU work may already target the reserved signal value.
+    if(ch->submittingValue && ch->submittingSlot==buf->slot)return FL_BUSY;
+    // Caller promises no outstanding CPU/GPU access. No implicit GPU wait.
+    flImageUnmap(buf->image);
+    ch->slotSubmitValue[buf->slot]=0;
+    return FL_OK;
+}
+
 FL_API flResult flBeginSubmit(flChannel* ch, const flBuffer* buf, uint64_t* signalValue) {
     fltrace::Scope trace("flBeginSubmit", fltrace::id(ch ? ch->name.c_str() : nullptr));
 
-    if (!ch || ch->isConsumer || !buf || !signalValue) return trace.result(FL_INVALID);
+    if (!ch || ch->isConsumer || !buf || !signalValue ||
+        buf->slot >= ch->images.size() || buf->image != ch->images[buf->slot] ||
+        ch->slotSubmitValue[buf->slot] != UINT64_MAX) return trace.result(FL_INVALID);
     if (!ch->link.connected()) return trace.result(FL_DISCONNECTED);
-    *signalValue = ++ch->readyValue;
+    if (ch->submittingValue) return trace.result(FL_BUSY);
+    if((ch->peerFeatures&(fl::FrameMetadataFeature<<16))&&!ch->slotMetadata[buf->slot].version)return trace.result(FL_FORMAT_UNSUPPORTED);
+    // UINT64_MAX is the reserved-slot sentinel, never a publishable fence value.
+    if (ch->readyValue >= UINT64_MAX-1) return trace.result(FL_INVALID);
+    ch->submittingSlot = buf->slot;
+    ch->submittingValue = ++ch->readyValue;
+    *signalValue = ch->submittingValue;
     if(trace.active) trace.event.fence=*signalValue;
     return trace.result(FL_OK);
 }
@@ -615,14 +729,18 @@ FL_API flResult flEndSubmit(flChannel* ch, const flBuffer* buf, uint64_t signalV
     if(trace.active) { trace.event.pts=ptsNs; trace.event.slot=buf?buf->slot:0; }
     if(trace.active) trace.event.fence=signalValue;
 
-    if (!ch || ch->isConsumer || !buf || buf->slot >= ch->images.size()) return trace.result(FL_INVALID);
+    if (!ch || ch->isConsumer || !buf || buf->slot >= ch->images.size() ||
+        buf->image != ch->images[buf->slot] || ch->slotSubmitValue[buf->slot] != UINT64_MAX ||
+        !signalValue || signalValue != ch->submittingValue ||
+        buf->slot != ch->submittingSlot) return trace.result(FL_INVALID);
     if (!ch->link.connected()) return trace.result(FL_DISCONNECTED);
     ch->slotSubmitValue[buf->slot] = signalValue;
+    ch->submittingValue = 0; ch->submittingSlot = UINT32_MAX;
     fl::FrameReadyMsg fr{};
     fr.slot = buf->slot;
     fr.readyValue = signalValue;
     fr.ptsNs = ptsNs;
-    return trace.result(ch->link.send(fl::MsgType::FrameReady, fr) ? FL_OK : FL_DISCONNECTED);
+    return trace.result(fl::sendFrame(ch->link,fr,ch->slotMetadata[buf->slot]) ? FL_OK : FL_DISCONNECTED);
 }
 
 FL_API flResult flSubmit(flChannel* ch, const flBuffer* buf, int64_t ptsNs) {
@@ -653,8 +771,8 @@ FL_API flResult flAcquireFrame(flChannel* ch, flFrame* out, uint32_t timeoutMs) 
             if (ch->hasPending && !ch->frameHeld &&
                 ((ch->flags & FL_GPU_SYNC) || fl::fenceReady(ch->sync.pending))) {
                 ch->sync.held=ch->sync.pending;ch->sync.pending=-1;
-                ch->frameHeld=true;
-                ch->heldReady=ch->pendingReady;ch->heldSlot=ch->pendingSlot;
+                ch->frameHeld=true;ch->heldArrival=ch->pendingArrival;
+                ch->heldReady=ch->pendingReady;ch->heldSlot=ch->pendingSlot;ch->heldMetadata=ch->pendingMetadata;
                 ch->hasPending = false;
                 out->slot = ch->pendingSlot;
                 out->image = ch->images[ch->pendingSlot];
@@ -680,6 +798,7 @@ FL_API flResult flReleaseSyncFd(flChannel* ch, const flFrame* frame, int consume
     fr.slot = frame->slot;
     fr.readyValue = frame->_readyValue;
     std::lock_guard<std::mutex> hold(ch->pendingMutex);
+    if(!ch->readers.empty())return FL_BUSY;
     if(!ch->frameHeld || frame->_readyValue!=ch->heldReady || frame->slot!=ch->heldSlot)return trace.result(FL_INVALID);
     int localFd=consumedFd>=0?dup(consumedFd):-1;
     if(consumedFd>=0 && localFd<0)return trace.result(FL_INTERNAL);
@@ -699,6 +818,7 @@ FL_API flResult flRelease(flChannel* ch, const flFrame* frame) {
     if(ch && (ch->flags & (FL_GPU_SYNC|FL_DEFER_RELEASE))) {
         if(!ch->isConsumer || !frame)return FL_INVALID;
         std::lock_guard<std::mutex> hold(ch->pendingMutex);
+    if(!ch->readers.empty())return FL_BUSY;
         if(!ch->frameHeld || frame->_readyValue!=ch->heldReady || frame->slot!=ch->heldSlot)return FL_INVALID;
         ch->frameHeld=false;
         if(ch->sync.held>=0)close(ch->sync.held);ch->sync.held=-1;
@@ -709,6 +829,7 @@ FL_API flResult flRelease(flChannel* ch, const flFrame* frame) {
 FL_API flResult flSignalConsumedSyncFd(flChannel* ch,uint64_t value,int fd) {
     if(!ch || !ch->isConsumer || !(ch->flags & (FL_GPU_SYNC|FL_DEFER_RELEASE)))return FL_INVALID;
     std::lock_guard<std::mutex> hold(ch->pendingMutex);
+    if(!ch->readers.empty())return FL_BUSY;
     if(value>ch->heldReady)return FL_INVALID;
     int localFd=fd>=0?dup(fd):-1;
     if(fd>=0 && localFd<0)return FL_INTERNAL;
@@ -729,12 +850,60 @@ FL_API flResult flSubmitSyncFd(flChannel* ch,const flBuffer* buffer,int fd,int64
     if(trace.active){trace.event.pts=pts;trace.event.slot=buffer?buffer->slot:0;}
     if(!ch || ch->isConsumer || !buffer || buffer->slot>=ch->images.size() || buffer->image!=ch->images[buffer->slot])return FL_INVALID;
     if(!ch->link.connected())return FL_DISCONNECTED;
+    uint64_t value=0;
+    flResult begun=flBeginSubmit(ch,buffer,&value);
+    if(begun!=FL_OK)return trace.result(begun);
     flImageUnmap(buffer->image);
-    uint64_t value=++ch->readyValue;ch->slotSubmitValue[buffer->slot]=value;
+    ch->slotSubmitValue[buffer->slot]=value;
+    ch->submittingValue=0;ch->submittingSlot=UINT32_MAX;
     if(trace.active)trace.event.fence=value;
     fl::FrameReadyMsg fr{};fr.slot=buffer->slot;fr.readyValue=value;fr.ptsNs=pts;
-    return trace.result(ch->link.sendWithFds(fl::MsgType::FrameReady,&fr,sizeof(fr),fd>=0?&fd:nullptr,fd>=0?1:0)?FL_OK:FL_DISCONNECTED);
+    return trace.result(fl::sendFrame(ch->link,fr,ch->slotMetadata[buffer->slot],fd)?FL_OK:FL_DISCONNECTED);
 }
+
+
+static void releaseLeaseReadyFence(flChannel* ch) {
+    if(ch->sync.held>=0)close(ch->sync.held);ch->sync.held=-1;
+}
+static flResult retireReadLeases(flChannel* ch,uint64_t value) {
+    // Readers completed synchronously before this call; no deferred fence here.
+    fl::FrameReadyMsg message{};message.readyValue=value;
+    if(ch->peer.connected() && !ch->peer.sendWithFds(fl::MsgType::FrameReleased,
+        &message,sizeof(message),nullptr,0))return FL_DISCONNECTED;
+    ch->retiredValue=value;
+    return FL_OK;
+}
+static flResult pollLeaseCompletions(flChannel* ch) {
+    for(auto& pending:ch->leaseCompletions) if(pending.token) {
+        pollfd p{pending.fd,POLLIN,0};
+        int result=poll(&p,1,0);
+        if(result<0) {if(errno==EINTR)continue;return FL_INTERNAL;}
+        if(!result)continue;
+        if(p.revents & (POLLERR|POLLHUP|POLLNVAL))return FL_INTERNAL;
+        if(p.revents & POLLIN) {
+            auto r=ch->readers.finishDeferred(pending.token);if(r!=FL_OK)return r;
+            close(pending.fd);pending.fd=-1;pending.token=0;
+        }
+    }
+    return FL_OK;
+}
+FL_API flResult flCompleteReadLeaseSyncFd(flChannel* ch,uint64_t token,int fd) {
+    if(!ch || !ch->isConsumer || fd<0)return FL_INVALID;
+    std::lock_guard<std::mutex> lock(ch->pendingMutex);
+    flFrame frame{};uint64_t generation=0;
+    if(ch->readers.get(token,frame,generation)!=FL_OK)return FL_INVALID;
+    for(auto& pending:ch->leaseCompletions) if(!pending.token) {
+        int owned=fcntl(fd,F_DUPFD_CLOEXEC,0);if(owned<0)return FL_INVALID;
+        auto r=ch->readers.defer(token);if(r!=FL_OK){close(owned);return r;}
+        pending.fd=owned;pending.token=token;return FL_OK;
+    }
+    return FL_BUSY;
+}
+
+static bool metadataReservation(flChannel* ch,const flBuffer* buffer) {
+    return buffer && buffer->slot<ch->images.size() && buffer->image==ch->images[buffer->slot] && ch->slotSubmitValue[buffer->slot]==UINT64_MAX;
+}
+#include "fl_read_api.inc"
 
 FL_API flResult flQuery(flChannel* ch, flChannelInfo* out) {
     if (!ch || !out) return FL_INVALID;
@@ -760,6 +929,52 @@ FL_API void flClose(flChannel* ch) {
 }
 
 // ---- dma-buf interop ---------------------------------------------------------
+
+FL_API flResult flImageMemoryInfo(flChannel* ch, flImage* img, flMemoryResourceInfo* out, size_t size) {
+    if (!ch || !img || !out || size != sizeof(*out)) return FL_INVALID;
+    if (out->version != FL_MEMORY_INFO_VERSION) return FL_VERSION_MISMATCH;
+    bool member=false; for (auto* image:ch->images) if(image==img) member=true;
+    if(!member) return FL_INVALID;
+    flMemoryResourceInfo r{}; r.version=FL_MEMORY_INFO_VERSION;
+    r.resourceType=FL_MEMORY_DMABUF; r.logicalFormat=ch->info.format;
+    r.width=img->width; r.height=img->height; r.generation=ch->info.generation;
+    r.nativeFormat=img->desc.fourcc; r.modifier=img->desc.modifier;
+    r.nativePlaneCount=img->desc.planes;
+    if(!r.nativePlaneCount || r.nativePlaneCount>4) return FL_INVALID;
+    r.knownFields=FL_MEMORY_INFO_PLANE_LAYOUT | FL_MEMORY_INFO_MAP_OPERATIONS;
+    if(img->desc.modifier!=DRM_FORMAT_MOD_INVALID) r.knownFields|=FL_MEMORY_INFO_MODIFIER;
+    for(uint32_t p=0;p<r.nativePlaneCount;p++) {
+        r.planeOffset[p]=img->desc.offset[p]; r.planeStride[p]=img->desc.stride[p];
+    }
+    if(img->allocationUsageKnown) {
+        r.nativeUsage=img->allocationUsage;
+        r.knownFields|=FL_MEMORY_INFO_NATIVE_USAGE | FL_MEMORY_INFO_DIRECT_USAGE;
+        if(img->allocationUsage & GBM_BO_USE_RENDERING) r.directUsage|=FL_MEMORY_GPU_RENDER;
+    }
+    if(img->planeView.planes) {
+        r.knownFields|=FL_MEMORY_INFO_MAPPED_USAGE;
+        r.mappedUsage=FL_MEMORY_CPU_READ | FL_MEMORY_CPU_WRITE;
+    }
+    struct stat st{};
+    if(ch->drmFd>=0 && fstat(ch->drmFd,&st)==0 && S_ISCHR(st.st_mode)) {
+        r.knownFields|=FL_MEMORY_INFO_DEVICE; r.deviceIdKind=FL_MEMORY_DEVICE_DRM_NODE;
+        uint32_t values[]={uint32_t(major(st.st_rdev)),uint32_t(minor(st.st_rdev))};
+        for(unsigned n=0;n<2;n++) for(unsigned b=0;b<4;b++) r.deviceId[n*4+b]=uint8_t(values[n]>>(8*b));
+    }
+    r.syncTransport=FL_MEMORY_SYNC_CPU_WAIT | FL_MEMORY_SYNC_FD;
+    r.handleTransport=FL_MEMORY_HANDLE_DMABUF;
+    r.interopCapabilities=FL_MEMORY_INTEROP_RING_IMPORT | FL_MEMORY_INTEROP_BORROW_NATIVE;
+    if(ch->externalPool)r.interopCapabilities|=FL_MEMORY_INTEROP_EXTERNAL_POOL;
+    if(fltrace::enabled()) {
+        fltrace::Event e{};e.op="image.memory_resource";e.start=fltrace::clockNs();
+        e.object=(uint64_t)(uintptr_t)img;e.details=fltrace::Memory|fltrace::Generation;
+        e.knownFields=r.knownFields;e.generation=r.generation;e.resource=r.resourceType;e.usage=r.directUsage;e.operations=r.mapOperations;
+        if(r.knownFields&FL_MEMORY_INFO_DEVICE) {e.details|=fltrace::Device;e.deviceKind=r.deviceIdKind;
+            for(unsigned i=0;i<8;i++){e.deviceLo|=(uint64_t)r.deviceId[i]<<(8*i);e.deviceHi|=(uint64_t)r.deviceId[i+8]<<(8*i);}}
+        fltrace::record(e);
+    }
+    *out=r; return FL_OK;
+}
 
 FL_API flResult flImageDmabuf(flImage* img, flDmabuf* out) {
     if (!img || !out) return FL_INVALID;

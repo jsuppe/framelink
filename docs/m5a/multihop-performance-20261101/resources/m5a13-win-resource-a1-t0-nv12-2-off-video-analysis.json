@@ -1,0 +1,37 @@
+{
+  "cases": [
+    {
+      "prefix": "/tmp/m5a13-win-resource-a1-t0-nv12-2-off",
+      "total_identities": 300,
+      "measured_identities": 240,
+      "fresh_fps": 59.992456513375984,
+      "source_marker_to_arrival_ms": {
+        "p50": 3.6591,
+        "p95": 4.2544,
+        "p99": 4.7189,
+        "max": 4.7328
+      },
+      "consumer_hold_ms": {
+        "p50": 2.0231,
+        "p95": 2.0342,
+        "p99": 2.0406,
+        "max": 2.0478
+      },
+      "producer_acquire_wait_ms": {
+        "p50": 0.0006,
+        "p95": 0.0006,
+        "p99": 0.0007,
+        "max": 0.0007
+      },
+      "delivery_interval_ms": {
+        "p50": 16.0031,
+        "p95": 18.0049,
+        "p99": 18.5067,
+        "max": 19.6014
+      },
+      "rate_pass": true,
+      "gpu_completion_verified_by_csv": false,
+      "pcm_qualified": false
+    }
+  ]
+}

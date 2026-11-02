@@ -1,0 +1,37 @@
+Internal ctest changing into directory: /tmp/fl-m5a-gst-build
+UpdateCTestConfiguration  from :/tmp/fl-m5a-gst-build/DartConfiguration.tcl
+UpdateCTestConfiguration  from :/tmp/fl-m5a-gst-build/DartConfiguration.tcl
+Test project /tmp/fl-m5a-gst-build
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 3
+    Start  3: read_leases
+
+3: Test command: /tmp/fl-m5a-gst-build/fl_read_leases
+3: Working Directory: /tmp/fl-m5a-gst-build
+3: Test timeout computed to be: 20
+3: native read leases: retained readers block reuse; ordered retirement and resize pass
+1/2 Test  #3: read_leases ......................   Passed    0.08 sec
+test 25
+    Start 25: gst_native_source
+
+25: Test command: /tmp/fl-m5a-gst-build/fl_gst_native_source "/tmp/fl-m5a-gst-build/libgstframelink.so"
+25: Working Directory: /tmp/fl-m5a-gst-build
+25: Test timeout computed to be: 15
+25: native DMA-BUF source: original allocation identity, PTS, pixels, bounded ownership and memory-subview lifetime after shutdown pass
+25: native DMA-BUF source: original allocation identity, PTS, pixels, bounded ownership and memory-subview lifetime after shutdown pass
+25: native DMA-BUF source: original allocation identity, PTS, pixels, bounded ownership and memory-subview lifetime after shutdown pass
+25: sysmem-only downstream rejected: no silent fallback
+2/2 Test #25: gst_native_source ................   Passed    0.45 sec
+
+The following tests passed:
+	read_leases
+	gst_native_source
+
+100% tests passed, 0 tests failed out of 2
+
+Total Test time (real) =   0.54 sec

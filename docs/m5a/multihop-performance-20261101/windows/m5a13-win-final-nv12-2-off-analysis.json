@@ -1,0 +1,37 @@
+{
+  "cases": [
+    {
+      "prefix": "/tmp/m5a13-win-final-nv12-2-off",
+      "total_identities": 3720,
+      "measured_identities": 3600,
+      "fresh_fps": 59.99904878418296,
+      "source_marker_to_arrival_ms": {
+        "p50": 3.2813,
+        "p95": 4.73,
+        "p99": 4.755,
+        "max": 5.2503
+      },
+      "consumer_hold_ms": {
+        "p50": 2.0228,
+        "p95": 2.0342,
+        "p99": 2.0433,
+        "max": 3.5342
+      },
+      "producer_acquire_wait_ms": {
+        "p50": 0.0006,
+        "p95": 0.0006,
+        "p99": 0.0007,
+        "max": 0.0073
+      },
+      "delivery_interval_ms": {
+        "p50": 16.0036,
+        "p95": 18.0062,
+        "p99": 18.5094,
+        "max": 20.1352
+      },
+      "rate_pass": true,
+      "gpu_completion_verified_by_csv": false,
+      "pcm_qualified": false
+    }
+  ]
+}

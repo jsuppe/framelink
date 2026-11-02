@@ -1,0 +1,31 @@
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /tmp/fl-m5a-gst-x86
+[ 50%] Built target framelink
+[ 64%] Built target gstframelink
+[ 92%] Building CXX object CMakeFiles/fl_av_memory_adversarial.dir/samples/av_memory_agreement.cpp.o
+[ 92%] Building CXX object CMakeFiles/fl_av_memory_adversarial.dir/test/test_av_memory_adversarial.cpp.o
+[ 92%] Building CXX object CMakeFiles/fl_av_memory_adversarial.dir/samples/av_auth.cpp.o
+[ 92%] Building CXX object CMakeFiles/fl_av_memory_adversarial.dir/samples/av_rendezvous.cpp.o
+[100%] Linking CXX executable fl_av_memory_adversarial
+[100%] Built target fl_av_memory_adversarial
+[ 50%] Built target framelink
+[ 64%] Built target gstframelink
+[ 71%] Linking CXX executable fl_av_memory_agreement
+[100%] Built target fl_av_memory_agreement
+[ 77%] Built target framelink
+[ 88%] Building CXX object CMakeFiles/fl_memory_boundary.dir/test/fl_memory_boundary.cpp.o
+[100%] Linking CXX executable fl_memory_boundary
+[100%] Built target fl_memory_boundary
+[ 77%] Built target framelink
+[ 88%] Building CXX object CMakeFiles/fl_memory_contract.dir/test/fl_memory_contract.cpp.o
+[100%] Linking CXX executable fl_memory_contract
+[100%] Built target fl_memory_contract
+[ 77%] Built target framelink
+[ 88%] Building C object CMakeFiles/fl_memory_c_api.dir/test/fl_memory_c_api.c.o
+[100%] Linking CXX executable fl_memory_c_api
+[100%] Built target fl_memory_c_api
+[ 63%] Built target framelink
+[ 81%] Built target gstframelink
+[ 90%] Linking CXX executable fl_gst_policy_generation
+[100%] Built target fl_gst_policy_generation

@@ -1,0 +1,50 @@
+/tmp/m5a13-relay-trace.3769026.csv # schema=2,clock=steady_ns,pid=3769026,origin_ns=378220434754873,wall_ns=1793572535303639524
+/tmp/m5a13-relay-trace.3769026.csv # dropped_events=0,rejected_threads=0,capacity_per_thread=65536
+/tmp/m5a13-relay-trace.3769036.csv # schema=2,clock=steady_ns,pid=3769036,origin_ns=378220436091782,wall_ns=1793572535304976172
+/tmp/m5a13-relay-trace.3769036.csv # dropped_events=0,rejected_threads=0,capacity_per_thread=65536
+/tmp/m5a13-relay-trace.3769038.csv # schema=2,clock=steady_ns,pid=3769038,origin_ns=378220437374021,wall_ns=1793572535306258356
+/tmp/m5a13-relay-trace.3769038.csv # dropped_events=0,rejected_threads=0,capacity_per_thread=65536
+/tmp/m5a13-relay-trace.3769026.csv flAcquireFrame: n=16 us p50=4111.796 p95=4175.624 p99=4175.624 max=4175.624 results={'0': 16}
+  channel=14674302268658016552 delivery interval ms p50=5.687 max=7.020 (API delivery, NOT presentation)
+/tmp/m5a13-relay-trace.3769026.csv flClose: n=1 us p50=95.034 p95=95.034 p99=95.034 max=95.034 results={'-9999': 1}
+/tmp/m5a13-relay-trace.3769026.csv flCreateChannelEx: n=1 us p50=99.641 p95=99.641 p99=99.641 max=99.641 results={'0': 1}
+/tmp/m5a13-relay-trace.3769026.csv flImageUnmap: n=2 us p50=0.033 p95=0.039 p99=0.039 max=0.039 results={'-9999': 2}
+/tmp/m5a13-relay-trace.3769026.csv ipc.frame_received: n=16 us p50=0.000 p95=0.000 p99=0.000 max=0.000 results={'0': 16}
+/tmp/m5a13-relay-trace.3769026.csv ipc.recv: n=18 us p50=2.807 p95=38.735 p99=38.735 max=38.735 results={'-9999': 18}
+/tmp/m5a13-relay-trace.3769026.csv ipc.send: n=19 us p50=2.438 p95=29.995 p99=29.995 max=29.995 results={'-9999': 19}
+/tmp/m5a13-relay-trace.3769026.csv reader.acquire: n=16 us p50=0.097 p95=0.226 p99=0.226 max=0.226 results={'0': 16}
+  retained frame records max=1 (not queued latency or reader-token count)
+/tmp/m5a13-relay-trace.3769026.csv reader.retire: n=16 us p50=0.045 p95=0.054 p99=0.054 max=0.054 results={'0': 16}
+  retained frame records max=0 (not queued latency or reader-token count)
+/tmp/m5a13-relay-trace.3769036.csv flAcquireBuffer: n=81 us p50=0.844 p95=4.944 p99=6.779 max=6.779 results={'0': 18, '1': 63}
+/tmp/m5a13-relay-trace.3769036.csv flAcquireFrame: n=44 us p50=2056.190 p95=2086.728 p99=2089.540 max=2089.540 results={'0': 16, '1': 28}
+  channel=1537121272342951585 delivery interval ms p50=6.217 max=8.304 (API delivery, NOT presentation)
+/tmp/m5a13-relay-trace.3769036.csv flBeginSubmit: n=16 us p50=0.025 p95=0.035 p99=0.035 max=0.035 results={'0': 16}
+/tmp/m5a13-relay-trace.3769036.csv flClose: n=2 us p50=9.508 p95=135.026 p99=135.026 max=135.026 results={'-9999': 2}
+/tmp/m5a13-relay-trace.3769036.csv flCreateChannelEx: n=1 us p50=218.446 p95=218.446 p99=218.446 max=218.446 results={'0': 1}
+/tmp/m5a13-relay-trace.3769036.csv flEndSubmit: n=16 us p50=3.259 p95=4.897 p99=4.897 max=4.897 results={'0': 16}
+/tmp/m5a13-relay-trace.3769036.csv flImageUnmap: n=6 us p50=0.028 p95=0.052 p99=0.052 max=0.052 results={'-9999': 6}
+/tmp/m5a13-relay-trace.3769036.csv flOpenProducer: n=1 us p50=159.754 p95=159.754 p99=159.754 max=159.754 results={'0': 1}
+/tmp/m5a13-relay-trace.3769036.csv flSubmit: n=16 us p50=3.708 p95=9.100 p99=9.100 max=9.100 results={'0': 16}
+/tmp/m5a13-relay-trace.3769036.csv ipc.frame_received: n=16 us p50=0.000 p95=0.000 p99=0.000 max=0.000 results={'0': 16}
+/tmp/m5a13-relay-trace.3769036.csv ipc.recv: n=36 us p50=2.657 p95=53.941 p99=68.495 max=68.495 results={'-9999': 36}
+/tmp/m5a13-relay-trace.3769036.csv ipc.send: n=39 us p50=2.712 p95=4.622 p99=27.772 max=27.772 results={'-9999': 39}
+/tmp/m5a13-relay-trace.3769036.csv reader.acquire: n=16 us p50=0.110 p95=0.125 p99=0.125 max=0.125 results={'0': 16}
+  retained frame records max=1 (not queued latency or reader-token count)
+/tmp/m5a13-relay-trace.3769036.csv reader.complete: n=16 us p50=0.039 p95=0.218 p99=0.218 max=0.218 results={'0': 16}
+  retained frame records max=1 (not queued latency or reader-token count)
+/tmp/m5a13-relay-trace.3769036.csv reader.retire: n=16 us p50=0.050 p95=0.053 p99=0.053 max=0.053 results={'0': 16}
+  retained frame records max=0 (not queued latency or reader-token count)
+/tmp/m5a13-relay-trace.3769038.csv flAcquireBuffer: n=34 us p50=0.930 p95=4175.160 p99=4180.550 max=4180.550 results={'0': 18, '1': 16}
+/tmp/m5a13-relay-trace.3769038.csv flBeginSubmit: n=16 us p50=0.031 p95=0.035 p99=0.035 max=0.035 results={'0': 16}
+/tmp/m5a13-relay-trace.3769038.csv flClose: n=1 us p50=13.543 p95=13.543 p99=13.543 max=13.543 results={'-9999': 1}
+/tmp/m5a13-relay-trace.3769038.csv flEndSubmit: n=16 us p50=2.645 p95=4.903 p99=4.903 max=4.903 results={'0': 16}
+/tmp/m5a13-relay-trace.3769038.csv flImageMap: n=16 us p50=7.382 p95=64.053 p99=64.053 max=64.053 results={'0': 16}
+/tmp/m5a13-relay-trace.3769038.csv flImageMapPlanes: n=16 us p50=7.266 p95=63.654 p99=63.654 max=63.654 results={'0': 16}
+/tmp/m5a13-relay-trace.3769038.csv flImageUnmap: n=20 us p50=3.156 p95=5.318 p99=5.639 max=5.639 results={'-9999': 20}
+/tmp/m5a13-relay-trace.3769038.csv flOpenProducer: n=1 us p50=146.760 p95=146.760 p99=146.760 max=146.760 results={'0': 1}
+/tmp/m5a13-relay-trace.3769038.csv flSubmit: n=16 us p50=3.078 p95=5.163 p99=5.163 max=5.163 results={'0': 16}
+/tmp/m5a13-relay-trace.3769038.csv ipc.recv: n=18 us p50=2.991 p95=50.339 p99=50.339 max=50.339 results={'-9999': 18}
+/tmp/m5a13-relay-trace.3769038.csv ipc.send: n=20 us p50=2.270 p95=2.985 p99=3.147 max=3.147 results={'-9999': 20}
+Exact channel/fence/PTS joins: n=32 submit-entry to acquire-return ms median=1.037 max=2.044; ambiguous=0
+Only meaningful on one host/boot with a shared monotonic clock. Not display latency; GPU_SYNC delivery may precede GPU completion.

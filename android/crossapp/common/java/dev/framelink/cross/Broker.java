@@ -44,7 +44,7 @@ public final class Broker extends Service {
  private final IBroker.Stub service=new IBroker.Stub(){
   public Bundle acquire(IBinder owner,String format,int frames,int fps,boolean producerClock)throws RemoteException {
    enforceCallingPermission("dev.framelink.cross.BIND","signature required");
-   if(owner==null || !("BGRA".equals(format)||"NV12".equals(format)) || frames<1 || frames>18000 || fps<13 || fps>120 || (long)frames*1000>300000L*fps)throw new IllegalArgumentException("invalid bounded media request");
+   if(owner==null || !("BGRA".equals(format)||"NV12".equals(format)||"RGBA".equals(format)) || frames<1 || frames>18000 || fps<13 || fps>120 || (long)frames*1000>300000L*fps)throw new IllegalArgumentException("invalid bounded media request");
    synchronized(lock){
     long deadline=SystemClock.elapsedRealtime()+10000;
     while(runner==null && !closing){long left=deadline-SystemClock.elapsedRealtime();if(left<=0)throw new RemoteException("producer service deadline");try{lock.wait(left);}catch(InterruptedException e){Thread.currentThread().interrupt();throw new RemoteException("interrupted");}}

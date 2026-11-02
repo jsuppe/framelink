@@ -1,0 +1,50 @@
+#< CLIXML
+-- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.26300.
+-- framelink: building GStreamer elements (gstframelink)
+-- Configuring done (0.8s)
+-- Generating done (0.7s)
+-- Build files have been written to: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
+  av_apps.cpp
+  framelink_av_producer.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink_av_producer.exe
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
+  av_apps.cpp
+  framelink_av_consumer.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink_av_consumer.exe
+UpdateCTestConfiguration  from :C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/DartConfiguration.tcl
+Test project C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 63
+    Start 63: m3_av_apps
+
+63: Test command: C:\Users\jonsu\AppData\Local\Microsoft\WindowsApps\python3.13.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/test/m3_apps.py" "--producer" "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/framelink_av_producer.exe" "--consumer" "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/framelink_av_consumer.exe" "--plugin" "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
+63: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+63: Test timeout computed to be: 180
+63: evidence: C:\Users\jonsu\AppData\Local\Temp\framelink-m3-v4kzw168
+63: {"case": "bgra-producer-first", "passed": true, "results": {"producer": {"role": "producer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}, "consumer": {"role": "consumer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}}, "verified_session": {"event": "session-complete", "instance": "9886893c9398c7180e92550252e0926e", "generation": 1, "format": "BGRA", "video_frames": 50, "audio_blocks": 50, "audio_offset_ns": 0}}
+63: {"case": "bgra-consumer-first", "passed": true, "results": {"consumer": {"role": "consumer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}, "producer": {"role": "producer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}}, "verified_session": {"event": "session-complete", "instance": "b108a74468db6132b90f6ba4537c0863", "generation": 1, "format": "BGRA", "video_frames": 50, "audio_blocks": 50, "audio_offset_ns": 0}}
+63: {"case": "nv12-producer-first", "passed": true, "results": {"producer": {"role": "producer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}, "consumer": {"role": "consumer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}}, "verified_session": {"event": "session-complete", "instance": "115bc5168e271f11fc13b7f78ca5284f", "generation": 1, "format": "NV12", "video_frames": 50, "audio_blocks": 50, "audio_offset_ns": 0}}
+63: {"case": "nv12-consumer-first", "passed": true, "results": {"consumer": {"role": "consumer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}, "producer": {"role": "producer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}}, "verified_session": {"event": "session-complete", "instance": "58e064d7cfdf180a23499d781f1ef392", "generation": 1, "format": "NV12", "video_frames": 50, "audio_blocks": 50, "audio_offset_ns": 0}}
+63: {"case": "producer-restart", "passed": true, "retired_identity": {"event": "media-progress", "instance": "18df7dbd080fe900aea4d2058717e2ba", "generation": 1, "format": "BGRA", "video_frames": 1, "audio_blocks": 1, "audio_offset_ns": 0}, "verified_sessions": [{"event": "session-complete", "instance": "bcbc90c12f6de84ec62129b7288fb4f3", "generation": 1, "format": "BGRA", "video_frames": 50, "audio_blocks": 50, "audio_offset_ns": 0}, {"event": "session-complete", "instance": "2fc62992e4e258c475d8b9d6ce835329", "generation": 1, "format": "BGRA", "video_frames": 50, "audio_blocks": 50, "audio_offset_ns": 0}]}
+63: {"case": "consumer-restart", "passed": true, "retired_identity": {"event": "media-progress", "instance": "65eac796b455072cad6809557e52e21c", "generation": 1, "format": "BGRA", "video_frames": 1, "audio_blocks": 1, "audio_offset_ns": 0}, "verified_sessions": [{"event": "session-complete", "instance": "92ccde38afa5e2bd8c2050b2b76ea40a", "generation": 1, "format": "BGRA", "video_frames": 50, "audio_blocks": 50, "audio_offset_ns": 0}, {"event": "session-complete", "instance": "4e3a576141caac16391c35970e24c2c2", "generation": 1, "format": "BGRA", "video_frames": 50, "audio_blocks": 50, "audio_offset_ns": 0}]}
+63: {"case": "producer-restart-format-change", "passed": true, "retired_identity": {"event": "media-progress", "instance": "dedf2cc713c390b966289fa9182017a7", "generation": 1, "format": "BGRA", "video_frames": 1, "audio_blocks": 1, "audio_offset_ns": 0}, "verified_sessions": [{"event": "session-complete", "instance": "682e4ed1e10b21f6b40f67911d732b76", "generation": 1, "format": "NV12", "video_frames": 50, "audio_blocks": 50, "audio_offset_ns": 0}, {"event": "session-complete", "instance": "ee929f34ae50164d7f4e4adefe355ae2", "generation": 1, "format": "NV12", "video_frames": 50, "audio_blocks": 50, "audio_offset_ns": 0}]}
+63: {"case": "missing-audio", "passed": true, "verified_before_fault": {"event": "media-progress", "instance": "0b4c06508f2d8b96acddf5a729a1d185", "generation": 1, "format": "BGRA", "video_frames": 1, "audio_blocks": 1, "audio_offset_ns": 0}, "expected_error": "audio timeout/EOS", "consumer_exit": 1}
+63: {"case": "audio-pts-reset", "passed": true, "verified_before_fault": {"event": "media-progress", "instance": "fb2e86515b01f9afcc8dcff6dfb5bd4d", "generation": 1, "format": "BGRA", "video_frames": 1, "audio_blocks": 1, "audio_offset_ns": 0}, "expected_error": "audio timeline mismatch", "consumer_exit": 1}
+63: {"case": "peer-death", "passed": true, "verified_before_fault": {"event": "media-progress", "instance": "008e4286b55bd17d3301c8cfa1a7cb42", "generation": 1, "format": "BGRA", "video_frames": 1, "audio_blocks": 1, "audio_offset_ns": 0}, "expected_error": "timeout/EOS", "consumer_exit": 1}
+1/1 Test #63: m3_av_apps .......................   Passed   30.39 sec
+
+The following tests passed:
+	m3_av_apps
+
+100% tests passed, 0 tests failed out of 1
+
+Total Test time (real) =  30.40 sec
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04"><Obj S="progress" RefId="0"><TN RefId="0"><T>System.Management.Automation.PSCustomObject</T><T>System.Object</T></TN><MS><I64 N="SourceId">1</I64><PR N="Record"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj></Objs>

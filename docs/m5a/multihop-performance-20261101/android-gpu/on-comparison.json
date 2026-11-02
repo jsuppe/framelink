@@ -1,0 +1,75 @@
+{
+  "cases": [
+    {
+      "prefix": "/tmp/m5a13-android-one-on",
+      "total_identities": 3720,
+      "measured_identities": 3600,
+      "fresh_fps": 59.999337383588944,
+      "source_marker_to_arrival_ms": {
+        "p50": 1.428923,
+        "p95": 2.422154,
+        "p99": 2.592923,
+        "max": 3.129308
+      },
+      "consumer_hold_ms": {
+        "p50": 5.531154,
+        "p95": 7.379308,
+        "p99": 8.271384,
+        "max": 10.857846
+      },
+      "producer_acquire_wait_ms": {
+        "p50": 0.093769,
+        "p95": 0.159077,
+        "p99": 0.176923,
+        "max": 0.270769
+      },
+      "delivery_interval_ms": {
+        "p50": 16.654154,
+        "p95": 18.320539,
+        "p99": 18.802076,
+        "max": 19.669616
+      },
+      "rate_pass": true,
+      "gpu_completion_verified_by_csv": false,
+      "pcm_qualified": false
+    },
+    {
+      "prefix": "/tmp/m5a13-android-two-on",
+      "total_identities": 3720,
+      "measured_identities": 3600,
+      "fresh_fps": 60.00204442887001,
+      "source_marker_to_arrival_ms": {
+        "p50": 2.943385,
+        "p95": 4.491077,
+        "p99": 4.980923,
+        "max": 7.619693
+      },
+      "consumer_hold_ms": {
+        "p50": 5.723308,
+        "p95": 7.539385,
+        "p99": 8.493307,
+        "max": 10.76777
+      },
+      "producer_acquire_wait_ms": {
+        "p50": 0.087692,
+        "p95": 0.195077,
+        "p99": 0.229846,
+        "max": 0.299307
+      },
+      "delivery_interval_ms": {
+        "p50": 16.544385,
+        "p95": 19.063,
+        "p99": 19.679154,
+        "max": 21.39477
+      },
+      "rate_pass": true,
+      "gpu_completion_verified_by_csv": false,
+      "pcm_qualified": false
+    }
+  ],
+  "comparison": {
+    "second_minus_first_p95_ms": 2.068923,
+    "budget_ms": 16.666666666666668,
+    "pass": true
+  }
+}

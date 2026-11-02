@@ -1,0 +1,58 @@
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /tmp/fl-m5a-gst-arm64
+[ 77%] Built target framelink
+[ 88%] Building CXX object CMakeFiles/fl_native_relay_process_android.dir/test/fl_native_relay_process_android.cpp.o
+/tmp/framelink-m5a/test/fl_native_relay_process_android.cpp:50:69: error: use of undeclared identifier 'AHardwareBuffer_recvHandleFromUnixSocket'
+   50 |  alarm(20);AHardwareBuffer*original[2]{};for(auto&b:original)CHECK(!AHardwareBuffer_recvHandleFromUnixSocket(control,&b));
+      |                                                                     ^
+/tmp/framelink-m5a/test/fl_native_relay_process_android.cpp:56:48: error: use of undeclared identifier 'AHardwareBuffer_release'
+   56 |  flClose(down);flClose(up);for(auto*b:original)AHardwareBuffer_release(b);close(control);return 0;
+      |                                                ^
+/tmp/framelink-m5a/test/fl_native_relay_process_android.cpp:89:2: error: unknown type name 'AHardwareBuffer_Desc'; did you mean 'AHardwareBuffer'?
+   89 |  AHardwareBuffer_Desc desc{};desc.width=64;desc.height=32;desc.layers=1;desc.format=AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM;desc.usage=AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE|AHARDWAREBUFFER_USAGE_CPU_READ_RARELY|AHARDWAREBUFFER_USAGE_CPU_WRITE_OFTEN;
+      |  ^~~~~~~~~~~~~~~~~~~~
+      |  AHardwareBuffer
+/tmp/framelink-m5a/include/framelink_ahb.h:13:32: note: 'AHardwareBuffer' declared here
+   13 | typedef struct AHardwareBuffer AHardwareBuffer;
+      |                                ^
+/tmp/framelink-m5a/test/fl_native_relay_process_android.cpp:89:23: error: variable has incomplete type 'AHardwareBuffer'
+   89 |  AHardwareBuffer_Desc desc{};desc.width=64;desc.height=32;desc.layers=1;desc.format=AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM;desc.usage=AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE|AHARDWAREBUFFER_USAGE_CPU_READ_RARELY|AHARDWAREBUFFER_USAGE_CPU_WRITE_OFTEN;
+      |                       ^
+/tmp/framelink-m5a/include/framelink_ahb.h:13:16: note: forward declaration of 'AHardwareBuffer'
+   13 | typedef struct AHardwareBuffer AHardwareBuffer;
+      |                ^
+/tmp/framelink-m5a/test/fl_native_relay_process_android.cpp:89:85: error: use of undeclared identifier 'AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM'
+   89 |  AHardwareBuffer_Desc desc{};desc.width=64;desc.height=32;desc.layers=1;desc.format=AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM;desc.usage=AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE|AHARDWAREBUFFER_USAGE_CPU_READ_RARELY|AHARDWAREBUFFER_USAGE_CPU_WRITE_OFTEN;
+      |                                                                                     ^
+/tmp/framelink-m5a/test/fl_native_relay_process_android.cpp:89:134: error: use of undeclared identifier 'AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE'
+   89 |  AHardwareBuffer_Desc desc{};desc.width=64;desc.height=32;desc.layers=1;desc.format=AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM;desc.usage=AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE|AHARDWAREBUFFER_USAGE_CPU_READ_RARELY|AHARDWAREBUFFER_USAGE_CPU_WRITE_OFTEN;
+      |                                                                                                                                      ^
+/tmp/framelink-m5a/test/fl_native_relay_process_android.cpp:89:174: error: use of undeclared identifier 'AHARDWAREBUFFER_USAGE_CPU_READ_RARELY'
+   89 |  AHardwareBuffer_Desc desc{};desc.width=64;desc.height=32;desc.layers=1;desc.format=AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM;desc.usage=AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE|AHARDWAREBUFFER_USAGE_CPU_READ_RARELY|AHARDWAREBUFFER_USAGE_CPU_WRITE_OFTEN;
+      |                                                                                                                                                                              ^
+/tmp/framelink-m5a/test/fl_native_relay_process_android.cpp:89:212: error: use of undeclared identifier 'AHARDWAREBUFFER_USAGE_CPU_WRITE_OFTEN'
+   89 |  AHardwareBuffer_Desc desc{};desc.width=64;desc.height=32;desc.layers=1;desc.format=AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM;desc.usage=AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE|AHARDWAREBUFFER_USAGE_CPU_READ_RARELY|AHARDWAREBUFFER_USAGE_CPU_WRITE_OFTEN;
+      |                                                                                                                                                                                                                    ^
+/tmp/framelink-m5a/test/fl_native_relay_process_android.cpp:92:156: error: use of undeclared identifier 'AHardwareBuffer_sendHandleToUnixSocket'
+   92 |  auto child=spawn(argv[0],{"relay",name,"100","101"},{relayPair[1],producerPair[1]});close(relayPair[1]);close(producerPair[1]);for(auto*b:original)CHECK(!AHardwareBuffer_sendHandleToUnixSocket(b,relayPair[0]));
+      |                                                                                                                                                            ^
+/tmp/framelink-m5a/test/fl_native_relay_process_android.cpp:131:33: error: use of undeclared identifier 'AHardwareBuffer_release'
+  131 |  flClose(c);for(auto*b:original)AHardwareBuffer_release(b);eglMakeCurrent(display,EGL_NO_SURFACE,EGL_NO_SURFACE,EGL_NO_CONTEXT);eglDestroyContext(display,context);eglDestroySurface(display,surface);eglTerminate(display);
+      |                                 ^
+10 errors generated.
+gmake[3]: *** [CMakeFiles/fl_native_relay_process_android.dir/build.make:76: CMakeFiles/fl_native_relay_process_android.dir/test/fl_native_relay_process_android.cpp.o] Error 1
+gmake[2]: *** [CMakeFiles/Makefile2:1242: CMakeFiles/fl_native_relay_process_android.dir/all] Error 2
+gmake[1]: *** [CMakeFiles/Makefile2:1249: CMakeFiles/fl_native_relay_process_android.dir/rule] Error 2
+gmake: *** [Makefile:712: fl_native_relay_process_android] Error 2
+[ 77%] Built target framelink
+[ 88%] Building CXX object CMakeFiles/fl_native_relay_process_android.dir/test/fl_native_relay_process_android.cpp.o
+[100%] Linking CXX executable fl_native_relay_process_android
+[100%] Built target fl_native_relay_process_android
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /tmp/fl-m5a-gst-arm64
+[ 77%] Built target framelink
+[ 88%] Building CXX object CMakeFiles/fl_native_relay_process_android.dir/test/fl_native_relay_process_egl.cpp.o
+[100%] Linking CXX executable fl_native_relay_process_android
+[100%] Built target fl_native_relay_process_android

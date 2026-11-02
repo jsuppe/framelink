@@ -32,6 +32,7 @@ enum class MsgType : uint32_t {
     RequestGeometry = 5,
     // Consumer -> producer: a producer is already attached to this channel.
     Busy = 6,
+    FrameReadyMetadata = 8, // opt-in feature: frame identity plus exact media metadata
     Bye = 7,        // either way: orderly shutdown
 };
 
@@ -49,7 +50,7 @@ struct HelloMsg {
     uint32_t version;    // FL_VERSION of the sender
     uint32_t pid;
     uint32_t luidValid;  // nonzero if adapterLUID is meaningful
-    uint32_t _pad;
+    uint32_t _pad; // feature word: support low16, required high16 (legacy zero)
     uint8_t  adapterLUID[8];
 };
 
@@ -92,6 +93,12 @@ struct FrameReadyMsg {
     uint64_t readyValue; // the ready-fence value that covers this frame
     int64_t  ptsNs;      // -1 when the producer does not timestamp
 };
+
+struct FrameReadyMetadataMsg {
+    FrameReadyMsg frame;
+    flFrameMetadata metadata;
+};
+static_assert(sizeof(FrameReadyMetadataMsg)==64,"metadata wire size");
 
 #pragma pack(pop)
 

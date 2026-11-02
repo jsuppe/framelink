@@ -1,0 +1,13 @@
+# schema=2,clock=steady_ns,pid=5220,origin_ns=1527678790108200,wall_ns=1793570057384774400
+thread,operation,start_ns,duration_ns,channel_id,sequence,fence,slot,pts_ns,result,details,payload_bytes,generation,occupancy,token,device_lo,device_hi,resource_type,usage,operations,device_kind,missing_usage,unmet_preference,rejected_resource,forbidden_operations,endpoint,resource_known_fields
+0,gst.memory_policy_evaluation,1527678790107600,0,17167082388509583839,0,0,0,0,3,50,0,1,0,0,0,0,2,4,0,0,8,0,0,0,0,0
+0,gst.memory_policy_evaluation,1527678790123600,0,17167082388509583839,0,0,0,0,3,50,0,1,0,0,0,0,2,4,0,0,0,0,0,0,1,0
+0,gst.memory_policy_evaluation,1527678790127600,0,17167082388509583839,0,0,0,0,0,50,0,1,0,0,0,0,2,4,0,0,0,0,0,0,0,0
+0,gst.memory_policy_evaluation,1527678790127700,0,17167082388509583839,0,0,0,0,0,50,0,1,0,0,0,0,2,4,0,0,0,0,0,0,1,0
+1,gst.frame_receive,1527678791038600,0,17167082388509583839,1,0,0,1000,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+1,gst.native_frame_submitted,1527678791256500,0,17167082388509583839,1,0,0,1000,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+1,gst.sinkRender,1527678791038300,218400,17167082388509583839,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+1,gst.frame_receive,1527678796523600,0,17167082388509583839,2,0,0,2000,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+1,gst.frame_drop.native_rejected,1527678796525300,0,17167082388509583839,2,0,0,2000,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+1,gst.sinkRender,1527678796523300,27500,17167082388509583839,0,0,0,0,-5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+# dropped_events=0,rejected_threads=0,capacity_per_thread=65536

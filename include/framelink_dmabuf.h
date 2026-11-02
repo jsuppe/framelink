@@ -24,6 +24,16 @@ typedef struct flDmabuf {
     uint64_t modifier; // DRM format modifier; DRM_FORMAT_MOD_LINEAR when mapped
 } flDmabuf;
 
+// Adopt externally allocated DMA-BUF images; inputs are borrowed and duplicated.
+// No pixel allocation/copy. All slots must have compatible native layouts and
+// distinct backing objects (suballocations sharing an FD across slots rejected).
+// Import compatibility is checked through GBM; immutable geometry thereafter.
+// Original owners must obey ring reservations/fences, not independently reuse
+// storage. Authorized cross-process FD delivery is the caller's responsibility.
+FL_API flResult flCreateChannelFromDmabufs(const char* name, uint32_t width,
+    uint32_t height, flFormat format, uint32_t poolSize, uint32_t flags,
+    const flDmabuf* images, flChannel** out);
+
 FL_API flResult flImageDmabuf(flImage*, flDmabuf* out);
 
 // flImageMap/flImageUnmap moved to framelink.h - CPU access is not dma-buf

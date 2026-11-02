@@ -1,0 +1,5 @@
+GStreamer NV12 padded/offset byte roundtrip and mismatch rejection passed
+RGBA native AHB sink roundtrip: bounded original allocations, explicit readiness, metadata and retained shutdown pass
+RGB10A2_LE native AHB sink roundtrip: bounded original allocations, explicit readiness, metadata and retained shutdown pass
+RGBA native AHB sink missing-ready negative: bounded original allocations, explicit readiness, metadata and retained shutdown pass
+same AHB RGBA relay: allocation IDs, reversed slots, identity rejection, exact pixels/metadata, downstream leases prevent upstream reuse and bounded completion passed

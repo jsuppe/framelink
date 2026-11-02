@@ -1,0 +1,37 @@
+{
+  "cases": [
+    {
+      "prefix": "/tmp/m5a13-win-final-bgra-2-on",
+      "total_identities": 3720,
+      "measured_identities": 3600,
+      "fresh_fps": 59.999109999309134,
+      "source_marker_to_arrival_ms": {
+        "p50": 3.5399,
+        "p95": 4.5294,
+        "p99": 5.0181,
+        "max": 6.9158
+      },
+      "consumer_hold_ms": {
+        "p50": 2.0228,
+        "p95": 2.0362,
+        "p99": 2.5314,
+        "max": 3.5172
+      },
+      "producer_acquire_wait_ms": {
+        "p50": 0.0008,
+        "p95": 0.0008,
+        "p99": 0.0009,
+        "max": 0.0073
+      },
+      "delivery_interval_ms": {
+        "p50": 16.0037,
+        "p95": 18.0072,
+        "p99": 18.51,
+        "max": 20.5089
+      },
+      "rate_pass": true,
+      "gpu_completion_verified_by_csv": false,
+      "pcm_qualified": false
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+[ 20%] Building CXX object framelink/CMakeFiles/framelink.dir/src/framelink_slots.cpp.o
+[ 20%] Building CXX object framelink/CMakeFiles/framelink.dir/src/fl_ipc_posix.cpp.o
+[ 20%] Building CXX object framelink/CMakeFiles/framelink.dir/src/framelink_android.cpp.o
+[ 26%] Building CXX object framelink/CMakeFiles/framelink.dir/src/fl_trace.cpp.o
+[ 33%] Building CXX object framelink/CMakeFiles/framelink.dir/src/framelink_session.cpp.o
+[ 40%] Building CXX object framelink/CMakeFiles/framelink.dir/src/framelink_memory.cpp.o
+[ 46%] Linking CXX static library libframelink.a
+[ 46%] Built target framelink
+[ 53%] Building CXX object framelink/CMakeFiles/gstframelink.dir/gst/gstframelink.cpp.o
+[ 60%] Linking CXX static library libgstframelink.a
+[ 60%] Built target gstframelink
+[ 80%] Building CXX object CMakeFiles/fl_crossapp.dir/tmp/framelink-m5a/samples/av_memory_agreement.cpp.o
+[ 80%] Building CXX object CMakeFiles/fl_crossapp.dir/jni.cpp.o
+[ 80%] Building CXX object CMakeFiles/fl_crossapp.dir/tmp/framelink-m5a/samples/av_apps.cpp.o
+[ 86%] Building CXX object CMakeFiles/fl_crossapp.dir/tmp/framelink-m5a/samples/av_auth.cpp.o
+[ 93%] Building CXX object CMakeFiles/fl_crossapp.dir/tmp/framelink-m5a/samples/av_rendezvous.cpp.o
+[100%] Linking CXX shared library libfl_crossapp.so
+[100%] Built target fl_crossapp

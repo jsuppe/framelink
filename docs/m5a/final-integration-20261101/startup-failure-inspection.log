@@ -1,0 +1,31 @@
+C:\Users\jonsu\AppData\Local\Temp\m5-startup-7f53a5vd
+
+Name                  Length
+----                  ------
+audio-coordinated.log    710
+audio.log                694
+cancel-consumer.log        0
+cancel-producer.log      275
+producer.log             701
+restart-consumer.log    1058
+restart-producer.log     871
+restart-producer.log
+{"event":"session-ready","instance":"d92781fc064d629a18111af616a5ff5d","generation":1,"format":"BGRA","video_frames":0,"audio_blocks":0,"audio_offset_ns":0}
+{"event":"startup-released","epoch_ns":1544404916994300}
+{"event":"media-progress","instance":"d92781fc064d629a18111af616a5ff5d","generation":1,"format":"BGRA","video_frames":1,"audio_blocks":1,"audio_offset_ns":0}
+{"event":"media-progress","instance":"d92781fc064d629a18111af616a5ff5d","generation":1,"format":"BGRA","video_frames":25,"audio_blocks":25,"audio_offset_ns":0}
+{"event":"producer-pacing","pacing_ppm":0,"max_push_ns":427800}
+{"event":"session-complete","instance":"d92781fc064d629a18111af616a5ff5d","generation":1,"format":"BGRA","video_frames":40,"audio_blocks":40,"audio_offset_ns":0}
+{"role":"producer","ok":true,"sessions":1,"video_frames":40,"audio_blocks":40,"errors":0,"disconnects":0}
+restart-consumer.log
+{"event":"startup-preroll-delay","requested_ms":1500,"elapsed_us":1501372}
+{"event":"playback-clock","policy":"producer","system_now_ns":1544404867127700,"selected_now_ns":1544404867127300,"device_now_ns":18446744073709551615,"mapped_producer_base_ns":1544404916994450,"playback_base_ns":1544404916994450,"latency_ns":100000000,"resample_slaves":0}
+{"event":"video-schedule-summary","received":39,"scheduled":39,"handed_off":0,"late":0,"overflow":0,"peak_pending":5,"pending_limit":8,"peak_bytes":288000,"byte_limit":134217728}
+{"event":"playback-metrics","peak_queue_buffers":4,"peak_queue_ns":80000000,"queue_empty_events":5,"queue_full_events":0,"late_audio_blocks":0,"arrival_drift_ns":-6338500}
+{"event":"playback-complete","audio_master":false,"video_received":39,"video_late":0,"audio_blocks":40,"audio_samples":38400,"latency_ns":100000000}
+{"event":"playback-timing","audio_first_running_pts_ns":0,"video_first_running_pts_ns":0,"audio_end_ns":800000000,"video_end_ns":800000000}
+{"role":"consumer","ok":true,"mode":"streaming","sessions":1}
+
+
+#< CLIXML
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04"><Obj S="progress" RefId="0"><TN RefId="0"><T>System.Management.Automation.PSCustomObject</T><T>System.Object</T></TN><MS><I64 N="SourceId">1</I64><PR N="Record"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj><Obj S="progress" RefId="1"><TNRef RefId="0" /><MS><I64 N="SourceId">1</I64><PR N="Record"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj></Objs>

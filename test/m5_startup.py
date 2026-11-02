@@ -31,25 +31,36 @@ for policy in ('producer','audio-coordinated','audio'):
 b=pathlib.Path(a.build).resolve();ext='.exe' if os.name=='nt' else ''
 plugin=b/('gstframelink.dll' if os.name=='nt' else 'libgstframelink.so')
 common=[str(plugin),'--session',str(root/'restart-session'),'--frames','40','--timeout-ms','4000']
-for attempt in ('cancel','restart','long-preroll'):
+for attempt in ('cancel','restart','long-preroll','producer-stall'):
     children=[]
     case_common=list(common)
     if attempt=='long-preroll':case_common[-1]='6000'
     delay='2300' if attempt=='long-preroll' else '1500'
+    if attempt=='producer-stall':case_common.append('--trace-media')
     started=time.monotonic()
     with (root/(attempt+'-producer.log')).open('w') as plog,(root/(attempt+'-consumer.log')).open('w') as clog:
         try:
-            producer=subprocess.Popen([str(b/('framelink_av_producer'+ext)),*case_common],stdout=plog,stderr=subprocess.STDOUT);children.append(producer)
+            producer=subprocess.Popen([str(b/('framelink_av_producer'+ext)),*case_common],env=dict(os.environ,FRAMELINK_TEST_PRODUCER_STALL_MS='55' if attempt=='producer-stall' else '0'),stdout=plog,stderr=subprocess.STDOUT);children.append(producer)
             consumer=subprocess.Popen([str(b/('framelink_av_consumer'+ext)),*case_common,'--stream','--clock-policy','producer','--audio-sink','fakesink'],env=dict(os.environ,FRAMELINK_TEST_PREROLL_DELAY_MS=delay),stdout=clog,stderr=subprocess.STDOUT);children.append(consumer)
             if attempt=='cancel':
                 time.sleep(.75);consumer.kill();consumer.wait(timeout=2)
             codes=(producer.wait(timeout=8),consumer.wait(timeout=8))
             assert (codes[0]!=0 if attempt=='cancel' else codes==(0,0)),(attempt,codes)
             if attempt!='cancel':
-                clog.flush()
+                plog.flush();clog.flush()
+                sent=[json.loads(line) for line in (root/(attempt+'-producer.log')).read_text().splitlines() if line.startswith('{')]
+                transport=[r for r in sent if r.get('event')=='video-transport-summary']
+                assert len(transport)==1 and transport[0]==dict(event='video-transport-summary',received=40,submitted=40,dropped=0,ring_full_drops=0),(attempt,'transport accounting',transport)
                 rows=[json.loads(line) for line in (root/(attempt+'-consumer.log')).read_text().splitlines() if line.startswith('{')]
                 complete=next(r for r in rows if r.get('event')=='playback-complete')
                 assert complete['video_received']==40 and complete['audio_samples']==38400,complete
+                assert not any(r.get('event')=='video-source-sequence-gap' for r in rows),rows
+                if attempt=='producer-stall':
+                    pacing=next(r for r in sent if r.get('event')=='producer-pacing')
+                    assert pacing['max_wake_lag_ns']>=50_000_000 and pacing['catchup_holds']>0,pacing
+                    video=[r for r in rows if r.get('event')=='media-trace' and r.get('track')=='video']
+                    assert len(video)==40 and {r['pts_ns'] for r in video}=={n*20_000_000 for n in range(40)},video
+                    assert all(r['duration_ns']==20_000_000 for r in video),video
                 if attempt=='long-preroll':
                     delayed=next(r for r in rows if r.get('event')=='startup-preroll-delay')
                     assert delayed['elapsed_us']>2_000_000,delayed

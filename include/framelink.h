@@ -5,9 +5,9 @@
 // specific (see the enum comments and platform interop headers).
 //
 // The ring belongs to the CONSUMER. A consumer calls flCreateChannel and owns
-// the buffers; producers flOpenProducer onto a channel that already exists and
-// never allocate. That is BufferQueue/AImageReader ownership, which is what
-// Android forces and therefore what all platforms use.
+// the endpoint pool; platform factories can also adopt externally allocated
+// buffers. Producers flOpenProducer onto that existing endpoint. See the
+// platform interop headers for external allocation and lifetime contracts.
 //
 //   consumer:  flCreateChannel -> flAcquireFrame / flRelease  -> flClose
 //   producer:  flOpenProducer  -> flAcquireBuffer / flSubmit  -> flClose
@@ -90,6 +90,19 @@ typedef struct flChannelInfo {
     uint64_t generation;
 } flChannelInfo;
 
+// Optional frame metadata; legacy flFrame ABI remains unchanged.
+#define FL_FRAME_METADATA_VERSION 1u
+#define FL_FRAME_HAS_DTS 0x1u
+#define FL_FRAME_HAS_DURATION 0x2u
+#define FL_FRAME_DISCONT 0x4u
+typedef struct flFrameMetadata {
+    uint32_t version, flags;
+    int64_t dtsNs; // agreed nonnegative running time when HAS_DTS
+    uint64_t durationNs;
+    uint64_t streamGeneration; // nonzero; media generation, not ring allocation ID
+    uint32_t reserved[2];
+} flFrameMetadata;
+
 // ---- consumer: owns the ring ------------------------------------------------
 
 typedef struct flFrame {
@@ -138,6 +151,11 @@ FL_API flResult flCreateChannel(const char* name, uint32_t width, uint32_t heigh
 // Require GPU-renderable allocation (Android native YUV may reject this).
 // Desktop rings already request rendering-capable storage. No CPU fallback.
 #define FL_GPU_RENDER 0x8
+// Opt-in receiver-local arrival age. Not media PTS or end-to-end latency.
+// When disabled, receipt does not read the clock for this feature.
+#define FL_TRACK_ARRIVAL 0x10
+// Require negotiated metadata support and metadata on every published frame.
+#define FL_REQUIRE_FRAME_METADATA 0x20
 
 FL_API flResult flCreateChannelEx(const char* name, uint32_t width, uint32_t height,
                                   flFormat format, uint32_t poolSize, uint32_t flags,
@@ -181,6 +199,31 @@ typedef struct flBuffer {
 // reason an Android producer does not choose a Surface's size.
 FL_API flResult flOpenProducer(const char* name, flChannel** out);
 FL_API flResult flAcquireBuffer(flChannel*, flBuffer* out, uint32_t timeoutMs);
+// Attach to a reserved producer buffer BEFORE BeginSubmit. All submit paths
+// preserve it. Unsupported peer rejects without consuming the reservation;
+// reacquisition clears metadata. Absent DTS/duration fields must be zero.
+FL_API flResult flSetFrameMetadata(flChannel*, const flBuffer*, const flFrameMetadata*);
+// Query exact held frame before flRelease/flLeaseFrame. Legacy absence is
+// FL_NOT_FOUND. Invalid/absent cases leave output unchanged.
+FL_API flResult flGetFrameMetadata(flChannel*, const flFrame*, flFrameMetadata*);
+
+// Return an acquired buffer without publishing. Caller must finish ALL access
+// first; cancellation does not wait for external GPU work. Returns FL_BUSY after
+// flBeginSubmit, FL_INVALID for a non-reserved buffer. Invalidates that borrow.
+FL_API flResult flCancelBuffer(flChannel*, const flBuffer*);
+
+// Pin a RESERVED producer allocation against reuse while local native-memory
+// references remain. Register before publication, alongside serialized producer
+// calls. Up to 256 references/channel; tokens are local, opaque and single-use.
+// Does NOT grant write permission after submission or replace readiness/remote
+// consumed fences. Cancellation does not discard pins. Geometry changes return
+// FL_BUSY until all pins are released. Output unchanged on failure.
+FL_API flResult flRetainBufferReference(flChannel*, const flBuffer*, uint64_t* reference);
+// Release after ALL local CPU/GPU access through this reference has completed.
+// May run concurrently with producer calls/other releases, but NEVER with close.
+// The caller must keep the channel alive until every reference is released.
+FL_API flResult flReleaseBufferReference(flChannel*, uint64_t reference);
+
 
 // Submit, having drawn with the channel's own D3D11 device. framelink signals
 // readiness for you.
@@ -194,7 +237,10 @@ FL_API flResult flSubmit(flChannel*, const flBuffer*, int64_t ptsNs); // -1 = no
 //
 //   1. flSharedReadyFence() once, and import the handle as a timeline
 //      semaphore (Vulkan: VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_D3D12_FENCE_BIT).
-//   2. flBeginSubmit() -> the value to signal for this frame.
+//   2. flBeginSubmit() -> the value to signal for this acquired frame.
+//      Only one begin/end transaction may be open per channel (FL_BUSY otherwise).
+//      flEndSubmit must use that exact buffer/value; invalid calls do not release
+//      the reservation. Finish submitted GPU work before closing the channel.
 //   3. queue your own work, signalling that value as part of it.
 //   4. flEndSubmit() to publish the frame.
 //
@@ -218,6 +264,9 @@ FL_API flResult flEndSubmit(flChannel*, const flBuffer*, uint64_t signalValue, i
 // ANativeWindow_setBuffersGeometry on a BufferQueue, where buffers belong to
 // the consumer and the producer may still say what it is about to draw -
 // consumer-owned means the producer does not ALLOCATE, not that it is mute.
+//
+// A geometry request returns FL_BUSY while the producer has an acquired but
+// unsubmitted buffer; replacing storage would invalidate that reservation.
 //
 // Needed because real producers differ and cannot be predicted: a mirroring
 // iPad sends 752x1080 while a laptop sends 1920x1080 into the same slot.
@@ -258,6 +307,11 @@ FL_API flResult flImageMapPlanes(flImage*, flMappedImage* out);
 FL_API flResult flImageMap(flImage*, void** pixels, uint64_t* stride);
 FL_API void     flImageUnmap(flImage*);
 
+// Local consumer creation flags, not remote capabilities or negotiated policy.
+// Producer channels reject this query; output is unchanged on failure.
+// Useful when transferring an owning consumer to an adapter that requires
+// deferred release. Does not mutate flags or establish native import support.
+FL_API flResult flQueryConsumerFlags(flChannel*, uint32_t* flags);
 FL_API flResult flQuery(flChannel*, flChannelInfo* out);
 FL_API void     flClose(flChannel*);
 
@@ -268,6 +322,37 @@ FL_API void     flClose(flChannel*);
 // Snapshot opt-in trace to FRAMELINK_TRACE.<pid>.csv. Control thread only.
 FL_API flResult flTraceFlush(void);
 
+#ifdef __cplusplus
+}
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+// Optional bounded downstream read leases. Channel must use FL_DEFER_RELEASE,
+// not FL_GPU_SYNC. Acquire normally, then transfer its held frame to a lease.
+// At most FL_MAX_POOL_SIZE frames and 256 readers are retained per channel.
+// Do not mix manual consumed-fence signalling with leases. Serialize these calls
+// with other channel operations. All leases MUST finish/collect before flClose.
+FL_API flResult flLeaseFrame(flChannel*, const flFrame*, uint64_t* lease);
+FL_API flResult flRetainReadLease(flChannel*, uint64_t lease, uint64_t* retained);
+FL_API flResult flReadLeaseFrame(flChannel*, uint64_t lease, flFrame*, uint64_t* generation);
+// Call only AFTER this reader's CPU/GPU access is actually complete. This does
+// not wait on a GPU fence. Consumes token exactly once; borrowed image then expires.
+FL_API flResult flCompleteReadLease(flChannel*, uint64_t lease);
+// Publish only the completed prefix; later completions cannot release earlier
+// readers. Retry backend retirement failure here, not by completing a token twice.
+FL_API flResult flCollectReadLeases(flChannel*);
+#ifdef __cplusplus
+}
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+// Age since the receiver accepted this frame announcement, including readiness
+// wait. Requires FL_TRACK_ARRIVAL and a currently held unmodified flFrame.
+FL_API flResult flFrameAgeNs(flChannel*, const flFrame*, uint64_t* ageNs);
 #ifdef __cplusplus
 }
 #endif

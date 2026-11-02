@@ -1,0 +1,37 @@
+{
+  "cases": [
+    {
+      "prefix": "/tmp/m5a13-win-post-wake-nv12-2-on",
+      "total_identities": 3720,
+      "measured_identities": 3600,
+      "fresh_fps": 59.997122071918305,
+      "source_marker_to_arrival_ms": {
+        "p50": 3.7357,
+        "p95": 4.7259,
+        "p99": 4.7431,
+        "max": 4.7874
+      },
+      "consumer_hold_ms": {
+        "p50": 2.0225,
+        "p95": 2.0335,
+        "p99": 2.0409,
+        "max": 3.5202
+      },
+      "producer_acquire_wait_ms": {
+        "p50": 0.0008,
+        "p95": 0.0008,
+        "p99": 0.001,
+        "max": 0.0074
+      },
+      "delivery_interval_ms": {
+        "p50": 16.0035,
+        "p95": 18.0069,
+        "p99": 18.5194,
+        "max": 20.116
+      },
+      "rate_pass": true,
+      "gpu_completion_verified_by_csv": false,
+      "pcm_qualified": false
+    }
+  ]
+}

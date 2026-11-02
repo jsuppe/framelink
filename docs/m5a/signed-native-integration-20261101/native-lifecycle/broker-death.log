@@ -1,0 +1,13 @@
+
+11-01 17:34:10.589  8808  8808 I FLCross : bind=true
+11-01 17:34:11.120  8865  8879 I FLCross : producer-start lease=5dcb54af-43e1-43b4-b3b8-74ba59aa1ba2 uid=10304 pid=8865
+11-01 17:34:11.120  8843  8856 I FLCross : grant lease=5dcb54af-43e1-43b4-b3b8-74ba59aa1ba2 generation=1 consumer_uid=10305 broker_uid=10304
+11-01 17:34:11.138  8808  8864 I FLCross : receiver-start lease=5dcb54af-43e1-43b4-b3b8-74ba59aa1ba2 generation=1 uid=10305 pid=8808
+11-01 17:34:11.215  8808  8864 I FLCross : playback producer-system-clock
+11-01 17:34:11.685  8843  8843 I FLCross : fault=kill-Broker pid=8843
+11-01 17:34:11.712  8808  8808 I FLCross : stop=broker-death
+11-01 17:34:11.712  8865  8876 I FLCross : producer broker-death lease=5dcb54af-43e1-43b4-b3b8-74ba59aa1ba2
+11-01 17:34:11.741  8865  8879 I FLCross : native failure: native source buffer acquisition failed
+11-01 17:34:11.741  8865  8879 I FLCross : producer-result lease=5dcb54af-43e1-43b4-b3b8-74ba59aa1ba2 {"ok":false,"video":0,"posts":0,"pcm_samples":0,"uid":10304,"pid":8865}
+11-01 17:34:11.747  8808  8864 I FLCross : native failure: audio EOS before finite completion
+11-01 17:34:11.748  8808  8864 I FLCross : receiver-result lease=5dcb54af-43e1-43b4-b3b8-74ba59aa1ba2 {"ok":false,"video":12,"posts":12,"pcm_samples":20800,"uid":10305,"pid":8808}

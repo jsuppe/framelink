@@ -1,0 +1,3 @@
+producer references: bounded 256, remote completion cannot reuse local-held slots, concurrent finalizer, cancel and resize guards pass
+native read leases: retained readers block reuse; ordered retirement and resize pass
+Producer reservations: wrong image/slot, duplicate/unmatched begin/end, forged values, geometry retention and post-release reuse passed

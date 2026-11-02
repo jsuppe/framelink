@@ -104,3 +104,16 @@ The opt-in `preserve-timestamps` property on both elements retains agreed
 session running time; defaults retain legacy arrival/submit timestamps.
 Both pipelines must agree on clock/base and use a dedicated channel. See
 [the working separate-PCM example and timing contract](../docs/AUDIO_VIDEO.md).
+
+## Bounded pool/overload controls
+
+See [pool policy](../docs/POOL_POLICY.md) for pool-size, buffer-wait-ms,
+error-on-ring-full and max-queue-age-ms. Defaults preserve existing behavior.
+[Transport timing](../docs/TRANSPORT_TIMING.md) separates these bounds from final
+A/V presentation scheduling. Native zero-copy Gst integration remains pending.
+
+## Opt-in native source memory
+
+See [native source adapters and limits](../docs/GST_NATIVE_MEMORY.md). Linux
+DMA-BUF, Windows D3D11 and exact Android RGB AHB wrappers are implemented; this
+is not yet a complete native decoder/sink/remote-negotiation pipeline.

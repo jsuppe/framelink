@@ -21,21 +21,19 @@ paths, evidence and exclusions; passing tests do not imply universal driver supp
 The current development branch is
 [`feature/m5a-native-memory`](https://github.com/jsuppe/framelink/tree/feature/m5a-native-memory).
 
-- **M5a.1 locally validated and pushed:** versioned required/preferred memory-usage
-  contract and strict copy/readback/upload/conversion policy, commit
-  [`3fc6f67`](https://github.com/jsuppe/framelink/commit/3fc6f67).
-- **M5a.2 locally validated and pushed:** actual native-resource queries for
-  device identity, format/layout, usage, mapping costs and supported interop,
-  commit [`4aab05f`](https://github.com/jsuppe/framelink/commit/4aab05f).
-  Linux, Windows/Caspar and Android device checks passed **6/6 each**, with no
-  skips; Android arm64/x86_64 builds passed. These test resource/mapping/pixel/PTS
-  behavior—not GPU throughput, arbitrary driver imports or physical output.
-- **M5a.3 next incomplete task:** external allocation ownership and safe buffer
-  retirement. Inspection has begun; no implementation/validation result is yet
-  published. A task marked in progress is not evidence of a running executor.
-- **M5a.4–15 remain pending:** transport/presentation separation, bounded small
-  pools, strict/fallback negotiation, native GStreamer sink/source integration,
-  Windows decoder example, relay, instrumentation and multi-hop qualification.
+- **M5a.1–12 locally validated and pushed:** memory/capability contracts,
+  external pools, bounded ownership/reader completion, strict/fallback policy,
+  native GStreamer adapters, decoder/relay examples and signed Android integration.
+- **M5a.13 locally qualified:** supported two-buffer one/two-hop1080p60 native
+  cases deliver3720/3720 frames; simultaneous PCM/media offset preserved. Copies,
+  fault replacements, resource costs and unqualified paths remain explicit in
+  [the performance report](docs/m5a/multihop-performance-20261101/README.md).
+- **M5a.14 locally complete:** [audio policy](docs/AUDIO_MEMORY_POLICY.md) retains
+  serialized GDP/GIO PCM; native video does not imply A/V zero-copy.
+- **M5a.15 active:** final platform checks, review, CI and merge in
+  [PR #7](https://github.com/jsuppe/framelink/pull/7). Not yet shipped or merged.
+- **M5b planned:** dedicated GStreamer audio source/sink, shared session coordinator
+  and A/V convenience bins; execute after M5a closure.
 - **M6 not started:** reliability/performance qualification, including 30-minute
   A/V soaks, at least 100 reconnect cycles per supported target and measured
   tracing overhead. **M7 not started:** release packaging and developer handoff.
@@ -157,8 +155,29 @@ A/V samples, signed Android cross-app ownership and qualified platform behavior
 are described in the [M5 capability matrix](docs/m5/CAPABILITY_MATRIX.md).
 For integration, start with the [Windows decoded-pipeline guide](docs/M5_WINDOWS_PIPELINE.md)
 or [Android cross-app sample](android/crossapp/README.md).
-Native GStreamer allocation/zero-copy negotiation remains pending within M5a; fan-out to
-multiple consumers of one channel is not implemented (use separate channels).
+Native memory negotiation, external pools, bounded reader leases and explicit
+GStreamer native-memory source/sink adapters are implemented on the M5a branch.
+See [native integration](docs/GST_NATIVE_MEMORY.md),
+[memory contract](docs/MEMORY_CONTRACT.md), [reader completion](docs/READ_LEASES.md),
+[Windows decoder example](samples/D3D_DECODER.md) and [relay](samples/NATIVE_RELAY.md).
+Fan-out to multiple consumers of one channel is not implemented (use separate channels).
+
+**M5a progress:** tasks1–14 locally validated; final integrated review/CI/merge
+(task15) is pending. [Checkable roadmap](docs/ROADMAP_TASKS.md) distinguishes
+implemented, locally qualified and merged work. M5b audio elements/A/V bins, M6
+reliability qualification and M7 release follow sequentially.
+
+[Performance evidence](docs/m5a/multihop-performance-20261101/README.md) records
+supported one/two-boundary1080p60 paths with two original allocations: nominal
+3720/3720 frames, exact A/V media offset and explicit GPU completion/copy accounting.
+Warmed Android and same-host native fixtures are not cold-start, arbitrary decoder,
+physical scanout or end-to-end zero-copy proof. Windows verification reads a private
+copy; Linux/Android verification samples originals into private output. See evidence
+for unsupported formats, fault drops and measurement limits.
+
+Audio remains CPU PCM over GDP/GIO, separately described in the
+[audio memory/copy policy](docs/AUDIO_MEMORY_POLICY.md). Native video does not make
+an entire audio/video session zero-copy.
 Physical output timing and seamless device/suspend behavior are not blanket claims.
 
 MIT licensed.
