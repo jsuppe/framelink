@@ -109,3 +109,54 @@ gboolean fl_gst_session_authenticate_audio_stream(FlGstSession*s,GSocketConnecti
  if(!fl_gst_session_publish_audio(s,&cfg,stream,producer))return fail("audio stream publication rejected");
  return TRUE;
 }
+
+namespace {
+struct StreamOwner {GSocketConnection* p=nullptr;~StreamOwner(){if(p){g_io_stream_close(G_IO_STREAM(p),nullptr,nullptr);g_object_unref(p);}}};
+struct ObjectOwner {GObject* p=nullptr;~ObjectOwner(){if(p)g_object_unref(p);}};
+}
+gboolean fl_gst_session_open_local_audio(FlGstSession*session,gboolean producer,const gchar*path,
+ const flAudioFormat*format,guint queueMs,guint timeout,guint idle,GCancellable*outer,GError**error){
+ auto fail=[&](const char*message){fl_gst_session_cancel(session);g_set_error_literal(error,G_IO_ERROR,G_IO_ERROR_FAILED,message);return FALSE;};
+ if(!session||!path||!*path||!format||!queueMs||queueMs>2000||!timeout||timeout>60000||!idle||idle>60000)return fail("invalid local audio session configuration");
+ flSessionCapabilities caps{};caps.version=FL_SESSION_OPTIONAL_TRACKS_VERSION;caps.audioCount=1;caps.audio[0]=*format;
+ Offer encoded{};if(!encode(caps,encoded))return fail("unsupported local PCM format");
+ Deadline deadline(timeout,outer);av::Endpoint endpoint{};av::RendezvousOwner owner;std::string reason;
+ ObjectOwner listener,client;StreamOwner control,audio;
+ // The outer Deadline bounds all nested operations together.
+ if(producer){
+  if(!av::secureRandom(endpoint.token.data(),endpoint.token.size(),reason))return fail(reason.c_str());
+  auto*l=g_socket_listener_new();listener.p=G_OBJECT(l);
+  auto*address=g_inet_address_new_from_string("127.0.0.1");auto*bind=g_inet_socket_address_new(address,0);g_object_unref(address);
+  GSocketAddress*effective=nullptr;const bool bound=g_socket_listener_add_address(l,bind,G_SOCKET_TYPE_STREAM,G_SOCKET_PROTOCOL_TCP,nullptr,&effective,nullptr);g_object_unref(bind);
+  if(!bound)return fail("cannot bind private loopback session listener");
+  endpoint.port=g_inet_socket_address_get_port(G_INET_SOCKET_ADDRESS(effective));g_object_unref(effective);
+  if(!owner.publish(path,endpoint,reason))return fail(reason.c_str());
+  control.p=g_socket_listener_accept(l,nullptr,deadline.cancel,nullptr);
+ }else{
+  while(!g_cancellable_is_cancelled(deadline.cancel)){
+   if(av::readEndpoint(path,endpoint,reason))break;
+   // Only discovery polling, never a per-frame poll or added media latency.
+   g_usleep(5000);
+  }
+  if(g_cancellable_is_cancelled(deadline.cancel))return fail("local session discovery deadline or cancellation");
+  auto*c=g_socket_client_new();client.p=G_OBJECT(c);
+  control.p=g_socket_client_connect_to_host(c,"127.0.0.1",endpoint.port,deadline.cancel,nullptr);
+ }
+ if(!control.p)return fail("local control connection deadline or failure");
+ auto*secret=g_bytes_new(endpoint.token.data(),endpoint.token.size());
+ struct BytesOwner{GBytes*p;~BytesOwner(){g_bytes_unref(p);}} secretOwner{secret};
+ flSessionConfig proposal{};proposal.version=FL_SESSION_OPTIONAL_TRACKS_VERSION;proposal.generation=1;proposal.audioTrackId=2;
+ proposal.audio=*format;proposal.audioQueueMs=queueMs;proposal.connectTimeoutMs=timeout;proposal.idleTimeoutMs=idle;
+ if(producer&&(!av::secureRandom(proposal.sessionId.bytes,16,reason)||!av::secureRandom(proposal.clockId.bytes,16,reason)))return fail(reason.c_str());
+ if(!fl_gst_session_negotiate_stream(session,control.p,producer,secret,&caps,producer?&proposal:nullptr,timeout,deadline.cancel,error))return FALSE;
+ flSessionConfig selected{};
+ if(fl_gst_session_get_config(session,&selected)!=FL_GST_SESSION_READY||selected.audioQueueMs>queueMs)return fail("peer audio queue budget exceeds local limit");
+ if(producer)audio.p=g_socket_listener_accept(G_SOCKET_LISTENER(listener.p),nullptr,deadline.cancel,nullptr);
+ else audio.p=g_socket_client_connect_to_host(G_SOCKET_CLIENT(client.p),"127.0.0.1",endpoint.port,deadline.cancel,nullptr);
+ if(!audio.p)return fail("local audio connection deadline or failure");
+ if(!fl_gst_session_authenticate_audio_stream(session,audio.p,producer,secret,timeout,deadline.cancel,error))return FALSE;
+ // Coordinator owns a strong reference after authentication. Do not close it on
+ // this successful scope exit; control channel is intentionally setup-only here.
+ g_object_unref(audio.p);audio.p=nullptr;
+ return TRUE;
+}

@@ -177,7 +177,7 @@ playback delay; unsupported hardware paths must reject clearly.
 
 ## M5b — GStreamer audio elements and coordinated A/V sessions
 
-**State: in progress; tasks1–2 locally validated; task3 audio sink active.** Added at Jon's request 2026-11-01. Execute
+**State: in progress; tasks1–3 locally validated; task4 audio source active.** Added at Jon's request 2026-11-01. Execute
 only after M5a closes, before M6 qualifies the complete public integration path.
 Video elements remain video-only; separate audio elements share one session.
 
@@ -203,9 +203,10 @@ elements remain independently available.
   behavior without requiring sample-application internals.
   [Control validation](m5b/coordinator-control/README.md): Linux9/9, Windows8/8,
   Android5/5 and dualABI/JNI builds. Public media elements remain next.
-- [ ] **M5b.3 Audio sink:** wrap existing bounded PCM transport, negotiate caps,
+- [x] **M5b.3 Audio sink:** wrap existing bounded PCM transport, negotiate caps,
   carry timestamps/durations/discontinuities, handle flow errors and backpressure;
   report explicit serialization/copy costs rather than imply shared PCM.
+  [Sink validation](m5b/audio-sink-local/README.md): Linux5/5, Windows5/5, Android4/4 and dualABI/JNI builds. Later timing/lifecycle gates remain explicit.
 - [ ] **M5b.4 Audio source:** receive PCM with exact sample order and timing,
   reconstruct buffers/caps, expose appropriate live/latency behavior and integrate
   with standard playback sinks using the shared pipeline clock.
@@ -228,21 +229,21 @@ elements remain independently available.
   one documented session configuration. Propagate caps, segments, EOS, flush,
   state changes and errors without adding independent timestamp rebasing or a
   hidden per-track latency reservoir. Final public element name is set in M5b.1.
-- [x] **M5b.10 Consumer A/V bin:** compose the validated video/audio sources;
+- [ ] **M5b.10 Consumer A/V bin:** compose the validated video/audio sources;
   expose separate audio/video source ghost pads for independent downstream
   rendering/playback. Coordinate readiness, session clocks and reconnect; do not
   hardwire a display or audio device. Preserve native video memory negotiation.
-- [x] **M5b.11 Bin parity and examples:** demonstrate standalone-element and
+- [ ] **M5b.11 Bin parity and examples:** demonstrate standalone-element and
   bin-based two-process pipelines. Test equivalent PCM/video timing and negotiated
   memory paths, missing-track policy, startup/pause/flush/EOS, peer death/reconnect,
   error propagation, queue bounds and cleanup. Document properties/pad names and
   supported audio-only/video-only behavior without silently waiting forever.
-- [x] **M5b.12 Platform qualification:** Windows, Linux and Android builds/runtime
+- [ ] **M5b.12 Platform qualification:** Windows, Linux and Android builds/runtime
   on supported targets; verify native video plus audio, audio-only, latency
   queries, queue bounds, resource cleanup and tracing/copy accounting for both
 individual elements and convenience bins. Separate
   software timing evidence from physical speaker/display alignment.
-- [x] **M5b.13 Publish/review/merge:** element reference, copy/timing contract,
+- [ ] **M5b.13 Publish/review/merge:** element reference, copy/timing contract,
   developer migration guide, examples, final-revision CI and reviewed evidence.
   Feed these elements into M6's sustained/performance qualification matrix.
 

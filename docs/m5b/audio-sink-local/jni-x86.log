@@ -1,0 +1,17 @@
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /tmp/fl-m5a-crossapp-x86
+[ 31%] Built target framelink
+[ 45%] Building CXX object framelink/CMakeFiles/framelink_gst_session.dir/gst/framelink_session_context.cpp.o
+[ 45%] Building CXX object framelink/CMakeFiles/framelink_gst_session.dir/runtime/av_auth.cpp.o
+[ 45%] Building CXX object framelink/CMakeFiles/framelink_gst_session.dir/gst/framelink_session_transport.cpp.o
+[ 50%] Building CXX object framelink/CMakeFiles/framelink_gst_session.dir/runtime/av_rendezvous.cpp.o
+[ 54%] Linking CXX static library libframelink_gst_session.a
+[ 54%] Built target framelink_gst_session
+[ 59%] Building CXX object framelink/CMakeFiles/gstframelink.dir/gst/gstframelink.cpp.o
+[ 63%] Building CXX object framelink/CMakeFiles/gstframelink.dir/gst/gstframelinkaudio.cpp.o
+[ 68%] Building CXX object framelink/CMakeFiles/gstframelink.dir/gst/fl_gst_audio_startup.cpp.o
+[ 72%] Linking CXX static library libgstframelink.a
+[ 72%] Built target gstframelink
+[ 77%] Linking CXX shared library libfl_crossapp.so
+[100%] Built target fl_crossapp

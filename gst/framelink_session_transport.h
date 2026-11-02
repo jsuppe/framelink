@@ -26,3 +26,13 @@ FL_GST_SESSION_API gboolean fl_gst_session_authenticate_audio_stream(FlGstSessio
 FL_GST_SESSION_API GSocketConnection* fl_gst_session_claim_audio_stream(FlGstSession*,
  gboolean producer,guint64 generation);
 G_END_DECLS
+
+G_BEGIN_DECLS
+// Standalone audio-only current-user rendezvous. A producer publishes a private
+// loopback listener; a consumer may start first and wait up to the same finite
+// deadline. This is worker-thread setup, not a blocking element state callback.
+// Android cross-UID callers use their authorized broker/connected-stream APIs.
+FL_GST_SESSION_API gboolean fl_gst_session_open_local_audio(FlGstSession*,gboolean producer,
+ const gchar* session_path,const flAudioFormat*,guint audio_queue_ms,
+ guint connect_timeout_ms,guint idle_timeout_ms,GCancellable*,GError**);
+G_END_DECLS

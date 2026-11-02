@@ -1,0 +1,32 @@
+#< CLIXML
+-- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.26300.
+-- framelink: building GStreamer elements (gstframelink)
+-- Configuring done (0.8s)
+-- Generating done (0.7s)
+-- Build files have been written to: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  fl_ipc_win32.cpp
+  fl_trace.cpp
+  framelink_memory.cpp
+  framelink_session.cpp
+  framelink_slots.cpp
+  framelink_win.cpp
+  Generating Code...
+     Creating library C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/framelink.lib and object C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/framelink.exp
+  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
+  framelink_session_context.cpp
+  framelink_session_transport.cpp
+  av_auth.cpp
+  av_rendezvous.cpp
+  Generating Code...
+     Creating library C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/framelink_gst_session.lib and object C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/framelink_gst_session.exp
+  framelink_gst_session.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink_gst_session.dll
+  gstframelink.cpp
+  The d3d11 library from gst-plugins-bad is unstable API and may change in future.
+  You can define GST_USE_UNSTABLE_API to avoid this warning.
+  gstframelinkaudio.cpp
+  fl_gst_audio_startup.cpp
+C:\Users\jonsu\dev\framelink-m5a-contract-20261101\gst\gstframelinkaudio.cpp(90,102): error C2397: conversion from 'flPcmFormat' to 'uint32_t' requires a narrowing conversion [C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\gstframelink.vcxproj]
+  Generating Code...
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04"><Obj S="progress" RefId="0"><TN RefId="0"><T>System.Management.Automation.PSCustomObject</T><T>System.Object</T></TN><MS><I64 N="SourceId">1</I64><PR N="Record"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj></Objs>
