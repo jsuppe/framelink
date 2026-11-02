@@ -1356,6 +1356,19 @@ static GstFlowReturn srcCreate(GstPushSrc* push, GstBuffer** outbuf) {
     if (!self->preserveFrameMetadata && self->fps > 0)
         GST_BUFFER_DURATION(buf) = gst_util_uint64_scale(GST_SECOND, 1, (guint64)self->fps);
     if (self->preserveTimestamps||self->preserveFrameMetadata) {
+        // Sparse loss evidence without per-frame logging or additional queues.
+        // This includes configured age-policy skips; it is not by itself proof
+        // of a transport replacement. Sequence resets are not positive gaps.
+        if(frame.sequence>self->lastSequence && frame.sequence-self->lastSequence>1 &&
+           (!self->haveTimestamp || !self->preserveFrameMetadata ||
+            metadata.streamGeneration==self->streamGeneration)) {
+            auto* gap=gst_structure_new("framelink-source-sequence-gap",
+                "previous-sequence",G_TYPE_UINT64,self->lastSequence,
+                "sequence",G_TYPE_UINT64,frame.sequence,
+                "missing",G_TYPE_UINT64,frame.sequence-self->lastSequence-1,
+                "pts-ns",G_TYPE_UINT64,guint64(frame.ptsNs),NULL);
+            gst_element_post_message(GST_ELEMENT(self),gst_message_new_element(GST_OBJECT(self),gap));
+        }
         GST_BUFFER_PTS(buf) = frame.ptsNs;
         if (!self->haveTimestamp || frame.ptsNs <= self->lastPts ||
             frame.sequence != self->lastSequence + 1 ||

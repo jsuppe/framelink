@@ -30,6 +30,14 @@ from producer ring-full drops. For loss-intolerant processing, also control upst
 production and downstream ownership; these options alone do not turn the transport
 into an unbounded reliable FIFO.
 
+When timestamp preservation is enabled, a positive source sequence gap posts a
+`framelink-source-sequence-gap` bus element message containing `previous-sequence`,
+`sequence`, `missing`, and `pts-ns`. Normal frames produce no such message. This
+counts skipped source sequences, not a diagnosis: configured age filtering can
+also cause gaps. The A/V sample preserves this as `video-source-sequence-gap` JSON;
+its producer separately prints serialized sink submission/drop totals at EOS.
+Neither counter is a physical-presentation or lossless-delivery guarantee.
+
 All properties are configured before allocation/streaming. Native users opt into
 `FL_TRACK_ARRIVAL` and query `flFrameAgeNs` while holding a frame. No arrival-clock
 read is performed for this feature when tracking is disabled. Adopted channels

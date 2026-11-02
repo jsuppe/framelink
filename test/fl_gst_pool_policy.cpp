@@ -73,6 +73,35 @@ static void agePolicy() {
  g_object_get(src,"expired-frames",&expired,nullptr);CHECK(expired==1);
  flClose(producer);gst_element_set_state(p,GST_STATE_NULL);gst_object_unref(pad);gst_object_unref(src);gst_object_unref(out);gst_object_unref(p);
 }
+// A held downstream pad lets two announcements replace one another without
+// adding a test-only transport mode. The sparse source message must account
+// for the exact missing sequence; the delivered pixels remain latest-wins.
+static void sequenceGap() {
+ const auto name="sequence-gap-"+std::to_string(g_get_monotonic_time());
+ auto*p=parse("framelinksrc name=source channel="+name+" width=16 height=16 pool-size=2 preserve-timestamps=true ! appsink name=out sync=false async=false max-buffers=2");
+ auto*src=gst_bin_get_by_name(GST_BIN(p),"source");auto*out=gst_bin_get_by_name(GST_BIN(p),"out");
+ auto*pad=gst_element_get_static_pad(src,"src");auto*bus=gst_element_get_bus(p);
+ std::atomic<bool> blocked{false};
+ auto probe=gst_pad_add_probe(pad,(GstPadProbeType)(GST_PAD_PROBE_TYPE_BLOCK|GST_PAD_PROBE_TYPE_BUFFER),
+  [](GstPad*,GstPadProbeInfo*,gpointer data){((std::atomic<bool>*)data)->store(true);return GST_PAD_PROBE_OK;},&blocked,nullptr);
+ CHECK(gst_element_set_state(p,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
+ flChannel*producer=nullptr;CHECK(flOpenProducer(name.c_str(),&producer)==FL_OK);
+ auto send=[&](int64_t pts){flBuffer b{};CHECK(flAcquireBuffer(producer,&b,1000)==FL_OK&&flSubmit(producer,&b,pts)==FL_OK);};
+ send(0);for(int i=0;i<1000&&!blocked.load();++i)g_usleep(1000);CHECK(blocked.load());
+ send(20000000);send(40000000);g_usleep(100000);
+ gst_pad_remove_probe(pad,probe);
+ for(uint64_t pts:{0ULL,40000000ULL}){auto*sample=gst_app_sink_try_pull_sample(GST_APP_SINK(out),2*GST_SECOND);CHECK(sample&&GST_BUFFER_PTS(gst_sample_get_buffer(sample))==pts);gst_sample_unref(sample);}
+ auto*message=gst_bus_timed_pop_filtered(bus,2*GST_SECOND,GST_MESSAGE_ELEMENT);CHECK(message);
+ auto*gap=gst_message_get_structure(message);CHECK(gst_structure_has_name(gap,"framelink-source-sequence-gap"));
+ guint64 previous=0,sequence=0,missing=0,pts=0;
+ CHECK(gst_structure_get_uint64(gap,"previous-sequence",&previous)&&previous==1);
+ CHECK(gst_structure_get_uint64(gap,"sequence",&sequence)&&sequence==3);
+ CHECK(gst_structure_get_uint64(gap,"missing",&missing)&&missing==1);
+ CHECK(gst_structure_get_uint64(gap,"pts-ns",&pts)&&pts==40000000);
+ gst_message_unref(message);CHECK(!gst_bus_pop_filtered(bus,GST_MESSAGE_ELEMENT));
+ flClose(producer);gst_element_set_state(p,GST_STATE_NULL);
+ gst_object_unref(bus);gst_object_unref(pad);gst_object_unref(src);gst_object_unref(out);gst_object_unref(p);
+}
 int main(int argc,char**argv){gst_init(&argc,&argv);SampleDeadline deadline;CHECK(argc==2);
 #ifdef __ANDROID__
  GST_PLUGIN_STATIC_REGISTER(framelink);GST_PLUGIN_STATIC_REGISTER(app);GST_PLUGIN_STATIC_REGISTER(coreelements);
@@ -80,6 +109,6 @@ int main(int argc,char**argv){gst_init(&argc,&argv);SampleDeadline deadline;CHEC
  GError*error=nullptr;auto*plugin=gst_plugin_load_file(argv[1],&error);CHECK(plugin&&!error);gst_object_unref(plugin);
 #endif
  for(unsigned pool:{2u,3u}){source(pool);policy(pool,false,false);policy(pool,true,false);policy(pool,true,true);}
- agePolicy();
+ agePolicy();sequenceGap();
  puts("2/3 image capacities: bounded drop, bounded error, delayed-reader recovery and exact loss accounting pass");
 }

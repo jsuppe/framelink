@@ -49,3 +49,26 @@ The startup regression requires40 actual submissions and zero sink drops as well
 as40 consumer receipts. This is diagnostic reporting, not a claimed transport fix.
 
 Diagnostic regression: Linux m5_startup passed1/1 (27.94s); Windows passed1/1 (31.29s), including exact synthetic sink accounting and existing cancellation/long-preroll/negative controls.
+
+## Sparse receiver diagnostic
+
+With timestamp preservation enabled, framelinksrc posts a
+`framelink-source-sequence-gap` element message only when a positive source
+sequence gap occurs. Fields: previous-sequence, sequence, missing, pts-ns.
+The streaming sample reports it as `video-source-sequence-gap` JSON. This adds
+no buffering and no per-frame log; it does not change latest-frame-wins delivery.
+Sequence reset/backwards movement is not counted as a positive gap. A configured
+source age filter can also cause a gap, so the message alone is not a claim of
+pending replacement or an exact explanation for the historical39/40 failure.
+
+A deterministic downstream-pad stall submits three frames, receives sequences1
+and3, and verifies exactly one message identifying missing sequence2. Linux and
+Windows affected checks passed3/3 each (pool policy, recovery, startup); Android
+arm64 device pool-policy suite passed, including this exact sequence assertion.
+
+Four longer traced and four matched untraced synthetic runs each delivered
+1000/1000 video frames and960000 PCM sample-frames, with1000 sink submissions and
+zero sink drops. They did not reproduce the historical failure and are not a
+claimed transport repair or a physical-output qualification.
+
+Android arm64/x86_64 plugin/pool-policy builds and signed cross-app JNI builds also passed for the diagnostic changes. The tablet policy test passed; this does not claim a fresh signed A/V lifecycle matrix.

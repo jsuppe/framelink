@@ -845,8 +845,22 @@ struct ProducerFailureWatch {
   ~ProducerFailureWatch(){done=true;worker.join();gst_object_unref(bus);}
 };
 void checkPlaybackBus(GstBus* bus) {
-  auto* message=gst_bus_pop_filtered(bus,GstMessageType(GST_MESSAGE_ERROR|GST_MESSAGE_CLOCK_LOST));
+  auto* message=gst_bus_pop_filtered(bus,GstMessageType(GST_MESSAGE_ERROR|GST_MESSAGE_CLOCK_LOST|GST_MESSAGE_ELEMENT));
   if(!message) return;
+  if(GST_MESSAGE_TYPE(message)==GST_MESSAGE_ELEMENT) {
+    const auto* gap=gst_message_get_structure(message);
+    if(gap && gst_structure_has_name(gap,"framelink-source-sequence-gap")) {
+      guint64 previous=0,sequence=0,missing=0,pts=0;
+      gst_structure_get_uint64(gap,"previous-sequence",&previous);
+      gst_structure_get_uint64(gap,"sequence",&sequence);
+      gst_structure_get_uint64(gap,"missing",&missing);
+      gst_structure_get_uint64(gap,"pts-ns",&pts);
+      printf("{\"event\":\"video-source-sequence-gap\",\"previous_sequence\":%llu,\"sequence\":%llu,\"missing\":%llu,\"pts_ns\":%llu}\n",
+          (unsigned long long)previous,(unsigned long long)sequence,
+          (unsigned long long)missing,(unsigned long long)pts);
+    }
+    gst_message_unref(message);return;
+  }
   std::string error="audio clock lost: renegotiate both tracks";
   if(GST_MESSAGE_TYPE(message)==GST_MESSAGE_ERROR) {
     GError* detail=nullptr;gchar* debug=nullptr;
