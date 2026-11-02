@@ -6,7 +6,7 @@
 // Private byte reader: g_input_stream_read returns available bytes, not a full
 // requested block. A small final GDP packet must not wait for later PCM or EOF.
 typedef struct {
- GstPushSrc parent; FlGstSession* session; GSocketConnection* connection;
+ GstPushSrc parent; GstBuffer* pendingDelivery; FlGstSession* session; GSocketConnection* connection;
  std::shared_ptr<FlAudioStartup>* startup; GCancellable* cancel; gint eos;
  guint8 header[62];guint headerUsed,payloadRemaining;
 } FlAudioReader;
@@ -32,6 +32,8 @@ static bool boundedWire(FlAudioReader*s,const guint8*data,gsize size){
 }
 static GstFlowReturn readChunk(GstPushSrc*base,GstBuffer**out){
  auto*s=reinterpret_cast<FlAudioReader*>(base);GError*error=nullptr;
+retry:
+ if(s->pendingDelivery){*out=gst_buffer_ref(s->pendingDelivery);return GST_FLOW_OK;}
  if(g_atomic_int_get(&s->eos))return GST_FLOW_EOS;
  if(!s->connection){
   if(*s->startup)s->connection=(*s->startup)->connection(s->cancel,&error);
@@ -46,7 +48,7 @@ static GstFlowReturn readChunk(GstPushSrc*base,GstBuffer**out){
    if(ready==FL_GST_SESSION_READY&&!g_cancellable_is_cancelled(s->cancel))
     s->connection=fl_gst_session_claim_audio_stream(s->session,FALSE,config.generation);
   }}
-  if(!s->connection){if(g_cancellable_is_cancelled(s->cancel)){g_clear_error(&error);return GST_FLOW_FLUSHING;}
+  if(!s->connection){if(g_cancellable_is_cancelled(s->cancel)){g_clear_error(&error);auto flow=gst_base_src_wait_playing(GST_BASE_SRC(s));if(flow!=GST_FLOW_OK)return flow;g_cancellable_reset(s->cancel);goto retry;}
    GST_ELEMENT_ERROR(s,RESOURCE,OPEN_READ,("%s",error?error->message:"no authenticated consumer audio stream"),(nullptr));g_clear_error(&error);return GST_FLOW_ERROR;}
   flSessionConfig config{};fl_gst_session_get_config(s->session,&config);
   g_socket_set_timeout(g_socket_connection_get_socket(s->connection),(config.idleTimeoutMs+999)/1000);
@@ -56,20 +58,26 @@ static GstFlowReturn readChunk(GstPushSrc*base,GstBuffer**out){
  bool bounded=count<=0||boundedWire(s,map.data,gsize(count));gst_buffer_unmap(b,&map);
  if(!bounded){gst_buffer_unref(b);GST_ELEMENT_ERROR(s,STREAM,FORMAT,("GDP payload exceeds negotiated bounds or invalid wire header"),(nullptr));fl_gst_session_cancel(s->session);return GST_FLOW_ERROR;}
  if(count<=0){gst_buffer_unref(b);
-  if(g_cancellable_is_cancelled(s->cancel)){g_clear_error(&error);return GST_FLOW_FLUSHING;}
+  if(g_cancellable_is_cancelled(s->cancel)||g_error_matches(error,G_IO_ERROR,G_IO_ERROR_CANCELLED)){
+   g_clear_error(&error);auto flow=gst_base_src_wait_playing(GST_BASE_SRC(s));if(flow!=GST_FLOW_OK)return flow;
+   g_cancellable_reset(s->cancel);goto retry;
+  }
   if(count==0&&g_atomic_int_get(&s->eos)){g_clear_error(&error);return GST_FLOW_EOS;}
   GST_ELEMENT_ERROR(s,RESOURCE,READ,("%s",error?error->message:"audio peer closed before GDP EOS"),(nullptr));g_clear_error(&error);return GST_FLOW_ERROR;
  }
- gst_buffer_resize(b,0,count);*out=b;return GST_FLOW_OK;
+ gst_buffer_resize(b,0,count);s->pendingDelivery=gst_buffer_ref(b);*out=b;return GST_FLOW_OK;
 }
 static gboolean unlockReader(GstBaseSrc*base){auto*s=reinterpret_cast<FlAudioReader*>(base);g_cancellable_cancel(s->cancel);return TRUE;}
 static gboolean unlockStopReader(GstBaseSrc*base){auto*s=reinterpret_cast<FlAudioReader*>(base);g_cancellable_reset(s->cancel);return TRUE;}
 static gboolean startReader(GstBaseSrc*base){auto*s=reinterpret_cast<FlAudioReader*>(base);g_cancellable_reset(s->cancel);g_atomic_int_set(&s->eos,0);s->headerUsed=s->payloadRemaining=0;return TRUE;}
-static gboolean stopReader(GstBaseSrc*base){auto*s=reinterpret_cast<FlAudioReader*>(base);g_clear_object(&s->connection);return TRUE;}
-static void finalizeReader(GObject*object){auto*s=reinterpret_cast<FlAudioReader*>(object);g_clear_object(&s->connection);g_clear_object(&s->session);g_object_unref(s->cancel);delete s->startup;G_OBJECT_CLASS(fl_audio_reader_parent_class)->finalize(object);}
+static gboolean stopReader(GstBaseSrc*base){auto*s=reinterpret_cast<FlAudioReader*>(base);gst_clear_buffer(&s->pendingDelivery);g_clear_object(&s->connection);return TRUE;}
+static void finalizeReader(GObject*object){auto*s=reinterpret_cast<FlAudioReader*>(object);gst_clear_buffer(&s->pendingDelivery);g_clear_object(&s->connection);g_clear_object(&s->session);g_object_unref(s->cancel);delete s->startup;G_OBJECT_CLASS(fl_audio_reader_parent_class)->finalize(object);}
 static void fl_audio_reader_class_init(FlAudioReaderClass*c){auto*b=GST_BASE_SRC_CLASS(c);b->start=startReader;b->stop=stopReader;b->unlock=unlockReader;b->unlock_stop=unlockStopReader;GST_PUSH_SRC_CLASS(c)->create=readChunk;G_OBJECT_CLASS(c)->finalize=finalizeReader;
  gst_element_class_set_static_metadata(GST_ELEMENT_CLASS(c),"FrameLink incremental audio reader","Source","Private GDP transport","FrameLink");gst_element_class_add_static_pad_template(GST_ELEMENT_CLASS(c),&wireTemplate);}
-static void fl_audio_reader_init(FlAudioReader*s){s->cancel=g_cancellable_new();s->startup=new std::shared_ptr<FlAudioStartup>();gst_base_src_set_live(GST_BASE_SRC(s),TRUE);gst_base_src_set_format(GST_BASE_SRC(s),GST_FORMAT_BYTES);gst_base_src_set_do_timestamp(GST_BASE_SRC(s),FALSE);}
+static void fl_audio_reader_init(FlAudioReader*s){
+ // Retain only the current <=4096-byte read until GstBaseSrc actually pushes it.
+ gst_pad_add_probe(GST_BASE_SRC_PAD(s),GST_PAD_PROBE_TYPE_BUFFER,[](GstPad*,GstPadProbeInfo*,gpointer data)->GstPadProbeReturn{gst_clear_buffer(&static_cast<FlAudioReader*>(data)->pendingDelivery);return GST_PAD_PROBE_OK;},s,nullptr);
+s->cancel=g_cancellable_new();s->startup=new std::shared_ptr<FlAudioStartup>();gst_base_src_set_live(GST_BASE_SRC(s),TRUE);gst_base_src_set_format(GST_BASE_SRC(s),GST_FORMAT_BYTES);gst_base_src_set_do_timestamp(GST_BASE_SRC(s),FALSE);}
 
 typedef struct {
  GstBin parent; FlAudioReader* reader; GstElement* depay; FlGstSession* session;

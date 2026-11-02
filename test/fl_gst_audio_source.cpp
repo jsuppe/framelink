@@ -2,6 +2,7 @@
 #include <gst/app/gstappsrc.h>
 #include <gst/app/gstappsink.h>
 #include <thread>
+#include <atomic>
 #include <string>
 #include <vector>
 #include <cstring>
@@ -105,6 +106,35 @@ static void local(bool first,bool missing,bool cancel){
  }
  start=g_get_monotonic_time();gst_element_set_state(rx,GST_STATE_NULL);gst_element_set_state(tx,GST_STATE_NULL);CHECK(g_get_monotonic_time()-start<1000000);gst_object_unref(in);gst_object_unref(out);gst_object_unref(rx);gst_object_unref(tx);
 }
+static void partialPause(){
+ Pair pair;auto*sender=fl_gst_session_new(2);auto*receiver=fl_gst_session_new(2);
+ flSessionConfig c{};c.version=2;c.sessionId.bytes[0]=9;c.clockId.bytes[0]=2;c.generation=1;c.audioTrackId=2;c.audio={FL_PCM_S16,48000,2};c.audioQueueMs=80;c.connectTimeoutMs=1000;c.idleTimeoutMs=1000;
+ flSessionCapabilities caps{};caps.version=2;caps.audioCount=1;caps.audio[0]=c.audio;
+ CHECK(fl_gst_session_configure(sender,&c,&caps,&caps)==FL_GST_SESSION_READY);CHECK(fl_gst_session_configure(receiver,&c,&caps,&caps)==FL_GST_SESSION_READY);
+ guint8 bytes[32];memset(bytes,6,sizeof bytes);auto*key=g_bytes_new(bytes,32);gboolean ok=FALSE;std::thread auth([&]{ok=fl_gst_session_authenticate_audio_stream(sender,pair.server,TRUE,key,1000,nullptr,nullptr);});CHECK(fl_gst_session_authenticate_audio_stream(receiver,pair.client,FALSE,key,1000,nullptr,nullptr));auth.join();CHECK(ok);g_bytes_unref(key);
+
+ auto*rx=parse("framelinkaudiosrc name=source ! appsink name=out sync=false async=false");
+ auto*context=fl_gst_session_create_context(receiver);gst_element_set_context(rx,context);gst_context_unref(context);
+ auto*source=gst_bin_get_by_name(GST_BIN(rx),"source");auto*out=gst_bin_get_by_name(GST_BIN(rx),"out");
+ std::atomic<guint> seen{0};auto*iterator=gst_bin_iterate_elements(GST_BIN(source));GValue child=G_VALUE_INIT;bool probed=false;
+ while(gst_iterator_next(iterator,&child)==GST_ITERATOR_OK){auto*e=GST_ELEMENT(g_value_get_object(&child));auto*f=gst_element_get_factory(e);
+  if(f&&!strcmp(gst_plugin_feature_get_name(GST_PLUGIN_FEATURE(f)),"gdpdepay")){auto*pad=gst_element_get_static_pad(e,"sink");gst_pad_add_probe(pad,GST_PAD_PROBE_TYPE_BUFFER,[](GstPad*,GstPadProbeInfo*i,gpointer p)->GstPadProbeReturn{static_cast<std::atomic<guint>*>(p)->fetch_add(guint(gst_buffer_get_size(GST_PAD_PROBE_INFO_BUFFER(i))));return GST_PAD_PROBE_OK;},&seen,nullptr);gst_object_unref(pad);probed=true;}g_value_reset(&child);
+ }g_value_unset(&child);gst_iterator_free(iterator);CHECK(probed);
+ auto*generator=parse("appsrc name=in is-live=true format=time caps=audio/x-raw,format=S16LE,layout=interleaved,rate=48000,channels=2 ! gdppay ! appsink name=wire sync=false async=false");
+ auto*in=gst_bin_get_by_name(GST_BIN(generator),"in");auto*wire=gst_bin_get_by_name(GST_BIN(generator),"wire");
+ CHECK(gst_element_set_state(generator,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
+ auto*buffer=gst_buffer_new_allocate(nullptr,192,nullptr);gst_buffer_memset(buffer,0,0x5a,192);GST_BUFFER_PTS(buffer)=37000000;GST_BUFFER_DURATION(buffer)=1000000;CHECK(gst_app_src_push_buffer(GST_APP_SRC(in),buffer)==GST_FLOW_OK);
+ std::vector<guint8> serialized;
+ for(int i=0;i<16;i++){auto*sample=gst_app_sink_try_pull_sample(GST_APP_SINK(wire),GST_SECOND);CHECK(sample);auto*b=gst_sample_get_buffer(sample);GstMapInfo map{};CHECK(gst_buffer_map(b,&map,GST_MAP_READ));CHECK(map.size>=62);bool media=GST_READ_UINT16_BE(map.data+4)==1;serialized.insert(serialized.end(),map.data,map.data+map.size);gst_buffer_unmap(b,&map);gst_sample_unref(sample);if(media)break;}
+ CHECK(serialized.size()>192);CHECK(gst_element_set_state(rx,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
+ auto*output=g_io_stream_get_output_stream(G_IO_STREAM(pair.server));CHECK(g_output_stream_write_all(output,serialized.data(),7,nullptr,nullptr,nullptr));
+ auto deadline=g_get_monotonic_time()+1000000;while(seen.load()<7&&g_get_monotonic_time()<deadline)g_usleep(1000);CHECK(seen.load()==7);
+ auto begin=g_get_monotonic_time();CHECK(gst_element_set_state(rx,GST_STATE_PAUSED)!=GST_STATE_CHANGE_FAILURE);CHECK(gst_element_get_state(rx,nullptr,nullptr,GST_SECOND)!=GST_STATE_CHANGE_FAILURE);CHECK(g_get_monotonic_time()-begin<500000);
+ CHECK(fl_gst_session_get_config(receiver,&c)==FL_GST_SESSION_READY);CHECK(gst_element_set_state(rx,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
+ CHECK(g_output_stream_write_all(output,serialized.data()+7,serialized.size()-7,nullptr,nullptr,nullptr));
+ auto*sample=gst_app_sink_try_pull_sample(GST_APP_SINK(out),GST_SECOND);if(!sample){fprintf(stderr,"partial bytes observed=%u expected=%zu\n",seen.load(),serialized.size());auto*bus=gst_element_get_bus(rx);while(auto*m=gst_bus_pop_filtered(bus,GST_MESSAGE_ERROR)){GError*e=nullptr;gst_message_parse_error(m,&e,nullptr);fprintf(stderr,"partial pause: %s\n",e->message);g_clear_error(&e);gst_message_unref(m);}gst_object_unref(bus);}CHECK(sample);auto*b=gst_sample_get_buffer(sample);CHECK(gst_buffer_get_size(b)==192&&GST_BUFFER_PTS(b)==37000000&&GST_BUFFER_DURATION(b)==1000000);guint8 data[192];CHECK(gst_buffer_extract(b,0,data,192)==192);for(auto value:data)CHECK(value==0x5a);gst_sample_unref(sample);
+ gst_element_set_state(generator,GST_STATE_NULL);gst_element_set_state(rx,GST_STATE_NULL);for(auto*e:{in,wire,generator,source,out,rx})gst_object_unref(e);g_object_unref(sender);g_object_unref(receiver);
+}
 static void hostile(int mode){
  Pair pair;auto*sender=fl_gst_session_new(2);auto*receiver=fl_gst_session_new(2);
  flSessionConfig c{};c.version=2;c.sessionId.bytes[0]=9;c.clockId.bytes[0]=2;c.generation=1;c.audioTrackId=2;c.audio={FL_PCM_S16,48000,2};c.audioQueueMs=80;c.connectTimeoutMs=1000;c.idleTimeoutMs=1000;
@@ -136,6 +166,7 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
  run(FL_PCM_S16,2,48000,5,true);
  run(FL_PCM_S16,2,48000,6,true);
  local(true,false,false);local(false,false,false);local(true,true,false);local(true,false,true);
+ partialPause();
  for(int mode=0;mode<4;mode++)hostile(mode);
  puts("public audio source: exact four PCM formats/layouts, incremental packet delivery before EOS, both startup orders, live latency, missing-peer and cancellation passed");return 0;
 }

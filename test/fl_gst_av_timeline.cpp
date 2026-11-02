@@ -52,13 +52,13 @@ static void run(bool audioLeads,int negative=0,bool gap=false,bool empty=false,i
   guint64 shift=gap&&n>=5?40000000:0;
   push(vin,32*16*4,guint8(n+10),5*GST_SECOND+voffset+n*20000000+shift,20000000,5*GST_SECOND,negative==3?2.0:1.0,pause==1&&n==5);
   if(!negative)push(ain,3840,guint8(n+20),2*GST_SECOND+aoffset+n*20000000+shift,20000000,2*GST_SECOND,1.0,pause==1&&n==5);
-  if(pause==2&&n==4){
+  if(pause>=2&&n==4){
    auto begin=g_get_monotonic_time();
 
    CHECK(gst_element_set_state(rx,GST_STATE_PAUSED)!=GST_STATE_CHANGE_FAILURE);
 
    CHECK(gst_element_get_state(rx,nullptr,nullptr,GST_SECOND)!=GST_STATE_CHANGE_FAILURE);
-   CHECK(g_get_monotonic_time()-begin<1500000);g_usleep(50000);
+   CHECK(g_get_monotonic_time()-begin<1500000);if(pause==2)g_usleep(50000);
    CHECK(fl_gst_session_get_config(sender,&c)==FL_GST_SESSION_READY);
    CHECK(fl_gst_session_get_config(receiver,&c)==FL_GST_SESSION_READY);
    CHECK(gst_element_set_state(rx,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
@@ -116,5 +116,5 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
   CHECK(gst_element_set_state(element,GST_STATE_PAUSED)==GST_STATE_CHANGE_FAILURE);
   gst_element_set_state(element,GST_STATE_NULL);gst_object_unref(element);
  }
- run(false);run(true);run(false,1);run(false,2);run(false,3);run(false,0,true);run(true,0,true);run(false,0,true,true);run(false,0,true,false,1);run(false,0,true,false,2);puts("coordinated public A/V: distinct TIME segments, one receiver mapping, exact +/-37ms offset, pixels/PCM/DTS/duration/generation passed");return 0;
+ run(false);run(true);run(false,1);run(false,2);run(false,3);run(false,0,true);run(true,0,true);run(false,0,true,true);run(false,0,true,false,1);run(false,0,true,false,2);run(false,0,true,false,3);puts("coordinated public A/V: distinct TIME segments, one receiver mapping, exact +/-37ms offset, pixels/PCM/DTS/duration/generation passed");return 0;
 }
