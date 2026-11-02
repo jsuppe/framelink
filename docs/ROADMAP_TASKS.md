@@ -177,7 +177,7 @@ playback delay; unsupported hardware paths must reject clearly.
 
 ## M5b — GStreamer audio elements and coordinated A/V sessions
 
-**State: planned, not started.** Added at Jon's request 2026-11-01. Execute
+**State: in progress; task1 contract specified, task2 next.** Added at Jon's request 2026-11-01. Execute
 only after M5a closes, before M6 qualifies the complete public integration path.
 Video elements remain video-only; separate audio elements share one session.
 
@@ -190,10 +190,13 @@ after the individual elements and session/timing behavior are validated. They
 expose separate audio/video pads, not a new multiplexed format; individual
 elements remain independently available.
 
-- [ ] **M5b.1 Public element/session contract:** define pad caps, supported PCM
+- [x] **M5b.1 Public element/session contract:** define pad caps, supported PCM
   formats/rates/layouts, properties, session/track identifiers, discovery/auth,
   standalone audio mode and opt-in coordinated A/V mode. Unsupported caps fail
   clearly; retain existing video-only application behavior.
+  [Public contract](GSTREAMER_AV_CONTRACT.md): explicit v2 optional-track semantics,
+  typed shared context, bounded lifecycle and separate-pad bin names. Design only;
+  factories/runtime qualification remain subsequent tasks.
 - [ ] **M5b.2 Reusable session coordinator:** share authenticated negotiation,
   track readiness, common epoch/clock mapping and config generation across audio
   and video elements. Define GstContext/API propagation and bounded missing-peer
@@ -223,21 +226,21 @@ elements remain independently available.
   one documented session configuration. Propagate caps, segments, EOS, flush,
   state changes and errors without adding independent timestamp rebasing or a
   hidden per-track latency reservoir. Final public element name is set in M5b.1.
-- [ ] **M5b.10 Consumer A/V bin:** compose the validated video/audio sources;
+- [x] **M5b.10 Consumer A/V bin:** compose the validated video/audio sources;
   expose separate audio/video source ghost pads for independent downstream
   rendering/playback. Coordinate readiness, session clocks and reconnect; do not
   hardwire a display or audio device. Preserve native video memory negotiation.
-- [ ] **M5b.11 Bin parity and examples:** demonstrate standalone-element and
+- [x] **M5b.11 Bin parity and examples:** demonstrate standalone-element and
   bin-based two-process pipelines. Test equivalent PCM/video timing and negotiated
   memory paths, missing-track policy, startup/pause/flush/EOS, peer death/reconnect,
   error propagation, queue bounds and cleanup. Document properties/pad names and
   supported audio-only/video-only behavior without silently waiting forever.
-- [ ] **M5b.12 Platform qualification:** Windows, Linux and Android builds/runtime
+- [x] **M5b.12 Platform qualification:** Windows, Linux and Android builds/runtime
   on supported targets; verify native video plus audio, audio-only, latency
   queries, queue bounds, resource cleanup and tracing/copy accounting for both
 individual elements and convenience bins. Separate
   software timing evidence from physical speaker/display alignment.
-- [ ] **M5b.13 Publish/review/merge:** element reference, copy/timing contract,
+- [x] **M5b.13 Publish/review/merge:** element reference, copy/timing contract,
   developer migration guide, examples, final-revision CI and reviewed evidence.
   Feed these elements into M6's sustained/performance qualification matrix.
 
