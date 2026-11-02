@@ -1,6 +1,7 @@
 #define FL_GST_SESSION_BUILD
 #include "framelink_session_context.h"
 #include <cstring>
+#include "fl_gst_session_internal.h"
 struct _FlGstSession {
  GObject parent;
  GMutex mutex;
@@ -9,6 +10,8 @@ struct _FlGstSession {
  gboolean configured,cancelled,mapped;
  flClockMapping mapping;
  guint64 maxUncertainty;
+ GSocketConnection* audioConnection;
+ gboolean audioProducer,audioClaimed;
  flSessionConfig config;
 };
 typedef struct { GObjectClass parent; } FlGstSessionClass;
@@ -16,6 +19,7 @@ G_DEFINE_TYPE(FlGstSession,fl_gst_session,G_TYPE_OBJECT)
 static bool valid(FlGstSession* s) {return s&&G_TYPE_CHECK_INSTANCE_TYPE(s,fl_gst_session_get_type());}
 static void finalize(GObject* object) {
  auto* s=reinterpret_cast<FlGstSession*>(object);
+ if(s->audioConnection)g_object_unref(s->audioConnection);
  g_cond_clear(&s->changed);g_mutex_clear(&s->mutex);
  G_OBJECT_CLASS(fl_gst_session_parent_class)->finalize(object);
 }
@@ -47,7 +51,8 @@ FlGstSessionResult fl_gst_session_configure(FlGstSession* s,const flSessionConfi
  if(s->configured){auto r=flSessionValidateReplacement(&s->config,c);
   if(r!=FL_SESSION_OK)return r==FL_SESSION_STALE?FL_GST_SESSION_STALE:FL_GST_SESSION_INVALID;
  }
- s->config=*c;s->mapped=FALSE;s->configured=TRUE;s->cancelled=FALSE;s->ready=0;g_cond_broadcast(&s->changed);return FL_GST_SESSION_READY;
+ if(s->audioConnection){g_socket_shutdown(g_socket_connection_get_socket(s->audioConnection),TRUE,TRUE,nullptr);g_object_unref(s->audioConnection);s->audioConnection=nullptr;}
+ s->audioClaimed=FALSE;s->config=*c;s->mapped=FALSE;s->configured=TRUE;s->cancelled=FALSE;s->ready=0;g_cond_broadcast(&s->changed);return FL_GST_SESSION_READY;
 }
 FlGstSessionResult fl_gst_session_register_track(FlGstSession* s,guint track) {
  if(!valid(s)||(track!=1&&track!=2))return FL_GST_SESSION_INVALID;
@@ -76,7 +81,9 @@ FlGstSessionResult fl_gst_session_wait(FlGstSession* s,guint64 generation,guint 
 }
 void fl_gst_session_cancel(FlGstSession* s) {
  if(!valid(s))return;
- Lock lock(&s->mutex);s->cancelled=TRUE;s->ready=0;g_cond_broadcast(&s->changed);
+ Lock lock(&s->mutex);s->cancelled=TRUE;s->ready=0;
+ if(s->audioConnection)g_socket_shutdown(g_socket_connection_get_socket(s->audioConnection),TRUE,TRUE,nullptr);
+ g_cond_broadcast(&s->changed);
 }
 
 FlGstSessionResult fl_gst_session_set_mapping(FlGstSession* s,guint64 generation,const flClockMapping* m,guint64 maxError) {
@@ -104,4 +111,18 @@ FlGstSessionResult fl_gst_session_get_config(FlGstSession* s,flSessionConfig* ou
  if(s->cancelled)return FL_GST_SESSION_CANCELLED;
  if(!s->configured)return FL_GST_SESSION_STALE;
  *out=s->config;return FL_GST_SESSION_READY;
+}
+
+gboolean fl_gst_session_publish_audio(FlGstSession* s,const flSessionConfig* config,GSocketConnection* stream,gboolean producer){
+ if(!valid(s)||!config||!stream)return FALSE;
+ Lock lock(&s->mutex);
+ guint8 expected[FL_SESSION_WIRE_SIZE],current[FL_SESSION_WIRE_SIZE];
+ if(s->cancelled||!s->configured||s->audioConnection||flSessionEncode(config,expected,sizeof expected)!=FL_SESSION_OK||flSessionEncode(&s->config,current,sizeof current)!=FL_SESSION_OK||memcmp(expected,current,sizeof expected))return FALSE;
+ s->audioConnection=static_cast<GSocketConnection*>(g_object_ref(stream));s->audioProducer=producer;s->audioClaimed=FALSE;return TRUE;
+}
+GSocketConnection* fl_gst_session_claim_audio_stream(FlGstSession* s,gboolean producer,guint64 generation){
+ if(!valid(s))return nullptr;
+ Lock lock(&s->mutex);
+ if(s->cancelled||!s->configured||s->config.generation!=generation||!s->audioConnection||s->audioProducer!=producer||s->audioClaimed)return nullptr;
+ s->audioClaimed=TRUE;return static_cast<GSocketConnection*>(g_object_ref(s->audioConnection));
 }

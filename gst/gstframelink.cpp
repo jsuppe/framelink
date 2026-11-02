@@ -1581,12 +1581,13 @@ static void gst_framelink_src_init(GstFrameLinkSrc* self) {
 
 // ---- plugin -----------------------------------------------------------------
 
+gboolean fl_register_audio_sink(GstPlugin*);
 static gboolean plugin_init(GstPlugin* plugin) {
     GST_DEBUG_CATEGORY_INIT(framelink_debug, "framelink", 0, "framelink elements");
     return gst_element_register(plugin, "framelinksink", GST_RANK_NONE,
                                 gst_framelink_sink_get_type()) &&
            gst_element_register(plugin, "framelinksrc", GST_RANK_NONE,
-                                gst_framelink_src_get_type());
+                                gst_framelink_src_get_type()) && fl_register_audio_sink(plugin);
 }
 
 #ifndef PACKAGE
@@ -1597,5 +1598,5 @@ static gboolean plugin_init(GstPlugin* plugin) {
 #endif
 
 GST_PLUGIN_DEFINE(GST_VERSION_MAJOR, GST_VERSION_MINOR, framelink,
-                  "framelink zero-copy frame transport elements", plugin_init,
+                  "FrameLink native video and serialized PCM transport", plugin_init,
                   PACKAGE_VERSION, "MIT/X11", PACKAGE, "https://github.com/jsuppe/framelink")

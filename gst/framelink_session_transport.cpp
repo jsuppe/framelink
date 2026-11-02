@@ -1,6 +1,7 @@
 #define FL_GST_SESSION_BUILD
 #include "framelink_session_transport.h"
 #include "../runtime/av_auth.h"
+#include "fl_gst_session_internal.h"
 #include <array>
 #include <cstring>
 #include <mutex>
@@ -105,5 +106,6 @@ gboolean fl_gst_session_authenticate_audio_stream(FlGstSession*s,GSocketConnecti
  if(!ok)return fail(reason.c_str());
  flSessionConfig current{};Wire currentWire{};
  if(g_cancellable_is_cancelled(deadline.cancel)||fl_gst_session_get_config(s,&current)!=FL_GST_SESSION_READY||flSessionEncode(&current,currentWire.data(),currentWire.size())!=FL_SESSION_OK||currentWire!=wire)return fail("audio session changed during authentication");
+ if(!fl_gst_session_publish_audio(s,&cfg,stream,producer))return fail("audio stream publication rejected");
  return TRUE;
 }

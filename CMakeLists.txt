@@ -1007,3 +1007,27 @@ if(TARGET gstframelink)
         set_tests_properties(gst_session_context PROPERTIES TIMEOUT 10)
     endif()
 endif()
+
+if(TARGET framelink_gst_session)
+    target_sources(gstframelink PRIVATE gst/gstframelinkaudio.cpp)
+    target_link_libraries(gstframelink PRIVATE framelink_gst_session)
+endif()
+if(FRAMELINK_BUILD_TESTS AND TARGET framelink_gst_session)
+    add_executable(fl_gst_audio_sink test/fl_gst_audio_sink.cpp)
+    target_link_libraries(fl_gst_audio_sink PRIVATE framelink_gst_session)
+    if(ANDROID)
+        target_link_libraries(fl_gst_audio_sink PRIVATE gstframelink
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstapp.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstcoreelements.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstgdp.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstgio.a"
+            ${FL_ANDROID_SESSION_GIO_STATIC_LDFLAGS} ${FL_ANDROID_GST_STATIC_LDFLAGS})
+    elseif(WIN32)
+        target_link_libraries(fl_gst_audio_sink PRIVATE gstapp-1.0.lib)
+    else()
+        target_link_libraries(fl_gst_audio_sink PRIVATE PkgConfig::FL_GST_APP)
+    endif()
+    add_dependencies(fl_gst_audio_sink gstframelink)
+    add_test(NAME gst_audio_sink COMMAND fl_gst_audio_sink $<TARGET_FILE:gstframelink>)
+    set_tests_properties(gst_audio_sink PROPERTIES TIMEOUT 20)
+endif()
