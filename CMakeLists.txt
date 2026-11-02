@@ -961,3 +961,8 @@ if(TARGET framelink_av_session)
     endif()
   endforeach()
 endif()
+
+if(FRAMELINK_BUILD_TESTS AND Python3_Interpreter_FOUND AND NOT ANDROID)
+  add_test(NAME boundary_av_analyzer COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/test_boundary_av_analyzer.py)
+  set_tests_properties(boundary_av_analyzer PROPERTIES TIMEOUT 15)
+endif()

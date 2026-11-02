@@ -103,8 +103,29 @@ A/V samples, signed Android cross-app ownership and qualified platform behavior
 are described in the [M5 capability matrix](docs/m5/CAPABILITY_MATRIX.md).
 For integration, start with the [Windows decoded-pipeline guide](docs/M5_WINDOWS_PIPELINE.md)
 or [Android cross-app sample](android/crossapp/README.md).
-Native GStreamer allocation/zero-copy negotiation is planned in M5a; fan-out to
-multiple consumers of one channel is not implemented (use separate channels).
+Native memory negotiation, external pools, bounded reader leases and explicit
+GStreamer native-memory source/sink adapters are implemented on the M5a branch.
+See [native integration](docs/GST_NATIVE_MEMORY.md),
+[memory contract](docs/MEMORY_CONTRACT.md), [reader completion](docs/READ_LEASES.md),
+[Windows decoder example](samples/D3D_DECODER.md) and [relay](samples/NATIVE_RELAY.md).
+Fan-out to multiple consumers of one channel is not implemented (use separate channels).
+
+**M5a progress:** tasks1–14 locally validated; final integrated review/CI/merge
+(task15) is pending. [Checkable roadmap](docs/ROADMAP_TASKS.md) distinguishes
+implemented, locally qualified and merged work. M5b audio elements/A/V bins, M6
+reliability qualification and M7 release follow sequentially.
+
+[Performance evidence](docs/m5a/multihop-performance-20261101/README.md) records
+supported one/two-boundary1080p60 paths with two original allocations: nominal
+3720/3720 frames, exact A/V media offset and explicit GPU completion/copy accounting.
+Warmed Android and same-host native fixtures are not cold-start, arbitrary decoder,
+physical scanout or end-to-end zero-copy proof. Windows verification reads a private
+copy; Linux/Android verification samples originals into private output. See evidence
+for unsupported formats, fault drops and measurement limits.
+
+Audio remains CPU PCM over GDP/GIO, separately described in the
+[audio memory/copy policy](docs/AUDIO_MEMORY_POLICY.md). Native video does not make
+an entire audio/video session zero-copy.
 Physical output timing and seamless device/suspend behavior are not blanket claims.
 
 MIT licensed.
