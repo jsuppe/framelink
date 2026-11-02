@@ -1,11 +1,14 @@
 #define FL_GST_SESSION_BUILD
 #include "framelink_session_context.h"
+#include <cstring>
 struct _FlGstSession {
  GObject parent;
  GMutex mutex;
  GCond changed;
  guint required,registered,ready;
- gboolean configured,cancelled;
+ gboolean configured,cancelled,mapped;
+ flClockMapping mapping;
+ guint64 maxUncertainty;
  flSessionConfig config;
 };
 typedef struct { GObjectClass parent; } FlGstSessionClass;
@@ -44,7 +47,7 @@ FlGstSessionResult fl_gst_session_configure(FlGstSession* s,const flSessionConfi
  if(s->configured){auto r=flSessionValidateReplacement(&s->config,c);
   if(r!=FL_SESSION_OK)return r==FL_SESSION_STALE?FL_GST_SESSION_STALE:FL_GST_SESSION_INVALID;
  }
- s->config=*c;s->configured=TRUE;s->cancelled=FALSE;s->ready=0;g_cond_broadcast(&s->changed);return FL_GST_SESSION_READY;
+ s->config=*c;s->mapped=FALSE;s->configured=TRUE;s->cancelled=FALSE;s->ready=0;g_cond_broadcast(&s->changed);return FL_GST_SESSION_READY;
 }
 FlGstSessionResult fl_gst_session_register_track(FlGstSession* s,guint track) {
  if(!valid(s)||(track!=1&&track!=2))return FL_GST_SESSION_INVALID;
@@ -74,4 +77,31 @@ FlGstSessionResult fl_gst_session_wait(FlGstSession* s,guint64 generation,guint 
 void fl_gst_session_cancel(FlGstSession* s) {
  if(!valid(s))return;
  Lock lock(&s->mutex);s->cancelled=TRUE;s->ready=0;g_cond_broadcast(&s->changed);
+}
+
+FlGstSessionResult fl_gst_session_set_mapping(FlGstSession* s,guint64 generation,const flClockMapping* m,guint64 maxError) {
+ if(!valid(s)||!m)return FL_GST_SESSION_INVALID;
+ Lock lock(&s->mutex);
+ if(s->cancelled)return FL_GST_SESSION_CANCELLED;
+ if(!s->configured||s->config.generation!=generation)return FL_GST_SESSION_STALE;
+ gint64 result=0;
+ if(flSessionMapPts(&s->config,m,maxError,0,&result)!=FL_SESSION_OK)return FL_GST_SESSION_INVALID;
+ if(s->mapped&&(memcmp(m->sourceClockId.bytes,s->mapping.sourceClockId.bytes,16)||memcmp(m->targetClockId.bytes,s->mapping.targetClockId.bytes,16)||m->sourceAnchorNs!=s->mapping.sourceAnchorNs||m->targetAnchorNs!=s->mapping.targetAnchorNs||m->uncertaintyNs!=s->mapping.uncertaintyNs||maxError!=s->maxUncertainty))return FL_GST_SESSION_INVALID;
+ s->mapping=*m;s->maxUncertainty=maxError;s->mapped=TRUE;return FL_GST_SESSION_READY;
+}
+FlGstSessionResult fl_gst_session_map_pts(FlGstSession* s,guint64 generation,gint64 pts,gint64* out) {
+ if(!valid(s)||!out)return FL_GST_SESSION_INVALID;
+ Lock lock(&s->mutex);
+ if(s->cancelled)return FL_GST_SESSION_CANCELLED;
+ if(!s->configured||s->config.generation!=generation)return FL_GST_SESSION_STALE;
+ if(!s->mapped)return FL_GST_SESSION_INVALID;
+ return flSessionMapPts(&s->config,&s->mapping,s->maxUncertainty,pts,out)==FL_SESSION_OK?FL_GST_SESSION_READY:FL_GST_SESSION_INVALID;
+}
+
+FlGstSessionResult fl_gst_session_get_config(FlGstSession* s,flSessionConfig* out) {
+ if(!valid(s)||!out)return FL_GST_SESSION_INVALID;
+ Lock lock(&s->mutex);
+ if(s->cancelled)return FL_GST_SESSION_CANCELLED;
+ if(!s->configured)return FL_GST_SESSION_STALE;
+ *out=s->config;return FL_GST_SESSION_READY;
 }

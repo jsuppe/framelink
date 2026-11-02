@@ -29,6 +29,8 @@ FL_GST_SESSION_API FlGstSession* fl_gst_session_from_context(const GstContext*);
 // newer generation; old waiters are cancelled. Track registration is retained.
 FL_GST_SESSION_API FlGstSessionResult fl_gst_session_configure(FlGstSession*,
  const flSessionConfig*, const flSessionCapabilities*, const flSessionCapabilities*);
+// Snapshot after negotiation, before media readiness, for caps/device setup.
+FL_GST_SESSION_API FlGstSessionResult fl_gst_session_get_config(FlGstSession*,flSessionConfig*);
 // Register once per local track; duplicate/missing/unsupported tracks reject.
 FL_GST_SESSION_API FlGstSessionResult fl_gst_session_register_track(FlGstSession*,guint track);
 FL_GST_SESSION_API FlGstSessionResult fl_gst_session_track_ready(FlGstSession*,guint track,guint64 generation);
@@ -36,5 +38,12 @@ FL_GST_SESSION_API FlGstSessionResult fl_gst_session_track_ready(FlGstSession*,g
 // Output unchanged on error. A new generation never satisfies an old waiter.
 FL_GST_SESSION_API FlGstSessionResult fl_gst_session_wait(FlGstSession*,guint64 generation,
  guint timeout_ms,flSessionConfig*);
+// One mapping for every track in a generation. Identical repeat is allowed;
+// conflicting clock/base changes require a new generation. No clock measurement,
+// drift correction or per-track rebasing is inferred. Caller holds a session ref.
+FL_GST_SESSION_API FlGstSessionResult fl_gst_session_set_mapping(FlGstSession*,guint64 generation,
+ const flClockMapping*,guint64 max_uncertainty_ns);
+FL_GST_SESSION_API FlGstSessionResult fl_gst_session_map_pts(FlGstSession*,guint64 generation,
+ gint64 producer_pts_ns,gint64* receiver_pts_ns);
 FL_GST_SESSION_API void fl_gst_session_cancel(FlGstSession*);
 G_END_DECLS

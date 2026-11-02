@@ -177,7 +177,7 @@ playback delay; unsupported hardware paths must reject clearly.
 
 ## M5b — GStreamer audio elements and coordinated A/V sessions
 
-**State: in progress; task1 contract specified, task2 next.** Added at Jon's request 2026-11-01. Execute
+**State: in progress; tasks1–2 locally validated; task3 audio sink active.** Added at Jon's request 2026-11-01. Execute
 only after M5a closes, before M6 qualifies the complete public integration path.
 Video elements remain video-only; separate audio elements share one session.
 
@@ -197,10 +197,12 @@ elements remain independently available.
   [Public contract](GSTREAMER_AV_CONTRACT.md): explicit v2 optional-track semantics,
   typed shared context, bounded lifecycle and separate-pad bin names. Design only;
   factories/runtime qualification remain subsequent tasks.
-- [ ] **M5b.2 Reusable session coordinator:** share authenticated negotiation,
+- [x] **M5b.2 Reusable session coordinator:** share authenticated negotiation,
   track readiness, common epoch/clock mapping and config generation across audio
   and video elements. Define GstContext/API propagation and bounded missing-peer
   behavior without requiring sample-application internals.
+  [Control validation](m5b/coordinator-control/README.md): Linux9/9, Windows8/8,
+  Android5/5 and dualABI/JNI builds. Public media elements remain next.
 - [ ] **M5b.3 Audio sink:** wrap existing bounded PCM transport, negotiate caps,
   carry timestamps/durations/discontinuities, handle flow errors and backpressure;
   report explicit serialization/copy costs rather than imply shared PCM.

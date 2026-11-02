@@ -1,0 +1,24 @@
+Internal ctest changing into directory: /tmp/fl-m5a-gst-build
+Test project /tmp/fl-m5a-gst-build
+    Start   6: session_contract
+1/9 Test   #6: session_contract .................   Passed    0.00 sec
+    Start   7: session_optional_tracks
+2/9 Test   #7: session_optional_tracks ..........   Passed    0.00 sec
+    Start   8: session_contract_c_api
+3/9 Test   #8: session_contract_c_api ...........   Passed    0.00 sec
+    Start  59: av_connected_fd
+4/9 Test  #59: av_connected_fd ..................   Passed    0.00 sec
+    Start  60: av_rendezvous
+5/9 Test  #60: av_rendezvous ....................   Passed    0.01 sec
+    Start  61: av_auth
+6/9 Test  #61: av_auth ..........................   Passed    0.01 sec
+    Start  64: m3_av_apps
+7/9 Test  #64: m3_av_apps .......................   Passed   28.72 sec
+    Start  99: gst_session_transport
+8/9 Test  #99: gst_session_transport ............   Passed    0.15 sec
+    Start 100: gst_session_context
+9/9 Test #100: gst_session_context ..............   Passed    0.02 sec
+
+100% tests passed, 0 tests failed out of 9
+
+Total Test time (real) =  28.91 sec

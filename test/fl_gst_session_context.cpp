@@ -25,9 +25,20 @@ int main(int argc,char**argv){
   g_object_unref(s);gst_context_unref(cxt);s=shared; // full reference survives both releases
   auto c=config(tracks);auto p=offer(c);flSessionConfig out{};out.generation=999;
   CHECK(fl_gst_session_configure(s,&c,&p,&p)==FL_GST_SESSION_READY);
+  flClockMapping mapping{};mapping.sourceClockId=c.clockId;mapping.targetClockId.bytes[0]=8;
+  mapping.sourceAnchorNs=c.epochNs;mapping.targetAnchorNs=1000000000;
+  CHECK(fl_gst_session_set_mapping(s,1,&mapping,0)==FL_GST_SESSION_READY);
+  gint64 audio=0,video=0;
+  CHECK(fl_gst_session_map_pts(s,1,0,&audio)==FL_GST_SESSION_READY);
+  CHECK(fl_gst_session_map_pts(s,1,37000000,&video)==FL_GST_SESSION_READY);
+  CHECK(video-audio==37000000&&audio==1000000000);
+  auto changed=mapping;changed.targetAnchorNs++;
+  CHECK(fl_gst_session_set_mapping(s,1,&changed,0)==FL_GST_SESSION_INVALID);
+  gint64 untouched=123;CHECK(fl_gst_session_map_pts(s,1,-1,&untouched)==FL_GST_SESSION_INVALID);CHECK(untouched==123);
   auto bad=p;bad.version=1;
   CHECK(fl_gst_session_configure(s,&c,&p,&bad)==FL_GST_SESSION_INVALID);
   CHECK(fl_gst_session_wait(s,1,1,&out)==FL_GST_SESSION_TIMEOUT);CHECK(out.generation==999);
+  CHECK(fl_gst_session_get_config(s,&out)==FL_GST_SESSION_READY);CHECK(out.generation==1);
   CHECK(fl_gst_session_track_ready(s,tracks&1?1:2,1)==FL_GST_SESSION_INVALID);
   for(unsigned track=1;track<=2;track++)if(tracks&track){
    CHECK(fl_gst_session_register_track(s,track)==FL_GST_SESSION_READY);
@@ -48,6 +59,17 @@ int main(int argc,char**argv){
   CHECK(result==FL_GST_SESSION_CANCELLED);CHECK(g_get_monotonic_time()-start<1000000);
   g_object_unref(s);
  }
+ // Standard bin context propagation supplies one owning object to both children.
+ auto* sharedSession=fl_gst_session_new(3);auto* context=fl_gst_session_create_context(sharedSession);
+ auto* pipeline=gst_pipeline_new(nullptr);auto* one=gst_bin_new(nullptr);auto* two=gst_bin_new(nullptr);
+ gst_bin_add_many(GST_BIN(pipeline),one,two,nullptr);gst_element_set_context(pipeline,context);
+ auto* childContext=gst_element_get_context(one,FL_GST_SESSION_CONTEXT);CHECK(childContext);
+ auto* fromChild=fl_gst_session_from_context(childContext);CHECK(fromChild==sharedSession);
+ g_object_unref(fromChild);gst_context_unref(childContext);
+ childContext=gst_element_get_context(two,FL_GST_SESSION_CONTEXT);CHECK(childContext);
+ fromChild=fl_gst_session_from_context(childContext);CHECK(fromChild==sharedSession);
+ g_object_unref(fromChild);gst_context_unref(childContext);
+ gst_object_unref(pipeline);gst_context_unref(context);g_object_unref(sharedSession);
  auto*wrong=gst_context_new(FL_GST_SESSION_CONTEXT,TRUE);
  gst_structure_set(gst_context_writable_structure(wrong),"coordinator",G_TYPE_STRING,"not an object",nullptr);
  CHECK(!fl_gst_session_from_context(wrong));gst_context_unref(wrong);

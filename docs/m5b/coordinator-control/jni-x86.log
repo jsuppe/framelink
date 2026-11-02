@@ -1,0 +1,16 @@
+-- Checking for module 'gio-2.0'
+--   Found gio-2.0, version 2.74.4
+-- Configuring done (0.1s)
+-- Generating done (0.0s)
+-- Build files have been written to: /tmp/fl-m5a-crossapp-x86
+[  6%] Building CXX object framelink/CMakeFiles/framelink.dir/src/framelink_session.cpp.o
+[ 13%] Linking CXX static library libframelink.a
+[ 46%] Built target framelink
+[ 60%] Built target gstframelink
+[ 66%] Building CXX object CMakeFiles/fl_crossapp.dir/jni.cpp.o
+[ 73%] Building CXX object CMakeFiles/fl_crossapp.dir/tmp/framelink-m5a/samples/av_apps.cpp.o
+[ 86%] Building CXX object CMakeFiles/fl_crossapp.dir/tmp/framelink-m5a/samples/av_memory_agreement.cpp.o
+[ 86%] Building CXX object CMakeFiles/fl_crossapp.dir/tmp/framelink-m5a/runtime/av_auth.cpp.o
+[ 93%] Building CXX object CMakeFiles/fl_crossapp.dir/tmp/framelink-m5a/runtime/av_rendezvous.cpp.o
+[100%] Linking CXX shared library libfl_crossapp.so
+[100%] Built target fl_crossapp
