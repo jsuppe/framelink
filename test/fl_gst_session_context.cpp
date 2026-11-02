@@ -18,6 +18,9 @@ static flSessionCapabilities offer(const flSessionConfig& c){
 }
 int main(int argc,char**argv){
  gst_init(&argc,&argv);
+ GstSegment seg;gst_segment_init(&seg,GST_FORMAT_TIME);seg.start=2*GST_SECOND;seg.base=500000000;
+ GstClockTime converted=999;CHECK(fl_gst_segment_running_time(&seg,2*GST_SECOND+37000000,&converted)&&converted==537000000);
+ converted=999;CHECK(!fl_gst_segment_running_time(&seg,0,&converted)&&converted==999);seg.rate=2;CHECK(!fl_gst_segment_running_time(&seg,2*GST_SECOND,&converted));seg.rate=1;CHECK(!fl_gst_segment_running_time(&seg,GST_CLOCK_TIME_NONE,&converted));
  CHECK(!fl_gst_session_new(0)&&!fl_gst_session_new(4));
  for(unsigned tracks=1;tracks<=3;tracks++){
   auto*s=fl_gst_session_new(tracks);auto*cxt=fl_gst_session_create_context(s);
@@ -25,6 +28,7 @@ int main(int argc,char**argv){
   g_object_unref(s);gst_context_unref(cxt);s=shared; // full reference survives both releases
   auto c=config(tracks);auto p=offer(c);flSessionConfig out{};out.generation=999;
   CHECK(fl_gst_session_configure(s,&c,&p,&p)==FL_GST_SESSION_READY);
+  gint64 identity=-1;CHECK(fl_gst_session_map_running_time(s,1,37000000,FALSE,&identity)==FL_GST_SESSION_READY&&identity==37000000);CHECK(fl_gst_session_map_running_time(s,1,37000000,TRUE,&identity)==FL_GST_SESSION_INVALID);
   flClockMapping mapping{};mapping.sourceClockId=c.clockId;mapping.targetClockId.bytes[0]=8;
   mapping.sourceAnchorNs=c.epochNs;mapping.targetAnchorNs=1000000000;
   CHECK(fl_gst_session_set_mapping(s,1,&mapping,0)==FL_GST_SESSION_READY);

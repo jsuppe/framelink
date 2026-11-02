@@ -28,6 +28,7 @@
 // under integration. See docs/GST_NATIVE_MEMORY.md for exact platform limits.
 
 #include <algorithm>
+#include "framelink_session_context.h"
 #if defined(FL_GST_DMABUF) || defined(FL_GST_D3D11) || defined(__ANDROID__)
 #define FL_GST_NATIVE 1
 #include <memory>
@@ -228,6 +229,8 @@ static gboolean allocationMemoryPolicy(GstQuery* query,const GstFrameLinkMemoryP
 
 typedef struct _GstFrameLinkSink {
     GstBaseSink parent;
+    FlGstSession* session; flSessionConfig sessionConfig; gboolean sessionRegistered;
+    guint64 sessionFrames;gint64 sessionLastPts;gboolean sessionHaveSegment;
 
     // properties
     gchar* channel; // exact channel name, or the slot-set prefix when slots > 0
@@ -376,6 +379,15 @@ static gboolean sinkStartLegacy(GstBaseSink* base) {
 
 static gboolean sinkStart(GstBaseSink* base) {
     auto* self=GST_FRAMELINK_SINK(base);
+    if(self->session){
+        if(fl_gst_session_get_config(self->session,&self->sessionConfig)!=FL_GST_SESSION_READY||!self->sessionConfig.videoTrackId||!self->delegated||
+           (self->memoryPolicyApplied&&self->memoryPolicy.sessionGeneration!=self->sessionConfig.generation)){
+            GST_ELEMENT_ERROR(self,RESOURCE,SETTINGS,("coordinated video requires an adopted channel and matching session generation"),(NULL));return FALSE;
+        }
+        if(!self->sessionRegistered){if(fl_gst_session_register_track(self->session,FL_GST_TRACK_VIDEO)!=FL_GST_SESSION_READY)return FALSE;self->sessionRegistered=TRUE;}
+        self->preserveTimestamps=TRUE;self->preserveFrameMetadata=TRUE;self->streamGeneration=self->sessionConfig.generation;self->sessionFrames=0;self->sessionLastPts=-1;self->sessionHaveSegment=FALSE;
+        gst_base_sink_set_sync(base,FALSE);
+    }
 #ifndef FL_GST_NATIVE_SINK
     if(self->nativeMemory){GST_ELEMENT_ERROR(self,RESOURCE,SETTINGS,("native sink is not supported by this build"),(NULL));return FALSE;}
 #else
@@ -395,6 +407,7 @@ static gboolean sinkStart(GstBaseSink* base) {
         if(!(*self->nativeProducer)->valid()){sinkDisconnect(self);return FALSE;}
     }
 #endif
+    if(self->session&&fl_gst_session_track_ready(self->session,FL_GST_TRACK_VIDEO,self->sessionConfig.generation)!=FL_GST_SESSION_READY)return FALSE;
     return TRUE;
 }
 static gpointer sinkAcquireNative(GstFrameLinkSink* self,guint timeoutMs){
@@ -455,6 +468,7 @@ static gboolean sinkProposeAllocation(GstBaseSink* base,GstQuery* query){
 static gboolean sinkSetCaps(GstBaseSink* base, GstCaps* caps) {
     GstFrameLinkSink* self = GST_FRAMELINK_SINK(base);
     if (!gst_video_info_from_caps(&self->vinfo, caps)) return FALSE;
+    if(self->session&&(guint(GST_VIDEO_INFO_WIDTH(&self->vinfo))!=self->sessionConfig.video.width||guint(GST_VIDEO_INFO_HEIGHT(&self->vinfo))!=self->sessionConfig.video.height||toFlFormat(GST_VIDEO_INFO_FORMAT(&self->vinfo))!=self->sessionConfig.video.format))return FALSE;
     if(GST_VIDEO_INFO_FORMAT(&self->vinfo)==GST_VIDEO_FORMAT_NV12 &&
        ((GST_VIDEO_INFO_WIDTH(&self->vinfo)&1)||(GST_VIDEO_INFO_HEIGHT(&self->vinfo)&1)))return FALSE;
     if(self->memoryPolicyApplied && (!self->ch || GST_VIDEO_INFO_WIDTH(&self->vinfo)!=(int)self->cinfo.width ||
@@ -480,6 +494,8 @@ static gboolean sinkSetCaps(GstBaseSink* base, GstCaps* caps) {
 static GstFlowReturn sinkRender(GstBaseSink* base, GstBuffer* buffer) {
     GstFrameLinkSink* self = GST_FRAMELINK_SINK(base);
     gsttrace::Scope trace("gst.sinkRender",gsttrace::id(self->channel));
+    if(self->session){flSessionConfig ready{};if(fl_gst_session_wait(self->session,self->sessionConfig.generation,self->sessionConfig.connectTimeoutMs,&ready)!=FL_GST_SESSION_READY){GST_ELEMENT_ERROR(self,RESOURCE,WRITE,("coordinated session not ready or cancelled"),(NULL));return GST_FLOW_ERROR;}}
+    if(self->session){auto*meta=gst_buffer_get_framelink_frame_meta(buffer);if(meta&&meta->frame.streamGeneration!=self->sessionConfig.generation){GST_ELEMENT_ERROR(self,STREAM,FORMAT,("stale producer video metadata generation"),(NULL));return GST_FLOW_ERROR;}}
     ++self->received;
     // Optional identity-bearing accounting. PTS is the original media running
     // time; received is a local ordinal, not a transport sequence. No I/O.
@@ -508,7 +524,7 @@ static GstFlowReturn sinkRender(GstBaseSink* base, GstBuffer* buffer) {
         if(self->preserveFrameMetadata)valid=frameMetadataFromBuffer(buffer,&base->segment,self->streamGeneration,pts,metadata);
         else if(self->preserveTimestamps)valid=frameRunningTime(&base->segment,GST_BUFFER_PTS(buffer),pts);
         if(valid && self->haveInfo && self->nativeProducer && (*self->nativeProducer)->submit(buffer,pts,self->preserveFrameMetadata?&metadata:nullptr)==FL_OK){
-            ++self->submitted;account("gst.native_frame_submitted");return trace.result(GST_FLOW_OK);
+            ++self->submitted;if(self->session){++self->sessionFrames;self->sessionLastPts=pts;}account("gst.native_frame_submitted");return trace.result(GST_FLOW_OK);
         }
 #endif
         ++self->dropped;account("gst.frame_drop.native_rejected");
@@ -700,6 +716,7 @@ static GstFlowReturn sinkRender(GstBaseSink* base, GstBuffer* buffer) {
             if(self->preserveFrameMetadata){GST_ELEMENT_ERROR(self,RESOURCE,WRITE,("metadata frame publication failed"),(NULL));return trace.result(GST_FLOW_ERROR);}
             return trace.result(GST_FLOW_OK);
         }
+        if(self->session){++self->sessionFrames;self->sessionLastPts=pts;}
         if (++self->submitted % 300 == 1)
             GST_INFO_OBJECT(self, "%" G_GUINT64_FORMAT " frames submitted, %" G_GUINT64_FORMAT
                             " dropped", self->submitted, self->dropped);
@@ -716,13 +733,19 @@ static GstFlowReturn sinkRender(GstBaseSink* base, GstBuffer* buffer) {
 // reporting lock or synchronous logging. Querying GstBaseSink's generic stats
 // alone would hide frames dropped by the transport's full-ring policy.
 static gboolean sinkEvent(GstBaseSink* base, GstEvent* event) {
+    auto* coordinated=GST_FRAMELINK_SINK(base);
+    if(coordinated->session){
+        if(GST_EVENT_TYPE(event)==GST_EVENT_SEGMENT){const GstSegment*segment=nullptr;gst_event_parse_segment(event,&segment);if(segment->format!=GST_FORMAT_TIME||segment->rate!=1||segment->applied_rate!=1){GST_ELEMENT_ERROR(base,STREAM,FORMAT,("coordinated video requires forward rate1 TIME segment"),(NULL));return FALSE;}if(coordinated->sessionHaveSegment&&(segment->start!=base->segment.start||segment->base!=base->segment.base||segment->offset!=base->segment.offset||segment->stop!=base->segment.stop)){GST_ELEMENT_ERROR(base,STREAM,FORMAT,("segment replacement requires a fresh session generation"),(NULL));return FALSE;}coordinated->sessionHaveSegment=TRUE;}
+        if(GST_EVENT_TYPE(event)==GST_EVENT_FLUSH_START||GST_EVENT_TYPE(event)==GST_EVENT_FLUSH_STOP)fl_gst_session_cancel(coordinated->session);
+    }
     if(GST_EVENT_TYPE(event)==GST_EVENT_STREAM_START){
         auto* self=GST_FRAMELINK_SINK(base);
-        if(self->streamGeneration==G_MAXUINT64)return FALSE;
-        ++self->streamGeneration;
+        if(!self->session){if(self->streamGeneration==G_MAXUINT64)return FALSE;
+        ++self->streamGeneration;}
     }
     if (GST_EVENT_TYPE(event) == GST_EVENT_EOS) {
         auto* self = GST_FRAMELINK_SINK(base);
+        if(self->session&&fl_gst_session_video_eos(self->session,self->sessionConfig.generation,self->sessionFrames,self->sessionLastPts)!=FL_GST_SESSION_READY){GST_ELEMENT_ERROR(self,STREAM,FAILED,("invalid coordinated video EOS"),(NULL));return FALSE;}
         auto* stats = gst_structure_new("framelink-sink-stats",
             "received", G_TYPE_UINT64, self->received,
             "submitted", G_TYPE_UINT64, self->submitted,
@@ -738,12 +761,14 @@ static gboolean sinkStop(GstBaseSink* base) {
     GstFrameLinkSink* self = GST_FRAMELINK_SINK(base);
     GST_INFO_OBJECT(self, "stopping: %" G_GUINT64_FORMAT " submitted, %" G_GUINT64_FORMAT
                     " dropped", self->submitted, self->dropped);
+    if(self->session)fl_gst_session_cancel(self->session);
     sinkDisconnect(self);
     return TRUE;
 }
 
 static void sinkSetProperty(GObject* obj, guint id, const GValue* value, GParamSpec* spec) {
     GstFrameLinkSink* self = GST_FRAMELINK_SINK(obj);
+    if(self->session&&GST_STATE(self)!=GST_STATE_NULL){GST_WARNING_OBJECT(self,"session configuration immutable outside NULL");return;}
     if(self->memoryPolicyApplied){GST_WARNING_OBJECT(self,"authenticated session properties are immutable; create a new element/session");return;}
     switch (id) {
         case SINK_PROP_BUFFER_WAIT:
@@ -791,6 +816,7 @@ static void sinkGetProperty(GObject* obj, guint id, GValue* value, GParamSpec* s
 
 static void sinkFinalize(GObject* obj) {
     GstFrameLinkSink* self = GST_FRAMELINK_SINK(obj);
+    if(self->session){fl_gst_session_cancel(self->session);g_object_unref(self->session);}
     sinkDisconnect(self); // adoption can precede PLAYING and fail during setup
     g_free(self->channel);
     G_OBJECT_CLASS(gst_framelink_sink_parent_class)->finalize(obj);
@@ -812,10 +838,18 @@ static gboolean sinkApplyMemoryPolicy(GstFrameLinkSink* self,const GstFrameLinkM
     self->memoryPolicy=*policy;self->memoryPolicyApplied=TRUE;return TRUE;
 }
 
+static void sinkSessionContext(GstElement*element,GstContext*context){
+ auto*self=GST_FRAMELINK_SINK(element);
+ if(gst_context_has_context_type(context,FL_GST_SESSION_CONTEXT)){auto*session=fl_gst_session_from_context(context);if(session){
+  if(GST_STATE(element)!=GST_STATE_NULL){g_object_unref(session);GST_ELEMENT_ERROR(element,CORE,STATE_CHANGE,("session context immutable outside NULL"),(NULL));return;}
+  if(self->session!=session){if(self->session)g_object_unref(self->session);self->session=session;self->sessionRegistered=FALSE;}else g_object_unref(session);
+ }}GST_ELEMENT_CLASS(gst_framelink_sink_parent_class)->set_context(element,context);
+}
 static void gst_framelink_sink_class_init(GstFrameLinkSinkClass* klass) {
     GObjectClass* gobject = G_OBJECT_CLASS(klass);
     GstElementClass* element = GST_ELEMENT_CLASS(klass);
     GstBaseSinkClass* basesink = GST_BASE_SINK_CLASS(klass);
+    element->set_context=sinkSessionContext;
 
     gobject->set_property = sinkSetProperty;
     gobject->get_property = sinkGetProperty;
@@ -923,6 +957,8 @@ struct NativeSourceReader {
 
 typedef struct _GstFrameLinkSrc {
     GstPushSrc parent;
+    FlGstSession* session; flSessionConfig sessionConfig; gboolean sessionRegistered;
+    guint64 sessionFrames;gint64 sessionLastPts;
 
     // properties: the ring THIS element allocates (it is the consumer)
     gchar* channel;
@@ -1022,6 +1058,15 @@ static GstCaps* srcGetCaps(GstBaseSrc* base, GstCaps* filter) {
 
 static gboolean srcStart(GstBaseSrc* base) {
     GstFrameLinkSrc* self = GST_FRAMELINK_SRC(base);
+    if(self->session){
+        if(fl_gst_session_get_config(self->session,&self->sessionConfig)!=FL_GST_SESSION_READY||!self->sessionConfig.videoTrackId||!self->delegated||
+           guint(self->width)!=self->sessionConfig.video.width||guint(self->height)!=self->sessionConfig.video.height||toFlFormat(gst_video_format_from_string(self->format))!=self->sessionConfig.video.format||
+           (self->memoryPolicyApplied&&self->memoryPolicy.sessionGeneration!=self->sessionConfig.generation)){
+            GST_ELEMENT_ERROR(self,RESOURCE,SETTINGS,("coordinated video requires matching adopted allocation/session"),(NULL));return FALSE;
+        }
+        if(!self->sessionRegistered){if(fl_gst_session_register_track(self->session,FL_GST_TRACK_VIDEO)!=FL_GST_SESSION_READY)return FALSE;self->sessionRegistered=TRUE;}
+        self->preserveTimestamps=TRUE;self->preserveFrameMetadata=TRUE;self->streamGeneration=self->sessionConfig.generation;self->sessionFrames=0;self->sessionLastPts=-1;
+    }
 #ifndef FL_GST_NATIVE
     if(self->nativeMemory){GST_ELEMENT_ERROR(self,RESOURCE,SETTINGS,("native-memory output is not supported by this build"),(NULL));return FALSE;}
 #else
@@ -1063,11 +1108,13 @@ static gboolean srcStart(GstBaseSrc* base) {
                     self->channel, self->cinfo.width, self->cinfo.height,
                     gst_video_format_to_string(toGstFormat(self->cinfo.format)),
                     self->cinfo.poolSize);
+    if(self->session&&fl_gst_session_track_ready(self->session,FL_GST_TRACK_VIDEO,self->sessionConfig.generation)!=FL_GST_SESSION_READY)return FALSE;
     return TRUE;
 }
 
 static gboolean srcStop(GstBaseSrc* base) {
     GstFrameLinkSrc* self = GST_FRAMELINK_SRC(base);
+    if(self->session)fl_gst_session_cancel(self->session);
 #ifdef _WIN32
     srcDropStaging(self);
 #endif
@@ -1079,6 +1126,7 @@ static gboolean srcStop(GstBaseSrc* base) {
 }
 
 static gboolean srcUnlock(GstBaseSrc* base) {
+    if(GST_FRAMELINK_SRC(base)->session)fl_gst_session_cancel(GST_FRAMELINK_SRC(base)->session);
     g_atomic_int_set(&GST_FRAMELINK_SRC(base)->flushing, 1);
     return TRUE;
 }
@@ -1180,8 +1228,11 @@ static GstFlowReturn srcCreate(GstPushSrc* push, GstBuffer** outbuf) {
     GstFrameLinkSrc* self = GST_FRAMELINK_SRC(push);
     gsttrace::Scope trace("gst.srcCreate",gsttrace::id(self->channel));
 
+    if(self->session){flSessionConfig ready{};if(fl_gst_session_wait(self->session,self->sessionConfig.generation,self->sessionConfig.connectTimeoutMs,&ready)!=FL_GST_SESSION_READY){GST_ELEMENT_ERROR(self,RESOURCE,READ,("coordinated session not ready or cancelled"),(NULL));return GST_FLOW_ERROR;}}
+    const gint64 idleDeadline=g_get_monotonic_time()+gint64(self->sessionConfig.idleTimeoutMs)*1000;
     flFrame frame = {};
     for (;;) {
+        if(self->session){flSessionConfig current{};if(fl_gst_session_get_config(self->session,&current)!=FL_GST_SESSION_READY||current.generation!=self->sessionConfig.generation||g_get_monotonic_time()>=idleDeadline){GST_ELEMENT_ERROR(self,RESOURCE,READ,("coordinated video idle deadline, cancellation or stale generation"),(NULL));return GST_FLOW_ERROR;}}
         if (g_atomic_int_get(&self->flushing)) return trace.result(GST_FLOW_FLUSHING);
         if(self->nativeMemory){
             auto collected=flCollectReadLeases(self->ch);
@@ -1189,6 +1240,9 @@ static GstFlowReturn srcCreate(GstPushSrc* push, GstBuffer** outbuf) {
                 GST_ELEMENT_ERROR(self,RESOURCE,READ,("native reader retirement failed"),("%s",flResultString(collected)));
                 return trace.result(GST_FLOW_ERROR);
             }
+        }
+        if(self->session){guint64 frames=0;gint64 pts=-1;auto end=fl_gst_session_wait_video_eos(self->session,self->sessionConfig.generation,0,&frames,&pts);
+            if(end==FL_GST_SESSION_READY&&self->sessionFrames>=frames){if(self->sessionFrames!=frames||self->sessionLastPts!=pts){GST_ELEMENT_ERROR(self,STREAM,FAILED,("video terminal accounting mismatch"),(NULL));return GST_FLOW_ERROR;}return GST_FLOW_EOS;}
         }
         flResult r = flAcquireFrame(self->ch, &frame, 100);
         if (r == FL_OK) {
@@ -1225,6 +1279,7 @@ static GstFlowReturn srcCreate(GstPushSrc* push, GstBuffer** outbuf) {
         return trace.result(GST_FLOW_ERROR);
     }
 
+    if(self->session&&metadata.streamGeneration!=self->sessionConfig.generation){srcReleaseFrame(self,&frame);GST_ELEMENT_ERROR(self,STREAM,FORMAT,("stale video media generation"),(NULL));return GST_FLOW_ERROR;}
     if(trace.active){trace.event.sequence=frame.sequence;trace.event.pts=frame.ptsNs;trace.event.fence=frame._readyValue;trace.event.slot=frame.slot;}
 
     // A producer's flRequestGeometry may have reallocated OUR ring (that is
@@ -1234,7 +1289,7 @@ static GstFlowReturn srcCreate(GstPushSrc* push, GstBuffer** outbuf) {
     flChannelInfo now = {};
     flQuery(self->ch, &now);
     if (now.generation != self->generation) {
-        if(self->memoryPolicyApplied){
+        if(self->memoryPolicyApplied||self->session){
             srcReleaseFrame(self,&frame);
             GST_ELEMENT_ERROR(self,CORE,NEGOTIATION,("authenticated pool generation changed; fresh session agreement required"),(NULL));
             return trace.result(GST_FLOW_ERROR);
@@ -1388,12 +1443,20 @@ static GstFlowReturn srcCreate(GstPushSrc* push, GstBuffer** outbuf) {
         if(!meta){gst_buffer_unref(buf);return trace.result(GST_FLOW_ERROR);}
         meta->frame=metadata;
     }
+    if(self->session){
+        ++self->sessionFrames;self->sessionLastPts=frame.ptsNs;
+        gint64 mapped=0;
+        if(fl_gst_session_map_running_time(self->session,self->sessionConfig.generation,GST_BUFFER_PTS(buf),TRUE,&mapped)!=FL_GST_SESSION_READY){gst_buffer_unref(buf);GST_ELEMENT_ERROR(self,STREAM,FORMAT,("shared receiver clock mapping required"),(NULL));return GST_FLOW_ERROR;}
+        GST_BUFFER_PTS(buf)=mapped;
+        if(GST_CLOCK_TIME_IS_VALID(GST_BUFFER_DTS(buf))){if(fl_gst_session_map_running_time(self->session,self->sessionConfig.generation,GST_BUFFER_DTS(buf),TRUE,&mapped)!=FL_GST_SESSION_READY){gst_buffer_unref(buf);return GST_FLOW_ERROR;}GST_BUFFER_DTS(buf)=mapped;auto*meta=gst_buffer_get_framelink_frame_meta(buf);if(meta)meta->frame.dtsNs=mapped;}
+    }
     *outbuf = buf; // default remains arrival-time timestamping
     return trace.result(GST_FLOW_OK);
 }
 
 static void srcSetProperty(GObject* obj, guint id, const GValue* value, GParamSpec* spec) {
     GstFrameLinkSrc* self = GST_FRAMELINK_SRC(obj);
+    if(self->session&&GST_STATE(self)!=GST_STATE_NULL){GST_WARNING_OBJECT(self,"session configuration immutable outside NULL");return;}
     if(self->memoryPolicyApplied){GST_WARNING_OBJECT(self,"authenticated session properties are immutable; create a new element/session");return;}
     switch (id) {
         case SRC_PROP_NATIVE_MEMORY:
@@ -1448,6 +1511,7 @@ static void srcGetProperty(GObject* obj, guint id, GValue* value, GParamSpec* sp
 
 static void srcFinalize(GObject* obj) {
     GstFrameLinkSrc* self = GST_FRAMELINK_SRC(obj);
+    if(self->session){fl_gst_session_cancel(self->session);g_object_unref(self->session);}
 #ifdef FL_GST_NATIVE
     if(self->nativeOwner){delete self->nativeOwner;self->nativeOwner=nullptr;self->ch=nullptr;}
 #endif
@@ -1489,9 +1553,17 @@ static gboolean srcDecideAllocation(GstBaseSrc* base,GstQuery* query){
     return parent->decide_allocation?parent->decide_allocation(base,query):TRUE;
 }
 
+static void srcSessionContext(GstElement*element,GstContext*context){
+ auto*self=GST_FRAMELINK_SRC(element);
+ if(gst_context_has_context_type(context,FL_GST_SESSION_CONTEXT)){auto*session=fl_gst_session_from_context(context);if(session){
+  if(GST_STATE(element)!=GST_STATE_NULL){g_object_unref(session);GST_ELEMENT_ERROR(element,CORE,STATE_CHANGE,("session context immutable outside NULL"),(NULL));return;}
+  if(self->session!=session){if(self->session)g_object_unref(self->session);self->session=session;self->sessionRegistered=FALSE;}else g_object_unref(session);
+ }}GST_ELEMENT_CLASS(gst_framelink_src_parent_class)->set_context(element,context);
+}
 static void gst_framelink_src_class_init(GstFrameLinkSrcClass* klass) {
     GObjectClass* gobject = G_OBJECT_CLASS(klass);
     GstElementClass* element = GST_ELEMENT_CLASS(klass);
+    element->set_context=srcSessionContext;
     GstBaseSrcClass* basesrc = GST_BASE_SRC_CLASS(klass);
     GstPushSrcClass* pushsrc = GST_PUSH_SRC_CLASS(klass);
 

@@ -67,7 +67,7 @@ static void fl_audio_reader_init(FlAudioReader*s){s->cancel=g_cancellable_new();
 typedef struct {
  GstBin parent; FlAudioReader* reader; GstElement* depay; FlGstSession* session;
  gchar *path,*format,*tracks;guint rate,channels,queueMs,connectMs,idleMs;
- gboolean local,failed,segment; guint64 blocks,bytes;
+ gboolean local,failed,segment; GstSegment receivedSegment; guint64 blocks,bytes;
 } GstFrameLinkAudioSrc;
 typedef struct {GstBinClass parent;} GstFrameLinkAudioSrcClass;
 G_DEFINE_TYPE(GstFrameLinkAudioSrc,gst_framelink_audio_src,GST_TYPE_BIN)
@@ -79,14 +79,24 @@ static GstPadProbeReturn inspectPcm(GstPad*,GstPadProbeInfo*info,gpointer data){
   if(gst_event_has_name(e,"framelink-audio-eos")){
    auto*st=gst_event_get_structure(e);guint version=0;guint64 generation=0,blocks=0,bytes=0;
    if(guint(GST_EVENT_TYPE(e))!=(guint(GST_EVENT_CUSTOM_DOWNSTREAM)&0xffffu)||!gst_structure_get_uint(st,"version",&version)||version!=1||!gst_structure_get_uint64(st,"generation",&generation)||generation!=c.generation||!gst_structure_get_uint64(st,"blocks",&blocks)||blocks!=s->blocks||!gst_structure_get_uint64(st,"pcm-bytes",&bytes)||bytes!=s->bytes)return badInput(s,"audio terminal record mismatch");
+   if(c.videoTrackId){guint64 frames=0;gint64 last=-1;if(!gst_structure_get_uint64(st,"video-frames",&frames)||!gst_structure_get_int64(st,"video-last-pts",&last)||fl_gst_session_video_eos(s->session,c.generation,frames,last)!=FL_GST_SESSION_READY)return badInput(s,"invalid coordinated video terminal record");}
    g_atomic_int_set(&s->reader->eos,1);auto*replacement=gst_event_new_eos();gst_event_set_seqnum(replacement,gst_event_get_seqnum(e));gst_event_unref(e);GST_PAD_PROBE_INFO_DATA(info)=replacement;
   }else if(GST_EVENT_TYPE(e)==GST_EVENT_EOS&&!g_atomic_int_get(&s->reader->eos)){return badInput(s,"missing terminal accounting");
   }else if(GST_EVENT_TYPE(e)==GST_EVENT_CAPS){GstCaps*caps=nullptr;gst_event_parse_caps(e,&caps);if(!caps||gst_caps_get_size(caps)!=1)return badInput(s,"invalid PCM caps");auto*st=gst_caps_get_structure(caps,0);gint rate=0,channels=0;auto*format=gst_structure_get_string(st,"format");auto*layout=gst_structure_get_string(st,"layout");
    if(!gst_structure_has_name(st,"audio/x-raw")||!format||strcmp(format,c.audio.pcm==FL_PCM_S16?"S16LE":"F32LE")||!layout||strcmp(layout,"interleaved")||!gst_structure_get_int(st,"rate",&rate)||!gst_structure_get_int(st,"channels",&channels)||guint(rate)!=c.audio.rate||guint(channels)!=c.audio.layout)return badInput(s,"PCM caps disagree with authenticated session");
-  }else if(GST_EVENT_TYPE(e)==GST_EVENT_SEGMENT){const GstSegment*seg=nullptr;gst_event_parse_segment(e,&seg);if(seg->format!=GST_FORMAT_TIME||seg->rate!=1||seg->applied_rate!=1)return badInput(s,"unsupported received segment");s->segment=TRUE;
+  }else if(GST_EVENT_TYPE(e)==GST_EVENT_GAP){
+   GstClockTime pts,duration,running=0;gst_event_parse_gap(e,&pts,&duration);gint64 mapped=0;
+   if(!s->segment||!fl_gst_segment_running_time(&s->receivedSegment,pts,&running)||fl_gst_session_map_running_time(s->session,c.generation,running,c.videoTrackId!=0,&mapped)!=FL_GST_SESSION_READY||!GST_CLOCK_TIME_IS_VALID(duration)||duration>G_MAXINT64-mapped)return badInput(s,"invalid mapped GAP");
+   auto*replacement=gst_event_new_gap(mapped,duration);gst_event_set_seqnum(replacement,gst_event_get_seqnum(e));gst_event_unref(e);GST_PAD_PROBE_INFO_DATA(info)=replacement;
+  }else if(GST_EVENT_TYPE(e)==GST_EVENT_SEGMENT){const GstSegment*seg=nullptr;gst_event_parse_segment(e,&seg);if(seg->format!=GST_FORMAT_TIME||seg->rate!=1||seg->applied_rate!=1)return badInput(s,"unsupported received segment");s->segment=TRUE;s->receivedSegment=*seg;GstSegment canonical;gst_segment_init(&canonical,GST_FORMAT_TIME);auto*replacement=gst_event_new_segment(&canonical);gst_event_set_seqnum(replacement,gst_event_get_seqnum(e));gst_event_unref(e);GST_PAD_PROBE_INFO_DATA(info)=replacement;
   }
  }else {auto*b=GST_PAD_PROBE_INFO_BUFFER(info);if(!b)return GST_PAD_PROBE_OK;const guint bpf=(c.audio.pcm==FL_PCM_S16?2u:4u)*c.audio.layout;auto size=gst_buffer_get_size(b);
-  if(!s->segment||!size||size%bpf||size>((guint64(c.audio.rate)*c.audioQueueMs+999)/1000)*bpf||!GST_CLOCK_TIME_IS_VALID(GST_BUFFER_PTS(b))||!GST_CLOCK_TIME_IS_VALID(GST_BUFFER_DURATION(b)))return badInput(s,"invalid received PCM size or timing");++s->blocks;s->bytes+=size;
+  if(!s->segment||!size||size%bpf||size>((guint64(c.audio.rate)*c.audioQueueMs+999)/1000)*bpf||!GST_CLOCK_TIME_IS_VALID(GST_BUFFER_PTS(b))||!GST_CLOCK_TIME_IS_VALID(GST_BUFFER_DURATION(b)))return badInput(s,"invalid received PCM size or timing");
+  GstClockTime running=0;gint64 mapped=0,dts=-1;
+  if(!fl_gst_segment_running_time(&s->receivedSegment,GST_BUFFER_PTS(b),&running)||fl_gst_session_map_running_time(s->session,c.generation,running,c.videoTrackId!=0,&mapped)!=FL_GST_SESSION_READY||GST_BUFFER_DURATION(b)>G_MAXINT64-mapped)return badInput(s,"invalid or missing shared receiver clock mapping");
+  if(GST_CLOCK_TIME_IS_VALID(GST_BUFFER_DTS(b))&&(!fl_gst_segment_running_time(&s->receivedSegment,GST_BUFFER_DTS(b),&running)||fl_gst_session_map_running_time(s->session,c.generation,running,c.videoTrackId!=0,&dts)!=FL_GST_SESSION_READY))return badInput(s,"invalid mapped DTS");
+  b=gst_buffer_make_writable(b);GST_PAD_PROBE_INFO_DATA(info)=b;GST_BUFFER_PTS(b)=mapped;GST_BUFFER_DTS(b)=dts<0?GST_CLOCK_TIME_NONE:guint64(dts);
+  ++s->blocks;s->bytes+=size;
  }
  return GST_PAD_PROBE_OK;
 }

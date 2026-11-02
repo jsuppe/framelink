@@ -47,3 +47,22 @@ FL_GST_SESSION_API FlGstSessionResult fl_gst_session_map_pts(FlGstSession*,guint
  gint64 producer_pts_ns,gint64* receiver_pts_ns);
 FL_GST_SESSION_API void fl_gst_session_cancel(FlGstSession*);
 G_END_DECLS
+
+G_BEGIN_DECLS
+// Forward rate1 TIME conversion shared by both media tracks. No first-frame
+// rebasing. Output unchanged on invalid/missing/out-of-range timestamps.
+FL_GST_SESSION_API gboolean fl_gst_segment_running_time(const GstSegment*,
+ GstClockTime pts,GstClockTime* running_time);
+// One receiver mapping per generation. Audio-only transport may explicitly
+// allow identity when no mapping is installed; mapping errors never fall back.
+FL_GST_SESSION_API FlGstSessionResult fl_gst_session_map_running_time(FlGstSession*,
+ guint64 generation,gint64 producer_running_time,gboolean require_mapping,gint64* out);
+G_END_DECLS
+G_BEGIN_DECLS
+// Per-generation video drain accounting, published by the local producer or
+// the authenticated audio/control receiver. Repeated contradictory ends reject.
+FL_GST_SESSION_API FlGstSessionResult fl_gst_session_video_eos(FlGstSession*,
+ guint64 generation,guint64 submitted_frames,gint64 last_running_pts);
+FL_GST_SESSION_API FlGstSessionResult fl_gst_session_wait_video_eos(FlGstSession*,
+ guint64 generation,guint timeout_ms,guint64* submitted_frames,gint64* last_running_pts);
+G_END_DECLS

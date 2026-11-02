@@ -22,12 +22,13 @@ struct Pair {
  ~Pair(){g_io_stream_close(G_IO_STREAM(client),nullptr,nullptr);g_io_stream_close(G_IO_STREAM(server),nullptr,nullptr);g_object_unref(client);g_object_unref(server);}
 };
 static GstElement* parse(const char*text){GError*error=nullptr;auto*p=gst_parse_launch(text,&error);if(error)fprintf(stderr,"parse: %s\n",error->message);CHECK(p&&!error);return p;}
-static void run(guint format,guint channels,guint rate,int negative){
+static void run(guint format,guint channels,guint rate,int negative,bool segmented=false){
  Pair pair;auto*sender=fl_gst_session_new(2);auto*receiver=fl_gst_session_new(2);
  flSessionConfig cfg{};cfg.version=2;cfg.sessionId.bytes[0]=1;cfg.clockId.bytes[0]=2;cfg.generation=1;cfg.audioTrackId=2;
  cfg.audio={format,rate,channels};cfg.audioQueueMs=80;cfg.connectTimeoutMs=1000;cfg.idleTimeoutMs=1000;
  flSessionCapabilities caps{};caps.version=2;caps.audioCount=1;caps.audio[0]=cfg.audio;
  CHECK(fl_gst_session_configure(sender,&cfg,&caps,&caps)==FL_GST_SESSION_READY);CHECK(fl_gst_session_configure(receiver,&cfg,&caps,&caps)==FL_GST_SESSION_READY);
+ if(segmented){flClockMapping mapping{};mapping.sourceClockId=cfg.clockId;mapping.targetClockId.bytes[0]=7;mapping.sourceAnchorNs=cfg.epochNs;mapping.targetAnchorNs=100000000;CHECK(fl_gst_session_set_mapping(receiver,1,&mapping,0)==FL_GST_SESSION_READY);}
  CHECK(!fl_gst_session_claim_audio_stream(sender,TRUE,1));
  guint8 secret[32];memset(secret,6,sizeof secret);auto*key=g_bytes_new(secret,sizeof secret);
  gboolean authenticated=FALSE;std::thread auth([&]{authenticated=fl_gst_session_authenticate_audio_stream(sender,pair.server,TRUE,key,1000,nullptr,nullptr);});
@@ -51,16 +52,23 @@ static void run(guint format,guint channels,guint rate,int negative){
  CHECK(gst_element_set_state(rx,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
  CHECK(gst_element_set_state(tx,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
  CHECK(!fl_gst_session_claim_audio_stream(sender,TRUE,1)); // authenticated stream cannot be shared by two sinks
- const guint samples=rate/100,bytes=samples*channels*(format==FL_PCM_S16?2:4);
+ if(segmented)g_object_set(source,"handle-segment-change",TRUE,nullptr);
+ guint64 observedGap[2]={GST_CLOCK_TIME_NONE,0};
+ if(segmented){auto*pad=gst_element_get_static_pad(output,"sink");gst_pad_add_probe(pad,GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM,[](GstPad*,GstPadProbeInfo*i,gpointer p)->GstPadProbeReturn{if(GST_EVENT_TYPE(GST_PAD_PROBE_INFO_EVENT(i))==GST_EVENT_GAP){auto*values=static_cast<guint64*>(p);gst_event_parse_gap(GST_PAD_PROBE_INFO_EVENT(i),&values[0],&values[1]);}return GST_PAD_PROBE_OK;},observedGap,nullptr);gst_object_unref(pad);}
+ const guint samples=segmented?1000:rate/100,bytes=samples*channels*(format==FL_PCM_S16?2:4);
  std::vector<guint8> expected(bytes);for(guint i=0;i<bytes;i++)expected[i]=guint8(i*31);
  for(guint n=0;n<(negative?1u:5u);n++){
   guint size=negative==2?bytes*9:negative==4?bytes-1:bytes;auto*b=gst_buffer_new_allocate(nullptr,size,nullptr);
   if(size==bytes)gst_buffer_fill(b,0,expected.data(),bytes);
-  GST_BUFFER_PTS(b)=negative==1?GST_CLOCK_TIME_NONE:37000000+guint64(n)*10000000;
-  GST_BUFFER_DURATION(b)=negative==2?90000000:10000000;
-  CHECK(gst_app_src_push_buffer(GST_APP_SRC(source),b)==GST_FLOW_OK);
+  guint64 delta=gst_util_uint64_scale(guint64(n)*samples,GST_SECOND,rate),next=gst_util_uint64_scale(guint64(n+1)*samples,GST_SECOND,rate);
+  if(segmented&&n==2){auto*pad=gst_element_get_static_pad(source,"src");CHECK(gst_pad_push_event(pad,gst_event_new_gap(2*GST_SECOND+37000000+delta,50000000)));gst_object_unref(pad);}
+  guint64 gapShift=segmented&&n>=2?50000000:0;
+  GST_BUFFER_PTS(b)=negative==1?GST_CLOCK_TIME_NONE:(segmented?2*GST_SECOND:0)+37000000+delta+gapShift;
+  GST_BUFFER_DURATION(b)=negative==2?90000000:next-delta;
+  if(segmented){GST_BUFFER_DTS(b)=GST_BUFFER_PTS(b);if(n==2)GST_BUFFER_FLAG_SET(b,GST_BUFFER_FLAG_DISCONT);GstSegment seg;gst_segment_init(&seg,GST_FORMAT_TIME);seg.start=2*GST_SECOND;seg.position=seg.start;seg.base=500000000;auto*caps=gst_app_src_get_caps(GST_APP_SRC(source));auto*sample=gst_sample_new(b,caps,&seg,nullptr);CHECK(gst_app_src_push_sample(GST_APP_SRC(source),sample)==GST_FLOW_OK);gst_sample_unref(sample);gst_caps_unref(caps);gst_buffer_unref(b);}
+  else CHECK(gst_app_src_push_buffer(GST_APP_SRC(source),b)==GST_FLOW_OK);
   if(!negative){auto*sample=gst_app_sink_try_pull_sample(GST_APP_SINK(output),2*GST_SECOND);if(!sample){for(auto*p:{tx,rx}){auto*debugBus=gst_element_get_bus(p);while(auto*m=gst_bus_pop_filtered(debugBus,GST_MESSAGE_ERROR)){GError*e=nullptr;gchar*detail=nullptr;gst_message_parse_error(m,&e,&detail);fprintf(stderr,"%s: %s / %s\n",GST_OBJECT_NAME(m->src),e->message,detail?detail:"");g_clear_error(&e);g_free(detail);gst_message_unref(m);}gst_object_unref(debugBus);}}CHECK(sample);
-   auto*got=gst_sample_get_buffer(sample);CHECK(GST_BUFFER_PTS(got)==37000000+guint64(n)*10000000);CHECK(GST_BUFFER_DURATION(got)==10000000);CHECK(gst_buffer_get_size(got)==bytes);
+   auto*got=gst_sample_get_buffer(sample);CHECK(GST_BUFFER_PTS(got)==(segmented?600000000:0)+37000000+delta+gapShift);CHECK(GST_BUFFER_DURATION(got)==next-delta);if(segmented){CHECK(GST_BUFFER_DTS(got)==GST_BUFFER_PTS(got));if(n==2){CHECK(GST_BUFFER_FLAG_IS_SET(got,GST_BUFFER_FLAG_DISCONT));CHECK(observedGap[0]==637000000+delta&&observedGap[1]==50000000);}}CHECK(gst_buffer_get_size(got)==bytes);
    GstMapInfo map{};CHECK(gst_buffer_map(got,&map,GST_MAP_READ));CHECK(!memcmp(map.data,expected.data(),bytes));gst_buffer_unmap(got,&map);gst_sample_unref(sample);
   }
  }
@@ -117,6 +125,7 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
  CHECK(argc>1);GError*error=nullptr;auto*p=gst_plugin_load_file(argv[1],&error);if(error)fprintf(stderr,"%s\n",error->message);CHECK(p&&!error);gst_object_unref(p);
 #endif
  for(guint format:{guint(FL_PCM_S16),guint(FL_PCM_F32)})for(guint channels:{1u,2u})run(format,channels,44100,0);
+ run(FL_PCM_F32,2,44100,0,true);
  local(true,false,false);local(false,false,false);local(true,true,false);local(true,false,true);
  for(int mode=0;mode<4;mode++)hostile(mode);
  puts("public audio source: exact four PCM formats/layouts, incremental packet delivery before EOS, both startup orders, live latency, missing-peer and cancellation passed");return 0;

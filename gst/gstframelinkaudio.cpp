@@ -33,13 +33,24 @@ static GstPadProbeReturn inspect(GstPad*,GstPadProbeInfo*info,gpointer data){
  if(s->failed)return GST_PAD_PROBE_DROP;
  if(GST_PAD_PROBE_INFO_TYPE(info)&GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM){
   auto*event=GST_PAD_PROBE_INFO_EVENT(info);
+  if(GST_EVENT_TYPE(event)==GST_EVENT_FLUSH_START||GST_EVENT_TYPE(event)==GST_EVENT_FLUSH_STOP){
+   fl_gst_session_cancel(s->session);s->failed=TRUE;return GST_PAD_PROBE_OK;
+  }
   if(GST_EVENT_TYPE(event)==GST_EVENT_CAPS){
    GstCaps*caps=nullptr;gst_event_parse_caps(event,&caps);auto*st=gst_caps_get_structure(caps,0);
    const GValue*mask=gst_structure_get_value(st,"channel-mask");
    if(mask&&(!GST_VALUE_HOLDS_BITMASK(mask)||(s->config.audio.layout==2?gst_value_get_bitmask(mask)!=3:(gst_value_get_bitmask(mask)!=0&&gst_value_get_bitmask(mask)!=4))))return reject(s,"unsupported PCM channel mask");
   }else if(GST_EVENT_TYPE(event)==GST_EVENT_SEGMENT){const GstSegment*seg=nullptr;gst_event_parse_segment(event,&seg);
    if(seg->format!=GST_FORMAT_TIME||seg->rate!=1.0||seg->applied_rate!=1.0)return reject(s,"only forward rate1 TIME segments supported");
+   if(s->haveSegment&&(seg->start!=s->segment.start||seg->base!=s->segment.base||seg->offset!=s->segment.offset||seg->stop!=s->segment.stop))return reject(s,"segment replacement requires a fresh session generation");
    s->segment=*seg;s->haveSegment=TRUE;
+   GstSegment canonical;gst_segment_init(&canonical,GST_FORMAT_TIME);auto*replacement=gst_event_new_segment(&canonical);gst_event_set_seqnum(replacement,gst_event_get_seqnum(event));gst_event_unref(event);GST_PAD_PROBE_INFO_DATA(info)=replacement;
+  }else if(GST_EVENT_TYPE(event)==GST_EVENT_GAP){
+   GstClockTime pts,duration,running=0;gst_event_parse_gap(event,&pts,&duration);
+   if(!s->haveSegment||!fl_gst_segment_running_time(&s->segment,pts,&running)||!GST_CLOCK_TIME_IS_VALID(duration)||duration>G_MAXINT64-running)return reject(s,"invalid audio GAP timing");
+   s->samples=0;s->origin=running+duration;
+   auto*replacement=gst_event_new_gap(running,duration);gst_event_set_seqnum(replacement,gst_event_get_seqnum(event));gst_event_unref(event);GST_PAD_PROBE_INFO_DATA(info)=replacement;
+  }else if(gst_event_has_name(event,"framelink-audio-eos")){return reject(s,"reserved terminal event supplied upstream");
   }else if(GST_EVENT_TYPE(event)==GST_EVENT_EOS){
    gst_element_post_message(GST_ELEMENT(s),gst_message_new_element(GST_OBJECT(s),gst_structure_new("framelink-audio-sink-stats",
     "blocks",G_TYPE_UINT64,s->blocks,"pcm-bytes",G_TYPE_UINT64,s->bytes,"sample-frames",G_TYPE_UINT64,s->totalSamples,
@@ -53,7 +64,7 @@ static GstPadProbeReturn inspect(GstPad*,GstPadProbeInfo*info,gpointer data){
   if(fl_gst_session_get_config(s->session,&s->config)!=FL_GST_SESSION_READY)return reject(s,"audio session cancelled");
  }
  if(!s->session||!s->haveSegment||!GST_CLOCK_TIME_IS_VALID(GST_BUFFER_PTS(b))||!GST_CLOCK_TIME_IS_VALID(GST_BUFFER_DURATION(b)))return reject(s,"PCM requires valid PTS, duration and TIME segment");
- auto running=gst_segment_to_running_time(&s->segment,GST_FORMAT_TIME,GST_BUFFER_PTS(b));
+ GstClockTime running=GST_CLOCK_TIME_NONE;fl_gst_segment_running_time(&s->segment,GST_BUFFER_PTS(b),&running);
  if(!GST_CLOCK_TIME_IS_VALID(running)||running>G_MAXINT64||GST_BUFFER_DURATION(b)>GST_CLOCK_TIME_NONE-1-running)return reject(s,"PCM is outside its TIME segment");
  const guint bpf=(s->config.audio.pcm==FL_PCM_S16?2u:4u)*s->config.audio.layout;
  const guint64 size=gst_buffer_get_size(b),count=size/bpf;
@@ -62,9 +73,12 @@ static GstPadProbeReturn inspect(GstPad*,GstPadProbeInfo*info,gpointer data){
  if(GST_BUFFER_FLAG_IS_SET(b,GST_BUFFER_FLAG_DISCONT)){s->samples=0;s->origin=GST_CLOCK_TIME_NONE;}
  if(s->origin==GST_CLOCK_TIME_NONE)s->origin=running;
  gint64 first=0,end=0;
- if(count>G_MAXUINT64-s->samples||flSessionSampleOffset(s->samples,s->config.audio.rate,&first)!=FL_SESSION_OK||flSessionSampleOffset(s->samples+count,s->config.audio.rate,&end)!=FL_SESSION_OK||guint64(first)>GST_CLOCK_TIME_NONE-1-s->origin||running!=s->origin+guint64(first)||GST_BUFFER_DURATION(b)!=guint64(end-first))return reject(s,"PCM sample duration/continuity mismatch");
+ if(count>G_MAXUINT64-s->samples||flSessionSampleOffset(s->samples,s->config.audio.rate,&first)!=FL_SESSION_OK||flSessionSampleOffset(s->samples+count,s->config.audio.rate,&end)!=FL_SESSION_OK||guint64(first)>GST_CLOCK_TIME_NONE-1-s->origin||(running>s->origin+guint64(first)?running-(s->origin+guint64(first)):(s->origin+guint64(first))-running)>1||(GST_BUFFER_DURATION(b)>guint64(end-first)?GST_BUFFER_DURATION(b)-guint64(end-first):guint64(end-first)-GST_BUFFER_DURATION(b))>1)return reject(s,"PCM sample duration/continuity mismatch");
  flSessionConfig ready{};
  if(fl_gst_session_wait(s->session,s->config.generation,s->config.connectTimeoutMs,&ready)!=FL_GST_SESSION_READY)return reject(s,"required session tracks not ready or cancelled");
+ GstClockTime dts=GST_CLOCK_TIME_NONE;
+ if(GST_CLOCK_TIME_IS_VALID(GST_BUFFER_DTS(b))&&!fl_gst_segment_running_time(&s->segment,GST_BUFFER_DTS(b),&dts))return reject(s,"DTS outside TIME segment");
+ b=gst_buffer_make_writable(b);GST_PAD_PROBE_INFO_DATA(info)=b;GST_BUFFER_PTS(b)=running;GST_BUFFER_DTS(b)=dts;
  s->samples+=count;s->totalSamples+=count;++s->blocks;s->bytes+=size;return GST_PAD_PROBE_OK;
 }
 static void setContext(GstElement*element,GstContext*context){
@@ -195,14 +209,16 @@ static void gst_framelink_audio_sink_init(GstFrameLinkAudioSink*s){
   [](GstPad*pad,GstPadProbeInfo*info,gpointer data)->GstPadProbeReturn{
    auto*self=static_cast<GstFrameLinkAudioSink*>(data);
    if(GST_EVENT_TYPE(GST_PAD_PROBE_INFO_EVENT(info))==GST_EVENT_EOS&&!self->failed){
+    guint64 videoFrames=0;gint64 videoLastPts=-1;
+    if(self->config.videoTrackId&&fl_gst_session_wait_video_eos(self->session,self->config.generation,self->config.idleTimeoutMs,&videoFrames,&videoLastPts)!=FL_GST_SESSION_READY)return reject(self,"required video EOS missing or cancelled");
     auto*marker=gst_event_new_custom(GST_EVENT_CUSTOM_DOWNSTREAM,gst_structure_new("framelink-audio-eos",
      "version",G_TYPE_UINT,1u,"generation",G_TYPE_UINT64,self->config.generation,
-     "blocks",G_TYPE_UINT64,self->blocks,"pcm-bytes",G_TYPE_UINT64,self->bytes,nullptr));
+     "blocks",G_TYPE_UINT64,self->blocks,"pcm-bytes",G_TYPE_UINT64,self->bytes,"video-frames",G_TYPE_UINT64,videoFrames,"video-last-pts",G_TYPE_INT64,videoLastPts,nullptr));
     if(!gst_pad_send_event(pad,marker))return reject(self,"audio terminal record could not be sent");
    }return GST_PAD_PROBE_OK;
   },s,nullptr);gst_object_unref(terminal);
  auto*pad=gst_element_get_static_pad(s->filter,"sink");
- gst_pad_add_probe(pad,GstPadProbeType(GST_PAD_PROBE_TYPE_BUFFER|GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM),inspect,s,nullptr);
+ gst_pad_add_probe(pad,GstPadProbeType(GST_PAD_PROBE_TYPE_BUFFER|GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM|GST_PAD_PROBE_TYPE_EVENT_FLUSH),inspect,s,nullptr);
  auto*ghost=gst_ghost_pad_new_from_template("sink",pad,gst_element_class_get_pad_template(GST_ELEMENT_GET_CLASS(s),"sink"));gst_object_unref(pad);gst_element_add_pad(GST_ELEMENT(s),ghost);
 }
 gboolean fl_register_audio_sink(GstPlugin*plugin){return gst_element_register(plugin,"framelinkaudiosink",GST_RANK_NONE,gst_framelink_audio_sink_get_type());}

@@ -7,7 +7,8 @@ struct _FlGstSession {
  GMutex mutex;
  GCond changed;
  guint required,registered,ready;
- gboolean configured,cancelled,mapped;
+ gboolean configured,cancelled,mapped,videoEnded;
+ guint64 videoFrames;gint64 videoLastPts;
  flClockMapping mapping;
  guint64 maxUncertainty;
  GSocketConnection* audioConnection;
@@ -52,7 +53,7 @@ FlGstSessionResult fl_gst_session_configure(FlGstSession* s,const flSessionConfi
   if(r!=FL_SESSION_OK)return r==FL_SESSION_STALE?FL_GST_SESSION_STALE:FL_GST_SESSION_INVALID;
  }
  if(s->audioConnection){g_socket_shutdown(g_socket_connection_get_socket(s->audioConnection),TRUE,TRUE,nullptr);g_object_unref(s->audioConnection);s->audioConnection=nullptr;}
- s->audioClaimed=FALSE;s->config=*c;s->mapped=FALSE;s->configured=TRUE;s->cancelled=FALSE;s->ready=0;g_cond_broadcast(&s->changed);return FL_GST_SESSION_READY;
+ s->audioClaimed=FALSE;s->videoEnded=FALSE;s->videoFrames=0;s->videoLastPts=-1;s->config=*c;s->mapped=FALSE;s->configured=TRUE;s->cancelled=FALSE;s->ready=0;g_cond_broadcast(&s->changed);return FL_GST_SESSION_READY;
 }
 FlGstSessionResult fl_gst_session_register_track(FlGstSession* s,guint track) {
  if(!valid(s)||(track!=1&&track!=2))return FL_GST_SESSION_INVALID;
@@ -125,4 +126,38 @@ GSocketConnection* fl_gst_session_claim_audio_stream(FlGstSession* s,gboolean pr
  Lock lock(&s->mutex);
  if(s->cancelled||!s->configured||s->config.generation!=generation||!s->audioConnection||s->audioProducer!=producer||s->audioClaimed)return nullptr;
  s->audioClaimed=TRUE;return static_cast<GSocketConnection*>(g_object_ref(s->audioConnection));
+}
+
+gboolean fl_gst_segment_running_time(const GstSegment* segment,GstClockTime pts,GstClockTime* out){
+ if(!segment||!out||segment->format!=GST_FORMAT_TIME||segment->rate!=1.0||segment->applied_rate!=1.0||!GST_CLOCK_TIME_IS_VALID(pts))return FALSE;
+ auto running=gst_segment_to_running_time(segment,GST_FORMAT_TIME,pts);
+ if(!GST_CLOCK_TIME_IS_VALID(running)||running>G_MAXINT64)return FALSE;
+ *out=running;return TRUE;
+}
+FlGstSessionResult fl_gst_session_map_running_time(FlGstSession*s,guint64 generation,gint64 pts,gboolean required,gint64*out){
+ if(!valid(s)||!out||pts<0)return FL_GST_SESSION_INVALID;
+ Lock lock(&s->mutex);
+ if(s->cancelled)return FL_GST_SESSION_CANCELLED;
+ if(!s->configured||s->config.generation!=generation)return FL_GST_SESSION_STALE;
+ if(!s->mapped){if(required)return FL_GST_SESSION_INVALID;*out=pts;return FL_GST_SESSION_READY;}
+ return flSessionMapPts(&s->config,&s->mapping,s->maxUncertainty,pts,out)==FL_SESSION_OK?FL_GST_SESSION_READY:FL_GST_SESSION_INVALID;
+}
+FlGstSessionResult fl_gst_session_video_eos(FlGstSession*s,guint64 generation,guint64 frames,gint64 pts){
+ if(!valid(s)||(frames?pts<0:pts!=-1))return FL_GST_SESSION_INVALID;
+ Lock lock(&s->mutex);
+ if(s->cancelled)return FL_GST_SESSION_CANCELLED;
+ if(!s->configured||s->config.generation!=generation)return FL_GST_SESSION_STALE;
+ if(!s->config.videoTrackId)return FL_GST_SESSION_INVALID;
+ if(s->videoEnded&&(s->videoFrames!=frames||s->videoLastPts!=pts))return FL_GST_SESSION_INVALID;
+ s->videoEnded=TRUE;s->videoFrames=frames;s->videoLastPts=pts;g_cond_broadcast(&s->changed);return FL_GST_SESSION_READY;
+}
+FlGstSessionResult fl_gst_session_wait_video_eos(FlGstSession*s,guint64 generation,guint timeout,guint64*frames,gint64*pts){
+ if(!valid(s)||!frames||!pts||timeout>60000)return FL_GST_SESSION_INVALID;
+ const auto deadline=g_get_monotonic_time()+gint64(timeout)*1000;Lock lock(&s->mutex);
+ while(true){if(s->cancelled)return FL_GST_SESSION_CANCELLED;
+  if(!s->configured||s->config.generation!=generation)return FL_GST_SESSION_STALE;
+  if(!s->config.videoTrackId)return FL_GST_SESSION_INVALID;
+  if(s->videoEnded){*frames=s->videoFrames;*pts=s->videoLastPts;return FL_GST_SESSION_READY;}
+  if(!timeout||!g_cond_wait_until(&s->changed,&s->mutex,deadline))return FL_GST_SESSION_TIMEOUT;
+ }
 }
