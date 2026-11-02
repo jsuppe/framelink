@@ -1,0 +1,75 @@
+{
+  "cases": [
+    {
+      "prefix": "/tmp/m5a13-gpu-final-one-off",
+      "total_identities": 3720,
+      "measured_identities": 3600,
+      "fresh_fps": 60.00273854299292,
+      "source_marker_to_arrival_ms": {
+        "p50": 1.228197,
+        "p95": 2.136285,
+        "p99": 2.23898,
+        "max": 2.387865
+      },
+      "consumer_hold_ms": {
+        "p50": 2.255655,
+        "p95": 2.385339,
+        "p99": 2.428957,
+        "max": 4.265309
+      },
+      "producer_acquire_wait_ms": {
+        "p50": 0.010272,
+        "p95": 0.014302,
+        "p99": 0.023358,
+        "max": 0.036518
+      },
+      "delivery_interval_ms": {
+        "p50": 17.183494,
+        "p95": 18.101567,
+        "p99": 19.647123,
+        "max": 28.392907
+      },
+      "rate_pass": true,
+      "gpu_completion_verified_by_csv": false,
+      "pcm_qualified": false
+    },
+    {
+      "prefix": "/tmp/m5a13-gpu-final-two-off",
+      "total_identities": 3720,
+      "measured_identities": 3600,
+      "fresh_fps": 59.99917783021591,
+      "source_marker_to_arrival_ms": {
+        "p50": 2.304741,
+        "p95": 3.730143,
+        "p99": 4.151435,
+        "max": 4.401869
+      },
+      "consumer_hold_ms": {
+        "p50": 2.242007,
+        "p95": 2.37816,
+        "p99": 2.439719,
+        "max": 4.35039
+      },
+      "producer_acquire_wait_ms": {
+        "p50": 0.009501,
+        "p95": 0.016091,
+        "p99": 0.024887,
+        "max": 0.035888
+      },
+      "delivery_interval_ms": {
+        "p50": 17.25984,
+        "p95": 18.332653,
+        "p99": 20.007028,
+        "max": 28.584035
+      },
+      "rate_pass": true,
+      "gpu_completion_verified_by_csv": false,
+      "pcm_qualified": false
+    }
+  ],
+  "comparison": {
+    "second_minus_first_p95_ms": 1.593858,
+    "budget_ms": 16.666666666666668,
+    "pass": true
+  }
+}

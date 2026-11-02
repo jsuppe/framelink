@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate matched native CPU-readable boundary measurements; not GPU/PCM proof."""
+"""Validate native boundary timing measurements; CSV alone is not GPU/PCM proof."""
 import argparse,csv,gzip,json,math,pathlib,statistics
 p=argparse.ArgumentParser();p.add_argument('prefix',nargs='+');p.add_argument('--frames',type=int,default=3720);p.add_argument('--warmup',type=int,default=120);p.add_argument('--fps',type=int,default=60);p.add_argument('--minimum-fps',type=float,default=59.4);a=p.parse_args()
 assert 0<=a.warmup<a.frames-1 and a.fps>0
@@ -27,11 +27,12 @@ for prefix in a.prefix:
  'consumer_hold_ms':stats([(r['retired_ns']-r['arrival_ns'])/1e6 for r in c]),
  'producer_acquire_wait_ms':stats([r['acquire_wait_ns']/1e6 for r in w]),
  'delivery_interval_ms':stats([(y['arrival_ns']-x['arrival_ns'])/1e6 for x,y in zip(c,c[1:])]),
- 'rate_pass':rate>=a.minimum_fps,'gpu_qualified':False,'pcm_qualified':False}
+ 'rate_pass':rate>=a.minimum_fps,'gpu_completion_verified_by_csv':False,'pcm_qualified':False}
  results.append(result)
-print(json.dumps(results,indent=2))
-assert all(r['rate_pass'] for r in results),'rate gate failed'
+report={'cases':results}
 if len(results)==2:
  delta=results[1]['source_marker_to_arrival_ms']['p95']-results[0]['source_marker_to_arrival_ms']['p95']
- print(json.dumps({'second_minus_first_p95_ms':delta,'budget_ms':1000/a.fps,'pass':delta<=1000/a.fps}))
- assert delta<=1000/a.fps,'extra boundary p95 budget failed'
+ report['comparison']={'second_minus_first_p95_ms':delta,'budget_ms':1000/a.fps,'pass':delta<=1000/a.fps}
+print(json.dumps(report,indent=2))
+assert all(r['rate_pass'] for r in results),'rate gate failed'
+assert report.get('comparison',{}).get('pass',True),'extra boundary p95 budget failed'

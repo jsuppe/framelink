@@ -1,0 +1,37 @@
+{
+  "cases": [
+    {
+      "prefix": "/tmp/m5a13-gpu-delayed",
+      "total_identities": 300,
+      "measured_identities": 270,
+      "fresh_fps": 60.054448783468416,
+      "source_marker_to_arrival_ms": {
+        "p50": 2.263317,
+        "p95": 3.745062,
+        "p99": 4.260731,
+        "max": 84.877531
+      },
+      "consumer_hold_ms": {
+        "p50": 1.105267,
+        "p95": 1.295918,
+        "p99": 2.413741,
+        "max": 100.433461
+      },
+      "producer_acquire_wait_ms": {
+        "p50": 0.014878,
+        "p95": 0.025861,
+        "p99": 4.116416,
+        "max": 74.245454
+      },
+      "delivery_interval_ms": {
+        "p50": 16.981683,
+        "p95": 19.145303,
+        "p99": 21.3582,
+        "max": 100.535443
+      },
+      "rate_pass": true,
+      "gpu_completion_verified_by_csv": false,
+      "pcm_qualified": false
+    }
+  ]
+}

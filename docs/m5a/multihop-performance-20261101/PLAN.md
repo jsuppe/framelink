@@ -30,4 +30,7 @@ One parent executor, sequential execution. This task remains OPEN.
 6. Publish evidence and limitations. Numeric baseline budgets are acceptance
    targets, not promises that unmeasured hardware already meets them.
 
-Current next action: instrumentation-validity capture on Linux GPU relay.
+Current evidence: Linux paced RGBA CPU/GPU one-/two-boundary cases and delayed
+reader qualification are recorded in linux-cpu/ and linux-gpu/. Task13 remains
+open for other supported formats/platforms, simultaneous PCM, and resource/flush
+accounting. Continue sequentially; do not relabel narrower video tests as full A/V.
