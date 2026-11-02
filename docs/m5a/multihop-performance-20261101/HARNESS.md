@@ -40,3 +40,11 @@ permitted in GPU mode; source CPU pattern generation remains explicit.
 Build/runtime qualification of this optional path is recorded separately from
 CPU-only results. Neither mode carries PCM; existing A/V timing tests must not be
 misrepresented as simultaneous PCM qualification of this benchmark.
+
+GPU setup now primes one original allocation through the shader/private FBO and
+completes a private readback before producer startup. This removes first-use
+shader/FBO costs from the paced workload without a per-frame handshake. The
+Android cold setup previously replaced pending frame1 with frame2: first GPU
+completion was about30ms after acquire and private verification added9ms.
+That cold-start failure is retained, not counted as steady-state qualification.
+The Linux evidence predates priming and remains tied to its recorded binary.

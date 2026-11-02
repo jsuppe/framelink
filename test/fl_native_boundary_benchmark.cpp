@@ -35,12 +35,12 @@ static int forward(const char*exe,const std::string&name,int control,int produce
  flResult result=FL_BUSY;const auto deadline=nowNs()+5000000000ULL;while(result==FL_BUSY&&nowNs()<deadline){result=r.finish();if(result==FL_BUSY)usleep(1000);}CHECK(result==FL_OK);sendByte(control,'F');receive(control,'D');join(child);flClose(down);flClose(up);cleanup(original);close(control);return 0;
 }
 int main(int argc,char**argv){configure();if(argc==4&&!strcmp(argv[1],"producer"))return producer(argv[2],atoi(argv[3]));if(argc==5&&!strcmp(argv[1],"relay"))return forward(argv[0],argv[2],atoi(argv[3]),atoi(argv[4]));CHECK(argc==1);
- BenchmarkGpu gpuReader;if(gpu)gpuReader.start();std::string name="boundary-bench-"+std::to_string(getpid());Native original[2]{};allocate(original);Native reversed[2]={original[1],original[0]};flChannel*c=nullptr;CHECK(channel(name+".down",reversed,&c)==FL_OK);
+ BenchmarkGpu gpuReader;if(gpu)gpuReader.start();std::string name="boundary-bench-"+std::to_string(getpid());Native original[2]{};allocate(original);if(gpu)gpuReader.warm(original[0]);Native reversed[2]={original[1],original[0]};flChannel*c=nullptr;CHECK(channel(name+".down",reversed,&c)==FL_OK);
  int rp[2],pp[2];CHECK(!socketpair(AF_UNIX,SOCK_STREAM|SOCK_CLOEXEC,0,rp));CHECK(!socketpair(AF_UNIX,SOCK_STREAM|SOCK_CLOEXEC,0,pp));
  pid_t child;if(hops==2){child=spawn(argv[0],{"relay",name,"100","101"},{rp[1],pp[1]});close(rp[1]);close(pp[1]);for(auto b:original)sendNative(rp[0],b);}else{child=spawn(argv[0],{"producer",name,"100"},{pp[1]});close(pp[1]);close(rp[1]);}
  receive(pp[0],'S');if(hops==2){sendByte(rp[0],'G');receive(rp[0],'S');}sendByte(pp[0],'G');std::vector<Observation> observations;observations.reserve(frames);
  for(unsigned n=0;n<frames;n++){
-  flFrame f{};CHECK(flAcquireFrame(c,&f,2000)==FL_OK);auto arrival=nowNs();CHECK(f.ptsNs==int64_t(uint64_t(n)*1000000000/fps));flFrameMetadata m{};CHECK(flGetFrameMetadata(c,&f,&m)==FL_OK&&m.dtsNs==f.ptsNs&&m.durationNs==uint64_t(n+1)*1000000000/fps-f.ptsNs&&m.streamGeneration==77);
+  flFrame f{};CHECK(flAcquireFrame(c,&f,2000)==FL_OK);auto arrival=nowNs();if(f.ptsNs!=int64_t(uint64_t(n)*1000000000/fps))std::fprintf(stderr,"frame mismatch expected=%u actual_pts=%lld sequence=%llu ready=%llu\n",n,(long long)f.ptsNs,(unsigned long long)f.sequence,(unsigned long long)f._readyValue);CHECK(f.ptsNs==int64_t(uint64_t(n)*1000000000/fps));flFrameMetadata m{};CHECK(flGetFrameMetadata(c,&f,&m)==FL_OK&&m.dtsNs==f.ptsNs&&m.durationNs==uint64_t(n+1)*1000000000/fps-f.ptsNs&&m.streamGeneration==77);
   uint64_t lease=0;CHECK(flLeaseFrame(c,&f,&lease)==FL_OK);if(delayUs&&n==delayFrame)usleep(delayUs);
   Header h{};uint64_t retired=0;
   if(gpu)retired=gpuReader.read(c,f,lease,&h,sizeof(h),n);
