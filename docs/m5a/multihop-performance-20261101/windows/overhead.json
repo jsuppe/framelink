@@ -1,0 +1,50 @@
+{
+  "nv12": {
+    "overhead": [
+      {
+        "trace_rate_difference_percent": 0.003291709196806547,
+        "trace_added_p95_ms": -0.005900000000000016,
+        "pass": true
+      },
+      {
+        "trace_rate_difference_percent": 0.0016650750790603297,
+        "trace_added_p95_ms": -0.009500000000000064,
+        "pass": true
+      }
+    ],
+    "extra_hop_off": {
+      "second_minus_first_p95_ms": 2.0025000000000004,
+      "budget_ms": 16.666666666666668,
+      "pass": true
+    },
+    "extra_hop_on": {
+      "second_minus_first_p95_ms": 1.9989000000000003,
+      "budget_ms": 16.666666666666668,
+      "pass": true
+    }
+  },
+  "bgra": {
+    "overhead": [
+      {
+        "trace_rate_difference_percent": 0.0026712357340086257,
+        "trace_added_p95_ms": -0.011199999999999655,
+        "pass": true
+      },
+      {
+        "trace_rate_difference_percent": 0.00083105185704202,
+        "trace_added_p95_ms": -0.007400000000000517,
+        "pass": true
+      }
+    ],
+    "extra_hop_off": {
+      "second_minus_first_p95_ms": 1.9969000000000006,
+      "budget_ms": 16.666666666666668,
+      "pass": true
+    },
+    "extra_hop_on": {
+      "second_minus_first_p95_ms": 2.0006999999999997,
+      "budget_ms": 16.666666666666668,
+      "pass": true
+    }
+  }
+}

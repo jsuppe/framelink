@@ -1,0 +1,16 @@
+{
+  "fault_only": true,
+  "nominal_performance_pass": false,
+  "producer_identities": 300,
+  "consumer_identities": 298,
+  "missing_consumer_identities": [
+    182,
+    186
+  ],
+  "boundary_joins": 596,
+  "explained_mailbox_replacements": 2,
+  "gpu_completions": 298,
+  "trace_loss": 0,
+  "max_consumer_hold_ms": 102.5305,
+  "max_producer_wait_ms": 78.534
+}
