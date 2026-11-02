@@ -46,7 +46,10 @@ for attempt in ('cancel','restart','long-preroll'):
             codes=(producer.wait(timeout=8),consumer.wait(timeout=8))
             assert (codes[0]!=0 if attempt=='cancel' else codes==(0,0)),(attempt,codes)
             if attempt!='cancel':
-                clog.flush()
+                plog.flush();clog.flush()
+                sent=[json.loads(line) for line in (root/(attempt+'-producer.log')).read_text().splitlines() if line.startswith('{')]
+                transport=[r for r in sent if r.get('event')=='video-transport-summary']
+                assert len(transport)==1 and transport[0]==dict(event='video-transport-summary',received=40,submitted=40,dropped=0,ring_full_drops=0),(attempt,'transport accounting',transport)
                 rows=[json.loads(line) for line in (root/(attempt+'-consumer.log')).read_text().splitlines() if line.startswith('{')]
                 complete=next(r for r in rows if r.get('event')=='playback-complete')
                 assert complete['video_received']==40 and complete['audio_samples']==38400,complete

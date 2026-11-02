@@ -819,8 +819,27 @@ struct ProducerFailureWatch {
   std::thread worker;
   explicit ProducerFailureWatch(Pipeline& p):pipeline(p.p),bus(gst_element_get_bus(p.p)),worker([this]{
     while (!done.load()) {
-      auto* message=gst_bus_timed_pop_filtered(bus,20*GST_MSECOND,GST_MESSAGE_ERROR);
-      if(message) {gst_message_unref(message);gst_element_set_state(pipeline,GST_STATE_NULL);break;}
+      auto* message=gst_bus_timed_pop_filtered(bus,20*GST_MSECOND,
+          GstMessageType(GST_MESSAGE_ERROR|GST_MESSAGE_ELEMENT));
+      if(!message) continue;
+      if(GST_MESSAGE_TYPE(message)==GST_MESSAGE_ERROR) {
+        gst_message_unref(message);gst_element_set_state(pipeline,GST_STATE_NULL);break;
+      }
+      // EOS statistics are serialized with the sink render calls. Preserve
+      // them here instead of letting an ERROR-only bus filter discard them:
+      // appsrc push success is not evidence of transport submission.
+      const auto* stats=gst_message_get_structure(message);
+      if(stats && gst_structure_has_name(stats,"framelink-sink-stats")) {
+        guint64 received=0,submitted=0,dropped=0,full=0;
+        gst_structure_get_uint64(stats,"received",&received);
+        gst_structure_get_uint64(stats,"submitted",&submitted);
+        gst_structure_get_uint64(stats,"dropped",&dropped);
+        gst_structure_get_uint64(stats,"ring-full-drops",&full);
+        printf("{\"event\":\"video-transport-summary\",\"received\":%llu,\"submitted\":%llu,\"dropped\":%llu,\"ring_full_drops\":%llu}\n",
+            (unsigned long long)received,(unsigned long long)submitted,
+            (unsigned long long)dropped,(unsigned long long)full);
+      }
+      gst_message_unref(message);
     }
   }) {}
   ~ProducerFailureWatch(){done=true;worker.join();gst_object_unref(bus);}
