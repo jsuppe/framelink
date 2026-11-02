@@ -62,7 +62,7 @@ Deliverables/evidence: [capability matrix](m5/CAPABILITY_MATRIX.md),
 
 ## M5a — Native-memory negotiation and zero-copy pipeline boundaries
 
-**State: in progress; M5a.1–12 locally validated; M5a.13 locally qualified within documented paths; audio policy/final closure remain.** Deliverables: versioned allocation/usage
+**State: in progress; M5a.1–12 locally validated; M5a.1–14 locally validated within documented paths; final closure remains.** Deliverables: versioned allocation/usage
 contract, native-memory GStreamer sink **and source**, platform adapters,
 Windows decoder-to-independent-renderer example, and measured multi-hop evidence.
 
@@ -160,9 +160,12 @@ Windows decoder-to-independent-renderer example, and measured multi-hop evidence
   nominal cases3720/3720 at~60fps, complete simultaneous PCM, exact media offset,
   zero accepted trace loss, explicit faults/copies/resource costs. Cold startup,
   unmeasured formats and physical output remain unqualified.
-- [ ] **M5a.14 Audio copy-cost decision:** report existing GDP/GIO separately;
+- [x] **M5a.14 Audio copy-cost decision:** report existing GDP/GIO separately;
   evaluate shared PCM only against a demonstrated requirement. Video sharing
   does not establish audio zero-copy or eliminate final playback buffering.
+  [Policy and measured-cost limits](AUDIO_MEMORY_POLICY.md): retain GDP/GIO,
+  advertise CPU/serialized PCM separately, reject strict zero-copy audio, and
+  require production profiling/budget evidence before a shared-PCM redesign.
 - [ ] **M5a.15 Publish/review/merge:** supported-path benchmarks, capability
   matrix, integration guide and passing gates for the actual final revisions.
 
