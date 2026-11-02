@@ -12,7 +12,8 @@
 //    base time to the current system-clock time, and proposes that instant as
 //    the session epoch. Running time is then clock - epoch on both tracks with
 //    no offset or rebasing; a producer pause is a media gap and consumer
-//    latency is unchanged. The pipeline must run on the system clock.
+//    latency is unchanged. The bin selects the system clock unless the
+//    application fixed a pipeline clock, which must then be the system clock.
 //    Child EOS is held until the consumer confirms its drain.
 //  - no session: thin composition. The application installs the
 //    framelink.session.v1 context, adopts the video channel through the bin's
@@ -107,7 +108,7 @@ static bool monotonicSystemClock(GstElement*element){
  if(clock&&GST_IS_SYSTEM_CLOCK(clock)){GstClockType type=GST_CLOCK_TYPE_REALTIME;g_object_get(clock,"clock-type",&type,nullptr);ok=type==GST_CLOCK_TYPE_MONOTONIC;}
  if(clock)gst_object_unref(clock);return ok;
 }
-static constexpr const char* kClockError="framelinkavsink with session= requires the pipeline system clock (gst_pipeline_use_clock(pipeline, gst_system_clock_obtain()))";
+static constexpr const char* kClockError="framelinkavsink with session= requires the pipeline system clock; do not fix another pipeline clock";
 
 static void releaseMedia(GstElement*element,gpointer){
  auto*s=reinterpret_cast<GstFrameLinkAvSink*>(element);auto*sh=s->shared;
@@ -202,7 +203,11 @@ static GstStateChangeReturn changeState(GstElement*element,GstStateChange transi
    // session epoch (start time NONE, base time = epoch).
    GstElement*top=element;while(auto*parent=GST_ELEMENT(gst_element_get_parent(top))){if(top!=element)gst_object_unref(top);top=parent;}
    if(top==element||!GST_IS_PIPELINE(top)){if(top!=element)gst_object_unref(top);GST_ELEMENT_ERROR(s,CORE,STATE_CHANGE,("framelinkavsink with session= must be inside a GstPipeline"),(nullptr));return GST_STATE_CHANGE_FAILURE;}
-   {auto*clock=gst_system_clock_obtain();const GstClockTime now=gst_clock_get_time(clock);gst_object_unref(clock);
+   {auto*clock=gst_system_clock_obtain();const GstClockTime now=gst_clock_get_time(clock);
+    // A clock the application fixed is respected and refused at PLAYING if it
+    // is not the system clock (a capture device clock would otherwise win).
+    if(!GST_OBJECT_FLAG_IS_SET(top,GST_PIPELINE_FLAG_FIXED_CLOCK))gst_pipeline_use_clock(GST_PIPELINE(top),clock);
+    gst_object_unref(clock);
     gst_element_set_start_time(top,GST_CLOCK_TIME_NONE);gst_element_set_base_time(top,now);gst_object_unref(top);
     std::lock_guard<std::mutex> lock(s->shared->mutex);s->shared->epoch=gint64(now);}
    GST_INFO_OBJECT(s,"pipeline start time NONE, base time = session epoch");

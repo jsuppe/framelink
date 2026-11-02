@@ -1,0 +1,59 @@
+UpdateCTestConfiguration  from :<win-tree>/build/DartConfiguration.tcl
+Test project <win-tree>/build
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 104
+    Start 104: gst_av_src_bin
+
+104: Test command: <win-tree>\build\Release\fl_gst_av_src_bin.exe "<win-tree>/build/Release/gstframelink.dll"
+104: Working Directory: <win-tree>/build
+104: Test timeout computed to be: 150
+104: CASE negative outside a pipeline
+104: CASE tracks=av consumer-first=1 lead=0ms 
+104:    producer=EOS consumer=EOS video=30 (mapped 30, memory:SystemMemory) samples=24000 lag video 150.2..151.9ms audio 150.3..152.4ms
+104: CASE tracks=av consumer-first=0 lead=800ms 
+104:    producer=EOS consumer=EOS video=30 (mapped 30, memory:SystemMemory) samples=24000 lag video 150.2..151.8ms audio 150.1..151.7ms
+104: CASE tracks=video consumer-first=0 lead=300ms 
+104:    producer=EOS consumer=EOS video=30 (mapped 30, memory:SystemMemory) samples=0 lag video 150.1..151.7ms audio 9223372036854.8..-9223372036854.8ms
+104: CASE tracks=audio consumer-first=1 lead=0ms 
+104:    producer=EOS consumer=EOS video=0 (mapped 0, -) samples=24000 lag video 9223372036854.8..-9223372036854.8ms audio 150.1..152.0ms
+104: CASE tracks=av consumer-first=1 lead=0ms  (clock-providing element in both pipelines)
+104:    producer=EOS consumer=EOS video=30 (mapped 30, memory:SystemMemory) samples=24000 lag video 150.1..152.0ms audio 150.0..151.9ms
+104: CASE tracks=av consumer-first=1 lead=0ms native-memory=true
+104:    producer=EOS consumer=EOS video=30 (mapped 30, memory:D3D11Memory) samples=24000 lag video 150.1..151.9ms audio 150.1..151.9ms
+104: CASE thin (application-installed context)
+104:    producer=EOS consumer=EOS video=30 (mapped 30, memory:SystemMemory) samples=24000 lag video 150.1..151.5ms audio 150.0..151.9ms
+104: CASE standalone-element producer
+104:    producer=EOS consumer=EOS video=30 (mapped 30, memory:SystemMemory) samples=24000 lag video 150.1..151.8ms audio 150.0..152.0ms
+104: CASE reconnect through NULL
+104:   round 0 producer=EOS consumer=EOS video=30 (mapped 30, memory:SystemMemory) samples=24000 lag video 150.0..151.5ms audio 150.0..151.9ms
+104:   round 1 producer=EOS consumer=EOS video=30 (mapped 30, memory:SystemMemory) samples=24000 lag video 150.1..151.9ms audio 150.1..151.7ms
+104:   sessions 03558abf6f963fe5822112f9e8930233 / dbcd447bfb4f3096e3b58f757c39c403
+104: CASE producer death mid-stream
+104:   consumer 6ms after producer death: flaudioreader24: audio peer closed before GDP EOS
+104: CASE teardown during setup
+104:   NULL in 6.1ms
+104: CASE negative no-producer
+104:   consumer error after 1006ms: c: local session discovery deadline or cancellation; producer: -
+104: CASE negative track-mismatch
+104:   consumer error after 7ms: c: producer selection or authentication rejected; producer: s: incompatible session selection
+104: CASE negative caps-mismatch
+104:   consumer error after 6ms: c: producer selection or authentication rejected; producer: s: incompatible session selection
+104: CASE negative non-system-clock
+104:   consumer error after 0ms: c: framelinkavsrc with session= requires the pipeline system clock (mapped PTS are system-clock times); do not fix another pipeline clock; producer: -
+104: framelinkavsrc: consumer/producer-first startup, consumer timeline (lag within latency bounds per track), exact counts/content, drain releases producer EOS, system clock over a clock-providing element, native memory negotiation, thin composition, standalone-element producer, reconnect via NULL, producer-death/track/caps/clock/missing-peer/outside-pipeline failures bounded
+1/1 Test #104: gst_av_src_bin ...................   Passed   15.90 sec
+
+The following tests passed:
+	gst_av_src_bin
+
+100% tests passed, 0 tests failed out of 1
+
+Label Time Summary:
+m5b_av    =  15.90 sec*proc (1 test)
+
+Total Test time (real) =  15.91 sec

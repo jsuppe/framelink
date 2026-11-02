@@ -177,7 +177,7 @@ playback delay; unsupported hardware paths must reject clearly.
 
 ## M5b — GStreamer audio elements and coordinated A/V sessions
 
-**State: in progress; tasks1–9 locally validated; task10 consumer A/V bin next.** Added at Jon's request 2026-11-01. Execute
+**State: in progress; tasks1–10 locally validated; task11 bin parity and examples next.** Added at Jon's request 2026-11-01. Execute
 only after M5a closes, before M6 qualifies the complete public integration path.
 Video elements remain video-only; separate audio elements share one session.
 
@@ -251,10 +251,18 @@ elements remain independently available.
   is held until ready; the timeline matches apply_pipeline_clock; EOS waits for
   the consumer drain. `gst_av_bin` x20 on Linux/Windows/Android, latency
   150–153ms on both tracks, bin/thin pause parity, Linux 109/109 serial.
-- [ ] **M5b.10 Consumer A/V bin:** compose the validated video/audio sources;
+- [x] **M5b.10 Consumer A/V bin:** compose the validated video/audio sources;
   expose separate audio/video source ghost pads for independent downstream
   rendering/playback. Coordinate readiness, session clocks and reconnect; do not
   hardwire a display or audio device. Preserve native video memory negotiation.
+  [Evidence](m5b/consumer-bin/README.md): `framelinkavsrc`, live source with
+  `session=` (consumer discovery off the state-change path, ready after its
+  sources start, drain after EOS on every track) or thin over an installed
+  context; consumer pipeline-clock semantics; reconnect via NULL. Native memory
+  negotiated per platform (DMABuf, D3D11Memory, FrameLinkAHardwareBuffer).
+  Both bins select the system clock unless the application fixed one.
+  `gst_av_src_bin` and `gst_av_bin` x20 on Linux, Windows and Android; Linux
+  110/110 serial.
 - [ ] **M5b.11 Bin parity and examples:** demonstrate standalone-element and
   bin-based two-process pipelines. Test equivalent PCM/video timing and negotiated
   memory paths, missing-track policy, startup/pause/flush/EOS, peer death/reconnect,

@@ -1,6 +1,6 @@
 # M5b public GStreamer A/V contract
 
-Status: tasks1–9 locally validated on the M5b development branch. Public audio
+Status: tasks1–10 locally validated on the M5b development branch. Public audio
 sink/source, coordinated timing, lifecycle/security, two-process examples, the
 automated validation matrix and the producer bin are implemented; the consumer
 bin and bin parity remain unfinished. See [producer bin](m5b/producer-bin/README.md),
@@ -16,11 +16,20 @@ only. No compatibility claim follows from this design document alone.
   task 9. With `session=`, it performs local discovery off the state-change
   path, holds media at its pads until the session is ready, and applies the
   producer pipeline-clock semantics: start time NONE, base time = session
-  epoch, monotonic system clock required. Without `session=`, it is a thin
+  epoch, monotonic system clock (selected unless the application fixed a
+  clock; a fixed non-system clock is refused). Without `session=`, it is a thin
   composition over an installed context, and the lease is adopted with its
   `adopt-channel` action (decision Jon, 2026-11-02: self-contained bins).
 - `framelinkavsrc`: consumer convenience bin; `video_src` and `audio_src`
-  ghost pads, no display/audio sink hardwired.
+  ghost pads, no display/audio sink hardwired. Implemented in task 10. With
+  `session=`, it is a live source that performs consumer discovery off the
+  state-change path, starts its inner sources once the session is ready and
+  PLAYING, then reports ready. It applies the consumer pipeline-clock
+  semantics (system clock unless fixed, start time NONE, base time 0,
+  `latency-ms`) and reports the drain once every enabled track delivered EOS.
+  `native-memory=true` allocates a deferred-release ring and leaves memory
+  negotiation to the inner `framelinksrc`. Thin mode as for the producer bin.
+  Reconnect requires NULL (fresh session).
 - Bins expose only enabled tracks, chosen while NULL with `tracks=audio|video|av`;
   default `av`. Individual audio elements default `audio`; coordinated use is
   explicit `av`. Video elements retain their legacy defaults unless attached

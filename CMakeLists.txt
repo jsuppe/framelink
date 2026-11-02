@@ -1009,7 +1009,7 @@ if(TARGET gstframelink)
 endif()
 
 if(TARGET framelink_gst_session)
-    target_sources(gstframelink PRIVATE gst/gstframelinkaudio.cpp gst/gstframelinkaudiosrc.cpp gst/fl_gst_audio_startup.cpp gst/gstframelinkavsink.cpp)
+    target_sources(gstframelink PRIVATE gst/gstframelinkaudio.cpp gst/gstframelinkaudiosrc.cpp gst/fl_gst_audio_startup.cpp gst/gstframelinkavsink.cpp gst/gstframelinkavsrc.cpp)
     target_link_libraries(gstframelink PRIVATE framelink_gst_session)
 endif()
 if(FRAMELINK_BUILD_TESTS AND TARGET framelink_gst_session)
@@ -1108,6 +1108,27 @@ if(FRAMELINK_BUILD_TESTS AND TARGET framelink_gst_session)
     add_dependencies(fl_gst_av_bin gstframelink)
     add_test(NAME gst_av_bin COMMAND fl_gst_av_bin $<TARGET_FILE:gstframelink>)
     set_tests_properties(gst_av_bin PROPERTIES TIMEOUT 120)
+    add_executable(fl_gst_av_src_bin test/fl_gst_av_src_bin.cpp)
+    target_link_libraries(fl_gst_av_src_bin PRIVATE framelink_gst_session)
+    if(ANDROID)
+        target_link_libraries(fl_gst_av_src_bin PRIVATE gstframelink
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstapp.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstcoreelements.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstgdp.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstgio.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstvideotestsrc.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstaudiotestsrc.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/libgstaudio-1.0.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/libgstcheck-1.0.a"
+            ${FL_ANDROID_SESSION_GIO_STATIC_LDFLAGS} ${FL_ANDROID_GST_STATIC_LDFLAGS})
+    elseif(WIN32)
+        target_link_libraries(fl_gst_av_src_bin PRIVATE gstapp-1.0.lib gstcheck-1.0.lib)
+    else()
+        target_link_libraries(fl_gst_av_src_bin PRIVATE PkgConfig::FL_GST_APP PkgConfig::FL_GST_VALIDATION_CHECK)
+    endif()
+    add_dependencies(fl_gst_av_src_bin gstframelink)
+    add_test(NAME gst_av_src_bin COMMAND fl_gst_av_src_bin $<TARGET_FILE:gstframelink>)
+    set_tests_properties(gst_av_src_bin PROPERTIES TIMEOUT 150)
     add_executable(fl_gst_local_av test/fl_gst_local_av.cpp)
     target_link_libraries(fl_gst_local_av PRIVATE framelink_gst_session)
     if(ANDROID)
@@ -1171,7 +1192,7 @@ endif()
 # M5b task8 validation matrix suites (tools/m5b_validation_matrix.py runs them
 # with repeats). Labels are appended so existing gpu/integration labels remain.
 set(FL_M5B_AV_TESTS gst_session_transport gst_session_context gst_audio_sink gst_audio_source
-    gst_event_channel gst_local_audio gst_av_timeline gst_av_validation gst_local_av gst_av_bin m5b_gst_av_example)
+    gst_event_channel gst_local_audio gst_av_timeline gst_av_validation gst_local_av gst_av_bin gst_av_src_bin m5b_gst_av_example)
 # Video-only element regression: framelinksink/src behaviour that predates M5b
 # and must remain unchanged with no session context.
 set(FL_GST_VIDEO_REGRESSION_TESTS gst_native_producer_linux gst_native_source gst_native_producer_win

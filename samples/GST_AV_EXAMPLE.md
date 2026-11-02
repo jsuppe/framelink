@@ -112,8 +112,8 @@ The consumer is unchanged; it can be any of the consumer setups above.
   start time to NONE and its base time to the current system-clock time, and
   proposes that time as the session epoch. Running time is session time on
   both tracks, with no offset, rebasing or per-track adjustment. The pipeline
-  must use the system clock; otherwise the bin fails PLAYING with a clear
-  error. A producer pause is therefore a media gap, and consumer latency does
+  must use the system clock. The bin selects it unless the application fixed
+  another pipeline clock, which makes PLAYING fail with a clear error. A producer pause is therefore a media gap, and consumer latency does
   not change. Live sources that skip samples on resume without setting DISCONT
   (live `audiotestsrc` does) are refused by `framelinkaudiosink`, just as with
   the standalone elements.
@@ -125,6 +125,58 @@ The consumer is unchanged; it can be any of the consumer setups above.
 - **Without `session=`.** The bin is a thin wrapper. Install the
   `framelink.session.v1` context, adopt the lease with the bin's
   `adopt-channel` action, and apply the pipeline clock yourself.
+
+### Consumer bin: `framelinkavsrc`
+
+The consumer side has a matching bin. With `session=`, it does discovery,
+negotiation, the clock exchange, the ready report and the drain report
+itself. It exposes separate `video_src` and `audio_src` pads (only the tracks
+you enable exist) and contains no display or audio device: link each pad to
+whatever renders or processes it.
+
+```c
+GstElement* p = gst_parse_launch(
+  "framelinkavsrc name=c tracks=av video-format=RGBA width=1280 height=720 latency-ms=150 "
+  "c.video_src ! queue ! videoconvert ! autovideosink "
+  "c.audio_src ! queue ! audioconvert ! autoaudiosink",
+  &err);
+GstElement* c = gst_bin_get_by_name(GST_BIN(p), "c");
+g_object_set(c, "session", dir, NULL);   // set in code: launch syntax eats Windows backslashes
+gst_element_set_state(p, GST_STATE_PLAYING);  // may start before the producer exists
+```
+
+The two bins work together, and each also works with the standalone setup on
+the other side.
+
+- **Startup.** The bin is a live source. Its pipeline reaches PLAYING without
+  preroll while discovery runs in the background, bounded by
+  `connect-timeout-ms`. The inner sources start once the session is ready and
+  the bin is PLAYING; the bin then reports ready, which releases the
+  producer's media.
+- **Timeline.** At NULL→READY the bin does what
+  `fl_gst_session_apply_pipeline_clock(consumer)` does on its pipeline: system
+  clock (unless the application fixed one; a non-system clock fails PLAYING),
+  start time NONE, base time 0 and pipeline latency `latency-ms`. Mapped PTS
+  are receiver system-clock capture times, so synchronized sinks present each
+  buffer `latency-ms` after capture on both tracks. Downstream audio sinks
+  that provide a clock do not replace it.
+- **Pool.** The consumer allocates the ring. `video-pool` (default 8) must
+  cover the frames held downstream within the latency, as above.
+- **Native memory.** `native-memory=true` creates the ring with deferred read
+  release and outputs the platform GPU memory (`memory:DMABuf`,
+  `memory:D3D11Memory` or `memory:FrameLinkAHardwareBuffer`). Downstream
+  negotiates it with the inner `framelinksrc` exactly as with the standalone
+  element; the bin's pad does not restrict caps features.
+- **End of stream.** When every enabled track has delivered EOS downstream,
+  all media has left the transport and the bin reports the drain, which
+  releases the producer's EOS. Rendering the tail is downstream's job.
+- **Failures and reconnect.** Producer death, track or format mismatch, a
+  missing producer and a fixed non-system clock post errors within bounded
+  time. A new session needs the bin set to NULL and back; there is no
+  automatic in-element reconnect.
+- **Without `session=`.** The bin is a thin wrapper. Install the context,
+  adopt the lease with `adopt-channel`, apply the consumer pipeline clock, and
+  call `fl_gst_session_local_ready` and `fl_gst_session_finish_local` yourself.
 
 ## Timing, latency and pool size
 

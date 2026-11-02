@@ -1746,12 +1746,13 @@ static void gst_framelink_src_init(GstFrameLinkSrc* self) {
 gboolean fl_register_audio_sink(GstPlugin*);
 gboolean fl_register_audio_src(GstPlugin*);
 gboolean fl_register_av_sink(GstPlugin*);
+gboolean fl_register_av_src(GstPlugin*);
 static gboolean plugin_init(GstPlugin* plugin) {
     GST_DEBUG_CATEGORY_INIT(framelink_debug, "framelink", 0, "framelink elements");
     return gst_element_register(plugin, "framelinksink", GST_RANK_NONE,
                                 gst_framelink_sink_get_type()) &&
            gst_element_register(plugin, "framelinksrc", GST_RANK_NONE,
-                                gst_framelink_src_get_type()) && fl_register_audio_sink(plugin) && fl_register_audio_src(plugin) && fl_register_av_sink(plugin);
+                                gst_framelink_src_get_type()) && fl_register_audio_sink(plugin) && fl_register_audio_src(plugin) && fl_register_av_sink(plugin) && fl_register_av_src(plugin);
 }
 
 #ifndef PACKAGE
