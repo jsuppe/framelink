@@ -9,6 +9,57 @@ matrix below rather than assuming every pipeline is zero-copy.
 and **Android** (AHardwareBuffer) share the core C API. Platform headers expose
 interop handles; allocation/format/fence support still depends on the driver.
 
+## Design and progress — November 1, 2026
+
+**Shipped on `master`: M1–M5 are complete within the documented platform scope.**
+This includes A/V session contracts, producer/consumer examples, synchronized
+playback, signed Android cross-app integration and targeted platform qualification.
+See the [M5 capability matrix](docs/m5/CAPABILITY_MATRIX.md) for exact supported
+paths, evidence and exclusions; passing tests do not imply universal driver support.
+
+**M5a: native-memory pipeline boundaries — in development, not merged.**
+The current development branch is
+[`feature/m5a-native-memory`](https://github.com/jsuppe/framelink/tree/feature/m5a-native-memory).
+
+- **M5a.1–12 locally validated and pushed:** memory/capability contracts,
+  external pools, bounded ownership/reader completion, strict/fallback policy,
+  native GStreamer adapters, decoder/relay examples and signed Android integration.
+- **M5a.13 locally qualified:** supported two-buffer one/two-hop1080p60 native
+  cases deliver3720/3720 frames; simultaneous PCM/media offset preserved. Copies,
+  fault replacements, resource costs and unqualified paths remain explicit in
+  [the performance report](docs/m5a/multihop-performance-20261101/README.md).
+- **M5a.14 locally complete:** [audio policy](docs/AUDIO_MEMORY_POLICY.md) retains
+  serialized GDP/GIO PCM; native video does not imply A/V zero-copy.
+- **M5a.15 active:** final platform checks, review, CI and merge in
+  [PR #7](https://github.com/jsuppe/framelink/pull/7). Not yet shipped or merged.
+- **M5b planned:** dedicated GStreamer audio source/sink, shared session coordinator
+  and A/V convenience bins; execute after M5a closure.
+- **M6 not started:** reliability/performance qualification, including 30-minute
+  A/V soaks, at least 100 reconnect cycles per supported target and measured
+  tracing overhead. **M7 not started:** release packaging and developer handoff.
+
+The intended M5a design shares allocations at process boundaries, with explicit
+CPU/GPU usage and import compatibility negotiation. Consumer-provided and
+producer-owned pools must retain storage until every downstream reader's actual
+CPU/GPU work completes. Strict zero-copy paths must reject incompatible resources
+rather than silently copy. Permitted staging or conversion must be explicit.
+
+**Pool capacity is not intentional queue latency.** A 12-buffer allocation must
+not imply a 12-frame playback reservoir at every hop. Pass-through boundaries
+preserve allocation identity and the common A/V media timeline; final outputs own
+presentation scheduling. Zero-copy does not mean zero synchronization or elapsed
+transfer time. Audio transport costs are assessed separately from video sharing.
+
+Start here:
+- [Current detailed task checklist](https://github.com/jsuppe/framelink/blob/feature/m5a-native-memory/docs/ROADMAP_TASKS.md)
+- [Pipeline-boundary design and acceptance criteria](docs/M5A_PIPELINE_BOUNDARIES.md)
+- [Development memory contract](https://github.com/jsuppe/framelink/blob/feature/m5a-native-memory/docs/MEMORY_CONTRACT.md)
+- [Adapter validation evidence](https://github.com/jsuppe/framelink/tree/4aab05f/docs/m5a/adapters-20261101)
+- [Remaining milestone roadmap](docs/REMAINING_ROADMAP.md)
+
+This is a dated source/evidence snapshot, not a live executor-status dashboard.
+Development-branch results are not merged release features.
+
 ```c
 // consumer — owns the buffers
 flChannel* ch;
@@ -43,10 +94,10 @@ contract; releasing a slot before its GPU reads finish is not safe.
 buffers; producers attach and draw into them. `flOpenProducer` never creates a
 channel — it returns `FL_NOT_FOUND` if nobody is consuming.
 
-This is not arbitrary. It is `dequeueBuffer`/`queueBuffer`, the same shape as
-Android's `Surface`/BufferQueue and `AImageReader`, where buffer ownership
-belongs to the consumer and is not something an API gets to choose. Designing
-it the other way ports fine to Windows and Linux, then hits a wall on Android.
+This is the current FrameLink channel model, similar to Android Surface/BufferQueue
+usage. It is not a universal restriction on sharing AHardwareBuffer allocations.
+M5a adds explicit external-allocation ownership and lifetime negotiation; that
+new path is not implemented by the examples above.
 
 Geometry remains consumer-owned. Producers query the accepted configuration
 with `flQuery`; `flRequestGeometry` is an advisory resize request, not permission
@@ -94,10 +145,11 @@ Android expose explicit ready/consumed sync-FDs through `framelink_sync_fd.h`;
 external GPU producers must supply actual completion, not submit unfinished work.
 The Windows shared-fence API is not silently emulated on Linux/Android.
 
-**NVIDIA note:** its GBM backend refuses `RENDERING|LINEAR` together, so a
-CPU-mappable buffer is not GPU-renderable. framelink falls back automatically
-and logs it; a GPU producer on NVIDIA should leave `FL_MAP_CPU` off and import
-the dma-buf.
+**Linux allocation note:** on the tested NVIDIA GBM path, `RENDERING|LINEAR`
+was refused and legacy CPU-mappable allocation could fall back to LINEAR-only.
+That does not guarantee GPU renderability. Do not infer actual usage from requested
+flags; M5a capability queries expose the allocation facts, and strict negotiation
+must reject a path that cannot establish required rendering support.
 
 A/V samples, signed Android cross-app ownership and qualified platform behavior
 are described in the [M5 capability matrix](docs/m5/CAPABILITY_MATRIX.md).
