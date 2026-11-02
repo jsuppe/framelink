@@ -5,7 +5,7 @@ Updated 2026-11-01. This is the checkable execution view of
 remain authoritative. Checked means implemented, reviewed and validated within
 the stated scope—not universal hardware support or physical-output qualification.
 
-Remaining execution order: **M5a → M5b → M6 → M7**, one task at a time. No concurrent
+Remaining execution order: **M5b → M6 → M7**, one task at a time. No concurrent
 implementation/review/validation streams. Finish the current milestone before
 starting the next. Hourly reporting is not an implementation executor.
 
@@ -62,7 +62,7 @@ Deliverables/evidence: [capability matrix](m5/CAPABILITY_MATRIX.md),
 
 ## M5a — Native-memory negotiation and zero-copy pipeline boundaries
 
-**State: in progress; M5a.1–14 locally validated within documented paths; final closure remains.** Deliverables: versioned allocation/usage
+**State: COMPLETE within documented paths; PR #7 merged as `3e1d51f`.** Deliverables: versioned allocation/usage
 contract, native-memory GStreamer sink **and source**, platform adapters,
 Windows decoder-to-independent-renderer example, and measured multi-hop evidence.
 
@@ -166,8 +166,10 @@ Windows decoder-to-independent-renderer example, and measured multi-hop evidence
   [Policy and measured-cost limits](AUDIO_MEMORY_POLICY.md): retain GDP/GIO,
   advertise CPU/serialized PCM separately, reject strict zero-copy audio, and
   require production profiling/budget evidence before a shared-PCM redesign.
-- [ ] **M5a.15 Publish/review/merge:** supported-path benchmarks, capability
+- [x] **M5a.15 Publish/review/merge:** supported-path benchmarks, capability
   matrix, integration guide and passing gates for the actual final revisions.
+  Final source `e38de30`: Linux97/97, Windows95/95, hosted Linux/Windows CI passed;
+  latest signed Android6/6. [Final evidence](m5a/final-integration-20261101/README.md).
 
 Acceptance: [shared-buffer boundary contract](M5A_PIPELINE_BOUNDARIES.md).
 Strict pass-through must not silently copy pixels or add intentional per-hop

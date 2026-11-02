@@ -1,13 +1,11 @@
 # M5a: shared-buffer pipeline boundaries
 
-Status: **required design/acceptance contract, not an implementation claim**.
-Updated 2026-11-01 from Jon's 2026-10-31 clarification. M5 is now merged within
-its documented capability scope. This contract defines the approved next M5a
-milestone. M5a.1–14 are locally validated on the feature branch, not merged.
-Explicit native adapters, ownership, authenticated allocation policy, scoped
-platform/relay/performance qualification and audio copy-cost policy are recorded.
-Final integrated checks/review/merge remain pending; see [the task ledger](ROADMAP_TASKS.md)
-and [measured scope/exclusions](m5a/multihop-performance-20261101/README.md).
+Status: **M5a complete within documented qualification scope.** PR #7 merged
+as `3e1d51f` on 2026-11-01 EST. This remains the design/acceptance contract;
+requirements do not imply support on unqualified drivers or arbitrary pipelines.
+See [final evidence](m5a/final-integration-20261101/README.md),
+[task ledger](ROADMAP_TASKS.md) and
+[measured scope/exclusions](m5a/multihop-performance-20261101/README.md).
 
 ## Intended use
 
@@ -75,7 +73,7 @@ moves, rather than removes, buffering and must remain visible in measurements.
    timeline. A stage that explicitly requires processing lookahead must expose
    that latency separately; zero-copy is not a claim of zero elapsed time.
 
-## Current implementation boundary
+## Historical pre-M5a implementation boundary
 
 These are the observed paths before M5a, not the target support matrix:
 

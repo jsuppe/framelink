@@ -3,8 +3,8 @@
 Updated 2026-11-01. Scope: local cross-platform video/audio sessions and renderer
 integration. Historical cloud calling, unrelated receiver features and HDR are
 not part of this release. M1–M5 are merged within their documented qualification
-scope. M5a is active; tasks1–14 are locally validated within documented scope, final integration/merge pending. Remaining
-M5a tasks and later milestones are not implemented/qualified merely by being planned.
+scope. M5a is complete within documented paths (PR #7, `3e1d51f`).
+M5b is next; M6/M7 follow. Planned work is not implemented merely by being listed.
 
 For individually checkable tasks and current merge gates, see
 [the executable roadmap checklist](ROADMAP_TASKS.md).

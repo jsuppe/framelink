@@ -1,4 +1,23 @@
-# M5a final integration — gate still open
+# M5a final integration — merged
+
+## Final gate
+
+PR #7 merged as `3e1d51f` at 2026-11-02 03:14:06 UTC (November 1 EST).
+Final source `e38de30` passed full Linux **97/97** (252.39s) and Windows
+**95/95** (245.39s), without skips. Logs: [Linux](linux-final-e38.log),
+[Windows](windows-final-e38.log). Hosted Linux/Windows checks passed
+[run41381322454](https://github.com/jsuppe/framelink/actions/runs/41381322454).
+Latest signed Android checks6/6 and dual-ABI builds passed; see producer-catchup.
+Post-wake native NV12/BGRA two-hop cases each3720/3720 with full PCM/GPU accounting.
+Documentation-only closure follows the merge; no production code differs.
+
+The chronology below preserves failed gates and repairs. Its earlier open-gate
+statements are historical, superseded by this final result. The original untraced
+39/40 event cannot be retrospectively attributed exactly; controlled matching
+producer-stall loss was reproduced and repaired. Physical output remains unqualified.
+
+## Investigation chronology
+
 
 Linux full96/96 passed with no skips, plus the new registered boundary_av_analyzer
 1/1 (eight internal controls):97 unique tests. Production Linux/Android unchanged

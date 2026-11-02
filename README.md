@@ -11,38 +11,28 @@ interop handles; allocation/format/fence support still depends on the driver.
 
 ## Design and progress — November 1, 2026
 
-**Shipped on `master`: M1–M5 are complete within the documented platform scope.**
-This includes A/V session contracts, producer/consumer examples, synchronized
-playback, signed Android cross-app integration and targeted platform qualification.
-See the [M5 capability matrix](docs/m5/CAPABILITY_MATRIX.md) for exact supported
-paths, evidence and exclusions; passing tests do not imply universal driver support.
+**Shipped on `master`: M1–M5 and M5a are complete within documented scope.**
+M5a merged in [PR #7](https://github.com/jsuppe/framelink/pull/7) as `3e1d51f`.
+Final source `e38de30` passed Linux **97/97**, Windows **95/95**, hosted Linux/Windows
+CI, and latest signed Android regressions **6/6**. See
+[final evidence and attribution limits](docs/m5a/final-integration-20261101/README.md).
 
-**M5a: native-memory pipeline boundaries — in development, not merged.**
-The current development branch is
-[`feature/m5a-native-memory`](https://github.com/jsuppe/framelink/tree/feature/m5a-native-memory).
+- Native allocation negotiation, external pools, downstream reader completion,
+  native GStreamer adapters and authenticated relay paths are implemented.
+- Supported two-buffer one/two-hop 1080p60 cases deliver 3,720/3,720 frames;
+  simultaneous PCM retains the producer media offset. See
+  [performance scope, copies and exclusions](docs/m5a/multihop-performance-20261101/README.md).
+- [Audio policy](docs/AUDIO_MEMORY_POLICY.md) retains serialized GDP/GIO PCM;
+  native video does not imply whole-A/V zero-copy.
+- **M5b next:** public audio source/sink, shared session coordination and A/V bins.
+  These are not yet shipped public elements.
+- **M6/M7 not started:** extended reliability/performance qualification, then release.
 
-- **M5a.1–12 locally validated and pushed:** memory/capability contracts,
-  external pools, bounded ownership/reader completion, strict/fallback policy,
-  native GStreamer adapters, decoder/relay examples and signed Android integration.
-- **M5a.13 locally qualified:** supported two-buffer one/two-hop1080p60 native
-  cases deliver3720/3720 frames; simultaneous PCM/media offset preserved. Copies,
-  fault replacements, resource costs and unqualified paths remain explicit in
-  [the performance report](docs/m5a/multihop-performance-20261101/README.md).
-- **M5a.14 locally complete:** [audio policy](docs/AUDIO_MEMORY_POLICY.md) retains
-  serialized GDP/GIO PCM; native video does not imply A/V zero-copy.
-- **M5a.15 active:** final platform checks, review, CI and merge in
-  [PR #7](https://github.com/jsuppe/framelink/pull/7). Not yet shipped or merged.
-- **M5b planned:** dedicated GStreamer audio source/sink, shared session coordinator
-  and A/V convenience bins; execute after M5a closure.
-- **M6 not started:** reliability/performance qualification, including 30-minute
-  A/V soaks, at least 100 reconnect cycles per supported target and measured
-  tracing overhead. **M7 not started:** release packaging and developer handoff.
-
-The intended M5a design shares allocations at process boundaries, with explicit
-CPU/GPU usage and import compatibility negotiation. Consumer-provided and
-producer-owned pools must retain storage until every downstream reader's actual
-CPU/GPU work completes. Strict zero-copy paths must reject incompatible resources
-rather than silently copy. Permitted staging or conversion must be explicit.
+M5a shares compatible allocations at process boundaries with explicit CPU/GPU
+usage negotiation. Storage remains owned until downstream work completes.
+Strict paths reject incompatibilities; permitted staging/conversion is explicit.
+Physical scanout, acoustic alignment, arbitrary drivers/decoders and cold wake
+are not established by software timing or GPU completion results.
 
 **Pool capacity is not intentional queue latency.** A 12-buffer allocation must
 not imply a 12-frame playback reservoir at every hop. Pass-through boundaries
@@ -51,9 +41,9 @@ presentation scheduling. Zero-copy does not mean zero synchronization or elapsed
 transfer time. Audio transport costs are assessed separately from video sharing.
 
 Start here:
-- [Current detailed task checklist](https://github.com/jsuppe/framelink/blob/feature/m5a-native-memory/docs/ROADMAP_TASKS.md)
+- [Current detailed task checklist](docs/ROADMAP_TASKS.md)
 - [Pipeline-boundary design and acceptance criteria](docs/M5A_PIPELINE_BOUNDARIES.md)
-- [Development memory contract](https://github.com/jsuppe/framelink/blob/feature/m5a-native-memory/docs/MEMORY_CONTRACT.md)
+- [Development memory contract](docs/MEMORY_CONTRACT.md)
 - [Adapter validation evidence](https://github.com/jsuppe/framelink/tree/4aab05f/docs/m5a/adapters-20261101)
 - [Remaining milestone roadmap](docs/REMAINING_ROADMAP.md)
 
