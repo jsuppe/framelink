@@ -1,0 +1,12 @@
+# LD_DEBUG=files ./fl_gst_local_av ./libgstframelink.so (Linux, 2026-11-02)
+# Libraries matching libproxy|libgiolibproxy|libpxbackend loaded by the process.
+
+fixed code (proxy disabled on loopback session connections): 0 matches; test passed
+
+pre-fix control (git stash of the fix, same build tree):
+file=libcurl-gnutls.so.4
+file=libduktape.so.207
+file=libproxy.so.1
+file=libpxbackend-1.0.so
+file=/usr/lib/x86_64-linux-gnu/gio/modules/libgiolibproxy.so
+file=/usr/lib/x86_64-linux-gnu/libproxy/libpxbackend-1.0.so

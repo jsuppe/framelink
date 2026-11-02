@@ -1067,6 +1067,26 @@ if(FRAMELINK_BUILD_TESTS AND TARGET framelink_gst_session)
     endif()
     add_dependencies(fl_gst_av_timeline gstframelink)
     add_test(NAME gst_av_timeline COMMAND fl_gst_av_timeline $<TARGET_FILE:gstframelink>)
+    add_executable(fl_gst_av_validation test/fl_gst_av_validation.cpp)
+    target_link_libraries(fl_gst_av_validation PRIVATE framelink_gst_session)
+    if(ANDROID)
+        target_link_libraries(fl_gst_av_validation PRIVATE gstframelink
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstapp.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstcoreelements.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstgdp.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstgio.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/libgstcheck-1.0.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/libgstvideo-1.0.a"
+            ${FL_ANDROID_SESSION_GIO_STATIC_LDFLAGS} ${FL_ANDROID_GST_STATIC_LDFLAGS})
+    elseif(WIN32)
+        target_link_libraries(fl_gst_av_validation PRIVATE gstapp-1.0.lib gstcheck-1.0.lib gstvideo-1.0.lib)
+    else()
+        pkg_check_modules(FL_GST_VALIDATION_CHECK REQUIRED IMPORTED_TARGET gstreamer-check-1.0 gstreamer-video-1.0)
+        target_link_libraries(fl_gst_av_validation PRIVATE PkgConfig::FL_GST_APP PkgConfig::FL_GST_VALIDATION_CHECK)
+    endif()
+    add_dependencies(fl_gst_av_validation gstframelink)
+    add_test(NAME gst_av_validation COMMAND fl_gst_av_validation $<TARGET_FILE:gstframelink>)
+    set_tests_properties(gst_av_validation PROPERTIES TIMEOUT 90)
     add_executable(fl_gst_local_av test/fl_gst_local_av.cpp)
     target_link_libraries(fl_gst_local_av PRIVATE framelink_gst_session)
     if(ANDROID)
@@ -1126,3 +1146,24 @@ if(FRAMELINK_BUILD_TESTS AND TARGET framelink_gst_session)
     add_test(NAME gst_event_channel COMMAND fl_gst_event_channel)
     set_tests_properties(gst_event_channel PROPERTIES TIMEOUT 15)
 endif()
+
+# M5b task8 validation matrix suites (tools/m5b_validation_matrix.py runs them
+# with repeats). Labels are appended so existing gpu/integration labels remain.
+set(FL_M5B_AV_TESTS gst_session_transport gst_session_context gst_audio_sink gst_audio_source
+    gst_event_channel gst_local_audio gst_av_timeline gst_av_validation gst_local_av m5b_gst_av_example)
+# Video-only element regression: framelinksink/src behaviour that predates M5b
+# and must remain unchanged with no session context.
+set(FL_GST_VIDEO_REGRESSION_TESTS gst_native_producer_linux gst_native_source gst_native_producer_win
+    gst_native_source_win gst_native_source_win_copy_negative gst_nv12_roundtrip gst_rgb10a2_roundtrip
+    gst_timestamp_contract gst_pool_policy gst_sink_stats gst_preconnect_slots gst_policy_generation
+    m5a_transport_relay m5a_transport_relay_audio_leads m5a_transport_relay_sync_negative)
+foreach(_t IN LISTS FL_M5B_AV_TESTS)
+    if(TEST ${_t})
+        set_property(TEST ${_t} APPEND PROPERTY LABELS m5b_av)
+    endif()
+endforeach()
+foreach(_t IN LISTS FL_GST_VIDEO_REGRESSION_TESTS)
+    if(TEST ${_t})
+        set_property(TEST ${_t} APPEND PROPERTY LABELS gst_video_regression)
+    endif()
+endforeach()

@@ -171,6 +171,8 @@ gboolean fl_gst_session_open_local_audio(FlGstSession*session,gboolean producer,
   }
   if(g_cancellable_is_cancelled(deadline.cancel))return fail("local session discovery deadline or cancellation");
   auto*c=g_socket_client_new();client.p=G_OBJECT(c);
+  // Private loopback: never consult the system proxy resolver (see open_local_av).
+  g_socket_client_set_enable_proxy(c,FALSE);
   control.p=g_socket_client_connect_to_host(c,"127.0.0.1",endpoint.port,deadline.cancel,nullptr);
  }
  if(!control.p)return fail("local control connection deadline or failure");
@@ -217,10 +219,13 @@ gboolean fl_gst_session_open_local_av(FlGstSession*session,gboolean producer,con
  Offer encoded{};if(!encode(*local,encoded))return fail("unsupported local A/V capabilities");
  Deadline deadline(timeout,outer);av::Endpoint endpoint{};av::RendezvousOwner owner;std::string reason;
  ObjectOwner listener,client;StreamOwner control,audio,events;
- auto next=[&](StreamOwner&out){
-  if(producer)out.p=g_socket_listener_accept(G_SOCKET_LISTENER(listener.p),nullptr,deadline.cancel,nullptr);
-  else out.p=g_socket_client_connect_to_host(G_SOCKET_CLIENT(client.p),"127.0.0.1",endpoint.port,deadline.cancel,nullptr);
+ std::string ioReason;
+ auto next=[&](StreamOwner&out){GError*e=nullptr;
+  if(producer)out.p=g_socket_listener_accept(G_SOCKET_LISTENER(listener.p),nullptr,deadline.cancel,&e);
+  else out.p=g_socket_client_connect_to_host(G_SOCKET_CLIENT(client.p),"127.0.0.1",endpoint.port,deadline.cancel,&e);
+  if(e){ioReason=e->message;g_error_free(e);}
   return out.p!=nullptr;};
+ auto ioFail=[&](const char*what){std::string m=std::string(what)+(ioReason.empty()?"":": "+ioReason);return fail(m.c_str());};
  if(producer){
   if(!av::secureRandom(endpoint.token.data(),endpoint.token.size(),reason))return fail(reason.c_str());
   auto*l=g_socket_listener_new();listener.p=G_OBJECT(l);
@@ -233,8 +238,13 @@ gboolean fl_gst_session_open_local_av(FlGstSession*session,gboolean producer,con
   while(!g_cancellable_is_cancelled(deadline.cancel)){if(av::readEndpoint(path,endpoint,reason))break;g_usleep(5000);}
   if(g_cancellable_is_cancelled(deadline.cancel))return fail("local session discovery deadline or cancellation");
   client.p=G_OBJECT(g_socket_client_new());
+  // Private loopback: never consult the system proxy resolver. Its first use
+  // in a process loads libproxy and GNetworkMonitor, which can block
+  // uncancellably for seconds (observed in a netlink send) past the deadline;
+  // a 127.0.0.1 rendezvous must not depend on proxy configuration anyway.
+  g_socket_client_set_enable_proxy(G_SOCKET_CLIENT(client.p),FALSE);
  }
- if(!next(control))return fail("local control connection deadline or failure");
+ if(!next(control))return ioFail("local control connection deadline or failure");
  // Small control records (clock request, ready/drain markers) must not wait
  // behind Nagle/delayed-ACK: that skews the round-trip midpoint by tens of ms.
  g_socket_set_option(g_socket_connection_get_socket(control.p),IPPROTO_TCP,TCP_NODELAY,1,nullptr);
@@ -275,12 +285,12 @@ gboolean fl_gst_session_open_local_av(FlGstSession*session,gboolean producer,con
   if(fl_gst_session_set_mapping(session,selected.generation,&mapping,50*GST_MSECOND)!=FL_GST_SESSION_READY)return fail("clock uncertainty exceeds 50ms or mapping rejected");
  }
  if(selected.audioTrackId){
-  if(!next(audio))return fail("local audio connection deadline or failure");
+  if(!next(audio))return ioFail("local audio connection deadline or failure");
   if(!fl_gst_session_authenticate_audio_stream(session,audio.p,producer,secret,timeout,deadline.cancel,error))return FALSE;
   g_object_unref(audio.p);audio.p=nullptr; // coordinator owns it now
  }
  if(selected.videoTrackId){
-  if(!next(events))return fail("local event connection deadline or failure");
+  if(!next(events))return ioFail("local event connection deadline or failure");
   if(!fl_gst_session_authenticate_event_stream(session,events.p,producer,secret,timeout,deadline.cancel,error))return FALSE;
   g_object_unref(events.p);events.p=nullptr;
   auto id=labelled(endpoint,"FrameLink public video channel v1",wire.data(),wire.size(),nullptr,0);

@@ -177,7 +177,7 @@ playback delay; unsupported hardware paths must reject clearly.
 
 ## M5b — GStreamer audio elements and coordinated A/V sessions
 
-**State: in progress; tasks1–7 locally validated; task8 automated validation next.** Added at Jon's request 2026-11-01. Execute
+**State: in progress; tasks1–8 locally validated; task9 producer A/V bin next.** Added at Jon's request 2026-11-01. Execute
 only after M5a closes, before M6 qualifies the complete public integration path.
 Video elements remain video-only; separate audio elements share one session.
 
@@ -232,9 +232,15 @@ elements remain independently available.
   one-call A/V setup, clock, ready and drain helpers; two-process example 30/30 on
   Linux/Windows/Android, Windows display mode, Linux107/107 serial. Five defects
   fixed with negative controls. CPU rings only; native memory stays M5a-qualified.
-- [ ] **M5b.8 Automated validation:** GstTestClock/segment tests, exact PCM and
+- [x] **M5b.8 Automated validation:** GstTestClock/segment tests, exact PCM and
   producer-to-consumer A/V offset checks, skew/jitter accounting, negative controls,
   restart/failure scenarios and regression tests for existing video-only elements.
+  [Evidence](m5b/validation/README.md): `gst_av_validation` (test-clock deadlines,
+  exact per-sample/per-pixel content, 0ns offset/drift, reported jitter, 7 fault
+  controls plus a leak control, 10 restart rounds) and `tools/m5b_validation_matrix.py`
+  (`m5b_av` and `gst_video_regression` suites). x20 on Linux, Windows and Android,
+  Linux 108/108 serial. Fixed an intermittent rendezvous stall: loopback session
+  connections no longer use the system proxy resolver (libproxy).
 - [ ] **M5b.9 Producer A/V bin:** compose the validated video/audio sinks with
   the shared session coordinator; expose separate audio/video sink ghost pads and
   one documented session configuration. Propagate caps, segments, EOS, flush,

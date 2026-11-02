@@ -350,6 +350,8 @@ Conn *connect(const av::Endpoint &r, char role, unsigned timeout,
     return c.release();
   }
   auto *client = g_socket_client_new();
+  // Loopback only: skip the system proxy resolver (libproxy start-up can stall).
+  g_socket_client_set_enable_proxy(client, FALSE);
   g_socket_client_set_timeout(
       client, std::min(2u, std::max(1u, (timeout + 999) / 1000)));
   auto *q = g_socket_client_connect_to_host(client, "127.0.0.1", r.port,
