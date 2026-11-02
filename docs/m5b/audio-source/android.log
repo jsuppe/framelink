@@ -1,0 +1,6 @@
+public audio source: exact four PCM formats/layouts, incremental packet delivery before EOS, both startup orders, live latency, missing-peer and cancellation passed
+backpressure: 2032 blocks accepted before bounded failure; teardown_us=2522
+public audio sink: exact PCM/PTS/duration and missing-auth/invalid-PTS/oversized-block negatives passed
+local audio setup: both startup orders, authenticated stream lifetime and bounded missing-peer passed
+authenticated session transport: all track modes, wrong key, mismatch, invalid config, timeout and cancel passed
+session context: ownership, readiness, track masks, generations and cancellation passed

@@ -187,6 +187,20 @@ static void gst_framelink_audio_sink_init(GstFrameLinkAudioSink*s){
    }return GST_PAD_PROBE_OK;
   },nullptr,nullptr);gst_object_unref(wirePad);
  if(!gst_element_link_many(s->filter,s->queue,s->pay,s->writer,nullptr)){s->failed=TRUE;return;}
+ // GDP forwards EOS locally without serializing it. Send an explicit
+ // terminal record after queue drain, then preserve local EOS. GDP stores event
+ // types in 16 bits; the receiver recognizes this private record by name/schema.
+ auto*terminal=gst_element_get_static_pad(s->pay,"sink");
+ gst_pad_add_probe(terminal,GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM,
+  [](GstPad*pad,GstPadProbeInfo*info,gpointer data)->GstPadProbeReturn{
+   auto*self=static_cast<GstFrameLinkAudioSink*>(data);
+   if(GST_EVENT_TYPE(GST_PAD_PROBE_INFO_EVENT(info))==GST_EVENT_EOS&&!self->failed){
+    auto*marker=gst_event_new_custom(GST_EVENT_CUSTOM_DOWNSTREAM,gst_structure_new("framelink-audio-eos",
+     "version",G_TYPE_UINT,1u,"generation",G_TYPE_UINT64,self->config.generation,
+     "blocks",G_TYPE_UINT64,self->blocks,"pcm-bytes",G_TYPE_UINT64,self->bytes,nullptr));
+    if(!gst_pad_send_event(pad,marker))return reject(self,"audio terminal record could not be sent");
+   }return GST_PAD_PROBE_OK;
+  },s,nullptr);gst_object_unref(terminal);
  auto*pad=gst_element_get_static_pad(s->filter,"sink");
  gst_pad_add_probe(pad,GstPadProbeType(GST_PAD_PROBE_TYPE_BUFFER|GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM),inspect,s,nullptr);
  auto*ghost=gst_ghost_pad_new_from_template("sink",pad,gst_element_class_get_pad_template(GST_ELEMENT_GET_CLASS(s),"sink"));gst_object_unref(pad);gst_element_add_pad(GST_ELEMENT(s),ghost);

@@ -177,7 +177,7 @@ playback delay; unsupported hardware paths must reject clearly.
 
 ## M5b — GStreamer audio elements and coordinated A/V sessions
 
-**State: in progress; tasks1–3 locally validated; task4 audio source active.** Added at Jon's request 2026-11-01. Execute
+**State: in progress; tasks1–4 locally validated; task5 common timing active.** Added at Jon's request 2026-11-01. Execute
 only after M5a closes, before M6 qualifies the complete public integration path.
 Video elements remain video-only; separate audio elements share one session.
 
@@ -207,9 +207,10 @@ elements remain independently available.
   carry timestamps/durations/discontinuities, handle flow errors and backpressure;
   report explicit serialization/copy costs rather than imply shared PCM.
   [Sink validation](m5b/audio-sink-local/README.md): Linux5/5, Windows5/5, Android4/4 and dualABI/JNI builds. Later timing/lifecycle gates remain explicit.
-- [ ] **M5b.4 Audio source:** receive PCM with exact sample order and timing,
+- [x] **M5b.4 Audio source:** receive PCM with exact sample order and timing,
   reconstruct buffers/caps, expose appropriate live/latency behavior and integrate
   with standard playback sinks using the shared pipeline clock.
+  [Source validation](m5b/audio-source/README.md): Linux6/6, Windows6/6, Android5/5, dualABI/JNI; clock-synchronized sink controls passed on all three.
 - [ ] **M5b.5 Common A/V timing:** map TIME segments into one common timeline,
   preserve intentional offsets, handle missing/invalid PTS, GAP, DISCONT, EOS,
   flush and new segment epochs. Never independently zero audio and video origins;

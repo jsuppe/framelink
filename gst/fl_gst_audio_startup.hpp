@@ -16,13 +16,14 @@ class FlAudioStartup {
  std::mutex mutex_;std::condition_variable changed_;std::thread worker_;
  bool done_=false,ok_=false;std::string error_;
  GSocketConnection* connection_=nullptr;
+ bool producer_=true;
 public:
- FlAudioStartup(FlGstSession*session,GstElement*owner,const char*path,flAudioFormat format,guint queue,guint timeout,guint idle)
+ FlAudioStartup(FlGstSession*session,GstElement*owner,const char*path,flAudioFormat format,guint queue,guint timeout,guint idle,bool producer=true)
  :session_(static_cast<FlGstSession*>(g_object_ref(session))){
-  g_weak_ref_init(&owner_,G_OBJECT(owner));
+  producer_=producer;g_weak_ref_init(&owner_,G_OBJECT(owner));
   const std::string directory(path);
   worker_=std::thread([this,directory,format,queue,timeout,idle]{GError*error=nullptr;
-   bool ok=fl_gst_session_open_local_audio(session_,TRUE,directory.c_str(),&format,queue,timeout,idle,cancel_,&error);
+   bool ok=fl_gst_session_open_local_audio(session_,producer_,directory.c_str(),&format,queue,timeout,idle,cancel_,&error);
    flSessionConfig config{};
    if(ok)ok=fl_gst_session_get_config(session_,&config)==FL_GST_SESSION_READY&&fl_gst_session_register_track(session_,FL_GST_TRACK_AUDIO)==FL_GST_SESSION_READY&&fl_gst_session_track_ready(session_,FL_GST_TRACK_AUDIO,config.generation)==FL_GST_SESSION_READY;
    {std::lock_guard<std::mutex> lock(mutex_);ok_=ok;done_=true;if(!ok)error_=error?error->message:"audio startup failed";}
@@ -40,15 +41,17 @@ public:
   if(g_cancellable_is_cancelled(cancel_)||(outer&&g_cancellable_is_cancelled(outer))){g_set_error_literal(error,G_IO_ERROR,G_IO_ERROR_CANCELLED,"audio startup cancelled");return false;}
   if(!ok_){g_set_error_literal(error,G_IO_ERROR,G_IO_ERROR_FAILED,error_.c_str());return false;}return true;
  }
- GOutputStream* output(GCancellable*outer,GError**error){
+ GSocketConnection* connection(GCancellable*outer,GError**error){
   if(!wait(outer,error))return nullptr;
   std::lock_guard<std::mutex> lock(mutex_);
   if(!connection_){flSessionConfig config{};
-   if(fl_gst_session_get_config(session_,&config)==FL_GST_SESSION_READY)connection_=fl_gst_session_claim_audio_stream(session_,TRUE,config.generation);
+   if(fl_gst_session_get_config(session_,&config)==FL_GST_SESSION_READY)connection_=fl_gst_session_claim_audio_stream(session_,producer_,config.generation);
    if(!connection_){g_set_error_literal(error,G_IO_ERROR,G_IO_ERROR_FAILED,"cannot claim authenticated audio output");return nullptr;}
    g_socket_set_timeout(g_socket_connection_get_socket(connection_),(config.idleTimeoutMs+999)/1000);
   }
-  return G_OUTPUT_STREAM(g_object_ref(g_io_stream_get_output_stream(G_IO_STREAM(connection_))));
+  return G_SOCKET_CONNECTION(g_object_ref(connection_));
  }
+ GOutputStream* output(GCancellable*outer,GError**error){auto*c=connection(outer,error);if(!c)return nullptr;auto*s=G_OUTPUT_STREAM(g_object_ref(g_io_stream_get_output_stream(G_IO_STREAM(c))));g_object_unref(c);return s;}
+ GInputStream* input(GCancellable*outer,GError**error){auto*c=connection(outer,error);if(!c)return nullptr;auto*s=G_INPUT_STREAM(g_object_ref(g_io_stream_get_input_stream(G_IO_STREAM(c))));g_object_unref(c);return s;}
 };
 GOutputStream* fl_deferred_audio_output(const std::shared_ptr<FlAudioStartup>&);

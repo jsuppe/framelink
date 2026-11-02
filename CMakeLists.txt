@@ -1009,7 +1009,7 @@ if(TARGET gstframelink)
 endif()
 
 if(TARGET framelink_gst_session)
-    target_sources(gstframelink PRIVATE gst/gstframelinkaudio.cpp gst/fl_gst_audio_startup.cpp)
+    target_sources(gstframelink PRIVATE gst/gstframelinkaudio.cpp gst/gstframelinkaudiosrc.cpp gst/fl_gst_audio_startup.cpp)
     target_link_libraries(gstframelink PRIVATE framelink_gst_session)
 endif()
 if(FRAMELINK_BUILD_TESTS AND TARGET framelink_gst_session)
@@ -1030,6 +1030,25 @@ if(FRAMELINK_BUILD_TESTS AND TARGET framelink_gst_session)
     add_dependencies(fl_gst_audio_sink gstframelink)
     add_test(NAME gst_audio_sink COMMAND fl_gst_audio_sink $<TARGET_FILE:gstframelink>)
     set_tests_properties(gst_audio_sink PROPERTIES TIMEOUT 20)
+endif()
+if(FRAMELINK_BUILD_TESTS AND TARGET framelink_gst_session)
+    add_executable(fl_gst_audio_source test/fl_gst_audio_source.cpp)
+    target_link_libraries(fl_gst_audio_source PRIVATE framelink_gst_session)
+    if(ANDROID)
+        target_link_libraries(fl_gst_audio_source PRIVATE gstframelink
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstapp.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstcoreelements.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstgdp.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstgio.a"
+            ${FL_ANDROID_SESSION_GIO_STATIC_LDFLAGS} ${FL_ANDROID_GST_STATIC_LDFLAGS})
+    elseif(WIN32)
+        target_link_libraries(fl_gst_audio_source PRIVATE gstapp-1.0.lib)
+    else()
+        target_link_libraries(fl_gst_audio_source PRIVATE PkgConfig::FL_GST_APP)
+    endif()
+    add_dependencies(fl_gst_audio_source gstframelink)
+    add_test(NAME gst_audio_source COMMAND fl_gst_audio_source $<TARGET_FILE:gstframelink>)
+    set_tests_properties(gst_audio_source PROPERTIES TIMEOUT 20)
 endif()
 
 if(FRAMELINK_BUILD_TESTS AND TARGET framelink_gst_session)
