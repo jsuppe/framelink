@@ -177,7 +177,7 @@ playback delay; unsupported hardware paths must reject clearly.
 
 ## M5b — GStreamer audio elements and coordinated A/V sessions
 
-**State: in progress; tasks1–8 locally validated; task9 producer A/V bin next.** Added at Jon's request 2026-11-01. Execute
+**State: in progress; tasks1–9 locally validated; task10 consumer A/V bin next.** Added at Jon's request 2026-11-01. Execute
 only after M5a closes, before M6 qualifies the complete public integration path.
 Video elements remain video-only; separate audio elements share one session.
 
@@ -241,11 +241,16 @@ elements remain independently available.
   (`m5b_av` and `gst_video_regression` suites). x20 on Linux, Windows and Android,
   Linux 108/108 serial. Fixed an intermittent rendezvous stall: loopback session
   connections no longer use the system proxy resolver (libproxy).
-- [ ] **M5b.9 Producer A/V bin:** compose the validated video/audio sinks with
+- [x] **M5b.9 Producer A/V bin:** compose the validated video/audio sinks with
   the shared session coordinator; expose separate audio/video sink ghost pads and
   one documented session configuration. Propagate caps, segments, EOS, flush,
   state changes and errors without adding independent timestamp rebasing or a
   hidden per-track latency reservoir. Final public element name is set in M5b.1.
+  [Evidence](m5b/producer-bin/README.md): `framelinkavsink`, self-contained with
+  `session=` (decision Jon 2026-11-02) or thin over an installed context. Media
+  is held until ready; the timeline matches apply_pipeline_clock; EOS waits for
+  the consumer drain. `gst_av_bin` x20 on Linux/Windows/Android, latency
+  150–153ms on both tracks, bin/thin pause parity, Linux 109/109 serial.
 - [ ] **M5b.10 Consumer A/V bin:** compose the validated video/audio sources;
   expose separate audio/video source ghost pads for independent downstream
   rendering/playback. Coordinate readiness, session clocks and reconnect; do not

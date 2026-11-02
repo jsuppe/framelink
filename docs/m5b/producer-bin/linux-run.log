@@ -1,0 +1,31 @@
+CASE thin (application-installed context)
+consumer=ok video=30 samples=24000 lag=150.1..150.2ms
+CASE pause/resume tracks=video (bin)
+  producer=EOS consumer=ok video=29 samples=0 lag=150.1..150.2ms
+CASE pause/resume tracks=video (thin)
+  producer=EOS consumer=ok video=29 samples=0 lag=150.1..150.2ms
+CASE pause/resume tracks=av (bin)
+  producer=audio: PCM sample duration/continuity mismatch consumer=flaudioreader1: audio peer closed before GDP EOS video=12 samples=18720 lag=150.1..150.2ms
+CASE pause/resume tracks=av (thin)
+  producer=audio: PCM sample duration/continuity mismatch consumer=flaudioreader2: audio peer closed before GDP EOS video=12 samples=18720 lag=150.1..150.2ms
+CASE teardown while media is held
+  NULL in 1.0ms
+CASE consumer death mid-stream
+  producer error 3ms after consumer death: giostreamsink16: Could not write to resource.
+CASE tracks=av producer-first=1 lead=800ms
+producer=ok consumer=ok video=30 samples=24000 lag=150.1..150.2ms generation=1 ids=1/2 session=e2d3ade11232706da25fcbdba555b8ee
+CASE tracks=av producer-first=0 lead=0ms
+producer=ok consumer=ok video=30 samples=24000 lag=150.1..150.2ms generation=1 ids=1/2 session=074e7c6810139971ab91469882523e6d
+CASE tracks=video producer-first=1 lead=300ms
+producer=ok consumer=ok video=30 samples=0 lag=150.1..150.2ms generation=1 ids=1/0 session=e0664d67c00b310a852fa2ba7fe58c1d
+CASE tracks=audio producer-first=0 lead=0ms
+producer=ok consumer=ok video=0 samples=24000 lag=150.1..150.2ms generation=1 ids=0/2 session=cf8ebd2910363bc885a6fc590efbae87
+CASE negative track-mismatch
+  producer error after 6ms: s: incompatible session selection; consumer: setup: producer selection or authentication rejected
+CASE negative no-consumer
+  producer error after 1001ms: s: local control connection deadline or failure: Operation was cancelled; consumer: 
+CASE negative non-system-clock
+  producer error after 1ms: s: framelinkavsink with session= requires the pipeline system clock (gst_pipeline_use_clock(pipeline, gst_system_clock_obtain())); consumer: setup: local session discovery deadline or cancellation
+CASE negative caps-mismatch
+  producer: videotestsrc13: Internal data stream error.; consumer: flaudioreader7: audio peer closed before GDP EOS
+framelinkavsink: held startup in both orders, session-epoch timeline (lag within latency bounds on both tracks), thin/bin pause parity, exact counts, drain before EOS, teardown/consumer-death/track/clock/caps/missing-peer failures bounded

@@ -9,3 +9,14 @@ FL_GST_SESSION_API gboolean fl_gst_session_publish_events(FlGstSession*,
 // Queued END record without consuming it; TIMEOUT when none has arrived yet.
 FL_GST_SESSION_API FlGstSessionResult fl_gst_session_peek_video_end(FlGstSession*,
  guint64 generation,FlGstVideoEvent*);
+// Producer epoch provider for convenience bins: called once with the current
+// system-clock time when the producer proposes the session. The default
+// (NULL) proposes now+200ms for applications that start at the epoch.
+typedef gint64 (*FlGstEpochFunc)(gpointer data,GstClockTime now);
+FL_GST_SESSION_API gboolean fl_gst_session_open_local_av_epoch(FlGstSession*,gboolean producer,
+ const gchar* session_path,const flSessionCapabilities* local,guint video_queue_frames,guint video_pool,
+ guint audio_queue_ms,guint connect_timeout_ms,guint idle_timeout_ms,guint channel_flags,flChannel** channel,
+ FlGstEpochFunc,gpointer,GCancellable*,GError**);
+// Ready/drain handshakes that a state change can cancel.
+FL_GST_SESSION_API gboolean fl_gst_session_local_ready_cancellable(FlGstSession*,gboolean producer,guint timeout_ms,GCancellable*,GError**);
+FL_GST_SESSION_API gboolean fl_gst_session_finish_local_cancellable(FlGstSession*,gboolean producer,guint timeout_ms,GCancellable*,GError**);

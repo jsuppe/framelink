@@ -1,8 +1,9 @@
 # M5b public GStreamer A/V contract
 
-Status: tasks1–8 locally validated on the M5b development branch. Public audio
-sink/source, coordinated timing, lifecycle/security, two-process examples and
-the automated validation matrix are implemented; A/V bins remain unfinished. See
+Status: tasks1–9 locally validated on the M5b development branch. Public audio
+sink/source, coordinated timing, lifecycle/security, two-process examples, the
+automated validation matrix and the producer bin are implemented; the consumer
+bin and bin parity remain unfinished. See [producer bin](m5b/producer-bin/README.md),
 [validation](m5b/validation/README.md), [examples](m5b/examples/README.md) and [lifecycle closure](m5b/lifecycle-security/README.md). Existing `framelinksink`/`framelinksrc` remain video
 only. No compatibility claim follows from this design document alone.
 
@@ -11,7 +12,13 @@ only. No compatibility claim follows from this design document alone.
 - `framelinkaudiosink`: always-present `sink` pad, producer role.
 - `framelinkaudiosrc`: always-present `src` pad, consumer role, live source.
 - `framelinkavsink`: producer convenience bin; `video_sink` and `audio_sink`
-  ghost pads wrapping the individual elements, no output device.
+  ghost pads wrapping the individual elements, no output device. Implemented in
+  task 9. With `session=`, it performs local discovery off the state-change
+  path, holds media at its pads until the session is ready, and applies the
+  producer pipeline-clock semantics: start time NONE, base time = session
+  epoch, monotonic system clock required. Without `session=`, it is a thin
+  composition over an installed context, and the lease is adopted with its
+  `adopt-channel` action (decision Jon, 2026-11-02: self-contained bins).
 - `framelinkavsrc`: consumer convenience bin; `video_src` and `audio_src`
   ghost pads, no display/audio sink hardwired.
 - Bins expose only enabled tracks, chosen while NULL with `tracks=audio|video|av`;

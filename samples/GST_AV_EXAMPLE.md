@@ -83,6 +83,49 @@ uncertainty) installed as the consumer's mapping; authenticated audio and event
 streams; and the video lease. The consumer creates the ring under a
 secret-derived name and returns only after the producer confirms the attach.
 
+### Producer bin: `framelinkavsink`
+
+The producer side can use one bin instead of the calls above. With `session=`,
+it does discovery, negotiation, the clock exchange, the ready gate and the
+drain itself, and exposes separate `video_sink` and `audio_sink` pads (only
+the tracks you enable exist). It is not a multiplexed format.
+
+```c
+GstElement* p = gst_parse_launch(
+  "framelinkavsink name=s tracks=av video-format=RGBA width=1280 height=720 framerate=30/1 "
+  "videotestsrc is-live=true ! video/x-raw,format=RGBA,width=1280,height=720,framerate=30/1 ! s.video_sink "
+  "audiotestsrc is-live=true ! audio/x-raw,format=S16LE,layout=interleaved,rate=48000,channels=2 ! s.audio_sink",
+  &err);
+GstElement* s = gst_bin_get_by_name(GST_BIN(p), "s");
+g_object_set(s, "session", dir, NULL);   // set in code: launch syntax eats Windows backslashes
+gst_element_set_state(p, GST_STATE_PLAYING);  // may start before the consumer exists
+```
+
+The consumer is unchanged; it can be any of the consumer setups above.
+
+- **Startup.** The bin can go to PLAYING before the consumer exists. Media
+  waits at its pads until the session is ready and the consumer has reported
+  ready. The wait is bounded by about twice `connect-timeout-ms`, and a flush
+  or state change ends it. Nothing is queued inside the bin.
+- **Timeline.** At NULL→READY the bin does what
+  `fl_gst_session_apply_pipeline_clock(producer)` does: it sets its pipeline's
+  start time to NONE and its base time to the current system-clock time, and
+  proposes that time as the session epoch. Running time is session time on
+  both tracks, with no offset, rebasing or per-track adjustment. The pipeline
+  must use the system clock; otherwise the bin fails PLAYING with a clear
+  error. A producer pause is therefore a media gap, and consumer latency does
+  not change. Live sources that skip samples on resume without setting DISCONT
+  (live `audiotestsrc` does) are refused by `framelinkaudiosink`, just as with
+  the standalone elements.
+- **End of stream.** The bin holds its EOS until the consumer confirms it has
+  rendered the tail.
+- **Format.** With `session=`, the offered formats come from `video-format`,
+  `width`, `height`, `framerate`, `audio-format`, `rate` and `channels`, and
+  upstream caps must match them.
+- **Without `session=`.** The bin is a thin wrapper. Install the
+  `framelink.session.v1` context, adopt the lease with the bin's
+  `adopt-channel` action, and apply the pipeline clock yourself.
+
 ## Timing, latency and pool size
 
 The producer's pipeline runs on the monotonic system clock with base time at

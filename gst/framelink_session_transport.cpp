@@ -211,6 +211,11 @@ bool constantEqual(const Digest&a,const guint8*b){guint8 x=0;for(gsize i=0;i<a.s
 gboolean fl_gst_session_open_local_av(FlGstSession*session,gboolean producer,const gchar*path,
  const flSessionCapabilities*local,guint videoQueue,guint pool,guint queueMs,guint timeout,guint idle,guint flags,
  flChannel**channel,GCancellable*outer,GError**error){
+ return fl_gst_session_open_local_av_epoch(session,producer,path,local,videoQueue,pool,queueMs,timeout,idle,flags,channel,nullptr,nullptr,outer,error);
+}
+gboolean fl_gst_session_open_local_av_epoch(FlGstSession*session,gboolean producer,const gchar*path,
+ const flSessionCapabilities*local,guint videoQueue,guint pool,guint queueMs,guint timeout,guint idle,guint flags,
+ flChannel**channel,FlGstEpochFunc epochFunc,gpointer epochData,GCancellable*outer,GError**error){
  if(channel)*channel=nullptr;
  auto fail=[&](const char*message){fl_gst_session_cancel(session);g_set_error_literal(error,G_IO_ERROR,G_IO_ERROR_FAILED,message);return FALSE;};
  if(!session||!path||!*path||!local||!channel||local->version!=FL_SESSION_OPTIONAL_TRACKS_VERSION||(!local->videoCount&&!local->audioCount)||
@@ -256,7 +261,8 @@ gboolean fl_gst_session_open_local_av(FlGstSession*session,gboolean producer,con
  proposal.videoQueueFrames=local->videoCount?videoQueue:0;proposal.audioQueueMs=local->audioCount?queueMs:0;
  proposal.connectTimeoutMs=timeout;proposal.idleTimeoutMs=idle;
  // Epoch is on the producer's monotonic system clock; media starts at or after it.
- proposal.epochNs=gint64(gst_clock_get_time(clock)+200*GST_MSECOND);
+ proposal.epochNs=epochFunc?epochFunc(epochData,gst_clock_get_time(clock)):gint64(gst_clock_get_time(clock)+200*GST_MSECOND);
+ if(producer&&proposal.epochNs<0)return fail("invalid session epoch");
  if(producer&&(!av::secureRandom(proposal.sessionId.bytes,16,reason)||!av::secureRandom(proposal.clockId.bytes,16,reason)))return fail(reason.c_str());
  if(!fl_gst_session_negotiate_stream(session,control.p,producer,secret,local,producer?&proposal:nullptr,timeout,deadline.cancel,error))return FALSE;
  flSessionConfig selected{};Wire wire{};
@@ -317,19 +323,25 @@ gboolean fl_gst_session_open_local_av(FlGstSession*session,gboolean producer,con
  return TRUE;
 }
 gboolean fl_gst_session_local_ready(FlGstSession*session,gboolean producer,guint timeout,GError**error){
+ return fl_gst_session_local_ready_cancellable(session,producer,timeout,nullptr,error);
+}
+gboolean fl_gst_session_local_ready_cancellable(FlGstSession*session,gboolean producer,guint timeout,GCancellable*outer,GError**error){
  if(!session||!timeout||timeout>60000){g_set_error_literal(error,G_IO_ERROR,G_IO_ERROR_INVALID_ARGUMENT,"invalid ready request");return FALSE;}
  auto*control=static_cast<GSocketConnection*>(g_object_get_data(G_OBJECT(session),"framelink-local-control"));
  if(!control){g_set_error_literal(error,G_IO_ERROR,G_IO_ERROR_NOT_FOUND,"no local control connection");return FALSE;}
- Deadline deadline(timeout,nullptr);guint8 marker='R';
+ Deadline deadline(timeout,outer);guint8 marker='R';
  const bool ok=producer?(exact(control,false,&marker,1,deadline.cancel)&&marker=='R'):exact(control,true,&marker,1,deadline.cancel);
  if(!ok){fl_gst_session_cancel(session);g_set_error_literal(error,G_IO_ERROR,G_IO_ERROR_TIMED_OUT,producer?"consumer did not report ready before the deadline":"ready report failed");}
  return ok;
 }
 gboolean fl_gst_session_finish_local(FlGstSession*session,gboolean producer,guint timeout,GError**error){
+ return fl_gst_session_finish_local_cancellable(session,producer,timeout,nullptr,error);
+}
+gboolean fl_gst_session_finish_local_cancellable(FlGstSession*session,gboolean producer,guint timeout,GCancellable*outer,GError**error){
  if(!session||!timeout||timeout>60000){g_set_error_literal(error,G_IO_ERROR,G_IO_ERROR_INVALID_ARGUMENT,"invalid finish request");return FALSE;}
  auto*control=static_cast<GSocketConnection*>(g_object_steal_data(G_OBJECT(session),"framelink-local-control"));
  if(!control){g_set_error_literal(error,G_IO_ERROR,G_IO_ERROR_NOT_FOUND,"no local control connection (already finished or not a local session)");return FALSE;}
- Deadline deadline(timeout,nullptr);guint8 marker='D';bool ok;
+ Deadline deadline(timeout,outer);guint8 marker='D';bool ok;
  if(producer)ok=exact(control,false,&marker,1,deadline.cancel)&&marker=='D';
  else ok=exact(control,true,&marker,1,deadline.cancel);
  g_io_stream_close(G_IO_STREAM(control),nullptr,nullptr);g_object_unref(control);
