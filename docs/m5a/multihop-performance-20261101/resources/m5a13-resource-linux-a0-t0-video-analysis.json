@@ -1,0 +1,37 @@
+{
+  "cases": [
+    {
+      "prefix": "/tmp/m5a13-resource-linux-a0-t0",
+      "total_identities": 300,
+      "measured_identities": 240,
+      "fresh_fps": 60.01520157936165,
+      "source_marker_to_arrival_ms": {
+        "p50": 2.358911,
+        "p95": 3.654839,
+        "p99": 4.294757,
+        "max": 4.320397
+      },
+      "consumer_hold_ms": {
+        "p50": 1.126603,
+        "p95": 2.353637,
+        "p99": 2.428411,
+        "max": 3.334984
+      },
+      "producer_acquire_wait_ms": {
+        "p50": 0.0099,
+        "p95": 0.017498,
+        "p99": 0.022173,
+        "max": 0.023637
+      },
+      "delivery_interval_ms": {
+        "p50": 17.066622,
+        "p95": 19.064942,
+        "p99": 20.461216,
+        "max": 22.403485
+      },
+      "rate_pass": true,
+      "gpu_completion_verified_by_csv": false,
+      "pcm_qualified": false
+    }
+  ]
+}

@@ -62,7 +62,7 @@ Deliverables/evidence: [capability matrix](m5/CAPABILITY_MATRIX.md),
 
 ## M5a — Native-memory negotiation and zero-copy pipeline boundaries
 
-**State: in progress; M5a.1–12 locally validated; M5a.13 performance/A/V qualification active.** Deliverables: versioned allocation/usage
+**State: in progress; M5a.1–12 locally validated; M5a.13 locally qualified within documented paths; audio policy/final closure remain.** Deliverables: versioned allocation/usage
 contract, native-memory GStreamer sink **and source**, platform adapters,
 Windows decoder-to-independent-renderer example, and measured multi-hop evidence.
 
@@ -152,10 +152,14 @@ Windows decoder-to-independent-renderer example, and measured multi-hop evidence
   A/V18/18 lifecycle/security cases, exact RGBA/PTS/PCM and GPU-completion retention.
   [Device evidence](m5a/signed-native-integration-20261101/README.md); unsupported
   decoder/layout and physical-output limits retained. Performance remains task13.
-- [ ] **M5a.13 One-hop vs multi-hop qualification:** identical sources; account
+- [x] **M5a.13 One-hop vs multi-hop qualification (qualified paths):** identical sources; account
   each identity, PTS and A/V offset; measure per-boundary residence/arrival jitter,
   payload copies, delayed readers/backpressure and safe reuse. Set numeric budgets
   before qualification; no claim of zero elapsed time or universal two-buffer FPS.
+  [Results and exclusions](m5a/multihop-performance-20261101/README.md): supported
+  nominal cases3720/3720 at~60fps, complete simultaneous PCM, exact media offset,
+  zero accepted trace loss, explicit faults/copies/resource costs. Cold startup,
+  unmeasured formats and physical output remain unqualified.
 - [ ] **M5a.14 Audio copy-cost decision:** report existing GDP/GIO separately;
   evaluate shared PCM only against a demonstrated requirement. Video sharing
   does not establish audio zero-copy or eliminate final playback buffering.

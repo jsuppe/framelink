@@ -948,7 +948,7 @@ endif()
 if(FRAMELINK_BUILD_TESTS AND WIN32)
   add_executable(fl_native_boundary_benchmark_win test/fl_native_boundary_benchmark_win.cpp)
   target_include_directories(fl_native_boundary_benchmark_win PRIVATE src)
-  target_link_libraries(fl_native_boundary_benchmark_win PRIVATE framelink d3d11 dxgi)
+  target_link_libraries(fl_native_boundary_benchmark_win PRIVATE framelink d3d11 dxgi psapi)
 endif()
 
 if(TARGET framelink_av_session)
