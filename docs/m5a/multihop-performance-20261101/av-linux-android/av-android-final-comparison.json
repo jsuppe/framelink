@@ -1,0 +1,75 @@
+{
+  "cases": [
+    {
+      "prefix": "/tmp/av-one-full",
+      "total_identities": 3720,
+      "measured_identities": 3600,
+      "fresh_fps": 59.99988437543816,
+      "source_marker_to_arrival_ms": {
+        "p50": 1.430539,
+        "p95": 2.440308,
+        "p99": 2.612,
+        "max": 8.346461
+      },
+      "consumer_hold_ms": {
+        "p50": 5.731615,
+        "p95": 7.625231,
+        "p99": 8.498154,
+        "max": 11.285154
+      },
+      "producer_acquire_wait_ms": {
+        "p50": 0.096,
+        "p95": 0.162077,
+        "p99": 0.186769,
+        "max": 1.042154
+      },
+      "delivery_interval_ms": {
+        "p50": 16.608385,
+        "p95": 18.389538,
+        "p99": 18.802153,
+        "max": 22.709923
+      },
+      "rate_pass": true,
+      "gpu_completion_verified_by_csv": false,
+      "pcm_qualified": false
+    },
+    {
+      "prefix": "/tmp/av-two-full-large",
+      "total_identities": 3720,
+      "measured_identities": 3600,
+      "fresh_fps": 60.000189767646596,
+      "source_marker_to_arrival_ms": {
+        "p50": 2.977231,
+        "p95": 4.519462,
+        "p99": 4.989616,
+        "max": 5.416077
+      },
+      "consumer_hold_ms": {
+        "p50": 6.153231,
+        "p95": 7.717846,
+        "p99": 8.480307,
+        "max": 11.677462
+      },
+      "producer_acquire_wait_ms": {
+        "p50": 0.087923,
+        "p95": 0.157462,
+        "p99": 0.222154,
+        "max": 0.818384
+      },
+      "delivery_interval_ms": {
+        "p50": 16.555923,
+        "p95": 18.929846,
+        "p99": 19.691154,
+        "max": 23.068
+      },
+      "rate_pass": true,
+      "gpu_completion_verified_by_csv": false,
+      "pcm_qualified": false
+    }
+  ],
+  "comparison": {
+    "second_minus_first_p95_ms": 2.079154,
+    "budget_ms": 16.666666666666668,
+    "pass": true
+  }
+}
