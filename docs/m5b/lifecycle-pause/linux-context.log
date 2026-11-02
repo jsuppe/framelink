@@ -1,0 +1,25 @@
+Internal ctest changing into directory: /tmp/fl-m5a-gst-build
+UpdateCTestConfiguration  from :/tmp/fl-m5a-gst-build/DartConfiguration.tcl
+UpdateCTestConfiguration  from :/tmp/fl-m5a-gst-build/DartConfiguration.tcl
+Test project /tmp/fl-m5a-gst-build
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 103
+    Start 103: gst_av_timeline
+
+103: Test command: /tmp/fl-m5a-gst-build/fl_gst_av_timeline "/tmp/fl-m5a-gst-build/libgstframelink.so"
+103: Working Directory: /tmp/fl-m5a-gst-build
+103: Test timeout computed to be: 20
+103: coordinated public A/V: distinct TIME segments, one receiver mapping, exact +/-37ms offset, pixels/PCM/DTS/duration/generation passed
+1/1 Test #103: gst_av_timeline ..................   Passed    1.15 sec
+
+The following tests passed:
+	gst_av_timeline
+
+100% tests passed, 0 tests failed out of 1
+
+Total Test time (real) =   1.15 sec

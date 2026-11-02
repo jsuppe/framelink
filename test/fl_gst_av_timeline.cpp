@@ -28,7 +28,7 @@ static void push(GstElement*source,guint size,guint8 value,GstClockTime pts,GstC
  GstSegment segment;gst_segment_init(&segment,GST_FORMAT_TIME);segment.rate=rate;segment.start=start;segment.position=start;segment.base=500000000;
  auto*caps=gst_app_src_get_caps(GST_APP_SRC(source));auto*sample=gst_sample_new(b,caps,&segment,nullptr);CHECK(gst_app_src_push_sample(GST_APP_SRC(source),sample)==GST_FLOW_OK);gst_sample_unref(sample);gst_caps_unref(caps);gst_buffer_unref(b);
 }
-static void run(bool audioLeads,int negative=0,bool gap=false,bool empty=false){
+static void run(bool audioLeads,int negative=0,bool gap=false,bool empty=false,bool pause=false){
  Pair audio,events;auto*sender=fl_gst_session_new(3);auto*receiver=fl_gst_session_new(3);
  flSessionConfig c{};c.version=2;c.sessionId.bytes[0]=1;c.clockId.bytes[0]=2;c.generation=1;c.videoTrackId=1;c.audioTrackId=2;c.video={FL_FORMAT_RGBA8,32,16,50,1};c.videoQueueFrames=2;c.audio={FL_PCM_S16,48000,2};c.audioQueueMs=80;c.connectTimeoutMs=2000;c.idleTimeoutMs=2000;
  flSessionCapabilities caps{};caps.version=2;caps.videoCount=caps.audioCount=1;caps.video[0]=c.video;caps.audio[0]=c.audio;
@@ -59,6 +59,19 @@ static void run(bool audioLeads,int negative=0,bool gap=false,bool empty=false){
   for(auto*b:{vb,ab}){GstMapInfo map{};CHECK(gst_buffer_map(b,&map,GST_MAP_READ));guint8 expected=b==vb?guint8(n+10):guint8(n+20);for(gsize i=0;i<map.size;i++)CHECK(map.data[i]==expected);gst_buffer_unmap(b,&map);}
   if(gap&&n==5)CHECK(videoGap[0]==600000000+voffset+n*20000000&&videoGap[1]==40000000);
   gst_sample_unref(v);gst_sample_unref(a);
+  if(pause&&n==4){
+   auto begin=g_get_monotonic_time();
+   CHECK(gst_element_set_state(tx,GST_STATE_PAUSED)!=GST_STATE_CHANGE_FAILURE);
+   CHECK(gst_element_set_state(rx,GST_STATE_PAUSED)!=GST_STATE_CHANGE_FAILURE);
+   CHECK(gst_element_get_state(tx,nullptr,nullptr,GST_SECOND)!=GST_STATE_CHANGE_FAILURE);
+   CHECK(gst_element_get_state(rx,nullptr,nullptr,GST_SECOND)!=GST_STATE_CHANGE_FAILURE);
+   CHECK(g_get_monotonic_time()-begin<1500000);g_usleep(50000);
+   CHECK(fl_gst_session_get_config(sender,&c)==FL_GST_SESSION_READY);
+   CHECK(fl_gst_session_get_config(receiver,&c)==FL_GST_SESSION_READY);
+   CHECK(gst_element_set_state(rx,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
+   CHECK(gst_element_set_state(tx,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
+  }
+
  }
  if(!negative){CHECK(gst_app_src_end_of_stream(GST_APP_SRC(ain))==GST_FLOW_OK);CHECK(gst_app_src_end_of_stream(GST_APP_SRC(vin))==GST_FLOW_OK);
  auto*bus=gst_element_get_bus(rx);auto*done=gst_bus_timed_pop_filtered(bus,3*GST_SECOND,GstMessageType(GST_MESSAGE_EOS|GST_MESSAGE_ERROR));if(done&&GST_MESSAGE_TYPE(done)==GST_MESSAGE_ERROR){GError*e=nullptr;gst_message_parse_error(done,&e,nullptr);fprintf(stderr,"EOS error: %s\n",e->message);g_clear_error(&e);}CHECK(done&&GST_MESSAGE_TYPE(done)==GST_MESSAGE_EOS);gst_message_unref(done);gst_object_unref(bus);}
@@ -70,5 +83,13 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
 #else
  CHECK(argc>1);GError*error=nullptr;auto*p=gst_plugin_load_file(argv[1],&error);if(error)fprintf(stderr,"%s\n",error->message);CHECK(p&&!error);gst_object_unref(p);
 #endif
- run(false);run(true);run(false,1);run(false,2);run(false,3);run(false,0,true);run(true,0,true);run(false,0,true,true);puts("coordinated public A/V: distinct TIME segments, one receiver mapping, exact +/-37ms offset, pixels/PCM/DTS/duration/generation passed");return 0;
+ for(const char*name:{"framelinksink","framelinksrc","framelinkaudiosink","framelinkaudiosrc"}){
+  auto*element=gst_element_factory_make(name,nullptr);CHECK(element);
+  auto*wrong=gst_context_new(FL_GST_SESSION_CONTEXT,TRUE);
+  gst_structure_set(gst_context_writable_structure(wrong),"coordinator",G_TYPE_STRING,"invalid",nullptr);
+  gst_element_set_context(element,wrong);gst_context_unref(wrong);
+  CHECK(gst_element_set_state(element,GST_STATE_PAUSED)==GST_STATE_CHANGE_FAILURE);
+  gst_element_set_state(element,GST_STATE_NULL);gst_object_unref(element);
+ }
+ run(false);run(true);run(false,1);run(false,2);run(false,3);run(false,0,true);run(true,0,true);run(false,0,true,true);run(false,0,true,false,true);puts("coordinated public A/V: distinct TIME segments, one receiver mapping, exact +/-37ms offset, pixels/PCM/DTS/duration/generation passed");return 0;
 }

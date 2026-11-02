@@ -93,10 +93,18 @@ static void setContext(GstElement*element,GstContext*context){
  }
  GST_ELEMENT_CLASS(gst_framelink_audio_sink_parent_class)->set_context(element,context);
 }
+
+static bool validSessionContext(GstElement*element){
+ auto*context=gst_element_get_context(element,FL_GST_SESSION_CONTEXT);if(!context)return true;
+ auto*session=fl_gst_session_from_context(context);gst_context_unref(context);
+ if(session){g_object_unref(session);return true;}
+ GST_ELEMENT_ERROR(element,RESOURCE,SETTINGS,("malformed FrameLink session context"),("refusing unauthenticated fallback"));return false;
+}
 static GstStateChangeReturn changeState(GstElement*element,GstStateChange transition){
  auto*s=reinterpret_cast<GstFrameLinkAudioSink*>(element);
  if(transition==GST_STATE_CHANGE_PAUSED_TO_READY){if(*s->startup)(*s->startup)->cancel();else if(s->session)fl_gst_session_cancel(s->session);}
  if(transition==GST_STATE_CHANGE_NULL_TO_READY){
+  if(!validSessionContext(element))return GST_STATE_CHANGE_FAILURE;
   if(!s->filter||!s->queue||!s->pay||!s->writer||!s->tracks||(strcmp(s->tracks,"audio")&&strcmp(s->tracks,"av"))){GST_ELEMENT_ERROR(s,RESOURCE,SETTINGS,("unsupported tracks or missing GDP/GIO elements"),(nullptr));return GST_STATE_CHANGE_FAILURE;}
   if(!s->session&&s->sessionPath&&*s->sessionPath&&(!s->pcmFormat||(strcmp(s->pcmFormat,"S16LE")&&strcmp(s->pcmFormat,"F32LE"))||strcmp(s->tracks,"audio"))){GST_ELEMENT_ERROR(s,RESOURCE,SETTINGS,("standalone mode requires audio tracks and supported PCM format"),("coordinated A/V requires a shared context"));return GST_STATE_CHANGE_FAILURE;}
   if(!s->session&&s->sessionPath&&*s->sessionPath){

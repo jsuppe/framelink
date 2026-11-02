@@ -377,7 +377,15 @@ static gboolean sinkStartLegacy(GstBaseSink* base) {
     return readyTrace.result(FALSE);
 }
 
+
+static bool validSessionContext(GstElement*element){
+ auto*context=gst_element_get_context(element,FL_GST_SESSION_CONTEXT);if(!context)return true;
+ auto*session=fl_gst_session_from_context(context);gst_context_unref(context);
+ if(session){g_object_unref(session);return true;}
+ GST_ELEMENT_ERROR(element,RESOURCE,SETTINGS,("malformed FrameLink session context"),("refusing unauthenticated fallback"));return false;
+}
 static gboolean sinkStart(GstBaseSink* base) {
+    if(!validSessionContext(GST_ELEMENT(base)))return FALSE;
     auto* self=GST_FRAMELINK_SINK(base);
     if(self->session){
         if(fl_gst_session_get_config(self->session,&self->sessionConfig)!=FL_GST_SESSION_READY||!self->sessionConfig.videoTrackId||!self->delegated||
@@ -1079,6 +1087,7 @@ static GstCaps* srcGetCaps(GstBaseSrc* base, GstCaps* filter) {
 }
 
 static gboolean srcStart(GstBaseSrc* base) {
+    if(!validSessionContext(GST_ELEMENT(base)))return FALSE;
     GstFrameLinkSrc* self = GST_FRAMELINK_SRC(base);
     if(self->session){
         if(fl_gst_session_get_config(self->session,&self->sessionConfig)!=FL_GST_SESSION_READY||!self->sessionConfig.videoTrackId||!self->delegated||
@@ -1148,7 +1157,6 @@ static gboolean srcStop(GstBaseSrc* base) {
 }
 
 static gboolean srcUnlock(GstBaseSrc* base) {
-    if(GST_FRAMELINK_SRC(base)->session)fl_gst_session_cancel(GST_FRAMELINK_SRC(base)->session);
     g_atomic_int_set(&GST_FRAMELINK_SRC(base)->flushing, 1);
     return TRUE;
 }
@@ -1265,7 +1273,16 @@ static GstFlowReturn srcCreate(GstPushSrc* push, GstBuffer** outbuf) {
     GstFrameLinkSrc* self = GST_FRAMELINK_SRC(push);
     gsttrace::Scope trace("gst.srcCreate",gsttrace::id(self->channel));
 
-    if(self->session){flSessionConfig ready{};if(fl_gst_session_wait(self->session,self->sessionConfig.generation,self->sessionConfig.connectTimeoutMs,&ready)!=FL_GST_SESSION_READY){GST_ELEMENT_ERROR(self,RESOURCE,READ,("coordinated session not ready or cancelled"),(NULL));return GST_FLOW_ERROR;}}
+    if(self->session){
+        const auto deadline=g_get_monotonic_time()+gint64(self->sessionConfig.connectTimeoutMs)*1000;
+        flSessionConfig ready{};FlGstSessionResult result;
+        do {
+            if(g_atomic_int_get(&self->flushing))return GST_FLOW_FLUSHING;
+            auto remaining=deadline-g_get_monotonic_time();if(remaining<=0){result=FL_GST_SESSION_TIMEOUT;break;}
+            result=fl_gst_session_wait(self->session,self->sessionConfig.generation,guint(std::min<gint64>(50,(remaining+999)/1000)),&ready);
+        }while(result==FL_GST_SESSION_TIMEOUT);
+        if(result!=FL_GST_SESSION_READY){GST_ELEMENT_ERROR(self,RESOURCE,READ,("coordinated session not ready or cancelled"),(NULL));return GST_FLOW_ERROR;}
+    }
     const gint64 idleDeadline=g_get_monotonic_time()+gint64(self->sessionConfig.idleTimeoutMs)*1000;
     flFrame frame = {};
     for (;;) {

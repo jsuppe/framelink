@@ -36,7 +36,14 @@ static GstFlowReturn readChunk(GstPushSrc*base,GstBuffer**out){
  if(!s->connection){
   if(*s->startup)s->connection=(*s->startup)->connection(s->cancel,&error);
   else {flSessionConfig config{};if(fl_gst_session_get_config(s->session,&config)==FL_GST_SESSION_READY){
-   if(fl_gst_session_wait(s->session,config.generation,config.connectTimeoutMs,&config)==FL_GST_SESSION_READY)
+   auto deadline=g_get_monotonic_time()+gint64(config.connectTimeoutMs)*1000;
+   FlGstSessionResult ready=FL_GST_SESSION_TIMEOUT;
+   while(!g_cancellable_is_cancelled(s->cancel)){
+    auto remaining=deadline-g_get_monotonic_time();if(remaining<=0)break;
+    ready=fl_gst_session_wait(s->session,config.generation,guint(std::min<gint64>(50,(remaining+999)/1000)),&config);
+    if(ready!=FL_GST_SESSION_TIMEOUT)break;
+   }
+   if(ready==FL_GST_SESSION_READY&&!g_cancellable_is_cancelled(s->cancel))
     s->connection=fl_gst_session_claim_audio_stream(s->session,FALSE,config.generation);
   }}
   if(!s->connection){if(g_cancellable_is_cancelled(s->cancel)){g_clear_error(&error);return GST_FLOW_FLUSHING;}
@@ -55,8 +62,8 @@ static GstFlowReturn readChunk(GstPushSrc*base,GstBuffer**out){
  }
  gst_buffer_resize(b,0,count);*out=b;return GST_FLOW_OK;
 }
-static gboolean unlockReader(GstBaseSrc*base){auto*s=reinterpret_cast<FlAudioReader*>(base);g_cancellable_cancel(s->cancel);if(s->session)fl_gst_session_cancel(s->session);return TRUE;}
-static gboolean unlockStopReader(GstBaseSrc*){return TRUE;}
+static gboolean unlockReader(GstBaseSrc*base){auto*s=reinterpret_cast<FlAudioReader*>(base);g_cancellable_cancel(s->cancel);return TRUE;}
+static gboolean unlockStopReader(GstBaseSrc*base){auto*s=reinterpret_cast<FlAudioReader*>(base);g_cancellable_reset(s->cancel);return TRUE;}
 static gboolean startReader(GstBaseSrc*base){auto*s=reinterpret_cast<FlAudioReader*>(base);g_cancellable_reset(s->cancel);g_atomic_int_set(&s->eos,0);s->headerUsed=s->payloadRemaining=0;return TRUE;}
 static gboolean stopReader(GstBaseSrc*base){auto*s=reinterpret_cast<FlAudioReader*>(base);g_clear_object(&s->connection);return TRUE;}
 static void finalizeReader(GObject*object){auto*s=reinterpret_cast<FlAudioReader*>(object);g_clear_object(&s->connection);g_clear_object(&s->session);g_object_unref(s->cancel);delete s->startup;G_OBJECT_CLASS(fl_audio_reader_parent_class)->finalize(object);}
@@ -101,8 +108,16 @@ static GstPadProbeReturn inspectPcm(GstPad*,GstPadProbeInfo*info,gpointer data){
  return GST_PAD_PROBE_OK;
 }
 static void contextSrc(GstElement*e,GstContext*c){auto*s=reinterpret_cast<GstFrameLinkAudioSrc*>(e);if(gst_context_has_context_type(c,FL_GST_SESSION_CONTEXT)){auto*session=fl_gst_session_from_context(c);if(session){if(GST_STATE(e)!=GST_STATE_NULL){g_object_unref(session);GST_ELEMENT_ERROR(s,CORE,STATE_CHANGE,("session context immutable outside NULL"),(nullptr));return;}g_clear_object(&s->session);s->session=session;}}GST_ELEMENT_CLASS(gst_framelink_audio_src_parent_class)->set_context(e,c);}
+
+static bool validSessionContext(GstElement*element){
+ auto*context=gst_element_get_context(element,FL_GST_SESSION_CONTEXT);if(!context)return true;
+ auto*session=fl_gst_session_from_context(context);gst_context_unref(context);
+ if(session){g_object_unref(session);return true;}
+ GST_ELEMENT_ERROR(element,RESOURCE,SETTINGS,("malformed FrameLink session context"),("refusing unauthenticated fallback"));return false;
+}
 static GstStateChangeReturn stateSrc(GstElement*e,GstStateChange t){auto*s=reinterpret_cast<GstFrameLinkAudioSrc*>(e);
  if(t==GST_STATE_CHANGE_NULL_TO_READY){
+  if(!validSessionContext(e))return GST_STATE_CHANGE_FAILURE;
   if(!s->reader||!s->depay||!s->tracks||(strcmp(s->tracks,"audio")&&strcmp(s->tracks,"av"))){GST_ELEMENT_ERROR(s,RESOURCE,SETTINGS,("missing GDP or invalid tracks"),(nullptr));return GST_STATE_CHANGE_FAILURE;}
   if(!s->session){if(!s->path||!*s->path||strcmp(s->tracks,"audio")||!s->format||(strcmp(s->format,"S16LE")&&strcmp(s->format,"F32LE"))){GST_ELEMENT_ERROR(s,RESOURCE,SETTINGS,("audio session path or authenticated context required"),(nullptr));return GST_STATE_CHANGE_FAILURE;}
    s->session=fl_gst_session_new(FL_GST_TRACK_AUDIO);s->local=TRUE;flAudioFormat format{guint(!strcmp(s->format,"F32LE")?FL_PCM_F32:FL_PCM_S16),s->rate,s->channels};
