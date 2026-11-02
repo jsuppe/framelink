@@ -36,3 +36,20 @@ FL_GST_SESSION_API gboolean fl_gst_session_open_local_audio(FlGstSession*,gboole
  const gchar* session_path,const flAudioFormat*,guint audio_queue_ms,
  guint connect_timeout_ms,guint idle_timeout_ms,GCancellable*,GError**);
 G_END_DECLS
+
+G_BEGIN_DECLS
+// Optional distinct authenticated event stream for ordered video GAP/flush
+// controls. No PCM/video payload. Bind before elements start; same config/root
+// credential as negotiation. Success transfers an owning reference to session.
+FL_GST_SESSION_API gboolean fl_gst_session_authenticate_event_stream(FlGstSession*,
+ GSocketConnection*,gboolean producer,GBytes* root_secret,guint timeout_ms,
+ GCancellable*,GError**);
+#define FL_GST_VIDEO_GAP 1u
+#define FL_GST_VIDEO_BARRIER 2u
+#define FL_GST_VIDEO_FLUSH 3u
+#define FL_GST_VIDEO_END 4u
+typedef struct {guint kind;guint64 afterFrames,ptsNs,durationNs;} FlGstVideoEvent;
+FL_GST_SESSION_API gboolean fl_gst_session_has_event_stream(FlGstSession*,guint64 generation);
+FL_GST_SESSION_API FlGstSessionResult fl_gst_session_send_video_event(FlGstSession*,guint64 generation,const FlGstVideoEvent*);
+FL_GST_SESSION_API FlGstSessionResult fl_gst_session_receive_video_event(FlGstSession*,guint64 generation,guint timeout_ms,FlGstVideoEvent*);
+G_END_DECLS

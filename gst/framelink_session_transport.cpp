@@ -110,6 +110,30 @@ gboolean fl_gst_session_authenticate_audio_stream(FlGstSession*s,GSocketConnecti
  return TRUE;
 }
 
+gboolean fl_gst_session_authenticate_event_stream(FlGstSession*s,GSocketConnection*stream,gboolean producer,
+ GBytes*secret,guint timeout,GCancellable*outer,GError**error){
+ auto fail=[&](const char*message){if(s&&G_TYPE_CHECK_INSTANCE_TYPE(s,fl_gst_session_get_type()))fl_gst_session_cancel(s);
+  if(stream&&G_IS_SOCKET_CONNECTION(stream))g_io_stream_close(G_IO_STREAM(stream),nullptr,nullptr);
+  g_set_error_literal(error,G_IO_ERROR,G_IO_ERROR_FAILED,message);return FALSE;};
+ flSessionConfig cfg{};Wire wire{};gsize n=0;
+ const auto*key=secret?static_cast<const guint8*>(g_bytes_get_data(secret,&n)):nullptr;
+ if(!stream||!G_IS_SOCKET_CONNECTION(stream)||!key||n!=32||!timeout||timeout>60000||fl_gst_session_get_config(s,&cfg)!=FL_GST_SESSION_READY||!cfg.videoTrackId||cfg.version!=FL_SESSION_OPTIONAL_TRACKS_VERSION||flSessionEncode(&cfg,wire.data(),wire.size())!=FL_SESSION_OK)return fail("invalid event session binding");
+ auto*socket=g_socket_connection_get_socket(stream);
+ if(g_socket_get_socket_type(socket)!=G_SOCKET_TYPE_STREAM||!g_socket_is_connected(socket))return fail("connected event STREAM socket required");
+ guint nonzero=0;for(gsize i=0;i<n;i++)nonzero|=key[i];if(!nonzero)return fail("invalid event session credential");
+ av::Endpoint ep{};auto*h=g_hmac_new(G_CHECKSUM_SHA256,key,n);
+ constexpr char label[]="FrameLink public event session v2";
+ g_hmac_update(h,reinterpret_cast<const guint8*>(label),sizeof label);g_hmac_update(h,wire.data(),wire.size());
+ n=ep.token.size();g_hmac_get_digest(h,ep.token.data(),&n);g_hmac_unref(h);
+ Deadline deadline(timeout,outer);std::string reason;
+ const bool ok=producer?av::authenticateServerCancellable(stream,ep,'E',reason,deadline.cancel):av::authenticateClientCancellable(stream,ep,'E',reason,deadline.cancel);
+ if(!ok)return fail(reason.c_str());
+ flSessionConfig current{};Wire currentWire{};
+ if(g_cancellable_is_cancelled(deadline.cancel)||fl_gst_session_get_config(s,&current)!=FL_GST_SESSION_READY||flSessionEncode(&current,currentWire.data(),currentWire.size())!=FL_SESSION_OK||currentWire!=wire)return fail("event session changed during authentication");
+ if(!fl_gst_session_publish_events(s,&cfg,stream,producer))return fail("event stream publication rejected");
+ return TRUE;
+}
+
 namespace {
 struct StreamOwner {GSocketConnection* p=nullptr;~StreamOwner(){if(p){g_io_stream_close(G_IO_STREAM(p),nullptr,nullptr);g_object_unref(p);}}};
 struct ObjectOwner {GObject* p=nullptr;~ObjectOwner(){if(p)g_object_unref(p);}};

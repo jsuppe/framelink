@@ -21,7 +21,7 @@ Digest proof(const Endpoint& e,unsigned char direction,char role,const Nonce& cl
  Digest d{};gsize n=d.size();g_hmac_get_digest(h,d.data(),&n);g_hmac_unref(h);return d;
 }
 bool equal(const Digest&a,const Digest&b){unsigned diff=0;for(size_t i=0;i<a.size();++i)diff|=a[i]^b[i];return diff==0;}
-bool roleValid(char role){return role=='C'||role=='A';}
+bool roleValid(char role){return role=='C'||role=='A'||role=='E';}
 }
 bool authenticateClientCancellable(GSocketConnection*c,const Endpoint&e,char role,std::string&error,GCancellable* cancellable){
  if(!c||!roleValid(role))return fail(error,"invalid authentication role");

@@ -1,0 +1,23 @@
+Test project C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+    Start  61: av_auth
+1/9 Test  #61: av_auth ..........................   Passed    0.03 sec
+    Start  82: gst_sink_stats
+2/9 Test  #82: gst_sink_stats ...................   Passed    0.10 sec
+    Start  97: gst_session_transport
+3/9 Test  #97: gst_session_transport ............   Passed    0.21 sec
+    Start  98: gst_session_context
+4/9 Test  #98: gst_session_context ..............   Passed    0.08 sec
+    Start  99: gst_audio_sink
+5/9 Test  #99: gst_audio_sink ...................   Passed    1.26 sec
+    Start 100: gst_audio_source
+6/9 Test #100: gst_audio_source .................   Passed    1.29 sec
+    Start 101: gst_av_timeline
+7/9 Test #101: gst_av_timeline ..................   Passed    1.61 sec
+    Start 102: gst_local_audio
+8/9 Test #102: gst_local_audio ..................   Passed    0.18 sec
+    Start 103: gst_event_channel
+9/9 Test #103: gst_event_channel ................   Passed    2.33 sec
+
+100% tests passed, 0 tests failed out of 9
+
+Total Test time (real) =   7.22 sec

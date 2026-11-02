@@ -2,8 +2,10 @@
 #include "framelink_session_context.h"
 #include <cstring>
 #include "fl_gst_session_internal.h"
+#include "fl_gst_event_channel.hpp"
 struct _FlGstSession {
  GObject parent;
+ std::shared_ptr<FlGstEventChannel>* events;
  GMutex mutex;
  GCond changed;
  guint required,registered,ready;
@@ -20,12 +22,13 @@ G_DEFINE_TYPE(FlGstSession,fl_gst_session,G_TYPE_OBJECT)
 static bool valid(FlGstSession* s) {return s&&G_TYPE_CHECK_INSTANCE_TYPE(s,fl_gst_session_get_type());}
 static void finalize(GObject* object) {
  auto* s=reinterpret_cast<FlGstSession*>(object);
+ delete s->events;
  if(s->audioConnection)g_object_unref(s->audioConnection);
  g_cond_clear(&s->changed);g_mutex_clear(&s->mutex);
  G_OBJECT_CLASS(fl_gst_session_parent_class)->finalize(object);
 }
 static void fl_gst_session_class_init(FlGstSessionClass* c){G_OBJECT_CLASS(c)->finalize=finalize;}
-static void fl_gst_session_init(FlGstSession* s){g_mutex_init(&s->mutex);g_cond_init(&s->changed);}
+static void fl_gst_session_init(FlGstSession* s){g_mutex_init(&s->mutex);g_cond_init(&s->changed);s->events=new std::shared_ptr<FlGstEventChannel>();}
 namespace { struct Lock {GMutex* m; explicit Lock(GMutex* p):m(p){g_mutex_lock(m);}~Lock(){g_mutex_unlock(m);}}; }
 FlGstSession* fl_gst_session_new(guint required) {
  if(!required||(required&~3u))return nullptr;
@@ -53,6 +56,7 @@ FlGstSessionResult fl_gst_session_configure(FlGstSession* s,const flSessionConfi
   if(r!=FL_SESSION_OK)return r==FL_SESSION_STALE?FL_GST_SESSION_STALE:FL_GST_SESSION_INVALID;
  }
  if(s->audioConnection){g_socket_shutdown(g_socket_connection_get_socket(s->audioConnection),TRUE,TRUE,nullptr);g_object_unref(s->audioConnection);s->audioConnection=nullptr;}
+ if(*s->events)(*s->events)->cancel();s->events->reset();
  s->audioClaimed=FALSE;s->videoEnded=FALSE;s->videoFrames=0;s->videoLastPts=-1;s->config=*c;s->mapped=FALSE;s->configured=TRUE;s->cancelled=FALSE;s->ready=0;g_cond_broadcast(&s->changed);return FL_GST_SESSION_READY;
 }
 FlGstSessionResult fl_gst_session_register_track(FlGstSession* s,guint track) {
@@ -83,6 +87,7 @@ FlGstSessionResult fl_gst_session_wait(FlGstSession* s,guint64 generation,guint 
 void fl_gst_session_cancel(FlGstSession* s) {
  if(!valid(s))return;
  Lock lock(&s->mutex);s->cancelled=TRUE;s->ready=0;
+ if(*s->events)(*s->events)->cancel();
  if(s->audioConnection)g_socket_shutdown(g_socket_connection_get_socket(s->audioConnection),TRUE,TRUE,nullptr);
  g_cond_broadcast(&s->changed);
 }
@@ -109,6 +114,7 @@ FlGstSessionResult fl_gst_session_map_pts(FlGstSession* s,guint64 generation,gin
 FlGstSessionResult fl_gst_session_get_config(FlGstSession* s,flSessionConfig* out) {
  if(!valid(s)||!out)return FL_GST_SESSION_INVALID;
  Lock lock(&s->mutex);
+ if(*s->events&&(*s->events)->failed()){s->cancelled=TRUE;s->ready=0;if(s->audioConnection)g_socket_shutdown(g_socket_connection_get_socket(s->audioConnection),TRUE,TRUE,nullptr);g_cond_broadcast(&s->changed);}
  if(s->cancelled)return FL_GST_SESSION_CANCELLED;
  if(!s->configured)return FL_GST_SESSION_STALE;
  *out=s->config;return FL_GST_SESSION_READY;
@@ -161,3 +167,15 @@ FlGstSessionResult fl_gst_session_wait_video_eos(FlGstSession*s,guint64 generati
   if(!timeout||!g_cond_wait_until(&s->changed,&s->mutex,deadline))return FL_GST_SESSION_TIMEOUT;
  }
 }
+
+gboolean fl_gst_session_publish_events(FlGstSession*s,const flSessionConfig*c,GSocketConnection*stream,gboolean producer){
+ if(!valid(s)||!c||!stream)return FALSE;Lock lock(&s->mutex);guint8 a[FL_SESSION_WIRE_SIZE],b[FL_SESSION_WIRE_SIZE];
+ if(s->cancelled||!s->configured||*s->events||flSessionEncode(c,a,sizeof a)!=FL_SESSION_OK||flSessionEncode(&s->config,b,sizeof b)!=FL_SESSION_OK||memcmp(a,b,sizeof a))return FALSE;
+ *s->events=std::make_shared<FlGstEventChannel>(stream,producer,c->generation,c->idleTimeoutMs);return TRUE;
+}
+static std::shared_ptr<FlGstEventChannel> eventChannel(FlGstSession*s,guint64 generation){
+ if(!valid(s))return {};Lock lock(&s->mutex);if(s->cancelled||!s->configured||s->config.generation!=generation)return {};return *s->events;
+}
+gboolean fl_gst_session_has_event_stream(FlGstSession*s,guint64 generation){return bool(eventChannel(s,generation));}
+FlGstSessionResult fl_gst_session_send_video_event(FlGstSession*s,guint64 generation,const FlGstVideoEvent*event){auto channel=eventChannel(s,generation);return channel&&event?channel->send(*event):FL_GST_SESSION_INVALID;}
+FlGstSessionResult fl_gst_session_receive_video_event(FlGstSession*s,guint64 generation,guint timeout,FlGstVideoEvent*event){auto channel=eventChannel(s,generation);return channel?channel->receive(timeout,event):FL_GST_SESSION_INVALID;}
