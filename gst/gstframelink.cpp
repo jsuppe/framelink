@@ -986,6 +986,7 @@ struct NativeSourceReader {
 
 typedef struct _GstFrameLinkSrc {
     GstPushSrc parent;
+    GstBuffer* pendingDelivery;
     FlGstSession* session; flSessionConfig sessionConfig; gboolean sessionRegistered;
     guint64 sessionFrames;gint64 sessionLastPts;
     FlGstVideoEvent pendingGaps[32];guint pendingGapCount;
@@ -1145,6 +1146,7 @@ static gboolean srcStart(GstBaseSrc* base) {
 
 static gboolean srcStop(GstBaseSrc* base) {
     GstFrameLinkSrc* self = GST_FRAMELINK_SRC(base);
+    gst_clear_buffer(&self->pendingDelivery);
     if(self->session)fl_gst_session_cancel(self->session);
 #ifdef _WIN32
     srcDropStaging(self);
@@ -1272,6 +1274,10 @@ static bool srcEmitGaps(GstFrameLinkSrc*self){
 static GstFlowReturn srcCreate(GstPushSrc* push, GstBuffer** outbuf) {
     GstFrameLinkSrc* self = GST_FRAMELINK_SRC(push);
     gsttrace::Scope trace("gst.srcCreate",gsttrace::id(self->channel));
+    // GstBaseSrc can discard create() output when PLAYING->PAUSED races with
+    // return. Keep this one already-owned frame until its source-pad push.
+    if(self->pendingDelivery){*outbuf=gst_buffer_ref(self->pendingDelivery);return GST_FLOW_OK;}
+
 
     if(self->session){
         const auto deadline=g_get_monotonic_time()+gint64(self->sessionConfig.connectTimeoutMs)*1000;
@@ -1506,6 +1512,7 @@ static GstFlowReturn srcCreate(GstPushSrc* push, GstBuffer** outbuf) {
         GST_BUFFER_PTS(buf)=mapped;
         if(GST_CLOCK_TIME_IS_VALID(GST_BUFFER_DTS(buf))){if(fl_gst_session_map_running_time(self->session,self->sessionConfig.generation,GST_BUFFER_DTS(buf),TRUE,&mapped)!=FL_GST_SESSION_READY){gst_buffer_unref(buf);return GST_FLOW_ERROR;}GST_BUFFER_DTS(buf)=mapped;auto*meta=gst_buffer_get_framelink_frame_meta(buf);if(meta)meta->frame.dtsNs=mapped;}
     }
+    if(self->session)self->pendingDelivery=gst_buffer_ref(buf);
     *outbuf = buf; // default remains arrival-time timestamping
     return trace.result(GST_FLOW_OK);
 }
@@ -1567,6 +1574,7 @@ static void srcGetProperty(GObject* obj, guint id, GValue* value, GParamSpec* sp
 
 static void srcFinalize(GObject* obj) {
     GstFrameLinkSrc* self = GST_FRAMELINK_SRC(obj);
+    gst_clear_buffer(&self->pendingDelivery);
     if(self->session){fl_gst_session_cancel(self->session);g_object_unref(self->session);}
 #ifdef FL_GST_NATIVE
     if(self->nativeOwner){delete self->nativeOwner;self->nativeOwner=nullptr;self->ch=nullptr;}
@@ -1696,7 +1704,7 @@ static void gst_framelink_src_class_init(GstFrameLinkSrcClass* klass) {
 }
 
 static void gst_framelink_src_init(GstFrameLinkSrc* self) {
-    gst_pad_add_probe(GST_BASE_SRC_PAD(self),GST_PAD_PROBE_TYPE_BUFFER,[](GstPad*,GstPadProbeInfo*,gpointer data)->GstPadProbeReturn{auto*self=GST_FRAMELINK_SRC(data);if(self->session&&!srcEmitGaps(self)){GST_ELEMENT_ERROR(self,STREAM,FAILED,("video GAP dispatch failed"),(NULL));return GST_PAD_PROBE_DROP;}return GST_PAD_PROBE_OK;},self,nullptr);
+    gst_pad_add_probe(GST_BASE_SRC_PAD(self),GST_PAD_PROBE_TYPE_BUFFER,[](GstPad*,GstPadProbeInfo*,gpointer data)->GstPadProbeReturn{auto*self=GST_FRAMELINK_SRC(data);if(self->session&&!srcEmitGaps(self)){GST_ELEMENT_ERROR(self,STREAM,FAILED,("video GAP dispatch failed"),(NULL));return GST_PAD_PROBE_DROP;}gst_clear_buffer(&self->pendingDelivery);return GST_PAD_PROBE_OK;},self,nullptr);
     self->poolSize=4;
     self->channel = g_strdup("framelink");
     self->format = g_strdup("BGRA");
