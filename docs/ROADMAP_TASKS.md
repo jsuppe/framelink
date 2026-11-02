@@ -224,8 +224,9 @@ elements remain independently available.
   Partial evidence: [pause/context](m5b/lifecycle-pause/README.md),
   [in-flight pause](m5b/inflight-pause/README.md), [rapid audio pause](m5b/rapid-audio-pause/README.md),
   [fatal-error propagation and peer death](m5b/fatal-propagation/README.md):
-  Linux105/105 serial, timeline20/20 on Linux/Windows/Android. Reconnect with a
-  fresh generation and stale-message rejection remain.
+  [reconnect on a fresh generation](m5b/reconnect/README.md): Linux105/105 serial,
+  timeline20/20 on Linux/Windows/Android. Remaining task6 audit: negotiation
+  rejection and endpoint permission coverage against the public elements.
 - [ ] **M5b.7 Integration examples:** audio-only and two-process A/V GStreamer
   examples, with Windows integration first, then Linux/Android adapters. Show
   independent video rendering plus standard audio output, shared session setup

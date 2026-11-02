@@ -129,6 +129,83 @@ static void run(bool audioLeads,int negative=0,bool gap=false,bool empty=false,i
  auto*bus=gst_element_get_bus(rx);auto*done=gst_bus_timed_pop_filtered(bus,3*GST_SECOND,GstMessageType(GST_MESSAGE_EOS|GST_MESSAGE_ERROR));if(done&&GST_MESSAGE_TYPE(done)==GST_MESSAGE_ERROR){GError*e=nullptr;gst_message_parse_error(done,&e,nullptr);fprintf(stderr,"EOS error: %s\n",e->message);g_clear_error(&e);}CHECK(done&&GST_MESSAGE_TYPE(done)==GST_MESSAGE_EOS);gst_message_unref(done);gst_object_unref(bus);}
  gst_element_set_state(tx,GST_STATE_NULL);gst_element_set_state(rx,GST_STATE_NULL);for(auto*e:{vs,vr,vin,ain,vout,aout,tx,rx})gst_object_unref(e);g_object_unref(sender);g_object_unref(receiver);
 }
+static void playing(GstElement*p,guint64 generation){
+ if(gst_element_set_state(p,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE)return;
+ auto*bus=gst_element_get_bus(p);while(auto*m=gst_bus_pop_filtered(bus,GST_MESSAGE_ERROR)){GError*e=nullptr;gchar*d=nullptr;gst_message_parse_error(m,&e,&d);fprintf(stderr,"gen%" G_GUINT64_FORMAT " start %s: %s (%s)\n",generation,GST_OBJECT_NAME(m->src),e->message,d?d:"");g_clear_error(&e);g_free(d);gst_message_unref(m);}gst_object_unref(bus);
+ CHECK(!"pipeline failed to start");
+}
+// Reconnect after consumer death on the SAME coordinator objects: generation1
+// delivers, the consumer dies, both sides adopt a strictly newer generation with
+// a fresh authenticated audio stream, fresh video lease and a different receiver
+// mapping. Generation1 operations must report STALE and generation2 media must
+// carry exact pixels/PCM/PTS/offset/metadata through EOS.
+static void reconnect(){
+ fprintf(stderr,"CASE reconnect\n");
+ auto*sender=fl_gst_session_new(3);auto*receiver=fl_gst_session_new(3);
+ flSessionConfig c{};c.version=2;c.sessionId.bytes[0]=1;c.clockId.bytes[0]=2;c.generation=1;c.videoTrackId=1;c.audioTrackId=2;c.video={FL_FORMAT_RGBA8,32,16,50,1};c.videoQueueFrames=2;c.audio={FL_PCM_S16,48000,2};c.audioQueueMs=80;c.connectTimeoutMs=2000;c.idleTimeoutMs=2000;
+ flSessionCapabilities caps{};caps.version=2;caps.videoCount=caps.audioCount=1;caps.video[0]=c.video;caps.audio[0]=c.audio;
+ auto*rx=parse("framelinksrc name=video width=32 height=16 format=RGBA ! appsink name=vout sync=false async=false framelinkaudiosrc name=audio tracks=av ! appsink name=aout sync=false async=false");
+ auto*tx=parse("appsrc name=vin is-live=true format=time handle-segment-change=true caps=video/x-raw,format=RGBA,width=32,height=16,framerate=50/1 ! framelinksink name=video sync=false async=false appsrc name=ain is-live=true format=time handle-segment-change=true caps=audio/x-raw,format=S16LE,layout=interleaved,rate=48000,channels=2,channel-mask=(bitmask)0x3 ! framelinkaudiosink tracks=av");
+ auto*vs=gst_bin_get_by_name(GST_BIN(tx),"video");auto*vr=gst_bin_get_by_name(GST_BIN(rx),"video");
+ auto*vin=gst_bin_get_by_name(GST_BIN(tx),"vin");auto*ain=gst_bin_get_by_name(GST_BIN(tx),"ain");auto*vout=gst_bin_get_by_name(GST_BIN(rx),"vout");auto*aout=gst_bin_get_by_name(GST_BIN(rx),"aout");
+ auto*context=fl_gst_session_create_context(sender);gst_element_set_context(tx,context);gst_context_unref(context);context=fl_gst_session_create_context(receiver);gst_element_set_context(rx,context);gst_context_unref(context);
+ std::vector<flChannel*> channels;
+ for(guint64 generation=1;generation<=2;generation++){
+  c.generation=generation;
+  CHECK(fl_gst_session_configure(sender,&c,&caps,&caps)==FL_GST_SESSION_READY);CHECK(fl_gst_session_configure(receiver,&c,&caps,&caps)==FL_GST_SESSION_READY);
+  const gint64 anchor=generation==1?100000000:200000000;
+  flClockMapping mapping{};mapping.sourceClockId=c.clockId;mapping.targetClockId.bytes[0]=3;mapping.targetAnchorNs=anchor;
+  CHECK(fl_gst_session_set_mapping(receiver,generation,&mapping,0)==FL_GST_SESSION_READY);
+  if(generation==2){
+   // Every generation1 operation is stale after replacement; no revival by old peers.
+   flClockMapping old=mapping;old.targetAnchorNs=100000000;flSessionConfig out{};gint64 mapped=0;
+   CHECK(fl_gst_session_set_mapping(receiver,1,&old,0)==FL_GST_SESSION_STALE);
+   CHECK(fl_gst_session_track_ready(sender,FL_GST_TRACK_AUDIO,1)==FL_GST_SESSION_STALE);
+   CHECK(fl_gst_session_wait(receiver,1,10,&out)==FL_GST_SESSION_STALE);
+   CHECK(fl_gst_session_map_running_time(receiver,1,0,TRUE,&mapped)==FL_GST_SESSION_STALE);
+   CHECK(!fl_gst_session_claim_audio_stream(sender,TRUE,1));
+   c.generation=1;CHECK(fl_gst_session_configure(sender,&c,&caps,&caps)==FL_GST_SESSION_STALE);c.generation=2;
+  }
+  Pair audio;guint8 secret[32];memset(secret,guint8(6+generation),32);auto*key=g_bytes_new(secret,32);gboolean ok=FALSE;
+  std::thread auth([&]{ok=fl_gst_session_authenticate_audio_stream(sender,audio.server,TRUE,key,1000,nullptr,nullptr);});CHECK(fl_gst_session_authenticate_audio_stream(receiver,audio.client,FALSE,key,1000,nullptr,nullptr));auth.join();CHECK(ok);g_bytes_unref(key);
+  std::string name="m5b-reconnect-"+std::to_string(generation)+"-"+std::to_string(g_get_monotonic_time());flChannel*consumer=nullptr,*producer=nullptr;
+  CHECK(flCreateChannelEx(name.c_str(),32,16,FL_FORMAT_RGBA8,2,FL_MAP_CPU|FL_REQUIRE_FRAME_METADATA,&consumer)==FL_OK);CHECK(flOpenProducer(name.c_str(),&producer)==FL_OK);
+  gboolean adopted=FALSE;g_signal_emit_by_name(vs,"adopt-channel",producer,&adopted);CHECK(adopted);g_signal_emit_by_name(vr,"adopt-channel",consumer,&adopted);CHECK(adopted);
+  playing(rx,generation);playing(tx,generation);
+  const guint frames=generation==1?3:6;
+  for(guint n=0;n<frames;n++){
+   push(vin,32*16*4,guint8(n+10*generation),5*GST_SECOND+n*20000000,20000000,5*GST_SECOND,1.0,n==0);
+   push(ain,3840,guint8(n+20*generation),2*GST_SECOND+37000000+n*20000000,20000000,2*GST_SECOND,1.0,n==0);
+   auto*v=gst_app_sink_try_pull_sample(GST_APP_SINK(vout),2*GST_SECOND);auto*a=gst_app_sink_try_pull_sample(GST_APP_SINK(aout),2*GST_SECOND);
+   if(!v||!a)for(auto*p:{tx,rx}){auto*bus=gst_element_get_bus(p);while(auto*m=gst_bus_pop_filtered(bus,GST_MESSAGE_ERROR)){GError*error=nullptr;gst_message_parse_error(m,&error,nullptr);fprintf(stderr,"gen%" G_GUINT64_FORMAT " %s: %s\n",generation,GST_OBJECT_NAME(m->src),error->message);g_clear_error(&error);gst_message_unref(m);}gst_object_unref(bus);}
+   CHECK(v&&a);auto*vb=gst_sample_get_buffer(v);auto*ab=gst_sample_get_buffer(a);
+   CHECK(GST_BUFFER_PTS(vb)==guint64(500000000+anchor)+n*20000000);CHECK(GST_BUFFER_PTS(ab)==guint64(500000000+anchor)+37000000+n*20000000);
+   auto*meta=gst_buffer_get_framelink_frame_meta(vb);CHECK(meta&&meta->frame.streamGeneration==generation);
+   for(auto*b:{vb,ab}){GstMapInfo map{};CHECK(gst_buffer_map(b,&map,GST_MAP_READ));guint8 expected=b==vb?guint8(n+10*generation):guint8(n+20*generation);for(gsize i=0;i<map.size;i++)CHECK(map.data[i]==expected);gst_buffer_unmap(b,&map);}
+   gst_sample_unref(v);gst_sample_unref(a);
+  }
+  if(generation==1){
+   // Consumer death, then the producer observes the failure and stops.
+   CHECK(gst_element_set_state(rx,GST_STATE_NULL)==GST_STATE_CHANGE_SUCCESS);
+   CHECK(g_socket_close(g_socket_connection_get_socket(audio.client),nullptr));
+   auto*bus=gst_element_get_bus(tx);GstMessage*err=nullptr;auto begin=g_get_monotonic_time();
+   for(guint k=0;!err&&g_get_monotonic_time()-begin<3000000;k++){auto*b=gst_buffer_new_allocate(nullptr,3840,nullptr);gst_buffer_memset(b,0,0,3840);GST_BUFFER_PTS(b)=GST_BUFFER_DTS(b)=2*GST_SECOND+37000000+(frames+k)*20000000;GST_BUFFER_DURATION(b)=20000000;gst_app_src_push_buffer(GST_APP_SRC(ain),b);err=gst_bus_timed_pop_filtered(bus,20*GST_MSECOND,GST_MESSAGE_ERROR);}
+   CHECK(err);gst_message_unref(err);flSessionConfig out{};CHECK(fl_gst_session_get_config(sender,&out)==FL_GST_SESSION_CANCELLED);
+   CHECK(gst_element_set_state(tx,GST_STATE_NULL)==GST_STATE_CHANGE_SUCCESS);
+   while(auto*m=gst_bus_pop(bus))gst_message_unref(m);gst_object_unref(bus);
+   auto*rbus=gst_element_get_bus(rx);while(auto*m=gst_bus_pop(rbus))gst_message_unref(m);gst_object_unref(rbus);
+  }else{
+   CHECK(gst_app_src_end_of_stream(GST_APP_SRC(ain))==GST_FLOW_OK);CHECK(gst_app_src_end_of_stream(GST_APP_SRC(vin))==GST_FLOW_OK);
+   auto*bus=gst_element_get_bus(rx);auto*done=gst_bus_timed_pop_filtered(bus,3*GST_SECOND,GstMessageType(GST_MESSAGE_EOS|GST_MESSAGE_ERROR));
+   if(done&&GST_MESSAGE_TYPE(done)==GST_MESSAGE_ERROR){GError*e=nullptr;gst_message_parse_error(done,&e,nullptr);fprintf(stderr,"gen2 EOS error: %s\n",e->message);g_clear_error(&e);}
+   CHECK(done&&GST_MESSAGE_TYPE(done)==GST_MESSAGE_EOS);gst_message_unref(done);gst_object_unref(bus);
+   gst_element_set_state(tx,GST_STATE_NULL);gst_element_set_state(rx,GST_STATE_NULL);
+  }
+  channels.push_back(consumer);channels.push_back(producer);
+ }
+ for(auto*e:{vs,vr,vin,ain,vout,aout,tx,rx})gst_object_unref(e);g_object_unref(sender);g_object_unref(receiver);
+ fprintf(stderr,"reconnect: generation2 exact media after consumer death; generation1 operations stale\n");
+}
 int main(int argc,char**argv){gst_init(&argc,&argv);
 #ifdef __ANDROID__
  GST_PLUGIN_STATIC_REGISTER(framelink);GST_PLUGIN_STATIC_REGISTER(app);GST_PLUGIN_STATIC_REGISTER(coreelements);GST_PLUGIN_STATIC_REGISTER(gdp);GST_PLUGIN_STATIC_REGISTER(gio);
@@ -143,5 +220,5 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
   CHECK(gst_element_set_state(element,GST_STATE_PAUSED)==GST_STATE_CHANGE_FAILURE);
   gst_element_set_state(element,GST_STATE_NULL);gst_object_unref(element);
  }
- run(false);run(true);run(false,1);run(false,2);run(false,3);run(false,4);run(false,5);run(false,0,true);run(true,0,true);run(false,0,true,true);run(false,0,true,false,1);run(false,0,true,false,2);run(false,0,true,false,3);puts("coordinated public A/V: distinct TIME segments, one receiver mapping, exact +/-37ms offset, pixels/PCM/DTS/duration/generation passed");return 0;
+ run(false);run(true);run(false,1);run(false,2);run(false,3);run(false,4);run(false,5);reconnect();run(false,0,true);run(true,0,true);run(false,0,true,true);run(false,0,true,false,1);run(false,0,true,false,2);run(false,0,true,false,3);puts("coordinated public A/V: distinct TIME segments, one receiver mapping, exact +/-37ms offset, pixels/PCM/DTS/duration/generation passed");return 0;
 }

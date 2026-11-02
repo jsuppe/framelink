@@ -87,7 +87,7 @@ s->cancel=g_cancellable_new();s->startup=new std::shared_ptr<FlAudioStartup>();g
 typedef struct {
  GstBin parent; FlAudioReader* reader; GstElement* depay; FlGstSession* session;
  gchar *path,*format,*tracks;guint rate,channels,queueMs,connectMs,idleMs;
- gboolean local,failed,segment; GstSegment receivedSegment; guint64 blocks,bytes;
+ gboolean local,failed,segment,registered; GstSegment receivedSegment; guint64 blocks,bytes;
 } GstFrameLinkAudioSrc;
 typedef struct {GstBinClass parent;} GstFrameLinkAudioSrcClass;
 G_DEFINE_TYPE(GstFrameLinkAudioSrc,gst_framelink_audio_src,GST_TYPE_BIN)
@@ -120,7 +120,7 @@ static GstPadProbeReturn inspectPcm(GstPad*,GstPadProbeInfo*info,gpointer data){
  }
  return GST_PAD_PROBE_OK;
 }
-static void contextSrc(GstElement*e,GstContext*c){auto*s=reinterpret_cast<GstFrameLinkAudioSrc*>(e);if(gst_context_has_context_type(c,FL_GST_SESSION_CONTEXT)){auto*session=fl_gst_session_from_context(c);if(session){if(GST_STATE(e)!=GST_STATE_NULL){g_object_unref(session);GST_ELEMENT_ERROR(s,CORE,STATE_CHANGE,("session context immutable outside NULL"),(nullptr));return;}g_clear_object(&s->session);s->session=session;}}GST_ELEMENT_CLASS(gst_framelink_audio_src_parent_class)->set_context(e,c);}
+static void contextSrc(GstElement*e,GstContext*c){auto*s=reinterpret_cast<GstFrameLinkAudioSrc*>(e);if(gst_context_has_context_type(c,FL_GST_SESSION_CONTEXT)){auto*session=fl_gst_session_from_context(c);if(session){if(GST_STATE(e)!=GST_STATE_NULL){g_object_unref(session);GST_ELEMENT_ERROR(s,CORE,STATE_CHANGE,("session context immutable outside NULL"),(nullptr));return;}if(s->session!=session){g_clear_object(&s->session);s->session=session;s->registered=FALSE;}else g_object_unref(session);}}GST_ELEMENT_CLASS(gst_framelink_audio_src_parent_class)->set_context(e,c);}
 
 static bool validSessionContext(GstElement*element){
  auto*context=gst_element_get_context(element,FL_GST_SESSION_CONTEXT);if(!context)return true;
@@ -135,7 +135,7 @@ static GstStateChangeReturn stateSrc(GstElement*e,GstStateChange t){auto*s=reint
   if(!s->session){if(!s->path||!*s->path||strcmp(s->tracks,"audio")||!s->format||(strcmp(s->format,"S16LE")&&strcmp(s->format,"F32LE"))){GST_ELEMENT_ERROR(s,RESOURCE,SETTINGS,("audio session path or authenticated context required"),(nullptr));return GST_STATE_CHANGE_FAILURE;}
    s->session=fl_gst_session_new(FL_GST_TRACK_AUDIO);s->local=TRUE;flAudioFormat format{guint(!strcmp(s->format,"F32LE")?FL_PCM_F32:FL_PCM_S16),s->rate,s->channels};
    *s->reader->startup=std::make_shared<FlAudioStartup>(s->session,e,s->path,format,s->queueMs,s->connectMs,s->idleMs,false);
-  }else {flSessionConfig c{};if(fl_gst_session_get_config(s->session,&c)!=FL_GST_SESSION_READY||!c.audioTrackId||bool(c.videoTrackId)!=(!strcmp(s->tracks,"av"))||fl_gst_session_register_track(s->session,FL_GST_TRACK_AUDIO)!=FL_GST_SESSION_READY||fl_gst_session_track_ready(s->session,FL_GST_TRACK_AUDIO,c.generation)!=FL_GST_SESSION_READY){GST_ELEMENT_ERROR(s,RESOURCE,SETTINGS,("invalid or duplicate consumer audio context"),(nullptr));return GST_STATE_CHANGE_FAILURE;}}
+  }else {flSessionConfig c{};if(fl_gst_session_get_config(s->session,&c)!=FL_GST_SESSION_READY||!c.audioTrackId||bool(c.videoTrackId)!=(!strcmp(s->tracks,"av"))||(!s->registered&&fl_gst_session_register_track(s->session,FL_GST_TRACK_AUDIO)!=FL_GST_SESSION_READY)||!(s->registered=TRUE)||fl_gst_session_track_ready(s->session,FL_GST_TRACK_AUDIO,c.generation)!=FL_GST_SESSION_READY){GST_ELEMENT_ERROR(s,RESOURCE,SETTINGS,("invalid or duplicate consumer audio context"),(nullptr));return GST_STATE_CHANGE_FAILURE;}}
   s->reader->session=static_cast<FlGstSession*>(g_object_ref(s->session));s->failed=s->segment=FALSE;s->blocks=s->bytes=0;
  }
  if(t==GST_STATE_CHANGE_PAUSED_TO_READY){if(s->session)fl_gst_session_cancel(s->session);if(*s->reader->startup)(*s->reader->startup)->cancel();}
