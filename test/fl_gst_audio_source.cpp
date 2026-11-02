@@ -67,6 +67,11 @@ static void run(guint format,guint channels,guint rate,int negative,bool segment
   GST_BUFFER_DURATION(b)=negative==2?90000000:next-delta;
   if(segmented){GST_BUFFER_DTS(b)=GST_BUFFER_PTS(b);if(n==2)GST_BUFFER_FLAG_SET(b,GST_BUFFER_FLAG_DISCONT);GstSegment seg;gst_segment_init(&seg,GST_FORMAT_TIME);seg.start=2*GST_SECOND;seg.position=seg.start;seg.base=500000000;auto*caps=gst_app_src_get_caps(GST_APP_SRC(source));auto*sample=gst_sample_new(b,caps,&seg,nullptr);CHECK(gst_app_src_push_sample(GST_APP_SRC(source),sample)==GST_FLOW_OK);gst_sample_unref(sample);gst_caps_unref(caps);gst_buffer_unref(b);}
   else CHECK(gst_app_src_push_buffer(GST_APP_SRC(source),b)==GST_FLOW_OK);
+  if(negative==5||negative==6){
+   auto*valid=gst_app_sink_try_pull_sample(GST_APP_SINK(output),2*GST_SECOND);CHECK(valid);gst_sample_unref(valid);
+   auto*pad=gst_element_get_static_pad(source,"src");GstSegment invalid;gst_segment_init(&invalid,GST_FORMAT_TIME);invalid.rate=negative==5?2.0:1.0;invalid.base=999;
+   gst_pad_push_event(pad,gst_event_new_segment(&invalid));gst_object_unref(pad);
+  }
   if(!negative){auto*sample=gst_app_sink_try_pull_sample(GST_APP_SINK(output),2*GST_SECOND);if(!sample){for(auto*p:{tx,rx}){auto*debugBus=gst_element_get_bus(p);while(auto*m=gst_bus_pop_filtered(debugBus,GST_MESSAGE_ERROR)){GError*e=nullptr;gchar*detail=nullptr;gst_message_parse_error(m,&e,&detail);fprintf(stderr,"%s: %s / %s\n",GST_OBJECT_NAME(m->src),e->message,detail?detail:"");g_clear_error(&e);g_free(detail);gst_message_unref(m);}gst_object_unref(debugBus);}}CHECK(sample);
    auto*got=gst_sample_get_buffer(sample);CHECK(GST_BUFFER_PTS(got)==(segmented?600000000:0)+37000000+delta+gapShift);CHECK(GST_BUFFER_DURATION(got)==next-delta);if(segmented){CHECK(GST_BUFFER_DTS(got)==GST_BUFFER_PTS(got));if(n==2){CHECK(GST_BUFFER_FLAG_IS_SET(got,GST_BUFFER_FLAG_DISCONT));CHECK(observedGap[0]==637000000+delta&&observedGap[1]==50000000);}}CHECK(gst_buffer_get_size(got)==bytes);
    GstMapInfo map{};CHECK(gst_buffer_map(got,&map,GST_MAP_READ));CHECK(!memcmp(map.data,expected.data(),bytes));gst_buffer_unmap(got,&map);gst_sample_unref(sample);
@@ -128,6 +133,8 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
  for(guint format:{guint(FL_PCM_S16),guint(FL_PCM_F32)})for(guint channels:{1u,2u})run(format,channels,44100,0);
  run(FL_PCM_F32,2,44100,0,true);
  run(FL_PCM_S16,2,48000,0,false,true);
+ run(FL_PCM_S16,2,48000,5,true);
+ run(FL_PCM_S16,2,48000,6,true);
  local(true,false,false);local(false,false,false);local(true,true,false);local(true,false,true);
  for(int mode=0;mode<4;mode++)hostile(mode);
  puts("public audio source: exact four PCM formats/layouts, incremental packet delivery before EOS, both startup orders, live latency, missing-peer and cancellation passed");return 0;

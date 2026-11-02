@@ -23,9 +23,9 @@ struct Pair {
  ~Pair(){g_io_stream_close(G_IO_STREAM(client),nullptr,nullptr);g_io_stream_close(G_IO_STREAM(server),nullptr,nullptr);g_object_unref(client);g_object_unref(server);}
 };
 static GstElement* parse(const char*text){GError*error=nullptr;auto*p=gst_parse_launch(text,&error);if(error)fprintf(stderr,"parse: %s\n",error->message);CHECK(p&&!error);return p;}
-static void push(GstElement*source,guint size,guint8 value,GstClockTime pts,GstClockTime duration,GstClockTime start){
+static void push(GstElement*source,guint size,guint8 value,GstClockTime pts,GstClockTime duration,GstClockTime start,double rate=1.0){
  auto*b=gst_buffer_new_allocate(nullptr,size,nullptr);gst_buffer_memset(b,0,value,size);GST_BUFFER_PTS(b)=GST_BUFFER_DTS(b)=pts;GST_BUFFER_DURATION(b)=duration;
- GstSegment segment;gst_segment_init(&segment,GST_FORMAT_TIME);segment.start=start;segment.position=start;segment.base=500000000;
+ GstSegment segment;gst_segment_init(&segment,GST_FORMAT_TIME);segment.rate=rate;segment.start=start;segment.position=start;segment.base=500000000;
  auto*caps=gst_app_src_get_caps(GST_APP_SRC(source));auto*sample=gst_sample_new(b,caps,&segment,nullptr);CHECK(gst_app_src_push_sample(GST_APP_SRC(source),sample)==GST_FLOW_OK);gst_sample_unref(sample);gst_caps_unref(caps);gst_buffer_unref(b);
 }
 static void run(bool audioLeads,int negative=0,bool gap=false,bool empty=false){
@@ -49,9 +49,9 @@ static void run(bool audioLeads,int negative=0,bool gap=false,bool empty=false){
   auto voffset=audioLeads?37000000u:0u,aoffset=audioLeads?0u:37000000u;
   if(gap&&n==5){for(auto*in:{vin,ain}){auto*pad=gst_element_get_static_pad(in,"src");CHECK(gst_pad_push_event(pad,gst_event_new_gap((in==vin?5:2)*GST_SECOND+(in==vin?voffset:aoffset)+n*20000000,40000000)));gst_object_unref(pad);}}
   guint64 shift=gap&&n>=5?40000000:0;
-  push(vin,32*16*4,guint8(n+10),5*GST_SECOND+voffset+n*20000000+shift,20000000,5*GST_SECOND);
+  push(vin,32*16*4,guint8(n+10),5*GST_SECOND+voffset+n*20000000+shift,20000000,5*GST_SECOND,negative==3?2.0:1.0);
   push(ain,3840,guint8(n+20),2*GST_SECOND+aoffset+n*20000000+shift,20000000,2*GST_SECOND);
-  if(negative){auto*bus=gst_element_get_bus(rx);auto*err=gst_bus_timed_pop_filtered(bus,2*GST_SECOND,GST_MESSAGE_ERROR);CHECK(err);gst_message_unref(err);gst_object_unref(bus);break;}
+  if(negative){auto*bus=gst_element_get_bus(negative==3?tx:rx);auto*err=gst_bus_timed_pop_filtered(bus,2*GST_SECOND,GST_MESSAGE_ERROR);CHECK(err);gst_message_unref(err);gst_object_unref(bus);break;}
   auto*v=gst_app_sink_try_pull_sample(GST_APP_SINK(vout),2*GST_SECOND);auto*a=gst_app_sink_try_pull_sample(GST_APP_SINK(aout),2*GST_SECOND);
   if(!v||!a)for(auto*p:{tx,rx}){auto*bus=gst_element_get_bus(p);while(auto*m=gst_bus_pop_filtered(bus,GST_MESSAGE_ERROR)){GError*error=nullptr;gst_message_parse_error(m,&error,nullptr);fprintf(stderr,"%s: %s\n",GST_OBJECT_NAME(m->src),error->message);g_clear_error(&error);gst_message_unref(m);}gst_object_unref(bus);}
   CHECK(v&&a);auto*vb=gst_sample_get_buffer(v);auto*ab=gst_sample_get_buffer(a);CHECK(GST_BUFFER_PTS(vb)==600000000+voffset+n*20000000+shift);CHECK(GST_BUFFER_PTS(ab)==600000000+aoffset+n*20000000+shift);CHECK(gint64(GST_BUFFER_PTS(ab))-gint64(GST_BUFFER_PTS(vb))==(audioLeads?-37000000:37000000));CHECK(GST_BUFFER_DTS(vb)==GST_BUFFER_PTS(vb)&&GST_BUFFER_DTS(ab)==GST_BUFFER_PTS(ab));CHECK(GST_BUFFER_DURATION(vb)==20000000&&GST_BUFFER_DURATION(ab)==20000000);
@@ -70,5 +70,5 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
 #else
  CHECK(argc>1);GError*error=nullptr;auto*p=gst_plugin_load_file(argv[1],&error);if(error)fprintf(stderr,"%s\n",error->message);CHECK(p&&!error);gst_object_unref(p);
 #endif
- run(false);run(true);run(false,1);run(false,2);run(false,0,true);run(true,0,true);run(false,0,true,true);puts("coordinated public A/V: distinct TIME segments, one receiver mapping, exact +/-37ms offset, pixels/PCM/DTS/duration/generation passed");return 0;
+ run(false);run(true);run(false,1);run(false,2);run(false,3);run(false,0,true);run(true,0,true);run(false,0,true,true);puts("coordinated public A/V: distinct TIME segments, one receiver mapping, exact +/-37ms offset, pixels/PCM/DTS/duration/generation passed");return 0;
 }

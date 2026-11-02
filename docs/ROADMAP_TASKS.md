@@ -211,10 +211,13 @@ elements remain independently available.
   reconstruct buffers/caps, expose appropriate live/latency behavior and integrate
   with standard playback sinks using the shared pipeline clock.
   [Source validation](m5b/audio-source/README.md): Linux6/6, Windows6/6, Android5/5, dualABI/JNI; clock-synchronized sink controls passed on all three.
-- [ ] **M5b.5 Common A/V timing:** map TIME segments into one common timeline,
+- [x] **M5b.5 Common A/V timing:** map TIME segments into one common timeline,
   preserve intentional offsets, handle missing/invalid PTS, GAP, DISCONT, EOS,
   flush and new segment epochs. Never independently zero audio and video origins;
   define supported seek/rate-change behavior and reject unsupported modes.
+  [Timing acceptance](m5b/timing-controls/README.md): common offsets, GAP/barriers,
+  flush invalidation, empty EOS, unsupported rates and fresh generation mappings.
+  Actual reconnect/pause lifecycle remains task6.
 - [ ] **M5b.6 Lifecycle/security:** both startup orders, coordinated pause/resume,
   track loss, cancellation, peer death/reconnect, stale generations, negotiation
   rejection, bounded cleanup and platform endpoint permissions/authentication.

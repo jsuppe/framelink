@@ -54,6 +54,13 @@ int main(int argc,char**argv){
   CHECK(fl_gst_session_configure(s,&c,&p,&p)==FL_GST_SESSION_STALE);
   fl_gst_session_cancel(s);CHECK(fl_gst_session_wait(s,1,10,&out)==FL_GST_SESSION_CANCELLED);
   c.generation=2;CHECK(fl_gst_session_configure(s,&c,&p,&p)==FL_GST_SESSION_READY);
+  CHECK(fl_gst_session_map_running_time(s,2,37000000,TRUE,&identity)==FL_GST_SESSION_INVALID);
+  CHECK(fl_gst_session_set_mapping(s,1,&mapping,0)==FL_GST_SESSION_STALE);
+  mapping.targetAnchorNs+=500000000;
+  CHECK(fl_gst_session_set_mapping(s,2,&mapping,0)==FL_GST_SESSION_READY);
+  CHECK(fl_gst_session_map_pts(s,2,0,&audio)==FL_GST_SESSION_READY);
+  CHECK(fl_gst_session_map_pts(s,2,37000000,&video)==FL_GST_SESSION_READY);
+  CHECK(video-audio==37000000&&audio==1500000000);
   CHECK(fl_gst_session_wait(s,1,10,&out)==FL_GST_SESSION_STALE);
   CHECK(fl_gst_session_track_ready(s,tracks&1?1:2,1)==FL_GST_SESSION_STALE);
   std::atomic<bool> entered{false};FlGstSessionResult result=FL_GST_SESSION_READY;
