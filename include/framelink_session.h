@@ -6,6 +6,8 @@
 extern "C" {
 #endif
 #define FL_SESSION_VERSION 1u
+// Explicit opt-in: v2 permits audio-only or video-only sessions. v1 is unchanged.
+#define FL_SESSION_OPTIONAL_TRACKS_VERSION 2u
 #define FL_SESSION_MAX_FORMATS 8u
 #define FL_SESSION_WIRE_SIZE 160u
 
@@ -52,7 +54,9 @@ FL_API flSessionResult flSessionValidateSelection(const flSessionConfig* config,
 // Reject changed session/track identities and non-increasing generation on replacement.
 FL_API flSessionResult flSessionValidateReplacement(const flSessionConfig* current,
     const flSessionConfig* next);
-// Exactly FL_SESSION_WIRE_SIZE bytes; LE integers, magic/version, zero reserved.
+// Exactly FL_SESSION_WIRE_SIZE bytes; LE integers, matching FVS1/FVS2 magic/version,
+// zero reserved. V2 absent track: zero ID, format and queue budget. At least one
+// track required. Peers must offer the same version and track presence.
 FL_API flSessionResult flSessionEncode(const flSessionConfig*, void*, size_t);
 FL_API flSessionResult flSessionDecode(const void*, size_t, flSessionConfig*);
 // Mapping is explicitly negotiated by the application; helper does not measure it.
