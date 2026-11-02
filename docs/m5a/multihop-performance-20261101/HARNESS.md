@@ -48,3 +48,18 @@ Android cold setup previously replaced pending frame1 with frame2: first GPU
 completion was about30ms after acquire and private verification added9ms.
 That cold-start failure is retained, not counted as steady-state qualification.
 The Linux evidence predates priming and remains tied to its recorded binary.
+
+Windows uses `fl_native_boundary_benchmark_win` with `FL_BENCH_FORMAT=BGRA|NV12`
+and the same timing/pool controls. It performs a GPU copy from the original
+shared texture into a private staging verification texture, retires the input
+reader lease on a D3D11 fence, then maps only that private output. This is a GPU
+copy consumer, not shader rendering or display presentation. The entire logical
+private image readback is accounted (width*height*4 for BGRA, *3/2 for NV12).
+Source CPU mapping/staging upload is explicit; relay performs no payload mapping.
+
+Windows benchmark completion events use `FL_BENCH_TRACE` (capacity variable
+`FL_BENCH_TRACE_EVENTS`) separately from `FRAMELINK_TRACE`. The executable and
+DLL have distinct inline recorders; sharing a prefix would overwrite one file at
+exit. Analyze core process traces plus `--completion-files CLIENT.csv`, with
+`--producer-map-operation flImageMapPlanes --private-readback-bytes BYTES`.
+Missing client completion evidence fails qualification, even if core traces pass.
