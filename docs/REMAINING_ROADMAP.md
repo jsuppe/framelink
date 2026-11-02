@@ -3,7 +3,7 @@
 Updated 2026-11-01. Scope: local cross-platform video/audio sessions and renderer
 integration. Historical cloud calling, unrelated receiver features and HDR are
 not part of this release. M1–M5 are merged within their documented qualification
-scope. M5a is now active; its policy contract is locally validated. Remaining
+scope. M5a is active; tasks1–14 are locally validated within documented scope, final integration/merge pending. Remaining
 M5a tasks and later milestones are not implemented/qualified merely by being planned.
 
 For individually checkable tasks and current merge gates, see
@@ -114,8 +114,9 @@ Gate: each advertised feature has implementation plus platform evidence or expli
 
 ## M5a — Memory-capability negotiation and GPU-native pipeline integration
 
-Status: IN PROGRESS, execution authorized 2026-11-01. M5a.1 portable policy
-contract/codec validated locally; platform/runtime integration remains pending.
+Status: FINAL INTEGRATION, execution authorized 2026-11-01. Tasks1–14 locally
+validated within the documented platform/performance limits. Final task15 review,
+CI and merge remain pending in PR7; see ROADMAP_TASKS.md.
 Separate milestone after M5 and
 before M6; existing milestone numbers remain stable. Does not expand M4.
 
