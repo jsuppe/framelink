@@ -1,0 +1,201 @@
+[
+  {
+    "platform_phase": "linux-before",
+    "case": "0",
+    "counts": {
+      "ipc.frame_received": 40,
+      "flAcquireFrame": 40,
+      "flEndSubmit": 40
+    },
+    "missing_pts_ns": [],
+    "trace_loss": 0
+  },
+  {
+    "platform_phase": "linux-before",
+    "case": "1",
+    "counts": {
+      "ipc.frame_received": 40,
+      "pending_replaced": 1,
+      "flAcquireFrame": 39,
+      "flEndSubmit": 40
+    },
+    "missing_pts_ns": [
+      420000000
+    ],
+    "trace_loss": 0
+  },
+  {
+    "platform_phase": "linux-before",
+    "case": "2",
+    "counts": {
+      "flEndSubmit": 40,
+      "ipc.frame_received": 40,
+      "pending_replaced": 2,
+      "flAcquireFrame": 38
+    },
+    "missing_pts_ns": [
+      400000000,
+      420000000
+    ],
+    "trace_loss": 0
+  },
+  {
+    "platform_phase": "linux-before",
+    "case": "3",
+    "counts": {
+      "ipc.frame_received": 40,
+      "pending_replaced": 2,
+      "flAcquireFrame": 38,
+      "flEndSubmit": 40
+    },
+    "missing_pts_ns": [
+      400000000,
+      420000000
+    ],
+    "trace_loss": 0
+  },
+  {
+    "platform_phase": "linux-after",
+    "case": "0",
+    "counts": {
+      "ipc.frame_received": 40,
+      "flAcquireFrame": 40,
+      "flEndSubmit": 40
+    },
+    "missing_pts_ns": [],
+    "trace_loss": 0
+  },
+  {
+    "platform_phase": "linux-after",
+    "case": "1",
+    "counts": {
+      "ipc.frame_received": 40,
+      "flAcquireFrame": 40,
+      "flEndSubmit": 40
+    },
+    "missing_pts_ns": [],
+    "trace_loss": 0
+  },
+  {
+    "platform_phase": "linux-after",
+    "case": "2",
+    "counts": {
+      "flEndSubmit": 40,
+      "ipc.frame_received": 40,
+      "flAcquireFrame": 40
+    },
+    "missing_pts_ns": [],
+    "trace_loss": 0
+  },
+  {
+    "platform_phase": "linux-after",
+    "case": "3",
+    "counts": {
+      "ipc.frame_received": 40,
+      "flAcquireFrame": 40,
+      "flEndSubmit": 40
+    },
+    "missing_pts_ns": [],
+    "trace_loss": 0
+  },
+  {
+    "platform_phase": "windows-before",
+    "case": "0",
+    "counts": {
+      "flEndSubmit": 40,
+      "ipc.frame_received": 40,
+      "flAcquireFrame": 40
+    },
+    "missing_pts_ns": [],
+    "trace_loss": 0
+  },
+  {
+    "platform_phase": "windows-before",
+    "case": "1",
+    "counts": {
+      "ipc.frame_received": 40,
+      "pending_replaced": 2,
+      "flAcquireFrame": 38,
+      "flEndSubmit": 40
+    },
+    "missing_pts_ns": [
+      400000000,
+      420000000
+    ],
+    "trace_loss": 0
+  },
+  {
+    "platform_phase": "windows-before",
+    "case": "2",
+    "counts": {
+      "flEndSubmit": 40,
+      "ipc.frame_received": 40,
+      "pending_replaced": 2,
+      "flAcquireFrame": 38
+    },
+    "missing_pts_ns": [
+      400000000,
+      420000000
+    ],
+    "trace_loss": 0
+  },
+  {
+    "platform_phase": "windows-before",
+    "case": "3",
+    "counts": {
+      "flEndSubmit": 40,
+      "ipc.frame_received": 40,
+      "pending_replaced": 2,
+      "flAcquireFrame": 38
+    },
+    "missing_pts_ns": [
+      400000000,
+      420000000
+    ],
+    "trace_loss": 0
+  },
+  {
+    "platform_phase": "windows-after",
+    "case": "0",
+    "counts": {
+      "ipc.frame_received": 40,
+      "flAcquireFrame": 40,
+      "flEndSubmit": 40
+    },
+    "missing_pts_ns": [],
+    "trace_loss": 0
+  },
+  {
+    "platform_phase": "windows-after",
+    "case": "1",
+    "counts": {
+      "flEndSubmit": 40,
+      "ipc.frame_received": 40,
+      "flAcquireFrame": 40
+    },
+    "missing_pts_ns": [],
+    "trace_loss": 0
+  },
+  {
+    "platform_phase": "windows-after",
+    "case": "2",
+    "counts": {
+      "flEndSubmit": 40,
+      "ipc.frame_received": 40,
+      "flAcquireFrame": 40
+    },
+    "missing_pts_ns": [],
+    "trace_loss": 0
+  },
+  {
+    "platform_phase": "windows-after",
+    "case": "3",
+    "counts": {
+      "ipc.frame_received": 40,
+      "flAcquireFrame": 40,
+      "flEndSubmit": 40
+    },
+    "missing_pts_ns": [],
+    "trace_loss": 0
+  }
+]

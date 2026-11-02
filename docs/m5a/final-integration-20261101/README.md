@@ -72,3 +72,7 @@ zero sink drops. They did not reproduce the historical failure and are not a
 claimed transport repair or a physical-output qualification.
 
 Android arm64/x86_64 plugin/pool-policy builds and signed cross-app JNI builds also passed for the diagnostic changes. The tablet policy test passed; this does not claim a fresh signed A/V lifecycle matrix.
+
+## Controlled burst repair and final checks
+
+The subsequent [controlled producer-stall investigation](producer-catchup/README.md) reproduced and repaired a matching pending-replacement mechanism on Linux/Windows without changing media timestamps or transport buffering. It does not prove the original uncaptured event had that exact cause. Full final checks and CI follow; no retrospective erasure of the failure. [Post-wake native performance](post-wake-performance/README.md) passed both NV12/BGRA two-hop3720-frame A/V cases with complete identities/PCM.

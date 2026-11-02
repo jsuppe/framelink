@@ -1117,7 +1117,12 @@ unsigned runProducer(const Options &o, GSocketListener *l,
     need(gst_app_src_push_buffer(GST_APP_SRC(a),makeAudio(o,0,0,duration))==GST_FLOW_OK,"audio prime failed");
     completeStartup();
   }
-  uint64_t maxPushNs=0;
+  uint64_t maxPushNs=0,maxWakeLagNs=0,lastDispatchNs=0,catchupHolds=0;
+  unsigned testProducerStallMs=0;
+  if(const char* value=g_getenv("FRAMELINK_TEST_PRODUCER_STALL_MS")) {
+    testProducerStallMs=number(value);
+    need(testProducerStallMs<=1000 && testProducerStallMs<=o.timeout,"invalid producer test stall");
+  }
   for (unsigned n = 0; n < o.frames; ++n) {
     watchdog.check();
     uint64_t pts = uint64_t(n) * GST_SECOND / o.fps,
@@ -1126,8 +1131,21 @@ unsigned runProducer(const Options &o, GSocketListener *l,
     // Only wall-clock pacing changes. PCM sample positions, A/V PTS and
     // durations remain exact on the negotiated media timeline.
     const auto paced=gst_util_uint64_scale(pts,1000000,1000000+o.pacingPpm);
-    if (uint64_t(cfg.epochNs) + paced > now)
-      g_usleep((uint64_t(cfg.epochNs) + paced - now) / 1000);
+    auto dispatchAt=uint64_t(cfg.epochNs)+paced;
+    // A delayed wake must not turn several overdue synthetic frames into an
+    // unbounded catch-up burst at the latest-frame transport. Recover toward
+    // the original epoch at at most 2x the configured rate. No PTS is changed,
+    // and on-time frames incur no extra wait or per-hop playback reservoir.
+    const auto minimumInterval=gst_util_uint64_scale(next-pts,1000000,1000000+o.pacingPpm)/2;
+    if(lastDispatchNs && lastDispatchNs+minimumInterval>dispatchAt) {
+      dispatchAt=lastDispatchNs+minimumInterval;++catchupHolds;
+    }
+    if (dispatchAt > now)g_usleep((dispatchAt-now)/1000);
+    if(n==20 && testProducerStallMs)g_usleep(uint64_t(testProducerStallMs)*1000);
+    const auto woke=gst_clock_get_time(clock);
+    lastDispatchNs=woke;
+    if(woke>uint64_t(cfg.epochNs)+paced)
+      maxWakeLagNs=std::max(maxWakeLagNs,woke-uint64_t(cfg.epochNs)-paced);
     const auto pushStart=gst_util_get_timestamp();
     auto* video=o.videoFrame?o.videoFrame(output,n,pts,next-pts):makeVideo(o,n,pts,next-pts);
     need(video,"video source adapter failed");
@@ -1148,7 +1166,7 @@ unsigned runProducer(const Options &o, GSocketListener *l,
     if (n == 0 || (n + 1) % 25 == 0)
       event("media-progress", o, n + 1, id);
   }
-  printf("{\"event\":\"producer-pacing\",\"pacing_ppm\":%d,\"max_push_ns\":%llu}\n",o.pacingPpm,(unsigned long long)maxPushNs);
+  printf("{\"event\":\"producer-pacing\",\"pacing_ppm\":%d,\"max_push_ns\":%llu,\"max_wake_lag_ns\":%llu,\"catchup_holds\":%llu}\n",o.pacingPpm,(unsigned long long)maxPushNs,(unsigned long long)maxWakeLagNs,(unsigned long long)catchupHolds);
   gst_app_src_end_of_stream(GST_APP_SRC(a));
   gst_app_src_end_of_stream(GST_APP_SRC(v));
   need(get(*control) == 0x444f4e45ULL, "consumer completion missing");

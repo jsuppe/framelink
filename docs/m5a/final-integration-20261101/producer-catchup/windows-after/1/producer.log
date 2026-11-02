@@ -1,0 +1,8 @@
+{"event":"session-ready","instance":"f807bb5aa413bae0c8ed253e38180baa","generation":1,"format":"BGRA","video_frames":0,"audio_blocks":0,"audio_offset_ns":0}
+{"event":"startup-released","epoch_ns":1546156087200800}
+{"event":"media-progress","instance":"f807bb5aa413bae0c8ed253e38180baa","generation":1,"format":"BGRA","video_frames":1,"audio_blocks":1,"audio_offset_ns":0}
+{"event":"media-progress","instance":"f807bb5aa413bae0c8ed253e38180baa","generation":1,"format":"BGRA","video_frames":25,"audio_blocks":25,"audio_offset_ns":0}
+{"event":"producer-pacing","pacing_ppm":0,"max_push_ns":53700,"max_wake_lag_ns":56528100,"catchup_holds":6}
+{"event":"video-transport-summary","received":40,"submitted":40,"dropped":0,"ring_full_drops":0}
+{"event":"session-complete","instance":"f807bb5aa413bae0c8ed253e38180baa","generation":1,"format":"BGRA","video_frames":40,"audio_blocks":40,"audio_offset_ns":0}
+{"role":"producer","ok":true,"sessions":1,"video_frames":40,"audio_blocks":40,"errors":0,"disconnects":0}
