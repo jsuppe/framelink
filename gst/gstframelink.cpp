@@ -499,7 +499,7 @@ static gboolean sinkSetCaps(GstBaseSink* base, GstCaps* caps) {
     return TRUE;
 }
 
-static GstFlowReturn sinkRender(GstBaseSink* base, GstBuffer* buffer) {
+static GstFlowReturn sinkRenderImpl(GstBaseSink* base, GstBuffer* buffer) {
     GstFrameLinkSink* self = GST_FRAMELINK_SINK(base);
     gsttrace::Scope trace("gst.sinkRender",gsttrace::id(self->channel));
     if(self->session){flSessionConfig ready{};if(fl_gst_session_wait(self->session,self->sessionConfig.generation,self->sessionConfig.connectTimeoutMs,&ready)!=FL_GST_SESSION_READY){GST_ELEMENT_ERROR(self,RESOURCE,WRITE,("coordinated session not ready or cancelled"),(NULL));return GST_FLOW_ERROR;}}
@@ -748,10 +748,16 @@ static GstFlowReturn sinkRender(GstBaseSink* base, GstBuffer* buffer) {
     return trace.result(GST_FLOW_OK);
 }
 
+static GstFlowReturn sinkRender(GstBaseSink*base,GstBuffer*buffer){
+ auto result=sinkRenderImpl(base,buffer);auto*self=GST_FRAMELINK_SINK(base);
+ if(self->session&&result<0&&result!=GST_FLOW_FLUSHING&&result!=GST_FLOW_EOS)fl_gst_session_cancel(self->session);
+ return result;
+}
+
 // EOS is serialized with render calls, so this snapshot needs no per-frame
 // reporting lock or synchronous logging. Querying GstBaseSink's generic stats
 // alone would hide frames dropped by the transport's full-ring policy.
-static gboolean sinkEvent(GstBaseSink* base, GstEvent* event) {
+static gboolean sinkEventImpl(GstBaseSink* base, GstEvent* event) {
     auto* coordinated=GST_FRAMELINK_SINK(base);
     if(coordinated->session){
         if(GST_EVENT_TYPE(event)==GST_EVENT_SEGMENT){const GstSegment*segment=nullptr;gst_event_parse_segment(event,&segment);if(segment->format!=GST_FORMAT_TIME||segment->rate!=1||segment->applied_rate!=1){GST_ELEMENT_ERROR(base,STREAM,FORMAT,("coordinated video requires forward rate1 TIME segment"),(NULL));return FALSE;}if(coordinated->sessionHaveSegment&&(segment->start!=base->segment.start||segment->base!=base->segment.base||segment->offset!=base->segment.offset||segment->stop!=base->segment.stop)){GST_ELEMENT_ERROR(base,STREAM,FORMAT,("segment replacement requires a fresh session generation"),(NULL));return FALSE;}coordinated->sessionHaveSegment=TRUE;}
@@ -784,6 +790,12 @@ static gboolean sinkEvent(GstBaseSink* base, GstEvent* event) {
             gst_message_new_element(GST_OBJECT(base), stats));
     }
     return GST_BASE_SINK_CLASS(gst_framelink_sink_parent_class)->event(base, event);
+}
+
+static gboolean sinkEvent(GstBaseSink*base,GstEvent*event){
+ auto result=sinkEventImpl(base,event);auto*self=GST_FRAMELINK_SINK(base);
+ if(!result&&self->session)fl_gst_session_cancel(self->session);
+ return result;
 }
 
 static gboolean sinkStop(GstBaseSink* base) {
@@ -1271,7 +1283,7 @@ static bool srcEmitGaps(GstFrameLinkSrc*self){
         if(fl_gst_session_map_running_time(self->session,self->sessionConfig.generation,event.ptsNs,TRUE,&mapped)!=FL_GST_SESSION_READY||event.durationNs>G_MAXINT64-mapped||!gst_pad_push_event(GST_BASE_SRC_PAD(self),gst_event_new_gap(mapped,event.durationNs)))return false;
     }self->pendingGapCount=0;return true;
 }
-static GstFlowReturn srcCreate(GstPushSrc* push, GstBuffer** outbuf) {
+static GstFlowReturn srcCreateImpl(GstPushSrc* push, GstBuffer** outbuf) {
     GstFrameLinkSrc* self = GST_FRAMELINK_SRC(push);
     gsttrace::Scope trace("gst.srcCreate",gsttrace::id(self->channel));
     // GstBaseSrc can discard create() output when PLAYING->PAUSED races with
@@ -1515,6 +1527,12 @@ static GstFlowReturn srcCreate(GstPushSrc* push, GstBuffer** outbuf) {
     if(self->session)self->pendingDelivery=gst_buffer_ref(buf);
     *outbuf = buf; // default remains arrival-time timestamping
     return trace.result(GST_FLOW_OK);
+}
+
+static GstFlowReturn srcCreate(GstPushSrc*base,GstBuffer**out){
+ auto result=srcCreateImpl(base,out);auto*self=GST_FRAMELINK_SRC(base);
+ if(self->session&&result<0&&result!=GST_FLOW_FLUSHING&&result!=GST_FLOW_EOS)fl_gst_session_cancel(self->session);
+ return result;
 }
 
 static void srcSetProperty(GObject* obj, guint id, const GValue* value, GParamSpec* spec) {

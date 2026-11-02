@@ -51,7 +51,7 @@ static void run(bool audioLeads,int negative=0,bool gap=false,bool empty=false,i
   if(gap&&n==5){for(auto*in:{vin,ain}){auto*pad=gst_element_get_static_pad(in,"src");CHECK(gst_pad_push_event(pad,gst_event_new_gap((in==vin?5:2)*GST_SECOND+(in==vin?voffset:aoffset)+n*20000000,40000000)));gst_object_unref(pad);}}
   guint64 shift=gap&&n>=5?40000000:0;
   push(vin,32*16*4,guint8(n+10),5*GST_SECOND+voffset+n*20000000+shift,20000000,5*GST_SECOND,negative==3?2.0:1.0,pause==1&&n==5);
-  if(!negative)push(ain,3840,guint8(n+20),2*GST_SECOND+aoffset+n*20000000+shift,20000000,2*GST_SECOND,1.0,pause==1&&n==5);
+  if(!negative||negative>=4)push(ain,3840,guint8(n+20),2*GST_SECOND+aoffset+n*20000000+shift,20000000,2*GST_SECOND,1.0,pause==1&&n==5);
   if(pause>=2&&n==4){
    auto begin=g_get_monotonic_time();
 
@@ -66,7 +66,34 @@ static void run(bool audioLeads,int negative=0,bool gap=false,bool empty=false,i
    CHECK(gst_element_get_state(rx,nullptr,nullptr,GST_SECOND)==GST_STATE_CHANGE_SUCCESS);
 
   }
-  if(negative){auto*bus=gst_element_get_bus(negative==3?tx:rx);auto*err=gst_bus_timed_pop_filtered(bus,2*GST_SECOND,GST_MESSAGE_ERROR);CHECK(err);gst_message_unref(err);gst_object_unref(bus);break;}
+  if(negative==4&&n==2){
+   // Consumer death: tear down the receiver and close its audio socket. The
+   // producer's GDP/GIO writer must fail and cancel the shared producer session
+   // so the video sibling stops promptly instead of streaming into a dead peer.
+   CHECK(gst_element_set_state(rx,GST_STATE_NULL)==GST_STATE_CHANGE_SUCCESS);
+   CHECK(g_socket_close(g_socket_connection_get_socket(audio.client),nullptr));
+   auto*bus=gst_element_get_bus(tx);GstMessage*err=nullptr;auto begin=g_get_monotonic_time();
+   for(guint k=1;!err&&g_get_monotonic_time()-begin<3000000;k++){
+    auto*b=gst_buffer_new_allocate(nullptr,3840,nullptr);gst_buffer_memset(b,0,0,3840);GST_BUFFER_PTS(b)=GST_BUFFER_DTS(b)=2*GST_SECOND+37000000+(n+k)*20000000;GST_BUFFER_DURATION(b)=20000000;
+    gst_app_src_push_buffer(GST_APP_SRC(ain),b);err=gst_bus_timed_pop_filtered(bus,20*GST_MSECOND,GST_MESSAGE_ERROR);
+   }
+   CHECK(err);{GError*e=nullptr;gchar*dbg=nullptr;gst_message_parse_error(err,&e,&dbg);fprintf(stderr,"consumer death surfaced at %s after %" G_GINT64_FORMAT "us: %s (%s)\n",GST_OBJECT_NAME(GST_MESSAGE_SRC(err)),g_get_monotonic_time()-begin,e->message,dbg?dbg:"");g_clear_error(&e);g_free(dbg);}gst_message_unref(err);
+   auto deadline=g_get_monotonic_time()+100000;FlGstSessionResult state;do{state=fl_gst_session_get_config(sender,&c);if(state==FL_GST_SESSION_CANCELLED)break;g_usleep(1000);}while(g_get_monotonic_time()<deadline);CHECK(state==FL_GST_SESSION_CANCELLED);
+   gst_object_unref(bus);break;
+  }
+  if(negative==5&&n==2){
+   // Audio transport loss without terminal accounting while the producer video
+   // channel stays alive: only the consumer audio reader can observe it, and it
+   // must fail and cancel the shared receiver session (no video-path rescue).
+   auto*a=gst_app_sink_try_pull_sample(GST_APP_SINK(aout),2*GST_SECOND);if(a)gst_sample_unref(a);
+   CHECK(g_socket_close(g_socket_connection_get_socket(audio.server),nullptr));
+   auto*bus=gst_element_get_bus(rx);auto begin=g_get_monotonic_time();auto*err=gst_bus_timed_pop_filtered(bus,3*GST_SECOND,GST_MESSAGE_ERROR);
+   CHECK(err);{GError*e=nullptr;gchar*dbg=nullptr;gst_message_parse_error(err,&e,&dbg);fprintf(stderr,"audio transport loss surfaced at %s after %" G_GINT64_FORMAT "us: %s\n",GST_OBJECT_NAME(GST_MESSAGE_SRC(err)),g_get_monotonic_time()-begin,e->message);g_clear_error(&e);g_free(dbg);}gst_message_unref(err);
+   auto deadline=g_get_monotonic_time()+100000;FlGstSessionResult state;do{state=fl_gst_session_get_config(receiver,&c);if(state==FL_GST_SESSION_CANCELLED)break;g_usleep(1000);}while(g_get_monotonic_time()<deadline);CHECK(state==FL_GST_SESSION_CANCELLED);
+   CHECK(!gst_app_sink_try_pull_sample(GST_APP_SINK(aout),100*GST_MSECOND));
+   gst_object_unref(bus);break;
+  }
+  if(negative&&negative<4){auto*bus=gst_element_get_bus(negative==3?tx:rx);auto*err=gst_bus_timed_pop_filtered(bus,2*GST_SECOND,GST_MESSAGE_ERROR);CHECK(err);gst_message_unref(err);gst_object_unref(bus);auto*failed=negative==3?sender:receiver;auto deadline=g_get_monotonic_time()+100000;FlGstSessionResult state;do{state=fl_gst_session_get_config(failed,&c);if(state==FL_GST_SESSION_CANCELLED)break;g_usleep(1000);}while(g_get_monotonic_time()<deadline);CHECK(state==FL_GST_SESSION_CANCELLED);break;}
   auto*v=gst_app_sink_try_pull_sample(GST_APP_SINK(vout),2*GST_SECOND);auto*a=gst_app_sink_try_pull_sample(GST_APP_SINK(aout),2*GST_SECOND);
   if(!v||!a)for(auto*p:{tx,rx}){auto*bus=gst_element_get_bus(p);while(auto*m=gst_bus_pop_filtered(bus,GST_MESSAGE_ERROR)){GError*error=nullptr;gst_message_parse_error(m,&error,nullptr);fprintf(stderr,"%s: %s\n",GST_OBJECT_NAME(m->src),error->message);g_clear_error(&error);gst_message_unref(m);}gst_object_unref(bus);}
   if(!v||!a)fprintf(stderr,"delivery n=%u pause=%d video=%d audio=%d\n",n,pause,v!=nullptr,a!=nullptr);
@@ -116,5 +143,5 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
   CHECK(gst_element_set_state(element,GST_STATE_PAUSED)==GST_STATE_CHANGE_FAILURE);
   gst_element_set_state(element,GST_STATE_NULL);gst_object_unref(element);
  }
- run(false);run(true);run(false,1);run(false,2);run(false,3);run(false,0,true);run(true,0,true);run(false,0,true,true);run(false,0,true,false,1);run(false,0,true,false,2);run(false,0,true,false,3);puts("coordinated public A/V: distinct TIME segments, one receiver mapping, exact +/-37ms offset, pixels/PCM/DTS/duration/generation passed");return 0;
+ run(false);run(true);run(false,1);run(false,2);run(false,3);run(false,4);run(false,5);run(false,0,true);run(true,0,true);run(false,0,true,true);run(false,0,true,false,1);run(false,0,true,false,2);run(false,0,true,false,3);puts("coordinated public A/V: distinct TIME segments, one receiver mapping, exact +/-37ms offset, pixels/PCM/DTS/duration/generation passed");return 0;
 }

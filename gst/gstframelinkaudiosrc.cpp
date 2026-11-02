@@ -30,7 +30,7 @@ static bool boundedWire(FlAudioReader*s,const guint8*data,gsize size){
  }
  return true;
 }
-static GstFlowReturn readChunk(GstPushSrc*base,GstBuffer**out){
+static GstFlowReturn readChunkImpl(GstPushSrc*base,GstBuffer**out){
  auto*s=reinterpret_cast<FlAudioReader*>(base);GError*error=nullptr;
 retry:
  if(s->pendingDelivery){*out=gst_buffer_ref(s->pendingDelivery);return GST_FLOW_OK;}
@@ -66,6 +66,11 @@ retry:
   GST_ELEMENT_ERROR(s,RESOURCE,READ,("%s",error?error->message:"audio peer closed before GDP EOS"),(nullptr));g_clear_error(&error);return GST_FLOW_ERROR;
  }
  gst_buffer_resize(b,0,count);s->pendingDelivery=gst_buffer_ref(b);*out=b;return GST_FLOW_OK;
+}
+static GstFlowReturn readChunk(GstPushSrc*base,GstBuffer**out){
+ auto result=readChunkImpl(base,out);auto*s=reinterpret_cast<FlAudioReader*>(base);
+ if(s->session&&result<0&&result!=GST_FLOW_FLUSHING&&result!=GST_FLOW_EOS)fl_gst_session_cancel(s->session);
+ return result;
 }
 static gboolean unlockReader(GstBaseSrc*base){auto*s=reinterpret_cast<FlAudioReader*>(base);g_cancellable_cancel(s->cancel);return TRUE;}
 static gboolean unlockStopReader(GstBaseSrc*base){auto*s=reinterpret_cast<FlAudioReader*>(base);g_cancellable_reset(s->cancel);return TRUE;}
@@ -150,7 +155,14 @@ static gboolean querySrc(GstElement*e,GstQuery*q){
  if(GST_QUERY_TYPE(q)==GST_QUERY_SEEKING){GstFormat format;gst_query_parse_seeking(q,&format,nullptr,nullptr,nullptr);gst_query_set_seeking(q,format,FALSE,0,-1);return TRUE;}
  return GST_ELEMENT_CLASS(gst_framelink_audio_src_parent_class)->query(e,q);
 }
-static void gst_framelink_audio_src_class_init(GstFrameLinkAudioSrcClass*c){auto*o=G_OBJECT_CLASS(c);o->set_property=setSrc;o->get_property=getSrc;o->finalize=finalizeSrc;auto*e=GST_ELEMENT_CLASS(c);e->set_context=contextSrc;e->change_state=stateSrc;e->query=querySrc;gst_element_class_set_static_metadata(e,"FrameLink audio consumer","Source/Audio","Authenticated incremental serialized PCM (not shared memory)","FrameLink");gst_element_class_add_static_pad_template(e,&pcmTemplate);
+// Depayloader or reader errors are fatal for the coordinated session; cancel
+// it so the video track does not wait for its own idle deadline.
+static void handleSrcMessage(GstBin*bin,GstMessage*message){
+ auto*s=reinterpret_cast<GstFrameLinkAudioSrc*>(bin);
+ if(GST_MESSAGE_TYPE(message)==GST_MESSAGE_ERROR&&GST_MESSAGE_SRC(message)!=GST_OBJECT(bin)&&s->session){s->failed=TRUE;fl_gst_session_cancel(s->session);}
+ GST_BIN_CLASS(gst_framelink_audio_src_parent_class)->handle_message(bin,message);
+}
+static void gst_framelink_audio_src_class_init(GstFrameLinkAudioSrcClass*c){auto*o=G_OBJECT_CLASS(c);GST_BIN_CLASS(c)->handle_message=handleSrcMessage;o->set_property=setSrc;o->get_property=getSrc;o->finalize=finalizeSrc;auto*e=GST_ELEMENT_CLASS(c);e->set_context=contextSrc;e->change_state=stateSrc;e->query=querySrc;gst_element_class_set_static_metadata(e,"FrameLink audio consumer","Source/Audio","Authenticated incremental serialized PCM (not shared memory)","FrameLink");gst_element_class_add_static_pad_template(e,&pcmTemplate);
  auto rw=GParamFlags(G_PARAM_READWRITE|G_PARAM_STATIC_STRINGS);auto ro=GParamFlags(G_PARAM_READABLE|G_PARAM_STATIC_STRINGS);
  g_object_class_install_property(o,P_PATH,g_param_spec_string("session","Session","Protected local rendezvous path",nullptr,rw));g_object_class_install_property(o,P_FORMAT,g_param_spec_string("format","Format","Exact S16LE or F32LE","S16LE",rw));g_object_class_install_property(o,P_TRACKS,g_param_spec_string("tracks","Tracks","audio standalone or av with context","audio",rw));
  g_object_class_install_property(o,P_RATE,g_param_spec_uint("rate","Rate","Exact sample rate",8000,192000,48000,rw));g_object_class_install_property(o,P_CHANNELS,g_param_spec_uint("channels","Channels","Exact channel count",1,2,2,rw));g_object_class_install_property(o,P_QUEUE,g_param_spec_uint("audio-queue-ms","Audio bound","Maximum negotiated PCM block/queue budget",1,2000,80,rw));g_object_class_install_property(o,P_CONNECT,g_param_spec_uint("connect-timeout-ms","Connect deadline","Whole startup deadline",1,60000,15000,rw));g_object_class_install_property(o,P_IDLE,g_param_spec_uint("idle-timeout-ms","Idle deadline","Socket timeout rounded up to seconds",1,60000,15000,rw));

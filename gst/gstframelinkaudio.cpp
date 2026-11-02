@@ -170,8 +170,16 @@ static void getProperty(GObject*object,guint property,GValue*value,GParamSpec*sp
  case PROP_RATE:g_value_set_uint(value,s->rate);break;case PROP_CHANNELS:g_value_set_uint(value,s->channels);break;case PROP_QUEUE:g_value_set_uint(value,s->queueMs);break;
  case PROP_CONNECT:g_value_set_uint(value,s->connectMs);break;case PROP_IDLE:g_value_set_uint(value,s->idleMs);break;default:G_OBJECT_WARN_INVALID_PROPERTY_ID(object,property,spec);}
 }
+// A child error (payloader, bounded queue or socket writer) is fatal for the
+// coordinated session: cancel it so sibling tracks fail promptly instead of
+// waiting for their own idle deadline. The message still reaches the pipeline.
+static void handleSinkMessage(GstBin*bin,GstMessage*message){
+ auto*s=reinterpret_cast<GstFrameLinkAudioSink*>(bin);
+ if(GST_MESSAGE_TYPE(message)==GST_MESSAGE_ERROR&&GST_MESSAGE_SRC(message)!=GST_OBJECT(bin)&&s->session){s->failed=TRUE;fl_gst_session_cancel(s->session);}
+ GST_BIN_CLASS(gst_framelink_audio_sink_parent_class)->handle_message(bin,message);
+}
 static void gst_framelink_audio_sink_class_init(GstFrameLinkAudioSinkClass*c){
- auto*object=G_OBJECT_CLASS(c);object->set_property=setProperty;object->get_property=getProperty;
+ auto*object=G_OBJECT_CLASS(c);GST_BIN_CLASS(c)->handle_message=handleSinkMessage;object->set_property=setProperty;object->get_property=getProperty;
  const auto flags=GParamFlags(G_PARAM_READWRITE|G_PARAM_STATIC_STRINGS);
  g_object_class_install_property(object,PROP_TRACKS,g_param_spec_string("tracks","Tracks","audio standalone or av with shared session context","audio",flags));
  const auto read=GParamFlags(G_PARAM_READABLE|G_PARAM_STATIC_STRINGS);
