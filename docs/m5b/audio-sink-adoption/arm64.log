@@ -1,0 +1,15 @@
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /tmp/fl-m5a-gst-arm64
+[ 40%] Built target framelink
+[ 46%] Building CXX object CMakeFiles/framelink_gst_session.dir/gst/framelink_session_context.cpp.o
+[ 53%] Building CXX object CMakeFiles/framelink_gst_session.dir/gst/framelink_session_transport.cpp.o
+[ 53%] Linking CXX static library libframelink_gst_session.a
+[ 66%] Built target framelink_gst_session
+[ 80%] Building CXX object CMakeFiles/gstframelink.dir/gst/gstframelink.cpp.o
+[ 80%] Building CXX object CMakeFiles/gstframelink.dir/gst/gstframelinkaudio.cpp.o
+[ 86%] Linking CXX static library libgstframelink.a
+[ 86%] Built target gstframelink
+[ 93%] Building CXX object CMakeFiles/fl_gst_audio_sink.dir/test/fl_gst_audio_sink.cpp.o
+[100%] Linking CXX executable fl_gst_audio_sink
+[100%] Built target fl_gst_audio_sink

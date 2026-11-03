@@ -1,0 +1,21 @@
+/tmp/fl-m5a-gst-arm64/fl_gst_av_timeline: 1 file pushed, 0 skipped. 137.1 MB/s (29533872 bytes in 0.205s)
+/tmp/fl-m5a-gst-arm64/fl_gst_event_channel: 1 file pushed, 0 skipped. 151.9 MB/s (20643040 bytes in 0.130s)
+/tmp/fl-m5a-gst-arm64/fl_gst_audio_source: 1 file pushed, 0 skipped. 129.0 MB/s (29580856 bytes in 0.219s)
+/tmp/fl-m5a-gst-arm64/fl_gst_audio_sink: 1 file pushed, 0 skipped. 123.4 MB/s (29618208 bytes in 0.229s)
+/tmp/fl-m5a-gst-arm64/fl_gst_session_context: 1 file pushed, 0 skipped. 146.0 MB/s (20285192 bytes in 0.133s)
+
+TEST fl_gst_av_timeline
+coordinated public A/V: distinct TIME segments, one receiver mapping, exact +/-37ms offset, pixels/PCM/DTS/duration/generation passed
+
+TEST fl_gst_event_channel
+event channel: authenticated ordered bounded controls; quiet idle, stale generation, queue overflow, partial-record deadline and cancellation passed
+
+TEST fl_gst_audio_source
+public audio source: exact four PCM formats/layouts, incremental packet delivery before EOS, both startup orders, live latency, missing-peer and cancellation passed
+
+TEST fl_gst_audio_sink
+backpressure: 2031 blocks accepted before bounded failure; teardown_us=3439
+public audio sink: exact PCM/PTS/duration and missing-auth/invalid-PTS/oversized-block negatives passed
+
+TEST fl_gst_session_context
+session context: ownership, readiness, track masks, generations and cancellation passed

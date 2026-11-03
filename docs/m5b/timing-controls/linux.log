@@ -1,0 +1,52 @@
+Internal ctest changing into directory: /tmp/fl-m5a-gst-build
+UpdateCTestConfiguration  from :/tmp/fl-m5a-gst-build/DartConfiguration.tcl
+UpdateCTestConfiguration  from :/tmp/fl-m5a-gst-build/DartConfiguration.tcl
+Test project /tmp/fl-m5a-gst-build
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 100
+    Start 100: gst_session_context
+
+100: Test command: /tmp/fl-m5a-gst-build/fl_gst_session_context
+100: Working Directory: /tmp/fl-m5a-gst-build
+100: Test timeout computed to be: 10
+100: session context: ownership, readiness, track masks, generations and cancellation passed
+1/4 Test #100: gst_session_context ..............   Passed    0.01 sec
+test 102
+    Start 102: gst_audio_source
+
+102: Test command: /tmp/fl-m5a-gst-build/fl_gst_audio_source "/tmp/fl-m5a-gst-build/libgstframelink.so"
+102: Working Directory: /tmp/fl-m5a-gst-build
+102: Test timeout computed to be: 20
+102: public audio source: exact four PCM formats/layouts, incremental packet delivery before EOS, both startup orders, live latency, missing-peer and cancellation passed
+2/4 Test #102: gst_audio_source .................   Passed    1.24 sec
+test 103
+    Start 103: gst_av_timeline
+
+103: Test command: /tmp/fl-m5a-gst-build/fl_gst_av_timeline "/tmp/fl-m5a-gst-build/libgstframelink.so"
+103: Working Directory: /tmp/fl-m5a-gst-build
+103: Test timeout computed to be: 20
+103: coordinated public A/V: distinct TIME segments, one receiver mapping, exact +/-37ms offset, pixels/PCM/DTS/duration/generation passed
+3/4 Test #103: gst_av_timeline ..................   Passed    0.90 sec
+test 105
+    Start 105: gst_event_channel
+
+105: Test command: /tmp/fl-m5a-gst-build/fl_gst_event_channel
+105: Working Directory: /tmp/fl-m5a-gst-build
+105: Test timeout computed to be: 15
+105: event channel: authenticated ordered bounded controls; quiet idle, stale generation, queue overflow, partial-record deadline and cancellation passed
+4/4 Test #105: gst_event_channel ................   Passed    2.31 sec
+
+The following tests passed:
+	gst_session_context
+	gst_audio_source
+	gst_av_timeline
+	gst_event_channel
+
+100% tests passed, 0 tests failed out of 4
+
+Total Test time (real) =   4.46 sec

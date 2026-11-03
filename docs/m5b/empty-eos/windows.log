@@ -1,0 +1,41 @@
+Test project <win-tree>/build
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 99
+    Start  99: gst_audio_sink
+
+99: Test command: <win-tree>\build\Release\fl_gst_audio_sink.exe "<win-tree>/build/Release/gstframelink.dll"
+99: Working Directory: <win-tree>/build
+99: Test timeout computed to be: 20
+99: backpressure: 49 blocks accepted before bounded failure; teardown_us=211
+99: public audio sink: exact PCM/PTS/duration and missing-auth/invalid-PTS/oversized-block negatives passed
+1/3 Test  #99: gst_audio_sink ...................   Passed    1.29 sec
+test 100
+    Start 100: gst_audio_source
+
+100: Test command: <win-tree>\build\Release\fl_gst_audio_source.exe "<win-tree>/build/Release/gstframelink.dll"
+100: Working Directory: <win-tree>/build
+100: Test timeout computed to be: 20
+100: public audio source: exact four PCM formats/layouts, incremental packet delivery before EOS, both startup orders, live latency, missing-peer and cancellation passed
+2/3 Test #100: gst_audio_source .................   Passed    1.30 sec
+test 101
+    Start 101: gst_av_timeline
+
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
+101: Test timeout computed to be: 20
+101: coordinated public A/V: distinct TIME segments, one receiver mapping, exact +/-37ms offset, pixels/PCM/DTS/duration/generation passed
+3/3 Test #101: gst_av_timeline ..................   Passed    1.90 sec
+
+The following tests passed:
+	gst_audio_sink
+	gst_audio_source
+	gst_av_timeline
+
+100% tests passed, 0 tests failed out of 3
+
+Total Test time (real) =   4.54 sec

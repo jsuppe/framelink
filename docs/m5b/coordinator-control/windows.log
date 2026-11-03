@@ -1,0 +1,41 @@
+#< CLIXML
+-- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.26300.
+-- framelink: building GStreamer elements (gstframelink)
+-- Configuring done (0.8s)
+-- Generating done (0.8s)
+-- Build files have been written to: <win-tree>/build
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <win-tree>\build\Release\framelink.dll
+  framelink_session_transport.cpp
+     Creating library <win-tree>/build/Release/framelink_gst_session.lib and object <win-tree>/build/Release/framelink_gst_session.exp
+  framelink_gst_session.vcxproj -> <win-tree>\build\Release\framelink_gst_session.dll
+  fl_gst_session_context.vcxproj -> <win-tree>\build\Release\fl_gst_session_context.exe
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <win-tree>\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> <win-tree>\build\Release\framelink_gst_session.dll
+  fl_gst_session_transport.cpp
+  fl_gst_session_transport.vcxproj -> <win-tree>\build\Release\fl_gst_session_transport.exe
+Test project <win-tree>/build
+    Start  4: session_contract
+1/8 Test  #4: session_contract .................   Passed    0.01 sec
+    Start  5: session_optional_tracks
+2/8 Test  #5: session_optional_tracks ..........   Passed    0.01 sec
+    Start  6: session_contract_c_api
+3/8 Test  #6: session_contract_c_api ...........   Passed    0.01 sec
+    Start 60: av_rendezvous
+4/8 Test #60: av_rendezvous ....................   Passed    0.03 sec
+    Start 61: av_auth
+5/8 Test #61: av_auth ..........................   Passed    0.02 sec
+    Start 64: m3_av_apps
+6/8 Test #64: m3_av_apps .......................   Passed   30.28 sec
+    Start 97: gst_session_transport
+7/8 Test #97: gst_session_transport ............   Passed    0.23 sec
+    Start 98: gst_session_context
+8/8 Test #98: gst_session_context ..............   Passed    0.08 sec
+
+100% tests passed, 0 tests failed out of 8
+
+Total Test time (real) =  30.71 sec
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04"><Obj S="progress" RefId="0"><TN RefId="0"><T>System.Management.Automation.PSCustomObject</T><T>System.Object</T></TN><MS><I64 N="SourceId">1</I64><PR N="Record"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj></Objs>

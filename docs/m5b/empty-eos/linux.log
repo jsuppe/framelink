@@ -1,0 +1,44 @@
+Internal ctest changing into directory: /tmp/fl-m5a-gst-build
+UpdateCTestConfiguration  from :/tmp/fl-m5a-gst-build/DartConfiguration.tcl
+UpdateCTestConfiguration  from :/tmp/fl-m5a-gst-build/DartConfiguration.tcl
+Test project /tmp/fl-m5a-gst-build
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 101
+    Start 101: gst_audio_sink
+
+101: Test command: /tmp/fl-m5a-gst-build/fl_gst_audio_sink "/tmp/fl-m5a-gst-build/libgstframelink.so"
+101: Working Directory: /tmp/fl-m5a-gst-build
+101: Test timeout computed to be: 20
+101: backpressure: 1088 blocks accepted before bounded failure; teardown_us=476
+101: public audio sink: exact PCM/PTS/duration and missing-auth/invalid-PTS/oversized-block negatives passed
+1/3 Test #101: gst_audio_sink ...................   Passed    1.21 sec
+test 102
+    Start 102: gst_audio_source
+
+102: Test command: /tmp/fl-m5a-gst-build/fl_gst_audio_source "/tmp/fl-m5a-gst-build/libgstframelink.so"
+102: Working Directory: /tmp/fl-m5a-gst-build
+102: Test timeout computed to be: 20
+102: public audio source: exact four PCM formats/layouts, incremental packet delivery before EOS, both startup orders, live latency, missing-peer and cancellation passed
+2/3 Test #102: gst_audio_source .................   Passed    1.24 sec
+test 103
+    Start 103: gst_av_timeline
+
+103: Test command: /tmp/fl-m5a-gst-build/fl_gst_av_timeline "/tmp/fl-m5a-gst-build/libgstframelink.so"
+103: Working Directory: /tmp/fl-m5a-gst-build
+103: Test timeout computed to be: 20
+103: coordinated public A/V: distinct TIME segments, one receiver mapping, exact +/-37ms offset, pixels/PCM/DTS/duration/generation passed
+3/3 Test #103: gst_av_timeline ..................   Passed    0.73 sec
+
+The following tests passed:
+	gst_audio_sink
+	gst_audio_source
+	gst_av_timeline
+
+100% tests passed, 0 tests failed out of 3
+
+Total Test time (real) =   3.19 sec

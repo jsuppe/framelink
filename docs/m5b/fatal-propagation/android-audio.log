@@ -1,0 +1,7 @@
+/tmp/fl-m5a-gst-arm64/fl_gst_audio_sink: 1 file pushed, 0 skipped. 132.0 MB/s (29635648 bytes in 0.214s)
+backpressure: 2034 blocks accepted before bounded failure; teardown_us=2937
+public audio sink: exact PCM/PTS/duration and missing-auth/invalid-PTS/oversized-block negatives passed
+exit=0
+/tmp/fl-m5a-gst-arm64/fl_gst_audio_source: 1 file pushed, 0 skipped. 123.9 MB/s (29665472 bytes in 0.228s)
+public audio source: exact four PCM formats/layouts, incremental packet delivery before EOS, both startup orders, live latency, missing-peer and cancellation passed
+exit=0

@@ -1,6 +1,6 @@
 # GStreamer elements
 
-Two elements that connect framelink to the GStreamer ecosystem. They build
+Video elements and a serialized PCM audio sink connect FrameLink to GStreamer. They build
 automatically when GStreamer development files are found (`FRAMELINK_BUILD_GST`,
 default ON) and produce one plugin, `gstframelink`.
 
@@ -117,3 +117,65 @@ A/V presentation scheduling. Native zero-copy Gst integration remains pending.
 See [native source adapters and limits](../docs/GST_NATIVE_MEMORY.md). Linux
 DMA-BUF, Windows D3D11 and exact Android RGB AHB wrappers are implemented; this
 is not yet a complete native decoder/sink/remote-negotiation pipeline.
+
+
+## Public audio elements — M5b development branch
+
+`framelinkaudiosink` carries interleaved S16LE/F32LE mono/stereo PCM at8–192kHz.
+This is serialized GDP/GIO audio, **not shared-memory or zero-copy PCM**. It does
+not play sound or independently pace the media timeline. The public source is `framelinkaudiosrc`; coordinated A/V bins and full
+lifecycle qualification remain later M5b tasks. This development branch is not
+a complete shipped A/V integration. See [public contract](../docs/GSTREAMER_AV_CONTRACT.md).
+
+Standalone audio-only mode uses `session=/private/path`, `format=S16LE|F32LE`,
+`rate=48000`, `channels=2`, `audio-queue-ms=80`, `connect-timeout-ms=15000`,
+`idle-timeout-ms=15000`, `tracks=audio` (defaults shown). Configure in NULL.
+The producer publishes a protected current-user loopback rendezvous; startup
+runs on a cancellable worker, not a blocking state callback. Either peer can
+start first. The public source accepts the same exact-format/session properties. The lower-level
+consumer API remains `fl_gst_session_open_local_audio`. No external network discovery or shared secret property.
+
+Applications with a broker/pre-negotiated session install the owning
+`framelink.session.v1` GstContext and authenticate the separate audio stream via
+`fl_gst_session_authenticate_audio_stream` before starting the element. Coordinated
+A/V requires `tracks=av` and a matching context; no dummy video track is created.
+Use `fl_gst_session_get_config` for selected formats. Read-only `session-id`,
+`generation`, `audio-track-id`, `video-track-id` expose negotiated identities.
+
+The sink claims one authenticated stream per generation. Invalid/unaligned or
+oversized PCM, invalid TIME/PTS/duration, incompatible caps and unmarked continuity
+breaks produce errors rather than silence or hidden conversion. DISCONT begins a
+new PCM continuity interval without zeroing transmitted PTS. Audio queue is a hard
+budget, not a fill target; a slow peer blocks bounded transport and then errors.
+There is one in-flight block in addition to queued data; upstream application
+queues must also be bounded. Ordinary GIO socket idle timeouts round up to seconds;
+startup has an exact whole-operation millisecond deadline. NULL/READY teardown
+cancels pending setup/I/O; reuse requires a fresh session or generation.
+
+GDP's outer serialized byte segment is adapted for non-seekable output; its
+encapsulated original PCM segment and timestamps remain intact. The validation
+fixture's byte-at-a-time GIO receiver is not a production reader. The public source uses
+incremental bounded socket reads so packet tails never wait for a future PCM block.
+Physical speaker alignment and independent clock drift correction are not implied.
+
+### Audio consumer behavior
+
+`framelinkaudiosrc session=/private/path format=S16LE rate=48000 channels=2`
+exposes one PCM `src` pad for an independently chosen downstream playback or
+processing path. It is live, non-seekable, does not provide a replacement clock,
+and does not reset timestamps to the consumer pipeline origin. The latency query
+reports live/zero mandatory buffering/unknown maximum: the queue budget is NOT a
+promise of end-to-end playback latency. Common session-to-playback clock mapping
+is a separate coordinated timing task, not implied by exact transport PTS.
+
+The reader checks GDP declared payload bounds before accumulation and validates
+received caps against the authenticated session. Missing-peer startup, transport
+idle, peer closure/truncation and cancellation are bounded. A socket EOF is not
+clean EOS. GDP does not serialize ordinary EOS; the public sink sends a private
+`framelink-audio-eos` terminal event after its queue drains, including version,
+generation, block and byte counts. The source accepts matching terminal accounting
+and emits standard downstream EOS. GDP truncates custom event types to16 bits;
+this private record is recognized by its exact wire type/name/schema and consumed
+inside the source. This is not general custom-event preservation. Raw older GDP
+senders without this terminal record do not qualify as clean public-source EOS.
+No dummy PCM block or extra PCM buffering is introduced for termination.

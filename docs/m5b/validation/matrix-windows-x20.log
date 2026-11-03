@@ -1,0 +1,26 @@
+PASS m5b_av gst_session_transport x20 4.13s
+PASS m5b_av gst_session_context x20 1.33s
+PASS m5b_av gst_audio_sink x20 24.96s
+PASS m5b_av gst_audio_source x20 25.75s
+PASS m5b_av gst_av_timeline x20 88.33s
+PASS m5b_av gst_av_validation x20 359.91s
+PASS m5b_av gst_local_av x20 56.51s
+PASS m5b_av m5b_gst_av_example x20 395.53s
+PASS m5b_av gst_local_audio x20 3.3s
+PASS m5b_av gst_event_channel x20 46.21s
+PASS gst_video_regression gst_native_producer_win x20 13.54s
+PASS gst_video_regression gst_native_source_win x20 35.69s
+PASS gst_video_regression gst_native_source_win_copy_negative x20 5.13s
+PASS gst_video_regression gst_nv12_roundtrip x20 14.5s
+PASS gst_video_regression gst_rgb10a2_roundtrip x20 14.19s
+PASS gst_video_regression gst_timestamp_contract x20 36.08s
+PASS gst_video_regression gst_pool_policy x20 43.26s
+PASS gst_video_regression m5a_transport_relay x20 28.52s
+PASS gst_video_regression m5a_transport_relay_audio_leads x20 28.42s
+PASS gst_video_regression m5a_transport_relay_sync_negative x20 14.46s
+PASS gst_video_regression gst_sink_stats x20 1.28s
+PASS gst_video_regression gst_preconnect_slots x20 18.58s
+PASS gst_video_regression gst_policy_generation x20 50.76s
+m5b_av: 10/10 tests passed x20
+gst_video_regression: 13/13 tests passed x20
+m5b validation matrix: pass

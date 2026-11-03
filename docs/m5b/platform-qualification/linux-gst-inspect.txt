@@ -1,0 +1,600 @@
+Plugin Details:
+  Name                     framelink
+  Description              FrameLink native video and serialized PCM transport
+  Filename                 <linux-build>/libgstframelink.so
+  Version                  0.1.0
+  License                  MIT/X11
+  Source module            framelink
+  Binary package           framelink
+  Origin URL               https://github.com/jsuppe/framelink
+
+  framelinkaudiosink: FrameLink audio producer
+  framelinkaudiosrc: FrameLink audio consumer
+  framelinkavsink: FrameLink A/V producer
+  framelinkavsrc: FrameLink A/V consumer
+  framelinksink: framelink sink
+  framelinksrc: framelink source
+
+  6 features:
+  +-- 6 elements
+
+
+==== framelinkavsink
+Factory Details:
+  Rank                     none (0)
+  Long-name                FrameLink A/V producer
+  Klass                    Sink/Video/Audio
+  Description              Composes framelinksink and framelinkaudiosink on one coordinated session; separate video_sink/audio_sink pads, not a multiplexed format
+  Author                   FrameLink
+
+Plugin Details:
+  Name                     framelink
+  Description              FrameLink native video and serialized PCM transport
+  Filename                 <linux-build>/libgstframelink.so
+  Version                  0.1.0
+  License                  MIT/X11
+  Source module            framelink
+  Binary package           framelink
+  Origin URL               https://github.com/jsuppe/framelink
+
+GObject
+ +----GInitiallyUnowned
+       +----GstObject
+             +----GstElement
+                   +----GstBin
+                         +----GstFrameLinkAvSink
+
+Implemented Interfaces:
+  GstChildProxy
+
+Pad Templates:
+  SINK template: 'audio_sink'
+    Availability: Sometimes
+    Capabilities:
+      audio/x-raw
+                 format: { (string)S16LE, (string)F32LE }
+                 layout: interleaved
+                   rate: [ 8000, 192000 ]
+               channels: [ 1, 2 ]
+  
+  SINK template: 'video_sink'
+    Availability: Sometimes
+    Capabilities:
+      video/x-raw
+                 format: { (string)BGRA, (string)RGBA, (string)NV12, (string)RGB10A2_LE }
+
+Element has no clocking capabilities.
+Element has no URI handling capabilities.
+
+Pads:
+  SINK: 'video_sink'
+    Pad Template: 'video_sink'
+  SINK: 'audio_sink'
+    Pad Template: 'audio_sink'
+
+Element Properties:
+
+  async-handling      : The bin will handle Asynchronous state changes
+                        flags: readable, writable
+                        Boolean. Default: false
+  
+  audio-format        : Offered PCM format with session= (S16LE, F32LE)
+                        flags: readable, writable, changeable only in NULL or READY state
+                        String. Default: "S16LE"
+  
+  audio-queue-ms      : Hard audio queue budget, not target latency
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 1 - 2000 Default: 80 
+  
+  audio-track-id      : Negotiated audio identity, zero when absent
+                        flags: readable
+                        Unsigned Integer. Range: 0 - 4294967295 Default: 0 
+  
+  channels            : Offered PCM channels with session=
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 1 - 2 Default: 2 
+  
+  connect-timeout-ms  : Session setup and media hold deadline
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 1 - 60000 Default: 15000 
+  
+  framerate           : Offered video frame rate with session=
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Fraction. Range: 1/1 - 240/1 Default: 30/1 
+  
+  generation          : Negotiated session generation
+                        flags: readable
+                        Unsigned Integer64. Range: 0 - 18446744073709551615 Default: 0 
+  
+  height              : Offered video height with session=
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 16 - 8192 Default: 720 
+  
+  idle-timeout-ms     : Bounded transport idle deadline
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 1 - 60000 Default: 15000 
+  
+  message-forward     : Forwards all children messages
+                        flags: readable, writable
+                        Boolean. Default: false
+  
+  name                : The name of the object
+                        flags: readable, writable
+                        String. Default: "framelinkavsink0"
+  
+  parent              : The parent of the object
+                        flags: readable, writable
+                        Object of type "GstObject"
+  
+  rate                : Offered PCM rate with session=
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 8000 - 192000 Default: 48000 
+  
+  session             : Private current-user local discovery directory (not a secret or URL); unset: use an installed framelink.session.v1 context
+                        flags: readable, writable, changeable only in NULL or READY state
+                        String. Default: null
+  
+  session-id          : Negotiated identity, not a secret
+                        flags: readable
+                        String. Default: null
+  
+  tracks              : Required track set: audio, video or av; only enabled pads exist
+                        flags: readable, writable, changeable only in NULL or READY state
+                        String. Default: "av"
+  
+  video-format        : Offered video format with session= (BGRA, RGBA, NV12, RGB10A2_LE)
+                        flags: readable, writable, changeable only in NULL or READY state
+                        String. Default: "BGRA"
+  
+  video-pool          : Consumer ring images requested (0: consumer default)
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 0 - 16 Default: 0 
+  
+  video-queue-frames  : Coordinated video queue budget
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 1 - 16 Default: 2 
+  
+  video-track-id      : Negotiated video identity, zero when absent
+                        flags: readable
+                        Unsigned Integer. Range: 0 - 4294967295 Default: 0 
+  
+  width               : Offered video width with session=
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 16 - 8192 Default: 1280 
+  
+
+Element Signals:
+
+  "pad-added" :  void user_function (GstElement * object,
+                                     GstPad * arg0,
+                                     gpointer user_data);
+
+  "pad-removed" :  void user_function (GstElement * object,
+                                       GstPad * arg0,
+                                       gpointer user_data);
+
+  "no-more-pads" :  void user_function (GstElement * object,
+                                        gpointer user_data);
+
+
+Element Actions:
+
+  "adopt-channel" -> gboolean  :  g_signal_emit_by_name (element, "adopt-channel",
+                                                         gpointer arg0,
+                                                         gboolean * p_return_value);
+
+
+Children:
+  audio
+  video
+
+==== framelinkavsrc
+Factory Details:
+  Rank                     none (0)
+  Long-name                FrameLink A/V consumer
+  Klass                    Source/Video/Audio
+  Description              Composes framelinksrc and framelinkaudiosrc on one coordinated session; separate video_src/audio_src pads, no display or audio device
+  Author                   FrameLink
+
+Plugin Details:
+  Name                     framelink
+  Description              FrameLink native video and serialized PCM transport
+  Filename                 <linux-build>/libgstframelink.so
+  Version                  0.1.0
+  License                  MIT/X11
+  Source module            framelink
+  Binary package           framelink
+  Origin URL               https://github.com/jsuppe/framelink
+
+GObject
+ +----GInitiallyUnowned
+       +----GstObject
+             +----GstElement
+                   +----GstBin
+                         +----GstFrameLinkAvSrc
+
+Implemented Interfaces:
+  GstChildProxy
+
+Pad Templates:
+  SRC template: 'audio_src'
+    Availability: Sometimes
+    Capabilities:
+      audio/x-raw
+                 format: { (string)S16LE, (string)F32LE }
+                 layout: interleaved
+                   rate: [ 8000, 192000 ]
+               channels: [ 1, 2 ]
+  
+  SRC template: 'video_src'
+    Availability: Sometimes
+    Capabilities:
+      video/x-raw(ANY)
+                 format: { (string)BGRA, (string)RGBA, (string)NV12, (string)RGB10A2_LE }
+
+Element has no clocking capabilities.
+Element has no URI handling capabilities.
+
+Pads:
+  SRC: 'video_src'
+    Pad Template: 'video_src'
+  SRC: 'audio_src'
+    Pad Template: 'audio_src'
+
+Element Properties:
+
+  async-handling      : The bin will handle Asynchronous state changes
+                        flags: readable, writable
+                        Boolean. Default: false
+  
+  audio-format        : Accepted PCM format (S16LE, F32LE)
+                        flags: readable, writable, changeable only in NULL or READY state
+                        String. Default: "S16LE"
+  
+  audio-queue-ms      : Hard audio queue budget, not target latency
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 1 - 2000 Default: 80 
+  
+  audio-track-id      : Negotiated audio identity, zero when absent
+                        flags: readable
+                        Unsigned Integer. Range: 0 - 4294967295 Default: 0 
+  
+  channels            : Accepted PCM channels
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 1 - 2 Default: 2 
+  
+  connect-timeout-ms  : Session setup and ready deadline
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 1 - 60000 Default: 15000 
+  
+  framerate           : Accepted video frame rate with session=
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Fraction. Range: 1/1 - 240/1 Default: 30/1 
+  
+  generation          : Negotiated session generation
+                        flags: readable
+                        Unsigned Integer64. Range: 0 - 18446744073709551615 Default: 0 
+  
+  height              : Accepted video height
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 16 - 8192 Default: 720 
+  
+  idle-timeout-ms     : Bounded transport idle deadline
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 1 - 60000 Default: 15000 
+  
+  latency-ms          : Pipeline latency installed with session=; covers transport and sink buffering
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 0 - 10000 Default: 150 
+  
+  message-forward     : Forwards all children messages
+                        flags: readable, writable
+                        Boolean. Default: false
+  
+  name                : The name of the object
+                        flags: readable, writable
+                        String. Default: "framelinkavsrc0"
+  
+  native-memory       : Output platform GPU memory (DMABuf, D3D11Memory, FrameLinkAHardwareBuffer) from the ring; with session= the ring defers read release
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Boolean. Default: false
+  
+  parent              : The parent of the object
+                        flags: readable, writable
+                        Object of type "GstObject"
+  
+  rate                : Accepted PCM rate
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 8000 - 192000 Default: 48000 
+  
+  session             : Private current-user local discovery directory (not a secret or URL); unset: use an installed framelink.session.v1 context
+                        flags: readable, writable, changeable only in NULL or READY state
+                        String. Default: null
+  
+  session-id          : Negotiated identity, not a secret
+                        flags: readable
+                        String. Default: null
+  
+  tracks              : Required track set: audio, video or av; only enabled pads exist
+                        flags: readable, writable, changeable only in NULL or READY state
+                        String. Default: "av"
+  
+  video-format        : Accepted video format (BGRA, RGBA, NV12, RGB10A2_LE)
+                        flags: readable, writable, changeable only in NULL or READY state
+                        String. Default: "BGRA"
+  
+  video-pool          : Ring images this consumer allocates with session= (0: 4); cover ceil(latency*fps)+2
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 0 - 16 Default: 8 
+  
+  video-queue-frames  : Coordinated video queue budget
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 1 - 16 Default: 2 
+  
+  video-track-id      : Negotiated video identity, zero when absent
+                        flags: readable
+                        Unsigned Integer. Range: 0 - 4294967295 Default: 0 
+  
+  width               : Accepted video width
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 16 - 8192 Default: 1280 
+  
+
+Element Signals:
+
+  "pad-added" :  void user_function (GstElement * object,
+                                     GstPad * arg0,
+                                     gpointer user_data);
+
+  "pad-removed" :  void user_function (GstElement * object,
+                                       GstPad * arg0,
+                                       gpointer user_data);
+
+  "no-more-pads" :  void user_function (GstElement * object,
+                                        gpointer user_data);
+
+
+Element Actions:
+
+  "adopt-channel" -> gboolean  :  g_signal_emit_by_name (element, "adopt-channel",
+                                                         gpointer arg0,
+                                                         gboolean * p_return_value);
+
+
+Children:
+  audio
+  video
+
+==== framelinkaudiosink
+Factory Details:
+  Rank                     none (0)
+  Long-name                FrameLink audio producer
+  Klass                    Sink/Audio
+  Description              Bounded authenticated PCM transport (serialized, not shared memory)
+  Author                   FrameLink
+
+Plugin Details:
+  Name                     framelink
+  Description              FrameLink native video and serialized PCM transport
+  Filename                 <linux-build>/libgstframelink.so
+  Version                  0.1.0
+  License                  MIT/X11
+  Source module            framelink
+  Binary package           framelink
+  Origin URL               https://github.com/jsuppe/framelink
+
+GObject
+ +----GInitiallyUnowned
+       +----GstObject
+             +----GstElement
+                   +----GstBin
+                         +----GstFrameLinkAudioSink
+
+Implemented Interfaces:
+  GstChildProxy
+
+Pad Templates:
+  SINK template: 'sink'
+    Availability: Always
+    Capabilities:
+      audio/x-raw
+                 format: { (string)S16LE, (string)F32LE }
+                 layout: interleaved
+                   rate: [ 8000, 192000 ]
+               channels: { (int)1, (int)2 }
+
+Element has no clocking capabilities.
+Element has no URI handling capabilities.
+
+Pads:
+  SINK: 'sink'
+    Pad Template: 'sink'
+
+Element Properties:
+
+  async-handling      : The bin will handle Asynchronous state changes
+                        flags: readable, writable
+                        Boolean. Default: false
+  
+  audio-queue-ms      : Hard queue budget, not target latency
+                        flags: readable, writable
+                        Unsigned Integer. Range: 1 - 2000 Default: 80 
+  
+  audio-track-id      : Negotiated audio identity
+                        flags: readable
+                        Unsigned Integer. Range: 0 - 4294967295 Default: 0 
+  
+  channels            : Standalone mono or stereo
+                        flags: readable, writable
+                        Unsigned Integer. Range: 1 - 2 Default: 2 
+  
+  connect-timeout-ms  : Whole standalone startup deadline
+                        flags: readable, writable
+                        Unsigned Integer. Range: 1 - 60000 Default: 15000 
+  
+  format              : Standalone S16LE or F32LE
+                        flags: readable, writable
+                        String. Default: "S16LE"
+  
+  generation          : Negotiated session generation
+                        flags: readable
+                        Unsigned Integer64. Range: 0 - 18446744073709551615 Default: 0 
+  
+  idle-timeout-ms     : Bounded transport idle deadline
+                        flags: readable, writable
+                        Unsigned Integer. Range: 1 - 60000 Default: 15000 
+  
+  message-forward     : Forwards all children messages
+                        flags: readable, writable
+                        Boolean. Default: false
+  
+  name                : The name of the object
+                        flags: readable, writable
+                        String. Default: "framelinkaudiosink0"
+  
+  parent              : The parent of the object
+                        flags: readable, writable
+                        Object of type "GstObject"
+  
+  rate                : Standalone PCM sample rate
+                        flags: readable, writable
+                        Unsigned Integer. Range: 8000 - 192000 Default: 48000 
+  
+  session             : Private local audio-only rendezvous path, or use an authenticated context
+                        flags: readable, writable
+                        String. Default: null
+  
+  session-id          : Negotiated identity, not a secret
+                        flags: readable
+                        String. Default: ""
+  
+  tracks              : audio standalone or av with shared session context
+                        flags: readable, writable
+                        String. Default: "audio"
+  
+  video-track-id      : Negotiated video identity, zero when absent
+                        flags: readable
+                        Unsigned Integer. Range: 0 - 4294967295 Default: 0 
+  
+
+Children:
+  giostreamsink0
+  gdppay0
+  queue0
+  capsfilter0
+
+==== framelinkaudiosrc
+Factory Details:
+  Rank                     none (0)
+  Long-name                FrameLink audio consumer
+  Klass                    Source/Audio
+  Description              Authenticated incremental serialized PCM (not shared memory)
+  Author                   FrameLink
+
+Plugin Details:
+  Name                     framelink
+  Description              FrameLink native video and serialized PCM transport
+  Filename                 <linux-build>/libgstframelink.so
+  Version                  0.1.0
+  License                  MIT/X11
+  Source module            framelink
+  Binary package           framelink
+  Origin URL               https://github.com/jsuppe/framelink
+
+GObject
+ +----GInitiallyUnowned
+       +----GstObject
+             +----GstElement
+                   +----GstBin
+                         +----GstFrameLinkAudioSrc
+
+Implemented Interfaces:
+  GstChildProxy
+
+Pad Templates:
+  SRC template: 'src'
+    Availability: Always
+    Capabilities:
+      audio/x-raw
+                 format: { (string)S16LE, (string)F32LE }
+                 layout: interleaved
+                   rate: [ 8000, 192000 ]
+               channels: { (int)1, (int)2 }
+
+Element has no clocking capabilities.
+Element has no URI handling capabilities.
+
+Pads:
+  SRC: 'src'
+    Pad Template: 'src'
+
+Element Properties:
+
+  async-handling      : The bin will handle Asynchronous state changes
+                        flags: readable, writable
+                        Boolean. Default: false
+  
+  audio-queue-ms      : Maximum negotiated PCM block/queue budget
+                        flags: readable, writable
+                        Unsigned Integer. Range: 1 - 2000 Default: 80 
+  
+  audio-track-id      : Audio identity
+                        flags: readable
+                        Unsigned Integer. Range: 0 - 4294967295 Default: 0 
+  
+  channels            : Exact channel count
+                        flags: readable, writable
+                        Unsigned Integer. Range: 1 - 2 Default: 2 
+  
+  connect-timeout-ms  : Whole startup deadline
+                        flags: readable, writable
+                        Unsigned Integer. Range: 1 - 60000 Default: 15000 
+  
+  format              : Exact S16LE or F32LE
+                        flags: readable, writable
+                        String. Default: "S16LE"
+  
+  generation          : Negotiated generation
+                        flags: readable
+                        Unsigned Integer64. Range: 0 - 18446744073709551615 Default: 0 
+  
+  idle-timeout-ms     : Socket timeout rounded up to seconds
+                        flags: readable, writable
+                        Unsigned Integer. Range: 1 - 60000 Default: 15000 
+  
+  message-forward     : Forwards all children messages
+                        flags: readable, writable
+                        Boolean. Default: false
+  
+  name                : The name of the object
+                        flags: readable, writable
+                        String. Default: "framelinkaudiosrc0"
+  
+  parent              : The parent of the object
+                        flags: readable, writable
+                        Object of type "GstObject"
+  
+  rate                : Exact sample rate
+                        flags: readable, writable
+                        Unsigned Integer. Range: 8000 - 192000 Default: 48000 
+  
+  session             : Protected local rendezvous path
+                        flags: readable, writable
+                        String. Default: null
+  
+  session-id          : Not a secret
+                        flags: readable
+                        String. Default: ""
+  
+  tracks              : audio standalone or av with context
+                        flags: readable, writable
+                        String. Default: "audio"
+  
+  video-track-id      : Video identity
+                        flags: readable
+                        Unsigned Integer. Range: 0 - 4294967295 Default: 0 
+  
+
+Children:
+  gdpdepay0
+  flaudioreader0

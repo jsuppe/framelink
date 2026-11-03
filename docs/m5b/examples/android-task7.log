@@ -1,0 +1,62 @@
+/tmp/fl-m5a-gst-arm64/fl_gst_local_av: 1 file pushed, 0 skipped. 133.6 MB/s (30281416 bytes in 0.216s)
+/tmp/fl-m5a-gst-arm64/framelink_gst_av: 1 file pushed, 0 skipped. 128.0 MB/s (30349328 bytes in 0.226s)
+local_av REPEAT 1 PASS
+track mismatch: producer incompatible session selection; consumer producer selection or authentication rejected
+mapping skew -53346ns
+video lag 150.4..151.2ms
+audio lag 150.3..151.2ms
+order=producer-first video=30 samples=24000 firstAV=-3253538ns
+mapping skew -71001ns
+video lag 150.4..151.0ms
+audio lag 150.4..150.9ms
+order=consumer-first video=30 samples=24000 firstAV=635769ns
+local A/V setup: authenticated rendezvous, identity clock mapping, both startup orders, live synchronized pixels/PCM, track mismatch rejection passed
+local_av REPEAT 2 PASS
+local_av REPEAT 3 PASS
+local_av REPEAT 4 PASS
+local_av REPEAT 5 PASS
+local_av REPEAT 6 PASS
+local_av REPEAT 7 PASS
+local_av REPEAT 8 PASS
+local_av REPEAT 9 PASS
+local_av REPEAT 10 PASS
+local_av REPEAT 11 PASS
+local_av REPEAT 12 PASS
+local_av REPEAT 13 PASS
+local_av REPEAT 14 PASS
+local_av REPEAT 15 PASS
+local_av REPEAT 16 PASS
+local_av REPEAT 17 PASS
+local_av REPEAT 18 PASS
+local_av REPEAT 19 PASS
+local_av REPEAT 20 PASS
+PASS rep0 av-rgba-consumer-first producer=0 consumer=0 4.11s {"event": "verify", "tracks": "av", "format": "RGBA", "frames": 90, "expected_frames": 90, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.188, "lag_max_ms": 150.892, "latency_ms": 150, "result": "pass"}
+PASS rep0 av-rgba-producer-first producer=0 consumer=0 4.10s {"event": "verify", "tracks": "av", "format": "RGBA", "frames": 90, "expected_frames": 90, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.124, "lag_max_ms": 151.251, "latency_ms": 150, "result": "pass"}
+PASS rep0 av-nv12 producer=0 consumer=0 4.10s {"event": "verify", "tracks": "av", "format": "NV12", "frames": 90, "expected_frames": 90, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.166, "lag_max_ms": 151.22, "latency_ms": 150, "result": "pass"}
+PASS rep0 video-bgra producer=0 consumer=0 4.10s {"event": "verify", "tracks": "video", "format": "BGRA", "frames": 90, "expected_frames": 90, "samples": 0, "expected_samples": 0, "lag_min_ms": 150.151, "lag_max_ms": 151.013, "latency_ms": 150, "result": "pass"}
+PASS rep0 audio-only producer=0 consumer=0 4.08s {"event": "verify", "tracks": "audio", "format": "RGBA", "frames": 0, "expected_frames": 0, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.197, "lag_max_ms": 151.072, "latency_ms": 150, "result": "pass"}
+PASS rep0 negative-track-mismatch producer=1 consumer=1 0.73s 
+PASS rep1 av-rgba-consumer-first producer=0 consumer=0 4.11s {"event": "verify", "tracks": "av", "format": "RGBA", "frames": 90, "expected_frames": 90, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.167, "lag_max_ms": 151.158, "latency_ms": 150, "result": "pass"}
+PASS rep1 av-rgba-producer-first producer=0 consumer=0 4.09s {"event": "verify", "tracks": "av", "format": "RGBA", "frames": 90, "expected_frames": 90, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.186, "lag_max_ms": 151.463, "latency_ms": 150, "result": "pass"}
+PASS rep1 av-nv12 producer=0 consumer=0 4.11s {"event": "verify", "tracks": "av", "format": "NV12", "frames": 90, "expected_frames": 90, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.16, "lag_max_ms": 151.145, "latency_ms": 150, "result": "pass"}
+PASS rep1 video-bgra producer=0 consumer=0 4.10s {"event": "verify", "tracks": "video", "format": "BGRA", "frames": 90, "expected_frames": 90, "samples": 0, "expected_samples": 0, "lag_min_ms": 150.143, "lag_max_ms": 150.787, "latency_ms": 150, "result": "pass"}
+PASS rep1 audio-only producer=0 consumer=0 4.08s {"event": "verify", "tracks": "audio", "format": "RGBA", "frames": 0, "expected_frames": 0, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.19, "lag_max_ms": 151.406, "latency_ms": 150, "result": "pass"}
+PASS rep1 negative-track-mismatch producer=1 consumer=1 0.72s 
+PASS rep2 av-rgba-consumer-first producer=0 consumer=0 4.11s {"event": "verify", "tracks": "av", "format": "RGBA", "frames": 90, "expected_frames": 90, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.125, "lag_max_ms": 151.125, "latency_ms": 150, "result": "pass"}
+PASS rep2 av-rgba-producer-first producer=0 consumer=0 4.11s {"event": "verify", "tracks": "av", "format": "RGBA", "frames": 90, "expected_frames": 90, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.171, "lag_max_ms": 151.179, "latency_ms": 150, "result": "pass"}
+PASS rep2 av-nv12 producer=0 consumer=0 4.12s {"event": "verify", "tracks": "av", "format": "NV12", "frames": 90, "expected_frames": 90, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.152, "lag_max_ms": 151.706, "latency_ms": 150, "result": "pass"}
+PASS rep2 video-bgra producer=0 consumer=0 4.10s {"event": "verify", "tracks": "video", "format": "BGRA", "frames": 90, "expected_frames": 90, "samples": 0, "expected_samples": 0, "lag_min_ms": 150.152, "lag_max_ms": 150.979, "latency_ms": 150, "result": "pass"}
+PASS rep2 audio-only producer=0 consumer=0 4.08s {"event": "verify", "tracks": "audio", "format": "RGBA", "frames": 0, "expected_frames": 0, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.206, "lag_max_ms": 151.009, "latency_ms": 150, "result": "pass"}
+PASS rep2 negative-track-mismatch producer=1 consumer=1 0.71s 
+PASS rep3 av-rgba-consumer-first producer=0 consumer=0 4.10s {"event": "verify", "tracks": "av", "format": "RGBA", "frames": 90, "expected_frames": 90, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.115, "lag_max_ms": 151.273, "latency_ms": 150, "result": "pass"}
+PASS rep3 av-rgba-producer-first producer=0 consumer=0 4.10s {"event": "verify", "tracks": "av", "format": "RGBA", "frames": 90, "expected_frames": 90, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.201, "lag_max_ms": 155.249, "latency_ms": 150, "result": "pass"}
+PASS rep3 av-nv12 producer=0 consumer=0 4.10s {"event": "verify", "tracks": "av", "format": "NV12", "frames": 90, "expected_frames": 90, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.178, "lag_max_ms": 152.085, "latency_ms": 150, "result": "pass"}
+PASS rep3 video-bgra producer=0 consumer=0 4.11s {"event": "verify", "tracks": "video", "format": "BGRA", "frames": 90, "expected_frames": 90, "samples": 0, "expected_samples": 0, "lag_min_ms": 150.145, "lag_max_ms": 151.026, "latency_ms": 150, "result": "pass"}
+PASS rep3 audio-only producer=0 consumer=0 4.07s {"event": "verify", "tracks": "audio", "format": "RGBA", "frames": 0, "expected_frames": 0, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.2, "lag_max_ms": 150.974, "latency_ms": 150, "result": "pass"}
+PASS rep3 negative-track-mismatch producer=1 consumer=1 0.72s 
+PASS rep4 av-rgba-consumer-first producer=0 consumer=0 4.11s {"event": "verify", "tracks": "av", "format": "RGBA", "frames": 90, "expected_frames": 90, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.186, "lag_max_ms": 151.312, "latency_ms": 150, "result": "pass"}
+PASS rep4 av-rgba-producer-first producer=0 consumer=0 4.10s {"event": "verify", "tracks": "av", "format": "RGBA", "frames": 90, "expected_frames": 90, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.17, "lag_max_ms": 151.037, "latency_ms": 150, "result": "pass"}
+PASS rep4 av-nv12 producer=0 consumer=0 4.11s {"event": "verify", "tracks": "av", "format": "NV12", "frames": 90, "expected_frames": 90, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.166, "lag_max_ms": 151.627, "latency_ms": 150, "result": "pass"}
+PASS rep4 video-bgra producer=0 consumer=0 4.11s {"event": "verify", "tracks": "video", "format": "BGRA", "frames": 90, "expected_frames": 90, "samples": 0, "expected_samples": 0, "lag_min_ms": 150.133, "lag_max_ms": 150.914, "latency_ms": 150, "result": "pass"}
+PASS rep4 audio-only producer=0 consumer=0 4.07s {"event": "verify", "tracks": "audio", "format": "RGBA", "frames": 0, "expected_frames": 0, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.161, "lag_max_ms": 151.038, "latency_ms": 150, "result": "pass"}
+PASS rep4 negative-track-mismatch producer=1 consumer=1 0.71s 

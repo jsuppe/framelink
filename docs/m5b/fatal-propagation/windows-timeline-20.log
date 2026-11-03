@@ -1,0 +1,501 @@
+#< CLIXML
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <win-tree>\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> <win-tree>\build\Release\framelink_gst_session.dll
+  gstframelink.vcxproj -> <win-tree>\build\Release\gstframelink.dll
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <win-tree>\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> <win-tree>\build\Release\framelink_gst_session.dll
+  gstframelink.vcxproj -> <win-tree>\build\Release\gstframelink.dll
+  fl_gst_av_timeline.vcxproj -> <win-tree>\build\Release\fl_gst_av_timeline.exe
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <win-tree>\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> <win-tree>\build\Release\framelink_gst_session.dll
+  gstframelink.vcxproj -> <win-tree>\build\Release\gstframelink.dll
+  fl_gst_audio_source.vcxproj -> <win-tree>\build\Release\fl_gst_audio_source.exe
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <win-tree>\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> <win-tree>\build\Release\framelink_gst_session.dll
+  gstframelink.vcxproj -> <win-tree>\build\Release\gstframelink.dll
+  fl_gst_audio_sink.vcxproj -> <win-tree>\build\Release\fl_gst_audio_sink.exe
+UpdateCTestConfiguration  from :<win-tree>/build/DartConfiguration.tcl
+Test project <win-tree>/build
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 101
+    Start 101: gst_av_timeline
+
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
+101: Test timeout computed to be: 20
+101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
+101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=1 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=2 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=3 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=4 gap=0 empty=0 pause=0
+101: consumer death surfaced at giostreamsink6 after 80us: Could not write to resource. (../gst/gio/gstgiobasesink.c(361): gst_gio_base_sink_render (): /GstPipeline:pipeline11/GstFrameLinkAudioSink:framelinkaudiosink6/GstGioStreamSink:giostreamsink6:
+101: Could not write to stream: Error sending data: An existing connection was forcibly closed by the remote host.)
+101: CASE lead=0 negative=5 gap=0 empty=0 pause=0
+101: audio transport loss surfaced at flaudioreader7 after 59us: audio peer closed before GDP EOS
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=0
+101: CASE lead=1 negative=0 gap=1 empty=0 pause=0
+101: CASE lead=0 negative=0 gap=1 empty=1 pause=0
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=1
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=2
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=3
+101: coordinated public A/V: distinct TIME segments, one receiver mapping, exact +/-37ms offset, pixels/PCM/DTS/duration/generation passed
+    Test #101: gst_av_timeline ..................   Passed    3.56 sec
+    Start 101: gst_av_timeline
+
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
+101: Test timeout computed to be: 20
+101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
+101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=1 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=2 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=3 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=4 gap=0 empty=0 pause=0
+101: consumer death surfaced at giostreamsink6 after 117us: Could not write to resource. (../gst/gio/gstgiobasesink.c(361): gst_gio_base_sink_render (): /GstPipeline:pipeline11/GstFrameLinkAudioSink:framelinkaudiosink6/GstGioStreamSink:giostreamsink6:
+101: Could not write to stream: Error sending data: An existing connection was forcibly closed by the remote host.)
+101: CASE lead=0 negative=5 gap=0 empty=0 pause=0
+101: audio transport loss surfaced at flaudioreader7 after 63us: audio peer closed before GDP EOS
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=0
+101: CASE lead=1 negative=0 gap=1 empty=0 pause=0
+101: CASE lead=0 negative=0 gap=1 empty=1 pause=0
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=1
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=2
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=3
+101: coordinated public A/V: distinct TIME segments, one receiver mapping, exact +/-37ms offset, pixels/PCM/DTS/duration/generation passed
+    Test #101: gst_av_timeline ..................   Passed    3.56 sec
+    Start 101: gst_av_timeline
+
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
+101: Test timeout computed to be: 20
+101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
+101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=1 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=2 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=3 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=4 gap=0 empty=0 pause=0
+101: consumer death surfaced at giostreamsink6 after 86us: Could not write to resource. (../gst/gio/gstgiobasesink.c(361): gst_gio_base_sink_render (): /GstPipeline:pipeline11/GstFrameLinkAudioSink:framelinkaudiosink6/GstGioStreamSink:giostreamsink6:
+101: Could not write to stream: Error sending data: An existing connection was forcibly closed by the remote host.)
+101: CASE lead=0 negative=5 gap=0 empty=0 pause=0
+101: audio transport loss surfaced at flaudioreader7 after 60us: audio peer closed before GDP EOS
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=0
+101: CASE lead=1 negative=0 gap=1 empty=0 pause=0
+101: CASE lead=0 negative=0 gap=1 empty=1 pause=0
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=1
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=2
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=3
+101: coordinated public A/V: distinct TIME segments, one receiver mapping, exact +/-37ms offset, pixels/PCM/DTS/duration/generation passed
+    Test #101: gst_av_timeline ..................   Passed    3.56 sec
+    Start 101: gst_av_timeline
+
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
+101: Test timeout computed to be: 20
+101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
+101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=1 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=2 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=3 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=4 gap=0 empty=0 pause=0
+101: consumer death surfaced at giostreamsink6 after 84us: Could not write to resource. (../gst/gio/gstgiobasesink.c(361): gst_gio_base_sink_render (): /GstPipeline:pipeline11/GstFrameLinkAudioSink:framelinkaudiosink6/GstGioStreamSink:giostreamsink6:
+101: Could not write to stream: Error sending data: An existing connection was forcibly closed by the remote host.)
+101: CASE lead=0 negative=5 gap=0 empty=0 pause=0
+101: audio transport loss surfaced at flaudioreader7 after 56us: audio peer closed before GDP EOS
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=0
+101: CASE lead=1 negative=0 gap=1 empty=0 pause=0
+101: CASE lead=0 negative=0 gap=1 empty=1 pause=0
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=1
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=2
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=3
+101: coordinated public A/V: distinct TIME segments, one receiver mapping, exact +/-37ms offset, pixels/PCM/DTS/duration/generation passed
+    Test #101: gst_av_timeline ..................   Passed    3.56 sec
+    Start 101: gst_av_timeline
+
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
+101: Test timeout computed to be: 20
+101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
+101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=1 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=2 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=3 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=4 gap=0 empty=0 pause=0
+101: consumer death surfaced at giostreamsink6 after 113us: Could not write to resource. (../gst/gio/gstgiobasesink.c(361): gst_gio_base_sink_render (): /GstPipeline:pipeline11/GstFrameLinkAudioSink:framelinkaudiosink6/GstGioStreamSink:giostreamsink6:
+101: Could not write to stream: Error sending data: An existing connection was forcibly closed by the remote host.)
+101: CASE lead=0 negative=5 gap=0 empty=0 pause=0
+101: audio transport loss surfaced at flaudioreader7 after 79us: audio peer closed before GDP EOS
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=0
+101: CASE lead=1 negative=0 gap=1 empty=0 pause=0
+101: CASE lead=0 negative=0 gap=1 empty=1 pause=0
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=1
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=2
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=3
+101: coordinated public A/V: distinct TIME segments, one receiver mapping, exact +/-37ms offset, pixels/PCM/DTS/duration/generation passed
+    Test #101: gst_av_timeline ..................   Passed    3.55 sec
+    Start 101: gst_av_timeline
+
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
+101: Test timeout computed to be: 20
+101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
+101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=1 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=2 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=3 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=4 gap=0 empty=0 pause=0
+101: consumer death surfaced at giostreamsink6 after 86us: Could not write to resource. (../gst/gio/gstgiobasesink.c(361): gst_gio_base_sink_render (): /GstPipeline:pipeline11/GstFrameLinkAudioSink:framelinkaudiosink6/GstGioStreamSink:giostreamsink6:
+101: Could not write to stream: Error sending data: An existing connection was forcibly closed by the remote host.)
+101: CASE lead=0 negative=5 gap=0 empty=0 pause=0
+101: audio transport loss surfaced at flaudioreader7 after 60us: audio peer closed before GDP EOS
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=0
+101: CASE lead=1 negative=0 gap=1 empty=0 pause=0
+101: CASE lead=0 negative=0 gap=1 empty=1 pause=0
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=1
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=2
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=3
+101: coordinated public A/V: distinct TIME segments, one receiver mapping, exact +/-37ms offset, pixels/PCM/DTS/duration/generation passed
+    Test #101: gst_av_timeline ..................   Passed    3.55 sec
+    Start 101: gst_av_timeline
+
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
+101: Test timeout computed to be: 20
+101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
+101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=1 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=2 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=3 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=4 gap=0 empty=0 pause=0
+101: consumer death surfaced at giostreamsink6 after 86us: Could not write to resource. (../gst/gio/gstgiobasesink.c(361): gst_gio_base_sink_render (): /GstPipeline:pipeline11/GstFrameLinkAudioSink:framelinkaudiosink6/GstGioStreamSink:giostreamsink6:
+101: Could not write to stream: Error sending data: An existing connection was forcibly closed by the remote host.)
+101: CASE lead=0 negative=5 gap=0 empty=0 pause=0
+101: audio transport loss surfaced at flaudioreader7 after 64us: audio peer closed before GDP EOS
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=0
+101: CASE lead=1 negative=0 gap=1 empty=0 pause=0
+101: CASE lead=0 negative=0 gap=1 empty=1 pause=0
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=1
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=2
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=3
+101: coordinated public A/V: distinct TIME segments, one receiver mapping, exact +/-37ms offset, pixels/PCM/DTS/duration/generation passed
+    Test #101: gst_av_timeline ..................   Passed    3.55 sec
+    Start 101: gst_av_timeline
+
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
+101: Test timeout computed to be: 20
+101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
+101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=1 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=2 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=3 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=4 gap=0 empty=0 pause=0
+101: consumer death surfaced at giostreamsink6 after 19648us: Could not write to resource. (../gst/gio/gstgiobasesink.c(361): gst_gio_base_sink_render (): /GstPipeline:pipeline11/GstFrameLinkAudioSink:framelinkaudiosink6/GstGioStreamSink:giostreamsink6:
+101: Could not write to stream: Error sending data: An established connection was aborted by the software in your host machine.)
+101: CASE lead=0 negative=5 gap=0 empty=0 pause=0
+101: audio transport loss surfaced at flaudioreader7 after 56us: audio peer closed before GDP EOS
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=0
+101: CASE lead=1 negative=0 gap=1 empty=0 pause=0
+101: CASE lead=0 negative=0 gap=1 empty=1 pause=0
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=1
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=2
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=3
+101: coordinated public A/V: distinct TIME segments, one receiver mapping, exact +/-37ms offset, pixels/PCM/DTS/duration/generation passed
+    Test #101: gst_av_timeline ..................   Passed    3.58 sec
+    Start 101: gst_av_timeline
+
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
+101: Test timeout computed to be: 20
+101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
+101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=1 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=2 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=3 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=4 gap=0 empty=0 pause=0
+101: consumer death surfaced at giostreamsink6 after 128us: Could not write to resource. (../gst/gio/gstgiobasesink.c(361): gst_gio_base_sink_render (): /GstPipeline:pipeline11/GstFrameLinkAudioSink:framelinkaudiosink6/GstGioStreamSink:giostreamsink6:
+101: Could not write to stream: Error sending data: An existing connection was forcibly closed by the remote host.)
+101: CASE lead=0 negative=5 gap=0 empty=0 pause=0
+101: audio transport loss surfaced at flaudioreader7 after 70us: audio peer closed before GDP EOS
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=0
+101: CASE lead=1 negative=0 gap=1 empty=0 pause=0
+101: CASE lead=0 negative=0 gap=1 empty=1 pause=0
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=1
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=2
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=3
+101: coordinated public A/V: distinct TIME segments, one receiver mapping, exact +/-37ms offset, pixels/PCM/DTS/duration/generation passed
+    Test #101: gst_av_timeline ..................   Passed    3.55 sec
+    Start 101: gst_av_timeline
+
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
+101: Test timeout computed to be: 20
+101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
+101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=1 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=2 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=3 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=4 gap=0 empty=0 pause=0
+101: consumer death surfaced at giostreamsink6 after 80us: Could not write to resource. (../gst/gio/gstgiobasesink.c(361): gst_gio_base_sink_render (): /GstPipeline:pipeline11/GstFrameLinkAudioSink:framelinkaudiosink6/GstGioStreamSink:giostreamsink6:
+101: Could not write to stream: Error sending data: An existing connection was forcibly closed by the remote host.)
+101: CASE lead=0 negative=5 gap=0 empty=0 pause=0
+101: audio transport loss surfaced at flaudioreader7 after 58us: audio peer closed before GDP EOS
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=0
+101: CASE lead=1 negative=0 gap=1 empty=0 pause=0
+101: CASE lead=0 negative=0 gap=1 empty=1 pause=0
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=1
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=2
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=3
+101: coordinated public A/V: distinct TIME segments, one receiver mapping, exact +/-37ms offset, pixels/PCM/DTS/duration/generation passed
+    Test #101: gst_av_timeline ..................   Passed    3.55 sec
+    Start 101: gst_av_timeline
+
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
+101: Test timeout computed to be: 20
+101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
+101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=1 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=2 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=3 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=4 gap=0 empty=0 pause=0
+101: consumer death surfaced at giostreamsink6 after 105us: Could not write to resource. (../gst/gio/gstgiobasesink.c(361): gst_gio_base_sink_render (): /GstPipeline:pipeline11/GstFrameLinkAudioSink:framelinkaudiosink6/GstGioStreamSink:giostreamsink6:
+101: Could not write to stream: Error sending data: An existing connection was forcibly closed by the remote host.)
+101: CASE lead=0 negative=5 gap=0 empty=0 pause=0
+101: audio transport loss surfaced at flaudioreader7 after 57us: audio peer closed before GDP EOS
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=0
+101: CASE lead=1 negative=0 gap=1 empty=0 pause=0
+101: CASE lead=0 negative=0 gap=1 empty=1 pause=0
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=1
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=2
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=3
+101: coordinated public A/V: distinct TIME segments, one receiver mapping, exact +/-37ms offset, pixels/PCM/DTS/duration/generation passed
+    Test #101: gst_av_timeline ..................   Passed    3.55 sec
+    Start 101: gst_av_timeline
+
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
+101: Test timeout computed to be: 20
+101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
+101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=1 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=2 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=3 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=4 gap=0 empty=0 pause=0
+101: consumer death surfaced at giostreamsink6 after 81us: Could not write to resource. (../gst/gio/gstgiobasesink.c(361): gst_gio_base_sink_render (): /GstPipeline:pipeline11/GstFrameLinkAudioSink:framelinkaudiosink6/GstGioStreamSink:giostreamsink6:
+101: Could not write to stream: Error sending data: An existing connection was forcibly closed by the remote host.)
+101: CASE lead=0 negative=5 gap=0 empty=0 pause=0
+101: audio transport loss surfaced at flaudioreader7 after 73us: audio peer closed before GDP EOS
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=0
+101: CASE lead=1 negative=0 gap=1 empty=0 pause=0
+101: CASE lead=0 negative=0 gap=1 empty=1 pause=0
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=1
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=2
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=3
+101: coordinated public A/V: distinct TIME segments, one receiver mapping, exact +/-37ms offset, pixels/PCM/DTS/duration/generation passed
+    Test #101: gst_av_timeline ..................   Passed    3.55 sec
+    Start 101: gst_av_timeline
+
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
+101: Test timeout computed to be: 20
+101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
+101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=1 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=2 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=3 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=4 gap=0 empty=0 pause=0
+101: consumer death surfaced at giostreamsink6 after 83us: Could not write to resource. (../gst/gio/gstgiobasesink.c(361): gst_gio_base_sink_render (): /GstPipeline:pipeline11/GstFrameLinkAudioSink:framelinkaudiosink6/GstGioStreamSink:giostreamsink6:
+101: Could not write to stream: Error sending data: An existing connection was forcibly closed by the remote host.)
+101: CASE lead=0 negative=5 gap=0 empty=0 pause=0
+101: audio transport loss surfaced at flaudioreader7 after 67us: audio peer closed before GDP EOS
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=0
+101: CASE lead=1 negative=0 gap=1 empty=0 pause=0
+101: CASE lead=0 negative=0 gap=1 empty=1 pause=0
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=1
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=2
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=3
+101: coordinated public A/V: distinct TIME segments, one receiver mapping, exact +/-37ms offset, pixels/PCM/DTS/duration/generation passed
+    Test #101: gst_av_timeline ..................   Passed    3.55 sec
+    Start 101: gst_av_timeline
+
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
+101: Test timeout computed to be: 20
+101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
+101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=1 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=2 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=3 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=4 gap=0 empty=0 pause=0
+101: consumer death surfaced at giostreamsink6 after 109us: Could not write to resource. (../gst/gio/gstgiobasesink.c(361): gst_gio_base_sink_render (): /GstPipeline:pipeline11/GstFrameLinkAudioSink:framelinkaudiosink6/GstGioStreamSink:giostreamsink6:
+101: Could not write to stream: Error sending data: An existing connection was forcibly closed by the remote host.)
+101: CASE lead=0 negative=5 gap=0 empty=0 pause=0
+101: audio transport loss surfaced at flaudioreader7 after 62us: audio peer closed before GDP EOS
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=0
+101: CASE lead=1 negative=0 gap=1 empty=0 pause=0
+101: CASE lead=0 negative=0 gap=1 empty=1 pause=0
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=1
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=2
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=3
+101: coordinated public A/V: distinct TIME segments, one receiver mapping, exact +/-37ms offset, pixels/PCM/DTS/duration/generation passed
+    Test #101: gst_av_timeline ..................   Passed    3.55 sec
+    Start 101: gst_av_timeline
+
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
+101: Test timeout computed to be: 20
+101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
+101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=1 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=2 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=3 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=4 gap=0 empty=0 pause=0
+101: consumer death surfaced at giostreamsink6 after 88us: Could not write to resource. (../gst/gio/gstgiobasesink.c(361): gst_gio_base_sink_render (): /GstPipeline:pipeline11/GstFrameLinkAudioSink:framelinkaudiosink6/GstGioStreamSink:giostreamsink6:
+101: Could not write to stream: Error sending data: An existing connection was forcibly closed by the remote host.)
+101: CASE lead=0 negative=5 gap=0 empty=0 pause=0
+101: audio transport loss surfaced at flaudioreader7 after 61us: audio peer closed before GDP EOS
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=0
+101: CASE lead=1 negative=0 gap=1 empty=0 pause=0
+101: CASE lead=0 negative=0 gap=1 empty=1 pause=0
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=1
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=2
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=3
+101: coordinated public A/V: distinct TIME segments, one receiver mapping, exact +/-37ms offset, pixels/PCM/DTS/duration/generation passed
+    Test #101: gst_av_timeline ..................   Passed    3.53 sec
+    Start 101: gst_av_timeline
+
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
+101: Test timeout computed to be: 20
+101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
+101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=1 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=2 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=3 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=4 gap=0 empty=0 pause=0
+101: consumer death surfaced at giostreamsink6 after 88us: Could not write to resource. (../gst/gio/gstgiobasesink.c(361): gst_gio_base_sink_render (): /GstPipeline:pipeline11/GstFrameLinkAudioSink:framelinkaudiosink6/GstGioStreamSink:giostreamsink6:
+101: Could not write to stream: Error sending data: An established connection was aborted by the software in your host machine.)
+101: CASE lead=0 negative=5 gap=0 empty=0 pause=0
+101: audio transport loss surfaced at flaudioreader7 after 63us: audio peer closed before GDP EOS
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=0
+101: CASE lead=1 negative=0 gap=1 empty=0 pause=0
+101: CASE lead=0 negative=0 gap=1 empty=1 pause=0
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=1
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=2
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=3
+101: coordinated public A/V: distinct TIME segments, one receiver mapping, exact +/-37ms offset, pixels/PCM/DTS/duration/generation passed
+    Test #101: gst_av_timeline ..................   Passed    3.55 sec
+    Start 101: gst_av_timeline
+
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
+101: Test timeout computed to be: 20
+101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
+101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=1 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=2 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=3 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=4 gap=0 empty=0 pause=0
+101: consumer death surfaced at giostreamsink6 after 91us: Could not write to resource. (../gst/gio/gstgiobasesink.c(361): gst_gio_base_sink_render (): /GstPipeline:pipeline11/GstFrameLinkAudioSink:framelinkaudiosink6/GstGioStreamSink:giostreamsink6:
+101: Could not write to stream: Error sending data: An existing connection was forcibly closed by the remote host.)
+101: CASE lead=0 negative=5 gap=0 empty=0 pause=0
+101: audio transport loss surfaced at flaudioreader7 after 65us: audio peer closed before GDP EOS
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=0
+101: CASE lead=1 negative=0 gap=1 empty=0 pause=0
+101: CASE lead=0 negative=0 gap=1 empty=1 pause=0
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=1
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=2
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=3
+101: coordinated public A/V: distinct TIME segments, one receiver mapping, exact +/-37ms offset, pixels/PCM/DTS/duration/generation passed
+    Test #101: gst_av_timeline ..................   Passed    3.56 sec
+    Start 101: gst_av_timeline
+
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
+101: Test timeout computed to be: 20
+101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
+101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=1 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=2 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=3 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=4 gap=0 empty=0 pause=0
+101: consumer death surfaced at giostreamsink6 after 101us: Could not write to resource. (../gst/gio/gstgiobasesink.c(361): gst_gio_base_sink_render (): /GstPipeline:pipeline11/GstFrameLinkAudioSink:framelinkaudiosink6/GstGioStreamSink:giostreamsink6:
+101: Could not write to stream: Error sending data: An existing connection was forcibly closed by the remote host.)
+101: CASE lead=0 negative=5 gap=0 empty=0 pause=0
+101: audio transport loss surfaced at flaudioreader7 after 72us: audio peer closed before GDP EOS
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=0
+101: CASE lead=1 negative=0 gap=1 empty=0 pause=0
+101: CASE lead=0 negative=0 gap=1 empty=1 pause=0
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=1
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=2
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=3
+101: coordinated public A/V: distinct TIME segments, one receiver mapping, exact +/-37ms offset, pixels/PCM/DTS/duration/generation passed
+    Test #101: gst_av_timeline ..................   Passed    3.53 sec
+    Start 101: gst_av_timeline
+
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
+101: Test timeout computed to be: 20
+101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
+101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=1 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=2 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=3 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=4 gap=0 empty=0 pause=0
+101: consumer death surfaced at giostreamsink6 after 93us: Could not write to resource. (../gst/gio/gstgiobasesink.c(361): gst_gio_base_sink_render (): /GstPipeline:pipeline11/GstFrameLinkAudioSink:framelinkaudiosink6/GstGioStreamSink:giostreamsink6:
+101: Could not write to stream: Error sending data: An existing connection was forcibly closed by the remote host.)
+101: CASE lead=0 negative=5 gap=0 empty=0 pause=0
+101: audio transport loss surfaced at flaudioreader7 after 73us: audio peer closed before GDP EOS
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=0
+101: CASE lead=1 negative=0 gap=1 empty=0 pause=0
+101: CASE lead=0 negative=0 gap=1 empty=1 pause=0
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=1
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=2
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=3
+101: coordinated public A/V: distinct TIME segments, one receiver mapping, exact +/-37ms offset, pixels/PCM/DTS/duration/generation passed
+    Test #101: gst_av_timeline ..................   Passed    3.53 sec
+    Start 101: gst_av_timeline
+
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
+101: Test timeout computed to be: 20
+101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
+101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=1 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=2 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=3 gap=0 empty=0 pause=0
+101: CASE lead=0 negative=4 gap=0 empty=0 pause=0
+101: consumer death surfaced at giostreamsink6 after 107us: Could not write to resource. (../gst/gio/gstgiobasesink.c(361): gst_gio_base_sink_render (): /GstPipeline:pipeline11/GstFrameLinkAudioSink:framelinkaudiosink6/GstGioStreamSink:giostreamsink6:
+101: Could not write to stream: Error sending data: An existing connection was forcibly closed by the remote host.)
+101: CASE lead=0 negative=5 gap=0 empty=0 pause=0
+101: audio transport loss surfaced at flaudioreader7 after 62us: audio peer closed before GDP EOS
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=0
+101: CASE lead=1 negative=0 gap=1 empty=0 pause=0
+101: CASE lead=0 negative=0 gap=1 empty=1 pause=0
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=1
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=2
+101: CASE lead=0 negative=0 gap=1 empty=0 pause=3
+101: coordinated public A/V: distinct TIME segments, one receiver mapping, exact +/-37ms offset, pixels/PCM/DTS/duration/generation passed
+1/1 Test #101: gst_av_timeline ..................   Passed    3.61 sec
+
+The following tests passed:
+	gst_av_timeline
+
+100% tests passed, 0 tests failed out of 1
+
+Total Test time (real) =  71.07 sec
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04"><Obj S="progress" RefId="0"><TN RefId="0"><T>System.Management.Automation.PSCustomObject</T><T>System.Object</T></TN><MS><I64 N="SourceId">1</I64><PR N="Record"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj></Objs>

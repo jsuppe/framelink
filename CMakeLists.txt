@@ -93,6 +93,9 @@ if(FRAMELINK_BUILD_TESTS)
     add_executable(fl_session_contract test/fl_session_contract.cpp)
     target_link_libraries(fl_session_contract PRIVATE framelink)
     add_test(NAME session_contract COMMAND fl_session_contract)
+    add_executable(fl_session_optional_tracks test/fl_session_optional_tracks.cpp)
+    target_link_libraries(fl_session_optional_tracks PRIVATE framelink)
+    add_test(NAME session_optional_tracks COMMAND fl_session_optional_tracks)
     enable_language(C)
     add_executable(fl_session_c_api test/fl_session_c_api.c)
     set_target_properties(fl_session_c_api PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED ON)
@@ -510,6 +513,7 @@ if(ANDROID AND FRAMELINK_BUILD_GST AND FRAMELINK_GST_ANDROID_ROOT)
     set(_fl_saved_pc_path "$ENV{PKG_CONFIG_PATH}")
     set(ENV{PKG_CONFIG_LIBDIR} "${FRAMELINK_GST_ANDROID_ROOT}/lib/pkgconfig")
     set(ENV{PKG_CONFIG_PATH} "")
+    pkg_check_modules(FL_ANDROID_SESSION_GIO REQUIRED gio-2.0)
     pkg_check_modules(FL_ANDROID_GST REQUIRED gstreamer-1.0 gstreamer-base-1.0 gstreamer-video-1.0 gstreamer-app-1.0)
     if(FRAMELINK_BUILD_SAMPLES)
         pkg_check_modules(FL_ANDROID_AV REQUIRED gio-2.0 gstreamer-net-1.0)
@@ -595,11 +599,11 @@ endif()
 if(FRAMELINK_BUILD_SAMPLES AND FL_GST_FOUND AND NOT ANDROID)
     foreach(_role producer consumer playback)
         if(_role STREQUAL "playback")
-            add_library(framelink_av_playback STATIC samples/av_apps.cpp samples/av_rendezvous.cpp samples/av_auth.cpp samples/av_memory_agreement.cpp)
+            add_library(framelink_av_playback STATIC samples/av_apps.cpp runtime/av_rendezvous.cpp runtime/av_auth.cpp samples/av_memory_agreement.cpp)
             target_compile_definitions(framelink_av_playback PRIVATE AV_PLAYBACK_LIBRARY=1)
             target_include_directories(framelink_av_playback PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/samples)
         else()
-            add_executable(framelink_av_${_role} samples/av_apps.cpp samples/av_rendezvous.cpp samples/av_auth.cpp samples/av_memory_agreement.cpp)
+            add_executable(framelink_av_${_role} samples/av_apps.cpp runtime/av_rendezvous.cpp runtime/av_auth.cpp samples/av_memory_agreement.cpp)
         endif()
         target_link_libraries(framelink_av_${_role} PUBLIC framelink)
         if(WIN32)
@@ -618,9 +622,9 @@ endif()
 
 # Pure local control-plane gates; no GPU device or media sink required.
 if(FRAMELINK_BUILD_TESTS AND TARGET framelink_av_producer)
-    add_executable(fl_av_rendezvous test/test_av_rendezvous.cpp samples/av_rendezvous.cpp)
+    add_executable(fl_av_rendezvous test/test_av_rendezvous.cpp runtime/av_rendezvous.cpp)
     target_include_directories(fl_av_rendezvous PRIVATE samples)
-    add_executable(fl_av_auth test/test_av_auth.cpp samples/av_auth.cpp samples/av_rendezvous.cpp)
+    add_executable(fl_av_auth test/test_av_auth.cpp runtime/av_auth.cpp runtime/av_rendezvous.cpp)
     target_include_directories(fl_av_auth PRIVATE samples)
     if(WIN32)
         target_link_libraries(fl_av_rendezvous PRIVATE advapi32 bcrypt)
@@ -631,7 +635,7 @@ if(FRAMELINK_BUILD_TESTS AND TARGET framelink_av_producer)
         target_link_libraries(fl_av_auth PRIVATE PkgConfig::FL_AV_IO)
     endif()
     if(NOT WIN32)
-        add_executable(fl_av_connected_fd test/test_av_connected_fd.cpp samples/av_auth.cpp samples/av_rendezvous.cpp)
+        add_executable(fl_av_connected_fd test/test_av_connected_fd.cpp runtime/av_auth.cpp runtime/av_rendezvous.cpp)
         target_include_directories(fl_av_connected_fd PRIVATE samples include)
         target_link_libraries(fl_av_connected_fd PRIVATE PkgConfig::FL_AV_IO)
         add_test(NAME av_connected_fd COMMAND fl_av_connected_fd)
@@ -805,7 +809,7 @@ endif()
 
 # Explicit opt-in memory agreement is distinct from the legacy A/V session wire.
 if(FRAMELINK_BUILD_TESTS AND (TARGET framelink_av_playback OR TARGET fl_gst_native_source_android))
-    add_executable(fl_av_memory_agreement test/test_av_memory_agreement.cpp samples/av_memory_agreement.cpp samples/av_auth.cpp samples/av_rendezvous.cpp)
+    add_executable(fl_av_memory_agreement test/test_av_memory_agreement.cpp samples/av_memory_agreement.cpp runtime/av_auth.cpp runtime/av_rendezvous.cpp)
     target_include_directories(fl_av_memory_agreement PRIVATE samples)
     if(ANDROID)
         target_link_libraries(fl_av_memory_agreement PRIVATE $<TARGET_PROPERTY:framelink_av_session,LINK_LIBRARIES>)
@@ -896,7 +900,7 @@ if(FRAMELINK_BUILD_TESTS)
 endif()
 
 if(TARGET fl_av_memory_agreement)
-    add_executable(fl_av_memory_adversarial test/test_av_memory_adversarial.cpp samples/av_memory_agreement.cpp samples/av_auth.cpp samples/av_rendezvous.cpp)
+    add_executable(fl_av_memory_adversarial test/test_av_memory_adversarial.cpp samples/av_memory_agreement.cpp runtime/av_auth.cpp runtime/av_rendezvous.cpp)
     target_include_directories(fl_av_memory_adversarial PRIVATE samples)
     if(ANDROID)
         target_include_directories(fl_av_memory_adversarial PRIVATE $<TARGET_PROPERTY:framelink_av_session,INCLUDE_DIRECTORIES>)
@@ -966,3 +970,284 @@ if(FRAMELINK_BUILD_TESTS AND Python3_Interpreter_FOUND AND NOT ANDROID)
   add_test(NAME boundary_av_analyzer COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/test_boundary_av_analyzer.py)
   set_tests_properties(boundary_av_analyzer PROPERTIES TIMEOUT 15)
 endif()
+
+# Reusable typed session context: public elements must not depend on sample apps.
+if(TARGET gstframelink)
+    if(ANDROID)
+        add_library(framelink_gst_session STATIC gst/framelink_session_context.cpp gst/framelink_session_transport.cpp runtime/av_auth.cpp runtime/av_rendezvous.cpp)
+        target_compile_definitions(framelink_gst_session PUBLIC FL_GST_SESSION_STATIC)
+        target_include_directories(framelink_gst_session PUBLIC ${FL_ANDROID_GST_INCLUDE_DIRS})
+        target_compile_options(framelink_gst_session PRIVATE ${FL_ANDROID_GST_CFLAGS_OTHER})
+        target_include_directories(framelink_gst_session PUBLIC ${FL_ANDROID_SESSION_GIO_INCLUDE_DIRS})
+        target_link_libraries(framelink_gst_session PUBLIC framelink ${FL_ANDROID_GST_STATIC_LDFLAGS} ${FL_ANDROID_SESSION_GIO_STATIC_LDFLAGS})
+    else()
+        add_library(framelink_gst_session SHARED gst/framelink_session_context.cpp gst/framelink_session_transport.cpp runtime/av_auth.cpp runtime/av_rendezvous.cpp)
+        target_link_libraries(framelink_gst_session PUBLIC framelink)
+        if(WIN32)
+            target_include_directories(framelink_gst_session PUBLIC
+                "${FL_GST_ROOT}/include/gstreamer-1.0" "${FL_GST_ROOT}/include/glib-2.0"
+                "${FL_GST_ROOT}/lib/glib-2.0/include")
+            target_link_directories(framelink_gst_session PUBLIC "${FL_GST_ROOT}/lib")
+            target_link_libraries(framelink_gst_session PUBLIC gstreamer-1.0.lib gobject-2.0.lib glib-2.0.lib gio-2.0.lib advapi32 bcrypt)
+        else()
+            pkg_check_modules(FL_SESSION_GIO REQUIRED IMPORTED_TARGET gio-2.0)
+            target_link_libraries(framelink_gst_session PUBLIC PkgConfig::FL_GST PkgConfig::FL_SESSION_GIO)
+        endif()
+    endif()
+    target_include_directories(framelink_gst_session PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/gst>)
+    if(FRAMELINK_BUILD_TESTS)
+        add_executable(fl_gst_session_transport test/fl_gst_session_transport.cpp runtime/av_auth.cpp runtime/av_rendezvous.cpp)
+        target_link_libraries(fl_gst_session_transport PRIVATE framelink_gst_session)
+        add_test(NAME gst_session_transport COMMAND fl_gst_session_transport)
+        set_tests_properties(gst_session_transport PROPERTIES TIMEOUT 15)
+        add_executable(fl_gst_session_context test/fl_gst_session_context.cpp)
+        target_link_libraries(fl_gst_session_context PRIVATE framelink_gst_session)
+        add_test(NAME gst_session_context COMMAND fl_gst_session_context)
+        set_tests_properties(gst_session_context PROPERTIES TIMEOUT 10)
+    endif()
+endif()
+
+if(TARGET framelink_gst_session)
+    target_sources(gstframelink PRIVATE gst/gstframelinkaudio.cpp gst/gstframelinkaudiosrc.cpp gst/fl_gst_audio_startup.cpp gst/gstframelinkavsink.cpp gst/gstframelinkavsrc.cpp)
+    target_link_libraries(gstframelink PRIVATE framelink_gst_session)
+endif()
+if(FRAMELINK_BUILD_TESTS AND TARGET framelink_gst_session)
+    add_executable(fl_gst_audio_sink test/fl_gst_audio_sink.cpp)
+    target_link_libraries(fl_gst_audio_sink PRIVATE framelink_gst_session)
+    if(ANDROID)
+        target_link_libraries(fl_gst_audio_sink PRIVATE gstframelink
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstapp.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstcoreelements.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstgdp.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstgio.a"
+            ${FL_ANDROID_SESSION_GIO_STATIC_LDFLAGS} ${FL_ANDROID_GST_STATIC_LDFLAGS})
+    elseif(WIN32)
+        target_link_libraries(fl_gst_audio_sink PRIVATE gstapp-1.0.lib)
+    else()
+        target_link_libraries(fl_gst_audio_sink PRIVATE PkgConfig::FL_GST_APP)
+    endif()
+    add_dependencies(fl_gst_audio_sink gstframelink)
+    add_test(NAME gst_audio_sink COMMAND fl_gst_audio_sink $<TARGET_FILE:gstframelink>)
+    set_tests_properties(gst_audio_sink PROPERTIES TIMEOUT 20)
+endif()
+if(FRAMELINK_BUILD_TESTS AND TARGET framelink_gst_session)
+    add_executable(fl_gst_audio_source test/fl_gst_audio_source.cpp)
+    target_link_libraries(fl_gst_audio_source PRIVATE framelink_gst_session)
+    if(ANDROID)
+        target_link_libraries(fl_gst_audio_source PRIVATE gstframelink
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstapp.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstcoreelements.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstgdp.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstgio.a"
+            ${FL_ANDROID_SESSION_GIO_STATIC_LDFLAGS} ${FL_ANDROID_GST_STATIC_LDFLAGS})
+    elseif(WIN32)
+        target_link_libraries(fl_gst_audio_source PRIVATE gstapp-1.0.lib)
+    else()
+        target_link_libraries(fl_gst_audio_source PRIVATE PkgConfig::FL_GST_APP)
+    endif()
+    add_dependencies(fl_gst_audio_source gstframelink)
+    add_test(NAME gst_audio_source COMMAND fl_gst_audio_source $<TARGET_FILE:gstframelink>)
+    set_tests_properties(gst_audio_source PROPERTIES TIMEOUT 20)
+endif()
+if(FRAMELINK_BUILD_TESTS AND TARGET framelink_gst_session)
+    add_executable(fl_gst_av_timeline test/fl_gst_av_timeline.cpp)
+    target_link_libraries(fl_gst_av_timeline PRIVATE framelink_gst_session)
+    if(ANDROID)
+        target_link_libraries(fl_gst_av_timeline PRIVATE gstframelink
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstapp.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstcoreelements.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstgdp.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstgio.a"
+            ${FL_ANDROID_SESSION_GIO_STATIC_LDFLAGS} ${FL_ANDROID_GST_STATIC_LDFLAGS})
+    elseif(WIN32)
+        target_link_libraries(fl_gst_av_timeline PRIVATE gstapp-1.0.lib)
+    else()
+        target_link_libraries(fl_gst_av_timeline PRIVATE PkgConfig::FL_GST_APP)
+    endif()
+    add_dependencies(fl_gst_av_timeline gstframelink)
+    add_test(NAME gst_av_timeline COMMAND fl_gst_av_timeline $<TARGET_FILE:gstframelink>)
+    add_executable(fl_gst_av_validation test/fl_gst_av_validation.cpp)
+    target_link_libraries(fl_gst_av_validation PRIVATE framelink_gst_session)
+    if(ANDROID)
+        target_link_libraries(fl_gst_av_validation PRIVATE gstframelink
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstapp.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstcoreelements.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstgdp.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstgio.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/libgstcheck-1.0.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/libgstvideo-1.0.a"
+            ${FL_ANDROID_SESSION_GIO_STATIC_LDFLAGS} ${FL_ANDROID_GST_STATIC_LDFLAGS})
+    elseif(WIN32)
+        target_link_libraries(fl_gst_av_validation PRIVATE gstapp-1.0.lib gstcheck-1.0.lib gstvideo-1.0.lib)
+    else()
+        pkg_check_modules(FL_GST_VALIDATION_CHECK REQUIRED IMPORTED_TARGET gstreamer-check-1.0 gstreamer-video-1.0)
+        target_link_libraries(fl_gst_av_validation PRIVATE PkgConfig::FL_GST_APP PkgConfig::FL_GST_VALIDATION_CHECK)
+    endif()
+    add_dependencies(fl_gst_av_validation gstframelink)
+    add_test(NAME gst_av_validation COMMAND fl_gst_av_validation $<TARGET_FILE:gstframelink>)
+    set_tests_properties(gst_av_validation PROPERTIES TIMEOUT 90)
+    add_executable(fl_gst_av_bin test/fl_gst_av_bin.cpp)
+    target_link_libraries(fl_gst_av_bin PRIVATE framelink_gst_session)
+    if(ANDROID)
+        target_link_libraries(fl_gst_av_bin PRIVATE gstframelink
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstapp.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstcoreelements.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstgdp.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstgio.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstvideotestsrc.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstaudiotestsrc.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/libgstaudio-1.0.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/libgstcheck-1.0.a"
+            ${FL_ANDROID_SESSION_GIO_STATIC_LDFLAGS} ${FL_ANDROID_GST_STATIC_LDFLAGS})
+    elseif(WIN32)
+        target_link_libraries(fl_gst_av_bin PRIVATE gstapp-1.0.lib gstcheck-1.0.lib)
+    else()
+        target_link_libraries(fl_gst_av_bin PRIVATE PkgConfig::FL_GST_APP PkgConfig::FL_GST_VALIDATION_CHECK)
+    endif()
+    add_dependencies(fl_gst_av_bin gstframelink)
+    add_test(NAME gst_av_bin COMMAND fl_gst_av_bin $<TARGET_FILE:gstframelink>)
+    set_tests_properties(gst_av_bin PROPERTIES TIMEOUT 120)
+    add_executable(fl_gst_av_src_bin test/fl_gst_av_src_bin.cpp)
+    target_link_libraries(fl_gst_av_src_bin PRIVATE framelink_gst_session)
+    if(ANDROID)
+        target_link_libraries(fl_gst_av_src_bin PRIVATE gstframelink
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstapp.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstcoreelements.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstgdp.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstgio.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstvideotestsrc.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstaudiotestsrc.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/libgstaudio-1.0.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/libgstcheck-1.0.a"
+            ${FL_ANDROID_SESSION_GIO_STATIC_LDFLAGS} ${FL_ANDROID_GST_STATIC_LDFLAGS})
+    elseif(WIN32)
+        target_link_libraries(fl_gst_av_src_bin PRIVATE gstapp-1.0.lib gstcheck-1.0.lib)
+    else()
+        target_link_libraries(fl_gst_av_src_bin PRIVATE PkgConfig::FL_GST_APP PkgConfig::FL_GST_VALIDATION_CHECK)
+    endif()
+    add_dependencies(fl_gst_av_src_bin gstframelink)
+    add_test(NAME gst_av_src_bin COMMAND fl_gst_av_src_bin $<TARGET_FILE:gstframelink>)
+    set_tests_properties(gst_av_src_bin PROPERTIES TIMEOUT 150)
+    add_executable(fl_gst_av_parity test/fl_gst_av_parity.cpp)
+    target_link_libraries(fl_gst_av_parity PRIVATE framelink_gst_session)
+    if(ANDROID)
+        target_link_libraries(fl_gst_av_parity PRIVATE gstframelink
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstapp.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstcoreelements.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstgdp.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstgio.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstvideotestsrc.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstaudiotestsrc.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/libgstaudio-1.0.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/libgstcheck-1.0.a"
+            ${FL_ANDROID_SESSION_GIO_STATIC_LDFLAGS} ${FL_ANDROID_GST_STATIC_LDFLAGS})
+    elseif(WIN32)
+        target_link_libraries(fl_gst_av_parity PRIVATE gstapp-1.0.lib gstcheck-1.0.lib)
+    else()
+        target_link_libraries(fl_gst_av_parity PRIVATE PkgConfig::FL_GST_APP PkgConfig::FL_GST_VALIDATION_CHECK)
+    endif()
+    add_dependencies(fl_gst_av_parity gstframelink)
+    add_test(NAME gst_av_parity COMMAND fl_gst_av_parity $<TARGET_FILE:gstframelink>)
+    set_tests_properties(gst_av_parity PROPERTIES TIMEOUT 300)
+    add_executable(fl_gst_av_qualification test/fl_gst_av_qualification.cpp)
+    target_link_libraries(fl_gst_av_qualification PRIVATE framelink_gst_session)
+    if(ANDROID)
+        target_link_libraries(fl_gst_av_qualification PRIVATE gstframelink
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstapp.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstcoreelements.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstgdp.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstgio.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstvideotestsrc.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstaudiotestsrc.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/libgstaudio-1.0.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/libgstcheck-1.0.a"
+            ${FL_ANDROID_SESSION_GIO_STATIC_LDFLAGS} ${FL_ANDROID_GST_STATIC_LDFLAGS})
+    elseif(WIN32)
+        target_link_libraries(fl_gst_av_qualification PRIVATE gstapp-1.0.lib gstcheck-1.0.lib)
+    else()
+        target_link_libraries(fl_gst_av_qualification PRIVATE PkgConfig::FL_GST_APP PkgConfig::FL_GST_VALIDATION_CHECK)
+    endif()
+    add_dependencies(fl_gst_av_qualification gstframelink)
+    add_test(NAME gst_av_qualification COMMAND fl_gst_av_qualification $<TARGET_FILE:gstframelink>)
+    set_tests_properties(gst_av_qualification PROPERTIES TIMEOUT 300)
+    add_executable(fl_gst_local_av test/fl_gst_local_av.cpp)
+    target_link_libraries(fl_gst_local_av PRIVATE framelink_gst_session)
+    if(ANDROID)
+        target_link_libraries(fl_gst_local_av PRIVATE gstframelink
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstapp.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstcoreelements.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstgdp.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstgio.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstvideotestsrc.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstaudiotestsrc.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/libgstaudio-1.0.a"
+            ${FL_ANDROID_SESSION_GIO_STATIC_LDFLAGS} ${FL_ANDROID_GST_STATIC_LDFLAGS})
+    elseif(WIN32)
+        target_link_libraries(fl_gst_local_av PRIVATE gstapp-1.0.lib)
+    else()
+        target_link_libraries(fl_gst_local_av PRIVATE PkgConfig::FL_GST_APP)
+    endif()
+    add_dependencies(fl_gst_local_av gstframelink)
+    add_test(NAME gst_local_av COMMAND fl_gst_local_av $<TARGET_FILE:gstframelink>)
+    set_tests_properties(gst_local_av PROPERTIES TIMEOUT 40)
+    add_executable(framelink_gst_av samples/gst_av_example.cpp)
+    target_link_libraries(framelink_gst_av PRIVATE framelink_gst_session)
+    if(ANDROID)
+        target_link_libraries(framelink_gst_av PRIVATE gstframelink
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstapp.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstcoreelements.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstgdp.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstgio.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstvideotestsrc.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstaudiotestsrc.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/libgstaudio-1.0.a"
+            ${FL_ANDROID_SESSION_GIO_STATIC_LDFLAGS} ${FL_ANDROID_GST_STATIC_LDFLAGS})
+    elseif(WIN32)
+        target_link_libraries(framelink_gst_av PRIVATE gstapp-1.0.lib)
+    else()
+        target_link_libraries(framelink_gst_av PRIVATE PkgConfig::FL_GST_APP)
+    endif()
+    add_dependencies(framelink_gst_av gstframelink)
+    if(NOT ANDROID AND Python3_Interpreter_FOUND)
+        add_test(NAME m5b_gst_av_example COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/m5b_gst_av_example.py
+            --example $<TARGET_FILE:framelink_gst_av> --plugin $<TARGET_FILE:gstframelink>)
+        set_tests_properties(m5b_gst_av_example PROPERTIES TIMEOUT 300)
+    endif()
+    set_tests_properties(gst_av_timeline PROPERTIES TIMEOUT 20)
+endif()
+
+if(FRAMELINK_BUILD_TESTS AND TARGET framelink_gst_session)
+    add_executable(fl_gst_local_audio test/fl_gst_local_audio.cpp)
+    target_link_libraries(fl_gst_local_audio PRIVATE framelink_gst_session)
+    add_test(NAME gst_local_audio COMMAND fl_gst_local_audio)
+    set_tests_properties(gst_local_audio PROPERTIES TIMEOUT 10)
+endif()
+
+if(FRAMELINK_BUILD_TESTS AND TARGET framelink_gst_session)
+    add_executable(fl_gst_event_channel test/fl_gst_event_channel.cpp)
+    target_link_libraries(fl_gst_event_channel PRIVATE framelink_gst_session)
+    add_test(NAME gst_event_channel COMMAND fl_gst_event_channel)
+    set_tests_properties(gst_event_channel PROPERTIES TIMEOUT 15)
+endif()
+
+# M5b task8 validation matrix suites (tools/m5b_validation_matrix.py runs them
+# with repeats). Labels are appended so existing gpu/integration labels remain.
+set(FL_M5B_AV_TESTS gst_session_transport gst_session_context gst_audio_sink gst_audio_source
+    gst_event_channel gst_local_audio gst_av_timeline gst_av_validation gst_local_av gst_av_bin gst_av_src_bin gst_av_parity gst_av_qualification m5b_gst_av_example)
+# Video-only element regression: framelinksink/src behaviour that predates M5b
+# and must remain unchanged with no session context.
+set(FL_GST_VIDEO_REGRESSION_TESTS gst_native_producer_linux gst_native_source gst_native_producer_win
+    gst_native_source_win gst_native_source_win_copy_negative gst_nv12_roundtrip gst_rgb10a2_roundtrip
+    gst_timestamp_contract gst_pool_policy gst_sink_stats gst_preconnect_slots gst_policy_generation
+    m5a_transport_relay m5a_transport_relay_audio_leads m5a_transport_relay_sync_negative)
+foreach(_t IN LISTS FL_M5B_AV_TESTS)
+    if(TEST ${_t})
+        set_property(TEST ${_t} APPEND PROPERTY LABELS m5b_av)
+    endif()
+endforeach()
+foreach(_t IN LISTS FL_GST_VIDEO_REGRESSION_TESTS)
+    if(TEST ${_t})
+        set_property(TEST ${_t} APPEND PROPERTY LABELS gst_video_regression)
+    endif()
+endforeach()

@@ -1,0 +1,24 @@
+PASS m5b_av gst_session_transport 10/10 12.57s
+PASS m5b_av gst_session_context 10/10 3.57s
+PASS m5b_av gst_audio_sink 10/10 28.56s
+PASS m5b_av gst_audio_source 10/10 25.61s
+PASS m5b_av gst_event_channel 10/10 27.96s
+PASS m5b_av gst_local_audio 10/10 17.93s
+PASS m5b_av gst_av_timeline 10/10 30.35s
+PASS m5b_av gst_av_validation 10/10 149.1s
+PASS m5b_av gst_local_av 10/10 31.85s
+PASS m5b_av gst_av_bin 10/10 193.09s
+PASS m5b_av gst_av_src_bin 10/10 152.63s
+PASS m5b_av gst_av_parity 10/10 806.96s
+PASS m5b_av m5b_gst_av_example 10/10 681.58s
+PASS gst_video_regression gst_native_source_android 10/10 9.34s
+PASS gst_video_regression gst_native_producer_android 10/10 5.44s
+PASS gst_video_regression gst_nv12_roundtrip 10/10 8.25s
+PASS gst_video_regression gst_rgb10a2_roundtrip 10/10 7.43s
+PASS gst_video_regression gst_timestamp_contract 10/10 7.51s
+PASS gst_video_regression gst_pool_policy 10/10 10.13s
+PASS gst_video_regression gst_policy_generation 10/10 9.41s
+m5b_av: 13/13 tests passed x10
+gst_video_regression: 7/7 tests passed x10
+m5b validation matrix: pass
+exit 0

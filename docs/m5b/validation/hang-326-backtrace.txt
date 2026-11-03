@@ -1,0 +1,91 @@
+
+This GDB supports auto-downloading debuginfo from the following URLs:
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Thread 1 "fl_gst_local_av" received signal SIGINT, Interrupt.
+0x00007ffff7498e51 in __futex_abstimed_wait_common64 (private=128, cancel=true, abstime=0x0, op=265, expected=320903, futex_word=0x7fffee5ff990) at ./nptl/futex-internal.c:57
+warning: 57	./nptl/futex-internal.c: No such file or directory
+
+Thread 9 (Thread 0x7fffeddfe6c0 (LWP 320911) "gdbus"):
+#0  0x00007ffff751b79d in __GI___poll (fds=0x7fffdc000b90, nfds=2, timeout=-1) at ../sysdeps/unix/sysv/linux/poll.c:29
+#1  0x00007ffff7d1db4e in ??? () at /lib/x86_64-linux-gnu/libglib-2.0.so.0
+#2  0x00007ffff7cbeff7 in g_main_loop_run () at /lib/x86_64-linux-gnu/libglib-2.0.so.0
+#3  0x00007ffff774a6c2 in ??? () at /lib/x86_64-linux-gnu/libgio-2.0.so.0
+#4  0x00007ffff7ced0e2 in ??? () at /lib/x86_64-linux-gnu/libglib-2.0.so.0
+#5  0x00007ffff749cb84 in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:447
+#6  0x00007ffff7529ecc in clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+
+Thread 8 (Thread 0x7fffeeffd6c0 (LWP 320910) "dconf worker"):
+#0  0x00007ffff751b79d in __GI___poll (fds=0x7fffd8000b90, nfds=1, timeout=-1) at ../sysdeps/unix/sysv/linux/poll.c:29
+#1  0x00007ffff7d1db4e in ??? () at /lib/x86_64-linux-gnu/libglib-2.0.so.0
+#2  0x00007ffff7cbdad3 in g_main_context_iteration () at /lib/x86_64-linux-gnu/libglib-2.0.so.0
+#3  0x00007ffff7f84595 in ??? () at /usr/lib/x86_64-linux-gnu/gio/modules/libdconfsettings.so
+#4  0x00007ffff7ced0e2 in ??? () at /lib/x86_64-linux-gnu/libglib-2.0.so.0
+#5  0x00007ffff749cb84 in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:447
+#6  0x00007ffff7529ecc in clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+
+Thread 7 (Thread 0x7fffef7fe6c0 (LWP 320909) "gmain"):
+#0  0x00007ffff751b79d in __GI___poll (fds=0x7fffe8031660, nfds=1, timeout=-1) at ../sysdeps/unix/sysv/linux/poll.c:29
+#1  0x00007ffff7d1db4e in ??? () at /lib/x86_64-linux-gnu/libglib-2.0.so.0
+#2  0x00007ffff7cbdad3 in g_main_context_iteration () at /lib/x86_64-linux-gnu/libglib-2.0.so.0
+#3  0x00007ffff7cbdb29 in ??? () at /lib/x86_64-linux-gnu/libglib-2.0.so.0
+#4  0x00007ffff7ced0e2 in ??? () at /lib/x86_64-linux-gnu/libglib-2.0.so.0
+#5  0x00007ffff749cb84 in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:447
+#6  0x00007ffff7529ecc in clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+
+Thread 6 (Thread 0x7fffeffff6c0 (LWP 320908) "pool-spawner"):
+#0  syscall () at ../sysdeps/unix/sysv/linux/x86_64/syscall.S:38
+#1  0x00007ffff7d177ad in g_cond_wait () at /lib/x86_64-linux-gnu/libglib-2.0.so.0
+#2  0x00007ffff7c8858b in ??? () at /lib/x86_64-linux-gnu/libglib-2.0.so.0
+#3  0x00007ffff7cedec3 in ??? () at /lib/x86_64-linux-gnu/libglib-2.0.so.0
+#4  0x00007ffff7ced0e2 in ??? () at /lib/x86_64-linux-gnu/libglib-2.0.so.0
+#5  0x00007ffff749cb84 in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:447
+#6  0x00007ffff7529ecc in clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+
+Thread 4 (Thread 0x7fffee5ff6c0 (LWP 320903) "fl_gst_local_av"):
+#0  0x00007ffff752c18a in __libc_send (flags=<optimized out>, len=20, buf=0x7fffee5fd400, fd=12) at ../sysdeps/unix/sysv/linux/send.c:28
+#1  __libc_send (fd=12, buf=0x7fffee5fd400, len=20, flags=16384) at ../sysdeps/unix/sysv/linux/send.c:23
+#2  0x00007ffff76d1967 in g_socket_send_with_blocking () at /lib/x86_64-linux-gnu/libgio-2.0.so.0
+#3  0x00007ffff7712a77 in ??? () at /lib/x86_64-linux-gnu/libgio-2.0.so.0
+#4  0x00007ffff7712ba3 in ??? () at /lib/x86_64-linux-gnu/libgio-2.0.so.0
+#5  0x00007ffff77130b2 in ??? () at /lib/x86_64-linux-gnu/libgio-2.0.so.0
+#6  0x00007ffff76ae8cc in g_initable_new_valist () at /lib/x86_64-linux-gnu/libgio-2.0.so.0
+#7  0x00007ffff76ae9bb in g_initable_new () at /lib/x86_64-linux-gnu/libgio-2.0.so.0
+#8  0x00007ffff76afa9a in ??? () at /lib/x86_64-linux-gnu/libgio-2.0.so.0
+#9  0x00007ffff76b5596 in ??? () at /lib/x86_64-linux-gnu/libgio-2.0.so.0
+#10 0x00007ffff76b9555 in g_network_monitor_get_default () at /lib/x86_64-linux-gnu/libgio-2.0.so.0
+#11 0x00007ffff565a121 in ??? () at /usr/lib/x86_64-linux-gnu/libproxy/libpxbackend-1.0.so
+#12 0x00007ffff7dd0bba in ??? () at /lib/x86_64-linux-gnu/libgobject-2.0.so.0
+#13 0x00007ffff7dd2e7d in g_object_new_valist () at /lib/x86_64-linux-gnu/libgobject-2.0.so.0
+#14 0x00007ffff5657cf3 in px_manager_new_with_options () at /usr/lib/x86_64-linux-gnu/libproxy/libpxbackend-1.0.so
+#15 0x00007ffff701f2cf in px_proxy_factory_new () at /lib/x86_64-linux-gnu/libproxy.so.1
+#16 0x00007ffff56907bd in ??? () at /usr/lib/x86_64-linux-gnu/gio/modules/libgiolibproxy.so
+#17 0x00007ffff7deaff9 in g_type_create_instance () at /lib/x86_64-linux-gnu/libgobject-2.0.so.0
+#18 0x00007ffff7dd0a64 in ??? () at /lib/x86_64-linux-gnu/libgobject-2.0.so.0
+#19 0x00007ffff7dd2016 in g_object_new_with_properties () at /lib/x86_64-linux-gnu/libgobject-2.0.so.0
+#20 0x00007ffff7dd2f71 in g_object_new () at /lib/x86_64-linux-gnu/libgobject-2.0.so.0
+#21 0x00007ffff76afadc in ??? () at /lib/x86_64-linux-gnu/libgio-2.0.so.0
+#22 0x00007ffff76b5596 in ??? () at /lib/x86_64-linux-gnu/libgio-2.0.so.0
+#23 0x00007ffff76c3f6a in g_proxy_resolver_get_default () at /lib/x86_64-linux-gnu/libgio-2.0.so.0
+#24 0x00007ffff76c40d5 in ??? () at /lib/x86_64-linux-gnu/libgio-2.0.so.0
+#25 0x00007ffff7dd0360 in ??? () at /lib/x86_64-linux-gnu/libgobject-2.0.so.0
+#26 0x00007ffff7dd0b98 in ??? () at /lib/x86_64-linux-gnu/libgobject-2.0.so.0
+#27 0x00007ffff7dd2bc3 in g_object_new_valist () at /lib/x86_64-linux-gnu/libgobject-2.0.so.0
+#28 0x00007ffff7dd2f4f in g_object_new () at /lib/x86_64-linux-gnu/libgobject-2.0.so.0
+#29 0x00007ffff76bc1a9 in ??? () at /lib/x86_64-linux-gnu/libgio-2.0.so.0
+#30 0x00007ffff76dcee5 in g_socket_client_connect () at /lib/x86_64-linux-gnu/libgio-2.0.so.0
+#31 0x00007ffff76dcfef in g_socket_client_connect_to_host () at /lib/x86_64-linux-gnu/libgio-2.0.so.0
+#32 0x00007ffff7fae9ca in fl_gst_session_open_local_av::{lambda((anonymous namespace)::StreamOwner&)#1}::operator()((anonymous namespace)::StreamOwner&) const [clone .constprop.0] () at /tmp/fl-m5a-gst-build/libframelink_gst_session.so
+#33 0x00007ffff7fb22fc in fl_gst_session_open_local_av () at /tmp/fl-m5a-gst-build/libframelink_gst_session.so
+#34 0x0000555555557f58 in std::thread::_State_impl<std::thread::_Invoker<std::tuple<mismatch()::{lambda()#2}> > >::_M_run() ()
+#35 0x00007ffff78ecdb4 in ??? () at /lib/x86_64-linux-gnu/libstdc++.so.6
+#36 0x00007ffff749cb84 in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:447
+#37 0x00007ffff7529ecc in clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+
+Thread 1 (Thread 0x7ffff707a880 (LWP 320897) "fl_gst_local_av"):
+#0  0x00007ffff7498e51 in __futex_abstimed_wait_common64 (private=128, cancel=true, abstime=0x0, op=265, expected=320903, futex_word=0x7fffee5ff990) at ./nptl/futex-internal.c:57
+#1  __futex_abstimed_wait_common (cancel=true, private=128, abstime=0x0, clockid=0, expected=320903, futex_word=0x7fffee5ff990) at ./nptl/futex-internal.c:87
+#2  __GI___futex_abstimed_wait_cancelable64 (futex_word=futex_word@entry=0x7fffee5ff990, expected=320903, clockid=clockid@entry=0, abstime=abstime@entry=0x0, private=private@entry=128) at ./nptl/futex-internal.c:139
+#3  0x00007ffff749e883 in __pthread_clockjoin_ex (threadid=140737192654528, thread_return=0x0, clockid=0, abstime=0x0, block=<optimized out>) at ./nptl/pthread_join_common.c:102
+#4  0x00007ffff78ece33 in std::thread::join() () at /lib/x86_64-linux-gnu/libstdc++.so.6
+#5  0x0000555555556b6f in main ()

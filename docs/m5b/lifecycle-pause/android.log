@@ -1,0 +1,7 @@
+/tmp/fl-m5a-gst-arm64/fl_gst_av_timeline: 1 file pushed, 0 skipped. 128.1 MB/s (29551232 bytes in 0.220s)
+coordinated public A/V: distinct TIME segments, one receiver mapping, exact +/-37ms offset, pixels/PCM/DTS/duration/generation passed
+/tmp/fl-m5a-gst-arm64/fl_gst_audio_source: 1 file pushed, 0 skipped. 126.8 MB/s (29591984 bytes in 0.222s)
+public audio source: exact four PCM formats/layouts, incremental packet delivery before EOS, both startup orders, live latency, missing-peer and cancellation passed
+/tmp/fl-m5a-gst-arm64/fl_gst_audio_sink: 1 file pushed, 0 skipped. 131.9 MB/s (29626456 bytes in 0.214s)
+backpressure: 2036 blocks accepted before bounded failure; teardown_us=3230
+public audio sink: exact PCM/PTS/duration and missing-auth/invalid-PTS/oversized-block negatives passed

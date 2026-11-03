@@ -1,0 +1,98 @@
+CASE factories
+  framelinksink      Sink/Video                   pads: sink 
+  framelinksrc       Source/Video                 pads: src 
+  framelinkaudiosink Sink/Audio                   pads: sink 
+  framelinkaudiosrc  Source/Audio                 pads: src 
+  framelinkavsink    Sink/Video/Audio             pads: video_sink audio_sink 
+  framelinkavsrc     Source/Video/Audio           pads: video_src audio_src 
+  native consumer memory: memory:DMABuf
+CASE cleanup
+  element cpu    churn        handles/threads: 7/10 7/10 7/10 7/10 7/10 7/10 7/10 7/10 -> bounded
+  element native churn        handles/threads: 7/10 7/10 7/10 7/10 7/10 7/10 7/10 7/10 -> bounded
+  bin     cpu    churn        handles/threads: 7/10 7/10 7/10 7/10 7/10 7/10 7/10 7/10 -> bounded
+  bin     native churn        handles/threads: 7/10 7/10 7/10 7/10 7/10 7/10 7/10 7/10 -> bounded
+  bin     cpu    leak-control handles/threads: 23/10 39/10 55/10 71/10 87/10 103/10 119/10 135/10 -> growing
+CASE av-cpu
+  producer=element consumer=element PASS frames 30/30 samples 24000/24000 memory memory:SystemMemory lag v 150.1..150.2 a 150.1..150.5ms
+    latency consumer live min=20ms max=1000ms (configured 150ms); sources video live min=0ms audio live min=0ms; producer not-live min=0ms max=none
+    video pool 8; producer submitted=30 dropped=0 ring-full=0
+    audio queue limit 80ms/15360B high-water 10ms/1920B; blocks=50 pcm-bytes=96000 sample-frames=24000 serialized-pcm
+    gst: gst.cpu_copy_sink n=30 bytes=245760; gst.cpu_copy_source n=30 bytes=245760; | core: no payload operations| occupancy max 0
+  producer=element consumer=bin     PASS frames 30/30 samples 24000/24000 memory memory:SystemMemory lag v 150.1..150.2 a 150.1..150.2ms
+    latency consumer live min=20ms max=1000ms (configured 150ms); sources video live min=0ms audio live min=0ms; producer not-live min=0ms max=none
+    video pool 8; producer submitted=30 dropped=0 ring-full=0
+    audio queue limit 80ms/15360B high-water 10ms/1920B; blocks=50 pcm-bytes=96000 sample-frames=24000 serialized-pcm
+    gst: gst.cpu_copy_sink n=30 bytes=245760; gst.cpu_copy_source n=30 bytes=245760; | core: no payload operations| occupancy max 0
+  producer=bin     consumer=element PASS frames 30/30 samples 24000/24000 memory memory:SystemMemory lag v 150.1..150.2 a 150.0..150.2ms
+    latency consumer live min=20ms max=1000ms (configured 150ms); sources video live min=0ms audio live min=0ms; producer not-live min=0ms max=none
+    video pool 8; producer submitted=30 dropped=0 ring-full=0
+    audio queue limit 80ms/15360B high-water 10ms/1920B; blocks=50 pcm-bytes=96000 sample-frames=24000 serialized-pcm
+    gst: gst.cpu_copy_sink n=30 bytes=245760; gst.cpu_copy_source n=30 bytes=245760; | core: no payload operations| occupancy max 0
+  producer=bin     consumer=bin     PASS frames 30/30 samples 24000/24000 memory memory:SystemMemory lag v 150.1..150.2 a 150.1..150.2ms
+    latency consumer live min=20ms max=1000ms (configured 150ms); sources video live min=0ms audio live min=0ms; producer not-live min=0ms max=none
+    video pool 8; producer submitted=30 dropped=0 ring-full=0
+    audio queue limit 80ms/15360B high-water 10ms/1920B; blocks=50 pcm-bytes=96000 sample-frames=24000 serialized-pcm
+    gst: gst.cpu_copy_sink n=30 bytes=245760; gst.cpu_copy_source n=30 bytes=245760; | core: no payload operations| occupancy max 0
+  => accounting identical across element/bin combinations
+CASE av-native
+  producer=element consumer=element PASS frames 30/30 samples 24000/24000 memory memory:DMABuf lag v 150.1..150.3 a 150.0..150.9ms
+    latency consumer live min=20ms max=1000ms (configured 150ms); sources video live min=0ms audio live min=0ms; producer not-live min=0ms max=none
+    video pool 8; producer submitted=30 dropped=0 ring-full=0
+    audio queue limit 80ms/15360B high-water 0ms/0B; blocks=50 pcm-bytes=96000 sample-frames=24000 serialized-pcm
+    gst: gst.cpu_copy_sink n=30 bytes=245760; | core: no payload operations| occupancy max 6
+  producer=element consumer=bin     PASS frames 30/30 samples 24000/24000 memory memory:DMABuf lag v 150.1..150.2 a 150.1..150.4ms
+    latency consumer live min=20ms max=1000ms (configured 150ms); sources video live min=0ms audio live min=0ms; producer not-live min=0ms max=none
+    video pool 8; producer submitted=30 dropped=0 ring-full=0
+    audio queue limit 80ms/15360B high-water 10ms/1920B; blocks=50 pcm-bytes=96000 sample-frames=24000 serialized-pcm
+    gst: gst.cpu_copy_sink n=30 bytes=245760; | core: no payload operations| occupancy max 6
+  producer=bin     consumer=element PASS frames 30/30 samples 24000/24000 memory memory:DMABuf lag v 150.1..150.3 a 150.0..152.9ms
+    latency consumer live min=20ms max=1000ms (configured 150ms); sources video live min=0ms audio live min=0ms; producer not-live min=0ms max=none
+    video pool 8; producer submitted=30 dropped=0 ring-full=0
+    audio queue limit 80ms/15360B high-water 0ms/0B; blocks=50 pcm-bytes=96000 sample-frames=24000 serialized-pcm
+    gst: gst.cpu_copy_sink n=30 bytes=245760; | core: no payload operations| occupancy max 6
+  producer=bin     consumer=bin     PASS frames 30/30 samples 24000/24000 memory memory:DMABuf lag v 150.1..150.3 a 150.1..150.4ms
+    latency consumer live min=20ms max=1000ms (configured 150ms); sources video live min=0ms audio live min=0ms; producer not-live min=0ms max=none
+    video pool 8; producer submitted=30 dropped=0 ring-full=0
+    audio queue limit 80ms/15360B high-water 10ms/1920B; blocks=50 pcm-bytes=96000 sample-frames=24000 serialized-pcm
+    gst: gst.cpu_copy_sink n=30 bytes=245760; | core: no payload operations| occupancy max 6
+  => accounting identical across element/bin combinations
+CASE video-only
+  producer=element consumer=element PASS frames 30/30 samples 0/0 memory memory:SystemMemory lag v 150.1..150.2 a 0.0..0.0ms
+    latency consumer live min=20ms max=1000ms (configured 150ms); sources video live min=0ms; producer not-live min=0ms max=none
+    video pool 8; producer submitted=30 dropped=0 ring-full=0
+    gst: gst.cpu_copy_sink n=30 bytes=245760; gst.cpu_copy_source n=30 bytes=245760; | core: no payload operations| occupancy max 0
+  producer=element consumer=bin     PASS frames 30/30 samples 0/0 memory memory:SystemMemory lag v 150.1..150.2 a 0.0..0.0ms
+    latency consumer live min=20ms max=1000ms (configured 150ms); sources video live min=0ms; producer not-live min=0ms max=none
+    video pool 8; producer submitted=30 dropped=0 ring-full=0
+    gst: gst.cpu_copy_sink n=30 bytes=245760; gst.cpu_copy_source n=30 bytes=245760; | core: no payload operations| occupancy max 0
+  producer=bin     consumer=element PASS frames 30/30 samples 0/0 memory memory:SystemMemory lag v 150.1..150.2 a 0.0..0.0ms
+    latency consumer live min=20ms max=1000ms (configured 150ms); sources video live min=0ms; producer not-live min=0ms max=none
+    video pool 8; producer submitted=30 dropped=0 ring-full=0
+    gst: gst.cpu_copy_sink n=30 bytes=245760; gst.cpu_copy_source n=30 bytes=245760; | core: no payload operations| occupancy max 0
+  producer=bin     consumer=bin     PASS frames 30/30 samples 0/0 memory memory:SystemMemory lag v 150.1..150.2 a 0.0..0.0ms
+    latency consumer live min=20ms max=1000ms (configured 150ms); sources video live min=0ms; producer not-live min=0ms max=none
+    video pool 8; producer submitted=30 dropped=0 ring-full=0
+    gst: gst.cpu_copy_sink n=30 bytes=245760; gst.cpu_copy_source n=30 bytes=245760; | core: no payload operations| occupancy max 0
+  => accounting identical across element/bin combinations
+CASE audio-only
+  producer=element consumer=element PASS frames 0/0 samples 24000/24000 memory none lag v 0.0..0.0 a 150.1..150.2ms
+    latency consumer live min=20ms max=none (configured 150ms); sources audio live min=0ms; producer not-live min=0ms max=none
+    audio queue limit 80ms/15360B high-water 10ms/1920B; blocks=50 pcm-bytes=96000 sample-frames=24000 serialized-pcm
+    no trace files (no video activity); gst: no payload operations| core: no payload operations| occupancy max 0
+  producer=element consumer=bin     PASS frames 0/0 samples 24000/24000 memory none lag v 0.0..0.0 a 150.1..150.2ms
+    latency consumer live min=20ms max=none (configured 150ms); sources audio live min=0ms; producer not-live min=0ms max=none
+    audio queue limit 80ms/15360B high-water 0ms/0B; blocks=50 pcm-bytes=96000 sample-frames=24000 serialized-pcm
+    no trace files (no video activity); gst: no payload operations| core: no payload operations| occupancy max 0
+  producer=bin     consumer=element PASS frames 0/0 samples 24000/24000 memory none lag v 0.0..0.0 a 150.1..150.2ms
+    latency consumer live min=20ms max=none (configured 150ms); sources audio live min=0ms; producer not-live min=0ms max=none
+    audio queue limit 80ms/15360B high-water 10ms/1920B; blocks=50 pcm-bytes=96000 sample-frames=24000 serialized-pcm
+    no trace files (no video activity); gst: no payload operations| core: no payload operations| occupancy max 0
+  producer=bin     consumer=bin     PASS frames 0/0 samples 24000/24000 memory none lag v 0.0..0.0 a 150.1..150.2ms
+    latency consumer live min=20ms max=none (configured 150ms); sources audio live min=0ms; producer not-live min=0ms max=none
+    audio queue limit 80ms/15360B high-water 10ms/1920B; blocks=50 pcm-bytes=96000 sample-frames=24000 serialized-pcm
+    no trace files (no video activity); gst: no payload operations| core: no payload operations| occupancy max 0
+  => accounting identical across element/bin combinations
+CASE controls
+  16-event recorder: lossy footer detected
+  CPU-path trace against native expectations: rejected
+platform qualification: elements and bins pass delivery, latency, bounds, cleanup and trace accounting

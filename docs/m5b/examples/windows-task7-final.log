@@ -1,0 +1,147 @@
+#< CLIXML
+Test project <win-tree>/build
+      Start  56: gst_av_session
+ 1/12 Test  #56: gst_av_session ...................   Passed    3.56 sec
+      Start  57: gst_av_faults
+ 2/12 Test  #57: gst_av_faults ....................   Passed    2.59 sec
+      Start  60: av_rendezvous
+ 3/12 Test  #60: av_rendezvous ....................   Passed    0.03 sec
+      Start  97: gst_session_transport
+ 4/12 Test  #97: gst_session_transport ............   Passed    0.33 sec
+      Start  98: gst_session_context
+ 5/12 Test  #98: gst_session_context ..............   Passed    0.07 sec
+      Start  99: gst_audio_sink
+ 6/12 Test  #99: gst_audio_sink ...................   Passed    1.26 sec
+      Start 100: gst_audio_source
+ 7/12 Test #100: gst_audio_source .................   Passed    1.31 sec
+      Start 101: gst_av_timeline
+ 8/12 Test #101: gst_av_timeline ..................   Passed    4.44 sec
+      Start 102: gst_local_av
+ 9/12 Test #102: gst_local_av .....................   Passed    2.84 sec
+      Start 103: m5b_gst_av_example
+10/12 Test #103: m5b_gst_av_example ...............   Passed   19.84 sec
+      Start 104: gst_local_audio
+11/12 Test #104: gst_local_audio ..................   Passed    0.21 sec
+      Start 105: gst_event_channel
+12/12 Test #105: gst_event_channel ................   Passed    2.32 sec
+
+100% tests passed, 0 tests failed out of 12
+
+Total Test time (real) =  38.91 sec
+PASS av-rgba-consumer-first producer=0 consumer=0 elapsed=3.90s {"event": "verify", "tracks": "av", "format": "RGBA", "frames": 90, "expected_frames": 90, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.025, "lag_max_ms": 151.998, "latency_ms": 150, "result": "pass"}
+PASS av-rgba-producer-first producer=0 consumer=0 elapsed=3.88s {"event": "verify", "tracks": "av", "format": "RGBA", "frames": 90, "expected_frames": 90, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.015, "lag_max_ms": 152.076, "latency_ms": 150, "result": "pass"}
+PASS av-nv12 producer=0 consumer=0 elapsed=3.90s {"event": "verify", "tracks": "av", "format": "NV12", "frames": 90, "expected_frames": 90, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.024, "lag_max_ms": 152.516, "latency_ms": 150, "result": "pass"}
+PASS video-bgra producer=0 consumer=0 elapsed=3.89s {"event": "verify", "tracks": "video", "format": "BGRA", "frames": 90, "expected_frames": 90, "samples": 0, "expected_samples": 0, "lag_min_ms": 150.057, "lag_max_ms": 151.924, "latency_ms": 150, "result": "pass"}
+PASS audio-only producer=0 consumer=0 elapsed=3.74s {"event": "verify", "tracks": "audio", "format": "RGBA", "frames": 0, "expected_frames": 0, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.01, "lag_max_ms": 151.951, "latency_ms": 150, "result": "pass"}
+PASS negative-track-mismatch producer=1 consumer=1 elapsed=0.39s 
+PASS av-rgba-consumer-first producer=0 consumer=0 elapsed=3.90s {"event": "verify", "tracks": "av", "format": "RGBA", "frames": 90, "expected_frames": 90, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.013, "lag_max_ms": 151.969, "latency_ms": 150, "result": "pass"}
+PASS av-rgba-producer-first producer=0 consumer=0 elapsed=3.88s {"event": "verify", "tracks": "av", "format": "RGBA", "frames": 90, "expected_frames": 90, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.007, "lag_max_ms": 152.477, "latency_ms": 150, "result": "pass"}
+PASS av-nv12 producer=0 consumer=0 elapsed=3.89s {"event": "verify", "tracks": "av", "format": "NV12", "frames": 90, "expected_frames": 90, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.023, "lag_max_ms": 151.978, "latency_ms": 150, "result": "pass"}
+PASS video-bgra producer=0 consumer=0 elapsed=3.89s {"event": "verify", "tracks": "video", "format": "BGRA", "frames": 90, "expected_frames": 90, "samples": 0, "expected_samples": 0, "lag_min_ms": 150.041, "lag_max_ms": 152.405, "latency_ms": 150, "result": "pass"}
+PASS audio-only producer=0 consumer=0 elapsed=3.74s {"event": "verify", "tracks": "audio", "format": "RGBA", "frames": 0, "expected_frames": 0, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.011, "lag_max_ms": 151.982, "latency_ms": 150, "result": "pass"}
+PASS negative-track-mismatch producer=1 consumer=1 elapsed=0.39s 
+PASS av-rgba-consumer-first producer=0 consumer=0 elapsed=3.91s {"event": "verify", "tracks": "av", "format": "RGBA", "frames": 90, "expected_frames": 90, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.01, "lag_max_ms": 152.004, "latency_ms": 150, "result": "pass"}
+PASS av-rgba-producer-first producer=0 consumer=0 elapsed=3.88s {"event": "verify", "tracks": "av", "format": "RGBA", "frames": 90, "expected_frames": 90, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.025, "lag_max_ms": 151.994, "latency_ms": 150, "result": "pass"}
+PASS av-nv12 producer=0 consumer=0 elapsed=3.89s {"event": "verify", "tracks": "av", "format": "NV12", "frames": 90, "expected_frames": 90, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.004, "lag_max_ms": 151.939, "latency_ms": 150, "result": "pass"}
+PASS video-bgra producer=0 consumer=0 elapsed=3.89s {"event": "verify", "tracks": "video", "format": "BGRA", "frames": 90, "expected_frames": 90, "samples": 0, "expected_samples": 0, "lag_min_ms": 150.145, "lag_max_ms": 152.261, "latency_ms": 150, "result": "pass"}
+PASS audio-only producer=0 consumer=0 elapsed=3.74s {"event": "verify", "tracks": "audio", "format": "RGBA", "frames": 0, "expected_frames": 0, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.01, "lag_max_ms": 152.069, "latency_ms": 150, "result": "pass"}
+PASS negative-track-mismatch producer=1 consumer=1 elapsed=0.39s 
+PASS av-rgba-consumer-first producer=0 consumer=0 elapsed=3.90s {"event": "verify", "tracks": "av", "format": "RGBA", "frames": 90, "expected_frames": 90, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.023, "lag_max_ms": 152.217, "latency_ms": 150, "result": "pass"}
+PASS av-rgba-producer-first producer=0 consumer=0 elapsed=3.89s {"event": "verify", "tracks": "av", "format": "RGBA", "frames": 90, "expected_frames": 90, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.007, "lag_max_ms": 151.998, "latency_ms": 150, "result": "pass"}
+PASS av-nv12 producer=0 consumer=0 elapsed=3.90s {"event": "verify", "tracks": "av", "format": "NV12", "frames": 90, "expected_frames": 90, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.014, "lag_max_ms": 151.98, "latency_ms": 150, "result": "pass"}
+PASS video-bgra producer=0 consumer=0 elapsed=3.89s {"event": "verify", "tracks": "video", "format": "BGRA", "frames": 90, "expected_frames": 90, "samples": 0, "expected_samples": 0, "lag_min_ms": 150.054, "lag_max_ms": 151.989, "latency_ms": 150, "result": "pass"}
+PASS audio-only producer=0 consumer=0 elapsed=3.74s {"event": "verify", "tracks": "audio", "format": "RGBA", "frames": 0, "expected_frames": 0, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.005, "lag_max_ms": 152.0, "latency_ms": 150, "result": "pass"}
+PASS negative-track-mismatch producer=1 consumer=1 elapsed=0.39s 
+PASS av-rgba-consumer-first producer=0 consumer=0 elapsed=3.90s {"event": "verify", "tracks": "av", "format": "RGBA", "frames": 90, "expected_frames": 90, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.012, "lag_max_ms": 152.0, "latency_ms": 150, "result": "pass"}
+PASS av-rgba-producer-first producer=0 consumer=0 elapsed=3.88s {"event": "verify", "tracks": "av", "format": "RGBA", "frames": 90, "expected_frames": 90, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.004, "lag_max_ms": 152.407, "latency_ms": 150, "result": "pass"}
+PASS av-nv12 producer=0 consumer=0 elapsed=3.89s {"event": "verify", "tracks": "av", "format": "NV12", "frames": 90, "expected_frames": 90, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.01, "lag_max_ms": 151.987, "latency_ms": 150, "result": "pass"}
+PASS video-bgra producer=0 consumer=0 elapsed=3.89s {"event": "verify", "tracks": "video", "format": "BGRA", "frames": 90, "expected_frames": 90, "samples": 0, "expected_samples": 0, "lag_min_ms": 150.013, "lag_max_ms": 151.872, "latency_ms": 150, "result": "pass"}
+PASS audio-only producer=0 consumer=0 elapsed=3.74s {"event": "verify", "tracks": "audio", "format": "RGBA", "frames": 0, "expected_frames": 0, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.013, "lag_max_ms": 152.003, "latency_ms": 150, "result": "pass"}
+PASS negative-track-mismatch producer=1 consumer=1 elapsed=0.39s 
+m5b gst A/V example: 30/30 cases passed
+Test project <win-tree>/build
+    Start 101: gst_av_timeline
+    Test #101: gst_av_timeline ..................   Passed    4.47 sec
+    Start 101: gst_av_timeline
+    Test #101: gst_av_timeline ..................   Passed    4.42 sec
+    Start 101: gst_av_timeline
+    Test #101: gst_av_timeline ..................   Passed    4.44 sec
+    Start 101: gst_av_timeline
+    Test #101: gst_av_timeline ..................   Passed    4.44 sec
+    Start 101: gst_av_timeline
+    Test #101: gst_av_timeline ..................   Passed    4.44 sec
+    Start 101: gst_av_timeline
+    Test #101: gst_av_timeline ..................   Passed    4.44 sec
+    Start 101: gst_av_timeline
+    Test #101: gst_av_timeline ..................   Passed    4.37 sec
+    Start 101: gst_av_timeline
+    Test #101: gst_av_timeline ..................   Passed    4.45 sec
+    Start 101: gst_av_timeline
+    Test #101: gst_av_timeline ..................   Passed    4.42 sec
+    Start 101: gst_av_timeline
+    Test #101: gst_av_timeline ..................   Passed    4.37 sec
+    Start 101: gst_av_timeline
+    Test #101: gst_av_timeline ..................   Passed    4.41 sec
+    Start 101: gst_av_timeline
+    Test #101: gst_av_timeline ..................   Passed    4.42 sec
+    Start 101: gst_av_timeline
+    Test #101: gst_av_timeline ..................   Passed    4.42 sec
+    Start 101: gst_av_timeline
+    Test #101: gst_av_timeline ..................   Passed    4.34 sec
+    Start 101: gst_av_timeline
+    Test #101: gst_av_timeline ..................   Passed    4.45 sec
+    Start 101: gst_av_timeline
+    Test #101: gst_av_timeline ..................   Passed    4.42 sec
+    Start 101: gst_av_timeline
+    Test #101: gst_av_timeline ..................   Passed    4.42 sec
+    Start 101: gst_av_timeline
+    Test #101: gst_av_timeline ..................   Passed    4.41 sec
+    Start 101: gst_av_timeline
+    Test #101: gst_av_timeline ..................   Passed    4.48 sec
+    Start 101: gst_av_timeline
+1/2 Test #101: gst_av_timeline ..................   Passed    4.45 sec
+    Start 102: gst_local_av
+    Test #102: gst_local_av .....................   Passed    2.83 sec
+    Start 102: gst_local_av
+    Test #102: gst_local_av .....................   Passed    2.82 sec
+    Start 102: gst_local_av
+    Test #102: gst_local_av .....................   Passed    2.82 sec
+    Start 102: gst_local_av
+    Test #102: gst_local_av .....................   Passed    2.82 sec
+    Start 102: gst_local_av
+    Test #102: gst_local_av .....................   Passed    2.82 sec
+    Start 102: gst_local_av
+    Test #102: gst_local_av .....................   Passed    2.82 sec
+    Start 102: gst_local_av
+    Test #102: gst_local_av .....................   Passed    2.82 sec
+    Start 102: gst_local_av
+    Test #102: gst_local_av .....................   Passed    2.83 sec
+    Start 102: gst_local_av
+    Test #102: gst_local_av .....................   Passed    2.82 sec
+    Start 102: gst_local_av
+    Test #102: gst_local_av .....................   Passed    2.82 sec
+    Start 102: gst_local_av
+    Test #102: gst_local_av .....................   Passed    2.83 sec
+    Start 102: gst_local_av
+    Test #102: gst_local_av .....................   Passed    2.83 sec
+    Start 102: gst_local_av
+    Test #102: gst_local_av .....................   Passed    2.82 sec
+    Start 102: gst_local_av
+    Test #102: gst_local_av .....................   Passed    2.85 sec
+    Start 102: gst_local_av
+    Test #102: gst_local_av .....................   Passed    2.82 sec
+    Start 102: gst_local_av
+    Test #102: gst_local_av .....................   Passed    2.82 sec
+    Start 102: gst_local_av
+    Test #102: gst_local_av .....................   Passed    2.83 sec
+    Start 102: gst_local_av
+    Test #102: gst_local_av .....................   Passed    2.82 sec
+    Start 102: gst_local_av
+    Test #102: gst_local_av .....................   Passed    2.82 sec
+    Start 102: gst_local_av
+2/2 Test #102: gst_local_av .....................   Passed    2.82 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Total Test time (real) = 145.01 sec
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04"><Obj S="progress" RefId="0"><TN RefId="0"><T>System.Management.Automation.PSCustomObject</T><T>System.Object</T></TN><MS><I64 N="SourceId">1</I64><PR N="Record"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj><Obj S="progress" RefId="1"><TNRef RefId="0" /><MS><I64 N="SourceId">1</I64><PR N="Record"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj></Objs>

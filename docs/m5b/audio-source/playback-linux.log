@@ -1,0 +1,25 @@
+Internal ctest changing into directory: /tmp/fl-m5a-gst-build
+UpdateCTestConfiguration  from :/tmp/fl-m5a-gst-build/DartConfiguration.tcl
+UpdateCTestConfiguration  from :/tmp/fl-m5a-gst-build/DartConfiguration.tcl
+Test project /tmp/fl-m5a-gst-build
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 102
+    Start 102: gst_audio_source
+
+102: Test command: /tmp/fl-m5a-gst-build/fl_gst_audio_source "/tmp/fl-m5a-gst-build/libgstframelink.so"
+102: Working Directory: /tmp/fl-m5a-gst-build
+102: Test timeout computed to be: 20
+102: public audio source: exact four PCM formats/layouts, incremental packet delivery before EOS, both startup orders, live latency, missing-peer and cancellation passed
+1/1 Test #102: gst_audio_source .................   Passed    4.47 sec
+
+The following tests passed:
+	gst_audio_source
+
+100% tests passed, 0 tests failed out of 1
+
+Total Test time (real) =   4.47 sec

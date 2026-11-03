@@ -1,0 +1,154 @@
+{
+ "platform": "android-arm64-A06B",
+ "repeat": 20,
+ "suites": {
+  "m5b_av": {
+   "registered": [
+    "gst_session_transport",
+    "gst_session_context",
+    "gst_audio_sink",
+    "gst_audio_source",
+    "gst_event_channel",
+    "gst_local_audio",
+    "gst_av_timeline",
+    "gst_av_validation",
+    "gst_local_av"
+   ],
+   "tests": [
+    {
+     "name": "gst_session_transport",
+     "repeat": 20,
+     "passed": 20,
+     "result": "pass",
+     "seconds": 24.93
+    },
+    {
+     "name": "gst_session_context",
+     "repeat": 20,
+     "passed": 20,
+     "result": "pass",
+     "seconds": 7.19
+    },
+    {
+     "name": "gst_audio_sink",
+     "repeat": 20,
+     "passed": 20,
+     "result": "pass",
+     "seconds": 56.33
+    },
+    {
+     "name": "gst_audio_source",
+     "repeat": 20,
+     "passed": 20,
+     "result": "pass",
+     "seconds": 51.33
+    },
+    {
+     "name": "gst_event_channel",
+     "repeat": 20,
+     "passed": 20,
+     "result": "pass",
+     "seconds": 55.82
+    },
+    {
+     "name": "gst_local_audio",
+     "repeat": 20,
+     "passed": 20,
+     "result": "pass",
+     "seconds": 35.74
+    },
+    {
+     "name": "gst_av_timeline",
+     "repeat": 20,
+     "passed": 20,
+     "result": "pass",
+     "seconds": 60.46
+    },
+    {
+     "name": "gst_av_validation",
+     "repeat": 20,
+     "passed": 20,
+     "result": "pass",
+     "seconds": 298.03
+    },
+    {
+     "name": "gst_local_av",
+     "repeat": 20,
+     "passed": 20,
+     "result": "pass",
+     "seconds": 63.76
+    },
+    {
+     "name": "m5b_gst_av_example",
+     "repeat": 20,
+     "passed": 20,
+     "result": "pass",
+     "seconds": 437.15
+    }
+   ]
+  },
+  "gst_video_regression": {
+   "registered": [
+    "gst_native_source_android",
+    "gst_native_producer_android",
+    "gst_nv12_roundtrip",
+    "gst_rgb10a2_roundtrip",
+    "gst_timestamp_contract",
+    "gst_pool_policy",
+    "gst_policy_generation"
+   ],
+   "tests": [
+    {
+     "name": "gst_native_source_android",
+     "repeat": 20,
+     "passed": 20,
+     "result": "pass",
+     "seconds": 18.54
+    },
+    {
+     "name": "gst_native_producer_android",
+     "repeat": 20,
+     "passed": 20,
+     "result": "pass",
+     "seconds": 10.57
+    },
+    {
+     "name": "gst_nv12_roundtrip",
+     "repeat": 20,
+     "passed": 20,
+     "result": "pass",
+     "seconds": 16.33
+    },
+    {
+     "name": "gst_rgb10a2_roundtrip",
+     "repeat": 20,
+     "passed": 20,
+     "result": "pass",
+     "seconds": 14.81
+    },
+    {
+     "name": "gst_timestamp_contract",
+     "repeat": 20,
+     "passed": 20,
+     "result": "pass",
+     "seconds": 14.99
+    },
+    {
+     "name": "gst_pool_policy",
+     "repeat": 20,
+     "passed": 20,
+     "result": "pass",
+     "seconds": 19.68
+    },
+    {
+     "name": "gst_policy_generation",
+     "repeat": 20,
+     "passed": 20,
+     "result": "pass",
+     "seconds": 19.31
+    }
+   ]
+  }
+ },
+ "result": "pass"
+}

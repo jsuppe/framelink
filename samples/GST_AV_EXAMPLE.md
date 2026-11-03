@@ -1,0 +1,319 @@
+# Two-process A/V with the public GStreamer elements
+
+`framelink_gst_av` splits one A/V pipeline across two processes using only the
+public elements (`framelinksink`, `framelinksrc`, `framelinkaudiosink`,
+`framelinkaudiosrc`) and the public session helpers in
+`gst/framelink_session_transport.h`. No GDP, socket or authentication code is
+written by the application.
+
+Reference: [elements and properties](../docs/GST_AV_REFERENCE.md);
+moving existing pipelines: [migration guide](../docs/GST_AV_MIGRATION.md).
+
+## Run it
+
+Use the same private `--session` directory for both processes. The producer
+creates it with current-user-only permissions; either process may start first.
+
+Windows (Developer PowerShell, GStreamer MSVC runtime on `PATH`):
+
+```
+$env:PATH = "<build>\Release;C:\Program Files\gstreamer\1.0\msvc_x86_64\bin;" + $env:PATH
+$env:GST_PLUGIN_PATH = "<build>\Release"
+framelink_gst_av consumer --session $env:TEMP\fl-demo --display
+framelink_gst_av producer --session $env:TEMP\fl-demo --seconds 10
+```
+
+Linux:
+
+```
+export GST_PLUGIN_PATH=<build>
+./framelink_gst_av consumer --session $XDG_RUNTIME_DIR/fl-demo --display
+./framelink_gst_av producer --session $XDG_RUNTIME_DIR/fl-demo --seconds 10
+```
+
+Options shared by both roles: `--bin`, `--tracks av|audio|video`, `--format
+RGBA|BGRA|NV12`, `--size WxH`, `--fps N`, `--seconds N`, `--timeout-ms N`.
+`--bin` uses the convenience bins (`framelinkavsink`, `framelinkavsrc`)
+instead of the individual elements and session calls; each side chooses
+independently, so a bin producer works with an element consumer and the
+reverse. Producer: `--video-source` and `--audio-source` replace the live test
+sources with any GStreamer source fragment. Non-live media such as a decoder
+chain must be paced in real time (see [Real-time delivery](#real-time-delivery)).
+Consumer:
+`--display` renders with `autovideosink` and plays through `autoaudiosink`;
+`--verify` is headless and prints a JSON summary (frame and sample counts,
+uniform-pixel check, contiguous audio timestamps, delivery lag).
+`--latency-ms` (default 150) and `--pool` (default 8) are explained below.
+
+On Windows, display mode needs an interactive desktop session. The plugin's
+directory must be on `PATH` as well as `GST_PLUGIN_PATH`, because the
+registry scanner loads it in a separate process. The Android command-line build
+supports `--verify` only.
+
+## Audio only with gst-launch
+
+The audio elements carry their own standalone discovery, so no code is needed:
+
+```
+gst-launch-1.0 framelinkaudiosrc session=$XDG_RUNTIME_DIR/fl-audio ! queue ! audioconvert ! autoaudiosink
+gst-launch-1.0 audiotestsrc is-live=true ! audio/x-raw,format=S16LE,layout=interleaved,rate=48000,channels=2 ! framelinkaudiosink session=$XDG_RUNTIME_DIR/fl-audio
+```
+
+Standalone audio uses each pipeline's own clock; there is no cross-process
+clock mapping in this mode. Use the A/V helper below when timing matters.
+
+With the bins no code is needed on either side. Linux:
+
+```
+gst-launch-1.0 framelinkavsrc name=c session=$XDG_RUNTIME_DIR/fl-av video-format=RGBA width=320 height=180 \
+  c.video_src ! queue ! videoconvert ! autovideosink c.audio_src ! queue ! audioconvert ! autoaudiosink
+gst-launch-1.0 framelinkavsink name=s session=$XDG_RUNTIME_DIR/fl-av video-format=RGBA width=320 height=180 framerate=30/1 \
+  videotestsrc is-live=true ! video/x-raw,format=RGBA,width=320,height=180,framerate=30/1 ! s.video_sink \
+  audiotestsrc is-live=true ! audio/x-raw,format=S16LE,layout=interleaved,rate=48000,channels=2 ! s.audio_sink
+```
+
+On Windows, set `session` from code instead: launch syntax drops the
+backslashes of a Windows path.
+
+## Integrating in an application
+
+Producer:
+
+```c
+FlGstSession* s = fl_gst_session_new(3);           // 1 video | 2 audio
+flChannel* lease = NULL;
+fl_gst_session_open_local_av(s, TRUE, dir, &caps, 2, 0, 80, 15000, 15000, 0, &lease, NULL, &err);
+GstContext* c = fl_gst_session_create_context(s);  gst_element_set_context(pipeline, c);
+g_signal_emit_by_name(video_sink, "adopt-channel", lease, &adopted);
+fl_gst_session_local_ready(s, TRUE, 15000, &err);   // consumer devices exist
+fl_gst_session_apply_pipeline_clock(s, GST_PIPELINE(pipeline), TRUE, 0, &err);
+gst_element_set_state(pipeline, GST_STATE_PLAYING);
+/* ... EOS ... */
+fl_gst_session_finish_local(s, TRUE, 15000, &err);  // consumer rendered the tail
+gst_element_set_state(pipeline, GST_STATE_NULL);
+```
+
+Consumer: the same calls with `producer = FALSE`, a video pool size, a
+pipeline latency in `apply_pipeline_clock`, `local_ready` after setting
+PLAYING, and `finish_local` after EOS.
+
+What the helper does: current-user rendezvous and a private loopback control
+connection; authenticated negotiation of formats, track set and queue budgets;
+an authenticated round-trip clock measurement (rejected above 50ms
+uncertainty) installed as the consumer's mapping; authenticated audio and event
+streams; and the video lease. The consumer creates the ring under a
+secret-derived name and returns only after the producer confirms the attach.
+
+### Producer bin: `framelinkavsink`
+
+The producer side can use one bin instead of the calls above. With `session=`,
+it does discovery, negotiation, the clock exchange, the ready gate and the
+drain itself, and exposes separate `video_sink` and `audio_sink` pads (only
+the tracks you enable exist). It is not a multiplexed format.
+
+```c
+GstElement* p = gst_parse_launch(
+  "framelinkavsink name=s tracks=av video-format=RGBA width=1280 height=720 framerate=30/1 "
+  "videotestsrc is-live=true ! video/x-raw,format=RGBA,width=1280,height=720,framerate=30/1 ! s.video_sink "
+  "audiotestsrc is-live=true ! audio/x-raw,format=S16LE,layout=interleaved,rate=48000,channels=2 ! s.audio_sink",
+  &err);
+GstElement* s = gst_bin_get_by_name(GST_BIN(p), "s");
+g_object_set(s, "session", dir, NULL);   // set in code: launch syntax eats Windows backslashes
+gst_element_set_state(p, GST_STATE_PLAYING);  // may start before the consumer exists
+```
+
+The consumer is unchanged; it can be any of the consumer setups above.
+
+- **Startup.** The bin can go to PLAYING before the consumer exists. Media
+  waits at its pads until the session is ready and the consumer has reported
+  ready. The wait is bounded by about twice `connect-timeout-ms`, and a flush
+  or state change ends it. Nothing is queued inside the bin.
+- **Timeline.** At NULL→READY the bin does what
+  `fl_gst_session_apply_pipeline_clock(producer)` does: it sets its pipeline's
+  start time to NONE and its base time to the current system-clock time, and
+  proposes that time as the session epoch. Running time is session time on
+  both tracks, with no offset, rebasing or per-track adjustment. The pipeline
+  must use the system clock. The bin selects it unless the application fixed
+  another pipeline clock, which makes PLAYING fail with a clear error. A producer pause is therefore a media gap, and consumer latency does
+  not change. Live sources that skip samples on resume without setting DISCONT
+  (live `audiotestsrc` does) are refused by `framelinkaudiosink`, just as with
+  the standalone elements.
+- **End of stream.** The bin holds its EOS until the consumer confirms it has
+  rendered the tail.
+- **Format.** With `session=`, the offered formats come from `video-format`,
+  `width`, `height`, `framerate`, `audio-format`, `rate` and `channels`, and
+  upstream caps must match them.
+- **Without `session=`.** The bin is a thin wrapper. Install the
+  `framelink.session.v1` context, adopt the lease with the bin's
+  `adopt-channel` action, and apply the pipeline clock yourself.
+
+### Consumer bin: `framelinkavsrc`
+
+The consumer side has a matching bin. With `session=`, it does discovery,
+negotiation, the clock exchange, the ready report and the drain report
+itself. It exposes separate `video_src` and `audio_src` pads (only the tracks
+you enable exist) and contains no display or audio device: link each pad to
+whatever renders or processes it.
+
+```c
+GstElement* p = gst_parse_launch(
+  "framelinkavsrc name=c tracks=av video-format=RGBA width=1280 height=720 latency-ms=150 "
+  "c.video_src ! queue ! videoconvert ! autovideosink "
+  "c.audio_src ! queue ! audioconvert ! autoaudiosink",
+  &err);
+GstElement* c = gst_bin_get_by_name(GST_BIN(p), "c");
+g_object_set(c, "session", dir, NULL);   // set in code: launch syntax eats Windows backslashes
+gst_element_set_state(p, GST_STATE_PLAYING);  // may start before the producer exists
+```
+
+The two bins work together, and each also works with the standalone setup on
+the other side.
+
+- **Startup.** The bin is a live source. Its pipeline reaches PLAYING without
+  preroll while discovery runs in the background, bounded by
+  `connect-timeout-ms`. The inner sources start once the session is ready and
+  the bin is PLAYING; the bin then reports ready, which releases the
+  producer's media.
+- **Timeline.** At NULL→READY the bin does what
+  `fl_gst_session_apply_pipeline_clock(consumer)` does on its pipeline: system
+  clock (unless the application fixed one; a non-system clock fails PLAYING),
+  start time NONE, base time 0 and pipeline latency `latency-ms`. Mapped PTS
+  are receiver system-clock capture times, so synchronized sinks present each
+  buffer `latency-ms` after capture on both tracks. Downstream audio sinks
+  that provide a clock do not replace it.
+- **Pool.** The consumer allocates the ring. `video-pool` (default 8) must
+  cover the frames held downstream within the latency, as above.
+- **Native memory.** `native-memory=true` creates the ring with deferred read
+  release and outputs the platform GPU memory (`memory:DMABuf`,
+  `memory:D3D11Memory` or `memory:FrameLinkAHardwareBuffer`). Downstream
+  negotiates it with the inner `framelinksrc` exactly as with the standalone
+  element; the bin's pad does not restrict caps features.
+- **End of stream.** When every enabled track has delivered EOS downstream,
+  all media has left the transport and the bin reports the drain, which
+  releases the producer's EOS. Rendering the tail is downstream's job.
+- **Failures and reconnect.** Producer death, track or format mismatch, a
+  missing producer and a fixed non-system clock post errors within bounded
+  time. A new session needs the bin set to NULL and back; there is no
+  automatic in-element reconnect.
+- **Without `session=`.** The bin is a thin wrapper. Install the context,
+  adopt the lease with `adopt-channel`, apply the consumer pipeline clock, and
+  call `fl_gst_session_local_ready` and `fl_gst_session_finish_local` yourself.
+
+### Bin reference
+
+Both bins take these setup properties, changeable only in NULL.
+
+| Property | Default | Meaning |
+|---|---|---|
+| `session` | unset | Private current-user discovery directory; unset means thin mode over an installed `framelink.session.v1` context |
+| `tracks` | `av` | `av`, `video` or `audio`; must match the peer |
+| `video-format`, `width`, `height`, `framerate` | `BGRA`, 1280, 720, 30/1 | Video offered (producer) or accepted (consumer); caps must match |
+| `audio-format`, `rate`, `channels` | `S16LE`, 48000, 2 | PCM offered or accepted (`S16LE`/`F32LE`, 8000–192000 Hz, mono/stereo) |
+| `connect-timeout-ms`, `idle-timeout-ms` | 15000, 15000 | Bounded setup and transport idle deadlines |
+| `audio-queue-ms` | 80 | Hard audio budget; a block larger than it fails |
+| `video-queue-frames` | 2 | Negotiated video budget |
+
+Producer only: `video-pool` (0: consumer default). Consumer only:
+`video-pool` (default 8, the ring it allocates), `latency-ms` (default 150)
+and `native-memory` (default false). Read-only on both: `session-id`,
+`generation`, `video-track-id`, `audio-track-id`. Action signal on both:
+`adopt-channel` (thin mode).
+
+| Bin | Pads (sometimes; only enabled tracks exist) |
+|---|---|
+| `framelinkavsink` | `video_sink`, `audio_sink` |
+| `framelinkavsrc` | `video_src`, `audio_src` |
+
+Audio-only and video-only sessions use `tracks=audio` or `tracks=video` on
+both sides; the bin then has only that pad and allocates nothing for the
+other track. A track set the peer does not have fails both sides at
+negotiation, within the connect timeout; nothing waits for a track that will
+never arrive.
+
+### Lifecycle and failures
+
+The bins and the individual elements behave identically in each of these
+cases (`test/fl_gst_av_parity.cpp` runs every case with element and bin
+producers against element and bin consumers):
+
+| Situation | Behaviour |
+|---|---|
+| Either side starts first | The other side's arrival completes setup; nothing is lost |
+| Producer ends the stream early (EOS) | Everything pushed arrives; the producer's EOS follows the consumer's drain |
+| Producer pauses | A media gap; consumer latency is unchanged (live audio sources that skip without DISCONT are refused) |
+| Consumer pauses | Fails at once: frames the producer delivered meanwhile were replaced in the ring (below) |
+| Seek on either pipeline | Refused (`gst_element_seek` returns FALSE); the stream continues intact |
+| Producer or consumer dies | The peer posts an error within milliseconds |
+| Audio block larger than `audio-queue-ms` | Producer error; consumer sees the peer close |
+| Producer delivers video faster than real time | Fails at once (below) |
+| New session | Set the pipeline (or bin) to NULL and back; a fresh session and generation |
+
+#### Real-time delivery
+
+The coordinated video sink does not pace frames; the producer's sources must
+deliver them in real time. The consumer's ring keeps only the newest unread
+frame, and every frame of a session is accounted for, so a frame replaced
+before the consumer read it cannot be recovered. The consumer then fails at
+once with "coordinated video frame replaced before it was read: the producer
+delivered faster than real time". Causes:
+
+- Non-live sources without pacing. Put `clocksync` before the sink for a
+  decoder or file chain.
+- A clock-paced source that starts behind its timeline, for example when it
+  reaches PLAYING well after the clock was applied. With the bins, a
+  `clocksync`-paced producer is effectively live and starts PLAYING before the
+  session exists, so the time spent waiting for the consumer becomes a
+  backlog; use live sources with `framelinkavsink`, or the individual
+  elements, which start the pipeline only after setup.
+- Pausing the consumer while the producer keeps running.
+- A consumer that takes longer than one frame interval to read a frame; see
+  CPU readback below.
+
+#### CPU readback
+
+Without `native-memory`, the consumer copies every frame out of the ring
+into system memory, holding the ring image while it copies. Ring images are
+GPU allocations. On Linux with a discrete NVIDIA GPU (RTX 3090, linear GBM
+buffers) that copy reads video memory over PCIe at about 34MB/s: a 640x360
+RGBA frame took 27ms median and 78ms at p90, against 33ms per frame at 30fps,
+so frames were replaced before they were read in about half of the runs. At
+320x180 (the example default) the copy fits. For larger frames use
+`native-memory=true` and a downstream that accepts the platform memory
+(DMABuf, D3D11Memory, FrameLinkAHardwareBuffer), which does not copy: 640x360
+passed 5/5 that way on the same machine. System-memory rings for CPU
+consumers are a follow-up (M6.8).
+
+## Timing, latency and pool size
+
+The producer's pipeline runs on the monotonic system clock with base time at
+the negotiated epoch. The consumer's base time is 0 and the mapping turns
+producer running time into consumer system-clock time, so synchronized sinks
+present at PTS plus the pipeline latency. Relative A/V timestamps are never
+rewritten.
+
+Put a `queue` after each FrameLink source. Without it, a synchronized sink
+blocks the source's streaming thread for the whole latency and the source can
+only ever see the newest frame. With the queue, frames held downstream still
+occupy ring images, so size the pool to cover them:
+`pool >= ceil(latency * fps) + 2`. The defaults (150ms, 30fps, pool 8) satisfy
+this. A pool that is too small shows up as `framelink-source-sequence-gap`
+messages, which the example prints.
+
+## Evidence and limits
+
+Two-process qualification: `test/m5b_gst_av_example.py` (registered as the
+`m5b_gst_av_example` test) and [task7 evidence](../docs/m5b/examples/README.md).
+
+Platform qualification (Linux, Windows, Android; elements and bins):
+[task 12 evidence](../docs/m5b/platform-qualification/README.md) covers
+delivery, latency queries, queue bounds, cleanup and exact copy accounting.
+
+The examples use CPU-mappable rings. On the consumer, `native-memory=true`
+(either `framelinksrc` or `framelinkavsrc`) is qualified with coordinated
+sessions: DMABuf, D3D11Memory or FrameLinkAHardwareBuffer with no boundary
+copy. On the producer, the coordinated elements copy system-memory input into
+the ring; native producer allocations
+([GST_NATIVE_MEMORY.md](../docs/GST_NATIVE_MEMORY.md)) are not qualified with
+coordinated sessions. Verify mode checks presentation against the system clock; it is not
+a measurement of physical display scanout or speaker output. Reconnecting after
+a peer failure requires a new session, as with the other coordinated elements.

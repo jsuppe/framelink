@@ -1,0 +1,24 @@
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /tmp/fl-m5a-gst-arm64
+[ 12%] Building CXX object CMakeFiles/framelink.dir/src/framelink_session.cpp.o
+[ 12%] Linking CXX static library libframelink.a
+[ 75%] Built target framelink
+[ 87%] Building CXX object CMakeFiles/fl_session_contract.dir/test/fl_session_contract.cpp.o
+[100%] Linking CXX executable fl_session_contract
+[100%] Built target fl_session_contract
+[ 75%] Built target framelink
+[ 87%] Building CXX object CMakeFiles/fl_session_optional_tracks.dir/test/fl_session_optional_tracks.cpp.o
+[100%] Linking CXX executable fl_session_optional_tracks
+[100%] Built target fl_session_optional_tracks
+[ 75%] Built target framelink
+[ 87%] Building C object CMakeFiles/fl_session_c_api.dir/test/fl_session_c_api.c.o
+[100%] Linking CXX executable fl_session_c_api
+[100%] Built target fl_session_c_api
+[ 66%] Built target framelink
+[ 77%] Building CXX object CMakeFiles/framelink_gst_session.dir/gst/framelink_session_context.cpp.o
+[ 88%] Linking CXX static library libframelink_gst_session.a
+[ 88%] Built target framelink_gst_session
+[ 88%] Building CXX object CMakeFiles/fl_gst_session_context.dir/test/fl_gst_session_context.cpp.o
+[100%] Linking CXX executable fl_gst_session_context
+[100%] Built target fl_gst_session_context

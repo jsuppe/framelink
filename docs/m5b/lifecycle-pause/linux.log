@@ -1,0 +1,16 @@
+Internal ctest changing into directory: /tmp/fl-m5a-gst-build
+Test project /tmp/fl-m5a-gst-build
+    Start 100: gst_session_context
+1/5 Test #100: gst_session_context ..............   Passed    0.02 sec
+    Start 101: gst_audio_sink
+2/5 Test #101: gst_audio_sink ...................   Passed    1.21 sec
+    Start 102: gst_audio_source
+3/5 Test #102: gst_audio_source .................   Passed    1.24 sec
+    Start 103: gst_av_timeline
+4/5 Test #103: gst_av_timeline ..................   Passed    1.10 sec
+    Start 105: gst_event_channel
+5/5 Test #105: gst_event_channel ................   Passed    2.26 sec
+
+100% tests passed, 0 tests failed out of 5
+
+Total Test time (real) =   5.84 sec

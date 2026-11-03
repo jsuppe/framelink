@@ -21,17 +21,20 @@ Digest proof(const Endpoint& e,unsigned char direction,char role,const Nonce& cl
  Digest d{};gsize n=d.size();g_hmac_get_digest(h,d.data(),&n);g_hmac_unref(h);return d;
 }
 bool equal(const Digest&a,const Digest&b){unsigned diff=0;for(size_t i=0;i<a.size();++i)diff|=a[i]^b[i];return diff==0;}
-bool roleValid(char role){return role=='C'||role=='A';}
+bool roleValid(char role){return role=='C'||role=='A'||role=='E';}
 }
-bool authenticateClient(GSocketConnection*c,const Endpoint&e,char role,std::string&error){
+bool authenticateClientCancellable(GSocketConnection*c,const Endpoint&e,char role,std::string&error,GCancellable* cancellable){
  if(!c||!roleValid(role))return fail(error,"invalid authentication role");
  Nonce client{},server{};Digest received{};
- if(!secureRandom(client.data(),client.size(),error)||!write(c,magic,sizeof(magic),error)||!write(c,&role,1,error)||!write(c,client.data(),client.size(),error)
-    ||!read(c,server.data(),server.size(),error)||!read(c,received.data(),received.size(),error))return false;
+ if(!secureRandom(client.data(),client.size(),error)||!write(c,magic,sizeof(magic),error,cancellable)||!write(c,&role,1,error,cancellable)||!write(c,client.data(),client.size(),error,cancellable)
+    ||!read(c,server.data(),server.size(),error,cancellable)||!read(c,received.data(),received.size(),error,cancellable))return false;
  if(!equal(received,proof(e,'S',role,client,server)))return fail(error,"server authentication rejected");
  auto response=proof(e,'C',role,client,server);
  unsigned char ok=0;
- return write(c,response.data(),response.size(),error)&&read(c,&ok,1,error)&&(ok==1||fail(error,"client authentication rejected"));
+ return write(c,response.data(),response.size(),error,cancellable)&&read(c,&ok,1,error,cancellable)&&(ok==1||fail(error,"client authentication rejected"));
+}
+bool authenticateClient(GSocketConnection*c,const Endpoint&e,char role,std::string&error){
+ return authenticateClientCancellable(c,e,role,error,nullptr);
 }
 bool authenticateServerCancellable(GSocketConnection*c,const Endpoint&e,char expectedRole,std::string&error,GCancellable* cancellable){
  if(!c||!roleValid(expectedRole))return fail(error,"invalid authentication role");

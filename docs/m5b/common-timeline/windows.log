@@ -1,0 +1,161 @@
+#< CLIXML
+-- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.26300.
+-- framelink: building GStreamer elements (gstframelink)
+-- Configuring done (0.8s)
+-- Generating done (1.0s)
+-- Build files have been written to: <win-tree>/build
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  fl_ipc_win32.cpp
+  fl_trace.cpp
+  framelink_memory.cpp
+  framelink_session.cpp
+  framelink_slots.cpp
+  framelink_win.cpp
+  Generating Code...
+     Creating library <win-tree>/build/Release/framelink.lib and object <win-tree>/build/Release/framelink.exp
+  framelink.vcxproj -> <win-tree>\build\Release\framelink.dll
+  framelink_session_context.cpp
+  framelink_session_transport.cpp
+  av_auth.cpp
+  av_rendezvous.cpp
+  Generating Code...
+     Creating library <win-tree>/build/Release/framelink_gst_session.lib and object <win-tree>/build/Release/framelink_gst_session.exp
+  framelink_gst_session.vcxproj -> <win-tree>\build\Release\framelink_gst_session.dll
+  fl_gst_audio_startup.cpp
+  gstframelink.cpp
+  The d3d11 library from gst-plugins-bad is unstable API and may change in future.
+  You can define GST_USE_UNSTABLE_API to avoid this warning.
+  gstframelinkaudio.cpp
+  gstframelinkaudiosrc.cpp
+  Generating Code...
+     Creating library <win-tree>/build/Release/gstframelink.lib and object <win-tree>/build/Release/gstframelink.exp
+  gstframelink.vcxproj -> <win-tree>\build\Release\gstframelink.dll
+  Building Custom Rule <win-tree>/CMakeLists.txt
+  fl_gst_av_timeline.cpp
+  fl_gst_av_timeline.vcxproj -> <win-tree>\build\Release\fl_gst_av_timeline.exe
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <win-tree>\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> <win-tree>\build\Release\framelink_gst_session.dll
+  gstframelink.vcxproj -> <win-tree>\build\Release\gstframelink.dll
+  fl_gst_audio_source.cpp
+  fl_gst_audio_source.vcxproj -> <win-tree>\build\Release\fl_gst_audio_source.exe
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <win-tree>\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> <win-tree>\build\Release\framelink_gst_session.dll
+  gstframelink.vcxproj -> <win-tree>\build\Release\gstframelink.dll
+  fl_gst_audio_sink.cpp
+  fl_gst_audio_sink.vcxproj -> <win-tree>\build\Release\fl_gst_audio_sink.exe
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <win-tree>\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> <win-tree>\build\Release\framelink_gst_session.dll
+  fl_gst_session_context.cpp
+  fl_gst_session_context.vcxproj -> <win-tree>\build\Release\fl_gst_session_context.exe
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <win-tree>\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> <win-tree>\build\Release\framelink_gst_session.dll
+  av_auth.cpp
+  av_rendezvous.cpp
+  fl_gst_session_transport.cpp
+  Generating Code...
+  fl_gst_session_transport.vcxproj -> <win-tree>\build\Release\fl_gst_session_transport.exe
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <win-tree>\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> <win-tree>\build\Release\framelink_gst_session.dll
+  fl_gst_local_audio.cpp
+  fl_gst_local_audio.vcxproj -> <win-tree>\build\Release\fl_gst_local_audio.exe
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <win-tree>\build\Release\framelink.dll
+  av_auth.cpp
+  av_rendezvous.cpp
+  av_apps.cpp
+  av_memory_agreement.cpp
+  Generating Code...
+  framelink_av_playback.vcxproj -> <win-tree>\build\Release\framelink_av_playback.lib
+  fl_gst_sink_stats.cpp
+  fl_gst_sink_stats.vcxproj -> <win-tree>\build\Release\fl_gst_sink_stats.exe
+UpdateCTestConfiguration  from :<win-tree>/build/DartConfiguration.tcl
+Test project <win-tree>/build
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 82
+    Start  82: gst_sink_stats
+
+82: Test command: <win-tree>\build\Release\fl_gst_sink_stats.exe "<win-tree>/build/Release/gstframelink.dll"
+82: Working Directory: <win-tree>/build
+82: Test timeout computed to be: 15
+82: EOS reports transport loss instead of counting inputs as delivered
+1/7 Test  #82: gst_sink_stats ...................   Passed    0.10 sec
+test 97
+    Start  97: gst_session_transport
+
+97: Test command: <win-tree>\build\Release\fl_gst_session_transport.exe
+97: Working Directory: <win-tree>/build
+97: Test timeout computed to be: 15
+97: authenticated session transport: all track modes, wrong key, mismatch, invalid config, timeout and cancel passed
+2/7 Test  #97: gst_session_transport ............   Passed    0.22 sec
+test 98
+    Start  98: gst_session_context
+
+98: Test command: <win-tree>\build\Release\fl_gst_session_context.exe
+98: Working Directory: <win-tree>/build
+98: Test timeout computed to be: 10
+98: session context: ownership, readiness, track masks, generations and cancellation passed
+3/7 Test  #98: gst_session_context ..............   Passed    0.08 sec
+test 99
+    Start  99: gst_audio_sink
+
+99: Test command: <win-tree>\build\Release\fl_gst_audio_sink.exe "<win-tree>/build/Release/gstframelink.dll"
+99: Working Directory: <win-tree>/build
+99: Test timeout computed to be: 20
+99: backpressure: 49 blocks accepted before bounded failure; teardown_us=209
+99: public audio sink: exact PCM/PTS/duration and missing-auth/invalid-PTS/oversized-block negatives passed
+4/7 Test  #99: gst_audio_sink ...................   Passed    1.26 sec
+test 100
+    Start 100: gst_audio_source
+
+100: Test command: <win-tree>\build\Release\fl_gst_audio_source.exe "<win-tree>/build/Release/gstframelink.dll"
+100: Working Directory: <win-tree>/build
+100: Test timeout computed to be: 20
+100: public audio source: exact four PCM formats/layouts, incremental packet delivery before EOS, both startup orders, live latency, missing-peer and cancellation passed
+5/7 Test #100: gst_audio_source .................   Passed    1.29 sec
+test 101
+    Start 101: gst_av_timeline
+
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
+101: Test timeout computed to be: 20
+101: coordinated public A/V: distinct TIME segments, one receiver mapping, exact +/-37ms offset, pixels/PCM/DTS/duration/generation passed
+6/7 Test #101: gst_av_timeline ..................   Passed    0.86 sec
+test 102
+    Start 102: gst_local_audio
+
+102: Test command: <win-tree>\build\Release\fl_gst_local_audio.exe
+102: Working Directory: <win-tree>/build
+102: Test timeout computed to be: 10
+102: local audio setup: both startup orders, authenticated stream lifetime and bounded missing-peer passed
+7/7 Test #102: gst_local_audio ..................   Passed    0.18 sec
+
+The following tests passed:
+	gst_sink_stats
+	gst_session_transport
+	gst_session_context
+	gst_audio_sink
+	gst_audio_source
+	gst_av_timeline
+	gst_local_audio
+
+100% tests passed, 0 tests failed out of 7
+
+Total Test time (real) =   4.11 sec
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04"><Obj S="progress" RefId="0"><TN RefId="0"><T>System.Management.Automation.PSCustomObject</T><T>System.Object</T></TN><MS><I64 N="SourceId">1</I64><PR N="Record"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj></Objs>

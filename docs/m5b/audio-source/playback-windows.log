@@ -1,0 +1,32 @@
+#< CLIXML
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <win-tree>\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> <win-tree>\build\Release\framelink_gst_session.dll
+  gstframelink.vcxproj -> <win-tree>\build\Release\gstframelink.dll
+  fl_gst_audio_source.cpp
+  fl_gst_audio_source.vcxproj -> <win-tree>\build\Release\fl_gst_audio_source.exe
+UpdateCTestConfiguration  from :<win-tree>/build/DartConfiguration.tcl
+Test project <win-tree>/build
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 100
+    Start 100: gst_audio_source
+
+100: Test command: <win-tree>\build\Release\fl_gst_audio_source.exe "<win-tree>/build/Release/gstframelink.dll"
+100: Working Directory: <win-tree>/build
+100: Test timeout computed to be: 20
+100: public audio source: exact four PCM formats/layouts, incremental packet delivery before EOS, both startup orders, live latency, missing-peer and cancellation passed
+1/1 Test #100: gst_audio_source .................   Passed    1.29 sec
+
+The following tests passed:
+	gst_audio_source
+
+100% tests passed, 0 tests failed out of 1
+
+Total Test time (real) =   1.31 sec
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04"><Obj S="progress" RefId="0"><TN RefId="0"><T>System.Management.Automation.PSCustomObject</T><T>System.Object</T></TN><MS><I64 N="SourceId">1</I64><PR N="Record"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj></Objs>

@@ -4,6 +4,9 @@
 #include <limits>
 #include <initializer_list>
 namespace {
+bool versionValid(uint32_t v) { return v==FL_SESSION_VERSION || v==FL_SESSION_OPTIONAL_TRACKS_VERSION; }
+bool videoEmpty(const flVideoFormat& v) { return !v.format&&!v.width&&!v.height&&!v.fpsNum&&!v.fpsDen; }
+bool audioEmpty(const flAudioFormat& a) { return !a.pcm&&!a.rate&&!a.layout; }
 bool idValid(const flSessionId& id) { uint8_t v=0; for(auto b:id.bytes) v|=b; return v!=0; }
 bool same(const flSessionId& a,const flSessionId& b) { return !std::memcmp(a.bytes,b.bytes,16); }
 bool audioValid(const flAudioFormat& a) { return (a.pcm==FL_PCM_S16||a.pcm==FL_PCM_F32) && a.rate>=8000 && a.rate<=192000 && (a.layout==FL_LAYOUT_MONO||a.layout==FL_LAYOUT_STEREO); }
@@ -12,8 +15,9 @@ bool eq(const flAudioFormat&a,const flAudioFormat&b) { return a.pcm==b.pcm&&a.ra
 bool eq(const flVideoFormat&a,const flVideoFormat&b) { return a.format==b.format&&a.width==b.width&&a.height==b.height&&uint64_t(a.fpsNum)*b.fpsDen==uint64_t(b.fpsNum)*a.fpsDen; }
 flSessionResult caps(const flSessionCapabilities* c) {
  if(!c) return FL_SESSION_INVALID;
- if(c->version!=FL_SESSION_VERSION) return FL_SESSION_VERSION_ERROR;
- if(!c->videoCount||c->videoCount>FL_SESSION_MAX_FORMATS||!c->audioCount||c->audioCount>FL_SESSION_MAX_FORMATS) return FL_SESSION_INVALID;
+ if(!versionValid(c->version)) return FL_SESSION_VERSION_ERROR;
+ if(c->videoCount>FL_SESSION_MAX_FORMATS||c->audioCount>FL_SESSION_MAX_FORMATS||(!c->videoCount&&!c->audioCount)) return FL_SESSION_INVALID;
+ if(c->version==FL_SESSION_VERSION&&(!c->videoCount||!c->audioCount)) return FL_SESSION_INVALID;
  for(uint32_t i=0;i<c->videoCount;i++) if(!videoValid(c->video[i])) return FL_SESSION_INVALID;
  for(uint32_t i=0;i<c->audioCount;i++) if(!audioValid(c->audio[i])) return FL_SESSION_INVALID;
  return FL_SESSION_OK;
@@ -26,26 +30,39 @@ extern "C" {
 flSessionResult flSessionNegotiate(const flSessionCapabilities* p,const flSessionCapabilities* c,flVideoFormat* v,flAudioFormat* a) {
  if(!v||!a) return FL_SESSION_INVALID;
  auto r=caps(p); if(r!=FL_SESSION_OK) return r; r=caps(c); if(r!=FL_SESSION_OK) return r;
+ if(p->version!=c->version)return FL_SESSION_VERSION_ERROR;
+ if(bool(p->videoCount)!=bool(c->videoCount)||bool(p->audioCount)!=bool(c->audioCount))return FL_SESSION_INCOMPATIBLE;
  flVideoFormat chosenV{}; flAudioFormat chosenA{};
  for(uint32_t i=0;i<p->videoCount&&!chosenV.width;i++) for(uint32_t j=0;j<c->videoCount;j++) if(eq(p->video[i],c->video[j])) { chosenV=p->video[i]; break; }
  for(int preferred=1;preferred>=0&&!chosenA.rate;preferred--) for(uint32_t i=0;i<p->audioCount&&!chosenA.rate;i++) {
   if(preferred&&p->audio[i].rate!=48000) continue;
   for(uint32_t j=0;j<c->audioCount;j++) if(eq(p->audio[i],c->audio[j])) { chosenA=p->audio[i]; break; }
  }
- if(!chosenV.width||!chosenA.rate) return FL_SESSION_INCOMPATIBLE;
+ if((p->videoCount&&!chosenV.width)||(p->audioCount&&!chosenA.rate)) return FL_SESSION_INCOMPATIBLE;
  *v=chosenV; *a=chosenA; return FL_SESSION_OK;
 }
 flSessionResult flSessionValidate(const flSessionConfig* c) {
  if(!c) return FL_SESSION_INVALID;
- if(c->version!=FL_SESSION_VERSION) return FL_SESSION_VERSION_ERROR;
- if(!idValid(c->sessionId)||!idValid(c->clockId)||!c->generation||!c->videoTrackId||!c->audioTrackId||c->videoTrackId==c->audioTrackId||!videoValid(c->video)||!audioValid(c->audio)||c->epochNs<0||!c->videoQueueFrames||c->videoQueueFrames>16||!c->audioQueueMs||c->audioQueueMs>2000||!c->connectTimeoutMs||c->connectTimeoutMs>60000||!c->idleTimeoutMs||c->idleTimeoutMs>60000) return FL_SESSION_INVALID;
+ if(!versionValid(c->version)) return FL_SESSION_VERSION_ERROR;
+ if(!idValid(c->sessionId)||!idValid(c->clockId)||!c->generation||c->epochNs<0||!c->connectTimeoutMs||c->connectTimeoutMs>60000||!c->idleTimeoutMs||c->idleTimeoutMs>60000) return FL_SESSION_INVALID;
+ if(!c->videoTrackId&&!c->audioTrackId)return FL_SESSION_INVALID;
+ if(c->version==FL_SESSION_VERSION&&(!c->videoTrackId||!c->audioTrackId))return FL_SESSION_INVALID;
+ if(c->videoTrackId&&c->videoTrackId==c->audioTrackId)return FL_SESSION_INVALID;
+ if(c->videoTrackId) {
+  if(!videoValid(c->video)||!c->videoQueueFrames||c->videoQueueFrames>16)return FL_SESSION_INVALID;
+ } else if(!videoEmpty(c->video)||c->videoQueueFrames)return FL_SESSION_INVALID;
+ if(c->audioTrackId) {
+  if(!audioValid(c->audio)||!c->audioQueueMs||c->audioQueueMs>2000)return FL_SESSION_INVALID;
+ } else if(!audioEmpty(c->audio)||c->audioQueueMs)return FL_SESSION_INVALID;
  return FL_SESSION_OK;
 }
 flSessionResult flSessionValidateSelection(const flSessionConfig* c,const flSessionCapabilities* p,const flSessionCapabilities* q) {
  auto r=flSessionValidate(c); if(r!=FL_SESSION_OK)return r;
  r=caps(p);if(r!=FL_SESSION_OK)return r;r=caps(q);if(r!=FL_SESSION_OK)return r;
  for(const auto* offer:{p,q}) {
-  bool video=false,audio=false;
+  if(offer->version!=c->version)return FL_SESSION_VERSION_ERROR;
+  if(bool(offer->videoCount)!=bool(c->videoTrackId)||bool(offer->audioCount)!=bool(c->audioTrackId))return FL_SESSION_INCOMPATIBLE;
+  bool video=!c->videoTrackId,audio=!c->audioTrackId;
   for(uint32_t i=0;i<offer->videoCount;i++) video|=eq(c->video,offer->video[i]);
   for(uint32_t i=0;i<offer->audioCount;i++) audio|=eq(c->audio,offer->audio[i]);
   if(!video||!audio)return FL_SESSION_INCOMPATIBLE;
@@ -54,6 +71,7 @@ flSessionResult flSessionValidateSelection(const flSessionConfig* c,const flSess
 }
 flSessionResult flSessionValidateReplacement(const flSessionConfig* c,const flSessionConfig* n) {
  auto r=flSessionValidate(c); if(r!=FL_SESSION_OK)return r; r=flSessionValidate(n); if(r!=FL_SESSION_OK)return r;
+ if(c->version!=n->version)return FL_SESSION_VERSION_ERROR;
  if(!same(c->sessionId,n->sessionId)||c->videoTrackId!=n->videoTrackId||c->audioTrackId!=n->audioTrackId)return FL_SESSION_INVALID;
  return n->generation>c->generation ? FL_SESSION_OK:FL_SESSION_STALE;
 }
@@ -61,7 +79,7 @@ flSessionResult flSessionEncode(const flSessionConfig* c,void* data,size_t size)
  if(!data||size!=FL_SESSION_WIRE_SIZE)return FL_SESSION_INVALID;
  auto r=flSessionValidate(c);if(r!=FL_SESSION_OK)return r;
  auto p=static_cast<uint8_t*>(data);std::memset(p,0,size);
- put(p,0x31535646,4);put(p,c->version,4);
+ put(p,c->version==FL_SESSION_VERSION?0x31535646:0x32535646,4);put(p,c->version,4);
  std::memcpy(p,c->sessionId.bytes,16);p+=16;std::memcpy(p,c->clockId.bytes,16);p+=16;
  put(p,c->generation,8);put(p,c->videoTrackId,4);put(p,c->audioTrackId,4);
  put(p,c->video.format,4);put(p,c->video.width,4);put(p,c->video.height,4);put(p,c->video.fpsNum,4);put(p,c->video.fpsDen,4);
@@ -72,9 +90,10 @@ flSessionResult flSessionEncode(const flSessionConfig* c,void* data,size_t size)
 flSessionResult flSessionDecode(const void* data,size_t size,flSessionConfig* out) {
  if(!data||!out||size!=FL_SESSION_WIRE_SIZE)return FL_SESSION_INVALID;
  auto p=static_cast<const uint8_t*>(data);auto end=p+size;
- if(get(p,4)!=0x31535646)return FL_SESSION_INVALID;
+ const auto magic=get(p,4);
+ if(magic!=0x31535646&&magic!=0x32535646)return FL_SESSION_INVALID;
  flSessionConfig c{};c.version=uint32_t(get(p,4));
- if(c.version!=FL_SESSION_VERSION)return FL_SESSION_VERSION_ERROR;
+ if(!versionValid(c.version)||magic!=(c.version==FL_SESSION_VERSION?0x31535646u:0x32535646u))return FL_SESSION_VERSION_ERROR;
  std::memcpy(c.sessionId.bytes,p,16);p+=16;std::memcpy(c.clockId.bytes,p,16);p+=16;
  c.generation=get(p,8);c.videoTrackId=uint32_t(get(p,4));c.audioTrackId=uint32_t(get(p,4));
  c.video.format=uint32_t(get(p,4));c.video.width=uint32_t(get(p,4));c.video.height=uint32_t(get(p,4));c.video.fpsNum=uint32_t(get(p,4));c.video.fpsDen=uint32_t(get(p,4));

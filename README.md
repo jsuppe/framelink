@@ -24,8 +24,12 @@ CI, and latest signed Android regressions **6/6**. See
   [performance scope, copies and exclusions](docs/m5a/multihop-performance-20261101/README.md).
 - [Audio policy](docs/AUDIO_MEMORY_POLICY.md) retains serialized GDP/GIO PCM;
   native video does not imply whole-A/V zero-copy.
-- **M5b next:** public audio source/sink, shared session coordination and A/V bins.
-  These are not yet shipped public elements.
+- **M5b (PR #8):** public GStreamer audio elements (`framelinkaudiosink`,
+  `framelinkaudiosrc`), coordinated A/V sessions for the video elements, and
+  the `framelinkavsink`/`framelinkavsrc` bins, qualified on Linux, Windows and
+  Android. Start with the [developer guide](samples/GST_AV_EXAMPLE.md), the
+  [element reference](docs/GST_AV_REFERENCE.md) and the
+  [migration guide](docs/GST_AV_MIGRATION.md).
 - **M6/M7 not started:** extended reliability/performance qualification, then release.
 
 M5a shares compatible allocations at process boundaries with explicit CPU/GPU
@@ -152,10 +156,11 @@ See [native integration](docs/GST_NATIVE_MEMORY.md),
 [Windows decoder example](samples/D3D_DECODER.md) and [relay](samples/NATIVE_RELAY.md).
 Fan-out to multiple consumers of one channel is not implemented (use separate channels).
 
-**M5a progress:** tasks1–14 locally validated; final integrated review/CI/merge
-(task15) is pending. [Checkable roadmap](docs/ROADMAP_TASKS.md) distinguishes
-implemented, locally qualified and merged work. M5b audio elements/A/V bins, M6
-reliability qualification and M7 release follow sequentially.
+**M5b:** public audio elements, coordinated A/V sessions and convenience bins;
+see the [A/V contract](docs/GSTREAMER_AV_CONTRACT.md) and
+[platform qualification](docs/m5b/platform-qualification/README.md).
+[Checkable roadmap](docs/ROADMAP_TASKS.md) distinguishes implemented, locally
+qualified and merged work. M6 reliability qualification and M7 release follow.
 
 [Performance evidence](docs/m5a/multihop-performance-20261101/README.md) records
 supported one/two-boundary1080p60 paths with two original allocations: nominal

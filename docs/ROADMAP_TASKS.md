@@ -177,7 +177,7 @@ playback delay; unsupported hardware paths must reject clearly.
 
 ## M5b — GStreamer audio elements and coordinated A/V sessions
 
-**State: planned, not started.** Added at Jon's request 2026-11-01. Execute
+**State: in progress; tasks1–12 locally validated; task13 publish/review/merge next.** Added at Jon's request 2026-11-01. Execute
 only after M5a closes, before M6 qualifies the complete public integration path.
 Video elements remain video-only; separate audio elements share one session.
 
@@ -190,53 +190,103 @@ after the individual elements and session/timing behavior are validated. They
 expose separate audio/video pads, not a new multiplexed format; individual
 elements remain independently available.
 
-- [ ] **M5b.1 Public element/session contract:** define pad caps, supported PCM
+- [x] **M5b.1 Public element/session contract:** define pad caps, supported PCM
   formats/rates/layouts, properties, session/track identifiers, discovery/auth,
   standalone audio mode and opt-in coordinated A/V mode. Unsupported caps fail
   clearly; retain existing video-only application behavior.
-- [ ] **M5b.2 Reusable session coordinator:** share authenticated negotiation,
+  [Public contract](GSTREAMER_AV_CONTRACT.md): explicit v2 optional-track semantics,
+  typed shared context, bounded lifecycle and separate-pad bin names. Design only;
+  factories/runtime qualification remain subsequent tasks.
+- [x] **M5b.2 Reusable session coordinator:** share authenticated negotiation,
   track readiness, common epoch/clock mapping and config generation across audio
   and video elements. Define GstContext/API propagation and bounded missing-peer
   behavior without requiring sample-application internals.
-- [ ] **M5b.3 Audio sink:** wrap existing bounded PCM transport, negotiate caps,
+  [Control validation](m5b/coordinator-control/README.md): Linux9/9, Windows8/8,
+  Android5/5 and dualABI/JNI builds. Public media elements remain next.
+- [x] **M5b.3 Audio sink:** wrap existing bounded PCM transport, negotiate caps,
   carry timestamps/durations/discontinuities, handle flow errors and backpressure;
   report explicit serialization/copy costs rather than imply shared PCM.
-- [ ] **M5b.4 Audio source:** receive PCM with exact sample order and timing,
+  [Sink validation](m5b/audio-sink-local/README.md): Linux5/5, Windows5/5, Android4/4 and dualABI/JNI builds. Later timing/lifecycle gates remain explicit.
+- [x] **M5b.4 Audio source:** receive PCM with exact sample order and timing,
   reconstruct buffers/caps, expose appropriate live/latency behavior and integrate
   with standard playback sinks using the shared pipeline clock.
-- [ ] **M5b.5 Common A/V timing:** map TIME segments into one common timeline,
+  [Source validation](m5b/audio-source/README.md): Linux6/6, Windows6/6, Android5/5, dualABI/JNI; clock-synchronized sink controls passed on all three.
+- [x] **M5b.5 Common A/V timing:** map TIME segments into one common timeline,
   preserve intentional offsets, handle missing/invalid PTS, GAP, DISCONT, EOS,
   flush and new segment epochs. Never independently zero audio and video origins;
   define supported seek/rate-change behavior and reject unsupported modes.
-- [ ] **M5b.6 Lifecycle/security:** both startup orders, coordinated pause/resume,
+  [Timing acceptance](m5b/timing-controls/README.md): common offsets, GAP/barriers,
+  flush invalidation, empty EOS, unsupported rates and fresh generation mappings.
+  Actual reconnect/pause lifecycle remains task6.
+- [x] **M5b.6 Lifecycle/security:** both startup orders, coordinated pause/resume,
   track loss, cancellation, peer death/reconnect, stale generations, negotiation
   rejection, bounded cleanup and platform endpoint permissions/authentication.
-- [ ] **M5b.7 Integration examples:** audio-only and two-process A/V GStreamer
+  [Closure matrix](m5b/lifecycle-security/README.md) with [fatal propagation](m5b/fatal-propagation/README.md)
+  and [reconnect](m5b/reconnect/README.md): Linux105/105 serial, Windows10/10,
+  timeline20/20 on Linux/Windows/Android. Automatic in-element reconnect is not provided.
+- [x] **M5b.7 Integration examples:** audio-only and two-process A/V GStreamer
   examples, with Windows integration first, then Linux/Android adapters. Show
   independent video rendering plus standard audio output, shared session setup
   and CPU/native-video compatibility without hand-wired GDP internals.
-- [ ] **M5b.8 Automated validation:** GstTestClock/segment tests, exact PCM and
+  [Guide](../samples/GST_AV_EXAMPLE.md), [evidence](m5b/examples/README.md): public
+  one-call A/V setup, clock, ready and drain helpers; two-process example 30/30 on
+  Linux/Windows/Android, Windows display mode, Linux107/107 serial. Five defects
+  fixed with negative controls. CPU rings only; native memory stays M5a-qualified.
+- [x] **M5b.8 Automated validation:** GstTestClock/segment tests, exact PCM and
   producer-to-consumer A/V offset checks, skew/jitter accounting, negative controls,
   restart/failure scenarios and regression tests for existing video-only elements.
-- [ ] **M5b.9 Producer A/V bin:** compose the validated video/audio sinks with
+  [Evidence](m5b/validation/README.md): `gst_av_validation` (test-clock deadlines,
+  exact per-sample/per-pixel content, 0ns offset/drift, reported jitter, 7 fault
+  controls plus a leak control, 10 restart rounds) and `tools/m5b_validation_matrix.py`
+  (`m5b_av` and `gst_video_regression` suites). x20 on Linux, Windows and Android,
+  Linux 108/108 serial. Fixed an intermittent rendezvous stall: loopback session
+  connections no longer use the system proxy resolver (libproxy).
+- [x] **M5b.9 Producer A/V bin:** compose the validated video/audio sinks with
   the shared session coordinator; expose separate audio/video sink ghost pads and
   one documented session configuration. Propagate caps, segments, EOS, flush,
   state changes and errors without adding independent timestamp rebasing or a
   hidden per-track latency reservoir. Final public element name is set in M5b.1.
-- [ ] **M5b.10 Consumer A/V bin:** compose the validated video/audio sources;
+  [Evidence](m5b/producer-bin/README.md): `framelinkavsink`, self-contained with
+  `session=` (decision Jon 2026-11-02) or thin over an installed context. Media
+  is held until ready; the timeline matches apply_pipeline_clock; EOS waits for
+  the consumer drain. `gst_av_bin` x20 on Linux/Windows/Android, latency
+  150–153ms on both tracks, bin/thin pause parity, Linux 109/109 serial.
+- [x] **M5b.10 Consumer A/V bin:** compose the validated video/audio sources;
   expose separate audio/video source ghost pads for independent downstream
   rendering/playback. Coordinate readiness, session clocks and reconnect; do not
   hardwire a display or audio device. Preserve native video memory negotiation.
-- [ ] **M5b.11 Bin parity and examples:** demonstrate standalone-element and
+  [Evidence](m5b/consumer-bin/README.md): `framelinkavsrc`, live source with
+  `session=` (consumer discovery off the state-change path, ready after its
+  sources start, drain after EOS on every track) or thin over an installed
+  context; consumer pipeline-clock semantics; reconnect via NULL. Native memory
+  negotiated per platform (DMABuf, D3D11Memory, FrameLinkAHardwareBuffer).
+  Both bins select the system clock unless the application fixed one.
+  `gst_av_src_bin` and `gst_av_bin` x20 on Linux, Windows and Android; Linux
+  110/110 serial.
+- [x] **M5b.11 Bin parity and examples:** demonstrate standalone-element and
   bin-based two-process pipelines. Test equivalent PCM/video timing and negotiated
   memory paths, missing-track policy, startup/pause/flush/EOS, peer death/reconnect,
   error propagation, queue bounds and cleanup. Document properties/pad names and
   supported audio-only/video-only behavior without silently waiting forever.
-- [ ] **M5b.12 Platform qualification:** Windows, Linux and Android builds/runtime
+  [Evidence](m5b/bin-parity/README.md): `gst_av_parity` runs 16 scenarios in all
+  four element/bin combinations with identical outcomes; the example runs
+  `--bin` on either side with element/bin lag agreement. Fixed: consumer-bin
+  drain after failure, refused seeks breaking the session (sinks refuse seeks),
+  replaced video frames now fail at once (decision Jon 2026-11-02). Documented:
+  real-time delivery and CPU readback limits (example default 320x180; M6.8).
+  Matrix x10 Linux, Windows and Android.
+- [x] **M5b.12 Platform qualification:** Windows, Linux and Android builds/runtime
   on supported targets; verify native video plus audio, audio-only, latency
   queries, queue bounds, resource cleanup and tracing/copy accounting for both
-individual elements and convenience bins. Separate
+  individual elements and convenience bins. Separate
   software timing evidence from physical speaker/display alignment.
+  [Evidence](m5b/platform-qualification/README.md): `gst_av_qualification`
+  runs A/V CPU, A/V native-consumer, video-only and audio-only sessions in all
+  four element/bin combinations, each a traced child process: exact per-platform
+  copy accounting with lossless recorders, latency queries, ring/audio-queue
+  bounds, EOS statistics, element/bin churn and recorder/accounting/leak
+  controls. Matrix x10 Linux, Windows and Android; Android x86_64 build-only.
+  Native producer allocations in sessions are not qualified (M6.9).
 - [ ] **M5b.13 Publish/review/merge:** element reference, copy/timing contract,
   developer migration guide, examples, final-revision CI and reviewed evidence.
   Feed these elements into M6's sustained/performance qualification matrix.
@@ -265,6 +315,16 @@ baseline evidence, not completion of these release-scale tasks.
   detection and reproducible frame/audio accounting.
 - [ ] **M6.7 Automate and close:** deterministic CI faults, reproducible benchmark
   commands and reviewed acceptance report with remaining unsupported modes.
+- [ ] **M6.8 CPU-consumer ring memory (found in M5b.11):** Linux GBM linear
+  rings live in discrete-GPU video memory, so the CPU consumer path reads
+  ~34MB/s (640x360 RGBA: 27ms median, 78ms p90 on an RTX 3090) and cannot
+  sustain 30fps there. Allocate CPU-consumed rings in cached system memory (or
+  use streaming reads), qualify throughput per platform and publish budgets.
+- [ ] **M6.9 Native producer in coordinated sessions (found in M5b.12):** the
+  coordinated producer elements copy system-memory input into the ring; wire
+  `framelinksink native-memory=true` (M5a policy binding, readiness fences)
+  into sessions so native producer allocations travel without a copy, and
+  qualify on each platform.
 
 ## M7 — Release and developer handoff
 
