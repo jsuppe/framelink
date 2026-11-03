@@ -23,7 +23,7 @@ Run instructions and exact contract: ../AUDIO_VIDEO.md.
 
 ## Android native qualification
 
-Static SDK: `/home/melchior/dev/gstreamer-android/{arm64,x86_64}`, NDK28.2,
+Static SDK: `<linux-home>/dev/gstreamer-android/{arm64,x86_64}`, NDK28.2,
 API29 Release. Both ABIs build. Arm64 executable run as adb shell in isolated
 `/data/local/tmp/fl-av-session`; no Activity launch/replacement. GDP/TCP/core/app
 plugins registered statically with explicit gio/gstreamer-net dependencies.
@@ -40,7 +40,7 @@ plugins registered statically with explicit gio/gstreamer-net dependencies.
 
 Caspar, Windows x64, NVIDIA RTX5090, MSVC Release, GStreamer 1.26.11.
 Source revision `b498e0b`; isolated checkout/build
-`C:\Users\jonsu\dev\framelink-audio-20261030`; existing demo untouched.
+`<win-home>\dev\framelink-audio-20261030`; existing demo untouched.
 No Windows portability source changes were needed.
 
 - Full suite **30/30 passed**, including normal and fault A/V tests

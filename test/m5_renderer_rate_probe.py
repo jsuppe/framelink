@@ -3,9 +3,9 @@
 import ctypes
 from ctypes import wintypes
 import os,pathlib,json,subprocess,time,urllib.request,socket,argparse
-p=argparse.ArgumentParser();p.add_argument("--build",default="C:/Users/jonsu/dev/framelink-m5-pipeline/build/Release");p.add_argument("--renderer",default="C:/Users/jonsu/dev/vkrender-m5-pipeline/build/Release/vkrenderer.exe");p.add_argument("--output");p.add_argument("--clock-policy",choices=["audio","producer"],default="producer");p.add_argument("--seconds",type=int,default=5);p.add_argument("--case");p.add_argument("--trace",choices=["off","on"],default="on");p.add_argument("--native",action="store_true");args=p.parse_args();p.error("seconds must be 1..300") if not 1<=args.seconds<=300 else None
+p=argparse.ArgumentParser();p.add_argument("--build",default=os.path.expanduser("~/dev/framelink-m5-pipeline/build/Release"));p.add_argument("--renderer",default=os.path.expanduser("~/dev/vkrender-m5-pipeline/build/Release/vkrenderer.exe"));p.add_argument("--output");p.add_argument("--clock-policy",choices=["audio","producer"],default="producer");p.add_argument("--seconds",type=int,default=5);p.add_argument("--case");p.add_argument("--trace",choices=["off","on"],default="on");p.add_argument("--native",action="store_true");args=p.parse_args();p.error("seconds must be 1..300") if not 1<=args.seconds<=300 else None
 if args.clock_policy!='producer':p.error('finite qualification requires --clock-policy producer')
-root=pathlib.Path(args.output or 'C:/Users/jonsu/dev/m5-render-rate-v3');root.mkdir(exist_ok=True)
+root=pathlib.Path(args.output or os.path.expanduser('~/dev/m5-render-rate-v3'));root.mkdir(exist_ok=True)
 b=pathlib.Path(args.build);renderer=pathlib.Path(args.renderer)
 baseenv=dict(os.environ);baseenv['PATH']='C:/Program Files/gstreamer/1.0/msvc_x86_64/bin;'+baseenv['PATH']
 def process_cpu(proc):

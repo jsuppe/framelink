@@ -3,19 +3,19 @@
 -- framelink: building GStreamer elements (gstframelink)
 -- Configuring done (0.8s)
 -- Generating done (0.7s)
--- Build files have been written to: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+-- Build files have been written to: <win-home>/dev/framelink-m5a-contract-20261101/build
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
-  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
+  framelink.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
   av_apps.cpp
-  framelink_av_producer.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink_av_producer.exe
+  framelink_av_producer.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\framelink_av_producer.exe
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
-  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
+  framelink.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
   av_apps.cpp
-  framelink_av_consumer.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink_av_consumer.exe
-UpdateCTestConfiguration  from :C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/DartConfiguration.tcl
-Test project C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+  framelink_av_consumer.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\framelink_av_consumer.exe
+UpdateCTestConfiguration  from :<win-home>/dev/framelink-m5a-contract-20261101/build/DartConfiguration.tcl
+Test project <win-home>/dev/framelink-m5a-contract-20261101/build
 Constructing a list of tests
 Done constructing a list of tests
 Updating test list for fixtures
@@ -25,10 +25,10 @@ Checking test dependency graph end
 test 63
     Start 63: m3_av_apps
 
-63: Test command: C:\Users\jonsu\AppData\Local\Microsoft\WindowsApps\python3.13.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/test/m3_apps.py" "--producer" "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/framelink_av_producer.exe" "--consumer" "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/framelink_av_consumer.exe" "--plugin" "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
-63: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+63: Test command: <win-home>\AppData\Local\Microsoft\WindowsApps\python3.13.exe "<win-home>/dev/framelink-m5a-contract-20261101/test/m3_apps.py" "--producer" "<win-home>/dev/framelink-m5a-contract-20261101/build/Release/framelink_av_producer.exe" "--consumer" "<win-home>/dev/framelink-m5a-contract-20261101/build/Release/framelink_av_consumer.exe" "--plugin" "<win-home>/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
+63: Working Directory: <win-home>/dev/framelink-m5a-contract-20261101/build
 63: Test timeout computed to be: 180
-63: evidence: C:\Users\jonsu\AppData\Local\Temp\framelink-m3-v4kzw168
+63: evidence: <win-home>\AppData\Local\Temp\framelink-m3-v4kzw168
 63: {"case": "bgra-producer-first", "passed": true, "results": {"producer": {"role": "producer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}, "consumer": {"role": "consumer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}}, "verified_session": {"event": "session-complete", "instance": "9886893c9398c7180e92550252e0926e", "generation": 1, "format": "BGRA", "video_frames": 50, "audio_blocks": 50, "audio_offset_ns": 0}}
 63: {"case": "bgra-consumer-first", "passed": true, "results": {"consumer": {"role": "consumer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}, "producer": {"role": "producer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}}, "verified_session": {"event": "session-complete", "instance": "b108a74468db6132b90f6ba4537c0863", "generation": 1, "format": "BGRA", "video_frames": 50, "audio_blocks": 50, "audio_offset_ns": 0}}
 63: {"case": "nv12-producer-first", "passed": true, "results": {"producer": {"role": "producer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}, "consumer": {"role": "consumer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}}, "verified_session": {"event": "session-complete", "instance": "115bc5168e271f11fc13b7f78ca5284f", "generation": 1, "format": "NV12", "video_frames": 50, "audio_blocks": 50, "audio_offset_ns": 0}}

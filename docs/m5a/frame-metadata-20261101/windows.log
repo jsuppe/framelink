@@ -3,7 +3,7 @@
 -- framelink: building GStreamer elements (gstframelink)
 -- Configuring done (0.8s)
 -- Generating done (0.5s)
--- Build files have been written to: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+-- Build files have been written to: <win-home>/dev/framelink-m5a-contract-20261101/build
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
   fl_ipc_win32.cpp
@@ -13,20 +13,20 @@ MSBuild version 17.14.23+b0019275e for .NET Framework
   framelink_slots.cpp
   framelink_win.cpp
   Generating Code...
-     Creating library C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/framelink.lib and object C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/framelink.exp
-  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
-  Building Custom Rule C:/Users/jonsu/dev/framelink-m5a-contract-20261101/CMakeLists.txt
+     Creating library <win-home>/dev/framelink-m5a-contract-20261101/build/Release/framelink.lib and object <win-home>/dev/framelink-m5a-contract-20261101/build/Release/framelink.exp
+  framelink.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
+  Building Custom Rule <win-home>/dev/framelink-m5a-contract-20261101/CMakeLists.txt
   fl_frame_metadata.cpp
   fl_ipc_win32.cpp
   Generating Code...
-  fl_frame_metadata.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_frame_metadata.exe
+  fl_frame_metadata.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_frame_metadata.exe
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
-  Building Custom Rule C:/Users/jonsu/dev/framelink-m5a-contract-20261101/CMakeLists.txt
+  Building Custom Rule <win-home>/dev/framelink-m5a-contract-20261101/CMakeLists.txt
   fl_frame_metadata_contract.cpp
-  fl_frame_metadata_contract.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_frame_metadata_contract.exe
-UpdateCTestConfiguration  from :C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/DartConfiguration.tcl
-Test project C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+  fl_frame_metadata_contract.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_frame_metadata_contract.exe
+UpdateCTestConfiguration  from :<win-home>/dev/framelink-m5a-contract-20261101/build/DartConfiguration.tcl
+Test project <win-home>/dev/framelink-m5a-contract-20261101/build
 Constructing a list of tests
 Done constructing a list of tests
 Updating test list for fixtures
@@ -36,16 +36,16 @@ Checking test dependency graph end
 test 2
     Start  2: frame_metadata_contract
 
-2: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_frame_metadata_contract.exe
-2: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+2: Test command: <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_frame_metadata_contract.exe
+2: Working Directory: <win-home>/dev/framelink-m5a-contract-20261101/build
 2: Test timeout computed to be: 9999879
 2: metadata wire sizes, feature agreement, canonical validation and malformed messages pass
 1/2 Test  #2: frame_metadata_contract ..........   Passed    0.02 sec
 test 21
     Start 21: frame_metadata
 
-21: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_frame_metadata.exe
-21: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+21: Test command: <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_frame_metadata.exe
+21: Working Directory: <win-home>/dev/framelink-m5a-contract-20261101/build
 21: Test timeout computed to be: 20
 21: [framelink error] framelink: refusing producer pid 18932 - speaks version 6, we speak 6
 21: [framelink error] framelink: refusing producer pid 18932 - speaks version 6, we speak 6

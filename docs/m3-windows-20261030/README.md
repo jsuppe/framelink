@@ -1,6 +1,6 @@
 # Windows M3 two-process qualification — 2026-10-30
 
-Isolated Caspar checkout: `C:\Users\jonsu\dev\framelink-m3-20261030`.
+Isolated Caspar checkout: `<win-home>\dev\framelink-m3-20261030`.
 The existing interactive renderer demo was not modified. No physical playback
 or speaker/display alignment qualification is claimed by these headless tests.
 

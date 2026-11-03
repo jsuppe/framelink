@@ -3,33 +3,33 @@
 -- framelink: building GStreamer elements (gstframelink)
 -- Configuring done (0.8s)
 -- Generating done (0.5s)
--- Build files have been written to: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+-- Build files have been written to: <win-home>/dev/framelink-m5a-contract-20261101/build
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
   framelink_memory.cpp
   framelink_win.cpp
   Generating Code...
-     Creating library C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/framelink.lib and object C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/framelink.exp
-  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
-  Building Custom Rule C:/Users/jonsu/dev/framelink-m5a-contract-20261101/CMakeLists.txt
+     Creating library <win-home>/dev/framelink-m5a-contract-20261101/build/Release/framelink.lib and object <win-home>/dev/framelink-m5a-contract-20261101/build/Release/framelink.exp
+  framelink.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
+  Building Custom Rule <win-home>/dev/framelink-m5a-contract-20261101/CMakeLists.txt
   fl_memory_boundary.cpp
-  fl_memory_boundary.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_memory_boundary.exe
+  fl_memory_boundary.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_memory_boundary.exe
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
-  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
+  framelink.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
   fl_memory_contract.cpp
-  fl_memory_contract.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_memory_contract.exe
+  fl_memory_contract.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_memory_contract.exe
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
-  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
+  framelink.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
   fl_memory_c_api.c
-  fl_memory_c_api.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_memory_c_api.exe
+  fl_memory_c_api.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_memory_c_api.exe
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
-  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
+  framelink.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
   fl_memory_resource.cpp
-  fl_memory_resource.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_memory_resource.exe
-Test project C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+  fl_memory_resource.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_memory_resource.exe
+Test project <win-home>/dev/framelink-m5a-contract-20261101/build
     Start  5: memory_boundary
 1/7 Test  #5: memory_boundary ..................   Passed    0.04 sec
     Start  6: memory_contract

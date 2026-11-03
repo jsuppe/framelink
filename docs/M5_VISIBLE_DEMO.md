@@ -38,7 +38,7 @@ Python helper itself.
 ## Caspar launch 2026-10-30
 
 Interactive task `FrameLink-M5-Visible-Demo` runs 90 loops (approximately 15 minutes) and launches the helper from
-`C:/Users/jonsu/dev/framelink-m5-pipeline/visible-demo.ps1`. Restart using
+`<win-home>/dev/framelink-m5-pipeline/visible-demo.ps1`. Restart using
 `Start-ScheduledTask -TaskName FrameLink-M5-Visible-Demo` after it has stopped.
 Existing RGB/NV12 demo PID 18580 was inspected and preserved. New demo producer,
 renderer, and browser ran in interactive SessionId 1. HTTP status reported real

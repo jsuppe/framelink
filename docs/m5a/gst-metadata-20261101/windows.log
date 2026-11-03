@@ -3,29 +3,29 @@
 -- framelink: building GStreamer elements (gstframelink)
 -- Configuring done (0.8s)
 -- Generating done (0.5s)
--- Build files have been written to: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+-- Build files have been written to: <win-home>/dev/framelink-m5a-contract-20261101/build
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
-  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
-  gstframelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\gstframelink.dll
+  framelink.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
+  gstframelink.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\gstframelink.dll
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
   fl_gst_timestamps.cpp
-  fl_gst_timestamps.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_timestamps.exe
+  fl_gst_timestamps.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_timestamps.exe
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
-  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
+  framelink.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
   fl_gst_native_source_win.cpp
   The d3d11 library from gst-plugins-bad is unstable API and may change in future.
   You can define GST_USE_UNSTABLE_API to avoid this warning.
-  fl_gst_native_source_win.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_native_source_win.exe
+  fl_gst_native_source_win.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_native_source_win.exe
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
-  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
+  framelink.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
   fl_gst_pool_policy.cpp
-  fl_gst_pool_policy.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_pool_policy.exe
-UpdateCTestConfiguration  from :C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/DartConfiguration.tcl
-Test project C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+  fl_gst_pool_policy.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_pool_policy.exe
+UpdateCTestConfiguration  from :<win-home>/dev/framelink-m5a-contract-20261101/build/DartConfiguration.tcl
+Test project <win-home>/dev/framelink-m5a-contract-20261101/build
 Constructing a list of tests
 Done constructing a list of tests
 Updating test list for fixtures
@@ -35,8 +35,8 @@ Checking test dependency graph end
 test 26
     Start 26: gst_native_source_win
 
-26: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_native_source_win.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
-26: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+26: Test command: <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_native_source_win.exe "<win-home>/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
+26: Working Directory: <win-home>/dev/framelink-m5a-contract-20261101/build
 26: Test timeout computed to be: 20
 26: RGBA native D3D11: same shared allocation, pixels/PTS, bounded reuse and retained memory after stop pass
 26: NV12 native D3D11: same shared allocation, pixels/PTS, bounded reuse and retained memory after stop pass
@@ -45,24 +45,24 @@ test 26
 test 27
     Start 27: gst_native_source_win_copy_negative
 
-27: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_native_source_win.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll" "--copy-negative"
-27: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+27: Test command: <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_native_source_win.exe "<win-home>/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll" "--copy-negative"
+27: Working Directory: <win-home>/dev/framelink-m5a-contract-20261101/build
 27: Test timeout computed to be: 20
 27: deliberate GPU copy rejected by allocation-alias oracle after successful setup
 2/4 Test #27: gst_native_source_win_copy_negative ...   Passed    0.25 sec
 test 55
     Start 55: gst_timestamp_contract
 
-55: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_timestamps.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
-55: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+55: Test command: <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_timestamps.exe "<win-home>/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
+55: Working Directory: <win-home>/dev/framelink-m5a-contract-20261101/build
 55: Test timeout computed to be: 25
 55: Timestamp contract: zero, repeated/backward, signed limit, overflow/missing rejection, segment mapping, variable metadata, generation relay, default mode passed
 3/4 Test #55: gst_timestamp_contract ................   Passed    1.71 sec
 test 62
     Start 62: gst_pool_policy
 
-62: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_pool_policy.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
-62: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+62: Test command: <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_pool_policy.exe "<win-home>/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
+62: Working Directory: <win-home>/dev/framelink-m5a-contract-20261101/build
 62: Test timeout computed to be: 30
 62: 2/3 image capacities: bounded drop, bounded error, delayed-reader recovery and exact loss accounting pass
 4/4 Test #62: gst_pool_policy .......................   Passed    1.83 sec

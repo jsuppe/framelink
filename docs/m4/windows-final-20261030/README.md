@@ -2,7 +2,7 @@
 
 FrameLink ea6f530; renderer 7960f33 (includes metrics).
 Caspar, Windows, MSVC19.44, GStreamer1.28, RTX5090. Isolated development trees
-`C:/Users/jonsu/dev/framelink-m4-20261030` and `vkrender-m4-20261030`;
+`<win-home>/dev/framelink-m4-20261030` and `vkrender-m4-20261030`;
 live interactive demo was not replaced.
 
 Fresh standalone Release build succeeded. Full CTest **46/47 passed** (113s).

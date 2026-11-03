@@ -3,44 +3,44 @@
 -- framelink: building GStreamer elements (gstframelink)
 -- Configuring done (0.8s)
 -- Generating done (0.7s)
--- Build files have been written to: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+-- Build files have been written to: <win-home>/dev/framelink-m5a-contract-20261101/build
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
   fl_trace_test.cpp
-  fl_trace_test.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_trace_test.exe
+  fl_trace_test.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_trace_test.exe
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
   fl_trace_test.cpp
-  fl_trace_compiled_out.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_trace_compiled_out.exe
+  fl_trace_compiled_out.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_trace_compiled_out.exe
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
   fl_ipc_win32.cpp
   fl_trace.cpp
   framelink_win.cpp
   Generating Code...
-     Creating library C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/framelink.lib and object C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/framelink.exp
-  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
+     Creating library <win-home>/dev/framelink-m5a-contract-20261101/build/Release/framelink.lib and object <win-home>/dev/framelink-m5a-contract-20261101/build/Release/framelink.exp
+  framelink.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
-  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
+  framelink.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
   gstframelink.cpp
   The d3d11 library from gst-plugins-bad is unstable API and may change in future.
   You can define GST_USE_UNSTABLE_API to avoid this warning.
-     Creating library C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.lib and object C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.exp
-  gstframelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\gstframelink.dll
+     Creating library <win-home>/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.lib and object <win-home>/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.exp
+  gstframelink.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\gstframelink.dll
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
-  fl_gst_nv12.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_nv12.exe
+  fl_gst_nv12.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_nv12.exe
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
-  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
-  fl_gst_native_producer_win.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_native_producer_win.exe
+  framelink.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
+  fl_gst_native_producer_win.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_native_producer_win.exe
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
-  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
-  fl_native_relay_win.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_native_relay_win.exe
-UpdateCTestConfiguration  from :C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/DartConfiguration.tcl
-Test project C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+  framelink.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
+  fl_native_relay_win.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_native_relay_win.exe
+UpdateCTestConfiguration  from :<win-home>/dev/framelink-m5a-contract-20261101/build/DartConfiguration.tcl
+Test project <win-home>/dev/framelink-m5a-contract-20261101/build
 Constructing a list of tests
 Done constructing a list of tests
 Updating test list for fixtures
@@ -50,8 +50,8 @@ Checking test dependency graph end
 test 27
     Start 27: gst_native_producer_win
 
-27: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_native_producer_win.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
-27: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+27: Test command: <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_native_producer_win.exe "<win-home>/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
+27: Working Directory: <win-home>/dev/framelink-m5a-contract-20261101/build
 27: Test timeout computed to be: 20
 27: RGBA native producer: original texture, ready fence, exact pixels/metadata, local reference reuse and owner lifetime pass
 27: NV12 native producer: original texture, ready fence, exact pixels/metadata, local reference reuse and owner lifetime pass
@@ -60,16 +60,16 @@ test 27
 test 30
     Start 30: gst_nv12_roundtrip
 
-30: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_nv12.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
-30: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+30: Test command: <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_nv12.exe "<win-home>/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
+30: Working Directory: <win-home>/dev/framelink-m5a-contract-20261101/build
 30: Test timeout computed to be: 30
 30: GStreamer NV12 padded/offset byte roundtrip and mismatch rejection passed
 2/8 Test #30: gst_nv12_roundtrip ...............   Passed    0.75 sec
 test 46
     Start 46: trace_disabled
 
-46: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_trace_test.exe
-46: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+46: Test command: <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_trace_test.exe
+46: Working Directory: <win-home>/dev/framelink-m5a-contract-20261101/build
 46: Environment variables: 
 46:  FRAMELINK_TRACE=
 46: Test timeout computed to be: 9999878
@@ -77,48 +77,48 @@ test 46
 test 47
     Start 47: trace_bounded_concurrent
 
-47: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_trace_test.exe
-47: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+47: Test command: <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_trace_test.exe
+47: Working Directory: <win-home>/dev/framelink-m5a-contract-20261101/build
 47: Environment variables: 
-47:  FRAMELINK_TRACE=C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/trace-test
+47:  FRAMELINK_TRACE=<win-home>/dev/framelink-m5a-contract-20261101/build/trace-test
 47:  FRAMELINK_TRACE_EVENTS=16
 47: Test timeout computed to be: 9999878
 4/8 Test #47: trace_bounded_concurrent .........   Passed    0.02 sec
 test 48
     Start 48: trace_thread_limit
 
-48: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_trace_test.exe "threads"
-48: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+48: Test command: <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_trace_test.exe "threads"
+48: Working Directory: <win-home>/dev/framelink-m5a-contract-20261101/build
 48: Environment variables: 
-48:  FRAMELINK_TRACE=C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/trace-threads
+48:  FRAMELINK_TRACE=<win-home>/dev/framelink-m5a-contract-20261101/build/trace-threads
 48:  FRAMELINK_TRACE_EVENTS=16
 48: Test timeout computed to be: 9999878
 5/8 Test #48: trace_thread_limit ...............   Passed    0.02 sec
 test 90
     Start 90: native_relay_win
 
-90: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_native_relay_win.exe
-90: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+90: Test command: <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_native_relay_win.exe
+90: Working Directory: <win-home>/dev/framelink-m5a-contract-20261101/build
 90: Test timeout computed to be: 20
 90: same canonical-NT NV12 relay: reversed slots, identity rejection, exact pixels/metadata, downstream leases prevent upstream reuse and bounded completion passed
 6/8 Test #90: native_relay_win .................   Passed    0.50 sec
 test 91
     Start 91: trace_details
 
-91: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_trace_test.exe "details"
-91: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+91: Test command: <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_trace_test.exe "details"
+91: Working Directory: <win-home>/dev/framelink-m5a-contract-20261101/build
 91: Environment variables: 
-91:  FRAMELINK_TRACE=C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/trace-details
+91:  FRAMELINK_TRACE=<win-home>/dev/framelink-m5a-contract-20261101/build/trace-details
 91:  FRAMELINK_TRACE_EVENTS=16
 91: Test timeout computed to be: 9999877
 7/8 Test #91: trace_details ....................   Passed    0.01 sec
 test 92
     Start 92: trace_compiled_out
 
-92: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_trace_compiled_out.exe
-92: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+92: Test command: <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_trace_compiled_out.exe
+92: Working Directory: <win-home>/dev/framelink-m5a-contract-20261101/build
 92: Environment variables: 
-92:  FRAMELINK_TRACE=C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/must-not-exist
+92:  FRAMELINK_TRACE=<win-home>/dev/framelink-m5a-contract-20261101/build/must-not-exist
 92: Test timeout computed to be: 9999877
 8/8 Test #92: trace_compiled_out ...............   Passed    0.02 sec
 

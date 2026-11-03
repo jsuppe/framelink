@@ -3,27 +3,27 @@
 -- framelink: building GStreamer elements (gstframelink)
 -- Configuring done (0.8s)
 -- Generating done (0.6s)
--- Build files have been written to: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+-- Build files have been written to: <win-home>/dev/framelink-m5a-contract-20261101/build
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
-  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
-  framelink_av_playback.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink_av_playback.lib
+  framelink.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
+  framelink_av_playback.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\framelink_av_playback.lib
   fl_d3d_memory_binding.cpp
-  fl_d3d_memory_binding.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_d3d_memory_binding.exe
+  fl_d3d_memory_binding.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_d3d_memory_binding.exe
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
-  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
-  framelink_av_playback.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink_av_playback.lib
-  fl_av_memory_agreement.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_av_memory_agreement.exe
+  framelink.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
+  framelink_av_playback.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\framelink_av_playback.lib
+  fl_av_memory_agreement.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_av_memory_agreement.exe
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
-  fl_av_auth.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_av_auth.exe
+  fl_av_auth.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_av_auth.exe
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
-  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
-  fl_memory_boundary.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_memory_boundary.exe
-UpdateCTestConfiguration  from :C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/DartConfiguration.tcl
-Test project C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+  framelink.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
+  fl_memory_boundary.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_memory_boundary.exe
+UpdateCTestConfiguration  from :<win-home>/dev/framelink-m5a-contract-20261101/build/DartConfiguration.tcl
+Test project <win-home>/dev/framelink-m5a-contract-20261101/build
 Constructing a list of tests
 Done constructing a list of tests
 Updating test list for fixtures
@@ -33,32 +33,32 @@ Checking test dependency graph end
 test 6
     Start  6: memory_boundary
 
-6: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_memory_boundary.exe
-6: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+6: Test command: <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_memory_boundary.exe
+6: Working Directory: <win-home>/dev/framelink-m5a-contract-20261101/build
 6: Test timeout computed to be: 10
 6: boundary agreement: endpoint usages, all-participant operation consent, conflicts and bounded negatives pass
 1/4 Test  #6: memory_boundary ..................   Passed    0.01 sec
 test 60
     Start 60: av_auth
 
-60: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_av_auth.exe
-60: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+60: Test command: <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_av_auth.exe
+60: Working Directory: <win-home>/dev/framelink-m5a-contract-20261101/build
 60: Test timeout computed to be: 30
 60: mutual A/V authentication: success, wrong key/role, fake server and reflection rejection passed
 2/4 Test #60: av_auth ..........................   Passed    0.02 sec
 test 87
     Start 87: av_memory_agreement
 
-87: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_av_memory_agreement.exe
-87: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+87: Test command: <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_av_memory_agreement.exe
+87: Working Directory: <win-home>/dev/framelink-m5a-contract-20261101/build
 87: Test timeout computed to be: 20
 87: authenticated memory agreement: exact binding, both-endpoint policy, explicit fallback, session/key mismatch, invalid offer and unchanged-output negatives pass
 3/4 Test #87: av_memory_agreement ..............   Passed    0.02 sec
 test 88
     Start 88: d3d_memory_binding
 
-88: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_d3d_memory_binding.exe
-88: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+88: Test command: <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_d3d_memory_binding.exe
+88: Working Directory: <win-home>/dev/framelink-m5a-contract-20261101/build
 88: Test timeout computed to be: 20
 88: RGBA canonical NT pool: exact imported-export proof, substitution/alias and partial-reservation cleanup pass
 88: NV12 canonical NT pool: exact imported-export proof, substitution/alias and partial-reservation cleanup pass

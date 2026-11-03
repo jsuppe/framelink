@@ -22,7 +22,7 @@ lifetime, so no original or mirror slot can be recycled before consumption.
 Downloaded official LunarG SDK1.4.363.0 from
 https://sdk.lunarg.com/sdk/download/1.4.363.0/windows/vulkan-sdk.exe .
 Authenticode status Valid, signer LunarG, Inc. Used 7-Zip to extract the layer DLL
-and manifest to C:/Users/jonsu/dev/vulkan-validation-local/Bin. No installer run,
+and manifest to <win-home>/dev/vulkan-validation-local/Bin. No installer run,
 registry changes or global SDK installation. Process-local VK_LAYER_PATH plus
 VKR_VALIDATION=1 selects it. DLL SHA256:
 2ACC317EF880F73A9862F23A964694C03F531B866FAB6D70F1412FCBAE60CAAC.

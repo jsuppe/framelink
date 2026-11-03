@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Timestamped AV scheduling telemetry, preview disabled, native offscreen output."""
 import os,pathlib,json,subprocess,time,urllib.request,socket,argparse
-p=argparse.ArgumentParser();p.add_argument("--build",default="C:/Users/jonsu/dev/framelink-m5-pipeline/build/Release");p.add_argument("--renderer",default="C:/Users/jonsu/dev/vkrender-m5-pipeline/build/Release/vkrenderer.exe");p.add_argument("--output");p.add_argument("--clock-policy",choices=["audio","producer"],default="audio");p.add_argument("--seconds",type=int,default=5);p.add_argument("--case");args=p.parse_args();p.error("seconds must be1..50") if not 1<=args.seconds<=50 else None
-root=pathlib.Path(args.output or 'C:/Users/jonsu/dev/m5-render-rate-v3');root.mkdir(exist_ok=True)
+p=argparse.ArgumentParser();p.add_argument("--build",default="<win-home>/dev/framelink-m5-pipeline/build/Release");p.add_argument("--renderer",default="<win-home>/dev/vkrender-m5-pipeline/build/Release/vkrenderer.exe");p.add_argument("--output");p.add_argument("--clock-policy",choices=["audio","producer"],default="audio");p.add_argument("--seconds",type=int,default=5);p.add_argument("--case");args=p.parse_args();p.error("seconds must be1..50") if not 1<=args.seconds<=50 else None
+root=pathlib.Path(args.output or '<win-home>/dev/m5-render-rate-v3');root.mkdir(exist_ok=True)
 b=pathlib.Path(args.build);renderer=pathlib.Path(args.renderer)
 baseenv=dict(os.environ);baseenv['PATH']='C:/Program Files/gstreamer/1.0/msvc_x86_64/bin;'+baseenv['PATH']
 summary=[]

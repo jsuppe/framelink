@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 import os,pathlib,subprocess,time,json
-root=pathlib.Path('C:/Users/jonsu/dev/m5-renderer-baseline-v2');root.mkdir(exist_ok=True)
+root=pathlib.Path(os.path.expanduser('~/dev/m5-renderer-baseline-v2'));root.mkdir(exist_ok=True)
 summary=[]
 for fmt in ['BGRA','NV12']:
  for fps in [30,60]:
   for version in ['m4','m5']:
-   d=root/f'{version}-{fmt}-{fps}';d.mkdir(exist_ok=True);base=pathlib.Path('C:/Users/jonsu/dev');b=base/('framelink-m4-20261030/build-final/Release' if version=='m4' else 'framelink-m5-pipeline/build/Release');r=base/('vkrender-m4-20261030/build/Release' if version=='m4' else 'vkrender-m5-pipeline/build/Release');channel=d.name
+   d=root/f'{version}-{fmt}-{fps}';d.mkdir(exist_ok=True);base=pathlib.Path(os.path.expanduser('~/dev'));b=base/('framelink-m4-20261030/build-final/Release' if version=='m4' else 'framelink-m5-pipeline/build/Release');r=base/('vkrender-m4-20261030/build/Release' if version=='m4' else 'vkrender-m5-pipeline/build/Release');channel=d.name
    env=dict(os.environ,VKR_INPUT_FORMATS=fmt.lower(),GST_PLUGIN_PATH=str(b),VKR_TRACE=str(d/'renderer'),FRAMELINK_TRACE=str(d/'transport'));env['GST_REGISTRY']=str(d/'registry.bin');env['PATH']=str(b)+';C:/Program Files/gstreamer/1.0/msvc_x86_64/bin;'+env['PATH']
    rc=[str(r/'vkrenderer.exe'),'--serve',channel,'--headless','120','--control-port','0'];pc=['C:/Program Files/gstreamer/1.0/msvc_x86_64/bin/gst-launch-1.0.exe','-q','videotestsrc','is-live=true','pattern=ball','!','video/x-raw,format='+fmt+f',width=1920,height=1080,framerate={fps}/1','!','framelinksink','channel='+channel+'.in.0','sync=true'];start=time.perf_counter()
    with (d/'renderer.log').open('w') as ro,(d/'producer.log').open('w') as po:

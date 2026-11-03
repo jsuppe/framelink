@@ -2,8 +2,8 @@ Start testing: Oct 30 08:13 Eastern Daylight Time
 ----------------------------------------------------------
 1/39 Testing: session_contract
 1/39 Test: session_contract
-Command: "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_session_contract.exe"
-Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+Command: "<win-home>/dev/framelink-m3-20261030/build/Release/fl_session_contract.exe"
+Directory: <win-home>/dev/framelink-m3-20261030/build
 "session_contract" start time: Oct 30 08:13 Eastern Daylight Time
 Output:
 ----------------------------------------------------------
@@ -18,8 +18,8 @@ Test Passed.
 
 2/39 Testing: session_contract_c_api
 2/39 Test: session_contract_c_api
-Command: "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_session_c_api.exe"
-Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+Command: "<win-home>/dev/framelink-m3-20261030/build/Release/fl_session_c_api.exe"
+Directory: <win-home>/dev/framelink-m3-20261030/build
 "session_contract_c_api" start time: Oct 30 08:13 Eastern Daylight Time
 Output:
 ----------------------------------------------------------
@@ -33,8 +33,8 @@ Test Passed.
 
 3/39 Testing: roundtrip
 3/39 Test: roundtrip
-Command: "C:/Program Files/CMake/bin/cmake.exe" "-DCONSUMER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_consume.exe" "-DPRODUCER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_produce.exe" "-DCONSUMER_ARGS=flci;20" "-DPRODUCER_ARGS=flci;400;0" "-P" "C:/Users/jonsu/dev/framelink-m3-20261030/test/run_roundtrip.cmake"
-Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+Command: "C:/Program Files/CMake/bin/cmake.exe" "-DCONSUMER=<win-home>/dev/framelink-m3-20261030/build/Release/fl_consume.exe" "-DPRODUCER=<win-home>/dev/framelink-m3-20261030/build/Release/fl_produce.exe" "-DCONSUMER_ARGS=flci;20" "-DPRODUCER_ARGS=flci;400;0" "-P" "<win-home>/dev/framelink-m3-20261030/test/run_roundtrip.cmake"
+Directory: <win-home>/dev/framelink-m3-20261030/build
 "roundtrip" start time: Oct 30 08:13 Eastern Daylight Time
 Output:
 ----------------------------------------------------------
@@ -54,8 +54,8 @@ Test Passed.
 
 4/39 Testing: roundtrip_reattach
 4/39 Test: roundtrip_reattach
-Command: "C:/Program Files/CMake/bin/cmake.exe" "-DCONSUMER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_consume.exe" "-DPRODUCER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_produce.exe" "-DCONSUMER_ARGS=flre;20;0;1" "-DPRODUCER_ARGS=flre;400;0;1" "-P" "C:/Users/jonsu/dev/framelink-m3-20261030/test/run_roundtrip.cmake"
-Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+Command: "C:/Program Files/CMake/bin/cmake.exe" "-DCONSUMER=<win-home>/dev/framelink-m3-20261030/build/Release/fl_consume.exe" "-DPRODUCER=<win-home>/dev/framelink-m3-20261030/build/Release/fl_produce.exe" "-DCONSUMER_ARGS=flre;20;0;1" "-DPRODUCER_ARGS=flre;400;0;1" "-P" "<win-home>/dev/framelink-m3-20261030/test/run_roundtrip.cmake"
+Directory: <win-home>/dev/framelink-m3-20261030/build
 "roundtrip_reattach" start time: Oct 30 08:13 Eastern Daylight Time
 Output:
 ----------------------------------------------------------
@@ -77,8 +77,8 @@ Test Passed.
 
 5/39 Testing: nv12_layout
 5/39 Test: nv12_layout
-Command: "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_nv12_layout.exe"
-Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+Command: "<win-home>/dev/framelink-m3-20261030/build/Release/fl_nv12_layout.exe"
+Directory: <win-home>/dev/framelink-m3-20261030/build
 "nv12_layout" start time: Oct 30 08:13 Eastern Daylight Time
 Output:
 ----------------------------------------------------------
@@ -93,8 +93,8 @@ Test Passed.
 
 6/39 Testing: gst_nv12_roundtrip
 6/39 Test: gst_nv12_roundtrip
-Command: "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_gst_nv12.exe" "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/gstframelink.dll"
-Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+Command: "<win-home>/dev/framelink-m3-20261030/build/Release/fl_gst_nv12.exe" "<win-home>/dev/framelink-m3-20261030/build/Release/gstframelink.dll"
+Directory: <win-home>/dev/framelink-m3-20261030/build
 "gst_nv12_roundtrip" start time: Oct 30 08:13 Eastern Daylight Time
 Output:
 ----------------------------------------------------------
@@ -109,8 +109,8 @@ Test Passed.
 
 7/39 Testing: gst_rgb10a2_roundtrip
 7/39 Test: gst_rgb10a2_roundtrip
-Command: "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_gst_nv12.exe" "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/gstframelink.dll" "rgb10a2"
-Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+Command: "<win-home>/dev/framelink-m3-20261030/build/Release/fl_gst_nv12.exe" "<win-home>/dev/framelink-m3-20261030/build/Release/gstframelink.dll" "rgb10a2"
+Directory: <win-home>/dev/framelink-m3-20261030/build
 "gst_rgb10a2_roundtrip" start time: Oct 30 08:13 Eastern Daylight Time
 Output:
 ----------------------------------------------------------
@@ -125,8 +125,8 @@ Test Passed.
 
 8/39 Testing: nv12_windows_roundtrip
 8/39 Test: nv12_windows_roundtrip
-Command: "C:/Program Files/CMake/bin/cmake.exe" "-DPRODUCER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_nv12_win.exe" "-DCONSUMER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_nv12_win.exe" "-DPRODUCER_ARGS=produce;flci-nv12" "-DCONSUMER_ARGS=consume;flci-nv12" "-P" "C:/Users/jonsu/dev/framelink-m3-20261030/test/run_roundtrip.cmake"
-Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+Command: "C:/Program Files/CMake/bin/cmake.exe" "-DPRODUCER=<win-home>/dev/framelink-m3-20261030/build/Release/fl_nv12_win.exe" "-DCONSUMER=<win-home>/dev/framelink-m3-20261030/build/Release/fl_nv12_win.exe" "-DPRODUCER_ARGS=produce;flci-nv12" "-DCONSUMER_ARGS=consume;flci-nv12" "-P" "<win-home>/dev/framelink-m3-20261030/test/run_roundtrip.cmake"
+Directory: <win-home>/dev/framelink-m3-20261030/build
 "nv12_windows_roundtrip" start time: Oct 30 08:13 Eastern Daylight Time
 Output:
 ----------------------------------------------------------
@@ -142,8 +142,8 @@ Test Passed.
 
 9/39 Testing: nv12_windows_1080p
 9/39 Test: nv12_windows_1080p
-Command: "C:/Program Files/CMake/bin/cmake.exe" "-DPRODUCER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_nv12_win.exe" "-DCONSUMER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_nv12_win.exe" "-DPRODUCER_ARGS=produce;flci-nv12-hd;1920;1080" "-DCONSUMER_ARGS=consume;flci-nv12-hd;1920;1080" "-P" "C:/Users/jonsu/dev/framelink-m3-20261030/test/run_roundtrip.cmake"
-Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+Command: "C:/Program Files/CMake/bin/cmake.exe" "-DPRODUCER=<win-home>/dev/framelink-m3-20261030/build/Release/fl_nv12_win.exe" "-DCONSUMER=<win-home>/dev/framelink-m3-20261030/build/Release/fl_nv12_win.exe" "-DPRODUCER_ARGS=produce;flci-nv12-hd;1920;1080" "-DCONSUMER_ARGS=consume;flci-nv12-hd;1920;1080" "-P" "<win-home>/dev/framelink-m3-20261030/test/run_roundtrip.cmake"
+Directory: <win-home>/dev/framelink-m3-20261030/build
 "nv12_windows_1080p" start time: Oct 30 08:13 Eastern Daylight Time
 Output:
 ----------------------------------------------------------
@@ -159,8 +159,8 @@ Test Passed.
 
 10/39 Testing: sample_bgra
 10/39 Test: sample_bgra
-Command: "C:/Program Files/CMake/bin/cmake.exe" "-DPRODUCER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_producer.exe" "-DCONSUMER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_consumer.exe" "-DPRODUCER_ARGS=--channel;sample-bgra;--frames;200;--fps;120;" "-DCONSUMER_ARGS=--channel;sample-bgra;--frames;12;--size;130x66;--format;bgra;--pool;1" "-P" "C:/Users/jonsu/dev/framelink-m3-20261030/test/run_samples.cmake"
-Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+Command: "C:/Program Files/CMake/bin/cmake.exe" "-DPRODUCER=<win-home>/dev/framelink-m3-20261030/build/Release/framelink_producer.exe" "-DCONSUMER=<win-home>/dev/framelink-m3-20261030/build/Release/framelink_consumer.exe" "-DPRODUCER_ARGS=--channel;sample-bgra;--frames;200;--fps;120;" "-DCONSUMER_ARGS=--channel;sample-bgra;--frames;12;--size;130x66;--format;bgra;--pool;1" "-P" "<win-home>/dev/framelink-m3-20261030/test/run_samples.cmake"
+Directory: <win-home>/dev/framelink-m3-20261030/build
 "sample_bgra" start time: Oct 30 08:13 Eastern Daylight Time
 Output:
 ----------------------------------------------------------
@@ -180,8 +180,8 @@ Test Passed.
 
 11/39 Testing: sample_nv12
 11/39 Test: sample_nv12
-Command: "C:/Program Files/CMake/bin/cmake.exe" "-DPRODUCER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_producer.exe" "-DCONSUMER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_consumer.exe" "-DPRODUCER_ARGS=--channel;sample-nv12;--frames;200;--fps;120;--format;nv12" "-DCONSUMER_ARGS=--channel;sample-nv12;--frames;12;--size;130x66;--format;nv12;--pool;8" "-P" "C:/Users/jonsu/dev/framelink-m3-20261030/test/run_samples.cmake"
-Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+Command: "C:/Program Files/CMake/bin/cmake.exe" "-DPRODUCER=<win-home>/dev/framelink-m3-20261030/build/Release/framelink_producer.exe" "-DCONSUMER=<win-home>/dev/framelink-m3-20261030/build/Release/framelink_consumer.exe" "-DPRODUCER_ARGS=--channel;sample-nv12;--frames;200;--fps;120;--format;nv12" "-DCONSUMER_ARGS=--channel;sample-nv12;--frames;12;--size;130x66;--format;nv12;--pool;8" "-P" "<win-home>/dev/framelink-m3-20261030/test/run_samples.cmake"
+Directory: <win-home>/dev/framelink-m3-20261030/build
 "sample_nv12" start time: Oct 30 08:13 Eastern Daylight Time
 Output:
 ----------------------------------------------------------
@@ -201,8 +201,8 @@ Test Passed.
 
 12/39 Testing: sample_slow
 12/39 Test: sample_slow
-Command: "C:/Program Files/CMake/bin/cmake.exe" "-DPRODUCER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_producer.exe" "-DCONSUMER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_consumer.exe" "-DPRODUCER_ARGS=--channel;sample-slow;--frames;200;--fps;120;--format;nv12" "-DCONSUMER_ARGS=--channel;sample-slow;--frames;12;--size;130x66;--format;nv12;--delay-ms;20;--pool;2" "-P" "C:/Users/jonsu/dev/framelink-m3-20261030/test/run_samples.cmake"
-Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+Command: "C:/Program Files/CMake/bin/cmake.exe" "-DPRODUCER=<win-home>/dev/framelink-m3-20261030/build/Release/framelink_producer.exe" "-DCONSUMER=<win-home>/dev/framelink-m3-20261030/build/Release/framelink_consumer.exe" "-DPRODUCER_ARGS=--channel;sample-slow;--frames;200;--fps;120;--format;nv12" "-DCONSUMER_ARGS=--channel;sample-slow;--frames;12;--size;130x66;--format;nv12;--delay-ms;20;--pool;2" "-P" "<win-home>/dev/framelink-m3-20261030/test/run_samples.cmake"
+Directory: <win-home>/dev/framelink-m3-20261030/build
 "sample_slow" start time: Oct 30 08:13 Eastern Daylight Time
 Output:
 ----------------------------------------------------------
@@ -222,8 +222,8 @@ Test Passed.
 
 13/39 Testing: sample_metadata
 13/39 Test: sample_metadata
-Command: "C:/Program Files/CMake/bin/cmake.exe" "-DPRODUCER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_producer.exe" "-DCONSUMER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_consumer.exe" "-DPRODUCER_ARGS=--channel;sample-metadata;--frames;200;--fps;120;" "-DCONSUMER_ARGS=--channel;sample-metadata;--frames;12;--size;130x66;--verify;0" "-P" "C:/Users/jonsu/dev/framelink-m3-20261030/test/run_samples.cmake"
-Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+Command: "C:/Program Files/CMake/bin/cmake.exe" "-DPRODUCER=<win-home>/dev/framelink-m3-20261030/build/Release/framelink_producer.exe" "-DCONSUMER=<win-home>/dev/framelink-m3-20261030/build/Release/framelink_consumer.exe" "-DPRODUCER_ARGS=--channel;sample-metadata;--frames;200;--fps;120;" "-DCONSUMER_ARGS=--channel;sample-metadata;--frames;12;--size;130x66;--verify;0" "-P" "<win-home>/dev/framelink-m3-20261030/test/run_samples.cmake"
+Directory: <win-home>/dev/framelink-m3-20261030/build
 "sample_metadata" start time: Oct 30 08:13 Eastern Daylight Time
 Output:
 ----------------------------------------------------------
@@ -243,8 +243,8 @@ Test Passed.
 
 14/39 Testing: sample_reconnect
 14/39 Test: sample_reconnect
-Command: "C:/Program Files/CMake/bin/cmake.exe" "-DPRODUCER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_producer.exe" "-DCONSUMER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_consumer.exe" "-DPRODUCER_ARGS=--channel;sample-reconnect;--frames;200;--fps;120;--reconnect-at;4" "-DCONSUMER_ARGS=--channel;sample-reconnect;--frames;12;--size;130x66;--format;nv12" "-P" "C:/Users/jonsu/dev/framelink-m3-20261030/test/run_samples.cmake"
-Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+Command: "C:/Program Files/CMake/bin/cmake.exe" "-DPRODUCER=<win-home>/dev/framelink-m3-20261030/build/Release/framelink_producer.exe" "-DCONSUMER=<win-home>/dev/framelink-m3-20261030/build/Release/framelink_consumer.exe" "-DPRODUCER_ARGS=--channel;sample-reconnect;--frames;200;--fps;120;--reconnect-at;4" "-DCONSUMER_ARGS=--channel;sample-reconnect;--frames;12;--size;130x66;--format;nv12" "-P" "<win-home>/dev/framelink-m3-20261030/test/run_samples.cmake"
+Directory: <win-home>/dev/framelink-m3-20261030/build
 "sample_reconnect" start time: Oct 30 08:13 Eastern Daylight Time
 Output:
 ----------------------------------------------------------
@@ -265,8 +265,8 @@ Test Passed.
 
 15/39 Testing: sample_geometry
 15/39 Test: sample_geometry
-Command: "C:/Program Files/CMake/bin/cmake.exe" "-DPRODUCER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_producer.exe" "-DCONSUMER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_consumer.exe" "-DPRODUCER_ARGS=--channel;sample-geometry;--frames;200;--fps;120;--size;194x98" "-DCONSUMER_ARGS=--channel;sample-geometry;--frames;12;--size;130x66;--format;nv12" "-P" "C:/Users/jonsu/dev/framelink-m3-20261030/test/run_samples.cmake"
-Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+Command: "C:/Program Files/CMake/bin/cmake.exe" "-DPRODUCER=<win-home>/dev/framelink-m3-20261030/build/Release/framelink_producer.exe" "-DCONSUMER=<win-home>/dev/framelink-m3-20261030/build/Release/framelink_consumer.exe" "-DPRODUCER_ARGS=--channel;sample-geometry;--frames;200;--fps;120;--size;194x98" "-DCONSUMER_ARGS=--channel;sample-geometry;--frames;12;--size;130x66;--format;nv12" "-P" "<win-home>/dev/framelink-m3-20261030/test/run_samples.cmake"
+Directory: <win-home>/dev/framelink-m3-20261030/build
 "sample_geometry" start time: Oct 30 08:13 Eastern Daylight Time
 Output:
 ----------------------------------------------------------
@@ -286,8 +286,8 @@ Test Passed.
 
 16/39 Testing: sample_slots
 16/39 Test: sample_slots
-Command: "C:/Program Files/CMake/bin/cmake.exe" "-DPRODUCER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_producer.exe" "-DCONSUMER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_consumer.exe" "-DPRODUCER_ARGS=--channel;sample-slots;--frames;200;--fps;120;--slots;2" "-DCONSUMER_ARGS=--channel;sample-slots;--frames;12;--size;130x66;--channel;sample-slots.0" "-P" "C:/Users/jonsu/dev/framelink-m3-20261030/test/run_samples.cmake"
-Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+Command: "C:/Program Files/CMake/bin/cmake.exe" "-DPRODUCER=<win-home>/dev/framelink-m3-20261030/build/Release/framelink_producer.exe" "-DCONSUMER=<win-home>/dev/framelink-m3-20261030/build/Release/framelink_consumer.exe" "-DPRODUCER_ARGS=--channel;sample-slots;--frames;200;--fps;120;--slots;2" "-DCONSUMER_ARGS=--channel;sample-slots;--frames;12;--size;130x66;--channel;sample-slots.0" "-P" "<win-home>/dev/framelink-m3-20261030/test/run_samples.cmake"
+Directory: <win-home>/dev/framelink-m3-20261030/build
 "sample_slots" start time: Oct 30 08:13 Eastern Daylight Time
 Output:
 ----------------------------------------------------------
@@ -308,8 +308,8 @@ Test Passed.
 
 17/39 Testing: sample_gpu_sync
 17/39 Test: sample_gpu_sync
-Command: "C:/Program Files/CMake/bin/cmake.exe" "-DPRODUCER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_producer.exe" "-DCONSUMER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_consumer.exe" "-DPRODUCER_ARGS=--channel;sample-gpu_sync;--frames;200;--fps;120;--submit;manual" "-DCONSUMER_ARGS=--channel;sample-gpu_sync;--frames;12;--size;130x66;--format;nv12;--gpu-sync;1" "-P" "C:/Users/jonsu/dev/framelink-m3-20261030/test/run_samples.cmake"
-Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+Command: "C:/Program Files/CMake/bin/cmake.exe" "-DPRODUCER=<win-home>/dev/framelink-m3-20261030/build/Release/framelink_producer.exe" "-DCONSUMER=<win-home>/dev/framelink-m3-20261030/build/Release/framelink_consumer.exe" "-DPRODUCER_ARGS=--channel;sample-gpu_sync;--frames;200;--fps;120;--submit;manual" "-DCONSUMER_ARGS=--channel;sample-gpu_sync;--frames;12;--size;130x66;--format;nv12;--gpu-sync;1" "-P" "<win-home>/dev/framelink-m3-20261030/test/run_samples.cmake"
+Directory: <win-home>/dev/framelink-m3-20261030/build
 "sample_gpu_sync" start time: Oct 30 08:13 Eastern Daylight Time
 Output:
 ----------------------------------------------------------
@@ -329,8 +329,8 @@ Test Passed.
 
 18/39 Testing: sample_invalid_cli
 18/39 Test: sample_invalid_cli
-Command: "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_consumer.exe" "--format" "nv12" "--size" "131x66"
-Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+Command: "<win-home>/dev/framelink-m3-20261030/build/Release/framelink_consumer.exe" "--format" "nv12" "--size" "131x66"
+Directory: <win-home>/dev/framelink-m3-20261030/build
 "sample_invalid_cli" start time: Oct 30 08:13 Eastern Daylight Time
 Output:
 ----------------------------------------------------------
@@ -345,8 +345,8 @@ Test Passed.
 
 19/39 Testing: sample_wrong_role
 19/39 Test: sample_wrong_role
-Command: "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_producer.exe" "--pool" "4"
-Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+Command: "<win-home>/dev/framelink-m3-20261030/build/Release/framelink_producer.exe" "--pool" "4"
+Directory: <win-home>/dev/framelink-m3-20261030/build
 "sample_wrong_role" start time: Oct 30 08:13 Eastern Daylight Time
 Output:
 ----------------------------------------------------------
@@ -361,8 +361,8 @@ Test Passed.
 
 20/39 Testing: sample_corruption
 20/39 Test: sample_corruption
-Command: "C:/Program Files/CMake/bin/cmake.exe" "-DPRODUCER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_producer.exe" "-DCONSUMER=C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_consumer.exe" "-DPRODUCER_ARGS=--channel;sample-corruption;--frames;100;--fps;10;--corrupt-at;0" "-DCONSUMER_ARGS=--channel;sample-corruption;--size;130x66;--format;nv12;--frames;10" "-DEXPECT_CONSUMER=1" "-P" "C:/Users/jonsu/dev/framelink-m3-20261030/test/run_samples.cmake"
-Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+Command: "C:/Program Files/CMake/bin/cmake.exe" "-DPRODUCER=<win-home>/dev/framelink-m3-20261030/build/Release/framelink_producer.exe" "-DCONSUMER=<win-home>/dev/framelink-m3-20261030/build/Release/framelink_consumer.exe" "-DPRODUCER_ARGS=--channel;sample-corruption;--frames;100;--fps;10;--corrupt-at;0" "-DCONSUMER_ARGS=--channel;sample-corruption;--size;130x66;--format;nv12;--frames;10" "-DEXPECT_CONSUMER=1" "-P" "<win-home>/dev/framelink-m3-20261030/test/run_samples.cmake"
+Directory: <win-home>/dev/framelink-m3-20261030/build
 "sample_corruption" start time: Oct 30 08:13 Eastern Daylight Time
 Output:
 ----------------------------------------------------------
@@ -382,8 +382,8 @@ Test Passed.
 
 21/39 Testing: disconnect_full_ring
 21/39 Test: disconnect_full_ring
-Command: "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_disconnect_win.exe"
-Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+Command: "<win-home>/dev/framelink-m3-20261030/build/Release/fl_disconnect_win.exe"
+Directory: <win-home>/dev/framelink-m3-20261030/build
 "disconnect_full_ring" start time: Oct 30 08:13 Eastern Daylight Time
 Output:
 ----------------------------------------------------------
@@ -398,8 +398,8 @@ Test Passed.
 
 22/39 Testing: trace_disabled
 22/39 Test: trace_disabled
-Command: "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_trace_test.exe"
-Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+Command: "<win-home>/dev/framelink-m3-20261030/build/Release/fl_trace_test.exe"
+Directory: <win-home>/dev/framelink-m3-20261030/build
 "trace_disabled" start time: Oct 30 08:13 Eastern Daylight Time
 Output:
 ----------------------------------------------------------
@@ -413,8 +413,8 @@ Test Passed.
 
 23/39 Testing: trace_bounded_concurrent
 23/39 Test: trace_bounded_concurrent
-Command: "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_trace_test.exe"
-Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+Command: "<win-home>/dev/framelink-m3-20261030/build/Release/fl_trace_test.exe"
+Directory: <win-home>/dev/framelink-m3-20261030/build
 "trace_bounded_concurrent" start time: Oct 30 08:13 Eastern Daylight Time
 Output:
 ----------------------------------------------------------
@@ -428,8 +428,8 @@ Test Passed.
 
 24/39 Testing: trace_thread_limit
 24/39 Test: trace_thread_limit
-Command: "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_trace_test.exe" "threads"
-Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+Command: "<win-home>/dev/framelink-m3-20261030/build/Release/fl_trace_test.exe" "threads"
+Directory: <win-home>/dev/framelink-m3-20261030/build
 "trace_thread_limit" start time: Oct 30 08:13 Eastern Daylight Time
 Output:
 ----------------------------------------------------------
@@ -443,8 +443,8 @@ Test Passed.
 
 25/39 Testing: portable_map_nv12
 25/39 Test: portable_map_nv12
-Command: "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_portable_map.exe" "nv12"
-Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+Command: "<win-home>/dev/framelink-m3-20261030/build/Release/fl_portable_map.exe" "nv12"
+Directory: <win-home>/dev/framelink-m3-20261030/build
 "portable_map_nv12" start time: Oct 30 08:13 Eastern Daylight Time
 Output:
 ----------------------------------------------------------
@@ -459,8 +459,8 @@ Test Passed.
 
 26/39 Testing: portable_map_rgba
 26/39 Test: portable_map_rgba
-Command: "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_portable_map.exe" "rgba"
-Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+Command: "<win-home>/dev/framelink-m3-20261030/build/Release/fl_portable_map.exe" "rgba"
+Directory: <win-home>/dev/framelink-m3-20261030/build
 "portable_map_rgba" start time: Oct 30 08:13 Eastern Daylight Time
 Output:
 ----------------------------------------------------------
@@ -475,8 +475,8 @@ Test Passed.
 
 27/39 Testing: portable_map_bgra
 27/39 Test: portable_map_bgra
-Command: "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_portable_map.exe" "bgra"
-Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+Command: "<win-home>/dev/framelink-m3-20261030/build/Release/fl_portable_map.exe" "bgra"
+Directory: <win-home>/dev/framelink-m3-20261030/build
 "portable_map_bgra" start time: Oct 30 08:13 Eastern Daylight Time
 Output:
 ----------------------------------------------------------
@@ -491,8 +491,8 @@ Test Passed.
 
 28/39 Testing: portable_map_rgb10a2
 28/39 Test: portable_map_rgb10a2
-Command: "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_portable_map.exe" "rgb10a2"
-Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+Command: "<win-home>/dev/framelink-m3-20261030/build/Release/fl_portable_map.exe" "rgb10a2"
+Directory: <win-home>/dev/framelink-m3-20261030/build
 "portable_map_rgb10a2" start time: Oct 30 08:13 Eastern Daylight Time
 Output:
 ----------------------------------------------------------
@@ -507,8 +507,8 @@ Test Passed.
 
 29/39 Testing: ready_fence_timeout
 29/39 Test: ready_fence_timeout
-Command: "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_ready_timeout_win.exe"
-Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+Command: "<win-home>/dev/framelink-m3-20261030/build/Release/fl_ready_timeout_win.exe"
+Directory: <win-home>/dev/framelink-m3-20261030/build
 "ready_fence_timeout" start time: Oct 30 08:13 Eastern Daylight Time
 Output:
 ----------------------------------------------------------
@@ -523,8 +523,8 @@ Test Passed.
 
 30/39 Testing: reconnect_held
 30/39 Test: reconnect_held
-Command: "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_reconnect_held.exe"
-Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+Command: "<win-home>/dev/framelink-m3-20261030/build/Release/fl_reconnect_held.exe"
+Directory: <win-home>/dev/framelink-m3-20261030/build
 "reconnect_held" start time: Oct 30 08:13 Eastern Daylight Time
 Output:
 ----------------------------------------------------------
@@ -539,8 +539,8 @@ Test Passed.
 
 31/39 Testing: gst_av_session
 31/39 Test: gst_av_session
-Command: "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_av_session.exe" "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/gstframelink.dll"
-Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+Command: "<win-home>/dev/framelink-m3-20261030/build/Release/framelink_av_session.exe" "<win-home>/dev/framelink-m3-20261030/build/Release/gstframelink.dll"
+Directory: <win-home>/dev/framelink-m3-20261030/build
 "gst_av_session" start time: Oct 30 08:13 Eastern Daylight Time
 Output:
 ----------------------------------------------------------
@@ -556,8 +556,8 @@ Test Passed.
 
 32/39 Testing: gst_av_faults
 32/39 Test: gst_av_faults
-Command: "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_av_session.exe" "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/gstframelink.dll" "--faults"
-Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+Command: "<win-home>/dev/framelink-m3-20261030/build/Release/framelink_av_session.exe" "<win-home>/dev/framelink-m3-20261030/build/Release/gstframelink.dll" "--faults"
+Directory: <win-home>/dev/framelink-m3-20261030/build
 "gst_av_faults" start time: Oct 30 08:13 Eastern Daylight Time
 Output:
 ----------------------------------------------------------
@@ -573,8 +573,8 @@ Test Passed.
 
 33/39 Testing: gst_timestamp_contract
 33/39 Test: gst_timestamp_contract
-Command: "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_gst_timestamps.exe" "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/gstframelink.dll"
-Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+Command: "<win-home>/dev/framelink-m3-20261030/build/Release/fl_gst_timestamps.exe" "<win-home>/dev/framelink-m3-20261030/build/Release/gstframelink.dll"
+Directory: <win-home>/dev/framelink-m3-20261030/build
 "gst_timestamp_contract" start time: Oct 30 08:13 Eastern Daylight Time
 Output:
 ----------------------------------------------------------
@@ -589,8 +589,8 @@ Test Passed.
 
 34/39 Testing: session_contract_peers
 34/39 Test: session_contract_peers
-Command: "C:/Users/jonsu/AppData/Local/Microsoft/WindowsApps/python3.13.exe" "C:/Users/jonsu/dev/framelink-m3-20261030/test/session_peers.py" "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_session_peer.exe"
-Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+Command: "<win-home>/AppData/Local/Microsoft/WindowsApps/python3.13.exe" "<win-home>/dev/framelink-m3-20261030/test/session_peers.py" "<win-home>/dev/framelink-m3-20261030/build/Release/fl_session_peer.exe"
+Directory: <win-home>/dev/framelink-m3-20261030/build
 "session_contract_peers" start time: Oct 30 08:13 Eastern Daylight Time
 Output:
 ----------------------------------------------------------
@@ -611,8 +611,8 @@ Test Passed.
 
 35/39 Testing: av_rendezvous
 35/39 Test: av_rendezvous
-Command: "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_av_rendezvous.exe"
-Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+Command: "<win-home>/dev/framelink-m3-20261030/build/Release/fl_av_rendezvous.exe"
+Directory: <win-home>/dev/framelink-m3-20261030/build
 "av_rendezvous" start time: Oct 30 08:13 Eastern Daylight Time
 Output:
 ----------------------------------------------------------
@@ -627,8 +627,8 @@ Test Passed.
 
 36/39 Testing: av_auth
 36/39 Test: av_auth
-Command: "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/fl_av_auth.exe"
-Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+Command: "<win-home>/dev/framelink-m3-20261030/build/Release/fl_av_auth.exe"
+Directory: <win-home>/dev/framelink-m3-20261030/build
 "av_auth" start time: Oct 30 08:13 Eastern Daylight Time
 Output:
 ----------------------------------------------------------
@@ -643,8 +643,8 @@ Test Passed.
 
 37/39 Testing: av_producer_help
 37/39 Test: av_producer_help
-Command: "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_av_producer.exe" "--help"
-Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+Command: "<win-home>/dev/framelink-m3-20261030/build/Release/framelink_av_producer.exe" "--help"
+Directory: <win-home>/dev/framelink-m3-20261030/build
 "av_producer_help" start time: Oct 30 08:13 Eastern Daylight Time
 Output:
 ----------------------------------------------------------
@@ -663,8 +663,8 @@ Test Passed.
 
 38/39 Testing: av_consumer_help
 38/39 Test: av_consumer_help
-Command: "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_av_consumer.exe" "--help"
-Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+Command: "<win-home>/dev/framelink-m3-20261030/build/Release/framelink_av_consumer.exe" "--help"
+Directory: <win-home>/dev/framelink-m3-20261030/build
 "av_consumer_help" start time: Oct 30 08:13 Eastern Daylight Time
 Output:
 ----------------------------------------------------------
@@ -683,12 +683,12 @@ Test Passed.
 
 39/39 Testing: m3_av_apps
 39/39 Test: m3_av_apps
-Command: "C:/Users/jonsu/AppData/Local/Microsoft/WindowsApps/python3.13.exe" "C:/Users/jonsu/dev/framelink-m3-20261030/test/m3_apps.py" "--producer" "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_av_producer.exe" "--consumer" "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/framelink_av_consumer.exe" "--plugin" "C:/Users/jonsu/dev/framelink-m3-20261030/build/Release/gstframelink.dll"
-Directory: C:/Users/jonsu/dev/framelink-m3-20261030/build
+Command: "<win-home>/AppData/Local/Microsoft/WindowsApps/python3.13.exe" "<win-home>/dev/framelink-m3-20261030/test/m3_apps.py" "--producer" "<win-home>/dev/framelink-m3-20261030/build/Release/framelink_av_producer.exe" "--consumer" "<win-home>/dev/framelink-m3-20261030/build/Release/framelink_av_consumer.exe" "--plugin" "<win-home>/dev/framelink-m3-20261030/build/Release/gstframelink.dll"
+Directory: <win-home>/dev/framelink-m3-20261030/build
 "m3_av_apps" start time: Oct 30 08:13 Eastern Daylight Time
 Output:
 ----------------------------------------------------------
-evidence: C:\Users\jonsu\AppData\Local\Temp\framelink-m3-y82eg6_e
+evidence: <win-home>\AppData\Local\Temp\framelink-m3-y82eg6_e
 {"case": "bgra-producer-first", "passed": true, "results": {"producer": {"role": "producer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}, "consumer": {"role": "consumer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}}, "verified_session": {"event": "session-complete", "instance": "6af675cb18e4410acd95f37fb1685950", "generation": 1, "format": "BGRA", "video_frames": 50, "audio_blocks": 50}}
 {"case": "bgra-consumer-first", "passed": true, "results": {"consumer": {"role": "consumer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}, "producer": {"role": "producer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}}, "verified_session": {"event": "session-complete", "instance": "432f05c1f8f1bb44139a05b6fd70e9a0", "generation": 1, "format": "BGRA", "video_frames": 50, "audio_blocks": 50}}
 {"case": "nv12-producer-first", "passed": true, "results": {"producer": {"role": "producer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}, "consumer": {"role": "consumer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}}, "verified_session": {"event": "session-complete", "instance": "57a200832f5809159e71d218144ac346", "generation": 1, "format": "NV12", "video_frames": 50, "audio_blocks": 50}}

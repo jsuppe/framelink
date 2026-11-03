@@ -1,4 +1,4 @@
-Test project C:/Users/jonsu/dev/framelink-m3-20261030/build
+Test project <win-home>/dev/framelink-m3-20261030/build
       Start  1: session_contract
  1/34 Test  #1: session_contract .................   Passed    0.04 sec
       Start  2: session_contract_c_api
@@ -71,7 +71,7 @@ Test project C:/Users/jonsu/dev/framelink-m3-20261030/build
 100% tests passed, 0 tests failed out of 34
 
 Total Test time (real) =  21.75 sec
-evidence: C:\Users\jonsu\dev\framelink-m3-20261030\m3-evidence
+evidence: <win-home>\dev\framelink-m3-20261030\m3-evidence
 {"case": "bgra-producer-first", "passed": true, "results": {"producer": {"role": "producer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}, "consumer": {"role": "consumer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}}, "verified_session": {"event": "session-complete", "instance": "bae7b06a3eeca36f3e6c2d7ef3fa6abb", "generation": 1, "format": "BGRA", "video_frames": 50, "audio_blocks": 50}}
 {"case": "bgra-consumer-first", "passed": true, "results": {"consumer": {"role": "consumer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}, "producer": {"role": "producer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}}, "verified_session": {"event": "session-complete", "instance": "573072f7d318579117c37ef6630ea5c7", "generation": 1, "format": "BGRA", "video_frames": 50, "audio_blocks": 50}}
 {"case": "nv12-producer-first", "passed": true, "results": {"producer": {"role": "producer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}, "consumer": {"role": "consumer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}}, "verified_session": {"event": "session-complete", "instance": "a0eece5e1205590581d27a32f4b239f7", "generation": 1, "format": "NV12", "video_frames": 50, "audio_blocks": 50}}
