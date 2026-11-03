@@ -306,11 +306,20 @@ new shared-PCM transport are not silently included.
 
 ## M6 — Reliability, performance and observability
 
-**State: not started as a milestone.** Earlier targeted stress/trace tests are
+**State: in progress (M6.1 done).** Earlier targeted stress/trace tests are
 baseline evidence, not completion of these release-scale tasks.
 
-- [ ] **M6.1 Define qualification matrix and numeric budgets:** supported
+- [x] **M6.1 Define qualification matrix and numeric budgets:** supported
   hardware/workload, FPS, latency/jitter, A/V offset, resources and tracing overhead.
+  [Matrix](m6/QUALIFICATION_MATRIX.md): three targets, nine cells (RGBA/NV12,
+  160x90–1280x720, bins/elements, CPU/native consumer, traced), 30 fps.
+  `fl_gst_av_bench` + `tools/m6_bench_matrix.py`/`m6_bench_report.py` measure
+  arrival/render lateness, A/V offset, deadline misses, CPU, memory,
+  handles/threads and GPU (per-process engines on Windows, device counters on
+  Linux, uid GPU time on Android). Baseline 3x60 s per cell on all platforms;
+  [budgets.json](m6/budgets.json) derived by a fixed rule, every baseline passes.
+  Linux CPU 640x360/1280x720 unsupported (M6.8); Linux CPU path bimodal (cause
+  open); Android NV12 slow (M6.5).
 - [ ] **M6.2 Sustained A/V:** 30-minute soaks on each supported target.
 - [ ] **M6.3 Lifecycle endurance:** at least 100 restart/reconnect cycles per target.
 - [ ] **M6.4 Fault qualification:** slow readers, underruns/drops, endpoint death,

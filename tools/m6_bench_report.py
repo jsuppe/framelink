@@ -30,6 +30,24 @@ def spread(text):
     d = dist(text)
     return int(d["max"] - d["min"]) if "min" in d and "max" in d else None
 
+def delta(x, key):
+    return num(x.get(f"gpu.device.active.{key}")) - num(x.get(f"gpu.device.idle.{key}"))
+
+def gpu_busy(x):
+    if "gpu.uid2000.busy_pct" in x:
+        return num(x["gpu.uid2000.busy_pct"])
+    if "gpu.producer.busiest_engine_pct" in x:
+        return max(num(x.get("gpu.producer.busiest_engine_pct")), num(x.get("gpu.consumer.busiest_engine_pct")))
+    return max(0.0, delta(x, "sm_pct")) if "gpu.device.active.sm_pct" in x else math.nan
+
+def max_fn(rows, fn):
+    vals = [v for v in (fn(x) for x in rows) if not math.isnan(v)]
+    return max(vals) if vals else math.nan
+
+def med_fn(rows, fn):
+    vals = [v for v in (fn(x) for x in rows) if not math.isnan(v)]
+    return statistics.median(vals) if vals else math.nan
+
 def cell_name(label):
     return re.sub(r"-r\d+$", "", label)
 
@@ -89,6 +107,20 @@ def aggregate(doc):
             "thread_spread": worst_spread("threads"),
             "seconds": min(num(x.get("seconds", "nan")) for x in s),
             "memory": s[0].get("consumer.memory", ""),
+            # GPU: one comparable busy figure per platform (Windows: busiest
+            # engine of either process; Android: GPU active time of the
+            # benchmark uid; Linux: device-wide SM load above idle), plus the
+            # device-wide NVIDIA deltas where available.
+            "gpu_busy_pct": med_fn(s, gpu_busy),
+            # Worst rounds, used by the budget rule (the Linux CPU path is bimodal).
+            "consumer_cpu_pct_max": max(num(x.get("consumer.cpu.percent")) for x in s),
+            "producer_cpu_pct_max": max(num(x.get("producer.cpu.percent")) for x in s),
+            "gpu_busy_pct_max": max_fn(s, gpu_busy),
+            "gpu_power_delta_w": med_fn(s, lambda x: delta(x, "power_w")),
+            "gpu_pcie_mb_s": med_fn(s, lambda x: delta(x, "pcie_rx_mb_s") + delta(x, "pcie_tx_mb_s")),
+            "gpu_fb_delta_mb": med_fn(s, lambda x: delta(x, "fb_mb")),
+            "gpu_core_mhz": med_fn(s, lambda x: num(x.get("gpu.device.active.core_mhz"))),
+            "gpu_process_dedicated_mb": med_fn(s, lambda x: max(num(x.get("gpu.producer.dedicated_mb"), math.nan), num(x.get("gpu.consumer.dedicated_mb"), math.nan))),
         })
         rows[name] = row
     return rows
@@ -99,7 +131,9 @@ COLUMNS = [("config", "Config", None), ("complete", "OK", None),
            ("video_render_jitter_ms", "V jit", 2), ("audio_render_jitter_ms", "A jit", 2),
            ("av_offset_abs_max_ms", "|A/V| max", 2), ("deadline_misses", "Late", None),
            ("consumer_cpu_pct", "C CPU%", 1), ("producer_cpu_pct", "P CPU%", 1),
-           ("mem_slope_kb_per_min", "Mem KB/min", 0), ("handle_spread", "dH", None), ("thread_spread", "dT", None)]
+           ("mem_slope_kb_per_min", "Mem KB/min", 0), ("handle_spread", "dH", None), ("thread_spread", "dT", None),
+           ("gpu_busy_pct", "GPU busy%", 1), ("gpu_power_delta_w", "GPU +W", 1), ("gpu_pcie_mb_s", "PCIe MB/s", 0),
+           ("gpu_fb_delta_mb", "GPU +MB", 0)]
 
 def fmt(v, digits):
     if v is None or (isinstance(v, float) and math.isnan(v)):
@@ -157,8 +191,9 @@ RULES = {
     "video_render_jitter_ms": (2.0, 1.0, None),
     "audio_render_jitter_ms": (2.0, 1.0, None),
     "av_offset_abs_max_ms": (2.0, 1.0, 5.0),
-    "consumer_cpu_pct": (1.5, 2.0, None),
-    "producer_cpu_pct": (1.5, 2.0, None),
+    "consumer_cpu_pct_max": (1.5, 2.0, None),
+    "producer_cpu_pct_max": (1.5, 2.0, None),
+    "gpu_busy_pct_max": (1.5, 2.0, None),
     "handle_spread": (2.0, 8, None),
     "thread_spread": (2.0, 4, None),
 }
@@ -208,8 +243,8 @@ def main():
         out = {"rule": {"scaled": {k: list(v) for k, v in RULES.items()}, "fixed": FIXED,
                         "growth": GROWTH, "growth_min_seconds": GROWTH_MIN_S,
                         "session_latency_ms": SESSION_LATENCY_MS,
-                        "text": "limit = min(cap, max(scale*baseline, baseline+floor)); baseline is the worst round "
-                                "for tails and the median round for CPU"},
+                        "text": "limit = min(cap, max(scale*baseline, baseline+floor)); baseline is the worst "
+                                "of the baseline rounds for every metric"},
                "platforms": {}}
         for path in a.results:
             doc = json.load(open(path))

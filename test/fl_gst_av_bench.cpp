@@ -201,6 +201,8 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
   auto args=std::vector<std::string>{argv[1],"--role",r,"--session",path,"--result",base+"-"+r+".txt"};auto opts=optionArgs(o);args.insert(args.end(),opts.begin(),opts.end());
   auto c=spawn(exe,args);for(const char*k:{"FRAMELINK_GST_TRACE","FRAMELINK_TRACE","FRAMELINK_GST_TRACE_EVENTS","FRAMELINK_TRACE_EVENTS"})setEnv(k,"");return c;};
  auto consumer=launch("consumer");g_usleep(200000);auto producer=launch("producer");
+ // Early pid line for external samplers (GPU counters per process).
+ printf("pids producer=%ld consumer=%ld\n",producer.pid,consumer.pid);
  const gint64 deadline=g_get_monotonic_time()+gint64(o.seconds+90)*G_USEC_PER_SEC;
  const int pc=await(producer,deadline),cc=await(consumer,deadline);
  auto pr=readResult(base+"-producer.txt"),cr=readResult(base+"-consumer.txt");
