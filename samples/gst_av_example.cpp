@@ -2,12 +2,15 @@
 // public session helpers. Run one producer and one consumer with the same
 // --session directory (private, current-user; created by the producer).
 //
-//   framelink_gst_av producer --session DIR [--tracks av|audio|video]
-//        [--format RGBA|BGRA|NV12] [--size 640x360] [--fps 30] [--seconds 10]
+//   framelink_gst_av producer --session DIR [--bin] [--tracks av|audio|video]
+//        [--format RGBA|BGRA|NV12] [--size 320x180] [--fps 30] [--seconds 10]
 //        [--video-source "videotestsrc is-live=true"] [--audio-source "audiotestsrc is-live=true"]
-//   framelink_gst_av consumer --session DIR [--tracks ...] [--format ...] [--size ...] [--fps ...]
+//   framelink_gst_av consumer --session DIR [--bin] [--tracks ...] [--format ...] [--size ...] [--fps ...]
 //        [--latency-ms 150] [--pool 8] [--display | --verify --seconds 10]
 //
+// --bin uses the convenience bins (framelinkavsink / framelinkavsrc with
+// session=) instead of the individual elements and session helpers; either
+// side may use either form.
 // Display mode renders with autovideosink and plays through autoaudiosink.
 // Verify mode is headless: exact frame/sample counts, uniform test pixels,
 // contiguous audio timestamps and delivery at PTS+latency on the system clock.
@@ -29,7 +32,9 @@ GST_PLUGIN_STATIC_DECLARE(gdp);GST_PLUGIN_STATIC_DECLARE(gio);GST_PLUGIN_STATIC_
 namespace {
 struct Options {
  std::string role,session,tracks="av",format="RGBA",videoSource="videotestsrc is-live=true pattern=solid-color foreground-color=0xffff0000",audioSource="audiotestsrc is-live=true wave=sine";
- unsigned width=640,height=360,fps=30,seconds=10,latencyMs=150,pool=8,timeoutMs=15000;bool display=false,verify=false;
+ // 320x180: the CPU consumer path copies each frame out of GPU memory, which
+ // on discrete GPUs must finish within one frame interval (GST_AV_EXAMPLE.md).
+ unsigned width=320,height=180,fps=30,seconds=10,latencyMs=150,pool=8,timeoutMs=15000;bool display=false,verify=false,bin=false;
 };
 [[noreturn]] void usage(const char*why){fprintf(stderr,"%s\nsee the header of samples/gst_av_example.cpp for usage\n",why);exit(2);}
 Options parse(int argc,char**argv){
@@ -42,7 +47,7 @@ Options parse(int argc,char**argv){
   else if(a=="--latency-ms")o.latencyMs=unsigned(atoi(value().c_str()));else if(a=="--pool")o.pool=unsigned(atoi(value().c_str()));
   else if(a=="--timeout-ms")o.timeoutMs=unsigned(atoi(value().c_str()));
   else if(a=="--video-source")o.videoSource=value();else if(a=="--audio-source")o.audioSource=value();
-  else if(a=="--display")o.display=true;else if(a=="--verify")o.verify=true;else usage(("unknown option "+a).c_str());
+  else if(a=="--bin")o.bin=true;else if(a=="--display")o.display=true;else if(a=="--verify")o.verify=true;else usage(("unknown option "+a).c_str());
  }
  if(o.session.empty())usage("--session is required");
  if(o.tracks!="av"&&o.tracks!="audio"&&o.tracks!="video")usage("--tracks av|audio|video");
@@ -107,7 +112,24 @@ GstFlowReturn onAudio(GstAppSink*sink,gpointer data){
  v->nextAudio=GST_BUFFER_PTS(b)+GST_BUFFER_DURATION(b);v->samples+=gst_buffer_get_size(b)/4;gst_sample_unref(s);return GST_FLOW_OK;
 }
 
+// The bin does discovery, negotiation, the clock exchange, the ready gate and
+// the drain itself; the application only links its sources to the pads.
+int producerBin(const Options&o){
+ std::string text="framelinkavsink name=s tracks="+o.tracks+" video-format="+o.format+" width="+std::to_string(o.width)+" height="+std::to_string(o.height)+
+  " framerate="+std::to_string(o.fps)+"/1 connect-timeout-ms="+std::to_string(o.timeoutMs)+" idle-timeout-ms="+std::to_string(o.timeoutMs)+" ";
+ if(hasVideo(o))text+=o.videoSource+" num-buffers="+std::to_string(o.fps*o.seconds)+" ! "+videoCaps(o)+" ! s.video_sink ";
+ if(hasAudio(o))text+=o.audioSource+" num-buffers="+std::to_string(o.seconds*(kRate/kBlock))+" samplesperbuffer="+std::to_string(kBlock)+" ! "+audioCaps+" ! s.audio_sink";
+ auto*pipeline=launch(text);if(!pipeline)return 1;
+ auto*s=gst_bin_get_by_name(GST_BIN(pipeline),"s");g_object_set(s,"session",o.session.c_str(),nullptr);gst_object_unref(s); // in code: launch syntax eats backslashes
+ fprintf(stderr,"producer (bin): waiting for consumer on %s\n",o.session.c_str());
+ bool ok=gst_element_set_state(pipeline,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE;
+ // EOS arrives only after the consumer confirmed its drain.
+ ok=runToEos(pipeline,o.seconds*1000+3*o.timeoutMs)&&ok;
+ gst_element_set_state(pipeline,GST_STATE_NULL);gst_object_unref(pipeline);
+ fprintf(stderr,"producer: %s\n",ok?"finished":"failed");return ok?0:1;
+}
 int producer(const Options&o){
+ if(o.bin)return producerBin(o);
  auto*session=fl_gst_session_new((hasVideo(o)?1u:0u)|(hasAudio(o)?2u:0u));
  flSessionCapabilities caps{};caps.version=FL_SESSION_OPTIONAL_TRACKS_VERSION;
  if(hasVideo(o)){caps.videoCount=1;caps.video[0]={guint32(format(o)),o.width,o.height,o.fps,1};}
@@ -132,21 +154,45 @@ int producer(const Options&o){
  fprintf(stderr,"producer: %s\n",ok?"finished":"failed");return ok?0:1;
 }
 
+void attachVerify(GstElement*pipeline,const Options&o,Verify&verify){
+ if(!o.verify)return;GstAppSinkCallbacks cb{};
+ if(hasVideo(o)){cb.new_sample=onVideo;auto*s=gst_bin_get_by_name(GST_BIN(pipeline),"vout");gst_app_sink_set_callbacks(GST_APP_SINK(s),&cb,&verify,nullptr);gst_object_unref(s);}
+ if(hasAudio(o)){cb.new_sample=onAudio;auto*s=gst_bin_get_by_name(GST_BIN(pipeline),"aout");gst_app_sink_set_callbacks(GST_APP_SINK(s),&cb,&verify,nullptr);gst_object_unref(s);}
+}
+std::string outputs(const Options&o,const std::string&videoPad,const std::string&audioPad){
+ // A queue after each live FrameLink source decouples it from the synchronized
+ // sink; the video pool must cover frames held within the pipeline latency.
+ std::string text;
+ if(hasVideo(o))text+=videoPad+" ! queue ! "+(o.display?"videoconvert ! autovideosink":"appsink name=vout sync=true emit-signals=false")+" ";
+ if(hasAudio(o))text+=audioPad+" ! queue ! "+(o.display?std::string("audioconvert ! audioresample ! autoaudiosink"):std::string("appsink name=aout sync=true"));
+ return text;
+}
+bool report(const Options&o,Verify&verify,bool ok);
+int consumerBin(const Options&o){
+ const std::string text="framelinkavsrc name=c tracks="+o.tracks+" video-format="+o.format+" width="+std::to_string(o.width)+" height="+std::to_string(o.height)+
+  " framerate="+std::to_string(o.fps)+"/1 latency-ms="+std::to_string(o.latencyMs)+" video-pool="+std::to_string(o.pool)+
+  " connect-timeout-ms="+std::to_string(o.timeoutMs)+" idle-timeout-ms="+std::to_string(o.timeoutMs)+" "+outputs(o,"c.video_src","c.audio_src");
+ auto*pipeline=launch(text);if(!pipeline)return 1;
+ auto*c=gst_bin_get_by_name(GST_BIN(pipeline),"c");g_object_set(c,"session",o.session.c_str(),nullptr);gst_object_unref(c);
+ Verify verify;attachVerify(pipeline,o,verify);
+ fprintf(stderr,"consumer (bin): connecting to %s\n",o.session.c_str());
+ // The bin installs the clock, latency and base time and reports ready and drained.
+ bool ok=gst_element_set_state(pipeline,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE;
+ ok=runToEos(pipeline,o.seconds*1000+3*o.timeoutMs)&&ok;
+ gst_element_set_state(pipeline,GST_STATE_NULL);gst_object_unref(pipeline);
+ ok=report(o,verify,ok);
+ fprintf(stderr,"consumer: %s\n",ok?"finished":"failed");return ok?0:1;
+}
 int consumer(const Options&o){
+ if(o.bin)return consumerBin(o);
  auto*session=fl_gst_session_new((hasVideo(o)?1u:0u)|(hasAudio(o)?2u:0u));
  flSessionCapabilities caps{};caps.version=FL_SESSION_OPTIONAL_TRACKS_VERSION;
  if(hasVideo(o)){caps.videoCount=1;caps.video[0]={guint32(format(o)),o.width,o.height,o.fps,1};}
  if(hasAudio(o)){caps.audioCount=1;caps.audio[0]={FL_PCM_S16,kRate,2};}
- // A queue after each live FrameLink source decouples it from the synchronized
- // sink; the video pool must cover frames held within the pipeline latency.
- std::string text;
- if(hasVideo(o))text+="framelinksrc name=video width="+std::to_string(o.width)+" height="+std::to_string(o.height)+" format="+o.format+" ! queue ! "+(o.display?"videoconvert ! autovideosink":"appsink name=vout sync=true emit-signals=false")+" ";
- if(hasAudio(o))text+="framelinkaudiosrc tracks="+o.tracks+" ! queue ! "+(o.display?std::string("audioconvert ! audioresample ! autoaudiosink"):std::string("appsink name=aout sync=true"));
+ const std::string text=outputs(o,"framelinksrc name=video width="+std::to_string(o.width)+" height="+std::to_string(o.height)+" format="+o.format,
+  "framelinkaudiosrc tracks="+o.tracks);
  auto*pipeline=launch(text);if(!pipeline)return 1;
- Verify verify;
- if(o.verify){GstAppSinkCallbacks cb{};
-  if(hasVideo(o)){cb.new_sample=onVideo;auto*s=gst_bin_get_by_name(GST_BIN(pipeline),"vout");gst_app_sink_set_callbacks(GST_APP_SINK(s),&cb,&verify,nullptr);gst_object_unref(s);}
-  if(hasAudio(o)){cb.new_sample=onAudio;auto*s=gst_bin_get_by_name(GST_BIN(pipeline),"aout");gst_app_sink_set_callbacks(GST_APP_SINK(s),&cb,&verify,nullptr);gst_object_unref(s);}}
+ Verify verify;attachVerify(pipeline,o,verify);
  fprintf(stderr,"consumer: connecting to %s\n",o.session.c_str());
  GError*e=nullptr;flChannel*channel=nullptr;
  if(!fl_gst_session_open_local_av(session,FALSE,o.session.c_str(),&caps,2,o.pool,80,o.timeoutMs,o.timeoutMs,0,&channel,nullptr,&e)){fprintf(stderr,"session setup: %s\n",e->message);return 1;}
@@ -159,18 +205,23 @@ int consumer(const Options&o){
  bool ok=runToEos(pipeline,o.seconds*1000+o.timeoutMs);
  if(ok&&!fl_gst_session_finish_local(session,FALSE,o.timeoutMs,&e)){fprintf(stderr,"finish: %s\n",e->message);g_clear_error(&e);ok=false;}
  gst_element_set_state(pipeline,GST_STATE_NULL);gst_object_unref(pipeline);g_object_unref(session);
+ ok=report(o,verify,ok);
+ fprintf(stderr,"consumer: %s\n",ok?"finished":"failed");return ok?0:1;
+}
+bool report(const Options&o,Verify&verify,bool ok){
+ const GstClockTime latency=GstClockTime(o.latencyMs)*GST_MSECOND;
  if(o.verify){
   const unsigned wantFrames=hasVideo(o)?o.fps*o.seconds:0;const guint64 wantSamples=hasAudio(o)?guint64(o.seconds)*kRate:0;
   if(verify.frames!=wantFrames)verify.fail("video frame count");
   if(verify.samples!=wantSamples)verify.fail("audio sample count");
   // Delivered by a synchronized sink: never before PTS+latency (5ms slack), at most 100ms after.
   if(wantFrames||wantSamples){if(verify.bestLag<gint64(latency)-5000000||verify.worstLag>gint64(latency)+100000000)verify.fail("delivery outside latency window");}
-  printf("{\"event\":\"verify\",\"tracks\":\"%s\",\"format\":\"%s\",\"frames\":%u,\"expected_frames\":%u,\"samples\":%llu,\"expected_samples\":%llu,\"lag_min_ms\":%.3f,\"lag_max_ms\":%.3f,\"latency_ms\":%u,\"result\":\"%s\"%s%s%s}\n",
-   o.tracks.c_str(),o.format.c_str(),verify.frames.load(),wantFrames,(unsigned long long)verify.samples.load(),(unsigned long long)wantSamples,
+  printf("{\"event\":\"verify\",\"mode\":\"%s\",\"tracks\":\"%s\",\"format\":\"%s\",\"frames\":%u,\"expected_frames\":%u,\"samples\":%llu,\"expected_samples\":%llu,\"lag_min_ms\":%.3f,\"lag_max_ms\":%.3f,\"latency_ms\":%u,\"result\":\"%s\"%s%s%s}\n",
+   o.bin?"bin":"element",o.tracks.c_str(),o.format.c_str(),verify.frames.load(),wantFrames,(unsigned long long)verify.samples.load(),(unsigned long long)wantSamples,
    verify.bestLag.load()==G_MAXINT64?0.0:verify.bestLag/1e6,verify.worstLag.load()==G_MININT64?0.0:verify.worstLag/1e6,o.latencyMs,ok&&!verify.bad?"pass":"fail",verify.bad?",\"reason\":\"":"",verify.bad?verify.why.c_str():"",verify.bad?"\"":"");
   ok=ok&&!verify.bad;
  }
- fprintf(stderr,"consumer: %s\n",ok?"finished":"failed");return ok?0:1;
+ return ok;
 }
 }
 int main(int argc,char**argv){

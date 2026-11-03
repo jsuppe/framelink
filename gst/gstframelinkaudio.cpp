@@ -178,8 +178,15 @@ static void handleSinkMessage(GstBin*bin,GstMessage*message){
  if(GST_MESSAGE_TYPE(message)==GST_MESSAGE_ERROR&&GST_MESSAGE_SRC(message)!=GST_OBJECT(bin)&&s->session){s->failed=TRUE;fl_gst_session_cancel(s->session);}
  GST_BIN_CLASS(gst_framelink_audio_sink_parent_class)->handle_message(bin,message);
 }
+// The socket stream is forward-only; refuse seeks before the inner sink would
+// forward them upstream and flush the producer's sources.
+static gboolean sinkSendEvent(GstElement*element,GstEvent*event){
+ auto*s=reinterpret_cast<GstFrameLinkAudioSink*>(element);
+ if(GST_EVENT_TYPE(event)==GST_EVENT_SEEK&&s->session){GST_WARNING_OBJECT(s,"seek refused: FrameLink audio is forward rate1 only");gst_event_unref(event);return FALSE;}
+ return GST_ELEMENT_CLASS(gst_framelink_audio_sink_parent_class)->send_event(element,event);
+}
 static void gst_framelink_audio_sink_class_init(GstFrameLinkAudioSinkClass*c){
- auto*object=G_OBJECT_CLASS(c);GST_BIN_CLASS(c)->handle_message=handleSinkMessage;object->set_property=setProperty;object->get_property=getProperty;
+ auto*object=G_OBJECT_CLASS(c);GST_BIN_CLASS(c)->handle_message=handleSinkMessage;GST_ELEMENT_CLASS(c)->send_event=sinkSendEvent;object->set_property=setProperty;object->get_property=getProperty;
  const auto flags=GParamFlags(G_PARAM_READWRITE|G_PARAM_STATIC_STRINGS);
  g_object_class_install_property(object,PROP_TRACKS,g_param_spec_string("tracks","Tracks","audio standalone or av with shared session context","audio",flags));
  const auto read=GParamFlags(G_PARAM_READABLE|G_PARAM_STATIC_STRINGS);

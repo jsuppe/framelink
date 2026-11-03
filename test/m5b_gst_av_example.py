@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
-"""Two-process qualification of samples/gst_av_example.cpp (M5b task7).
+"""Two-process qualification of samples/gst_av_example.cpp (M5b tasks 7 and 11).
 
 Each case launches a real producer and consumer process on a fresh private
 session directory and requires the consumer's headless verification to pass.
-A negative case requires disagreeing track sets to fail on both sides.
+Every case runs with the individual elements and with the convenience bins
+(--bin) on both sides, and A/V cases also with one side of each; delivery lag
+must agree between the element and bin runs. A negative case requires
+disagreeing track sets to fail on both sides, in both forms.
 With --adb SERIAL --remote-dir DIR both processes run on an Android device
 (statically linked example already pushed to DIR); each case gets a fresh
 remote scratch directory that is removed afterwards.
@@ -41,20 +44,26 @@ class AdbRoot:
         # "[f]ramelink" never matches this cleanup shell's own command line.
         subprocess.run(self.adb + ["shell", f"rm -rf {self.path}; pkill -f '[f]ramelink_gst_av.*{self.path}'; true"])
 
-def run_case(args, env, name, tracks, fmt, consumer_first, consumer_tracks=None, expect_pass=True):
+# (producer uses bin, consumer uses bin)
+MODES = [(False, False), (True, True), (True, False), (False, True)]
+def mode_name(mode):
+    return ("bin" if mode[0] else "element") + "/" + ("bin" if mode[1] else "element")
+
+def run_case(args, env, name, tracks, fmt, consumer_first, consumer_tracks=None, expect_pass=True, mode=(False, False)):
     root = AdbRoot(args) if args.adb else LocalRoot(args)
     try:
-        return run_case_in(root, args, env, name, tracks, fmt, consumer_first, consumer_tracks, expect_pass)
+        return run_case_in(root, args, env, f"{name} [{mode_name(mode)}]", tracks, fmt, consumer_first,
+                           consumer_tracks, expect_pass, mode)
     finally:
         root.close()
 
-def run_case_in(root, args, env, name, tracks, fmt, consumer_first, consumer_tracks, expect_pass):
+def run_case_in(root, args, env, name, tracks, fmt, consumer_first, consumer_tracks, expect_pass, mode):
     session = root.path + "/session"
     common = ["--session", session, "--format", fmt, "--size", "160x90", "--fps", "30",
               "--seconds", str(args.seconds), "--timeout-ms", "8000"]
-    producer = root.command(["producer", "--tracks", tracks] + common)
+    producer = root.command(["producer", "--tracks", tracks] + (["--bin"] if mode[0] else []) + common)
     consumer = root.command(["consumer", "--tracks", consumer_tracks or tracks, "--verify",
-                             "--latency-ms", "150", "--pool", "8"] + common)
+                             "--latency-ms", "150", "--pool", "8"] + (["--bin"] if mode[1] else []) + common)
     order = [consumer, producer] if consumer_first else [producer, consumer]
     role = {id(consumer): "consumer", id(producer): "producer"}
     started = time.monotonic()
@@ -71,7 +80,7 @@ def run_case_in(root, args, env, name, tracks, fmt, consumer_first, consumer_tra
             for p in procs:
                 p.kill()
             print(f"FAIL {name}: timeout", flush=True)
-            return False
+            return False, None
         outputs[role[id(cmd)]] = (proc.returncode, out, err)
     elapsed = time.monotonic() - started
     (pc, _, perr), (cc, cout, cerr) = outputs["producer"], outputs["consumer"]
@@ -87,7 +96,7 @@ def run_case_in(root, args, env, name, tracks, fmt, consumer_first, consumer_tra
           json.dumps(verify) if verify else "", flush=True)
     if not ok:
         sys.stderr.write(f"--- producer stderr\n{perr}\n--- consumer stderr\n{cerr}\n")
-    return ok
+    return ok, verify
 
 def main():
     ap = argparse.ArgumentParser()
@@ -112,9 +121,24 @@ def main():
     results = []
     for _ in range(args.repeat):
         for case in CASES:
-            results.append(run_case(args, env, *case))
-        results.append(run_case(args, env, "negative-track-mismatch", "av", "RGBA", True,
-                                consumer_tracks="audio", expect_pass=False))
+            lags = {}
+            for mode in MODES:
+                if mode[0] != mode[1] and case[1] != "av":
+                    continue  # mixed forms: A/V cases only
+                ok, verify = run_case(args, env, *case, mode=mode)
+                results.append(ok)
+                if ok and verify:
+                    lags[mode] = (verify["lag_min_ms"], verify["lag_max_ms"])
+            # Equivalent timing: the bins install exactly the helpers' timeline.
+            if (False, False) in lags and (True, True) in lags:
+                (e0, e1), (b0, b1) = lags[(False, False)], lags[(True, True)]
+                same = abs(e0 - b0) <= 20 and abs(e1 - b1) <= 20
+                print(("PASS" if same else "FAIL"), f"{case[0]} timing parity element {e0:.1f}..{e1:.1f}ms "
+                      f"bin {b0:.1f}..{b1:.1f}ms", flush=True)
+                results.append(same)
+        for mode in [(False, False), (True, True)]:
+            results.append(run_case(args, env, "negative-track-mismatch", "av", "RGBA", True,
+                                    consumer_tracks="audio", expect_pass=False, mode=mode)[0])
     passed = sum(results)
     print(f"m5b gst A/V example: {passed}/{len(results)} cases passed", flush=True)
     return 0 if passed == len(results) else 1

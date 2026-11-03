@@ -177,7 +177,7 @@ playback delay; unsupported hardware paths must reject clearly.
 
 ## M5b — GStreamer audio elements and coordinated A/V sessions
 
-**State: in progress; tasks1–10 locally validated; task11 bin parity and examples next.** Added at Jon's request 2026-11-01. Execute
+**State: in progress; tasks1–11 locally validated; task12 platform qualification next.** Added at Jon's request 2026-11-01. Execute
 only after M5a closes, before M6 qualifies the complete public integration path.
 Video elements remain video-only; separate audio elements share one session.
 
@@ -263,11 +263,18 @@ elements remain independently available.
   Both bins select the system clock unless the application fixed one.
   `gst_av_src_bin` and `gst_av_bin` x20 on Linux, Windows and Android; Linux
   110/110 serial.
-- [ ] **M5b.11 Bin parity and examples:** demonstrate standalone-element and
+- [x] **M5b.11 Bin parity and examples:** demonstrate standalone-element and
   bin-based two-process pipelines. Test equivalent PCM/video timing and negotiated
   memory paths, missing-track policy, startup/pause/flush/EOS, peer death/reconnect,
   error propagation, queue bounds and cleanup. Document properties/pad names and
   supported audio-only/video-only behavior without silently waiting forever.
+  [Evidence](m5b/bin-parity/README.md): `gst_av_parity` runs 16 scenarios in all
+  four element/bin combinations with identical outcomes; the example runs
+  `--bin` on either side with element/bin lag agreement. Fixed: consumer-bin
+  drain after failure, refused seeks breaking the session (sinks refuse seeks),
+  replaced video frames now fail at once (decision Jon 2026-11-02). Documented:
+  real-time delivery and CPU readback limits (example default 320x180; M6.8).
+  Matrix x10 Linux, Windows and Android.
 - [ ] **M5b.12 Platform qualification:** Windows, Linux and Android builds/runtime
   on supported targets; verify native video plus audio, audio-only, latency
   queries, queue bounds, resource cleanup and tracing/copy accounting for both
@@ -301,6 +308,11 @@ baseline evidence, not completion of these release-scale tasks.
   detection and reproducible frame/audio accounting.
 - [ ] **M6.7 Automate and close:** deterministic CI faults, reproducible benchmark
   commands and reviewed acceptance report with remaining unsupported modes.
+- [ ] **M6.8 CPU-consumer ring memory (found in M5b.11):** Linux GBM linear
+  rings live in discrete-GPU video memory, so the CPU consumer path reads
+  ~34MB/s (640x360 RGBA: 27ms median, 78ms p90 on an RTX 3090) and cannot
+  sustain 30fps there. Allocate CPU-consumed rings in cached system memory (or
+  use streaming reads), qualify throughput per platform and publish budgets.
 
 ## M7 — Release and developer handoff
 

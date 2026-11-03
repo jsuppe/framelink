@@ -24,7 +24,7 @@ SUITES = ("m5b_av", "gst_video_regression")
 # Desktop builds must register every m5b_av test; absence is a matrix failure.
 M5B_AV_REQUIRED = {"gst_session_transport", "gst_session_context", "gst_audio_sink", "gst_audio_source",
                    "gst_event_channel", "gst_local_audio", "gst_av_timeline", "gst_av_validation",
-                   "gst_local_av", "gst_av_bin", "gst_av_src_bin", "m5b_gst_av_example"}
+                   "gst_local_av", "gst_av_bin", "gst_av_src_bin", "gst_av_parity", "m5b_gst_av_example"}
 # Android: (name, binary, args). "static" fills the plugin-path argument that
 # desktop builds load; Android registers the plugins statically.
 ANDROID = {
@@ -40,6 +40,7 @@ ANDROID = {
         ("gst_local_av", "fl_gst_local_av", ["static"]),
         ("gst_av_bin", "fl_gst_av_bin", ["static"]),
         ("gst_av_src_bin", "fl_gst_av_src_bin", ["static"]),
+        ("gst_av_parity", "fl_gst_av_parity", ["static"]),
     ],
     "gst_video_regression": [
         ("gst_native_source_android", "fl_gst_native_source_android", []),
@@ -141,7 +142,7 @@ def main():
     ap.add_argument("--suites", default=",".join(SUITES))
     ap.add_argument("--adb", help="Android device serial (Android build directory)")
     ap.add_argument("--remote-dir", default="/data/local/tmp/fl-m5b-matrix")
-    ap.add_argument("--android-timeout", type=int, default=180)
+    ap.add_argument("--android-timeout", type=int, default=400)
     ap.add_argument("--platform", help="label recorded in the summary")
     ap.add_argument("--out", help="write the JSON summary here")
     args = ap.parse_args()

@@ -1,6 +1,6 @@
 # M5b public GStreamer A/V contract
 
-Status: tasks1–10 locally validated on the M5b development branch. Public audio
+Status: tasks1–11 locally validated on the M5b development branch. Public audio
 sink/source, coordinated timing, lifecycle/security, two-process examples, the
 automated validation matrix and the producer bin are implemented; the consumer
 bin and bin parity remain unfinished. See [producer bin](m5b/producer-bin/README.md),
@@ -55,7 +55,10 @@ Shared configuration is immutable outside NULL. Public elements/bins expose:
 - `audio-queue-ms` (default80, range1..2000): hard bounded buffering budget,
   not preroll/latency target. Oversized blocks fail rather than bypass the cap.
 - `video-queue-frames` (default2, range1..16), independent of required native
-  allocation count and existing video overflow policy.
+  allocation count and existing video overflow policy. Delivery keeps the
+  ring's newest-unread-frame policy; coordinated video must be paced in real
+  time, and a frame replaced before the consumer read it fails the session at
+  once with that cause (decision Jon, 2026-11-02: fail fast and document).
 - Read-only negotiated `session-id`, `generation`, `audio-track-id`,
   `video-track-id`; absent track ID is zero. Nonzero IDs must differ.
 
@@ -107,7 +110,8 @@ must not also pace each track independently or add per-hop presentation reservoi
 
 Missing PTS/overflow/negative mapping reject; no guessed wall-clock timestamps.
 Initial support is forward rate1 TIME segments. Reject unsupported seek/trick-rate
-changes. Flush/cancellation wakes bounded operations, retires ownership safely and
+changes: the coordinated sinks refuse seek events before they travel upstream
+(task 11), so a refused seek leaves the session intact. Flush/cancellation wakes bounded operations, retires ownership safely and
 requires a coordinated new epoch/generation before resuming. DISCONT/GAP/EOS are
 explicit control/timing events; no synthetic silence or video fabrication.
 Track EOS is distinct from peer death. Normal session EOS follows all required

@@ -887,11 +887,19 @@ static void sinkSessionContext(GstElement*element,GstContext*context){
   if(self->session!=session){if(self->session)g_object_unref(self->session);self->session=session;self->sessionRegistered=FALSE;}else g_object_unref(session);
  }}GST_ELEMENT_CLASS(gst_framelink_sink_parent_class)->set_context(element,context);
 }
+// Coordinated sessions support forward rate1 TIME only. Refuse a seek here,
+// before it travels upstream: a flushing seek that reached the sources would
+// flush this sink and end the session (flush needs a new generation).
+static gboolean sinkSendEvent(GstElement* element,GstEvent* event){
+    auto*self=GST_FRAMELINK_SINK(element);
+    if(GST_EVENT_TYPE(event)==GST_EVENT_SEEK&&self->session){GST_WARNING_OBJECT(self,"seek refused: coordinated sessions are forward rate1 only");gst_event_unref(event);return FALSE;}
+    return GST_ELEMENT_CLASS(gst_framelink_sink_parent_class)->send_event(element,event);
+}
 static void gst_framelink_sink_class_init(GstFrameLinkSinkClass* klass) {
     GObjectClass* gobject = G_OBJECT_CLASS(klass);
     GstElementClass* element = GST_ELEMENT_CLASS(klass);
     GstBaseSinkClass* basesink = GST_BASE_SINK_CLASS(klass);
-    element->set_context=sinkSessionContext;
+    element->set_context=sinkSessionContext;element->send_event=sinkSendEvent;
 
     gobject->set_property = sinkSetProperty;
     gobject->get_property = sinkGetProperty;
@@ -1002,7 +1010,7 @@ typedef struct _GstFrameLinkSrc {
     GstBuffer* pendingDelivery;
     FlGstSession* session; flSessionConfig sessionConfig; gboolean sessionRegistered;
     guint64 sessionFrames;gint64 sessionLastPts;
-    FlGstVideoEvent pendingGaps[32];guint pendingGapCount;gboolean videoEndSeen;
+    FlGstVideoEvent pendingGaps[32];guint pendingGapCount;gboolean videoEndSeen;guint64 sessionSequence;
 
     // properties: the ring THIS element allocates (it is the consumer)
     gchar* channel;
@@ -1110,7 +1118,7 @@ static gboolean srcStart(GstBaseSrc* base) {
             GST_ELEMENT_ERROR(self,RESOURCE,SETTINGS,("coordinated video requires matching adopted allocation/session"),(NULL));return FALSE;
         }
         if(!self->sessionRegistered){if(fl_gst_session_register_track(self->session,FL_GST_TRACK_VIDEO)!=FL_GST_SESSION_READY)return FALSE;self->sessionRegistered=TRUE;}
-        self->preserveTimestamps=TRUE;self->preserveFrameMetadata=TRUE;self->streamGeneration=self->sessionConfig.generation;self->sessionFrames=0;self->sessionLastPts=-1;self->pendingGapCount=0;self->videoEndSeen=FALSE;
+        self->preserveTimestamps=TRUE;self->preserveFrameMetadata=TRUE;self->streamGeneration=self->sessionConfig.generation;self->sessionFrames=0;self->sessionLastPts=-1;self->pendingGapCount=0;self->videoEndSeen=FALSE;self->sessionSequence=0;
     }
 #ifndef FL_GST_NATIVE
     if(self->nativeMemory){GST_ELEMENT_ERROR(self,RESOURCE,SETTINGS,("native-memory output is not supported by this build"),(NULL));return FALSE;}
@@ -1359,6 +1367,14 @@ static GstFlowReturn srcCreateImpl(GstPushSrc* push, GstBuffer** outbuf) {
     }
 
     if(self->session&&metadata.streamGeneration!=self->sessionConfig.generation){srcReleaseFrame(self,&frame);GST_ELEMENT_ERROR(self,STREAM,FORMAT,("stale video media generation"),(NULL));return GST_FLOW_ERROR;}
+    // The ring keeps only the newest unread frame. Every submitted session
+    // frame is accounted for, so a replaced one can never be recovered: fail
+    // now with the cause instead of at the idle deadline.
+    if(self->session&&frame.sequence!=self->sessionSequence+1){const guint64 previous=self->sessionSequence;srcReleaseFrame(self,&frame);
+        GST_ELEMENT_ERROR(self,STREAM,FAILED,("coordinated video frame replaced before it was read: the producer delivered faster than real time"),
+            ("ring sequence %" G_GUINT64_FORMAT " after %" G_GUINT64_FORMAT "; coordinated video must be paced in real time (live or clock-synchronized sources)",frame.sequence,previous));
+        return GST_FLOW_ERROR;}
+    if(self->session)self->sessionSequence=frame.sequence;
     if(self->session&&(metadata.flags&FL_FRAME_DISCONT)&&!srcVideoEvents(self,FL_GST_VIDEO_BARRIER,frame.ptsNs)){srcReleaseFrame(self,&frame);GST_ELEMENT_ERROR(self,STREAM,FAILED,("video discontinuity event barrier failed"),(NULL));return GST_FLOW_ERROR;}
     if(trace.active){trace.event.sequence=frame.sequence;trace.event.pts=frame.ptsNs;trace.event.fence=frame._readyValue;trace.event.slot=frame.slot;}
 

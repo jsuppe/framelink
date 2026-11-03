@@ -1,0 +1,145 @@
+UpdateCTestConfiguration  from :<win-tree>/build/DartConfiguration.tcl
+Test project <win-tree>/build
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 105
+    Start 105: gst_av_parity
+
+Test command: <win-tree>\build\Release\fl_gst_av_parity.exe "<win-tree>/build/Release/gstframelink.dll"
+Working Directory: <win-tree>/build
+Test timeout computed to be: 300
+CASE consumer-first av
+  consumer-first   producer=element consumer=element | producer=EOS consumer=EOS | frames 30/30 samples 24000/24000 lag v 150.1..151.7 a 150.2..151.9ms memory:SystemMemory
+  consumer-first   producer=element consumer=bin     | producer=EOS consumer=EOS | frames 30/30 samples 24000/24000 lag v 150.1..151.9 a 150.0..152.0ms memory:SystemMemory
+  consumer-first   producer=bin     consumer=element | producer=EOS consumer=EOS | frames 30/30 samples 24000/24000 lag v 150.0..151.5 a 150.1..151.6ms memory:SystemMemory
+  consumer-first   producer=bin     consumer=bin     | producer=EOS consumer=EOS | frames 30/30 samples 24000/24000 lag v 150.2..151.9 a 150.0..152.3ms memory:SystemMemory
+  => parity: producer=EOS consumer=EOS memory:SystemMemory
+CASE producer-first av
+  producer-first   producer=element consumer=element | producer=EOS consumer=EOS | frames 30/30 samples 24000/24000 lag v 150.2..152.0 a 150.2..151.9ms memory:SystemMemory
+  producer-first   producer=element consumer=bin     | producer=EOS consumer=EOS | frames 30/30 samples 24000/24000 lag v 150.3..151.8 a 150.0..151.9ms memory:SystemMemory
+  producer-first   producer=bin     consumer=element | producer=EOS consumer=EOS | frames 30/30 samples 24000/24000 lag v 150.1..151.7 a 150.0..151.9ms memory:SystemMemory
+  producer-first   producer=bin     consumer=bin     | producer=EOS consumer=EOS | frames 30/30 samples 24000/24000 lag v 150.0..151.9 a 150.0..151.9ms memory:SystemMemory
+  => parity: producer=EOS consumer=EOS memory:SystemMemory
+CASE burst
+  burst            producer=element consumer=element | producer=error: Could not write to resource. consumer=error: coordinated video frame replaced before it was read: the producer delivered faster than real time | frames 0/11 samples 0/25920 lag v 9223372036854.8..-9223372036854.8 a 9223372036854.8..-9223372036854.8ms 
+  burst            producer=element consumer=bin     | producer=error: Could not write to resource. consumer=error: coordinated video frame replaced before it was read: the producer delivered faster than real time | frames 0/11 samples 0/25920 lag v 9223372036854.8..-9223372036854.8 a 9223372036854.8..-9223372036854.8ms 
+  burst            producer=bin     consumer=element | producer=error: Could not write to resource. consumer=error: coordinated video frame replaced before it was read: the producer delivered faster than real time | frames 0/15 samples 0/32640 lag v 9223372036854.8..-9223372036854.8 a 9223372036854.8..-9223372036854.8ms 
+  burst            producer=bin     consumer=bin     | producer=error: metadata frame publication failed consumer=error: coordinated video frame replaced before it was read: the producer delivered faster than real time | frames 0/12 samples 0/22560 lag v 9223372036854.8..-9223372036854.8 a 9223372036854.8..-9223372036854.8ms 
+  => parity: producer=error consumer=error: coordinated video frame replaced before it was read: the producer delivered faster than real time
+CASE video-only
+  consumer-first   producer=element consumer=element | producer=EOS consumer=EOS | frames 30/30 samples 0/0 lag v 150.1..151.8 a 9223372036854.8..-9223372036854.8ms memory:SystemMemory
+  consumer-first   producer=element consumer=bin     | producer=EOS consumer=EOS | frames 30/30 samples 0/0 lag v 150.1..151.9 a 9223372036854.8..-9223372036854.8ms memory:SystemMemory
+  consumer-first   producer=bin     consumer=element | producer=EOS consumer=EOS | frames 30/30 samples 0/0 lag v 150.2..151.7 a 9223372036854.8..-9223372036854.8ms memory:SystemMemory
+  consumer-first   producer=bin     consumer=bin     | producer=EOS consumer=EOS | frames 30/30 samples 0/0 lag v 150.0..151.9 a 9223372036854.8..-9223372036854.8ms memory:SystemMemory
+  => parity: producer=EOS consumer=EOS memory:SystemMemory
+CASE audio-only
+  producer-first   producer=element consumer=element | producer=EOS consumer=EOS | frames 0/0 samples 24000/24000 lag v 9223372036854.8..-9223372036854.8 a 150.1..151.5ms 
+  producer-first   producer=element consumer=bin     | producer=EOS consumer=EOS | frames 0/0 samples 24000/24000 lag v 9223372036854.8..-9223372036854.8 a 150.3..151.8ms 
+  producer-first   producer=bin     consumer=element | producer=EOS consumer=EOS | frames 0/0 samples 24000/24000 lag v 9223372036854.8..-9223372036854.8 a 150.0..151.9ms 
+  producer-first   producer=bin     consumer=bin     | producer=EOS consumer=EOS | frames 0/0 samples 24000/24000 lag v 9223372036854.8..-9223372036854.8 a 150.1..151.9ms 
+  => parity: producer=EOS consumer=EOS 
+CASE native-memory
+  native           producer=element consumer=element | producer=EOS consumer=EOS | frames 30/30 samples 24000/24000 lag v 150.1..151.6 a 150.1..151.7ms memory:D3D11Memory
+  native           producer=element consumer=bin     | producer=EOS consumer=EOS | frames 30/30 samples 24000/24000 lag v 150.3..152.3 a 150.0..152.0ms memory:D3D11Memory
+  native           producer=bin     consumer=element | producer=EOS consumer=EOS | frames 30/30 samples 24000/24000 lag v 150.0..151.5 a 150.1..152.0ms memory:D3D11Memory
+  native           producer=bin     consumer=bin     | producer=EOS consumer=EOS | frames 30/30 samples 24000/24000 lag v 150.2..151.6 a 150.1..152.3ms memory:D3D11Memory
+  => parity: producer=EOS consumer=EOS memory:D3D11Memory
+CASE early-eos
+  early-eos        producer=element consumer=element | producer=EOS consumer=EOS | frames 14/14 samples 22080/22080 lag v 150.1..151.4 a 150.1..151.9ms memory:SystemMemory
+  early-eos        producer=element consumer=bin     | producer=EOS consumer=EOS | frames 14/14 samples 22080/22080 lag v 150.0..151.7 a 150.0..151.5ms memory:SystemMemory
+  early-eos        producer=bin     consumer=element | producer=EOS consumer=EOS | frames 14/14 samples 22080/22080 lag v 150.3..151.8 a 150.0..151.8ms memory:SystemMemory
+  early-eos        producer=bin     consumer=bin     | producer=EOS consumer=EOS | frames 14/14 samples 22080/22080 lag v 150.2..151.7 a 150.2..151.8ms memory:SystemMemory
+  => parity: producer=EOS consumer=EOS
+CASE consumer-pause
+  consumer-pause   producer=element consumer=element | producer=error: Could not write to resource. consumer=error: coordinated video frame replaced before it was read: the producer delivered faster than real time | frames 13/22 samples 25920/43680 lag v 150.1..422.0 a 150.1..448.7ms memory:SystemMemory
+  consumer-pause   producer=element consumer=bin     | producer=error: Could not write to resource. consumer=error: coordinated video frame replaced before it was read: the producer delivered faster than real time | frames 13/22 samples 24960/43680 lag v 150.2..420.1 a 150.1..446.8ms memory:SystemMemory
+  consumer-pause   producer=bin     consumer=element | producer=error: Could not write to resource. consumer=error: coordinated video frame replaced before it was read: the producer delivered faster than real time | frames 13/22 samples 24480/43680 lag v 150.2..419.1 a 150.2..445.8ms memory:SystemMemory
+  consumer-pause   producer=bin     consumer=bin     | producer=error: Could not write to resource. consumer=error: coordinated video frame replaced before it was read: the producer delivered faster than real time | frames 13/22 samples 24960/43680 lag v 150.3..419.3 a 150.1..446.0ms memory:SystemMemory
+  => parity: producer=error: Could not write to resource. consumer=error: coordinated video frame replaced before it was read: the producer delivered faster than real time
+CASE producer-seek
+  producer-seek    producer=element consumer=element | producer=EOS consumer=EOS | frames 60/60 samples 48000/48000 lag v 150.1..152.0 a 150.0..151.9ms memory:SystemMemory
+    flushing seek refused; delivered 60/60 frames, 48000/48000 samples
+  producer-seek    producer=element consumer=bin     | producer=EOS consumer=EOS | frames 60/60 samples 48000/48000 lag v 150.0..151.8 a 150.0..151.8ms memory:SystemMemory
+    flushing seek refused; delivered 60/60 frames, 48000/48000 samples
+  producer-seek    producer=bin     consumer=element | producer=EOS consumer=EOS | frames 60/60 samples 48000/48000 lag v 150.0..151.8 a 150.0..151.8ms memory:SystemMemory
+    flushing seek refused; delivered 60/60 frames, 48000/48000 samples
+  producer-seek    producer=bin     consumer=bin     | producer=EOS consumer=EOS | frames 60/60 samples 48000/48000 lag v 150.0..151.6 a 150.0..152.0ms memory:SystemMemory
+    flushing seek refused; delivered 60/60 frames, 48000/48000 samples
+  => parity: producer=EOS seek=refused consumer=EOS
+CASE consumer-seek
+  consumer-seek    producer=element consumer=element | producer=EOS consumer=EOS | frames 60/60 samples 48000/48000 lag v 150.0..152.1 a 150.0..151.9ms memory:SystemMemory
+    flushing seek refused
+  consumer-seek    producer=element consumer=bin     | producer=EOS consumer=EOS | frames 60/60 samples 48000/48000 lag v 150.0..151.7 a 150.0..152.0ms memory:SystemMemory
+    flushing seek refused
+  consumer-seek    producer=bin     consumer=element | producer=EOS consumer=EOS | frames 60/60 samples 48000/48000 lag v 150.0..151.6 a 150.0..152.0ms memory:SystemMemory
+    flushing seek refused
+  consumer-seek    producer=bin     consumer=bin     | producer=EOS consumer=EOS | frames 60/60 samples 48000/48000 lag v 150.0..151.7 a 150.0..151.9ms memory:SystemMemory
+    flushing seek refused
+  => parity: producer=EOS consumer=EOS seek=refused
+CASE producer-death
+  producer-death   producer=element consumer=element | producer=killed consumer=error: audio peer closed before GDP EOS | frames 8/13 samples 12480/19680 lag v 150.2..150.9 a 150.1..152.4ms memory:SystemMemory
+    peer reported 14ms after death
+  producer-death   producer=element consumer=bin     | producer=killed consumer=error: audio peer closed before GDP EOS | frames 8/13 samples 12480/19680 lag v 150.3..152.0 a 150.1..151.6ms memory:SystemMemory
+    peer reported 16ms after death
+  producer-death   producer=bin     consumer=element | producer=killed consumer=error: audio peer closed before GDP EOS | frames 8/13 samples 12960/19680 lag v 150.0..152.0 a 150.0..151.7ms memory:SystemMemory
+    peer reported 19ms after death
+  producer-death   producer=bin     consumer=bin     | producer=killed consumer=error: audio peer closed before GDP EOS | frames 8/13 samples 12960/19680 lag v 150.1..150.8 a 150.1..151.9ms memory:SystemMemory
+    peer reported 17ms after death
+  => parity: producer=killed consumer=error
+CASE consumer-death
+  consumer-death   producer=element consumer=element | producer=error: Could not write to resource. consumer=killed | frames 8/14 samples 12000/29760 lag v 150.4..151.1 a 150.1..151.6ms memory:SystemMemory
+    peer reported 21ms after death
+  consumer-death   producer=element consumer=bin     | producer=error: Could not write to resource. consumer=killed | frames 8/14 samples 12000/30240 lag v 150.6..151.6 a 150.1..151.9ms memory:SystemMemory
+    peer reported 20ms after death
+  consumer-death   producer=bin     consumer=element | producer=error: Could not write to resource. consumer=killed | frames 8/14 samples 12480/30240 lag v 150.0..151.6 a 150.3..152.0ms memory:SystemMemory
+    peer reported 32ms after death
+  consumer-death   producer=bin     consumer=bin     | producer=error: Could not write to resource. consumer=killed | frames 8/14 samples 12480/32160 lag v 150.5..151.6 a 150.2..151.8ms memory:SystemMemory
+    peer reported 32ms after death
+  => parity: producer=error consumer=killed
+CASE missing-audio
+  tracks video/av  producer=element consumer=element | producer=error: incompatible session selection consumer=error: producer selection or authentication rejected | frames 0/0 samples 0/0 lag v 9223372036854.8..-9223372036854.8 a 9223372036854.8..-9223372036854.8ms 
+  tracks video/av  producer=element consumer=bin     | producer=error: incompatible session selection consumer=error: producer selection or authentication rejected | frames 0/0 samples 0/0 lag v 9223372036854.8..-9223372036854.8 a 9223372036854.8..-9223372036854.8ms 
+  tracks video/av  producer=bin     consumer=element | producer=error: incompatible session selection consumer=error: producer selection or authentication rejected | frames 0/0 samples 0/0 lag v 9223372036854.8..-9223372036854.8 a 9223372036854.8..-9223372036854.8ms 
+  tracks video/av  producer=bin     consumer=bin     | producer=error: incompatible session selection consumer=error: producer selection or authentication rejected | frames 0/0 samples 0/0 lag v 9223372036854.8..-9223372036854.8 a 9223372036854.8..-9223372036854.8ms 
+  => parity: producer=error: incompatible session selection consumer=error: producer selection or authentication rejected
+CASE missing-video
+  tracks av/audio  producer=element consumer=element | producer=error: incompatible session selection consumer=error: producer selection or authentication rejected | frames 0/0 samples 0/0 lag v 9223372036854.8..-9223372036854.8 a 9223372036854.8..-9223372036854.8ms 
+  tracks av/audio  producer=element consumer=bin     | producer=error: incompatible session selection consumer=error: producer selection or authentication rejected | frames 0/0 samples 0/0 lag v 9223372036854.8..-9223372036854.8 a 9223372036854.8..-9223372036854.8ms 
+  tracks av/audio  producer=bin     consumer=element | producer=error: incompatible session selection consumer=error: producer selection or authentication rejected | frames 0/0 samples 0/480 lag v 9223372036854.8..-9223372036854.8 a 9223372036854.8..-9223372036854.8ms 
+  tracks av/audio  producer=bin     consumer=bin     | producer=error: incompatible session selection consumer=error: producer selection or authentication rejected | frames 0/0 samples 0/480 lag v 9223372036854.8..-9223372036854.8 a 9223372036854.8..-9223372036854.8ms 
+  => parity: producer=error: incompatible session selection consumer=error: producer selection or authentication rejected
+CASE audio-queue-bound
+  audio-queue-5ms  producer=element consumer=element | producer=error: PCM block is misaligned, empty or exceeds bounded queue budget consumer=error: audio peer closed before GDP EOS | frames 0/1 samples 0/15360 lag v 9223372036854.8..-9223372036854.8 a 9223372036854.8..-9223372036854.8ms 
+  audio-queue-5ms  producer=element consumer=bin     | producer=error: PCM block is misaligned, empty or exceeds bounded queue budget consumer=error: audio peer closed before GDP EOS | frames 0/1 samples 0/15360 lag v 9223372036854.8..-9223372036854.8 a 9223372036854.8..-9223372036854.8ms 
+  audio-queue-5ms  producer=bin     consumer=element | producer=error: PCM block is misaligned, empty or exceeds bounded queue budget consumer=error: audio peer closed before GDP EOS | frames 0/2 samples 0/10560 lag v 9223372036854.8..-9223372036854.8 a 9223372036854.8..-9223372036854.8ms 
+  audio-queue-5ms  producer=bin     consumer=bin     | producer=error: PCM block is misaligned, empty or exceeds bounded queue budget consumer=error: audio peer closed before GDP EOS | frames 0/1 samples 0/17760 lag v 9223372036854.8..-9223372036854.8 a 9223372036854.8..-9223372036854.8ms 
+  => parity: producer=error: PCM block is misaligned, empty or exceeds bounded queue budget consumer=error: audio peer closed before GDP EOS
+CASE reconnect
+  reconnect-1      producer=element consumer=element | producer=EOS consumer=EOS | frames 30/30 samples 24000/24000 lag v 150.3..151.9 a 150.2..152.0ms memory:SystemMemory
+  reconnect-2      producer=element consumer=element | producer=EOS consumer=EOS | frames 30/30 samples 24000/24000 lag v 150.1..151.9 a 150.2..151.9ms memory:SystemMemory
+  reconnect-1      producer=element consumer=bin     | producer=EOS consumer=EOS | frames 30/30 samples 24000/24000 lag v 150.1..151.8 a 150.0..152.0ms memory:SystemMemory
+  reconnect-2      producer=element consumer=bin     | producer=EOS consumer=EOS | frames 30/30 samples 24000/24000 lag v 150.0..151.8 a 150.1..151.9ms memory:SystemMemory
+  reconnect-1      producer=bin     consumer=element | producer=EOS consumer=EOS | frames 30/30 samples 24000/24000 lag v 150.2..151.7 a 150.1..151.9ms memory:SystemMemory
+  reconnect-2      producer=bin     consumer=element | producer=EOS consumer=EOS | frames 30/30 samples 24000/24000 lag v 150.1..151.6 a 150.2..151.9ms memory:SystemMemory
+  reconnect-1      producer=bin     consumer=bin     | producer=EOS consumer=EOS | frames 30/30 samples 24000/24000 lag v 150.2..152.0 a 150.1..152.1ms memory:SystemMemory
+  reconnect-2      producer=bin     consumer=bin     | producer=EOS consumer=EOS | frames 30/30 samples 24000/24000 lag v 150.1..152.0 a 150.0..152.0ms memory:SystemMemory
+  => parity: producer=EOS consumer=EOS
+CASE cleanup (bin/bin churn)
+  churn handles: 1533 1533 1533 1533 1533 1533 1533 1531 (warm-up max 1533) -> bounded
+  leak control handles: 1536 1540 1544 1548 1552 1556 1560 1564 (warm-up max 1544) -> growing
+bin parity: identical outcomes for element/bin producers x element/bin consumers
+1/1 Test #105: gst_av_parity ....................   Passed   97.83 sec
+
+The following tests passed:
+	gst_av_parity
+
+100% tests passed, 0 tests failed out of 1
+
+Label Time Summary:
+m5b_av    =  97.83 sec*proc (1 test)
+
+Total Test time (real) =  97.86 sec

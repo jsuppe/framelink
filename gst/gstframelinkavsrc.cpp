@@ -32,7 +32,7 @@ GST_DEBUG_CATEGORY_STATIC(fl_avsrc_debug);
 namespace {
 struct Shared {
  std::mutex mutex;std::condition_variable changed;
- bool setupDone=false,setupOk=false,released=false,readySent=false,cancelled=false,playing=false;
+ bool setupDone=false,setupOk=false,released=false,readySent=false,cancelled=false,playing=false,failed=false;
  bool eos[2]={false,false};
  flChannel*channel=nullptr;
 };
@@ -127,15 +127,18 @@ static void startWorker(GstFrameLinkAvSrc*s){
 }
 
 // All enabled tracks delivered EOS: every buffer left the transport, so the
-// producer may close. Rendering the tail is downstream's business.
+// producer may close. Rendering the tail is downstream's business. GstBaseSrc
+// also pushes EOS after a fatal flow error; a failed session reports no drain,
+// exactly like an application that stops on the error.
 static GstPadProbeReturn eosProbe(GstPad*pad,GstPadProbeInfo*info,gpointer data){
  auto*s=static_cast<GstFrameLinkAvSrc*>(data);auto*sh=s->shared;auto*event=GST_PAD_PROBE_INFO_EVENT(info);
  if(GST_EVENT_TYPE(event)!=GST_EVENT_EOS)return GST_PAD_PROBE_OK;
  std::lock_guard<std::mutex> lock(sh->mutex);sh->eos[pad==s->videoPad?0:1]=true;
- if((s->videoPad&&!sh->eos[0])||(s->audioPad&&!sh->eos[1])||s->drainer)return GST_PAD_PROBE_OK;
+ if(sh->failed||(s->videoPad&&!sh->eos[0])||(s->audioPad&&!sh->eos[1])||s->drainer)return GST_PAD_PROBE_OK;
  g_object_ref(s->session);
  s->drainer=new std::thread([s,sh]{
-  {std::unique_lock<std::mutex> lock(sh->mutex);sh->changed.wait(lock,[&]{return sh->readySent||sh->cancelled;});}
+  {std::unique_lock<std::mutex> lock(sh->mutex);sh->changed.wait(lock,[&]{return sh->readySent||sh->cancelled;});
+   if(sh->failed||sh->cancelled){g_object_unref(s->session);return;}}
   GError*error=nullptr;const bool ok=fl_gst_session_finish_local_cancellable(s->session,FALSE,s->connectMs,s->cancel,&error);
   if(!ok&&!g_cancellable_is_cancelled(s->cancel))GST_ELEMENT_ERROR(s,RESOURCE,READ,("%s",error?error->message:"drain report failed"),(nullptr));
   g_clear_error(&error);g_object_unref(s->session);
@@ -235,6 +238,13 @@ static GstStateChangeReturn changeState(GstElement*element,GstStateChange transi
  return result;
 }
 
+static void handleMessage(GstBin*bin,GstMessage*message){
+ auto*s=reinterpret_cast<GstFrameLinkAvSrc*>(bin);
+ // Inner errors are posted before GstBaseSrc pushes its EOS: no drain report.
+ if(s->local&&GST_MESSAGE_TYPE(message)==GST_MESSAGE_ERROR){std::lock_guard<std::mutex> lock(s->shared->mutex);s->shared->failed=true;}
+ GST_BIN_CLASS(gst_framelink_av_src_parent_class)->handle_message(bin,message);
+}
+
 static gboolean adoptChannel(GstFrameLinkAvSrc*s,flChannel*channel){
  if(s->local||!s->video||GST_STATE(s)!=GST_STATE_NULL)return FALSE;
  configureChildren(s);
@@ -303,7 +313,7 @@ static void gst_framelink_av_src_init(GstFrameLinkAvSrc*s){
 static void gst_framelink_av_src_class_init(GstFrameLinkAvSrcClass*klass){
  GST_DEBUG_CATEGORY_INIT(fl_avsrc_debug,"framelinkavsrc",0,"FrameLink consumer A/V bin");
  auto*o=G_OBJECT_CLASS(klass);o->set_property=setProperty;o->get_property=getProperty;o->dispose=dispose;o->finalize=finalize;
- GST_ELEMENT_CLASS(klass)->change_state=changeState;auto*e=GST_ELEMENT_CLASS(klass);
+ GST_ELEMENT_CLASS(klass)->change_state=changeState;GST_BIN_CLASS(klass)->handle_message=handleMessage;auto*e=GST_ELEMENT_CLASS(klass);
  gst_element_class_set_static_metadata(e,"FrameLink A/V consumer","Source/Video/Audio",
   "Composes framelinksrc and framelinkaudiosrc on one coordinated session; separate video_src/audio_src pads, no display or audio device","FrameLink");
  gst_element_class_add_static_pad_template(e,&videoTemplate);gst_element_class_add_static_pad_template(e,&audioTemplate);
