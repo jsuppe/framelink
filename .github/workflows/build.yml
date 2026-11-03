@@ -14,7 +14,7 @@ jobs:
       - name: Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends libgbm-dev libdrm-dev libegl-dev libgles-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad
+          sudo apt-get install -y --no-install-recommends libgbm-dev libdrm-dev libegl-dev libgles-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-tools
       - name: Build all targets including A/V fixtures
         run: |
           cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DFRAMELINK_BUILD_GST=ON -DFRAMELINK_BUILD_TESTS=ON -DFRAMELINK_BUILD_SAMPLES=ON
