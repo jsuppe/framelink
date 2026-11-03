@@ -1171,6 +1171,27 @@ if(FRAMELINK_BUILD_TESTS AND TARGET framelink_gst_session)
     add_dependencies(fl_gst_av_qualification gstframelink)
     add_test(NAME gst_av_qualification COMMAND fl_gst_av_qualification $<TARGET_FILE:gstframelink>)
     set_tests_properties(gst_av_qualification PROPERTIES TIMEOUT 300)
+    # M6 session benchmark (baselines/soaks); the smoke test keeps it runnable.
+    add_executable(fl_gst_av_bench test/fl_gst_av_bench.cpp)
+    target_link_libraries(fl_gst_av_bench PRIVATE framelink_gst_session)
+    if(ANDROID)
+        target_link_libraries(fl_gst_av_bench PRIVATE gstframelink
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstapp.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstcoreelements.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstgdp.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstgio.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstvideotestsrc.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstaudiotestsrc.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/libgstaudio-1.0.a"
+            ${FL_ANDROID_SESSION_GIO_STATIC_LDFLAGS} ${FL_ANDROID_GST_STATIC_LDFLAGS})
+    elseif(WIN32)
+        target_link_libraries(fl_gst_av_bench PRIVATE gstapp-1.0.lib)
+    else()
+        target_link_libraries(fl_gst_av_bench PRIVATE PkgConfig::FL_GST_APP)
+    endif()
+    add_dependencies(fl_gst_av_bench gstframelink)
+    add_test(NAME gst_av_bench_smoke COMMAND fl_gst_av_bench $<TARGET_FILE:gstframelink> --seconds 6 --size 160x90 --out ${CMAKE_CURRENT_BINARY_DIR} --label bench-smoke)
+    set_tests_properties(gst_av_bench_smoke PROPERTIES TIMEOUT 120)
     add_executable(fl_gst_local_av test/fl_gst_local_av.cpp)
     target_link_libraries(fl_gst_local_av PRIVATE framelink_gst_session)
     if(ANDROID)

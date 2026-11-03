@@ -28,6 +28,11 @@ GST_PLUGIN_STATIC_DECLARE(gdp);GST_PLUGIN_STATIC_DECLARE(gio);GST_PLUGIN_STATIC_
 #endif
 #define CHECK(x) do{if(!(x)){fprintf(stderr,"line%d %s\n",__LINE__,#x);exit(1);}}while(0)
 static constexpr guint FRAMES=30,BLOCKS=50,BLOCK=480;static constexpr GstClockTime LATENCY=150*GST_MSECOND;
+// Session geometry and run limit; the M5b tests use these defaults, the M6
+// benchmark overrides them before building any side.
+static guint gWidth=64,gHeight=32,gFps=30;static std::string gFormat="RGBA";static GstClockTime gRunLimit=25*GST_SECOND;
+static std::string geometry(){return "width="+std::to_string(gWidth)+" height="+std::to_string(gHeight);}
+static flFormat sessionFormat(){return gFormat=="NV12"?FL_FORMAT_NV12:gFormat=="BGRA"?FL_FORMAT_BGRA8:FL_FORMAT_RGBA8;}
 enum class Mode {Element,Bin};
 static const char* name(Mode m){return m==Mode::Bin?"bin":"element";}
 static GstElement* parse(const std::string&text){GError*e=nullptr;auto*p=gst_parse_launch(text.c_str(),&e);if(e)fprintf(stderr,"parse: %s\n",e->message);CHECK(p&&!e);return p;}
@@ -43,7 +48,7 @@ static guint handles(){
 // between the bins and the application's pipelines.
 static std::string errorText(GstMessage*m){GError*e=nullptr;gchar*d=nullptr;gst_message_parse_error(m,&e,&d);std::string t=e->message;g_clear_error(&e);g_free(d);return t;}
 static flSessionCapabilities capabilities(bool video,bool audio){flSessionCapabilities c{};c.version=FL_SESSION_OPTIONAL_TRACKS_VERSION;
- if(video){c.videoCount=1;c.video[0]={FL_FORMAT_RGBA8,64,32,30,1};}if(audio){c.audioCount=1;c.audio[0]={FL_PCM_S16,48000,2};}return c;}
+ if(video){c.videoCount=1;c.video[0]={uint32_t(sessionFormat()),gWidth,gHeight,gFps,1};}if(audio){c.audioCount=1;c.audio[0]={FL_PCM_S16,48000,2};}return c;}
 
 // One side of a session, run on its own thread like a separate application.
 struct Side {
@@ -70,10 +75,10 @@ struct Side {
   else if(!fl_gst_session_apply_pipeline_clock(session,GST_PIPELINE(p),FALSE,LATENCY,&e))return fail("clock");
   if(gst_element_set_state(p,GST_STATE_PLAYING)==GST_STATE_CHANGE_FAILURE){result=wait(GST_SECOND);return;}
   if(!producer&&!fl_gst_session_local_ready(session,FALSE,5000,&e))return fail("ready");
-  playing=true;result=wait(25*GST_SECOND);
+  playing=true;result=wait(gRunLimit);
   if(result=="EOS"&&!fl_gst_session_finish_local(session,producer,5000,&e))fail("drain");
  }
- void runBin(){if(gst_element_set_state(p,GST_STATE_PLAYING)==GST_STATE_CHANGE_FAILURE){result=wait(GST_SECOND);return;}playing=true;result=wait(25*GST_SECOND);}
+ void runBin(){if(gst_element_set_state(p,GST_STATE_PLAYING)==GST_STATE_CHANGE_FAILURE){result=wait(GST_SECOND);return;}playing=true;result=wait(gRunLimit);}
  void start(){th=std::thread([this]{if(mode==Mode::Bin)runBin();else runElement();});}
  void kill(){stop=true;if(th.joinable())th.join();gst_element_set_state(p,GST_STATE_NULL);}
  void finish(){if(th.joinable())th.join();gst_element_set_state(p,GST_STATE_NULL);}
@@ -84,13 +89,14 @@ struct Producer:Side {
  std::atomic<guint> pushedFrames{0};std::atomic<guint64> pushedSamples{0};
  // fileLike: non-live seekable sources paced by clocksync (the coordinated
  // sinks do not pace), as for a decoded file.
- Producer(Mode m,const std::string&path_,const std::string&tracks_,guint frames,guint queueMs=80,bool fileLike=false){mode=m;producer=true;path=path_;tracks=tracks_;audioQueueMs=queueMs;
-  const std::string vn=frames?" num-buffers="+std::to_string(frames):"",an=frames?" num-buffers="+std::to_string(frames*BLOCKS/FRAMES):"";
+ // audioBlocks: audio buffer count; by default derived from frames (FRAMES:BLOCKS).
+ Producer(Mode m,const std::string&path_,const std::string&tracks_,guint frames,guint queueMs=80,bool fileLike=false,guint audioBlocks=0){mode=m;producer=true;path=path_;tracks=tracks_;audioQueueMs=queueMs;
+  const std::string vn=frames?" num-buffers="+std::to_string(frames):"",an=frames?" num-buffers="+std::to_string(audioBlocks?audioBlocks:frames*BLOCKS/FRAMES):"";
   const std::string live=fileLike?"false":"true",sync=fileLike?" ! clocksync":"";
-  const std::string vs="videotestsrc name=vsrc is-live="+live+" pattern=red"+vn+" ! video/x-raw,format=RGBA,width=64,height=32,framerate=30/1"+sync+" ! ",
+  const std::string vs="videotestsrc name=vsrc is-live="+live+" pattern=red"+vn+" ! video/x-raw,format="+gFormat+",width="+std::to_string(gWidth)+",height="+std::to_string(gHeight)+",framerate="+std::to_string(gFps)+"/1"+sync+" ! ",
    as="audiotestsrc name=asrc is-live="+live+" samplesperbuffer="+std::to_string(BLOCK)+an+" ! audio/x-raw,format=S16LE,layout=interleaved,rate=48000,channels=2"+sync+" ! ";
   std::string t;
-  if(m==Mode::Bin){t="framelinkavsink name=s tracks="+tracks+" video-format=RGBA width=64 height=32 framerate=30/1 connect-timeout-ms=5000 idle-timeout-ms=3000 audio-queue-ms="+std::to_string(queueMs)+" ";
+  if(m==Mode::Bin){t="framelinkavsink name=s tracks="+tracks+" video-format="+gFormat+" "+geometry()+" framerate="+std::to_string(gFps)+"/1 connect-timeout-ms=5000 idle-timeout-ms=3000 audio-queue-ms="+std::to_string(queueMs)+" ";
    if(video())t+=vs+"s.video_sink ";if(audio())t+=as+"s.audio_sink";}
   else{if(video())t+=vs+"framelinksink name=video ";if(audio())t+=as+"framelinkaudiosink tracks="+tracks+" audio-queue-ms="+std::to_string(queueMs);}
   p=parse(t);if(m==Mode::Bin){auto*s=gst_bin_get_by_name(GST_BIN(p),"s");g_object_set(s,"session",path.c_str(),nullptr);gst_object_unref(s);}
@@ -101,22 +107,24 @@ struct Producer:Side {
  }
 };
 struct Consumer:Side {
- std::atomic<guint> frames{0};std::atomic<guint64> samples{0};gint64 trackBest[2]={G_MAXINT64,G_MAXINT64},trackWorst[2]={G_MININT64,G_MININT64};bool uniform=true,contiguous=true;
+ std::atomic<guint> frames{0};std::atomic<guint64> samples{0};gint64 trackBest[2]={G_MAXINT64,G_MAXINT64},trackWorst[2]={G_MININT64,G_MININT64};bool uniform=true,contiguous=true,checkContent=true;
+ // record: keep every render lateness (ns) per track for distributions.
+ bool record=false;std::vector<gint64> lateness[2];
  std::string features;GstClockTime next=GST_CLOCK_TIME_NONE;std::mutex mutex;
  Consumer(Mode m,const std::string&path_,const std::string&tracks_,bool native_=false){mode=m;producer=false;path=path_;tracks=tracks_;native=native_;
   const std::string sinkV="queue ! appsink name=vout sync=true max-buffers=0 ",sinkA="queue ! appsink name=aout sync=true max-buffers=0";std::string t;
-  if(m==Mode::Bin){t="framelinkavsrc name=c tracks="+tracks+" video-format=RGBA width=64 height=32 connect-timeout-ms=5000 idle-timeout-ms=3000"+(native?" native-memory=true ":" ");
+  if(m==Mode::Bin){t="framelinkavsrc name=c tracks="+tracks+" video-format="+gFormat+" "+geometry()+" connect-timeout-ms=5000 idle-timeout-ms=3000"+(native?" native-memory=true ":" ");
    if(video())t+="c.video_src ! "+sinkV;if(audio())t+="c.audio_src ! "+sinkA;}
-  else{if(video())t+=std::string("framelinksrc name=video width=64 height=32 format=RGBA")+(native?" native-memory=true":"")+" ! "+sinkV;
+  else{if(video())t+="framelinksrc name=video "+geometry()+" format="+gFormat+(native?" native-memory=true":"")+" ! "+sinkV;
    if(audio())t+="framelinkaudiosrc tracks="+tracks+" ! "+sinkA;}
   p=parse(t);if(m==Mode::Bin){auto*c=gst_bin_get_by_name(GST_BIN(p),"c");g_object_set(c,"session",path.c_str(),nullptr);gst_object_unref(c);}
   for(const char*n:{"vout","aout"}){auto*sink=gst_bin_get_by_name(GST_BIN(p),n);if(!sink)continue;
    GstAppSinkCallbacks cb{};cb.new_sample=[](GstAppSink*s,gpointer d)->GstFlowReturn{auto*self=static_cast<Consumer*>(d);auto*sample=gst_app_sink_pull_sample(s);auto*b=gst_sample_get_buffer(sample);
      const int track=strcmp(GST_OBJECT_NAME(s),"vout")?1:0;std::lock_guard<std::mutex> lock(self->mutex);
      if(auto*clock=gst_element_get_clock(GST_ELEMENT(s))){gint64 l=gint64(gst_clock_get_time(clock))-gint64(gst_element_get_base_time(GST_ELEMENT(s)))-gint64(GST_BUFFER_PTS(b));gst_object_unref(clock);
-      self->trackBest[track]=std::min(self->trackBest[track],l);self->trackWorst[track]=std::max(self->trackWorst[track],l);}
+      if(self->record)self->lateness[track].push_back(l);self->trackBest[track]=std::min(self->trackBest[track],l);self->trackWorst[track]=std::max(self->trackWorst[track],l);}
      if(track==0){if(self->features.empty()){auto*f=gst_caps_get_features(gst_sample_get_caps(sample),0);gchar*text=f?gst_caps_features_to_string(f):g_strdup("memory:SystemMemory");self->features=text;g_free(text);}
-      GstMapInfo m{};if(gst_buffer_map(b,&m,GST_MAP_READ)){for(gsize i=4;i+3<m.size;i+=4)if(memcmp(m.data+i,m.data,4)){self->uniform=false;break;}gst_buffer_unmap(b,&m);}self->frames++;}
+      GstMapInfo m{};if(self->checkContent&&gst_buffer_map(b,&m,GST_MAP_READ)){for(gsize i=4;i+3<m.size;i+=4)if(memcmp(m.data+i,m.data,4)){self->uniform=false;break;}gst_buffer_unmap(b,&m);}self->frames++;}
      else{if(GST_CLOCK_TIME_IS_VALID(self->next)){auto dd=gint64(GST_BUFFER_PTS(b))-gint64(self->next);if(dd<-1||dd>1)self->contiguous=false;}self->next=GST_BUFFER_PTS(b)+GST_BUFFER_DURATION(b);self->samples+=gst_buffer_get_size(b)/4;}
      gst_sample_unref(sample);return GST_FLOW_OK;};
    gst_app_sink_set_callbacks(GST_APP_SINK(sink),&cb,this,nullptr);gst_object_unref(sink);}
