@@ -3,21 +3,21 @@
 -- framelink: building GStreamer elements (gstframelink)
 -- Configuring done (0.8s)
 -- Generating done (0.8s)
--- Build files have been written to: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+-- Build files have been written to: <win-tree>/build
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
-  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
+  framelink.vcxproj -> <win-tree>\build\Release\framelink.dll
   framelink_session_transport.cpp
-     Creating library C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/framelink_gst_session.lib and object C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/framelink_gst_session.exp
-  framelink_gst_session.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink_gst_session.dll
-  fl_gst_session_context.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_session_context.exe
+     Creating library <win-tree>/build/Release/framelink_gst_session.lib and object <win-tree>/build/Release/framelink_gst_session.exp
+  framelink_gst_session.vcxproj -> <win-tree>\build\Release\framelink_gst_session.dll
+  fl_gst_session_context.vcxproj -> <win-tree>\build\Release\fl_gst_session_context.exe
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
-  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
-  framelink_gst_session.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink_gst_session.dll
+  framelink.vcxproj -> <win-tree>\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> <win-tree>\build\Release\framelink_gst_session.dll
   fl_gst_session_transport.cpp
-  fl_gst_session_transport.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_session_transport.exe
-Test project C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+  fl_gst_session_transport.vcxproj -> <win-tree>\build\Release\fl_gst_session_transport.exe
+Test project <win-tree>/build
     Start  4: session_contract
 1/8 Test  #4: session_contract .................   Passed    0.01 sec
     Start  5: session_optional_tracks

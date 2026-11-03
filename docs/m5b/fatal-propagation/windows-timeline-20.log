@@ -1,29 +1,29 @@
 #< CLIXML
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
-  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
-  framelink_gst_session.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink_gst_session.dll
-  gstframelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\gstframelink.dll
+  framelink.vcxproj -> <win-tree>\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> <win-tree>\build\Release\framelink_gst_session.dll
+  gstframelink.vcxproj -> <win-tree>\build\Release\gstframelink.dll
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
-  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
-  framelink_gst_session.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink_gst_session.dll
-  gstframelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\gstframelink.dll
-  fl_gst_av_timeline.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_av_timeline.exe
+  framelink.vcxproj -> <win-tree>\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> <win-tree>\build\Release\framelink_gst_session.dll
+  gstframelink.vcxproj -> <win-tree>\build\Release\gstframelink.dll
+  fl_gst_av_timeline.vcxproj -> <win-tree>\build\Release\fl_gst_av_timeline.exe
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
-  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
-  framelink_gst_session.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink_gst_session.dll
-  gstframelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\gstframelink.dll
-  fl_gst_audio_source.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_audio_source.exe
+  framelink.vcxproj -> <win-tree>\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> <win-tree>\build\Release\framelink_gst_session.dll
+  gstframelink.vcxproj -> <win-tree>\build\Release\gstframelink.dll
+  fl_gst_audio_source.vcxproj -> <win-tree>\build\Release\fl_gst_audio_source.exe
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
-  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
-  framelink_gst_session.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink_gst_session.dll
-  gstframelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\gstframelink.dll
-  fl_gst_audio_sink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_audio_sink.exe
-UpdateCTestConfiguration  from :C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/DartConfiguration.tcl
-Test project C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+  framelink.vcxproj -> <win-tree>\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> <win-tree>\build\Release\framelink_gst_session.dll
+  gstframelink.vcxproj -> <win-tree>\build\Release\gstframelink.dll
+  fl_gst_audio_sink.vcxproj -> <win-tree>\build\Release\fl_gst_audio_sink.exe
+UpdateCTestConfiguration  from :<win-tree>/build/DartConfiguration.tcl
+Test project <win-tree>/build
 Constructing a list of tests
 Done constructing a list of tests
 Updating test list for fixtures
@@ -33,8 +33,8 @@ Checking test dependency graph end
 test 101
     Start 101: gst_av_timeline
 
-101: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_av_timeline.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
-101: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
 101: Test timeout computed to be: 20
 101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
 101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
@@ -56,8 +56,8 @@ test 101
     Test #101: gst_av_timeline ..................   Passed    3.56 sec
     Start 101: gst_av_timeline
 
-101: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_av_timeline.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
-101: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
 101: Test timeout computed to be: 20
 101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
 101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
@@ -79,8 +79,8 @@ test 101
     Test #101: gst_av_timeline ..................   Passed    3.56 sec
     Start 101: gst_av_timeline
 
-101: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_av_timeline.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
-101: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
 101: Test timeout computed to be: 20
 101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
 101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
@@ -102,8 +102,8 @@ test 101
     Test #101: gst_av_timeline ..................   Passed    3.56 sec
     Start 101: gst_av_timeline
 
-101: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_av_timeline.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
-101: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
 101: Test timeout computed to be: 20
 101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
 101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
@@ -125,8 +125,8 @@ test 101
     Test #101: gst_av_timeline ..................   Passed    3.56 sec
     Start 101: gst_av_timeline
 
-101: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_av_timeline.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
-101: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
 101: Test timeout computed to be: 20
 101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
 101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
@@ -148,8 +148,8 @@ test 101
     Test #101: gst_av_timeline ..................   Passed    3.55 sec
     Start 101: gst_av_timeline
 
-101: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_av_timeline.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
-101: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
 101: Test timeout computed to be: 20
 101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
 101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
@@ -171,8 +171,8 @@ test 101
     Test #101: gst_av_timeline ..................   Passed    3.55 sec
     Start 101: gst_av_timeline
 
-101: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_av_timeline.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
-101: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
 101: Test timeout computed to be: 20
 101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
 101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
@@ -194,8 +194,8 @@ test 101
     Test #101: gst_av_timeline ..................   Passed    3.55 sec
     Start 101: gst_av_timeline
 
-101: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_av_timeline.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
-101: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
 101: Test timeout computed to be: 20
 101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
 101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
@@ -217,8 +217,8 @@ test 101
     Test #101: gst_av_timeline ..................   Passed    3.58 sec
     Start 101: gst_av_timeline
 
-101: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_av_timeline.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
-101: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
 101: Test timeout computed to be: 20
 101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
 101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
@@ -240,8 +240,8 @@ test 101
     Test #101: gst_av_timeline ..................   Passed    3.55 sec
     Start 101: gst_av_timeline
 
-101: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_av_timeline.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
-101: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
 101: Test timeout computed to be: 20
 101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
 101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
@@ -263,8 +263,8 @@ test 101
     Test #101: gst_av_timeline ..................   Passed    3.55 sec
     Start 101: gst_av_timeline
 
-101: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_av_timeline.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
-101: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
 101: Test timeout computed to be: 20
 101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
 101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
@@ -286,8 +286,8 @@ test 101
     Test #101: gst_av_timeline ..................   Passed    3.55 sec
     Start 101: gst_av_timeline
 
-101: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_av_timeline.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
-101: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
 101: Test timeout computed to be: 20
 101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
 101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
@@ -309,8 +309,8 @@ test 101
     Test #101: gst_av_timeline ..................   Passed    3.55 sec
     Start 101: gst_av_timeline
 
-101: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_av_timeline.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
-101: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
 101: Test timeout computed to be: 20
 101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
 101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
@@ -332,8 +332,8 @@ test 101
     Test #101: gst_av_timeline ..................   Passed    3.55 sec
     Start 101: gst_av_timeline
 
-101: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_av_timeline.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
-101: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
 101: Test timeout computed to be: 20
 101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
 101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
@@ -355,8 +355,8 @@ test 101
     Test #101: gst_av_timeline ..................   Passed    3.55 sec
     Start 101: gst_av_timeline
 
-101: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_av_timeline.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
-101: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
 101: Test timeout computed to be: 20
 101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
 101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
@@ -378,8 +378,8 @@ test 101
     Test #101: gst_av_timeline ..................   Passed    3.53 sec
     Start 101: gst_av_timeline
 
-101: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_av_timeline.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
-101: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
 101: Test timeout computed to be: 20
 101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
 101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
@@ -401,8 +401,8 @@ test 101
     Test #101: gst_av_timeline ..................   Passed    3.55 sec
     Start 101: gst_av_timeline
 
-101: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_av_timeline.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
-101: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
 101: Test timeout computed to be: 20
 101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
 101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
@@ -424,8 +424,8 @@ test 101
     Test #101: gst_av_timeline ..................   Passed    3.56 sec
     Start 101: gst_av_timeline
 
-101: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_av_timeline.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
-101: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
 101: Test timeout computed to be: 20
 101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
 101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
@@ -447,8 +447,8 @@ test 101
     Test #101: gst_av_timeline ..................   Passed    3.53 sec
     Start 101: gst_av_timeline
 
-101: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_av_timeline.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
-101: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
 101: Test timeout computed to be: 20
 101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
 101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
@@ -470,8 +470,8 @@ test 101
     Test #101: gst_av_timeline ..................   Passed    3.53 sec
     Start 101: gst_av_timeline
 
-101: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_av_timeline.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
-101: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
 101: Test timeout computed to be: 20
 101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
 101: CASE lead=1 negative=0 gap=0 empty=0 pause=0

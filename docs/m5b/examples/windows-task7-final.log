@@ -1,5 +1,5 @@
 #< CLIXML
-Test project C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+Test project <win-tree>/build
       Start  56: gst_av_session
  1/12 Test  #56: gst_av_session ...................   Passed    3.56 sec
       Start  57: gst_av_faults
@@ -59,7 +59,7 @@ PASS video-bgra producer=0 consumer=0 elapsed=3.89s {"event": "verify", "tracks"
 PASS audio-only producer=0 consumer=0 elapsed=3.74s {"event": "verify", "tracks": "audio", "format": "RGBA", "frames": 0, "expected_frames": 0, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.013, "lag_max_ms": 152.003, "latency_ms": 150, "result": "pass"}
 PASS negative-track-mismatch producer=1 consumer=1 elapsed=0.39s 
 m5b gst A/V example: 30/30 cases passed
-Test project C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+Test project <win-tree>/build
     Start 101: gst_av_timeline
     Test #101: gst_av_timeline ..................   Passed    4.47 sec
     Start 101: gst_av_timeline

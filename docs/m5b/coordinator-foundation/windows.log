@@ -3,7 +3,7 @@
 -- framelink: building GStreamer elements (gstframelink)
 -- Configuring done (0.8s)
 -- Generating done (0.7s)
--- Build files have been written to: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+-- Build files have been written to: <win-tree>/build
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
   fl_ipc_win32.cpp
@@ -13,32 +13,32 @@ MSBuild version 17.14.23+b0019275e for .NET Framework
   framelink_slots.cpp
   framelink_win.cpp
   Generating Code...
-     Creating library C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/framelink.lib and object C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/framelink.exp
-  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
+     Creating library <win-tree>/build/Release/framelink.lib and object <win-tree>/build/Release/framelink.exp
+  framelink.vcxproj -> <win-tree>\build\Release\framelink.dll
   fl_session_contract.cpp
-  fl_session_contract.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_session_contract.exe
+  fl_session_contract.vcxproj -> <win-tree>\build\Release\fl_session_contract.exe
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
-  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
-  Building Custom Rule C:/Users/jonsu/dev/framelink-m5a-contract-20261101/CMakeLists.txt
+  framelink.vcxproj -> <win-tree>\build\Release\framelink.dll
+  Building Custom Rule <win-tree>/CMakeLists.txt
   fl_session_optional_tracks.cpp
-  fl_session_optional_tracks.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_session_optional_tracks.exe
+  fl_session_optional_tracks.vcxproj -> <win-tree>\build\Release\fl_session_optional_tracks.exe
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
-  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
+  framelink.vcxproj -> <win-tree>\build\Release\framelink.dll
   fl_session_c_api.c
-  fl_session_c_api.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_session_c_api.exe
+  fl_session_c_api.vcxproj -> <win-tree>\build\Release\fl_session_c_api.exe
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
-  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
-  Building Custom Rule C:/Users/jonsu/dev/framelink-m5a-contract-20261101/CMakeLists.txt
+  framelink.vcxproj -> <win-tree>\build\Release\framelink.dll
+  Building Custom Rule <win-tree>/CMakeLists.txt
   framelink_session_context.cpp
-     Creating library C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/framelink_gst_session.lib and object C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/framelink_gst_session.exp
-  framelink_gst_session.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink_gst_session.dll
-  Building Custom Rule C:/Users/jonsu/dev/framelink-m5a-contract-20261101/CMakeLists.txt
+     Creating library <win-tree>/build/Release/framelink_gst_session.lib and object <win-tree>/build/Release/framelink_gst_session.exp
+  framelink_gst_session.vcxproj -> <win-tree>\build\Release\framelink_gst_session.dll
+  Building Custom Rule <win-tree>/CMakeLists.txt
   fl_gst_session_context.cpp
-  fl_gst_session_context.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_session_context.exe
-Test project C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+  fl_gst_session_context.vcxproj -> <win-tree>\build\Release\fl_gst_session_context.exe
+Test project <win-tree>/build
     Start  4: session_contract
 1/4 Test  #4: session_contract .................   Passed    0.03 sec
     Start  5: session_optional_tracks

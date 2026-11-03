@@ -1,13 +1,13 @@
 #< CLIXML
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
-  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
-  framelink_gst_session.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink_gst_session.dll
-  gstframelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\gstframelink.dll
+  framelink.vcxproj -> <win-tree>\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> <win-tree>\build\Release\framelink_gst_session.dll
+  gstframelink.vcxproj -> <win-tree>\build\Release\gstframelink.dll
   fl_gst_audio_source.cpp
-  fl_gst_audio_source.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_audio_source.exe
-UpdateCTestConfiguration  from :C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/DartConfiguration.tcl
-Test project C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+  fl_gst_audio_source.vcxproj -> <win-tree>\build\Release\fl_gst_audio_source.exe
+UpdateCTestConfiguration  from :<win-tree>/build/DartConfiguration.tcl
+Test project <win-tree>/build
 Constructing a list of tests
 Done constructing a list of tests
 Updating test list for fixtures
@@ -17,8 +17,8 @@ Checking test dependency graph end
 test 100
     Start 100: gst_audio_source
 
-100: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_audio_source.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
-100: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+100: Test command: <win-tree>\build\Release\fl_gst_audio_source.exe "<win-tree>/build/Release/gstframelink.dll"
+100: Working Directory: <win-tree>/build
 100: Test timeout computed to be: 20
 100: public audio source: exact four PCM formats/layouts, incremental packet delivery before EOS, both startup orders, live latency, missing-peer and cancellation passed
 1/1 Test #100: gst_audio_source .................   Passed    1.29 sec

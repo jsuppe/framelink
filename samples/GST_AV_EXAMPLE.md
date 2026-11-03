@@ -6,6 +6,9 @@ public elements (`framelinksink`, `framelinksrc`, `framelinkaudiosink`,
 `gst/framelink_session_transport.h`. No GDP, socket or authentication code is
 written by the application.
 
+Reference: [elements and properties](../docs/GST_AV_REFERENCE.md);
+moving existing pipelines: [migration guide](../docs/GST_AV_MIGRATION.md).
+
 ## Run it
 
 Use the same private `--session` directory for both processes. The producer

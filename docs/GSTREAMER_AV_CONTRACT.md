@@ -9,7 +9,8 @@ qualification (Linux, Windows, Android) are implemented; publish/review/merge
 [producer bin](m5b/producer-bin/README.md), [validation](m5b/validation/README.md),
 [examples](m5b/examples/README.md) and [lifecycle closure](m5b/lifecycle-security/README.md).
 Existing `framelinksink`/`framelinksrc` remain video only unless attached to a
-session context.
+session context. Element reference: [GST_AV_REFERENCE.md](GST_AV_REFERENCE.md);
+migration: [GST_AV_MIGRATION.md](GST_AV_MIGRATION.md).
 
 ## Public surface
 

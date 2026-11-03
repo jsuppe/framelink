@@ -1,6 +1,6 @@
 $ErrorActionPreference='Continue'
-$root='C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release'
-$out='C:\Users\jonsu\dev\m5b-display-example'
+$root='<win-tree>\build\Release'
+$out='<win-home>\dev\m5b-display-example'
 Remove-Item -Recurse -Force $out -ErrorAction SilentlyContinue; New-Item -ItemType Directory $out | Out-Null
 $env:PATH="$root;C:\Program Files\gstreamer\1.0\msvc_x86_64\bin;"+$env:PATH
 $env:GST_PLUGIN_PATH=$root

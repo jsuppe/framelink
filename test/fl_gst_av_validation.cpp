@@ -137,7 +137,7 @@ static void testClock(){
   guint waiting=(videoLeft?1:0)+(audioLeft?1:0);GList*ids=nullptr;
   gst_test_clock_wait_for_multiple_pending_ids(tc,waiting,&ids);
   GstClockID earliest=nullptr;GstClockTime t=GST_CLOCK_TIME_NONE;
-  for(auto*l=ids;l;l=l->next){auto id=GstClockID(l->data);auto when=gst_clock_id_get_time(id);if(getenv("FL_DEBUG_IDS"))fprintf(stderr,"  pending %" G_GUINT64_FORMAT "\n",when);if(when<t){t=when;earliest=id;}}
+  for(auto*l=ids;l;l=l->next){auto id=GstClockID(l->data);auto when=gst_clock_id_get_time(id);if(when<t){t=when;earliest=id;}}
   if(t!=d.t)fprintf(stderr,"deadline %s n=%u got %" G_GUINT64_FORMAT " expected %" G_GUINT64_FORMAT "\n",d.video?"video":"audio",d.n,t,d.t);CHECK(t==d.t);
   // Neither sink may have rendered anything while its deadline is unreached.
   CHECK(!gst_app_sink_try_pull_sample(GST_APP_SINK(s.vout),0)&&!gst_app_sink_try_pull_sample(GST_APP_SINK(s.aout),0));

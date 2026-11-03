@@ -1,4 +1,4 @@
-Test project C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+Test project <win-tree>/build
 Constructing a list of tests
 Done constructing a list of tests
 Updating test list for fixtures
@@ -8,32 +8,32 @@ Checking test dependency graph end
 test 98
     Start  98: gst_session_context
 
-98: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_session_context.exe
-98: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+98: Test command: <win-tree>\build\Release\fl_gst_session_context.exe
+98: Working Directory: <win-tree>/build
 98: Test timeout computed to be: 10
 98: session context: ownership, readiness, track masks, generations and cancellation passed
 1/4 Test  #98: gst_session_context ..............   Passed    0.08 sec
 test 100
     Start 100: gst_audio_source
 
-100: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_audio_source.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
-100: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+100: Test command: <win-tree>\build\Release\fl_gst_audio_source.exe "<win-tree>/build/Release/gstframelink.dll"
+100: Working Directory: <win-tree>/build
 100: Test timeout computed to be: 20
 100: public audio source: exact four PCM formats/layouts, incremental packet delivery before EOS, both startup orders, live latency, missing-peer and cancellation passed
 2/4 Test #100: gst_audio_source .................   Passed    1.31 sec
 test 101
     Start 101: gst_av_timeline
 
-101: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_av_timeline.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
-101: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
 101: Test timeout computed to be: 20
 101: coordinated public A/V: distinct TIME segments, one receiver mapping, exact +/-37ms offset, pixels/PCM/DTS/duration/generation passed
 3/4 Test #101: gst_av_timeline ..................   Passed    2.02 sec
 test 103
     Start 103: gst_event_channel
 
-103: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_event_channel.exe
-103: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+103: Test command: <win-tree>\build\Release\fl_gst_event_channel.exe
+103: Working Directory: <win-tree>/build
 103: Test timeout computed to be: 15
 103: event channel: authenticated ordered bounded controls; quiet idle, stale generation, queue overflow, partial-record deadline and cancellation passed
 4/4 Test #103: gst_event_channel ................   Passed    2.31 sec

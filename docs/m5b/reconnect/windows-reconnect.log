@@ -1,79 +1,79 @@
 #< CLIXML
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
-  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
-  framelink_gst_session.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink_gst_session.dll
+  framelink.vcxproj -> <win-tree>\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> <win-tree>\build\Release\framelink_gst_session.dll
   gstframelinkaudiosrc.cpp
-     Creating library C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.lib and object C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.exp
-  gstframelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\gstframelink.dll
-  framelink_av_playback.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink_av_playback.lib
-  fl_av_rendezvous.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_av_rendezvous.exe
-  fl_audio_segment.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_audio_segment.exe
-  fl_av_offer_bounds.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_av_offer_bounds.exe
-  fl_buffer_references.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_buffer_references.exe
-  fl_av_memory_agreement.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_av_memory_agreement.exe
-  fl_consume.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_consume.exe
-  fl_audio_alignment.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_audio_alignment.exe
-  fl_d3d_decode_consumer.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_d3d_decode_consumer.exe
-  fl_d3d_decode_producer.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_d3d_decode_producer.exe
-  fl_d3d_decoder_probe.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_d3d_decoder_probe.exe
-  fl_d3d_memory_binding.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_d3d_memory_binding.exe
-  fl_av_auth.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_av_auth.exe
-  fl_av_memory_adversarial.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_av_memory_adversarial.exe
-  fl_disconnect_win.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_disconnect_win.exe
-  fl_expanded_pool.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_expanded_pool.exe
-  fl_frame_metadata_contract.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_frame_metadata_contract.exe
-  fl_external_pool_win.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_external_pool_win.exe
-  fl_frame_metadata.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_frame_metadata.exe
-  fl_gst_audio_sink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_audio_sink.exe
-  fl_gst_audio_source.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_audio_source.exe
-  fl_gst_event_channel.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_event_channel.exe
-  fl_gst_local_audio.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_local_audio.exe
-  fl_gst_native_producer_win.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_native_producer_win.exe
+     Creating library <win-tree>/build/Release/gstframelink.lib and object <win-tree>/build/Release/gstframelink.exp
+  gstframelink.vcxproj -> <win-tree>\build\Release\gstframelink.dll
+  framelink_av_playback.vcxproj -> <win-tree>\build\Release\framelink_av_playback.lib
+  fl_av_rendezvous.vcxproj -> <win-tree>\build\Release\fl_av_rendezvous.exe
+  fl_audio_segment.vcxproj -> <win-tree>\build\Release\fl_audio_segment.exe
+  fl_av_offer_bounds.vcxproj -> <win-tree>\build\Release\fl_av_offer_bounds.exe
+  fl_buffer_references.vcxproj -> <win-tree>\build\Release\fl_buffer_references.exe
+  fl_av_memory_agreement.vcxproj -> <win-tree>\build\Release\fl_av_memory_agreement.exe
+  fl_consume.vcxproj -> <win-tree>\build\Release\fl_consume.exe
+  fl_audio_alignment.vcxproj -> <win-tree>\build\Release\fl_audio_alignment.exe
+  fl_d3d_decode_consumer.vcxproj -> <win-tree>\build\Release\fl_d3d_decode_consumer.exe
+  fl_d3d_decode_producer.vcxproj -> <win-tree>\build\Release\fl_d3d_decode_producer.exe
+  fl_d3d_decoder_probe.vcxproj -> <win-tree>\build\Release\fl_d3d_decoder_probe.exe
+  fl_d3d_memory_binding.vcxproj -> <win-tree>\build\Release\fl_d3d_memory_binding.exe
+  fl_av_auth.vcxproj -> <win-tree>\build\Release\fl_av_auth.exe
+  fl_av_memory_adversarial.vcxproj -> <win-tree>\build\Release\fl_av_memory_adversarial.exe
+  fl_disconnect_win.vcxproj -> <win-tree>\build\Release\fl_disconnect_win.exe
+  fl_expanded_pool.vcxproj -> <win-tree>\build\Release\fl_expanded_pool.exe
+  fl_frame_metadata_contract.vcxproj -> <win-tree>\build\Release\fl_frame_metadata_contract.exe
+  fl_external_pool_win.vcxproj -> <win-tree>\build\Release\fl_external_pool_win.exe
+  fl_frame_metadata.vcxproj -> <win-tree>\build\Release\fl_frame_metadata.exe
+  fl_gst_audio_sink.vcxproj -> <win-tree>\build\Release\fl_gst_audio_sink.exe
+  fl_gst_audio_source.vcxproj -> <win-tree>\build\Release\fl_gst_audio_source.exe
+  fl_gst_event_channel.vcxproj -> <win-tree>\build\Release\fl_gst_event_channel.exe
+  fl_gst_local_audio.vcxproj -> <win-tree>\build\Release\fl_gst_local_audio.exe
+  fl_gst_native_producer_win.vcxproj -> <win-tree>\build\Release\fl_gst_native_producer_win.exe
   fl_gst_av_timeline.cpp
-  fl_gst_native_source_win.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_native_source_win.exe
-  fl_gst_nv12.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_nv12.exe
-  fl_gst_policy_generation.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_policy_generation.exe
-  fl_gst_pool_policy.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_pool_policy.exe
-  fl_gst_preconnect_slots.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_preconnect_slots.exe
-  fl_gst_session_context.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_session_context.exe
-  fl_gst_session_transport.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_session_transport.exe
-  fl_gst_sink_stats.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_sink_stats.exe
-  fl_gst_timestamps.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_timestamps.exe
-  fl_import_failure_win.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_import_failure_win.exe
-  fl_m4_transport_timing.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_m4_transport_timing.exe
-  fl_memory_boundary.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_memory_boundary.exe
-  fl_memory_contract.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_memory_contract.exe
-  fl_memory_c_api.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_memory_c_api.exe
-  fl_memory_resource.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_memory_resource.exe
-  fl_native_boundary_benchmark_win.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_native_boundary_benchmark_win.exe
-  fl_native_relay_process_win.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_native_relay_process_win.exe
-  fl_native_relay_win.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_native_relay_win.exe
-  fl_nv12_win.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_nv12_win.exe
-  fl_nv12_layout.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_nv12_layout.exe
-  fl_portable_map.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_portable_map.exe
-  fl_playback_recovery.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_playback_recovery.exe
-  fl_read_lease_d3d11.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_read_lease_d3d11.exe
-  fl_produce.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_produce.exe
-  fl_read_leases.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_read_leases.exe
-  fl_read_ledger.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_read_ledger.exe
-  fl_ready_timeout_win.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_ready_timeout_win.exe
-  fl_reconnect_held.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_reconnect_held.exe
-  fl_session_c_api.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_session_c_api.exe
-  fl_session_contract.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_session_contract.exe
-  fl_session_optional_tracks.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_session_optional_tracks.exe
-  fl_session_peer.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_session_peer.exe
-  fl_startup_win.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_startup_win.exe
-  fl_submit_ownership.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_submit_ownership.exe
-  fl_trace_test.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_trace_test.exe
-  fl_trace_compiled_out.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_trace_compiled_out.exe
-  framelink_av_consumer.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink_av_consumer.exe
-  framelink_consumer.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink_consumer.exe
-  framelink_av_session.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink_av_session.exe
-  framelink_av_producer.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink_av_producer.exe
-  framelink_producer.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink_producer.exe
-  fl_gst_av_timeline.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_av_timeline.exe
-Test project C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+  fl_gst_native_source_win.vcxproj -> <win-tree>\build\Release\fl_gst_native_source_win.exe
+  fl_gst_nv12.vcxproj -> <win-tree>\build\Release\fl_gst_nv12.exe
+  fl_gst_policy_generation.vcxproj -> <win-tree>\build\Release\fl_gst_policy_generation.exe
+  fl_gst_pool_policy.vcxproj -> <win-tree>\build\Release\fl_gst_pool_policy.exe
+  fl_gst_preconnect_slots.vcxproj -> <win-tree>\build\Release\fl_gst_preconnect_slots.exe
+  fl_gst_session_context.vcxproj -> <win-tree>\build\Release\fl_gst_session_context.exe
+  fl_gst_session_transport.vcxproj -> <win-tree>\build\Release\fl_gst_session_transport.exe
+  fl_gst_sink_stats.vcxproj -> <win-tree>\build\Release\fl_gst_sink_stats.exe
+  fl_gst_timestamps.vcxproj -> <win-tree>\build\Release\fl_gst_timestamps.exe
+  fl_import_failure_win.vcxproj -> <win-tree>\build\Release\fl_import_failure_win.exe
+  fl_m4_transport_timing.vcxproj -> <win-tree>\build\Release\fl_m4_transport_timing.exe
+  fl_memory_boundary.vcxproj -> <win-tree>\build\Release\fl_memory_boundary.exe
+  fl_memory_contract.vcxproj -> <win-tree>\build\Release\fl_memory_contract.exe
+  fl_memory_c_api.vcxproj -> <win-tree>\build\Release\fl_memory_c_api.exe
+  fl_memory_resource.vcxproj -> <win-tree>\build\Release\fl_memory_resource.exe
+  fl_native_boundary_benchmark_win.vcxproj -> <win-tree>\build\Release\fl_native_boundary_benchmark_win.exe
+  fl_native_relay_process_win.vcxproj -> <win-tree>\build\Release\fl_native_relay_process_win.exe
+  fl_native_relay_win.vcxproj -> <win-tree>\build\Release\fl_native_relay_win.exe
+  fl_nv12_win.vcxproj -> <win-tree>\build\Release\fl_nv12_win.exe
+  fl_nv12_layout.vcxproj -> <win-tree>\build\Release\fl_nv12_layout.exe
+  fl_portable_map.vcxproj -> <win-tree>\build\Release\fl_portable_map.exe
+  fl_playback_recovery.vcxproj -> <win-tree>\build\Release\fl_playback_recovery.exe
+  fl_read_lease_d3d11.vcxproj -> <win-tree>\build\Release\fl_read_lease_d3d11.exe
+  fl_produce.vcxproj -> <win-tree>\build\Release\fl_produce.exe
+  fl_read_leases.vcxproj -> <win-tree>\build\Release\fl_read_leases.exe
+  fl_read_ledger.vcxproj -> <win-tree>\build\Release\fl_read_ledger.exe
+  fl_ready_timeout_win.vcxproj -> <win-tree>\build\Release\fl_ready_timeout_win.exe
+  fl_reconnect_held.vcxproj -> <win-tree>\build\Release\fl_reconnect_held.exe
+  fl_session_c_api.vcxproj -> <win-tree>\build\Release\fl_session_c_api.exe
+  fl_session_contract.vcxproj -> <win-tree>\build\Release\fl_session_contract.exe
+  fl_session_optional_tracks.vcxproj -> <win-tree>\build\Release\fl_session_optional_tracks.exe
+  fl_session_peer.vcxproj -> <win-tree>\build\Release\fl_session_peer.exe
+  fl_startup_win.vcxproj -> <win-tree>\build\Release\fl_startup_win.exe
+  fl_submit_ownership.vcxproj -> <win-tree>\build\Release\fl_submit_ownership.exe
+  fl_trace_test.vcxproj -> <win-tree>\build\Release\fl_trace_test.exe
+  fl_trace_compiled_out.vcxproj -> <win-tree>\build\Release\fl_trace_compiled_out.exe
+  framelink_av_consumer.vcxproj -> <win-tree>\build\Release\framelink_av_consumer.exe
+  framelink_consumer.vcxproj -> <win-tree>\build\Release\framelink_consumer.exe
+  framelink_av_session.vcxproj -> <win-tree>\build\Release\framelink_av_session.exe
+  framelink_av_producer.vcxproj -> <win-tree>\build\Release\framelink_av_producer.exe
+  framelink_producer.vcxproj -> <win-tree>\build\Release\framelink_producer.exe
+  fl_gst_av_timeline.vcxproj -> <win-tree>\build\Release\fl_gst_av_timeline.exe
+Test project <win-tree>/build
     Start  56: gst_av_session
 1/8 Test  #56: gst_av_session ...................   Passed    3.53 sec
     Start  57: gst_av_faults
@@ -94,8 +94,8 @@ Test project C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
 100% tests passed, 0 tests failed out of 8
 
 Total Test time (real) =  15.65 sec
-UpdateCTestConfiguration  from :C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/DartConfiguration.tcl
-Test project C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+UpdateCTestConfiguration  from :<win-tree>/build/DartConfiguration.tcl
+Test project <win-tree>/build
 Constructing a list of tests
 Done constructing a list of tests
 Updating test list for fixtures
@@ -105,8 +105,8 @@ Checking test dependency graph end
 test 101
     Start 101: gst_av_timeline
 
-101: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_av_timeline.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
-101: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
 101: Test timeout computed to be: 20
 101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
 101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
@@ -130,8 +130,8 @@ test 101
     Test #101: gst_av_timeline ..................   Passed    4.37 sec
     Start 101: gst_av_timeline
 
-101: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_av_timeline.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
-101: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
 101: Test timeout computed to be: 20
 101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
 101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
@@ -155,8 +155,8 @@ test 101
     Test #101: gst_av_timeline ..................   Passed    4.31 sec
     Start 101: gst_av_timeline
 
-101: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_av_timeline.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
-101: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
 101: Test timeout computed to be: 20
 101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
 101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
@@ -180,8 +180,8 @@ test 101
     Test #101: gst_av_timeline ..................   Passed    4.35 sec
     Start 101: gst_av_timeline
 
-101: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_av_timeline.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
-101: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
 101: Test timeout computed to be: 20
 101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
 101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
@@ -205,8 +205,8 @@ test 101
     Test #101: gst_av_timeline ..................   Passed    4.40 sec
     Start 101: gst_av_timeline
 
-101: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_av_timeline.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
-101: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
 101: Test timeout computed to be: 20
 101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
 101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
@@ -230,8 +230,8 @@ test 101
     Test #101: gst_av_timeline ..................   Passed    4.44 sec
     Start 101: gst_av_timeline
 
-101: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_av_timeline.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
-101: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
 101: Test timeout computed to be: 20
 101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
 101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
@@ -255,8 +255,8 @@ test 101
     Test #101: gst_av_timeline ..................   Passed    4.31 sec
     Start 101: gst_av_timeline
 
-101: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_av_timeline.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
-101: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
 101: Test timeout computed to be: 20
 101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
 101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
@@ -280,8 +280,8 @@ test 101
     Test #101: gst_av_timeline ..................   Passed    4.38 sec
     Start 101: gst_av_timeline
 
-101: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_av_timeline.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
-101: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
 101: Test timeout computed to be: 20
 101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
 101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
@@ -305,8 +305,8 @@ test 101
     Test #101: gst_av_timeline ..................   Passed    4.37 sec
     Start 101: gst_av_timeline
 
-101: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_av_timeline.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
-101: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
 101: Test timeout computed to be: 20
 101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
 101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
@@ -330,8 +330,8 @@ test 101
     Test #101: gst_av_timeline ..................   Passed    4.30 sec
     Start 101: gst_av_timeline
 
-101: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_av_timeline.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
-101: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
 101: Test timeout computed to be: 20
 101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
 101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
@@ -355,8 +355,8 @@ test 101
     Test #101: gst_av_timeline ..................   Passed    4.36 sec
     Start 101: gst_av_timeline
 
-101: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_av_timeline.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
-101: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
 101: Test timeout computed to be: 20
 101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
 101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
@@ -380,8 +380,8 @@ test 101
     Test #101: gst_av_timeline ..................   Passed    4.36 sec
     Start 101: gst_av_timeline
 
-101: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_av_timeline.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
-101: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
 101: Test timeout computed to be: 20
 101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
 101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
@@ -405,8 +405,8 @@ test 101
     Test #101: gst_av_timeline ..................   Passed    4.36 sec
     Start 101: gst_av_timeline
 
-101: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_av_timeline.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
-101: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
 101: Test timeout computed to be: 20
 101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
 101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
@@ -430,8 +430,8 @@ test 101
     Test #101: gst_av_timeline ..................   Passed    4.36 sec
     Start 101: gst_av_timeline
 
-101: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_av_timeline.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
-101: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
 101: Test timeout computed to be: 20
 101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
 101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
@@ -455,8 +455,8 @@ test 101
     Test #101: gst_av_timeline ..................   Passed    4.33 sec
     Start 101: gst_av_timeline
 
-101: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_av_timeline.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
-101: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
 101: Test timeout computed to be: 20
 101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
 101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
@@ -480,8 +480,8 @@ test 101
     Test #101: gst_av_timeline ..................   Passed    4.37 sec
     Start 101: gst_av_timeline
 
-101: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_av_timeline.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
-101: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
 101: Test timeout computed to be: 20
 101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
 101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
@@ -505,8 +505,8 @@ test 101
     Test #101: gst_av_timeline ..................   Passed    4.30 sec
     Start 101: gst_av_timeline
 
-101: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_av_timeline.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
-101: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
 101: Test timeout computed to be: 20
 101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
 101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
@@ -530,8 +530,8 @@ test 101
     Test #101: gst_av_timeline ..................   Passed    4.39 sec
     Start 101: gst_av_timeline
 
-101: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_av_timeline.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
-101: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
 101: Test timeout computed to be: 20
 101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
 101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
@@ -555,8 +555,8 @@ test 101
     Test #101: gst_av_timeline ..................   Passed    4.35 sec
     Start 101: gst_av_timeline
 
-101: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_av_timeline.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
-101: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
 101: Test timeout computed to be: 20
 101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
 101: CASE lead=1 negative=0 gap=0 empty=0 pause=0
@@ -580,8 +580,8 @@ test 101
     Test #101: gst_av_timeline ..................   Passed    4.37 sec
     Start 101: gst_av_timeline
 
-101: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_av_timeline.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
-101: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+101: Test command: <win-tree>\build\Release\fl_gst_av_timeline.exe "<win-tree>/build/Release/gstframelink.dll"
+101: Working Directory: <win-tree>/build
 101: Test timeout computed to be: 20
 101: CASE lead=0 negative=0 gap=0 empty=0 pause=0
 101: CASE lead=1 negative=0 gap=0 empty=0 pause=0

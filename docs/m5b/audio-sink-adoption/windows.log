@@ -3,7 +3,7 @@
 -- framelink: building GStreamer elements (gstframelink)
 -- Configuring done (0.8s)
 -- Generating done (0.7s)
--- Build files have been written to: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+-- Build files have been written to: <win-tree>/build
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
   fl_ipc_win32.cpp
@@ -13,52 +13,52 @@ MSBuild version 17.14.23+b0019275e for .NET Framework
   framelink_slots.cpp
   framelink_win.cpp
   Generating Code...
-     Creating library C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/framelink.lib and object C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/framelink.exp
-  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
+     Creating library <win-tree>/build/Release/framelink.lib and object <win-tree>/build/Release/framelink.exp
+  framelink.vcxproj -> <win-tree>\build\Release\framelink.dll
   framelink_session_context.cpp
   framelink_session_transport.cpp
   av_auth.cpp
   av_rendezvous.cpp
   Generating Code...
-     Creating library C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/framelink_gst_session.lib and object C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/framelink_gst_session.exp
-  framelink_gst_session.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink_gst_session.dll
+     Creating library <win-tree>/build/Release/framelink_gst_session.lib and object <win-tree>/build/Release/framelink_gst_session.exp
+  framelink_gst_session.vcxproj -> <win-tree>\build\Release\framelink_gst_session.dll
   gstframelink.cpp
   The d3d11 library from gst-plugins-bad is unstable API and may change in future.
   You can define GST_USE_UNSTABLE_API to avoid this warning.
   gstframelinkaudio.cpp
   Generating Code...
-     Creating library C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.lib and object C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.exp
-  gstframelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\gstframelink.dll
-  Building Custom Rule C:/Users/jonsu/dev/framelink-m5a-contract-20261101/CMakeLists.txt
+     Creating library <win-tree>/build/Release/gstframelink.lib and object <win-tree>/build/Release/gstframelink.exp
+  gstframelink.vcxproj -> <win-tree>\build\Release\gstframelink.dll
+  Building Custom Rule <win-tree>/CMakeLists.txt
   fl_gst_audio_sink.cpp
-  fl_gst_audio_sink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_audio_sink.exe
+  fl_gst_audio_sink.vcxproj -> <win-tree>\build\Release\fl_gst_audio_sink.exe
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
-  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
-  framelink_gst_session.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink_gst_session.dll
+  framelink.vcxproj -> <win-tree>\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> <win-tree>\build\Release\framelink_gst_session.dll
   av_auth.cpp
   av_rendezvous.cpp
   fl_gst_session_transport.cpp
   Generating Code...
-  fl_gst_session_transport.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_session_transport.exe
+  fl_gst_session_transport.vcxproj -> <win-tree>\build\Release\fl_gst_session_transport.exe
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
-  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
-  framelink_gst_session.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink_gst_session.dll
+  framelink.vcxproj -> <win-tree>\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> <win-tree>\build\Release\framelink_gst_session.dll
   fl_gst_session_context.cpp
-  fl_gst_session_context.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_session_context.exe
+  fl_gst_session_context.vcxproj -> <win-tree>\build\Release\fl_gst_session_context.exe
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
-  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
+  framelink.vcxproj -> <win-tree>\build\Release\framelink.dll
   av_apps.cpp
   av_rendezvous.cpp
   av_auth.cpp
   av_memory_agreement.cpp
   Generating Code...
-  framelink_av_playback.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink_av_playback.lib
+  framelink_av_playback.vcxproj -> <win-tree>\build\Release\framelink_av_playback.lib
   fl_gst_sink_stats.cpp
-  fl_gst_sink_stats.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_sink_stats.exe
-Test project C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+  fl_gst_sink_stats.vcxproj -> <win-tree>\build\Release\fl_gst_sink_stats.exe
+Test project <win-tree>/build
     Start 82: gst_sink_stats
 1/4 Test #82: gst_sink_stats ...................   Passed    0.10 sec
     Start 97: gst_session_transport
