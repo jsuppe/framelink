@@ -29,12 +29,30 @@ SETS = {
         ("cpu-720p",     ["--size", "1280x720", "--format", "RGBA", "--mode", "bin"]),
         ("ref-traced",   ["--size", "320x180", "--format", "RGBA", "--mode", "bin", "--trace"]),
     ],
+    # Project targets: 1080p60 and 4K30, BGRA and NV12, native and CPU consumer;
+    # "src-*" measure the test sources alone (no FrameLink) for the producer.
+    "requirement": [
+        (f"{size}-{fmt.lower()}-{path}", ["--size", dims, "--fps", fps, "--format", fmt, "--mode", "bin"] + (["--native"] if path == "native" else []))
+        for size, dims, fps in (("1080p60", "1920x1080", "60"), ("4k30", "3840x2160", "30"))
+        for fmt in ("BGRA", "NV12") for path in ("native", "cpu")
+    ] + [
+        (f"src-{size}-{fmt.lower()}", ["--size", dims, "--fps", fps, "--format", fmt, "--source-only"])
+        for size, dims, fps in (("1080p60", "1920x1080", "60"), ("4k30", "3840x2160", "30")) for fmt in ("BGRA", "NV12")
+    ],
     "soak": [
         ("soak-ref",     ["--size", "320x180", "--format", "RGBA", "--mode", "bin"]),
     ],
 }
 # Android production evidence is documented at 160x90; add it as a cell there.
-ANDROID_EXTRA = [("ref-160", ["--size", "160x90", "--format", "RGBA", "--mode", "bin"])]
+# Android native consumer memory supports RGBA layouts only (not BGRA or NV12),
+# so the requirement set adds RGBA native cells there.
+ANDROID_EXTRA = {
+    "baseline": [("ref-160", ["--size", "160x90", "--format", "RGBA", "--mode", "bin"])],
+    "requirement": [(f"{size}-rgba-native", ["--size", dims, "--fps", fps, "--format", "RGBA", "--mode", "bin", "--native"])
+                    for size, dims, fps in (("1080p60", "1920x1080", "60"), ("4k30", "3840x2160", "30"))]
+                   + [(f"src-{size}-rgba", ["--size", dims, "--fps", fps, "--format", "RGBA", "--source-only"])
+                      for size, dims, fps in (("1080p60", "1920x1080", "60"), ("4k30", "3840x2160", "30"))],
+}
 
 def parse_summary(text):
     out = {}
@@ -255,7 +273,8 @@ def record_cell(label, opts, rc, text, seconds, gpu):
     state = "SKIP" if skipped else ("PASS" if rc == 0 else "FAIL")
     print(state, label, summary.get("config", ""), f"{record['seconds']}s", flush=True)
     for key in ("consumer.video.arrival.ms", "consumer.video.render_jitter.p1_p99.ms", "consumer.av_offset.abs.ms",
-                "consumer.video.deadline_misses", "consumer.cpu.percent", "producer.cpu.percent"):
+                "consumer.video.deadline_misses", "consumer.cpu.percent", "producer.cpu.percent", "source.cpu.percent",
+                "consumer.result", "producer.result"):
         if key in summary:
             print(f"  {key}={summary[key]}", flush=True)
     for key in sorted(gpu):
@@ -279,7 +298,7 @@ def main():
     ap.add_argument("--evidence", help="desktop: directory for per-cell summaries (default: a temporary one)")
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
-    cells = list(SETS[args.set]) + (ANDROID_EXTRA if args.adb and args.set == "baseline" else [])
+    cells = list(SETS[args.set]) + (ANDROID_EXTRA.get(args.set, []) if args.adb else [])
     if args.cells:
         wanted = args.cells.split(",")
         cells = [c for c in cells if c[0] in wanted]

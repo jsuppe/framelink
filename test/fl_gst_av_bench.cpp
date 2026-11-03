@@ -29,7 +29,7 @@
 #include <unistd.h>
 #endif
 
-struct Options {guint seconds=60;std::string mode="bin",label="run",out=".";bool native=false,trace=false,raw=false;};
+struct Options {guint seconds=60;std::string mode="bin",label="run",out=".";bool native=false,trace=false,raw=false,sourceOnly=false;};
 static constexpr guint WARMUP_S=2;  // excluded from steady-state distributions
 
 // ---- process resources -----------------------------------------------------
@@ -84,6 +84,17 @@ static std::string dist(const std::vector<double>&v){char t[200];snprintf(t,size
 // ---- children ------------------------------------------------------------------
 static void writeResult(const std::string&file,const std::map<std::string,std::string>&r){FILE*f=fopen(file.c_str(),"w");CHECK(f);for(auto&kv:r)fprintf(f,"%s=%s\n",kv.first.c_str(),kv.second.c_str());fclose(f);}
 static Mode modeOf(const std::string&m){return m=="element"?Mode::Element:Mode::Bin;}
+
+// Source cost alone: the producer's test sources into fakesinks (no FrameLink),
+// so the transport's own producer CPU is the producer cell minus this.
+static int sourceChild(const Options&o,const std::string&out){
+ Sampler sampler;std::map<std::string,std::string> r;
+ const std::string t="videotestsrc is-live=true pattern=red num-buffers="+std::to_string(o.seconds*gFps)+" ! video/x-raw,format="+gFormat+",width="+std::to_string(gWidth)+",height="+std::to_string(gHeight)+",framerate="+std::to_string(gFps)+"/1 ! fakesink sync=false "
+  "audiotestsrc is-live=true samplesperbuffer="+std::to_string(BLOCK)+" num-buffers="+std::to_string(o.seconds*100)+" ! audio/x-raw,format=S16LE,layout=interleaved,rate=48000,channels=2 ! fakesink sync=false";
+ GstElement*p=parse(t);gst_element_set_state(p,GST_STATE_PLAYING);auto*bus=gst_element_get_bus(p);
+ auto*m=gst_bus_timed_pop_filtered(bus,gRunLimit,GstMessageType(GST_MESSAGE_EOS|GST_MESSAGE_ERROR));r["result"]=m&&GST_MESSAGE_TYPE(m)==GST_MESSAGE_EOS?"EOS":m?"error: "+errorText(m):"timeout";
+ if(m)gst_message_unref(m);gst_object_unref(bus);sampler.stop();gst_element_set_state(p,GST_STATE_NULL);gst_object_unref(p);
+ sampler.report(r);writeResult(out,r);return 0;}
 
 static int producerChild(const Options&o,const std::string&session,const std::string&out){
  Sampler sampler;std::map<std::string,std::string> r;
@@ -174,7 +185,7 @@ static std::map<std::string,std::string> readResult(const std::string&path){std:
  while(std::getline(in,line)){auto eq=line.find('=');if(eq!=std::string::npos)r[line.substr(0,eq)]=line.substr(eq+1);}return r;}
 
 static std::vector<std::string> optionArgs(const Options&o){
- std::vector<std::string> a{"--seconds",std::to_string(o.seconds),"--size",std::to_string(gWidth)+"x"+std::to_string(gHeight),"--fps",std::to_string(gFps),"--format",gFormat,"--mode",o.mode};
+ std::vector<std::string> a{"--seconds",std::to_string(o.seconds),"--size",std::to_string(gWidth)+"x"+std::to_string(gHeight),"--fps",std::to_string(gFps),"--format",gFormat,"--mode",o.mode,"--pool",std::to_string(gVideoPool)};
  if(o.native)a.push_back("--native");if(o.raw)a.push_back("--raw");return a;}
 
 int main(int argc,char**argv){gst_init(&argc,&argv);
@@ -188,9 +199,17 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
  for(int i=2;i<argc;i++){std::string a=argv[i];auto next=[&]{CHECK(i+1<argc);return std::string(argv[++i]);};
   if(a=="--seconds")o.seconds=guint(std::stoul(next()));else if(a=="--fps")gFps=guint(std::stoul(next()));else if(a=="--format")gFormat=next();else if(a=="--mode")o.mode=next();
   else if(a=="--size"){auto s=next();auto x=s.find('x');CHECK(x!=std::string::npos);gWidth=guint(std::stoul(s.substr(0,x)));gHeight=guint(std::stoul(s.substr(x+1)));}
+  else if(a=="--pool")gVideoPool=guint(std::stoul(next()));else if(a=="--source-only")o.sourceOnly=true;
   else if(a=="--native")o.native=true;else if(a=="--trace")o.trace=true;else if(a=="--raw")o.raw=true;else if(a=="--out")o.out=next();else if(a=="--label")o.label=next();
   else if(a=="--role")role=next();else if(a=="--session")session=next();else if(a=="--result")result=next();else{fprintf(stderr,"unknown option %s\n",a.c_str());return 2;}}
  CHECK(o.seconds>=WARMUP_S+3&&(o.mode=="bin"||o.mode=="element"));gRunLimit=(o.seconds+30)*GST_SECOND;
+ // Ring: ceil(latency x fps) + 2 images (documented sizing), at least the default 8.
+ // Queue: no byte/buffer limit (frames reach 33 MB at 4K); the 1 s time bound
+ // stays above the session latency.
+ {bool poolSet=false;for(int i=2;i<argc;i++)if(!strcmp(argv[i],"--pool"))poolSet=true;
+  if(!poolSet)gVideoPool=std::min<guint>(FL_MAX_POOL_SIZE,std::max<guint>(8,guint(std::ceil(LATENCY/1e9*gFps))+2));}
+ gQueue="queue max-size-bytes=0 max-size-buffers=0 max-size-time=1000000000";
+ if(role=="source")return sourceChild(o,result);
  if(role=="producer")return producerChild(o,session,result);
  if(role=="consumer")return consumerChild(o,session,result);
  setvbuf(stdout,nullptr,_IONBF,0);
@@ -200,6 +219,11 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
   if(o.trace){setEnv("FRAMELINK_GST_TRACE",base+"-"+r+"-gst");setEnv("FRAMELINK_TRACE",base+"-"+r+"-core");setEnv("FRAMELINK_GST_TRACE_EVENTS","1048576");setEnv("FRAMELINK_TRACE_EVENTS","1048576");}
   auto args=std::vector<std::string>{argv[1],"--role",r,"--session",path,"--result",base+"-"+r+".txt"};auto opts=optionArgs(o);args.insert(args.end(),opts.begin(),opts.end());
   auto c=spawn(exe,args);for(const char*k:{"FRAMELINK_GST_TRACE","FRAMELINK_TRACE","FRAMELINK_GST_TRACE_EVENTS","FRAMELINK_TRACE_EVENTS"})setEnv(k,"");return c;};
+ if(o.sourceOnly){auto src=launch("source");printf("pids producer=%ld consumer=0\n",src.pid);
+  const int rc=await(src,g_get_monotonic_time()+gint64(o.seconds+90)*G_USEC_PER_SEC);auto sr=readResult(base+"-source.txt");
+  std::map<std::string,std::string> s{{"label",o.label},{"config",gFormat+" "+std::to_string(gWidth)+"x"+std::to_string(gHeight)+"@"+std::to_string(gFps)+" source only "+std::to_string(o.seconds)+"s"},{"seconds",std::to_string(o.seconds)},{"exit",std::to_string(rc)}};
+  for(auto&kv:sr)s["source."+kv.first]=kv.second;const bool ok=rc==0&&sr["result"]=="EOS";s["complete"]=ok?"yes":"no";
+  writeResult(base+".summary.txt",s);for(auto&kv:s)printf("%s=%s\n",kv.first.c_str(),kv.second.c_str());return ok?0:1;}
  auto consumer=launch("consumer");g_usleep(200000);auto producer=launch("producer");
  // Early pid line for external samplers (GPU counters per process).
  printf("pids producer=%ld consumer=%ld\n",producer.pid,consumer.pid);
@@ -207,7 +231,7 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
  const int pc=await(producer,deadline),cc=await(consumer,deadline);
  auto pr=readResult(base+"-producer.txt"),cr=readResult(base+"-consumer.txt");
  std::map<std::string,std::string> s{{"label",o.label},{"config",gFormat+" "+std::to_string(gWidth)+"x"+std::to_string(gHeight)+"@"+std::to_string(gFps)+" "+o.mode+(o.native?" native":" cpu")+(o.trace?" traced":"")+" "+std::to_string(o.seconds)+"s"},
-  {"exit",std::to_string(pc)+"/"+std::to_string(cc)},{"seconds",std::to_string(o.seconds)},{"producer.pid",std::to_string(producer.pid)},{"consumer.pid",std::to_string(consumer.pid)}};
+  {"exit",std::to_string(pc)+"/"+std::to_string(cc)},{"video.pool",std::to_string(gVideoPool)},{"seconds",std::to_string(o.seconds)},{"producer.pid",std::to_string(producer.pid)},{"consumer.pid",std::to_string(consumer.pid)}};
  for(auto&kv:pr)s["producer."+kv.first]=kv.second;for(auto&kv:cr)s["consumer."+kv.first]=kv.second;
  const bool ok=pc==0&&cc==0&&pr["result"]=="EOS"&&cr["result"]=="EOS"&&cr["frames"]==pr["pushed.frames"]&&cr["samples"]==pr["pushed.samples"];
  s["complete"]=ok?"yes":"no";

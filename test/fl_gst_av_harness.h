@@ -31,6 +31,9 @@ static constexpr guint FRAMES=30,BLOCKS=50,BLOCK=480;static constexpr GstClockTi
 // Session geometry and run limit; the M5b tests use these defaults, the M6
 // benchmark overrides them before building any side.
 static guint gWidth=64,gHeight=32,gFps=30;static std::string gFormat="RGBA";static GstClockTime gRunLimit=25*GST_SECOND;
+// Consumer video ring size and the queue in front of each appsink (the
+// default queue byte limit stalls a session once frames exceed ~10 MB).
+static guint gVideoPool=8;static std::string gQueue="queue";
 static std::string geometry(){return "width="+std::to_string(gWidth)+" height="+std::to_string(gHeight);}
 static flFormat sessionFormat(){return gFormat=="NV12"?FL_FORMAT_NV12:gFormat=="BGRA"?FL_FORMAT_BGRA8:FL_FORMAT_RGBA8;}
 enum class Mode {Element,Bin};
@@ -68,7 +71,7 @@ struct Side {
   session=fl_gst_session_new((video()?1u:0u)|(audio()?2u:0u));auto caps=capabilities(video(),audio());GError*e=nullptr;flChannel*channel=nullptr;
   const guint flags=native?guint(FL_MAP_CPU|FL_DEFER_RELEASE|FL_REQUIRE_FRAME_METADATA):0u;
   auto fail=[&](const char*what){result=std::string("error: ")+(e?e->message:what);g_clear_error(&e);endedAt=g_get_monotonic_time();};
-  if(!fl_gst_session_open_local_av(session,producer,path.c_str(),&caps,2,producer?0:8,audioQueueMs,5000,3000,producer?0:flags,&channel,nullptr,&e))return fail("setup");
+  if(!fl_gst_session_open_local_av(session,producer,path.c_str(),&caps,2,producer?0:gVideoPool,audioQueueMs,5000,3000,producer?0:flags,&channel,nullptr,&e))return fail("setup");
   auto*context=fl_gst_session_create_context(session);gst_element_set_context(p,context);gst_context_unref(context);
   if(channel){auto*v=gst_bin_get_by_name(GST_BIN(p),"video");gboolean adopted=FALSE;g_signal_emit_by_name(v,"adopt-channel",channel,&adopted);gst_object_unref(v);if(!adopted)return fail("adopt");}
   if(producer){if(!fl_gst_session_local_ready(session,TRUE,5000,&e))return fail("ready");if(!fl_gst_session_apply_pipeline_clock(session,GST_PIPELINE(p),TRUE,0,&e))return fail("clock");g_usleep(lateMs*1000);}
@@ -112,8 +115,8 @@ struct Consumer:Side {
  bool record=false;std::vector<gint64> lateness[2];
  std::string features;GstClockTime next=GST_CLOCK_TIME_NONE;std::mutex mutex;
  Consumer(Mode m,const std::string&path_,const std::string&tracks_,bool native_=false){mode=m;producer=false;path=path_;tracks=tracks_;native=native_;
-  const std::string sinkV="queue ! appsink name=vout sync=true max-buffers=0 ",sinkA="queue ! appsink name=aout sync=true max-buffers=0";std::string t;
-  if(m==Mode::Bin){t="framelinkavsrc name=c tracks="+tracks+" video-format="+gFormat+" "+geometry()+" connect-timeout-ms=5000 idle-timeout-ms=3000"+(native?" native-memory=true ":" ");
+  const std::string sinkV=gQueue+" ! appsink name=vout sync=true max-buffers=0 ",sinkA=gQueue+" ! appsink name=aout sync=true max-buffers=0";std::string t;
+  if(m==Mode::Bin){t="framelinkavsrc name=c tracks="+tracks+" video-pool="+std::to_string(gVideoPool)+" video-format="+gFormat+" "+geometry()+" framerate="+std::to_string(gFps)+"/1 connect-timeout-ms=5000 idle-timeout-ms=3000"+(native?" native-memory=true ":" ");
    if(video())t+="c.video_src ! "+sinkV;if(audio())t+="c.audio_src ! "+sinkA;}
   else{if(video())t+="framelinksrc name=video "+geometry()+" format="+gFormat+(native?" native-memory=true":"")+" ! "+sinkV;
    if(audio())t+="framelinkaudiosrc tracks="+tracks+" ! "+sinkA;}

@@ -76,9 +76,22 @@
  },
  "platforms": {
   "linux": {
-   "baseline": "linux-i9-10900k-rtx3090",
-   "seconds": 60,
-   "repeat": 3,
+   "baselines": [
+    {
+     "platform": "linux-i9-10900k-rtx3090",
+     "set": "baseline",
+     "seconds": 60,
+     "repeat": 3,
+     "file": "linux.json"
+    },
+    {
+     "platform": "linux-i9-10900k-rtx3090",
+     "set": "requirement",
+     "seconds": 60,
+     "repeat": 3,
+     "file": "linux-requirement.json"
+    }
+   ],
    "cells": {
     "ref": {
      "video_arrival_p99_ms": 45.9,
@@ -194,13 +207,130 @@
      "deadline_misses": 0,
      "handle_slope_per_min": 1.0,
      "thread_slope_per_min": 0.5
+    },
+    "1080p60-bgra-native": {
+     "video_arrival_p99_ms": 24.44,
+     "video_arrival_max_ms": 29.18,
+     "audio_arrival_p99_ms": 5.42,
+     "audio_arrival_max_ms": 11.23,
+     "video_render_jitter_ms": 1.16,
+     "audio_render_jitter_ms": 1.14,
+     "av_offset_abs_max_ms": 1.08,
+     "consumer_cpu_pct_max": 3.65,
+     "producer_cpu_pct_max": 56.51,
+     "gpu_busy_pct_max": 2.0,
+     "handle_spread": 9,
+     "thread_spread": 5,
+     "deadline_misses": 0,
+     "mem_slope_kb_per_min": 64,
+     "handle_slope_per_min": 1.0,
+     "thread_slope_per_min": 0.5
+    },
+    "1080p60-bgra-cpu": {
+     "unsupported": true,
+     "note": "Linux dGPU CPU readback cannot sustain the rate (0 of 3 rounds); M6.8"
+    },
+    "1080p60-nv12-native": {
+     "video_arrival_p99_ms": 15.12,
+     "video_arrival_max_ms": 19.68,
+     "audio_arrival_p99_ms": 5.52,
+     "audio_arrival_max_ms": 11.64,
+     "video_render_jitter_ms": 1.16,
+     "audio_render_jitter_ms": 1.16,
+     "av_offset_abs_max_ms": 1.04,
+     "consumer_cpu_pct_max": 5.57,
+     "producer_cpu_pct_max": 41.47,
+     "gpu_busy_pct_max": 2.0,
+     "handle_spread": 9,
+     "thread_spread": 5,
+     "deadline_misses": 0,
+     "mem_slope_kb_per_min": 64,
+     "handle_slope_per_min": 1.0,
+     "thread_slope_per_min": 0.5
+    },
+    "1080p60-nv12-cpu": {
+     "unsupported": true,
+     "note": "Linux dGPU CPU readback cannot sustain the rate (0 of 3 rounds); M6.8"
+    },
+    "4k30-bgra-native": {
+     "video_arrival_p99_ms": 52.64,
+     "video_arrival_max_ms": 75.0,
+     "audio_arrival_p99_ms": 5.37,
+     "audio_arrival_max_ms": 10.59,
+     "video_render_jitter_ms": 1.09,
+     "audio_render_jitter_ms": 1.17,
+     "av_offset_abs_max_ms": 1.04,
+     "consumer_cpu_pct_max": 3.05,
+     "producer_cpu_pct_max": 86.11,
+     "gpu_busy_pct_max": 2.0,
+     "handle_spread": 9,
+     "thread_spread": 5,
+     "deadline_misses": 0,
+     "mem_slope_kb_per_min": 64,
+     "handle_slope_per_min": 1.0,
+     "thread_slope_per_min": 0.5
+    },
+    "4k30-bgra-cpu": {
+     "unsupported": true,
+     "note": "Linux dGPU CPU readback cannot sustain the rate (0 of 3 rounds); M6.8"
+    },
+    "4k30-nv12-native": {
+     "video_arrival_p99_ms": 39.6,
+     "video_arrival_max_ms": 41.56,
+     "audio_arrival_p99_ms": 5.47,
+     "audio_arrival_max_ms": 11.15,
+     "video_render_jitter_ms": 1.16,
+     "audio_render_jitter_ms": 1.16,
+     "av_offset_abs_max_ms": 1.07,
+     "consumer_cpu_pct_max": 4.19,
+     "producer_cpu_pct_max": 59.23,
+     "gpu_busy_pct_max": 2.0,
+     "handle_spread": 9,
+     "thread_spread": 6,
+     "deadline_misses": 0,
+     "mem_slope_kb_per_min": 64,
+     "handle_slope_per_min": 1.0,
+     "thread_slope_per_min": 0.5
+    },
+    "4k30-nv12-cpu": {
+     "unsupported": true,
+     "note": "Linux dGPU CPU readback cannot sustain the rate (0 of 3 rounds); M6.8"
+    },
+    "src-1080p60-bgra": {
+     "reference": true,
+     "note": "test sources alone; not budgeted"
+    },
+    "src-1080p60-nv12": {
+     "reference": true,
+     "note": "test sources alone; not budgeted"
+    },
+    "src-4k30-bgra": {
+     "reference": true,
+     "note": "test sources alone; not budgeted"
+    },
+    "src-4k30-nv12": {
+     "reference": true,
+     "note": "test sources alone; not budgeted"
     }
    }
   },
   "windows": {
-   "baseline": "windows-9800x3d-rtx5090",
-   "seconds": 60,
-   "repeat": 3,
+   "baselines": [
+    {
+     "platform": "windows-9800x3d-rtx5090",
+     "set": "baseline",
+     "seconds": 60,
+     "repeat": 3,
+     "file": "windows.json"
+    },
+    {
+     "platform": "windows-9800x3d-rtx5090",
+     "set": "requirement",
+     "seconds": 60,
+     "repeat": 3,
+     "file": "windows-requirement.json"
+    }
+   ],
    "cells": {
     "ref": {
      "video_arrival_p99_ms": 9.05,
@@ -344,13 +474,186 @@
      "deadline_misses": 0,
      "handle_slope_per_min": 1.0,
      "thread_slope_per_min": 0.5
+    },
+    "1080p60-bgra-native": {
+     "video_arrival_p99_ms": 12.62,
+     "video_arrival_max_ms": 19.31,
+     "audio_arrival_p99_ms": 7.03,
+     "audio_arrival_max_ms": 12.56,
+     "video_render_jitter_ms": 3.82,
+     "audio_render_jitter_ms": 3.88,
+     "av_offset_abs_max_ms": 1.43,
+     "consumer_cpu_pct_max": 10.26,
+     "producer_cpu_pct_max": 16.12,
+     "gpu_busy_pct_max": 20.73,
+     "handle_spread": 96.0,
+     "thread_spread": 12.0,
+     "deadline_misses": 0,
+     "mem_slope_kb_per_min": 64,
+     "handle_slope_per_min": 1.0,
+     "thread_slope_per_min": 0.5
+    },
+    "1080p60-bgra-cpu": {
+     "video_arrival_p99_ms": 18.14,
+     "video_arrival_max_ms": 21.98,
+     "audio_arrival_p99_ms": 7.03,
+     "audio_arrival_max_ms": 12.56,
+     "video_render_jitter_ms": 3.88,
+     "audio_render_jitter_ms": 3.9,
+     "av_offset_abs_max_ms": 1.43,
+     "consumer_cpu_pct_max": 31.3,
+     "producer_cpu_pct_max": 18.24,
+     "gpu_busy_pct_max": 11.65,
+     "handle_spread": 92.0,
+     "thread_spread": 12.0,
+     "deadline_misses": 0,
+     "mem_slope_kb_per_min": 64,
+     "handle_slope_per_min": 1.0,
+     "thread_slope_per_min": 0.5
+    },
+    "1080p60-nv12-native": {
+     "video_arrival_p99_ms": 10.28,
+     "video_arrival_max_ms": 17.33,
+     "audio_arrival_p99_ms": 7.02,
+     "audio_arrival_max_ms": 12.54,
+     "video_render_jitter_ms": 3.8,
+     "audio_render_jitter_ms": 3.86,
+     "av_offset_abs_max_ms": 1.35,
+     "consumer_cpu_pct_max": 10.1,
+     "producer_cpu_pct_max": 13.35,
+     "gpu_busy_pct_max": 9.35,
+     "handle_spread": 96.0,
+     "thread_spread": 12.0,
+     "deadline_misses": 0,
+     "mem_slope_kb_per_min": 64,
+     "handle_slope_per_min": 1.0,
+     "thread_slope_per_min": 0.5
+    },
+    "1080p60-nv12-cpu": {
+     "video_arrival_p99_ms": 13.5,
+     "video_arrival_max_ms": 18.15,
+     "audio_arrival_p99_ms": 7.02,
+     "audio_arrival_max_ms": 12.55,
+     "video_render_jitter_ms": 3.86,
+     "audio_render_jitter_ms": 3.86,
+     "av_offset_abs_max_ms": 1.36,
+     "consumer_cpu_pct_max": 24.72,
+     "producer_cpu_pct_max": 17.07,
+     "gpu_busy_pct_max": 10.05,
+     "handle_spread": 92.0,
+     "thread_spread": 12.0,
+     "deadline_misses": 0,
+     "mem_slope_kb_per_min": 64,
+     "handle_slope_per_min": 1.0,
+     "thread_slope_per_min": 0.5
+    },
+    "4k30-bgra-native": {
+     "video_arrival_p99_ms": 30.1,
+     "video_arrival_max_ms": 34.2,
+     "audio_arrival_p99_ms": 7.04,
+     "audio_arrival_max_ms": 12.57,
+     "video_render_jitter_ms": 3.64,
+     "audio_render_jitter_ms": 3.88,
+     "av_offset_abs_max_ms": 1.44,
+     "consumer_cpu_pct_max": 11.21,
+     "producer_cpu_pct_max": 22.56,
+     "gpu_busy_pct_max": 40.94,
+     "handle_spread": 96.0,
+     "thread_spread": 12.0,
+     "deadline_misses": 0,
+     "mem_slope_kb_per_min": 64,
+     "handle_slope_per_min": 1.0,
+     "thread_slope_per_min": 0.5
+    },
+    "4k30-bgra-cpu": {
+     "video_arrival_p99_ms": 40.78,
+     "video_arrival_max_ms": 42.32,
+     "audio_arrival_p99_ms": 7.02,
+     "audio_arrival_max_ms": 13.27,
+     "video_render_jitter_ms": 4.48,
+     "audio_render_jitter_ms": 3.88,
+     "av_offset_abs_max_ms": 3.94,
+     "consumer_cpu_pct_max": 63.05,
+     "producer_cpu_pct_max": 21.36,
+     "gpu_busy_pct_max": 20.96,
+     "handle_spread": 96.0,
+     "thread_spread": 12.0,
+     "deadline_misses": 0,
+     "mem_slope_kb_per_min": 64,
+     "handle_slope_per_min": 1.0,
+     "thread_slope_per_min": 0.5
+    },
+    "4k30-nv12-native": {
+     "video_arrival_p99_ms": 20.5,
+     "video_arrival_max_ms": 26.82,
+     "audio_arrival_p99_ms": 7.03,
+     "audio_arrival_max_ms": 12.55,
+     "video_render_jitter_ms": 3.68,
+     "audio_render_jitter_ms": 3.9,
+     "av_offset_abs_max_ms": 1.43,
+     "consumer_cpu_pct_max": 9.03,
+     "producer_cpu_pct_max": 19.54,
+     "gpu_busy_pct_max": 18.23,
+     "handle_spread": 96.0,
+     "thread_spread": 12.0,
+     "deadline_misses": 0,
+     "mem_slope_kb_per_min": 64,
+     "handle_slope_per_min": 1.0,
+     "thread_slope_per_min": 0.5
+    },
+    "4k30-nv12-cpu": {
+     "video_arrival_p99_ms": 30.86,
+     "video_arrival_max_ms": 33.6,
+     "audio_arrival_p99_ms": 7.04,
+     "audio_arrival_max_ms": 12.54,
+     "video_render_jitter_ms": 3.92,
+     "audio_render_jitter_ms": 3.9,
+     "av_offset_abs_max_ms": 1.54,
+     "consumer_cpu_pct_max": 29.64,
+     "producer_cpu_pct_max": 20.8,
+     "gpu_busy_pct_max": 11.05,
+     "handle_spread": 100.0,
+     "thread_spread": 54.0,
+     "deadline_misses": 0,
+     "mem_slope_kb_per_min": 64,
+     "handle_slope_per_min": 1.0,
+     "thread_slope_per_min": 0.5
+    },
+    "src-1080p60-bgra": {
+     "reference": true,
+     "note": "test sources alone; not budgeted"
+    },
+    "src-1080p60-nv12": {
+     "reference": true,
+     "note": "test sources alone; not budgeted"
+    },
+    "src-4k30-bgra": {
+     "reference": true,
+     "note": "test sources alone; not budgeted"
+    },
+    "src-4k30-nv12": {
+     "reference": true,
+     "note": "test sources alone; not budgeted"
     }
    }
   },
   "android": {
-   "baseline": "android-tcl8483a-mt8786",
-   "seconds": 60,
-   "repeat": 3,
+   "baselines": [
+    {
+     "platform": "android-tcl8483a-mt8786",
+     "set": "baseline",
+     "seconds": 60,
+     "repeat": 3,
+     "file": "android.json"
+    },
+    {
+     "platform": "android-tcl8483a-mt8786",
+     "set": "requirement",
+     "seconds": 60,
+     "repeat": 3,
+     "file": "android-requirement.json"
+    }
+   ],
    "cells": {
     "ref": {
      "video_arrival_p99_ms": 16.44,
@@ -512,6 +815,98 @@
      "mem_slope_kb_per_min": 64,
      "handle_slope_per_min": 1.0,
      "thread_slope_per_min": 0.5
+    },
+    "1080p60-bgra-native": {
+     "unsupported": true,
+     "note": "Android native consumer memory supports RGBA layouts only; see the rgba-native cells"
+    },
+    "1080p60-bgra-cpu": {
+     "unsupported": true,
+     "note": "CPU path saturates the tablet's cores at this size and rate (0 of 3 rounds)"
+    },
+    "1080p60-nv12-native": {
+     "unsupported": true,
+     "note": "Android native consumer memory supports RGBA layouts only; see the rgba-native cells"
+    },
+    "1080p60-nv12-cpu": {
+     "unsupported": true,
+     "note": "CPU path saturates the tablet's cores at this size and rate (0 of 3 rounds)"
+    },
+    "4k30-bgra-native": {
+     "unsupported": true,
+     "note": "Android native consumer memory supports RGBA layouts only; see the rgba-native cells"
+    },
+    "4k30-bgra-cpu": {
+     "unsupported": true,
+     "note": "CPU path saturates the tablet's cores at this size and rate (0 of 3 rounds)"
+    },
+    "4k30-nv12-native": {
+     "unsupported": true,
+     "note": "Android native consumer memory supports RGBA layouts only; see the rgba-native cells"
+    },
+    "4k30-nv12-cpu": {
+     "unsupported": true,
+     "note": "CPU path saturates the tablet's cores at this size and rate (0 of 3 rounds)"
+    },
+    "src-1080p60-bgra": {
+     "reference": true,
+     "note": "test sources alone; not budgeted"
+    },
+    "src-1080p60-nv12": {
+     "reference": true,
+     "note": "test sources alone; not budgeted"
+    },
+    "src-4k30-bgra": {
+     "reference": true,
+     "note": "test sources alone; not budgeted"
+    },
+    "src-4k30-nv12": {
+     "reference": true,
+     "note": "test sources alone; not budgeted"
+    },
+    "1080p60-rgba-native": {
+     "video_arrival_p99_ms": 17.8,
+     "video_arrival_max_ms": 19.94,
+     "audio_arrival_p99_ms": 7.61,
+     "audio_arrival_max_ms": 14.13,
+     "video_render_jitter_ms": 1.59,
+     "audio_render_jitter_ms": 1.74,
+     "av_offset_abs_max_ms": 1.16,
+     "consumer_cpu_pct_max": 18.93,
+     "producer_cpu_pct_max": 83.04,
+     "gpu_busy_pct_max": 2.0,
+     "handle_spread": 9,
+     "thread_spread": 5,
+     "deadline_misses": 0,
+     "mem_slope_kb_per_min": 64,
+     "handle_slope_per_min": 1.0,
+     "thread_slope_per_min": 0.5
+    },
+    "4k30-rgba-native": {
+     "video_arrival_p99_ms": 28.32,
+     "video_arrival_max_ms": 34.58,
+     "audio_arrival_p99_ms": 8.45,
+     "audio_arrival_max_ms": 17.67,
+     "video_render_jitter_ms": 1.62,
+     "audio_render_jitter_ms": 1.93,
+     "av_offset_abs_max_ms": 1.22,
+     "consumer_cpu_pct_max": 19.04,
+     "producer_cpu_pct_max": 87.05,
+     "gpu_busy_pct_max": 2.0,
+     "handle_spread": 10,
+     "thread_spread": 5,
+     "deadline_misses": 0,
+     "mem_slope_kb_per_min": 64,
+     "handle_slope_per_min": 1.0,
+     "thread_slope_per_min": 0.5
+    },
+    "src-1080p60-rgba": {
+     "reference": true,
+     "note": "test sources alone; not budgeted"
+    },
+    "src-4k30-rgba": {
+     "reference": true,
+     "note": "test sources alone; not budgeted"
     }
    }
   }

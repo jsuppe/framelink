@@ -311,8 +311,13 @@ baseline evidence, not completion of these release-scale tasks.
 
 - [x] **M6.1 Define qualification matrix and numeric budgets:** supported
   hardware/workload, FPS, latency/jitter, A/V offset, resources and tracing overhead.
-  [Matrix](m6/QUALIFICATION_MATRIX.md): three targets, nine cells (RGBA/NV12,
-  160x90–1280x720, bins/elements, CPU/native consumer, traced), 30 fps.
+  [Matrix](m6/QUALIFICATION_MATRIX.md): three targets; requirement cells at the
+  project targets 1080p60 and 4K30 (BGRA/NV12, Android RGBA; native and CPU
+  consumer; source-only references) plus functional cells (RGBA/NV12,
+  160x90–1280x720 at 30 fps, bins/elements, traced). Native consumer carries
+  1080p60 and 4K30 on all three platforms; CPU consumer at target sizes only on
+  Windows (Linux: M6.8; Android: saturates); Android native output RGBA-only.
+  Producer per-frame copy is the remaining cost (M6.9).
   `fl_gst_av_bench` + `tools/m6_bench_matrix.py`/`m6_bench_report.py` measure
   arrival/render lateness, A/V offset, deadline misses, CPU, memory,
   handles/threads and GPU (per-process engines on Windows, device counters on

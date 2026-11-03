@@ -9,7 +9,7 @@ docs/m6/budgets.json for its platform and the exit code reports violations.
   tools/m6_bench_report.py linux.json windows.json android.json --markdown
   tools/m6_bench_report.py soak.json --budgets docs/m6/budgets.json --platform linux
 """
-import argparse, json, math, re, statistics, sys
+import argparse, json, math, os, re, statistics, sys
 from collections import OrderedDict
 
 def dist(text):
@@ -65,6 +65,12 @@ def aggregate(doc):
             rows[name] = row
             continue
         s = [r["summary"] for r in ok]
+        if any("source.cpu.percent" in x for x in s):
+            # Source-only reference: the test sources alone, no FrameLink.
+            row.update({"source_cpu_pct": statistics.median(num(x.get("source.cpu.percent")) for x in s),
+                        "source_cpu_pct_max": max(num(x.get("source.cpu.percent")) for x in s), "reference": True})
+            rows[name] = row
+            continue
         def worst(key, field, fn=max):
             vals = [dist(x.get(key)).get(field, math.nan) for x in s]
             vals = [v for v in vals if not math.isnan(v)]
@@ -144,6 +150,9 @@ def markdown(platform, rows):
     out = [f"### {platform}", "", "| Cell | " + " | ".join(c[1] for c in COLUMNS) + " |",
            "|---|" + "---|" * len(COLUMNS)]
     for name, row in rows.items():
+        if row.get("reference"):
+            out.append(f"| {name} | {row['config']} | {row['complete']}/{row['rounds']} | source alone: {fmt(row['source_cpu_pct'], 1)}% CPU |" + " |" * (len(COLUMNS) - 3))
+            continue
         if row["complete"] == 0:
             out.append(f"| {name} | {row['config']} | 0/{row['rounds']} | " + " | ".join(["-"] * (len(COLUMNS) - 2)) +
                        f" |\n|  | failed: {'; '.join(row['errors'])[:160]} |")
@@ -164,13 +173,13 @@ def check(platform, rows, budgets):
         if not limits:
             problems.append(f"{name}: no budget for cell {base}")
             continue
-        if limits.get("unsupported"):
+        if limits.get("unsupported") or limits.get("reference"):
             continue
         if row["complete"] < row["rounds"]:
             problems.append(f"{name}: {row['rounds'] - row['complete']} of {row['rounds']} rounds incomplete {row['errors']}")
             continue
         for key, limit in limits.items():
-            if key in ("unsupported", "note"):
+            if key in ("unsupported", "note", "reference"):
                 continue
             if key in GROWTH and not row.get("seconds", 0) >= GROWTH_MIN_S:
                 continue
@@ -207,6 +216,9 @@ def derive(platform_rows, unsupported):
     """Budgets per cell from one platform's aggregated baseline rows."""
     cells = {}
     for name, row in platform_rows.items():
+        if row.get("reference"):
+            cells[name] = {"reference": True, "note": "test sources alone; not budgeted"}
+            continue
         if name in unsupported:
             cells[name] = {"unsupported": True, "note": unsupported[name]}
             continue
@@ -255,8 +267,10 @@ def main():
                 cell, reason = rest.split("=", 1)
                 if plat == key:
                     unsupported[cell] = reason
-            out["platforms"][key] = {"baseline": doc["platform"], "seconds": doc["seconds"], "repeat": doc.get("repeat", 1),
-                                     "cells": derive(aggregate(doc), unsupported)}
+            entry = out["platforms"].setdefault(key, {"baselines": [], "cells": {}})
+            entry["baselines"].append({"platform": doc["platform"], "set": doc.get("set"), "seconds": doc["seconds"],
+                                       "repeat": doc.get("repeat", 1), "file": os.path.basename(path)})
+            entry["cells"].update(derive(aggregate(doc), unsupported))
         with open(a.derive, "w") as f:
             json.dump(out, f, indent=1)
             f.write("\n")
