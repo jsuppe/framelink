@@ -9,13 +9,15 @@ matrix below rather than assuming every pipeline is zero-copy.
 and **Android** (AHardwareBuffer) share the core C API. Platform headers expose
 interop handles; allocation/format/fence support still depends on the driver.
 
-## Design and progress — November 1, 2026
+## Design and progress — November 3, 2026
 
-**Shipped on `master`: M1–M5 and M5a are complete within documented scope.**
-M5a merged in [PR #7](https://github.com/jsuppe/framelink/pull/7) as `3e1d51f`.
-Final source `e38de30` passed Linux **97/97**, Windows **95/95**, hosted Linux/Windows
-CI, and latest signed Android regressions **6/6**. See
-[final evidence and attribution limits](docs/m5a/final-integration-20261101/README.md).
+**Shipped on `master`: M1–M5, M5a and M5b are complete within documented scope.**
+M5b merged in [PR #8](https://github.com/jsuppe/framelink/pull/8) as `9f86c35`.
+Final source `4fafe51` passed Linux **112/112**, Windows **110/110**, the M5b
+validation matrix on Linux, Windows and Android, and hosted Linux/Windows CI. See
+[M5b final evidence](docs/m5b/final-integration/README.md). M5a merged in
+[PR #7](https://github.com/jsuppe/framelink/pull/7) as `3e1d51f`; see
+[M5a final evidence and attribution limits](docs/m5a/final-integration-20261101/README.md).
 
 - Native allocation negotiation, external pools, downstream reader completion,
   native GStreamer adapters and authenticated relay paths are implemented.
@@ -24,7 +26,7 @@ CI, and latest signed Android regressions **6/6**. See
   [performance scope, copies and exclusions](docs/m5a/multihop-performance-20261101/README.md).
 - [Audio policy](docs/AUDIO_MEMORY_POLICY.md) retains serialized GDP/GIO PCM;
   native video does not imply whole-A/V zero-copy.
-- **M5b (PR #8):** public GStreamer audio elements (`framelinkaudiosink`,
+- **M5b (PR #8, merged):** public GStreamer audio elements (`framelinkaudiosink`,
   `framelinkaudiosrc`), coordinated A/V sessions for the video elements, and
   the `framelinkavsink`/`framelinkavsrc` bins, qualified on Linux, Windows and
   Android. Start with the [developer guide](samples/GST_AV_EXAMPLE.md), the

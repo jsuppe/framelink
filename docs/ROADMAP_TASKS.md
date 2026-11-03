@@ -177,7 +177,7 @@ playback delay; unsupported hardware paths must reject clearly.
 
 ## M5b — GStreamer audio elements and coordinated A/V sessions
 
-**State: in progress; tasks1–12 locally validated; task13 publish/review/merge next.** Added at Jon's request 2026-11-01. Execute
+**State: COMPLETE within documented scope; PR #8 merged as `9f86c35` (2026-11-03).** Added at Jon's request 2026-11-01. Execute
 only after M5a closes, before M6 qualifies the complete public integration path.
 Video elements remain video-only; separate audio elements share one session.
 
@@ -287,9 +287,15 @@ elements remain independently available.
   bounds, EOS statistics, element/bin churn and recorder/accounting/leak
   controls. Matrix x10 Linux, Windows and Android; Android x86_64 build-only.
   Native producer allocations in sessions are not qualified (M6.9).
-- [ ] **M5b.13 Publish/review/merge:** element reference, copy/timing contract,
+- [x] **M5b.13 Publish/review/merge:** element reference, copy/timing contract,
   developer migration guide, examples, final-revision CI and reviewed evidence.
   Feed these elements into M6's sustained/performance qualification matrix.
+  [Reference](GST_AV_REFERENCE.md), [migration guide](GST_AV_MIGRATION.md),
+  hosted CI runs the GPU-free M5b tests and `gst-inspect-1.0` of all six
+  elements; [final evidence](m5b/final-integration/README.md): source `4fafe51`
+  Linux 112/112, Windows 110/110, matrix on all three platforms. PR #8 merged
+  as `9f86c35`. M6 should add `gst_av_qualification`/`gst_av_parity` to its
+  sustained matrix.
 
 Acceptance: a developer can split an A/V GStreamer pipeline across processes
 using either the individual public video/audio elements with shared-session

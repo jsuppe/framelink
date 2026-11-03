@@ -4,7 +4,7 @@ Updated 2026-11-01. Scope: local cross-platform video/audio sessions and rendere
 integration. Historical cloud calling, unrelated receiver features and HDR are
 not part of this release. M1–M5 are merged within their documented qualification
 scope. M5a is complete within documented paths (PR #7, `3e1d51f`).
-M5b is next; M6/M7 follow. Planned work is not implemented merely by being listed.
+M5b is complete within documented scope (PR #8, `9f86c35`). M6 is next; M7 follows. Planned work is not implemented merely by being listed.
 
 For individually checkable tasks and current merge gates, see
 [the executable roadmap checklist](ROADMAP_TASKS.md).
@@ -191,7 +191,8 @@ total pipeline buffering.
 
 ## M5b — GStreamer audio elements and coordinated A/V sessions
 
-Status: PLANNED, not started. Added by Jon 2026-11-01. Follows M5a; precedes
+Status: COMPLETE within documented scope; PR #8 merged as `9f86c35`
+(2026-11-03). Added by Jon 2026-11-01. Follows M5a; precedes
 M6 so reliability/performance qualification includes the public audio elements.
 
 Goal: developers use `framelinkaudiosink` / `framelinkaudiosrc` alongside the

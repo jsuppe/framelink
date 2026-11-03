@@ -1,4 +1,6 @@
-# M5b final integration
+# M5b final integration — merged
+
+PR #8 merged as `9f86c35` at 2026-11-03 05:08 UTC.
 
 Final source `4fafe51` (M5b tasks 1–13; the following commit `8da5315` only
 installs `gstreamer1.0-tools` in hosted CI).

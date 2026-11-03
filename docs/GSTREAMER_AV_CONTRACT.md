@@ -1,10 +1,10 @@
 # M5b public GStreamer A/V contract
 
-Status: tasks1–12 locally validated on the M5b development branch. Public audio
-sink/source, coordinated timing, lifecycle/security, two-process examples, the
-automated validation matrix, both convenience bins, bin parity and platform
-qualification (Linux, Windows, Android) are implemented; publish/review/merge
-(task13) remains. See [platform qualification](m5b/platform-qualification/README.md),
+Status: complete within documented scope; merged in PR #8 (`9f86c35`). Public
+audio sink/source, coordinated timing, lifecycle/security, two-process examples,
+the automated validation matrix, both convenience bins, bin parity and platform
+qualification (Linux, Windows, Android) are implemented; see the
+[final evidence](m5b/final-integration/README.md). Also [platform qualification](m5b/platform-qualification/README.md),
 [bin parity](m5b/bin-parity/README.md), [consumer bin](m5b/consumer-bin/README.md),
 [producer bin](m5b/producer-bin/README.md), [validation](m5b/validation/README.md),
 [examples](m5b/examples/README.md) and [lifecycle closure](m5b/lifecycle-security/README.md).
