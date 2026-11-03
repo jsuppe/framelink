@@ -1,11 +1,15 @@
 # M5b public GStreamer A/V contract
 
-Status: tasks1–11 locally validated on the M5b development branch. Public audio
+Status: tasks1–12 locally validated on the M5b development branch. Public audio
 sink/source, coordinated timing, lifecycle/security, two-process examples, the
-automated validation matrix and the producer bin are implemented; the consumer
-bin and bin parity remain unfinished. See [producer bin](m5b/producer-bin/README.md),
-[validation](m5b/validation/README.md), [examples](m5b/examples/README.md) and [lifecycle closure](m5b/lifecycle-security/README.md). Existing `framelinksink`/`framelinksrc` remain video
-only. No compatibility claim follows from this design document alone.
+automated validation matrix, both convenience bins, bin parity and platform
+qualification (Linux, Windows, Android) are implemented; publish/review/merge
+(task13) remains. See [platform qualification](m5b/platform-qualification/README.md),
+[bin parity](m5b/bin-parity/README.md), [consumer bin](m5b/consumer-bin/README.md),
+[producer bin](m5b/producer-bin/README.md), [validation](m5b/validation/README.md),
+[examples](m5b/examples/README.md) and [lifecycle closure](m5b/lifecycle-security/README.md).
+Existing `framelinksink`/`framelinksrc` remain video only unless attached to a
+session context.
 
 ## Public surface
 
@@ -131,6 +135,11 @@ dropped/rejected blocks, generation, timing offset and transport errors. Copies
 inside OS/driver internals remain unknown, not zero. Trace opt-in, aggregate EOS
 stats cheap; keys/PCM payload are not traced. Latency queries report live status
 and actual bounded buffering policy without claiming physical-output alignment.
+Qualified behavior (task 12): FrameLink sources answer live with no added
+latency, so the consumer pipeline latency is the application's sinks plus
+`latency-ms`; the coordinated sinks do not synchronize, so the producer pipeline
+answers not-live. Video copy accounting is exact per platform in the
+GStreamer and core traces; audio accounting is the EOS statistics.
 
 ## Acceptance and implementation order
 

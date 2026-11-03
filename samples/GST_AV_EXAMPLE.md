@@ -301,9 +301,16 @@ messages, which the example prints.
 Two-process qualification: `test/m5b_gst_av_example.py` (registered as the
 `m5b_gst_av_example` test) and [task7 evidence](../docs/m5b/examples/README.md).
 
-The examples use CPU-mappable rings. Native GPU memory composes with the same
-session through the native-memory elements described in
-[GST_NATIVE_MEMORY.md](../docs/GST_NATIVE_MEMORY.md) and is qualified there,
-not here. Verify mode checks presentation against the system clock; it is not
+Platform qualification (Linux, Windows, Android; elements and bins):
+[task 12 evidence](../docs/m5b/platform-qualification/README.md) covers
+delivery, latency queries, queue bounds, cleanup and exact copy accounting.
+
+The examples use CPU-mappable rings. On the consumer, `native-memory=true`
+(either `framelinksrc` or `framelinkavsrc`) is qualified with coordinated
+sessions: DMABuf, D3D11Memory or FrameLinkAHardwareBuffer with no boundary
+copy. On the producer, the coordinated elements copy system-memory input into
+the ring; native producer allocations
+([GST_NATIVE_MEMORY.md](../docs/GST_NATIVE_MEMORY.md)) are not qualified with
+coordinated sessions. Verify mode checks presentation against the system clock; it is not
 a measurement of physical display scanout or speaker output. Reconnecting after
 a peer failure requires a new session, as with the other coordinated elements.

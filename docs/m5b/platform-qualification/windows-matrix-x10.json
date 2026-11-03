@@ -1,0 +1,209 @@
+{
+ "platform": "windows-caspar",
+ "repeat": 10,
+ "suites": {
+  "m5b_av": {
+   "registered": [
+    "gst_session_transport",
+    "gst_session_context",
+    "gst_audio_sink",
+    "gst_audio_source",
+    "gst_av_timeline",
+    "gst_av_validation",
+    "gst_av_bin",
+    "gst_av_src_bin",
+    "gst_av_parity",
+    "gst_av_qualification",
+    "gst_local_av",
+    "m5b_gst_av_example",
+    "gst_local_audio",
+    "gst_event_channel"
+   ],
+   "tests": [
+    {
+     "name": "gst_session_transport",
+     "repeat": 10,
+     "result": "pass",
+     "seconds": 2.03
+    },
+    {
+     "name": "gst_session_context",
+     "repeat": 10,
+     "result": "pass",
+     "seconds": 0.69
+    },
+    {
+     "name": "gst_audio_sink",
+     "repeat": 10,
+     "result": "pass",
+     "seconds": 12.49
+    },
+    {
+     "name": "gst_audio_source",
+     "repeat": 10,
+     "result": "pass",
+     "seconds": 12.91
+    },
+    {
+     "name": "gst_av_timeline",
+     "repeat": 10,
+     "result": "pass",
+     "seconds": 44.19
+    },
+    {
+     "name": "gst_av_validation",
+     "repeat": 10,
+     "result": "pass",
+     "seconds": 179.95
+    },
+    {
+     "name": "gst_av_bin",
+     "repeat": 10,
+     "result": "pass",
+     "seconds": 186.75
+    },
+    {
+     "name": "gst_av_src_bin",
+     "repeat": 10,
+     "result": "pass",
+     "seconds": 159.11
+    },
+    {
+     "name": "gst_av_parity",
+     "repeat": 10,
+     "result": "pass",
+     "seconds": 980.18
+    },
+    {
+     "name": "gst_av_qualification",
+     "repeat": 10,
+     "result": "pass",
+     "seconds": 641.41
+    },
+    {
+     "name": "gst_local_av",
+     "repeat": 10,
+     "result": "pass",
+     "seconds": 28.26
+    },
+    {
+     "name": "m5b_gst_av_example",
+     "repeat": 10,
+     "result": "pass",
+     "seconds": 625.71
+    },
+    {
+     "name": "gst_local_audio",
+     "repeat": 10,
+     "result": "pass",
+     "seconds": 1.69
+    },
+    {
+     "name": "gst_event_channel",
+     "repeat": 10,
+     "result": "pass",
+     "seconds": 23.11
+    }
+   ],
+   "missing": []
+  },
+  "gst_video_regression": {
+   "registered": [
+    "gst_native_producer_win",
+    "gst_native_source_win",
+    "gst_native_source_win_copy_negative",
+    "gst_nv12_roundtrip",
+    "gst_rgb10a2_roundtrip",
+    "gst_timestamp_contract",
+    "gst_pool_policy",
+    "m5a_transport_relay",
+    "m5a_transport_relay_audio_leads",
+    "m5a_transport_relay_sync_negative",
+    "gst_sink_stats",
+    "gst_preconnect_slots",
+    "gst_policy_generation"
+   ],
+   "tests": [
+    {
+     "name": "gst_native_producer_win",
+     "repeat": 10,
+     "result": "pass",
+     "seconds": 6.81
+    },
+    {
+     "name": "gst_native_source_win",
+     "repeat": 10,
+     "result": "pass",
+     "seconds": 17.84
+    },
+    {
+     "name": "gst_native_source_win_copy_negative",
+     "repeat": 10,
+     "result": "pass",
+     "seconds": 2.59
+    },
+    {
+     "name": "gst_nv12_roundtrip",
+     "repeat": 10,
+     "result": "pass",
+     "seconds": 6.93
+    },
+    {
+     "name": "gst_rgb10a2_roundtrip",
+     "repeat": 10,
+     "result": "pass",
+     "seconds": 6.91
+    },
+    {
+     "name": "gst_timestamp_contract",
+     "repeat": 10,
+     "result": "pass",
+     "seconds": 17.35
+    },
+    {
+     "name": "gst_pool_policy",
+     "repeat": 10,
+     "result": "pass",
+     "seconds": 21.18
+    },
+    {
+     "name": "m5a_transport_relay",
+     "repeat": 10,
+     "result": "pass",
+     "seconds": 13.43
+    },
+    {
+     "name": "m5a_transport_relay_audio_leads",
+     "repeat": 10,
+     "result": "pass",
+     "seconds": 13.55
+    },
+    {
+     "name": "m5a_transport_relay_sync_negative",
+     "repeat": 10,
+     "result": "pass",
+     "seconds": 7.08
+    },
+    {
+     "name": "gst_sink_stats",
+     "repeat": 10,
+     "result": "pass",
+     "seconds": 0.64
+    },
+    {
+     "name": "gst_preconnect_slots",
+     "repeat": 10,
+     "result": "pass",
+     "seconds": 9.27
+    },
+    {
+     "name": "gst_policy_generation",
+     "repeat": 10,
+     "result": "pass",
+     "seconds": 25.39
+    }
+   ]
+  }
+ },
+ "result": "pass"
+}

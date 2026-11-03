@@ -177,7 +177,7 @@ playback delay; unsupported hardware paths must reject clearly.
 
 ## M5b — GStreamer audio elements and coordinated A/V sessions
 
-**State: in progress; tasks1–11 locally validated; task12 platform qualification next.** Added at Jon's request 2026-11-01. Execute
+**State: in progress; tasks1–12 locally validated; task13 publish/review/merge next.** Added at Jon's request 2026-11-01. Execute
 only after M5a closes, before M6 qualifies the complete public integration path.
 Video elements remain video-only; separate audio elements share one session.
 
@@ -275,11 +275,18 @@ elements remain independently available.
   replaced video frames now fail at once (decision Jon 2026-11-02). Documented:
   real-time delivery and CPU readback limits (example default 320x180; M6.8).
   Matrix x10 Linux, Windows and Android.
-- [ ] **M5b.12 Platform qualification:** Windows, Linux and Android builds/runtime
+- [x] **M5b.12 Platform qualification:** Windows, Linux and Android builds/runtime
   on supported targets; verify native video plus audio, audio-only, latency
   queries, queue bounds, resource cleanup and tracing/copy accounting for both
-individual elements and convenience bins. Separate
+  individual elements and convenience bins. Separate
   software timing evidence from physical speaker/display alignment.
+  [Evidence](m5b/platform-qualification/README.md): `gst_av_qualification`
+  runs A/V CPU, A/V native-consumer, video-only and audio-only sessions in all
+  four element/bin combinations, each a traced child process: exact per-platform
+  copy accounting with lossless recorders, latency queries, ring/audio-queue
+  bounds, EOS statistics, element/bin churn and recorder/accounting/leak
+  controls. Matrix x10 Linux, Windows and Android; Android x86_64 build-only.
+  Native producer allocations in sessions are not qualified (M6.9).
 - [ ] **M5b.13 Publish/review/merge:** element reference, copy/timing contract,
   developer migration guide, examples, final-revision CI and reviewed evidence.
   Feed these elements into M6's sustained/performance qualification matrix.
@@ -313,6 +320,11 @@ baseline evidence, not completion of these release-scale tasks.
   ~34MB/s (640x360 RGBA: 27ms median, 78ms p90 on an RTX 3090) and cannot
   sustain 30fps there. Allocate CPU-consumed rings in cached system memory (or
   use streaming reads), qualify throughput per platform and publish budgets.
+- [ ] **M6.9 Native producer in coordinated sessions (found in M5b.12):** the
+  coordinated producer elements copy system-memory input into the ring; wire
+  `framelinksink native-memory=true` (M5a policy binding, readiness fences)
+  into sessions so native producer allocations travel without a copy, and
+  qualify on each platform.
 
 ## M7 — Release and developer handoff
 

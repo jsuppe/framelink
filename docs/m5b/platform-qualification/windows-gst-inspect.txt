@@ -1,0 +1,26 @@
+framelinksink exists=True
+framelinksrc exists=True
+framelinkaudiosink exists=True
+framelinkaudiosrc exists=True
+framelinkavsink exists=True
+framelinkavsrc exists=True
+Plugin Details:
+  Name                     framelink
+  Description              FrameLink native video and serialized PCM transport
+  Filename                 <win-tree>\build\Release\gstframelink.dll
+  Version                  0.1.0
+  License                  MIT/X11
+  Source module            framelink
+  Binary package           framelink
+  Origin URL               https://github.com/jsuppe/framelink
+
+  framelinkaudiosink: FrameLink audio producer
+  framelinkaudiosrc: FrameLink audio consumer
+  framelinkavsink: FrameLink A/V producer
+  framelinkavsrc: FrameLink A/V consumer
+  framelinksink: framelink sink
+  framelinksrc: framelink source
+
+  6 features:
+  +-- 6 elements
+
