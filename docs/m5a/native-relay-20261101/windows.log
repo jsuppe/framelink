@@ -3,14 +3,14 @@
 -- framelink: building GStreamer elements (gstframelink)
 -- Configuring done (0.8s)
 -- Generating done (0.6s)
--- Build files have been written to: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+-- Build files have been written to: <win-home>/dev/framelink-m5a-contract-20261101/build
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
-  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
+  framelink.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
   fl_native_relay_win.cpp
-  fl_native_relay_win.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_native_relay_win.exe
-UpdateCTestConfiguration  from :C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/DartConfiguration.tcl
-Test project C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+  fl_native_relay_win.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_native_relay_win.exe
+UpdateCTestConfiguration  from :<win-home>/dev/framelink-m5a-contract-20261101/build/DartConfiguration.tcl
+Test project <win-home>/dev/framelink-m5a-contract-20261101/build
 Constructing a list of tests
 Done constructing a list of tests
 Updating test list for fixtures
@@ -20,8 +20,8 @@ Checking test dependency graph end
 test 90
     Start 90: native_relay_win
 
-90: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_native_relay_win.exe
-90: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+90: Test command: <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_native_relay_win.exe
+90: Working Directory: <win-home>/dev/framelink-m5a-contract-20261101/build
 90: Test timeout computed to be: 20
 90: same canonical-NT NV12 relay: reversed slots, identity rejection, exact pixels/metadata, downstream leases prevent upstream reuse and bounded completion passed
 1/1 Test #90: native_relay_win .................   Passed    0.52 sec

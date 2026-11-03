@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Matched native video transport rate comparison; not scanout measurement."""
 import subprocess,time,pathlib,json,os,hashlib
-root=pathlib.Path('C:/Users/jonsu/dev/m5-rate-evidence');root.mkdir(exist_ok=True)
-bases={'m4':pathlib.Path('C:/Users/jonsu/dev/framelink-m4-20261030/build-final/Release'),'m5':pathlib.Path('C:/Users/jonsu/dev/framelink-m5-pipeline/build/Release')}
+root=pathlib.Path(os.path.expanduser('~/dev/m5-rate-evidence'));root.mkdir(exist_ok=True)
+bases={'m4':pathlib.Path(os.path.expanduser('~/dev/framelink-m4-20261030/build-final/Release')),'m5':pathlib.Path(os.path.expanduser('~/dev/framelink-m5-pipeline/build/Release'))}
 summary=[]
 for fmt in ['bgra','nv12']:
  for fps in [30,60]:

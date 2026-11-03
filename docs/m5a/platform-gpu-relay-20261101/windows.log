@@ -3,14 +3,14 @@
 -- framelink: building GStreamer elements (gstframelink)
 -- Configuring done (0.8s)
 -- Generating done (0.7s)
--- Build files have been written to: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+-- Build files have been written to: <win-home>/dev/framelink-m5a-contract-20261101/build
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
-  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
+  framelink.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
   fl_native_relay_process_win.cpp
-  fl_native_relay_process_win.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_native_relay_process_win.exe
-UpdateCTestConfiguration  from :C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/DartConfiguration.tcl
-Test project C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+  fl_native_relay_process_win.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_native_relay_process_win.exe
+UpdateCTestConfiguration  from :<win-home>/dev/framelink-m5a-contract-20261101/build/DartConfiguration.tcl
+Test project <win-home>/dev/framelink-m5a-contract-20261101/build
 Constructing a list of tests
 Done constructing a list of tests
 Updating test list for fixtures
@@ -20,8 +20,8 @@ Checking test dependency graph end
 test 94
     Start 94: native_relay_process_win
 
-94: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_native_relay_process_win.exe
-94: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+94: Test command: <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_native_relay_process_win.exe
+94: Working Directory: <win-home>/dev/framelink-m5a-contract-20261101/build
 94: Test timeout computed to be: 30
 94: three-process NV12 relay16/16: exact pixels/PTS/DTS/duration, reversed pool identity, no upstream reuse while downstream held, GPU-fence completion and bounded drain passed
 1/1 Test #94: native_relay_process_win .........   Passed    0.86 sec

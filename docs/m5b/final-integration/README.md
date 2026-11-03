@@ -17,7 +17,10 @@ installs `gstreamer1.0-tools` in hosted CI).
 
 The Windows tree was checked byte for byte against `4fafe51` before the
 Windows gates: SHA-256 of all 204 tracked source, test, tool and sample files
-matched ([source-sha256.txt](source-sha256.txt)).
+matched ([source-sha256.txt](source-sha256.txt)). The manifest records
+`4fafe51`; four Windows M5 scripts (`test/m5_*rate*.py`,
+`test/m5_windows_renderer_baseline.py`) later had their hard-coded user
+paths replaced by home-relative defaults and no longer match it.
 
 Repeat evidence (x10 on all three platforms) is in
 [platform qualification](../platform-qualification/README.md) and

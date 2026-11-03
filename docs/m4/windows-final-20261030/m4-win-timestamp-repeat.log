@@ -1,5 +1,5 @@
-UpdateCTestConfiguration  from :C:/Users/jonsu/dev/framelink-m4-20261030/build-final/DartConfiguration.tcl
-Test project C:/Users/jonsu/dev/framelink-m4-20261030/build-final
+UpdateCTestConfiguration  from :<win-home>/dev/framelink-m4-20261030/build-final/DartConfiguration.tcl
+Test project <win-home>/dev/framelink-m4-20261030/build-final
 Constructing a list of tests
 Done constructing a list of tests
 Updating test list for fixtures
@@ -9,8 +9,8 @@ Checking test dependency graph end
 test 33
     Start 33: gst_timestamp_contract
 
-33: Test command: C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_gst_timestamps.exe "C:/Users/jonsu/dev/framelink-m4-20261030/build-final/Release/gstframelink.dll"
-33: Working Directory: C:/Users/jonsu/dev/framelink-m4-20261030/build-final
+33: Test command: <win-home>\dev\framelink-m4-20261030\build-final\Release\fl_gst_timestamps.exe "<win-home>/dev/framelink-m4-20261030/build-final/Release/gstframelink.dll"
+33: Working Directory: <win-home>/dev/framelink-m4-20261030/build-final
 33: Test timeout computed to be: 25
 33: 0:00:00.212459200      54980      35136 INFO               framelink gstframelink.cpp:564:srcStart:<framelinksrc0> channel 'pts-1341126541734-0' up: 16x16 BGRA, ring of 4 - waiting for a producer
 33: 0:00:00.235376000      54980      55020 INFO               framelink gstframelink.cpp:216:sinkTryConnect:<framelinksink0> producing on 'pts-1341126541734-00' (16x16 BGRA, ring of 4)
@@ -41,8 +41,8 @@ test 33
     Test #33: gst_timestamp_contract ...........   Passed    1.06 sec
     Start 33: gst_timestamp_contract
 
-33: Test command: C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_gst_timestamps.exe "C:/Users/jonsu/dev/framelink-m4-20261030/build-final/Release/gstframelink.dll"
-33: Working Directory: C:/Users/jonsu/dev/framelink-m4-20261030/build-final
+33: Test command: <win-home>\dev\framelink-m4-20261030\build-final\Release\fl_gst_timestamps.exe "<win-home>/dev/framelink-m4-20261030/build-final/Release/gstframelink.dll"
+33: Working Directory: <win-home>/dev/framelink-m4-20261030/build-final
 33: Test timeout computed to be: 25
 33: 0:00:00.212974400      55008      54960 INFO               framelink gstframelink.cpp:564:srcStart:<framelinksrc0> channel 'pts-1341127596934-0' up: 16x16 BGRA, ring of 4 - waiting for a producer
 33: 0:00:00.234226600      55008       6968 INFO               framelink gstframelink.cpp:216:sinkTryConnect:<framelinksink0> producing on 'pts-1341127596934-00' (16x16 BGRA, ring of 4)
@@ -73,8 +73,8 @@ test 33
     Test #33: gst_timestamp_contract ...........   Passed    1.03 sec
     Start 33: gst_timestamp_contract
 
-33: Test command: C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_gst_timestamps.exe "C:/Users/jonsu/dev/framelink-m4-20261030/build-final/Release/gstframelink.dll"
-33: Working Directory: C:/Users/jonsu/dev/framelink-m4-20261030/build-final
+33: Test command: <win-home>\dev\framelink-m4-20261030\build-final\Release\fl_gst_timestamps.exe "<win-home>/dev/framelink-m4-20261030/build-final/Release/gstframelink.dll"
+33: Working Directory: <win-home>/dev/framelink-m4-20261030/build-final
 33: Test timeout computed to be: 25
 33: 0:00:00.208005900      11800      51916 INFO               framelink gstframelink.cpp:564:srcStart:<framelinksrc0> channel 'pts-1341128629658-0' up: 16x16 BGRA, ring of 4 - waiting for a producer
 33: 0:00:00.228329800      11800      54684 INFO               framelink gstframelink.cpp:216:sinkTryConnect:<framelinksink0> producing on 'pts-1341128629658-00' (16x16 BGRA, ring of 4)
@@ -105,8 +105,8 @@ test 33
     Test #33: gst_timestamp_contract ...........   Passed    1.04 sec
     Start 33: gst_timestamp_contract
 
-33: Test command: C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_gst_timestamps.exe "C:/Users/jonsu/dev/framelink-m4-20261030/build-final/Release/gstframelink.dll"
-33: Working Directory: C:/Users/jonsu/dev/framelink-m4-20261030/build-final
+33: Test command: <win-home>\dev\framelink-m4-20261030\build-final\Release\fl_gst_timestamps.exe "<win-home>/dev/framelink-m4-20261030/build-final/Release/gstframelink.dll"
+33: Working Directory: <win-home>/dev/framelink-m4-20261030/build-final
 33: Test timeout computed to be: 25
 33: 0:00:00.212220600      55004      54956 INFO               framelink gstframelink.cpp:564:srcStart:<framelinksrc0> channel 'pts-1341129670630-0' up: 16x16 BGRA, ring of 4 - waiting for a producer
 33: 0:00:00.236707800      55004      45040 INFO               framelink gstframelink.cpp:216:sinkTryConnect:<framelinksink0> producing on 'pts-1341129670630-00' (16x16 BGRA, ring of 4)
@@ -137,8 +137,8 @@ test 33
     Test #33: gst_timestamp_contract ...........   Passed    1.04 sec
     Start 33: gst_timestamp_contract
 
-33: Test command: C:\Users\jonsu\dev\framelink-m4-20261030\build-final\Release\fl_gst_timestamps.exe "C:/Users/jonsu/dev/framelink-m4-20261030/build-final/Release/gstframelink.dll"
-33: Working Directory: C:/Users/jonsu/dev/framelink-m4-20261030/build-final
+33: Test command: <win-home>\dev\framelink-m4-20261030\build-final\Release\fl_gst_timestamps.exe "<win-home>/dev/framelink-m4-20261030/build-final/Release/gstframelink.dll"
+33: Working Directory: <win-home>/dev/framelink-m4-20261030/build-final
 33: Test timeout computed to be: 25
 33: 0:00:00.206254700      18512      15124 INFO               framelink gstframelink.cpp:564:srcStart:<framelinksrc0> channel 'pts-1341130708370-0' up: 16x16 BGRA, ring of 4 - waiting for a producer
 33: 0:00:00.226091400      18512      50896 INFO               framelink gstframelink.cpp:216:sinkTryConnect:<framelinksink0> producing on 'pts-1341130708370-00' (16x16 BGRA, ring of 4)

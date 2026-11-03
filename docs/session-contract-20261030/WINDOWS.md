@@ -2,7 +2,7 @@
 
 Source `0a5ba51d6a578e9c05027a96220ab225939358e2`, Caspar Windows x64,
 MSVC19.44.35216.0 / Visual Studio2022, Release; isolated directory
-`C:\Users\jonsu\dev\framelink-session-20261030`. Existing live demo untouched.
+`<win-home>\dev\framelink-session-20261030`. Existing live demo untouched.
 
 - All targets built; **32/32 full regression tests passed**.
 - `session_contract` independently passed: exact capability intersection,

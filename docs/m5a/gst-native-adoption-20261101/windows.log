@@ -3,7 +3,7 @@
 -- framelink: building GStreamer elements (gstframelink)
 -- Configuring done (0.8s)
 -- Generating done (0.5s)
--- Build files have been written to: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+-- Build files have been written to: <win-home>/dev/framelink-m5a-contract-20261101/build
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
   fl_ipc_win32.cpp
@@ -13,27 +13,27 @@ MSBuild version 17.14.23+b0019275e for .NET Framework
   framelink_slots.cpp
   framelink_win.cpp
   Generating Code...
-     Creating library C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/framelink.lib and object C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/framelink.exp
-  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
+     Creating library <win-home>/dev/framelink-m5a-contract-20261101/build/Release/framelink.lib and object <win-home>/dev/framelink-m5a-contract-20261101/build/Release/framelink.exp
+  framelink.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
   fl_gst_native_source_win.cpp
   The d3d11 library from gst-plugins-bad is unstable API and may change in future.
   You can define GST_USE_UNSTABLE_API to avoid this warning.
-  fl_gst_native_source_win.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_native_source_win.exe
+  fl_gst_native_source_win.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_native_source_win.exe
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
-  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
+  framelink.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
   gstframelink.cpp
   The d3d11 library from gst-plugins-bad is unstable API and may change in future.
   You can define GST_USE_UNSTABLE_API to avoid this warning.
-     Creating library C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.lib and object C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.exp
-  gstframelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\gstframelink.dll
+     Creating library <win-home>/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.lib and object <win-home>/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.exp
+  gstframelink.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\gstframelink.dll
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
-  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
+  framelink.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
   fl_read_leases.cpp
-  fl_read_leases.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_read_leases.exe
-UpdateCTestConfiguration  from :C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/DartConfiguration.tcl
-Test project C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+  fl_read_leases.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_read_leases.exe
+UpdateCTestConfiguration  from :<win-home>/dev/framelink-m5a-contract-20261101/build/DartConfiguration.tcl
+Test project <win-home>/dev/framelink-m5a-contract-20261101/build
 Constructing a list of tests
 Done constructing a list of tests
 Updating test list for fixtures
@@ -43,16 +43,16 @@ Checking test dependency graph end
 test 1
     Start  1: read_leases
 
-1: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_read_leases.exe
-1: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+1: Test command: <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_read_leases.exe
+1: Working Directory: <win-home>/dev/framelink-m5a-contract-20261101/build
 1: Test timeout computed to be: 20
 1: native read leases: retained readers block reuse; ordered retirement and resize pass
 1/3 Test  #1: read_leases ...........................   Passed    0.37 sec
 test 24
     Start 24: gst_native_source_win
 
-24: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_native_source_win.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
-24: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+24: Test command: <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_native_source_win.exe "<win-home>/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll"
+24: Working Directory: <win-home>/dev/framelink-m5a-contract-20261101/build
 24: Test timeout computed to be: 20
 24: RGBA native D3D11: same shared allocation, pixels/PTS, bounded reuse and retained memory after stop pass
 24: NV12 native D3D11: same shared allocation, pixels/PTS, bounded reuse and retained memory after stop pass
@@ -61,8 +61,8 @@ test 24
 test 25
     Start 25: gst_native_source_win_copy_negative
 
-25: Test command: C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_native_source_win.exe "C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll" "--copy-negative"
-25: Working Directory: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+25: Test command: <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_native_source_win.exe "<win-home>/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.dll" "--copy-negative"
+25: Working Directory: <win-home>/dev/framelink-m5a-contract-20261101/build
 25: Test timeout computed to be: 20
 25: deliberate GPU copy rejected by allocation-alias oracle after successful setup
 3/3 Test #25: gst_native_source_win_copy_negative ...   Passed    0.25 sec

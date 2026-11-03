@@ -175,7 +175,7 @@ available to submit and discover the disconnect through a write.
 Validated on 2026-10-29: 14/14 total CTest tests passed on Linux/Melchior and
 18/18 on Windows/Caspar (RTX 5090, MSVC x64 Release). The existing NV12/GStreamer
 regressions remain included in those totals. Caspar binaries are under
-`C:\Users\jonsu\dev\framelink-nv12-20261029\build\Release`.
+`%USERPROFILE%\dev\framelink-nv12-20261029\build\Release`.
 
 ## Platform-parity additions
 

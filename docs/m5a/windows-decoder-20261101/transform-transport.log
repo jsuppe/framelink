@@ -3,18 +3,18 @@
 -- framelink: building GStreamer elements (gstframelink)
 -- Configuring done (0.8s)
 -- Generating done (0.6s)
--- Build files have been written to: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+-- Build files have been written to: <win-home>/dev/framelink-m5a-contract-20261101/build
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
-  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
+  framelink.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
   d3d_decode_producer.cpp
   The d3d11 library from gst-plugins-bad is unstable API and may change in future.
   You can define GST_USE_UNSTABLE_API to avoid this warning.
-  fl_d3d_decode_producer.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_d3d_decode_producer.exe
+  fl_d3d_decode_producer.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_d3d_decode_producer.exe
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
-  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
-  framelink_consumer.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink_consumer.exe
+  framelink.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
+  framelink_consumer.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\framelink_consumer.exe
 decoded=60 gpu_color_transforms=60 boundary_cpu_maps=0 explicit_gpu_completion_waits=60; native sink path, NOT raw NV12 decoder zero-copy
 channel version=6 format=BGRA size=320x240 pool=2 generation=1 adapter=c57d010000000000
 consumer received=60 verified=0 pattern_gaps=0 sequence_gaps=0 timeouts=6 fps=21.68 pts_age_mean_ms=0.000 pts_age_max_ms=0.000

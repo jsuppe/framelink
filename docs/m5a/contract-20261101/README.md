@@ -6,7 +6,7 @@ Production ABI: include/framelink_memory.h; wire/policy spec: ../../MEMORY_CONTR
 - Linux Release exported-library tests4/4: memory policy, C11 caller, unchanged
   session contract and C11 session caller. Logs linux.log.gz.
 - Fresh Caspar MSVC2022 build, same four tests4/4. Source copy isolated in
-  C:/Users/jonsu/dev/framelink-m5a-contract-20261101; windows.log.gz.
+  <win-home>/dev/framelink-m5a-contract-20261101; windows.log.gz.
 - NDK28.2 arm64-v8a/x86_64 builds targeting existing Android29 minimum: four
   executables each linked to actual FrameLink static library. x86_64 is build
   coverage only, not device runtime. Build logs retained.

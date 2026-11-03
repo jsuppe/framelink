@@ -1,1 +1,1 @@
-filesrc location="C:/Users/jonsu/dev/m5-final-external-windows-20261101/absent-input.avi" ! avidemux name=d d.video_0 ! jpegdec ! videoconvert ! videoscale ! videorate ! @VIDEO_SINK@ d.audio_0 ! audioconvert ! audioresample ! @AUDIO_SINK@
+filesrc location="<win-home>/dev/m5-final-external-windows-20261101/absent-input.avi" ! avidemux name=d d.video_0 ! jpegdec ! videoconvert ! videoscale ! videorate ! @VIDEO_SINK@ d.audio_0 ! audioconvert ! audioresample ! @AUDIO_SINK@

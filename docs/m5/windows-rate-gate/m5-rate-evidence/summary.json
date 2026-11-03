@@ -10,7 +10,7 @@
     "producer": "channel version=5 format=BGRA size=1920x1080 pool=4 generation=2 adapter=c57d010000000000\nproducer sent=150 timeouts=0 reconnects=0 elapsed_ms=5156\n",
     "commands": [
       [
-        "C:\\Users\\jonsu\\dev\\framelink-m4-20261030\\build-final\\Release\\framelink_producer.exe",
+        "<win-home>\\dev\\framelink-m4-20261030\\build-final\\Release\\framelink_producer.exe",
         "--channel",
         "rate-m4-bgra-30",
         "--size",
@@ -25,7 +25,7 @@
         "30"
       ],
       [
-        "C:\\Users\\jonsu\\dev\\framelink-m4-20261030\\build-final\\Release\\framelink_consumer.exe",
+        "<win-home>\\dev\\framelink-m4-20261030\\build-final\\Release\\framelink_consumer.exe",
         "--channel",
         "rate-m4-bgra-30",
         "--size",
@@ -64,7 +64,7 @@
     "producer": "channel version=5 format=BGRA size=1920x1080 pool=4 generation=2 adapter=c57d010000000000\nproducer sent=150 timeouts=0 reconnects=0 elapsed_ms=5157\n",
     "commands": [
       [
-        "C:\\Users\\jonsu\\dev\\framelink-m5-pipeline\\build\\Release\\framelink_producer.exe",
+        "<win-home>\\dev\\framelink-m5-pipeline\\build\\Release\\framelink_producer.exe",
         "--channel",
         "rate-m5-bgra-30",
         "--size",
@@ -79,7 +79,7 @@
         "30"
       ],
       [
-        "C:\\Users\\jonsu\\dev\\framelink-m5-pipeline\\build\\Release\\framelink_consumer.exe",
+        "<win-home>\\dev\\framelink-m5-pipeline\\build\\Release\\framelink_consumer.exe",
         "--channel",
         "rate-m5-bgra-30",
         "--size",
@@ -118,7 +118,7 @@
     "producer": "channel version=5 format=BGRA size=1920x1080 pool=4 generation=2 adapter=c57d010000000000\nproducer sent=300 timeouts=0 reconnects=0 elapsed_ms=5157\n",
     "commands": [
       [
-        "C:\\Users\\jonsu\\dev\\framelink-m4-20261030\\build-final\\Release\\framelink_producer.exe",
+        "<win-home>\\dev\\framelink-m4-20261030\\build-final\\Release\\framelink_producer.exe",
         "--channel",
         "rate-m4-bgra-60",
         "--size",
@@ -133,7 +133,7 @@
         "60"
       ],
       [
-        "C:\\Users\\jonsu\\dev\\framelink-m4-20261030\\build-final\\Release\\framelink_consumer.exe",
+        "<win-home>\\dev\\framelink-m4-20261030\\build-final\\Release\\framelink_consumer.exe",
         "--channel",
         "rate-m4-bgra-60",
         "--size",
@@ -172,7 +172,7 @@
     "producer": "channel version=5 format=BGRA size=1920x1080 pool=4 generation=2 adapter=c57d010000000000\nproducer sent=300 timeouts=0 reconnects=0 elapsed_ms=5158\n",
     "commands": [
       [
-        "C:\\Users\\jonsu\\dev\\framelink-m5-pipeline\\build\\Release\\framelink_producer.exe",
+        "<win-home>\\dev\\framelink-m5-pipeline\\build\\Release\\framelink_producer.exe",
         "--channel",
         "rate-m5-bgra-60",
         "--size",
@@ -187,7 +187,7 @@
         "60"
       ],
       [
-        "C:\\Users\\jonsu\\dev\\framelink-m5-pipeline\\build\\Release\\framelink_consumer.exe",
+        "<win-home>\\dev\\framelink-m5-pipeline\\build\\Release\\framelink_consumer.exe",
         "--channel",
         "rate-m5-bgra-60",
         "--size",
@@ -226,7 +226,7 @@
     "producer": "channel version=5 format=NV12 size=1920x1080 pool=4 generation=2 adapter=c57d010000000000\nproducer sent=150 timeouts=0 reconnects=0 elapsed_ms=5155\n",
     "commands": [
       [
-        "C:\\Users\\jonsu\\dev\\framelink-m4-20261030\\build-final\\Release\\framelink_producer.exe",
+        "<win-home>\\dev\\framelink-m4-20261030\\build-final\\Release\\framelink_producer.exe",
         "--channel",
         "rate-m4-nv12-30",
         "--size",
@@ -241,7 +241,7 @@
         "30"
       ],
       [
-        "C:\\Users\\jonsu\\dev\\framelink-m4-20261030\\build-final\\Release\\framelink_consumer.exe",
+        "<win-home>\\dev\\framelink-m4-20261030\\build-final\\Release\\framelink_consumer.exe",
         "--channel",
         "rate-m4-nv12-30",
         "--size",
@@ -280,7 +280,7 @@
     "producer": "channel version=5 format=NV12 size=1920x1080 pool=4 generation=2 adapter=c57d010000000000\nproducer sent=150 timeouts=0 reconnects=0 elapsed_ms=5158\n",
     "commands": [
       [
-        "C:\\Users\\jonsu\\dev\\framelink-m5-pipeline\\build\\Release\\framelink_producer.exe",
+        "<win-home>\\dev\\framelink-m5-pipeline\\build\\Release\\framelink_producer.exe",
         "--channel",
         "rate-m5-nv12-30",
         "--size",
@@ -295,7 +295,7 @@
         "30"
       ],
       [
-        "C:\\Users\\jonsu\\dev\\framelink-m5-pipeline\\build\\Release\\framelink_consumer.exe",
+        "<win-home>\\dev\\framelink-m5-pipeline\\build\\Release\\framelink_consumer.exe",
         "--channel",
         "rate-m5-nv12-30",
         "--size",
@@ -334,7 +334,7 @@
     "producer": "channel version=5 format=NV12 size=1920x1080 pool=4 generation=2 adapter=c57d010000000000\nproducer sent=300 timeouts=0 reconnects=0 elapsed_ms=5157\n",
     "commands": [
       [
-        "C:\\Users\\jonsu\\dev\\framelink-m4-20261030\\build-final\\Release\\framelink_producer.exe",
+        "<win-home>\\dev\\framelink-m4-20261030\\build-final\\Release\\framelink_producer.exe",
         "--channel",
         "rate-m4-nv12-60",
         "--size",
@@ -349,7 +349,7 @@
         "60"
       ],
       [
-        "C:\\Users\\jonsu\\dev\\framelink-m4-20261030\\build-final\\Release\\framelink_consumer.exe",
+        "<win-home>\\dev\\framelink-m4-20261030\\build-final\\Release\\framelink_consumer.exe",
         "--channel",
         "rate-m4-nv12-60",
         "--size",
@@ -388,7 +388,7 @@
     "producer": "channel version=5 format=NV12 size=1920x1080 pool=4 generation=2 adapter=c57d010000000000\nproducer sent=300 timeouts=0 reconnects=0 elapsed_ms=5158\n",
     "commands": [
       [
-        "C:\\Users\\jonsu\\dev\\framelink-m5-pipeline\\build\\Release\\framelink_producer.exe",
+        "<win-home>\\dev\\framelink-m5-pipeline\\build\\Release\\framelink_producer.exe",
         "--channel",
         "rate-m5-nv12-60",
         "--size",
@@ -403,7 +403,7 @@
         "60"
       ],
       [
-        "C:\\Users\\jonsu\\dev\\framelink-m5-pipeline\\build\\Release\\framelink_consumer.exe",
+        "<win-home>\\dev\\framelink-m5-pipeline\\build\\Release\\framelink_consumer.exe",
         "--channel",
         "rate-m5-nv12-60",
         "--size",

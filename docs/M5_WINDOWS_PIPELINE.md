@@ -62,7 +62,7 @@ as the same user. Either startup order is supported by the existing rendezvous.
 ```powershell
 $bin = 'C:/src/framelink/build/Release'
 $plugin = "$bin/gstframelink.dll"
-$session = 'C:/Users/jonsu/temp/fl-external-session'
+$session = '<win-home>/temp/fl-external-session'
 & "$bin/framelink_av_producer.exe" $plugin --session $session --format BGRA --frames 100 --input-pipeline C:/media/source.pipeline --timeout-ms 15000
 ```
 

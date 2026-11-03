@@ -76,9 +76,9 @@ cmake --build /tmp/framelink-m5-build -j4
 ctest --test-dir /tmp/framelink-m5-build --output-on-failure \
   -R '^(av_connected_fd|av_auth|av_offer_bounds|broker_producer_stream|m3_av_apps|m5_finite_budget|m5_startup|m5_preconnect)$'
 cmake -S android/avsample -B /tmp/fl-m5-adoption-arm64 -G Ninja \
-  -DCMAKE_TOOLCHAIN_FILE=/home/melchior/Android/Sdk/ndk/28.2.13676358/build/cmake/android.toolchain.cmake \
+  -DCMAKE_TOOLCHAIN_FILE=<linux-home>/Android/Sdk/ndk/28.2.13676358/build/cmake/android.toolchain.cmake \
   -DANDROID_ABI=arm64-v8a -DANDROID_PLATFORM=android-29 -DCMAKE_BUILD_TYPE=Release \
-  -DFRAMELINK_GST_ANDROID_ROOT=/home/melchior/dev/gstreamer-android/arm64
+  -DFRAMELINK_GST_ANDROID_ROOT=<linux-home>/dev/gstreamer-android/arm64
 cmake --build /tmp/fl-m5-adoption-arm64 -j4
 # Repeat with x86_64 ABI/root and /tmp/fl-m5-adoption-x86 build directory.
 gradle -p android/binder-spike assembleDebug -PimpostorStore=/tmp/fl-spike-untrusted.jks

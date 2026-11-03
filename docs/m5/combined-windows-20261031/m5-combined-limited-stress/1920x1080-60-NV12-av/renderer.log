@@ -30,9 +30,9 @@
 [Vulkan Loader] INFO | LAYER:   Located json file "C:\Program Files (x86)\Steam\SteamFossilizeVulkanLayer64.json" from registry "HKEY_LOCAL_MACHINE\SOFTWARE\Khronos\Vulkan\ImplicitLayers"
 [Vulkan Loader] LAYER:          Searching for explicit layer manifest files
 [Vulkan Loader] LAYER:             In following locations:
-[Vulkan Loader] LAYER:                C:/Users/jonsu/dev/vulkan-validation-local/Bin
+[Vulkan Loader] LAYER:                <win-home>/dev/vulkan-validation-local/Bin
 [Vulkan Loader] LAYER:             Found the following files:
-[Vulkan Loader] LAYER:                C:/Users/jonsu/dev/vulkan-validation-local/Bin\VkLayer_khronos_validation.json
+[Vulkan Loader] LAYER:                <win-home>/dev/vulkan-validation-local/Bin\VkLayer_khronos_validation.json
 [Vulkan Loader] LAYER:          Checking for Layer Manifest files in Registry at HKEY_LOCAL_MACHINE\SOFTWARE\Khronos\Vulkan\ImplicitLayers
 [Vulkan Loader] INFO | LAYER:   Located json file "C:\ProgramData\obs-studio-hook\obs-vulkan64.json" from registry "HKEY_LOCAL_MACHINE\SOFTWARE\Khronos\Vulkan\ImplicitLayers"
 [Vulkan Loader] INFO | LAYER:   Located json file "C:\Program Files (x86)\Epic Games\Epic Online Services\managedArtifacts\98bc04bc842e4906993fd6d6644ffb8d\EOSOverlayVkLayer-Win64.json" from registry "HKEY_LOCAL_MACHINE\SOFTWARE\Khronos\Vulkan\ImplicitLayers"
@@ -45,9 +45,9 @@
 [Vulkan Loader] INFO | LAYER:   Located json file "C:\Program Files (x86)\Steam\SteamFossilizeVulkanLayer64.json" from registry "HKEY_LOCAL_MACHINE\SOFTWARE\Khronos\Vulkan\ImplicitLayers"
 [Vulkan Loader] LAYER:          Searching for explicit layer manifest files
 [Vulkan Loader] LAYER:             In following locations:
-[Vulkan Loader] LAYER:                C:/Users/jonsu/dev/vulkan-validation-local/Bin
+[Vulkan Loader] LAYER:                <win-home>/dev/vulkan-validation-local/Bin
 [Vulkan Loader] LAYER:             Found the following files:
-[Vulkan Loader] LAYER:                C:/Users/jonsu/dev/vulkan-validation-local/Bin\VkLayer_khronos_validation.json
+[Vulkan Loader] LAYER:                <win-home>/dev/vulkan-validation-local/Bin\VkLayer_khronos_validation.json
 [INF] renderer: validation layer enabled
 [Vulkan Loader] LAYER:          Checking for Layer Manifest files in Registry at HKEY_LOCAL_MACHINE\SOFTWARE\Khronos\Vulkan\ImplicitLayers
 [Vulkan Loader] INFO | LAYER:   Located json file "C:\ProgramData\obs-studio-hook\obs-vulkan64.json" from registry "HKEY_LOCAL_MACHINE\SOFTWARE\Khronos\Vulkan\ImplicitLayers"
@@ -56,11 +56,11 @@
 [Vulkan Loader] INFO | LAYER:   Located json file "C:\Program Files (x86)\Steam\SteamFossilizeVulkanLayer64.json" from registry "HKEY_LOCAL_MACHINE\SOFTWARE\Khronos\Vulkan\ImplicitLayers"
 [Vulkan Loader] LAYER:          Searching for explicit layer manifest files
 [Vulkan Loader] LAYER:             In following locations:
-[Vulkan Loader] LAYER:                C:/Users/jonsu/dev/vulkan-validation-local/Bin
+[Vulkan Loader] LAYER:                <win-home>/dev/vulkan-validation-local/Bin
 [Vulkan Loader] LAYER:             Found the following files:
-[Vulkan Loader] LAYER:                C:/Users/jonsu/dev/vulkan-validation-local/Bin\VkLayer_khronos_validation.json
-[Vulkan Loader] DEBUG | LAYER:  Loading layer library C:/Users/jonsu/dev/vulkan-validation-local/Bin\.\VkLayer_khronos_validation.dll
-[Vulkan Loader] INFO | LAYER:   Insert instance layer "VK_LAYER_KHRONOS_validation" (C:\Users\jonsu\dev\vulkan-validation-local\Bin\VkLayer_khronos_validation.dll)
+[Vulkan Loader] LAYER:                <win-home>/dev/vulkan-validation-local/Bin\VkLayer_khronos_validation.json
+[Vulkan Loader] DEBUG | LAYER:  Loading layer library <win-home>/dev/vulkan-validation-local/Bin\.\VkLayer_khronos_validation.dll
+[Vulkan Loader] INFO | LAYER:   Insert instance layer "VK_LAYER_KHRONOS_validation" (<win-home>\dev\vulkan-validation-local\Bin\VkLayer_khronos_validation.dll)
 [Vulkan Loader] DEBUG | LAYER:  Loading layer library C:\ProgramData\obs-studio-hook\.\graphics-hook64.dll
 [Vulkan Loader] INFO | LAYER:   Insert instance layer "VK_LAYER_OBS_HOOK" (C:\ProgramData\obs-studio-hook\graphics-hook64.dll)
 [Vulkan Loader] DEBUG | LAYER:  Loading layer library C:\windows\System32\DriverStore\FileRepository\nv_dispi.inf_amd64_da865124972e1f80\.\nvoglv64.dll
@@ -96,12 +96,12 @@
 [Vulkan Loader] LAYER:             VK_LAYER_KHRONOS_validation
 [Vulkan Loader] LAYER:                     Type: Explicit
 [Vulkan Loader] LAYER:                     Enabled By: By the Application
-[Vulkan Loader] LAYER:                     Manifest: C:/Users/jonsu/dev/vulkan-validation-local/Bin\VkLayer_khronos_validation.json
-[Vulkan Loader] LAYER:                     Library:  C:\Users\jonsu\dev\vulkan-validation-local\Bin\VkLayer_khronos_validation.dll
+[Vulkan Loader] LAYER:                     Manifest: <win-home>/dev/vulkan-validation-local/Bin\VkLayer_khronos_validation.json
+[Vulkan Loader] LAYER:                     Library:  <win-home>\dev\vulkan-validation-local\Bin\VkLayer_khronos_validation.dll
 [Vulkan Loader] LAYER:               ||
 [Vulkan Loader] LAYER:             <Drivers>
 [INF] renderer: device: NVIDIA GeForce RTX 5090 (headless)
-[Vulkan Loader] INFO | LAYER:   Inserted device layer "VK_LAYER_KHRONOS_validation" (C:\Users\jonsu\dev\vulkan-validation-local\Bin\VkLayer_khronos_validation.dll)
+[Vulkan Loader] INFO | LAYER:   Inserted device layer "VK_LAYER_KHRONOS_validation" (<win-home>\dev\vulkan-validation-local\Bin\VkLayer_khronos_validation.dll)
 [Vulkan Loader] INFO | LAYER:   Inserted device layer "VK_LAYER_OBS_HOOK" (C:\ProgramData\obs-studio-hook\graphics-hook64.dll)
 [Vulkan Loader] INFO | LAYER:   Inserted device layer "VK_LAYER_NV_present" (C:\windows\System32\DriverStore\FileRepository\nv_dispi.inf_amd64_da865124972e1f80\nvoglv64.dll)
 [Vulkan Loader] INFO | LAYER:   Inserted device layer "VK_LAYER_NV_optimus" (C:\windows\System32\DriverStore\FileRepository\nv_dispi.inf_amd64_da865124972e1f80\nvoglv64.dll)
@@ -134,8 +134,8 @@
 [Vulkan Loader] LAYER:             VK_LAYER_KHRONOS_validation
 [Vulkan Loader] LAYER:                     Type: Explicit
 [Vulkan Loader] LAYER:                     Enabled By: By the Application
-[Vulkan Loader] LAYER:                     Manifest: C:/Users/jonsu/dev/vulkan-validation-local/Bin\VkLayer_khronos_validation.json
-[Vulkan Loader] LAYER:                     Library:  C:\Users\jonsu\dev\vulkan-validation-local\Bin\VkLayer_khronos_validation.dll
+[Vulkan Loader] LAYER:                     Manifest: <win-home>/dev/vulkan-validation-local/Bin\VkLayer_khronos_validation.json
+[Vulkan Loader] LAYER:                     Library:  <win-home>\dev\vulkan-validation-local\Bin\VkLayer_khronos_validation.dll
 [Vulkan Loader] LAYER:               ||
 [Vulkan Loader] DRIVER:            <Device>
 [Vulkan Loader] DRIVER:                Using "NVIDIA GeForce RTX 5090" with driver: "C:\windows\System32\DriverStore\FileRepository\nv_dispi.inf_amd64_da865124972e1f80\nvoglv64.dll"
@@ -259,7 +259,7 @@ AV_RENDER due_decisions=479 hold_checks=141 late_drops=1 invalid_pts=0 status=en
 [Vulkan Loader] DEBUG | LAYER:  Unloading layer library C:\windows\System32\DriverStore\FileRepository\nv_dispi.inf_amd64_da865124972e1f80\nvoglv64.dll
 [Vulkan Loader] DEBUG | LAYER:  Unloading layer library C:\windows\System32\DriverStore\FileRepository\nv_dispi.inf_amd64_da865124972e1f80\nvoglv64.dll
 [Vulkan Loader] DEBUG | LAYER:  Unloading layer library C:\ProgramData\obs-studio-hook\graphics-hook64.dll
-[Vulkan Loader] DEBUG | LAYER:  Unloading layer library C:\Users\jonsu\dev\vulkan-validation-local\Bin\VkLayer_khronos_validation.dll
+[Vulkan Loader] DEBUG | LAYER:  Unloading layer library <win-home>\dev\vulkan-validation-local\Bin\VkLayer_khronos_validation.dll
 {"event":"playback-clock","policy":"producer","system_now_ns":1402571084345500,"selected_now_ns":1402571084345300,"device_now_ns":0,"mapped_producer_base_ns":1402571134235500,"playback_base_ns":1402571134235500,"latency_ns":100000000,"resample_slaves":1}
 {"event":"playback-metrics","peak_queue_buffers":4,"peak_queue_ns":66666667,"queue_empty_events":4,"queue_full_events":595,"late_audio_blocks":0,"arrival_drift_ns":822933}
 {"event":"playback-complete","audio_master":false,"video_received":0,"video_late":0,"audio_blocks":600,"audio_samples":480000,"latency_ns":100000000}

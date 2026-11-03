@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Timestamped AV scheduling telemetry, preview disabled, native offscreen output."""
 import os,pathlib,json,subprocess,time,urllib.request,socket,argparse
-p=argparse.ArgumentParser();p.add_argument("--build",default="C:/Users/jonsu/dev/framelink-m5-pipeline/build/Release");p.add_argument("--renderer",default="C:/Users/jonsu/dev/vkrender-m5-pipeline/build/Release/vkrenderer.exe");p.add_argument("--output");p.add_argument("--clock-policy",choices=["audio","producer"],default="audio");args=p.parse_args()
-root=pathlib.Path(args.output or 'C:/Users/jonsu/dev/m5-render-decoded');root.mkdir(exist_ok=True)
+p=argparse.ArgumentParser();p.add_argument("--build",default=os.path.expanduser("~/dev/framelink-m5-pipeline/build/Release"));p.add_argument("--renderer",default=os.path.expanduser("~/dev/vkrender-m5-pipeline/build/Release/vkrenderer.exe"));p.add_argument("--output");p.add_argument("--clock-policy",choices=["audio","producer"],default="audio");args=p.parse_args()
+root=pathlib.Path(args.output or os.path.expanduser('~/dev/m5-render-decoded'));root.mkdir(exist_ok=True)
 b=pathlib.Path(args.build);renderer=pathlib.Path(args.renderer)
 baseenv=dict(os.environ);baseenv['PATH']='C:/Program Files/gstreamer/1.0/msvc_x86_64/bin;'+baseenv['PATH']
 summary=[]
@@ -15,7 +15,7 @@ for width,height,fps in [(160,90,50)]:
    rc=[str(renderer),'--serve',name,'--headless',str(-1),'--control-port',str(port)]
    if mode=='av':
     rc+=['--av-exit-on-end','--av-session',str(d/'session'),'--av-plugin',str(b/'gstframelink.dll'),'--av-format',fmt,'--av-width',str(width),'--av-height',str(height),'--av-fps',str(fps),'--av-audio-sink','autoaudiosink','--av-clock',args.clock_policy]
-    pipeline=d/'source.pipeline';pipeline.write_text('filesrc location="C:/Users/jonsu/dev/framelink-m5-pipeline/visible-demo/demo-10s.avi" ! avidemux name=d d.video_0 ! queue ! jpegdec ! videoconvert ! @VIDEO_SINK@ d.audio_0 ! queue ! audioconvert ! @AUDIO_SINK@')
+    pipeline=d/'source.pipeline';pipeline.write_text('filesrc location=os.path.expanduser("~/dev/framelink-m5-pipeline/visible-demo/demo-10s.avi") ! avidemux name=d d.video_0 ! queue ! jpegdec ! videoconvert ! @VIDEO_SINK@ d.audio_0 ! queue ! audioconvert ! @AUDIO_SINK@')
     pc=[str(b/'framelink_av_producer.exe'),str(b/'gstframelink.dll'),'--session',str(d/'session'),'--format',fmt,'--frames',str(n),'--width',str(width),'--height',str(height),'--fps',str(fps),'--input-pipeline',str(pipeline),'--timeout-ms','15000']
    else:
     env['GST_PLUGIN_PATH']=str(b);env['VKR_INPUT_FORMATS']=fmt.lower()

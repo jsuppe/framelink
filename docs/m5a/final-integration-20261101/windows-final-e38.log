@@ -3,7 +3,7 @@
 -- framelink: building GStreamer elements (gstframelink)
 -- Configuring done (0.8s)
 -- Generating done (0.8s)
--- Build files have been written to: C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+-- Build files have been written to: <win-home>/dev/framelink-m5a-contract-20261101/build
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
   fl_ipc_win32.cpp
@@ -13,13 +13,13 @@ MSBuild version 17.14.23+b0019275e for .NET Framework
   framelink_slots.cpp
   framelink_win.cpp
   Generating Code...
-     Creating library C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/framelink.lib and object C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/framelink.exp
-  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
+     Creating library <win-home>/dev/framelink-m5a-contract-20261101/build/Release/framelink.lib and object <win-home>/dev/framelink-m5a-contract-20261101/build/Release/framelink.exp
+  framelink.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\framelink.dll
   gstframelink.cpp
   The d3d11 library from gst-plugins-bad is unstable API and may change in future.
   You can define GST_USE_UNSTABLE_API to avoid this warning.
-     Creating library C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.lib and object C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.exp
-  gstframelink.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\gstframelink.dll
+     Creating library <win-home>/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.lib and object <win-home>/dev/framelink-m5a-contract-20261101/build/Release/gstframelink.exp
+  gstframelink.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\gstframelink.dll
   av_rendezvous.cpp
   av_apps.cpp
   fl_buffer_references.cpp
@@ -28,142 +28,142 @@ MSBuild version 17.14.23+b0019275e for .NET Framework
   d3d_decode_consumer.cpp
   av_rendezvous.cpp
   test_av_rendezvous.cpp
-  fl_buffer_references.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_buffer_references.exe
-  fl_consume.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_consume.exe
+  fl_buffer_references.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_buffer_references.exe
+  fl_consume.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_consume.exe
   d3d_decode_producer.cpp
   d3d_decoder_probe.cpp
   av_auth.cpp
   test_av_auth.cpp
   av_memory_agreement.cpp
-  fl_d3d_decode_consumer.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_d3d_decode_consumer.exe
+  fl_d3d_decode_consumer.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_d3d_decode_consumer.exe
   fl_disconnect_win.cpp
   Generating Code...
   Generating Code...
   av_rendezvous.cpp
-  fl_d3d_decoder_probe.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_d3d_decoder_probe.exe
+  fl_d3d_decoder_probe.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_d3d_decoder_probe.exe
   fl_ipc_win32.cpp
-  fl_d3d_decode_producer.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_d3d_decode_producer.exe
+  fl_d3d_decode_producer.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_d3d_decode_producer.exe
   fl_external_pool_win.cpp
   fl_ipc_win32.cpp
-  fl_av_auth.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_av_auth.exe
-  fl_disconnect_win.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_disconnect_win.exe
+  fl_av_auth.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_av_auth.exe
+  fl_disconnect_win.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_disconnect_win.exe
   Generating Code...
   fl_frame_metadata_contract.cpp
-  fl_av_rendezvous.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_av_rendezvous.exe
+  fl_av_rendezvous.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_av_rendezvous.exe
   fl_expanded_pool.cpp
   fl_gst_native_producer_win.cpp
   fl_frame_metadata.cpp
   Generating Code...
   Generating Code...
-  fl_frame_metadata_contract.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_frame_metadata_contract.exe
+  fl_frame_metadata_contract.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_frame_metadata_contract.exe
   The d3d11 library from gst-plugins-bad is unstable API and may change in future.
   You can define GST_USE_UNSTABLE_API to avoid this warning.
   fl_gst_native_source_win.cpp
-  fl_external_pool_win.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_external_pool_win.exe
+  fl_external_pool_win.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_external_pool_win.exe
   fl_gst_nv12.cpp
-  fl_expanded_pool.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_expanded_pool.exe
-  fl_frame_metadata.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_frame_metadata.exe
+  fl_expanded_pool.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_expanded_pool.exe
+  fl_frame_metadata.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_frame_metadata.exe
   fl_gst_pool_policy.cpp
   fl_gst_timestamps.cpp
   The d3d11 library from gst-plugins-bad is unstable API and may change in future.
   You can define GST_USE_UNSTABLE_API to avoid this warning.
-  framelink_av_playback.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink_av_playback.lib
+  framelink_av_playback.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\framelink_av_playback.lib
   fl_ipc_win32.cpp
-  fl_gst_native_producer_win.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_native_producer_win.exe
-  fl_gst_nv12.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_nv12.exe
+  fl_gst_native_producer_win.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_native_producer_win.exe
+  fl_gst_nv12.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_nv12.exe
   fl_audio_alignment.cpp
   fl_gst_sink_stats.cpp
   fl_gst_preconnect_slots.cpp
   fl_av_offer_bounds.cpp
-  fl_gst_native_source_win.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_native_source_win.exe
+  fl_gst_native_source_win.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_native_source_win.exe
   fl_d3d_memory_binding.cpp
-  fl_gst_sink_stats.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_sink_stats.exe
+  fl_gst_sink_stats.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_sink_stats.exe
   fl_trace.cpp
   av_auth.cpp
   fl_audio_segment.cpp
-  fl_audio_alignment.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_audio_alignment.exe
+  fl_audio_alignment.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_audio_alignment.exe
   framelink_memory.cpp
   fl_import_failure_win.cpp
   av_memory_agreement.cpp
-  fl_gst_preconnect_slots.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_preconnect_slots.exe
-  fl_gst_timestamps.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_timestamps.exe
+  fl_gst_preconnect_slots.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_preconnect_slots.exe
+  fl_gst_timestamps.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_timestamps.exe
   av_auth.cpp
   av_rendezvous.cpp
-  fl_audio_segment.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_audio_segment.exe
+  fl_audio_segment.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_audio_segment.exe
   av_memory_agreement.cpp
-  fl_gst_pool_policy.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_pool_policy.exe
-  fl_d3d_memory_binding.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_d3d_memory_binding.exe
+  fl_gst_pool_policy.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_pool_policy.exe
+  fl_d3d_memory_binding.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_d3d_memory_binding.exe
   m4_transport_timing.cpp
   fl_gst_policy_generation.cpp
   av_rendezvous.cpp
   test_av_memory_agreement.cpp
   Generating Code...
   Generating Code...
-  fl_gst_policy_generation.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_policy_generation.exe
-  fl_av_offer_bounds.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_av_offer_bounds.exe
+  fl_gst_policy_generation.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_gst_policy_generation.exe
+  fl_av_offer_bounds.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_av_offer_bounds.exe
   fl_memory_c_api.c
   fl_memory_boundary.cpp
   test_av_memory_adversarial.cpp
-  fl_memory_c_api.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_memory_c_api.exe
+  fl_memory_c_api.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_memory_c_api.exe
   fl_memory_contract.cpp
-  fl_m4_transport_timing.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_m4_transport_timing.exe
-  fl_memory_boundary.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_memory_boundary.exe
-     Creating library C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/fl_import_failure_win.lib and object C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build/Release/fl_import_failure_win.exp
+  fl_m4_transport_timing.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_m4_transport_timing.exe
+  fl_memory_boundary.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_memory_boundary.exe
+     Creating library <win-home>/dev/framelink-m5a-contract-20261101/build/Release/fl_import_failure_win.lib and object <win-home>/dev/framelink-m5a-contract-20261101/build/Release/fl_import_failure_win.exp
   fl_memory_resource.cpp
-  fl_import_failure_win.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_import_failure_win.exe
-  fl_av_memory_agreement.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_av_memory_agreement.exe
+  fl_import_failure_win.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_import_failure_win.exe
+  fl_av_memory_agreement.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_av_memory_agreement.exe
   fl_native_boundary_benchmark_win.cpp
   fl_native_relay_process_win.cpp
   Generating Code...
   fl_native_relay_win.cpp
-  fl_memory_contract.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_memory_contract.exe
+  fl_memory_contract.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_memory_contract.exe
   fl_nv12_layout.cpp
-  fl_nv12_layout.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_nv12_layout.exe
-  fl_memory_resource.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_memory_resource.exe
+  fl_nv12_layout.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_nv12_layout.exe
+  fl_memory_resource.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_memory_resource.exe
   fl_nv12_win.cpp
   fl_playback_recovery.cpp
-  fl_av_memory_adversarial.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_av_memory_adversarial.exe
+  fl_av_memory_adversarial.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_av_memory_adversarial.exe
   fl_portable_map.cpp
-  fl_native_relay_win.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_native_relay_win.exe
-  fl_native_relay_process_win.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_native_relay_process_win.exe
+  fl_native_relay_win.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_native_relay_win.exe
+  fl_native_relay_process_win.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_native_relay_process_win.exe
   fl_produce.cpp
-  fl_portable_map.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_portable_map.exe
+  fl_portable_map.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_portable_map.exe
   fl_read_lease_d3d11.cpp
-  fl_nv12_win.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_nv12_win.exe
+  fl_nv12_win.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_nv12_win.exe
   fl_read_leases.cpp
-  fl_playback_recovery.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_playback_recovery.exe
+  fl_playback_recovery.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_playback_recovery.exe
   fl_read_ledger.cpp
   fl_ready_timeout_win.cpp
-  fl_produce.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_produce.exe
+  fl_produce.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_produce.exe
   fl_reconnect_held.cpp
-  fl_native_boundary_benchmark_win.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_native_boundary_benchmark_win.exe
-  fl_read_ledger.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_read_ledger.exe
+  fl_native_boundary_benchmark_win.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_native_boundary_benchmark_win.exe
+  fl_read_ledger.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_read_ledger.exe
   fl_session_c_api.c
   fl_session_contract.cpp
-  fl_read_lease_d3d11.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_read_lease_d3d11.exe
-  fl_session_c_api.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_session_c_api.exe
+  fl_read_lease_d3d11.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_read_lease_d3d11.exe
+  fl_session_c_api.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_session_c_api.exe
   fl_session_peer.cpp
-  fl_reconnect_held.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_reconnect_held.exe
-  fl_read_leases.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_read_leases.exe
+  fl_reconnect_held.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_reconnect_held.exe
+  fl_read_leases.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_read_leases.exe
   fl_startup_win.cpp
   fl_submit_ownership.cpp
   fl_trace_test.cpp
-  fl_ready_timeout_win.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_ready_timeout_win.exe
+  fl_ready_timeout_win.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_ready_timeout_win.exe
   fl_trace_test.cpp
-  fl_session_contract.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_session_contract.exe
-  fl_session_peer.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_session_peer.exe
+  fl_session_contract.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_session_contract.exe
+  fl_session_peer.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_session_peer.exe
   av_apps.cpp
   av_apps.cpp
-  fl_startup_win.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_startup_win.exe
+  fl_startup_win.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_startup_win.exe
   av_session.cpp
-  fl_trace_compiled_out.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_trace_compiled_out.exe
-  fl_submit_ownership.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_submit_ownership.exe
+  fl_trace_compiled_out.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_trace_compiled_out.exe
+  fl_submit_ownership.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_submit_ownership.exe
   consumer.cpp
   producer.cpp
   av_auth.cpp
-  fl_trace_test.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\fl_trace_test.exe
+  fl_trace_test.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\fl_trace_test.exe
   av_auth.cpp
-  framelink_av_session.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink_av_session.exe
+  framelink_av_session.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\framelink_av_session.exe
   av_memory_agreement.cpp
   av_memory_agreement.cpp
   sample_common.cpp
@@ -174,11 +174,11 @@ MSBuild version 17.14.23+b0019275e for .NET Framework
   Generating Code...
   Generating Code...
   Generating Code...
-  framelink_consumer.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink_consumer.exe
-  framelink_producer.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink_producer.exe
-  framelink_av_consumer.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink_av_consumer.exe
-  framelink_av_producer.vcxproj -> C:\Users\jonsu\dev\framelink-m5a-contract-20261101\build\Release\framelink_av_producer.exe
-Test project C:/Users/jonsu/dev/framelink-m5a-contract-20261101/build
+  framelink_consumer.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\framelink_consumer.exe
+  framelink_producer.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\framelink_producer.exe
+  framelink_av_consumer.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\framelink_av_consumer.exe
+  framelink_av_producer.vcxproj -> <win-home>\dev\framelink-m5a-contract-20261101\build\Release\framelink_av_producer.exe
+Test project <win-home>/dev/framelink-m5a-contract-20261101/build
       Start  1: read_leases
  1/95 Test  #1: read_leases ...........................   Passed    0.35 sec
       Start  2: frame_metadata_contract
