@@ -8,7 +8,9 @@ combined results go to --out as JSON (one object per cell).
 
 Cell sets:
   baseline  the M6.1 baseline matrix (see docs/m6/QUALIFICATION_MATRIX.md)
-  soak      the M6.2 sustained cell (use --seconds 1800)
+  requirement  1080p60 and 4K30 cells (the project targets) and source-only references
+  soak      the requirement cells as M6.2 soaks (use --seconds 1800 and --cells)
+  lifecycle M6.3: 100 restart cycles of 1080p60 native, producer and consumer restarts
 
 Examples:
   tools/m6_bench_matrix.py --build build --set baseline --platform linux --out base.json
@@ -39,14 +41,24 @@ SETS = {
         (f"src-{size}-{fmt.lower()}", ["--size", dims, "--fps", fps, "--format", fmt, "--source-only"])
         for size, dims, fps in (("1080p60", "1920x1080", "60"), ("4k30", "3840x2160", "30")) for fmt in ("BGRA", "NV12")
     ],
-    "soak": [
-        ("soak-ref",     ["--size", "320x180", "--format", "RGBA", "--mode", "bin"]),
-    ],
 }
+# M6.3: >= 100 restart cycles of the 1080p60 native cell, restarting the
+# producer process (long-lived consumer) and the consumer process (long-lived
+# producer). Android uses RGBA (native output is RGBA-only).
+def lifecycle_cells(fmt):
+    return [(f"lifecycle-{fmt.lower()}-restart-{side}", ["--size", "1920x1080", "--fps", "60", "--format", fmt, "--mode", "bin",
+                                                         "--native", "--cycles", "100", "--seconds", "5", "--restart", side])
+            for side in ("producer", "consumer")]
+SETS["lifecycle"] = lifecycle_cells("BGRA")
+# M6.2: every requirement cell as a soak (run with --seconds 1800 and --cells
+# limited to the cells supported on the platform); budgets map soak-X to X.
+SETS["soak"] = [(f"soak-{name}", opts) for name, opts in SETS["requirement"] if not name.startswith("src-")]
 # Android production evidence is documented at 160x90; add it as a cell there.
 # Android native consumer memory supports RGBA layouts only (not BGRA or NV12),
 # so the requirement set adds RGBA native cells there.
 ANDROID_EXTRA = {
+    "soak": [(f"soak-{size}-rgba-native", ["--size", dims, "--fps", fps, "--format", "RGBA", "--mode", "bin", "--native"])
+             for size, dims, fps in (("1080p60", "1920x1080", "60"), ("4k30", "3840x2160", "30"))],
     "baseline": [("ref-160", ["--size", "160x90", "--format", "RGBA", "--mode", "bin"])],
     "requirement": [(f"{size}-rgba-native", ["--size", dims, "--fps", fps, "--format", "RGBA", "--mode", "bin", "--native"])
                     for size, dims, fps in (("1080p60", "1920x1080", "60"), ("4k30", "3840x2160", "30"))]
@@ -192,6 +204,13 @@ def stream(cmd, timeout, on_pids):
 
 CHILD_ENV = dict(os.environ, G_DEBUG="fatal-warnings")
 
+def cell_timeout(args, opts):
+    """Seconds allowed for one cell (lifecycle cells run cycles x per-cycle seconds)."""
+    def opt(name, default):
+        return int(opts[opts.index(name) + 1]) if name in opts else default
+    seconds = opt("--seconds", args.seconds)
+    return opt("--cycles", 1) * (seconds + 15) + 180
+
 def run_desktop(args, cells):
     exe_dir = os.path.join(args.build, args.config) if args.config else args.build
     exe = os.path.join(exe_dir, "fl_gst_av_bench" + (".exe" if os.name == "nt" else ""))
@@ -214,7 +233,7 @@ def run_desktop(args, cells):
                 # processes have created their GPU devices.
                 time.sleep(3)
                 per_process.start(max(1, args.seconds - 5))
-        rc, text = stream(cmd, args.seconds + 180, on_pids)
+        rc, text = stream(cmd, cell_timeout(args, opts), on_pids)
         end = time.monotonic()
         gpu = {}
         if device:
@@ -253,7 +272,7 @@ def run_android(args, cells):
                 samples.append(android_gpu_sample(adb))
             threading.Thread(target=run, daemon=True).start()
         begin = time.monotonic()
-        rc, text = stream(adb + ["shell", shell], args.seconds + 240, sampler)
+        rc, text = stream(adb + ["shell", shell], cell_timeout(args, opts) + 60, sampler)
         gpu = {}
         good = [x for x in samples if x]
         if len(good) == 2 and good[1][0] > good[0][0]:
@@ -298,7 +317,10 @@ def main():
     ap.add_argument("--evidence", help="desktop: directory for per-cell summaries (default: a temporary one)")
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
-    cells = list(SETS[args.set]) + (ANDROID_EXTRA.get(args.set, []) if args.adb else [])
+    if args.set == "lifecycle" and args.adb:
+        cells = lifecycle_cells("RGBA")
+    else:
+        cells = list(SETS[args.set]) + (ANDROID_EXTRA.get(args.set, []) if args.adb else [])
     if args.cells:
         wanted = args.cells.split(",")
         cells = [c for c in cells if c[0] in wanted]

@@ -65,6 +65,15 @@ def aggregate(doc):
             rows[name] = row
             continue
         s = [r["summary"] for r in ok]
+        if any("cycles" in x for x in s):
+            # Lifecycle (M6.3): per-cycle completion and long-lived growth per cycle.
+            row.update({"lifecycle": True, "cycles_ok": min(x.get("cycles.ok", "0/0") for x in s),
+                        "mem_kb_per_cycle": max(num(x.get("long.mem.slope.kb_per_cycle")) for x in s),
+                        "handles_per_cycle": max(num(x.get("long.handles.slope.per_cycle")) for x in s),
+                        "threads_per_cycle": max(num(x.get("long.threads.slope.per_cycle")) for x in s),
+                        "wall_s": max(num(x.get("wall.s")) for x in s)})
+            rows[name] = row
+            continue
         if any("source.cpu.percent" in x for x in s):
             # Source-only reference: the test sources alone, no FrameLink.
             row.update({"source_cpu_pct": statistics.median(num(x.get("source.cpu.percent")) for x in s),
@@ -150,6 +159,10 @@ def markdown(platform, rows):
     out = [f"### {platform}", "", "| Cell | " + " | ".join(c[1] for c in COLUMNS) + " |",
            "|---|" + "---|" * len(COLUMNS)]
     for name, row in rows.items():
+        if row.get("lifecycle"):
+            out.append(f"| {name} | {row['config']} | {row['complete']}/{row['rounds']} | cycles ok {row['cycles_ok']}; long-lived growth per cycle: "
+                       f"{row['mem_kb_per_cycle']:.2f} KB, {row['handles_per_cycle']:.3f} handles, {row['threads_per_cycle']:.3f} threads; {row['wall_s']:.0f} s |" + " |" * (len(COLUMNS) - 3))
+            continue
         if row.get("reference"):
             out.append(f"| {name} | {row['config']} | {row['complete']}/{row['rounds']} | source alone: {fmt(row['source_cpu_pct'], 1)}% CPU |" + " |" * (len(COLUMNS) - 3))
             continue
@@ -161,6 +174,10 @@ def markdown(platform, rows):
             (f"{row['complete']}/{row['rounds']}" if k == "complete" else fmt(row.get(k), d)) for k, _, d in COLUMNS) + " |")
     return "\n".join(out) + "\n"
 
+# M6.3 lifecycle limits per cycle of the long-lived process, after warm-up:
+# under 1.6 MB, 10 handles and 2 threads of growth over 100 cycles.
+LIFECYCLE = {"mem_kb_per_cycle": 16.0, "handles_per_cycle": 0.1, "threads_per_cycle": 0.02}
+
 def check(platform, rows, budgets):
     """Budget violations for one platform: list of strings."""
     b = budgets["platforms"].get(platform)
@@ -168,6 +185,14 @@ def check(platform, rows, budgets):
         return [f"no budgets for platform {platform}"]
     problems = []
     for name, row in rows.items():
+        if row.get("lifecycle") or name.startswith("lifecycle-"):
+            if row["complete"] < row["rounds"] or not row.get("lifecycle"):
+                problems.append(f"{name}: incomplete {row.get('errors')}")
+                continue
+            for key, limit in LIFECYCLE.items():
+                if not row[key] <= limit:
+                    problems.append(f"{name}: {key}={row[key]:.3f} exceeds {limit}")
+            continue
         base = name[len("soak-"):] if name.startswith("soak-") else name
         limits = dict(b.get("cells", {}).get(base, {}))
         if not limits:

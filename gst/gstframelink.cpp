@@ -1008,7 +1008,7 @@ struct NativeSourceReader {
 typedef struct _GstFrameLinkSrc {
     GstPushSrc parent;
     GstBuffer* pendingDelivery;
-    FlGstSession* session; flSessionConfig sessionConfig; gboolean sessionRegistered;
+    FlGstSession* session; flSessionConfig sessionConfig; gboolean sessionRegistered; guint receiveQueue;
     guint64 sessionFrames;gint64 sessionLastPts;
     FlGstVideoEvent pendingGaps[32];guint pendingGapCount;gboolean videoEndSeen;guint64 sessionSequence;
 
@@ -1149,6 +1149,16 @@ static gboolean srcStart(GstBaseSrc* base) {
     if(flQuery(self->ch, &self->cinfo)!=FL_OK)return FALSE;
     if(self->memoryPolicyApplied && self->cinfo.generation!=self->memoryPoolGeneration){
         GST_ELEMENT_ERROR(self,CORE,NEGOTIATION,("authenticated pool generation changed before start"),(NULL));return FALSE;
+    }
+    // Every coordinated frame is accounted for, so the negotiated queue budget
+    // is the slack a briefly late reader has before a frame is replaced. The
+    // ring must also hold the frame being read and the one being drawn, so a
+    // small pool limits the depth (never below the original single frame).
+    if(self->session){
+        const guint ringLimit=self->cinfo.poolSize>3?self->cinfo.poolSize-2:1;
+        self->receiveQueue=std::min<guint>(self->sessionConfig.videoQueueFrames,ringLimit);
+        if(flSetReceiveQueue(self->ch,self->receiveQueue)!=FL_OK){GST_ELEMENT_ERROR(self,RESOURCE,SETTINGS,("cannot set the video receive queue"),(NULL));return FALSE;}
+        GST_INFO_OBJECT(self,"receive queue %u frames (video-queue-frames %u, ring %u)",self->receiveQueue,self->sessionConfig.videoQueueFrames,self->cinfo.poolSize);
     }
 #ifdef FL_GST_NATIVE
     if(self->nativeMemory)self->nativeOwner=new std::shared_ptr<NativeSourceOwner>(std::make_shared<NativeSourceOwner>(self->ch));
@@ -1367,12 +1377,12 @@ static GstFlowReturn srcCreateImpl(GstPushSrc* push, GstBuffer** outbuf) {
     }
 
     if(self->session&&metadata.streamGeneration!=self->sessionConfig.generation){srcReleaseFrame(self,&frame);GST_ELEMENT_ERROR(self,STREAM,FORMAT,("stale video media generation"),(NULL));return GST_FLOW_ERROR;}
-    // The ring keeps only the newest unread frame. Every submitted session
-    // frame is accounted for, so a replaced one can never be recovered: fail
-    // now with the cause instead of at the idle deadline.
+    // The ring keeps at most receiveQueue unread frames. Every submitted
+    // session frame is accounted for, so a replaced one can never be recovered:
+    // fail now with the cause instead of at the idle deadline.
     if(self->session&&frame.sequence!=self->sessionSequence+1){const guint64 previous=self->sessionSequence;srcReleaseFrame(self,&frame);
         GST_ELEMENT_ERROR(self,STREAM,FAILED,("coordinated video frame replaced before it was read: the producer delivered faster than real time"),
-            ("ring sequence %" G_GUINT64_FORMAT " after %" G_GUINT64_FORMAT "; coordinated video must be paced in real time (live or clock-synchronized sources)",frame.sequence,previous));
+            ("ring sequence %" G_GUINT64_FORMAT " after %" G_GUINT64_FORMAT " with a receive queue of %u; coordinated video must be paced in real time (live or clock-synchronized sources) and read within the queue budget",frame.sequence,previous,self->receiveQueue));
         return GST_FLOW_ERROR;}
     if(self->session)self->sessionSequence=frame.sequence;
     if(self->session&&(metadata.flags&FL_FRAME_DISCONT)&&!srcVideoEvents(self,FL_GST_VIDEO_BARRIER,frame.ptsNs)){srcReleaseFrame(self,&frame);GST_ELEMENT_ERROR(self,STREAM,FAILED,("video discontinuity event barrier failed"),(NULL));return GST_FLOW_ERROR;}

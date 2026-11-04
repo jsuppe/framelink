@@ -187,6 +187,16 @@ FL_API flResult flCreateChannelOnAdapter(const char* name, uint32_t width, uint3
 FL_API flResult flAcquireFrame(flChannel*, flFrame* out, uint32_t timeoutMs);
 FL_API flResult flRelease(flChannel*, const flFrame*);
 
+// Consumer: keep up to `frames` announced but unread frames, oldest first. The
+// default, 1, is latest-frame-wins: a new frame replaces the unread one. A
+// deeper queue absorbs a briefly late reader (a scheduling hiccup) without a
+// skip; when it is full the oldest unread frame is replaced and flFrame::sequence
+// shows the gap. The producer never waits on it. The ring must leave room for
+// the frame being read and the one being drawn: above 1, frames + 2 <= pool size.
+// Shrinking discards the oldest unread frames. FL_INVALID otherwise.
+#define FL_MAX_RECEIVE_QUEUE 16
+FL_API flResult flSetReceiveQueue(flChannel*, uint32_t frames);
+
 // ---- producer: attaches ------------------------------------------------------
 
 typedef struct flBuffer {

@@ -188,6 +188,10 @@ if(FRAMELINK_BUILD_TESTS)
     target_link_libraries(fl_expanded_pool PRIVATE framelink Threads::Threads)
     add_test(NAME expanded_pool COMMAND fl_expanded_pool)
     set_tests_properties(expanded_pool PROPERTIES TIMEOUT 30 LABELS "gpu;integration")
+    add_executable(fl_receive_queue test/fl_receive_queue.cpp)
+    target_link_libraries(fl_receive_queue PRIVATE framelink Threads::Threads)
+    add_test(NAME receive_queue COMMAND fl_receive_queue)
+    set_tests_properties(receive_queue PROPERTIES TIMEOUT 30 LABELS "gpu;integration")
     if(WIN32)
         # Separate binaries because the D3D11 path draws on the GPU, which is
         # what makes the fence wait meaningful.

@@ -127,7 +127,7 @@ Setup properties change only in NULL.
 | `tracks` | string, default "av" | read/write | Required track set: audio, video or av; only enabled pads exist |
 | `video-format` | string, default "BGRA" | read/write | Offered video format with session= (BGRA, RGBA, NV12, RGB10A2_LE) |
 | `video-pool` | uint 0 - 16, default 0 | read/write | Consumer ring images requested (0: consumer default) |
-| `video-queue-frames` | uint 1 - 16, default 2 | read/write | Coordinated video queue budget |
+| `video-queue-frames` | uint 1 - 16, default 2 | read/write | Unread coordinated video frames the consumer ring keeps, oldest first; limited to pool - 2 (at least 1) |
 | `video-track-id` | uint, default 0 | read-only | Negotiated video identity, zero when absent |
 | `width` | uint 16 - 8192, default 1280 | read/write | Offered video width with session= |
 
@@ -156,7 +156,7 @@ Actions: `adopt-channel`
 | `tracks` | string, default "av" | read/write | Required track set: audio, video or av; only enabled pads exist |
 | `video-format` | string, default "BGRA" | read/write | Accepted video format (BGRA, RGBA, NV12, RGB10A2_LE) |
 | `video-pool` | uint 0 - 16, default 8 | read/write | Ring images this consumer allocates with session= (0: 4); cover ceil(latency*fps)+2 |
-| `video-queue-frames` | uint 1 - 16, default 2 | read/write | Coordinated video queue budget |
+| `video-queue-frames` | uint 1 - 16, default 2 | read/write | Unread coordinated video frames the consumer ring keeps, oldest first; limited to pool - 2 (at least 1) |
 | `video-track-id` | uint, default 0 | read-only | Negotiated video identity, zero when absent |
 | `width` | uint 16 - 8192, default 1280 | read/write | Accepted video width |
 

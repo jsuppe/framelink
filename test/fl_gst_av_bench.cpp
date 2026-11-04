@@ -15,6 +15,7 @@
 // lateness (same-second windows), i.e. sink scheduling, given that the session
 // preserves relative PTS exactly (M5b timeline tests).
 #include "fl_gst_av_harness.h"
+#include <glib/gstdio.h>
 #include <cmath>
 #include <fstream>
 #include <map>
@@ -29,7 +30,7 @@
 #include <unistd.h>
 #endif
 
-struct Options {guint seconds=60;std::string mode="bin",label="run",out=".";bool native=false,trace=false,raw=false,sourceOnly=false;};
+struct Options {guint seconds=60,cycles=0;std::string mode="bin",label="run",out=".",restart="producer";bool native=false,trace=false,raw=false,sourceOnly=false;};
 static constexpr guint WARMUP_S=2;  // excluded from steady-state distributions
 
 // ---- process resources -----------------------------------------------------
@@ -96,10 +97,27 @@ static int sourceChild(const Options&o,const std::string&out){
  if(m)gst_message_unref(m);gst_object_unref(bus);sampler.stop();gst_element_set_state(p,GST_STATE_NULL);gst_object_unref(p);
  sampler.report(r);writeResult(out,r);return 0;}
 
+// Producer push: running time when the video source pushes each frame, minus
+// its PTS (on the session timeline shared with the consumer). A live source
+// that stalls catches up with back-to-back pushes; bursts show here.
+struct Pushes {std::mutex m;std::vector<std::pair<gint64,gint64>> v;GstElement*pipeline=nullptr;};  // {pts, lateness}
+static GstPadProbeReturn pushed(GstPad*,GstPadProbeInfo*info,gpointer d){
+ auto*a=static_cast<Pushes*>(d);auto*b=GST_PAD_PROBE_INFO_BUFFER(info);
+ if(auto*clock=gst_element_get_clock(a->pipeline)){gint64 l=gint64(gst_clock_get_time(clock))-gint64(gst_element_get_base_time(a->pipeline))-gint64(GST_BUFFER_PTS(b));gst_object_unref(clock);
+  std::lock_guard<std::mutex> lock(a->m);a->v.push_back({gint64(GST_BUFFER_PTS(b)),l});}
+ return GST_PAD_PROBE_OK;}
+
 static int producerChild(const Options&o,const std::string&session,const std::string&out){
- Sampler sampler;std::map<std::string,std::string> r;
- {Producer p(modeOf(o.mode),session,"av",o.seconds*gFps,80,false,o.seconds*100);p.start();p.finish();sampler.stop();
+ Sampler sampler;std::map<std::string,std::string> r;Pushes pushes;
+ {Producer p(modeOf(o.mode),session,"av",o.seconds*gFps,80,false,o.seconds*100);pushes.pipeline=p.p;pushes.v.resize(size_t(o.seconds+10)*gFps);pushes.v.clear();
+  {auto*src=gst_bin_get_by_name(GST_BIN(p.p),"vsrc");CHECK(src);auto*pad=gst_element_get_static_pad(src,"src");gst_pad_add_probe(pad,GST_PAD_PROBE_TYPE_BUFFER,pushed,&pushes,nullptr);gst_object_unref(pad);gst_object_unref(src);}
+  p.start();p.finish();sampler.stop();
   r["result"]=p.result;r["pushed.frames"]=std::to_string(p.pushedFrames.load());r["pushed.samples"]=std::to_string(p.pushedSamples.load());
+  {std::lock_guard<std::mutex> lock(pushes.m);auto&v=pushes.v;std::vector<double> late,gaps;guint burst=0,maxBurst=0;const double period=1e9/gFps;
+   for(size_t i=0;i<v.size();i++){if(v[i].first-v.front().first<gint64(WARMUP_S*GST_SECOND))continue;late.push_back(v[i].second/1e6);
+    if(i){const double gap=double((v[i].first+v[i].second)-(v[i-1].first+v[i-1].second));gaps.push_back(gap/1e6);burst=gap<period/4?burst+1:0;maxBurst=std::max(maxBurst,burst);}}
+   r["video.push_lateness.ms"]=dist(late);r["video.push_interval.ms"]=dist(gaps);r["video.push_burst.max"]=std::to_string(maxBurst);
+   if(o.raw||p.result!="EOS"){std::ofstream f(out+".push.csv");f<<"pts_ns,push_lateness_ns\n";for(auto&x:v)f<<x.first<<","<<x.second<<"\n";}}
   std::lock_guard<std::mutex> lock(p.statsMutex);
   for(auto*s:p.stats){gchar*t=gst_structure_to_string(s);r[std::string("stats.")+gst_structure_get_name(s)]=t;g_free(t);}}
  sampler.report(r);writeResult(out,r);return 0;}
@@ -132,13 +150,27 @@ static int consumerChild(const Options&o,const std::string&session,const std::st
    r[std::string(n)+".arrival.ms"]=dist(arr);r[std::string(n)+".render.ms"]=dist(ren);r[std::string(n)+".render_interval.ms"]=dist(gaps);
    r[std::string(n)+".deadline_misses"]=std::to_string(misses)+"/"+std::to_string(av.size());
    char t[64];snprintf(t,sizeof t,"%.2f",ren.empty()?NAN:pct(ren,.99)-pct(ren,.01));r[std::string(n)+".render_jitter.p1_p99.ms"]=t;
-   if(o.raw){std::ofstream f(out+"."+n+".csv");f<<"pts_ns,arrival_lateness_ns,render_lateness_ns\n";for(size_t i=0;i<av.size();i++)f<<av[i].first<<","<<av[i].second<<","<<(i<rv.size()?std::to_string(rv[i]):"")<<"\n";}}
+   if(o.raw||c.result!="EOS"){std::ofstream f(out+"."+n+".csv");f<<"pts_ns,arrival_lateness_ns,render_lateness_ns\n";for(size_t i=0;i<av.size();i++)f<<av[i].first<<","<<av[i].second<<","<<(i<rv.size()?std::to_string(rv[i]):"")<<"\n";}}
   // A/V offset: per one-second PTS window, median video minus median audio render lateness.
   std::map<gint64,std::vector<double>> w[2];gint64 first=G_MAXINT64;for(auto&v:arrivals.v)if(!v.empty())first=std::min(first,v.front().first);
   for(int track=0;track<2;track++)for(size_t i=0;i<arrivals.v[track].size()&&i<c.lateness[track].size();i++){const gint64 t=arrivals.v[track][i].first-first;if(t<gint64(WARMUP_S*GST_SECOND))continue;w[track][t/GST_SECOND].push_back(c.lateness[track][i]/1e6);}
   std::vector<double> offsets,absOffsets;for(auto&kv:w[0]){auto it=w[1].find(kv.first);if(it==w[1].end())continue;const double d=pct(kv.second,.5)-pct(it->second,.5);offsets.push_back(d);absOffsets.push_back(std::fabs(d));}
   r["av_offset.ms"]=dist(offsets);r["av_offset.abs.ms"]=dist(absOffsets);}
  sampler.report(r);writeResult(out,r);return 0;}
+
+// ---- lifecycle (M6.3) ------------------------------------------------------------
+// The long-lived side runs one session per cycle in a single process, each in
+// <base>/c<i>/session, while the driver starts a fresh process for the other
+// side per cycle. After each cycle's teardown the long-lived process records
+// its memory, handles and threads; growth across cycles is a leak.
+static int lifecycleChild(const Options&o,bool producer,const std::string&base,const std::string&out){
+ FILE*f=fopen(out.c_str(),"w");CHECK(f);
+ for(guint i=0;i<o.cycles;i++){const std::string path=base+"/c"+std::to_string(i)+"/session";std::string result;guint64 frames=0,samples=0;
+  if(producer){Producer p(modeOf(o.mode),path,"av",o.seconds*gFps,80,false,o.seconds*100);p.start();p.finish();result=p.result;frames=p.pushedFrames;samples=p.pushedSamples;}
+  else{Consumer c(modeOf(o.mode),path,"av",o.native);c.checkContent=false;c.start();c.finish();result=c.result;frames=c.frames;samples=c.samples;}
+  const Resources r=resources();
+  fprintf(f,"cycle.%u=%s|%llu|%llu|%llu|%u|%u\n",i,result.c_str(),(unsigned long long)frames,(unsigned long long)samples,(unsigned long long)r.memKb,r.handles,r.threads);fflush(f);}
+ fclose(f);return 0;}
 
 // ---- driver ----------------------------------------------------------------------
 static std::string selfPath(const char*argv0){
@@ -185,8 +217,48 @@ static std::map<std::string,std::string> readResult(const std::string&path){std:
  while(std::getline(in,line)){auto eq=line.find('=');if(eq!=std::string::npos)r[line.substr(0,eq)]=line.substr(eq+1);}return r;}
 
 static std::vector<std::string> optionArgs(const Options&o){
- std::vector<std::string> a{"--seconds",std::to_string(o.seconds),"--size",std::to_string(gWidth)+"x"+std::to_string(gHeight),"--fps",std::to_string(gFps),"--format",gFormat,"--mode",o.mode,"--pool",std::to_string(gVideoPool)};
+ std::vector<std::string> a{"--seconds",std::to_string(o.seconds),"--size",std::to_string(gWidth)+"x"+std::to_string(gHeight),"--fps",std::to_string(gFps),"--format",gFormat,"--mode",o.mode,"--pool",std::to_string(gVideoPool),"--video-queue",std::to_string(gVideoQueue)};
  if(o.native)a.push_back("--native");if(o.raw)a.push_back("--raw");return a;}
+
+// Least-squares slope of y over x.
+static double slope(const std::vector<std::pair<double,double>>&v){double sx=0,sy=0,sxx=0,sxy=0;const double n=double(v.size());
+ for(auto&p:v){sx+=p.first;sy+=p.second;sxx+=p.first*p.first;sxy+=p.first*p.second;}return n>1&&n*sxx-sx*sx>0?(n*sxy-sx*sy)/(n*sxx-sx*sx):0;}
+static constexpr guint LIFECYCLE_WARMUP=5;
+static int lifecycle(const Options&o,const std::string&exe,const char*plugin,const std::string&base){
+ const bool restartProducer=o.restart=="producer";CHECK(restartProducer||o.restart=="consumer");
+ gchar*root=g_dir_make_tmp("framelink-lifecycle-XXXXXX",nullptr);CHECK(root);const std::string dir=root;g_free(root);
+ for(guint i=0;i<o.cycles;i++)CHECK(g_mkdir((dir+"/c"+std::to_string(i)).c_str(),0700)==0);
+ auto opts=optionArgs(o);opts.push_back("--cycles");opts.push_back(std::to_string(o.cycles));
+ auto args=[&](std::vector<std::string> a){a.insert(a.begin(),plugin);a.insert(a.end(),opts.begin(),opts.end());return a;};
+ const char*longRole=restartProducer?"lifecycle-consumer":"lifecycle-producer",*freshRole=restartProducer?"producer":"consumer";
+ auto longChild=spawn(exe,args({"--role",longRole,"--session-base",dir,"--result",base+"-long.txt"}));
+ std::vector<std::map<std::string,std::string>> fresh;std::vector<int> freshExit;const gint64 t0=g_get_monotonic_time();
+ for(guint i=0;i<o.cycles;i++){auto c=spawn(exe,args({"--role",freshRole,"--session",dir+"/c"+std::to_string(i)+"/session","--result",base+"-fresh-"+std::to_string(i)+".txt"}));
+  freshExit.push_back(await(c,g_get_monotonic_time()+gint64(o.seconds+60)*G_USEC_PER_SEC));fresh.push_back(readResult(base+"-fresh-"+std::to_string(i)+".txt"));
+  std::remove((base+"-fresh-"+std::to_string(i)+".txt").c_str());}
+ const int longExit=await(longChild,g_get_monotonic_time()+gint64(o.seconds+120)*G_USEC_PER_SEC);
+ auto lr=readResult(base+"-long.txt");guint ok=0;std::string firstBad;std::vector<std::pair<double,double>> mem,hnd,thr;guint64 m0=0,m1=0;guint h0=0,h1=0,t0c=0,t1c=0;
+ for(guint i=0;i<o.cycles;i++){auto it=lr.find("cycle."+std::to_string(i));std::vector<std::string> f;
+  if(it!=lr.end()){std::string cell;std::istringstream in(it->second);while(std::getline(in,cell,'|'))f.push_back(cell);}
+  bool good=f.size()==6&&f[0]=="EOS"&&freshExit[i]==0&&fresh[i]["result"]=="EOS";
+  if(good){const std::string pf=restartProducer?fresh[i]["pushed.frames"]:f[1],ps=restartProducer?fresh[i]["pushed.samples"]:f[2],cf=restartProducer?f[1]:fresh[i]["frames"],cs=restartProducer?f[2]:fresh[i]["samples"];
+   good=pf==cf&&ps==cs&&pf==std::to_string(o.seconds*gFps);}
+  if(good)ok++;else if(firstBad.empty())firstBad="cycle "+std::to_string(i)+": long="+(f.empty()?std::string("missing"):f[0])+" fresh="+fresh[i]["result"];
+  if(f.size()==6&&i>=LIFECYCLE_WARMUP){const double x=i;const guint64 mk=std::stoull(f[3]);const guint h=guint(std::stoul(f[4])),t=guint(std::stoul(f[5]));
+   mem.push_back({x,double(mk)});hnd.push_back({x,double(h)});thr.push_back({x,double(t)});
+   if(i==LIFECYCLE_WARMUP){m0=mk;h0=h;t0c=t;}m1=mk;h1=h;t1c=t;}}
+ char t[64];std::map<std::string,std::string> s{{"label",o.label},{"seconds",std::to_string(o.seconds)},
+  {"config",gFormat+" "+std::to_string(gWidth)+"x"+std::to_string(gHeight)+"@"+std::to_string(gFps)+" "+o.mode+(o.native?" native":" cpu")+" lifecycle restart-"+o.restart+" "+std::to_string(o.cycles)+"x"+std::to_string(o.seconds)+"s"},
+  {"cycles",std::to_string(o.cycles)},{"cycles.ok",std::to_string(ok)+"/"+std::to_string(o.cycles)},{"long.exit",std::to_string(longExit)},{"long.role",longRole}};
+ if(!firstBad.empty())s["first_failure"]=firstBad;
+ snprintf(t,sizeof t,"%.1f",(g_get_monotonic_time()-t0)/1e6);s["wall.s"]=t;
+ s["long.mem.kb"]=std::to_string(m0)+".."+std::to_string(m1);snprintf(t,sizeof t,"%.2f",slope(mem));s["long.mem.slope.kb_per_cycle"]=t;
+ s["long.handles"]=std::to_string(h0)+".."+std::to_string(h1);snprintf(t,sizeof t,"%.3f",slope(hnd));s["long.handles.slope.per_cycle"]=t;
+ s["long.threads"]=std::to_string(t0c)+".."+std::to_string(t1c);snprintf(t,sizeof t,"%.3f",slope(thr));s["long.threads.slope.per_cycle"]=t;
+ {std::string series;for(guint i=0;i<o.cycles;i++){auto it=lr.find("cycle."+std::to_string(i));if(it!=lr.end())series+=it->second+";";}s["long.series.result_frames_samples_memkb_handles_threads"]=series;}
+ const bool complete=longExit==0&&ok==o.cycles;s["complete"]=complete?"yes":"no";
+ writeResult(base+".summary.txt",s);for(auto&kv:s)printf("%s=%s\n",kv.first.c_str(),kv.second.c_str());
+ return complete?0:1;}
 
 int main(int argc,char**argv){gst_init(&argc,&argv);
 #ifdef __ANDROID__
@@ -195,21 +267,28 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
 #else
  CHECK(argc>1);GError*error=nullptr;auto*plugin=gst_plugin_load_file(argv[1],&error);if(error)fprintf(stderr,"%s\n",error->message);CHECK(plugin&&!error);gst_object_unref(plugin);
 #endif
- Options o;std::string role,session,result;
+ Options o;std::string role,session,result,sessionBase;
  for(int i=2;i<argc;i++){std::string a=argv[i];auto next=[&]{CHECK(i+1<argc);return std::string(argv[++i]);};
   if(a=="--seconds")o.seconds=guint(std::stoul(next()));else if(a=="--fps")gFps=guint(std::stoul(next()));else if(a=="--format")gFormat=next();else if(a=="--mode")o.mode=next();
   else if(a=="--size"){auto s=next();auto x=s.find('x');CHECK(x!=std::string::npos);gWidth=guint(std::stoul(s.substr(0,x)));gHeight=guint(std::stoul(s.substr(x+1)));}
-  else if(a=="--pool")gVideoPool=guint(std::stoul(next()));else if(a=="--source-only")o.sourceOnly=true;
+  else if(a=="--pool")gVideoPool=guint(std::stoul(next()));else if(a=="--video-queue")gVideoQueue=guint(std::stoul(next()));else if(a=="--source-only")o.sourceOnly=true;
+  else if(a=="--cycles")o.cycles=guint(std::stoul(next()));else if(a=="--restart")o.restart=next();else if(a=="--session-base")sessionBase=next();
   else if(a=="--native")o.native=true;else if(a=="--trace")o.trace=true;else if(a=="--raw")o.raw=true;else if(a=="--out")o.out=next();else if(a=="--label")o.label=next();
   else if(a=="--role")role=next();else if(a=="--session")session=next();else if(a=="--result")result=next();else{fprintf(stderr,"unknown option %s\n",a.c_str());return 2;}}
  CHECK(o.seconds>=WARMUP_S+3&&(o.mode=="bin"||o.mode=="element"));gRunLimit=(o.seconds+30)*GST_SECOND;
  // Ring: ceil(latency x fps) + 2 images (documented sizing), at least the default 8.
  // Queue: no byte/buffer limit (frames reach 33 MB at 4K); the 1 s time bound
  // stays above the session latency.
- {bool poolSet=false;for(int i=2;i<argc;i++)if(!strcmp(argv[i],"--pool"))poolSet=true;
-  if(!poolSet)gVideoPool=std::min<guint>(FL_MAX_POOL_SIZE,std::max<guint>(8,guint(std::ceil(LATENCY/1e9*gFps))+2));}
+ {bool poolSet=false,queueSet=false;for(int i=2;i<argc;i++){if(!strcmp(argv[i],"--pool"))poolSet=true;if(!strcmp(argv[i],"--video-queue"))queueSet=true;}
+  // A frame that arrives within the session latency is on time, so the receive
+  // queue covers that latency: a producer stall shorter than it then shows as
+  // lateness instead of replacing unread frames. The ring adds the frame being
+  // read and the one being drawn.
+  if(!queueSet)gVideoQueue=std::min<guint>(FL_MAX_POOL_SIZE-2,std::max<guint>(2,guint(std::ceil(LATENCY/1e9*gFps))));
+  if(!poolSet)gVideoPool=std::min<guint>(FL_MAX_POOL_SIZE,std::max<guint>(8,gVideoQueue+2));}
  gQueue="queue max-size-bytes=0 max-size-buffers=0 max-size-time=1000000000";
  if(role=="source")return sourceChild(o,result);
+ if(role=="lifecycle-producer"||role=="lifecycle-consumer")return lifecycleChild(o,role=="lifecycle-producer",sessionBase,result);
  if(role=="producer")return producerChild(o,session,result);
  if(role=="consumer")return consumerChild(o,session,result);
  setvbuf(stdout,nullptr,_IONBF,0);
@@ -224,6 +303,7 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
   std::map<std::string,std::string> s{{"label",o.label},{"config",gFormat+" "+std::to_string(gWidth)+"x"+std::to_string(gHeight)+"@"+std::to_string(gFps)+" source only "+std::to_string(o.seconds)+"s"},{"seconds",std::to_string(o.seconds)},{"exit",std::to_string(rc)}};
   for(auto&kv:sr)s["source."+kv.first]=kv.second;const bool ok=rc==0&&sr["result"]=="EOS";s["complete"]=ok?"yes":"no";
   writeResult(base+".summary.txt",s);for(auto&kv:s)printf("%s=%s\n",kv.first.c_str(),kv.second.c_str());return ok?0:1;}
+ if(o.cycles)return lifecycle(o,exe,argv[1],base);
  auto consumer=launch("consumer");g_usleep(200000);auto producer=launch("producer");
  // Early pid line for external samplers (GPU counters per process).
  printf("pids producer=%ld consumer=%ld\n",producer.pid,consumer.pid);
@@ -231,7 +311,7 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
  const int pc=await(producer,deadline),cc=await(consumer,deadline);
  auto pr=readResult(base+"-producer.txt"),cr=readResult(base+"-consumer.txt");
  std::map<std::string,std::string> s{{"label",o.label},{"config",gFormat+" "+std::to_string(gWidth)+"x"+std::to_string(gHeight)+"@"+std::to_string(gFps)+" "+o.mode+(o.native?" native":" cpu")+(o.trace?" traced":"")+" "+std::to_string(o.seconds)+"s"},
-  {"exit",std::to_string(pc)+"/"+std::to_string(cc)},{"video.pool",std::to_string(gVideoPool)},{"seconds",std::to_string(o.seconds)},{"producer.pid",std::to_string(producer.pid)},{"consumer.pid",std::to_string(consumer.pid)}};
+  {"exit",std::to_string(pc)+"/"+std::to_string(cc)},{"video.pool",std::to_string(gVideoPool)},{"video.queue",std::to_string(gVideoQueue)},{"seconds",std::to_string(o.seconds)},{"producer.pid",std::to_string(producer.pid)},{"consumer.pid",std::to_string(consumer.pid)}};
  for(auto&kv:pr)s["producer."+kv.first]=kv.second;for(auto&kv:cr)s["consumer."+kv.first]=kv.second;
  const bool ok=pc==0&&cc==0&&pr["result"]=="EOS"&&cr["result"]=="EOS"&&cr["frames"]==pr["pushed.frames"]&&cr["samples"]==pr["pushed.samples"];
  s["complete"]=ok?"yes":"no";

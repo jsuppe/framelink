@@ -26,6 +26,7 @@
 #include "fl_arrival.hpp"
 #include "framelink_sync_fd.h"
 #include "fl_sync_fd.hpp"
+#include "fl_pending.hpp"
 #include "framelink_dmabuf.h"
 
 #if !defined(_WIN32) && !defined(__ANDROID__)
@@ -82,7 +83,7 @@ struct flChannel {
     uint32_t peerFeatures=0;
     fl::BufferReferences bufferReferences;
     flFrameMetadata slotMetadata[FL_MAX_POOL_SIZE]{};
-    flFrameMetadata pendingMetadata{},heldMetadata{};
+    flFrameMetadata heldMetadata{};
 
     int drmFd = -1;
     gbm_device* gbm = nullptr;
@@ -99,17 +100,14 @@ struct flChannel {
     std::atomic<bool> stop{false};
     std::atomic<bool> peerGone{false};
     std::mutex pendingMutex;
-    bool hasPending = false;
+    fl::PendingFrames pending; // announced, not yet acquired
     fl::ReadLedger readers;
     std::array<LeaseCompletion,fl::ReadLedger::MaxReaders> leaseCompletions;
     bool frameHeld = false;
     uint64_t heldReady = 0;
     uint64_t retiredValue = 0; // completed consumer GPU reads; protects geometry changes
     uint32_t heldSlot = 0;
-    uint32_t pendingSlot = 0;
-    uint64_t pendingReady = 0;
-    int64_t pendingPts = -1;
-    uint64_t pendingArrival=0,heldArrival=0;
+    uint64_t heldArrival=0;
     uint64_t sequence = 0;
 
     // producer. Slot recycling is MONOTONIC, exactly like the Windows
@@ -322,13 +320,13 @@ void acceptLoop(flChannel* ch) {
         {
             std::lock_guard<std::mutex> hold(ch->pendingMutex);
             ch->sync.advance(ch->retiredValue);
-            if(!ch->readers.empty() || ch->frameHeld || ch->retiredValue<ch->heldReady || !fl::fenceReady(ch->sync.pending)) {
+            if(!ch->readers.empty() || ch->frameHeld || ch->retiredValue<ch->heldReady || !ch->pending.all([](const fl::PendingFrame& f){return fl::fenceReady(f.fence);})) {
                 link.send(fl::MsgType::Busy);
                 continue;
             }
             // A new producer starts its timeline at one. Old release values
             // must never authorize reuse on the replacement timeline.
-            ch->hasPending=false;ch->sync.clear();
+            ch->pending.clear();ch->sync.clear();
             ch->readers.resetEpoch();ch->heldReady=ch->retiredValue=0;ch->peerFeatures=ph->_pad;
             ++ch->info.generation;
             if (!handOverRing(ch, link)) continue;
@@ -368,8 +366,7 @@ void acceptLoop(flChannel* ch) {
                     std::lock_guard<std::mutex> hold(ch->pendingMutex);
                     ch->sync.advance(ch->retiredValue);
                     if(!ch->readers.empty() || ch->frameHeld || ch->retiredValue < ch->heldReady){if(!handOverRing(ch,ch->peer))break;continue;}
-                    ch->hasPending = false; // stale: the old ring is going away
-                    if(ch->sync.pending>=0)close(ch->sync.pending);ch->sync.pending=-1;
+                    ch->pending.clear(); // stale: the old ring is going away
                     const uint32_t pool = (uint32_t)ch->images.size();
 
                     if (!reallocRing(ch, g->width, g->height, pool)) {
@@ -389,22 +386,21 @@ void acceptLoop(flChannel* ch) {
             const auto* fr=fl::decodeFrame(*msg,(ch->flags&FL_REQUIRE_FRAME_METADATA)!=0,metadata);
             if(!fr || fr->slot>=ch->images.size()){for(int fd:msg->fds)close(fd);break;}
             std::lock_guard<std::mutex> hold(ch->pendingMutex);
-            // Latest-frame-wins, as on Windows: a slow consumer must not stall
-            // the producer.
+            // Oldest-first, bounded by flSetReceiveQueue (default 1: latest-frame-
+            // wins). A full queue replaces its oldest frame; a slow consumer must
+            // never stall the producer.
             if(fltrace::enabled()) {
                 fltrace::Event e{"ipc.frame_received",fltrace::clockNs(),0,fltrace::id(ch->name.c_str()),
-                    ch->sequence+1,fr->readyValue,fr->slot,fr->ptsNs,ch->hasPending?1:0};
+                    ch->sequence+1,fr->readyValue,fr->slot,fr->ptsNs,ch->pending.size()==ch->pending.depth()?1:0};
                 fltrace::record(e); // result=1: unconsumed pending frame replaced
             }
-            if(ch->sync.pending>=0)close(ch->sync.pending);
-            ch->sync.pending=msg->fds.empty()?-1:msg->fds[0];
+            fl::PendingFrame frame;
+            frame.slot=fr->slot;frame.ready=fr->readyValue;frame.pts=fr->ptsNs;frame.metadata=metadata;
+            frame.sequence=++ch->sequence;
+            frame.fence=msg->fds.empty()?-1:msg->fds[0];
             for(size_t i=1;i<msg->fds.size();i++)close(msg->fds[i]);
-            ch->hasPending = true;
-            ch->pendingSlot = fr->slot;
-            ch->pendingReady = fr->readyValue;
-            ch->pendingPts = fr->ptsNs;ch->pendingMetadata=metadata;
-            if(ch->flags & FL_TRACK_ARRIVAL)ch->pendingArrival=fl::arrivalNowNs();
-            ++ch->sequence;
+            if(ch->flags & FL_TRACK_ARRIVAL)frame.arrival=fl::arrivalNowNs();
+            ch->pending.push(frame);
         }
         ch->peerGone = true;
         if (ch->stop.load()) return;
@@ -768,17 +764,17 @@ FL_API flResult flAcquireFrame(flChannel* ch, flFrame* out, uint32_t timeoutMs) 
     for (uint32_t waited = 0;; waited += 2) {
         {
             std::lock_guard<std::mutex> hold(ch->pendingMutex);
-            if (ch->hasPending && !ch->frameHeld &&
-                ((ch->flags & FL_GPU_SYNC) || fl::fenceReady(ch->sync.pending))) {
-                ch->sync.held=ch->sync.pending;ch->sync.pending=-1;
-                ch->frameHeld=true;ch->heldArrival=ch->pendingArrival;
-                ch->heldReady=ch->pendingReady;ch->heldSlot=ch->pendingSlot;ch->heldMetadata=ch->pendingMetadata;
-                ch->hasPending = false;
-                out->slot = ch->pendingSlot;
-                out->image = ch->images[ch->pendingSlot];
-                out->ptsNs = ch->pendingPts;
-                out->sequence = ch->sequence;
-                out->_readyValue = ch->pendingReady;
+            if (!ch->pending.empty() && !ch->frameHeld &&
+                ((ch->flags & FL_GPU_SYNC) || fl::fenceReady(ch->pending.front().fence))) {
+                const fl::PendingFrame f=ch->pending.pop();
+                ch->sync.held=f.fence;
+                ch->frameHeld=true;ch->heldArrival=f.arrival;
+                ch->heldReady=f.ready;ch->heldSlot=f.slot;ch->heldMetadata=f.metadata;
+                out->slot = f.slot;
+                out->image = ch->images[f.slot];
+                out->ptsNs = f.pts;
+                out->sequence = f.sequence;
+                out->_readyValue = f.ready;
                 if(trace.active){trace.event.slot=out->slot;trace.event.sequence=out->sequence;trace.event.pts=out->ptsNs;trace.event.fence=out->_readyValue;}
                 return trace.result(FL_OK);
             }

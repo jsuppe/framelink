@@ -7,6 +7,13 @@ static void traceReadState(fltrace::Scope& trace,flChannel* ch,uint64_t token=0)
     trace.event.generation=ch->info.generation;
     trace.event.occupancy=ch->readers.size();trace.event.token=token;
 }
+FL_API flResult flSetReceiveQueue(flChannel* ch,uint32_t frames) {
+    if(!ch || !ch->isConsumer || !frames || frames>fl::PendingFrames::MaxDepth)return FL_INVALID;
+    std::lock_guard<std::mutex> lock(ch->pendingMutex);
+    if(frames>1 && frames+2>ch->info.poolSize)return FL_INVALID;
+    ch->pending.setDepth(frames);
+    return FL_OK;
+}
 FL_API flResult flLeaseFrame(flChannel* ch, const flFrame* frame, uint64_t* lease) {
     fltrace::Scope trace("reader.acquire",fltrace::id(ch?ch->name.c_str():nullptr));
     if(!ch || !ch->isConsumer || !frame || !lease || !(ch->flags & FL_DEFER_RELEASE) ||

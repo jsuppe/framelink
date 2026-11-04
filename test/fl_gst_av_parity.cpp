@@ -26,8 +26,9 @@ static Outcome normal(Mode pm,Mode cm,const std::string&tracks,bool native,bool 
  o.consumer+=" "+c.features;return o;
 }
 // A clock-paced file-like producer that starts 300ms behind its timeline
-// bursts frames faster than real time. The ring keeps only the newest unread
-// frame, so coordinated video fails at once, naming the cause, in both modes.
+// bursts frames faster than real time. The burst exceeds the default receive
+// queue (video-queue-frames=2), so coordinated video fails at once, naming the
+// cause, in both modes.
 // Element: the application starts PLAYING 300ms after applying the clock.
 // Bin: PLAYING 300ms before the consumer exists, so media is held meanwhile.
 static Outcome burst(Mode pm,Mode cm){
@@ -36,6 +37,16 @@ static Outcome burst(Mode pm,Mode cm){
  c.finish();p.finish();Outcome o{p.result,c.result};log("burst",pm,cm,p,c,o);
  CHECK(o.consumer.find("coordinated video frame replaced before it was read")!=std::string::npos&&o.producer.rfind("error: ",0)==0&&c.frames<FRAMES*2);
  return {"error","error: coordinated video frame replaced before it was read: the producer delivered faster than real time"};
+}
+// The same burst within a receive queue that covers it (14 frames, ring 16):
+// every frame arrives in order and the stream ends normally.
+static Outcome burstQueued(Mode pm,Mode cm){
+ const guint queue=gVideoQueue,pool=gVideoPool;gVideoQueue=14;gVideoPool=16;
+ auto path=sessionPath();Producer p(pm,path,"av",FRAMES*2,80,true);p.lateMs=300;Consumer c(cm,path,"av");
+ if(pm==Mode::Bin){p.start();g_usleep(300000);c.start();}else{c.start();p.start();}
+ c.finish();p.finish();gVideoQueue=queue;gVideoPool=pool;Outcome o{p.result,c.result};log("burst-queued",pm,cm,p,c,o);
+ CHECK(o.producer=="EOS"&&o.consumer=="EOS"&&c.frames==FRAMES*2&&c.contiguous);
+ return o;
 }
 // The producer application ends the stream early: everything pushed arrives.
 static Outcome earlyEos(Mode pm,Mode cm){
@@ -126,6 +137,7 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
  parity("consumer-first av",[](Mode pm,Mode cm){return normal(pm,cm,"av",false,true);});
  parity("producer-first av",[](Mode pm,Mode cm){return normal(pm,cm,"av",false,false);});
  parity("burst",burst);
+ parity("burst-queued",burstQueued);
  parity("video-only",[](Mode pm,Mode cm){return normal(pm,cm,"video",false,true);});
  parity("audio-only",[](Mode pm,Mode cm){return normal(pm,cm,"audio",false,false);});
  // Native memory: the same negotiated platform memory on both consumer paths.

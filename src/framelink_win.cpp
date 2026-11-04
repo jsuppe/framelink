@@ -15,6 +15,7 @@
 #include "framelink.h"
 #include "framelink_memory.h"
 #include "fl_read_ledger.hpp"
+#include "fl_pending.hpp"
 #include "fl_buffer_refs.hpp"
 #include "fl_arrival.hpp"
 #include "fl_layout.h"
@@ -67,7 +68,7 @@ struct flChannel {
     uint32_t peerFeatures=0;
     fl::BufferReferences bufferReferences;
     flFrameMetadata slotMetadata[FL_MAX_POOL_SIZE]{};
-    flFrameMetadata pendingMetadata{},heldMetadata{};
+    flFrameMetadata heldMetadata{};
     std::string name;
 
     ComPtr<ID3D11Device> device;
@@ -92,16 +93,13 @@ struct flChannel {
     std::atomic<bool> stop{false};
     std::atomic<bool> peerGone{false};
     std::mutex pendingMutex;
-    bool hasPending = false;
+    fl::PendingFrames pending; // announced, not yet acquired
     fl::ReadLedger readers;
     std::array<LeaseCompletion,fl::ReadLedger::MaxReaders> leaseCompletions;
     bool frameHeld = false;
     uint64_t heldReady = 0;
     uint32_t heldSlot = 0;
-    uint32_t pendingSlot = 0;
-    uint64_t pendingReady = 0;
-    int64_t pendingPts = -1;
-    uint64_t pendingArrival=0,heldArrival=0;
+    uint64_t heldArrival=0;
     uint64_t sequence = 0;
 
     // --- producer only ---
@@ -251,7 +249,7 @@ bool resetSync(flChannel* ch) {
     ch->readyValue = 0;
     {
         std::lock_guard<std::mutex> hold(ch->pendingMutex);
-        ch->hasPending = false; // announced against the old fence
+        ch->pending.clear(); // announced against the old fence
         ch->readers.resetEpoch();ch->heldReady=0;
     }
     ++ch->info.generation;
@@ -346,7 +344,7 @@ void acceptLoop(flChannel* ch) {
             std::lock_guard<std::mutex> hold(ch->pendingMutex);
             ch->peerFeatures=ph->_pad;
             if(!ch->readers.empty() || ch->frameHeld || ch->consumedFence->GetCompletedValue()<ch->heldReady ||
-               (ch->hasPending && ch->readyFence->GetCompletedValue()<ch->pendingReady)) {
+               !ch->pending.all([ch](const fl::PendingFrame& f){return ch->readyFence->GetCompletedValue()>=f.ready;})) {
                 link.send(fl::MsgType::Busy);
                 continue;
             }
@@ -370,13 +368,13 @@ void acceptLoop(flChannel* ch) {
                     (g->width != ch->info.width || g->height != ch->info.height)) {
                     // Scoped, not held across the rebuild: resetSync takes the
                     // same mutex, and std::mutex is not recursive. Clearing
-                    // hasPending here is enough - only this thread ever sets
+                    // the pending queue here is enough - only this thread ever sets
                     // it, so nothing can be announced against the old ring
                     // between here and the new ring being live.
                     {
                         std::lock_guard<std::mutex> hold(ch->pendingMutex);
                         if(!ch->readers.empty() || ch->frameHeld || ((ch->flags & (FL_GPU_SYNC|FL_DEFER_RELEASE)) && ch->consumedFence->GetCompletedValue()<ch->heldReady)){if(!handOverRing(ch,link,link.peerPid()))break;continue;}
-                        ch->hasPending = false; // stale: the old ring is going away
+                        ch->pending.clear(); // stale: the old ring is going away
                     }
                     const uint32_t pool = (uint32_t)ch->images.size();
                     for (flImage* img : ch->images) {
@@ -403,18 +401,19 @@ void acceptLoop(flChannel* ch) {
             const auto* fr=fl::decodeFrame(*msg,(ch->flags&FL_REQUIRE_FRAME_METADATA)!=0,metadata);
             if(!fr || fr->slot>=ch->images.size()){break;}
             std::lock_guard<std::mutex> hold(ch->pendingMutex);
-            // Latest-frame-wins: a slow consumer must never stall the producer.
+            // Oldest-first, bounded by flSetReceiveQueue (default 1: latest-frame-
+            // wins). A full queue replaces its oldest frame; a slow consumer must
+            // never stall the producer.
             if(fltrace::enabled()) {
                 fltrace::Event e{"ipc.frame_received",fltrace::clockNs(),0,fltrace::id(ch->name.c_str()),
-                    ch->sequence+1,fr->readyValue,fr->slot,fr->ptsNs,ch->hasPending?1:0};
+                    ch->sequence+1,fr->readyValue,fr->slot,fr->ptsNs,ch->pending.size()==ch->pending.depth()?1:0};
                 fltrace::record(e); // result=1: unconsumed pending frame replaced
             }
-            ch->hasPending = true;
-            ch->pendingSlot = fr->slot;
-            ch->pendingReady = fr->readyValue;
-            ch->pendingPts = fr->ptsNs;ch->pendingMetadata=metadata;
-            if(ch->flags & FL_TRACK_ARRIVAL)ch->pendingArrival=fl::arrivalNowNs();
-            ++ch->sequence;
+            fl::PendingFrame frame;
+            frame.slot=fr->slot;frame.ready=fr->readyValue;frame.pts=fr->ptsNs;frame.metadata=metadata;
+            frame.sequence=++ch->sequence;
+            if(ch->flags & FL_TRACK_ARRIVAL)frame.arrival=fl::arrivalNowNs();
+            ch->pending.push(frame);
         }
         ch->peerGone = true;
         FL_LOG("framelink: producer detached from '%s'", ch->name.c_str());
@@ -855,16 +854,16 @@ FL_API flResult flAcquireFrame(flChannel* ch, flFrame* out, uint32_t timeoutMs) 
         bool got = false;
         {
             std::lock_guard<std::mutex> hold(ch->pendingMutex);
-            if (ch->hasPending && !ch->frameHeld &&
-                ((ch->flags & FL_GPU_SYNC) || ch->readyFence->GetCompletedValue() >= ch->pendingReady)) {
-                ch->frameHeld = true;ch->heldArrival=ch->pendingArrival;
-                ch->heldReady = ch->pendingReady;
-                ch->heldSlot = ch->pendingSlot;ch->heldMetadata=ch->pendingMetadata;
-                ch->hasPending = false;
-                slot = ch->pendingSlot;
-                ready = ch->pendingReady;
-                pts = ch->pendingPts;
-                seq = ch->sequence;
+            if (!ch->pending.empty() && !ch->frameHeld &&
+                ((ch->flags & FL_GPU_SYNC) || ch->readyFence->GetCompletedValue() >= ch->pending.front().ready)) {
+                const fl::PendingFrame f=ch->pending.pop();
+                ch->frameHeld = true;ch->heldArrival=f.arrival;
+                ch->heldReady = f.ready;
+                ch->heldSlot = f.slot;ch->heldMetadata=f.metadata;
+                slot = f.slot;
+                ready = f.ready;
+                pts = f.pts;
+                seq = f.sequence;
                 got = true;
             }
         }
