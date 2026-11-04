@@ -112,7 +112,11 @@ runs. Every validation records revision, host/driver, settings, exact command,
 trace state, all failures, and raw evidence. Execute sequentially.
 
 ### M6.2 — Current task: low-latency sustained A/V
-- [ ] 2a Audit timing/queue behavior in bins, elements, renderer and benchmark;
+
+2a source inspection completed: [timing audit](TIMING_AUDIT.md). 2b partial:
+independent benchmark timing controls and [Linux controls](zero-delay-controls/README.md)
+validated; output occupancy and primary-profile budgets remain pending.
+- [x] 2a Audit timing/queue behavior in bins, elements, renderer and benchmark;
       publish where each wait/copy occurs and reconcile D1/D2 with current code.
 - [ ] 2b Parameterize latency, pool and unread depth independently; add primary
       zero-added-delay and explicit buffered-control profiles; expose effective
