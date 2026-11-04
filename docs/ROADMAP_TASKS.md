@@ -1,11 +1,11 @@
 # FrameLink + vkrender — executable roadmap checklist
 
-Updated 2026-11-01. This is the checkable execution view of
+Updated 2026-11-04. This is the checkable execution view of
 [the milestone roadmap](REMAINING_ROADMAP.md); the detailed acceptance contracts
 remain authoritative. Checked means implemented, reviewed and validated within
 the stated scope—not universal hardware support or physical-output qualification.
 
-Remaining execution order: **M5b → M6 → M7**, one task at a time. No concurrent
+Remaining execution order: **M6 → M7**, one task at a time. No concurrent
 implementation/review/validation streams. Finish the current milestone before
 starting the next. Hourly reporting is not an implementation executor.
 
@@ -305,6 +305,13 @@ bounded, and audio copies/unsupported paths are explicit. Physical lip-sync and
 new shared-PCM transport are not silently included.
 
 ## M6 — Reliability, performance and observability
+
+**November 4 requirement update:** the primary profile has no intentional
+per-hop delay; 150 ms buffered runs do not qualify it. See the
+[low-latency resolution plan and decision register](m6/LOW_LATENCY_PLAN.md)
+for mandatory M6.2–M6.9 subtasks, pending design decisions and final gates.
+M6.1 primary-profile budget acceptance is reopened; historical evidence remains.
+M6.7 prepares closure infrastructure; actual closure follows M6.8/M6.9.
 
 **State: in progress (M6.1 done).** Earlier targeted stress/trace tests are
 baseline evidence, not completion of these release-scale tasks.

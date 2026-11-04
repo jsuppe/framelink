@@ -1,13 +1,17 @@
 # FrameLink + renderer remaining roadmap
 
-Updated 2026-11-01. Scope: local cross-platform video/audio sessions and renderer
+Updated 2026-11-04. Scope: local cross-platform video/audio sessions and renderer
 integration. Historical cloud calling, unrelated receiver features and HDR are
 not part of this release. M1–M5 are merged within their documented qualification
 scope. M5a is complete within documented paths (PR #7, `3e1d51f`).
-M5b is complete within documented scope (PR #8, `9f86c35`). M6 is next; M7 follows. Planned work is not implemented merely by being listed.
+M5b is complete within documented scope (PR #8, `9f86c35`). M6 is in progress; M7 follows. Planned work is not implemented merely by being listed.
 
 For individually checkable tasks and current merge gates, see
 [the executable roadmap checklist](ROADMAP_TASKS.md).
+
+November 4: [Low-latency/native-memory resolution plan](m6/LOW_LATENCY_PLAN.md)
+adds mandatory subtasks and a versioned decision register to M6. The primary
+profile has no intentional per-hop delay; buffered results remain controls.
 
 ## M1 — Land the validated audio foundation
 

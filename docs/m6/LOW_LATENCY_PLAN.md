@@ -1,0 +1,194 @@
+# M6 low-latency and native-memory resolution plan
+
+Revision 1 — 2026-11-04. Owner: project executor, one task at a time.
+Status: approved user requirements plus implementation proposals; no new runtime
+qualification is claimed by this document. Applies to FrameLink and vkrender.
+
+## Confirmed requirements and evidence boundaries
+
+Jon confirmed on November 4 that the primary use case is zero-added-latency
+process boundaries, not 150 ms buffering. Preserve original A/V timing across
+hops and use native allocation sharing where compatible. Pool capacity is not a
+playout delay. Mandatory ownership and readiness synchronization must never be
+removed to obtain a lower latency number. Literal zero elapsed time is not a claim.
+
+M1–M5b remain complete within their published scope. M6.1's existing matrix and
+150 ms measurements remain historical evidence, not acceptance of the primary
+low-latency mode. M6.2 is incomplete; a722b75 repairs receive queue handling but
+post-fix full qualification is not established here. M6.8/M6.9 are open gaps.
+Keep existing order M6.2–M6.9, then M7. M6.7 is automation infrastructure, not
+permission to close M6 before M6.8 and M6.9 and their final integrated reruns.
+
+## Decision register
+
+For every proposal below record: accepted/rejected/superseded, decision owner,
+date, rationale, public API/default impact, implementation revision and evidence.
+Do not silently promote a recommendation to a user decision. Jon owns product
+tradeoffs; executor owns routine implementation choices within accepted scope.
+
+### D1 — Timing ownership and defaults
+
+**Confirmed:** no intentional per-hop buffering in the primary mode.
+**Proposed:** transport-only boundaries immediately expose ready buffers and
+preserve the common media timeline; only the final playback stage schedules
+presentation. Set the primary session/example profile to zero added transport
+latency; retain explicitly selected buffered playback for compatibility.
+Inventory all BaseSink sync flags, bin latency, app queues and renderer waits.
+Do not set every final audio/video sink to sync=false: that destroys playback
+synchronization. Do not independently rebase audio and video at each hop.
+
+Alternative: retain 150 ms default and require opt-out. Not recommended because
+it makes the primary use case opt-in and can conceal throughput failures.
+Decision needed: compatibility transition for existing applications relying on
+150 ms. Recommendation: named explicit legacy profile plus migration notice;
+no claim of a silently compatible timing change.
+
+### D2 — Queue capacity, overload and loss semantics
+
+**Proposed:** default to the smallest validated ownership pool, test two buffers
+first, and permit additional allocations only with a measured ownership reason.
+No fill-before-delivery or queue-depth-derived delay. Keep pool size, unread
+queue bound and scheduling latency independent. Publish actual effective values;
+strict negotiation rejects unsupported depth rather than silently clamping it.
+
+A finite-memory transport cannot guarantee zero waiting, zero drops and lossless
+operation under an arbitrarily stalled consumer. Propose explicit policies:
+- realtime/latest: bounded stale-video replacement, reported identities and age;
+- lossless: bounded backpressure, with latency allowed to rise and reported;
+- qualification/strict: fail on unexpected loss or unsupported allocation policy.
+Never overwrite a GPU-owned frame. Audio must not silently use latest-frame-wins;
+retain sample continuity or explicitly signal discontinuity/failure.
+Decision needed: realtime overload behavior and API default. Retain current
+fail-fast behavior until this choice is resolved; do not change it just to pass.
+
+### D3 — Native producer integration and fallback
+
+**Proposed:** bind M5a allocation/usage negotiation and completion fences to
+coordinated sessions (M6.9), both individual elements and A/V bins. Support
+upstream allocation into a negotiated pool where compatible, and external
+allocation import where supported. Preserve identity, format/planes, stride,
+modifier, adapter, generation and lifetime through every boundary.
+
+Strict zero-copy rejects incompatibility before media. Optional copy fallback
+must be explicitly selected and report reason, bytes and direction (CPU copy,
+upload, readback, conversion). GPU-to-GPU copies are copies too. Generic decoder
+compatibility is not established by a synthetic producer alone.
+Decision needed: whether convenience callers default to strict or explicit
+fallback profile. Recommendation: strict in the native profile; separately named
+CPU/compatibility profile, never a hidden fallback.
+
+### D4 — CPU versus GPU memory placement
+
+**Proposed:** negotiate intended consumer access rather than assuming all native
+memory is CPU-efficient. For CPU-heavy consumers evaluate cached shared system
+memory versus explicit staging/readback; for render/decoder consumers preserve
+native GPU allocations. Unified-memory platforms still need cache/fence checks.
+Mixed CPU/GPU consumers must report the chosen compromise and actual transfer
+costs. Do not promise simultaneous optimal placement or universal zero-copy.
+
+Linux M6.8 compares cached memory, streaming access and staging on the same
+workload. Android M6.5 isolates NV12 conversion, lock/cache and stride costs;
+unsupported exact layouts must reject. Windows qualifies readback, adapter
+compatibility and queue behavior rather than assuming Linux findings apply.
+Selection depends on measured support; no vendor-specific solution is mandated.
+
+### D5 — Qualification budgets
+
+**Confirmed:** 1080p60 and 4K30 remain target workloads, not tiny-frame substitutes.
+**Proposed gates:** zero configured transport hold; no unexplained nominal loss;
+no hidden copies in strict native mode; bounded memory/leases; exact propagated
+A/V timestamp offset. Test one and two boundaries with matched source work.
+
+Before each campaign freeze numeric per-platform p50/p95/p99/max boundary-age,
+CPU/GPU and overhead budgets. Proposed initial added-hop p95 target: <=2 ms;
+this is a proposal, not a measured universal guarantee (older evidence includes
+~2.1 ms). Report misses, do not tune the budget after observing a failing run.
+Physical scanout/acoustic alignment are separate from API completion and PTS.
+
+## Executable work breakdown
+
+All unchecked tasks below are pending, not newly completed by prior large-queue
+runs. Every validation records revision, host/driver, settings, exact command,
+trace state, all failures, and raw evidence. Execute sequentially.
+
+### M6.2 — Current task: low-latency sustained A/V
+- [ ] 2a Audit timing/queue behavior in bins, elements, renderer and benchmark;
+      publish where each wait/copy occurs and reconcile D1/D2 with current code.
+- [ ] 2b Parameterize latency, pool and unread depth independently; add primary
+      zero-added-delay and explicit buffered-control profiles; expose effective
+      settings. Reopen M6.1 budget acceptance for the primary profile.
+- [ ] 2c Review a722b75 ownership, fence disposal, queue shrink, disconnect,
+      monotonic release and actual depth; test unsupported-depth rejection.
+- [ ] 2d Add deterministic fast-consumer, delayed-consumer and burst controls:
+      distinguish producer gaps, overwritten pending frames, GPU-held slots,
+      clock scheduling and upstream loss. Verify no wait-to-fill.
+- [ ] 2e Run affected full suites on Linux/Windows/Android; then 30-minute
+      supported 1080p60/4K30 cases with zero-added-delay/small pools. Preserve
+      startup, steady-state and drain accounting. Record other host load.
+- [ ] 2f Publish all pass/fail cells and queue-age distributions. Large-pool or
+      150 ms control success cannot waive the low-latency gate.
+
+### M6.3 — Lifecycle endurance
+- [ ] 3a At least 100 restart/reconnect cycles per target in the primary profile.
+- [ ] 3b Include outstanding native leases, generation changes, EOS and pause;
+      ensure cancellation is bounded and resources return to warm baseline.
+
+### M6.4 — Fault and overload qualification
+- [ ] 4a Resolve D2 before changing public overload defaults.
+- [ ] 4b Inject consumer/GPU stalls, producer bursts, endpoint death, audio
+      underruns and malformed/stale metadata. Validate each selected policy.
+- [ ] 4c Verify bounded recovery, explicit loss/discontinuity, and no unsafe reuse.
+
+### M6.5 — Performance and platform cost analysis
+- [ ] 5a Measure per-stage copy/lock/wait/convert/present cost and resource growth.
+- [ ] 5b Isolate Android NV12 CPU costs with format/layout and lock controls.
+- [ ] 5c Separate Windows queue timing from producer and GPU scheduling defects.
+- [ ] 5d Publish platform/format/resolution limits; no unsupported-cell omission.
+
+### M6.6 — Observability without hidden overhead
+- [ ] 6a Join independent source identities through each boundary, GPU completion
+      and presentation submission; separately track PCM and A/V offset.
+- [ ] 6b Compare trace off/on, quantify memory per recorder and loss detection;
+      require bounded configurable recorder capacity, not huge implicit defaults.
+
+### M6.7 — Repeatable automation (closure infrastructure)
+- [ ] 7a Add deterministic queue/ownership/timing negatives to CI.
+- [ ] 7b Publish reproducible real-device scripts and machine-readable gates.
+- [ ] 7c Ensure final acceptance references the exact integrated revision after
+      M6.8/M6.9; old benchmark passes are not final qualification.
+
+### M6.8 — CPU-consumer memory path repair
+- [ ] 8a Reproduce Linux slow/bimodal readback with allocation/cache diagnostics.
+- [ ] 8b Compare cached shared-memory, streaming and explicit staging choices;
+      implement negotiated CPU-efficient path without mislabeling copies.
+- [ ] 8c Validate pixels, planes, visibility, lifetime and A/V timing; measure
+      target-rate CPU consumption on all three platforms where supported.
+
+### M6.9 — Zero-copy native producer in coordinated sessions
+- [ ] 9a Connect native negotiation to session coordinator, sink and A/V bin.
+- [ ] 9b Integrate upstream allocation/import and readiness/completion fences for
+      DMA-BUF, D3D11 and supported AHardwareBuffer layouts.
+- [ ] 9c Reject incompatible adapter/layout/usage and test explicit fallback.
+- [ ] 9d Qualify real compatible decoder/renderer producers, native consumer,
+      and two-hop relay with PCM; prove allocation identity and zero payload
+      copies, not just absence of CPU mapping.
+- [ ] 9e Repeat affected endurance/performance/trace gates on the final integrated
+      revision, review all unresolved decisions and verify CI/merge before M6 closes.
+
+### M7 — Release and developer handoff
+- [ ] 7.1 Freeze API/ABI, decision records, capability matrix and timing migration.
+- [ ] 7.2 Ship zero-added-delay Windows/Linux/Android examples, native decoder
+      integration recipes and an explicitly buffered playback example.
+- [ ] 7.3 Validate clean installation and observable effective settings/copy paths.
+- [ ] 7.4 Review exact-head tests, merge/tag/artifacts and known limits; retain
+      physical-output exclusions unless independently measured.
+
+## Immediate next action and coordination
+
+Current implementation handoff remains M6.2. This planning update does not launch
+another executor, alter runtime defaults or approve unmeasured compatibility
+claims. Reconcile the existing Claude Code owner before resuming implementation.
+The next ready task is 2a, followed by explicit primary-profile gates; existing
+Windows repair evidence must be preserved. Later tasks keep their established
+order. Recommendations D1–D5 remain proposals except requirements explicitly
+marked confirmed above.
