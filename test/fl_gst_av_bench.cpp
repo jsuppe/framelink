@@ -153,7 +153,7 @@ static int consumerChild(const Options&o,const std::string&session,const std::st
    gst_pad_add_probe(qs,GST_PAD_PROBE_TYPE_BUFFER,arrival,&arrivals,nullptr);
    g_object_set_data(G_OBJECT(peer),"track",GINT_TO_POINTER(track));gst_pad_add_probe(peer,GST_PAD_PROBE_TYPE_BUFFER,departed,&arrivals,nullptr);for(auto*x:{(GstObject*)qs,(GstObject*)queue,(GstObject*)peer,(GstObject*)sp,(GstObject*)sink})gst_object_unref(x);}
   // Pre-fault the per-buffer records so they do not show as consumer growth.
-  for(int track=0;track<2;track++){const size_t n=size_t(o.seconds+10)*(track?100:gFps);for(auto*v:{&c.lateness[track]}){v->resize(n);v->clear();}arrivals.v[track].resize(n);arrivals.v[track].clear();}
+  for(int track=0;track<2;track++){const size_t n=size_t(o.seconds+10)*(track?100:gFps);for(auto*v:{&c.lateness[track]}){v->resize(n);v->clear();}arrivals.v[track].resize(n);arrivals.v[track].clear();arrivals.residence[track].resize(n);arrivals.residence[track].clear();}
   c.start();c.finish();sampler.stop();
   r["result"]=c.result;r["frames"]=std::to_string(c.frames.load());r["samples"]=std::to_string(c.samples.load());r["memory"]=c.features;
   std::lock_guard<std::mutex> lock(c.mutex);std::lock_guard<std::mutex> alock(arrivals.m);
