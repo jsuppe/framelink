@@ -64,6 +64,16 @@ def audio_continuity(rows, expected, budget_ns):
             "scope": "PTS continuity only; PCM bytes/counts require the benchmark summary."}
 
 
+def av_mapping(video_result, audio_producer, audio_consumer, expected, budget_ns):
+    audio_result = analyze(audio_producer, audio_consumer, expected, budget_ns)
+    delta = audio_result["pts_offset_ns"] - video_result["pts_offset_ns"]
+    if delta:
+        raise ValueError(f"A/V PTS mapping differs by {delta} ns; relative offset changed")
+    return {"audio": audio_result, "av_mapping_delta_ns": delta,
+            "scope": "Both tracks preserve the same inferred constant PTS mapping. "
+                     "No independent allocation identity or physical playback claim."}
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("producer")
@@ -71,18 +81,24 @@ def main():
     p.add_argument("--expected", type=int, required=True)
     p.add_argument("--budget-ms", type=float, required=True)
     p.add_argument("--audio")
+    p.add_argument("--producer-audio")
     p.add_argument("--expected-audio-blocks", type=int)
     a = p.parse_args()
     if not math.isfinite(a.budget_ms) or a.budget_ms < 0:
         p.error("budget must be finite and non-negative")
     if bool(a.audio) != (a.expected_audio_blocks is not None):
         p.error("--audio and --expected-audio-blocks must be supplied together")
+    if a.producer_audio and not a.audio:
+        p.error("--producer-audio requires --audio")
     try:
         result = analyze(read(a.producer), read(a.consumer), a.expected,
                          round(a.budget_ms * 1e6))
         if a.audio:
             result["audio"] = audio_continuity(read(a.audio), a.expected_audio_blocks,
                                                round(a.budget_ms * 1e6))
+        if a.producer_audio:
+            result["av_mapping"] = av_mapping(result, read(a.producer_audio), read(a.audio),
+                                              a.expected_audio_blocks, round(a.budget_ms * 1e6))
     except (ValueError, KeyError, OSError) as e:
         p.exit(2, str(e) + "\n")
     print(json.dumps(result, indent=2))

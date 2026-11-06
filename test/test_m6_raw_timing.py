@@ -55,6 +55,19 @@ class TimingJoin(unittest.TestCase):
         with self.assertRaises(ValueError):
             timing.audio_continuity(rows, 3, 17000000)
 
+    def test_shared_av_offset_and_independent_rebase_negative(self):
+        video = timing.analyze(self.p, self.c, 3, 17000000)
+        audio_p, audio_c = copy.deepcopy(self.p), copy.deepcopy(self.c)
+        for row in audio_p + audio_c:
+            row["pts_ns"] = str(int(row["pts_ns"]) + 37000000)
+        r = timing.av_mapping(video, audio_p, audio_c, 3, 17000000)
+        self.assertEqual(r["av_mapping_delta_ns"], 0)
+        rebased = copy.deepcopy(audio_c)
+        for row in rebased:
+            row["pts_ns"] = str(int(row["pts_ns"]) + 37000000)
+        with self.assertRaises(ValueError):
+            timing.av_mapping(video, audio_p, rebased, 3, 17000000)
+
 
 if __name__ == "__main__":
     unittest.main()

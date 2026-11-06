@@ -113,9 +113,10 @@ trace state, all failures, and raw evidence. Execute sequentially.
 
 ### M6.2 — Current task: low-latency sustained A/V
 
-2a source inspection completed: [timing audit](TIMING_AUDIT.md). 2b partial:
-independent benchmark timing controls and [Linux controls](zero-delay-controls/README.md)
-validated; output occupancy and primary-profile budgets remain pending.
+2a source inspection completed: [timing audit](TIMING_AUDIT.md). 2b partial: independent timing, bounded output, paired admission/residence probes,
+all-frame timing and explicit preroll controls are validated in
+[platform controls](zero-delay-platform-controls/README.md). Primary-profile
+budget acceptance remains open; these measurements do not prove physical output.
 - [x] 2a Audit timing/queue behavior in bins, elements, renderer and benchmark;
       publish where each wait/copy occurs and reconcile D1/D2 with current code.
 - [ ] 2b Parameterize latency, pool and unread depth independently; add primary
@@ -191,10 +192,17 @@ Receive-depth gate evidence: [review and platform tests](receive-depth/README.md
 
 ## Immediate next action and coordination
 
-Current implementation handoff remains M6.2. This planning update does not launch
-another executor, alter runtime defaults or approve unmeasured compatibility
-claims. Reconcile the existing Claude Code owner before resuming implementation.
-The next ready task is 2a, followed by explicit primary-profile gates; existing
-Windows repair evidence must be preserved. Later tasks keep their established
-order. Recommendations D1–D5 remain proposals except requirements explicitly
-marked confirmed above.
+November6: parent executor owns M6.2, sequentially. Execution ownership has been
+reconciled; there is no pending Claude Code handoff. Exact-depth review and
+platform regressions passed. Linux full suite passed114/114 at8541985; Windows
+and Android affected checks passed, not full latest platform suites. Android
+30-minute native-consumer1080p60 completed exact counts and zero17ms arrival
+misses at4497b3b, with the startup-output limitation preserved in its evidence.
+
+The measurement layer now exposes independent counts, audio continuity and
+all-frame metrics; an explicit no-output-preroll control separates measurement
+startup from transport arrival. Next: record producer audio as well as video
+PTS, verify the same mapping across tracks, and continue the remaining primary
+profile target-rate/ownership qualification. No buffered or short control is
+substituted for the final sustained matrix. LaterM6.3–M6.9 keep their order.
+RecommendationsD1–D5 remain proposals except confirmed user requirements.

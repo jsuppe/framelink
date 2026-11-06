@@ -105,24 +105,26 @@ static int sourceChild(const Options&o,const std::string&out){
 // Producer push: running time when the video source pushes each frame, minus
 // its PTS (on the session timeline shared with the consumer). A live source
 // that stalls catches up with back-to-back pushes; bursts show here.
-struct Pushes {std::mutex m;std::vector<std::pair<gint64,gint64>> v;GstElement*pipeline=nullptr;};  // {pts, lateness}
-static GstPadProbeReturn pushed(GstPad*,GstPadProbeInfo*info,gpointer d){
+struct Pushes {std::mutex m;std::vector<std::pair<gint64,gint64>> v[2];GstElement*pipeline=nullptr;};  // {pts, lateness}
+static GstPadProbeReturn pushed(GstPad*pad,GstPadProbeInfo*info,gpointer d){
  auto*a=static_cast<Pushes*>(d);auto*b=GST_PAD_PROBE_INFO_BUFFER(info);
  if(auto*clock=gst_element_get_clock(a->pipeline)){gint64 l=gint64(gst_clock_get_time(clock))-gint64(gst_element_get_base_time(a->pipeline))-gint64(GST_BUFFER_PTS(b));gst_object_unref(clock);
-  std::lock_guard<std::mutex> lock(a->m);a->v.push_back({gint64(GST_BUFFER_PTS(b)),l});}
+  const int track=GPOINTER_TO_INT(g_object_get_data(G_OBJECT(pad),"m6-track"));
+  std::lock_guard<std::mutex> lock(a->m);a->v[track].push_back({gint64(GST_BUFFER_PTS(b)),l});}
  return GST_PAD_PROBE_OK;}
 
 static int producerChild(const Options&o,const std::string&session,const std::string&out){
  Sampler sampler;std::map<std::string,std::string> r;Pushes pushes;
- {Producer p(modeOf(o.mode),session,"av",o.seconds*gFps,80,false,o.seconds*100);pushes.pipeline=p.p;pushes.v.resize(size_t(o.seconds+10)*gFps);pushes.v.clear();
-  {auto*src=gst_bin_get_by_name(GST_BIN(p.p),"vsrc");CHECK(src);auto*pad=gst_element_get_static_pad(src,"src");gst_pad_add_probe(pad,GST_PAD_PROBE_TYPE_BUFFER,pushed,&pushes,nullptr);gst_object_unref(pad);gst_object_unref(src);}
+ {Producer p(modeOf(o.mode),session,"av",o.seconds*gFps,80,false,o.seconds*100);pushes.pipeline=p.p;
+  for(int track=0;track<2;++track){pushes.v[track].resize(size_t(o.seconds+10)*(track?100:gFps));pushes.v[track].clear();
+   auto*src=gst_bin_get_by_name(GST_BIN(p.p),track?"asrc":"vsrc");CHECK(src);auto*pad=gst_element_get_static_pad(src,"src");g_object_set_data(G_OBJECT(pad),"m6-track",GINT_TO_POINTER(track));gst_pad_add_probe(pad,GST_PAD_PROBE_TYPE_BUFFER,pushed,&pushes,nullptr);gst_object_unref(pad);gst_object_unref(src);}
   p.start();p.finish();sampler.stop();
   r["result"]=p.result;r["pushed.frames"]=std::to_string(p.pushedFrames.load());r["pushed.samples"]=std::to_string(p.pushedSamples.load());
-  {std::lock_guard<std::mutex> lock(pushes.m);auto&v=pushes.v;std::vector<double> late,gaps;guint burst=0,maxBurst=0;const double period=1e9/gFps;
+  {std::lock_guard<std::mutex> lock(pushes.m);for(int track=0;track<2;++track){auto&v=pushes.v[track];std::vector<double> late,gaps;guint burst=0,maxBurst=0;const double period=1e9/(track?100:gFps);const std::string name=track?"audio":"video";
    for(size_t i=0;i<v.size();i++){if(v[i].first-v.front().first<gint64(WARMUP_S*GST_SECOND))continue;late.push_back(v[i].second/1e6);
     if(i){const double gap=double((v[i].first+v[i].second)-(v[i-1].first+v[i-1].second));gaps.push_back(gap/1e6);burst=gap<period/4?burst+1:0;maxBurst=std::max(maxBurst,burst);}}
-   r["video.push_lateness.ms"]=dist(late);r["video.push_interval.ms"]=dist(gaps);r["video.push_burst.max"]=std::to_string(maxBurst);
-   if(o.raw||p.result!="EOS"){std::ofstream f(out+".push.csv");f<<"pts_ns,push_lateness_ns\n";for(auto&x:v)f<<x.first<<","<<x.second<<"\n";}}
+   r[name+".push_lateness.ms"]=dist(late);r[name+".push_interval.ms"]=dist(gaps);r[name+".push_burst.max"]=std::to_string(maxBurst);
+   if(o.raw||p.result!="EOS"){std::ofstream f(out+(track?".audio-push.csv":".push.csv"));f<<"pts_ns,push_lateness_ns\n";for(auto&x:v)f<<x.first<<","<<x.second<<"\n";}}}
   std::lock_guard<std::mutex> lock(p.statsMutex);
   for(auto*s:p.stats){gchar*t=gst_structure_to_string(s);r[std::string("stats.")+gst_structure_get_name(s)]=t;g_free(t);}}
  sampler.report(r);writeResult(out,r);return 0;}
