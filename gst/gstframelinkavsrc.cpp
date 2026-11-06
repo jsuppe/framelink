@@ -306,7 +306,7 @@ static void finalize(GObject*object){
 static void gst_framelink_av_src_init(GstFrameLinkAvSrc*s){
  s->tracks=g_strdup("av");s->videoFormat=g_strdup("BGRA");s->audioFormat=g_strdup("S16LE");
  s->width=1280;s->height=720;s->fpsN=30;s->fpsD=1;s->rate=48000;s->channels=2;
- s->connectMs=15000;s->idleMs=15000;s->audioQueueMs=80;s->videoQueue=2;s->videoPool=8;s->latencyMs=150;s->nativeMemory=FALSE;
+ s->connectMs=15000;s->idleMs=15000;s->audioQueueMs=80;s->videoQueue=2;s->videoPool=8;s->latencyMs=0;s->nativeMemory=FALSE;
  s->shared=new Shared;
  rebuild(s);
 }
@@ -333,7 +333,7 @@ static void gst_framelink_av_src_class_init(GstFrameLinkAvSrcClass*klass){
  g_object_class_install_property(o,PROP_AUDIO_QUEUE,g_param_spec_uint("audio-queue-ms","Audio queue","Hard audio queue budget, not target latency",1,2000,80,rw));
  g_object_class_install_property(o,PROP_VIDEO_QUEUE,g_param_spec_uint("video-queue-frames","Video queue","Coordinated video queue budget",1,16,2,rw));
  g_object_class_install_property(o,PROP_VIDEO_POOL,g_param_spec_uint("video-pool","Video pool","Ring images this consumer allocates with session= (0: 4); cover ceil(latency*fps)+2",0,FL_MAX_POOL_SIZE,8,rw));
- g_object_class_install_property(o,PROP_LATENCY,g_param_spec_uint("latency-ms","Latency","Pipeline latency installed with session=; covers transport and sink buffering",0,10000,150,rw));
+ g_object_class_install_property(o,PROP_LATENCY,g_param_spec_uint("latency-ms","Latency","Explicit pipeline latency with session=; zero for transport, set required final-playback buffering explicitly",0,10000,0,rw));
  g_object_class_install_property(o,PROP_NATIVE,g_param_spec_boolean("native-memory","Native memory","Output platform GPU memory (DMABuf, D3D11Memory, FrameLinkAHardwareBuffer) from the ring; with session= the ring defers read release",FALSE,rw));
  g_object_class_install_property(o,PROP_ID,g_param_spec_string("session-id","Session identity","Negotiated identity, not a secret",nullptr,ro));
  g_object_class_install_property(o,PROP_GENERATION,g_param_spec_uint64("generation","Generation","Negotiated session generation",0,G_MAXUINT64,0,ro));

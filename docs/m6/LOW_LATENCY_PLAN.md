@@ -39,9 +39,12 @@ synchronization. Do not independently rebase audio and video at each hop.
 
 Alternative: retain 150 ms default and require opt-out. Not recommended because
 it makes the primary use case opt-in and can conceal throughput failures.
-Decision needed: compatibility transition for existing applications relying on
-150 ms. Recommendation: named explicit legacy profile plus migration notice;
-no claim of a silently compatible timing change.
+Implementation decision (executor, November6): apply the confirmed zero-added
+transport requirement to the public `framelinkavsrc` default (0ms). Retain the
+existing explicit `latency-ms=150` setting for compatibility instead of adding a
+redundant profile API. Migration notice and scheduled-playback regressions are
+required; no claim of a silently compatible default change. Application-managed
+clock setup and explicit final-playback samples remain unchanged.
 
 ### D2 — Queue capacity, overload and loss semantics
 

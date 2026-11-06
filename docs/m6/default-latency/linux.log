@@ -1,0 +1,147 @@
+Start testing: Nov 06 07:25 EST
+----------------------------------------------------------
+107/114 Testing: gst_av_src_bin
+107/114 Test: gst_av_src_bin
+Command: "<linux-build>/fl_gst_av_src_bin" "<linux-build>/libgstframelink.so"
+Directory: <linux-build>
+"gst_av_src_bin" start time: Nov 06 07:25 EST
+Output:
+----------------------------------------------------------
+CASE negative outside a pipeline
+CASE tracks=av consumer-first=1 lead=0ms 
+   producer=EOS consumer=EOS video=30 (mapped 30, memory:SystemMemory) samples=24000 lag video 150.1..150.2ms audio 150.1..150.2ms
+CASE tracks=av consumer-first=0 lead=800ms 
+   producer=EOS consumer=EOS video=30 (mapped 30, memory:SystemMemory) samples=24000 lag video 150.1..150.2ms audio 150.1..150.1ms
+CASE tracks=video consumer-first=0 lead=300ms 
+   producer=EOS consumer=EOS video=30 (mapped 30, memory:SystemMemory) samples=0 lag video 150.1..150.2ms audio 9223372036854.8..-9223372036854.8ms
+CASE tracks=audio consumer-first=1 lead=0ms 
+   producer=EOS consumer=EOS video=0 (mapped 0, -) samples=24000 lag video 9223372036854.8..-9223372036854.8ms audio 150.0..150.2ms
+CASE tracks=av consumer-first=1 lead=0ms  (clock-providing element in both pipelines)
+   producer=EOS consumer=EOS video=30 (mapped 30, memory:SystemMemory) samples=24000 lag video 150.1..150.2ms audio 150.1..150.2ms
+CASE tracks=av consumer-first=1 lead=0ms native-memory=true
+   producer=EOS consumer=EOS video=30 (mapped 30, memory:DMABuf) samples=24000 lag video 150.1..150.2ms audio 150.0..150.2ms
+CASE thin (application-installed context)
+   producer=EOS consumer=EOS video=30 (mapped 30, memory:SystemMemory) samples=24000 lag video 150.1..150.2ms audio 150.1..150.2ms
+CASE standalone-element producer
+   producer=EOS consumer=EOS video=30 (mapped 30, memory:SystemMemory) samples=24000 lag video 150.0..150.1ms audio 150.1..150.2ms
+CASE reconnect through NULL
+  round 0 producer=EOS consumer=EOS video=30 (mapped 30, memory:SystemMemory) samples=24000 lag video 150.1..150.2ms audio 150.1..150.2ms
+  round 1 producer=EOS consumer=EOS video=30 (mapped 30, memory:SystemMemory) samples=24000 lag video 150.1..150.2ms audio 150.1..150.2ms
+  sessions e1ca699a55035d1c49b175d8cfd9b9d3 / cdb7858245f04ced8a1fe06297cf8321
+CASE producer death mid-stream
+  consumer 2ms after producer death: flaudioreader26: audio peer closed before GDP EOS
+CASE teardown during setup
+  NULL in 2.7ms
+CASE negative no-producer
+  consumer error after 1004ms: c: local session discovery deadline or cancellation; producer: -
+CASE negative track-mismatch
+  consumer error after 6ms: c: producer selection or authentication rejected; producer: s: incompatible session selection
+CASE negative caps-mismatch
+  consumer error after 6ms: c: producer selection or authentication rejected; producer: s: incompatible session selection
+CASE negative non-system-clock
+  consumer error after 0ms: c: framelinkavsrc with session= requires the pipeline system clock (mapped PTS are system-clock times); do not fix another pipeline clock; producer: -
+transport default installs zero latency; explicit150ms compatibility preserved
+framelinkavsrc: consumer/producer-first startup, consumer timeline (lag within latency bounds per track), exact counts/content, drain releases producer EOS, system clock over a clock-providing element, native memory negotiation, thin composition, standalone-element producer, reconnect via NULL, producer-death/track/caps/clock/missing-peer/outside-pipeline failures bounded
+<end of output>
+Test time =  14.24 sec
+----------------------------------------------------------
+Test Passed.
+"gst_av_src_bin" end time: Nov 06 07:25 EST
+"gst_av_src_bin" time elapsed: 00:00:14
+----------------------------------------------------------
+
+110/114 Testing: gst_av_bench_smoke
+110/114 Test: gst_av_bench_smoke
+Command: "<linux-build>/fl_gst_av_bench" "<linux-build>/libgstframelink.so" "--seconds" "6" "--size" "160x90" "--out" "<linux-build>" "--label" "bench-smoke"
+Directory: <linux-build>
+"gst_av_bench_smoke" start time: Nov 06 07:25 EST
+Output:
+----------------------------------------------------------
+pids producer=632553 consumer=632545
+arrival.budget_ms=150
+complete=yes
+config=RGBA 160x90@30 bin cpu 6s
+consumer.audio.arrival.all.ms=n=600 p50=0.48 p95=0.49 p99=0.51 max=0.55 min=0.14
+consumer.audio.arrival.ms=n=400 p50=0.48 p95=0.49 p99=0.50 max=0.54 min=0.15
+consumer.audio.contiguous=yes
+consumer.audio.deadline_misses=0/600
+consumer.audio.output_queue.admission_residence.ms=n=600 p50=139.68 p95=139.94 p99=139.99 max=140.00 min=0.01
+consumer.audio.output_queue.pending=0
+consumer.audio.output_queue.sampled_max_buffers=13
+consumer.audio.output_queue.unmatched=0
+consumer.audio.render.all.ms=n=600 p50=150.14 p95=150.15 p99=150.17 max=150.19 min=150.06
+consumer.audio.render.ms=n=400 p50=150.14 p95=150.15 p99=150.17 max=150.19 min=150.06
+consumer.audio.render_interval.ms=n=399 p50=10.00 p95=10.05 p99=10.08 max=10.11 min=9.90
+consumer.audio.render_jitter.p1_p99.ms=0.11
+consumer.av_offset.abs.ms=n=4 p50=0.00 p95=0.00 p99=0.00 max=0.00 min=0.00
+consumer.av_offset.ms=n=4 p50=0.00 p95=0.00 p99=0.00 max=0.00 min=0.00
+consumer.cpu.percent=14.92
+consumer.frames=180
+consumer.handles=26..26 min=26 max=26
+consumer.handles.slope.per_min=0.00
+consumer.mem.kb=15184..15184 min=15184 max=15184
+consumer.mem.kind=rss
+consumer.mem.slope.kb_per_min=0.00
+consumer.memory=memory:SystemMemory
+consumer.pid=632545
+consumer.queue.accounting=complete
+consumer.result=EOS
+consumer.samples=288000
+consumer.series.t_cpums_memkb_handles_threads=0.0:9:12244:7:2;1.0:99:15184:26:11;2.0:221:15184:26:11;3.0:371:15184:26:11;4.0:521:15184:26:11;5.0:670:15184:26:11;6.0:820:15184:26:11;6.4:852:14956:12:7;
+consumer.threads=11..11 min=11 max=11
+consumer.threads.slope.per_min=-0.00
+consumer.video.arrival.all.ms=n=180 p50=5.16 p95=6.29 p99=7.32 max=7.40 min=1.92
+consumer.video.arrival.ms=n=120 p50=5.27 p95=6.28 p99=6.39 max=6.48 min=1.92
+consumer.video.deadline_misses=0/180
+consumer.video.output_queue.admission_residence.ms=n=180 p50=111.66 p95=114.00 p99=114.81 max=114.83 min=0.00
+consumer.video.output_queue.pending=0
+consumer.video.output_queue.sampled_max_buffers=3
+consumer.video.output_queue.unmatched=0
+consumer.video.render.all.ms=n=180 p50=150.14 p95=150.15 p99=150.20 max=150.25 min=150.04
+consumer.video.render.ms=n=120 p50=150.14 p95=150.15 p99=150.20 max=150.25 min=150.06
+consumer.video.render_interval.ms=n=119 p50=33.33 p95=33.39 p99=33.41 max=33.49 min=33.15
+consumer.video.render_jitter.p1_p99.ms=0.14
+exit=0/0
+expected.frames=180
+expected.samples=288000
+label=bench-smoke
+output.async=true
+output.queue_buffers=0
+output.sync=true
+playback.latency_ms=150
+producer.audio.push_burst.max=0
+producer.audio.push_interval.ms=n=400 p50=10.00 p95=10.06 p99=10.07 max=10.11 min=9.89
+producer.audio.push_lateness.ms=n=400 p50=0.14 p95=0.15 p99=0.17 max=0.20 min=0.06
+producer.cpu.percent=4.56
+producer.handles=23..24 min=23 max=24
+producer.handles.slope.per_min=29.92
+producer.mem.kb=16040..16060 min=16040 max=16060
+producer.mem.kind=rss
+producer.mem.slope.kb_per_min=598.43
+producer.pid=632553
+producer.pushed.frames=180
+producer.pushed.samples=288000
+producer.result=EOS
+producer.series.t_cpums_memkb_handles_threads=0.0:13:12224:7:2;1.0:63:16040:23:8;2.0:94:16040:23:8;3.0:141:16040:23:8;4.0:187:16040:23:8;5.0:233:16040:23:8;6.0:277:16060:24:10;6.1:278:16128:11:6;
+producer.stats.framelink-audio-sink-stats=framelink-audio-sink-stats, blocks=(guint64)600, pcm-bytes=(guint64)1152000, sample-frames=(guint64)288000, generation=(guint64)1, shared-pcm=(boolean)false;
+producer.stats.framelink-sink-stats=framelink-sink-stats, received=(guint64)180, submitted=(guint64)180, dropped=(guint64)0, ring-full-drops=(guint64)0;
+producer.threads=8..10 min=8 max=10
+producer.threads.slope.per_min=59.84
+producer.video.push_burst.max=0
+producer.video.push_interval.ms=n=120 p50=33.33 p95=33.40 p99=33.41 max=33.43 min=33.24
+producer.video.push_lateness.ms=n=120 p50=0.13 p95=0.14 p99=0.15 max=0.17 min=0.06
+seconds=6
+video.pool=8
+video.queue=5
+<end of output>
+Test time =   6.45 sec
+----------------------------------------------------------
+Test Passed.
+"gst_av_bench_smoke" end time: Nov 06 07:26 EST
+"gst_av_bench_smoke" time elapsed: 00:00:06
+----------------------------------------------------------
+
+End testing: Nov 06 07:26 EST
+
+m5b_av =  14.24 sec*proc
+

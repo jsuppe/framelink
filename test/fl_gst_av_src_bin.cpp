@@ -46,7 +46,9 @@ struct Rx {
   best=std::min(best,l);worst=std::max(worst,l);trackBest[track]=std::min(trackBest[track],l);trackWorst[track]=std::max(trackWorst[track],l);}
 };
 static std::string consumerText(const std::string&tracks,const std::string&extra=""){
- std::string t="framelinkavsrc name=c tracks="+tracks+" video-format=RGBA width=64 height=32 connect-timeout-ms=5000 idle-timeout-ms=3000 "+extra+" ";
+ // These cases intentionally qualify scheduled playback, now explicit rather
+ // than relying on a transport element's former 150ms default.
+ std::string t="framelinkavsrc name=c tracks="+tracks+" video-format=RGBA width=64 height=32 connect-timeout-ms=5000 idle-timeout-ms=3000 latency-ms=150 "+extra+" ";
  if(tracks!="audio")t+="c.video_src ! queue ! appsink name=vout sync=true max-buffers=0 ";
  if(tracks!="video")t+="c.audio_src ! queue ! appsink name=aout sync=true max-buffers=0";
  return t;
@@ -205,6 +207,19 @@ static const char* nativeFeature(){
  gst_object_unref(factory);return feature;
 }
 
+static void latencyDefaults(){
+ for(guint ms:{0u,150u}){
+  auto*p=gst_pipeline_new(nullptr);auto*s=gst_element_factory_make("framelinkavsrc",nullptr);CHECK(p&&s);
+  auto*spec=g_object_class_find_property(G_OBJECT_GET_CLASS(s),"latency-ms");CHECK(G_IS_PARAM_SPEC_UINT(spec)&&G_PARAM_SPEC_UINT(spec)->default_value==0);
+  guint actual=999;g_object_get(s,"latency-ms",&actual,nullptr);CHECK(actual==0);
+  g_object_set(s,"session",sessionPath().c_str(),nullptr);if(ms)g_object_set(s,"latency-ms",ms,nullptr);
+  CHECK(gst_bin_add(GST_BIN(p),s));CHECK(gst_element_set_state(p,GST_STATE_READY)!=GST_STATE_CHANGE_FAILURE);
+  CHECK(gst_pipeline_get_latency(GST_PIPELINE(p))==GstClockTime(ms)*GST_MSECOND);
+  CHECK(gst_element_set_state(p,GST_STATE_NULL)!=GST_STATE_CHANGE_FAILURE);gst_object_unref(p);
+ }
+ puts("transport default installs zero latency; explicit150ms compatibility preserved");
+}
+
 int main(int argc,char**argv){gst_init(&argc,&argv);
 #ifdef __ANDROID__
  GST_PLUGIN_STATIC_REGISTER(framelink);GST_PLUGIN_STATIC_REGISTER(app);GST_PLUGIN_STATIC_REGISTER(coreelements);GST_PLUGIN_STATIC_REGISTER(gdp);GST_PLUGIN_STATIC_REGISTER(gio);
@@ -212,6 +227,7 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
 #else
  CHECK(argc>1);GError*error=nullptr;auto*plugin=gst_plugin_load_file(argv[1],&error);if(error)fprintf(stderr,"%s\n",error->message);CHECK(plugin&&!error);gst_object_unref(plugin);
 #endif
+ latencyDefaults();
  // Only enabled pads exist; no display or audio device is inside the bin.
  for(auto t:{"av","video","audio"}){auto*s=gst_element_factory_make("framelinkavsrc",nullptr);CHECK(s);g_object_set(s,"tracks",t,nullptr);
   auto*v=gst_element_get_static_pad(s,"video_src"),*a=gst_element_get_static_pad(s,"audio_src");CHECK((v!=nullptr)==(strcmp(t,"audio")!=0)&&(a!=nullptr)==(strcmp(t,"video")!=0));

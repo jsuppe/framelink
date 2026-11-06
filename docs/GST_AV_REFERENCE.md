@@ -148,14 +148,14 @@ Actions: `adopt-channel`
 | `generation` | uint64, default 0 | read-only | Negotiated session generation |
 | `height` | uint 16 - 8192, default 720 | read/write | Accepted video height |
 | `idle-timeout-ms` | uint 1 - 60000, default 15000 | read/write | Bounded transport idle deadline |
-| `latency-ms` | uint 0 - 10000, default 150 | read/write | Pipeline latency installed with session=; covers transport and sink buffering |
+| `latency-ms` | uint 0 - 10000, default 0 | read/write | Explicit pipeline latency with session=; zero for transport, set required final-playback buffering explicitly |
 | `native-memory` | bool, default false | read/write | Output platform GPU memory (DMABuf, D3D11Memory, FrameLinkAHardwareBuffer) from the ring; with session= the ring defers read release |
 | `rate` | uint 8000 - 192000, default 48000 | read/write | Accepted PCM rate |
 | `session` | string, default null | read/write | Private current-user local discovery directory (not a secret or URL); unset: use an installed framelink.session.v1 context |
 | `session-id` | string, default null | read-only | Negotiated identity, not a secret |
 | `tracks` | string, default "av" | read/write | Required track set: audio, video or av; only enabled pads exist |
 | `video-format` | string, default "BGRA" | read/write | Accepted video format (BGRA, RGBA, NV12, RGB10A2_LE) |
-| `video-pool` | uint 0 - 16, default 8 | read/write | Ring images this consumer allocates with session= (0: 4); cover ceil(latency*fps)+2 |
+| `video-pool` | uint 0 - 16, default 8 | read/write | Independent ownership capacity with session= (0: 4), not a playback delay; cover unread depth and downstream-held buffers |
 | `video-queue-frames` | uint 1 - 16, default 2 | read/write | Unread coordinated video frames the consumer ring keeps, oldest first; limited to pool - 2 (at least 1) |
 | `video-track-id` | uint, default 0 | read-only | Negotiated video identity, zero when absent |
 | `width` | uint 16 - 8192, default 1280 | read/write | Accepted video width |
