@@ -27,3 +27,10 @@ Android x86_64 is not requalified by these tests. No skip treated as a pass.
 
 Next: zero-added-delay sustained target-rate matrix; producer-copy and CPU-memory
 gaps remain M6.9/M6.8, not solved by receive queue correctness.
+
+## Subsequent full-suite gates
+
+Linux full114/114 passed at8541985, including the corrected timeline fixture.
+Windows full112/112 passed on runtimeb5236a4 after the zero-default migration,
+with no failures or skips. Logs are alongside this document. These full suites
+do not close the remaining sustained matrix or later M6 tasks.
