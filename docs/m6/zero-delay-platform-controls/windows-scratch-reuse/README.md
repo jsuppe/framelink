@@ -26,3 +26,5 @@ Loom pre-edit context unavailable (missing chromadb); repository requirements
 and low-latency plan were used directly. No public policy/default changed.
 
 Matched60s traced controls: sink median 2.8756 to 0.9818ms; map/allocate/repack median 1.9733 to 0.4490ms. Patched1800/1800frames,2880000PCM,zero34msmisses,AVmapping0ns,zero trace drops. Full Windows regression is next; original159ms stall remains unresolved.
+
+Full Windows CTest on scratch-reuse runtime passed112/112, no failures or skips,551.28s. See windows-full.log. Next gate is trace-off1800s NV12 4K30, unchanged34ms threshold and two-buffer pool.
