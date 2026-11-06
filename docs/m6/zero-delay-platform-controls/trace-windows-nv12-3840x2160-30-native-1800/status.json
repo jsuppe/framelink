@@ -1,0 +1,20 @@
+{
+  "state": "finished",
+  "revision": "b5236a4",
+  "started": 1794000914.719226,
+  "label": "trace-windows-nv12-3840x2160-30-native-1800",
+  "seconds": 1800,
+  "budget_ms": 34,
+  "controller_recovered": true,
+  "original_controller_exit": "unavailable",
+  "process_exit": null,
+  "complete": "yes",
+  "consumer.frames": "54000",
+  "consumer.samples": "86400000",
+  "consumer.queue.accounting": "complete",
+  "consumer.video.deadline_misses": "0/54000",
+  "consumer.audio.deadline_misses": "0/180000",
+  "analysis_exit": 0,
+  "ended": 1794002746.2246592,
+  "note": "Original controller exit unavailable. Recovery collector used a placeholder zero; not evidence of original process exit. Complete summary and independent raw analysis establish delivery."
+}
