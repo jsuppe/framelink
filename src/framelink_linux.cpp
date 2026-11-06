@@ -65,6 +65,7 @@ struct flImage {
     uint32_t allocationUsage=0; // known only for locally allocated GBM BOs
     void* planeMaps[4]{};
     size_t planeLengths[4]{};
+    bool planeCpuAccess[4]{};
     flMappedImage planeView{};
 };
 
@@ -157,6 +158,8 @@ gbm_device* openRenderNode(int* fdOut) {
 
 void freeImage(flImage* img) {
     flImageUnmap(img);
+    for (uint32_t p = 0; p < 4; ++p)
+        if (img->planeMaps[p]) munmap(img->planeMaps[p], img->planeLengths[p]);
     for (uint32_t i = 0; i < img->desc.planes; ++i)
         if (img->desc.fd[i] >= 0) ::close(img->desc.fd[i]);
     if (img->bo) gbm_bo_destroy(img->bo);
@@ -994,13 +997,23 @@ FL_API flResult flImageMapPlanes(flImage* img,flMappedImage* out) {
            !fl::planeFits(st.st_size,img->desc.offset[p],img->desc.stride[p],rows,bytes)) {
             flImageUnmap(img);return trace.result(FL_INVALID);
         }
-        void* base=mmap(nullptr,st.st_size,PROT_READ|PROT_WRITE,MAP_SHARED,img->desc.fd[p],0);
-        if(base==MAP_FAILED){flImageUnmap(img);return trace.result(FL_FORMAT_UNSUPPORTED);}
+        // Keep the VMA for this allocation's lifetime. Recreating it every frame
+        // forces a minor fault for every touched page (8100 pages at 4K BGRA).
+        // CPU ownership is still acquired/released with DMA_BUF_IOCTL_SYNC on
+        // every map/unmap pair; a retained VMA does not permit out-of-lease use.
+        if (!img->planeMaps[p]) {
+            void* base=mmap(nullptr,st.st_size,PROT_READ|PROT_WRITE,MAP_SHARED,img->desc.fd[p],0);
+            if(base==MAP_FAILED){flImageUnmap(img);return trace.result(FL_FORMAT_UNSUPPORTED);}
+            img->planeMaps[p]=base;img->planeLengths[p]=st.st_size;
+        }
+        if (img->planeLengths[p] != static_cast<size_t>(st.st_size)) {
+            flImageUnmap(img);return trace.result(FL_INVALID);
+        }
         dma_buf_sync sync{DMA_BUF_SYNC_START|DMA_BUF_SYNC_RW};
         int result;do{result=ioctl(img->desc.fd[p],DMA_BUF_IOCTL_SYNC,&sync);}while(result<0 && errno==EINTR);
-        if(result<0){munmap(base,st.st_size);flImageUnmap(img);return trace.result(FL_INTERNAL);}
-        img->planeMaps[p]=base;img->planeLengths[p]=st.st_size;
-        img->planeView.plane[p]={(char*)base+img->desc.offset[p],img->desc.stride[p],bytes,rows};
+        if(result<0){flImageUnmap(img);return trace.result(FL_INTERNAL);}
+        img->planeCpuAccess[p]=true;
+        img->planeView.plane[p]={(char*)img->planeMaps[p]+img->desc.offset[p],img->desc.stride[p],bytes,rows};
     }
     img->planeView.planes=planes;*out=img->planeView;return trace.result(FL_OK);
 }
@@ -1017,10 +1030,10 @@ FL_API flResult flImageMap(flImage* img,void** pixels,uint64_t* stride) {
 FL_API void flImageUnmap(flImage* img) {
     fltrace::Scope trace("flImageUnmap",(uint64_t)(uintptr_t)img);
     if(!img)return;
-    for(uint32_t p=0;p<4;p++)if(img->planeMaps[p]) {
+    for(uint32_t p=0;p<4;p++)if(img->planeCpuAccess[p]) {
         dma_buf_sync sync{DMA_BUF_SYNC_END|DMA_BUF_SYNC_RW};
         int result;do{result=ioctl(img->desc.fd[p],DMA_BUF_IOCTL_SYNC,&sync);}while(result<0 && errno==EINTR);
-        munmap(img->planeMaps[p],img->planeLengths[p]);img->planeMaps[p]=nullptr;img->planeLengths[p]=0;
+        img->planeCpuAccess[p]=false;
     }
     img->planeView={};
 }
