@@ -16,3 +16,22 @@ Android5second preflight output is included. No production behavior changed.
 
 Zero-copy producer, final playback and physical output are not claimed.17ms is
 an explicit diagnostic threshold, not approval of a universal latency contract.
+
+
+## Raw timing correlation
+
+`tools/m6_raw_timing.py PRODUCER.push.csv CONSUMER.video.csv --expected 3600
+--budget-ms 17` validates the expected count and strictly increasing PTS,
+then checks a constant inferred producer-to-consumer PTS offset before
+comparing push and arrival lateness. It includes startup and drain. Exit 2
+rejects an invalid join; exit 1 reports diagnostic arrival misses; exit 0
+means the join and chosen arrival diagnostic passed, not full qualification.
+Five tests reject truncation, missing consumer records, duplicate PTS and
+changed mapping, and retain a known late frame.
+
+The offset is inferred, not independently captured from negotiation: this
+cannot exclude a whole-stream constant shift and is not allocation/identity
+proof. The residual includes producer copy, transport, consumer work and
+mapping error. Correlation is not by itself causal attribution. The saved
+60-second Android raw control joins 3,600 records, with no 17 ms misses;
+this does not repair the earlier two late arrivals.
