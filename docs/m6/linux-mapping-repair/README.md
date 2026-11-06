@@ -11,3 +11,5 @@ After repair, same20s control sampled0additional minor/major faults for both pro
 ## Matched sustained validation — f7ed7bd
 
 Same1800s BGRA4K30/pool2/unread1/output1/latency0/no-preroll/dualraw/34ms diagnostic:54000/54000video+86400000PCM,180000continuousaudio blocks,completequeueaccounting,EOS. Zero video/audio arrival misses; inferredAVmappingdelta0ns. Videoarrivalp9513.48/max17.73ms (before17.79/43.64ms,165misses);producerCPU44.82% (before56.88%). ConsumerCPU1.32%;RSSslopes+3.23KB/min retained,handle/threadslopes~0. These results support repair of the observed mapping-churn failure, not a universal real-time guarantee or removal of producer copies. Remaining matrix/full regression gates still required.
+
+Full Linux CTest on runtimef7ed7bd passed114/114, no failures/skips,512.11seconds. Required remaining platform/performance gates remain open.
