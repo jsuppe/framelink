@@ -1,0 +1,7 @@
+legacy pool generation: renegotiates as before
+authenticated pool generation: fails closed before new-pool frame
+authenticated pool changed before start: rejected
+authenticated sink generation rejected before start
+authenticated sink generation rejected before submit
+native reader policy missing contract rejected before delivery
+native reader policy explicit completion/usage accepted

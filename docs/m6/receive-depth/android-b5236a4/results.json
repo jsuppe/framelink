@@ -1,0 +1,434 @@
+[
+  {
+    "name": "read_lease_egl",
+    "rc": 0,
+    "seconds": 1.87,
+    "status": "passed"
+  },
+  {
+    "name": "read_lease_egl_producer_death",
+    "rc": 0,
+    "seconds": 0.77,
+    "status": "passed"
+  },
+  {
+    "name": "read_leases",
+    "rc": 0,
+    "seconds": 0.41,
+    "status": "passed"
+  },
+  {
+    "name": "frame_metadata_contract",
+    "rc": 0,
+    "seconds": 0.11,
+    "status": "passed"
+  },
+  {
+    "name": "read_ledger",
+    "rc": 0,
+    "seconds": 0.12,
+    "status": "passed"
+  },
+  {
+    "name": "session_contract",
+    "rc": 0,
+    "seconds": 0.32,
+    "status": "passed"
+  },
+  {
+    "name": "session_optional_tracks",
+    "rc": 0,
+    "seconds": 0.31,
+    "status": "passed"
+  },
+  {
+    "name": "session_contract_c_api",
+    "rc": 0,
+    "seconds": 0.26,
+    "status": "passed"
+  },
+  {
+    "name": "memory_boundary",
+    "rc": 0,
+    "seconds": 0.32,
+    "status": "passed"
+  },
+  {
+    "name": "memory_contract",
+    "rc": 0,
+    "seconds": 0.32,
+    "status": "passed"
+  },
+  {
+    "name": "memory_contract_c_api",
+    "rc": 0,
+    "seconds": 0.32,
+    "status": "passed"
+  },
+  {
+    "name": "external_pool_1",
+    "rc": 0,
+    "seconds": 0.72,
+    "status": "passed"
+  },
+  {
+    "name": "external_pool_broker_1",
+    "rc": 0,
+    "seconds": 0.57,
+    "status": "passed"
+  },
+  {
+    "name": "external_pool_2",
+    "rc": 0,
+    "seconds": 0.72,
+    "status": "passed"
+  },
+  {
+    "name": "external_pool_broker_2",
+    "rc": 0,
+    "seconds": 0.52,
+    "status": "passed"
+  },
+  {
+    "name": "external_pool_3",
+    "rc": 0,
+    "seconds": 0.72,
+    "status": "passed"
+  },
+  {
+    "name": "external_pool_broker_3",
+    "rc": 0,
+    "seconds": 0.57,
+    "status": "passed"
+  },
+  {
+    "name": "external_pool_4",
+    "rc": 0,
+    "seconds": 0.72,
+    "status": "passed"
+  },
+  {
+    "name": "external_pool_broker_4",
+    "rc": 0,
+    "seconds": 0.57,
+    "status": "passed"
+  },
+  {
+    "name": "buffer_references",
+    "rc": 0,
+    "seconds": 0.47,
+    "status": "passed"
+  },
+  {
+    "name": "submit_ownership",
+    "rc": 0,
+    "seconds": 0.42,
+    "status": "passed"
+  },
+  {
+    "name": "memory_resource_1",
+    "rc": 0,
+    "seconds": 0.47,
+    "status": "passed"
+  },
+  {
+    "name": "memory_resource_2",
+    "rc": 0,
+    "seconds": 0.32,
+    "status": "passed"
+  },
+  {
+    "name": "memory_resource_3",
+    "rc": 0,
+    "seconds": 0.37,
+    "status": "passed"
+  },
+  {
+    "name": "memory_resource_4",
+    "rc": 0,
+    "seconds": 0.37,
+    "status": "passed"
+  },
+  {
+    "name": "ipc_expanded_capacity",
+    "rc": 0,
+    "seconds": 0.22,
+    "status": "passed"
+  },
+  {
+    "name": "ipc_connected_fd",
+    "rc": 0,
+    "seconds": 0.17,
+    "status": "passed"
+  },
+  {
+    "name": "frame_metadata",
+    "rc": 0,
+    "seconds": 0.67,
+    "status": "passed"
+  },
+  {
+    "name": "expanded_pool",
+    "rc": 0,
+    "seconds": 0.52,
+    "status": "passed"
+  },
+  {
+    "name": "receive_queue",
+    "rc": 0,
+    "seconds": 1.87,
+    "status": "passed"
+  },
+  {
+    "name": "roundtrip",
+    "rc": 0,
+    "seconds": 0.62,
+    "status": "passed"
+  },
+  {
+    "name": "android_connected_fd",
+    "rc": 0,
+    "seconds": 1.12,
+    "status": "passed"
+  },
+  {
+    "name": "nv12_layout",
+    "rc": 0,
+    "seconds": 0.06,
+    "status": "passed"
+  },
+  {
+    "name": "trace_disabled",
+    "rc": 0,
+    "seconds": 0.06,
+    "status": "passed"
+  },
+  {
+    "name": "trace_bounded_concurrent",
+    "rc": 0,
+    "seconds": 0.11,
+    "status": "passed"
+  },
+  {
+    "name": "trace_thread_limit",
+    "rc": 0,
+    "seconds": 0.11,
+    "status": "passed"
+  },
+  {
+    "name": "portable_map_nv12",
+    "rc": 0,
+    "seconds": 0.37,
+    "status": "passed"
+  },
+  {
+    "name": "portable_map_rgba",
+    "rc": 0,
+    "seconds": 0.42,
+    "status": "passed"
+  },
+  {
+    "name": "portable_map_bgra",
+    "rc": 0,
+    "seconds": 0.42,
+    "status": "passed"
+  },
+  {
+    "name": "portable_map_rgb10a2",
+    "rc": 0,
+    "seconds": 0.42,
+    "status": "passed"
+  },
+  {
+    "name": "sync_fd_contract",
+    "rc": 0,
+    "seconds": 0.67,
+    "status": "passed"
+  },
+  {
+    "name": "reconnect_held",
+    "rc": 0,
+    "seconds": 0.42,
+    "status": "passed"
+  },
+  {
+    "name": "gst_pool_policy",
+    "rc": 0,
+    "seconds": 1.07,
+    "status": "passed"
+  },
+  {
+    "name": "m5a_transport_relay",
+    "rc": 0,
+    "seconds": 5.58,
+    "status": "passed"
+  },
+  {
+    "name": "m5a_transport_relay_audio_leads",
+    "rc": 0,
+    "seconds": 5.38,
+    "status": "passed"
+  },
+  {
+    "name": "m5a_transport_relay_sync_negative",
+    "rc": 0,
+    "seconds": 0.87,
+    "status": "passed"
+  },
+  {
+    "name": "m4_transport_audio_lags",
+    "rc": 0,
+    "seconds": 2.77,
+    "status": "passed"
+  },
+  {
+    "name": "m4_transport_audio_leads",
+    "rc": 0,
+    "seconds": 2.77,
+    "status": "passed"
+  },
+  {
+    "name": "m4_transport_jitter_drift",
+    "rc": 0,
+    "seconds": 2.57,
+    "status": "passed"
+  },
+  {
+    "name": "m4_transport_negative_retimestamps",
+    "rc": 0,
+    "seconds": 0.57,
+    "status": "passed"
+  },
+  {
+    "name": "av_memory_agreement",
+    "rc": 0,
+    "seconds": 0.37,
+    "status": "passed"
+  },
+  {
+    "name": "ahb_memory_binding",
+    "rc": 0,
+    "seconds": 0.37,
+    "status": "passed"
+  },
+  {
+    "name": "gst_policy_generation",
+    "rc": 0,
+    "seconds": 0.87,
+    "status": "passed"
+  },
+  {
+    "name": "native_relay_android",
+    "rc": 0,
+    "seconds": 0.42,
+    "status": "passed"
+  },
+  {
+    "name": "trace_details",
+    "rc": 0,
+    "seconds": 0.06,
+    "status": "passed"
+  },
+  {
+    "name": "trace_compiled_out",
+    "rc": 0,
+    "seconds": 0.06,
+    "status": "passed"
+  },
+  {
+    "name": "av_memory_adversarial",
+    "rc": 0,
+    "seconds": 0.37,
+    "status": "passed"
+  },
+  {
+    "name": "native_relay_process_android",
+    "rc": 0,
+    "seconds": 1.37,
+    "status": "passed"
+  },
+  {
+    "name": "gst_session_transport",
+    "rc": 0,
+    "seconds": 1.22,
+    "status": "passed"
+  },
+  {
+    "name": "gst_session_context",
+    "rc": 0,
+    "seconds": 0.32,
+    "status": "passed"
+  },
+  {
+    "name": "gst_audio_sink",
+    "rc": 0,
+    "seconds": 2.87,
+    "status": "passed"
+  },
+  {
+    "name": "gst_audio_source",
+    "rc": 0,
+    "seconds": 2.47,
+    "status": "passed"
+  },
+  {
+    "name": "gst_av_timeline",
+    "rc": 0,
+    "seconds": 2.97,
+    "status": "passed"
+  },
+  {
+    "name": "gst_av_validation",
+    "rc": 0,
+    "seconds": 14.96,
+    "status": "passed"
+  },
+  {
+    "name": "gst_av_bin",
+    "rc": 0,
+    "seconds": 15.36,
+    "status": "passed"
+  },
+  {
+    "name": "gst_av_src_bin",
+    "rc": 0,
+    "seconds": 15.31,
+    "status": "passed"
+  },
+  {
+    "name": "gst_av_parity",
+    "rc": 0,
+    "seconds": 89.83,
+    "status": "passed"
+  },
+  {
+    "name": "gst_av_qualification",
+    "rc": 0,
+    "seconds": 54.42,
+    "status": "passed"
+  },
+  {
+    "name": "gst_av_bench_smoke",
+    "rc": 0,
+    "seconds": 7.19,
+    "status": "passed"
+  },
+  {
+    "name": "gst_local_av",
+    "rc": 0,
+    "seconds": 3.22,
+    "status": "passed"
+  },
+  {
+    "name": "gst_local_audio",
+    "rc": 0,
+    "seconds": 1.72,
+    "status": "passed"
+  },
+  {
+    "name": "gst_event_channel",
+    "rc": 0,
+    "seconds": 2.72,
+    "status": "passed"
+  }
+]

@@ -1,0 +1,31 @@
+CASE thin (application-installed context)
+consumer=ok video=30 samples=24000 lag=150.2..150.9ms
+CASE pause/resume tracks=video (thin)
+  producer=EOS consumer=ok video=29 samples=0 lag=150.2..150.9ms
+CASE pause/resume tracks=video (bin)
+  producer=EOS consumer=ok video=29 samples=0 lag=150.2..150.9ms
+CASE pause/resume tracks=av (thin)
+  producer=audio: PCM sample duration/continuity mismatch consumer=flaudioreader1: audio peer closed before GDP EOS video=12 samples=18720 lag=150.2..150.8ms
+CASE pause/resume tracks=av (bin)
+  producer=audio: PCM sample duration/continuity mismatch consumer=flaudioreader2: audio peer closed before GDP EOS video=12 samples=18720 lag=150.2..150.5ms
+CASE teardown while media is held
+  NULL in 3.2ms
+CASE consumer death mid-stream
+  producer error 0ms after consumer death: giostreamsink16: Could not write to resource.
+CASE tracks=av producer-first=1 lead=800ms
+producer=ok consumer=ok video=30 samples=24000 lag=150.2..151.1ms generation=1 ids=1/2 session=47ca67a8a301630ab15b7c20b9745bff
+CASE tracks=av producer-first=0 lead=0ms
+producer=ok consumer=ok video=30 samples=24000 lag=150.2..150.9ms generation=1 ids=1/2 session=1208129a7386fbba5a1c5fe685c8aa4a
+CASE tracks=video producer-first=1 lead=300ms
+producer=ok consumer=ok video=30 samples=0 lag=150.2..150.8ms generation=1 ids=1/0 session=83ce91f05493481399d5300539ccbd1a
+CASE tracks=audio producer-first=0 lead=0ms
+producer=ok consumer=ok video=0 samples=24000 lag=150.2..150.8ms generation=1 ids=0/2 session=9955975a986e4942b840a39ec4174286
+CASE negative track-mismatch
+  producer error after 17ms: s: incompatible session selection; consumer: setup: producer selection or authentication rejected
+CASE negative no-consumer
+  producer error after 1003ms: s: local control connection deadline or failure: Operation was cancelled; consumer: 
+CASE negative non-system-clock
+  producer error after 2ms: s: framelinkavsink with session= requires the pipeline system clock; do not fix another pipeline clock; consumer: setup: local control connection deadline or failure: Could not connect to 127.0.0.1: Connection refused
+CASE negative caps-mismatch
+  producer: audio: required session tracks not ready or cancelled; consumer: flaudioreader7: audio peer closed before GDP EOS
+framelinkavsink: held startup in both orders, session-epoch timeline (lag within latency bounds on both tracks), thin/bin pause parity, exact counts, drain before EOS, teardown/consumer-death/track/clock/caps/missing-peer failures bounded
