@@ -1153,10 +1153,14 @@ static gboolean srcStart(GstBaseSrc* base) {
     // Every coordinated frame is accounted for, so the negotiated queue budget
     // is the slack a briefly late reader has before a frame is replaced. The
     // ring must also hold the frame being read and the one being drawn, so a
-    // small pool limits the depth (never below the original single frame).
+    // small pool limits supported depth. Never silently shrink the agreed queue.
     if(self->session){
         const guint ringLimit=self->cinfo.poolSize>3?self->cinfo.poolSize-2:1;
-        self->receiveQueue=std::min<guint>(self->sessionConfig.videoQueueFrames,ringLimit);
+        if(self->sessionConfig.videoQueueFrames>ringLimit){
+            GST_ELEMENT_ERROR(self,RESOURCE,SETTINGS,("negotiated video queue exceeds ring capacity"),
+                ("requested %u unread frames, ring %u permits %u",self->sessionConfig.videoQueueFrames,self->cinfo.poolSize,ringLimit));return FALSE;
+        }
+        self->receiveQueue=self->sessionConfig.videoQueueFrames;
         if(flSetReceiveQueue(self->ch,self->receiveQueue)!=FL_OK){GST_ELEMENT_ERROR(self,RESOURCE,SETTINGS,("cannot set the video receive queue"),(NULL));return FALSE;}
         GST_INFO_OBJECT(self,"receive queue %u frames (video-queue-frames %u, ring %u)",self->receiveQueue,self->sessionConfig.videoQueueFrames,self->cinfo.poolSize);
     }

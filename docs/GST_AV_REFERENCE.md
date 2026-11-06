@@ -238,3 +238,10 @@ Actions: `apply-memory-policy`, `adopt-channel`
 both are written at process exit. Check the footer for
 `dropped_events=0,rejected_threads=0` before trusting totals. See
 [memory tracing](MEMORY_TRACING.md) and [performance tracing](PERFORMANCE_TRACING.md).
+
+### Receive depth versus allocation capacity
+
+Coordinated sessions reject a negotiated unread-video queue that cannot fit
+the consumer pool. Depth1 supports pools of2 or more; larger depths require
+`queue + 2 <= pool`. No silent reduction of the agreed depth is performed.
+This is capacity validation, not permission to add a playout delay.

@@ -63,8 +63,9 @@ G_BEGIN_DECLS
 // (consumer installs the mapping; uncertainty above 50ms rejects), audio and
 // event stream authentication, and the video channel lease. The consumer
 // creates the ring (channel_flags 0 = FL_MAP_CPU|FL_REQUIRE_FRAME_METADATA;
-// video_pool images, 0 = 4, 2..16, independent of the negotiated video queue;
-// size it to cover frames a synchronized consumer holds within its latency)
+// video_pool images, 0 = 4, 2..16. Queue depth 1 works with pools >=2;
+// greater depths require queue + 2 <= pool. Unsupported negotiated depth
+// rejects before channel creation; it is never silently clamped.)
 // under a secret-derived name; the
 // producer attaches only after the consumer reports it, and the consumer
 // returns only after the producer confirms the attach. *channel receives the

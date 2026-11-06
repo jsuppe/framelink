@@ -269,6 +269,13 @@ gboolean fl_gst_session_open_local_av_epoch(FlGstSession*session,gboolean produc
  if(fl_gst_session_get_config(session,&selected)!=FL_GST_SESSION_READY||flSessionEncode(&selected,wire.data(),wire.size())!=FL_SESSION_OK)return fail("negotiated session unavailable");
  if(bool(selected.videoTrackId)!=bool(local->videoCount)||bool(selected.audioTrackId)!=bool(local->audioCount))return fail("peer track set differs from local tracks");
  if((selected.audioTrackId&&selected.audioQueueMs>queueMs)||(selected.videoTrackId&&selected.videoQueueFrames>videoQueue))return fail("peer queue budget exceeds local limit");
+ // Validate the agreed queue before allocating or announcing any video ring.
+ // A queue is a negotiated capacity, not permission to silently clamp it.
+ if(!producer&&selected.videoTrackId){
+  const guint actualPool=pool?pool:4u;
+  const guint capacity=actualPool>3?actualPool-2:1;
+  if(selected.videoQueueFrames>capacity)return fail("negotiated video queue exceeds ring capacity");
+ }
  // Authenticated clock offset: consumer nonce, producer time + HMAC over both.
  constexpr char clockLabel[]="FrameLink public clock v1";
  guint8 nonce[16];guint8 reply[8+32];

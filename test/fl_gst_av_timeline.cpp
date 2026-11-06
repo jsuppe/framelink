@@ -28,10 +28,11 @@ static void push(GstElement*source,guint size,guint8 value,GstClockTime pts,GstC
  GstSegment segment;gst_segment_init(&segment,GST_FORMAT_TIME);segment.rate=rate;segment.start=start;segment.position=start;segment.base=500000000;
  auto*caps=gst_app_src_get_caps(GST_APP_SRC(source));auto*sample=gst_sample_new(b,caps,&segment,nullptr);auto flow=gst_app_src_push_sample(GST_APP_SRC(source),sample);auto retryUntil=g_get_monotonic_time()+100000;while(resuming&&flow==GST_FLOW_FLUSHING&&g_get_monotonic_time()<retryUntil){g_usleep(1000);flow=gst_app_src_push_sample(GST_APP_SRC(source),sample);}if(flow!=GST_FLOW_OK)fprintf(stderr,"push %s pts=%" G_GUINT64_FORMAT " flow=%s\n",GST_OBJECT_NAME(source),pts,gst_flow_get_name(flow));CHECK(flow==GST_FLOW_OK);gst_sample_unref(sample);gst_caps_unref(caps);gst_buffer_unref(b);
 }
+// Two-image fixtures use one unread slot; a two-frame queue requires four images.
 static void run(bool audioLeads,int negative=0,bool gap=false,bool empty=false,int pause=0){
  fprintf(stderr,"CASE lead=%d negative=%d gap=%d empty=%d pause=%d\n",audioLeads,negative,gap,empty,pause);
  Pair audio,events;auto*sender=fl_gst_session_new(3);auto*receiver=fl_gst_session_new(3);
- flSessionConfig c{};c.version=2;c.sessionId.bytes[0]=1;c.clockId.bytes[0]=2;c.generation=1;c.videoTrackId=1;c.audioTrackId=2;c.video={FL_FORMAT_RGBA8,32,16,50,1};c.videoQueueFrames=2;c.audio={FL_PCM_S16,48000,2};c.audioQueueMs=80;c.connectTimeoutMs=2000;c.idleTimeoutMs=2000;
+ flSessionConfig c{};c.version=2;c.sessionId.bytes[0]=1;c.clockId.bytes[0]=2;c.generation=1;c.videoTrackId=1;c.audioTrackId=2;c.video={FL_FORMAT_RGBA8,32,16,50,1};c.videoQueueFrames=1;c.audio={FL_PCM_S16,48000,2};c.audioQueueMs=80;c.connectTimeoutMs=2000;c.idleTimeoutMs=2000;
  flSessionCapabilities caps{};caps.version=2;caps.videoCount=caps.audioCount=1;caps.video[0]=c.video;caps.audio[0]=c.audio;
  CHECK(fl_gst_session_configure(sender,&c,&caps,&caps)==FL_GST_SESSION_READY);CHECK(fl_gst_session_configure(receiver,&c,&caps,&caps)==FL_GST_SESSION_READY);
  flClockMapping mapping{};mapping.sourceClockId=c.clockId;mapping.targetClockId.bytes[0]=3;mapping.targetAnchorNs=negative==2?G_MAXINT64-510000000:100000000;if(negative!=1)CHECK(fl_gst_session_set_mapping(receiver,1,&mapping,0)==FL_GST_SESSION_READY);
@@ -142,7 +143,7 @@ static void playing(GstElement*p,guint64 generation){
 static void reconnect(){
  fprintf(stderr,"CASE reconnect\n");
  auto*sender=fl_gst_session_new(3);auto*receiver=fl_gst_session_new(3);
- flSessionConfig c{};c.version=2;c.sessionId.bytes[0]=1;c.clockId.bytes[0]=2;c.generation=1;c.videoTrackId=1;c.audioTrackId=2;c.video={FL_FORMAT_RGBA8,32,16,50,1};c.videoQueueFrames=2;c.audio={FL_PCM_S16,48000,2};c.audioQueueMs=80;c.connectTimeoutMs=2000;c.idleTimeoutMs=2000;
+ flSessionConfig c{};c.version=2;c.sessionId.bytes[0]=1;c.clockId.bytes[0]=2;c.generation=1;c.videoTrackId=1;c.audioTrackId=2;c.video={FL_FORMAT_RGBA8,32,16,50,1};c.videoQueueFrames=1;c.audio={FL_PCM_S16,48000,2};c.audioQueueMs=80;c.connectTimeoutMs=2000;c.idleTimeoutMs=2000;
  flSessionCapabilities caps{};caps.version=2;caps.videoCount=caps.audioCount=1;caps.video[0]=c.video;caps.audio[0]=c.audio;
  auto*rx=parse("framelinksrc name=video width=32 height=16 format=RGBA ! appsink name=vout sync=false async=false framelinkaudiosrc name=audio tracks=av ! appsink name=aout sync=false async=false");
  auto*tx=parse("appsrc name=vin is-live=true format=time handle-segment-change=true caps=video/x-raw,format=RGBA,width=32,height=16,framerate=50/1 ! framelinksink name=video sync=false async=false appsrc name=ain is-live=true format=time handle-segment-change=true caps=audio/x-raw,format=S16LE,layout=interleaved,rate=48000,channels=2,channel-mask=(bitmask)0x3 ! framelinkaudiosink tracks=av");
@@ -226,7 +227,7 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
  for(int avSession=0;avSession<2;avSession++){
   auto*session=fl_gst_session_new(avSession?3:2);flSessionConfig c{};c.version=2;c.sessionId.bytes[0]=9;c.clockId.bytes[0]=2;c.generation=1;c.audioTrackId=2;c.audio={FL_PCM_S16,48000,2};c.audioQueueMs=80;c.connectTimeoutMs=2000;c.idleTimeoutMs=2000;
   flSessionCapabilities caps{};caps.version=2;caps.audioCount=1;caps.audio[0]=c.audio;
-  if(avSession){c.videoTrackId=1;c.video={FL_FORMAT_RGBA8,32,16,50,1};c.videoQueueFrames=2;caps.videoCount=1;caps.video[0]=c.video;}
+  if(avSession){c.videoTrackId=1;c.video={FL_FORMAT_RGBA8,32,16,50,1};c.videoQueueFrames=1;caps.videoCount=1;caps.video[0]=c.video;}
   CHECK(fl_gst_session_configure(session,&c,&caps,&caps)==FL_GST_SESSION_READY);
   for(const char*name:{"framelinkaudiosink","framelinkaudiosrc"}){
    auto*element=gst_element_factory_make(name,nullptr);CHECK(element);g_object_set(element,"tracks",avSession?"audio":"av",nullptr);

@@ -1,0 +1,107 @@
+#< CLIXML
+-- Building for: Visual Studio 17 2022
+-- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.26300.
+-- The CXX compiler identification is MSVC 19.44.35216.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- The C compiler identification is MSVC 19.44.35216.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Failed
+-- Looking for pthread_create in pthreads
+-- Looking for pthread_create in pthreads - not found
+-- Looking for pthread_create in pthread
+-- Looking for pthread_create in pthread - not found
+-- Found Threads: TRUE
+-- framelink: building GStreamer elements (gstframelink)
+-- Found Python3: C:/Users/jonsu/AppData/Local/Microsoft/WindowsApps/python3.13.exe (found version "3.13.14") found components: Interpreter
+-- Configuring done (7.5s)
+-- Generating done (0.4s)
+-- Build files have been written to: <windows-source>/build
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  1>Checking Build System
+  Building Custom Rule <windows-source>/CMakeLists.txt
+  framelink_win.cpp
+  framelink_slots.cpp
+  fl_ipc_win32.cpp
+  fl_trace.cpp
+  framelink_session.cpp
+  framelink_memory.cpp
+  Generating Code...
+     Creating library <windows-source>/build/Release/framelink.lib and object <windows-source>/build/Release/framelink.exp
+  framelink.vcxproj -> <windows-source>\build\Release\framelink.dll
+  Building Custom Rule <windows-source>/CMakeLists.txt
+  framelink_session_context.cpp
+  framelink_session_transport.cpp
+  av_auth.cpp
+  av_rendezvous.cpp
+  Generating Code...
+     Creating library <windows-source>/build/Release/framelink_gst_session.lib and object <windows-source>/build/Release/framelink_gst_session.exp
+  framelink_gst_session.vcxproj -> <windows-source>\build\Release\framelink_gst_session.dll
+  Building Custom Rule <windows-source>/CMakeLists.txt
+  gstframelink.cpp
+  The d3d11 library from gst-plugins-bad is unstable API and may change in future.
+  You can define GST_USE_UNSTABLE_API to avoid this warning.
+  gstframelinkaudio.cpp
+  gstframelinkaudiosrc.cpp
+  fl_gst_audio_startup.cpp
+  gstframelinkavsink.cpp
+  gstframelinkavsrc.cpp
+  Generating Code...
+     Creating library <windows-source>/build/Release/gstframelink.lib and object <windows-source>/build/Release/gstframelink.exp
+  gstframelink.vcxproj -> <windows-source>\build\Release\gstframelink.dll
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <windows-source>\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> <windows-source>\build\Release\framelink_gst_session.dll
+  gstframelink.vcxproj -> <windows-source>\build\Release\gstframelink.dll
+  Building Custom Rule <windows-source>/CMakeLists.txt
+  fl_gst_local_av.cpp
+  fl_gst_local_av.vcxproj -> <windows-source>\build\Release\fl_gst_local_av.exe
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <windows-source>\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> <windows-source>\build\Release\framelink_gst_session.dll
+  gstframelink.vcxproj -> <windows-source>\build\Release\gstframelink.dll
+  Building Custom Rule <windows-source>/CMakeLists.txt
+  fl_gst_av_timeline.cpp
+  fl_gst_av_timeline.vcxproj -> <windows-source>\build\Release\fl_gst_av_timeline.exe
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <windows-source>\build\Release\framelink.dll
+  Building Custom Rule <windows-source>/CMakeLists.txt
+  fl_receive_queue.cpp
+  fl_receive_queue.vcxproj -> <windows-source>\build\Release\fl_receive_queue.exe
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <windows-source>\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> <windows-source>\build\Release\framelink_gst_session.dll
+  gstframelink.vcxproj -> <windows-source>\build\Release\gstframelink.dll
+  Building Custom Rule <windows-source>/CMakeLists.txt
+  fl_gst_av_bench.cpp
+  fl_gst_av_bench.vcxproj -> <windows-source>\build\Release\fl_gst_av_bench.exe
+Test project <windows-source>/build
+    Start  25: receive_queue
+1/3 Test  #25: receive_queue ....................   Passed    1.73 sec
+    Start 102: gst_av_timeline
+2/3 Test #102: gst_av_timeline ..................   Passed    4.71 sec
+    Start 109: gst_local_av
+3/3 Test #109: gst_local_av .....................   Passed    3.05 sec
+
+100% tests passed, 0 tests failed out of 3
+
+Label Time Summary:
+gpu            =   1.73 sec*proc (1 test)
+integration    =   1.73 sec*proc (1 test)
+m5b_av         =   7.77 sec*proc (2 tests)
+
+Total Test time (real) =   9.54 sec
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04"><Obj S="progress" RefId="0"><TN RefId="0"><T>System.Management.Automation.PSCustomObject</T><T>System.Object</T></TN><MS><I64 N="SourceId">1</I64><PR N="Record"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj></Objs>

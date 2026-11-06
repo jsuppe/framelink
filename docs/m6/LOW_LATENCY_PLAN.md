@@ -121,7 +121,7 @@ validated; output occupancy and primary-profile budgets remain pending.
 - [ ] 2b Parameterize latency, pool and unread depth independently; add primary
       zero-added-delay and explicit buffered-control profiles; expose effective
       settings. Reopen M6.1 budget acceptance for the primary profile.
-- [ ] 2c Review a722b75 ownership, fence disposal, queue shrink, disconnect,
+- [x] 2c Review a722b75 ownership, fence disposal, queue shrink, disconnect,
       monotonic release and actual depth; test unsupported-depth rejection.
 - [ ] 2d Add deterministic fast-consumer, delayed-consumer and burst controls:
       distinguish producer gaps, overwritten pending frames, GPU-held slots,
@@ -131,6 +131,8 @@ validated; output occupancy and primary-profile budgets remain pending.
       startup, steady-state and drain accounting. Record other host load.
 - [ ] 2f Publish all pass/fail cells and queue-age distributions. Large-pool or
       150 ms control success cannot waive the low-latency gate.
+
+Receive-depth gate evidence: [review and platform tests](receive-depth/README.md).
 
 ### M6.3 — Lifecycle endurance
 - [ ] 3a At least 100 restart/reconnect cycles per target in the primary profile.
