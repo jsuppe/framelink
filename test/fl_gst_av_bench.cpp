@@ -9,6 +9,7 @@
 //   fl_gst_av_bench <plugin|static> [--seconds N] [--size WxH] [--fps F]
 //     [--format RGBA|NV12|BGRA] [--mode bin|element] [--native] [--trace]
 //     [--latency-ms N] [--arrival-budget-ms N] [--transport-only]
+//     [--output-queue-buffers N] (0 retains the legacy time-only limit)
 //     [--pool N] [--video-queue N] [--raw] [--out DIR] [--label NAME]
 //
 // Software timing on the pipeline clock; physical display/speaker output is
@@ -32,6 +33,7 @@
 #endif
 
 struct Options {guint seconds=60,cycles=0;std::string mode="bin",label="run",out=".",restart="producer";bool native=false,trace=false,raw=false,sourceOnly=false;};
+static guint gOutputQueueBuffers=0;
 static GstClockTime gArrivalBudget=LATENCY;
 static constexpr guint WARMUP_S=2;  // excluded from steady-state distributions
 
@@ -124,12 +126,23 @@ static int producerChild(const Options&o,const std::string&session,const std::st
   for(auto*s:p.stats){gchar*t=gst_structure_to_string(s);r[std::string("stats.")+gst_structure_get_name(s)]=t;g_free(t);}}
  sampler.report(r);writeResult(out,r);return 0;}
 
-struct Arrivals {std::mutex m;std::vector<std::pair<gint64,gint64>> v[2];GstElement*pipeline=nullptr;};  // {pts, lateness}
+struct Arrivals {std::map<GstBuffer*,gint64> pending[2];std::vector<double> residence[2];guint sampledLevel[2]={0,0};guint unmatched[2]={0,0};std::mutex m;std::vector<std::pair<gint64,gint64>> v[2];GstElement*pipeline=nullptr;};  // {pts, lateness}
 static GstPadProbeReturn arrival(GstPad*pad,GstPadProbeInfo*info,gpointer d){
  auto*a=static_cast<Arrivals*>(d);auto*b=GST_PAD_PROBE_INFO_BUFFER(info);const int track=GPOINTER_TO_INT(g_object_get_data(G_OBJECT(pad),"track"));
+ {auto*q=gst_pad_get_parent_element(pad);guint level=0;g_object_get(q,"current-level-buffers",&level,nullptr);gst_object_unref(q);
+  std::lock_guard<std::mutex> lock(a->m);a->sampledLevel[track]=std::max(a->sampledLevel[track],level);a->pending[track][b]=g_get_monotonic_time();}
  if(auto*clock=gst_element_get_clock(a->pipeline)){gint64 l=gint64(gst_clock_get_time(clock))-gint64(gst_element_get_base_time(a->pipeline))-gint64(GST_BUFFER_PTS(b));gst_object_unref(clock);
   std::lock_guard<std::mutex> lock(a->m);a->v[track].push_back({gint64(GST_BUFFER_PTS(b)),l});}
  return GST_PAD_PROBE_OK;}
+
+static GstPadProbeReturn departed(GstPad*pad,GstPadProbeInfo*info,gpointer d){
+ auto*a=static_cast<Arrivals*>(d);auto*b=GST_PAD_PROBE_INFO_BUFFER(info);
+ const int track=GPOINTER_TO_INT(g_object_get_data(G_OBJECT(pad),"track"));
+ std::lock_guard<std::mutex> lock(a->m);auto it=a->pending[track].find(b);
+ if(it==a->pending[track].end())++a->unmatched[track];
+ else{a->residence[track].push_back((g_get_monotonic_time()-it->second)/1000.0);a->pending[track].erase(it);}
+ return GST_PAD_PROBE_OK;
+}
 
 static int consumerChild(const Options&o,const std::string&session,const std::string&out){
  Sampler sampler;std::map<std::string,std::string> r;Arrivals arrivals;
@@ -137,13 +150,18 @@ static int consumerChild(const Options&o,const std::string&session,const std::st
   // Arrival: the sink pad of the queue in front of each appsink.
   for(int track=0;track<2;track++){auto*sink=gst_bin_get_by_name(GST_BIN(c.p),track?"aout":"vout");CHECK(sink);auto*sp=gst_element_get_static_pad(sink,"sink");auto*peer=gst_pad_get_peer(sp);CHECK(peer);
    auto*queue=gst_pad_get_parent_element(peer);auto*qs=gst_element_get_static_pad(queue,"sink");g_object_set_data(G_OBJECT(qs),"track",GINT_TO_POINTER(track));
-   gst_pad_add_probe(qs,GST_PAD_PROBE_TYPE_BUFFER,arrival,&arrivals,nullptr);for(auto*x:{(GstObject*)qs,(GstObject*)queue,(GstObject*)peer,(GstObject*)sp,(GstObject*)sink})gst_object_unref(x);}
+   gst_pad_add_probe(qs,GST_PAD_PROBE_TYPE_BUFFER,arrival,&arrivals,nullptr);
+   g_object_set_data(G_OBJECT(peer),"track",GINT_TO_POINTER(track));gst_pad_add_probe(peer,GST_PAD_PROBE_TYPE_BUFFER,departed,&arrivals,nullptr);for(auto*x:{(GstObject*)qs,(GstObject*)queue,(GstObject*)peer,(GstObject*)sp,(GstObject*)sink})gst_object_unref(x);}
   // Pre-fault the per-buffer records so they do not show as consumer growth.
   for(int track=0;track<2;track++){const size_t n=size_t(o.seconds+10)*(track?100:gFps);for(auto*v:{&c.lateness[track]}){v->resize(n);v->clear();}arrivals.v[track].resize(n);arrivals.v[track].clear();}
   c.start();c.finish();sampler.stop();
   r["result"]=c.result;r["frames"]=std::to_string(c.frames.load());r["samples"]=std::to_string(c.samples.load());r["memory"]=c.features;
   std::lock_guard<std::mutex> lock(c.mutex);std::lock_guard<std::mutex> alock(arrivals.m);
   for(int track=0;track<2;track++){const char*n=track?"audio":"video";auto&av=arrivals.v[track];auto&rv=c.lateness[track];
+   r[std::string(n)+".output_queue.admission_residence.ms"]=dist(arrivals.residence[track]);
+   r[std::string(n)+".output_queue.sampled_max_buffers"]=std::to_string(arrivals.sampledLevel[track]);
+   r[std::string(n)+".output_queue.unmatched"]=std::to_string(arrivals.unmatched[track]);
+   r[std::string(n)+".output_queue.pending"]=std::to_string(arrivals.pending[track].size());
    if(av.empty())continue;const gint64 first=av.front().first;std::vector<double> arr,ren,gaps;guint misses=0;
    for(size_t i=0;i<av.size();i++){const bool steady=av[i].first-first>=gint64(WARMUP_S*GST_SECOND);if(av[i].second>gint64(gArrivalBudget))misses++;
     if(!steady)continue;arr.push_back(av[i].second/1e6);if(i<rv.size())ren.push_back(rv[i]/1e6);}
@@ -157,6 +175,8 @@ static int consumerChild(const Options&o,const std::string&session,const std::st
   std::map<gint64,std::vector<double>> w[2];gint64 first=G_MAXINT64;for(auto&v:arrivals.v)if(!v.empty())first=std::min(first,v.front().first);
   for(int track=0;track<2;track++)for(size_t i=0;i<arrivals.v[track].size()&&i<c.lateness[track].size();i++){const gint64 t=arrivals.v[track][i].first-first;if(t<gint64(WARMUP_S*GST_SECOND))continue;w[track][t/GST_SECOND].push_back(c.lateness[track][i]/1e6);}
   std::vector<double> offsets,absOffsets;for(auto&kv:w[0]){auto it=w[1].find(kv.first);if(it==w[1].end())continue;const double d=pct(kv.second,.5)-pct(it->second,.5);offsets.push_back(d);absOffsets.push_back(std::fabs(d));}
+  bool queueAccounting=true;for(int t=0;t<2;++t)queueAccounting=queueAccounting&&!arrivals.unmatched[t]&&arrivals.pending[t].empty()&&arrivals.residence[t].size()==arrivals.v[t].size();
+  r["queue.accounting"]=queueAccounting?"complete":"incomplete";
   r["av_offset.ms"]=dist(offsets);r["av_offset.abs.ms"]=dist(absOffsets);}
  sampler.report(r);writeResult(out,r);return 0;}
 
@@ -220,7 +240,7 @@ static std::map<std::string,std::string> readResult(const std::string&path){std:
 
 static std::vector<std::string> optionArgs(const Options&o){
  std::vector<std::string> a{"--seconds",std::to_string(o.seconds),"--size",std::to_string(gWidth)+"x"+std::to_string(gHeight),"--fps",std::to_string(gFps),"--format",gFormat,"--mode",o.mode,"--pool",std::to_string(gVideoPool),"--video-queue",std::to_string(gVideoQueue)};
- a.insert(a.end(),{"--arrival-budget-ms",std::to_string(gArrivalBudget/GST_MSECOND),"--latency-ms",std::to_string(gPlaybackLatency/GST_MSECOND)});if(!gOutputSync)a.push_back("--transport-only");
+ a.insert(a.end(),{"--output-queue-buffers",std::to_string(gOutputQueueBuffers),"--arrival-budget-ms",std::to_string(gArrivalBudget/GST_MSECOND),"--latency-ms",std::to_string(gPlaybackLatency/GST_MSECOND)});if(!gOutputSync)a.push_back("--transport-only");
  if(o.native)a.push_back("--native");if(o.raw)a.push_back("--raw");return a;}
 
 // Least-squares slope of y over x.
@@ -274,6 +294,7 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
  for(int i=2;i<argc;i++){std::string a=argv[i];auto next=[&]{CHECK(i+1<argc);return std::string(argv[++i]);};
   if(a=="--seconds")o.seconds=guint(std::stoul(next()));else if(a=="--fps")gFps=guint(std::stoul(next()));else if(a=="--format")gFormat=next();else if(a=="--mode")o.mode=next();
   else if(a=="--size"){auto s=next();auto x=s.find('x');CHECK(x!=std::string::npos);gWidth=guint(std::stoul(s.substr(0,x)));gHeight=guint(std::stoul(s.substr(x+1)));}
+  else if(a=="--output-queue-buffers"){auto n=std::stoul(next());CHECK(n<=1024);gOutputQueueBuffers=guint(n);}
   else if(a=="--arrival-budget-ms"){auto ms=std::stoul(next());CHECK(ms>0&&ms<=10000);gArrivalBudget=ms*GST_MSECOND;}
   else if(a=="--latency-ms"){auto ms=std::stoul(next());CHECK(ms<=10000);gPlaybackLatency=ms*GST_MSECOND;}else if(a=="--transport-only")gOutputSync=false;
   else if(a=="--pool")gVideoPool=guint(std::stoul(next()));else if(a=="--video-queue")gVideoQueue=guint(std::stoul(next()));else if(a=="--source-only")o.sourceOnly=true;
@@ -291,7 +312,7 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
   // read and the one being drawn.
   if(!queueSet)gVideoQueue=std::min<guint>(FL_MAX_POOL_SIZE-2,std::max<guint>(2,guint(std::ceil(gPlaybackLatency/1e9*gFps))));
   if(!poolSet)gVideoPool=std::min<guint>(FL_MAX_POOL_SIZE,std::max<guint>(8,gVideoQueue+2));}
- gQueue="queue max-size-bytes=0 max-size-buffers=0 max-size-time=1000000000";
+ gQueue="queue max-size-bytes=0 max-size-buffers="+std::to_string(gOutputQueueBuffers)+" max-size-time=1000000000";
  if(role=="source")return sourceChild(o,result);
  if(role=="lifecycle-producer"||role=="lifecycle-consumer")return lifecycleChild(o,role=="lifecycle-producer",sessionBase,result);
  if(role=="producer")return producerChild(o,session,result);
@@ -316,9 +337,9 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
  const int pc=await(producer,deadline),cc=await(consumer,deadline);
  auto pr=readResult(base+"-producer.txt"),cr=readResult(base+"-consumer.txt");
  std::map<std::string,std::string> s{{"label",o.label},{"config",gFormat+" "+std::to_string(gWidth)+"x"+std::to_string(gHeight)+"@"+std::to_string(gFps)+" "+o.mode+(o.native?" native":" cpu")+(o.trace?" traced":"")+" "+std::to_string(o.seconds)+"s"},
-  {"exit",std::to_string(pc)+"/"+std::to_string(cc)},{"arrival.budget_ms",std::to_string(gArrivalBudget/GST_MSECOND)},{"playback.latency_ms",std::to_string(gPlaybackLatency/GST_MSECOND)},{"output.sync",gOutputSync?"true":"false"},{"video.pool",std::to_string(gVideoPool)},{"video.queue",std::to_string(gVideoQueue)},{"seconds",std::to_string(o.seconds)},{"producer.pid",std::to_string(producer.pid)},{"consumer.pid",std::to_string(consumer.pid)}};
+  {"exit",std::to_string(pc)+"/"+std::to_string(cc)},{"arrival.budget_ms",std::to_string(gArrivalBudget/GST_MSECOND)},{"playback.latency_ms",std::to_string(gPlaybackLatency/GST_MSECOND)},{"output.queue_buffers",std::to_string(gOutputQueueBuffers)},{"output.sync",gOutputSync?"true":"false"},{"video.pool",std::to_string(gVideoPool)},{"video.queue",std::to_string(gVideoQueue)},{"seconds",std::to_string(o.seconds)},{"producer.pid",std::to_string(producer.pid)},{"consumer.pid",std::to_string(consumer.pid)}};
  for(auto&kv:pr)s["producer."+kv.first]=kv.second;for(auto&kv:cr)s["consumer."+kv.first]=kv.second;
- const bool ok=pc==0&&cc==0&&pr["result"]=="EOS"&&cr["result"]=="EOS"&&cr["frames"]==pr["pushed.frames"]&&cr["samples"]==pr["pushed.samples"];
+ const bool ok=pc==0&&cc==0&&cr["queue.accounting"]=="complete"&&pr["result"]=="EOS"&&cr["result"]=="EOS"&&cr["frames"]==pr["pushed.frames"]&&cr["samples"]==pr["pushed.samples"];
  s["complete"]=ok?"yes":"no";
  writeResult(base+".summary.txt",s);for(auto&kv:s)printf("%s=%s\n",kv.first.c_str(),kv.second.c_str());
  return ok?0:1;
