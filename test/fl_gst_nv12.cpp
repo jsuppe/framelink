@@ -53,6 +53,9 @@ if(error)fprintf(stderr,"%s\n",error->message);CHECK(plugin);gst_object_unref(pl
  snprintf(send,sizeof(send),"appsrc name=in is-live=true format=time caps=video/x-raw,format=%s,width=130,height=66,framerate=60/1 ! framelinksink channel=gst-nv12-%d sync=false",fmt,getpid());
  GstElement*r=gst_parse_launch(receive,&error);CHECK(r&&!error);GstElement*t=gst_parse_launch(send,&error);CHECK(t&&!error);
  GstElement*out=gst_bin_get_by_name(GST_BIN(r),"out"),*in=gst_bin_get_by_name(GST_BIN(t),"in");
+ // Reuse each sink across stop/start: staging must be released at stop and
+ // recreated safely, with fresh bytes in independently strided planes.
+ for(int cycle=0;cycle<2;cycle++) {
  CHECK(gst_element_set_state(r,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);usleep(100000);
  CHECK(gst_element_set_state(t,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
  int checked=0;
@@ -63,6 +66,7 @@ if(error)fprintf(stderr,"%s\n",error->message);CHECK(plugin);gst_object_unref(pl
  }
  CHECK(checked==12);
  gst_element_set_state(t,GST_STATE_NULL);gst_element_set_state(r,GST_STATE_NULL);
+ }
  gst_object_unref(in);gst_object_unref(out);gst_object_unref(t);gst_object_unref(r);
  // A consumer with an RGB ring must reject NV12, never reinterpret its bytes.
  snprintf(receive,sizeof(receive),"framelinksrc channel=gst-mismatch-%d width=130 height=66 ! appsink name=out sync=false",getpid());

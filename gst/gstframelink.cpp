@@ -259,6 +259,9 @@ typedef struct _GstFrameLinkSink {
     gboolean errorOnRingFull;
     gboolean testOpenDelayed;
     guint64 submitted, dropped, received, ringFullDrops;
+#ifdef _WIN32
+    GByteArray* uploadScratch; // one CPU staging buffer, serialized by BaseSink
+#endif
 #ifndef _WIN32
     gboolean mapRefused; // consumer ring not FL_MAP_CPU - fatal, but say why
 #endif
@@ -288,6 +291,9 @@ static GstStaticPadTemplate sinkTemplate =
                             GST_STATIC_CAPS(FL_SINK_CAPS));
 
 static void sinkDisconnect(GstFrameLinkSink* self) {
+#ifdef _WIN32
+    g_clear_pointer(&self->uploadScratch, g_byte_array_unref);
+#endif
 #ifdef FL_GST_NATIVE_SINK
     if(self->nativeProducer){(*self->nativeProducer)->active=false;delete self->nativeProducer;self->nativeProducer=nullptr;self->ch=nullptr;}
 #endif
@@ -476,6 +482,10 @@ static gboolean sinkProposeAllocation(GstBaseSink* base,GstQuery* query){
 }
 static gboolean sinkSetCaps(GstBaseSink* base, GstCaps* caps) {
     GstFrameLinkSink* self = GST_FRAMELINK_SINK(base);
+#ifdef _WIN32
+    // Drop old geometry's storage rather than retaining a historical peak.
+    g_clear_pointer(&self->uploadScratch, g_byte_array_unref);
+#endif
     if (!gst_video_info_from_caps(&self->vinfo, caps)) return FALSE;
     if(self->session&&(guint(GST_VIDEO_INFO_WIDTH(&self->vinfo))!=self->sessionConfig.video.width||guint(GST_VIDEO_INFO_HEIGHT(&self->vinfo))!=self->sessionConfig.video.height||toFlFormat(GST_VIDEO_INFO_FORMAT(&self->vinfo))!=self->sessionConfig.video.format))return FALSE;
     if(GST_VIDEO_INFO_FORMAT(&self->vinfo)==GST_VIDEO_FORMAT_NV12 &&
@@ -641,13 +651,15 @@ static GstFlowReturn sinkRenderImpl(GstBaseSink* base, GstBuffer* buffer) {
         if (incoming == FL_FORMAT_NV12) {
             // D3D11 upload uses one pitch for Y and UV. Repack GstVideoMeta's
             // independently strided planes without changing their values.
-            scratch = g_byte_array_sized_new(w * h * 3 / 2);
+            if (!self->uploadScratch)
+                self->uploadScratch = g_byte_array_sized_new(w * h * 3 / 2);
+            scratch = self->uploadScratch;
             g_byte_array_set_size(scratch, w * h * 3 / 2);
             for (guint p=0;p<2;p++) {
                 const gint pitch=GST_VIDEO_FRAME_PLANE_STRIDE(&vframe,p);
                 if(pitch<(gint)w) {
                     account("gst.frame_drop.invalid_pitch");
-                    ctx->Release();g_byte_array_unref(scratch);
+                    ctx->Release();
                     gst_video_frame_unmap(&vframe);sinkDisconnect(self);return trace.result(GST_FLOW_ERROR);
                 }
                 for(guint y=0;y<(p?h/2:h);y++)
@@ -657,7 +669,9 @@ static GstFlowReturn sinkRenderImpl(GstBaseSink* base, GstBuffer* buffer) {
             gsttrace::payload("gst.cpu_repack",gsttrace::id(self->channel),(uint64_t)w*h*3/2,FL_MEMORY_COPY);
             upload=scratch->data;uploadStride=w;
         } else if (swap) {
-            scratch = g_byte_array_sized_new(w * 4 * h);
+            if (!self->uploadScratch)
+                self->uploadScratch = g_byte_array_sized_new(w * 4 * h);
+            scratch = self->uploadScratch;
             g_byte_array_set_size(scratch, w * 4 * h);
             copyPixels(scratch->data, w * 4, src, srcStride, w, h, TRUE);
             gsttrace::payload("gst.cpu_convert",gsttrace::id(self->channel),(uint64_t)w*h*4,FL_MEMORY_COPY|FL_MEMORY_CONVERT);
@@ -669,7 +683,8 @@ static GstFlowReturn sinkRenderImpl(GstBaseSink* base, GstBuffer* buffer) {
                                (UINT)(uploadStride * h));
         gsttrace::payload("gst.gpu_upload_issued",gsttrace::id(self->channel),(uint64_t)w*h*(incoming==FL_FORMAT_NV12?3:8)/2,FL_MEMORY_UPLOAD);
         ctx->Release();
-        if (scratch) g_byte_array_unref(scratch);
+        // UpdateSubresource snapshots CPU source bytes before returning. Reuse
+        // staging only after that call; shared GPU texture ownership is unchanged.
         wrote = TRUE;
     }
 #else
