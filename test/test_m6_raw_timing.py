@@ -44,6 +44,17 @@ class TimingJoin(unittest.TestCase):
         with self.assertRaises(ValueError):
             timing.analyze(self.p, self.c[:-1], 3, 17000000)
 
+    def test_audio_continuity_and_late_frame(self):
+        rows = [{"pts_ns": str(x), "arrival_lateness_ns": "19000000"}
+                for x in (5, 10000005, 20000005)]
+        r = timing.audio_continuity(rows, 3, 17000000)
+        self.assertEqual(r["arrival_misses"], 3)
+        with self.assertRaises(ValueError):
+            timing.audio_continuity(rows, 4, 17000000)
+        rows[1]["pts_ns"] = "20000005"
+        with self.assertRaises(ValueError):
+            timing.audio_continuity(rows, 3, 17000000)
+
 
 if __name__ == "__main__":
     unittest.main()

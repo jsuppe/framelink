@@ -33,7 +33,7 @@ static constexpr guint FRAMES=30,BLOCKS=50,BLOCK=480;static constexpr GstClockTi
 static guint gWidth=64,gHeight=32,gFps=30;static std::string gFormat="RGBA";static GstClockTime gRunLimit=25*GST_SECOND;
 // Consumer video ring size and the queue in front of each appsink (the
 // default queue byte limit stalls a session once frames exceed ~10 MB).
-static GstClockTime gPlaybackLatency=LATENCY;static bool gOutputSync=true;
+static GstClockTime gPlaybackLatency=LATENCY;static bool gOutputSync=true,gOutputAsync=true;
 static guint gVideoPool=8,gVideoQueue=2;static std::string gQueue="queue";
 static std::string geometry(){return "width="+std::to_string(gWidth)+" height="+std::to_string(gHeight);}
 static flFormat sessionFormat(){return gFormat=="NV12"?FL_FORMAT_NV12:gFormat=="BGRA"?FL_FORMAT_BGRA8:FL_FORMAT_RGBA8;}
@@ -116,7 +116,7 @@ struct Consumer:Side {
  bool record=false;std::vector<gint64> lateness[2];
  std::string features;GstClockTime next=GST_CLOCK_TIME_NONE;std::mutex mutex;
  Consumer(Mode m,const std::string&path_,const std::string&tracks_,bool native_=false){mode=m;producer=false;path=path_;tracks=tracks_;native=native_;
-  const std::string sinkV=gQueue+" ! appsink name=vout sync="+(gOutputSync?"true":"false")+" max-buffers=0 ",sinkA=gQueue+" ! appsink name=aout sync="+(gOutputSync?"true":"false")+" max-buffers=0";std::string t;
+  const std::string sinkV=gQueue+" ! appsink name=vout sync="+(gOutputSync?"true":"false")+" async="+(gOutputAsync?"true":"false")+" max-buffers=0 ",sinkA=gQueue+" ! appsink name=aout sync="+(gOutputSync?"true":"false")+" async="+(gOutputAsync?"true":"false")+" max-buffers=0";std::string t;
   if(m==Mode::Bin){t="framelinkavsrc name=c tracks="+tracks+" video-queue-frames="+std::to_string(gVideoQueue)+" video-pool="+std::to_string(gVideoPool)+" video-format="+gFormat+" "+geometry()+" framerate="+std::to_string(gFps)+"/1 connect-timeout-ms=5000 idle-timeout-ms=3000"+(native?" native-memory=true ":" ");
    if(video())t+="c.video_src ! "+sinkV;if(audio())t+="c.audio_src ! "+sinkA;}
   else{if(video())t+="framelinksrc name=video "+geometry()+" format="+gFormat+(native?" native-memory=true":"")+" ! "+sinkV;
@@ -146,4 +146,3 @@ static const char* nativeFeature(){
   gst_caps_unref(caps);}
  gst_object_unref(factory);return feature;
 }
-

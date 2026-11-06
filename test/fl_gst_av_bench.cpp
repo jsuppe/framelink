@@ -10,6 +10,7 @@
 //     [--format RGBA|NV12|BGRA] [--mode bin|element] [--native] [--trace]
 //     [--latency-ms N] [--arrival-budget-ms N] [--transport-only]
 //     [--output-queue-buffers N] (0 retains the legacy time-only limit)
+//     [--no-output-preroll] (measurement appsinks async=false)
 //     [--pool N] [--video-queue N] [--raw] [--out DIR] [--label NAME]
 //
 // Software timing on the pipeline clock; physical display/speaker output is
@@ -156,6 +157,7 @@ static int consumerChild(const Options&o,const std::string&session,const std::st
   for(int track=0;track<2;track++){const size_t n=size_t(o.seconds+10)*(track?100:gFps);for(auto*v:{&c.lateness[track]}){v->resize(n);v->clear();}arrivals.v[track].resize(n);arrivals.v[track].clear();arrivals.residence[track].resize(n);arrivals.residence[track].clear();}
   c.start();c.finish();sampler.stop();
   r["result"]=c.result;r["frames"]=std::to_string(c.frames.load());r["samples"]=std::to_string(c.samples.load());r["memory"]=c.features;
+  r["audio.contiguous"]=c.contiguous?"yes":"no";
   std::lock_guard<std::mutex> lock(c.mutex);std::lock_guard<std::mutex> alock(arrivals.m);
   for(int track=0;track<2;track++){const char*n=track?"audio":"video";auto&av=arrivals.v[track];auto&rv=c.lateness[track];
    r[std::string(n)+".output_queue.admission_residence.ms"]=dist(arrivals.residence[track]);
@@ -168,6 +170,8 @@ static int consumerChild(const Options&o,const std::string&session,const std::st
    // Interval between consecutive renders (wall), from render lateness + PTS.
    for(size_t i=1;i<rv.size()&&i<av.size();i++)if(av[i-1].first-first>=gint64(WARMUP_S*GST_SECOND))gaps.push_back(((av[i].first+rv[i])-(av[i-1].first+rv[i-1]))/1e6);
    r[std::string(n)+".arrival.ms"]=dist(arr);r[std::string(n)+".render.ms"]=dist(ren);r[std::string(n)+".render_interval.ms"]=dist(gaps);
+   std::vector<double> allArr,allRen;for(auto&x:av)allArr.push_back(x.second/1e6);for(auto x:rv)allRen.push_back(x/1e6);
+   r[std::string(n)+".arrival.all.ms"]=dist(allArr);r[std::string(n)+".render.all.ms"]=dist(allRen);
    r[std::string(n)+".deadline_misses"]=std::to_string(misses)+"/"+std::to_string(av.size());
    char t[64];snprintf(t,sizeof t,"%.2f",ren.empty()?NAN:pct(ren,.99)-pct(ren,.01));r[std::string(n)+".render_jitter.p1_p99.ms"]=t;
    if(o.raw||c.result!="EOS"){std::ofstream f(out+"."+n+".csv");f<<"pts_ns,arrival_lateness_ns,render_lateness_ns\n";for(size_t i=0;i<av.size();i++)f<<av[i].first<<","<<av[i].second<<","<<(i<rv.size()?std::to_string(rv[i]):"")<<"\n";}}
@@ -240,7 +244,7 @@ static std::map<std::string,std::string> readResult(const std::string&path){std:
 
 static std::vector<std::string> optionArgs(const Options&o){
  std::vector<std::string> a{"--seconds",std::to_string(o.seconds),"--size",std::to_string(gWidth)+"x"+std::to_string(gHeight),"--fps",std::to_string(gFps),"--format",gFormat,"--mode",o.mode,"--pool",std::to_string(gVideoPool),"--video-queue",std::to_string(gVideoQueue)};
- a.insert(a.end(),{"--output-queue-buffers",std::to_string(gOutputQueueBuffers),"--arrival-budget-ms",std::to_string(gArrivalBudget/GST_MSECOND),"--latency-ms",std::to_string(gPlaybackLatency/GST_MSECOND)});if(!gOutputSync)a.push_back("--transport-only");
+ a.insert(a.end(),{"--output-queue-buffers",std::to_string(gOutputQueueBuffers),"--arrival-budget-ms",std::to_string(gArrivalBudget/GST_MSECOND),"--latency-ms",std::to_string(gPlaybackLatency/GST_MSECOND)});if(!gOutputSync)a.push_back("--transport-only");if(!gOutputAsync)a.push_back("--no-output-preroll");
  if(o.native)a.push_back("--native");if(o.raw)a.push_back("--raw");return a;}
 
 // Least-squares slope of y over x.
@@ -297,6 +301,7 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
   else if(a=="--output-queue-buffers"){auto n=std::stoul(next());CHECK(n<=1024);gOutputQueueBuffers=guint(n);}
   else if(a=="--arrival-budget-ms"){auto ms=std::stoul(next());CHECK(ms>0&&ms<=10000);gArrivalBudget=ms*GST_MSECOND;}
   else if(a=="--latency-ms"){auto ms=std::stoul(next());CHECK(ms<=10000);gPlaybackLatency=ms*GST_MSECOND;}else if(a=="--transport-only")gOutputSync=false;
+  else if(a=="--no-output-preroll")gOutputAsync=false;
   else if(a=="--pool")gVideoPool=guint(std::stoul(next()));else if(a=="--video-queue")gVideoQueue=guint(std::stoul(next()));else if(a=="--source-only")o.sourceOnly=true;
   else if(a=="--cycles")o.cycles=guint(std::stoul(next()));else if(a=="--restart")o.restart=next();else if(a=="--session-base")sessionBase=next();
   else if(a=="--native")o.native=true;else if(a=="--trace")o.trace=true;else if(a=="--raw")o.raw=true;else if(a=="--out")o.out=next();else if(a=="--label")o.label=next();
@@ -339,7 +344,10 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
  std::map<std::string,std::string> s{{"label",o.label},{"config",gFormat+" "+std::to_string(gWidth)+"x"+std::to_string(gHeight)+"@"+std::to_string(gFps)+" "+o.mode+(o.native?" native":" cpu")+(o.trace?" traced":"")+" "+std::to_string(o.seconds)+"s"},
   {"exit",std::to_string(pc)+"/"+std::to_string(cc)},{"arrival.budget_ms",std::to_string(gArrivalBudget/GST_MSECOND)},{"playback.latency_ms",std::to_string(gPlaybackLatency/GST_MSECOND)},{"output.queue_buffers",std::to_string(gOutputQueueBuffers)},{"output.sync",gOutputSync?"true":"false"},{"video.pool",std::to_string(gVideoPool)},{"video.queue",std::to_string(gVideoQueue)},{"seconds",std::to_string(o.seconds)},{"producer.pid",std::to_string(producer.pid)},{"consumer.pid",std::to_string(consumer.pid)}};
  for(auto&kv:pr)s["producer."+kv.first]=kv.second;for(auto&kv:cr)s["consumer."+kv.first]=kv.second;
- const bool ok=pc==0&&cc==0&&cr["queue.accounting"]=="complete"&&pr["result"]=="EOS"&&cr["result"]=="EOS"&&cr["frames"]==pr["pushed.frames"]&&cr["samples"]==pr["pushed.samples"];
+ s["expected.frames"]=std::to_string(guint64(o.seconds)*gFps);
+ s["output.async"]=gOutputAsync?"true":"false";
+ s["expected.samples"]=std::to_string(guint64(o.seconds)*48000);
+ const bool ok=pc==0&&cc==0&&cr["queue.accounting"]=="complete"&&cr["audio.contiguous"]=="yes"&&pr["result"]=="EOS"&&cr["result"]=="EOS"&&cr["frames"]==s["expected.frames"]&&cr["frames"]==pr["pushed.frames"]&&cr["samples"]==s["expected.samples"]&&cr["samples"]==pr["pushed.samples"];
  s["complete"]=ok?"yes":"no";
  writeResult(base+".summary.txt",s);for(auto&kv:s)printf("%s=%s\n",kv.first.c_str(),kv.second.c_str());
  return ok?0:1;

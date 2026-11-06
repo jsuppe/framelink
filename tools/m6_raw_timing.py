@@ -50,23 +50,44 @@ def analyze(producer, consumer, expected, budget_ns):
                      "error; not a root-cause proof."}
 
 
+def audio_continuity(rows, expected, budget_ns):
+    """Benchmark uses 480-sample blocks at 48 kHz (10 ms), not arbitrary audio."""
+    if expected <= 0 or len(rows) != expected:
+        raise ValueError("audio block count does not match independent expected count")
+    pts = [int(r["pts_ns"]) for r in rows]
+    if any(abs(b - a - 10000000) > 1 for a, b in zip(pts, pts[1:])):
+        raise ValueError("benchmark audio PTS sequence has a gap or overlap")
+    arrivals = [int(r["arrival_lateness_ns"]) for r in rows]
+    return {"blocks": expected, "contiguous_10ms_pts": True,
+            "arrival_misses": sum(x > budget_ns for x in arrivals),
+            "arrival_ms": distribution(arrivals),
+            "scope": "PTS continuity only; PCM bytes/counts require the benchmark summary."}
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("producer")
     p.add_argument("consumer")
     p.add_argument("--expected", type=int, required=True)
     p.add_argument("--budget-ms", type=float, required=True)
+    p.add_argument("--audio")
+    p.add_argument("--expected-audio-blocks", type=int)
     a = p.parse_args()
     if not math.isfinite(a.budget_ms) or a.budget_ms < 0:
         p.error("budget must be finite and non-negative")
+    if bool(a.audio) != (a.expected_audio_blocks is not None):
+        p.error("--audio and --expected-audio-blocks must be supplied together")
     try:
         result = analyze(read(a.producer), read(a.consumer), a.expected,
                          round(a.budget_ms * 1e6))
+        if a.audio:
+            result["audio"] = audio_continuity(read(a.audio), a.expected_audio_blocks,
+                                               round(a.budget_ms * 1e6))
     except (ValueError, KeyError, OSError) as e:
         p.exit(2, str(e) + "\n")
     print(json.dumps(result, indent=2))
     # Successful joining is not successful latency qualification.
-    return 1 if result["arrival_misses"] else 0
+    return 1 if result["arrival_misses"] or result.get("audio", {}).get("arrival_misses") else 0
 
 
 if __name__ == "__main__":
