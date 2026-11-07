@@ -1,0 +1,28 @@
+{
+  "state": "finished",
+  "started": 1794040704.6713028,
+  "source_sha256": {
+    "gst/gstframelinkavsink.cpp": "ff6f1e4ce41d87217d87f6aa29f24fd9047f2cb00ac9ff30e27a5f4bb11e9151",
+    "test/fl_gst_av_bin.cpp": "92f8660b5b66f7653920041ca816e55226da0846f203bb683577f4b3525c4153",
+    "test/fl_gst_av_bench.cpp": "2bec22cd9afdadedab8f8e95dc9a0684e55105164241b9788c1a9c4b1be539cb"
+  },
+  "steps": [
+    {
+      "name": "preflight",
+      "exit": 0
+    },
+    {
+      "name": "build",
+      "exit": 0
+    },
+    {
+      "name": "eos-stress",
+      "exit": 0
+    },
+    {
+      "name": "av-bin",
+      "exit": 0
+    }
+  ],
+  "ended": 1794040759.3998625
+}

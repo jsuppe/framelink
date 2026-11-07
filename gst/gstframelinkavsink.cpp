@@ -36,6 +36,7 @@ struct Shared {
  std::mutex mutex;std::condition_variable changed;
  bool setupDone=false,setupOk=false,released=false,cancelled=false,playing=false;
  bool flushing[2]={false,false};
+ guint eosSeen=0; // protected with heldEos and drainer publication by mutex
  gint64 epoch=-1;
  std::string error;flChannel*channel=nullptr;
 };
@@ -252,6 +253,15 @@ static GstStateChangeReturn changeState(GstElement*element,GstStateChange transi
 static void handleMessage(GstBin*bin,GstMessage*message){
  auto*s=reinterpret_cast<GstFrameLinkAvSink*>(bin);
  if(s->local&&GST_MESSAGE_TYPE(message)==GST_MESSAGE_EOS&&GST_MESSAGE_SRC(message)!=GST_OBJECT(bin)){
+  // Audio/video post from independent streaming threads. Serialize both the
+  // collection and single drainer publication; never forward while locked.
+  std::lock_guard<std::mutex> lock(s->shared->mutex);
+  const guint track=GST_MESSAGE_SRC(message)==GST_OBJECT(s->video)?1u:
+                    GST_MESSAGE_SRC(message)==GST_OBJECT(s->audio)?2u:0u;
+  if(s->shared->cancelled || !track || (s->shared->eosSeen&track)){
+   gst_message_unref(message);return;
+  }
+  s->shared->eosSeen|=track;
   // Hold sink EOS until the consumer confirms it rendered the tail.
   s->heldEos->push_back(message);
   if(s->heldEos->size()==s->eosNeeded&&!s->drainer){
@@ -260,7 +270,7 @@ static void handleMessage(GstBin*bin,GstMessage*message){
     GError*error=nullptr;const bool ok=fl_gst_session_finish_local_cancellable(s->session,TRUE,s->connectMs+s->idleMs,s->cancel,&error);
     if(!ok&&!g_cancellable_is_cancelled(s->cancel))GST_ELEMENT_ERROR(s,RESOURCE,WRITE,("%s",error?error->message:"consumer drain failed"),(nullptr));
     g_clear_error(&error);
-    if(ok){std::vector<GstMessage*> held;held.swap(*s->heldEos);for(auto*m:held)GST_BIN_CLASS(gst_framelink_av_sink_parent_class)->handle_message(GST_BIN(s),m);}
+    if(ok){std::vector<GstMessage*> held;{std::lock_guard<std::mutex> lock(s->shared->mutex);held.swap(*s->heldEos);}for(auto*m:held)GST_BIN_CLASS(gst_framelink_av_sink_parent_class)->handle_message(GST_BIN(s),m);}
     g_object_unref(s->session);
    });
   }

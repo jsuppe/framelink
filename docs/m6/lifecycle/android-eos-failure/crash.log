@@ -1,0 +1,74 @@
+11-07 03:26:36.445 14807 14813 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 14813 (vsrc:src), pid 14807 (fl_gst_av_bench)
+11-07 03:26:36.809 14840 14840 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+11-07 03:26:36.809 14840 14840 F DEBUG   : Build fingerprint: 'TCL/8483A_FCA/Lugh_FHD_WiFi:15/AP3A.240905.015.A2/BUBI:user/release-keys'
+11-07 03:26:36.809 14840 14840 F DEBUG   : Revision: '0'
+11-07 03:26:36.809 14840 14840 F DEBUG   : ABI: 'arm64'
+11-07 03:26:36.810 14840 14840 F DEBUG   : Timestamp: 2026-11-07 03:26:36.558419779-0500
+11-07 03:26:36.810 14840 14840 F DEBUG   : Process uptime: 7s
+11-07 03:26:36.810 14840 14840 F DEBUG   : Cmdline: /data/local/tmp/framelink-m6-20261106/fl_gst_av_bench static --role producer --session /data/local/tmp/framelink-m6-20261106/framelink-lifecycle-6JD6X3/c8/session --result /data/local/tmp/framelink-m6-20261106/lifecycle-current/android-rgba1080p60-native-restart-producer-100x5-fresh-8.txt --seconds 5 --size 1920x1080 --fps 60 --format RGBA --mode bin --pool 2 --video-queue 1 --output-queue-buffers 1 --arrival-budget-ms 17 --latency-ms 0 --transport-only --no-output-preroll --native --cycles 100
+11-07 03:26:36.810 14840 14840 F DEBUG   : pid: 14807, tid: 14813, name: vsrc:src  >>> /data/local/tmp/framelink-m6-20261106/fl_gst_av_bench <<<
+11-07 03:26:36.810 14840 14840 F DEBUG   : uid: 2000
+11-07 03:26:36.810 14840 14840 F DEBUG   : tagged_addr_ctrl: 0000000000000001 (PR_TAGGED_ADDR_ENABLE)
+11-07 03:26:36.810 14840 14840 F DEBUG   : signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+11-07 03:26:36.810 14840 14840 F DEBUG   : Abort message: 'terminating due to uncaught exception of type std::bad_alloc: std::bad_alloc'
+11-07 03:26:36.810 14840 14840 F DEBUG   :     x0  0000000000000000  x1  00000000000039dd  x2  0000000000000006  x3  0000007136f0f290
+11-07 03:26:36.810 14840 14840 F DEBUG   :     x4  646277641f736766  x5  646277641f736766  x6  646277641f736766  x7  7f7f7f7f7f7f7f7f
+11-07 03:26:36.810 14840 14840 F DEBUG   :     x8  00000000000000f0  x9  00000073f8c45468  x10 0000000000000001  x11 00000073f8c97590
+11-07 03:26:36.810 14840 14840 F DEBUG   :     x12 000000006aeee0bc  x13 000000007fffffff  x14 000000004c5ad1e0  x15 0000379af49479b8
+11-07 03:26:36.810 14840 14840 F DEBUG   :     x16 00000073f8d00ff8  x17 00000073f8ceb040  x18 0000007135b48000  x19 00000000000039d7
+11-07 03:26:36.810 14840 14840 F DEBUG   :     x20 00000000000039dd  x21 00000000ffffffff  x22 0000007136f0f3c0  x23 0000007136f0f400
+11-07 03:26:36.810 14840 14840 F DEBUG   :     x24 0000007136f0f4b0  x25 0000007136f109c0  x26 097ffff1d6bfa8f2  x27 12ffffe3ad7f51e4
+11-07 03:26:36.810 14840 14840 F DEBUG   :     x28 0000000000006e0e  x29 0000007136f0f310
+11-07 03:26:36.810 14840 14840 F DEBUG   :     lr  00000073f8c7fa58  sp  0000007136f0f270  pc  00000073f8c7fa88  pst 0000000000001000
+11-07 03:26:36.810 14840 14840 F DEBUG   : 44 total frames
+11-07 03:26:36.810 14840 14840 F DEBUG   : backtrace:
+11-07 03:26:36.810 14840 14840 F DEBUG   :   NOTE: Function names and BuildId information is missing for some frames due
+11-07 03:26:36.810 14840 14840 F DEBUG   :   NOTE: to unreadable libraries. For unwinds of apps, only shared libraries
+11-07 03:26:36.810 14840 14840 F DEBUG   :   NOTE: found under the lib/ directory are readable.
+11-07 03:26:36.810 14840 14840 F DEBUG   :   NOTE: On this device, run setenforce 0 to make the libraries readable.
+11-07 03:26:36.810 14840 14840 F DEBUG   :   NOTE: Unreadable libraries:
+11-07 03:26:36.810 14840 14840 F DEBUG   :   NOTE:   /data/local/tmp/framelink-m6-20261106/fl_gst_av_bench
+11-07 03:26:36.810 14840 14840 F DEBUG   :       #00 pc 000000000005da88  /apex/com.android.runtime/lib64/bionic/libc.so (abort+168) (BuildId: a456cab5ed9fabd7bd67b7e9927bde17)
+11-07 03:26:36.810 14840 14840 F DEBUG   :       #01 pc 00000000005b09ac  /data/local/tmp/framelink-m6-20261106/fl_gst_av_bench
+11-07 03:26:36.810 14840 14840 F DEBUG   :       #02 pc 00000000005b0538  /data/local/tmp/framelink-m6-20261106/fl_gst_av_bench
+11-07 03:26:36.810 14840 14840 F DEBUG   :       #03 pc 00000000005b03f8  /data/local/tmp/framelink-m6-20261106/fl_gst_av_bench
+11-07 03:26:36.810 14840 14840 F DEBUG   :       #04 pc 00000000005ca078  /data/local/tmp/framelink-m6-20261106/fl_gst_av_bench
+11-07 03:26:36.810 14840 14840 F DEBUG   :       #05 pc 00000000005ca054  /data/local/tmp/framelink-m6-20261106/fl_gst_av_bench
+11-07 03:26:36.810 14840 14840 F DEBUG   :       #06 pc 00000000005d0b24  /data/local/tmp/framelink-m6-20261106/fl_gst_av_bench
+11-07 03:26:36.810 14840 14840 F DEBUG   :       #07 pc 0000000000311bd0  /data/local/tmp/framelink-m6-20261106/fl_gst_av_bench
+11-07 03:26:36.810 14840 14840 F DEBUG   :       #08 pc 00000000005166ac  /data/local/tmp/framelink-m6-20261106/fl_gst_av_bench
+11-07 03:26:36.810 14840 14840 F DEBUG   :       #09 pc 000000000051d6e8  /data/local/tmp/framelink-m6-20261106/fl_gst_av_bench
+11-07 03:26:36.810 14840 14840 F DEBUG   :       #10 pc 000000000052a1d4  /data/local/tmp/framelink-m6-20261106/fl_gst_av_bench
+11-07 03:26:36.810 14840 14840 F DEBUG   :       #11 pc 0000000000527bc4  /data/local/tmp/framelink-m6-20261106/fl_gst_av_bench
+11-07 03:26:36.810 14840 14840 F DEBUG   :       #12 pc 00000000004f7520  /data/local/tmp/framelink-m6-20261106/fl_gst_av_bench
+11-07 03:26:36.810 14840 14840 F DEBUG   :       #13 pc 0000000000301b2c  /data/local/tmp/framelink-m6-20261106/fl_gst_av_bench
+11-07 03:26:36.810 14840 14840 F DEBUG   :       #14 pc 00000000004f849c  /data/local/tmp/framelink-m6-20261106/fl_gst_av_bench
+11-07 03:26:36.810 14840 14840 F DEBUG   :       #15 pc 00000000005428c4  /data/local/tmp/framelink-m6-20261106/fl_gst_av_bench
+11-07 03:26:36.810 14840 14840 F DEBUG   :       #16 pc 00000000005422e8  /data/local/tmp/framelink-m6-20261106/fl_gst_av_bench
+11-07 03:26:36.810 14840 14840 F DEBUG   :       #17 pc 0000000000544abc  /data/local/tmp/framelink-m6-20261106/fl_gst_av_bench
+11-07 03:26:36.810 14840 14840 F DEBUG   :       #18 pc 000000000053f254  /data/local/tmp/framelink-m6-20261106/fl_gst_av_bench
+11-07 03:26:36.810 14840 14840 F DEBUG   :       #19 pc 000000000053fec0  /data/local/tmp/framelink-m6-20261106/fl_gst_av_bench
+11-07 03:26:36.810 14840 14840 F DEBUG   :       #20 pc 000000000054200c  /data/local/tmp/framelink-m6-20261106/fl_gst_av_bench
+11-07 03:26:36.810 14840 14840 F DEBUG   :       #21 pc 000000000053e754  /data/local/tmp/framelink-m6-20261106/fl_gst_av_bench
+11-07 03:26:36.810 14840 14840 F DEBUG   :       #22 pc 000000000053e528  /data/local/tmp/framelink-m6-20261106/fl_gst_av_bench
+11-07 03:26:36.810 14840 14840 F DEBUG   :       #23 pc 000000000053e678  /data/local/tmp/framelink-m6-20261106/fl_gst_av_bench
+11-07 03:26:36.810 14840 14840 F DEBUG   :       #24 pc 00000000005428c4  /data/local/tmp/framelink-m6-20261106/fl_gst_av_bench
+11-07 03:26:36.810 14840 14840 F DEBUG   :       #25 pc 00000000005422e8  /data/local/tmp/framelink-m6-20261106/fl_gst_av_bench
+11-07 03:26:36.810 14840 14840 F DEBUG   :       #26 pc 0000000000544abc  /data/local/tmp/framelink-m6-20261106/fl_gst_av_bench
+11-07 03:26:36.810 14840 14840 F DEBUG   :       #27 pc 000000000053f254  /data/local/tmp/framelink-m6-20261106/fl_gst_av_bench
+11-07 03:26:36.810 14840 14840 F DEBUG   :       #28 pc 000000000053fec0  /data/local/tmp/framelink-m6-20261106/fl_gst_av_bench
+11-07 03:26:36.810 14840 14840 F DEBUG   :       #29 pc 000000000054200c  /data/local/tmp/framelink-m6-20261106/fl_gst_av_bench
+11-07 03:26:36.810 14840 14840 F DEBUG   :       #30 pc 0000000000506c28  /data/local/tmp/framelink-m6-20261106/fl_gst_av_bench
+11-07 03:26:36.810 14840 14840 F DEBUG   :       #31 pc 0000000000317f44  /data/local/tmp/framelink-m6-20261106/fl_gst_av_bench
+11-07 03:26:36.810 14840 14840 F DEBUG   :       #32 pc 00000000005428c4  /data/local/tmp/framelink-m6-20261106/fl_gst_av_bench
+11-07 03:26:36.810 14840 14840 F DEBUG   :       #33 pc 00000000005422e8  /data/local/tmp/framelink-m6-20261106/fl_gst_av_bench
+11-07 03:26:36.810 14840 14840 F DEBUG   :       #34 pc 0000000000544abc  /data/local/tmp/framelink-m6-20261106/fl_gst_av_bench
+11-07 03:26:36.810 14840 14840 F DEBUG   :       #35 pc 000000000053f254  /data/local/tmp/framelink-m6-20261106/fl_gst_av_bench
+11-07 03:26:36.810 14840 14840 F DEBUG   :       #36 pc 000000000053fec0  /data/local/tmp/framelink-m6-20261106/fl_gst_av_bench
+11-07 03:26:36.810 14840 14840 F DEBUG   :       #37 pc 000000000054200c  /data/local/tmp/framelink-m6-20261106/fl_gst_av_bench
+11-07 03:26:36.810 14840 14840 F DEBUG   :       #38 pc 00000000005020bc  /data/local/tmp/framelink-m6-20261106/fl_gst_av_bench
+11-07 03:26:36.810 14840 14840 F DEBUG   :       #39 pc 000000000055f5bc  /data/local/tmp/framelink-m6-20261106/fl_gst_av_bench
+11-07 03:26:36.810 14840 14840 F DEBUG   :       #40 pc 00000000004659e8  /data/local/tmp/framelink-m6-20261106/fl_gst_av_bench
+11-07 03:26:36.810 14840 14840 F DEBUG   :       #41 pc 0000000000464bbc  /data/local/tmp/framelink-m6-20261106/fl_gst_av_bench
+11-07 03:26:36.810 14840 14840 F DEBUG   :       #42 pc 00000000000701d4  /apex/com.android.runtime/lib64/bionic/libc.so (__pthread_start(void*)+196) (BuildId: a456cab5ed9fabd7bd67b7e9927bde17)
+11-07 03:26:36.810 14840 14840 F DEBUG   :       #43 pc 0000000000061560  /apex/com.android.runtime/lib64/bionic/libc.so (__start_thread+64) (BuildId: a456cab5ed9fabd7bd67b7e9927bde17)

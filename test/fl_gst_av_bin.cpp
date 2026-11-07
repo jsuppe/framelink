@@ -12,6 +12,9 @@
 #include <cstring>
 #include <string>
 #include <thread>
+#include <mutex>
+#include <condition_variable>
+#include <chrono>
 #ifdef __ANDROID__
 extern "C" {
 GST_PLUGIN_STATIC_DECLARE(framelink);GST_PLUGIN_STATIC_DECLARE(app);GST_PLUGIN_STATIC_DECLARE(coreelements);
@@ -75,10 +78,24 @@ static GstElement* producerPipeline(const std::string&text,const std::string&pat
  auto*p=parse(text);auto*s=gst_bin_get_by_name(GST_BIN(p),"s");CHECK(s);g_object_set(s,"session",path.c_str(),nullptr);gst_object_unref(s);return p;
 }
 
-static void pair(const std::string&tracks,bool producerFirst,guint producerLeadMs){
+static void pair(const std::string&tracks,bool producerFirst,guint producerLeadMs,bool concurrentEos=false){
  fprintf(stderr,"CASE tracks=%s producer-first=%d lead=%ums\n",tracks.c_str(),producerFirst,producerLeadMs);
  const bool video=tracks!="audio",audio=tracks!="video";auto path=sessionPath();
  auto*p=producerPipeline(producerText(path,tracks),path);Consumer c;std::thread consumer;
+ // Force both streaming threads to reach EOS before either child handles it.
+ struct EosBarrier {std::mutex mutex;std::condition_variable ready;unsigned arrived=0;} barrier;
+ if(concurrentEos){
+  auto*bin=gst_bin_get_by_name(GST_BIN(p),"s");
+  for(const char*name:{"video","audio"}){auto*child=gst_bin_get_by_name(GST_BIN(bin),name);CHECK(child);
+   auto*pad=gst_element_get_static_pad(child,"sink");CHECK(pad);
+   gst_pad_add_probe(pad,GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM,[](GstPad*,GstPadProbeInfo*info,gpointer data)->GstPadProbeReturn{
+    if(GST_EVENT_TYPE(GST_PAD_PROBE_INFO_EVENT(info))==GST_EVENT_EOS){auto*b=static_cast<EosBarrier*>(data);
+     std::unique_lock<std::mutex> lock(b->mutex);++b->arrived;b->ready.notify_all();
+     CHECK(b->ready.wait_for(lock,std::chrono::seconds(5),[&]{return b->arrived==2;}));}
+    return GST_PAD_PROBE_OK;
+   },&barrier,nullptr);gst_object_unref(pad);gst_object_unref(child);
+  }gst_object_unref(bin);
+ }
  if(!producerFirst){consumer=std::thread([&]{c.run(path,video,audio);});g_usleep(200000);}
  CHECK(gst_element_set_state(p,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
  if(producerFirst){g_usleep(producerLeadMs*1000);consumer=std::thread([&]{c.run(path,video,audio);});}
@@ -89,7 +106,7 @@ static void pair(const std::string&tracks,bool producerFirst,guint producerLeadM
  gst_element_set_state(p,GST_STATE_NULL);gst_object_unref(p);
  fprintf(stderr,"producer=%s consumer=%s video=%u samples=%" G_GUINT64_FORMAT " lag=%.1f..%.1fms generation=%" G_GUINT64_FORMAT " ids=%u/%u session=%s\n",
   perr.empty()?"ok":perr.c_str(),c.ok?"ok":c.error.c_str(),c.frames.load(),c.samples,c.best/1e6,c.worst/1e6,generation,vid,aid,id?id:"-");
- CHECK(perr.empty()&&c.ok);
+ CHECK(perr.empty()&&c.ok);if(concurrentEos)CHECK(barrier.arrived==2);
  CHECK(c.frames==(video?FRAMES:0u)&&c.samples==(audio?guint64(BLOCKS)*BLOCK:0u)&&c.uniform&&c.contiguous);
  // The shared offset puts the producer timeline on the session epoch: every
  // buffer renders one consumer latency after capture, on both tracks.
@@ -192,10 +209,11 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
  for(auto t:{"av","video","audio"}){auto*s=gst_element_factory_make("framelinkavsink",nullptr);CHECK(s);g_object_set(s,"tracks",t,nullptr);
   auto*v=gst_element_get_static_pad(s,"video_sink"),*a=gst_element_get_static_pad(s,"audio_sink");CHECK((v!=nullptr)==(strcmp(t,"audio")!=0)&&(a!=nullptr)==(strcmp(t,"video")!=0));
   if(v)gst_object_unref(v);if(a)gst_object_unref(a);gst_object_unref(s);}
- if(const char*only=getenv("FL_AVBIN_ONLY")){if(!strcmp(only,"pause")){for(auto t:{"video","av"})CHECK(pauseResume(true,t)==pauseResume(false,t));}return 0;}
+ if(const char*only=getenv("FL_AVBIN_ONLY")){if(!strcmp(only,"eos")){for(int i=0;i<12;++i)pair("av",false,0,true);}else if(!strcmp(only,"pause")){for(auto t:{"video","av"})CHECK(pauseResume(true,t)==pauseResume(false,t));}return 0;}
  thin();
  for(auto t:{"video","av"})CHECK(pauseResume(true,t)==pauseResume(false,t));
  teardownWhileHeld();consumerDeath();
+ for(int i=0;i<4;++i)pair("av",false,0,true);
  pair("av",true,800);pair("av",false,0);pair("video",true,300);pair("audio",false,0);
  negative("track-mismatch","av","audio",false,2000,"");
  negative("no-consumer","av","",false,1000,"");
