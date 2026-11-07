@@ -45,3 +45,16 @@ BGRA local-consumer baseline completed with7.31KB/min (NV12local7.34), complete5
 CPU-cache NV12CPU1080p60 sustained regression passed108000video/86400000PCM, zero17ms misses/AVmapping0ns; consumer3.25/producer7.34KBmin below64. See cpu-pool-windows-nv12-1920x1080-60-cpu-1800. Current cache CPU matrix2/4; BGRA1080p60 thenNV124K30 remain.
 
 CPU-cache BGRA CPU1080p60 sustained regression passed108000video/86400000PCM, zero17ms misses/AVmapping0ns; consumer7.18/producer7.22KBmin below64. See cpu-pool-windows-bgra-1920x1080-60-cpu-1800. Current cache CPU matrix3/4; finalNV124K30 remains.
+
+## Current repaired CPU matrix complete
+
+All four CPU-cache cases on29bbddb pass complete counts, fixed arrival diagnostic and64KB/min resources:
+
+| Case | Consumer KB/min | Producer KB/min | Memory gate |
+|---|---:|---:|---|
+| BGRA1080p60 | 7.18 | 7.22 | pass |
+| NV121080p60 | 3.25 | 7.34 | pass |
+| BGRA4K30 | 7.14 | 7.18 | pass |
+| NV124K30 | 7.32 | 46.69 | pass |
+
+Evidence directories use cpu-pool-windows-* labels; originals above are retained failures, not current measurements. Native4K cache repair evidence is unchanged by the Windows CPU-only pool. This resource reconciliation does not close the original intermittent159ms timing failure, primary-profile budget decision, deterministic2d controls or full milestone. Next execute deterministic queue/clock/upstream-gap controls.
