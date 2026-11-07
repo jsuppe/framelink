@@ -4,6 +4,15 @@
 #include <cstdio>
 #include <cstdlib>
 #include <string>
+#include <cstring>
+#ifdef _WIN32
+#include <windows.h>
+#include <psapi.h>
+#include <tlhelp32.h>
+#else
+#include <dirent.h>
+#include <unistd.h>
+#endif
 #define CHECK(x) do {if(!(x)){std::fprintf(stderr,"line %d: %s\n",__LINE__,#x);std::exit(1);}} while(0)
 #ifdef _WIN32
 #include "framelink_d3d11.h"
@@ -44,7 +53,7 @@ static void collect(flChannel* c) {
  for(int i=0;i<1000;++i){auto r=flCollectReadLeases(c);if(r==FL_OK)return;CHECK(r==FL_BUSY||r==FL_DISCONNECTED);std::this_thread::sleep_for(std::chrono::milliseconds(1));}
  CHECK(false);
 }
-int main() {
+static int cycle() {
  std::string name="leases-"+std::to_string(std::chrono::steady_clock::now().time_since_epoch().count());
  flChannel *c=nullptr,*p=nullptr;
  auto r=flCreateChannelEx(name.c_str(),64,32,FL_FORMAT_RGBA8,2,FL_MAP_CPU|FL_DEFER_RELEASE,&c);
@@ -105,5 +114,34 @@ int main() {
  CHECK(flReadLeaseFrame(c,second,&f,&generation)==FL_OK && f.ptsNs==707);
  CHECK(flCompleteReadLease(c,second)==FL_OK);collect(c);
  flClose(p);flClose(c);
- std::puts("native read leases: retained readers block reuse; ordered retirement and resize pass");
+ return 0;
+}
+
+// M6.3b: sample only after cycle() returns, including destruction of the
+// external completion fences/contexts. Same resource definitions as AV bench.
+static void resourceRow(unsigned cycleNumber) {
+ unsigned long long memory=0;unsigned handles=0,threads=0;
+#ifdef _WIN32
+ PROCESS_MEMORY_COUNTERS_EX m{};
+ CHECK(K32GetProcessMemoryInfo(GetCurrentProcess(),reinterpret_cast<PROCESS_MEMORY_COUNTERS*>(&m),sizeof m));memory=m.PrivateUsage/1024;
+ DWORD count=0;CHECK(GetProcessHandleCount(GetCurrentProcess(),&count));handles=count;
+ HANDLE snapshot=CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD,0);CHECK(snapshot!=INVALID_HANDLE_VALUE);
+ THREADENTRY32 entry{};entry.dwSize=sizeof entry;
+ for(BOOL ok=Thread32First(snapshot,&entry);ok;ok=Thread32Next(snapshot,&entry))if(entry.th32OwnerProcessID==GetCurrentProcessId())++threads;
+ CloseHandle(snapshot);
+#else
+ FILE*f=std::fopen("/proc/self/statm","r");CHECK(f);unsigned long pages=0,resident=0;
+ CHECK(std::fscanf(f,"%lu %lu",&pages,&resident)==2);std::fclose(f);memory=resident*(unsigned long)sysconf(_SC_PAGESIZE)/1024;
+ auto count=[](const char*path){unsigned n=0;DIR*d=opendir(path);CHECK(d);while(auto*e=readdir(d))if(e->d_name[0]!='.')++n;closedir(d);return n;};
+ handles=count("/proc/self/fd")-1;threads=count("/proc/self/task");
+#endif
+ std::printf("cycle.%u=%llu|%u|%u\n",cycleNumber,memory,handles,threads);std::fflush(stdout);
+}
+int main(int argc,char**argv) {
+ unsigned cycles=1;bool sample=false;
+ if(argc!=1){CHECK(argc==3&&!std::strcmp(argv[1],"--cycles"));char*end=nullptr;
+  auto n=std::strtoul(argv[2],&end,10);CHECK(end&&!*end&&n>=6&&n<=1000);cycles=unsigned(n);sample=true;}
+ for(unsigned i=0;i<cycles;++i){int rc=cycle();if(rc)return rc;if(sample)resourceRow(i);}
+ std::puts("native read leases: retained readers block reuse; ordered retirement, resize and reconnect pass");
+ return 0;
 }

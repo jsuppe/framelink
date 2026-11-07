@@ -1,0 +1,69 @@
+{
+  "state": "failed",
+  "started": 1794042209.3595243,
+  "source_sha256": "f05a8977340c12273c3ff92861433876fd468ec3d0b4ece26100382f43fe9138",
+  "cases": [
+    {
+      "label": "linux",
+      "cycles": 100,
+      "slopes_memory_kb_handles_threads": [
+        0.14171332586786115,
+        0.0,
+        0.0
+      ],
+      "accepted": true,
+      "first_warm": [
+        4488,
+        3,
+        1
+      ],
+      "last": [
+        4500,
+        3,
+        1
+      ]
+    },
+    {
+      "label": "android",
+      "cycles": 100,
+      "slopes_memory_kb_handles_threads": [
+        -0.5091825307950728,
+        0.0,
+        0.0
+      ],
+      "accepted": true,
+      "first_warm": [
+        38736,
+        6,
+        1
+      ],
+      "last": [
+        38712,
+        6,
+        1
+      ]
+    },
+    {
+      "label": "windows",
+      "cycles": 100,
+      "slopes_memory_kb_handles_threads": [
+        82.52833146696528,
+        0.0,
+        0.0
+      ],
+      "accepted": false,
+      "first_warm": [
+        59476,
+        231,
+        5
+      ],
+      "last": [
+        65900,
+        231,
+        5
+      ]
+    }
+  ],
+  "error": "windows resource gate failed",
+  "ended": 1794042262.156848
+}

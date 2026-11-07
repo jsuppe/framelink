@@ -1,0 +1,21 @@
+#< CLIXML
+Test project <win-home>/dev/framelink-m6-20261106/build
+    Start   1: read_leases
+1/5 Test   #1: read_leases ......................   Passed    0.34 sec
+    Start  10: read_lease_d3d11
+2/5 Test  #10: read_lease_d3d11 .................   Passed    0.40 sec
+    Start  56: reconnect_held
+3/5 Test  #56: reconnect_held ...................   Passed    0.29 sec
+    Start  91: gst_policy_generation
+4/5 Test  #91: gst_policy_generation ............   Passed    2.54 sec
+    Start 107: gst_av_qualification
+5/5 Test #107: gst_av_qualification .............   Passed   64.09 sec
+
+100% tests passed, 0 tests failed out of 5
+
+Label Time Summary:
+gst_video_regression    =   2.54 sec*proc (1 test)
+m5b_av                  =  64.09 sec*proc (1 test)
+
+Total Test time (real) =  67.72 sec
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04"><Obj S="progress" RefId="0"><TN RefId="0"><T>System.Management.Automation.PSCustomObject</T><T>System.Object</T></TN><MS><I64 N="SourceId">1</I64><PR N="Record"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj></Objs>

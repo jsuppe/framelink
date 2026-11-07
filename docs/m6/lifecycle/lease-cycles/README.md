@@ -1,0 +1,5 @@
+# Same-process held-lease/reconnect endurance
+
+100 complete functional cycles on each platform. Every cycle retains readers, prevents early reuse, retires out-of-order completion, changes geometry, rejects stale tokens, disconnects/reconnects while a reader remains outstanding, and verifies new data identity. Resources sampled after all external completion objects destruct. LinuxRSS0.142KB/cycle andAndroidRSS-0.509 pass; Windowsprivatecommit82.528FAILS frozen16KB/cycle. Handles/threads flat on all platforms. Five-cycle warmup and0.1handle/0.02thread limits unchanged. Windowsresourcefailure is not a functional-test failure and does not justify modifying the gate. Allcycle rows retained.
+
+POSIX completion handles here are eventfd readiness controls; separate real EGL GPU/import/readback and producer-death tests passed in ownership evidence. Windows uses real shared D3D11 fences. Small-fixture functional/baseline evidence does not substitute for primary-profile latency or presentation testing. M6.3b Windowsmemory acceptance remains suspended with the existing device-lifecycle dependency.
