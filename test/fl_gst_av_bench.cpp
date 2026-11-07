@@ -197,13 +197,15 @@ static int consumerChild(const Options&o,const std::string&session,const std::st
 // side per cycle. After each cycle's teardown the long-lived process records
 // its memory, handles and threads; growth across cycles is a leak.
 static int lifecycleChild(const Options&o,bool producer,const std::string&base,const std::string&out){
- FILE*f=fopen(out.c_str(),"w");CHECK(f);
+ FILE*f=fopen(out.c_str(),"w");CHECK(f);bool complete=true;
+ fprintf(f,"scope=%s\n",o.localConsumer?"local-consumer-lifecycle-no-transport":"transport-lifecycle");
  for(guint i=0;i<o.cycles;i++){const std::string path=base+"/c"+std::to_string(i)+"/session";std::string result;guint64 frames=0,samples=0;
   if(producer){Producer p(modeOf(o.mode),path,"av",o.seconds*gFps,80,false,o.seconds*100);p.start();p.finish();result=p.result;frames=p.pushedFrames;samples=p.pushedSamples;}
-  else{Consumer c(modeOf(o.mode),path,"av",o.native);c.checkContent=false;c.start();c.finish();result=c.result;frames=c.frames;samples=c.samples;}
+  else{Consumer c(modeOf(o.mode),path,"av",o.native,o.localConsumer?o.seconds:0);c.checkContent=false;c.start();c.finish();result=c.result;frames=c.frames;samples=c.samples;if(!c.contiguous)result="error: audio discontinuity";}
+  complete=complete&&result=="EOS"&&frames==guint64(o.seconds)*gFps&&samples==guint64(o.seconds)*48000;
   const Resources r=resources();
   fprintf(f,"cycle.%u=%s|%llu|%llu|%llu|%u|%u\n",i,result.c_str(),(unsigned long long)frames,(unsigned long long)samples,(unsigned long long)r.memKb,r.handles,r.threads);fflush(f);}
- fclose(f);return 0;}
+ fprintf(f,"complete=%s\n",complete?"yes":"no");fclose(f);return complete?0:1;}
 
 // ---- driver ----------------------------------------------------------------------
 static std::string selfPath(const char*argv0){
@@ -320,7 +322,7 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
   else if(a=="--cycles")o.cycles=guint(std::stoul(next()));else if(a=="--restart")o.restart=next();else if(a=="--session-base")sessionBase=next();
   else if(a=="--local-consumer")o.localConsumer=true;else if(a=="--native")o.native=true;else if(a=="--trace")o.trace=true;else if(a=="--raw")o.raw=true;else if(a=="--out")o.out=next();else if(a=="--label")o.label=next();
   else if(a=="--role")role=next();else if(a=="--session")session=next();else if(a=="--result")result=next();else{fprintf(stderr,"unknown option %s\n",a.c_str());return 2;}}
- CHECK(!o.localConsumer||(role=="consumer"&&o.mode=="bin"&&!o.native&&!o.sourceOnly&&!o.cycles&&!result.empty()));
+ CHECK(!o.localConsumer||(((role=="consumer"&&!o.cycles)||(role=="lifecycle-consumer"&&o.cycles>0))&&o.mode=="bin"&&!o.native&&!o.sourceOnly&&!result.empty()));
  CHECK(o.seconds>=WARMUP_S+3&&(o.mode=="bin"||o.mode=="element"));gRunLimit=(o.seconds+30)*GST_SECOND;
  // Ring: ceil(latency x fps) + 2 images (documented sizing), at least the default 8.
  // Queue: no byte/buffer limit (frames reach 33 MB at 4K); the 1 s time bound
