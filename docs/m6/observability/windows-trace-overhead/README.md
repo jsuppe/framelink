@@ -1,0 +1,3 @@
+# Windows trace overhead controls
+
+Three ordered off/on300frame1080p60 one-hop D3D11copy/fullreadback + testGDP pairs passed counts/PCM and zero-loss trace/GPU joins. P95 arrival-age deltas -0.008,+0.005,-0.478ms; CPU deltas producer -203.125..+62.5ms,consumer -31.25..+93.75ms. Noise/sign changes preclude a precise causal overhead percentage. Peak working-set deltas0.38..0.57MiB are not privatecommit or reserved recorder capacity. Explicit control flush adds4.28..4.38msproducer/2.76..2.88msconsumer, automatic exit flush excluded. Fullmetrics retained. Not primary app/presentation qualification.

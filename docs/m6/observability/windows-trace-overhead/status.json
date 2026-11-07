@@ -1,0 +1,103 @@
+{
+  "state": "finished",
+  "scope": "three fixed off/on pairs; native D3D11 full-readback + testGDP PCM; not presentation or universal overhead budget",
+  "started": 1794046185.5416944,
+  "steps": [
+    {
+      "name": "build",
+      "exit": 0
+    },
+    {
+      "name": "capture-off-1",
+      "exit": 0
+    },
+    {
+      "name": "pull-off-1",
+      "exit": 0
+    },
+    {
+      "name": "av-off-1",
+      "exit": 0
+    },
+    {
+      "name": "capture-on-1",
+      "exit": 0
+    },
+    {
+      "name": "pull-on-1",
+      "exit": 0
+    },
+    {
+      "name": "join-on-1",
+      "exit": 0
+    },
+    {
+      "name": "av-on-1",
+      "exit": 0
+    },
+    {
+      "name": "capture-off-2",
+      "exit": 0
+    },
+    {
+      "name": "pull-off-2",
+      "exit": 0
+    },
+    {
+      "name": "av-off-2",
+      "exit": 0
+    },
+    {
+      "name": "capture-on-2",
+      "exit": 0
+    },
+    {
+      "name": "pull-on-2",
+      "exit": 0
+    },
+    {
+      "name": "join-on-2",
+      "exit": 0
+    },
+    {
+      "name": "av-on-2",
+      "exit": 0
+    },
+    {
+      "name": "capture-off-3",
+      "exit": 0
+    },
+    {
+      "name": "pull-off-3",
+      "exit": 0
+    },
+    {
+      "name": "av-off-3",
+      "exit": 0
+    },
+    {
+      "name": "capture-on-3",
+      "exit": 0
+    },
+    {
+      "name": "pull-on-3",
+      "exit": 0
+    },
+    {
+      "name": "join-on-3",
+      "exit": 0
+    },
+    {
+      "name": "av-on-3",
+      "exit": 0
+    }
+  ],
+  "source_sha256": {
+    "test/fl_native_boundary_benchmark_win.cpp": "b18bb0b8b06cc40c065f652eb2d6602940acb0c59f6931e729a2ee045800185d",
+    "test/fl_boundary_audio.hpp": "3fc38917cd52c3f033fff12cbd4a5ada81113c79caab4f926faa91c433a72658",
+    "test/fl_boundary_resources.hpp": "05f911951bc404650b4d4a2479d69b3e8e8ba61cea376de1b7cf75c9d47fab7c",
+    "include/framelink_trace.hpp": "462791535b134ea890a103ebb580ddf80188b47ae22fe08707ca46939ed8e260",
+    "samples/native_relay.h": "49771515e2b0d433e86dae321b51878e7c0a6aa7463936d02c125da36aa59fc5"
+  },
+  "ended": 1794046227.1128798
+}
