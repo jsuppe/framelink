@@ -1,0 +1,28 @@
+
+  dev\vkrender-m5-final-validation\renderer\scene_host.cpp:607:    static const bool kTiming = getenv("VKR_SCENE_TIMING") != nullptr;
+  dev\vkrender-m5-final-validation\renderer\scene_host.cpp:608:    const int64_t tFrameStart = kTiming ? nowNs() : 0;
+  dev\vkrender-m5-final-validation\renderer\scene_host.cpp:609:
+  dev\vkrender-m5-final-validation\renderer\scene_host.cpp:610:    const VkResult traceWaitResult = vkrtrace::call("scene.wait_inflight_fence", [&]{return vkWaitForFences(vk.device, 1, &f.inFlight, VK_TRUE, UINT64_MAX);});
+  dev\vkrender-m5-final-validation\renderer\scene_host.cpp:611:    if (traceWaitResult == VK_SUCCESS)
+> dev\vkrender-m5-final-validation\renderer\scene_host.cpp:612:        traceFrames("av.frame_gpu_complete", f.traceFrames, 0, f.traceSubmission);
+  dev\vkrender-m5-final-validation\renderer\scene_host.cpp:613:    f.traceFrames.clear();
+  dev\vkrender-m5-final-validation\renderer\scene_host.cpp:614:    if (f.testRelease.joinable()) f.testRelease.join();
+  dev\vkrender-m5-final-validation\renderer\scene_host.cpp:615:    f.gpuTrace.prepare(vk);
+  dev\vkrender-m5-final-validation\renderer\scene_host.cpp:616:    portableOutput_.retire(vk,(frameIndex_-1)%kFramesInFlight);
+  dev\vkrender-m5-final-validation\renderer\scene_host.cpp:617:    const int64_t tAfterFence = kTiming ? nowNs() : 0;
+  dev\vkrender-m5-final-validation\renderer\scene_host.cpp:960:void SceneHost::destroy(VkContext& vk) {
+  dev\vkrender-m5-final-validation\renderer\scene_host.cpp:961:    const VkResult drained = vkDeviceWaitIdle(vk.device);
+  dev\vkrender-m5-final-validation\renderer\scene_host.cpp:962:    if (drained == VK_SUCCESS && vkrtrace::enabled()) {
+  dev\vkrender-m5-final-validation\renderer\scene_host.cpp:963:        for (auto& f : frames_) {
+  dev\vkrender-m5-final-validation\renderer\scene_host.cpp:964:            for (const auto& i : f.traceFrames)
+> dev\vkrender-m5-final-validation\renderer\scene_host.cpp:965:                vkrtrace::record({"av.frame_gpu_complete", vkrtrace::clockNs(), f.traceSubmission,
+  dev\vkrender-m5-final-validation\renderer\scene_host.cpp:966:                    i.channel, i.sequence, i.ready, i.generation, i.pts, 0});
+  dev\vkrender-m5-final-validation\renderer\scene_host.cpp:967:            f.traceFrames.clear();
+  dev\vkrender-m5-final-validation\renderer\scene_host.cpp:968:        }
+  dev\vkrender-m5-final-validation\renderer\scene_host.cpp:969:    }
+  dev\vkrender-m5-final-validation\renderer\scene_host.cpp:970:    portableOutput_.destroy(vk);
+
+
+
+#< CLIXML
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04"><Obj S="progress" RefId="0"><TN RefId="0"><T>System.Management.Automation.PSCustomObject</T><T>System.Object</T></TN><MS><I64 N="SourceId">1</I64><PR N="Record"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj><Obj S="progress" RefId="1"><TNRef RefId="0" /><MS><I64 N="SourceId">1</I64><PR N="Record"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj></Objs>
