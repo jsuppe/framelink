@@ -75,7 +75,7 @@ of the header). Existing error/debug logs remain separate.
 - One-time per-thread buffer allocation and mutex-protected registration. No
   dynamically formatted strings and no background flushing thread. Operation
   names are static literals. No frame pixels are captured by the recorder.
-- Default 65,536 events/thread; `<PREFIX_ENV>_EVENTS` accepts 16..1,048,576.
+- Default 4,096 events/thread; `<PREFIX_ENV>_EVENTS` accepts 16..1,048,576.
   For the plugin use FRAMELINK_GST_TRACE_EVENTS. At 72 bytes/event the default
   allocation is about 4.5 MiB per participating thread, allocated lazily. Maximum
   64 threads per recorder, including threads that have already exited. Threads
@@ -152,3 +152,5 @@ FRAMELINK_TRACE=/tmp/bench FRAMELINK_TRACE_EVENTS=262144 ./build/fl_trace_test b
 The report prints sample counts, p50/p95/p99/max durations, result distributions,
 API delivery intervals and unambiguous transport joins. It deliberately does
 not label callback/delivery counts as fresh display FPS.
+
+On the measured64-bit ABI, each event is168 bytes: default4096 slots reserve672KiB per attached thread (42MiB at64threads per recorder), excluding allocator/container overhead. Tracing disabled allocates no event buffers. The explicit maximum1048576 slots can reserve168MiB/thread (10.5GiB at64threads); this is an intentional opt-in, not a safe blanket capture recommendation. Size each recorder for the capture, and reject any nonzero dropped/rejected footer. Multiple recorder namespaces/processes have separate bounds.

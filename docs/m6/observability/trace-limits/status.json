@@ -1,0 +1,59 @@
+{
+  "state": "finished",
+  "started": 1794046258.5417619,
+  "steps": [
+    {
+      "name": "linux-build",
+      "exit": 0
+    },
+    {
+      "name": "linux-tests",
+      "exit": 0
+    },
+    {
+      "name": "layout-build",
+      "exit": 0
+    },
+    {
+      "name": "layout",
+      "exit": 0
+    },
+    {
+      "name": "android-build",
+      "exit": 0
+    },
+    {
+      "name": "push-fl_trace_test",
+      "exit": 0
+    },
+    {
+      "name": "push-fl_trace_compiled_out",
+      "exit": 0
+    },
+    {
+      "name": "android-disabled",
+      "exit": 0
+    },
+    {
+      "name": "android-concurrent",
+      "exit": 0
+    },
+    {
+      "name": "android-threads",
+      "exit": 0
+    },
+    {
+      "name": "android-details",
+      "exit": 0
+    },
+    {
+      "name": "android-compiled-out",
+      "exit": 0
+    },
+    {
+      "name": "windows-tests",
+      "exit": 0
+    }
+  ],
+  "ended": 1794046260.6990051
+}

@@ -478,6 +478,15 @@ if(FRAMELINK_BUILD_TESTS)
     endif()
     add_test(NAME trace_disabled COMMAND fl_trace_test)
     set_tests_properties(trace_disabled PROPERTIES ENVIRONMENT "FRAMELINK_TRACE=")
+    add_test(NAME trace_default_capacity COMMAND fl_trace_test capacity 4096)
+    set_tests_properties(trace_default_capacity PROPERTIES ENVIRONMENT
+        "FRAMELINK_TRACE=${CMAKE_CURRENT_BINARY_DIR}/trace-default;FRAMELINK_TRACE_EVENTS=")
+    add_test(NAME trace_override_capacity COMMAND fl_trace_test capacity 8192)
+    set_tests_properties(trace_override_capacity PROPERTIES ENVIRONMENT
+        "FRAMELINK_TRACE=${CMAKE_CURRENT_BINARY_DIR}/trace-override;FRAMELINK_TRACE_EVENTS=8192")
+    add_test(NAME trace_invalid_capacity COMMAND fl_trace_test capacity 4096)
+    set_tests_properties(trace_invalid_capacity PROPERTIES ENVIRONMENT
+        "FRAMELINK_TRACE=${CMAKE_CURRENT_BINARY_DIR}/trace-invalid;FRAMELINK_TRACE_EVENTS=invalid")
     add_test(NAME trace_bounded_concurrent COMMAND fl_trace_test)
     set_tests_properties(trace_bounded_concurrent PROPERTIES ENVIRONMENT
         "FRAMELINK_TRACE=${CMAKE_CURRENT_BINARY_DIR}/trace-test;FRAMELINK_TRACE_EVENTS=16")
