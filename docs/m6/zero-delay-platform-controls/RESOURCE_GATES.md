@@ -31,3 +31,7 @@ Local-consumer control completed1800s with54000video/86400000PCM, no diagnostic 
 ## Layout-cache NV12 sustained result
 
 [Native NV124K30 repaired1800s](layout-cache-windows-nv12-3840x2160-30-native-1800/README.md): complete54000video/86400000PCM, zero34ms misses, AVmapping0ns. Consumer6.96KB/min and producer45.72KB/min pass64KB/min (previous consumer69.28). Full Windows regression112/112 passed. Native NV12 resource failure is repaired at this revision; original timing failure is not causally closed. Next validate the same cache in native BGRA4K30; BGRA CPU remains separate. Historical failing rows remain evidence, not current repaired measurements.
+
+## Layout-cache BGRA sustained result
+
+[Native BGRA4K30 repaired1800s](layout-cache-windows-bgra-3840x2160-30-native-1800/README.md):54000video/86400000PCM, zero34ms misses, AVmapping0ns; consumer6.93KB/min (previous69.47),producer6.52KB/min. Both native4K resource cases now pass after the cache repair. BGRA CPU98.11KB/min remains unresolved. Next discriminating control: BGRA4K30 local-consumer1800s with identical queue/appsink/count recording but no transport or GPU readback, comparing against the previous NV12 local-consumer7.34KB/min. This separates format-dependent harness/source allocations from the CPU transport/readback path; no transport qualification claim.
