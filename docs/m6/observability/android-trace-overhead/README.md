@@ -1,0 +1,3 @@
+# Android trace overhead controls
+
+Three ordered off/on pairs, fixed300frame1080p60 one-hop GPU+testGDP PCM workload. All independent counts/PCM checks passed; trace-on GPU/transport joins pass with zero loss. Arrival-age p95 differences +0.057,+0.100,-0.030ms. Whole-process CPU differences producer+12.965..26.715ms,consumer+0.698..19.868ms; short ordered pairs do not establish a universal percentage. Explicit control flush adds27.98..31.14ms producer and13.34..19.52ms consumer; automatic exit flush excluded. RSS differences range negative/positive and do not equal reserved recorder capacity. Full metrics retained; no retrospective acceptance threshold.
