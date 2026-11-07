@@ -1,0 +1,15 @@
+complete=yes
+config=NV12 3840x2160@30 source only 10s
+exit=0
+label=nv21-fixed-3840x2160-30-source-10
+seconds=10
+source.cpu.percent=27.29
+source.handles=10..10 min=10 max=10
+source.handles.slope.per_min=0.00
+source.mem.kb=74236..74236 min=74236 max=74236
+source.mem.kind=rss
+source.mem.slope.kb_per_min=0.00
+source.result=EOS
+source.series.t_cpums_memkb_handles_threads=0.0:185:37116:8:2;1.0:493:74236:10:5;2.0:763:74236:10:5;3.0:1021:74236:10:5;4.0:1306:74236:10:5;5.0:1604:74236:10:5;6.0:1872:74236:10:5;7.1:2146:74236:10:5;8.1:2412:74236:10:5;9.1:2689:74236:10:5;10.0:2963:74236:10:4;
+source.threads=5..5 min=5 max=5
+source.threads.slope.per_min=0.00

@@ -1,0 +1,15 @@
+complete=yes
+config=NV12 1920x1080@60 source only 10s
+exit=0
+label=nv21-fixed-1920x1080-60-source-10
+seconds=10
+source.cpu.percent=21.53
+source.handles=10..10 min=10 max=10
+source.handles.slope.per_min=-0.00
+source.mem.kb=47176..47176 min=47176 max=47176
+source.mem.kind=rss
+source.mem.slope.kb_per_min=-0.00
+source.result=EOS
+source.series.t_cpums_memkb_handles_threads=0.0:194:37448:6:2;1.0:423:47176:10:5;2.0:641:47176:10:5;3.0:842:47176:10:5;4.0:1058:47176:10:5;5.0:1276:47176:10:5;6.1:1500:47176:10:5;7.1:1718:47176:10:5;8.1:1942:47176:10:5;9.1:2160:47176:10:5;10.0:2358:47176:10:4;
+source.threads=5..5 min=5 max=5
+source.threads.slope.per_min=-0.00
