@@ -153,7 +153,7 @@ Receive-depth gate evidence: [review and platform tests](receive-depth/README.md
 
 ### M6.5 — Performance and platform cost analysis
 - [ ] 5a Measure per-stage copy/lock/wait/convert/present cost and resource growth.
-- [ ] 5b Isolate Android NV12 CPU costs with format/layout and lock controls.
+- [x] 5b Isolate Android NV12 CPU costs with format/layout and lock controls. Evidence: cost/android-map, android-nv21-fix, android-cpu-controls and android-cpu-trace; target CPU throughput remains unqualified and carries into M6.8.
 - [ ] 5c Separate Windows queue timing from producer and GPU scheduling defects.
 - [ ] 5d Publish platform/format/resolution limits; no unsupported-cell omission.
 
