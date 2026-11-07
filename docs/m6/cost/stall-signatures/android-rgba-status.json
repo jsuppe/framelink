@@ -1,0 +1,45 @@
+{
+  "state": "finished",
+  "started": 1794045761.1969626,
+  "revision": "benchmark controlled source/post-push stall validation",
+  "scope": "bounded 65536-event per-recorder diagnostic stage timing, not throughput qualification",
+  "cases": [
+    {
+      "label": "stall-none-1794045761",
+      "producer_consumer_exit": [
+        0,
+        0
+      ],
+      "push_ms": 0.292796,
+      "arrival_ms": 10.720642,
+      "residual_ms": 10.427846,
+      "frames": 150,
+      "samples": 240000
+    },
+    {
+      "label": "stall-source-1794045767",
+      "producer_consumer_exit": [
+        0,
+        0
+      ],
+      "push_ms": 150.54318,
+      "arrival_ms": 162.742026,
+      "residual_ms": 12.198846000000003,
+      "frames": 150,
+      "samples": 240000
+    },
+    {
+      "label": "stall-post-push-1794045773",
+      "producer_consumer_exit": [
+        0,
+        0
+      ],
+      "push_ms": 0.211565,
+      "arrival_ms": 162.359527,
+      "residual_ms": 162.147962,
+      "frames": 150,
+      "samples": 240000
+    }
+  ],
+  "ended": 1794045779.555017
+}

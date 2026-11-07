@@ -13,6 +13,9 @@
 //     [--no-output-preroll] (measurement appsinks async=false)
 //     [--pool N] [--video-queue N] [--raw] [--out DIR] [--label NAME]
 //
+// Diagnostic fault: --video-stall-stage source|post-push
+//   --video-stall-frame N (1-based) --video-stall-ms N (1..1000).
+// CPU source-thread delay only; not GPU injection or qualification.
 // Resource isolation: --role consumer --local-consumer --result FILE
 // feeds the usual queues/appsinks directly; never transport qualification.
 // Software timing on the pipeline clock; physical display/speaker output is
@@ -35,7 +38,7 @@
 #include <unistd.h>
 #endif
 
-struct Options {guint seconds=60,cycles=0;std::string mode="bin",label="run",out=".",restart="producer";bool native=false,trace=false,raw=false,sourceOnly=false,localConsumer=false;};
+struct Options {guint stallFrame=0,stallMs=0;std::string stallStage;guint seconds=60,cycles=0;std::string mode="bin",label="run",out=".",restart="producer";bool native=false,trace=false,raw=false,sourceOnly=false,localConsumer=false;};
 static guint gOutputQueueBuffers=0;
 static GstClockTime gArrivalBudget=LATENCY;
 static constexpr guint WARMUP_S=2;  // excluded from steady-state distributions
@@ -107,16 +110,23 @@ static int sourceChild(const Options&o,const std::string&out){
 // Producer push: running time when the video source pushes each frame, minus
 // its PTS (on the session timeline shared with the consumer). A live source
 // that stalls catches up with back-to-back pushes; bursts show here.
-struct Pushes {std::mutex m;std::vector<std::pair<gint64,gint64>> v[2];GstElement*pipeline=nullptr;};  // {pts, lateness}
+struct Pushes {const Options* options=nullptr;guint videoIndex=0,stallCount=0;gint64 stallStartUs=0,stallElapsedUs=0;std::mutex m;std::vector<std::pair<gint64,gint64>> v[2];GstElement*pipeline=nullptr;};  // {pts, lateness}
 static GstPadProbeReturn pushed(GstPad*pad,GstPadProbeInfo*info,gpointer d){
  auto*a=static_cast<Pushes*>(d);auto*b=GST_PAD_PROBE_INFO_BUFFER(info);
+ const int track=GPOINTER_TO_INT(g_object_get_data(G_OBJECT(pad),"m6-track"));
+ if(track==0)++a->videoIndex;
+ auto stall=[&](const char*stage){if(track==0&&a->options&&a->options->stallStage==stage&&a->videoIndex==a->options->stallFrame){
+  a->stallStartUs=g_get_monotonic_time();g_usleep(gulong(a->options->stallMs)*1000);a->stallElapsedUs=g_get_monotonic_time()-a->stallStartUs;++a->stallCount;}};
+ // Test-only controls: before measuring source push versus after that boundary.
+ // Neither is a GPU delay injection; actual execution is reported below.
+ stall("source");
  if(auto*clock=gst_element_get_clock(a->pipeline)){gint64 l=gint64(gst_clock_get_time(clock))-gint64(gst_element_get_base_time(a->pipeline))-gint64(GST_BUFFER_PTS(b));gst_object_unref(clock);
-  const int track=GPOINTER_TO_INT(g_object_get_data(G_OBJECT(pad),"m6-track"));
   std::lock_guard<std::mutex> lock(a->m);a->v[track].push_back({gint64(GST_BUFFER_PTS(b)),l});}
+ stall("post-push");
  return GST_PAD_PROBE_OK;}
 
 static int producerChild(const Options&o,const std::string&session,const std::string&out){
- Sampler sampler;std::map<std::string,std::string> r;Pushes pushes;
+ Sampler sampler;std::map<std::string,std::string> r;Pushes pushes;pushes.options=&o;
  {Producer p(modeOf(o.mode),session,"av",o.seconds*gFps,80,false,o.seconds*100);pushes.pipeline=p.p;
   for(int track=0;track<2;++track){pushes.v[track].resize(size_t(o.seconds+10)*(track?100:gFps));pushes.v[track].clear();
    auto*src=gst_bin_get_by_name(GST_BIN(p.p),track?"asrc":"vsrc");CHECK(src);auto*pad=gst_element_get_static_pad(src,"src");g_object_set_data(G_OBJECT(pad),"m6-track",GINT_TO_POINTER(track));gst_pad_add_probe(pad,GST_PAD_PROBE_TYPE_BUFFER,pushed,&pushes,nullptr);gst_object_unref(pad);gst_object_unref(src);}
@@ -129,6 +139,9 @@ static int producerChild(const Options&o,const std::string&session,const std::st
    if(o.raw||p.result!="EOS"){std::ofstream f(out+(track?".audio-push.csv":".push.csv"));f<<"pts_ns,push_lateness_ns\n";for(auto&x:v)f<<x.first<<","<<x.second<<"\n";}}}
   std::lock_guard<std::mutex> lock(p.statsMutex);
   for(auto*s:p.stats){gchar*t=gst_structure_to_string(s);r[std::string("stats.")+gst_structure_get_name(s)]=t;g_free(t);}}
+ r["injection.stage"]=o.stallStage.empty()?"none":o.stallStage;r["injection.frame"]=std::to_string(o.stallFrame);
+ r["injection.requested_ms"]=std::to_string(o.stallMs);r["injection.executed"]=std::to_string(pushes.stallCount);
+ r["injection.start_monotonic_us"]=std::to_string(pushes.stallStartUs);r["injection.elapsed_us"]=std::to_string(pushes.stallElapsedUs);
  sampler.report(r);writeResult(out,r);return 0;}
 
 struct Arrivals {std::map<GstBuffer*,gint64> pending[2];std::vector<double> residence[2];guint sampledLevel[2]={0,0};guint unmatched[2]={0,0};std::mutex m;std::vector<std::pair<gint64,gint64>> v[2];GstElement*pipeline=nullptr;};  // {pts, lateness}
@@ -254,6 +267,7 @@ static std::map<std::string,std::string> readResult(const std::string&path){std:
 static std::vector<std::string> optionArgs(const Options&o){
  std::vector<std::string> a{"--seconds",std::to_string(o.seconds),"--size",std::to_string(gWidth)+"x"+std::to_string(gHeight),"--fps",std::to_string(gFps),"--format",gFormat,"--mode",o.mode,"--pool",std::to_string(gVideoPool),"--video-queue",std::to_string(gVideoQueue)};
  a.insert(a.end(),{"--output-queue-buffers",std::to_string(gOutputQueueBuffers),"--arrival-budget-ms",std::to_string(gArrivalBudget/GST_MSECOND),"--latency-ms",std::to_string(gPlaybackLatency/GST_MSECOND)});if(!gOutputSync)a.push_back("--transport-only");if(!gOutputAsync)a.push_back("--no-output-preroll");
+ if(!o.stallStage.empty())a.insert(a.end(),{"--video-stall-stage",o.stallStage,"--video-stall-frame",std::to_string(o.stallFrame),"--video-stall-ms",std::to_string(o.stallMs)});
  if(o.native)a.push_back("--native");if(o.raw)a.push_back("--raw");return a;}
 
 // Least-squares slope of y over x.
@@ -313,6 +327,7 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
  Options o;std::string role,session,result,sessionBase;
  for(int i=2;i<argc;i++){std::string a=argv[i];auto next=[&]{CHECK(i+1<argc);return std::string(argv[++i]);};
   if(a=="--seconds")o.seconds=guint(std::stoul(next()));else if(a=="--fps")gFps=guint(std::stoul(next()));else if(a=="--format")gFormat=next();else if(a=="--mode")o.mode=next();
+  else if(a=="--video-stall-stage")o.stallStage=next();else if(a=="--video-stall-frame")o.stallFrame=guint(std::stoul(next()));else if(a=="--video-stall-ms")o.stallMs=guint(std::stoul(next()));
   else if(a=="--size"){auto s=next();auto x=s.find('x');CHECK(x!=std::string::npos);gWidth=guint(std::stoul(s.substr(0,x)));gHeight=guint(std::stoul(s.substr(x+1)));}
   else if(a=="--output-queue-buffers"){auto n=std::stoul(next());CHECK(n<=1024);gOutputQueueBuffers=guint(n);}
   else if(a=="--arrival-budget-ms"){auto ms=std::stoul(next());CHECK(ms>0&&ms<=10000);gArrivalBudget=ms*GST_MSECOND;}
@@ -322,6 +337,8 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
   else if(a=="--cycles")o.cycles=guint(std::stoul(next()));else if(a=="--restart")o.restart=next();else if(a=="--session-base")sessionBase=next();
   else if(a=="--local-consumer")o.localConsumer=true;else if(a=="--native")o.native=true;else if(a=="--trace")o.trace=true;else if(a=="--raw")o.raw=true;else if(a=="--out")o.out=next();else if(a=="--label")o.label=next();
   else if(a=="--role")role=next();else if(a=="--session")session=next();else if(a=="--result")result=next();else{fprintf(stderr,"unknown option %s\n",a.c_str());return 2;}}
+ CHECK(o.stallStage.empty()?(o.stallFrame==0&&o.stallMs==0):
+   ((o.stallStage=="source"||o.stallStage=="post-push")&&o.stallFrame>0&&o.stallFrame<guint64(o.seconds)*gFps&&o.stallMs>0&&o.stallMs<=1000&&!o.cycles&&!o.sourceOnly&&!o.localConsumer));
  CHECK(!o.localConsumer||(((role=="consumer"&&!o.cycles)||(role=="lifecycle-consumer"&&o.cycles>0))&&o.mode=="bin"&&!o.native&&!o.sourceOnly&&!result.empty()));
  CHECK(o.seconds>=WARMUP_S+3&&(o.mode=="bin"||o.mode=="element"));gRunLimit=(o.seconds+30)*GST_SECOND;
  // Ring: ceil(latency x fps) + 2 images (documented sizing), at least the default 8.

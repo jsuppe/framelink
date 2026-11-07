@@ -1,0 +1,9 @@
+{
+  "state": "failed",
+  "started": 1794045733.2937107,
+  "revision": "benchmark controlled source/post-push stall validation",
+  "scope": "bounded 65536-event per-recorder diagnostic stage timing, not throughput qualification",
+  "cases": [],
+  "error": "{'audio.contiguous': 'yes', 'audio.output_queue.admission_residence.ms': 'n=0 p50=nan p95=nan p99=nan max=nan min=nan', 'audio.output_queue.pending': '0', 'audio.output_queue.sampled_max_buffers': '0', 'audio.output_queue.unmatched': '0', 'av_offset.abs.ms': 'n=0 p50=nan p95=nan p99=nan max=nan min=nan', 'av_offset.ms': 'n=0 p50=nan p95=nan p99=nan max=nan min=nan', 'frames': '0', 'memory': '', 'queue.accounting': 'complete', 'resources': 'too short', 'result': 'error: native AHB output currently requires exact RGBA/RGB10 layout; opaque YUV is not NV12 bytes', 'samples': '0', 'scope': 'transport-consumer', 'video.output_queue.admission_residence.ms': 'n=0 p50=nan p95=nan p99=nan max=nan min=nan', 'video.output_queue.pending': '0', 'video.output_queue.sampled_max_buffers': '0', 'video.output_queue.unmatched': '0'}",
+  "ended": 1794045734.649496
+}
