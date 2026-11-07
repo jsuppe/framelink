@@ -41,3 +41,5 @@ BGRA local-consumer baseline completed with7.31KB/min (NV12local7.34), complete5
 ## CPU output-cache BGRA sustained result
 
 [BGRA CPU4K30 repaired1800s](cpu-pool-windows-bgra-3840x2160-30-cpu-1800/README.md): complete54000video/86400000PCM, zero34ms misses, AVmapping0ns. Consumer7.14KB/min (previous98.11),producer7.18 pass64KB/min. All three originally failing selected resource cells now have repaired-revision passing evidence. CPU allocation churn is proven; exact retained-growth cause is not. Next sustained regressions cover other CPU formats/rates sharing the new cache; native159ms stall, deterministic queue controls and primary-profile budgets remain open.
+
+CPU-cache NV12CPU1080p60 sustained regression passed108000video/86400000PCM, zero17ms misses/AVmapping0ns; consumer3.25/producer7.34KBmin below64. See cpu-pool-windows-nv12-1920x1080-60-cpu-1800. Current cache CPU matrix2/4; BGRA1080p60 thenNV124K30 remain.
