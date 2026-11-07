@@ -1,0 +1,95 @@
+{
+  "state": "finished",
+  "started": 1794036952.209044,
+  "purpose": "isolate repeated D3D11 allocation lifecycle vs cached native wrapping, no transport",
+  "cases": [
+    {
+      "label": "raw-2",
+      "cycles": 2,
+      "max_device_release_refs": 0,
+      "first": {
+        "cycle": 0,
+        "monotonic_us": 278439735171,
+        "private_bytes": 27959296,
+        "page_faults": 18447,
+        "handles": 244,
+        "device_release_refs": 0
+      },
+      "last": {
+        "cycle": 1,
+        "monotonic_us": 278444879884,
+        "private_bytes": 29319168,
+        "page_faults": 29344,
+        "handles": 244,
+        "device_release_refs": 0
+      }
+    },
+    {
+      "label": "wrapped-2",
+      "cycles": 2,
+      "max_device_release_refs": 0,
+      "first": {
+        "cycle": 0,
+        "monotonic_us": 278450771117,
+        "private_bytes": 27967488,
+        "page_faults": 19343,
+        "handles": 238,
+        "device_release_refs": 0
+      },
+      "last": {
+        "cycle": 1,
+        "monotonic_us": 278455948173,
+        "private_bytes": 28430336,
+        "page_faults": 32277,
+        "handles": 238,
+        "device_release_refs": 0
+      }
+    },
+    {
+      "label": "raw-100",
+      "cycles": 100,
+      "max_device_release_refs": 0,
+      "first": {
+        "cycle": 0,
+        "monotonic_us": 278461842948,
+        "private_bytes": 27672576,
+        "page_faults": 17255,
+        "handles": 238,
+        "device_release_refs": 0
+      },
+      "last": {
+        "cycle": 99,
+        "monotonic_us": 278971122589,
+        "private_bytes": 28848128,
+        "page_faults": 1062764,
+        "handles": 235,
+        "device_release_refs": 0
+      },
+      "postwarm_kb_per_cycle": 31.225363941769317
+    },
+    {
+      "label": "wrapped-100",
+      "cycles": 100,
+      "max_device_release_refs": 0,
+      "first": {
+        "cycle": 0,
+        "monotonic_us": 278977053484,
+        "private_bytes": 27271168,
+        "page_faults": 19360,
+        "handles": 238,
+        "device_release_refs": 0
+      },
+      "last": {
+        "cycle": 99,
+        "monotonic_us": 279486345005,
+        "private_bytes": 32690176,
+        "page_faults": 1268138,
+        "handles": 235,
+        "device_release_refs": 0
+      },
+      "postwarm_kb_per_cycle": 28.21013437849944
+    }
+  ],
+  "build_exit": 0,
+  "ended": 1794038009.2246282
+}
