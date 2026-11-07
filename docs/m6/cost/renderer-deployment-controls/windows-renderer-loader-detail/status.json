@@ -1,0 +1,18 @@
+{
+  "state": "failed",
+  "started": 1794045154.2336755,
+  "scope": "five-second legacy renderer artifact + current M6 transport diagnostic; hash identified, not integrated renderer qualification or physical scanout",
+  "remote_stage": "<win-home>/dev/m6-render-stage-1794045154",
+  "steps": [
+    {
+      "name": "prepare",
+      "exit": 0
+    },
+    {
+      "name": "capture",
+      "exit": 1
+    }
+  ],
+  "error": "capture failed",
+  "ended": 1794045172.2222998
+}
