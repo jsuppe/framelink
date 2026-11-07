@@ -5,3 +5,5 @@ Production/test revision 29bbddb: Windows-only generic GstBufferPool with maximu
 Affected Windows6/6 passed including four retained samples beyond cache capacity and stop/start in padded NV12/RGB10 roundtrips. Additional native-source/copy-negative2/2 passed with CPU NV12 grow/shrink64→640→128width; retained old samples preserve exact extent,PTS and pixels across resize/teardown. Linux rebuild plus both modified roundtrips2/2 passed (2.94s).
 
 The isolated allocation probe establishes reduced churn, not the original fitted98.11KB/min retained-growth root cause. Full Windows suite and sustained BGRA CPU resource gate remain pending. Keep the historical failure and original159ms native stall open.
+
+Full Windows rebuild/CTest passed112/112, no failures or skips,554.76s; exact runtime in full-status.json. Next sustained BGRA CPU gate remains required.
