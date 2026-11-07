@@ -164,7 +164,7 @@ Receive-depth gate evidence: [review and platform tests](receive-depth/README.md
       Default reduced to4096events/thread; explicit sizing and overflow reporting validated on all platforms.
 
 ### M6.7 — Repeatable automation (closure infrastructure)
-- [ ] 7a Add deterministic queue/ownership/timing negatives to CI.
+- [x] 7a Add deterministic queue/ownership/timing negatives to CI. Hosted CPU trace checks and opt-in native hardware selection updated; local Linux19pass1skip/Windows20pass evidence in automation. HostedActions execution is not claimed; final integrated CI remains7c.
 - [ ] 7b Publish reproducible real-device scripts and machine-readable gates.
 - [ ] 7c Ensure final acceptance references the exact integrated revision after
       M6.8/M6.9; old benchmark passes are not final qualification.
@@ -204,7 +204,7 @@ Sole executor Evelyn, sequential only. M6 is not complete.
 - Windows3a memory slopes21.10/84.09KB/cycle fail16. RawD3Ddevicechurn reproduces growth, exclusive retaineddevice flat, Trimnegative. No implicitcache/APIchange. Resource acceptance suspended per lifecycle/WINDOWS_DEVICE_LIFETIME.md with owner/resumeconditions; no blanket attribution orwaiver.
 - M6.3b functionallease/generation/EOS/pause/boundedcancellation checks passallplatforms (lifecycle/ownership andeos-fix). Sameprocess100heldlease/reconnectcycles allfunctionalpass; LinuxRSS0.142/Android-0.509KBcycle pass, Windowsprivate82.528FAILS16, handles/threadsflatall. Evidence lifecycle/lease-cycles. Windowsmemory portion remains suspended under same dependency;M6.3unchecked.
 - M6.4 existingpolicy8testsperplatform pass, plusWindowsD3D11normal/death/controlledGPUwait3/3. Faultscope in fault-coverage. Linux/AndroidEGLcontrollablewait injection unavailable77, notpass; rawnegativepreserved. M6.4b/c GPU-delay subset SUSPENDED pending supportednativefenceinjection; D2publicdefaultchoice unresolved, nochange. Existingpolicies testedexplicitly, no newlyapproveddefault inferred.
-- M6.5a/b/d and6b documented/validated.5c and6a integrated causal/renderer evidence suspended pending9. Trace default4096 passed8tests/platform; off/on costs and bounds in observability/TRACE_OVERHEAD.md. M6.7a CI negative-coverage audit in progress; final7c waits8/9.
+- M6.5a/b/d and6b validated within documented scopes. Trace-default repair ad3f127 passed24targetedchecks.5c/6a integrated causal/renderer gaps pending9. M6.7a: added3hostedtracecapacity tests, expanded opt-in hardware queue/ownership/timing negatives and required-registration list. Linux integrated build/registration passed; selected20tests=19passed1knownGPUdelay skip, not20passes. Sole mild-glade PID1113121 validates Windows build/registration/selected negatives; status <linux-home>/dev/evidence/m6-automation/windows-negatives/status.json. CI edits uncommitted until validation; hosted CI not yet run.
 
 
 M6.4a default-policy decision unresolved;M6.5–9 pending. No automatedstatus reports. Notify Jon atfullM6closure andholdbeforeM7 for maintenance.

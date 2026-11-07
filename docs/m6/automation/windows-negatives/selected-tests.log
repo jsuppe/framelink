@@ -1,0 +1,53 @@
+#< CLIXML
+Test project <win-home>/dev/framelink-m6-20261106/build
+      Start   1: read_leases
+ 1/20 Test   #1: read_leases ...........................   Passed    0.34 sec
+      Start   3: read_ledger
+ 2/20 Test   #3: read_ledger ...........................   Passed    0.01 sec
+      Start  10: read_lease_d3d11
+ 3/20 Test  #10: read_lease_d3d11 ......................   Passed    0.36 sec
+      Start  11: read_lease_d3d11_producer_death
+ 4/20 Test  #11: read_lease_d3d11_producer_death .......   Passed    0.36 sec
+      Start  12: read_lease_d3d11_delayed_completion
+ 5/20 Test  #12: read_lease_d3d11_delayed_completion ...   Passed    0.42 sec
+      Start  26: receive_queue
+ 6/20 Test  #26: receive_queue .........................   Passed    1.66 sec
+      Start  49: trace_disabled
+ 7/20 Test  #49: trace_disabled ........................   Passed    0.01 sec
+      Start  50: trace_default_capacity
+ 8/20 Test  #50: trace_default_capacity ................   Passed    0.02 sec
+      Start  51: trace_override_capacity
+ 9/20 Test  #51: trace_override_capacity ...............   Passed    0.03 sec
+      Start  52: trace_invalid_capacity
+10/20 Test  #52: trace_invalid_capacity ................   Passed    0.02 sec
+      Start  53: trace_bounded_concurrent
+11/20 Test  #53: trace_bounded_concurrent ..............   Passed    0.02 sec
+      Start  54: trace_thread_limit
+12/20 Test  #54: trace_thread_limit ....................   Passed    0.02 sec
+      Start  70: gst_pool_policy
+13/20 Test  #70: gst_pool_policy .......................   Passed    3.81 sec
+      Start  73: m5a_transport_relay_sync_negative
+14/20 Test  #73: m5a_transport_relay_sync_negative .....   Passed    0.72 sec
+      Start  76: m4_transport_jitter_drift
+15/20 Test  #76: m4_transport_jitter_drift .............   Passed    1.02 sec
+      Start  77: m4_transport_negative_retimestamps
+16/20 Test  #77: m4_transport_negative_retimestamps ....   Passed    0.43 sec
+      Start  95: gst_policy_generation
+17/20 Test  #95: gst_policy_generation .................   Passed    2.54 sec
+      Start  97: trace_details
+18/20 Test  #97: trace_details .........................   Passed    0.01 sec
+      Start  98: trace_compiled_out
+19/20 Test  #98: trace_compiled_out ....................   Passed    0.01 sec
+      Start 106: gst_av_timeline
+20/20 Test #106: gst_av_timeline .......................   Passed    4.39 sec
+
+100% tests passed, 0 tests failed out of 20
+
+Label Time Summary:
+gpu                     =   1.66 sec*proc (1 test)
+gst_video_regression    =   7.07 sec*proc (3 tests)
+integration             =   1.66 sec*proc (1 test)
+m5b_av                  =   4.39 sec*proc (1 test)
+
+Total Test time (real) =  16.20 sec
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04"><Obj S="progress" RefId="0"><TN RefId="0"><T>System.Management.Automation.PSCustomObject</T><T>System.Object</T></TN><MS><I64 N="SourceId">1</I64><PR N="Record"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj></Objs>

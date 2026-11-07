@@ -1,0 +1,23 @@
+{
+  "state": "finished",
+  "started": 1794046446.7903943,
+  "scope": "local reproduction of new CI registration and deterministic regression selection; not hosted workflow result",
+  "steps": [
+    {
+      "name": "build",
+      "exit": 0
+    },
+    {
+      "name": "registration",
+      "exit": 0
+    },
+    {
+      "name": "selected-tests",
+      "exit": 0
+    }
+  ],
+  "skips": [
+    "read_lease_egl_delayed_completion"
+  ],
+  "ended": 1794046460.7353199
+}
