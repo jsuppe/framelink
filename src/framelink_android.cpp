@@ -985,9 +985,14 @@ FL_API flResult flImageMapPlanes(flImage* img, flMappedImage* out) {
         if (!img->mapped) {
             try { img->nv12.resize((size_t)img->width * img->height * 3 / 2); }
             catch (...) { return trace.result(FL_OOM); }
-            if (AHardwareBuffer_lockPlanes(img->ahb,
+            int lockResult;
+            {
+            fltrace::Scope lockTrace("image.ahb_lock_planes", (uint64_t)(uintptr_t)img);
+            lockResult = AHardwareBuffer_lockPlanes(img->ahb,
                     AHARDWAREBUFFER_USAGE_CPU_WRITE_OFTEN | AHARDWAREBUFFER_USAGE_CPU_READ_RARELY,
-                    -1, nullptr, &img->lockedPlanes) != 0) return trace.result(FL_FORMAT_UNSUPPORTED);
+                    -1, nullptr, &img->lockedPlanes);
+            }
+            if (lockResult != 0) return trace.result(FL_FORMAT_UNSUPPORTED);
             if (img->lockedPlanes.planeCount != 3) {
                 AHardwareBuffer_unlock(img->ahb, nullptr);
                 return trace.result(FL_FORMAT_UNSUPPORTED);
@@ -999,7 +1004,9 @@ FL_API flResult flImageMapPlanes(flImage* img, flMappedImage* out) {
                 vPlane.pixelStride == 2 && uPlane.rowStride == vPlane.rowStride &&
                 (uintptr_t)vPlane.data == (uintptr_t)uPlane.data + 1;
             img->mapped = img->nativeNv12 ? yPlane.data : img->nv12.data();
-            if (!img->nativeNv12 && !fl::readNv21(img->lockedPlanes.planes,
+            if (!img->nativeNv12) {
+            fltrace::Scope normalizeTrace("image.yuv_normalize", (uint64_t)(uintptr_t)img);
+            if (!fl::readNv21(img->lockedPlanes.planes,
                     img->width, img->height, img->nv12.data())) for (unsigned p = 0; p < 3; ++p) {
                 const auto& plane = img->lockedPlanes.planes[p];
                 auto* dst = img->nv12.data() + (p ? (size_t)img->width * img->height + p - 1 : 0);
@@ -1007,6 +1014,7 @@ FL_API flResult flImageMapPlanes(flImage* img, flMappedImage* out) {
                     for (unsigned x = 0; x < (p ? img->width / 2 : img->width); ++x)
                         dst[(size_t)y * img->width + x * (p ? 2 : 1)] =
                             ((const uint8_t*)plane.data)[(size_t)y * plane.rowStride + x * plane.pixelStride];
+            }
             }
             if(!img->nativeNv12)fltrace::payload("image.cpu_yuv_read",(uint64_t)(uintptr_t)img,(uint64_t)img->width*img->height*3/2,FL_MEMORY_COPY|FL_MEMORY_CONVERT);
         }
@@ -1047,6 +1055,7 @@ FL_API void flImageUnmap(flImage* img) {
         img->nativeMapped = nullptr;
     }
     if (img->format == FL_FORMAT_NV12 && !img->nativeNv12) {
+        fltrace::Scope writeTrace("image.yuv_writeback", (uint64_t)(uintptr_t)img);
         if (!fl::writeNv21(img->lockedPlanes.planes, img->width, img->height,
                           img->nv12.data())) for (unsigned p = 0; p < 3; ++p) {
             const auto& plane = img->lockedPlanes.planes[p];
@@ -1058,7 +1067,10 @@ FL_API void flImageUnmap(flImage* img) {
         }
         fltrace::payload("image.cpu_yuv_write",(uint64_t)(uintptr_t)img,(uint64_t)img->width*img->height*3/2,FL_MEMORY_COPY|FL_MEMORY_CONVERT);
     }
-    AHardwareBuffer_unlock(img->ahb, nullptr);
+    {
+        fltrace::Scope unlockTrace("image.ahb_unlock", (uint64_t)(uintptr_t)img);
+        AHardwareBuffer_unlock(img->ahb, nullptr);
+    }
     img->mapped = nullptr;
 }
 

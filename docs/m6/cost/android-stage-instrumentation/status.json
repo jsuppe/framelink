@@ -1,0 +1,71 @@
+{
+  "state": "finished",
+  "started": 1794044620.9040966,
+  "source_sha256": {
+    "src/fl_nv21.h": "c2977f2101bc23c48530b2f15be1fc697f7c60e4e318aaf34fab0d5fb02b0af7",
+    "src/framelink_android.cpp": "08659ea7cdc972100c3e938c1de15e126fbdb17cde719f10bd7c1ede9cdbce59",
+    "gst/gstframelink.cpp": "16d5f54e7e812288bbfa3f8c97f4ba6d70e4787337bdc4e3efe782ab3564a38a",
+    "test/fl_nv21.cpp": "a78d3ed91c8c734c0b4982745037734535f0ec83ecdbf40ec805876c30cfd6cf",
+    "CMakeLists.txt": "6554da5edd2cda573a04a15b651abec26512ee09d3884991de5d474f858e19f0"
+  },
+  "steps": [
+    {
+      "name": "linux-build",
+      "exit": 0
+    },
+    {
+      "name": "linux-tests",
+      "exit": 0
+    },
+    {
+      "name": "arm64-configure",
+      "exit": 0
+    },
+    {
+      "name": "arm64-build",
+      "exit": 0
+    },
+    {
+      "name": "x86_64-build",
+      "exit": 0
+    },
+    {
+      "name": "android-read_lease_egl",
+      "exit": 0
+    },
+    {
+      "name": "android-read_lease_egl_producer_death",
+      "exit": 0
+    },
+    {
+      "name": "android-read_leases",
+      "exit": 0
+    },
+    {
+      "name": "android-nv21_conversion",
+      "exit": 0
+    },
+    {
+      "name": "android-portable_map_nv12",
+      "exit": 0
+    },
+    {
+      "name": "android-portable_map_rgba",
+      "exit": 0
+    },
+    {
+      "name": "android-portable_map_bgra",
+      "exit": 0
+    },
+    {
+      "name": "android-portable_map_rgb10a2",
+      "exit": 0
+    },
+    {
+      "name": "android-gst_pool_policy",
+      "exit": 0
+    }
+  ],
+  "cases": [],
+  "ended": 1794044634.562976
+}

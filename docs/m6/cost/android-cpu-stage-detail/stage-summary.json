@@ -1,0 +1,362 @@
+{
+  "nv21-stage-1920x1080-1794044634/consumer-core.31248.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "flCreateChannelEx": {
+        "n": 1,
+        "mean_ms": 28.259615,
+        "p95_ms": 28.259615
+      },
+      "ipc.send": {
+        "n": 305,
+        "mean_ms": 0.0340965737704918,
+        "p95_ms": 0.035769
+      },
+      "ipc.recv": {
+        "n": 301,
+        "mean_ms": 0.03014566777408638,
+        "p95_ms": 0.045847
+      },
+      "flAcquireFrame": {
+        "n": 299,
+        "mean_ms": 6.552453016722408,
+        "p95_ms": 8.843077
+      },
+      "image.ahb_lock_planes": {
+        "n": 299,
+        "mean_ms": 0.08979521739130435,
+        "p95_ms": 0.121154
+      },
+      "image.yuv_normalize": {
+        "n": 299,
+        "mean_ms": 4.907923839464883,
+        "p95_ms": 5.527692
+      },
+      "flImageMapPlanes": {
+        "n": 299,
+        "mean_ms": 5.035487327759197,
+        "p95_ms": 5.623693
+      },
+      "image.yuv_writeback": {
+        "n": 299,
+        "mean_ms": 1.0487319498327758,
+        "p95_ms": 1.189308
+      },
+      "image.ahb_unlock": {
+        "n": 299,
+        "mean_ms": 0.041063795986622076,
+        "p95_ms": 0.046231
+      },
+      "flImageUnmap": {
+        "n": 301,
+        "mean_ms": 1.0866557707641196,
+        "p95_ms": 1.232615
+      },
+      "flRelease": {
+        "n": 299,
+        "mean_ms": 0.03944816722408027,
+        "p95_ms": 0.065538
+      },
+      "flClose": {
+        "n": 1,
+        "mean_ms": 1.645462,
+        "p95_ms": 1.645462
+      }
+    }
+  },
+  "nv21-stage-1920x1080-1794044634/consumer-gst.31248.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "gst.cpu_output_allocate": {
+        "n": 299,
+        "mean_ms": 0.12732773913043477,
+        "p95_ms": 0.243077
+      },
+      "gst.cpu_copy_source_duration": {
+        "n": 299,
+        "mean_ms": 3.8139614180602006,
+        "p95_ms": 4.243923
+      },
+      "gst.srcCreate": {
+        "n": 300,
+        "mean_ms": 16.649598216666668,
+        "p95_ms": 19.443077
+      }
+    }
+  },
+  "nv21-stage-1920x1080-1794044634/producer-core.31257.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "ipc.recv": {
+        "n": 300,
+        "mean_ms": 0.05037768333333333,
+        "p95_ms": 0.105846
+      },
+      "ipc.send": {
+        "n": 305,
+        "mean_ms": 0.1267843344262295,
+        "p95_ms": 0.218154
+      },
+      "flOpenProducer": {
+        "n": 1,
+        "mean_ms": 39.299692,
+        "p95_ms": 39.299692
+      },
+      "flRequestGeometry": {
+        "n": 1,
+        "mean_ms": 0.912923,
+        "p95_ms": 0.912923
+      },
+      "flAcquireBuffer": {
+        "n": 300,
+        "mean_ms": 0.12346895,
+        "p95_ms": 0.167
+      },
+      "image.ahb_lock_planes": {
+        "n": 299,
+        "mean_ms": 0.13992925752508362,
+        "p95_ms": 0.267615
+      },
+      "image.yuv_normalize": {
+        "n": 299,
+        "mean_ms": 6.074341869565218,
+        "p95_ms": 6.612847
+      },
+      "flImageMapPlanes": {
+        "n": 299,
+        "mean_ms": 6.24081837458194,
+        "p95_ms": 6.752846
+      },
+      "image.yuv_writeback": {
+        "n": 299,
+        "mean_ms": 0.9220339598662207,
+        "p95_ms": 0.999692
+      },
+      "image.ahb_unlock": {
+        "n": 299,
+        "mean_ms": 0.037648254180602005,
+        "p95_ms": 0.043615
+      },
+      "flImageUnmap": {
+        "n": 462,
+        "mean_ms": 0.6242527380952381,
+        "p95_ms": 1.030231
+      },
+      "flBeginSubmit": {
+        "n": 299,
+        "mean_ms": 0.0007834080267558528,
+        "p95_ms": 0.000923
+      },
+      "flEndSubmit": {
+        "n": 299,
+        "mean_ms": 0.13171111705685618,
+        "p95_ms": 0.221231
+      },
+      "flSubmit": {
+        "n": 299,
+        "mean_ms": 0.13602110033444817,
+        "p95_ms": 0.225538
+      },
+      "flClose": {
+        "n": 1,
+        "mean_ms": 2.832923,
+        "p95_ms": 2.832923
+      }
+    }
+  },
+  "nv21-stage-1920x1080-1794044634/producer-gst.31257.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "gst.cpu_copy_sink_duration": {
+        "n": 299,
+        "mean_ms": 0.6317095518394649,
+        "p95_ms": 0.762461
+      },
+      "gst.sinkRender": {
+        "n": 300,
+        "mean_ms": 8.124049226666667,
+        "p95_ms": 8.649461
+      }
+    }
+  },
+  "nv21-stage-3840x2160-1794044640/consumer-core.31294.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "flCreateChannelEx": {
+        "n": 1,
+        "mean_ms": 27.392,
+        "p95_ms": 27.392
+      },
+      "ipc.send": {
+        "n": 152,
+        "mean_ms": 0.03301369736842105,
+        "p95_ms": 0.036308
+      },
+      "ipc.recv": {
+        "n": 148,
+        "mean_ms": 0.11679215540540541,
+        "p95_ms": 0.154769
+      },
+      "flAcquireFrame": {
+        "n": 146,
+        "mean_ms": 0.8090226438356164,
+        "p95_ms": 0.001154
+      },
+      "image.ahb_lock_planes": {
+        "n": 146,
+        "mean_ms": 0.07418334246575342,
+        "p95_ms": 0.066769
+      },
+      "image.yuv_normalize": {
+        "n": 146,
+        "mean_ms": 20.691243438356164,
+        "p95_ms": 21.531692
+      },
+      "flImageMapPlanes": {
+        "n": 146,
+        "mean_ms": 21.01204167808219,
+        "p95_ms": 21.620308
+      },
+      "image.yuv_writeback": {
+        "n": 146,
+        "mean_ms": 3.3777708424657535,
+        "p95_ms": 3.831692
+      },
+      "image.ahb_unlock": {
+        "n": 146,
+        "mean_ms": 0.036325609589041095,
+        "p95_ms": 0.041538
+      },
+      "flImageUnmap": {
+        "n": 148,
+        "mean_ms": 3.372066506756757,
+        "p95_ms": 3.866462
+      },
+      "flRelease": {
+        "n": 146,
+        "mean_ms": 0.034481,
+        "p95_ms": 0.055308
+      },
+      "flClose": {
+        "n": 1,
+        "mean_ms": 9.535615,
+        "p95_ms": 9.535615
+      }
+    }
+  },
+  "nv21-stage-3840x2160-1794044640/consumer-gst.31294.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "gst.cpu_output_allocate": {
+        "n": 146,
+        "mean_ms": 0.2064541506849315,
+        "p95_ms": 0.122692
+      },
+      "gst.cpu_copy_source_duration": {
+        "n": 146,
+        "mean_ms": 14.678552171232877,
+        "p95_ms": 15.570461
+      },
+      "gst.srcCreate": {
+        "n": 147,
+        "mean_ms": 39.924684462585034,
+        "p95_ms": 40.137539
+      }
+    }
+  },
+  "nv21-stage-3840x2160-1794044640/producer-core.31297.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "ipc.recv": {
+        "n": 147,
+        "mean_ms": 0.02559860544217687,
+        "p95_ms": 0.026462
+      },
+      "ipc.send": {
+        "n": 152,
+        "mean_ms": 0.07710319736842106,
+        "p95_ms": 0.131769
+      },
+      "flOpenProducer": {
+        "n": 1,
+        "mean_ms": 33.141308,
+        "p95_ms": 33.141308
+      },
+      "flRequestGeometry": {
+        "n": 1,
+        "mean_ms": 0.701461,
+        "p95_ms": 0.701461
+      },
+      "flAcquireBuffer": {
+        "n": 150,
+        "mean_ms": 4.71069378,
+        "p95_ms": 6.801615
+      },
+      "image.ahb_lock_planes": {
+        "n": 146,
+        "mean_ms": 0.06248630821917808,
+        "p95_ms": 0.069769
+      },
+      "image.yuv_normalize": {
+        "n": 146,
+        "mean_ms": 20.97699998630137,
+        "p95_ms": 21.648385
+      },
+      "flImageMapPlanes": {
+        "n": 146,
+        "mean_ms": 21.176097452054794,
+        "p95_ms": 21.765846
+      },
+      "image.yuv_writeback": {
+        "n": 146,
+        "mean_ms": 4.691415643835616,
+        "p95_ms": 5.081539
+      },
+      "image.ahb_unlock": {
+        "n": 146,
+        "mean_ms": 0.056089054794520546,
+        "p95_ms": 0.095923
+      },
+      "flImageUnmap": {
+        "n": 218,
+        "mean_ms": 3.1839153211009172,
+        "p95_ms": 5.063385
+      },
+      "flBeginSubmit": {
+        "n": 146,
+        "mean_ms": 0.001444178082191781,
+        "p95_ms": 0.002692
+      },
+      "flEndSubmit": {
+        "n": 146,
+        "mean_ms": 0.08201949315068494,
+        "p95_ms": 0.135385
+      },
+      "flSubmit": {
+        "n": 146,
+        "mean_ms": 0.0897397397260274,
+        "p95_ms": 0.163384
+      },
+      "flClose": {
+        "n": 1,
+        "mean_ms": 6.992,
+        "p95_ms": 6.992
+      }
+    }
+  },
+  "nv21-stage-3840x2160-1794044640/producer-gst.31297.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "gst.cpu_copy_sink_duration": {
+        "n": 146,
+        "mean_ms": 3.5519051232876713,
+        "p95_ms": 3.800615
+      },
+      "gst.sinkRender": {
+        "n": 150,
+        "mean_ms": 33.552768633333336,
+        "p95_ms": 36.818692
+      }
+    }
+  }
+}

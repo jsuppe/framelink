@@ -116,7 +116,7 @@ static void copyPixels(guint8* dst, gsize dstStride, const guint8* src, gsize sr
 
 // Reading a GBM/dma-buf CPU mapping with plain loads is catastrophically slow
 // - the mapping is write-combined, and WC reads bypass the cache one access
-// at a time. Measured on melchior (RTX 3090, LINEAR bo): 10 MB/s, 363 ms per
+// at a time. Measured on <linux-host> (RTX 3090, LINEAR bo): 10 MB/s, 363 ms per
 // 720p frame. MOVNTDQA (SSE4.1 streaming load) is the architected way to read
 // WC memory at bandwidth; writes to the ordinary GstBuffer stay plain stores.
 // x86-only: Android's AHardwareBuffer_lock hands back a cached mapping, so
@@ -695,6 +695,8 @@ static GstFlowReturn sinkRenderImpl(GstBaseSink* base, GstBuffer* buffer) {
         flMappedImage view{};
         r=flImageMapPlanes(fb.image,&view);
         if(r==FL_OK) {
+            {
+            gsttrace::Scope copyTrace("gst.cpu_copy_sink_duration",gsttrace::id(self->channel));
             wrote=view.planes==2;
             for(guint p=0;p<2 && wrote;p++) {
                 const gint pitch=GST_VIDEO_FRAME_PLANE_STRIDE(&vframe,p);
@@ -703,6 +705,7 @@ static GstFlowReturn sinkRenderImpl(GstBaseSink* base, GstBuffer* buffer) {
                     memcpy((guint8*)view.plane[p].pixels+y*view.plane[p].stride,
                            (guint8*)GST_VIDEO_FRAME_PLANE_DATA(&vframe,p)+(gsize)y*pitch,w);
                 gsttrace::payload("gst.cpu_copy_sink",gsttrace::id(self->channel),(uint64_t)w*view.plane[p].rows,FL_MEMORY_COPY);
+            }
             }
             flImageUnmap(fb.image);
         }
@@ -1499,11 +1502,14 @@ static GstFlowReturn srcCreateImpl(GstPushSrc* push, GstBuffer** outbuf) {
     } else
 #endif
     {
+{
+    gsttrace::Scope allocateTrace("gst.cpu_output_allocate",gsttrace::id(self->channel));
 #ifdef _WIN32
     buf = srcCpuOutputBuffer(self, outputInfo.size);
 #else
     buf = gst_buffer_new_allocate(NULL, outputInfo.size, NULL);
 #endif
+    }
     if (!buf) { srcReleaseFrame(self, &frame); return trace.result(GST_FLOW_ERROR); }
     GstMapInfo map;
     gboolean filled = FALSE;
@@ -1548,6 +1554,8 @@ static GstFlowReturn srcCreateImpl(GstPushSrc* push, GstBuffer** outbuf) {
         if(self->cinfo.format==FL_FORMAT_NV12) {
             flMappedImage view{};
             if(flImageMapPlanes(frame.image,&view)==FL_OK) {
+                {
+                gsttrace::Scope copyTrace("gst.cpu_copy_source_duration",gsttrace::id(self->channel));
                 filled=view.planes==2;
                 memset(map.data,0,map.size);
                 for(guint p=0;p<2 && filled;p++) {
@@ -1556,6 +1564,7 @@ static GstFlowReturn srcCreateImpl(GstPushSrc* push, GstBuffer** outbuf) {
                         memcpy(map.data+outputInfo.offset[p]+(gsize)y*outputInfo.stride[p],
                                (guint8*)view.plane[p].pixels+y*view.plane[p].stride,w);
                     gsttrace::payload("gst.cpu_copy_source",gsttrace::id(self->channel),(uint64_t)w*view.plane[p].rows,FL_MEMORY_COPY);
+                }
                 }
                 flImageUnmap(frame.image);
             }
