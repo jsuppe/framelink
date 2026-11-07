@@ -19,6 +19,8 @@ jobs:
         run: |
           cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DFRAMELINK_BUILD_GST=ON -DFRAMELINK_BUILD_TESTS=ON -DFRAMELINK_BUILD_SAMPLES=ON
           cmake --build build --parallel 4
+      - name: Validate M6 gate accounting
+        run: python tools/test_m6_validation.py
       - name: Require A/V test registration
         run: python3 tools/check_av_test_registration.py build
       - name: Inspect public GStreamer elements
@@ -60,6 +62,8 @@ jobs:
         run: cmake -S . -B build -A x64 -DFRAMELINK_BUILD_GST=ON -DFRAMELINK_BUILD_TESTS=ON -DFRAMELINK_BUILD_SAMPLES=ON
       - name: Build all targets including A/V fixtures
         run: cmake --build build --config Release --parallel 4
+      - name: Validate M6 gate accounting
+        run: python tools/test_m6_validation.py
       - name: Require A/V test registration
         run: python tools/check_av_test_registration.py build Release
       - name: Inspect public GStreamer elements

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="(empty)"
+	tests="1"
+	failures="0"
+	disabled="0"
+	skipped="0"
+	hostname=""
+	time="0"
+	timestamp="2026-11-07T05:16:36"
+	>
+	<testcase name="m4_transport_jitter_drift" classname="m4_transport_jitter_drift" time="0.715213" status="run">
+		<properties/>
+		<system-out>{"frame":0,"producer_offset_ns":37000000,"consumer_offset_ns":37000000,"video_send_ns":159881778152000,"audio_send_ns":159881778336000,"video_receive_ns":159881783880000,"audio_receive_ns":159881780199000}
+{"frame":1,"producer_offset_ns":37100000,"consumer_offset_ns":37100000,"video_send_ns":159881785237000,"audio_send_ns":159881786483000,"video_receive_ns":159881787762000,"audio_receive_ns":159881787099000}
+{"frame":2,"producer_offset_ns":37200000,"consumer_offset_ns":37200000,"video_send_ns":159881789076000,"audio_send_ns":159881791254000,"video_receive_ns":159881791413000,"audio_receive_ns":159881791819000}
+{"frame":3,"producer_offset_ns":37300000,"consumer_offset_ns":37300000,"video_send_ns":159881793136000,"audio_send_ns":159881796337000,"video_receive_ns":159881797227000,"audio_receive_ns":159881796902000}
+{"frame":4,"producer_offset_ns":37400000,"consumer_offset_ns":37400000,"video_send_ns":159881798512000,"audio_send_ns":159881802735000,"video_receive_ns":159881800828000,"audio_receive_ns":15988180333...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+</testsuite>

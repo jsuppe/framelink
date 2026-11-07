@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="(empty)"
+	tests="1"
+	failures="0"
+	disabled="0"
+	skipped="0"
+	hostname=""
+	time="0"
+	timestamp="2026-11-07T05:16:37"
+	>
+	<testcase name="m5a_transport_relay_sync_negative" classname="m5a_transport_relay_sync_negative" time="0.463534" status="run">
+		<properties>
+			<property name="cmake_labels" value="gst_video_regression"/>
+		</properties>
+		<system-out>NEGATIVE_CONTROL_CAUGHT: intermediate sync=true schedules future media instead of transporting immediately
+</system-out>
+	</testcase>
+</testsuite>

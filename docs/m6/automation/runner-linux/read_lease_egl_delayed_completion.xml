@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="(empty)"
+	tests="1"
+	failures="0"
+	disabled="0"
+	skipped="1"
+	hostname=""
+	time="0"
+	timestamp="2026-11-07T05:16:37"
+	>
+	<testcase name="read_lease_egl_delayed_completion" classname="read_lease_egl_delayed_completion" time="0.0844457" status="notrun">
+		<skipped message="SKIP_RETURN_CODE=77"/>
+		<properties/>
+		<system-out>injection unavailable: native fence became ready behind unsignalled reusable gate (revents=1)
+EGL vendor=NVIDIA GL vendor=NVIDIA Corporation renderer=NVIDIA GeForce RTX 3090/PCIe/SSE2
+SKIP: controllable reusable-sync server wait unavailable EGL=3000
+</system-out>
+	</testcase>
+</testsuite>
