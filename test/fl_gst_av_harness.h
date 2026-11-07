@@ -115,13 +115,17 @@ struct Consumer:Side {
  // record: keep every render lateness (ns) per track for distributions.
  bool record=false;std::vector<gint64> lateness[2];
  std::string features;GstClockTime next=GST_CLOCK_TIME_NONE;std::mutex mutex;
- Consumer(Mode m,const std::string&path_,const std::string&tracks_,bool native_=false){mode=m;producer=false;path=path_;tracks=tracks_;native=native_;
+ Consumer(Mode m,const std::string&path_,const std::string&tracks_,bool native_=false,guint localSeconds=0){mode=m;producer=false;path=path_;tracks=tracks_;native=native_;
   const std::string sinkV=gQueue+" ! appsink name=vout sync="+(gOutputSync?"true":"false")+" async="+(gOutputAsync?"true":"false")+" max-buffers=0 ",sinkA=gQueue+" ! appsink name=aout sync="+(gOutputSync?"true":"false")+" async="+(gOutputAsync?"true":"false")+" max-buffers=0";std::string t;
-  if(m==Mode::Bin){t="framelinkavsrc name=c tracks="+tracks+" video-queue-frames="+std::to_string(gVideoQueue)+" video-pool="+std::to_string(gVideoPool)+" video-format="+gFormat+" "+geometry()+" framerate="+std::to_string(gFps)+"/1 connect-timeout-ms=5000 idle-timeout-ms=3000"+(native?" native-memory=true ":" ");
+  // Benchmark-only control: identical queues/appsinks without FrameLink or IPC.
+  if(localSeconds){CHECK(m==Mode::Bin&&!native&&tracks=="av");
+   t="videotestsrc is-live=true pattern=red num-buffers="+std::to_string(localSeconds*gFps)+" ! video/x-raw,format="+gFormat+",width="+std::to_string(gWidth)+",height="+std::to_string(gHeight)+",framerate="+std::to_string(gFps)+"/1 ! "+sinkV+
+     " audiotestsrc is-live=true samplesperbuffer=480 num-buffers="+std::to_string(localSeconds*100)+" ! audio/x-raw,format=S16LE,layout=interleaved,rate=48000,channels=2 ! "+sinkA;
+  }else if(m==Mode::Bin){t="framelinkavsrc name=c tracks="+tracks+" video-queue-frames="+std::to_string(gVideoQueue)+" video-pool="+std::to_string(gVideoPool)+" video-format="+gFormat+" "+geometry()+" framerate="+std::to_string(gFps)+"/1 connect-timeout-ms=5000 idle-timeout-ms=3000"+(native?" native-memory=true ":" ");
    if(video())t+="c.video_src ! "+sinkV;if(audio())t+="c.audio_src ! "+sinkA;}
   else{if(video())t+="framelinksrc name=video "+geometry()+" format="+gFormat+(native?" native-memory=true":"")+" ! "+sinkV;
    if(audio())t+="framelinkaudiosrc tracks="+tracks+" ! "+sinkA;}
-  p=parse(t);if(m==Mode::Bin){auto*c=gst_bin_get_by_name(GST_BIN(p),"c");g_object_set(c,"session",path.c_str(),"latency-ms",guint(gPlaybackLatency/GST_MSECOND),nullptr);gst_object_unref(c);}
+  p=parse(t);if(m==Mode::Bin&&!localSeconds){auto*c=gst_bin_get_by_name(GST_BIN(p),"c");g_object_set(c,"session",path.c_str(),"latency-ms",guint(gPlaybackLatency/GST_MSECOND),nullptr);gst_object_unref(c);}
   for(const char*n:{"vout","aout"}){auto*sink=gst_bin_get_by_name(GST_BIN(p),n);if(!sink)continue;
    GstAppSinkCallbacks cb{};cb.new_sample=[](GstAppSink*s,gpointer d)->GstFlowReturn{auto*self=static_cast<Consumer*>(d);auto*sample=gst_app_sink_pull_sample(s);auto*b=gst_sample_get_buffer(sample);
      const int track=strcmp(GST_OBJECT_NAME(s),"vout")?1:0;std::lock_guard<std::mutex> lock(self->mutex);

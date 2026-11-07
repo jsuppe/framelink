@@ -13,6 +13,8 @@
 //     [--no-output-preroll] (measurement appsinks async=false)
 //     [--pool N] [--video-queue N] [--raw] [--out DIR] [--label NAME]
 //
+// Resource isolation: --role consumer --local-consumer --result FILE
+// feeds the usual queues/appsinks directly; never transport qualification.
 // Software timing on the pipeline clock; physical display/speaker output is
 // not measured. A/V offset is the difference between the two tracks' render
 // lateness (same-second windows), i.e. sink scheduling, given that the session
@@ -33,7 +35,7 @@
 #include <unistd.h>
 #endif
 
-struct Options {guint seconds=60,cycles=0;std::string mode="bin",label="run",out=".",restart="producer";bool native=false,trace=false,raw=false,sourceOnly=false;};
+struct Options {guint seconds=60,cycles=0;std::string mode="bin",label="run",out=".",restart="producer";bool native=false,trace=false,raw=false,sourceOnly=false,localConsumer=false;};
 static guint gOutputQueueBuffers=0;
 static GstClockTime gArrivalBudget=LATENCY;
 static constexpr guint WARMUP_S=2;  // excluded from steady-state distributions
@@ -149,7 +151,7 @@ static GstPadProbeReturn departed(GstPad*pad,GstPadProbeInfo*info,gpointer d){
 
 static int consumerChild(const Options&o,const std::string&session,const std::string&out){
  Sampler sampler;std::map<std::string,std::string> r;Arrivals arrivals;
- {Consumer c(modeOf(o.mode),session,"av",o.native);c.checkContent=false;c.record=true;arrivals.pipeline=c.p;
+ {Consumer c(modeOf(o.mode),session,"av",o.native,o.localConsumer?o.seconds:0);c.checkContent=false;c.record=true;arrivals.pipeline=c.p;
   // Arrival: the sink pad of the queue in front of each appsink.
   for(int track=0;track<2;track++){auto*sink=gst_bin_get_by_name(GST_BIN(c.p),track?"aout":"vout");CHECK(sink);auto*sp=gst_element_get_static_pad(sink,"sink");auto*peer=gst_pad_get_peer(sp);CHECK(peer);
    auto*queue=gst_pad_get_parent_element(peer);auto*qs=gst_element_get_static_pad(queue,"sink");g_object_set_data(G_OBJECT(qs),"track",GINT_TO_POINTER(track));
@@ -184,7 +186,10 @@ static int consumerChild(const Options&o,const std::string&session,const std::st
   bool queueAccounting=true;for(int t=0;t<2;++t)queueAccounting=queueAccounting&&!arrivals.unmatched[t]&&arrivals.pending[t].empty()&&arrivals.residence[t].size()==arrivals.v[t].size();
   r["queue.accounting"]=queueAccounting?"complete":"incomplete";
   r["av_offset.ms"]=dist(offsets);r["av_offset.abs.ms"]=dist(absOffsets);}
- sampler.report(r);writeResult(out,r);return 0;}
+ r["scope"]=o.localConsumer?"local-consumer-control-no-transport":"transport-consumer";
+ sampler.report(r);writeResult(out,r);
+ if(o.localConsumer)return r["result"]=="EOS"&&r["frames"]==std::to_string(guint64(o.seconds)*gFps)&&r["samples"]==std::to_string(guint64(o.seconds)*48000)&&r["audio.contiguous"]=="yes"&&r["queue.accounting"]=="complete"?0:1;
+ return 0;}
 
 // ---- lifecycle (M6.3) ------------------------------------------------------------
 // The long-lived side runs one session per cycle in a single process, each in
@@ -306,8 +311,9 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
   else if(a=="--no-output-preroll")gOutputAsync=false;
   else if(a=="--pool")gVideoPool=guint(std::stoul(next()));else if(a=="--video-queue")gVideoQueue=guint(std::stoul(next()));else if(a=="--source-only")o.sourceOnly=true;
   else if(a=="--cycles")o.cycles=guint(std::stoul(next()));else if(a=="--restart")o.restart=next();else if(a=="--session-base")sessionBase=next();
-  else if(a=="--native")o.native=true;else if(a=="--trace")o.trace=true;else if(a=="--raw")o.raw=true;else if(a=="--out")o.out=next();else if(a=="--label")o.label=next();
+  else if(a=="--local-consumer")o.localConsumer=true;else if(a=="--native")o.native=true;else if(a=="--trace")o.trace=true;else if(a=="--raw")o.raw=true;else if(a=="--out")o.out=next();else if(a=="--label")o.label=next();
   else if(a=="--role")role=next();else if(a=="--session")session=next();else if(a=="--result")result=next();else{fprintf(stderr,"unknown option %s\n",a.c_str());return 2;}}
+ CHECK(!o.localConsumer||(role=="consumer"&&o.mode=="bin"&&!o.native&&!o.sourceOnly&&!o.cycles&&!result.empty()));
  CHECK(o.seconds>=WARMUP_S+3&&(o.mode=="bin"||o.mode=="element"));gRunLimit=(o.seconds+30)*GST_SECOND;
  // Ring: ceil(latency x fps) + 2 images (documented sizing), at least the default 8.
  // Queue: no byte/buffer limit (frames reach 33 MB at 4K); the 1 s time bound

@@ -21,3 +21,7 @@ Consumer sample inspection: native NV12 private commit median rises from 102744 
 Next discriminating baseline: same Windows binaries, 4K30 NV12 live video plus 48kHz audio, same 1800s duration, source-only (no FrameLink transport/consumer). Measure common GStreamer source + sampler private commit against the unchanged 64KB/min gate. This cannot directly exonerate the consumer: a clean baseline narrows investigation to consumer/transport work; a rising baseline identifies shared harness/source costs worth isolating. No repeat of the already-clean timing soak is needed. Parent owns attribution; original rare timing failure remains separate.
 
 M6.2 remains open for resource attribution, deterministic controls, primary-profile budgets and retained timing failures; M6.3–M6.9 remain open.
+
+## Source baseline result
+
+Source-only NV124K30 completed1800s with7.36KB/min private commit growth, flat handles/threads,CPU5.12%. See [source baseline](windows-source-resource/README.md). Next isolate the consumer harness using `--role consumer --local-consumer --result FILE`; reject native/element-mode combinations and require independent video/audio counts. This control never qualifies FrameLink transport.

@@ -1,0 +1,49 @@
+audio.arrival.all.ms=n=500 p50=0.75 p95=1.83 p99=1.92 max=2.35 min=0.01
+audio.arrival.ms=n=300 p50=0.76 p95=1.81 p99=1.86 max=2.35 min=0.10
+audio.contiguous=yes
+audio.deadline_misses=0/500
+audio.output_queue.admission_residence.ms=n=500 p50=0.01 p95=0.01 p99=0.01 max=0.03 min=0.01
+audio.output_queue.pending=0
+audio.output_queue.sampled_max_buffers=0
+audio.output_queue.unmatched=0
+audio.render.all.ms=n=500 p50=0.77 p95=1.84 p99=1.93 max=2.37 min=0.04
+audio.render.ms=n=300 p50=0.78 p95=1.83 p99=1.88 max=2.37 min=0.11
+audio.render_interval.ms=n=299 p50=10.00 p95=11.01 p99=11.02 max=11.51 min=8.18
+audio.render_jitter.p1_p99.ms=1.75
+av_offset.abs.ms=n=3 p50=0.10 p95=0.26 p99=0.26 max=0.26 min=0.08
+av_offset.ms=n=3 p50=-0.08 p95=0.10 p99=0.10 max=0.10 min=-0.26
+cpu.percent=4.47
+frames=150
+handles=1479..1479 min=1479 max=1479
+handles.slope.per_min=0.00
+mem.kb=63812..63812 min=63812 max=63812
+mem.kind=private
+mem.slope.kb_per_min=0.00
+memory=memory:SystemMemory
+queue.accounting=complete
+result=EOS
+samples=240000
+scope=local-consumer-control-no-transport
+threads=18..18 min=18 max=18
+threads.slope.per_min=0.00
+video.arrival.all.ms=n=150 p50=0.63 p95=1.88 p99=1.97 max=2.01 min=0.02
+video.arrival.ms=n=90 p50=0.63 p95=1.88 p99=2.01 max=2.01 min=0.02
+video.deadline_misses=0/150
+video.output_queue.admission_residence.ms=n=150 p50=0.01 p95=0.01 p99=0.03 max=0.03 min=0.00
+video.output_queue.pending=0
+video.output_queue.sampled_max_buffers=0
+video.output_queue.unmatched=0
+video.render.all.ms=n=150 p50=0.65 p95=1.90 p99=2.00 max=2.02 min=0.04
+video.render.ms=n=90 p50=0.65 p95=1.90 p99=2.02 max=2.02 min=0.04
+video.render_interval.ms=n=89 p50=33.50 p95=35.00 p99=35.04 max=35.04 min=31.50
+video.render_jitter.p1_p99.ms=1.99
+Test project C:/Users/jonsu/dev/framelink-m6-20261106/build
+    Start 108: gst_av_bench_smoke
+1/1 Test #108: gst_av_bench_smoke ...............   Passed    6.93 sec
+
+100% tests passed, 0 tests failed out of 1
+
+Total Test time (real) =   6.95 sec
+#< CLIXML
+line316 !o.localConsumer||(role=="consumer"&&o.mode=="bin"&&!o.native&&!o.sourceOnly&&!o.cycles&&!result.empty())
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04"><Obj S="progress" RefId="0"><TN RefId="0"><T>System.Management.Automation.PSCustomObject</T><T>System.Object</T></TN><MS><I64 N="SourceId">1</I64><PR N="Record"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj></Objs>
