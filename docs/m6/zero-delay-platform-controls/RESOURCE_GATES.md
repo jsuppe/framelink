@@ -35,3 +35,5 @@ Local-consumer control completed1800s with54000video/86400000PCM, no diagnostic 
 ## Layout-cache BGRA sustained result
 
 [Native BGRA4K30 repaired1800s](layout-cache-windows-bgra-3840x2160-30-native-1800/README.md):54000video/86400000PCM, zero34ms misses, AVmapping0ns; consumer6.93KB/min (previous69.47),producer6.52KB/min. Both native4K resource cases now pass after the cache repair. BGRA CPU98.11KB/min remains unresolved. Next discriminating control: BGRA4K30 local-consumer1800s with identical queue/appsink/count recording but no transport or GPU readback, comparing against the previous NV12 local-consumer7.34KB/min. This separates format-dependent harness/source allocations from the CPU transport/readback path; no transport qualification claim.
+
+BGRA local-consumer baseline completed with7.31KB/min (NV12local7.34), complete54000video/86400000PCM and zero diagnostic misses. See windows-bgra-local-consumer-resource. Next isolated GstBuffer allocate/reuse probe tests33MB per-frame allocation pressure; CPU-path fitted98.11KB/min remains failing pending attribution/repair, not excused as sampling noise.
