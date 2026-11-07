@@ -1,0 +1,254 @@
+[
+  {
+    "platform": "Linux",
+    "cell": "BGRA1080p60 native",
+    "evidence": "zero-delay-platform-controls/linux-bgra1080p60-current",
+    "frames": 108000,
+    "arrival_ms": {
+      "p50": 6.617499,
+      "p95": 8.082798,
+      "p99": 8.992457,
+      "max": 14.95315
+    },
+    "consumer_memory_kb_min": 3.23,
+    "producer_memory_kb_min": 3.23,
+    "consumer_cpu_percent": 1.93,
+    "producer_cpu_percent": 39.22,
+    "video_queue_ms": "n=108000 p50=0.04 p95=0.05 p99=0.06 max=0.77 min=0.00",
+    "audio_queue_ms": "n=180000 p50=0.04 p95=0.06 p99=0.07 max=0.98 min=0.01"
+  },
+  {
+    "platform": "Linux",
+    "cell": "NV121080p60 native",
+    "evidence": "zero-delay-platform-controls/linux-nv121080p60-current",
+    "frames": 108000,
+    "arrival_ms": {
+      "p50": 6.057923,
+      "p95": 7.421333,
+      "p99": 7.566782,
+      "max": 10.942878
+    },
+    "consumer_memory_kb_min": 3.23,
+    "producer_memory_kb_min": 3.24,
+    "consumer_cpu_percent": 4.41,
+    "producer_cpu_percent": 32.18,
+    "video_queue_ms": "n=108000 p50=0.09 p95=0.10 p99=0.11 max=1.48 min=0.01",
+    "audio_queue_ms": "n=180000 p50=0.09 p95=0.10 p99=0.10 max=1.56 min=0.00"
+  },
+  {
+    "platform": "Linux",
+    "cell": "BGRA4K30 native",
+    "evidence": "linux-mapping-repair/sustained",
+    "frames": 54000,
+    "arrival_ms": {
+      "p50": 12.513156,
+      "p95": 13.479876,
+      "p99": 13.678923,
+      "max": 17.729654
+    },
+    "consumer_memory_kb_min": 3.23,
+    "producer_memory_kb_min": 3.23,
+    "consumer_cpu_percent": 1.32,
+    "producer_cpu_percent": 44.82,
+    "video_queue_ms": "n=54000 p50=0.04 p95=0.05 p99=0.07 max=0.89 min=0.01",
+    "audio_queue_ms": "n=180000 p50=0.04 p95=0.05 p99=0.07 max=3.10 min=0.00"
+  },
+  {
+    "platform": "Linux",
+    "cell": "NV124K30 native",
+    "evidence": "zero-delay-platform-controls/linux-nv124k30-current",
+    "frames": 54000,
+    "arrival_ms": {
+      "p50": 5.670315,
+      "p95": 6.673649,
+      "p99": 6.893029,
+      "max": 8.933673
+    },
+    "consumer_memory_kb_min": 3.23,
+    "producer_memory_kb_min": 3.24,
+    "consumer_cpu_percent": 4.04,
+    "producer_cpu_percent": 26.25,
+    "video_queue_ms": "n=54000 p50=0.09 p95=0.11 p99=0.12 max=1.83 min=0.01",
+    "audio_queue_ms": "n=180000 p50=0.09 p95=0.12 p99=0.13 max=1.63 min=0.00"
+  },
+  {
+    "platform": "Android",
+    "cell": "RGBA1080p60 native",
+    "evidence": "zero-delay-platform-controls/android-1080p60-current",
+    "frames": 108000,
+    "arrival_ms": {
+      "p50": 6.185932,
+      "p95": 7.656922,
+      "p99": 8.689591,
+      "max": 10.812697
+    },
+    "consumer_memory_kb_min": -0.0,
+    "producer_memory_kb_min": 0.0,
+    "consumer_cpu_percent": 14.49,
+    "producer_cpu_percent": 55.52,
+    "video_queue_ms": "n=108000 p50=0.34 p95=0.50 p99=0.59 max=2.37 min=0.05",
+    "audio_queue_ms": "n=180000 p50=0.26 p95=0.48 p99=0.59 max=5.06 min=0.06"
+  },
+  {
+    "platform": "Android",
+    "cell": "RGBA4K30 native",
+    "evidence": "zero-delay-platform-controls/android-4k30-soak",
+    "frames": 54000,
+    "arrival_ms": {
+      "p50": 10.702963,
+      "p95": 11.99513,
+      "p99": 13.899759,
+      "max": 23.476399
+    },
+    "consumer_memory_kb_min": -2.3,
+    "producer_memory_kb_min": -2.92,
+    "consumer_cpu_percent": 15.64,
+    "producer_cpu_percent": 58.12,
+    "video_queue_ms": "n=54000 p50=0.49 p95=0.68 p99=0.80 max=3.68 min=0.10",
+    "audio_queue_ms": "n=180000 p50=0.34 p95=0.62 p99=0.71 max=2.49 min=0.06"
+  },
+  {
+    "platform": "Windows",
+    "cell": "BGRA 1920x1080@60 native",
+    "evidence": "zero-delay-platform-controls/windows-bgra-1920x1080-60-native-1800",
+    "frames": 108000,
+    "arrival_ms": {
+      "p50": 4.46785,
+      "p95": 5.779917,
+      "p99": 6.174384,
+      "max": 10.53955
+    },
+    "consumer_memory_kb_min": 7.14,
+    "producer_memory_kb_min": 3.24,
+    "consumer_cpu_percent": 6.1,
+    "producer_cpu_percent": 9.14,
+    "video_queue_ms": "n=108000 p50=0.01 p95=0.01 p99=0.01 max=0.06 min=0.00",
+    "audio_queue_ms": "n=180000 p50=0.01 p95=0.01 p99=0.01 max=1.32 min=0.00"
+  },
+  {
+    "platform": "Windows",
+    "cell": "BGRA 1920x1080@60 CPU",
+    "evidence": "zero-delay-platform-controls/cpu-pool-windows-bgra-1920x1080-60-cpu-1800",
+    "frames": 108000,
+    "arrival_ms": {
+      "p50": 4.910967,
+      "p95": 6.5304,
+      "p99": 7.632867,
+      "max": 10.139334
+    },
+    "consumer_memory_kb_min": 7.18,
+    "producer_memory_kb_min": 7.22,
+    "consumer_cpu_percent": 14.96,
+    "producer_cpu_percent": 9.5,
+    "video_queue_ms": "n=108000 p50=0.01 p95=0.01 p99=0.01 max=0.04 min=0.00",
+    "audio_queue_ms": "n=180000 p50=0.01 p95=0.01 p99=0.01 max=0.76 min=0.00"
+  },
+  {
+    "platform": "Windows",
+    "cell": "BGRA 3840x2160@30 native",
+    "evidence": "zero-delay-platform-controls/layout-cache-windows-bgra-3840x2160-30-native-1800",
+    "frames": 54000,
+    "arrival_ms": {
+      "p50": 12.26565,
+      "p95": 13.555884,
+      "p99": 14.22795,
+      "max": 15.768984
+    },
+    "consumer_memory_kb_min": 6.93,
+    "producer_memory_kb_min": 6.52,
+    "consumer_cpu_percent": 5.81,
+    "producer_cpu_percent": 14.44,
+    "video_queue_ms": "n=54000 p50=0.01 p95=0.01 p99=0.01 max=0.11 min=0.00",
+    "audio_queue_ms": "n=180000 p50=0.01 p95=0.01 p99=0.01 max=0.98 min=0.00"
+  },
+  {
+    "platform": "Windows",
+    "cell": "BGRA 3840x2160@30 CPU",
+    "evidence": "zero-delay-platform-controls/cpu-pool-windows-bgra-3840x2160-30-cpu-1800",
+    "frames": 54000,
+    "arrival_ms": {
+      "p50": 14.43745,
+      "p95": 15.756917,
+      "p99": 16.15935,
+      "max": 19.36695
+    },
+    "consumer_memory_kb_min": 7.14,
+    "producer_memory_kb_min": 7.18,
+    "consumer_cpu_percent": 23.59,
+    "producer_cpu_percent": 13.74,
+    "video_queue_ms": "n=54000 p50=0.01 p95=0.01 p99=0.01 max=0.05 min=0.00",
+    "audio_queue_ms": "n=180000 p50=0.01 p95=0.01 p99=0.01 max=0.65 min=0.00"
+  },
+  {
+    "platform": "Windows",
+    "cell": "NV12 1920x1080@60 native",
+    "evidence": "zero-delay-platform-controls/windows-nv12-1920x1080-60-native-1800",
+    "frames": 108000,
+    "arrival_ms": {
+      "p50": 3.513217,
+      "p95": 4.933484,
+      "p99": 5.20845,
+      "max": 9.581917
+    },
+    "consumer_memory_kb_min": 7.69,
+    "producer_memory_kb_min": 5.68,
+    "consumer_cpu_percent": 5.6,
+    "producer_cpu_percent": 10.34,
+    "video_queue_ms": "n=108000 p50=0.01 p95=0.01 p99=0.01 max=0.34 min=0.00",
+    "audio_queue_ms": "n=180000 p50=0.01 p95=0.01 p99=0.01 max=2.29 min=0.00"
+  },
+  {
+    "platform": "Windows",
+    "cell": "NV12 1920x1080@60 CPU",
+    "evidence": "zero-delay-platform-controls/cpu-pool-windows-nv12-1920x1080-60-cpu-1800",
+    "frames": 108000,
+    "arrival_ms": {
+      "p50": 4.61585,
+      "p95": 5.969084,
+      "p99": 6.314717,
+      "max": 7.883117
+    },
+    "consumer_memory_kb_min": 3.25,
+    "producer_memory_kb_min": 7.34,
+    "consumer_cpu_percent": 15.02,
+    "producer_cpu_percent": 8.27,
+    "video_queue_ms": "n=108000 p50=0.01 p95=0.01 p99=0.01 max=0.56 min=0.00",
+    "audio_queue_ms": "n=180000 p50=0.01 p95=0.01 p99=0.01 max=1.16 min=0.00"
+  },
+  {
+    "platform": "Windows",
+    "cell": "NV12 3840x2160@30 native",
+    "evidence": "zero-delay-platform-controls/layout-cache-windows-nv12-3840x2160-30-native-1800",
+    "frames": 54000,
+    "arrival_ms": {
+      "p50": 7.200934,
+      "p95": 8.495267,
+      "p99": 8.9119,
+      "max": 10.3239
+    },
+    "consumer_memory_kb_min": 6.96,
+    "producer_memory_kb_min": 45.72,
+    "consumer_cpu_percent": 4.66,
+    "producer_cpu_percent": 9.17,
+    "video_queue_ms": "n=54000 p50=0.01 p95=0.01 p99=0.01 max=0.14 min=0.00",
+    "audio_queue_ms": "n=180000 p50=0.01 p95=0.01 p99=0.01 max=0.59 min=0.00"
+  },
+  {
+    "platform": "Windows",
+    "cell": "NV12 3840x2160@30 CPU",
+    "evidence": "zero-delay-platform-controls/cpu-pool-windows-nv12-3840x2160-30-cpu-1800",
+    "frames": 54000,
+    "arrival_ms": {
+      "p50": 8.456134,
+      "p95": 12.6529,
+      "p99": 13.3958,
+      "max": 15.0661
+    },
+    "consumer_memory_kb_min": 7.32,
+    "producer_memory_kb_min": 46.69,
+    "consumer_cpu_percent": 15.4,
+    "producer_cpu_percent": 9.18,
+    "video_queue_ms": "n=54000 p50=0.01 p95=0.01 p99=0.01 max=0.59 min=0.00",
+    "audio_queue_ms": "n=180000 p50=0.01 p95=0.01 p99=0.01 max=2.85 min=0.00"
+  }
+]

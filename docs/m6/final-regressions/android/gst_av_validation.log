@@ -1,0 +1,73 @@
+CASE testclock
+CASE content fault=none
+{"case":"testclock","deadlines":20,"latency_ns":10000000,"av_offset_ns":37000000,"early_renders":0,"result":"pass"}
+{"case":"content","fault":"none","video_frames":50,"audio_buffers":77,"audio_samples":49537,"av_offset_error_ns":0,"audio_drift_ns":0,"video_drift_ns":0,"arrival_us":{"video":{"p50":2840,"p95":4108,"max":4304},"audio":{"p50":2673,"p95":3596,"max":5223}},"failures":0,"result":"pass"}
+CASE content fault=corrupt-pcm
+{"case":"content","fault":"corrupt-pcm","video_frames":50,"audio_buffers":77,"audio_samples":49537,"av_offset_error_ns":0,"audio_drift_ns":0,"video_drift_ns":0,"arrival_us":{"video":{"p50":3197,"p95":4195,"max":4413},"audio":{"p50":2764,"p95":3441,"max":8941}},"failures":1,"result":"fail"}
+  validator: audio pcm: 1 samples differ
+CASE content fault=corrupt-pixel
+  validator: video pixels frame 9: 1 bytes differ
+{"case":"content","fault":"corrupt-pixel","video_frames":50,"audio_buffers":77,"audio_samples":49537,"av_offset_error_ns":0,"audio_drift_ns":0,"video_drift_ns":0,"arrival_us":{"video":{"p50":2963,"p95":4234,"max":4443},"audio":{"p50":2720,"p95":4059,"max":13172}},"failures":1,"result":"fail"}
+CASE content fault=audio-offset-1-sample
+{"case":"content","fault":"audio-offset-1-sample","video_frames":50,"audio_buffers":77,"audio_samples":49537,"av_offset_error_ns":20833,"audio_drift_ns":0,"video_drift_ns":0,"arrival_us":{"video":{"p50":2953,"p95":4130,"max":4276},"audio":{"p50":2583,"p95":3656,"max":10394}},"failures":3,"result":"fail"}
+  validator: audio pts/duration: 77 buffers off the sample-index timeline
+  validator: audio contiguity: 1 discontinuities
+  validator: A/V offset error 20833ns
+CASE content fault=video-pts-1ms
+  validator: video pts 781000000 not on the 20ms grid
+{"case":"content","fault":"video-pts-1ms","video_frames":50,"audio_buffers":77,"audio_samples":49537,"av_offset_error_ns":0,"audio_drift_ns":0,"video_drift_ns":0,"arrival_us":{"video":{"p50":2930,"p95":3938,"max":4142},"audio":{"p50":2495,"p95":3553,"max":10201}},"failures":1,"result":"fail"}
+CASE content fault=drop-video
+  validator: video frame count 49 != 50
+  validator: video frame 9 carries frame 10
+  validator: video frame 10 carries frame 11
+  validator: video frame 11 carries frame 12
+  validator: video frame 12 carries frame 13
+  validator: video frame 13 carries frame 14
+  validator: video frame 14 carries frame 15
+  validator: video frame 15 carries frame 16
+{"case":"content","fault":"drop-video","video_frames":49,"audio_buffers":77,"audio_samples":49537,"av_offset_error_ns":0,"audio_drift_ns":0,"video_drift_ns":20000000,"arrival_us":{"video":{"p50":2845,"p95":4040,"max":4317},"audio":{"p50":2397,"p95":3334,"max":7021}},"failures":42,"result":"fail"}
+CASE content fault=drop-audio-after-transport
+{"case":"content","fault":"drop-audio-after-transport","video_frames":50,"audio_buffers":76,"audio_samples":49534,"av_offset_error_ns":0,"audio_drift_ns":62500,"video_drift_ns":0,"arrival_us":{"video":{"p50":2925,"p95":4250,"max":4318},"audio":{"p50":2807,"p95":12920,"max":12928}},"failures":5,"result":"fail"}
+  validator: audio samples 49534 != 49537
+  validator: audio pcm: 86298 samples differ
+  validator: audio pts/duration: 67 buffers off the sample-index timeline
+  validator: audio contiguity: 1 discontinuities
+  validator: audio drift 62500ns
+CASE content fault=producer-audio-gap
+EOS wait got error flaudioreader8: audio peer closed before GDP EOS
+{"case":"content","fault":"producer-audio-gap","video_frames":6,"audio_buffers":9,"audio_samples":6385,"av_offset_error_ns":0,"audio_drift_ns":0,"video_drift_ns":0,"arrival_us":{"video":{"p50":2920,"p95":4011,"max":4011},"audio":{"p50":2355,"p95":7671,"max":7671}},"failures":3,"result":"fail"}
+producer asink: PCM sample duration/continuity mismatch (/home/melchior/dev/framelink-m6/gst/gstframelinkaudio.cpp(28): reject (): /GstPipeline:pipeline17/GstFrameLinkAudioSink:asink:
+FrameLink audio rejected before serialization)
+producer video: coordinated session not ready or cancelled (/home/melchior/dev/framelink-m6/gst/gstframelink.cpp(516): sinkRenderImpl (): /GstPipeline:pipeline17/GstFrameLinkSink:video)
+producer vin: Internal data stream error. (../libs/gst/base/gstbasesrc.c(3177): gst_base_src_loop (): /GstPipeline:pipeline17/GstAppSrc:vin:
+streaming stopped, reason error (-5))
+producer video: invalid coordinated video EOS (/home/melchior/dev/framelink-m6/gst/gstframelink.cpp(798): sinkEventImpl (): /GstPipeline:pipeline17/GstFrameLinkSink:video)
+  validator: pipeline did not reach EOS
+  validator: video frame count 6 != 50
+  validator: audio samples 6385 != 49537
+CASE churn
+round 0 generation 1 clean ended in 112909us
+round 1 generation 2 consumer-death ended in 135389us
+round 2 generation 3 producer-death ended in 5879us
+round 3 generation 4 clean ended in 113194us
+round 4 generation 5 consumer-death ended in 139276us
+round 5 generation 6 producer-death ended in 5701us
+round 6 generation 7 clean ended in 114059us
+round 7 generation 8 consumer-death ended in 138338us
+round 8 generation 9 producer-death ended in 4053us
+round 9 generation 10 clean ended in 113843us
+handles per round: 23 22 22 23 22 22 23 22 22 23
+CASE churn leak-control
+round 0 generation 1 clean ended in 114225us
+round 1 generation 2 consumer-death ended in 138835us
+round 2 generation 3 producer-death ended in 5875us
+round 3 generation 4 clean ended in 112182us
+round 4 generation 5 consumer-death ended in 137497us
+round 5 generation 6 producer-death ended in 5221us
+round 6 generation 7 clean ended in 111997us
+round 7 generation 8 consumer-death ended in 138573us
+round 8 generation 9 producer-death ended in 5716us
+round 9 generation 10 clean ended in 113524us
+handles per round: 27 30 34 39 42 46 51 54 58 63
+{"case":"churn","rounds":10,"handles_warmup_max":23,"handles_final":23,"worst_failure_us":139276,"result":"pass"}
+m5b A/V validation: test-clock deadlines, exact content/offset/drift, detected fault controls and restart rounds passed

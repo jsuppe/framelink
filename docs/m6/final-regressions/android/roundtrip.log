@@ -1,0 +1,4 @@
+consume: channel 'flci' 256x128 pool 4 (dma-buf, CPU-mappable)
+consume: ring is now 320x240 (producer requested it)
+consume: 20 verified, 0 mismatched, 0 skipped
+consume: PASS
