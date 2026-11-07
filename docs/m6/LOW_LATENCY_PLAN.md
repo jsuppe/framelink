@@ -155,7 +155,7 @@ Receive-depth gate evidence: [review and platform tests](receive-depth/README.md
 - [x] 5a Measure software call-boundary copy/lock/wait/convert/present costs and resource growth. Evidence/scope: cost/STAGE_COSTS.md. GPU execution, physical scanout and primary-renderer qualification are not inferred; remaining gates stay open.
 - [x] 5b Isolate Android NV12 CPU costs with format/layout and lock controls. Evidence: cost/android-map, android-nv21-fix, android-cpu-controls and android-cpu-trace; target CPU throughput remains unqualified and carries into M6.8.
 - [ ] 5c Separate Windows queue timing from producer and GPU scheduling defects.
-- [ ] 5d Publish platform/format/resolution limits; no unsupported-cell omission.
+- [x] 5d Publish platform/format/resolution limits; failed and unqualified cells explicit in PLATFORM_LIMITS.md.
 
 ### M6.6 — Observability without hidden overhead
 - [ ] 6a Join independent source identities through each boundary, GPU completion
@@ -204,7 +204,7 @@ Sole executor Evelyn, sequential only. M6 is not complete.
 - Windows3a memory slopes21.10/84.09KB/cycle fail16. RawD3Ddevicechurn reproduces growth, exclusive retaineddevice flat, Trimnegative. No implicitcache/APIchange. Resource acceptance suspended per lifecycle/WINDOWS_DEVICE_LIFETIME.md with owner/resumeconditions; no blanket attribution orwaiver.
 - M6.3b functionallease/generation/EOS/pause/boundedcancellation checks passallplatforms (lifecycle/ownership andeos-fix). Sameprocess100heldlease/reconnectcycles allfunctionalpass; LinuxRSS0.142/Android-0.509KBcycle pass, Windowsprivate82.528FAILS16, handles/threadsflatall. Evidence lifecycle/lease-cycles. Windowsmemory portion remains suspended under same dependency;M6.3unchecked.
 - M6.4 existingpolicy8testsperplatform pass, plusWindowsD3D11normal/death/controlledGPUwait3/3. Faultscope in fault-coverage. Linux/AndroidEGLcontrollablewait injection unavailable77, notpass; rawnegativepreserved. M6.4b/c GPU-delay subset SUSPENDED pending supportednativefenceinjection; D2publicdefaultchoice unresolved, nochange. Existingpolicies testedexplicitly, no newlyapproveddefault inferred.
-- M6.5a/b scoped complete. M6.5c controlled source/post-push signatures verified on Linux/Windows NV12 and Android RGBA (nine complete captures). Causal attribution SUSPENDED pending per-frame boundary/GPU evidence in M6.6a; owner Evelyn, original159ms acceptance remains open. Evidence cost/stall-signatures. M6.5d platform limits in progress.
+- M6.5a/b scoped complete. M6.5c controlled source/post-push signatures verified on Linux/Windows NV12 and Android RGBA (nine complete captures). Causal attribution SUSPENDED pending per-frame boundary/GPU evidence in M6.6a; owner Evelyn, original159ms acceptance remains open. Evidence cost/stall-signatures. M6.5d published in PLATFORM_LIMITS.md. M6.6a boundary evidence audit in progress.
 
 
 M6.4a default-policy decision unresolved;M6.5–9 pending. No automatedstatus reports. Notify Jon atfullM6closure andholdbeforeM7 for maintenance.

@@ -48,7 +48,7 @@ Exact paired output-queue admission/residence distributions, including startup/d
 - Windows native NV124K30 originally6/54000 over34ms,max159.06ms. Two traced reproductions and repaired trace-off runs were clean; no causal repair of that intermittent event is proven. This remains an unresolved acceptance issue owned by Evelyn, not waived by current passes.
 - Android original60s control had2 arrivals over17ms,max19.10ms; later current-profile1800s was clean. Historical tails remain recorded; no universal real-time guarantee.
 - Three Windows resource cells originally exceeded64KB/min. Native layout probe repair and bounded CPU cache now pass matched sustained gates; precise historical CPU retained-growth cause is not proven. RESOURCE_GATES.md retains all rows.
-- Linux CPU target cells remain unsupported/deferred toM6.8; Android CPU target cells remain unsupported/deferred toM6.5. They are not silently counted as passes. Android native NV12/BGRA exact layouts reject rather than masquerade as supported.
+- Linux CPU target cells remain unsupported/deferred toM6.8; Android CPU target cells remain unsupported/deferred toM6.8. They are not silently counted as passes. Android native NV12/BGRA exact layouts reject rather than masquerade as supported.
 - Host load was not hermetically controlled; existing captured logs/hash/environment evidence is retained. No retrospective GPU-load estimate is invented.
 
 ## Integrated regressions
