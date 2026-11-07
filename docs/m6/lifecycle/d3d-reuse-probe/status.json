@@ -1,0 +1,52 @@
+{
+  "state": "finished",
+  "started": 1794038086.894427,
+  "purpose": "hold one exclusive D3D11 device across texture/wrapper lifecycles, no transport",
+  "cases": [
+    {
+      "label": "reuse-2",
+      "cycles": 2,
+      "max_device_release_refs": 0,
+      "first": {
+        "cycle": 0,
+        "monotonic_us": 279574139445,
+        "private_bytes": 61513728,
+        "page_faults": 19357,
+        "handles": 375,
+        "device_release_refs": 0
+      },
+      "last": {
+        "cycle": 1,
+        "monotonic_us": 279579142189,
+        "private_bytes": 61526016,
+        "page_faults": 21400,
+        "handles": 375,
+        "device_release_refs": 0
+      }
+    },
+    {
+      "label": "reuse-100",
+      "cycles": 100,
+      "max_device_release_refs": 0,
+      "first": {
+        "cycle": 0,
+        "monotonic_us": 279585024523,
+        "private_bytes": 63438848,
+        "page_faults": 19175,
+        "handles": 368,
+        "device_release_refs": 0
+      },
+      "last": {
+        "cycle": 99,
+        "monotonic_us": 280080248500,
+        "private_bytes": 63541248,
+        "page_faults": 221084,
+        "handles": 366,
+        "device_release_refs": 0
+      },
+      "postwarm_kb_per_cycle": -0.38365061590145577
+    }
+  ],
+  "build_exit": 0,
+  "ended": 1794038603.1765218
+}
