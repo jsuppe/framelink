@@ -1,0 +1,38 @@
+{
+  "state": "finished",
+  "started": 1794036362.6087527,
+  "purpose": "local-consumer lifecycle allocation control, no transport/GPU wrapping",
+  "cases": [
+    {
+      "label": "windows-local-consumer-2x5",
+      "exit": 0,
+      "cycles": 2
+    },
+    {
+      "label": "windows-local-consumer-100x5",
+      "exit": 0,
+      "cycles": 100,
+      "mem_kb_per_cycle": -1.9941209406494962,
+      "handles_per_cycle": -0.12122060470324748,
+      "threads_per_cycle": -0.0551511758118701,
+      "first_warm": [
+        "EOS",
+        "300",
+        "240000",
+        "15008",
+        "1477",
+        "16"
+      ],
+      "last": [
+        "EOS",
+        "300",
+        "240000",
+        "14436",
+        "1428",
+        "7"
+      ]
+    }
+  ],
+  "build_exit": 0,
+  "ended": 1794036880.6940246
+}
