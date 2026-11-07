@@ -1,0 +1,65 @@
+[
+  {
+    "case": "1920x1080-60-NV12-av",
+    "trace": "on",
+    "wall_s": 6.8526863000006415,
+    "exit_codes": [
+      0,
+      0
+    ],
+    "native": true,
+    "media_run_ms": 5000,
+    "commands": [
+      [
+        "<win-home>\\dev\\framelink-m6-20261106\\build\\Release\\framelink_av_producer.exe",
+        "<win-home>\\dev\\framelink-m6-20261106\\build\\Release\\gstframelink.dll",
+        "--session",
+        "<win-home>\\dev\\m6-render-stage-1794045441\\results\\1920x1080-60-NV12-av\\session",
+        "--format",
+        "NV12",
+        "--frames",
+        "300",
+        "--width",
+        "1920",
+        "--height",
+        "1080",
+        "--fps",
+        "60",
+        "--input-pipeline",
+        "<win-home>\\dev\\m6-render-stage-1794045441\\results\\1920x1080-60-NV12-av\\source.pipeline",
+        "--timeout-ms",
+        "15000",
+        "--media-run-ms",
+        "5000"
+      ],
+      [
+        "<win-home>\\dev\\m6-render-stage-1794045441\\vkrenderer.exe",
+        "--serve",
+        "1920x1080-60-NV12-av",
+        "--control-port",
+        "54796",
+        "--av-exit-on-end",
+        "--av-session",
+        "<win-home>\\dev\\m6-render-stage-1794045441\\results\\1920x1080-60-NV12-av\\session",
+        "--av-plugin",
+        "<win-home>\\dev\\framelink-m6-20261106\\build\\Release\\gstframelink.dll",
+        "--av-format",
+        "NV12",
+        "--av-width",
+        "1920",
+        "--av-height",
+        "1080",
+        "--av-fps",
+        "60",
+        "--av-audio-sink",
+        "autoaudiosink",
+        "--av-clock",
+        "producer",
+        "--av-timeout-ms",
+        "15000",
+        "--av-media-run-ms",
+        "5000"
+      ]
+    ]
+  }
+]

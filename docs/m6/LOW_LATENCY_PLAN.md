@@ -152,7 +152,7 @@ Receive-depth gate evidence: [review and platform tests](receive-depth/README.md
 - [ ] 4c Verify bounded recovery, explicit loss/discontinuity, and no unsafe reuse.
 
 ### M6.5 — Performance and platform cost analysis
-- [ ] 5a Measure per-stage copy/lock/wait/convert/present cost and resource growth.
+- [x] 5a Measure software call-boundary copy/lock/wait/convert/present costs and resource growth. Evidence/scope: cost/STAGE_COSTS.md. GPU execution, physical scanout and primary-renderer qualification are not inferred; remaining gates stay open.
 - [x] 5b Isolate Android NV12 CPU costs with format/layout and lock controls. Evidence: cost/android-map, android-nv21-fix, android-cpu-controls and android-cpu-trace; target CPU throughput remains unqualified and carries into M6.8.
 - [ ] 5c Separate Windows queue timing from producer and GPU scheduling defects.
 - [ ] 5d Publish platform/format/resolution limits; no unsupported-cell omission.
@@ -204,7 +204,7 @@ Sole executor Evelyn, sequential only. M6 is not complete.
 - Windows3a memory slopes21.10/84.09KB/cycle fail16. RawD3Ddevicechurn reproduces growth, exclusive retaineddevice flat, Trimnegative. No implicitcache/APIchange. Resource acceptance suspended per lifecycle/WINDOWS_DEVICE_LIFETIME.md with owner/resumeconditions; no blanket attribution orwaiver.
 - M6.3b functionallease/generation/EOS/pause/boundedcancellation checks passallplatforms (lifecycle/ownership andeos-fix). Sameprocess100heldlease/reconnectcycles allfunctionalpass; LinuxRSS0.142/Android-0.509KBcycle pass, Windowsprivate82.528FAILS16, handles/threadsflatall. Evidence lifecycle/lease-cycles. Windowsmemory portion remains suspended under same dependency;M6.3unchecked.
 - M6.4 existingpolicy8testsperplatform pass, plusWindowsD3D11normal/death/controlledGPUwait3/3. Faultscope in fault-coverage. Linux/AndroidEGLcontrollablewait injection unavailable77, notpass; rawnegativepreserved. M6.4b/c GPU-delay subset SUSPENDED pending supportednativefenceinjection; D2publicdefaultchoice unresolved, nochange. Existingpolicies testedexplicitly, no newlyapproveddefault inferred.
-- M6.5b COMPLETE isolation;CPUtargetfailurescarryM6.8. M6.5a IN_PROGRESS:colocatedsessionDLLresolvedlegacyrendererpluginload;OS0/0,300due/0gaps/240000PCM. Recorder65536lost239365events,distributioninvalidforfullrun. Soleactiveneat-falcon PID1106863 autowake windows_renderer_complete_trace.py,status evidence/m6-cost/windows-renderer-complete-trace/status.json;onlyrendererrecorderincreasedto524288,transport/GST65536. Legacy100msscheduling/noactivedisplay,notzerolatency/physicalscanoutqualification. Controlsarchivedcost/renderer-deployment-controls.
+- M6.5b COMPLETE isolation;CPUtargetfailurescarryM6.8. M6.5a IN_PROGRESS:rendererrecorderzero-loss/300uniqueadopt+presentidentities;present-callCPUmean.304ms/p95.324ms(notGPU/scanout). Receivercoretraceoverflow79817events preventsfullboundaryjoin. Soleactivedawn-sage PID1107150 autowake windows_renderer_all_recorders.py,status evidence/m6-cost/windows-renderer-all-recorders/status.json;onlycorecapacity262144,renderer524288/GST65536. Legacy100ms/noactivedisplayfixturelimitsretained.
 
 
 M6.4a default-policy decision unresolved;M6.5–9 pending. No automatedstatus reports. Notify Jon atfullM6closure andholdbeforeM7 for maintenance.
