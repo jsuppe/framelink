@@ -195,17 +195,6 @@ Receive-depth gate evidence: [review and platform tests](receive-depth/README.md
 
 ## Immediate next action and coordination
 
-November6: parent executor owns M6.2, sequentially. Execution ownership has been
-reconciled; there is no pending Claude Code handoff. Exact-depth review and
-platform regressions passed. Linux full suite passed114/114 at8541985; Windows
-and Android affected checks passed, not full latest platform suites. Android
-30-minute native-consumer1080p60 completed exact counts and zero17ms arrival
-misses at4497b3b, with the startup-output limitation preserved in its evidence.
+November6 20:30 EST: parent executor owns M6.2 sequentially. All four Windows CPU 1800s cases have complete counts and zero diagnostic timing misses, but this is not milestone completion. Current Windows BGRA native, NV12 native and BGRA CPU exceed the existing64KB/min memory-growth gate; see [resource reconciliation](zero-delay-platform-controls/RESOURCE_GATES.md). Original Windows159ms native stall remains unproven as repaired. Linux114/114, Windows112/112 and Android72/72 full-suite evidence exists at the recorded platform revisions; final integrated qualification remains required.
 
-The measurement layer now exposes independent counts, audio continuity and
-all-frame metrics; an explicit no-output-preroll control separates measurement
-startup from transport arrival. Next: record producer audio as well as video
-PTS, verify the same mapping across tracks, and continue the remaining primary
-profile target-rate/ownership qualification. No buffered or short control is
-substituted for the final sustained matrix. LaterM6.3–M6.9 keep their order.
-RecommendationsD1–D5 remain proposals except confirmed user requirements.
+Next: source-only Windows NV124K30 resource baseline, then consumer/transport resource attribution and deterministic queue controls. Keep original failures and no physical-output/zero-copy claim. M6.3–M6.9 remain open in order. Notify Jon only at full M6 closure and hold before M7 for maintenance; periodic status automation remains cancelled.
