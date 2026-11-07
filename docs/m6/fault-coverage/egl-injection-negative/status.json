@@ -1,0 +1,18 @@
+{
+  "state": "failed",
+  "started": 1794042485.5026186,
+  "steps": [
+    {
+      "name": "linux-build",
+      "exit": 0,
+      "supported": true
+    },
+    {
+      "name": "linux-delay",
+      "exit": 1,
+      "supported": true
+    }
+  ],
+  "error": "linux-delay failed",
+  "ended": 1794042486.2819855
+}

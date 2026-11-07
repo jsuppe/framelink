@@ -1,0 +1,28 @@
+Internal ctest changing into directory: <linux-home>/dev/build/framelink-m6-linux
+Test project <linux-home>/dev/build/framelink-m6-linux
+    Start   4: frame_metadata_contract
+1/8 Test   #4: frame_metadata_contract ..........   Passed    0.00 sec
+    Start  24: frame_metadata
+2/8 Test  #24: frame_metadata ...................   Passed    0.29 sec
+    Start  26: receive_queue
+3/8 Test  #26: receive_queue ....................   Passed    1.50 sec
+    Start  66: gst_pool_policy
+4/8 Test  #66: gst_pool_policy ..................   Passed    1.67 sec
+    Start  96: av_memory_adversarial
+5/8 Test  #96: av_memory_adversarial ............   Passed    0.02 sec
+    Start 102: gst_audio_sink
+6/8 Test #102: gst_audio_sink ...................   Passed    1.21 sec
+    Start 103: gst_audio_source
+7/8 Test #103: gst_audio_source .................   Passed    1.25 sec
+    Start 113: gst_local_audio
+8/8 Test #113: gst_local_audio ..................   Passed    1.12 sec
+
+100% tests passed, 0 tests failed out of 8
+
+Label Time Summary:
+gpu                     =   1.50 sec*proc (1 test)
+gst_video_regression    =   1.67 sec*proc (1 test)
+integration             =   1.50 sec*proc (1 test)
+m5b_av                  =   3.58 sec*proc (3 tests)
+
+Total Test time (real) =   7.07 sec

@@ -1,0 +1,23 @@
+{
+  "state": "finished",
+  "started": 1794042397.4859045,
+  "source_sha256": {
+    "CMakeLists.txt": "24e4d2606949a1e48fb95ebd34f20614a8a5f4f9633819aee355183b0d1aee5f",
+    "test/fl_read_lease_d3d11.cpp": "2635be98d19eb78d6186439752d9a254b7b68fc5c006ed528a758f3520c0c5c8"
+  },
+  "steps": [
+    {
+      "name": "preflight",
+      "exit": 0
+    },
+    {
+      "name": "build",
+      "exit": 0
+    },
+    {
+      "name": "gpu-completion",
+      "exit": 0
+    }
+  ],
+  "ended": 1794042404.2982442
+}

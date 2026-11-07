@@ -1,0 +1,37 @@
+{
+  "state": "finished",
+  "started": 1794042564.539917,
+  "steps": [
+    {
+      "name": "linux-build",
+      "exit": 0,
+      "supported": true
+    },
+    {
+      "name": "linux-delay",
+      "exit": 77,
+      "supported": false
+    },
+    {
+      "name": "arm64-build",
+      "exit": 0,
+      "supported": true
+    },
+    {
+      "name": "android-normal",
+      "exit": 0,
+      "supported": true
+    },
+    {
+      "name": "android-producer-death",
+      "exit": 0,
+      "supported": true
+    },
+    {
+      "name": "android-delayed-completion",
+      "exit": 77,
+      "supported": false
+    }
+  ],
+  "ended": 1794042567.5450752
+}

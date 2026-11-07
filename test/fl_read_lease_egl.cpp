@@ -17,6 +17,7 @@
 #include <string>
 #include <unistd.h>
 #include <spawn.h>
+#include <poll.h>
 #include <sys/wait.h>
 extern char** environ;
 #define CHECK(x) do {if(!(x)){std::fprintf(stderr,"line %d: %s EGL=%x GL=%x\n",__LINE__,#x,eglGetError(),glGetError());std::exit(1);}}while(0)
@@ -36,6 +37,7 @@ static int producer(const char* name,bool crash) {
 int main(int argc,char** argv) {
  if(argc==3)return producer(argv[2],!std::strcmp(argv[1],"--producer-crash"));
  bool crash=argc==2 && !std::strcmp(argv[1],"--producer-death");
+ bool delayed=argc==2 && !std::strcmp(argv[1],"--delayed-completion");
  EGLDisplay display=EGL_NO_DISPLAY;
 #ifndef __ANDROID__
  auto platform=(PFNEGLGETPLATFORMDISPLAYEXTPROC)eglGetProcAddress("eglGetPlatformDisplayEXT");
@@ -60,6 +62,28 @@ int main(int argc,char** argv) {
  auto destroySync=(PFNEGLDESTROYSYNCKHRPROC)eglGetProcAddress("eglDestroySyncKHR");
  auto exportFence=(PFNEGLDUPNATIVEFENCEFDANDROIDPROC)eglGetProcAddress("eglDupNativeFenceFDANDROID");
  CHECK(createImage&&destroyImage&&bindImage&&createSync&&destroySync&&exportFence);
+ auto waitSync=(PFNEGLWAITSYNCKHRPROC)eglGetProcAddress("eglWaitSyncKHR");
+ auto signalSync=(PFNEGLSIGNALSYNCKHRPROC)eglGetProcAddress("eglSignalSyncKHR");
+ EGLSyncKHR gate=EGL_NO_SYNC_KHR;
+ if(delayed){
+  // Probe server-side support, not just the presence of extension symbols.
+  // Some drivers only permit fence (not reusable) syncs in eglWaitSyncKHR.
+  if(strstr(extensions,"EGL_KHR_reusable_sync")&&waitSync&&signalSync)gate=createSync(display,EGL_SYNC_REUSABLE_KHR,nullptr);
+  bool supported=gate!=EGL_NO_SYNC_KHR&&waitSync(display,gate,0)==EGL_TRUE;
+  EGLint why=eglGetError();
+  // A successful wait call is insufficient: prove the exported native fence
+  // stays unsignalled behind this gate, without any FrameLink participation.
+  if(supported){
+   auto probe=createSync(display,EGL_SYNC_NATIVE_FENCE_ANDROID,nullptr);CHECK(probe!=EGL_NO_SYNC_KHR);glFlush();
+   int probeFd=exportFence(display,probe);CHECK(probeFd>=0);
+   pollfd pending{probeFd,POLLIN,0};int ready=poll(&pending,1,20);CHECK(ready>=0);
+   if(ready!=0){std::fprintf(stderr,"injection unavailable: native fence became ready behind unsignalled reusable gate (revents=%x)\n",pending.revents);supported=false;}
+   CHECK(signalSync(display,gate,EGL_SIGNALED_KHR));CHECK(poll(&pending,1,2000)==1&&(pending.revents&POLLIN));
+   close(probeFd);destroySync(display,probe);
+  }
+  if(gate!=EGL_NO_SYNC_KHR){CHECK(signalSync(display,gate,EGL_SIGNALED_KHR));destroySync(display,gate);gate=EGL_NO_SYNC_KHR;}
+  if(!supported){std::printf("SKIP: controllable reusable-sync server wait unavailable EGL=%x\n",why);eglMakeCurrent(display,EGL_NO_SURFACE,EGL_NO_SURFACE,EGL_NO_CONTEXT);eglDestroyContext(display,context);eglDestroySurface(display,surface);eglTerminate(display);return 77;}
+ }
  std::string name="egl-lease-"+std::to_string(getpid());flChannel *c=nullptr;
  CHECK(flCreateChannelEx(name.c_str(),64,32,FL_FORMAT_RGBA8,2,FL_MAP_CPU|FL_GPU_RENDER|FL_DEFER_RELEASE,&c)==FL_OK);
  pid_t child=0;char* args[]={argv[0],const_cast<char*>(crash?"--producer-crash":"--producer"),const_cast<char*>(name.c_str()),nullptr};
@@ -87,11 +111,22 @@ int main(int argc,char** argv) {
  GLuint program=glCreateProgram();glAttachShader(program,vs);glAttachShader(program,fs);glBindAttribLocation(program,0,"position");glLinkProgram(program);GLint linked=0;glGetProgramiv(program,GL_LINK_STATUS,&linked);CHECK(linked);glUseProgram(program);
  glUniform1i(glGetUniformLocation(program,"source"),0);glActiveTexture(GL_TEXTURE0);glBindTexture(GL_TEXTURE_EXTERNAL_OES,texture);
  GLfloat vertices[]={-1,-1,1,-1,-1,1,1,1};glEnableVertexAttribArray(0);glVertexAttribPointer(0,2,GL_FLOAT,GL_FALSE,0,vertices);glViewport(0,0,64,32);
+ if(delayed){gate=createSync(display,EGL_SYNC_REUSABLE_KHR,nullptr);CHECK(gate!=EGL_NO_SYNC_KHR);CHECK(waitSync(display,gate,0));}
  // Sample the imported allocation into a test-only verification surface.
  glDrawArrays(GL_TRIANGLE_STRIP,0,4);CHECK(glGetError()==GL_NO_ERROR);
  auto sync=createSync(display,EGL_SYNC_NATIVE_FENCE_ANDROID,nullptr);CHECK(sync!=EGL_NO_SYNC_KHR);glFlush();
  int fd=exportFence(display,sync);CHECK(fd>=0);
- CHECK(flCompleteReadLeaseSyncFd(c,lease,fd)==FL_OK);close(fd);destroySync(display,sync);
+ if(delayed){auto getSync=(PFNEGLGETSYNCATTRIBKHRPROC)eglGetProcAddress("eglGetSyncAttribKHR");CHECK(getSync);EGLint gateState=0,fenceState=0;
+  CHECK(getSync(display,gate,EGL_SYNC_STATUS_KHR,&gateState));CHECK(getSync(display,sync,EGL_SYNC_STATUS_KHR,&fenceState));
+  pollfd check{fd,POLLIN,0};int ready=poll(&check,1,0);CHECK(ready>=0);
+  std::fprintf(stderr,"injection: gate_status=%x fence_status=%x fd_ready=%d revents=%x\n",gateState,fenceState,ready,check.revents);
+ }
+ CHECK(flCompleteReadLeaseSyncFd(c,lease,fd)==FL_OK);destroySync(display,sync);
+ if(delayed){
+  for(unsigned i=0;i<20;++i){auto result=flCollectReadLeases(c);if(result!=FL_BUSY){pollfd state{fd,POLLIN,0};int ready=poll(&state,1,0);std::fprintf(stderr,"collect iteration=%u result=%d fence_ready=%d revents=%x\n",i,int(result),ready,state.revents);}CHECK(result==FL_BUSY);int status=0;CHECK(waitpid(child,&status,WNOHANG)==0);std::this_thread::sleep_for(std::chrono::milliseconds(1));}
+  CHECK(signalSync(display,gate,EGL_SIGNALED_KHR));destroySync(display,gate);
+ }
+ close(fd);
  bool collected=false;for(int i=0;i<2000;++i){auto r=flCollectReadLeases(c);if(r==FL_OK){collected=true;break;}CHECK(r==FL_BUSY || (crash && r==FL_DISCONNECTED));std::this_thread::sleep_for(std::chrono::milliseconds(1));}CHECK(collected);
  glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,output,0);unsigned char pixel[4]{};glReadPixels(0,0,1,1,GL_RGBA,GL_UNSIGNED_BYTE,pixel);CHECK(glGetError()==GL_NO_ERROR);
  CHECK(pixel[0]==17&&pixel[1]==91&&pixel[2]==203&&pixel[3]==255);
