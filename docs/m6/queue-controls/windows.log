@@ -1,0 +1,37 @@
+#< CLIXML
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\framelink.dll
+  fl_gst_pool_policy.cpp
+  fl_gst_pool_policy.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_gst_pool_policy.exe
+UpdateCTestConfiguration  from :C:/Users/jonsu/dev/framelink-m6-20261106/build/DartConfiguration.tcl
+Test project C:/Users/jonsu/dev/framelink-m6-20261106/build
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 66
+    Start 66: gst_pool_policy
+
+66: Test command: C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_gst_pool_policy.exe "C:/Users/jonsu/dev/framelink-m6-20261106/build/Release/gstframelink.dll"
+66: Working Directory: C:/Users/jonsu/dev/framelink-m6-20261106/build
+66: Test timeout computed to be: 30
+66: pool2: single-frame no-fill, producer gap, exact PTS/pixels and no invented sequence loss pass
+66: pool3: single-frame no-fill, producer gap, exact PTS/pixels and no invented sequence loss pass
+66: sync=0: transport admission separated from sink clock hold pass
+66: sync=1: transport admission separated from sink clock hold pass
+66: 2/3 image capacities: bounded drop, bounded error, delayed-reader recovery and exact loss accounting pass
+1/1 Test #66: gst_pool_policy ..................   Passed    4.01 sec
+
+The following tests passed:
+	gst_pool_policy
+
+100% tests passed, 0 tests failed out of 1
+
+Label Time Summary:
+gst_video_regression    =   4.01 sec*proc (1 test)
+
+Total Test time (real) =   4.04 sec
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04"><Obj S="progress" RefId="0"><TN RefId="0"><T>System.Management.Automation.PSCustomObject</T><T>System.Object</T></TN><MS><I64 N="SourceId">1</I64><PR N="Record"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj></Objs>
