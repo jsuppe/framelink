@@ -1,0 +1,1266 @@
+{
+  "stage-BGRA-1920x1080-cpu-1794044791/consumer-gst.50944.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "gst.cpu_output_allocate": {
+        "n": 300,
+        "mean_ms": 0.0010846666666666667,
+        "p95_ms": 0.0011,
+        "max_ms": 0.0371
+      },
+      "gst.d3d11_readback_map": {
+        "n": 300,
+        "mean_ms": 0.7818566666666666,
+        "p95_ms": 1.3142,
+        "max_ms": 2.4596
+      },
+      "gst.srcCreate": {
+        "n": 301,
+        "mean_ms": 16.916417940199334,
+        "p95_ms": 18.1379,
+        "max_ms": 104.4556
+      }
+    }
+  },
+  "stage-BGRA-1920x1080-cpu-1794044791/producer-gst.37616.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "gst.sinkRender": {
+        "n": 300,
+        "mean_ms": 0.44230766666666665,
+        "p95_ms": 0.5079,
+        "max_ms": 1.1044
+      }
+    }
+  },
+  "stage-BGRA-1920x1080-cpu-1794044791/producer-core.37616.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "ipc.recv": {
+        "n": 3,
+        "mean_ms": 0.012666666666666666,
+        "p95_ms": 0.0133,
+        "max_ms": 0.0214
+      },
+      "ipc.send": {
+        "n": 303,
+        "mean_ms": 0.00493003300330033,
+        "p95_ms": 0.006,
+        "max_ms": 0.0109
+      },
+      "flOpenProducer": {
+        "n": 1,
+        "mean_ms": 154.104,
+        "p95_ms": 154.104,
+        "max_ms": 154.104
+      },
+      "flRequestGeometry": {
+        "n": 1,
+        "mean_ms": 0.0561,
+        "p95_ms": 0.0561,
+        "max_ms": 0.0561
+      },
+      "flAcquireBuffer": {
+        "n": 300,
+        "mean_ms": 0.00028599999999999996,
+        "p95_ms": 0.0003,
+        "max_ms": 0.0016
+      },
+      "flBeginSubmit": {
+        "n": 203,
+        "mean_ms": 0.0001,
+        "p95_ms": 0.0001,
+        "max_ms": 0.0001
+      },
+      "flImageUnmap": {
+        "n": 126,
+        "mean_ms": 0.0001,
+        "p95_ms": 0.0001,
+        "max_ms": 0.0001
+      },
+      "d3d11.signal_ready": {
+        "n": 300,
+        "mean_ms": 0.052462,
+        "p95_ms": 0.0627,
+        "max_ms": 0.0754
+      },
+      "d3d11.flush_ready": {
+        "n": 300,
+        "mean_ms": 0.0030096666666666666,
+        "p95_ms": 0.0036,
+        "max_ms": 0.0047
+      },
+      "flEndSubmit": {
+        "n": 300,
+        "mean_ms": 0.005328,
+        "p95_ms": 0.0067,
+        "max_ms": 0.0123
+      },
+      "flSubmit": {
+        "n": 300,
+        "mean_ms": 0.062123333333333336,
+        "p95_ms": 0.073,
+        "max_ms": 0.09
+      },
+      "flClose": {
+        "n": 1,
+        "mean_ms": 19.1683,
+        "p95_ms": 19.1683,
+        "max_ms": 19.1683
+      }
+    }
+  },
+  "stage-BGRA-1920x1080-cpu-1794044791/consumer-core.50944.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "flCreateChannelOnAdapter": {
+        "n": 1,
+        "mean_ms": 167.0134,
+        "p95_ms": 167.0134,
+        "max_ms": 167.0134
+      },
+      "flCreateChannelEx": {
+        "n": 1,
+        "mean_ms": 167.0284,
+        "p95_ms": 167.0284,
+        "max_ms": 167.0284
+      },
+      "ipc.send": {
+        "n": 3,
+        "mean_ms": 0.0031,
+        "p95_ms": 0.0028,
+        "max_ms": 0.0041
+      },
+      "ipc.recv": {
+        "n": 303,
+        "mean_ms": 17.329382508250823,
+        "p95_ms": 18.0055,
+        "max_ms": 155.0294
+      },
+      "flAcquireFrame": {
+        "n": 301,
+        "mean_ms": 15.823536212624585,
+        "p95_ms": 17.4172,
+        "max_ms": 104.4524
+      },
+      "flRelease": {
+        "n": 300,
+        "mean_ms": 0.021771,
+        "p95_ms": 0.0277,
+        "max_ms": 0.0439
+      },
+      "flClose": {
+        "n": 1,
+        "mean_ms": 20.2246,
+        "p95_ms": 20.2246,
+        "max_ms": 20.2246
+      }
+    }
+  },
+  "stage-BGRA-1920x1080-native-1794044798/producer-core.35648.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "ipc.recv": {
+        "n": 3,
+        "mean_ms": 0.011966666666666667,
+        "p95_ms": 0.0158,
+        "max_ms": 0.0168
+      },
+      "ipc.send": {
+        "n": 303,
+        "mean_ms": 0.004813861386138614,
+        "p95_ms": 0.0059,
+        "max_ms": 0.012
+      },
+      "flOpenProducer": {
+        "n": 1,
+        "mean_ms": 153.078,
+        "p95_ms": 153.078,
+        "max_ms": 153.078
+      },
+      "flRequestGeometry": {
+        "n": 1,
+        "mean_ms": 0.0524,
+        "p95_ms": 0.0524,
+        "max_ms": 0.0524
+      },
+      "flAcquireBuffer": {
+        "n": 300,
+        "mean_ms": 0.0002956666666666666,
+        "p95_ms": 0.0003,
+        "max_ms": 0.0019
+      },
+      "flImageUnmap": {
+        "n": 117,
+        "mean_ms": 0.00010085470085470086,
+        "p95_ms": 0.0001,
+        "max_ms": 0.0002
+      },
+      "d3d11.signal_ready": {
+        "n": 300,
+        "mean_ms": 0.053094666666666665,
+        "p95_ms": 0.0654,
+        "max_ms": 0.0853
+      },
+      "d3d11.flush_ready": {
+        "n": 300,
+        "mean_ms": 0.002958,
+        "p95_ms": 0.0036,
+        "max_ms": 0.0048
+      },
+      "flEndSubmit": {
+        "n": 300,
+        "mean_ms": 0.005212,
+        "p95_ms": 0.0069,
+        "max_ms": 0.0123
+      },
+      "flSubmit": {
+        "n": 300,
+        "mean_ms": 0.062552,
+        "p95_ms": 0.0762,
+        "max_ms": 0.0954
+      },
+      "flBeginSubmit": {
+        "n": 187,
+        "mean_ms": 0.0001,
+        "p95_ms": 0.0001,
+        "max_ms": 0.0001
+      },
+      "flClose": {
+        "n": 1,
+        "mean_ms": 22.1021,
+        "p95_ms": 22.1021,
+        "max_ms": 22.1021
+      }
+    }
+  },
+  "stage-BGRA-1920x1080-native-1794044798/consumer-gst.4756.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "gst.srcCreate": {
+        "n": 301,
+        "mean_ms": 16.893760797342193,
+        "p95_ms": 17.9951,
+        "max_ms": 98.4876
+      }
+    }
+  },
+  "stage-BGRA-1920x1080-native-1794044798/producer-gst.35648.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "gst.sinkRender": {
+        "n": 300,
+        "mean_ms": 0.43808366666666665,
+        "p95_ms": 0.499,
+        "max_ms": 1.0815
+      }
+    }
+  },
+  "stage-BGRA-1920x1080-native-1794044798/consumer-core.4756.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "flCreateChannelOnAdapter": {
+        "n": 1,
+        "mean_ms": 164.7492,
+        "p95_ms": 164.7492,
+        "max_ms": 164.7492
+      },
+      "flCreateChannelEx": {
+        "n": 1,
+        "mean_ms": 164.7649,
+        "p95_ms": 164.7649,
+        "max_ms": 164.7649
+      },
+      "ipc.send": {
+        "n": 3,
+        "mean_ms": 0.0033,
+        "p95_ms": 0.003,
+        "max_ms": 0.0042
+      },
+      "ipc.recv": {
+        "n": 303,
+        "mean_ms": 17.30488580858086,
+        "p95_ms": 18.0203,
+        "max_ms": 154.3694
+      },
+      "flAcquireFrame": {
+        "n": 301,
+        "mean_ms": 16.883162790697675,
+        "p95_ms": 17.985,
+        "max_ms": 98.4838
+      },
+      "reader.acquire": {
+        "n": 300,
+        "mean_ms": 0.00020666666666666668,
+        "p95_ms": 0.0002,
+        "max_ms": 0.0047
+      },
+      "reader.complete": {
+        "n": 236,
+        "mean_ms": 0.00010084745762711865,
+        "p95_ms": 0.0001,
+        "max_ms": 0.0002
+      },
+      "reader.retire": {
+        "n": 196,
+        "mean_ms": 0.0001,
+        "p95_ms": 0.0001,
+        "max_ms": 0.0001
+      },
+      "flClose": {
+        "n": 1,
+        "mean_ms": 1.1734,
+        "p95_ms": 1.1734,
+        "max_ms": 1.1734
+      }
+    }
+  },
+  "stage-BGRA-3840x2160-cpu-1794044818/producer-core.21944.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "ipc.recv": {
+        "n": 3,
+        "mean_ms": 0.0164,
+        "p95_ms": 0.0218,
+        "max_ms": 0.0242
+      },
+      "ipc.send": {
+        "n": 153,
+        "mean_ms": 0.005149019607843137,
+        "p95_ms": 0.0063,
+        "max_ms": 0.0082
+      },
+      "flOpenProducer": {
+        "n": 1,
+        "mean_ms": 152.8883,
+        "p95_ms": 152.8883,
+        "max_ms": 152.8883
+      },
+      "flRequestGeometry": {
+        "n": 1,
+        "mean_ms": 0.0648,
+        "p95_ms": 0.0648,
+        "max_ms": 0.0648
+      },
+      "flAcquireBuffer": {
+        "n": 150,
+        "mean_ms": 0.000292,
+        "p95_ms": 0.0004,
+        "max_ms": 0.0017
+      },
+      "flBeginSubmit": {
+        "n": 121,
+        "mean_ms": 0.00010247933884297521,
+        "p95_ms": 0.0001,
+        "max_ms": 0.0004
+      },
+      "d3d11.signal_ready": {
+        "n": 150,
+        "mean_ms": 0.05760133333333333,
+        "p95_ms": 0.068,
+        "max_ms": 0.0888
+      },
+      "d3d11.flush_ready": {
+        "n": 150,
+        "mean_ms": 0.0029706666666666666,
+        "p95_ms": 0.0036,
+        "max_ms": 0.005
+      },
+      "flEndSubmit": {
+        "n": 150,
+        "mean_ms": 0.005654666666666666,
+        "p95_ms": 0.008,
+        "max_ms": 0.0111
+      },
+      "flSubmit": {
+        "n": 150,
+        "mean_ms": 0.06762733333333333,
+        "p95_ms": 0.0799,
+        "max_ms": 0.0978
+      },
+      "flImageUnmap": {
+        "n": 88,
+        "mean_ms": 0.0001,
+        "p95_ms": 0.0001,
+        "max_ms": 0.0001
+      },
+      "flClose": {
+        "n": 1,
+        "mean_ms": 28.8093,
+        "p95_ms": 28.8093,
+        "max_ms": 28.8093
+      }
+    }
+  },
+  "stage-BGRA-3840x2160-cpu-1794044818/consumer-core.33460.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "flCreateChannelOnAdapter": {
+        "n": 1,
+        "mean_ms": 165.822,
+        "p95_ms": 165.822,
+        "max_ms": 165.822
+      },
+      "flCreateChannelEx": {
+        "n": 1,
+        "mean_ms": 165.8393,
+        "p95_ms": 165.8393,
+        "max_ms": 165.8393
+      },
+      "ipc.send": {
+        "n": 3,
+        "mean_ms": 0.0036,
+        "p95_ms": 0.0032,
+        "max_ms": 0.0048
+      },
+      "ipc.recv": {
+        "n": 153,
+        "mean_ms": 34.273787581699345,
+        "p95_ms": 34.957,
+        "max_ms": 153.8077
+      },
+      "flAcquireFrame": {
+        "n": 151,
+        "mean_ms": 29.330758940397352,
+        "p95_ms": 31.6813,
+        "max_ms": 95.9328
+      },
+      "flRelease": {
+        "n": 150,
+        "mean_ms": 0.026146,
+        "p95_ms": 0.0361,
+        "max_ms": 0.0525
+      },
+      "flClose": {
+        "n": 1,
+        "mean_ms": 32.5761,
+        "p95_ms": 32.5761,
+        "max_ms": 32.5761
+      }
+    }
+  },
+  "stage-BGRA-3840x2160-cpu-1794044818/consumer-gst.33460.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "gst.cpu_output_allocate": {
+        "n": 150,
+        "mean_ms": 0.0013166666666666667,
+        "p95_ms": 0.0012,
+        "max_ms": 0.0373
+      },
+      "gst.d3d11_readback_map": {
+        "n": 150,
+        "mean_ms": 2.639066,
+        "p95_ms": 4.7258,
+        "max_ms": 4.7395
+      },
+      "gst.srcCreate": {
+        "n": 151,
+        "mean_ms": 33.67239602649007,
+        "p95_ms": 34.6269,
+        "max_ms": 95.9384
+      }
+    }
+  },
+  "stage-BGRA-3840x2160-cpu-1794044818/producer-gst.21944.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "gst.sinkRender": {
+        "n": 150,
+        "mean_ms": 1.5865133333333332,
+        "p95_ms": 1.7624,
+        "max_ms": 3.6207
+      }
+    }
+  },
+  "stage-BGRA-3840x2160-native-1794044825/producer-gst.51020.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "gst.sinkRender": {
+        "n": 150,
+        "mean_ms": 1.5443786666666666,
+        "p95_ms": 1.7424,
+        "max_ms": 3.5742
+      }
+    }
+  },
+  "stage-BGRA-3840x2160-native-1794044825/consumer-gst.37704.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "gst.srcCreate": {
+        "n": 151,
+        "mean_ms": 33.69064966887417,
+        "p95_ms": 34.4956,
+        "max_ms": 102.4968
+      }
+    }
+  },
+  "stage-BGRA-3840x2160-native-1794044825/producer-core.51020.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "ipc.recv": {
+        "n": 3,
+        "mean_ms": 0.014966666666666666,
+        "p95_ms": 0.0144,
+        "max_ms": 0.0264
+      },
+      "ipc.send": {
+        "n": 153,
+        "mean_ms": 0.005271895424836601,
+        "p95_ms": 0.007,
+        "max_ms": 0.0121
+      },
+      "flOpenProducer": {
+        "n": 1,
+        "mean_ms": 155.9988,
+        "p95_ms": 155.9988,
+        "max_ms": 155.9988
+      },
+      "flRequestGeometry": {
+        "n": 1,
+        "mean_ms": 0.0626,
+        "p95_ms": 0.0626,
+        "max_ms": 0.0626
+      },
+      "flAcquireBuffer": {
+        "n": 150,
+        "mean_ms": 0.00029466666666666666,
+        "p95_ms": 0.0004,
+        "max_ms": 0.0023
+      },
+      "flImageUnmap": {
+        "n": 74,
+        "mean_ms": 0.0001027027027027027,
+        "p95_ms": 0.0001,
+        "max_ms": 0.0003
+      },
+      "d3d11.signal_ready": {
+        "n": 150,
+        "mean_ms": 0.059224,
+        "p95_ms": 0.0766,
+        "max_ms": 0.1256
+      },
+      "d3d11.flush_ready": {
+        "n": 150,
+        "mean_ms": 0.0030013333333333333,
+        "p95_ms": 0.0039,
+        "max_ms": 0.0052
+      },
+      "flEndSubmit": {
+        "n": 150,
+        "mean_ms": 0.005678666666666667,
+        "p95_ms": 0.0085,
+        "max_ms": 0.0127
+      },
+      "flSubmit": {
+        "n": 150,
+        "mean_ms": 0.06927133333333334,
+        "p95_ms": 0.0881,
+        "max_ms": 0.1423
+      },
+      "flBeginSubmit": {
+        "n": 117,
+        "mean_ms": 0.00010512820512820514,
+        "p95_ms": 0.0001,
+        "max_ms": 0.0002
+      },
+      "flClose": {
+        "n": 1,
+        "mean_ms": 21.5047,
+        "p95_ms": 21.5047,
+        "max_ms": 21.5047
+      }
+    }
+  },
+  "stage-BGRA-3840x2160-native-1794044825/consumer-core.37704.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "flCreateChannelOnAdapter": {
+        "n": 1,
+        "mean_ms": 164.3025,
+        "p95_ms": 164.3025,
+        "max_ms": 164.3025
+      },
+      "flCreateChannelEx": {
+        "n": 1,
+        "mean_ms": 164.3192,
+        "p95_ms": 164.3192,
+        "max_ms": 164.3192
+      },
+      "ipc.send": {
+        "n": 3,
+        "mean_ms": 0.003033333333333333,
+        "p95_ms": 0.0029,
+        "max_ms": 0.0038
+      },
+      "ipc.recv": {
+        "n": 153,
+        "mean_ms": 34.306896732026146,
+        "p95_ms": 34.3224,
+        "max_ms": 157.4725
+      },
+      "flAcquireFrame": {
+        "n": 151,
+        "mean_ms": 33.67703112582782,
+        "p95_ms": 34.4834,
+        "max_ms": 102.4923
+      },
+      "reader.acquire": {
+        "n": 150,
+        "mean_ms": 0.00026933333333333334,
+        "p95_ms": 0.0004,
+        "max_ms": 0.0009
+      },
+      "reader.retire": {
+        "n": 103,
+        "mean_ms": 0.0001,
+        "p95_ms": 0.0001,
+        "max_ms": 0.0001
+      },
+      "reader.complete": {
+        "n": 138,
+        "mean_ms": 0.00010072463768115943,
+        "p95_ms": 0.0001,
+        "max_ms": 0.0002
+      },
+      "flClose": {
+        "n": 1,
+        "mean_ms": 2.9189,
+        "p95_ms": 2.9189,
+        "max_ms": 2.9189
+      }
+    }
+  },
+  "stage-NV12-1920x1080-cpu-1794044778/producer-gst.49204.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "gst.sinkRender": {
+        "n": 300,
+        "mean_ms": 0.332369,
+        "p95_ms": 0.3723,
+        "max_ms": 0.9747
+      }
+    }
+  },
+  "stage-NV12-1920x1080-cpu-1794044778/consumer-core.39576.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "flCreateChannelOnAdapter": {
+        "n": 1,
+        "mean_ms": 166.77,
+        "p95_ms": 166.77,
+        "max_ms": 166.77
+      },
+      "flCreateChannelEx": {
+        "n": 1,
+        "mean_ms": 166.7872,
+        "p95_ms": 166.7872,
+        "max_ms": 166.7872
+      },
+      "ipc.send": {
+        "n": 3,
+        "mean_ms": 0.0031666666666666666,
+        "p95_ms": 0.0029,
+        "max_ms": 0.0038
+      },
+      "ipc.recv": {
+        "n": 303,
+        "mean_ms": 17.323594389438945,
+        "p95_ms": 18.0106,
+        "max_ms": 156.6228
+      },
+      "flAcquireFrame": {
+        "n": 301,
+        "mean_ms": 16.130224916943522,
+        "p95_ms": 17.5225,
+        "max_ms": 101.0998
+      },
+      "flRelease": {
+        "n": 300,
+        "mean_ms": 0.021788,
+        "p95_ms": 0.027,
+        "max_ms": 0.0349
+      },
+      "flClose": {
+        "n": 1,
+        "mean_ms": 24.0856,
+        "p95_ms": 24.0856,
+        "max_ms": 24.0856
+      }
+    }
+  },
+  "stage-NV12-1920x1080-cpu-1794044778/consumer-gst.39576.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "gst.cpu_output_allocate": {
+        "n": 300,
+        "mean_ms": 0.0011173333333333335,
+        "p95_ms": 0.0011,
+        "max_ms": 0.0379
+      },
+      "gst.d3d11_readback_map": {
+        "n": 300,
+        "mean_ms": 0.5417733333333333,
+        "p95_ms": 1.1917,
+        "max_ms": 1.2168
+      },
+      "gst.srcCreate": {
+        "n": 301,
+        "mean_ms": 16.906648837209303,
+        "p95_ms": 18.0364,
+        "max_ms": 101.1032
+      }
+    }
+  },
+  "stage-NV12-1920x1080-cpu-1794044778/producer-core.49204.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "ipc.recv": {
+        "n": 3,
+        "mean_ms": 0.009233333333333333,
+        "p95_ms": 0.0108,
+        "max_ms": 0.0134
+      },
+      "ipc.send": {
+        "n": 303,
+        "mean_ms": 0.004776567656765676,
+        "p95_ms": 0.0058,
+        "max_ms": 0.0119
+      },
+      "flOpenProducer": {
+        "n": 1,
+        "mean_ms": 155.6862,
+        "p95_ms": 155.6862,
+        "max_ms": 155.6862
+      },
+      "flRequestGeometry": {
+        "n": 1,
+        "mean_ms": 0.0512,
+        "p95_ms": 0.0512,
+        "max_ms": 0.0512
+      },
+      "flAcquireBuffer": {
+        "n": 300,
+        "mean_ms": 0.0002686666666666667,
+        "p95_ms": 0.0003,
+        "max_ms": 0.0022
+      },
+      "flImageUnmap": {
+        "n": 132,
+        "mean_ms": 0.0001,
+        "p95_ms": 0.0001,
+        "max_ms": 0.0001
+      },
+      "d3d11.signal_ready": {
+        "n": 300,
+        "mean_ms": 0.051222333333333335,
+        "p95_ms": 0.0609,
+        "max_ms": 0.0771
+      },
+      "d3d11.flush_ready": {
+        "n": 300,
+        "mean_ms": 0.003087,
+        "p95_ms": 0.0037,
+        "max_ms": 0.0092
+      },
+      "flEndSubmit": {
+        "n": 300,
+        "mean_ms": 0.005130333333333333,
+        "p95_ms": 0.0064,
+        "max_ms": 0.0122
+      },
+      "flSubmit": {
+        "n": 300,
+        "mean_ms": 0.06065266666666667,
+        "p95_ms": 0.071,
+        "max_ms": 0.0886
+      },
+      "flBeginSubmit": {
+        "n": 236,
+        "mean_ms": 0.00010042372881355933,
+        "p95_ms": 0.0001,
+        "max_ms": 0.0002
+      },
+      "flClose": {
+        "n": 1,
+        "mean_ms": 23.4412,
+        "p95_ms": 23.4412,
+        "max_ms": 23.4412
+      }
+    }
+  },
+  "stage-NV12-1920x1080-native-1794044785/producer-gst.13272.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "gst.sinkRender": {
+        "n": 300,
+        "mean_ms": 0.28041733333333335,
+        "p95_ms": 0.3339,
+        "max_ms": 0.963
+      }
+    }
+  },
+  "stage-NV12-1920x1080-native-1794044785/consumer-gst.35160.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "gst.srcCreate": {
+        "n": 301,
+        "mean_ms": 16.908865780730896,
+        "p95_ms": 17.995,
+        "max_ms": 103.3222
+      }
+    }
+  },
+  "stage-NV12-1920x1080-native-1794044785/consumer-core.35160.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "flCreateChannelOnAdapter": {
+        "n": 1,
+        "mean_ms": 165.8764,
+        "p95_ms": 165.8764,
+        "max_ms": 165.8764
+      },
+      "flCreateChannelEx": {
+        "n": 1,
+        "mean_ms": 165.8925,
+        "p95_ms": 165.8925,
+        "max_ms": 165.8925
+      },
+      "ipc.send": {
+        "n": 3,
+        "mean_ms": 0.0032333333333333333,
+        "p95_ms": 0.0027,
+        "max_ms": 0.0046
+      },
+      "ipc.recv": {
+        "n": 303,
+        "mean_ms": 17.32029306930693,
+        "p95_ms": 18.0065,
+        "max_ms": 154.896
+      },
+      "flAcquireFrame": {
+        "n": 301,
+        "mean_ms": 16.898452159468437,
+        "p95_ms": 17.9858,
+        "max_ms": 103.3178
+      },
+      "reader.acquire": {
+        "n": 300,
+        "mean_ms": 0.00019733333333333335,
+        "p95_ms": 0.0002,
+        "max_ms": 0.0005
+      },
+      "reader.complete": {
+        "n": 251,
+        "mean_ms": 0.0001,
+        "p95_ms": 0.0001,
+        "max_ms": 0.0001
+      },
+      "reader.retire": {
+        "n": 197,
+        "mean_ms": 0.00010456852791878173,
+        "p95_ms": 0.0001,
+        "max_ms": 0.001
+      },
+      "flClose": {
+        "n": 1,
+        "mean_ms": 0.8001,
+        "p95_ms": 0.8001,
+        "max_ms": 0.8001
+      }
+    }
+  },
+  "stage-NV12-1920x1080-native-1794044785/producer-core.13272.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "ipc.recv": {
+        "n": 3,
+        "mean_ms": 0.010066666666666666,
+        "p95_ms": 0.0085,
+        "max_ms": 0.0184
+      },
+      "ipc.send": {
+        "n": 303,
+        "mean_ms": 0.00478052805280528,
+        "p95_ms": 0.006,
+        "max_ms": 0.0131
+      },
+      "flOpenProducer": {
+        "n": 1,
+        "mean_ms": 153.5816,
+        "p95_ms": 153.5816,
+        "max_ms": 153.5816
+      },
+      "flRequestGeometry": {
+        "n": 1,
+        "mean_ms": 0.0592,
+        "p95_ms": 0.0592,
+        "max_ms": 0.0592
+      },
+      "flAcquireBuffer": {
+        "n": 300,
+        "mean_ms": 0.000283,
+        "p95_ms": 0.0003,
+        "max_ms": 0.0018
+      },
+      "flBeginSubmit": {
+        "n": 193,
+        "mean_ms": 0.0001,
+        "p95_ms": 0.0001,
+        "max_ms": 0.0001
+      },
+      "d3d11.signal_ready": {
+        "n": 300,
+        "mean_ms": 0.051805333333333335,
+        "p95_ms": 0.0631,
+        "max_ms": 0.0993
+      },
+      "d3d11.flush_ready": {
+        "n": 300,
+        "mean_ms": 0.003263,
+        "p95_ms": 0.0043,
+        "max_ms": 0.0091
+      },
+      "flEndSubmit": {
+        "n": 300,
+        "mean_ms": 0.005161666666666667,
+        "p95_ms": 0.0071,
+        "max_ms": 0.0135
+      },
+      "flSubmit": {
+        "n": 300,
+        "mean_ms": 0.061545333333333334,
+        "p95_ms": 0.0737,
+        "max_ms": 0.1185
+      },
+      "flImageUnmap": {
+        "n": 147,
+        "mean_ms": 0.00010136054421768707,
+        "p95_ms": 0.0001,
+        "max_ms": 0.0002
+      },
+      "flClose": {
+        "n": 1,
+        "mean_ms": 23.0282,
+        "p95_ms": 23.0282,
+        "max_ms": 23.0282
+      }
+    }
+  },
+  "stage-NV12-3840x2160-cpu-1794044805/consumer-core.18908.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "flCreateChannelOnAdapter": {
+        "n": 1,
+        "mean_ms": 166.3509,
+        "p95_ms": 166.3509,
+        "max_ms": 166.3509
+      },
+      "flCreateChannelEx": {
+        "n": 1,
+        "mean_ms": 166.3664,
+        "p95_ms": 166.3664,
+        "max_ms": 166.3664
+      },
+      "ipc.send": {
+        "n": 3,
+        "mean_ms": 0.0028666666666666667,
+        "p95_ms": 0.0026,
+        "max_ms": 0.0037
+      },
+      "ipc.recv": {
+        "n": 153,
+        "mean_ms": 34.23081960784314,
+        "p95_ms": 34.978,
+        "max_ms": 154.2151
+      },
+      "flAcquireFrame": {
+        "n": 151,
+        "mean_ms": 31.047997350993377,
+        "p95_ms": 33.4461,
+        "max_ms": 95.2323
+      },
+      "flRelease": {
+        "n": 150,
+        "mean_ms": 0.025066,
+        "p95_ms": 0.0336,
+        "max_ms": 0.0453
+      },
+      "flClose": {
+        "n": 1,
+        "mean_ms": 23.5606,
+        "p95_ms": 23.5606,
+        "max_ms": 23.5606
+      }
+    }
+  },
+  "stage-NV12-3840x2160-cpu-1794044805/consumer-gst.18908.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "gst.cpu_output_allocate": {
+        "n": 150,
+        "mean_ms": 0.0013233333333333333,
+        "p95_ms": 0.0013,
+        "max_ms": 0.0439
+      },
+      "gst.d3d11_readback_map": {
+        "n": 150,
+        "mean_ms": 1.6244673333333333,
+        "p95_ms": 2.2387,
+        "max_ms": 4.298
+      },
+      "gst.srcCreate": {
+        "n": 151,
+        "mean_ms": 33.63956821192053,
+        "p95_ms": 35.0598,
+        "max_ms": 95.2357
+      }
+    }
+  },
+  "stage-NV12-3840x2160-cpu-1794044805/producer-core.45252.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "ipc.recv": {
+        "n": 3,
+        "mean_ms": 0.012366666666666666,
+        "p95_ms": 0.0153,
+        "max_ms": 0.0183
+      },
+      "ipc.send": {
+        "n": 153,
+        "mean_ms": 0.005603921568627451,
+        "p95_ms": 0.0067,
+        "max_ms": 0.0202
+      },
+      "flOpenProducer": {
+        "n": 1,
+        "mean_ms": 153.3449,
+        "p95_ms": 153.3449,
+        "max_ms": 153.3449
+      },
+      "flRequestGeometry": {
+        "n": 1,
+        "mean_ms": 0.0546,
+        "p95_ms": 0.0546,
+        "max_ms": 0.0546
+      },
+      "flAcquireBuffer": {
+        "n": 150,
+        "mean_ms": 0.000286,
+        "p95_ms": 0.0005,
+        "max_ms": 0.0016
+      },
+      "flBeginSubmit": {
+        "n": 127,
+        "mean_ms": 0.0001,
+        "p95_ms": 0.0001,
+        "max_ms": 0.0001
+      },
+      "d3d11.signal_ready": {
+        "n": 150,
+        "mean_ms": 0.05916066666666667,
+        "p95_ms": 0.0702,
+        "max_ms": 0.122
+      },
+      "d3d11.flush_ready": {
+        "n": 150,
+        "mean_ms": 0.003204,
+        "p95_ms": 0.0036,
+        "max_ms": 0.007
+      },
+      "flEndSubmit": {
+        "n": 150,
+        "mean_ms": 0.006064666666666667,
+        "p95_ms": 0.0077,
+        "max_ms": 0.0207
+      },
+      "flSubmit": {
+        "n": 150,
+        "mean_ms": 0.06984466666666667,
+        "p95_ms": 0.0839,
+        "max_ms": 0.1358
+      },
+      "flImageUnmap": {
+        "n": 74,
+        "mean_ms": 0.00010135135135135136,
+        "p95_ms": 0.0001,
+        "max_ms": 0.0002
+      },
+      "flClose": {
+        "n": 1,
+        "mean_ms": 21.6259,
+        "p95_ms": 21.6259,
+        "max_ms": 21.6259
+      }
+    }
+  },
+  "stage-NV12-3840x2160-cpu-1794044805/producer-gst.45252.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "gst.sinkRender": {
+        "n": 150,
+        "mean_ms": 1.080522,
+        "p95_ms": 1.2217,
+        "max_ms": 3.0477
+      }
+    }
+  },
+  "stage-NV12-3840x2160-native-1794044812/producer-gst.49288.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "gst.sinkRender": {
+        "n": 150,
+        "mean_ms": 1.093524,
+        "p95_ms": 1.22,
+        "max_ms": 3.0601
+      }
+    }
+  },
+  "stage-NV12-3840x2160-native-1794044812/consumer-gst.51088.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "gst.srcCreate": {
+        "n": 151,
+        "mean_ms": 33.64026490066225,
+        "p95_ms": 34.4949,
+        "max_ms": 99.4918
+      }
+    }
+  },
+  "stage-NV12-3840x2160-native-1794044812/consumer-core.51088.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "flCreateChannelOnAdapter": {
+        "n": 1,
+        "mean_ms": 167.7396,
+        "p95_ms": 167.7396,
+        "max_ms": 167.7396
+      },
+      "flCreateChannelEx": {
+        "n": 1,
+        "mean_ms": 167.7563,
+        "p95_ms": 167.7563,
+        "max_ms": 167.7563
+      },
+      "ipc.send": {
+        "n": 3,
+        "mean_ms": 0.003533333333333333,
+        "p95_ms": 0.0034,
+        "max_ms": 0.0048
+      },
+      "ipc.recv": {
+        "n": 153,
+        "mean_ms": 34.26377516339869,
+        "p95_ms": 35.0191,
+        "max_ms": 159.2106
+      },
+      "flAcquireFrame": {
+        "n": 151,
+        "mean_ms": 33.62805894039735,
+        "p95_ms": 34.4853,
+        "max_ms": 99.4878
+      },
+      "reader.acquire": {
+        "n": 150,
+        "mean_ms": 0.0002,
+        "p95_ms": 0.0002,
+        "max_ms": 0.0012
+      },
+      "reader.complete": {
+        "n": 130,
+        "mean_ms": 0.00010076923076923077,
+        "p95_ms": 0.0001,
+        "max_ms": 0.0002
+      },
+      "reader.retire": {
+        "n": 104,
+        "mean_ms": 0.0001,
+        "p95_ms": 0.0001,
+        "max_ms": 0.0001
+      },
+      "flClose": {
+        "n": 1,
+        "mean_ms": 2.1256,
+        "p95_ms": 2.1256,
+        "max_ms": 2.1256
+      }
+    }
+  },
+  "stage-NV12-3840x2160-native-1794044812/producer-core.49288.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "ipc.recv": {
+        "n": 3,
+        "mean_ms": 0.0131,
+        "p95_ms": 0.0149,
+        "max_ms": 0.0208
+      },
+      "ipc.send": {
+        "n": 153,
+        "mean_ms": 0.005503921568627451,
+        "p95_ms": 0.0065,
+        "max_ms": 0.0116
+      },
+      "flOpenProducer": {
+        "n": 1,
+        "mean_ms": 157.8389,
+        "p95_ms": 157.8389,
+        "max_ms": 157.8389
+      },
+      "flRequestGeometry": {
+        "n": 1,
+        "mean_ms": 0.0525,
+        "p95_ms": 0.0525,
+        "max_ms": 0.0525
+      },
+      "flAcquireBuffer": {
+        "n": 150,
+        "mean_ms": 0.000334,
+        "p95_ms": 0.0004,
+        "max_ms": 0.0043
+      },
+      "flBeginSubmit": {
+        "n": 112,
+        "mean_ms": 0.0001,
+        "p95_ms": 0.0001,
+        "max_ms": 0.0001
+      },
+      "flImageUnmap": {
+        "n": 74,
+        "mean_ms": 0.0001,
+        "p95_ms": 0.0001,
+        "max_ms": 0.0001
+      },
+      "d3d11.signal_ready": {
+        "n": 150,
+        "mean_ms": 0.06127133333333333,
+        "p95_ms": 0.0727,
+        "max_ms": 0.094
+      },
+      "d3d11.flush_ready": {
+        "n": 150,
+        "mean_ms": 0.0032073333333333333,
+        "p95_ms": 0.0037,
+        "max_ms": 0.0096
+      },
+      "flEndSubmit": {
+        "n": 150,
+        "mean_ms": 0.0060086666666666665,
+        "p95_ms": 0.0082,
+        "max_ms": 0.0119
+      },
+      "flSubmit": {
+        "n": 150,
+        "mean_ms": 0.07211533333333334,
+        "p95_ms": 0.0852,
+        "max_ms": 0.1042
+      },
+      "flClose": {
+        "n": 1,
+        "mean_ms": 20.673,
+        "p95_ms": 20.673,
+        "max_ms": 20.673
+      }
+    }
+  }
+}

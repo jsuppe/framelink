@@ -1,0 +1,5 @@
+{
+    "config":  "--seconds 5 --size 3840x2160 --fps 30 --format BGRA --pool 2 --video-queue 1 --latency-ms 0 --arrival-budget-ms 34 --transport-only --no-output-preroll --output-queue-buffers 1 --raw",
+    "consumer_exit":  null,
+    "producer_exit":  null
+}
