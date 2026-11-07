@@ -40,6 +40,7 @@
 #include "fl_read_ledger.hpp"
 #include "fl_buffer_refs.hpp"
 #include "fl_arrival.hpp"
+#include "fl_nv21.h"
 #include <dlfcn.h>
 #include "framelink_sync_fd.h"
 #include "fl_sync_fd.hpp"
@@ -998,7 +999,8 @@ FL_API flResult flImageMapPlanes(flImage* img, flMappedImage* out) {
                 vPlane.pixelStride == 2 && uPlane.rowStride == vPlane.rowStride &&
                 (uintptr_t)vPlane.data == (uintptr_t)uPlane.data + 1;
             img->mapped = img->nativeNv12 ? yPlane.data : img->nv12.data();
-            if (!img->nativeNv12) for (unsigned p = 0; p < 3; ++p) {
+            if (!img->nativeNv12 && !fl::readNv21(img->lockedPlanes.planes,
+                    img->width, img->height, img->nv12.data())) for (unsigned p = 0; p < 3; ++p) {
                 const auto& plane = img->lockedPlanes.planes[p];
                 auto* dst = img->nv12.data() + (p ? (size_t)img->width * img->height + p - 1 : 0);
                 for (unsigned y = 0; y < (p ? img->height / 2 : img->height); ++y)
@@ -1045,7 +1047,8 @@ FL_API void flImageUnmap(flImage* img) {
         img->nativeMapped = nullptr;
     }
     if (img->format == FL_FORMAT_NV12 && !img->nativeNv12) {
-        for (unsigned p = 0; p < 3; ++p) {
+        if (!fl::writeNv21(img->lockedPlanes.planes, img->width, img->height,
+                          img->nv12.data())) for (unsigned p = 0; p < 3; ++p) {
             const auto& plane = img->lockedPlanes.planes[p];
             const auto* src = img->nv12.data() + (p ? (size_t)img->width * img->height + p - 1 : 0);
             for (unsigned y = 0; y < (p ? img->height / 2 : img->height); ++y)
