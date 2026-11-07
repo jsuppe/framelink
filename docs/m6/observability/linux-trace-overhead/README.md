@@ -1,0 +1,3 @@
+# Linux trace overhead controls
+
+Three ordered off/on pairs, fixed300frame1080p60 one-hop GPU+testGDP PCM workload. All independent counts/PCM checks passed; all trace-on GPU/transport joins passed with zero loss. Arrival-age p95 on-minus-off differences were +0.018,-0.014,+0.052ms. CPU differences vary in sign (producer -71.917..+84.248ms; consumer -46.081..+47.250ms over the whole process), so these short noisy pairs do not support a precise causal CPU percentage. RSS deltas are not reserved recorder capacity. Explicit control flush adds1.95..11.96ms producer and1.85..7.24ms consumer; automatic exit flush excluded. Raw values retained in overhead-summary.json. No new pass threshold or physical-output qualification.
