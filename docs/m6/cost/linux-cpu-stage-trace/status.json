@@ -1,0 +1,133 @@
+{
+  "state": "finished",
+  "started": 1794044923.2592394,
+  "revision": "230159c4807fa53be6ccd2b5d6c1dfd210fa3017",
+  "scope": "bounded stage diagnostics; CPU5s nominal; previous1s launch rejected before pipelines; no qualification",
+  "cases": [
+    {
+      "label": "stage-NV12-1920x1080-cpu-1794044923",
+      "seconds": 5,
+      "command_options": [
+        "--seconds",
+        "5",
+        "--size",
+        "1920x1080",
+        "--fps",
+        "60",
+        "--format",
+        "NV12",
+        "--pool",
+        "2",
+        "--video-queue",
+        "1",
+        "--latency-ms",
+        "0",
+        "--arrival-budget-ms",
+        "17",
+        "--transport-only",
+        "--no-output-preroll",
+        "--output-queue-buffers",
+        "1",
+        "--raw"
+      ],
+      "producer_consumer_exit": [
+        0,
+        0
+      ]
+    },
+    {
+      "label": "stage-BGRA-1920x1080-cpu-1794044928",
+      "seconds": 5,
+      "command_options": [
+        "--seconds",
+        "5",
+        "--size",
+        "1920x1080",
+        "--fps",
+        "60",
+        "--format",
+        "BGRA",
+        "--pool",
+        "2",
+        "--video-queue",
+        "1",
+        "--latency-ms",
+        "0",
+        "--arrival-budget-ms",
+        "17",
+        "--transport-only",
+        "--no-output-preroll",
+        "--output-queue-buffers",
+        "1",
+        "--raw"
+      ],
+      "producer_consumer_exit": [
+        0,
+        0
+      ]
+    },
+    {
+      "label": "stage-NV12-3840x2160-cpu-1794044934",
+      "seconds": 5,
+      "command_options": [
+        "--seconds",
+        "5",
+        "--size",
+        "3840x2160",
+        "--fps",
+        "30",
+        "--format",
+        "NV12",
+        "--pool",
+        "2",
+        "--video-queue",
+        "1",
+        "--latency-ms",
+        "0",
+        "--arrival-budget-ms",
+        "34",
+        "--transport-only",
+        "--no-output-preroll",
+        "--output-queue-buffers",
+        "1",
+        "--raw"
+      ],
+      "producer_consumer_exit": [
+        0,
+        0
+      ]
+    },
+    {
+      "label": "stage-BGRA-3840x2160-cpu-1794044941",
+      "seconds": 5,
+      "command_options": [
+        "--seconds",
+        "5",
+        "--size",
+        "3840x2160",
+        "--fps",
+        "30",
+        "--format",
+        "BGRA",
+        "--pool",
+        "2",
+        "--video-queue",
+        "1",
+        "--latency-ms",
+        "0",
+        "--arrival-budget-ms",
+        "34",
+        "--transport-only",
+        "--no-output-preroll",
+        "--output-queue-buffers",
+        "1",
+        "--raw"
+      ],
+      "producer_consumer_exit": [
+        0,
+        0
+      ]
+    }
+  ],
+  "ended": 1794044946.9874551
+}
