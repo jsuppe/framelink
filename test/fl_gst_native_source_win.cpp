@@ -86,7 +86,7 @@ static void layoutGeneration(){
  auto*p=gst_parse_launch(("framelinksrc channel="+name+" width=64 height=32 format=NV12 pool-size=2 native-memory=true preserve-timestamps=true ! fakesink name=out sync=false async=false enable-last-sample=false signal-handoffs=true").c_str(),&e);CHECK(p&&!e);
  struct Check {std::atomic<unsigned> width{64},height{32};std::atomic<bool> done{false};}check;
  auto*out=gst_bin_get_by_name(GST_BIN(p),"out");g_signal_connect(out,"handoff",G_CALLBACK(+[](GstElement*,GstBuffer*buffer,GstPad*,gpointer data){
-  auto*c=static_cast<Check*>(data);const unsigned w=c->width.load(),h=c->height.load();auto*meta=gst_buffer_get_video_meta(buffer);CHECK(meta&&meta->width==w&&meta->height==h&&meta->n_planes==2);
+  auto*c=static_cast<Check*>(data);const unsigned w=c->width.load();const unsigned h=c->height.load();auto*meta=gst_buffer_get_video_meta(buffer);CHECK(meta&&meta->width==w&&meta->height==h&&meta->n_planes==2);
   auto*mem=gst_buffer_peek_memory(buffer,0);GstMapInfo map{};CHECK(gst_memory_map(mem,&map,GST_MAP_READ));
   for(unsigned plane=0;plane<2;++plane){unsigned rows=plane?h/2:h;CHECK(meta->stride[plane]>=gint(w)&&map.size>=meta->offset[plane]+gsize(rows-1)*meta->stride[plane]+w);
    for(unsigned y=0;y<rows;++y)for(unsigned x=0;x<w;++x)CHECK(map.data[meta->offset[plane]+y*meta->stride[plane]+x]==51+plane);}
