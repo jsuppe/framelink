@@ -1,0 +1,36 @@
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\framelink_gst_session.dll
+  gstframelink.cpp
+  The d3d11 library from gst-plugins-bad is unstable API and may change in future.
+  You can define GST_USE_UNSTABLE_API to avoid this warning.
+     Creating library C:/Users/jonsu/dev/framelink-m6-20261106/build/Release/gstframelink.lib and object C:/Users/jonsu/dev/framelink-m6-20261106/build/Release/gstframelink.exp
+  gstframelink.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\gstframelink.dll
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\framelink.dll
+  fl_gst_native_source_win.cpp
+  The d3d11 library from gst-plugins-bad is unstable API and may change in future.
+  You can define GST_USE_UNSTABLE_API to avoid this warning.
+  fl_gst_native_source_win.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_gst_native_source_win.exe
+Test project C:/Users/jonsu/dev/framelink-m6-20261106/build
+    Start  30: gst_native_source_win
+1/5 Test  #30: gst_native_source_win .................   Passed    1.90 sec
+    Start  31: gst_native_source_win_copy_negative
+2/5 Test  #31: gst_native_source_win_copy_negative ...   Passed    0.25 sec
+    Start  32: gst_nv12_roundtrip
+3/5 Test  #32: gst_nv12_roundtrip ....................   Passed    1.97 sec
+    Start  33: gst_rgb10a2_roundtrip
+4/5 Test  #33: gst_rgb10a2_roundtrip .................   Passed    1.97 sec
+    Start 108: gst_av_bench_smoke
+5/5 Test #108: gst_av_bench_smoke ....................   Passed    6.95 sec
+
+100% tests passed, 0 tests failed out of 5
+
+Label Time Summary:
+gst_video_regression    =   6.10 sec*proc (4 tests)
+
+Total Test time (real) =  13.11 sec
+#< CLIXML
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04"><Obj S="progress" RefId="0"><TN RefId="0"><T>System.Management.Automation.PSCustomObject</T><T>System.Object</T></TN><MS><I64 N="SourceId">1</I64><PR N="Record"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj></Objs>

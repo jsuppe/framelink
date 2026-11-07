@@ -1003,6 +1003,10 @@ struct NativeSourceOwner {
     flChannel* channel;
 #ifdef _WIN32
     GstD3D11Device* device;
+    // Layout only, never a retained GstMemory/texture or reader lease. A fresh
+    // ring generation invalidates even a recycled texture address.
+    struct Layout { guint64 generation=0; ID3D11Texture2D* texture=nullptr; gsize size=0; guint pitch=0; };
+    Layout layouts[FL_MAX_POOL_SIZE]{};
     explicit NativeSourceOwner(flChannel* c):channel(c),device(gst_d3d11_device_new_wrapped(flChannelD3D11Device(c))){}
     ~NativeSourceOwner(){if(device)gst_object_unref(device);flClose(channel);}
 #else
@@ -1259,17 +1263,26 @@ static GstBuffer* srcNativeBuffer(GstFrameLinkSrc* self,const flFrame& frame) {
 static GstBuffer* srcNativeBuffer(GstFrameLinkSrc* self,const flFrame& frame) {
     if(!self->nativeOwner || !(*self->nativeOwner)->device)return nullptr;
     auto*tex=flImageD3D11(frame.image);if(!tex)return nullptr;
-    // size=0 asks GStreamer to probe an EMPTY staging allocation's pitch, not
-    // copy the shared image. Do not guess CPU stride from logical row width.
-    auto*mem=gst_d3d11_allocator_alloc_wrapped(nullptr,(*self->nativeOwner)->device,tex,0,nullptr,nullptr);
+    if(frame.slot>=FL_MAX_POOL_SIZE)return nullptr;
+    auto&layout=(*self->nativeOwner)->layouts[frame.slot];
+    if(layout.generation!=self->generation || layout.texture!=tex)layout={};
+    // Probe the actual CPU layout once per allocation, not once per frame.
+    // size=0 creates/maps/frees a temporary staging texture in GStreamer;
+    // repeated probes accumulate driver private commit even with release Flush.
+    // Subsequent wrappers use that measured size; GstVideoMeta carries pitch.
+    auto*mem=gst_d3d11_allocator_alloc_wrapped(nullptr,(*self->nativeOwner)->device,tex,layout.size,nullptr,nullptr);
     if(!mem)return nullptr;
-    guint pitch=0;if(!gst_d3d11_memory_get_resource_stride(GST_D3D11_MEMORY_CAST(mem),&pitch) || !pitch || pitch>G_MAXINT){gst_memory_unref(mem);return nullptr;}
+    if(!layout.size){
+        guint pitch=0;if(!gst_d3d11_memory_get_resource_stride(GST_D3D11_MEMORY_CAST(mem),&pitch) || !pitch || pitch>G_MAXINT || !mem->size){gst_memory_unref(mem);return nullptr;}
+        layout={self->generation,tex,mem->size,pitch};
+    }
+    const guint pitch=layout.pitch;
     uint64_t token=0;if(flLeaseFrame(self->ch,&frame,&token)!=FL_OK){gst_memory_unref(mem);return nullptr;}
     auto*reader=new NativeSourceReader{*self->nativeOwner,token};
     gst_mini_object_set_qdata(GST_MINI_OBJECT(mem),g_quark_from_static_string("framelink-reader"),reader,
         [](gpointer p){delete static_cast<NativeSourceReader*>(p);});
-    // A later explicit CPU map must download current shared pixels, not return
-    // the empty staging probe. Native GPU consumers use the original texture.
+    // A later explicit CPU map must download current shared pixels, regardless
+    // of how layout was obtained. Native GPU consumers use the original texture.
     GST_MINI_OBJECT_FLAG_SET(mem,GST_D3D11_MEMORY_TRANSFER_NEED_DOWNLOAD);
     auto*buf=gst_buffer_new();gst_buffer_append_memory(buf,mem);
     gsize offsets[GST_VIDEO_MAX_PLANES]{};gint strides[GST_VIDEO_MAX_PLANES]{};

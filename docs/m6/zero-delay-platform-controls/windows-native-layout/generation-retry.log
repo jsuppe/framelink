@@ -1,0 +1,31 @@
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\framelink.dll
+  fl_gst_native_source_win.cpp
+  The d3d11 library from gst-plugins-bad is unstable API and may change in future.
+  You can define GST_USE_UNSTABLE_API to avoid this warning.
+  fl_gst_native_source_win.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_gst_native_source_win.exe
+Test project C:/Users/jonsu/dev/framelink-m6-20261106/build
+    Start 30: gst_native_source_win
+1/2 Test #30: gst_native_source_win ............***Failed    3.95 sec
+layout step0 expected64x32 got64x32 planes2 pts1000
+line 91: resized
+RGBA native D3D11: same shared allocation, pixels/PTS, bounded reuse and retained memory after stop pass
+NV12 native D3D11: same shared allocation, pixels/PTS, bounded reuse and retained memory after stop pass
+RGBA native D3D11: same shared allocation, pixels/PTS, bounded reuse and retained memory after stop pass
+
+    Start 91: gst_policy_generation
+2/2 Test #91: gst_policy_generation ............   Passed    2.49 sec
+
+50% tests passed, 1 tests failed out of 2
+
+Label Time Summary:
+gst_video_regression    =   6.44 sec*proc (2 tests)
+
+Total Test time (real) =   6.47 sec
+
+The following tests FAILED:
+	 30 - gst_native_source_win (Failed)                    gst_video_regression
+#< CLIXML
+Errors while running CTest
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04"><Obj S="progress" RefId="0"><TN RefId="0"><T>System.Management.Automation.PSCustomObject</T><T>System.Object</T></TN><MS><I64 N="SourceId">1</I64><PR N="Record"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj></Objs>

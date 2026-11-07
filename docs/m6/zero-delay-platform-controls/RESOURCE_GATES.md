@@ -25,3 +25,5 @@ M6.2 remains open for resource attribution, deterministic controls, primary-prof
 ## Source baseline result
 
 Source-only NV124K30 completed1800s with7.36KB/min private commit growth, flat handles/threads,CPU5.12%. See [source baseline](windows-source-resource/README.md). Next isolate the consumer harness using `--role consumer --local-consumer --result FILE`; reject native/element-mode combinations and require independent video/audio counts. This control never qualifies FrameLink transport.
+
+Local-consumer control completed1800s with54000video/86400000PCM, no diagnostic misses,7.34KB/min growth. [Native-layout diagnostic](windows-native-layout/README.md) isolates per-frame temporary texture-layout probing: after10000warm-up frames,50000more flushed probes added1588KB versus0KB using cached measured layout. Fixed-size per-slot metadata cache implemented; exact generation/texture identity invalidate it and leases/fences remain unchanged. Full regression and sustained rerun must pass before clearing native resource failures. BGRA CPU growth and original159ms stall remain open.

@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.20)
+project(wrap_probe LANGUAGES CXX)
+set(GST_ROOT "C:/Program Files/gstreamer/1.0/msvc_x86_64")
+add_executable(wrap_probe probe.cpp)
+target_compile_features(wrap_probe PRIVATE cxx_std_17)
+target_include_directories(wrap_probe PRIVATE "${GST_ROOT}/include/gstreamer-1.0" "${GST_ROOT}/lib/gstreamer-1.0/include" "${GST_ROOT}/include/glib-2.0" "${GST_ROOT}/lib/glib-2.0/include")
+target_link_directories(wrap_probe PRIVATE "${GST_ROOT}/lib")
+target_link_libraries(wrap_probe PRIVATE gstreamer-1.0.lib gstd3d11-1.0.lib gstvideo-1.0.lib gobject-2.0.lib glib-2.0.lib d3d11.lib)
