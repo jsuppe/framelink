@@ -107,4 +107,32 @@ static void layoutGeneration(){
  CHECK(gst_element_set_state(p,GST_STATE_NULL)!=GST_STATE_CHANGE_FAILURE);gst_object_unref(out);gst_object_unref(p);flClose(producer);
  puts("native layout generation: resized NV12 pixels, planes and memory extent pass");
 }
-int main(int argc,char**argv){gst_init(&argc,&argv);CHECK(argc==2||argc==3);copyNegative=argc==3;GError*e=nullptr;auto*p=gst_plugin_load_file(argv[1],&e);CHECK(p&&!e);gst_object_unref(p);run("RGBA");run("NV12");run("RGBA",true);layoutGeneration();}
+static void cpuOutputGeneration(){
+ auto name="cpu-output-generation-"+std::to_string(g_get_monotonic_time());GError*e=nullptr;
+ auto*p=gst_parse_launch(("framelinksrc channel="+name+" width=64 height=32 format=NV12 pool-size=2 preserve-timestamps=true ! appsink name=out sync=false async=false enable-last-sample=false").c_str(),&e);CHECK(p&&!e);
+ auto*out=gst_bin_get_by_name(GST_BIN(p),"out");CHECK(gst_element_set_state(p,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
+ flChannel*producer=nullptr;CHECK(flOpenProducer(name.c_str(),&producer)==FL_OK);
+ GstSample*held[3]{};
+ auto verify=[](GstSample*sample,unsigned step){
+  GstVideoInfo info{};CHECK(gst_video_info_from_caps(&info,gst_sample_get_caps(sample)));
+  CHECK(info.width==(step==0?64:step==1?640:128)&&info.height==32&&info.finfo->format==GST_VIDEO_FORMAT_NV12);
+  auto*buffer=gst_sample_get_buffer(sample);CHECK(gst_buffer_get_size(buffer)==info.size&&GST_BUFFER_PTS(buffer)==1000+step);
+  GstVideoFrame frame{};CHECK(gst_video_frame_map(&frame,&info,buffer,GST_MAP_READ));
+  for(unsigned plane=0;plane<2;++plane)for(unsigned y=0;y<(plane?16u:32u);++y)for(unsigned x=0;x<unsigned(info.width);++x)
+   CHECK(((guint8*)GST_VIDEO_FRAME_PLANE_DATA(&frame,plane))[y*GST_VIDEO_FRAME_PLANE_STRIDE(&frame,plane)+x]==61+step+plane);
+  gst_video_frame_unmap(&frame);
+ };
+ for(unsigned step=0;step<3;++step){unsigned w=step==0?64:step==1?640:128;
+  if(step){CHECK(flRequestGeometry(producer,w,32,FL_FORMAT_NV12)==FL_OK);flChannelInfo info{};CHECK(flQuery(producer,&info)==FL_OK&&info.width==w);}
+  flBuffer b{};CHECK(flAcquireBuffer(producer,&b,1000)==FL_OK);flMappedImage image{};CHECK(flImageMapPlanes(b.image,&image)==FL_OK);
+  for(unsigned plane=0;plane<2;++plane)for(unsigned y=0;y<image.plane[plane].rows;++y)memset((char*)image.plane[plane].pixels+y*image.plane[plane].stride,61+step+plane,w);
+  flImageUnmap(b.image);CHECK(flSubmit(producer,&b,1000+step)==FL_OK);
+  auto*sample=gst_app_sink_try_pull_sample(GST_APP_SINK(out),2*GST_SECOND);CHECK(sample);
+  held[step]=gst_sample_new(gst_sample_get_buffer(sample),gst_sample_get_caps(sample),nullptr,nullptr);gst_sample_unref(sample);
+  for(unsigned i=0;i<=step;++i)verify(held[i],i);
+ }
+ CHECK(gst_element_set_state(p,GST_STATE_NULL)!=GST_STATE_CHANGE_FAILURE);gst_object_unref(out);gst_object_unref(p);flClose(producer);
+ for(unsigned i=0;i<3;++i){verify(held[i],i);gst_sample_unref(held[i]);}
+ puts("CPU output cache: retained pixels and exact extent across grow/shrink/stop pass");
+}
+int main(int argc,char**argv){gst_init(&argc,&argv);CHECK(argc==2||argc==3);copyNegative=argc==3;GError*e=nullptr;auto*p=gst_plugin_load_file(argv[1],&e);CHECK(p&&!e);gst_object_unref(p);run("RGBA");run("NV12");run("RGBA",true);layoutGeneration();cpuOutputGeneration();}

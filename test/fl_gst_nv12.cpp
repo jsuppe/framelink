@@ -59,13 +59,22 @@ if(error)fprintf(stderr,"%s\n",error->message);CHECK(plugin);gst_object_unref(pl
  CHECK(gst_element_set_state(r,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);usleep(100000);
  CHECK(gst_element_set_state(t,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
  int checked=0;
+ GstSample* held[4]{};int identities[4]{};int heldCount=0;
  for(int n=0;n<30 && checked<12;n++) {
   CHECK(gst_app_src_push_buffer(GST_APP_SRC(in),pattern(n))==GST_FLOW_OK);
   GstSample*s=gst_app_sink_try_pull_sample(GST_APP_SINK(out),500*GST_MSECOND);
-  if(s){verify(s,n);gst_sample_unref(s);checked++;}
+  if(s){
+   verify(s,n);
+   // Keep more than the two reusable CPU buffers: acquisition must fall back
+   // without blocking, and new frames must never overwrite retained pixels.
+   if(heldCount<4){held[heldCount]=gst_sample_new(gst_sample_get_buffer(s),gst_sample_get_caps(s),nullptr,nullptr);identities[heldCount++]=n;}
+   for(int i=0;i<heldCount;i++)verify(held[i],identities[i]);
+   gst_sample_unref(s);checked++;
+  }
  }
  CHECK(checked==12);
  gst_element_set_state(t,GST_STATE_NULL);gst_element_set_state(r,GST_STATE_NULL);
+ for(int i=0;i<heldCount;i++){verify(held[i],identities[i]);gst_sample_unref(held[i]);}
  }
  gst_object_unref(in);gst_object_unref(out);gst_object_unref(t);gst_object_unref(r);
  // A consumer with an RGB ring must reject NV12, never reinterpret its bytes.

@@ -1057,6 +1057,8 @@ typedef struct _GstFrameLinkSrc {
     volatile gint flushing;
 #ifdef _WIN32
     ID3D11Texture2D* staging; // cached; rebuilt when the generation moves
+    GstBufferPool* cpuOutputPool; // at most two reusable CPU buffers; never wait
+    gsize cpuOutputSize;
 #endif
 } GstFrameLinkSrc;
 
@@ -1085,10 +1087,41 @@ static GstStaticPadTemplate srcTemplate =
 
 #ifdef _WIN32
 static void srcDropStaging(GstFrameLinkSrc* self) {
+    if (self->cpuOutputPool) {
+        // Outstanding downstream buffers remain valid; their pool frees them
+        // when returned. Stop and resize must never wait for downstream refs.
+        gst_buffer_pool_set_active(self->cpuOutputPool, FALSE);
+        gst_object_unref(self->cpuOutputPool);
+        self->cpuOutputPool = nullptr;
+        self->cpuOutputSize = 0;
+    }
     if (self->staging) {
         self->staging->Release();
         self->staging = NULL;
     }
+}
+
+static GstBuffer* srcCpuOutputBuffer(GstFrameLinkSrc* self, gsize size) {
+    if (self->cpuOutputPool && self->cpuOutputSize != size) srcDropStaging(self);
+    if (!self->cpuOutputPool && size <= G_MAXUINT) {
+        auto* pool = gst_buffer_pool_new();
+        auto* config = gst_buffer_pool_get_config(pool);
+        gst_buffer_pool_config_set_params(config, nullptr, (guint)size, 0, 2);
+        if (gst_buffer_pool_set_config(pool, config) && gst_buffer_pool_set_active(pool, TRUE)) {
+            self->cpuOutputPool = pool;
+            self->cpuOutputSize = size;
+        } else gst_object_unref(pool);
+    }
+    if (self->cpuOutputPool) {
+        GstBufferPoolAcquireParams params{};
+        params.flags = GST_BUFFER_POOL_ACQUIRE_FLAG_DONTWAIT;
+        GstBuffer* buffer = nullptr;
+        if (gst_buffer_pool_acquire_buffer(self->cpuOutputPool, &buffer, &params) == GST_FLOW_OK)
+            return buffer;
+    }
+    // Preserve the old nonblocking ownership contract when downstream holds
+    // both cached buffers. Fallback buffers are not retained in the cache.
+    return gst_buffer_new_allocate(nullptr, size, nullptr);
 }
 #endif
 
@@ -1466,7 +1499,12 @@ static GstFlowReturn srcCreateImpl(GstPushSrc* push, GstBuffer** outbuf) {
     } else
 #endif
     {
+#ifdef _WIN32
+    buf = srcCpuOutputBuffer(self, outputInfo.size);
+#else
     buf = gst_buffer_new_allocate(NULL, outputInfo.size, NULL);
+#endif
+    if (!buf) { srcReleaseFrame(self, &frame); return trace.result(GST_FLOW_ERROR); }
     GstMapInfo map;
     gboolean filled = FALSE;
     if (gst_buffer_map(buf, &map, GST_MAP_WRITE)) {
@@ -1657,6 +1695,9 @@ static void srcGetProperty(GObject* obj, guint id, GValue* value, GParamSpec* sp
 
 static void srcFinalize(GObject* obj) {
     GstFrameLinkSrc* self = GST_FRAMELINK_SRC(obj);
+#ifdef _WIN32
+    srcDropStaging(self);
+#endif
     gst_clear_buffer(&self->pendingDelivery);
     if(self->session){fl_gst_session_cancel(self->session);g_object_unref(self->session);}
 #ifdef FL_GST_NATIVE
