@@ -22,6 +22,22 @@ FL_API flResult flSharedCpuOpenConsumerFd(int fd,uint32_t timeoutMs,
 FL_API flResult flSharedCpuOpenProducerFd(int fd,uint32_t timeoutMs,
     const flSessionConfig*,const flMemoryRequirements*,uint32_t operations,
     flSharedCpuChannel** out);
+// Strict explicit metadata mode: BOTH peers must select the same flag. No
+// downgrade to unextended peers. Original factories select flags=0 unchanged.
+#define FL_SHARED_CPU_FRAME_METADATA 1u
+FL_API flResult flSharedCpuOpenConsumerFdEx(int fd,uint32_t timeoutMs,
+    const flSessionConfig*,const flMemoryRequirements*,uint32_t operations,
+    const flSharedCpuDescriptor* desc,size_t count,uint32_t flags,flSharedCpuChannel** out);
+FL_API flResult flSharedCpuOpenProducerFdEx(int fd,uint32_t timeoutMs,
+    const flSessionConfig*,const flMemoryRequirements*,uint32_t operations,
+    uint32_t flags,flSharedCpuChannel** out);
+// Metadata mode requires this submit API, and preserves DTS/duration/discontinuity
+// and independent nonzero media generation. Same write-lease consumption rules.
+FL_API flResult flSharedCpuSubmitWithMetadata(flSharedCpuLease*,uint64_t sequence,
+    int64_t ptsNs,const flFrameMetadata*);
+// Read lease only. Legacy frames return an all-zero metadata struct. Does not
+// consume a reference; valid while the lease survives, including after close.
+FL_API flResult flSharedCpuReadMetadata(const flSharedCpuLease*,flFrameMetadata*);
 // Close disconnects immediately; existing leases retain their mapped storage.
 // After close, submit/release consumes the lease but reports DISCONNECTED.
 FL_API void flSharedCpuClose(flSharedCpuChannel*);

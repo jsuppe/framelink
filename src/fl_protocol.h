@@ -38,6 +38,7 @@ enum class MsgType : uint32_t {
     SharedCpuAccepted = 11, // FCA1 positive acceptance of imported pool
     SharedCpuReady = 12, // FCF1 completed CPU writes, exact slot/sequence
     SharedCpuReleased = 13, // FCR1 completed CPU reads, exact slot/sequence
+    SharedCpuReadyMetadata = 14, // FCM1 exact CPU frame plus media metadata
     Bye = 7,        // either way: orderly shutdown
 };
 

@@ -51,11 +51,11 @@ int main(){
  }
  CHECK(fdCount()==baseline);
  // Wrong session, same endpoint role, copy/GPU policy: both ends fail closed.
- for(unsigned fault=0;fault<4;fault++){
+ for(unsigned fault=0;fault<5;fault++){
  CHECK(!socketpair(AF_UNIX,SOCK_SEQPACKET|SOCK_CLOEXEC,0,fd));child=fork();CHECK(child>=0);
  if(!child){close(fd[0]);fl::SharedCpuControl c(fl::Channel::adoptConnectedFd(fd[1],1000));auto s=config();auto r=requirements();
  if(fault==0)s.generation++;if(fault==2)r.allowedOperations=0;if(fault==3)r.requiredUsage=FL_MEMORY_GPU_SAMPLE;
- CHECK(c.negotiate(fault==1?false:true,s,r,0)!=FL_OK);CHECK(!c.agreed());_exit(0);}
+ CHECK(c.negotiate(fault==1?false:true,s,r,0,fault==4)!=FL_OK);CHECK(!c.agreed());_exit(0);}
  close(fd[1]);{fl::SharedCpuControl c(fl::Channel::adoptConnectedFd(fd[0],1000));CHECK(c.negotiate(false,config(),requirements(),FL_MEMORY_COPY)!=FL_OK);CHECK(!c.agreed());}
  int status=0;CHECK(waitpid(child,&status,0)==child&&WIFEXITED(status)&&WEXITSTATUS(status)==0);
  }
@@ -126,6 +126,31 @@ int main(){
    if(fault==0)frame[8]=6;if(fault==1)frame[16]=0;if(fault==2)frame[32]=2;if(fault==3)frame[36]=1;if(fault==4)frame[31]=128;if(fault==5)frame[0]='X';
    CHECK(peer.sendWithFds(fault==6?fl::MsgType::FrameReady:fl::MsgType::SharedCpuReady,frame.data(),frame.size()-(fault==7),fault==8?handles:nullptr,fault==8?1:0));
    fl::SharedCpuControl::Frame out{999,888,777};CHECK(c.receiveFrame(out)==FL_INVALID);CHECK(out.sequence==999&&out.ptsNs==888&&out.slot==777);CHECK(!c.poolAccepted());
+   for(int h:handles)close(h);
+  }
+  CHECK(fdCount()==baseline);
+ }
+ // A hostile peer cannot announce stale epochs, replay frames or reuse a
+ // consumer-held slot. Every malformed ready preserves output and poisons setup.
+ for(unsigned fault=0;fault<10;fault++){
+  CHECK(!socketpair(AF_UNIX,SOCK_SEQPACKET|SOCK_CLOEXEC,0,fd));
+  {
+   auto peer=fl::Channel::adoptConnectedFd(fd[0],30);fl::SharedCpuControl c(fl::Channel::adoptConnectedFd(fd[1],30));
+   std::array<uint8_t,256> hello{};memcpy(hello.data(),"FCH1",4);hello[4]=1;hello[8]=1;hello[16]=2;
+   auto session=config();auto req=requirements();CHECK(flSessionEncode(&session,hello.data()+32,160)==FL_SESSION_OK);CHECK(flMemoryRequirementsEncode(&req,hello.data()+192,64)==FL_MEMORY_OK);
+   CHECK(peer.send(fl::MsgType::SharedCpuHello,hello.data(),hello.size()));CHECK(c.negotiate(false,session,req,0,true)==FL_OK);
+   flSharedCpuDescriptor desc[2]{};fl::SharedCpuAllocation owners[2];int handles[2];
+   for(unsigned i=0;i<2;i++){auto&d=desc[i];d.version=1;d.resourceType=FL_MEMORY_SHARED_CPU;d.format=FL_FORMAT_BGRA8;d.width=d.height=16;d.planeCount=1;d.generation=7;d.allocationId=i+1;d.allocationBytes=1024;d.planeStride[0]=64;
+    CHECK(fl::SharedCpuAllocation::create(d,owners[i])==FL_OK);CHECK(owners[i].exportFd(true,handles[i])==FL_OK);}
+   std::array<uint8_t,24> ack{};memcpy(ack.data(),"FCA1",4);ack[4]=1;ack[8]=7;ack[16]=2;
+   CHECK(peer.send(fl::MsgType::SharedCpuAccepted,ack.data(),ack.size()));CHECK(c.sendPool(desc,handles,2)==FL_OK);
+   std::array<uint8_t,80> frame{};memcpy(frame.data(),"FCM1",4);frame[4]=1;frame[8]=7;frame[16]=1;
+   frame[40]=1;frame[44]=FL_FRAME_HAS_DTS|FL_FRAME_HAS_DURATION;frame[48]=10;frame[56]=20;frame[64]=77;
+   if(fault==0)frame[40]=2;if(fault==1)frame[44]|=128;if(fault==2)frame[55]=128;if(fault==3)frame[63]=128;if(fault==4)frame[64]=0;
+   if(fault==5)frame[72]=1;if(fault==6)frame[44]&=~FL_FRAME_HAS_DTS;if(fault==7)frame[44]&=~FL_FRAME_HAS_DURATION;
+   CHECK(peer.send(fl::MsgType::SharedCpuReadyMetadata,frame.data(),frame.size()-(fault==8)));
+   fl::SharedCpuControl::Frame out{999,888,777};if(fault==9){CHECK(c.receiveFrame(out)==FL_OK);CHECK(out.metadata.version==1&&out.metadata.dtsNs==10&&out.metadata.durationNs==20&&out.metadata.streamGeneration==77);}
+   else {CHECK(c.receiveFrame(out)==FL_INVALID);CHECK(out.sequence==999&&out.ptsNs==888&&out.slot==777);CHECK(!c.poolAccepted());}
    for(int h:handles)close(h);
   }
   CHECK(fdCount()==baseline);
