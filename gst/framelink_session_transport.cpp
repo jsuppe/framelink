@@ -477,8 +477,13 @@ gboolean fl_gst_session_open_local_av_epoch(FlGstSession*session,gboolean produc
 gboolean fl_gst_session_open_local_cpu(FlGstSession*session,gboolean producer,const gchar*path,
  const flSessionCapabilities*local,guint videoQueue,guint pool,guint queueMs,guint timeout,guint idle,
  GCancellable*outer,GError**error){
+ return fl_gst_session_open_local_cpu_epoch(session,producer,path,local,videoQueue,pool,queueMs,timeout,idle,nullptr,nullptr,outer,error);
+}
+gboolean fl_gst_session_open_local_cpu_epoch(FlGstSession*session,gboolean producer,const gchar*path,
+ const flSessionCapabilities*local,guint videoQueue,guint pool,guint queueMs,guint timeout,guint idle,
+ FlGstEpochFunc epochFunc,gpointer epochData,GCancellable*outer,GError**error){
  flChannel*unused=nullptr;
- return open_local_av_impl(session,producer,path,local,videoQueue,pool,queueMs,timeout,idle,0,&unused,nullptr,nullptr,outer,error,true);
+ return open_local_av_impl(session,producer,path,local,videoQueue,pool,queueMs,timeout,idle,0,&unused,epochFunc,epochData,outer,error,true);
 }
 #endif
 gboolean fl_gst_session_local_ready(FlGstSession*session,gboolean producer,guint timeout,GError**error){

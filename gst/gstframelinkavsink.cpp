@@ -121,7 +121,7 @@ static void releaseMedia(GstElement*element,gpointer){
  const GstClockTime base=gst_element_get_base_time(element);gint64 epoch;
  {std::lock_guard<std::mutex> lock(sh->mutex);epoch=sh->epoch;}
  if(gint64(base)!=epoch){if(channel)flClose(channel);return fail("pipeline base time changed after framelinkavsink set it to the session epoch");}
- if(s->video){gboolean adopted=FALSE;g_signal_emit_by_name(s->video,"adopt-channel",channel,&adopted);if(!adopted){if(channel)flClose(channel);return fail("video channel lease rejected");}}
+ if(s->video&&!s->sharedCpu){gboolean adopted=FALSE;g_signal_emit_by_name(s->video,"adopt-channel",channel,&adopted);if(!adopted){if(channel)flClose(channel);return fail("video channel lease rejected");}}
  auto*context=fl_gst_session_create_context(s->session);
  for(auto*child:{s->video,s->audio}){
   if(!child)continue;gst_element_set_context(child,context);
@@ -142,7 +142,12 @@ static void startWorker(GstFrameLinkAvSink*s){
  g_object_ref(s->session);
  s->worker=new std::thread([s,caps,path]{
   GError*error=nullptr;flChannel*channel=nullptr;
-  bool ok=fl_gst_session_open_local_av_epoch(s->session,TRUE,path.c_str(),&caps,s->videoQueue,s->videoPool,s->audioQueueMs,s->connectMs,s->idleMs,0,
+  bool ok=false;
+#ifdef __linux__
+  if(s->sharedCpu)ok=fl_gst_session_open_local_cpu_epoch(s->session,TRUE,path.c_str(),&caps,s->videoQueue,s->videoPool,s->audioQueueMs,s->connectMs,s->idleMs,chooseEpoch,s,s->cancel,&error);
+  else
+#endif
+  ok=fl_gst_session_open_local_av_epoch(s->session,TRUE,path.c_str(),&caps,s->videoQueue,s->videoPool,s->audioQueueMs,s->connectMs,s->idleMs,0,
    &channel,chooseEpoch,s,s->cancel,&error);
   // Do not release media until the consumer's sinks and devices exist.
   if(ok)ok=fl_gst_session_local_ready_cancellable(s->session,TRUE,s->connectMs,s->cancel,&error);
@@ -192,7 +197,10 @@ static GstStateChangeReturn changeState(GstElement*element,GstStateChange transi
  auto*s=reinterpret_cast<GstFrameLinkAvSink*>(element);
  switch(transition){
  case GST_STATE_CHANGE_NULL_TO_READY:{
-  if(s->sharedCpu&&(!wantVideo(s)||(s->sessionPath&&*s->sessionPath))){GST_ELEMENT_ERROR(s,RESOURCE,SETTINGS,("shared-cpu requires broker-bound video context, no session path or native memory"),(nullptr));return GST_STATE_CHANGE_FAILURE;}
+  if(s->sharedCpu&&(!wantVideo(s))){GST_ELEMENT_ERROR(s,RESOURCE,SETTINGS,("shared-cpu requires a video track and forbids native memory"),(nullptr));return GST_STATE_CHANGE_FAILURE;}
+#ifndef __linux__
+  if(s->sharedCpu&&s->sessionPath&&*s->sessionPath){GST_ELEMENT_ERROR(s,RESOURCE,SETTINGS,("local shared-cpu discovery unavailable on this platform"),(nullptr));return GST_STATE_CHANGE_FAILURE;}
+#endif
   if(s->video)g_object_set(s->video,"shared-cpu",s->sharedCpu,nullptr);
   if(!s->tracks||(!wantVideo(s)&&!wantAudio(s))){GST_ELEMENT_ERROR(s,RESOURCE,SETTINGS,("tracks must be audio, video or av"),(nullptr));return GST_STATE_CHANGE_FAILURE;}
   if((wantVideo(s)&&!s->video)||(wantAudio(s)&&!s->audio)){GST_ELEMENT_ERROR(s,CORE,MISSING_PLUGIN,("FrameLink video/audio sinks unavailable"),(nullptr));return GST_STATE_CHANGE_FAILURE;}
@@ -369,7 +377,7 @@ static void gst_framelink_av_sink_class_init(GstFrameLinkAvSinkClass*klass){
  g_object_class_install_property(o,PROP_AUDIO_QUEUE,g_param_spec_uint("audio-queue-ms","Audio queue","Hard audio queue budget, not target latency",1,2000,80,rw));
  g_object_class_install_property(o,PROP_VIDEO_QUEUE,g_param_spec_uint("video-queue-frames","Video queue","Coordinated video queue budget",1,16,2,rw));
  g_object_class_install_property(o,PROP_VIDEO_POOL,g_param_spec_uint("video-pool","Video pool","Consumer ring images requested (0: consumer default)",0,FL_MAX_POOL_SIZE,0,rw));
- g_object_class_install_property(o,PROP_SHARED_CPU,g_param_spec_boolean("shared-cpu","Shared CPU","Explicit broker-bound CPU video copy path; no session= discovery or native fallback",FALSE,rw));
+ g_object_class_install_property(o,PROP_SHARED_CPU,g_param_spec_boolean("shared-cpu","Shared CPU","Explicit CPU video copy path; broker context or Linux/Android session= discovery, no native fallback",FALSE,rw));
  g_object_class_install_property(o,PROP_ID,g_param_spec_string("session-id","Session identity","Negotiated identity, not a secret",nullptr,ro));
  g_object_class_install_property(o,PROP_GENERATION,g_param_spec_uint64("generation","Generation","Negotiated session generation",0,G_MAXUINT64,0,ro));
  g_object_class_install_property(o,PROP_AUDIO_ID,g_param_spec_uint("audio-track-id","Audio track","Negotiated audio identity, zero when absent",0,G_MAXUINT,0,ro));

@@ -179,3 +179,15 @@ this private record is recognized by its exact wire type/name/schema and consume
 inside the source. This is not general custom-event preservation. Raw older GDP
 senders without this terminal record do not qualify as clean public-source EOS.
 No dummy PCM block or extra PCM buffering is introduced for termination.
+
+### Explicit cached shared-CPU video
+
+On Linux/Android, both A/V bins support `shared-cpu=true session=/private/path`
+for current-user authenticated local setup, or `shared-cpu=true` with a
+broker-provisioned context. Both endpoints must select this mode. Video is
+required; `native-memory=true` is incompatible. This is **CPU copy-in/copy-out**,
+not native GPU sharing or a zero-copy claim. The default native path is unchanged.
+The local mode preserves common A/V clocks, readiness, EOS and cancellable
+startup; it does not add intentional playback buffering. Android cross-UID
+clients require an authorized broker rather than this current-user discovery.
+See [validation and limits](../docs/m6/cpu-path/LOCAL_CPU_BINS.md).

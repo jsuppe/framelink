@@ -85,7 +85,7 @@ static void releaseMedia(GstElement*element,gpointer){
  {std::lock_guard<std::mutex> lock(sh->mutex);if(sh->released||sh->cancelled||!sh->setupOk||!sh->playing)return;channel=sh->channel;sh->channel=nullptr;}
  auto fail=[&](const char*why){GST_ELEMENT_ERROR(s,RESOURCE,OPEN_READ,("%s",why),(nullptr));stopSession(s);};
  if(!monotonicSystemClock(element)){if(channel)flClose(channel);return fail(kClockError);}
- if(s->video){gboolean adopted=FALSE;g_signal_emit_by_name(s->video,"adopt-channel",channel,&adopted);if(!adopted){if(channel)flClose(channel);return fail("video channel lease rejected");}}
+ if(s->video&&!s->sharedCpu){gboolean adopted=FALSE;g_signal_emit_by_name(s->video,"adopt-channel",channel,&adopted);if(!adopted){if(channel)flClose(channel);return fail("video channel lease rejected");}}
  auto*context=fl_gst_session_create_context(s->session);
  for(auto*child:{s->video,s->audio}){
   if(!child)continue;gst_element_set_context(child,context);
@@ -109,7 +109,12 @@ static void startWorker(GstFrameLinkAvSrc*s){
  g_object_ref(s->session);
  s->worker=new std::thread([s,caps,path,flags]{
   auto*sh=s->shared;GError*error=nullptr;flChannel*channel=nullptr;
-  bool ok=fl_gst_session_open_local_av(s->session,FALSE,path.c_str(),&caps,s->videoQueue,s->videoPool,s->audioQueueMs,s->connectMs,s->idleMs,flags,
+  bool ok=false;
+#ifdef __linux__
+  if(s->sharedCpu)ok=fl_gst_session_open_local_cpu(s->session,FALSE,path.c_str(),&caps,s->videoQueue,s->videoPool,s->audioQueueMs,s->connectMs,s->idleMs,s->cancel,&error);
+  else
+#endif
+  ok=fl_gst_session_open_local_av(s->session,FALSE,path.c_str(),&caps,s->videoQueue,s->videoPool,s->audioQueueMs,s->connectMs,s->idleMs,flags,
    &channel,s->cancel,&error);
   {std::lock_guard<std::mutex> lock(sh->mutex);sh->setupDone=true;sh->setupOk=ok;sh->channel=channel;sh->changed.notify_all();}
   if(ok){
@@ -183,7 +188,10 @@ static GstStateChangeReturn changeState(GstElement*element,GstStateChange transi
  auto*s=reinterpret_cast<GstFrameLinkAvSrc*>(element);
  switch(transition){
  case GST_STATE_CHANGE_NULL_TO_READY:{
-  if(s->sharedCpu&&(!wantVideo(s)||(s->sessionPath&&*s->sessionPath)||s->nativeMemory)){GST_ELEMENT_ERROR(s,RESOURCE,SETTINGS,("shared-cpu requires broker-bound video context, no session path or native memory"),(nullptr));return GST_STATE_CHANGE_FAILURE;}
+  if(s->sharedCpu&&(!wantVideo(s)||s->nativeMemory)){GST_ELEMENT_ERROR(s,RESOURCE,SETTINGS,("shared-cpu requires a video track and forbids native memory"),(nullptr));return GST_STATE_CHANGE_FAILURE;}
+#ifndef __linux__
+  if(s->sharedCpu&&s->sessionPath&&*s->sessionPath){GST_ELEMENT_ERROR(s,RESOURCE,SETTINGS,("local shared-cpu discovery unavailable on this platform"),(nullptr));return GST_STATE_CHANGE_FAILURE;}
+#endif
   if(s->video)g_object_set(s->video,"shared-cpu",s->sharedCpu,nullptr);
   if(!s->tracks||(!wantVideo(s)&&!wantAudio(s))){GST_ELEMENT_ERROR(s,RESOURCE,SETTINGS,("tracks must be audio, video or av"),(nullptr));return GST_STATE_CHANGE_FAILURE;}
   if((wantVideo(s)&&!s->video)||(wantAudio(s)&&!s->audio)){GST_ELEMENT_ERROR(s,CORE,MISSING_PLUGIN,("FrameLink video/audio sources unavailable"),(nullptr));return GST_STATE_CHANGE_FAILURE;}
@@ -339,7 +347,7 @@ static void gst_framelink_av_src_class_init(GstFrameLinkAvSrcClass*klass){
  g_object_class_install_property(o,PROP_VIDEO_POOL,g_param_spec_uint("video-pool","Video pool","Ring images this consumer allocates with session= (0: 4); cover ceil(latency*fps)+2",0,FL_MAX_POOL_SIZE,8,rw));
  g_object_class_install_property(o,PROP_LATENCY,g_param_spec_uint("latency-ms","Latency","Explicit pipeline latency with session=; zero for transport, set required final-playback buffering explicitly",0,10000,0,rw));
  g_object_class_install_property(o,PROP_NATIVE,g_param_spec_boolean("native-memory","Native memory","Output platform GPU memory (DMABuf, D3D11Memory, FrameLinkAHardwareBuffer) from the ring; with session= the ring defers read release",FALSE,rw));
- g_object_class_install_property(o,PROP_SHARED_CPU,g_param_spec_boolean("shared-cpu","Shared CPU","Explicit broker-bound CPU video copy path; no session= discovery or native fallback",FALSE,rw));
+ g_object_class_install_property(o,PROP_SHARED_CPU,g_param_spec_boolean("shared-cpu","Shared CPU","Explicit CPU video copy path; broker context or Linux/Android session= discovery, no native fallback",FALSE,rw));
  g_object_class_install_property(o,PROP_ID,g_param_spec_string("session-id","Session identity","Negotiated identity, not a secret",nullptr,ro));
  g_object_class_install_property(o,PROP_GENERATION,g_param_spec_uint64("generation","Generation","Negotiated session generation",0,G_MAXUINT64,0,ro));
  g_object_class_install_property(o,PROP_AUDIO_ID,g_param_spec_uint("audio-track-id","Audio track","Negotiated audio identity, zero when absent",0,G_MAXUINT,0,ro));

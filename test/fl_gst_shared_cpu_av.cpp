@@ -5,6 +5,7 @@
 #include <sys/socket.h>
 #include <glib/gstdio.h>
 #include <thread>
+#include <initializer_list>
 #include <cstring>
 #include <cstdio>
 #include <cstdlib>
@@ -22,12 +23,11 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
  CHECK(argc>1);GError*e=nullptr;auto*plugin=gst_plugin_load_file(argv[1],&e);CHECK(plugin&&!e);gst_object_unref(plugin);
 #endif
  // Invalid combinations fail before discovery or native-channel adoption.
- for(unsigned kind=0;kind<2;kind++)for(unsigned bad=0;bad<(kind?3u:2u);bad++){
+ for(unsigned kind=0;kind<2;kind++)for(unsigned bad=0;bad<(kind?2u:1u);bad++){
   auto*b=gst_element_factory_make(kind?"framelinkavsrc":"framelinkavsink",nullptr);CHECK(b);
   gboolean selected=TRUE;g_object_get(b,"shared-cpu",&selected,nullptr);CHECK(!selected);
   g_object_set(b,"shared-cpu",TRUE,nullptr);
-  if(bad==0)g_object_set(b,"session","/unused-cpu-discovery",nullptr);
-  else if(bad==1)g_object_set(b,"tracks","audio",nullptr);
+  if(bad==0)g_object_set(b,"tracks","audio",nullptr);
   else g_object_set(b,"native-memory",TRUE,nullptr);
   CHECK(gst_element_set_state(b,GST_STATE_READY)==GST_STATE_CHANGE_FAILURE);
   gst_element_set_state(b,GST_STATE_NULL);gst_object_unref(b);
@@ -54,13 +54,25 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
   CHECK(!fl_gst_session_claim_shared_cpu(s,TRUE,1)&&!fl_gst_session_claim_shared_cpu(r,FALSE,1));
   g_object_unref(s);g_object_unref(r);auto*lock=g_build_filename(path,".owner.lock",nullptr);g_remove(lock);g_free(lock);CHECK(g_rmdir(path)==0);g_free(path);
  }
- for(unsigned variant=0;variant<16;variant++){
-  const bool localSetup=variant>=12;const unsigned mode=localSetup?variant-12:variant%6;const bool bins=variant>=6;
+ // A state change must cancel discovery promptly even with a 60s deadline.
+ for(bool producer:{false,true}){
+  auto*path=g_dir_make_tmp("framelink-cpu-bin-cancel-XXXXXX",nullptr);CHECK(path);
+  auto*p=pipeline(producer?
+   "framelinkavsink name=transport shared-cpu=true appsrc is-live=true format=time ! transport.video_sink appsrc is-live=true format=time ! transport.audio_sink":
+   "framelinkavsrc name=transport shared-cpu=true transport.video_src ! fakesink sync=false async=false transport.audio_src ! fakesink sync=false async=false");
+  auto*b=gst_bin_get_by_name(GST_BIN(p),"transport");CHECK(b);g_object_set(b,"session",path,"connect-timeout-ms",60000u,nullptr);gst_object_unref(b);
+  CHECK(gst_element_set_state(p,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);g_usleep(20000);
+  auto start=g_get_monotonic_time();CHECK(gst_element_set_state(p,GST_STATE_NULL)!=GST_STATE_CHANGE_FAILURE);CHECK(g_get_monotonic_time()-start<1000000);gst_object_unref(p);
+  auto*lock=g_build_filename(path,".owner.lock",nullptr);g_remove(lock);g_free(lock);CHECK(g_rmdir(path)==0);g_free(path);
+ }
+ for(unsigned variant=0;variant<20;variant++){
+  const bool localBins=variant>=16;const bool localSetup=variant>=12&&!localBins;const unsigned mode=localBins?variant-16:localSetup?variant-12:variant%6;const bool bins=variant>=6;
   fprintf(stderr,"mode %u\n",mode);bool nv12=mode%2==1;auto*s=fl_gst_session_new(3);auto*r=fl_gst_session_new(3);
   flSessionConfig cfg{};cfg.version=2;cfg.sessionId.bytes[0]=1;cfg.clockId.bytes[0]=2;cfg.generation=1;cfg.videoTrackId=1;cfg.audioTrackId=2;cfg.audio={FL_PCM_S16,48000,2};cfg.audioQueueMs=80;cfg.video={nv12?FL_FORMAT_NV12:FL_FORMAT_BGRA8,18,16,60,1};cfg.videoQueueFrames=1;cfg.connectTimeoutMs=cfg.idleTimeoutMs=1000;
   flSessionCapabilities offers{};offers.version=2;offers.videoCount=1;offers.video[0]=cfg.video;offers.audioCount=1;offers.audio[0]=cfg.audio;
   GSocketConnection*bc=nullptr;gint64 expectedBase=1000000;gchar*localPath=nullptr;
-  if(localSetup){
+  if(localBins){localPath=g_dir_make_tmp("framelink-cpu-bins-XXXXXX",nullptr);CHECK(localPath);}
+  else if(localSetup){
    localPath=g_dir_make_tmp("framelink-cpu-local-XXXXXX",nullptr);CHECK(localPath);
    gboolean opened=FALSE;GError*producerError=nullptr,*consumerError=nullptr;
    // Consumer starts first, exercising bounded discovery rather than inherited FDs.
@@ -99,7 +111,10 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
   }
   auto*tx=pipeline(bins?"framelinkavsink name=transport shared-cpu=true appsrc name=vi is-live=true format=time ! transport.video_sink appsrc name=ai is-live=true format=time caps=audio/x-raw,format=S16LE,layout=interleaved,rate=48000,channels=2,channel-mask=(bitmask)0x3 ! transport.audio_sink":"appsrc name=vi is-live=true format=time ! framelinksink shared-cpu=true appsrc name=ai is-live=true format=time caps=audio/x-raw,format=S16LE,layout=interleaved,rate=48000,channels=2,channel-mask=(bitmask)0x3 ! framelinkaudiosink tracks=av");
   auto*rx=pipeline(bins?"framelinkavsrc name=transport shared-cpu=true transport.video_src ! appsink name=vo sync=false async=false transport.audio_src ! appsink name=ao sync=false async=false":"framelinksrc shared-cpu=true ! appsink name=vo sync=false async=false framelinkaudiosrc tracks=av ! appsink name=ao sync=false async=false");
-  context(tx,s);context(rx,r);
+  if(localBins){
+   for(auto*p:{tx,rx}){auto*b=gst_bin_get_by_name(GST_BIN(p),"transport");CHECK(b);
+    g_object_set(b,"session",localPath,"video-format",nv12?"NV12":"BGRA","width",18u,"height",16u,"video-queue-frames",1u,"video-pool",2u,nullptr);gst_object_unref(b);}
+  }else{context(tx,s);context(rx,r);}
   auto*vi=gst_bin_get_by_name(GST_BIN(tx),"vi");auto*ai=gst_bin_get_by_name(GST_BIN(tx),"ai");auto*vo=gst_bin_get_by_name(GST_BIN(rx),"vo");auto*ao=gst_bin_get_by_name(GST_BIN(rx),"ao");
   GstVideoInfo info;gst_video_info_set_format(&info,nv12?GST_VIDEO_FORMAT_NV12:GST_VIDEO_FORMAT_BGRA,18,16);auto*vc=gst_video_info_to_caps(&info);gst_app_src_set_caps(GST_APP_SRC(vi),vc);gst_caps_unref(vc);
   CHECK(gst_element_set_state(rx,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);CHECK(gst_element_set_state(tx,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
@@ -110,6 +125,7 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
    CHECK(gst_app_src_push_buffer(GST_APP_SRC(vi),v)==GST_FLOW_OK);CHECK(gst_app_src_push_buffer(GST_APP_SRC(ai),a)==GST_FLOW_OK);
    auto*vs=gst_app_sink_try_pull_sample(GST_APP_SINK(vo),2*GST_SECOND);auto*ap=gst_app_sink_try_pull_sample(GST_APP_SINK(ao),2*GST_SECOND);CHECK(vs&&ap);
    auto*vb=gst_sample_get_buffer(vs);auto*ab=gst_sample_get_buffer(ap);
+   if(localBins&&n==0){CHECK(GST_BUFFER_PTS(ab)<=G_MAXINT64);expectedBase=GST_BUFFER_PTS(ab);}
    CHECK(GST_BUFFER_PTS(vb)==guint64(expectedBase)+37000000+n*1000000&&GST_BUFFER_PTS(ab)==guint64(expectedBase)+n*1000000);
    CHECK(GST_BUFFER_PTS(vb)-GST_BUFFER_PTS(ab)==37000000&&GST_BUFFER_DURATION(ab)==1000000&&GST_BUFFER_DURATION(vb)==1000000);
    guint8 pcm[192];CHECK(gst_buffer_extract(ab,0,pcm,192)==192);for(auto b:pcm)CHECK(b==n+31);
@@ -135,7 +151,7 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
   auto*bus=gst_element_get_bus(rx);CHECK(!gst_bus_timed_pop_filtered(bus,30*GST_MSECOND,GstMessageType(GST_MESSAGE_EOS|GST_MESSAGE_ERROR)));gst_object_unref(bus);
   CHECK(gst_app_src_end_of_stream(GST_APP_SRC(mode%2?ai:vi))==GST_FLOW_OK);
   terminal(tx,GST_MESSAGE_EOS);terminal(rx,GST_MESSAGE_EOS);
-  guint64 total=999;gint64 last=999;CHECK(fl_gst_session_wait_video_eos(r,1,0,&total,&last)==FL_GST_SESSION_READY&&total==count&&last==(count?gint64(37000000+(count-1)*1000000):gint64(-1)));
+  guint64 total=999;gint64 last=999;if(!localBins)CHECK(fl_gst_session_wait_video_eos(r,1,0,&total,&last)==FL_GST_SESSION_READY&&total==count&&last==(count?gint64(37000000+(count-1)*1000000):gint64(-1)));
   }
   if(localSetup){CHECK(fl_gst_session_finish_local(r,FALSE,1000,nullptr));CHECK(fl_gst_session_finish_local(s,TRUE,1000,nullptr));}
   auto stop=g_get_monotonic_time();gst_element_set_state(tx,GST_STATE_NULL);gst_element_set_state(rx,GST_STATE_NULL);CHECK(g_get_monotonic_time()-stop<1000000);if(bc)g_object_unref(bc);
