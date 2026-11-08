@@ -1,0 +1,16 @@
+{
+  "base_revision": "57b159a7014526089b5344be20945e0f6594a294",
+  "sha256": {
+    "src/fl_shared_cpu_allocation.h": "68bb5308da98408a04c9aa0b7e621a3d6a8b3793879488f94140f1063ad98584",
+    "test/fl_shared_cpu_allocation.cpp": "e9c4f79b3d34f3430c737ecb5fdeb720934d5e7dcd6a7f1117c8dda598e30dc6",
+    "CMakeLists.txt": "58d7b46161394d483a2f7aa9864ba2efb8d4edc932fe2e2fd64ab87fc0623f41"
+  },
+  "commands": [
+    "cmake --build <linux-home>/dev/build/framelink-m6-linux --target fl_shared_cpu_allocation -j4",
+    "ctest --test-dir <linux-home>/dev/build/framelink-m6-linux -R ^(shared_cpu_allocation|shared_cpu_contract|shared_cpu_contract_c_api)$ --output-on-failure",
+    "cmake --build <linux-home>/dev/build/framelink-m6-arm64 --target fl_shared_cpu_allocation -j4",
+    "cmake --build <linux-home>/dev/build/framelink-m6-x86_64 --target fl_shared_cpu_allocation -j4",
+    "adb shell TMPDIR=/data/local/tmp/framelink-m6-20261106 LD_LIBRARY_PATH=/data/local/tmp/framelink-m6-20261106 /data/local/tmp/framelink-m6-20261106/fl_shared_cpu_allocation"
+  ],
+  "result": "Linux3/3; Android arm64 allocation passed; dual ABI build passed; internal allocator only, no FrameLink channel integration or Windows allocator"
+}
