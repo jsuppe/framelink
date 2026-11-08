@@ -35,6 +35,7 @@ enum class MsgType : uint32_t {
     FrameReadyMetadata = 8, // opt-in feature: frame identity plus exact media metadata
     SharedCpuHello = 9, // explicit CPU-only control extension; never legacy negotiation
     SharedCpuPool = 10, // FCP1 descriptors and one FD per allocation
+    SharedCpuAccepted = 11, // FCA1 positive acceptance of imported pool
     Bye = 7,        // either way: orderly shutdown
 };
 

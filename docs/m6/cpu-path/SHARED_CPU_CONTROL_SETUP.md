@@ -23,12 +23,25 @@ legacy message types never trigger fallback. Setup cannot be repeated on the sam
 control instance; replacement needs a fresh explicitly negotiated connection and
 existing imported-pool replacement validation.
 
-A successful send means only that the kernel accepted the setup packet, not that
-the peer accepted the import. **There is no pool acknowledgment or live frame
-protocol yet.** Do not recycle slots or claim frame delivery from this setup. The
-next integration step must add pool acceptance/ready-release ownership, generation
-and sequence checks, and bounded peer-death behavior before public factories or
-GStreamer expose this route. Native GPU entry points must remain unavailable.
+`sendPool` now waits for an exact 24-byte FCA1 acceptance (message type 11):
+version, generation, slot count and zero reserved bytes, with no ancillary FDs.
+Only a matching reply sets `poolAccepted()`. Silence, close, wrong type, stale
+identity, malformed bytes or unsolicited FDs fail closed within the socket's
+configured I/O bound. A failed connection cannot be retried or used for media.
+This is an authenticated peer's assertion, not proof against a dishonest peer.
+
+The producer sends acceptance only after complete atomic import. If sending that
+ACK fails, `receivePool` returns DISCONNECTED and the control is not accepted;
+the output pool nevertheless retains the successful local import. Its mappings
+remain safe owners, but the caller must not publish media on a failed setup.
+ACK send success cannot guarantee the remote received it; readiness still needs
+the forthcoming frame protocol. This is normal distributed-connection uncertainty,
+not permission to reuse slots. Session-level retry must use a new generation and
+respect old held storage.
+
+**There is still no live frame protocol.** Next: ready/release ownership,
+generation and sequence checks, and bounded peer-death behavior before public
+factories or GStreamer expose this route. Native GPU entry points remain unavailable.
 
 ## Evidence
 
@@ -47,3 +60,12 @@ this build statically links libframelink.a. The binaries had copied successfully
 they were then run directly and passed. This was a controller deployment mistake,
 not a runtime failure. Windows allocator/control implementation remains open.
 Raw results and source hashes: `shared-cpu-control/`.
+
+## Pool acceptance validation
+
+Linux 7/7 shared-CPU/IPC tests and Android control runtime pass, with both Android
+ABI builds. The real cross-process import now completes the ACK exchange. Nine
+additional cases reject unknown tag/version, stale epoch, wrong count, reserved
+bytes, legacy message type, short payload, unsolicited FD and silent peer. The
+silent case uses a 30ms socket bound and must return within one second. FD counts
+return to baseline after every case. Results: `shared-cpu-acceptance/`.
