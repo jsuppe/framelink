@@ -1,11 +1,21 @@
 #define FL_GST_SESSION_BUILD
 #include "framelink_session_context.h"
 #include <cstring>
+#ifndef _WIN32
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/socket.h>
+#endif
 #include "fl_gst_session_internal.h"
 #include "fl_gst_event_channel.hpp"
 struct _FlGstSession {
  GObject parent;
  std::shared_ptr<FlGstEventChannel>* events;
+#ifndef _WIN32
+ flSharedCpuChannel* cpuChannel;
+ int cpuShutdownFd;
+ gboolean cpuOpening,cpuClaimed,cpuProducer;
+#endif
  GMutex mutex;
  GCond changed;
  guint required,registered,ready;
@@ -20,15 +30,29 @@ struct _FlGstSession {
 typedef struct { GObjectClass parent; } FlGstSessionClass;
 G_DEFINE_TYPE(FlGstSession,fl_gst_session,G_TYPE_OBJECT)
 static bool valid(FlGstSession* s) {return s&&G_TYPE_CHECK_INSTANCE_TYPE(s,fl_gst_session_get_type());}
+#ifndef _WIN32
+static void resetCpu(FlGstSession*s){
+ if(s->cpuShutdownFd>=0){shutdown(s->cpuShutdownFd,SHUT_RDWR);close(s->cpuShutdownFd);s->cpuShutdownFd=-1;}
+ if(s->cpuChannel){flSharedCpuClose(s->cpuChannel);s->cpuChannel=nullptr;}
+ // Do not reset cpuOpening: an old setup must return before a new one starts.
+}
+#endif
 static void finalize(GObject* object) {
  auto* s=reinterpret_cast<FlGstSession*>(object);
+#ifndef _WIN32
+ resetCpu(s);
+#endif
  delete s->events;
  if(s->audioConnection)g_object_unref(s->audioConnection);
  g_cond_clear(&s->changed);g_mutex_clear(&s->mutex);
  G_OBJECT_CLASS(fl_gst_session_parent_class)->finalize(object);
 }
 static void fl_gst_session_class_init(FlGstSessionClass* c){G_OBJECT_CLASS(c)->finalize=finalize;}
-static void fl_gst_session_init(FlGstSession* s){g_mutex_init(&s->mutex);g_cond_init(&s->changed);s->events=new std::shared_ptr<FlGstEventChannel>();}
+static void fl_gst_session_init(FlGstSession* s){g_mutex_init(&s->mutex);g_cond_init(&s->changed);s->events=new std::shared_ptr<FlGstEventChannel>();
+#ifndef _WIN32
+ s->cpuShutdownFd=-1;
+#endif
+}
 namespace { struct Lock {GMutex* m; explicit Lock(GMutex* p):m(p){g_mutex_lock(m);}~Lock(){g_mutex_unlock(m);}}; }
 FlGstSession* fl_gst_session_new(guint required) {
  if(!required||(required&~3u))return nullptr;
@@ -55,6 +79,9 @@ FlGstSessionResult fl_gst_session_configure(FlGstSession* s,const flSessionConfi
  if(s->configured){auto r=flSessionValidateReplacement(&s->config,c);
   if(r!=FL_SESSION_OK)return r==FL_SESSION_STALE?FL_GST_SESSION_STALE:FL_GST_SESSION_INVALID;
  }
+#ifndef _WIN32
+ resetCpu(s);s->cpuClaimed=FALSE;
+#endif
  if(s->audioConnection){g_socket_shutdown(g_socket_connection_get_socket(s->audioConnection),TRUE,TRUE,nullptr);g_object_unref(s->audioConnection);s->audioConnection=nullptr;}
  if(*s->events)(*s->events)->cancel();s->events->reset();
  s->audioClaimed=FALSE;s->videoEnded=FALSE;s->videoFrames=0;s->videoLastPts=-1;s->config=*c;s->mapped=FALSE;s->configured=TRUE;s->cancelled=FALSE;s->ready=0;g_cond_broadcast(&s->changed);return FL_GST_SESSION_READY;
@@ -87,6 +114,9 @@ FlGstSessionResult fl_gst_session_wait(FlGstSession* s,guint64 generation,guint 
 void fl_gst_session_cancel(FlGstSession* s) {
  if(!valid(s))return;
  Lock lock(&s->mutex);s->cancelled=TRUE;s->ready=0;
+#ifndef _WIN32
+ resetCpu(s);
+#endif
  if(*s->events)(*s->events)->cancel();
  if(s->audioConnection)g_socket_shutdown(g_socket_connection_get_socket(s->audioConnection),TRUE,TRUE,nullptr);
  g_cond_broadcast(&s->changed);
@@ -114,7 +144,11 @@ FlGstSessionResult fl_gst_session_map_pts(FlGstSession* s,guint64 generation,gin
 FlGstSessionResult fl_gst_session_get_config(FlGstSession* s,flSessionConfig* out) {
  if(!valid(s)||!out)return FL_GST_SESSION_INVALID;
  Lock lock(&s->mutex);
- if(*s->events&&(*s->events)->failed()){s->cancelled=TRUE;s->ready=0;if(s->audioConnection)g_socket_shutdown(g_socket_connection_get_socket(s->audioConnection),TRUE,TRUE,nullptr);g_cond_broadcast(&s->changed);}
+ if(*s->events&&(*s->events)->failed()){s->cancelled=TRUE;s->ready=0;
+#ifndef _WIN32
+ resetCpu(s);
+#endif
+ if(s->audioConnection)g_socket_shutdown(g_socket_connection_get_socket(s->audioConnection),TRUE,TRUE,nullptr);g_cond_broadcast(&s->changed);}
  if(s->cancelled)return FL_GST_SESSION_CANCELLED;
  if(!s->configured)return FL_GST_SESSION_STALE;
  *out=s->config;return FL_GST_SESSION_READY;
@@ -180,3 +214,41 @@ gboolean fl_gst_session_has_event_stream(FlGstSession*s,guint64 generation){retu
 FlGstSessionResult fl_gst_session_send_video_event(FlGstSession*s,guint64 generation,const FlGstVideoEvent*event){auto channel=eventChannel(s,generation);return channel&&event?channel->send(*event):FL_GST_SESSION_INVALID;}
 FlGstSessionResult fl_gst_session_peek_video_end(FlGstSession*s,guint64 generation,FlGstVideoEvent*event){auto channel=eventChannel(s,generation);if(!channel||!event)return FL_GST_SESSION_INVALID;return channel->peekEnd(event)?FL_GST_SESSION_READY:FL_GST_SESSION_TIMEOUT;}
 FlGstSessionResult fl_gst_session_receive_video_event(FlGstSession*s,guint64 generation,guint timeout,FlGstVideoEvent*event){auto channel=eventChannel(s,generation);return channel?channel->receive(timeout,event):FL_GST_SESSION_INVALID;}
+
+#ifndef _WIN32
+FlGstSessionResult fl_gst_session_bind_shared_cpu_fd(FlGstSession*s,gboolean producer,
+ guint64 generation,int fd,guint timeout,const flMemoryRequirements*requirements,
+ guint operations,const flSharedCpuDescriptor*desc,gsize count){
+ struct Fd{int value;~Fd(){if(value>=0)close(value);}} owned{fd};
+ if(!valid(s)||fd<0||!requirements||!timeout||timeout>60000||
+    (producer?(desc||count):(!desc||count<2||count>FL_MAX_POOL_SIZE)))return FL_GST_SESSION_INVALID;
+ flSessionConfig config{};
+ {
+  Lock lock(&s->mutex);
+  if(s->cancelled)return FL_GST_SESSION_CANCELLED;
+  if(!s->configured||s->config.generation!=generation)return FL_GST_SESSION_STALE;
+  if(!s->config.videoTrackId||s->cpuOpening||s->cpuChannel||s->cpuClaimed)return FL_GST_SESSION_INVALID;
+  s->cpuShutdownFd=fcntl(fd,F_DUPFD_CLOEXEC,0);if(s->cpuShutdownFd<0)return FL_GST_SESSION_INVALID;
+  s->cpuOpening=TRUE;config=s->config;
+ }
+ flSharedCpuChannel*channel=nullptr;
+ owned.value=-1; // factories consume fd even on validation failure
+ const guint flags=FL_SHARED_CPU_FRAME_METADATA|FL_SHARED_CPU_ORDERED_EOS;
+ auto result=producer?flSharedCpuOpenProducerFdEx(fd,timeout,&config,requirements,operations,flags,&channel):
+  flSharedCpuOpenConsumerFdEx(fd,timeout,&config,requirements,operations,desc,count,flags,&channel);
+ Lock lock(&s->mutex);s->cpuOpening=FALSE;
+ // Configure enforces a strictly newer generation. No successful old setup can
+ // publish into a replacement generation, even if its peer accepted the pool.
+ auto status=s->cancelled?FL_GST_SESSION_CANCELLED:
+  (!s->configured||s->config.generation!=generation?FL_GST_SESSION_STALE:
+   (result==FL_OK?FL_GST_SESSION_READY:FL_GST_SESSION_INVALID));
+ if(status!=FL_GST_SESSION_READY){if(channel)flSharedCpuClose(channel);resetCpu(s);return status;}
+ s->cpuChannel=channel;s->cpuProducer=!!producer;return FL_GST_SESSION_READY;
+}
+flSharedCpuChannel* fl_gst_session_claim_shared_cpu(FlGstSession*s,gboolean producer,guint64 generation){
+ if(!valid(s))return nullptr;Lock lock(&s->mutex);
+ if(s->cancelled||!s->configured||s->config.generation!=generation||s->cpuClaimed||
+    s->cpuProducer!=!!producer||!s->cpuChannel)return nullptr;
+ auto*channel=s->cpuChannel;s->cpuChannel=nullptr;s->cpuClaimed=TRUE;return channel;
+}
+#endif

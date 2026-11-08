@@ -97,3 +97,26 @@ FL_GST_SESSION_API gboolean fl_gst_session_finish_local(FlGstSession*,gboolean p
 FL_GST_SESSION_API gboolean fl_gst_session_apply_pipeline_clock(FlGstSession*,GstPipeline*,
  gboolean producer,GstClockTime latency,GError**);
 G_END_DECLS
+
+#if !defined(_WIN32)
+#include "framelink_shared_cpu_channel.h"
+G_BEGIN_DECLS
+// Explicit CPU-only broker seam, NOT authentication or local discovery. Caller
+// must first configure the session from authenticated offers and supply a
+// broker-authorized connected SEQPACKET FD. Consumes fd on every path. Caller
+// holds a session reference throughout this worker-thread call. No hidden native
+// fallback; metadata and ordered EOS are mandatory on both endpoints.
+// Consumer supplies 2..16 matching descriptors; producer supplies NULL/0.
+// Bounded per-I/O by timeout_ms. Session cancel/reconfigure shuts down this
+// socket, including while setup is blocked. Does not mark a track ready.
+FL_GST_SESSION_API FlGstSessionResult fl_gst_session_bind_shared_cpu_fd(
+ FlGstSession*,gboolean producer,guint64 generation,int fd,guint timeout_ms,
+ const flMemoryRequirements*,guint operations,const flSharedCpuDescriptor*,gsize count);
+// Transfer-full, once per generation, exact role. Caller externally serializes
+// channel/lease calls and closes the channel. Session retains only a socket
+// shutdown handle: cancel/reconfigure interrupts I/O but never frees claimed
+// channels/leases; held mappings survive. Unclaimed channels are session-owned.
+FL_GST_SESSION_API flSharedCpuChannel* fl_gst_session_claim_shared_cpu(
+ FlGstSession*,gboolean producer,guint64 generation);
+G_END_DECLS
+#endif

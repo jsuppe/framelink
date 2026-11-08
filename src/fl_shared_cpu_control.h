@@ -7,6 +7,7 @@
 #include "fl_shared_cpu_imported_pool.h"
 #include <array>
 #include <cstring>
+#include <sys/socket.h>
 namespace fl {
 class SharedCpuControl {
     Channel link_;
@@ -23,13 +24,17 @@ class SharedCpuControl {
     static uint32_t get(const uint8_t*p){uint32_t x=0;for(unsigned i=0;i<4;i++)x|=uint32_t(p[i])<<(i*8);return x;}
     static void put64(uint8_t*p,uint64_t x){put(p,uint32_t(x));put(p+4,uint32_t(x>>32));}
     static uint64_t get64(const uint8_t*p){return uint64_t(get(p))|(uint64_t(get(p+4))<<32);}
-    flResult fail(flResult r=FL_INVALID){link_=Channel{};agreed_=false;accepted_=false;return r;}
+    void disconnect(){if(link_.pollFd()>=0)shutdown(link_.pollFd(),SHUT_RDWR);}
+    flResult fail(flResult r=FL_INVALID){disconnect();link_=Channel{};agreed_=false;accepted_=false;return r;}
     struct Received {
         std::optional<Message> message;
         ~Received(){if(message)for(int fd:message->fds)close(fd);}
     };
 public:
     explicit SharedCpuControl(Channel&& link):link_(std::move(link)){}
+    // A coordinator may retain a duplicate solely for cancellation. Closing or
+    // failing the owner must still disconnect immediately, not wait for that FD.
+    ~SharedCpuControl(){disconnect();}
     bool agreed()const{return agreed_;}
     bool poolAccepted()const{return accepted_;}
     bool writableSlot(uint32_t slot)const{return accepted_&&producer_&&slot<poolCount_&&!slots_[slot]&&!ended_;}
