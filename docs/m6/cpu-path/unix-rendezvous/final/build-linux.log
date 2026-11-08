@@ -1,0 +1,17 @@
+[0/1] Re-running CMake...
+-- framelink: building GStreamer elements (gstframelink)
+-- Configuring done (0.1s)
+-- Generating done (0.1s)
+-- Build files have been written to: <linux-home>/dev/build/framelink-m6-linux
+[1/12] Building CXX object CMakeFiles/framelink_gst_session.dir/runtime/av_auth.cpp.o
+[2/12] Building CXX object CMakeFiles/framelink_gst_session.dir/runtime/av_rendezvous.cpp.o
+[3/12] Building CXX object CMakeFiles/fl_gst_session_transport.dir/runtime/av_auth.cpp.o
+[4/12] Building CXX object CMakeFiles/fl_av_rendezvous.dir/test/test_av_rendezvous.cpp.o
+[5/12] Linking CXX executable fl_av_rendezvous
+[6/12] Building CXX object CMakeFiles/fl_gst_session_transport.dir/test/fl_gst_session_transport.cpp.o
+[7/12] Building CXX object CMakeFiles/framelink_gst_session.dir/gst/framelink_session_transport.cpp.o
+[8/12] Linking CXX shared library libframelink_gst_session.so
+[9/12] Linking CXX shared module libgstframelink.so
+[10/12] Linking CXX executable fl_gst_shared_cpu_av
+[11/12] Building CXX object CMakeFiles/fl_gst_session_transport.dir/runtime/av_rendezvous.cpp.o
+[12/12] Linking CXX executable fl_gst_session_transport

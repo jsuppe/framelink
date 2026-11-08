@@ -16,24 +16,46 @@
 #include <sys/file.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#ifdef __linux__
+#include <sys/socket.h>
+#include <sys/un.h>
+#endif
 #endif
 namespace av {
 namespace {
-constexpr size_t wireSize = 38;
+constexpr size_t wireSize = 38, unixWireSize = 52;
 const char* recordName = "endpoint";
-std::array<unsigned char, wireSize> encode(const Endpoint& e) {
-    std::array<unsigned char, wireSize> b{};
-    memcpy(b.data(), "FAR1", 4); b[4] = e.port & 255; b[5] = e.port >> 8;
-    std::copy(e.token.begin(), e.token.end(), b.begin() + 6); return b;
+template<size_t N> bool nonzero(const std::array<unsigned char,N>& a) {
+    return std::any_of(a.begin(),a.end(),[](unsigned char c){return c!=0;});
 }
-bool decode(const unsigned char* b, size_t n, Endpoint& e, std::string& error) {
-    if (n != wireSize || memcmp(b,"FAR1",4)) { error="invalid rendezvous record"; return false; }
-    Endpoint tmp; tmp.port=uint16_t(b[4] | (unsigned(b[5])<<8));
-    std::copy(b+6,b+38,tmp.token.begin());
-    if (!tmp.port || std::all_of(tmp.token.begin(),tmp.token.end(),[](unsigned char c){return c==0;})) {
-        error="invalid rendezvous endpoint"; return false;
+std::vector<unsigned char> encode(const Endpoint& e) {
+    const bool unixSocket=nonzero(e.unixName);
+    std::vector<unsigned char> b(unixSocket?unixWireSize:wireSize);
+    if(unixSocket){
+        // A mixed TCP/Unix endpoint is invalid, never silently select one.
+        if(e.port)return {};
+        memcpy(b.data(),"FAR2",4);
+        std::copy(e.token.begin(),e.token.end(),b.begin()+4);
+        std::copy(e.unixName.begin(),e.unixName.end(),b.begin()+36);
+    }else{
+        memcpy(b.data(),"FAR1",4);b[4]=e.port&255;b[5]=e.port>>8;
+        std::copy(e.token.begin(),e.token.end(),b.begin()+6);
     }
-    e=tmp; return true;
+    return b;
+}
+bool decode(const unsigned char* b,size_t n,Endpoint& e,std::string& error) {
+    Endpoint tmp;
+    if(n==wireSize&&!memcmp(b,"FAR1",4)){
+        tmp.port=uint16_t(b[4]|(unsigned(b[5])<<8));
+        std::copy(b+6,b+38,tmp.token.begin());
+        if(!tmp.port){error="invalid TCP rendezvous endpoint";return false;}
+    }else if(n==unixWireSize&&!memcmp(b,"FAR2",4)){
+        std::copy(b+4,b+36,tmp.token.begin());
+        std::copy(b+36,b+52,tmp.unixName.begin());
+        if(!nonzero(tmp.unixName)){error="invalid Unix rendezvous endpoint";return false;}
+    }else{error="invalid rendezvous record";return false;}
+    if(!nonzero(tmp.token)){error="invalid rendezvous credential";return false;}
+    e=tmp;return true;
 }
 bool fail(std::string& error, const char* operation) { error=operation; return false; }
 std::string tempName(std::string& error) {
@@ -180,28 +202,28 @@ bool RendezvousOwner::publish(const std::string& directory,const Endpoint& endpo
 void RendezvousOwner::close() {
     if(!impl_)return;
     auto expected=encode(impl_->endpoint);
-    unsigned char b[wireSize+1]{};
+    unsigned char b[unixWireSize+1]{};
 #ifdef _WIN32
     auto name=impl_->path+L"\\endpoint";
     // The directory is pinned against rename; only the same trusted user can
     // alter its entries. Compare our generation token before deleting.
     Handle f;f.h=openFile(name,GENERIC_READ,FILE_SHARE_READ,OPEN_EXISTING,impl_->security);
     std::string error;DWORD n=0;bool own=f.h!=INVALID_HANDLE_VALUE&&impl_->security.check(f.h,false,error);
-    if(own)own=ReadFile(f.h,b,sizeof(b),&n,nullptr)&&n==wireSize&&memcmp(b,expected.data(),wireSize)==0;
+    if(own)own=ReadFile(f.h,b,sizeof(b),&n,nullptr)&&n==expected.size()&&memcmp(b,expected.data(),expected.size())==0;
     if(f.h!=INVALID_HANDLE_VALUE){CloseHandle(f.h);f.h=INVALID_HANDLE_VALUE;}
     if(own)DeleteFileW(name.c_str());
 #else
     Fd f;f.fd=openat(impl_->dir.fd,recordName,O_RDONLY|O_NONBLOCK|O_NOFOLLOW|O_CLOEXEC);std::string error;
     if(f.fd>=0&&check(f.fd,false,error)){
         ssize_t n;do{n=::read(f.fd,b,sizeof(b));}while(n<0&&errno==EINTR);
-        if(n==ssize_t(wireSize)&&memcmp(b,expected.data(),wireSize)==0)unlinkat(impl_->dir.fd,recordName,0);
+        if(n==ssize_t(expected.size())&&memcmp(b,expected.data(),expected.size())==0)unlinkat(impl_->dir.fd,recordName,0);
     }
 #endif
     // Keep .owner.lock permanently: unlinking lock files permits split ownership.
     delete impl_;impl_=nullptr;
 }
-bool readEndpoint(const std::string& directory,Endpoint& endpoint,std::string& error) {
-    unsigned char b[wireSize+1]{};size_t count=0;
+static bool readAnyEndpoint(const std::string& directory,Endpoint& endpoint,std::string& error) {
+    unsigned char b[unixWireSize+1]{};size_t count=0;
 #ifdef _WIN32
     Security s;if(!s.init(error))return false;auto path=wide(directory);
     Handle dir;dir.h=openDir(path,false,s,error);if(dir.h==INVALID_HANDLE_VALUE)return false;
@@ -220,4 +242,43 @@ bool readEndpoint(const std::string& directory,Endpoint& endpoint,std::string& e
 #endif
     return decode(b,count,endpoint,error);
 }
+bool readEndpoint(const std::string& directory,Endpoint& endpoint,std::string& error){
+    Endpoint e;if(!readAnyEndpoint(directory,e,error))return false;
+    if(!e.port)return fail(error,"TCP rendezvous required");
+    endpoint=e;return true;
+}
+#ifdef __linux__
+bool readUnixEndpoint(const std::string& directory,Endpoint& endpoint,std::string& error){
+    Endpoint e;if(!readAnyEndpoint(directory,e,error))return false;
+    if(e.port)return fail(error,"Unix rendezvous required");
+    endpoint=e;return true;
+}
+std::string unixAddress(const Endpoint& e) {
+    if(e.port||!nonzero(e.unixName)||!nonzero(e.token))return {};
+    std::string address(1,'\0');address+="framelink-cpu-";
+    for(auto c:e.unixName){address+="0123456789abcdef"[c>>4];address+="0123456789abcdef"[c&15];}
+    return address;
+}
+UnixRendezvousOwner::~UnixRendezvousOwner(){close();}
+void UnixRendezvousOwner::close(){
+    record_.close();
+    if(fd_>=0){::close(fd_);fd_=-1;}
+}
+bool UnixRendezvousOwner::publish(const std::string& directory,std::string& error){
+    if(fd_>=0)return fail(error,"Unix rendezvous already published");
+    Endpoint e;
+    if(!secureRandom(e.token.data(),e.token.size(),error)||
+       !secureRandom(e.unixName.data(),e.unixName.size(),error))return false;
+    auto address=unixAddress(e);if(address.empty())return fail(error,"invalid Unix random endpoint");
+    Fd listener;listener.fd=socket(AF_UNIX,SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK,0);
+    if(listener.fd<0)return fail(error,"cannot create Unix listener");
+    sockaddr_un addr{};addr.sun_family=AF_UNIX;memcpy(addr.sun_path,address.data(),address.size());
+    if(bind(listener.fd,reinterpret_cast<sockaddr*>(&addr),offsetof(sockaddr_un,sun_path)+address.size())||
+       listen(listener.fd,8))return fail(error,"cannot bind Unix listener");
+    // Publish only after listen; failed lock acquisition closes only our socket.
+    if(!record_.publish(directory,e,error))return false;
+    fd_=listener.fd;listener.fd=-1;return true;
+}
+#endif
+
 }

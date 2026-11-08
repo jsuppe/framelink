@@ -1,5 +1,7 @@
 #include "av_rendezvous.h"
 #include <cstdio>
+#include <cerrno>
+#include <cstring>
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
@@ -12,6 +14,11 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#ifdef __linux__
+#include <sys/socket.h>
+#include <sys/un.h>
+#include <fcntl.h>
+#endif
 #endif
 #define CHECK(x) do {if(!(x)){fprintf(stderr,"FAIL line %d: %s (%s)\n",__LINE__,#x,error.c_str());return 1;}}while(0)
 namespace fs=std::filesystem;
@@ -45,6 +52,51 @@ int main(int argc,char** argv){
  int status=0;CHECK(waitpid(child,&status,0)==child&&WIFEXITED(status)&&WEXITSTATUS(status)==0);
 #endif
  CHECK(av::readEndpoint(path,got,error));CHECK(owner.publish(path,e,error));
+#ifdef __linux__
+ // Typed Unix discovery must never be accepted by a legacy TCP consumer.
+ got.port=54321;CHECK(!av::readUnixEndpoint(path,got,error));CHECK(got.port==54321);
+ owner.close();
+ av::UnixRendezvousOwner unixOwner;CHECK(unixOwner.publish(path,error));
+ CHECK((fcntl(unixOwner.fd(),F_GETFD)&FD_CLOEXEC)!=0);
+ CHECK((fcntl(unixOwner.fd(),F_GETFL)&O_NONBLOCK)!=0);
+ av::Endpoint unixEndpoint;CHECK(av::readUnixEndpoint(path,unixEndpoint,error));
+ CHECK(!av::readEndpoint(path,got,error));CHECK(got.port==54321);
+ auto address=av::unixAddress(unixEndpoint);CHECK(!address.empty()&&address[0]=='\0');
+ {av::UnixRendezvousOwner duplicate;CHECK(!duplicate.publish(path,error));CHECK(duplicate.fd()==-1);}
+ {av::RendezvousOwner duplicate;CHECK(!duplicate.publish(path,e,error));}
+ int socketFd=socket(AF_UNIX,SOCK_STREAM|SOCK_CLOEXEC,0);CHECK(socketFd>=0);
+ sockaddr_un addr{};addr.sun_family=AF_UNIX;memcpy(addr.sun_path,address.data(),address.size());
+ CHECK(connect(socketFd,reinterpret_cast<sockaddr*>(&addr),offsetof(sockaddr_un,sun_path)+address.size())==0);
+ int accepted=accept4(unixOwner.fd(),nullptr,nullptr,SOCK_CLOEXEC);CHECK(accepted>=0);
+ char sent='V',received=0;CHECK(write(socketFd,&sent,1)==1);CHECK(read(accepted,&received,1)==1&&received=='V');
+ close(accepted);close(socketFd);unixOwner.close();CHECK(!av::readUnixEndpoint(path,unixEndpoint,error));
+ CHECK(unixOwner.publish(path,error));av::Endpoint fresh;CHECK(av::readUnixEndpoint(path,fresh,error));
+ CHECK(fresh.unixName!=unixEndpoint.unixName&&fresh.token!=unixEndpoint.token);
+ unixOwner.close();
+ // Malformed FAR2 records leave outputs intact; no legacy reinterpretation.
+ for(int bad=0;bad<4;++bad){
+   CHECK(unixOwner.publish(path,error));
+   auto record=fs::path(path)/"endpoint";
+   std::ifstream in(record,std::ios::binary);std::string bytes((std::istreambuf_iterator<char>(in)),{});in.close();
+   CHECK(bytes.size()==52);
+   if(bad==0)bytes.pop_back();if(bad==1)bytes+='x';
+   if(bad==2)std::fill(bytes.begin()+4,bytes.begin()+36,0);
+   if(bad==3)std::fill(bytes.begin()+36,bytes.end(),0);
+   {std::ofstream out(record,std::ios::binary|std::ios::trunc);out.write(bytes.data(),bytes.size());}
+   got.port=54321;CHECK(!av::readUnixEndpoint(path,got,error));CHECK(got.port==54321);
+   CHECK(!av::readEndpoint(path,got,error));unixOwner.close();fs::remove(record);
+ }
+ for(int cycle=0;cycle<100;++cycle){CHECK(unixOwner.publish(path,error));unixOwner.close();CHECK(unixOwner.fd()==-1);}
+ // Both formats use one OS lifetime lock; crash recovery produces a fresh name.
+ child=fork();CHECK(child>=0);if(!child){av::UnixRendezvousOwner p;if(!p.publish(path,error))_exit(2);_exit(0);}
+ CHECK(waitpid(child,&status,0)==child&&WIFEXITED(status)&&WEXITSTATUS(status)==0);
+ CHECK(av::readUnixEndpoint(path,unixEndpoint,error));CHECK(unixOwner.publish(path,error));
+ CHECK(av::readUnixEndpoint(path,fresh,error));CHECK(fresh.unixName!=unixEndpoint.unixName);
+ unixOwner.close();
+ // Mixed transport descriptors must not publish or disturb an existing owner.
+ auto mixed=e;mixed.unixName[0]=1;CHECK(!owner.publish(path,mixed,error));
+ CHECK(owner.publish(path,e,error));
+#endif
  // Oversized or truncated records fail closed and leave caller's output alone.
  {std::ofstream f(fs::path(path)/"endpoint",std::ios::binary|std::ios::trunc);f<<"FAR1";}
  got.port=54321;CHECK(!av::readEndpoint(path,got,error));CHECK(got.port==54321);owner.close();
@@ -56,8 +108,20 @@ int main(int argc,char** argv){
  CHECK(owner.publish(path,e,error));owner.close();
  auto victim=root/"victim";{std::ofstream f(victim);f<<"untouched";}
  fs::create_symlink(victim,fs::path(path)/"endpoint");CHECK(!av::readEndpoint(path,got,error));fs::remove(fs::path(path)/"endpoint");
- fs::create_hard_link(victim,fs::path(path)/"endpoint");CHECK(!av::readEndpoint(path,got,error));fs::remove(fs::path(path)/"endpoint");
- CHECK(mkfifo((fs::path(path)/"endpoint").c_str(),0600)==0);CHECK(!av::readEndpoint(path,got,error));fs::remove(fs::path(path)/"endpoint");
+ std::error_code linkError;fs::create_hard_link(victim,fs::path(path)/"endpoint",linkError);
+#ifdef __ANDROID__
+ if(linkError==std::errc::permission_denied||linkError==std::errc::operation_not_permitted)
+   puts("UNAVAILABLE: hard-link negative fixture denied by Android filesystem policy");
+ else
+#endif
+ {CHECK(!linkError);CHECK(!av::readEndpoint(path,got,error));fs::remove(fs::path(path)/"endpoint");}
+ int fifoResult=mkfifo((fs::path(path)/"endpoint").c_str(),0600);
+#ifdef __ANDROID__
+ if(fifoResult!=0&&(errno==EACCES||errno==EPERM))
+   puts("UNAVAILABLE: FIFO negative fixture denied by Android filesystem policy");
+ else
+#endif
+ {CHECK(fifoResult==0);CHECK(!av::readEndpoint(path,got,error));fs::remove(fs::path(path)/"endpoint");}
  fs::remove(fs::path(path)/".owner.lock");fs::create_symlink(victim,fs::path(path)/".owner.lock");CHECK(!owner.publish(path,e,error));fs::remove(fs::path(path)/".owner.lock");
 #else
  // A NULL DACL grants everyone access; neither reader nor publisher may accept it.

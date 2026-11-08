@@ -1,0 +1,2 @@
+FAIL line 117: mkfifo((fs::path(path)/"endpoint").c_str(),0600)==0 (rendezvous record unavailable)
+UNAVAILABLE: hard-link negative fixture denied by Android filesystem policy

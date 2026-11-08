@@ -1,0 +1,17 @@
+Internal ctest changing into directory: <linux-home>/dev/build/framelink-m6-linux
+Test project <linux-home>/dev/build/framelink-m6-linux
+    Start  79: av_rendezvous
+1/4 Test  #79: av_rendezvous ....................   Passed    0.08 sec
+    Start  81: av_auth
+2/4 Test  #81: av_auth ..........................   Passed    0.01 sec
+    Start 119: gst_session_transport
+3/4 Test #119: gst_session_transport ............   Passed    0.68 sec
+    Start 126: gst_shared_cpu_av
+4/4 Test #126: gst_shared_cpu_av ................   Passed    0.30 sec
+
+100% tests passed, 0 tests failed out of 4
+
+Label Time Summary:
+m5b_av    =   0.68 sec*proc (1 test)
+
+Total Test time (real) =   1.09 sec
