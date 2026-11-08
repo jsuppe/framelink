@@ -8,9 +8,13 @@
 #else
 #include <sys/socket.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <cerrno>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
+#ifdef __linux__
+#include <gio/gunixsocketaddress.h>
+#endif
 #endif
 #include <array>
 #include <cstring>
@@ -290,25 +294,49 @@ gboolean fl_gst_session_open_local_av(FlGstSession*session,gboolean producer,con
  flChannel**channel,GCancellable*outer,GError**error){
  return fl_gst_session_open_local_av_epoch(session,producer,path,local,videoQueue,pool,queueMs,timeout,idle,flags,channel,nullptr,nullptr,outer,error);
 }
-gboolean fl_gst_session_open_local_av_epoch(FlGstSession*session,gboolean producer,const gchar*path,
+static gboolean open_local_av_impl(FlGstSession*session,gboolean producer,const gchar*path,
  const flSessionCapabilities*local,guint videoQueue,guint pool,guint queueMs,guint timeout,guint idle,guint flags,
- flChannel**channel,FlGstEpochFunc epochFunc,gpointer epochData,GCancellable*outer,GError**error){
+ flChannel**channel,FlGstEpochFunc epochFunc,gpointer epochData,GCancellable*outer,GError**error,bool cpu){
  if(channel)*channel=nullptr;
  auto fail=[&](const char*message){fl_gst_session_cancel(session);g_set_error_literal(error,G_IO_ERROR,G_IO_ERROR_FAILED,message);return FALSE;};
- if(!session||!path||!*path||!local||!channel||local->version!=FL_SESSION_OPTIONAL_TRACKS_VERSION||(!local->videoCount&&!local->audioCount)||
+ if(!session||!path||!*path||!local||!channel||(cpu&&!local->videoCount)||local->version!=FL_SESSION_OPTIONAL_TRACKS_VERSION||(!local->videoCount&&!local->audioCount)||
     (local->videoCount&&(!videoQueue||videoQueue>16||pool==1||pool>FL_MAX_POOL_SIZE))||(local->audioCount&&(!queueMs||queueMs>2000))||!timeout||timeout>60000||!idle||idle>60000)
   return fail("invalid local A/V session configuration");
  Offer encoded{};if(!encode(*local,encoded))return fail("unsupported local A/V capabilities");
  Deadline deadline(timeout,outer);av::Endpoint endpoint{};av::RendezvousOwner owner;std::string reason;
  ObjectOwner listener,client;StreamOwner control,audio,events;
+#ifdef __linux__
+ av::UnixRendezvousOwner unixOwner;
+#else
+ if(cpu)return fail("local CPU discovery unavailable on this platform");
+#endif
  std::string ioReason;
  auto next=[&](StreamOwner&out){GError*e=nullptr;
   if(producer)out.p=g_socket_listener_accept(G_SOCKET_LISTENER(listener.p),nullptr,deadline.cancel,&e);
-  else out.p=g_socket_client_connect_to_host(G_SOCKET_CLIENT(client.p),"127.0.0.1",endpoint.port,deadline.cancel,&e);
+  else {
+#ifdef __linux__
+  if(cpu){auto bytes=av::unixAddress(endpoint);
+   auto*address=g_unix_socket_address_new_with_type(bytes.data()+1,bytes.size()-1,G_UNIX_SOCKET_ADDRESS_ABSTRACT);
+   out.p=g_socket_client_connect(G_SOCKET_CLIENT(client.p),G_SOCKET_CONNECTABLE(address),deadline.cancel,&e);g_object_unref(address);
+  }else
+#endif
+  out.p=g_socket_client_connect_to_host(G_SOCKET_CLIENT(client.p),"127.0.0.1",endpoint.port,deadline.cancel,&e);
+ }
   if(e){ioReason=e->message;g_error_free(e);}
   return out.p!=nullptr;};
  auto ioFail=[&](const char*what){std::string m=std::string(what)+(ioReason.empty()?"":": "+ioReason);return fail(m.c_str());};
  if(producer){
+#ifdef __linux__
+  if(cpu){
+   if(!unixOwner.publish(path,reason)||!av::readUnixEndpoint(path,endpoint,reason))return fail(reason.c_str());
+   int fd=fcntl(unixOwner.fd(),F_DUPFD_CLOEXEC,0);if(fd<0)return fail("cannot duplicate Unix listener");
+   auto*socket=g_socket_new_from_fd(fd,nullptr);if(!socket){close(fd);return fail("cannot wrap Unix listener");}
+   auto*l=g_socket_listener_new();listener.p=G_OBJECT(l);
+   bool added=g_socket_listener_add_socket(l,socket,nullptr,nullptr);g_object_unref(socket);
+   if(!added)return fail("cannot adopt Unix listener");
+  }else
+#endif
+  {
   if(!av::secureRandom(endpoint.token.data(),endpoint.token.size(),reason))return fail(reason.c_str());
   auto*l=g_socket_listener_new();listener.p=G_OBJECT(l);
   auto*address=g_inet_address_new_from_string("127.0.0.1");auto*bind=g_inet_socket_address_new(address,0);g_object_unref(address);
@@ -316,8 +344,16 @@ gboolean fl_gst_session_open_local_av_epoch(FlGstSession*session,gboolean produc
   if(!bound)return fail("cannot bind private loopback session listener");
   endpoint.port=g_inet_socket_address_get_port(G_INET_SOCKET_ADDRESS(effective));g_object_unref(effective);
   if(!owner.publish(path,endpoint,reason))return fail(reason.c_str());
+  }
  }else{
-  while(!g_cancellable_is_cancelled(deadline.cancel)){if(av::readEndpoint(path,endpoint,reason))break;g_usleep(5000);}
+  while(!g_cancellable_is_cancelled(deadline.cancel)){
+#ifdef __linux__
+   bool found=cpu?av::readUnixEndpoint(path,endpoint,reason):av::readEndpoint(path,endpoint,reason);
+#else
+   bool found=av::readEndpoint(path,endpoint,reason);
+#endif
+   if(found)break;g_usleep(5000);
+  }
   if(g_cancellable_is_cancelled(deadline.cancel))return fail("local session discovery deadline or cancellation");
   client.p=G_OBJECT(g_socket_client_new());
   // Private loopback: never consult the system proxy resolver. Its first use
@@ -329,7 +365,7 @@ gboolean fl_gst_session_open_local_av_epoch(FlGstSession*session,gboolean produc
  if(!next(control))return ioFail("local control connection deadline or failure");
  // Small control records (clock request, ready/drain markers) must not wait
  // behind Nagle/delayed-ACK: that skews the round-trip midpoint by tens of ms.
- g_socket_set_option(g_socket_connection_get_socket(control.p),IPPROTO_TCP,TCP_NODELAY,1,nullptr);
+ if(!cpu)g_socket_set_option(g_socket_connection_get_socket(control.p),IPPROTO_TCP,TCP_NODELAY,1,nullptr);
  auto*secret=g_bytes_new(endpoint.token.data(),endpoint.token.size());
  struct BytesOwner{GBytes*p;~BytesOwner(){g_bytes_unref(p);}} secretOwner{secret};
  auto*clock=gst_system_clock_obtain();struct ClockOwner{GstClock*p;~ClockOwner(){gst_object_unref(p);}} clockOwner{clock};
@@ -383,6 +419,31 @@ gboolean fl_gst_session_open_local_av_epoch(FlGstSession*session,gboolean produc
   if(!next(events))return ioFail("local event connection deadline or failure");
   if(!fl_gst_session_authenticate_event_stream(session,events.p,producer,secret,timeout,deadline.cancel,error))return FALSE;
   g_object_unref(events.p);events.p=nullptr;
+#ifdef __linux__
+  if(cpu){
+   StreamOwner bootstrap;if(!next(bootstrap))return ioFail("CPU bootstrap connection failed");
+   int fd=-1;
+   if(!fl_gst_session_create_cpu_endpoint(session,bootstrap.p,producer,secret,timeout,deadline.cancel,&fd,error))return FALSE;
+   flMemoryRequirements req{};flMemoryRequirementsInit(&req);
+   req.allowedResourceTypes=FL_MEMORY_SHARED_CPU;req.allowedOperations=FL_MEMORY_COPY;
+   std::array<flSharedCpuDescriptor,16> descriptors{};guint count=pool?pool:4;
+   for(guint i=0;i<count;i++){
+    auto&d=descriptors[i];d.version=FL_SHARED_CPU_VERSION;d.resourceType=FL_MEMORY_SHARED_CPU;
+    d.format=selected.video.format;d.width=selected.video.width;d.height=selected.video.height;
+    d.generation=selected.generation;d.allocationId=i+1;
+    const bool nv12=d.format==FL_FORMAT_NV12;d.planeCount=nv12?2:1;
+    d.planeStride[0]=guint64(d.width)*(nv12?1:4);d.allocationBytes=d.planeStride[0]*d.height;
+    if(nv12){d.planeOffset[1]=d.allocationBytes;d.planeStride[1]=d.width;d.allocationBytes+=guint64(d.width)*(d.height/2);}
+   }
+   // The setup deadline must also interrupt the channel/pool handshake. The
+   // channel retains the independently negotiated idle timeout after setup.
+   auto cancelId=g_cancellable_connect(deadline.cancel,G_CALLBACK(+[](GCancellable*,gpointer p){fl_gst_session_cancel(static_cast<FlGstSession*>(p));}),session,nullptr);
+   auto result=fl_gst_session_bind_shared_cpu_fd(session,producer,selected.generation,fd,idle,&req,FL_MEMORY_COPY,producer?nullptr:descriptors.data(),producer?0:count);
+   if(cancelId)g_cancellable_disconnect(deadline.cancel,cancelId);
+   if(result!=FL_GST_SESSION_READY||g_cancellable_is_cancelled(deadline.cancel))return fail("CPU pool setup failed or cancelled");
+  }else
+#endif
+  {
   auto id=labelled(endpoint,"FrameLink public video channel v1",wire.data(),wire.size(),nullptr,0);
   gchar name[5+24+1]="flav-";for(int i=0;i<12;i++)g_snprintf(name+5+2*i,3,"%02x",id[i]);
   guint8 ready=0;flChannel*ch=nullptr;
@@ -401,11 +462,25 @@ gboolean fl_gst_session_open_local_av_epoch(FlGstSession*session,gboolean produc
    ready='P';if(!exact(control.p,true,&ready,1,deadline.cancel)){flClose(ch);return fail("video attach confirmation failed");}
   }
   *channel=ch;
+  }
  }
  // Retain the authenticated control connection for fl_gst_session_finish_local.
  g_object_set_data_full(G_OBJECT(session),"framelink-local-control",control.p,g_object_unref);control.p=nullptr;
  return TRUE;
 }
+gboolean fl_gst_session_open_local_av_epoch(FlGstSession*session,gboolean producer,const gchar*path,
+ const flSessionCapabilities*local,guint videoQueue,guint pool,guint queueMs,guint timeout,guint idle,guint flags,
+ flChannel**channel,FlGstEpochFunc epochFunc,gpointer epochData,GCancellable*outer,GError**error){
+ return open_local_av_impl(session,producer,path,local,videoQueue,pool,queueMs,timeout,idle,flags,channel,epochFunc,epochData,outer,error,false);
+}
+#ifdef __linux__
+gboolean fl_gst_session_open_local_cpu(FlGstSession*session,gboolean producer,const gchar*path,
+ const flSessionCapabilities*local,guint videoQueue,guint pool,guint queueMs,guint timeout,guint idle,
+ GCancellable*outer,GError**error){
+ flChannel*unused=nullptr;
+ return open_local_av_impl(session,producer,path,local,videoQueue,pool,queueMs,timeout,idle,0,&unused,nullptr,nullptr,outer,error,true);
+}
+#endif
 gboolean fl_gst_session_local_ready(FlGstSession*session,gboolean producer,guint timeout,GError**error){
  return fl_gst_session_local_ready_cancellable(session,producer,timeout,nullptr,error);
 }

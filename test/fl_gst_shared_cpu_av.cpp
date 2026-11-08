@@ -3,6 +3,7 @@
 #include <gst/app/gstappsink.h>
 #include <gst/video/video.h>
 #include <sys/socket.h>
+#include <glib/gstdio.h>
 #include <thread>
 #include <cstring>
 #include <cstdio>
@@ -31,11 +32,47 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
   CHECK(gst_element_set_state(b,GST_STATE_READY)==GST_STATE_CHANGE_FAILURE);
   gst_element_set_state(b,GST_STATE_NULL);gst_object_unref(b);
  }
- for(unsigned variant=0;variant<12;variant++){
-  const unsigned mode=variant%6;const bool bins=variant>=6;
+ // Discovery has a whole-operation deadline and cannot fall back to native.
+ for(unsigned negative=0;negative<4;++negative){
+  auto*path=g_dir_make_tmp("framelink-cpu-negative-XXXXXX",nullptr);CHECK(path);
+  auto*session=fl_gst_session_new(1);auto*cancel=g_cancellable_new();
+  flSessionCapabilities caps{};caps.version=2;caps.videoCount=1;caps.video[0]={FL_FORMAT_BGRA8,18,16,60,1};
+  if(negative>=2)g_cancellable_cancel(cancel);
+  auto begin=g_get_monotonic_time();
+  CHECK(!fl_gst_session_open_local_cpu(session,negative%2,path,&caps,1,2,0,50,60000,cancel,nullptr));
+  CHECK(g_get_monotonic_time()-begin<500000);
+  CHECK(!fl_gst_session_claim_shared_cpu(session,negative%2,1));
+  g_object_unref(cancel);g_object_unref(session);
+  auto*lock=g_build_filename(path,".owner.lock",nullptr);g_remove(lock);g_free(lock);CHECK(g_rmdir(path)==0);g_free(path);
+ }
+ {
+  auto*path=g_dir_make_tmp("framelink-cpu-mismatch-XXXXXX",nullptr);CHECK(path);
+  auto*s=fl_gst_session_new(1);auto*r=fl_gst_session_new(1);
+  flSessionCapabilities a{};a.version=2;a.videoCount=1;a.video[0]={FL_FORMAT_BGRA8,18,16,60,1};auto b=a;b.video[0].format=FL_FORMAT_NV12;
+  gboolean result=TRUE;std::thread peer([&]{result=fl_gst_session_open_local_cpu(r,FALSE,path,&b,1,2,0,200,60000,nullptr,nullptr);});
+  CHECK(!fl_gst_session_open_local_cpu(s,TRUE,path,&a,1,2,0,200,60000,nullptr,nullptr));peer.join();CHECK(!result);
+  CHECK(!fl_gst_session_claim_shared_cpu(s,TRUE,1)&&!fl_gst_session_claim_shared_cpu(r,FALSE,1));
+  g_object_unref(s);g_object_unref(r);auto*lock=g_build_filename(path,".owner.lock",nullptr);g_remove(lock);g_free(lock);CHECK(g_rmdir(path)==0);g_free(path);
+ }
+ for(unsigned variant=0;variant<16;variant++){
+  const bool localSetup=variant>=12;const unsigned mode=localSetup?variant-12:variant%6;const bool bins=variant>=6;
   fprintf(stderr,"mode %u\n",mode);bool nv12=mode%2==1;auto*s=fl_gst_session_new(3);auto*r=fl_gst_session_new(3);
   flSessionConfig cfg{};cfg.version=2;cfg.sessionId.bytes[0]=1;cfg.clockId.bytes[0]=2;cfg.generation=1;cfg.videoTrackId=1;cfg.audioTrackId=2;cfg.audio={FL_PCM_S16,48000,2};cfg.audioQueueMs=80;cfg.video={nv12?FL_FORMAT_NV12:FL_FORMAT_BGRA8,18,16,60,1};cfg.videoQueueFrames=1;cfg.connectTimeoutMs=cfg.idleTimeoutMs=1000;
   flSessionCapabilities offers{};offers.version=2;offers.videoCount=1;offers.video[0]=cfg.video;offers.audioCount=1;offers.audio[0]=cfg.audio;
+  GSocketConnection*bc=nullptr;gint64 expectedBase=1000000;gchar*localPath=nullptr;
+  if(localSetup){
+   localPath=g_dir_make_tmp("framelink-cpu-local-XXXXXX",nullptr);CHECK(localPath);
+   gboolean opened=FALSE;GError*producerError=nullptr,*consumerError=nullptr;
+   // Consumer starts first, exercising bounded discovery rather than inherited FDs.
+   std::thread consumer([&]{opened=fl_gst_session_open_local_cpu(r,FALSE,localPath,&offers,1,2,80,1000,60000,nullptr,&consumerError);});
+   g_usleep(10000);
+   bool ok=fl_gst_session_open_local_cpu(s,TRUE,localPath,&offers,1,2,80,1000,60000,nullptr,&producerError);
+   consumer.join();if(!ok||!opened)fprintf(stderr,"local setup: producer=%s consumer=%s\n",producerError?producerError->message:"ok",consumerError?consumerError->message:"ok");
+   CHECK(ok&&opened);g_clear_error(&producerError);g_clear_error(&consumerError);
+   CHECK(fl_gst_session_get_config(s,&cfg)==FL_GST_SESSION_READY);
+   CHECK(fl_gst_session_map_pts(r,cfg.generation,0,&expectedBase)==FL_GST_SESSION_READY);
+   CHECK(fl_gst_session_local_ready(r,FALSE,1000,nullptr));CHECK(fl_gst_session_local_ready(s,TRUE,1000,nullptr));
+  }else{
   CHECK(fl_gst_session_configure(s,&cfg,&offers,&offers)==FL_GST_SESSION_READY);CHECK(fl_gst_session_configure(r,&cfg,&offers,&offers)==FL_GST_SESSION_READY);
   int ev[2];CHECK(!socketpair(AF_UNIX,SOCK_STREAM,0,ev));auto*sa=g_socket_new_from_fd(ev[0],nullptr);auto*sb=g_socket_new_from_fd(ev[1],nullptr);CHECK(sa&&sb);auto*ea=g_socket_connection_factory_create_connection(sa);auto*eb=g_socket_connection_factory_create_connection(sb);g_object_unref(sa);g_object_unref(sb);
   guint8 secret[32]{};secret[0]=73;auto*key=g_bytes_new(secret,32);gboolean auth=FALSE;
@@ -55,10 +92,11 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
   // Independently authenticated PCM stream, sharing only session/clock identity.
   int af[2];CHECK(!socketpair(AF_UNIX,SOCK_STREAM,0,af));
   auto*as=g_socket_new_from_fd(af[0],nullptr);auto*ar=g_socket_new_from_fd(af[1],nullptr);
-  auto*ac=g_socket_connection_factory_create_connection(as);auto*bc=g_socket_connection_factory_create_connection(ar);g_object_unref(as);g_object_unref(ar);
+  auto*ac=g_socket_connection_factory_create_connection(as);bc=g_socket_connection_factory_create_connection(ar);g_object_unref(as);g_object_unref(ar);
   key=g_bytes_new(secret,32);auth=FALSE;
   std::thread aa([&]{auth=fl_gst_session_authenticate_audio_stream(s,ac,TRUE,key,1000,nullptr,nullptr);});
   CHECK(fl_gst_session_authenticate_audio_stream(r,bc,FALSE,key,1000,nullptr,nullptr));aa.join();CHECK(auth);g_bytes_unref(key);g_object_unref(ac);
+  }
   auto*tx=pipeline(bins?"framelinkavsink name=transport shared-cpu=true appsrc name=vi is-live=true format=time ! transport.video_sink appsrc name=ai is-live=true format=time caps=audio/x-raw,format=S16LE,layout=interleaved,rate=48000,channels=2,channel-mask=(bitmask)0x3 ! transport.audio_sink":"appsrc name=vi is-live=true format=time ! framelinksink shared-cpu=true appsrc name=ai is-live=true format=time caps=audio/x-raw,format=S16LE,layout=interleaved,rate=48000,channels=2,channel-mask=(bitmask)0x3 ! framelinkaudiosink tracks=av");
   auto*rx=pipeline(bins?"framelinkavsrc name=transport shared-cpu=true transport.video_src ! appsink name=vo sync=false async=false transport.audio_src ! appsink name=ao sync=false async=false":"framelinksrc shared-cpu=true ! appsink name=vo sync=false async=false framelinkaudiosrc tracks=av ! appsink name=ao sync=false async=false");
   context(tx,s);context(rx,r);
@@ -72,7 +110,7 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
    CHECK(gst_app_src_push_buffer(GST_APP_SRC(vi),v)==GST_FLOW_OK);CHECK(gst_app_src_push_buffer(GST_APP_SRC(ai),a)==GST_FLOW_OK);
    auto*vs=gst_app_sink_try_pull_sample(GST_APP_SINK(vo),2*GST_SECOND);auto*ap=gst_app_sink_try_pull_sample(GST_APP_SINK(ao),2*GST_SECOND);CHECK(vs&&ap);
    auto*vb=gst_sample_get_buffer(vs);auto*ab=gst_sample_get_buffer(ap);
-   CHECK(GST_BUFFER_PTS(vb)==38000000+n*1000000&&GST_BUFFER_PTS(ab)==1000000+n*1000000);
+   CHECK(GST_BUFFER_PTS(vb)==guint64(expectedBase)+37000000+n*1000000&&GST_BUFFER_PTS(ab)==guint64(expectedBase)+n*1000000);
    CHECK(GST_BUFFER_PTS(vb)-GST_BUFFER_PTS(ab)==37000000&&GST_BUFFER_DURATION(ab)==1000000&&GST_BUFFER_DURATION(vb)==1000000);
    guint8 pcm[192];CHECK(gst_buffer_extract(ab,0,pcm,192)==192);for(auto b:pcm)CHECK(b==n+31);
    GstVideoInfo got;CHECK(gst_video_info_from_caps(&got,gst_sample_get_caps(vs)));GstVideoFrame vf{};CHECK(gst_video_frame_map(&vf,&got,vb,GST_MAP_READ));
@@ -99,8 +137,10 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
   terminal(tx,GST_MESSAGE_EOS);terminal(rx,GST_MESSAGE_EOS);
   guint64 total=999;gint64 last=999;CHECK(fl_gst_session_wait_video_eos(r,1,0,&total,&last)==FL_GST_SESSION_READY&&total==count&&last==(count?gint64(37000000+(count-1)*1000000):gint64(-1)));
   }
-  auto stop=g_get_monotonic_time();gst_element_set_state(tx,GST_STATE_NULL);gst_element_set_state(rx,GST_STATE_NULL);CHECK(g_get_monotonic_time()-stop<1000000);g_object_unref(bc);
+  if(localSetup){CHECK(fl_gst_session_finish_local(r,FALSE,1000,nullptr));CHECK(fl_gst_session_finish_local(s,TRUE,1000,nullptr));}
+  auto stop=g_get_monotonic_time();gst_element_set_state(tx,GST_STATE_NULL);gst_element_set_state(rx,GST_STATE_NULL);CHECK(g_get_monotonic_time()-stop<1000000);if(bc)g_object_unref(bc);
   gst_object_unref(vi);gst_object_unref(ai);gst_object_unref(vo);gst_object_unref(ao);gst_object_unref(tx);gst_object_unref(rx);g_object_unref(s);g_object_unref(r);
+  if(localPath){auto*lock=g_build_filename(localPath,".owner.lock",nullptr);g_remove(lock);g_free(lock);CHECK(g_rmdir(localPath)==0);g_free(localPath);}
  }
  puts("CPU A/V: exact PCM/pixels, common mapping preserves37ms offset, both EOS submission orders, empty streams, terminal conflict and PCM death passed");
 }

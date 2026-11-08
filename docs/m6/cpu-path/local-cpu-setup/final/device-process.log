@@ -1,0 +1,672 @@
+  PID ARGS                       
+    1 init second_stage
+    2 [kthreadd]
+    3 [pool_workqueue_release]
+    4 [kworker/R-rcu_g]
+    5 [kworker/R-slub_]
+    6 [kworker/R-netns]
+   12 [kworker/R-mm_pe]
+   13 [rcu_tasks_kthread]
+   14 [rcu_tasks_trace_kthread]
+   15 [ksoftirqd/0]
+   16 [rcu_preempt]
+   17 [rcub/0]
+   18 [rcu_exp_gp_kthread_worker]
+   19 [rcu_exp_par_gp_kthread_worker]
+   20 [migration/0]
+   21 [idle_inject/0]
+   22 [cpuhp/0]
+   23 [cpuhp/1]
+   24 [idle_inject/1]
+   25 [migration/1]
+   26 [ksoftirqd/1]
+   29 [cpuhp/2]
+   30 [idle_inject/2]
+   31 [migration/2]
+   32 [ksoftirqd/2]
+   35 [cpuhp/3]
+   36 [idle_inject/3]
+   37 [migration/3]
+   38 [ksoftirqd/3]
+   41 [cpuhp/4]
+   42 [idle_inject/4]
+   43 [migration/4]
+   44 [ksoftirqd/4]
+   47 [cpuhp/5]
+   48 [idle_inject/5]
+   49 [migration/5]
+   50 [ksoftirqd/5]
+   53 [cpuhp/6]
+   54 [idle_inject/6]
+   55 [migration/6]
+   56 [ksoftirqd/6]
+   59 [cpuhp/7]
+   60 [idle_inject/7]
+   61 [migration/7]
+   62 [ksoftirqd/7]
+   65 [kworker/R-inet_]
+   66 [kauditd]
+   67 [khungtaskd]
+   68 [oom_reaper]
+   69 [kworker/R-write]
+   70 [kcompactd0]
+   71 [kworker/R-kbloc]
+   72 [kworker/R-edac-]
+   73 [kworker/R-devfr]
+   74 [watchdogd]
+   79 [kswapd0]
+   82 [erofs_worker/0]
+   90 [kworker/R-kthro]
+   92 [dmabuf-deferred-free-worker]
+   93 [kworker/R-nvme-]
+   94 [kworker/R-nvme-]
+   95 [kworker/R-nvme-]
+   96 [kworker/R-uas]
+   97 [kworker/R-dm_bu]
+   98 [kworker/R-mld]
+   99 [kworker/R-ipv6_]
+  100 [kworker/R-kstrp]
+  102 [tkperfd]
+  108 [hang_detect]
+  109 [hang_detect1]
+  110 [kworker/R-mt-wd]
+  111 [wdtk-0]
+  112 [wdtk-1]
+  113 [wdtk-2]
+  114 [wdtk-3]
+  115 [wdtk-4]
+  116 [wdtk-5]
+  117 [wdtk-6]
+  118 [wdtk-7]
+  119 [irq/172-mt6358-irq]
+  120 [irq/233-amms_irq]
+  121 [tee_irq_bh]
+  122 [tee_log]
+  123 [tee_worker/0]
+  124 [tee_worker/1]
+  125 [tee_worker/2]
+  126 [tee_worker/3]
+  128 [irq/236-11240000.mmc]
+  129 [irq/237-11230000.mmc]
+  130 [irq/37-11240000.mmc cd]
+  131 [kworker/R-regul]
+  132 [kworker/R-usb20]
+  133 [irq/245-musb-hdrc]
+  134 [spi0]
+  136 [spi1]
+  137 [spi2]
+  138 [spi3]
+  139 [spi4]
+  140 [spi5]
+  141 [tcpc_timer_type_c_port0]
+  142 [kworker/R-lbat_]
+  143 [cpuhp-ppm]
+  144 [kworker/R-mmdvf]
+  145 [dmabuf-deferred-free-worker]
+  146 [dma_pool_fill_thread]
+  147 [cmdq_irq_thread]
+  148 [kworker/R-cmdq_]
+  149 [kworker/R-cmdq_]
+  150 [kworker/R-cmdq_]
+  151 [kworker/R-cmdq_]
+  152 [cmdq_buffer_usage]
+  153 [irq/31-chr_irq]
+  154 [attach_thread]
+  156 [charger_thread]
+  162 [mtk_bat_irq_thread]
+  163 [fgauge gct]
+  164 [fgauge]
+  165 [battery_manager_thread]
+  166 [power_misc_thread]
+  167 [tcpc_event_type_c_port0]
+  168 [kworker/R-extco]
+  171 [bp_notify_thread]
+  172 [card0-crtc0]
+  173 [card0-crtc1]
+  174 [card0-crtc2]
+  175 [card0-crtc3]
+  176 [kworker/R-cmdq_]
+  177 [kworker/R-cmdq_]
+  178 [kworker/R-cmdq_]
+  179 [kworker/R-cmdq_]
+  180 [mtk_drm_disp_idlemgr-0]
+  181 [dis_ki-0]
+  182 [enable_vblank]
+  183 [mtk_drm_cwb]
+  184 [disp_echk]
+  185 [mtk_drm_fake_vsync:0]
+  186 [ddp_trig]
+  187 [ddp_trig_d]
+  188 [ddp_repaint]
+  189 [ddp_cmdq_trig]
+  190 [pf_release_thread]
+  191 [sf_pf_release_thread]
+  192 [signal_fence]
+  193 [mode_switch]
+  194 [smi_info_dump_thread]
+  195 [kworker/R-cmdq_]
+  196 [pf_release_thread]
+  197 [sf_pf_release_thread]
+  198 [signal_fence]
+  199 [mode_switch]
+  200 [smi_info_dump_thread]
+  201 [kworker/R-cmdq_]
+  202 [pf_release_thread]
+  203 [sf_pf_release_thread]
+  204 [signal_fence]
+  205 [mode_switch]
+  206 [smi_info_dump_thread]
+  207 [mtk_drm_bind]
+  208 [kworker/R-pure_]
+  209 [kworker/R-aal_r]
+  210 [aal_sof_0]
+  211 [BOOT_DETECT_THREAD]
+  212 [hwrng]
+  214 [kworker/R-mmc_c]
+  218 [jbd2/mmcblk0p20-8]
+  219 [kworker/R-ext4-]
+  220 [kworker/R-kdmfl]
+  221 [kworker/R-kdmfl]
+  222 [kworker/R-kdmfl]
+  223 [kworker/R-kdmfl]
+  224 [kworker/R-kdmfl]
+  225 [kworker/R-kdmfl]
+  226 [kworker/R-kdmfl]
+  227 [kworker/R-kdmfl]
+  228 [kworker/R-kdmfl]
+  229 [kworker/R-kdmfl]
+  230 [kworker/R-kdmfl]
+  231 [kworker/R-kdmfl]
+  232 [kworker/R-kdmfl]
+  233 [kworker/R-kdmfl]
+  234 [kworker/R-kdmfl]
+  235 [kworker/R-kdmfl]
+  236 [kworker/R-kdmfl]
+  237 [kworker/R-kdmfl]
+  238 [kworker/R-kdmfl]
+  239 [kworker/R-kveri]
+  240 [kworker/R-kdmfl]
+  241 [kworker/R-kveri]
+  242 [kworker/R-kdmfl]
+  243 [kworker/R-kveri]
+  244 [kworker/R-kdmfl]
+  245 [kworker/R-kveri]
+  246 [kworker/R-ext4-]
+  247 [kworker/R-kdmfl]
+  248 [kworker/R-kveri]
+  249 [kworker/R-kdmfl]
+  250 [kworker/R-kveri]
+  251 [kworker/R-kdmfl]
+  252 [kworker/R-kveri]
+  265 init subcontext u:r:vendor_init:s0 16
+  267 ueventd
+  287 [kworker/R-kdmfl]
+  288 [kworker/R-kdmfl]
+  289 [kworker/R-kdmfl]
+  290 [kworker/R-kdmfl]
+  292 [kworker/R-kdmfl]
+  293 [kworker/R-kdmfl]
+  294 [kworker/R-kdmfl]
+  295 [kworker/R-kdmfl]
+  296 [kworker/R-kdmfl]
+  297 [kworker/R-kdmfl]
+  299 [kworker/R-kdmfl]
+  302 [kworker/R-kdmfl]
+  304 [kworker/R-kdmfl]
+  305 [kworker/R-kdmfl]
+  309 [kworker/R-kdmfl]
+  310 [kworker/R-kdmfl]
+  311 [kworker/R-kdmfl]
+  313 [kworker/R-kdmfl]
+  316 [kworker/R-kdmfl]
+  318 [kworker/R-kdmfl]
+  321 [kworker/R-kdmfl]
+  322 [kworker/R-kdmfl]
+  323 [kworker/R-kdmfl]
+  329 [kworker/R-ext4-]
+  330 [kworker/R-ext4-]
+  331 [kworker/R-ext4-]
+  335 prng_seeder
+  352 [kworker/R-tls-s]
+  353 [krfcommd]
+  357 logd
+  358 lmkd
+  359 servicemanager
+  360 [kworker/R-SSPM_]
+  361 [kworker/R-sspm_]
+  363 vndservicemanager /dev/vndbinder
+  365 [psimon]
+  366 [kworker/R-chipo]
+  378 [irq/29-chipone-tddi-fhd]
+  379 [btif_rxd]
+  380 [pt_notify_thread]
+  381 [conn-md-thread]
+  382 [dlpt_notify_thread]
+  383 vold --blkid_context=u:r:blkid:s0 --blkid_untrusted_context=u:r:blkid_untrusted:s0 --fsck_context=u:r:fsck:s0 --fsck_untrusted_context=u:r:fsck_untrusted:s0
+  384 android.hardware.boot-service.mtk
+  385 [qos_ipi_recv]
+  390 [kworker/R-ged_n]
+  391 [kworker/R-ged_k]
+  392 [kworker/R-ged_f]
+  393 [mgm_refill_worker]
+  394 [jbd2/mmcblk0p15-8]
+  395 [kworker/R-ext4-]
+  399 [kworker/R-kdmfl]
+  403 [kworker/R-free_]
+  404 [kworker/R-kbase]
+  405 [jbd2/mmcblk0p16-8]
+  406 [kworker/R-ext4-]
+  410 [jbd2/mmcblk0p12-8]
+  411 [kworker/R-ext4-]
+  414 [krtatm]
+  416 [kworker/R-bcct_]
+  417 [jbd2/mmcblk0p4-8]
+  418 [kworker/R-ext4-]
+  422 [kworker/R-SCP_W]
+  423 [kworker/R-SCP_L]
+  424 [kworker/R-SCP_R]
+  425 [nanohub]
+  426 [kworker/R-ipi_m]
+  427 [chre_kthread]
+  428 [scp_power_reset]
+  429 [jbd2/mmcblk0p3-8]
+  430 [kworker/R-ext4-]
+  434 [kworker/R-accel]
+  435 [keyEvent_send]
+  436 [irq/36-aw_sar0_irq]
+  437 [jbd2/mmcblk0p6-8]
+  438 [kworker/R-ext4-]
+  440 [kworker/R-uethe]
+  441 [kworker/R-uethe]
+  442 [kworker/R-uethe]
+  443 [id0_trusty_n/0]
+  444 [id0_trusty_n/1]
+  445 [id0_trusty_n/2]
+  446 [id0_trusty_n/3]
+  447 [id0_trusty_n/4]
+  448 [id0_trusty_n/5]
+  449 [id0_trusty_n/6]
+  450 [id0_trusty_n/7]
+  451 [trusty_poll_task]
+  452 [id0_trusty_k/0]
+  453 [id0_trusty_k/1]
+  454 [id0_trusty_k/2]
+  455 [id0_trusty_c/0]
+  457 [kworker/R-tmem_]
+  458 [kworker/R-tmem_]
+  459 [kworker/R-tmem_]
+  460 [kworker/R-tmem_]
+  461 [kworker/R-tmem_]
+  462 [kworker/R-tmem_]
+  463 [kworker/R-tmem_]
+  464 [kworker/R-tmem_]
+  465 [kworker/R-cmdq_]
+  466 [kworker/R-cmdq_]
+  468 [kworker/R-task_]
+  469 [kworker/R-cmdq_]
+  470 [kworker/R-cmdq_]
+  471 [kworker/R-cmdq_]
+  472 [kworker/R-cmdq_]
+  473 [kworker/R-cmdq_]
+  474 [kworker/R-cmdq_]
+  475 [kworker/R-cmdq_]
+  476 [kworker/R-cmdq_]
+  477 [kworker/R-cmdq_]
+  478 [kworker/R-cmdq_]
+  479 [kworker/R-cmdq_]
+  480 [kworker/R-cmdq_]
+  481 [kworker/R-cmdq_]
+  482 [kworker/R-cmdq_]
+  483 [kworker/R-cmdq_]
+  484 [kworker/R-cmdq_]
+  485 [kworker/R-cmdq_]
+  486 [kworker/R-cmdq_]
+  487 [kworker/R-cmdq_]
+  488 [kworker/R-cmdq_]
+  489 [kworker/R-cmdq_]
+  490 [kworker/R-delay]
+  491 [kworker/R-accde]
+  492 [kworker/R-dismi]
+  493 [kworker/R-accde]
+  494 [ipi_cpu_dvfs_rtask]
+  497 [EEM_CTRL_L]
+  498 [EEM_CTRL_B]
+  499 [EEM_CTRL_CCI]
+  500 [EEM_CTRL_GPU]
+  501 [Init_1_Stress]
+  502 [kworker/R-cpu_f]
+  503 [kworker/R-cpu_c]
+  504 [kworker/R-dram_]
+  505 [kworker/R-vcore]
+  506 [kworker/R-usb_a]
+  507 [kworker/R-sipa_]
+  508 [kworker/R-sipa_]
+  509 aee_aed
+  510 aee_aed64
+  511 aee_aedv
+  512 aee_aedv64
+  517 wmt_launcher -p /vendor/firmware/ -o 1
+  518 android.system.suspend-service
+  519 keystore2 /data/misc/keystore
+  520 android.hardware.gatekeeper-service.trustonic
+  521 android.hardware.security.keymint@3.0-service.trustonic
+  532 [irq/294-ccu]
+  533 [ccu-enque]
+  534 [kworker/R-cmdq_]
+  535 [kworker/R-cmdq_]
+  543 [kworker/R-cmdq_]
+  544 [kworker/R-cmdq_]
+  545 [kworker/R-task_]
+  546 [kworker/R-cmdq_]
+  549 [kworker/R-mtk-v]
+  550 [kworker/R-vdec_]
+  551 [kworker/R-vdec_]
+  552 [kworker/R-mtk-v]
+  553 [kworker/R-lt_wq]
+  554 [kworker/R-mt_us]
+  555 [touch_boost]
+  556 [kworker/R-task_]
+  557 [kworker/R-cmdq_]
+  558 [kworker/R-task_]
+  559 [kworker/R-cmdq_]
+  560 [kworker/R-cfg80]
+  561 [pause_drain_rqs]
+  562 [kfps]
+  563 [kworker/R-mt_fs]
+  564 [kworker/R-compo]
+  565 [kworker/R-fbt_c]
+  566 [kworker/R-mt_mi]
+  567 [kworker/R-fpt_c]
+  568 [kworker/R-fpt_c]
+  569 [dybridge_thread]
+  572 [mtk_stp_psm]
+  573 [mtk_stp_btm]
+  574 [mtk_wmtd]
+  575 [mtk_wmtd_worker]
+  584 [f2fs_discard-254:67]
+  585 [f2fs_gc-254:67]
+  591 tombstoned
+  641 [kworker/R-kveri]
+  642 [kworker/R-ext4-]
+  643 [kworker/R-ext4-]
+  644 [kworker/R-ext4-]
+  645 [kworker/R-kveri]
+  646 [kworker/R-kveri]
+  647 [kworker/R-kveri]
+  650 [kworker/R-ext4-]
+  651 [kworker/R-ext4-]
+  652 [kworker/R-ext4-]
+  653 [kworker/R-ext4-]
+  655 [kworker/R-ext4-]
+  658 [kworker/R-kveri]
+  659 [kworker/R-ext4-]
+  660 [kworker/R-ext4-]
+  661 [kworker/R-ext4-]
+  662 [kworker/R-kveri]
+  663 [kworker/R-ext4-]
+  664 [kworker/R-ext4-]
+  665 [kworker/R-kveri]
+  666 [kworker/R-ext4-]
+  667 [kworker/R-kveri]
+  668 [kworker/R-kveri]
+  669 [kworker/R-ext4-]
+  670 [kworker/R-ext4-]
+  671 [kworker/R-ext4-]
+  672 [kworker/R-ext4-]
+  673 [kworker/R-ext4-]
+  674 [kworker/R-ext4-]
+  675 [kworker/R-ext4-]
+  676 [kworker/R-kveri]
+  677 [kworker/R-kveri]
+  678 [kworker/R-ext4-]
+  679 [kworker/R-ext4-]
+  680 [kworker/R-kveri]
+  681 [kworker/R-ext4-]
+  682 [kworker/R-kveri]
+  683 [kworker/R-ext4-]
+  684 [kworker/R-kveri]
+  685 [kworker/R-ext4-]
+  686 [kworker/R-ext4-]
+  687 [kworker/R-kveri]
+  688 [kworker/R-ext4-]
+  689 [kworker/R-ext4-]
+  690 [kworker/R-kveri]
+  691 [kworker/R-kveri]
+  692 [kworker/R-kveri]
+  693 [kworker/R-ext4-]
+  694 [kworker/R-ext4-]
+  695 [kworker/R-ext4-]
+  696 [kworker/R-kveri]
+  698 [kworker/R-ext4-]
+  699 [kworker/R-ext4-]
+  700 [kworker/R-kveri]
+  701 [kworker/R-kveri]
+  702 [kworker/R-ext4-]
+  703 [kworker/R-ext4-]
+  704 [kworker/R-kveri]
+  705 [kworker/R-ext4-]
+  706 [kworker/R-ext4-]
+  707 [kworker/R-ext4-]
+  708 [kworker/R-ext4-]
+  709 [kworker/R-kveri]
+  710 [kworker/R-ext4-]
+  711 [kworker/R-ext4-]
+  835 [kworker/6:0-mm_percpu_wq]
+ 1079 [kworker/u16:0]
+ 1168 [sugov:0]
+ 1169 [sugov:6]
+ 1225 statsd
+ 1226 netd
+ 1227 zygote64
+ 1232 vendor.tcl.display.nxtvision.service
+ 1234 android.hardware.audio.service-aidl.mediatek
+ 1235 android.hardware.bluetooth-service-mediatek
+ 1236 android.hardware.drm-service.clearkey
+ 1237 android.hardware.graphics.allocator-V2-service-mediatek
+ 1240 android.hardware.graphics.composer@3.3-service
+ 1241 android.hardware.health-service.example
+ 1242 android.hardware.media.c2-mediatek
+ 1243 android.hardware.sensors-service.multihal
+ 1244 android.hardware.usb-aidl-service.mediatekv1.0
+ 1245 android.hardware.usb.gadget-aidl-service.mediatekv1.0
+ 1246 android.hardware.lights-service.mediatek
+ 1247 iptables-restore --noflush -w -v
+ 1248 ip6tables-restore --noflush -w -v
+ 1250 android.hardware.memtrack-service.mediatek
+ 1251 vendor.mediatek.hardware.mtkpower_applist-service.mediatek
+ 1253 android.hardware.thermal-service.mediatek
+ 1256 vendor.mediatek.hardware.mtkpower-service.mediatek
+ 1258 vendor.mediatek.hardware.nvram-service
+ 1259 vendor.mediatek.hardware.nwk_opt@1.0-service
+ 1262 vendor.tcl.ipel@1.0-service
+ 1265 vendor.tct.hardware.node.service
+ 1267 vendor.tct.hardware.sysinfo.service
+ 1269 vendor.trustonic.tee-service
+ 1277 android.hardware.cas-service.example
+ 1279 android.hardware.drm-service.widevine
+ 1281 audioserver
+ 1284 credstore /data/misc/credstore
+ 1287 gpuservice
+ 1299 surfaceflinger
+ 1301 android.hardware.audio.parameter_parser.service
+ 1305 fuelgauged
+ 1313 mcDriverDaemon --P1 /mnt/vendor/persist/mcRegistry -r /vendor/app/mcRegistry/06090000000000000000000000000000.drbin -r /vendor/app/mcRegistry/020f0000000000000000000000000000.drbin -r /vendor/app/mcRegistry/05120000000000000000000000000000.drbin -r /vendor/app/mcRegistry/05120000000000000000000000000001.drbin -r /vendor/app/mcRegistry/05160000000000000000000000000000.drbin -r /vendor/app/mcRegistry/020b0000000000000000000000000000.drbin -r /vendor/app/mcRegistry/05070000000000000000000000000000.drbin -r /vendor/app/mcRegistry/030b0000000000000000000000000000.drbin -r /vendor/app/mcRegistry/03100000000000000000000000000000.drbin -r /vendor/app/mcRegistry/030c0000000000000000000000000000.drbin -r /vendor/app/mcRegistry/031c0000000000000000000000000000.drbin -r /vendor/app/mcRegistry/032c0000000000000000000000000000.drbin -r /vendor/app/mcRegistry/033c0000000000000000000000000000.drbin -r /vendor/app/mcRegistry/034c0000000000000000000000000000.drbin -r /vendor/app/mcRegistry/035c0000000000000000000000000000.drbin -r /vendor/app/mcRegistry/036c0000000000000000000000000000.drbin -r /vendor/app/mcRegistry/037c0000000000000000000000000000.drbin -r /vendor/app/mcRegistry/40188311faf343488db888ad39496f9a.drbin -r /vendor/app/mcRegistry/090b0000000000000000000000000000.drbin -r /vendor/app/mcRegistry/0f5eed3c3b5a47afacca69a84bf0efad.drbin -r /vendor/app/mcRegistry/07060000000000000000000000007169.drbin -r /vendor/app/mcRegistry/4be4f7dc1f2c11e5b5f7727283247c7f.drbin -r /vendor/app/mcRegistry/08070000000000000000000000008270.drbin -r /vendor/app/mcRegistry/07070000000000000000000000000000.drbin -r /vendor/app/mcRegistry/07407000000000000000000000000000.drbin -r /vendor/app/mcRegistry/9073f03a9618383bb1856eb3f990babd.drbin -r /vendor/app/mcRegistry/6b3f5fa0f8cf55a7be2582587d62d63a.drbin -r /vendor/app/mcRegistry/5020170115e016302017012521300000.drbin -r /vendor/app/mcRegistry/07210000000000000000000000000000.drbin
+ 1337 [kworker/R-kdmfl]
+ 1339 adbd --root_seclabel=u:r:su:s0 --tim_seclabel=u:r:adbd_tradeinmode:s0
+ 1341 [kworker/R-kdmfl]
+ 1367 drmserver64
+ 1371 traced_probes
+ 1373 traced
+ 1376 connsyslogger
+ 1385 android.hardware.neuralnetworks-shim-service-mtk-legacy
+ 1387 tdefrag_engine
+ 1394 [kworker/R-fm_ti]
+ 1396 [kworker/R-fm_ei]
+ 1422 [rpmb_gp_Dci]
+ 1426 [wlan_rst_thread]
+ 1429 wlan_assistant
+ 1437 cameraserver
+ 1443 heserver
+ 1447 incidentd
+ 1457 installd
+ 1458 media.extractor aextractor
+ 1460 media.metrics diametrics
+ 1461 storaged
+ 1465 wificond
+ 1466 emdlogger
+ 1469 lbs_dbg_ext
+ 1472 thermald
+ 1474 mediaserver
+ 1476 mobile_log_d
+ 1490 netdiag
+ 1491 camerahalserver
+ 1502 thermal
+ 1507 thermalloadalgod
+ 1511 mtk_storageproxyd -d /dev/trusty-ipc-dev1 -g /dev/trusty-ipc-dev0 -p /data/vendor/trusty -r /dev/0:0:0:49476
+ 1513 sh /vendor/bin/tcl_perf_ko_ctrl.sh
+ 1515 v3avpud -f
+ 1516 vendor.mediatek.hardware.pq_aidl-service
+ 1519 cameraalgoservice
+ 1521 media.swcodec oid.media.swcodec/bin/mediaswcodec
+ 1524 gatekeeperd /data/misc/gatekeeper
+ 1528 update_engine --logtostderr --logtofile --foreground
+ 1535 netdagent
+ 1561 [kworker/R-kbase]
+ 1723 com.google.android.partnersetup
+ 1726 com.google.android.apps.turbo:aab
+ 1774 system_server
+ 2078 android.hardware.biometrics.face-service
+ 2109 android.hardware.wifi-service-lazy
+ 2116 [main_thread]
+ 2117 [hif_thread]
+ 2118 [rx_thread]
+ 2123 wpa_supplicant -O/data/vendor/wifi/wpa/sockets -dd -g@android:wpa_wlan0
+ 2212 com.tcl.guard
+ 2244 com.android.systemui
+ 2361 com.android.networkstack.process
+ 2439 com.android.bluetooth
+ 2453 com.android.phone
+ 2489 com.mediatek.ims
+ 2499 com.android.se
+ 2686 com.tcl.ttvs.container
+ 2752 com.tcl.ttvs
+ 2817 com.tcl.android.launcher
+ 2819 [kworker/R-kbase]
+ 2913 [f2fs_ckpt-254:67]
+ 2918 com.tct.onetouchbooster
+ 2974 com.google.android.ext.services
+ 2997 batterywarning
+ 2998 cota_wr
+ 2999 oembin_wr
+ 3010 [kworker/R-kbase]
+ 3049 [kworker/6:2-events_freezable_power_]
+ 3068 [kworker/0:2-events_freezable_power_]
+ 3292 com.tcl.guard:core
+ 3358 [kworker/4:1-events_freezable_power_]
+ 3563 [kworker/4:0H-kblockd]
+ 4266 com.tct.smart.stylus
+ 4267 com.tct.smart.sidebar
+ 4311 com.google.android.providers.media.module
+ 4313 com.google.android.as
+ 4349 [kworker/5:1-mm_percpu_wq]
+ 4357 [kworker/1:1-events]
+ 4387 com.tct.iris
+ 4603 [kworker/R-kbase]
+ 4693 com.tcl.fota.system
+ 4727 [kworker/7:0H-kblockd]
+ 4790 android.process.acore
+ 5226 com.android.providers.calendar
+ 5646 [kworker/0:2H-kverityd]
+ 5649 [kworker/1:0H-kverityd]
+ 5650 [kworker/2:2H-kverityd]
+ 6292 [kworker/6:3-mm_percpu_wq]
+ 6297 [kworker/0:1-events]
+ 6358 [kworker/4:3-events_freezable_power_]
+ 6436 [kworker/2:1H-kblockd]
+ 6464 virtualizationservice
+ 6486 [kworker/6:4-events_freezable_power_]
+ 6558 [kworker/3:1H-kblockd]
+ 6561 [kworker/3:4H-kverityd]
+ 6569 [kworker/6:7H-kblockd]
+ 6570 [kworker/6:8H-kverityd]
+ 6572 [kworker/0:1H-kverityd]
+ 6573 [kworker/0:3H-kverityd]
+ 6574 [kworker/5:1H-kverityd]
+ 6575 [kworker/5:3H-kverityd]
+ 6576 [kworker/5:4H-kverityd]
+ 6577 [kworker/5:5H-kblockd]
+ 6578 [kworker/5:6H-kverityd]
+ 7018 [kworker/4:4-mm_percpu_wq]
+ 7036 dev.vkrender.airplay
+ 7380 [kworker/1:1H-kverityd]
+ 7381 [kworker/1:3H-kverityd]
+ 7576 [kworker/5:0-events]
+ 7696 [kworker/0:0-events]
+ 7935 [kworker/1:4H-kverityd]
+ 8328 [kworker/1:5H-kblockd]
+ 8341 [kworker/6:1-events_freezable_power_]
+ 8403 ps -A -o PID,ARGS
+ 9154 [kworker/3:1-events]
+12026 abb
+13791 [kworker/u16:1-adb]
+13830 com.google.android.googlequicksearchbox:interactor
+15773 [erofs_worker/1]
+15774 [erofs_worker/2]
+15775 [erofs_worker/3]
+15776 [erofs_worker/4]
+15777 [erofs_worker/5]
+15778 [erofs_worker/6]
+15779 [erofs_worker/7]
+15793 cat /proc/tcl_modules_ctrl_msg
+16406 [kworker/R-kbase]
+17375 com.google.android.permissioncontroller
+18539 com.tct.reducesar
+18811 com.google.android.apps.chromecast.app
+19321 webview_zygote
+19496 [kworker/1:2-events]
+20813 com.google.android.inputmethod.latin
+21742 com.google.android.gms
+22345 [kworker/R-kbase]
+23572 [kworker/u16:2-events_unbound]
+24479 [kworker/3:0-events]
+24481 [kworker/2:0-events]
+25167 [kworker/7:2-mm_percpu_wq]
+25717 com.google.android.googlequicksearchbox:search
+25763 com.google.android.googlequicksearchbox:googleapp
+25991 com.google.android.tts
+26012 [kworker/u17:1]
+26029 com.google.android.deskclock
+26045 com.google.android.apps.nbu.files
+26067 [kworker/4:1H-kverityd]
+26078 com.google.android.apps.kids.home
+26112 com.google.android.apps.subscriptions.red
+26144 com.android.vending
+26253 com.android.vending:background
+26386 com.google.android.apps.photos
+27102 com.android.chrome
+27659 [kworker/3:3H-fsverity_read_queue]
+27664 com.android.settings
+27878 [kworker/R-kbase]
+28163 [kworker/1:2H-kverityd]
+28239 com.android.rkpdapp
+28378 [kworker/4:2-mm_percpu_wq]
+28564 com.discord
+29123 com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0
+29161 [kworker/R-kbase]
+29200 [kworker/R-kbase]
+29201 [kworker/u17:2-composer_wq]
+29219 com.google.android.webview:webview_service
+29475 [kworker/7:3H-fsverity_read_queue]
+29848 com.android.externalstorage
+29875 [kworker/R-kdmfl]
+29876 [kworker/R-kveri]
+29977 [kworker/7:0-ipv6_addrconf]
+31378 com.google.android.gms.unstable
+32391 [kworker/2:3-mm_percpu_wq]
+32481 com.android.calllogbackup
+32494 com.google.android.accessibility.switchaccess
+32629 com.android.traceur
+32662 com.google.android.apps.turbo
+32693 com.google.android.documentsui
+32724 com.google.android.cellbroadcastreceiver
+32737 com.google.android.marvin.talkback
