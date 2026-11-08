@@ -55,3 +55,14 @@ max=4.297075ms, inferred A/V mapping delta0ns. Consumer/producer RSS slopes
 Evidence: `shared-cpu-benchmark/linux-nv12-1080p60-sustained/`.
 Same transport-only and inferred-mapping limitations apply; no physical output
 or full-stream pixel-identity claim. Linux sustained cells2/4 complete.
+
+## Third sustained cell
+
+Linux BGRA3840x2160@30,1800s, docs448251e with unchanged65a1268 binaries:
+54000video/86400000PCM,180000contiguous audio blocks, complete queues and
+zero34ms video/audio arrival misses. Video p95=24.317275ms,max=27.683631ms;
+inferred A/V mapping delta0ns. Consumer/producer RSS slopes3.23/3.24KB/min
+pass64KB/min; CPU35.32%/45.96%, handle/thread slopes nonpositive.
+Evidence: `shared-cpu-benchmark/linux-bgra-4k30-sustained/`.
+Same transport-only/inferred-mapping scope, no physical-output or full-stream
+pixel-identity claim. Linux sustained cells3/4 complete.
