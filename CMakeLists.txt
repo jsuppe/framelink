@@ -1151,6 +1151,25 @@ if(FRAMELINK_BUILD_TESTS AND TARGET framelink_gst_session)
     add_test(NAME gst_audio_source COMMAND fl_gst_audio_source $<TARGET_FILE:gstframelink>)
     set_tests_properties(gst_audio_source PROPERTIES TIMEOUT 20)
 endif()
+if(FRAMELINK_BUILD_TESTS AND TARGET framelink_gst_session AND NOT WIN32)
+    add_executable(fl_gst_shared_cpu_source test/fl_gst_shared_cpu_source.cpp)
+    target_link_libraries(fl_gst_shared_cpu_source PRIVATE framelink_gst_session)
+    if(ANDROID)
+        target_link_libraries(fl_gst_shared_cpu_source PRIVATE gstframelink
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstapp.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstcoreelements.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstgdp.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstgio.a"
+            ${FL_ANDROID_SESSION_GIO_STATIC_LDFLAGS} ${FL_ANDROID_GST_STATIC_LDFLAGS})
+    elseif(WIN32)
+        target_link_libraries(fl_gst_shared_cpu_source PRIVATE gstapp-1.0.lib)
+    else()
+        target_link_libraries(fl_gst_shared_cpu_source PRIVATE PkgConfig::FL_GST_APP)
+    endif()
+    add_dependencies(fl_gst_shared_cpu_source gstframelink)
+    add_test(NAME gst_shared_cpu_source COMMAND fl_gst_shared_cpu_source $<TARGET_FILE:gstframelink>)
+    set_tests_properties(gst_shared_cpu_source PROPERTIES TIMEOUT 20)
+endif()
 if(FRAMELINK_BUILD_TESTS AND TARGET framelink_gst_session)
     add_executable(fl_gst_av_timeline test/fl_gst_av_timeline.cpp)
     target_link_libraries(fl_gst_av_timeline PRIVATE framelink_gst_session)

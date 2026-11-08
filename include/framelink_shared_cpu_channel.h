@@ -39,6 +39,11 @@ FL_API flResult flSharedCpuSubmitWithMetadata(flSharedCpuLease*,uint64_t sequenc
 // Read lease only. Legacy frames return an all-zero metadata struct. Does not
 // consume a reference; valid while the lease survives, including after close.
 FL_API flResult flSharedCpuReadMetadata(const flSharedCpuLease*,flFrameMetadata*);
+// Read the negotiated local role/policy and immutable session. All outputs
+// required; unchanged on failure. Operations are actual declared copies, not
+// merely allowed permissions. No borrowed internal pointers are returned.
+FL_API flResult flSharedCpuQuery(flSharedCpuChannel*,flSessionConfig*,
+    uint32_t* operations,uint32_t* flags,int* producer,uint32_t* slots);
 // Close disconnects immediately; existing leases retain their mapped storage.
 // After close, submit/release consumes the lease but reports DISCONNECTED.
 FL_API void flSharedCpuClose(flSharedCpuChannel*);

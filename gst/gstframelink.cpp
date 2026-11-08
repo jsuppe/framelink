@@ -1044,6 +1044,10 @@ typedef struct _GstFrameLinkSrc {
     guint poolSize,maxQueueAgeMs;
     gboolean nativeMemory;
     gboolean gpuReadback;
+    gboolean sharedCpu;
+#ifndef _WIN32
+    flSharedCpuChannel* cpuChannel;
+#endif
 #ifdef FL_GST_EGL_READBACK
     FrameLinkEglReadback* eglReadback;
 #endif
@@ -1080,7 +1084,7 @@ G_DEFINE_TYPE(GstFrameLinkSrc, gst_framelink_src, GST_TYPE_PUSH_SRC)
 #define GST_FRAMELINK_SRC(o) \
     (G_TYPE_CHECK_INSTANCE_CAST((o), gst_framelink_src_get_type(), GstFrameLinkSrc))
 
-enum { SRC_PROP_0, SRC_PROP_CHANNEL, SRC_PROP_WIDTH, SRC_PROP_HEIGHT, SRC_PROP_FPS, SRC_PROP_FORMAT, SRC_PROP_PRESERVE_TIMESTAMPS, SRC_PROP_FRAME_METADATA, SRC_PROP_POOL_SIZE, SRC_PROP_MAX_QUEUE_AGE, SRC_PROP_EXPIRED_FRAMES, SRC_PROP_NATIVE_MEMORY, SRC_PROP_GPU_READBACK };
+enum { SRC_PROP_0, SRC_PROP_CHANNEL, SRC_PROP_WIDTH, SRC_PROP_HEIGHT, SRC_PROP_FPS, SRC_PROP_FORMAT, SRC_PROP_PRESERVE_TIMESTAMPS, SRC_PROP_FRAME_METADATA, SRC_PROP_POOL_SIZE, SRC_PROP_MAX_QUEUE_AGE, SRC_PROP_EXPIRED_FRAMES, SRC_PROP_NATIVE_MEMORY, SRC_PROP_GPU_READBACK, SRC_PROP_SHARED_CPU };
 
 #ifdef FL_GST_DMABUF
 #define FL_SOURCE_CAPS FRAMELINK_CAPS ";" GST_VIDEO_CAPS_MAKE_WITH_FEATURES("memory:DMABuf", "{ BGRA, RGBA, NV12, RGB10A2_LE }")
@@ -1170,9 +1174,20 @@ static GstCaps* srcGetCaps(GstBaseSrc* base, GstCaps* filter) {
     return caps;
 }
 
+#ifndef _WIN32
+#include "fl_gst_shared_cpu_source.inc"
+#endif
+
 static gboolean srcStart(GstBaseSrc* base) {
     if(!validSessionContext(GST_ELEMENT(base)))return FALSE;
     GstFrameLinkSrc* self = GST_FRAMELINK_SRC(base);
+    if(self->sharedCpu){
+#ifndef _WIN32
+        return srcSharedCpuStart(self);
+#else
+        return FALSE;
+#endif
+    }
     if(self->gpuReadback){
 #ifdef FL_GST_EGL_READBACK
         if(self->nativeMemory||!self->memoryPolicyApplied||!FrameLinkEglReadback::permits(self->memoryPolicy)||
@@ -1254,6 +1269,9 @@ static gboolean srcStart(GstBaseSrc* base) {
 static gboolean srcStop(GstBaseSrc* base) {
     GstFrameLinkSrc* self = GST_FRAMELINK_SRC(base);
     gst_clear_buffer(&self->pendingDelivery);
+#ifndef _WIN32
+    if(self->cpuChannel){flSharedCpuClose(self->cpuChannel);self->cpuChannel=nullptr;}
+#endif
 #ifdef FL_GST_EGL_READBACK
     delete self->eglReadback;self->eglReadback=nullptr;
 #endif
@@ -1270,6 +1288,8 @@ static gboolean srcStop(GstBaseSrc* base) {
 
 static gboolean srcUnlock(GstBaseSrc* base) {
     g_atomic_int_set(&GST_FRAMELINK_SRC(base)->flushing, 1);
+    auto*self=GST_FRAMELINK_SRC(base);
+    if(self->sharedCpu&&self->session)fl_gst_session_cancel(self->session);
     return TRUE;
 }
 
@@ -1408,6 +1428,9 @@ static GstFlowReturn srcCreateImpl(GstPushSrc* push, GstBuffer** outbuf) {
         }while(result==FL_GST_SESSION_TIMEOUT);
         if(result!=FL_GST_SESSION_READY){GST_ELEMENT_ERROR(self,RESOURCE,READ,("coordinated session not ready or cancelled"),(NULL));return GST_FLOW_ERROR;}
     }
+#ifndef _WIN32
+    if(self->sharedCpu)return srcSharedCpuCreate(self,outbuf);
+#endif
     const gint64 idleDeadline=g_get_monotonic_time()+gint64(self->sessionConfig.idleTimeoutMs)*1000;
     flFrame frame = {};
     for (;;) {
@@ -1685,6 +1708,9 @@ static void srcSetProperty(GObject* obj, guint id, const GValue* value, GParamSp
     if(self->session&&GST_STATE(self)!=GST_STATE_NULL){GST_WARNING_OBJECT(self,"session configuration immutable outside NULL");return;}
     if(self->memoryPolicyApplied){GST_WARNING_OBJECT(self,"authenticated session properties are immutable; create a new element/session");return;}
     switch (id) {
+        case SRC_PROP_SHARED_CPU:
+            if(GST_STATE(self)!=GST_STATE_NULL||self->ch)return;
+            self->sharedCpu=g_value_get_boolean(value);break;
         case SRC_PROP_GPU_READBACK:
             if(GST_STATE(self)>GST_STATE_READY||self->ch){GST_WARNING_OBJECT(self,"readback mode cannot change while allocated");break;}
             self->gpuReadback=g_value_get_boolean(value);break;
@@ -1723,6 +1749,7 @@ static void srcSetProperty(GObject* obj, guint id, const GValue* value, GParamSp
 static void srcGetProperty(GObject* obj, guint id, GValue* value, GParamSpec* spec) {
     GstFrameLinkSrc* self = GST_FRAMELINK_SRC(obj);
     switch (id) {
+        case SRC_PROP_SHARED_CPU: g_value_set_boolean(value,self->sharedCpu);break;
         case SRC_PROP_GPU_READBACK: g_value_set_boolean(value,self->gpuReadback);break;
         case SRC_PROP_NATIVE_MEMORY: g_value_set_boolean(value,self->nativeMemory);break;
         case SRC_PROP_EXPIRED_FRAMES: GST_OBJECT_LOCK(self);g_value_set_uint64(value,self->expiredFrames);GST_OBJECT_UNLOCK(self);break;
@@ -1745,6 +1772,9 @@ static void srcFinalize(GObject* obj) {
     srcDropStaging(self);
 #endif
     gst_clear_buffer(&self->pendingDelivery);
+#ifndef _WIN32
+    if(self->cpuChannel){flSharedCpuClose(self->cpuChannel);self->cpuChannel=nullptr;}
+#endif
 #ifdef FL_GST_EGL_READBACK
     delete self->eglReadback;self->eglReadback=nullptr;
 #endif
@@ -1759,7 +1789,7 @@ static void srcFinalize(GObject* obj) {
 }
 
 static gboolean srcAdoptChannel(GstFrameLinkSrc* self,flChannel* channel) {
-    if(GST_STATE(self)!=GST_STATE_NULL || self->ch || !channel || self->memoryPolicyApplied)return FALSE;
+    if(GST_STATE(self)!=GST_STATE_NULL || self->ch || !channel || self->memoryPolicyApplied || self->sharedCpu)return FALSE;
     flChannelInfo info{};if(flQuery(channel,&info)!=FL_OK)return FALSE;
     if(info.width!=(guint)self->width || info.height!=(guint)self->height ||
        info.format!=toFlFormat(gst_video_format_from_string(self->format)))return FALSE;
@@ -1846,6 +1876,10 @@ static void gst_framelink_src_class_init(GstFrameLinkSrcClass* klass) {
         g_param_spec_int("fps", "FPS", "nominal frame rate advertised in the caps", 1, 240,
                          30, (GParamFlags)(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
 
+    g_object_class_install_property(gobject,SRC_PROP_SHARED_CPU,
+        g_param_spec_boolean("shared-cpu","Shared CPU source",
+            "Explicit broker-bound video-only shared CPU source; negotiated COPY required; no native fallback",
+            FALSE,(GParamFlags)(G_PARAM_READWRITE|G_PARAM_STATIC_STRINGS)));
     g_object_class_install_property(gobject,SRC_PROP_GPU_READBACK,
         g_param_spec_boolean("gpu-readback","Explicit GPU readback",
             "Linux BGRA/RGBA GPU staging into CPU output; requires adopted channel and negotiated COPY|READBACK; no fallback",

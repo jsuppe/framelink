@@ -1,0 +1,69 @@
+[
+  {
+    "step": "final-build-linux",
+    "command": [
+      "cmake",
+      "--build",
+      "<linux-home>/dev/build/framelink-m6-linux",
+      "-j4",
+      "--target",
+      "fl_gst_shared_cpu_source"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "final-linux-source",
+    "command": [
+      "<linux-home>/dev/build/framelink-m6-linux/fl_gst_shared_cpu_source",
+      "<linux-home>/dev/build/framelink-m6-linux/libgstframelink.so"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "final-build-arm64",
+    "command": [
+      "cmake",
+      "--build",
+      "<linux-home>/dev/build/framelink-m6-arm64",
+      "-j4",
+      "--target",
+      "fl_gst_shared_cpu_source"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "final-build-x86_64",
+    "command": [
+      "cmake",
+      "--build",
+      "<linux-home>/dev/build/framelink-m6-x86_64",
+      "-j4",
+      "--target",
+      "fl_gst_shared_cpu_source"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "final-push",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "push",
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_gst_shared_cpu_source",
+      "/data/local/tmp/framelink-cpu-gst-source/"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "final-android-source",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "shell",
+      "cd /data/local/tmp/framelink-cpu-gst-source && ./fl_gst_shared_cpu_source static"
+    ],
+    "exit": 0
+  }
+]
