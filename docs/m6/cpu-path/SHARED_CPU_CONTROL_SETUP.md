@@ -39,9 +39,9 @@ the forthcoming frame protocol. This is normal distributed-connection uncertaint
 not permission to reuse slots. Session-level retry must use a new generation and
 respect old held storage.
 
-**There is still no live frame protocol.** Next: ready/release ownership,
-generation and sequence checks, and bounded peer-death behavior before public
-factories or GStreamer expose this route. Native GPU entry points remain unavailable.
+An internal ready/release protocol is now implemented; see SHARED_CPU_FRAMES.md.
+Public lease integration and routing remain pending. Native GPU entry points
+remain unavailable.
 
 ## Evidence
 

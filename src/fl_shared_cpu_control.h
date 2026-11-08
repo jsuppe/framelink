@@ -13,9 +13,14 @@ class SharedCpuControl {
     flMemoryRequirements requirements_[2]{};
     uint32_t operations_[2]{};
     bool producer_=false,agreed_=false,poolExchanged_=false,accepted_=false;
+    size_t poolCount_=0;
+    uint64_t lastReady_=0;
+    std::array<uint64_t,FL_MAX_POOL_SIZE> slots_{};
     static constexpr size_t HelloSize=256,PoolHeader=16;
     static void put(uint8_t*p,uint32_t x){for(unsigned i=0;i<4;i++)p[i]=uint8_t(x>>(i*8));}
     static uint32_t get(const uint8_t*p){uint32_t x=0;for(unsigned i=0;i<4;i++)x|=uint32_t(p[i])<<(i*8);return x;}
+    static void put64(uint8_t*p,uint64_t x){put(p,uint32_t(x));put(p+4,uint32_t(x>>32));}
+    static uint64_t get64(const uint8_t*p){return uint64_t(get(p))|(uint64_t(get(p+4))<<32);}
     flResult fail(flResult r=FL_INVALID){link_=Channel{};agreed_=false;accepted_=false;return r;}
     struct Received {
         std::optional<Message> message;
@@ -76,7 +81,7 @@ public:
         const auto*p=m.payload.data();
         if(get(p)!=0x31414346||get(p+4)!=1||get(p+8)!=uint32_t(session_.generation)||
            get(p+12)!=uint32_t(session_.generation>>32)||get(p+16)!=count||get(p+20))return fail();
-        accepted_=true;return FL_OK;
+        poolCount_=count;accepted_=true;return FL_OK;
     }
     // Import publishes out before the ACK send. If that send fails, out retains
     // the newly imported storage but this connection is failed/not accepted.
@@ -99,7 +104,54 @@ public:
         put(ack.data()+8,uint32_t(session_.generation));put(ack.data()+12,uint32_t(session_.generation>>32));
         put(ack.data()+16,uint32_t(count));
         if(!link_.send(MsgType::SharedCpuAccepted,ack.data(),ack.size()))return fail(FL_DISCONNECTED);
-        accepted_=true;return FL_OK;
+        poolCount_=count;accepted_=true;return FL_OK;
+    }
+    struct Frame {uint64_t sequence=0;int64_t ptsNs=0;uint32_t slot=0;};
+private:
+    flResult sendFrameMessage(MsgType type,uint32_t magic,const Frame& frame){
+        std::array<uint8_t,40> wire{};put(wire.data(),magic);put(wire.data()+4,1);
+        put64(wire.data()+8,session_.generation);put64(wire.data()+16,frame.sequence);
+        put64(wire.data()+24,uint64_t(frame.ptsNs));put(wire.data()+32,frame.slot);
+        return link_.send(type,wire.data(),wire.size())?FL_OK:fail(FL_DISCONNECTED);
+    }
+    flResult receiveFrameMessage(MsgType type,uint32_t magic,Frame& out){
+        Received received{link_.recv()};if(!received.message)return fail(FL_DISCONNECTED);
+        const auto&m=*received.message;
+        if(m.type!=type||m.payload.size()!=40||!m.fds.empty())return fail();
+        const auto*p=m.payload.data();
+        if(get(p)!=magic||get(p+4)!=1||get64(p+8)!=session_.generation||get(p+36)||
+           !get64(p+16)||get64(p+24)>uint64_t(INT64_MAX)||get(p+32)>=poolCount_)return fail();
+        out={get64(p+16),int64_t(get64(p+24)),get(p+32)};return FL_OK;
+    }
+public:
+    // Serialized CPU-only protocol. Before submit, caller finishes all writes;
+    // before release, caller finishes ALL reads and retires any borrowed views.
+    // This does not make raw mapped pointers enforceable access leases.
+    flResult submit(const Frame& frame){
+        if(!accepted_||!producer_||frame.slot>=poolCount_||!frame.sequence||
+           frame.sequence<=lastReady_||frame.ptsNs<0)return fail();
+        if(slots_[frame.slot])return FL_BUSY; // no implicit overwrite/drop
+        auto r=sendFrameMessage(MsgType::SharedCpuReady,0x31464346,frame);
+        if(r!=FL_OK)return r;
+        slots_[frame.slot]=frame.sequence;lastReady_=frame.sequence;return FL_OK;
+    }
+    flResult receiveFrame(Frame& out){
+        if(!accepted_||producer_)return fail();
+        Frame frame;auto r=receiveFrameMessage(MsgType::SharedCpuReady,0x31464346,frame);if(r!=FL_OK)return r;
+        if(frame.sequence<=lastReady_||slots_[frame.slot])return fail();
+        slots_[frame.slot]=frame.sequence;lastReady_=frame.sequence;out=frame;return FL_OK;
+    }
+    flResult release(uint32_t slot,uint64_t sequence){
+        if(!accepted_||producer_||slot>=poolCount_||!sequence||slots_[slot]!=sequence)return fail();
+        auto r=sendFrameMessage(MsgType::SharedCpuReleased,0x31524346,{sequence,0,slot});
+        if(r!=FL_OK)return r;
+        slots_[slot]=0;return FL_OK;
+    }
+    flResult receiveRelease(Frame& out){
+        if(!accepted_||!producer_)return fail();
+        Frame frame;auto r=receiveFrameMessage(MsgType::SharedCpuReleased,0x31524346,frame);if(r!=FL_OK)return r;
+        if(frame.ptsNs||slots_[frame.slot]!=frame.sequence)return fail();
+        slots_[frame.slot]=0;out=frame;return FL_OK;
     }
 };
 }

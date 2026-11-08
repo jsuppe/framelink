@@ -36,6 +36,8 @@ enum class MsgType : uint32_t {
     SharedCpuHello = 9, // explicit CPU-only control extension; never legacy negotiation
     SharedCpuPool = 10, // FCP1 descriptors and one FD per allocation
     SharedCpuAccepted = 11, // FCA1 positive acceptance of imported pool
+    SharedCpuReady = 12, // FCF1 completed CPU writes, exact slot/sequence
+    SharedCpuReleased = 13, // FCR1 completed CPU reads, exact slot/sequence
     Bye = 7,        // either way: orderly shutdown
 };
 
