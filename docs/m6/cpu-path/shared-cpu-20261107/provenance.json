@@ -1,0 +1,8 @@
+{
+  "base_revision": "6275fe5d3a0efe0fccd4f29d160b4b73324551a2",
+  "command": "/usr/bin/time -v -o resources.txt ./probe > results.csv 2> stderr.txt",
+  "build": "c++ -std=c++17 -O2 -Wall -Wextra probe.cpp -o probe",
+  "source_sha256": "6720e38192b9ac23b458ba85f325360098c0f333ed9079090921ec17fb7f4d1f",
+  "binary_sha256": "4ba6beed3add59bbdd67779661d1ed7e47622777dec2f2080664941fbc74b0a5",
+  "scope": "Real sealed-size memfd mappings in separate forked producer/consumer processes. Distinct read-only consumer mapping. Explicit row memcpy at both endpoints and ACK before overwrite. Descriptor inherited at fork, not passed using FrameLink; no GPU or session integration, pacing, or A/V qualification."
+}

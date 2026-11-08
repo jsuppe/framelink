@@ -1,0 +1,50 @@
+{
+  "BGRA/1920": {
+    "write_ms": {
+      "first_ms": 2.67504,
+      "median_ms": 0.611316,
+      "max_ms": 2.67504
+    },
+    "read_copy_ms": {
+      "first_ms": 0.93558,
+      "median_ms": 0.5670895,
+      "max_ms": 0.93558
+    }
+  },
+  "BGRA/3840": {
+    "write_ms": {
+      "first_ms": 12.22028,
+      "median_ms": 3.3574805,
+      "max_ms": 12.22028
+    },
+    "read_copy_ms": {
+      "first_ms": 4.543034,
+      "median_ms": 3.4304815,
+      "max_ms": 4.543034
+    }
+  },
+  "NV12/1920": {
+    "write_ms": {
+      "first_ms": 0.907948,
+      "median_ms": 0.108864,
+      "max_ms": 0.907948
+    },
+    "read_copy_ms": {
+      "first_ms": 0.204142,
+      "median_ms": 0.1108225,
+      "max_ms": 0.204142
+    }
+  },
+  "NV12/3840": {
+    "write_ms": {
+      "first_ms": 4.083242,
+      "median_ms": 1.222349,
+      "max_ms": 4.083242
+    },
+    "read_copy_ms": {
+      "first_ms": 1.28466,
+      "median_ms": 1.0582815,
+      "max_ms": 1.28466
+    }
+  }
+}

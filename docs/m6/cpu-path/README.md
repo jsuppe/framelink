@@ -71,8 +71,11 @@ verification method is opt-in and adds no readback to timed benchmark runs.
 Linux CTest passes, Android arm64 execution passes, and both Android ABIs build;
 see `visibility-regression/`. Windows does not build this EGL-only test.
 
-Next bounded task: implement an **explicitly selected and negotiated** Linux
-staging path without changing native defaults.
+Implemented explicit Linux staging in `6275fe5`; see [adapter contract and
+validation](EGL_READBACK.md). A separate real cross-process cached allocation
+control also passes 32 full frames; see [shared-CPU comparison](SHARED_CPU_CONTROL.md).
+Next bounded task: implement the explicitly negotiated shared-CPU resource and
+descriptor contract without changing native defaults.
 Do not smuggle readback into a CPU-copy-only or strict native agreement:
 `FL_MEMORY_COPY|FL_MEMORY_READBACK` must be permitted and reported, including
 payload byte counts. Preserve source leases until GPU completion; make context,
