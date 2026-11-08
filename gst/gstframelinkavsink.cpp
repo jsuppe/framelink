@@ -47,7 +47,7 @@ typedef struct _GstFrameLinkAvSink {
  gchar*sessionPath,*tracks,*videoFormat,*audioFormat;
  guint width,height,fpsN,fpsD,rate,channels,connectMs,idleMs,audioQueueMs,videoQueue,videoPool;
  GstElement*video,*audio;GstPad*videoPad,*audioPad;
- FlGstSession*session;gboolean local;
+ FlGstSession*session;gboolean local,sharedCpu;
  GCancellable*cancel;std::thread*worker;std::thread*drainer;Shared*shared;
  std::vector<GstMessage*>*heldEos;guint eosNeeded;gulong probes[2];
 } GstFrameLinkAvSink;
@@ -60,7 +60,7 @@ static GstStaticPadTemplate audioTemplate=GST_STATIC_PAD_TEMPLATE("audio_sink",G
  GST_STATIC_CAPS("audio/x-raw,format={S16LE,F32LE},layout=interleaved,rate=[8000,192000],channels=[1,2]"));
 
 enum {PROP_0,PROP_SESSION,PROP_TRACKS,PROP_VIDEO_FORMAT,PROP_WIDTH,PROP_HEIGHT,PROP_FRAMERATE,PROP_AUDIO_FORMAT,PROP_RATE,PROP_CHANNELS,
- PROP_CONNECT,PROP_IDLE,PROP_AUDIO_QUEUE,PROP_VIDEO_QUEUE,PROP_VIDEO_POOL,PROP_ID,PROP_GENERATION,PROP_AUDIO_ID,PROP_VIDEO_ID};
+ PROP_CONNECT,PROP_IDLE,PROP_AUDIO_QUEUE,PROP_VIDEO_QUEUE,PROP_VIDEO_POOL,PROP_SHARED_CPU,PROP_ID,PROP_GENERATION,PROP_AUDIO_ID,PROP_VIDEO_ID};
 
 static bool wantVideo(GstFrameLinkAvSink*s){return s->tracks&&(!strcmp(s->tracks,"av")||!strcmp(s->tracks,"video"));}
 static bool wantAudio(GstFrameLinkAvSink*s){return s->tracks&&(!strcmp(s->tracks,"av")||!strcmp(s->tracks,"audio"));}
@@ -192,6 +192,8 @@ static GstStateChangeReturn changeState(GstElement*element,GstStateChange transi
  auto*s=reinterpret_cast<GstFrameLinkAvSink*>(element);
  switch(transition){
  case GST_STATE_CHANGE_NULL_TO_READY:{
+  if(s->sharedCpu&&(!wantVideo(s)||(s->sessionPath&&*s->sessionPath))){GST_ELEMENT_ERROR(s,RESOURCE,SETTINGS,("shared-cpu requires broker-bound video context, no session path or native memory"),(nullptr));return GST_STATE_CHANGE_FAILURE;}
+  if(s->video)g_object_set(s->video,"shared-cpu",s->sharedCpu,nullptr);
   if(!s->tracks||(!wantVideo(s)&&!wantAudio(s))){GST_ELEMENT_ERROR(s,RESOURCE,SETTINGS,("tracks must be audio, video or av"),(nullptr));return GST_STATE_CHANGE_FAILURE;}
   if((wantVideo(s)&&!s->video)||(wantAudio(s)&&!s->audio)){GST_ELEMENT_ERROR(s,CORE,MISSING_PLUGIN,("FrameLink video/audio sinks unavailable"),(nullptr));return GST_STATE_CHANGE_FAILURE;}
   if(s->sessionPath&&*s->sessionPath){
@@ -280,7 +282,7 @@ static void handleMessage(GstBin*bin,GstMessage*message){
 }
 
 static gboolean adoptChannel(GstFrameLinkAvSink*s,flChannel*channel){
- if(s->local||!s->video||GST_STATE(s)!=GST_STATE_NULL)return FALSE;
+ if(s->sharedCpu||s->local||!s->video||GST_STATE(s)!=GST_STATE_NULL)return FALSE;
  gboolean adopted=FALSE;g_signal_emit_by_name(s->video,"adopt-channel",channel,&adopted);return adopted;
 }
 
@@ -288,6 +290,7 @@ static void setProperty(GObject*object,guint id,const GValue*value,GParamSpec*sp
  auto*s=reinterpret_cast<GstFrameLinkAvSink*>(object);
  if(GST_STATE(s)!=GST_STATE_NULL){g_warning("framelinkavsink: %s can only change in NULL",spec->name);return;}
  switch(id){
+ case PROP_SHARED_CPU:s->sharedCpu=g_value_get_boolean(value);break;
  case PROP_SESSION:g_free(s->sessionPath);s->sessionPath=g_value_dup_string(value);break;
  case PROP_TRACKS:{const char*t=g_value_get_string(value);if(!t||(strcmp(t,"av")&&strcmp(t,"audio")&&strcmp(t,"video"))){g_warning("framelinkavsink: tracks must be audio, video or av");break;}
   g_free(s->tracks);s->tracks=g_strdup(t);rebuild(s);break;}
@@ -307,6 +310,7 @@ static void getProperty(GObject*object,guint id,GValue*value,GParamSpec*spec){
  if(id>=PROP_ID){FlGstSession*session=nullptr;GST_OBJECT_LOCK(s);if(s->session)session=static_cast<FlGstSession*>(g_object_ref(s->session));GST_OBJECT_UNLOCK(s);
   if(session){if(fl_gst_session_get_config(session,&c)!=FL_GST_SESSION_READY)c={};g_object_unref(session);}}
  switch(id){
+ case PROP_SHARED_CPU:g_value_set_boolean(value,s->sharedCpu);break;
  case PROP_SESSION:g_value_set_string(value,s->sessionPath);break;case PROP_TRACKS:g_value_set_string(value,s->tracks);break;
  case PROP_VIDEO_FORMAT:g_value_set_string(value,s->videoFormat);break;
  case PROP_WIDTH:g_value_set_uint(value,s->width);break;case PROP_HEIGHT:g_value_set_uint(value,s->height);break;
@@ -365,6 +369,7 @@ static void gst_framelink_av_sink_class_init(GstFrameLinkAvSinkClass*klass){
  g_object_class_install_property(o,PROP_AUDIO_QUEUE,g_param_spec_uint("audio-queue-ms","Audio queue","Hard audio queue budget, not target latency",1,2000,80,rw));
  g_object_class_install_property(o,PROP_VIDEO_QUEUE,g_param_spec_uint("video-queue-frames","Video queue","Coordinated video queue budget",1,16,2,rw));
  g_object_class_install_property(o,PROP_VIDEO_POOL,g_param_spec_uint("video-pool","Video pool","Consumer ring images requested (0: consumer default)",0,FL_MAX_POOL_SIZE,0,rw));
+ g_object_class_install_property(o,PROP_SHARED_CPU,g_param_spec_boolean("shared-cpu","Shared CPU","Explicit broker-bound CPU video copy path; no session= discovery or native fallback",FALSE,rw));
  g_object_class_install_property(o,PROP_ID,g_param_spec_string("session-id","Session identity","Negotiated identity, not a secret",nullptr,ro));
  g_object_class_install_property(o,PROP_GENERATION,g_param_spec_uint64("generation","Generation","Negotiated session generation",0,G_MAXUINT64,0,ro));
  g_object_class_install_property(o,PROP_AUDIO_ID,g_param_spec_uint("audio-track-id","Audio track","Negotiated audio identity, zero when absent",0,G_MAXUINT,0,ro));

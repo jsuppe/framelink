@@ -20,7 +20,19 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
 #else
  CHECK(argc>1);GError*e=nullptr;auto*plugin=gst_plugin_load_file(argv[1],&e);CHECK(plugin&&!e);gst_object_unref(plugin);
 #endif
- for(unsigned mode=0;mode<6;mode++){
+ // Invalid combinations fail before discovery or native-channel adoption.
+ for(unsigned kind=0;kind<2;kind++)for(unsigned bad=0;bad<(kind?3u:2u);bad++){
+  auto*b=gst_element_factory_make(kind?"framelinkavsrc":"framelinkavsink",nullptr);CHECK(b);
+  gboolean selected=TRUE;g_object_get(b,"shared-cpu",&selected,nullptr);CHECK(!selected);
+  g_object_set(b,"shared-cpu",TRUE,nullptr);
+  if(bad==0)g_object_set(b,"session","/unused-cpu-discovery",nullptr);
+  else if(bad==1)g_object_set(b,"tracks","audio",nullptr);
+  else g_object_set(b,"native-memory",TRUE,nullptr);
+  CHECK(gst_element_set_state(b,GST_STATE_READY)==GST_STATE_CHANGE_FAILURE);
+  gst_element_set_state(b,GST_STATE_NULL);gst_object_unref(b);
+ }
+ for(unsigned variant=0;variant<12;variant++){
+  const unsigned mode=variant%6;const bool bins=variant>=6;
   fprintf(stderr,"mode %u\n",mode);bool nv12=mode%2==1;auto*s=fl_gst_session_new(3);auto*r=fl_gst_session_new(3);
   flSessionConfig cfg{};cfg.version=2;cfg.sessionId.bytes[0]=1;cfg.clockId.bytes[0]=2;cfg.generation=1;cfg.videoTrackId=1;cfg.audioTrackId=2;cfg.audio={FL_PCM_S16,48000,2};cfg.audioQueueMs=80;cfg.video={nv12?FL_FORMAT_NV12:FL_FORMAT_BGRA8,18,16,60,1};cfg.videoQueueFrames=1;cfg.connectTimeoutMs=cfg.idleTimeoutMs=1000;
   flSessionCapabilities offers{};offers.version=2;offers.videoCount=1;offers.video[0]=cfg.video;offers.audioCount=1;offers.audio[0]=cfg.audio;
@@ -41,8 +53,8 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
   key=g_bytes_new(secret,32);auth=FALSE;
   std::thread aa([&]{auth=fl_gst_session_authenticate_audio_stream(s,ac,TRUE,key,1000,nullptr,nullptr);});
   CHECK(fl_gst_session_authenticate_audio_stream(r,bc,FALSE,key,1000,nullptr,nullptr));aa.join();CHECK(auth);g_bytes_unref(key);g_object_unref(ac);
-  auto*tx=pipeline("appsrc name=vi is-live=true format=time ! framelinksink shared-cpu=true appsrc name=ai is-live=true format=time caps=audio/x-raw,format=S16LE,layout=interleaved,rate=48000,channels=2,channel-mask=(bitmask)0x3 ! framelinkaudiosink tracks=av");
-  auto*rx=pipeline("framelinksrc shared-cpu=true ! appsink name=vo sync=false async=false framelinkaudiosrc tracks=av ! appsink name=ao sync=false async=false");
+  auto*tx=pipeline(bins?"framelinkavsink name=transport shared-cpu=true appsrc name=vi is-live=true format=time ! transport.video_sink appsrc name=ai is-live=true format=time caps=audio/x-raw,format=S16LE,layout=interleaved,rate=48000,channels=2,channel-mask=(bitmask)0x3 ! transport.audio_sink":"appsrc name=vi is-live=true format=time ! framelinksink shared-cpu=true appsrc name=ai is-live=true format=time caps=audio/x-raw,format=S16LE,layout=interleaved,rate=48000,channels=2,channel-mask=(bitmask)0x3 ! framelinkaudiosink tracks=av");
+  auto*rx=pipeline(bins?"framelinkavsrc name=transport shared-cpu=true transport.video_src ! appsink name=vo sync=false async=false transport.audio_src ! appsink name=ao sync=false async=false":"framelinksrc shared-cpu=true ! appsink name=vo sync=false async=false framelinkaudiosrc tracks=av ! appsink name=ao sync=false async=false");
   context(tx,s);context(rx,r);
   auto*vi=gst_bin_get_by_name(GST_BIN(tx),"vi");auto*ai=gst_bin_get_by_name(GST_BIN(tx),"ai");auto*vo=gst_bin_get_by_name(GST_BIN(rx),"vo");auto*ao=gst_bin_get_by_name(GST_BIN(rx),"ao");
   GstVideoInfo info;gst_video_info_set_format(&info,nv12?GST_VIDEO_FORMAT_NV12:GST_VIDEO_FORMAT_BGRA,18,16);auto*vc=gst_video_info_to_caps(&info);gst_app_src_set_caps(GST_APP_SRC(vi),vc);gst_caps_unref(vc);
