@@ -51,11 +51,11 @@ int main(){
  }
  CHECK(fdCount()==baseline);
  // Wrong session, same endpoint role, copy/GPU policy: both ends fail closed.
- for(unsigned fault=0;fault<5;fault++){
+ for(unsigned fault=0;fault<6;fault++){
  CHECK(!socketpair(AF_UNIX,SOCK_SEQPACKET|SOCK_CLOEXEC,0,fd));child=fork();CHECK(child>=0);
  if(!child){close(fd[0]);fl::SharedCpuControl c(fl::Channel::adoptConnectedFd(fd[1],1000));auto s=config();auto r=requirements();
  if(fault==0)s.generation++;if(fault==2)r.allowedOperations=0;if(fault==3)r.requiredUsage=FL_MEMORY_GPU_SAMPLE;
- CHECK(c.negotiate(fault==1?false:true,s,r,0,fault==4)!=FL_OK);CHECK(!c.agreed());_exit(0);}
+ CHECK(c.negotiate(fault==1?false:true,s,r,0,fault==4,fault==5)!=FL_OK);CHECK(!c.agreed());_exit(0);}
  close(fd[1]);{fl::SharedCpuControl c(fl::Channel::adoptConnectedFd(fd[0],1000));CHECK(c.negotiate(false,config(),requirements(),FL_MEMORY_COPY)!=FL_OK);CHECK(!c.agreed());}
  int status=0;CHECK(waitpid(child,&status,0)==child&&WIFEXITED(status)&&WEXITSTATUS(status)==0);
  }

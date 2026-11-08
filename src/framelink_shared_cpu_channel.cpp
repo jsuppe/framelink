@@ -4,7 +4,7 @@
 #include <limits>
 namespace {
 struct State {
- bool producer=false,alive=true;
+ bool producer=false,alive=true,eosEnabled=false;
  size_t count=0;
  std::unique_ptr<fl::SharedCpuControl> control;
  fl::SharedCpuImportedPool imported;
@@ -27,14 +27,14 @@ extern "C" {
 flResult flSharedCpuOpenConsumerFdEx(int fd,uint32_t timeout,const flSessionConfig*s,const flMemoryRequirements*r,uint32_t ops,const flSharedCpuDescriptor*d,size_t count,uint32_t flags,flSharedCpuChannel**out){
  // Adopt first: even invalid caller parameters must consume the delegated FD.
  auto link=fl::Channel::adoptConnectedFd(fd,timeout);
- if(!link.connected()||!s||!r||!d||!out||count<2||count>FL_MAX_POOL_SIZE||(flags&~FL_SHARED_CPU_FRAME_METADATA))return FL_INVALID;
+ if(!link.connected()||!s||!r||!d||!out||count<2||count>FL_MAX_POOL_SIZE||(flags&~(FL_SHARED_CPU_FRAME_METADATA|FL_SHARED_CPU_ORDERED_EOS)))return FL_INVALID;
  flMemoryRequirements preflight[2]{};flMemoryRequirementsInit(&preflight[0]);preflight[0].allowedOperations=FL_MEMORY_COPY;preflight[1]=*r;
  uint32_t preOps[2]={0,ops};flMemoryDecision decisions[2]{};
  if(fl::validateSharedCpuPool(s,d,count,preflight,preOps,decisions)!=FL_MEMORY_OK)return FL_INVALID;
  try{
-  auto state=std::make_shared<State>();state->count=count;
+  auto state=std::make_shared<State>();state->count=count;state->eosEnabled=flags&FL_SHARED_CPU_ORDERED_EOS;
   state->control=std::make_unique<fl::SharedCpuControl>(std::move(link));
-  auto result=state->control->negotiate(false,*s,*r,ops,flags&FL_SHARED_CPU_FRAME_METADATA);if(result!=FL_OK)return result;
+  auto result=state->control->negotiate(false,*s,*r,ops,flags&FL_SHARED_CPU_FRAME_METADATA,flags&FL_SHARED_CPU_ORDERED_EOS);if(result!=FL_OK)return result;
   Fds fds;
   for(size_t i=0;i<count;i++){result=fl::SharedCpuAllocation::create(d[i],state->owners[i]);if(result!=FL_OK)return result;
    result=state->owners[i].exportFd(true,fds.values[i]);if(result!=FL_OK)return result;}
@@ -43,10 +43,10 @@ flResult flSharedCpuOpenConsumerFdEx(int fd,uint32_t timeout,const flSessionConf
  }catch(const std::bad_alloc&){return FL_OOM;}
 }
 flResult flSharedCpuOpenProducerFdEx(int fd,uint32_t timeout,const flSessionConfig*s,const flMemoryRequirements*r,uint32_t ops,uint32_t flags,flSharedCpuChannel**out){
- auto link=fl::Channel::adoptConnectedFd(fd,timeout);if(!link.connected()||!s||!r||!out||(flags&~FL_SHARED_CPU_FRAME_METADATA))return FL_INVALID;
+ auto link=fl::Channel::adoptConnectedFd(fd,timeout);if(!link.connected()||!s||!r||!out||(flags&~(FL_SHARED_CPU_FRAME_METADATA|FL_SHARED_CPU_ORDERED_EOS)))return FL_INVALID;
  try{
-  auto state=std::make_shared<State>();state->producer=true;state->control=std::make_unique<fl::SharedCpuControl>(std::move(link));
-  auto result=state->control->negotiate(true,*s,*r,ops,flags&FL_SHARED_CPU_FRAME_METADATA);if(result!=FL_OK)return result;
+  auto state=std::make_shared<State>();state->producer=true;state->eosEnabled=flags&FL_SHARED_CPU_ORDERED_EOS;state->control=std::make_unique<fl::SharedCpuControl>(std::move(link));
+  auto result=state->control->negotiate(true,*s,*r,ops,flags&FL_SHARED_CPU_FRAME_METADATA,flags&FL_SHARED_CPU_ORDERED_EOS);if(result!=FL_OK)return result;
   result=state->control->receivePool(state->imported);if(result!=FL_OK)return result;state->count=state->imported.size();
   auto channel=std::make_unique<flSharedCpuChannel>();channel->state=std::move(state);*out=channel.release();return FL_OK;
  }catch(const std::bad_alloc&){return FL_OOM;}
@@ -81,13 +81,23 @@ flResult flSharedCpuReceiveRelease(flSharedCpuChannel*c){
  if(!c||!c->state->producer)return FL_INVALID;auto s=c->state;if(!s->live())return FL_DISCONNECTED;
  try{fl::SharedCpuControl::Frame frame;return s->control->receiveRelease(frame);}catch(const std::bad_alloc&){s->close();return FL_OOM;}
 }
+flResult flSharedCpuSendEos(flSharedCpuChannel*c){
+ if(!c||!c->state->producer)return FL_INVALID;auto s=c->state;if(!s->live())return FL_DISCONNECTED;
+ for(bool reserved:s->reserved)if(reserved)return FL_BUSY;
+ return s->control->sendEos();
+}
 flResult flSharedCpuReceive(flSharedCpuChannel*c,flSharedCpuLease**out,flMappedImage*view,uint64_t*seq,int64_t*pts){
- if(!c||c->state->producer||!out||!view||!seq||!pts)return FL_INVALID;auto s=c->state;if(!s->live())return FL_DISCONNECTED;
+ if(c&&c->state->eosEnabled)return FL_INVALID;
+ int eos=0;return flSharedCpuReceiveEvent(c,out,view,seq,pts,&eos);
+}
+flResult flSharedCpuReceiveEvent(flSharedCpuChannel*c,flSharedCpuLease**out,flMappedImage*view,uint64_t*seq,int64_t*pts,int*eos){
+ if(!c||c->state->producer||!out||!view||!seq||!pts||!eos)return FL_INVALID;auto s=c->state;if(!s->live())return FL_DISCONNECTED;
  try{
   auto lease=std::make_unique<flSharedCpuLease>();lease->state=s;
-  auto r=s->control->receiveFrame(lease->frame);if(r!=FL_OK)return r;
+  bool end=false;auto r=s->control->receiveFrame(lease->frame,&end);if(r!=FL_OK)return r;
+  if(end){*eos=1;return FL_OK;}
   r=s->owners[lease->frame.slot].map(false,lease->mapping);if(r!=FL_OK){s->close();return r;}
-  *view=lease->mapping.view();*seq=lease->frame.sequence;*pts=lease->frame.ptsNs;*out=lease.release();return FL_OK;
+  *view=lease->mapping.view();*seq=lease->frame.sequence;*pts=lease->frame.ptsNs;*out=lease.release();*eos=0;return FL_OK;
  }catch(const std::bad_alloc&){s->close();return FL_OOM;}
 }
 flResult flSharedCpuRetainRead(flSharedCpuLease*l){

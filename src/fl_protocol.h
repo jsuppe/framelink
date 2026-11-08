@@ -39,6 +39,7 @@ enum class MsgType : uint32_t {
     SharedCpuReady = 12, // FCF1 completed CPU writes, exact slot/sequence
     SharedCpuReleased = 13, // FCR1 completed CPU reads, exact slot/sequence
     SharedCpuReadyMetadata = 14, // FCM1 exact CPU frame plus media metadata
+    SharedCpuEos = 15, // FCE1 ordered terminal marker; leases still drain
     Bye = 7,        // either way: orderly shutdown
 };
 

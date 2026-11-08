@@ -25,6 +25,7 @@ FL_API flResult flSharedCpuOpenProducerFd(int fd,uint32_t timeoutMs,
 // Strict explicit metadata mode: BOTH peers must select the same flag. No
 // downgrade to unextended peers. Original factories select flags=0 unchanged.
 #define FL_SHARED_CPU_FRAME_METADATA 1u
+#define FL_SHARED_CPU_ORDERED_EOS 2u
 FL_API flResult flSharedCpuOpenConsumerFdEx(int fd,uint32_t timeoutMs,
     const flSessionConfig*,const flMemoryRequirements*,uint32_t operations,
     const flSharedCpuDescriptor* desc,size_t count,uint32_t flags,flSharedCpuChannel** out);
@@ -55,6 +56,15 @@ FL_API flResult flSharedCpuReceiveRelease(flSharedCpuChannel*);
 // nonnegative PTS are preserved. No hidden scheduling, latest-wins or CPU copy.
 FL_API flResult flSharedCpuReceive(flSharedCpuChannel*,flSharedCpuLease** out,
     flMappedImage* view,uint64_t* sequence,int64_t* ptsNs);
+// EOS is independently opt-in on BOTH factories. Send after final submit;
+// reserved writes must first be submitted/cancelled. No more writes after EOS.
+// Outstanding reads remain valid and releases must still be drained normally.
+FL_API flResult flSharedCpuSendEos(flSharedCpuChannel*);
+// Required receiver for ORDERED_EOS mode. On EOS returns OK and *eos=1,
+// leaving frame outputs unchanged; repeated calls return the same terminal event.
+// Socket death/timeout is never EOS. On a frame returns OK and *eos=0.
+FL_API flResult flSharedCpuReceiveEvent(flSharedCpuChannel*,flSharedCpuLease** out,
+    flMappedImage* view,uint64_t* sequence,int64_t* ptsNs,int* eos);
 // Only read leases can be retained. Each successful retain needs one release.
 // Final release finishes all reads BEFORE notifying the producer. No destructor
 // thread or automatic callback performs network work. Wrong lease kind rejects

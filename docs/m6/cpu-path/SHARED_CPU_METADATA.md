@@ -28,5 +28,6 @@ words, presence mismatch and truncated payload, preserving caller output. One
 valid explicit metadata packet passes. A mismatched metadata-mode peer is rejected
 on both ends. Evidence: `shared-cpu-metadata/`.
 
-Coordinator/broker selection, EOS and GStreamer/A/V-bin integration remain pending.
+Ordered channel EOS is now available independently (SHARED_CPU_EOS.md).
+Coordinator/broker selection and GStreamer/A/V-bin integration remain pending.
 These media-field checks do not qualify A/V sync, scheduling or target rates.

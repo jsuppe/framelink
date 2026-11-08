@@ -14,7 +14,7 @@ class SharedCpuControl {
     flMemoryRequirements requirements_[2]{};
     uint32_t operations_[2]{};
     bool producer_=false,agreed_=false,poolExchanged_=false,accepted_=false;
-    bool metadata_=false;
+    bool metadata_=false,eosEnabled_=false,ended_=false;
     size_t poolCount_=0;
     uint64_t lastReady_=0;
     std::array<uint64_t,FL_MAX_POOL_SIZE> slots_{};
@@ -32,26 +32,26 @@ public:
     explicit SharedCpuControl(Channel&& link):link_(std::move(link)){}
     bool agreed()const{return agreed_;}
     bool poolAccepted()const{return accepted_;}
-    bool writableSlot(uint32_t slot)const{return accepted_&&producer_&&slot<poolCount_&&!slots_[slot];}
+    bool writableSlot(uint32_t slot)const{return accepted_&&producer_&&slot<poolCount_&&!slots_[slot]&&!ended_;}
     // Both ends send then receive a bounded offer. No handles may accompany it.
     // Session bytes bind all identities, timestamps, queues and negotiated formats.
     // Caller has already validated selection against both real session offers.
     flResult negotiate(bool producer,const flSessionConfig& session,
-        const flMemoryRequirements& local,uint32_t operations,bool metadata=false){
+        const flMemoryRequirements& local,uint32_t operations,bool metadata=false,bool eos=false){
         if(agreed_||poolExchanged_||!link_.connected())return fail();
         std::array<uint8_t,HelloSize> offer{};
         if(!session.videoTrackId||flSessionEncode(&session,offer.data()+32,160)!=FL_SESSION_OK||
            flMemoryRequirementsEncode(&local,offer.data()+192,64)!=FL_MEMORY_OK||
            (operations&~FL_MEMORY_COPY))return fail();
         put(offer.data(),0x31484346); // FCH1
-        put(offer.data()+4,1);put(offer.data()+8,producer?1:2);put(offer.data()+12,operations);put(offer.data()+16,metadata?2u:0u);
+        put(offer.data()+4,1);put(offer.data()+8,producer?1:2);put(offer.data()+12,operations);put(offer.data()+16,(metadata?2u:0u)|(eos?4u:0u));
         if(!link_.send(MsgType::SharedCpuHello,offer.data(),offer.size()))return fail(FL_DISCONNECTED);
         Received received{link_.recv()};if(!received.message)return fail(FL_DISCONNECTED);
         auto&m=*received.message;
         if(m.type!=MsgType::SharedCpuHello||m.payload.size()!=HelloSize||!m.fds.empty())return fail();
         const auto*p=m.payload.data();
         if(get(p)!=0x31484346||get(p+4)!=1||get(p+8)!=(producer?2u:1u)||get(p+12)&~FL_MEMORY_COPY)return fail();
-        if(get(p+16)!=(metadata?2u:0u))return fail();
+        if(get(p+16)!=((metadata?2u:0u)|(eos?4u:0u)))return fail();
         for(unsigned i=20;i<32;i++)if(p[i])return fail();
         if(std::memcmp(p+32,offer.data()+32,160))return fail();
         flMemoryRequirements peer{};
@@ -62,7 +62,7 @@ public:
                                {FL_MEMORY_VERSION,FL_MEMORY_SHARED_CPU,FL_MEMORY_CPU_READ,ops[1],{}}};
         flMemoryDecision decisions[2]{};
         if(flMemoryEvaluateBoundary(req,paths,2,decisions)!=FL_MEMORY_OK)return fail(FL_ACCESS_DENIED);
-        session_=session;producer_=producer;metadata_=metadata;
+        session_=session;producer_=producer;metadata_=metadata;eosEnabled_=eos;
         for(unsigned i=0;i<2;i++){requirements_[i]=req[i];operations_[i]=ops[i];}
         agreed_=true;return FL_OK;
     }
@@ -123,9 +123,16 @@ private:
             put64(wire.data()+48,uint64_t(m.dtsNs));put64(wire.data()+56,m.durationNs);put64(wire.data()+64,m.streamGeneration);}
         return link_.send(type,wire.data(),extended?80:40)?FL_OK:fail(FL_DISCONNECTED);
     }
-    flResult receiveFrameMessage(MsgType type,uint32_t magic,Frame& out){
+    flResult receiveFrameMessage(MsgType type,uint32_t magic,Frame& out,bool* eos=nullptr){
         Received received{link_.recv()};if(!received.message)return fail(FL_DISCONNECTED);
         const auto&m=*received.message;
+        if(m.type==MsgType::SharedCpuEos&&eos&&eosEnabled_){
+            if(m.payload.size()!=32||!m.fds.empty())return fail();
+            const auto*p=m.payload.data();
+            if(get(p)!=0x31454346||get(p+4)!=1||get64(p+8)!=session_.generation||
+               get64(p+16)!=lastReady_||get64(p+24))return fail();
+            ended_=true;*eos=true;return FL_OK;
+        }
         const bool extended=metadata_&&type==MsgType::SharedCpuReady;
         if(extended){type=MsgType::SharedCpuReadyMetadata;magic=0x314d4346;}
         if(m.type!=type||m.payload.size()!=(extended?80u:40u)||!m.fds.empty())return fail();
@@ -145,6 +152,7 @@ public:
     // before release, caller finishes ALL reads and retires any borrowed views.
     // This does not make raw mapped pointers enforceable access leases.
     flResult submit(const Frame& frame){
+        if(ended_)return FL_INVALID;
         if(!accepted_||!producer_||frame.slot>=poolCount_||!frame.sequence||
            frame.sequence<=lastReady_||frame.ptsNs<0)return fail();
         if(metadata_?validateMetadata(frame.metadata)!=FL_OK:
@@ -154,11 +162,21 @@ public:
         if(r!=FL_OK)return r;
         slots_[frame.slot]=frame.sequence;lastReady_=frame.sequence;return FL_OK;
     }
-    flResult receiveFrame(Frame& out){
+    flResult sendEos(){
+        if(!accepted_||!producer_||!eosEnabled_||ended_)return FL_INVALID;
+        std::array<uint8_t,32> wire{};put(wire.data(),0x31454346);put(wire.data()+4,1);
+        put64(wire.data()+8,session_.generation);put64(wire.data()+16,lastReady_);
+        if(!link_.send(MsgType::SharedCpuEos,wire.data(),wire.size()))return fail(FL_DISCONNECTED);
+        ended_=true;return FL_OK;
+    }
+    flResult receiveFrame(Frame& out,bool* eos=nullptr){
         if(!accepted_||producer_)return fail();
-        Frame frame;auto r=receiveFrameMessage(MsgType::SharedCpuReady,0x31464346,frame);if(r!=FL_OK)return r;
+        if(ended_){if(eos){*eos=true;return FL_OK;}return FL_INVALID;}
+        bool end=false;
+        Frame frame;auto r=receiveFrameMessage(MsgType::SharedCpuReady,0x31464346,frame,eos?&end:nullptr);if(r!=FL_OK)return r;
+        if(end){*eos=true;return FL_OK;}
         if(frame.sequence<=lastReady_||slots_[frame.slot])return fail();
-        slots_[frame.slot]=frame.sequence;lastReady_=frame.sequence;out=frame;return FL_OK;
+        slots_[frame.slot]=frame.sequence;lastReady_=frame.sequence;out=frame;if(eos)*eos=false;return FL_OK;
     }
     flResult release(uint32_t slot,uint64_t sequence){
         if(!accepted_||producer_||slot>=poolCount_||!sequence||slots_[slot]!=sequence)return fail();
