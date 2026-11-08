@@ -34,6 +34,7 @@ static guint gWidth=64,gHeight=32,gFps=30;static std::string gFormat="RGBA";stat
 // Consumer video ring size and the queue in front of each appsink (the
 // default queue byte limit stalls a session once frames exceed ~10 MB).
 static GstClockTime gPlaybackLatency=LATENCY;static bool gOutputSync=true,gOutputAsync=true;
+static bool gSharedCpu=false;
 static guint gVideoPool=8,gVideoQueue=2;static std::string gQueue="queue";
 static std::string geometry(){return "width="+std::to_string(gWidth)+" height="+std::to_string(gHeight);}
 static flFormat sessionFormat(){return gFormat=="NV12"?FL_FORMAT_NV12:gFormat=="BGRA"?FL_FORMAT_BGRA8:FL_FORMAT_RGBA8;}
@@ -103,7 +104,7 @@ struct Producer:Side {
   if(m==Mode::Bin){t="framelinkavsink name=s tracks="+tracks+" video-queue-frames="+std::to_string(gVideoQueue)+" video-format="+gFormat+" "+geometry()+" framerate="+std::to_string(gFps)+"/1 connect-timeout-ms=5000 idle-timeout-ms=3000 audio-queue-ms="+std::to_string(queueMs)+" ";
    if(video())t+=vs+"s.video_sink ";if(audio())t+=as+"s.audio_sink";}
   else{if(video())t+=vs+"framelinksink name=video ";if(audio())t+=as+"framelinkaudiosink tracks="+tracks+" audio-queue-ms="+std::to_string(queueMs);}
-  p=parse(t);if(m==Mode::Bin){auto*s=gst_bin_get_by_name(GST_BIN(p),"s");g_object_set(s,"session",path.c_str(),nullptr);gst_object_unref(s);}
+  p=parse(t);if(m==Mode::Bin){auto*s=gst_bin_get_by_name(GST_BIN(p),"s");g_object_set(s,"session",path.c_str(),"shared-cpu",gSharedCpu,nullptr);gst_object_unref(s);}
   for(const char*n:{"vsrc","asrc"}){auto*e=gst_bin_get_by_name(GST_BIN(p),n);if(!e)continue;auto*pad=gst_element_get_static_pad(e,"src");
    gst_pad_add_probe(pad,GST_PAD_PROBE_TYPE_BUFFER,[](GstPad*pad,GstPadProbeInfo*info,gpointer d)->GstPadProbeReturn{auto*self=static_cast<Producer*>(d);
     if(!strcmp(GST_OBJECT_NAME(GST_OBJECT_PARENT(pad)),"vsrc"))self->pushedFrames++;else self->pushedSamples+=gst_buffer_get_size(GST_PAD_PROBE_INFO_BUFFER(info))/4;return GST_PAD_PROBE_OK;},this,nullptr);
@@ -125,7 +126,7 @@ struct Consumer:Side {
    if(video())t+="c.video_src ! "+sinkV;if(audio())t+="c.audio_src ! "+sinkA;}
   else{if(video())t+="framelinksrc name=video "+geometry()+" format="+gFormat+(native?" native-memory=true":"")+" ! "+sinkV;
    if(audio())t+="framelinkaudiosrc tracks="+tracks+" ! "+sinkA;}
-  p=parse(t);if(m==Mode::Bin&&!localSeconds){auto*c=gst_bin_get_by_name(GST_BIN(p),"c");g_object_set(c,"session",path.c_str(),"latency-ms",guint(gPlaybackLatency/GST_MSECOND),nullptr);gst_object_unref(c);}
+  p=parse(t);if(m==Mode::Bin&&!localSeconds){auto*c=gst_bin_get_by_name(GST_BIN(p),"c");g_object_set(c,"session",path.c_str(),"shared-cpu",gSharedCpu,"latency-ms",guint(gPlaybackLatency/GST_MSECOND),nullptr);gst_object_unref(c);}
   for(const char*n:{"vout","aout"}){auto*sink=gst_bin_get_by_name(GST_BIN(p),n);if(!sink)continue;
    GstAppSinkCallbacks cb{};cb.new_sample=[](GstAppSink*s,gpointer d)->GstFlowReturn{auto*self=static_cast<Consumer*>(d);auto*sample=gst_app_sink_pull_sample(s);auto*b=gst_sample_get_buffer(sample);
      const int track=strcmp(GST_OBJECT_NAME(s),"vout")?1:0;std::lock_guard<std::mutex> lock(self->mutex);

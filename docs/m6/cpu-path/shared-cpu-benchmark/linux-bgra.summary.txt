@@ -1,0 +1,82 @@
+arrival.budget_ms=150
+complete=yes
+config=BGRA 64x64@30 bin shared-cpu traced 5s
+consumer.audio.arrival.all.ms=n=500 p50=0.44 p95=0.45 p99=0.46 max=0.49 min=0.13
+consumer.audio.arrival.ms=n=300 p50=0.44 p95=0.45 p99=0.46 max=0.49 min=0.17
+consumer.audio.contiguous=yes
+consumer.audio.deadline_misses=0/500
+consumer.audio.output_queue.admission_residence.ms=n=500 p50=0.10 p95=0.10 p99=0.11 max=0.11 min=0.00
+consumer.audio.output_queue.pending=0
+consumer.audio.output_queue.sampled_max_buffers=0
+consumer.audio.output_queue.unmatched=0
+consumer.audio.render.all.ms=n=500 p50=0.55 p95=0.57 p99=0.58 max=0.60 min=0.16
+consumer.audio.render.ms=n=300 p50=0.56 p95=0.57 p99=0.58 max=0.60 min=0.19
+consumer.audio.render_interval.ms=n=299 p50=10.00 p95=10.06 p99=10.13 max=10.16 min=9.68
+consumer.audio.render_jitter.p1_p99.ms=0.37
+consumer.av_offset.abs.ms=n=3 p50=0.09 p95=0.13 p99=0.13 max=0.13 min=0.08
+consumer.av_offset.ms=n=3 p50=-0.09 p95=-0.08 p99=-0.08 max=-0.08 min=-0.13
+consumer.cpu.percent=2.92
+consumer.frames=150
+consumer.handles=19..19 min=19 max=19
+consumer.handles.slope.per_min=-0.00
+consumer.mem.kb=15364..15436 min=15364 max=15436
+consumer.mem.kind=rss
+consumer.mem.slope.kb_per_min=1196.70
+consumer.memory=memory:SystemMemory
+consumer.pid=1490955
+consumer.queue.accounting=complete
+consumer.result=EOS
+consumer.samples=240000
+consumer.scope=transport-consumer
+consumer.series.t_cpums_memkb_handles_threads=0.0:9:13044:6:2;1.0:34:15336:19:10;2.0:60:15364:19:10;3.0:90:15388:19:10;4.0:118:15416:19:10;5.0:148:15436:19:10;5.2:157:15388:10:7;
+consumer.threads=10..10 min=10 max=10
+consumer.threads.slope.per_min=-0.00
+consumer.video.arrival.all.ms=n=150 p50=0.33 p95=0.39 p99=0.40 max=0.47 min=0.11
+consumer.video.arrival.ms=n=90 p50=0.33 p95=0.39 p99=0.40 max=0.40 min=0.11
+consumer.video.deadline_misses=0/150
+consumer.video.output_queue.admission_residence.ms=n=150 p50=0.09 p95=0.11 p99=0.12 max=0.12 min=0.00
+consumer.video.output_queue.pending=0
+consumer.video.output_queue.sampled_max_buffers=0
+consumer.video.output_queue.unmatched=0
+consumer.video.render.all.ms=n=150 p50=0.44 p95=0.50 p99=0.52 max=0.57 min=0.13
+consumer.video.render.ms=n=90 p50=0.46 p95=0.50 p99=0.51 max=0.51 min=0.16
+consumer.video.render_interval.ms=n=89 p50=33.33 p95=33.44 p99=33.53 max=33.53 min=33.06
+consumer.video.render_jitter.p1_p99.ms=0.36
+exit=0/0
+expected.frames=150
+expected.samples=240000
+label=linux-bgra
+output.async=false
+output.queue_buffers=0
+output.sync=false
+playback.latency_ms=0
+producer.audio.push_burst.max=0
+producer.audio.push_interval.ms=n=300 p50=10.00 p95=10.05 p99=10.07 max=10.11 min=9.87
+producer.audio.push_lateness.ms=n=300 p50=0.14 p95=0.15 p99=0.17 max=0.21 min=0.06
+producer.cpu.percent=2.85
+producer.handles=19..19 min=19 max=19
+producer.handles.slope.per_min=0.00
+producer.injection.elapsed_us=0
+producer.injection.executed=0
+producer.injection.frame=0
+producer.injection.requested_ms=0
+producer.injection.stage=none
+producer.injection.start_monotonic_us=0
+producer.mem.kb=16560..16616 min=16560 max=16616
+producer.mem.kind=rss
+producer.mem.slope.kb_per_min=1675.68
+producer.pid=1490963
+producer.pushed.frames=150
+producer.pushed.samples=240000
+producer.result=EOS
+producer.series.t_cpums_memkb_handles_threads=0.0:14:12812:6:2;1.0:44:16528:19:8;2.0:71:16560:19:8;3.0:101:16588:19:8;4.0:128:16616:19:8;5.0:161:16612:10:6;
+producer.stats.framelink-audio-sink-stats=framelink-audio-sink-stats, blocks=(guint64)500, pcm-bytes=(guint64)960000, sample-frames=(guint64)240000, generation=(guint64)1, shared-pcm=(boolean)false;
+producer.stats.framelink-sink-stats=framelink-sink-stats, received=(guint64)150, submitted=(guint64)150, dropped=(guint64)0, ring-full-drops=(guint64)0;
+producer.threads=8..8 min=8 max=8
+producer.threads.slope.per_min=0.00
+producer.video.push_burst.max=0
+producer.video.push_interval.ms=n=90 p50=33.33 p95=33.39 p99=33.41 max=33.41 min=33.27
+producer.video.push_lateness.ms=n=90 p50=0.09 p95=0.15 p99=0.19 max=0.19 min=0.06
+seconds=5
+video.pool=4
+video.queue=2

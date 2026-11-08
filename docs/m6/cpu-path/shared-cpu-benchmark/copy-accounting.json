@@ -1,0 +1,42 @@
+{
+  "linux-bgra": {
+    "producer": {
+      "copies": 150,
+      "bytes": 2457600
+    },
+    "consumer": {
+      "copies": 150,
+      "bytes": 2457600
+    }
+  },
+  "linux-nv12": {
+    "producer": {
+      "copies": 150,
+      "bytes": 921600
+    },
+    "consumer": {
+      "copies": 150,
+      "bytes": 921600
+    }
+  },
+  "android-bgra": {
+    "producer": {
+      "copies": 150,
+      "bytes": 2457600
+    },
+    "consumer": {
+      "copies": 150,
+      "bytes": 2457600
+    }
+  },
+  "android-nv12": {
+    "producer": {
+      "copies": 150,
+      "bytes": 921600
+    },
+    "consumer": {
+      "copies": 150,
+      "bytes": 921600
+    }
+  }
+}

@@ -7,7 +7,7 @@
 // prints one summary (key=value) used for the M6 baselines and budgets.
 //
 //   fl_gst_av_bench <plugin|static> [--seconds N] [--size WxH] [--fps F]
-//     [--format RGBA|NV12|BGRA] [--mode bin|element] [--native] [--trace]
+//     [--format RGBA|NV12|BGRA] [--mode bin|element] [--native | --shared-cpu] [--trace]
 //     [--latency-ms N] [--arrival-budget-ms N] [--transport-only]
 //     [--output-queue-buffers N] (0 retains the legacy time-only limit)
 //     [--no-output-preroll] (measurement appsinks async=false)
@@ -268,7 +268,7 @@ static std::vector<std::string> optionArgs(const Options&o){
  std::vector<std::string> a{"--seconds",std::to_string(o.seconds),"--size",std::to_string(gWidth)+"x"+std::to_string(gHeight),"--fps",std::to_string(gFps),"--format",gFormat,"--mode",o.mode,"--pool",std::to_string(gVideoPool),"--video-queue",std::to_string(gVideoQueue)};
  a.insert(a.end(),{"--output-queue-buffers",std::to_string(gOutputQueueBuffers),"--arrival-budget-ms",std::to_string(gArrivalBudget/GST_MSECOND),"--latency-ms",std::to_string(gPlaybackLatency/GST_MSECOND)});if(!gOutputSync)a.push_back("--transport-only");if(!gOutputAsync)a.push_back("--no-output-preroll");
  if(!o.stallStage.empty())a.insert(a.end(),{"--video-stall-stage",o.stallStage,"--video-stall-frame",std::to_string(o.stallFrame),"--video-stall-ms",std::to_string(o.stallMs)});
- if(o.native)a.push_back("--native");if(o.raw)a.push_back("--raw");return a;}
+ if(gSharedCpu)a.push_back("--shared-cpu");if(o.native)a.push_back("--native");if(o.raw)a.push_back("--raw");return a;}
 
 // Least-squares slope of y over x.
 static double slope(const std::vector<std::pair<double,double>>&v){double sx=0,sy=0,sxx=0,sxy=0;const double n=double(v.size());
@@ -299,7 +299,7 @@ static int lifecycle(const Options&o,const std::string&exe,const char*plugin,con
    mem.push_back({x,double(mk)});hnd.push_back({x,double(h)});thr.push_back({x,double(t)});
    if(i==LIFECYCLE_WARMUP){m0=mk;h0=h;t0c=t;}m1=mk;h1=h;t1c=t;}}
  char t[64];std::map<std::string,std::string> s{{"label",o.label},{"seconds",std::to_string(o.seconds)},
-  {"config",gFormat+" "+std::to_string(gWidth)+"x"+std::to_string(gHeight)+"@"+std::to_string(gFps)+" "+o.mode+(o.native?" native":" cpu")+" lifecycle restart-"+o.restart+" "+std::to_string(o.cycles)+"x"+std::to_string(o.seconds)+"s"},
+  {"config",gFormat+" "+std::to_string(gWidth)+"x"+std::to_string(gHeight)+"@"+std::to_string(gFps)+" "+o.mode+(gSharedCpu?" shared-cpu":(o.native?" native":" cpu"))+" lifecycle restart-"+o.restart+" "+std::to_string(o.cycles)+"x"+std::to_string(o.seconds)+"s"},
   {"cycles",std::to_string(o.cycles)},{"cycles.ok",std::to_string(ok)+"/"+std::to_string(o.cycles)},{"long.exit",std::to_string(longExit)},{"long.role",longRole}};
  s["expected.frames.per_cycle"]=std::to_string(guint64(o.seconds)*gFps);
  s["expected.samples.per_cycle"]=std::to_string(guint64(o.seconds)*48000);
@@ -335,10 +335,14 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
   else if(a=="--no-output-preroll")gOutputAsync=false;
   else if(a=="--pool")gVideoPool=guint(std::stoul(next()));else if(a=="--video-queue")gVideoQueue=guint(std::stoul(next()));else if(a=="--source-only")o.sourceOnly=true;
   else if(a=="--cycles")o.cycles=guint(std::stoul(next()));else if(a=="--restart")o.restart=next();else if(a=="--session-base")sessionBase=next();
-  else if(a=="--local-consumer")o.localConsumer=true;else if(a=="--native")o.native=true;else if(a=="--trace")o.trace=true;else if(a=="--raw")o.raw=true;else if(a=="--out")o.out=next();else if(a=="--label")o.label=next();
+  else if(a=="--local-consumer")o.localConsumer=true;else if(a=="--shared-cpu")gSharedCpu=true;else if(a=="--native")o.native=true;else if(a=="--trace")o.trace=true;else if(a=="--raw")o.raw=true;else if(a=="--out")o.out=next();else if(a=="--label")o.label=next();
   else if(a=="--role")role=next();else if(a=="--session")session=next();else if(a=="--result")result=next();else{fprintf(stderr,"unknown option %s\n",a.c_str());return 2;}}
  CHECK(o.stallStage.empty()?(o.stallFrame==0&&o.stallMs==0):
    ((o.stallStage=="source"||o.stallStage=="post-push")&&o.stallFrame>0&&o.stallFrame<guint64(o.seconds)*gFps&&o.stallMs>0&&o.stallMs<=1000&&!o.cycles&&!o.sourceOnly&&!o.localConsumer));
+ CHECK(!gSharedCpu||(o.mode=="bin"&&!o.native&&!o.sourceOnly&&!o.localConsumer&&!o.cycles));
+#ifdef _WIN32
+ CHECK(!gSharedCpu); // No Windows shared-CPU allocator/endpoint implementation yet.
+#endif
  CHECK(!o.localConsumer||(((role=="consumer"&&!o.cycles)||(role=="lifecycle-consumer"&&o.cycles>0))&&o.mode=="bin"&&!o.native&&!o.sourceOnly&&!result.empty()));
  CHECK(o.seconds>=WARMUP_S+3&&(o.mode=="bin"||o.mode=="element"));gRunLimit=(o.seconds+30)*GST_SECOND;
  // Ring: ceil(latency x fps) + 2 images (documented sizing), at least the default 8.
@@ -375,7 +379,7 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
  const gint64 deadline=g_get_monotonic_time()+gint64(o.seconds+90)*G_USEC_PER_SEC;
  const int pc=await(producer,deadline),cc=await(consumer,deadline);
  auto pr=readResult(base+"-producer.txt"),cr=readResult(base+"-consumer.txt");
- std::map<std::string,std::string> s{{"label",o.label},{"config",gFormat+" "+std::to_string(gWidth)+"x"+std::to_string(gHeight)+"@"+std::to_string(gFps)+" "+o.mode+(o.native?" native":" cpu")+(o.trace?" traced":"")+" "+std::to_string(o.seconds)+"s"},
+ std::map<std::string,std::string> s{{"label",o.label},{"config",gFormat+" "+std::to_string(gWidth)+"x"+std::to_string(gHeight)+"@"+std::to_string(gFps)+" "+o.mode+(gSharedCpu?" shared-cpu":(o.native?" native":" cpu"))+(o.trace?" traced":"")+" "+std::to_string(o.seconds)+"s"},
   {"exit",std::to_string(pc)+"/"+std::to_string(cc)},{"arrival.budget_ms",std::to_string(gArrivalBudget/GST_MSECOND)},{"playback.latency_ms",std::to_string(gPlaybackLatency/GST_MSECOND)},{"output.queue_buffers",std::to_string(gOutputQueueBuffers)},{"output.sync",gOutputSync?"true":"false"},{"video.pool",std::to_string(gVideoPool)},{"video.queue",std::to_string(gVideoQueue)},{"seconds",std::to_string(o.seconds)},{"producer.pid",std::to_string(producer.pid)},{"consumer.pid",std::to_string(consumer.pid)}};
  for(auto&kv:pr)s["producer."+kv.first]=kv.second;for(auto&kv:cr)s["consumer."+kv.first]=kv.second;
  s["expected.frames"]=std::to_string(guint64(o.seconds)*gFps);
