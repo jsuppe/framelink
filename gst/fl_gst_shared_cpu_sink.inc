@@ -7,6 +7,21 @@ static gboolean sinkSharedCpuStart(GstFrameLinkSink*self){
  flSessionConfig cfg{};uint32_t ops=0,flags=0;int producer=0;
  if(flSharedCpuQuery(self->cpuChannel,&cfg,&ops,&flags,&producer,&self->cpuSlots)!=FL_OK||!producer||!(ops&FL_MEMORY_COPY)||
     flags!=(FL_SHARED_CPU_FRAME_METADATA|FL_SHARED_CPU_ORDERED_EOS)||cfg.generation!=self->sessionConfig.generation){sinkDisconnect(self);return FALSE;}
+ // Materialize writable shared pages before advertising media readiness.
+ // A fresh memfd is only virtually allocated: its first payload write otherwise
+ // pays all physical page faults inside the first-frame transport budget.
+ // Acquire/cancel preserves ownership and does not submit synthetic frames.
+ const gint64 warmDeadline=g_get_monotonic_time()+gint64(cfg.connectTimeoutMs)*1000;
+ for(guint slot=0;slot<self->cpuSlots;slot++){
+  flSharedCpuLease*lease=nullptr;flMappedImage view{};
+  if(flSharedCpuAcquireWrite(self->cpuChannel,slot,&lease,&view)!=FL_OK){sinkDisconnect(self);return FALSE;}
+  bool ready=true;
+  for(guint p=0;p<view.planes&&ready;p++)for(guint row=0;row<view.plane[p].rows;row++){
+   if(g_atomic_int_get(&self->cpuFlushing)||g_get_monotonic_time()>=warmDeadline){ready=false;break;}
+   memset(static_cast<char*>(view.plane[p].pixels)+row*view.plane[p].stride,0,view.plane[p].rowBytes);
+  }
+  if(flSharedCpuCancelWrite(lease)!=FL_OK||!ready){sinkDisconnect(self);return FALSE;}
+ }
  if(!self->sessionRegistered){if(fl_gst_session_register_track(self->session,FL_GST_TRACK_VIDEO)!=FL_GST_SESSION_READY){sinkDisconnect(self);return FALSE;}self->sessionRegistered=TRUE;}
  self->preserveTimestamps=self->preserveFrameMetadata=TRUE;self->streamGeneration=cfg.generation;
  self->sessionFrames=0;self->sessionLastPts=-1;self->sessionHaveSegment=FALSE;self->sessionGapPending=FALSE;
