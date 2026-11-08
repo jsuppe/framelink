@@ -1,0 +1,70 @@
+{
+  "join": "inferred_constant_pts_mapping",
+  "frames": 3600,
+  "pts_offset_ns": 3900541287252480,
+  "arrival_budget_ns": 34000000,
+  "arrival_misses": 0,
+  "late_frames": [],
+  "push_ms": {
+    "p50": 0.207799,
+    "p95": 0.444595,
+    "p99": 0.511083,
+    "max": 0.715466
+  },
+  "arrival_ms": {
+    "p50": 20.748776,
+    "p95": 21.27716,
+    "p99": 21.718904,
+    "max": 27.20272
+  },
+  "post_push_residual_ms": {
+    "p50": 20.522923,
+    "p95": 20.972231,
+    "p99": 21.467462,
+    "max": 26.897693
+  },
+  "scope": "All frames including startup/drain. Offset inferred from first records: cannot independently exclude a whole-stream constant shift; not identity proof. Residual includes producer copy, transport, consumer work and clock-mapping error; not a root-cause proof.",
+  "audio": {
+    "blocks": 12000,
+    "contiguous_10ms_pts": true,
+    "arrival_misses": 0,
+    "arrival_ms": {
+      "p50": 1.573162,
+      "p95": 2.16208,
+      "p99": 2.515543,
+      "max": 3.521387
+    },
+    "scope": "PTS continuity only; PCM bytes/counts require the benchmark summary."
+  },
+  "av_mapping": {
+    "audio": {
+      "join": "inferred_constant_pts_mapping",
+      "frames": 12000,
+      "pts_offset_ns": 3900541287252480,
+      "arrival_budget_ns": 34000000,
+      "arrival_misses": 0,
+      "late_frames": [],
+      "push_ms": {
+        "p50": 0.366852,
+        "p95": 0.612309,
+        "p99": 0.830235,
+        "max": 1.393853
+      },
+      "arrival_ms": {
+        "p50": 1.573162,
+        "p95": 2.16208,
+        "p99": 2.515543,
+        "max": 3.521387
+      },
+      "post_push_residual_ms": {
+        "p50": 1.194539,
+        "p95": 1.627001,
+        "p99": 1.842693,
+        "max": 2.597616
+      },
+      "scope": "All frames including startup/drain. Offset inferred from first records: cannot independently exclude a whole-stream constant shift; not identity proof. Residual includes producer copy, transport, consumer work and clock-mapping error; not a root-cause proof."
+    },
+    "av_mapping_delta_ns": 0,
+    "scope": "Both tracks preserve the same inferred constant PTS mapping. No independent allocation identity or physical playback claim."
+  }
+}

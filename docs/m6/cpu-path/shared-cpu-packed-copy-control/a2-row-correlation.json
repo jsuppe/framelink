@@ -1,0 +1,103 @@
+{
+  "join": "inferred_constant_pts_mapping",
+  "frames": 3600,
+  "pts_offset_ns": 3900662971624603,
+  "arrival_budget_ns": 34000000,
+  "arrival_misses": 4,
+  "late_frames": [
+    {
+      "index": 785,
+      "producer_pts_ns": 26455097128,
+      "consumer_pts_ns": 3900689426721731,
+      "push_lateness_ns": 277412,
+      "arrival_lateness_ns": 34464989,
+      "post_push_residual_ns": 34187577
+    },
+    {
+      "index": 796,
+      "producer_pts_ns": 26821763795,
+      "consumer_pts_ns": 3900689793388398,
+      "push_lateness_ns": 257130,
+      "arrival_lateness_ns": 35568553,
+      "post_push_residual_ns": 35311423
+    },
+    {
+      "index": 797,
+      "producer_pts_ns": 26855097128,
+      "consumer_pts_ns": 3900689826721731,
+      "push_lateness_ns": 412412,
+      "arrival_lateness_ns": 35739835,
+      "post_push_residual_ns": 35327423
+    },
+    {
+      "index": 798,
+      "producer_pts_ns": 26888430462,
+      "consumer_pts_ns": 3900689860055065,
+      "push_lateness_ns": 2364078,
+      "arrival_lateness_ns": 35778501,
+      "post_push_residual_ns": 33414423
+    }
+  ],
+  "push_ms": {
+    "p50": 0.210846,
+    "p95": 0.312005,
+    "p99": 0.448725,
+    "max": 2.856078
+  },
+  "arrival_ms": {
+    "p50": 20.960169,
+    "p95": 22.855936,
+    "p99": 27.381092,
+    "max": 35.778501
+  },
+  "post_push_residual_ms": {
+    "p50": 20.727961,
+    "p95": 22.640654,
+    "p99": 27.236192,
+    "max": 35.327423
+  },
+  "scope": "All frames including startup/drain. Offset inferred from first records: cannot independently exclude a whole-stream constant shift; not identity proof. Residual includes producer copy, transport, consumer work and clock-mapping error; not a root-cause proof.",
+  "audio": {
+    "blocks": 12000,
+    "contiguous_10ms_pts": true,
+    "arrival_misses": 0,
+    "arrival_ms": {
+      "p50": 1.49935,
+      "p95": 2.212583,
+      "p99": 2.862117,
+      "max": 8.159424
+    },
+    "scope": "PTS continuity only; PCM bytes/counts require the benchmark summary."
+  },
+  "av_mapping": {
+    "audio": {
+      "join": "inferred_constant_pts_mapping",
+      "frames": 12000,
+      "pts_offset_ns": 3900662971624603,
+      "arrival_budget_ns": 34000000,
+      "arrival_misses": 0,
+      "late_frames": [],
+      "push_ms": {
+        "p50": 0.359699,
+        "p95": 0.600925,
+        "p99": 0.859385,
+        "max": 6.105617
+      },
+      "arrival_ms": {
+        "p50": 1.49935,
+        "p95": 2.212583,
+        "p99": 2.862117,
+        "max": 8.159424
+      },
+      "post_push_residual_ms": {
+        "p50": 1.124346,
+        "p95": 1.6945,
+        "p99": 2.096807,
+        "max": 5.402346
+      },
+      "scope": "All frames including startup/drain. Offset inferred from first records: cannot independently exclude a whole-stream constant shift; not identity proof. Residual includes producer copy, transport, consumer work and clock-mapping error; not a root-cause proof."
+    },
+    "av_mapping_delta_ns": 0,
+    "scope": "Both tracks preserve the same inferred constant PTS mapping. No independent allocation identity or physical playback claim."
+  }
+}
