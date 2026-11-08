@@ -91,6 +91,13 @@ public:
         if(fd<0)return FL_INTERNAL;
         out=fd;return FL_OK;
     }
+    // Query the retained descriptor, never a borrowed FD that may be recycled.
+    std::weak_ptr<void> lifetime()const{return state_;}
+    flResult identity(dev_t& device,ino_t& inode)const{
+        auto state=state_;if(!state)return FL_INVALID;
+        struct stat st{};if(fstat(state->fd,&st))return FL_INTERNAL;
+        device=st.st_dev;inode=st.st_ino;return FL_OK;
+    }
     flResult map(bool writable,Mapping& out)const{
         auto state=state_;if(!state)return FL_INVALID;
         if(writable&&!state->writable)return FL_ACCESS_DENIED;
