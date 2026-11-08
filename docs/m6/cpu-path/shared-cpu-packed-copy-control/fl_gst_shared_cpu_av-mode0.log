@@ -1,0 +1,231 @@
+CPU A/V: exact PCM/pixels, common mapping preserves37ms offset, both EOS submission orders, empty streams, terminal conflict and PCM death passed
+mode 0
+AUDIT sink index=0 start=3900270562950 wait_us=5 acquire_us=7 copy_us=48 submit_us=80
+AUDIT plane_mode enabled=0
+AUDIT consumer seq=1 start=3900270559910 receive_us=3228 output_us=8 copy_us=26 release_us=12 meta_us=200 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=1 start=3900270563869 wait_us=30 acquire_us=4 copy_us=5 submit_us=38
+AUDIT consumer seq=2 start=3900270563695 receive_us=509 output_us=12 copy_us=11 release_us=15 meta_us=4 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=2 start=3900270564563 wait_us=23 acquire_us=2 copy_us=4 submit_us=39
+AUDIT consumer seq=3 start=3900270564334 receive_us=341 output_us=8 copy_us=8 release_us=19 meta_us=4 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=3 start=3900270564954 wait_us=17 acquire_us=2 copy_us=3 submit_us=31
+AUDIT consumer seq=4 start=3900270564800 receive_us=293 output_us=6 copy_us=6 release_us=12 meta_us=3 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=4 start=3900270565335 wait_us=18 acquire_us=3 copy_us=3 submit_us=36
+AUDIT consumer seq=5 start=3900270565199 receive_us=318 output_us=6 copy_us=5 release_us=13 meta_us=3 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=5 start=3900270565887 wait_us=20 acquire_us=2 copy_us=4 submit_us=36
+AUDIT consumer seq=6 start=3900270565730 receive_us=379 output_us=7 copy_us=6 release_us=15 meta_us=3 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=6 start=3900270566701 wait_us=21 acquire_us=3 copy_us=4 submit_us=37
+AUDIT consumer seq=7 start=3900270566465 receive_us=402 output_us=6 copy_us=6 release_us=15 meta_us=3 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=7 start=3900270567312 wait_us=21 acquire_us=2 copy_us=4 submit_us=41
+AUDIT consumer seq=8 start=3900270567076 receive_us=499 output_us=7 copy_us=6 release_us=16 meta_us=3 copy_faults=0 copy_cpu_us=0
+mode 1
+AUDIT sink index=0 start=3900270627596 wait_us=7 acquire_us=7 copy_us=12 submit_us=87
+AUDIT plane_mode enabled=0
+AUDIT consumer seq=1 start=3900270624901 receive_us=3037 output_us=17 copy_us=232 release_us=119 meta_us=17 copy_faults=0 copy_cpu_us=218
+AUDIT sink index=1 start=3900270629320 wait_us=39 acquire_us=5 copy_us=5 submit_us=49
+AUDIT consumer seq=2 start=3900270628574 receive_us=1071 output_us=14 copy_us=9 release_us=18 meta_us=5 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=2 start=3900270629987 wait_us=28 acquire_us=4 copy_us=5 submit_us=55
+AUDIT consumer seq=3 start=3900270629787 receive_us=347 output_us=8 copy_us=9 release_us=19 meta_us=4 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=3 start=3900270630806 wait_us=34 acquire_us=5 copy_us=6 submit_us=60
+AUDIT consumer seq=4 start=3900270630304 receive_us=763 output_us=10 copy_us=10 release_us=24 meta_us=5 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=4 start=3900270631490 wait_us=31 acquire_us=4 copy_us=6 submit_us=59
+AUDIT consumer seq=5 start=3900270631258 receive_us=456 output_us=9 copy_us=12 release_us=24 meta_us=5 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=5 start=3900270632731 wait_us=37 acquire_us=5 copy_us=5 submit_us=76
+AUDIT consumer seq=6 start=3900270631870 receive_us=1073 output_us=13 copy_us=11 release_us=28 meta_us=5 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=6 start=3900270633860 wait_us=31 acquire_us=3 copy_us=5 submit_us=55
+AUDIT consumer seq=7 start=3900270633133 receive_us=927 output_us=10 copy_us=10 release_us=24 meta_us=5 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=7 start=3900270635091 wait_us=32 acquire_us=4 copy_us=6 submit_us=63
+AUDIT consumer seq=8 start=3900270634214 receive_us=1098 output_us=11 copy_us=11 release_us=28 meta_us=5 copy_faults=0 copy_cpu_us=0
+mode 2
+mode 3
+mode 4
+AUDIT sink index=0 start=3900270813456 wait_us=5 acquire_us=8 copy_us=11 submit_us=64
+AUDIT plane_mode enabled=0
+AUDIT consumer seq=1 start=3900270810918 receive_us=2706 output_us=12 copy_us=35 release_us=18 meta_us=271 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=1 start=3900270814769 wait_us=31 acquire_us=4 copy_us=4 submit_us=63
+AUDIT consumer seq=2 start=3900270814129 receive_us=860 output_us=11 copy_us=12 release_us=198 meta_us=5 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=2 start=3900270815519 wait_us=20 acquire_us=4 copy_us=4 submit_us=54
+AUDIT consumer seq=3 start=3900270815344 receive_us=423 output_us=7 copy_us=9 release_us=15 meta_us=3 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=3 start=3900270816330 wait_us=24 acquire_us=3 copy_us=4 submit_us=45
+AUDIT consumer seq=4 start=3900270815905 receive_us=656 output_us=9 copy_us=9 release_us=16 meta_us=3 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=4 start=3900270817018 wait_us=18 acquire_us=3 copy_us=4 submit_us=38
+AUDIT consumer seq=5 start=3900270816667 receive_us=556 output_us=6 copy_us=7 release_us=15 meta_us=3 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=5 start=3900270817627 wait_us=27 acquire_us=3 copy_us=7 submit_us=55
+AUDIT consumer seq=6 start=3900270817344 receive_us=497 output_us=6 copy_us=7 release_us=15 meta_us=3 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=6 start=3900270818328 wait_us=19 acquire_us=3 copy_us=4 submit_us=34
+AUDIT consumer seq=7 start=3900270817986 receive_us=506 output_us=7 copy_us=8 release_us=15 meta_us=4 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=7 start=3900270819044 wait_us=35 acquire_us=4 copy_us=6 submit_us=76
+AUDIT consumer seq=8 start=3900270818603 receive_us=729 output_us=11 copy_us=10 release_us=25 meta_us=5 copy_faults=0 copy_cpu_us=0
+bus: Internal data stream error. ../libs/gst/base/gstbasesrc.c(3177): gst_base_src_loop (): /GstPipeline:pipeline11/GstFrameLinkSrc:framelinksrc4:
+streaming stopped, reason error (-5)
+mode 5
+AUDIT sink index=0 start=3900270840820 wait_us=4 acquire_us=5 copy_us=8 submit_us=60
+AUDIT plane_mode enabled=0
+AUDIT consumer seq=1 start=3900270838750 receive_us=2283 output_us=10 copy_us=32 release_us=19 meta_us=9 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=1 start=3900270841819 wait_us=30 acquire_us=4 copy_us=7 submit_us=47
+AUDIT consumer seq=2 start=3900270841203 receive_us=814 output_us=10 copy_us=10 release_us=17 meta_us=3 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=2 start=3900270842296 wait_us=23 acquire_us=3 copy_us=4 submit_us=22
+AUDIT consumer seq=3 start=3900270842139 receive_us=508 output_us=8 copy_us=8 release_us=16 meta_us=4 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=3 start=3900270842903 wait_us=20 acquire_us=2 copy_us=4 submit_us=44
+AUDIT consumer seq=4 start=3900270842769 receive_us=282 output_us=7 copy_us=7 release_us=17 meta_us=3 copy_faults=0 copy_cpu_us=0
+AUDIT consumer seq=5 start=3900270843316 receive_us=252 output_us=8 copy_us=6 release_us=16 meta_us=3 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=4 start=3900270843448 wait_us=28 acquire_us=3 copy_us=5 submit_us=287
+AUDIT sink index=5 start=3900270844185 wait_us=23 acquire_us=3 copy_us=5 submit_us=35
+AUDIT consumer seq=6 start=3900270843988 receive_us=407 output_us=9 copy_us=9 release_us=19 meta_us=4 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=6 start=3900270844869 wait_us=35 acquire_us=4 copy_us=7 submit_us=64
+AUDIT consumer seq=7 start=3900270844540 receive_us=626 output_us=11 copy_us=12 release_us=24 meta_us=5 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=7 start=3900270845677 wait_us=31 acquire_us=4 copy_us=7 submit_us=59
+AUDIT consumer seq=8 start=3900270845338 receive_us=614 output_us=11 copy_us=11 release_us=23 meta_us=5 copy_faults=0 copy_cpu_us=0
+bus: audio peer closed before GDP EOS <linux-home>/dev/framelink-m6/gst/gstframelinkaudiosrc.cpp(66): readChunkImpl (): /GstPipeline:pipeline13/GstFrameLinkAudioSrc:framelinkaudiosrc5/FlAudioReader:flaudioreader9
+mode 0
+AUDIT plane_mode enabled=0
+AUDIT consumer seq=1 start=3900270862940 receive_us=2408 output_us=11 copy_us=68 release_us=19 meta_us=10 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=0 start=3900270865218 wait_us=5 acquire_us=5 copy_us=8 submit_us=412
+AUDIT sink index=1 start=3900270866260 wait_us=28 acquire_us=4 copy_us=5 submit_us=37
+AUDIT consumer seq=2 start=3900270865575 receive_us=893 output_us=11 copy_us=9 release_us=16 meta_us=3 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=2 start=3900270866903 wait_us=23 acquire_us=3 copy_us=4 submit_us=43
+AUDIT consumer seq=3 start=3900270866595 receive_us=430 output_us=8 copy_us=8 release_us=14 meta_us=3 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=3 start=3900270867583 wait_us=23 acquire_us=3 copy_us=5 submit_us=41
+AUDIT consumer seq=4 start=3900270867117 receive_us=695 output_us=8 copy_us=7 release_us=15 meta_us=3 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=4 start=3900270868177 wait_us=25 acquire_us=2 copy_us=5 submit_us=36
+AUDIT consumer seq=5 start=3900270867905 receive_us=440 output_us=8 copy_us=8 release_us=15 meta_us=5 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=5 start=3900270868675 wait_us=22 acquire_us=4 copy_us=4 submit_us=41
+AUDIT consumer seq=6 start=3900270868465 receive_us=342 output_us=7 copy_us=9 release_us=24 meta_us=6 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=6 start=3900270869557 wait_us=35 acquire_us=4 copy_us=8 submit_us=60
+AUDIT consumer seq=7 start=3900270868967 receive_us=850 output_us=11 copy_us=12 release_us=30 meta_us=6 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=7 start=3900270870466 wait_us=154 acquire_us=4 copy_us=8 submit_us=57
+AUDIT consumer seq=8 start=3900270870019 receive_us=811 output_us=11 copy_us=10 release_us=21 meta_us=4 copy_faults=0 copy_cpu_us=0
+mode 1
+AUDIT sink index=0 start=3900270930959 wait_us=6 acquire_us=6 copy_us=11 submit_us=84
+AUDIT plane_mode enabled=0
+AUDIT consumer seq=1 start=3900270927981 receive_us=3295 output_us=16 copy_us=38 release_us=21 meta_us=25 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=1 start=3900270932994 wait_us=50 acquire_us=6 copy_us=8 submit_us=69
+AUDIT consumer seq=2 start=3900270931541 receive_us=1800 output_us=19 copy_us=18 release_us=26 meta_us=8 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=2 start=3900270933959 wait_us=29 acquire_us=5 copy_us=6 submit_us=43
+AUDIT consumer seq=3 start=3900270933541 receive_us=648 output_us=11 copy_us=10 release_us=19 meta_us=5 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=3 start=3900270934677 wait_us=29 acquire_us=8 copy_us=6 submit_us=58
+AUDIT consumer seq=4 start=3900270934342 receive_us=578 output_us=10 copy_us=10 release_us=23 meta_us=4 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=4 start=3900270935477 wait_us=27 acquire_us=3 copy_us=6 submit_us=51
+AUDIT consumer seq=5 start=3900270935097 receive_us=627 output_us=8 copy_us=9 release_us=22 meta_us=4 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=5 start=3900270936105 wait_us=41 acquire_us=5 copy_us=8 submit_us=86
+AUDIT consumer seq=6 start=3900270935875 receive_us=534 output_us=10 copy_us=9 release_us=21 meta_us=5 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=6 start=3900270936987 wait_us=27 acquire_us=4 copy_us=7 submit_us=51
+AUDIT consumer seq=7 start=3900270936616 receive_us=614 output_us=9 copy_us=9 release_us=23 meta_us=5 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=7 start=3900270937818 wait_us=37 acquire_us=4 copy_us=7 submit_us=59
+AUDIT consumer seq=8 start=3900270937419 receive_us=640 output_us=8 copy_us=8 release_us=16 meta_us=3 copy_faults=0 copy_cpu_us=56
+mode 2
+mode 3
+mode 4
+AUDIT sink index=0 start=3900271132461 wait_us=6 acquire_us=8 copy_us=10 submit_us=67
+AUDIT plane_mode enabled=0
+AUDIT consumer seq=1 start=3900271130301 receive_us=2380 output_us=13 copy_us=33 release_us=17 meta_us=12 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=1 start=3900271134729 wait_us=45 acquire_us=5 copy_us=8 submit_us=84
+AUDIT consumer seq=2 start=3900271133008 receive_us=2050 output_us=14 copy_us=14 release_us=25 meta_us=6 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=2 start=3900271135998 wait_us=100 acquire_us=5 copy_us=7 submit_us=93
+AUDIT consumer seq=3 start=3900271135231 receive_us=1165 output_us=13 copy_us=13 release_us=26 meta_us=6 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=3 start=3900271137518 wait_us=33 acquire_us=5 copy_us=6 submit_us=67
+AUDIT consumer seq=4 start=3900271136647 receive_us=1117 output_us=11 copy_us=10 release_us=25 meta_us=5 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=4 start=3900271138382 wait_us=30 acquire_us=5 copy_us=7 submit_us=92
+AUDIT consumer seq=5 start=3900271137949 receive_us=821 output_us=9 copy_us=11 release_us=22 meta_us=5 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=5 start=3900271139348 wait_us=27 acquire_us=3 copy_us=6 submit_us=82
+AUDIT consumer seq=6 start=3900271138962 receive_us=1399 output_us=13 copy_us=12 release_us=33 meta_us=5 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=6 start=3900271141103 wait_us=34 acquire_us=4 copy_us=6 submit_us=109
+AUDIT consumer seq=7 start=3900271140589 receive_us=865 output_us=11 copy_us=12 release_us=22 meta_us=5 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=7 start=3900271141882 wait_us=109 acquire_us=4 copy_us=5 submit_us=51
+AUDIT consumer seq=8 start=3900271141633 receive_us=707 output_us=8 copy_us=219 release_us=26 meta_us=4 copy_faults=0 copy_cpu_us=0
+bus: Internal data stream error. ../libs/gst/base/gstbasesrc.c(3177): gst_base_src_loop (): /GstPipeline:pipeline23/GstFrameLinkAvSrc:transport/GstFrameLinkSrc:video:
+streaming stopped, reason error (-5)
+mode 5
+AUDIT sink index=0 start=3900271167295 wait_us=6 acquire_us=8 copy_us=12 submit_us=78
+AUDIT plane_mode enabled=0
+AUDIT consumer seq=1 start=3900271165132 receive_us=2455 output_us=15 copy_us=39 release_us=26 meta_us=12 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=1 start=3900271169383 wait_us=56 acquire_us=7 copy_us=9 submit_us=76
+AUDIT consumer seq=2 start=3900271167995 receive_us=1728 output_us=17 copy_us=19 release_us=26 meta_us=6 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=2 start=3900271170096 wait_us=40 acquire_us=6 copy_us=9 submit_us=87
+AUDIT consumer seq=3 start=3900271169921 receive_us=607 output_us=15 copy_us=15 release_us=35 meta_us=7 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=3 start=3900271171047 wait_us=31 acquire_us=4 copy_us=7 submit_us=69
+AUDIT consumer seq=4 start=3900271170781 receive_us=447 output_us=9 copy_us=10 release_us=24 meta_us=4 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=4 start=3900271171793 wait_us=27 acquire_us=4 copy_us=7 submit_us=60
+AUDIT consumer seq=5 start=3900271171366 receive_us=747 output_us=10 copy_us=11 release_us=25 meta_us=5 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=5 start=3900271172438 wait_us=32 acquire_us=3 copy_us=6 submit_us=51
+AUDIT consumer seq=6 start=3900271172307 receive_us=411 output_us=26 copy_us=23 release_us=31 meta_us=4 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=6 start=3900271173298 wait_us=30 acquire_us=4 copy_us=6 submit_us=57
+AUDIT consumer seq=7 start=3900271172930 receive_us=577 output_us=8 copy_us=9 release_us=241 meta_us=5 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=7 start=3900271174107 wait_us=52 acquire_us=6 copy_us=8 submit_us=48
+AUDIT consumer seq=8 start=3900271173883 receive_us=481 output_us=9 copy_us=10 release_us=196 meta_us=5 copy_faults=0 copy_cpu_us=0
+bus: audio peer closed before GDP EOS <linux-home>/dev/framelink-m6/gst/gstframelinkaudiosrc.cpp(66): readChunkImpl (): /GstPipeline:pipeline25/GstFrameLinkAvSrc:transport/GstFrameLinkAudioSrc:audio/FlAudioReader:flaudioreader15
+mode 0
+AUDIT sink index=0 start=3900271220522 wait_us=5 acquire_us=5 copy_us=10 submit_us=58
+AUDIT plane_mode enabled=0
+AUDIT consumer seq=1 start=3900271218123 receive_us=2547 output_us=11 copy_us=34 release_us=15 meta_us=458 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=1 start=3900271222019 wait_us=40 acquire_us=5 copy_us=7 submit_us=60
+AUDIT consumer seq=2 start=3900271221400 receive_us=898 output_us=44 copy_us=14 release_us=22 meta_us=6 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=2 start=3900271222791 wait_us=25 acquire_us=4 copy_us=5 submit_us=51
+AUDIT consumer seq=3 start=3900271222479 receive_us=529 output_us=9 copy_us=8 release_us=18 meta_us=4 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=3 start=3900271223520 wait_us=52 acquire_us=9 copy_us=7 submit_us=69
+AUDIT consumer seq=4 start=3900271223164 receive_us=696 output_us=8 copy_us=9 release_us=22 meta_us=4 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=4 start=3900271224573 wait_us=25 acquire_us=3 copy_us=6 submit_us=51
+AUDIT consumer seq=5 start=3900271224077 receive_us=730 output_us=20 copy_us=22 release_us=32 meta_us=7 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=5 start=3900271225148 wait_us=23 acquire_us=3 copy_us=5 submit_us=49
+AUDIT consumer seq=6 start=3900271225005 receive_us=342 output_us=6 copy_us=8 release_us=18 meta_us=3 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=6 start=3900271225847 wait_us=23 acquire_us=3 copy_us=5 submit_us=41
+AUDIT consumer seq=7 start=3900271225492 receive_us=614 output_us=11 copy_us=17 release_us=22 meta_us=3 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=7 start=3900271226710 wait_us=22 acquire_us=3 copy_us=5 submit_us=41
+AUDIT consumer seq=8 start=3900271226270 receive_us=735 output_us=8 copy_us=8 release_us=22 meta_us=3 copy_faults=0 copy_cpu_us=0
+mode 1
+AUDIT sink index=0 start=3900271307318 wait_us=4 acquire_us=5 copy_us=10 submit_us=62
+AUDIT plane_mode enabled=0
+AUDIT consumer seq=1 start=3900271304719 receive_us=2996 output_us=11 copy_us=31 release_us=18 meta_us=11 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=1 start=3900271309130 wait_us=47 acquire_us=5 copy_us=8 submit_us=66
+AUDIT consumer seq=2 start=3900271307911 receive_us=1553 output_us=14 copy_us=15 release_us=27 meta_us=6 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=2 start=3900271310502 wait_us=33 acquire_us=4 copy_us=7 submit_us=53
+AUDIT consumer seq=3 start=3900271309670 receive_us=1052 output_us=11 copy_us=13 release_us=26 meta_us=5 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=3 start=3900271311098 wait_us=30 acquire_us=5 copy_us=6 submit_us=79
+AUDIT consumer seq=4 start=3900271310892 receive_us=382 output_us=9 copy_us=9 release_us=24 meta_us=4 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=4 start=3900271311872 wait_us=29 acquire_us=3 copy_us=6 submit_us=74
+AUDIT consumer seq=5 start=3900271311748 receive_us=408 output_us=9 copy_us=10 release_us=24 meta_us=4 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=5 start=3900271312693 wait_us=30 acquire_us=3 copy_us=6 submit_us=66
+AUDIT consumer seq=6 start=3900271312315 receive_us=647 output_us=9 copy_us=10 release_us=23 meta_us=4 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=6 start=3900271313671 wait_us=27 acquire_us=3 copy_us=6 submit_us=47
+AUDIT consumer seq=7 start=3900271313125 receive_us=724 output_us=13 copy_us=13 release_us=27 meta_us=7 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=7 start=3900271314451 wait_us=28 acquire_us=3 copy_us=6 submit_us=50
+AUDIT consumer seq=8 start=3900271314004 receive_us=728 output_us=8 copy_us=9 release_us=23 meta_us=5 copy_faults=0 copy_cpu_us=0
+mode 2
+mode 3
+mode 0
+AUDIT sink index=0 start=3900271540617 wait_us=5 acquire_us=5 copy_us=12 submit_us=83
+AUDIT plane_mode enabled=0
+AUDIT consumer seq=1 start=3900271538764 receive_us=2274 output_us=14 copy_us=40 release_us=22 meta_us=12 copy_faults=0 copy_cpu_us=110
+AUDIT sink index=1 start=3900271543314 wait_us=40 acquire_us=4 copy_us=6 submit_us=59
+AUDIT consumer seq=2 start=3900271541313 receive_us=2244 output_us=13 copy_us=13 release_us=21 meta_us=4 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=2 start=3900271544165 wait_us=31 acquire_us=3 copy_us=5 submit_us=73
+AUDIT consumer seq=3 start=3900271543815 receive_us=510 output_us=10 copy_us=11 release_us=21 meta_us=4 copy_faults=0 copy_cpu_us=47
+AUDIT consumer seq=4 start=3900271544475 receive_us=448 output_us=7 copy_us=8 release_us=17 meta_us=3 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=3 start=3900271544788 wait_us=24 acquire_us=3 copy_us=4 submit_us=332
+AUDIT sink index=4 start=3900271545722 wait_us=174 acquire_us=5 copy_us=7 submit_us=57
+AUDIT consumer seq=5 start=3900271545453 receive_us=698 output_us=10 copy_us=11 release_us=25 meta_us=6 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=5 start=3900271546889 wait_us=45 acquire_us=8 copy_us=13 submit_us=66
+AUDIT consumer seq=6 start=3900271546503 receive_us=641 output_us=10 copy_us=10 release_us=25 meta_us=5 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=6 start=3900271547813 wait_us=31 acquire_us=4 copy_us=6 submit_us=58
+AUDIT consumer seq=7 start=3900271547379 receive_us=695 output_us=10 copy_us=10 release_us=27 meta_us=5 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=7 start=3900271548577 wait_us=33 acquire_us=4 copy_us=6 submit_us=60
+AUDIT consumer seq=8 start=3900271548253 receive_us=588 output_us=10 copy_us=10 release_us=25 meta_us=5 copy_faults=0 copy_cpu_us=0
+mode 1
+AUDIT sink index=0 start=3900271640898 wait_us=5 acquire_us=6 copy_us=10 submit_us=93
+AUDIT plane_mode enabled=0
+AUDIT consumer seq=1 start=3900271638017 receive_us=3747 output_us=657 copy_us=113 release_us=53 meta_us=17 copy_faults=0 copy_cpu_us=127
+AUDIT sink index=1 start=3900271645408 wait_us=60 acquire_us=7 copy_us=7 submit_us=67
+AUDIT consumer seq=2 start=3900271642967 receive_us=2773 output_us=18 copy_us=18 release_us=27 meta_us=11 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=2 start=3900271646527 wait_us=50 acquire_us=9 copy_us=8 submit_us=55
+AUDIT consumer seq=3 start=3900271646096 receive_us=841 output_us=18 copy_us=22 release_us=26 meta_us=11 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=3 start=3900271648237 wait_us=73 acquire_us=9 copy_us=13 submit_us=90
+AUDIT consumer seq=4 start=3900271647170 receive_us=1335 output_us=20 copy_us=25 release_us=28 meta_us=9 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=4 start=3900271649314 wait_us=60 acquire_us=7 copy_us=7 submit_us=70
+AUDIT consumer seq=5 start=3900271648853 receive_us=727 output_us=15 copy_us=17 release_us=23 meta_us=8 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=5 start=3900271650720 wait_us=52 acquire_us=6 copy_us=8 submit_us=68
+AUDIT consumer seq=6 start=3900271649855 receive_us=1165 output_us=16 copy_us=16 release_us=25 meta_us=9 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=6 start=3900271652225 wait_us=77 acquire_us=7 copy_us=12 submit_us=85
+AUDIT consumer seq=7 start=3900271651286 receive_us=1360 output_us=30 copy_us=27 release_us=35 meta_us=17 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=7 start=3900271653568 wait_us=63 acquire_us=9 copy_us=11 submit_us=64
+AUDIT consumer seq=8 start=3900271652943 receive_us=998 output_us=12 copy_us=16 release_us=24 meta_us=9 copy_faults=0 copy_cpu_us=0
+mode 2
+mode 3

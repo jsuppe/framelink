@@ -1,0 +1,51 @@
+CPU video roundtrip: BGRA/NV12 exact pixels/timing, COPY/caps/duration rejection, empty EOS and held-final-frame drain/cancellation passed
+mode 0
+AUDIT sink index=0 start=3900272463018 wait_us=6 acquire_us=9 copy_us=63 submit_us=98
+AUDIT plane_mode enabled=1
+AUDIT consumer seq=1 start=3900272461894 receive_us=1463 output_us=16 copy_us=32 release_us=42 meta_us=49 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=1 start=3900272463305 wait_us=475 acquire_us=3 copy_us=8 submit_us=17
+AUDIT consumer seq=2 start=3900272464239 receive_us=35 output_us=11 copy_us=9 release_us=37 meta_us=5 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=2 start=3900272463853 wait_us=537 acquire_us=2 copy_us=3 submit_us=13
+AUDIT output_fallback frame=2 size=1152
+AUDIT consumer seq=3 start=3900272464415 receive_us=26 output_us=36 copy_us=5 release_us=44 meta_us=4 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=3 start=3900272464467 wait_us=98 acquire_us=2 copy_us=2 submit_us=11
+AUDIT consumer seq=4 start=3900272464601 receive_us=29 output_us=8 copy_us=6 release_us=46 meta_us=27 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=4 start=3900272464607 wait_us=196 acquire_us=2 copy_us=3 submit_us=11
+AUDIT consumer seq=5 start=3900272464833 receive_us=32 output_us=6 copy_us=6 release_us=43 meta_us=4 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=5 start=3900272464845 wait_us=172 acquire_us=3 copy_us=6 submit_us=25
+AUDIT consumer seq=6 start=3900272464991 receive_us=131 output_us=7 copy_us=5 release_us=39 meta_us=4 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=6 start=3900272465099 wait_us=152 acquire_us=3 copy_us=6 submit_us=25
+AUDIT consumer seq=7 start=3900272465252 receive_us=99 output_us=5 copy_us=5 release_us=17 meta_us=3 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=7 start=3900272465452 wait_us=20 acquire_us=2 copy_us=5 submit_us=19
+AUDIT consumer seq=8 start=3900272465442 receive_us=92 output_us=4 copy_us=3 release_us=12 meta_us=2 copy_faults=0 copy_cpu_us=0
+mode 1
+AUDIT sink index=0 start=3900272471916 wait_us=4 acquire_us=4 copy_us=7 submit_us=50
+AUDIT plane_mode enabled=1
+AUDIT consumer seq=1 start=3900272471280 receive_us=830 output_us=7 copy_us=20 release_us=22 meta_us=7 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=1 start=3900272472098 wait_us=167 acquire_us=2 copy_us=7 submit_us=21
+AUDIT consumer seq=2 start=3900272472608 receive_us=29 output_us=9 copy_us=6 release_us=32 meta_us=4 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=2 start=3900272472404 wait_us=406 acquire_us=3 copy_us=4 submit_us=28
+AUDIT consumer seq=3 start=3900272472767 receive_us=221 output_us=6 copy_us=5 release_us=26 meta_us=3 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=3 start=3900272472944 wait_us=195 acquire_us=2 copy_us=5 submit_us=29
+AUDIT consumer seq=4 start=3900272473098 receive_us=156 output_us=5 copy_us=5 release_us=26 meta_us=7 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=4 start=3900272473212 wait_us=231 acquire_us=3 copy_us=5 submit_us=28
+AUDIT sink index=5 start=3900272473535 wait_us=93 acquire_us=3 copy_us=3 submit_us=11
+AUDIT consumer seq=5 start=3900272473390 receive_us=187 output_us=5 copy_us=4 release_us=139 meta_us=3 copy_faults=0 copy_cpu_us=0
+AUDIT consumer seq=6 start=3900272473788 receive_us=19 output_us=3 copy_us=4 release_us=25 meta_us=3 copy_faults=0 copy_cpu_us=64
+AUDIT sink index=6 start=3900272473697 wait_us=242 acquire_us=2 copy_us=4 submit_us=25
+AUDIT consumer seq=7 start=3900272473905 receive_us=173 output_us=8 copy_us=4 release_us=35 meta_us=5 copy_faults=0 copy_cpu_us=0
+AUDIT sink index=7 start=3900272474022 wait_us=203 acquire_us=2 copy_us=3 submit_us=25
+AUDIT consumer seq=8 start=3900272474192 receive_us=172 output_us=4 copy_us=4 release_us=24 meta_us=3 copy_faults=0 copy_cpu_us=0
+mode 2
+mode 3
+bus: Internal data stream error. ../libs/gst/base/gstbasesrc.c(3177): gst_base_src_loop (): /GstPipeline:pipeline6/GstAppSrc:input:
+streaming stopped, reason not-negotiated (-4)
+mode 4
+bus: Internal data stream error. ../libs/gst/base/gstbasesrc.c(3177): gst_base_src_loop (): /GstPipeline:pipeline8/GstAppSrc:input:
+streaming stopped, reason error (-5)
+mode 5
+AUDIT sink index=0 start=3900272495907 wait_us=4 acquire_us=4 copy_us=6 submit_us=30
+mode 6
+mode 7
+bus: Internal data stream error. ../libs/gst/base/gstbasesrc.c(3177): gst_base_src_loop (): /GstPipeline:pipeline13/GstAppSrc:input:
+streaming stopped, reason error (-5)

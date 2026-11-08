@@ -1,0 +1,8 @@
+{
+  "unit": "framelink-m6-packed-copy-20261108T202121.service",
+  "command": [
+    "python3",
+    "<linux-home>/dev/evidence/m6-cpu-path/android-packed-copy-control/campaign/campaign.py"
+  ],
+  "next": "Collect all four cells; independently validate counts, modes, stages and compare copy cost and late neighbors; no duplicate."
+}

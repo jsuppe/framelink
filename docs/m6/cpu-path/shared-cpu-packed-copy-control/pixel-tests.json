@@ -1,0 +1,32 @@
+[
+  {
+    "mode": 0,
+    "test": "fl_gst_shared_cpu_source",
+    "exit": 0
+  },
+  {
+    "mode": 0,
+    "test": "fl_gst_shared_cpu_roundtrip",
+    "exit": 0
+  },
+  {
+    "mode": 0,
+    "test": "fl_gst_shared_cpu_av",
+    "exit": 0
+  },
+  {
+    "mode": 1,
+    "test": "fl_gst_shared_cpu_source",
+    "exit": 0
+  },
+  {
+    "mode": 1,
+    "test": "fl_gst_shared_cpu_roundtrip",
+    "exit": 0
+  },
+  {
+    "mode": 1,
+    "test": "fl_gst_shared_cpu_av",
+    "exit": 0
+  }
+]

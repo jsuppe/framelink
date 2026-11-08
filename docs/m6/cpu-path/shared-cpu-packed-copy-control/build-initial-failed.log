@@ -1,0 +1,22 @@
+[1/7] Building CXX object CMakeFiles/gstframelink.dir/gst/gstframelink.cpp.o
+FAILED: CMakeFiles/gstframelink.dir/gst/gstframelink.cpp.o 
+<linux-home>/Android/Sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ --target=aarch64-none-linux-android29 --sysroot=<linux-home>/Android/Sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/sysroot -DFL_GST_SESSION_STATIC -DPACKAGE=\"framelink\" -DPACKAGE_VERSION=\"0.1.0\" -I<linux-home>/dev/gstreamer-android/arm64/lib/pkgconfig/../../include/gstreamer-1.0 -I<linux-home>/dev/gstreamer-android/arm64/lib/pkgconfig/../../include/glib-2.0 -I<linux-home>/dev/gstreamer-android/arm64/lib/pkgconfig/../../lib/glib-2.0/include -I<linux-home>/dev/gstreamer-android/arm64/lib/pkgconfig/../../include -I<linux-home>/dev/gstreamer-android/arm64/lib/pkgconfig/../../include/orc-0.4 -I<linux-home>/dev/framelink-m6/include -I<linux-home>/dev/framelink-m6/gst -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -O2 -g -DNDEBUG -std=gnu++17 -fPIC -pthread -MD -MT CMakeFiles/gstframelink.dir/gst/gstframelink.cpp.o -MF CMakeFiles/gstframelink.dir/gst/gstframelink.cpp.o.d -o CMakeFiles/gstframelink.dir/gst/gstframelink.cpp.o -c <linux-home>/dev/framelink-m6/gst/gstframelink.cpp
+In file included from <linux-home>/dev/framelink-m6/gst/gstframelink.cpp:1227:
+<linux-home>/dev/framelink-m6/gst/fl_gst_shared_cpu_source.inc:101:11: error: unexpected type name 'guint': expected expression
+  101 |   elsefor(guint y=0;y<rows;y++)memcpy(map.data+info.offset[p]+gsize(y)*info.stride[p],static_cast<const guint8*>(view.plane[p].pixels)+gsize(y)*view.plane[p].stride,rowBytes);
+      |           ^
+<linux-home>/dev/framelink-m6/gst/fl_gst_shared_cpu_source.inc:101:17: error: expected ')'
+  101 |   elsefor(guint y=0;y<rows;y++)memcpy(map.data+info.offset[p]+gsize(y)*info.stride[p],static_cast<const guint8*>(view.plane[p].pixels)+gsize(y)*view.plane[p].stride,rowBytes);
+      |                 ^
+<linux-home>/dev/framelink-m6/gst/fl_gst_shared_cpu_source.inc:101:10: note: to match this '('
+  101 |   elsefor(guint y=0;y<rows;y++)memcpy(map.data+info.offset[p]+gsize(y)*info.stride[p],static_cast<const guint8*>(view.plane[p].pixels)+gsize(y)*view.plane[p].stride,rowBytes);
+      |          ^
+<linux-home>/dev/framelink-m6/gst/fl_gst_shared_cpu_source.inc:101:21: error: use of undeclared identifier 'y'
+  101 |   elsefor(guint y=0;y<rows;y++)memcpy(map.data+info.offset[p]+gsize(y)*info.stride[p],static_cast<const guint8*>(view.plane[p].pixels)+gsize(y)*view.plane[p].stride,rowBytes);
+      |                     ^
+<linux-home>/dev/framelink-m6/gst/fl_gst_shared_cpu_source.inc:101:28: error: use of undeclared identifier 'y'
+  101 |   elsefor(guint y=0;y<rows;y++)memcpy(map.data+info.offset[p]+gsize(y)*info.stride[p],static_cast<const guint8*>(view.plane[p].pixels)+gsize(y)*view.plane[p].stride,rowBytes);
+      |                            ^
+4 errors generated.
+[2/7] Building CXX object CMakeFiles/fl_gst_av_bench.dir/test/fl_gst_av_bench.cpp.o
+ninja: build stopped: subcommand failed.
