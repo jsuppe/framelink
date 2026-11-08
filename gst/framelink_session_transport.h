@@ -22,6 +22,15 @@ FL_GST_SESSION_API gboolean fl_gst_session_negotiate_stream(FlGstSession*,
 FL_GST_SESSION_API gboolean fl_gst_session_authenticate_audio_stream(FlGstSession*,
  GSocketConnection*,gboolean producer,GBytes* root_secret,guint timeout_ms,
  GCancellable*,GError**);
+// Authenticate a distinct short-lived CPU bootstrap STREAM, using a separate
+// credential domain bound to the entire configured session and fresh challenges.
+// Requires a video track. Caller retains the stream on success; failure cancels
+// the session and closes the stream. This does NOT authorize an unrelated FD,
+// publish a CPU channel, or perform discovery: an authenticated descriptor
+// transfer over this same connection is still required before CPU binding.
+FL_GST_SESSION_API gboolean fl_gst_session_authenticate_cpu_bootstrap(FlGstSession*,
+ GSocketConnection*,gboolean producer,GBytes* root_secret,guint timeout_ms,
+ GCancellable*,GError**);
 // Full reference, single consumer/producer element claim per generation. Returns
 // NULL before successful audio authentication, on wrong role or duplicate claim.
 FL_GST_SESSION_API GSocketConnection* fl_gst_session_claim_audio_stream(FlGstSession*,

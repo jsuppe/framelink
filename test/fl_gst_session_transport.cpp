@@ -72,6 +72,35 @@ int main(int argc,char**argv){gst_init(&argc,&argv);guint8 raw[32];memset(raw,3,
   CHECK(stale?(!sr&&!cr&&se&&ce):(sr&&cr&&!se&&!ce));
   g_clear_error(&se);g_clear_error(&ce);g_object_unref(s);g_object_unref(c);
  }
+ // CPU bootstrap has a distinct credential domain and exact session binding.
+ for(unsigned mode=0;mode<7;mode++){
+  fprintf(stderr,"CPU bootstrap mode %u\n",mode);
+  Pair pair;auto*s=fl_gst_session_new(3);auto*c=fl_gst_session_new(3);auto cfg=config(3);auto caps=offer(cfg);
+  CHECK(fl_gst_session_configure(c,&cfg,&caps,&caps)==FL_GST_SESSION_READY);
+  if(mode==2)cfg.generation++;if(mode==3)cfg.epochNs++;if(mode==4)cfg.clockId.bytes[0]++;
+  CHECK(fl_gst_session_configure(s,&cfg,&caps,&caps)==FL_GST_SESSION_READY);
+  gboolean sr=FALSE;GError*se=nullptr,*ce=nullptr;
+  std::thread server([&]{sr=fl_gst_session_authenticate_cpu_bootstrap(s,pair.server,TRUE,key,1000,nullptr,&se);});
+  gboolean cr= mode==5?fl_gst_session_authenticate_event_stream(c,pair.client,FALSE,key,1000,nullptr,&ce):
+   mode==6?fl_gst_session_authenticate_audio_stream(c,pair.client,FALSE,key,1000,nullptr,&ce):
+   fl_gst_session_authenticate_cpu_bootstrap(c,pair.client,FALSE,mode==1?wrong:key,1000,nullptr,&ce);
+  server.join();CHECK(mode?(!sr&&!cr&&se&&ce):(sr&&cr&&!se&&!ce));
+  if(!mode){ // Successful auth consumes only its handshake, leaving stream usable.
+   guint8 sent=73,received=0;gsize n=0;
+   CHECK(g_output_stream_write_all(g_io_stream_get_output_stream(G_IO_STREAM(pair.server)),&sent,1,&n,nullptr,nullptr)&&n==1);
+   CHECK(g_input_stream_read_all(g_io_stream_get_input_stream(G_IO_STREAM(pair.client)),&received,1,&n,nullptr,nullptr)&&n==1&&received==sent);
+   CHECK(!fl_gst_session_has_event_stream(c,1));
+  }else {flSessionConfig out{};CHECK(fl_gst_session_get_config(c,&out)==FL_GST_SESSION_CANCELLED);}
+  g_clear_error(&se);g_clear_error(&ce);g_object_unref(s);g_object_unref(c);
+ }
+ for(bool cancel:{false,true}){
+  Pair pair;auto*s=fl_gst_session_new(1);auto cfg=config(1);auto caps=offer(cfg);CHECK(fl_gst_session_configure(s,&cfg,&caps,&caps)==FL_GST_SESSION_READY);
+  auto*token=g_cancellable_new();GError*e=nullptr;std::thread interrupter;
+  if(cancel)interrupter=std::thread([&]{g_usleep(20000);g_cancellable_cancel(token);});
+  auto start=g_get_monotonic_time();CHECK(!fl_gst_session_authenticate_cpu_bootstrap(s,pair.server,TRUE,key,100,token,&e));
+  CHECK(e&&g_get_monotonic_time()-start<1000000);if(interrupter.joinable())interrupter.join();
+  g_clear_error(&e);g_object_unref(token);g_object_unref(s);
+ }
  // A silent peer cannot keep a public element worker alive indefinitely.
  for(bool cancel:{false,true}){
   Pair pair;auto*s=fl_gst_session_new(2);auto cfg=config(2);auto caps=offer(cfg);auto*token=g_cancellable_new();GError*e=nullptr;
