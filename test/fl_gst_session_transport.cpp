@@ -5,6 +5,12 @@
 #include <cstdlib>
 #include <cstring>
 #include <initializer_list>
+#ifndef _WIN32
+#include <sys/socket.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <dirent.h>
+#endif
 #define CHECK(x) do{if(!(x)){fprintf(stderr,"line%d %s\n",__LINE__,#x);exit(1);}}while(0)
 struct Pair {
  GSocketConnection *client=nullptr,*server=nullptr;
@@ -101,6 +107,35 @@ int main(int argc,char**argv){gst_init(&argc,&argv);guint8 raw[32];memset(raw,3,
   CHECK(e&&g_get_monotonic_time()-start<1000000);if(interrupter.joinable())interrupter.join();
   g_clear_error(&e);g_object_unref(token);g_object_unref(s);
  }
+#ifndef _WIN32
+ // Endpoint transfer over the authenticated Unix stream, including hostile FDs.
+ auto fdCount=[](){unsigned n=0;auto*d=opendir("/proc/self/fd");CHECK(d);while(readdir(d))++n;closedir(d);return n;};
+ for(unsigned mode=0;mode<8;mode++){
+  const auto baseline=fdCount();int unixPair[2];CHECK(!socketpair(AF_UNIX,SOCK_STREAM,0,unixPair));
+  auto*x=g_socket_new_from_fd(unixPair[0],nullptr);auto*y=g_socket_new_from_fd(unixPair[1],nullptr);
+  auto*a=g_socket_connection_factory_create_connection(x);auto*b=g_socket_connection_factory_create_connection(y);g_object_unref(x);g_object_unref(y);
+  auto*s=fl_gst_session_new(1);auto*c=fl_gst_session_new(1);auto cfg=config(1);auto caps=offer(cfg);
+  CHECK(fl_gst_session_configure(s,&cfg,&caps,&caps)==FL_GST_SESSION_READY);CHECK(fl_gst_session_configure(c,&cfg,&caps,&caps)==FL_GST_SESSION_READY);
+  int endpoint=-1,peer=-1;gboolean ok=FALSE;GError*error=nullptr;
+  std::thread server([&]{ok=fl_gst_session_create_cpu_endpoint(s,a,TRUE,key,300,nullptr,&endpoint,&error);});
+  if(mode==0){CHECK(fl_gst_session_create_cpu_endpoint(c,b,FALSE,key,300,nullptr,&peer,nullptr));}
+  else{
+   CHECK(fl_gst_session_authenticate_cpu_bootstrap(c,b,FALSE,key,300,nullptr,nullptr));
+   if(mode==6){ // authenticated silent peer
+    g_usleep(400000);
+   }else{
+    int fd[2];CHECK(!socketpair(AF_UNIX,mode==3?SOCK_STREAM:mode==4?SOCK_DGRAM:SOCK_SEQPACKET,0,fd));
+    char tag=mode==5?'X':'V';iovec io{&tag,1};alignas(cmsghdr) char ancillary[CMSG_SPACE(20*sizeof(int))]{};
+    msghdr msg{};msg.msg_iov=&io;msg.msg_iovlen=1;
+    if(mode!=1){unsigned count=mode==7?20:mode==2?2:1;msg.msg_control=ancillary;msg.msg_controllen=CMSG_SPACE(count*sizeof(int));auto*h=CMSG_FIRSTHDR(&msg);h->cmsg_level=SOL_SOCKET;h->cmsg_type=SCM_RIGHTS;h->cmsg_len=CMSG_LEN(count*sizeof(int));for(unsigned i=0;i<count;i++)memcpy(CMSG_DATA(h)+i*sizeof(int),&fd[i%2],sizeof(int));}
+    CHECK(sendmsg(g_socket_get_fd(g_socket_connection_get_socket(b)),&msg,MSG_NOSIGNAL)==1);close(fd[0]);close(fd[1]);
+   }
+  }
+  server.join();CHECK(mode?(!ok&&endpoint==-1&&error):(ok&&endpoint>=0&&!error));
+  if(!mode){CHECK(fcntl(endpoint,F_GETFD)&FD_CLOEXEC);CHECK(fcntl(peer,F_GETFD)&FD_CLOEXEC);char tag=73,got=0;CHECK(send(peer,&tag,1,MSG_NOSIGNAL)==1&&recv(endpoint,&got,1,0)==1&&got==tag);close(endpoint);close(peer);}
+  g_clear_error(&error);g_io_stream_close(G_IO_STREAM(a),nullptr,nullptr);g_io_stream_close(G_IO_STREAM(b),nullptr,nullptr);g_object_unref(a);g_object_unref(b);g_object_unref(s);g_object_unref(c);CHECK(fdCount()==baseline);
+ }
+#endif
  // A silent peer cannot keep a public element worker alive indefinitely.
  for(bool cancel:{false,true}){
   Pair pair;auto*s=fl_gst_session_new(2);auto cfg=config(2);auto caps=offer(cfg);auto*token=g_cancellable_new();GError*e=nullptr;

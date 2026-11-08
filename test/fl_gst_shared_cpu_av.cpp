@@ -43,7 +43,13 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
   flClockMapping mapping{};mapping.sourceClockId=cfg.clockId;mapping.targetClockId.bytes[0]=8;mapping.targetAnchorNs=1000000;CHECK(fl_gst_session_set_mapping(r,1,&mapping,0)==FL_GST_SESSION_READY);
   flSharedCpuDescriptor d[2]{};for(unsigned i=0;i<2;i++){auto&v=d[i];v.version=1;v.resourceType=FL_MEMORY_SHARED_CPU;v.format=cfg.video.format;v.width=18;v.height=16;v.planeCount=nv12?2:1;v.generation=1;v.allocationId=i+1;v.planeStride[0]=nv12?32:80;v.allocationBytes=v.planeStride[0]*16;if(nv12){v.planeOffset[1]=v.allocationBytes+64;v.planeStride[1]=32;v.allocationBytes+=64+256;}}
   flMemoryRequirements req{};CHECK(flMemoryRequirementsInit(&req)==FL_MEMORY_OK);req.allowedResourceTypes=FL_MEMORY_SHARED_CPU;req.allowedOperations=FL_MEMORY_COPY;
-  int fd[2];CHECK(!socketpair(AF_UNIX,SOCK_SEQPACKET|SOCK_CLOEXEC,0,fd));FlGstSessionResult opened=FL_GST_SESSION_INVALID;
+  int fd[2]={-1,-1},boot[2];CHECK(!socketpair(AF_UNIX,SOCK_STREAM,0,boot));
+  auto*bs=g_socket_new_from_fd(boot[0],nullptr);auto*br=g_socket_new_from_fd(boot[1],nullptr);
+  auto*bp=g_socket_connection_factory_create_connection(bs);auto*bq=g_socket_connection_factory_create_connection(br);g_object_unref(bs);g_object_unref(br);
+  key=g_bytes_new(secret,32);gboolean endpointOk=FALSE;
+  std::thread bootstrap([&]{endpointOk=fl_gst_session_create_cpu_endpoint(s,bp,TRUE,key,1000,nullptr,&fd[1],nullptr);});
+  CHECK(fl_gst_session_create_cpu_endpoint(r,bq,FALSE,key,1000,nullptr,&fd[0],nullptr));bootstrap.join();CHECK(endpointOk);g_bytes_unref(key);g_object_unref(bp);g_object_unref(bq);
+  FlGstSessionResult opened=FL_GST_SESSION_INVALID;
   std::thread setup([&]{opened=fl_gst_session_bind_shared_cpu_fd(s,TRUE,1,fd[1],60000,&req,FL_MEMORY_COPY,nullptr,0);});
   CHECK(fl_gst_session_bind_shared_cpu_fd(r,FALSE,1,fd[0],60000,&req,FL_MEMORY_COPY,d,2)==FL_GST_SESSION_READY);setup.join();CHECK(opened==FL_GST_SESSION_READY);
   // Independently authenticated PCM stream, sharing only session/clock identity.

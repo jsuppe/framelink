@@ -6,6 +6,9 @@
 #ifdef _WIN32
 #include <winsock2.h>
 #else
+#include <sys/socket.h>
+#include <unistd.h>
+#include <cerrno>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #endif
@@ -164,6 +167,56 @@ gboolean fl_gst_session_authenticate_cpu_bootstrap(FlGstSession*s,GSocketConnect
  // Caller retains the authenticated bootstrap stream; no media FD is bound here.
  return TRUE;
 }
+
+#ifndef _WIN32
+// Dedicated authenticated Unix STREAM bootstrap. No payload is sent on it.
+gboolean fl_gst_session_create_cpu_endpoint(FlGstSession*s,GSocketConnection*stream,gboolean producer,
+ GBytes*secret,guint timeout,GCancellable*outer,int*out,GError**error){
+ if(out)*out=-1;
+ struct Fd {int n=-1;~Fd(){if(n>=0)close(n);}} local,remote;
+ auto fail=[&](const char*why){if(s&&G_TYPE_CHECK_INSTANCE_TYPE(s,fl_gst_session_get_type()))fl_gst_session_cancel(s);
+  if(stream&&G_IS_SOCKET_CONNECTION(stream))g_io_stream_close(G_IO_STREAM(stream),nullptr,nullptr);
+  if(!error||!*error)g_set_error_literal(error,G_IO_ERROR,G_IO_ERROR_FAILED,why);return FALSE;};
+ flSessionConfig initial{};Wire before{};
+ if(!out||!stream||!G_IS_SOCKET_CONNECTION(stream)||!timeout||timeout>60000||
+    fl_gst_session_get_config(s,&initial)!=FL_GST_SESSION_READY||flSessionEncode(&initial,before.data(),before.size())!=FL_SESSION_OK)return fail("invalid CPU endpoint arguments");
+ auto*socket=g_socket_connection_get_socket(stream);
+ if(g_socket_get_family(socket)!=G_SOCKET_FAMILY_UNIX||g_socket_get_socket_type(socket)!=G_SOCKET_TYPE_STREAM||!g_socket_is_connected(socket))return fail("CPU endpoint requires connected Unix STREAM");
+ Deadline deadline(timeout,outer);const auto end=g_get_monotonic_time()+gint64(timeout)*1000;
+ if(!fl_gst_session_authenticate_cpu_bootstrap(s,stream,producer,secret,timeout,deadline.cancel,error))return FALSE;
+ auto wait=[&](GIOCondition condition){const auto remaining=end-g_get_monotonic_time();return remaining>0&&g_socket_condition_timed_wait(socket,condition,remaining,deadline.cancel,nullptr);};
+ const int transport=g_socket_get_fd(socket);
+ if(!producer){
+  int pair[2];if(socketpair(AF_UNIX,SOCK_SEQPACKET|SOCK_CLOEXEC,0,pair))return fail("CPU socketpair failed");local.n=pair[0];remote.n=pair[1];
+  char tag='V';iovec io{&tag,1};alignas(cmsghdr) char ancillary[CMSG_SPACE(sizeof(int))]{};
+  msghdr msg{};msg.msg_iov=&io;msg.msg_iovlen=1;msg.msg_control=ancillary;msg.msg_controllen=sizeof ancillary;
+  auto*c=CMSG_FIRSTHDR(&msg);c->cmsg_level=SOL_SOCKET;c->cmsg_type=SCM_RIGHTS;c->cmsg_len=CMSG_LEN(sizeof(int));memcpy(CMSG_DATA(c),&remote.n,sizeof(int));
+  for(;;){if(!wait(G_IO_OUT))return fail("CPU endpoint send deadline");auto n=sendmsg(transport,&msg,MSG_DONTWAIT|MSG_NOSIGNAL);if(n==1)break;if(n<0&&(errno==EINTR||errno==EAGAIN))continue;return fail("CPU endpoint send failed");}
+ }else{
+  char tag=0;iovec io{&tag,1};alignas(cmsghdr) char ancillary[CMSG_SPACE(16*sizeof(int))]{};
+  msghdr msg{};ssize_t received=-1;
+  for(;;){if(!wait(G_IO_IN))return fail("CPU endpoint receive deadline");msg={};msg.msg_iov=&io;msg.msg_iovlen=1;msg.msg_control=ancillary;msg.msg_controllen=sizeof ancillary;
+   received=recvmsg(transport,&msg,MSG_DONTWAIT|MSG_CMSG_CLOEXEC);if(received<0&&(errno==EINTR||errno==EAGAIN))continue;break;}
+  unsigned count=0;bool valid=received==1&&tag=='V'&&!(msg.msg_flags&(MSG_CTRUNC|MSG_TRUNC));
+  for(auto*c=CMSG_FIRSTHDR(&msg);c;c=CMSG_NXTHDR(&msg,c)){
+   if(c->cmsg_level!=SOL_SOCKET||c->cmsg_type!=SCM_RIGHTS||c->cmsg_len<CMSG_LEN(0)){valid=false;continue;}
+   auto bytes=c->cmsg_len-CMSG_LEN(0);if(bytes%sizeof(int))valid=false;
+   for(size_t i=0;i+sizeof(int)<=bytes;i+=sizeof(int)){int fd=-1;memcpy(&fd,CMSG_DATA(c)+i,sizeof fd);if(!count)local.n=fd;else close(fd);++count;}
+  }
+  sockaddr_storage peer{};socklen_t size=sizeof peer;int type=0;socklen_t typeSize=sizeof type;
+  if(!valid||count!=1||getsockopt(local.n,SOL_SOCKET,SO_TYPE,&type,&typeSize)||type!=SOCK_SEQPACKET||getpeername(local.n,reinterpret_cast<sockaddr*>(&peer),&size)||peer.ss_family!=AF_UNIX)return fail("invalid CPU endpoint descriptor");
+ }
+ flSessionConfig now{};Wire after{};
+ if(g_cancellable_is_cancelled(deadline.cancel)||fl_gst_session_get_config(s,&now)!=FL_GST_SESSION_READY||flSessionEncode(&now,after.data(),after.size())!=FL_SESSION_OK||before!=after)return fail("CPU endpoint session changed");
+ // Acknowledgement prevents successful consumer return after a rejected FD.
+ char ack='K';
+ for(;;){if(!wait(producer?G_IO_OUT:G_IO_IN))return fail("CPU endpoint acknowledgement deadline");
+  auto n=producer?send(transport,&ack,1,MSG_DONTWAIT|MSG_NOSIGNAL):recv(transport,&ack,1,MSG_DONTWAIT);
+  if(n<0&&(errno==EINTR||errno==EAGAIN))continue;if(n!=1||ack!='K')return fail("CPU endpoint acknowledgement failed");break;}
+ if(g_cancellable_is_cancelled(deadline.cancel)||fl_gst_session_get_config(s,&now)!=FL_GST_SESSION_READY||flSessionEncode(&now,after.data(),after.size())!=FL_SESSION_OK||before!=after)return fail("CPU endpoint session changed before completion");
+ g_io_stream_close(G_IO_STREAM(stream),nullptr,nullptr);*out=local.n;local.n=-1;return TRUE;
+}
+#endif
 
 namespace {
 struct StreamOwner {GSocketConnection* p=nullptr;~StreamOwner(){if(p){g_io_stream_close(G_IO_STREAM(p),nullptr,nullptr);g_object_unref(p);}}};

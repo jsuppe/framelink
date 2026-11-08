@@ -31,6 +31,16 @@ FL_GST_SESSION_API gboolean fl_gst_session_authenticate_audio_stream(FlGstSessio
 FL_GST_SESSION_API gboolean fl_gst_session_authenticate_cpu_bootstrap(FlGstSession*,
  GSocketConnection*,gboolean producer,GBytes* root_secret,guint timeout_ms,
  GCancellable*,GError**);
+#ifndef _WIN32
+// Dedicated Unix STREAM bootstrap: authenticates, transfers a fresh connected
+// SEQPACKET endpoint via SCM_RIGHTS, validates it and acknowledges receipt.
+// Closes bootstrap on success/failure; caller still owns its GObject reference.
+// Success returns an owned CLOEXEC fd for bind_shared_cpu_fd; failure sets -1
+// and cancels session. No discovery/pool binding; timeout covers entire call.
+FL_GST_SESSION_API gboolean fl_gst_session_create_cpu_endpoint(FlGstSession*,
+ GSocketConnection*,gboolean producer,GBytes*,guint timeout_ms,GCancellable*,
+ int* endpoint_fd,GError**);
+#endif
 // Full reference, single consumer/producer element claim per generation. Returns
 // NULL before successful audio authentication, on wrong role or duplicate claim.
 FL_GST_SESSION_API GSocketConnection* fl_gst_session_claim_audio_stream(FlGstSession*,
