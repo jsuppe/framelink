@@ -27,3 +27,20 @@ historical-source checks for other drift. No unreviewed remote file overwritten.
 
 Evidence scripts/logs/copy accounting are under `shared-cpu-benchmark/`.
 Full-resolution rate/resource gates and Windows shared-CPU support remain open.
+
+## First full-resolution sustained cell
+
+Revision65a1268, Linux BGRA1920x1080@60,1800s:108000video frames and
+86400000PCM sample-frames,180000contiguous audio blocks, complete queues and
+zero17ms arrival misses. Video arrival p95=6.682544ms,max=11.908798ms;
+common inferred A/V mapping delta=0ns. Both RSS slopes3.23KB/min pass64KB/min.
+Consumer CPU24.08%; raw manifest and complete summary retained in
+`linux-bgra-1080p60-sustained/`. This is transport-consumer evidence, not
+physical presentation or independent full-stream pixel identity.
+
+Three preceding attempts were interrupted by command ownership/timeout,
+not failed benchmark verdicts; originals remain at the external evidence root.
+The third established gateway dynamic-tool timeout600000ms despite requested
+2000s, with no surviving process or result. Native execution completed and
+was collected successfully. No threshold, duration or binary changed.
+Other Linux formats/rates, Android endurance and Windows support remain open.
