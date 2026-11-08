@@ -51,3 +51,7 @@ FD counts return to baseline. Invalid factory arguments consume the delegated FD
 Raw results and hashes: `shared-cpu-channel/`. Still required: coordinator/broker
 selection and GStreamer/A/V-bin integration, metadata/EOS/reconnect behavior and
 rate/endurance qualification. No Windows CPU allocator or product-rate claim.
+
+Public held-lease reconnect validation: see SHARED_CPU_RECONNECT.md (100 fresh
+generations each Linux/Android with exact FD/named-VMA cleanup; not in-place
+reconnect or A/V continuity qualification).
