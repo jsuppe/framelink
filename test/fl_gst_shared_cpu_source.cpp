@@ -47,7 +47,7 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
      }
      if(mode<2||mode==6)CHECK(flSharedCpuSendEos(p)==FL_OK);
     });
-    GstSample*held=nullptr;
+    GstSample*held[3]{};
     if(mode<2)for(unsigned n=1;n<=8;n++){
      auto*sample=gst_app_sink_try_pull_sample(GST_APP_SINK(output),3*GST_SECOND);CHECK(sample);auto*b=gst_sample_get_buffer(sample);
      CHECK(GST_BUFFER_PTS(b)==1000000+n*1000&&GST_BUFFER_DTS(b)==1000000+n*1000-10&&GST_BUFFER_DURATION(b)==1000);
@@ -55,11 +55,13 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
      CHECK(bool(GST_BUFFER_FLAG_IS_SET(b,GST_BUFFER_FLAG_DISCONT))==(n==1||n==4));
      GstVideoInfo vi;CHECK(gst_video_info_from_caps(&vi,gst_sample_get_caps(sample)));GstVideoFrame frame{};CHECK(gst_video_frame_map(&frame,&vi,b,GST_MAP_READ));
      for(unsigned plane=0;plane<(nv12?2u:1u);plane++)for(unsigned y=0;y<(plane?8u:16u);y++)for(unsigned x=0;x<(nv12?18u:72u);x++)CHECK(static_cast<unsigned char*>(GST_VIDEO_FRAME_PLANE_DATA(&frame,plane))[y*GST_VIDEO_FRAME_PLANE_STRIDE(&frame,plane)+x]==n+plane*20);
-     gst_video_frame_unmap(&frame);if(n==1)held=sample;else gst_sample_unref(sample);
+     gst_video_frame_unmap(&frame);if(n<=3)held[n-1]=sample;else gst_sample_unref(sample);
     }
     writer.join();
     auto*message=gst_bus_timed_pop_filtered(bus,3*GST_SECOND,GstMessageType(GST_MESSAGE_ERROR|GST_MESSAGE_EOS));CHECK(message);CHECK(GST_MESSAGE_TYPE(message)==(mode<2||mode==6?GST_MESSAGE_EOS:GST_MESSAGE_ERROR));gst_message_unref(message);
-    if(held){guint8 first=0;CHECK(gst_buffer_extract(gst_sample_get_buffer(held),0,&first,1)==1&&first==1);gst_sample_unref(held);}
+    // Exhaust both cache slots and retain a fallback through source teardown.
+    CHECK(gst_element_set_state(pipeline,GST_STATE_NULL)!=GST_STATE_CHANGE_FAILURE);
+    for(unsigned i=0;i<3;i++)if(held[i]){guint8 first=0;CHECK(gst_buffer_extract(gst_sample_get_buffer(held[i]),0,&first,1)==1&&first==i+1);gst_sample_unref(held[i]);}
    }
   }
   gst_element_set_state(pipeline,GST_STATE_NULL);if(p)flSharedCpuClose(p);gst_object_unref(bus);gst_object_unref(source);gst_object_unref(output);gst_object_unref(pipeline);g_object_unref(s);

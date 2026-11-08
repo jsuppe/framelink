@@ -18,6 +18,18 @@ static gboolean srcSharedCpuStart(GstFrameLinkSrc*self){
  self->width=cfg.video.width;self->height=cfg.video.height;g_free(self->format);self->format=g_strdup(gst_video_format_to_string(fmt));
  self->preserveTimestamps=self->preserveFrameMetadata=TRUE;self->sessionFrames=0;self->sessionLastPts=-1;self->sessionSequence=0;
  self->pendingGapCount=0;self->videoEndSeen=FALSE;self->haveTimestamp=FALSE;
+ // Materialize both bounded cache allocations before declaring track readiness.
+ // Retain both temporarily so the second acquisition cannot reuse the first.
+ GstVideoInfo info;gst_video_info_init(&info);
+ if(!gst_video_info_set_format(&info,fmt,self->width,self->height))return FALSE;
+ GstBuffer*warm[2]{};bool ready=true;
+ for(unsigned i=0;i<2;i++){
+  warm[i]=srcCpuOutputBuffer(self,info.size);GstMapInfo map{};
+  if(!warm[i]||!gst_buffer_map(warm[i],&map,GST_MAP_WRITE)){ready=false;break;}
+  memset(map.data,0,map.size);gst_buffer_unmap(warm[i],&map);
+ }
+ for(auto*b:warm)if(b)gst_buffer_unref(b);
+ if(!ready){srcDropCpuOutput(self);return FALSE;}
  gst_base_src_set_do_timestamp(GST_BASE_SRC(self),FALSE);
  return fl_gst_session_track_ready(self->session,FL_GST_TRACK_VIDEO,cfg.generation)==FL_GST_SESSION_READY;
 }
@@ -60,7 +72,7 @@ static GstFlowReturn srcSharedCpuCreate(GstFrameLinkSrc*self,GstBuffer**out){
     seq!=self->sessionSequence+1)return GST_FLOW_ERROR;
  GstVideoInfo info;gst_video_info_init(&info);
  if(!gst_video_info_set_format(&info,toGstFormat(flFormat(self->sessionConfig.video.format)),self->width,self->height))return GST_FLOW_ERROR;
- auto*buf=gst_buffer_new_allocate(nullptr,info.size,nullptr);if(!buf)return GST_FLOW_ERROR;
+ auto*buf=srcCpuOutputBuffer(self,info.size);if(!buf)return GST_FLOW_ERROR;
  struct Buffer{GstBuffer*p;~Buffer(){if(p)gst_buffer_unref(p);}} owned{buf};
  GstMapInfo map{};if(!gst_buffer_map(buf,&map,GST_MAP_WRITE))return GST_FLOW_ERROR;
  bool valid=view.planes==GST_VIDEO_INFO_N_PLANES(&info);guint64 bytes=0;

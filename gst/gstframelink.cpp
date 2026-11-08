@@ -1112,9 +1112,9 @@ typedef struct _GstFrameLinkSrc {
     volatile gint flushing;
 #ifdef _WIN32
     ID3D11Texture2D* staging; // cached; rebuilt when the generation moves
+#endif
     GstBufferPool* cpuOutputPool; // at most two reusable CPU buffers; never wait
     gsize cpuOutputSize;
-#endif
 } GstFrameLinkSrc;
 
 typedef struct _GstFrameLinkSrcClass {
@@ -1140,8 +1140,7 @@ static GstStaticPadTemplate srcTemplate =
     GST_STATIC_PAD_TEMPLATE("src", GST_PAD_SRC, GST_PAD_ALWAYS,
                             GST_STATIC_CAPS(FL_SOURCE_CAPS));
 
-#ifdef _WIN32
-static void srcDropStaging(GstFrameLinkSrc* self) {
+static void srcDropCpuOutput(GstFrameLinkSrc* self) {
     if (self->cpuOutputPool) {
         // Outstanding downstream buffers remain valid; their pool frees them
         // when returned. Stop and resize must never wait for downstream refs.
@@ -1150,14 +1149,22 @@ static void srcDropStaging(GstFrameLinkSrc* self) {
         self->cpuOutputPool = nullptr;
         self->cpuOutputSize = 0;
     }
-    if (self->staging) {
-        self->staging->Release();
-        self->staging = NULL;
-    }
 }
+#ifdef _WIN32
+static void srcDropStaging(GstFrameLinkSrc* self) {
+    srcDropCpuOutput(self);
+    if (self->staging) {self->staging->Release();self->staging = NULL;}
+}
+#endif
 
 static GstBuffer* srcCpuOutputBuffer(GstFrameLinkSrc* self, gsize size) {
-    if (self->cpuOutputPool && self->cpuOutputSize != size) srcDropStaging(self);
+    if (self->cpuOutputPool && self->cpuOutputSize != size) {
+#ifdef _WIN32
+        srcDropStaging(self);
+#else
+        srcDropCpuOutput(self);
+#endif
+    }
     if (!self->cpuOutputPool && size <= G_MAXUINT) {
         auto* pool = gst_buffer_pool_new();
         auto* config = gst_buffer_pool_get_config(pool);
@@ -1178,7 +1185,6 @@ static GstBuffer* srcCpuOutputBuffer(GstFrameLinkSrc* self, gsize size) {
     // both cached buffers. Fallback buffers are not retained in the cache.
     return gst_buffer_new_allocate(nullptr, size, nullptr);
 }
-#endif
 
 static GstCaps* srcMakeCaps(GstFrameLinkSrc* self) {
     // After start() the channel is the truth (its format differs per platform:
@@ -1310,6 +1316,7 @@ static gboolean srcStart(GstBaseSrc* base) {
 
 static gboolean srcStop(GstBaseSrc* base) {
     GstFrameLinkSrc* self = GST_FRAMELINK_SRC(base);
+    srcDropCpuOutput(self);
     gst_clear_buffer(&self->pendingDelivery);
 #ifndef _WIN32
     if(self->cpuChannel){flSharedCpuClose(self->cpuChannel);self->cpuChannel=nullptr;}
@@ -1810,6 +1817,7 @@ static void srcGetProperty(GObject* obj, guint id, GValue* value, GParamSpec* sp
 
 static void srcFinalize(GObject* obj) {
     GstFrameLinkSrc* self = GST_FRAMELINK_SRC(obj);
+    srcDropCpuOutput(self);
 #ifdef _WIN32
     srcDropStaging(self);
 #endif
