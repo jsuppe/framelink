@@ -59,3 +59,5 @@ source hashes without rerunning unchanged tests. Commands/logs/hashes are in
 
 Next: coordinator/bin selection and A/V/event/flush integration, authenticated
 rendezvous provisioning, Windows allocation and target-rate/endurance gates.
+
+Event-stream support has since been integrated and qualified in SHARED_CPU_GST_EVENTS.md; the initial event-stream rejection described above is superseded. Audio-track rejection remains until A/V qualification.

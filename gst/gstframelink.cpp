@@ -1216,6 +1216,7 @@ static GstCaps* srcGetCaps(GstBaseSrc* base, GstCaps* filter) {
 }
 
 #ifndef _WIN32
+static bool srcEmitGaps(GstFrameLinkSrc*);
 #include "fl_gst_shared_cpu_source.inc"
 #endif
 

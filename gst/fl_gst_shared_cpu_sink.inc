@@ -2,8 +2,7 @@
 static gboolean sinkSharedCpuStart(GstFrameLinkSink*self){
  if(!self->session||self->ch||self->nativeMemory||self->memoryPolicyApplied||self->slots||
     fl_gst_session_get_config(self->session,&self->sessionConfig)!=FL_GST_SESSION_READY||
-    !self->sessionConfig.videoTrackId||self->sessionConfig.audioTrackId||
-    fl_gst_session_has_event_stream(self->session,self->sessionConfig.generation))return FALSE;
+    !self->sessionConfig.videoTrackId||self->sessionConfig.audioTrackId)return FALSE;
  self->cpuChannel=fl_gst_session_claim_shared_cpu(self->session,TRUE,self->sessionConfig.generation);if(!self->cpuChannel)return FALSE;
  flSessionConfig cfg{};uint32_t ops=0,flags=0;int producer=0;
  if(flSharedCpuQuery(self->cpuChannel,&cfg,&ops,&flags,&producer,&self->cpuSlots)!=FL_OK||!producer||!(ops&FL_MEMORY_COPY)||

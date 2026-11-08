@@ -35,6 +35,7 @@ public:
     // A coordinator may retain a duplicate solely for cancellation. Closing or
     // failing the owner must still disconnect immediately, not wait for that FD.
     ~SharedCpuControl(){disconnect();}
+    int pollFd()const{return link_.pollFd();}
     bool agreed()const{return agreed_;}
     bool poolAccepted()const{return accepted_;}
     bool writableSlot(uint32_t slot)const{return accepted_&&producer_&&slot<poolCount_&&!slots_[slot]&&!ended_;}

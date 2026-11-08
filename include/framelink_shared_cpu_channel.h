@@ -54,6 +54,10 @@ FL_API flResult flSharedCpuAcquireWrite(flSharedCpuChannel*,uint32_t slot,
     flSharedCpuLease** out,flMappedImage* view);
 FL_API flResult flSharedCpuSubmit(flSharedCpuLease*,uint64_t sequence,int64_t ptsNs);
 FL_API flResult flSharedCpuCancelWrite(flSharedCpuLease*);
+// Non-consuming readiness wait (0..60000ms). TIMEOUT leaves the channel live;
+// EOF/error readiness may return OK and must be resolved by Receive/Release.
+// Externally serialized like other calls; does not recycle slots or read packets.
+FL_API flResult flSharedCpuWaitReadable(flSharedCpuChannel*,uint32_t timeoutMs);
 // Receive exactly one matching release to make its slot writable again.
 // Timeout/peer death fails this connection; does NOT infer release of any slot.
 FL_API flResult flSharedCpuReceiveRelease(flSharedCpuChannel*);

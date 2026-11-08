@@ -58,3 +58,5 @@ all operation=COPY. Source hashes, exact commands and raw logs are in
 Next: CPU sink adoption/upload with declared copies, then coordinated A/V-bin
 selection, broker/local rendezvous, event/flush/pause handling and sustained rates.
 M6.8b/c and M6.9 remain open; no Windows CPU allocator or end-to-end A/V claim.
+
+Event-stream support has since been integrated and qualified in SHARED_CPU_GST_EVENTS.md; the initial event-stream rejection described above is superseded. Audio-track rejection remains until A/V qualification.

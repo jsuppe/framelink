@@ -2,6 +2,9 @@
 #include "framelink_shared_cpu_channel.h"
 #include "fl_shared_cpu_control.h"
 #include <limits>
+#include <poll.h>
+#include <chrono>
+#include <cerrno>
 namespace {
 struct State {
  bool producer=false,alive=true,eosEnabled=false;
@@ -82,6 +85,17 @@ flResult flSharedCpuReadMetadata(const flSharedCpuLease*l,flFrameMetadata*out){i
 flResult flSharedCpuCancelWrite(flSharedCpuLease*l){
  if(!l||!l->write)return FL_INVALID;
  auto s=l->state;s->reserved[l->frame.slot]=false;delete l;return s->live()?FL_OK:FL_DISCONNECTED;
+}
+flResult flSharedCpuWaitReadable(flSharedCpuChannel*c,uint32_t timeout){
+ if(!c||timeout>60000)return FL_INVALID;auto s=c->state;if(!s->live())return FL_DISCONNECTED;
+ const auto end=std::chrono::steady_clock::now()+std::chrono::milliseconds(timeout);
+ int remaining=int(timeout);
+ for(;;){pollfd fd{s->control->pollFd(),POLLIN,0};int r=poll(&fd,1,remaining);
+  if(r>0)return fd.revents&POLLNVAL?FL_DISCONNECTED:FL_OK;
+  if(!r)return FL_TIMEOUT;if(errno!=EINTR)return FL_DISCONNECTED;
+  auto now=std::chrono::steady_clock::now();if(now>=end)return FL_TIMEOUT;
+  remaining=int(std::chrono::duration_cast<std::chrono::milliseconds>(end-now).count());
+ }
 }
 flResult flSharedCpuReceiveRelease(flSharedCpuChannel*c){
  if(!c||!c->state->producer)return FL_INVALID;auto s=c->state;if(!s->live())return FL_DISCONNECTED;

@@ -2,8 +2,7 @@
 static gboolean srcSharedCpuStart(GstFrameLinkSrc*self){
  if(!self->session||self->ch||self->nativeMemory||self->gpuReadback||self->memoryPolicyApplied||self->maxQueueAgeMs||
     fl_gst_session_get_config(self->session,&self->sessionConfig)!=FL_GST_SESSION_READY||
-    !self->sessionConfig.videoTrackId||self->sessionConfig.audioTrackId||
-    fl_gst_session_has_event_stream(self->session,self->sessionConfig.generation))return FALSE;
+    !self->sessionConfig.videoTrackId||self->sessionConfig.audioTrackId)return FALSE;
  auto fmt=toGstFormat(flFormat(self->sessionConfig.video.format));if(fmt==GST_VIDEO_FORMAT_UNKNOWN)return FALSE;
  self->cpuChannel=fl_gst_session_claim_shared_cpu(self->session,FALSE,self->sessionConfig.generation);
  if(!self->cpuChannel)return FALSE;
@@ -22,12 +21,36 @@ static gboolean srcSharedCpuStart(GstFrameLinkSrc*self){
  gst_base_src_set_do_timestamp(GST_BASE_SRC(self),FALSE);
  return fl_gst_session_track_ready(self->session,FL_GST_TRACK_VIDEO,cfg.generation)==FL_GST_SESSION_READY;
 }
+// Unlike native latest-wins handling, this path never skips submitted frames:
+// every control record must refer to the exact count already delivered.
+static bool srcSharedCpuEvents(GstFrameLinkSrc*self,guint kind,guint64 pts){
+ if(!fl_gst_session_has_event_stream(self->session,self->sessionConfig.generation))return true;
+ const auto end=g_get_monotonic_time()+gint64(self->sessionConfig.idleTimeoutMs)*1000;
+ while(g_get_monotonic_time()<end){
+  FlGstVideoEvent event{};auto remaining=end-g_get_monotonic_time();
+  if(fl_gst_session_receive_video_event(self->session,self->sessionConfig.generation,guint(std::max<gint64>(1,(remaining+999)/1000)),&event)!=FL_GST_SESSION_READY)return false;
+  if(event.afterFrames!=self->sessionFrames)return false;
+  if(event.kind==FL_GST_VIDEO_GAP){if(self->pendingGapCount>=32)return false;self->pendingGaps[self->pendingGapCount++]=event;continue;}
+  return event.kind==kind&&event.ptsNs==pts;
+ }
+ return false;
+}
 static GstFlowReturn srcSharedCpuCreate(GstFrameLinkSrc*self,GstBuffer**out){
  if(g_atomic_int_get(&self->flushing))return GST_FLOW_FLUSHING;
+ const auto deadline=g_get_monotonic_time()+gint64(self->sessionConfig.idleTimeoutMs)*1000;
+ for(;;){
+  flSessionConfig cfg{};
+  if(g_atomic_int_get(&self->flushing))return GST_FLOW_FLUSHING;
+  if(fl_gst_session_get_config(self->session,&cfg)!=FL_GST_SESSION_READY||cfg.generation!=self->sessionConfig.generation||g_get_monotonic_time()>=deadline)return GST_FLOW_ERROR;
+  const auto remaining=deadline-g_get_monotonic_time();if(remaining<=0)return GST_FLOW_ERROR;
+  auto ready=flSharedCpuWaitReadable(self->cpuChannel,guint(std::min<gint64>(50,(remaining+999)/1000)));
+  if(ready==FL_OK)break;if(ready!=FL_TIMEOUT)return GST_FLOW_ERROR;
+ }
  flSharedCpuLease*lease=nullptr;flMappedImage view{};uint64_t seq=0;int64_t pts=0;int eos=0;
  auto result=flSharedCpuReceiveEvent(self->cpuChannel,&lease,&view,&seq,&pts,&eos);
  if(result!=FL_OK)return g_atomic_int_get(&self->flushing)?GST_FLOW_FLUSHING:GST_FLOW_ERROR;
  if(eos){
+  if(!srcSharedCpuEvents(self,FL_GST_VIDEO_END,self->sessionLastPts<0?0:guint64(self->sessionLastPts))||!srcEmitGaps(self))return GST_FLOW_ERROR;
   if(fl_gst_session_video_eos(self->session,self->sessionConfig.generation,self->sessionFrames,self->sessionLastPts)!=FL_GST_SESSION_READY)return GST_FLOW_ERROR;
   return GST_FLOW_EOS;
  }
@@ -56,6 +79,7 @@ static GstFlowReturn srcSharedCpuCreate(GstFrameLinkSrc*self,GstBuffer**out){
  // Finish all mapped reads and return the slot before downstream sees a buffer.
  result=flSharedCpuReleaseRead(lease);held.p=nullptr;
  if(!valid||result!=FL_OK)return GST_FLOW_ERROR;
+ if((!self->sessionFrames||(metadata.flags&FL_FRAME_DISCONT))&&!srcSharedCpuEvents(self,FL_GST_VIDEO_BARRIER,pts))return GST_FLOW_ERROR;
  gint64 mapped=0;
  if(fl_gst_session_map_running_time(self->session,self->sessionConfig.generation,pts,TRUE,&mapped)!=FL_GST_SESSION_READY)return GST_FLOW_ERROR;
  GST_BUFFER_PTS(buf)=mapped;
