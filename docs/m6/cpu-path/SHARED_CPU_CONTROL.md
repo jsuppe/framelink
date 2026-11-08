@@ -1,49 +1,44 @@
-# Explicit shared-CPU control setup
+# Cross-process cached shared-CPU control
 
-Internal Linux/Android `SharedCpuControl` now connects the preflight and atomic
-import components through the existing bounded AF_UNIX/SEQPACKET channel. It is
-**not selected by any legacy channel factory** and has no fallback to DMA-BUF/AHB.
-FL_VERSION, legacy Hello/RingDesc layout, session wire and default feature words
-are unchanged. New message types 9/10 are used only by this explicit setup class.
+Source and all 32 raw rows: `shared-cpu-20261107/`. Exit 0. Four cells, eight
+iterations each, BGRA and NV12 at 1080p/4K. This is a real size-sealed memfd, not
+just a cached heap baseline: forked consumer removes the inherited producer
+mapping and creates its own read-only shared mapping. An explicit socket ACK
+follows every complete pixel check before the producer may overwrite storage.
 
-Both participants send then receive a fixed 256-byte FCH1 offer containing an
-opposite endpoint role, exact encoded session, one endpoint's memory requirements
-and declared COPY operation. Reserved bytes, version/tag/size, unexpected handles,
-session disagreement, same-role peers, GPU requirements and forbidden operations
-reject and close the control connection. The complete session byte comparison
-binds session/clock IDs, generation, tracks, formats, epoch, queues and timeouts.
-The broker must authenticate/delegate this socket; these bytes are not credentials.
-The coordinator must first validate session selection against actual peer offers.
+The independent byte pattern varies frame, plane, row and column. Plane offsets
+are page-aligned and row strides 256-byte aligned. Every logical byte is checked;
+padding is not claimed to be image data. Both endpoints perform an explicit row
+copy. The size seals reject allocation resizing; they do not make pixel payload
+immutable. Descriptor inheritance is not a FrameLink descriptor-exchange test.
 
-Only after agreement can the consumer send one FCP1 pool: fixed 16-byte header,
-2..16 exact FCS1 descriptors, and exactly one SCM_RIGHTS FD per slot. The producer
-checks the envelope and descriptor count, then uses atomic rights/identity-checked
-pool import. Received FDs are closed on every normal success/error path. Unexpected
-legacy message types never trigger fallback. Setup cannot be repeated on the same
-control instance; replacement needs a fresh explicitly negotiated connection and
-existing imported-pool replacement validation.
+| Cell | Producer copy median / max | Consumer copy median / max |
+|---|---:|---:|
+| BGRA 1080p | 0.611 / 2.675 ms | 0.567 / 0.936 ms |
+| BGRA 4K | 3.357 / 12.220 ms | 3.430 / 4.543 ms |
+| NV12 1080p | 0.109 / 0.908 ms | 0.111 / 0.204 ms |
+| NV12 4K | 1.222 / 4.083 ms | 1.058 / 1.285 ms |
 
-A successful send means only that the kernel accepted the setup packet, not that
-the peer accepted the import. **There is no pool acknowledgment or live frame
-protocol yet.** Do not recycle slots or claim frame delivery from this setup. The
-next integration step must add pool acceptance/ready-release ownership, generation
-and sequence checks, and bounded peer-death behavior before public factories or
-GStreamer expose this route. Native GPU entry points must remain unavailable.
+Cold first-touch costs are retained. Timing excludes independent pattern
+generation, pixel verification and IPC handshake. This is not paced throughput,
+end-to-end latency, A/V, GPU interoperability, or lifecycle qualification.
 
-## Evidence
+## Bounded implementation choice
 
-Linux 7/7 shared-CPU and connected-IPC tests pass. Android control and connected-IPC
-runtime tests pass; arm64 and x86_64 builds pass. Real forked producer receives
-allocations created only after fork, validates all 1024 bytes of each of two slots,
-and writes back through received mappings; parent verifies the same backing bytes.
-Negative peers cover session generation, role, strict copy permissions and GPU
-usage. Eight malformed envelope/FD cases run ten times each with unchanged FD
-count: unknown tag/version, reserved bytes, legacy type, short hello, unsolicited
-hello FD, wrong pool FD count and invalid pool descriptors. Partial setup publishes
-no imported pool. Existing connected-IPC test verifies bounded silent-peer receive.
+The two demonstrated choices serve different use cases:
 
-Android deployment initially attempted to copy a nonexistent libframelink.so;
-this build statically links libframelink.a. The binaries had copied successfully;
-they were then run directly and passed. This was a controller deployment mistake,
-not a runtime failure. Windows allocator/control implementation remains open.
-Raw results and source hashes: `shared-cpu-control/`.
+- Existing native GPU allocations: explicit GPU copy + CPU readback (implemented
+  for Linux BGRA/RGBA in 6275fe5), subject to negotiated permissions.
+- CPU-only producer/consumer: explicitly negotiate `FL_MEMORY_SHARED_CPU`, map
+  cached shared storage and report actual endpoint copies. This avoids routing
+  CPU content through a GPU allocation just to map it back. NV12 planes can be
+  preserved without shader color conversion.
+
+Do not label a memfd as DMA-BUF, send it under an existing native descriptor,
+claim GPU/device capabilities it lacks, or change existing native defaults.
+A coordinated shared-CPU path is **not implemented** by this control. Next work
+must define a separately negotiated resource/descriptor contract, bounded layout
+and size validation, mapped lifetime and generation ownership, and explicit
+rejection of native GPU export/import calls on CPU-only images. Add malformed
+layout, missing-copy permission, retained-frame, reconnect and resize negatives
+before connecting it to the coordinator/GStreamer bins. M6.8b/c stay open.
