@@ -52,5 +52,5 @@ needed for these cases.
 
 Linux eight shared-CPU/IPC tests pass. Android release test and both ABI builds
 pass; raw evidence and source hash are in `shared-cpu-release/`. These are internal
-protocol checks, not public channel or GPU lease qualification. Next: integrate
-actual borrow/lease ownership with channel/coordinator/GStreamer routing.
+protocol checks, not public channel or GPU lease qualification. Typed public CPU-only borrow/lease integration is now in SHARED_CPU_CHANNEL.md.
+Coordinator/GStreamer selection and session lifecycle integration remain pending.

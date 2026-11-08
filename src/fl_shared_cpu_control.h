@@ -30,6 +30,7 @@ public:
     explicit SharedCpuControl(Channel&& link):link_(std::move(link)){}
     bool agreed()const{return agreed_;}
     bool poolAccepted()const{return accepted_;}
+    bool writableSlot(uint32_t slot)const{return accepted_&&producer_&&slot<poolCount_&&!slots_[slot];}
     // Both ends send then receive a bounded offer. No handles may accompany it.
     // Session bytes bind all identities, timestamps, queues and negotiated formats.
     // Caller has already validated selection against both real session offers.
