@@ -1,0 +1,21 @@
+{
+  "base_revision": "e7bde0f19c4bd1712db22dbfe33ab05566158bbd",
+  "source_sha256": {
+    "CMakeLists.txt": "24d56c7e98ef3b8ade4421aa0d87844a55dea4357bc062ac868730542cc97681",
+    "gst/gstframelink.cpp": "f7e8f6f4f236060ee097476fb2ba185602f7f60aacef5e897a52f55f0bb241b0",
+    "gst/fl_gst_egl_readback.hpp": "ef9c2ce13091275ea3d83377119e572eb29e985c2e28f6b7f780126d7eb8dc10",
+    "test/fl_egl_readback.cpp": "ac911519321da7dbea177f58ed65d345d85ed2ba3f1cef73c8d8fb7b4b16e1c3",
+    "test/fl_gst_egl_readback.cpp": "8985343d6fe257b5d6ed6aab4bc0eabe2e44b473c9c187f56657dc7e8a4dcc5e"
+  },
+  "results": {
+    "linux_focused": 9,
+    "linux_final_adapter_tests": 2,
+    "windows_focused": 9,
+    "android_affected_tests": 6,
+    "android_build_abis": [
+      "arm64",
+      "x86_64"
+    ]
+  },
+  "scope": "Explicit Linux BGRA/RGBA staging only; no target-rate/A/V/endurance or shared-CPU qualification."
+}

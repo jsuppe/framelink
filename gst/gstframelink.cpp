@@ -53,6 +53,9 @@
 #include "framelink.h"
 #include "fl_gst_metadata.hpp"
 #include "framelink_memory_policy.h"
+#ifdef FL_GST_EGL_READBACK
+#include "fl_gst_egl_readback.hpp"
+#endif
 #ifdef FL_GST_D3D11
 #include "fl_gst_d3d11_producer.hpp"
 #endif
@@ -1040,6 +1043,10 @@ typedef struct _GstFrameLinkSrc {
     gint width, height, fps;
     guint poolSize,maxQueueAgeMs;
     gboolean nativeMemory;
+    gboolean gpuReadback;
+#ifdef FL_GST_EGL_READBACK
+    FrameLinkEglReadback* eglReadback;
+#endif
     gboolean memoryPolicyApplied;
     guint64 memoryPoolGeneration;
     GstFrameLinkMemoryPolicy memoryPolicy;
@@ -1073,7 +1080,7 @@ G_DEFINE_TYPE(GstFrameLinkSrc, gst_framelink_src, GST_TYPE_PUSH_SRC)
 #define GST_FRAMELINK_SRC(o) \
     (G_TYPE_CHECK_INSTANCE_CAST((o), gst_framelink_src_get_type(), GstFrameLinkSrc))
 
-enum { SRC_PROP_0, SRC_PROP_CHANNEL, SRC_PROP_WIDTH, SRC_PROP_HEIGHT, SRC_PROP_FPS, SRC_PROP_FORMAT, SRC_PROP_PRESERVE_TIMESTAMPS, SRC_PROP_FRAME_METADATA, SRC_PROP_POOL_SIZE, SRC_PROP_MAX_QUEUE_AGE, SRC_PROP_EXPIRED_FRAMES, SRC_PROP_NATIVE_MEMORY };
+enum { SRC_PROP_0, SRC_PROP_CHANNEL, SRC_PROP_WIDTH, SRC_PROP_HEIGHT, SRC_PROP_FPS, SRC_PROP_FORMAT, SRC_PROP_PRESERVE_TIMESTAMPS, SRC_PROP_FRAME_METADATA, SRC_PROP_POOL_SIZE, SRC_PROP_MAX_QUEUE_AGE, SRC_PROP_EXPIRED_FRAMES, SRC_PROP_NATIVE_MEMORY, SRC_PROP_GPU_READBACK };
 
 #ifdef FL_GST_DMABUF
 #define FL_SOURCE_CAPS FRAMELINK_CAPS ";" GST_VIDEO_CAPS_MAKE_WITH_FEATURES("memory:DMABuf", "{ BGRA, RGBA, NV12, RGB10A2_LE }")
@@ -1166,6 +1173,16 @@ static GstCaps* srcGetCaps(GstBaseSrc* base, GstCaps* filter) {
 static gboolean srcStart(GstBaseSrc* base) {
     if(!validSessionContext(GST_ELEMENT(base)))return FALSE;
     GstFrameLinkSrc* self = GST_FRAMELINK_SRC(base);
+    if(self->gpuReadback){
+#ifdef FL_GST_EGL_READBACK
+        if(self->nativeMemory||!self->memoryPolicyApplied||!FrameLinkEglReadback::permits(self->memoryPolicy)||
+           (strcmp(self->format,"BGRA")&&strcmp(self->format,"RGBA"))){
+            GST_ELEMENT_ERROR(self,RESOURCE,SETTINGS,("gpu-readback requires negotiated COPY|READBACK, CPU output and exact BGRA/RGBA"),(NULL));return FALSE;
+        }
+#else
+        GST_ELEMENT_ERROR(self,RESOURCE,SETTINGS,("gpu-readback is unavailable in this build"),(NULL));return FALSE;
+#endif
+    }
     if(self->session){
         if(fl_gst_session_get_config(self->session,&self->sessionConfig)!=FL_GST_SESSION_READY||!self->sessionConfig.videoTrackId||!self->delegated||
            guint(self->width)!=self->sessionConfig.video.width||guint(self->height)!=self->sessionConfig.video.height||toFlFormat(gst_video_format_from_string(self->format))!=self->sessionConfig.video.format||
@@ -1237,6 +1254,9 @@ static gboolean srcStart(GstBaseSrc* base) {
 static gboolean srcStop(GstBaseSrc* base) {
     GstFrameLinkSrc* self = GST_FRAMELINK_SRC(base);
     gst_clear_buffer(&self->pendingDelivery);
+#ifdef FL_GST_EGL_READBACK
+    delete self->eglReadback;self->eglReadback=nullptr;
+#endif
     if(self->session)fl_gst_session_cancel(self->session);
 #ifdef _WIN32
     srcDropStaging(self);
@@ -1514,6 +1534,18 @@ static GstFlowReturn srcCreateImpl(GstPushSrc* push, GstBuffer** outbuf) {
     GstMapInfo map;
     gboolean filled = FALSE;
     if (gst_buffer_map(buf, &map, GST_MAP_WRITE)) {
+#ifdef FL_GST_EGL_READBACK
+        if(self->gpuReadback){
+            if(!self->eglReadback)self->eglReadback=new FrameLinkEglReadback;
+            {
+                gsttrace::Scope readbackTrace("gst.egl_readback",gsttrace::id(self->channel));
+                filled=self->eglReadback->read(self->ch,frame,self->memoryPolicy,map.data,map.size);
+            }
+            if(self->eglReadback->gpuCopyBytes())gsttrace::payload("gst.gpu_copy_issued",gsttrace::id(self->channel),self->eglReadback->gpuCopyBytes(),FL_MEMORY_COPY);
+            if(self->eglReadback->readbackBytes())gsttrace::payload("gst.gpu_readback_issued",gsttrace::id(self->channel),self->eglReadback->readbackBytes(),FL_MEMORY_READBACK);
+        }else
+#endif
+        {
 #ifdef _WIN32
         ID3D11Device* dev = flChannelD3D11Device(self->ch);
         ID3D11Texture2D* tex = flImageD3D11(frame.image);
@@ -1582,6 +1614,7 @@ static GstFlowReturn srcCreateImpl(GstPushSrc* push, GstBuffer** outbuf) {
         }
         }
 #endif
+        } // selected readback path; never silently fall back
         gst_buffer_unmap(buf, &map);
     }
     srcReleaseFrame(self, &frame);
@@ -1652,6 +1685,9 @@ static void srcSetProperty(GObject* obj, guint id, const GValue* value, GParamSp
     if(self->session&&GST_STATE(self)!=GST_STATE_NULL){GST_WARNING_OBJECT(self,"session configuration immutable outside NULL");return;}
     if(self->memoryPolicyApplied){GST_WARNING_OBJECT(self,"authenticated session properties are immutable; create a new element/session");return;}
     switch (id) {
+        case SRC_PROP_GPU_READBACK:
+            if(GST_STATE(self)>GST_STATE_READY||self->ch){GST_WARNING_OBJECT(self,"readback mode cannot change while allocated");break;}
+            self->gpuReadback=g_value_get_boolean(value);break;
         case SRC_PROP_NATIVE_MEMORY:
             if(GST_STATE(self)>GST_STATE_READY || self->ch){GST_WARNING_OBJECT(self,"memory mode cannot change while allocated");break;}
             if(self->memoryPolicyApplied){GST_WARNING_OBJECT(self,"native-memory is frozen by authenticated policy");return;}
@@ -1687,6 +1723,7 @@ static void srcSetProperty(GObject* obj, guint id, const GValue* value, GParamSp
 static void srcGetProperty(GObject* obj, guint id, GValue* value, GParamSpec* spec) {
     GstFrameLinkSrc* self = GST_FRAMELINK_SRC(obj);
     switch (id) {
+        case SRC_PROP_GPU_READBACK: g_value_set_boolean(value,self->gpuReadback);break;
         case SRC_PROP_NATIVE_MEMORY: g_value_set_boolean(value,self->nativeMemory);break;
         case SRC_PROP_EXPIRED_FRAMES: GST_OBJECT_LOCK(self);g_value_set_uint64(value,self->expiredFrames);GST_OBJECT_UNLOCK(self);break;
         case SRC_PROP_MAX_QUEUE_AGE: g_value_set_uint(value,self->maxQueueAgeMs);break;
@@ -1708,6 +1745,9 @@ static void srcFinalize(GObject* obj) {
     srcDropStaging(self);
 #endif
     gst_clear_buffer(&self->pendingDelivery);
+#ifdef FL_GST_EGL_READBACK
+    delete self->eglReadback;self->eglReadback=nullptr;
+#endif
     if(self->session){fl_gst_session_cancel(self->session);g_object_unref(self->session);}
 #ifdef FL_GST_NATIVE
     if(self->nativeOwner){delete self->nativeOwner;self->nativeOwner=nullptr;self->ch=nullptr;}
@@ -1725,6 +1765,7 @@ static gboolean srcAdoptChannel(GstFrameLinkSrc* self,flChannel* channel) {
        info.format!=toFlFormat(gst_video_format_from_string(self->format)))return FALSE;
     uint32_t flags=0;if(flQueryConsumerFlags(channel,&flags)!=FL_OK)return FALSE;
     if(self->nativeMemory && (!(flags&FL_DEFER_RELEASE)||(flags&FL_GPU_SYNC)))return FALSE;
+    if(self->gpuReadback&&(self->nativeMemory||(flags&FL_GPU_SYNC)))return FALSE;
     if(self->maxQueueAgeMs && !(flags&FL_TRACK_ARRIVAL))return FALSE;
     if(self->preserveFrameMetadata && !(flags&FL_REQUIRE_FRAME_METADATA))return FALSE;
     self->ch=channel;self->cinfo=info;self->delegated=TRUE;return TRUE;
@@ -1732,6 +1773,13 @@ static gboolean srcAdoptChannel(GstFrameLinkSrc* self,flChannel* channel) {
 
 static gboolean srcApplyMemoryPolicy(GstFrameLinkSrc* self,const GstFrameLinkMemoryPolicy* policy){
     if(GST_STATE(self)!=GST_STATE_NULL||!self->delegated||!self->ch||self->memoryPolicyApplied||!validMemoryPolicy(policy,self->nativeMemory,FALSE,self->channel))return FALSE;
+    if(self->gpuReadback){
+#ifdef FL_GST_EGL_READBACK
+        if(self->nativeMemory||!FrameLinkEglReadback::permits(*policy))return FALSE;
+#else
+        return FALSE;
+#endif
+    }
     flChannelInfo info{};if(flQuery(self->ch,&info)!=FL_OK)return FALSE;
     self->memoryPoolGeneration=info.generation;
     self->memoryPolicy=*policy;self->memoryPolicyApplied=TRUE;return TRUE;
@@ -1798,6 +1846,10 @@ static void gst_framelink_src_class_init(GstFrameLinkSrcClass* klass) {
         g_param_spec_int("fps", "FPS", "nominal frame rate advertised in the caps", 1, 240,
                          30, (GParamFlags)(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
 
+    g_object_class_install_property(gobject,SRC_PROP_GPU_READBACK,
+        g_param_spec_boolean("gpu-readback","Explicit GPU readback",
+            "Linux BGRA/RGBA GPU staging into CPU output; requires adopted channel and negotiated COPY|READBACK; no fallback",
+            FALSE,(GParamFlags)(G_PARAM_READWRITE|G_PARAM_STATIC_STRINGS|GST_PARAM_MUTABLE_READY)));
     g_object_class_install_property(gobject,SRC_PROP_NATIVE_MEMORY,
         g_param_spec_boolean("native-memory","Native memory output",
             "Opt-in native DMA-BUF, D3D11 or exact RGB AHardwareBuffer output; unsupported paths fail without CPU fallback",

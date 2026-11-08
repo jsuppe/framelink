@@ -1,0 +1,27 @@
+Internal ctest changing into directory: <linux-home>/dev/build/framelink-m6-linux
+Test project <linux-home>/dev/build/framelink-m6-linux
+    Start  1: egl_readback
+1/9 Test  #1: egl_readback .....................   Passed    1.63 sec
+    Start  2: native_cpu_write_visibility
+2/9 Test  #2: native_cpu_write_visibility ......   Passed    0.60 sec
+    Start 34: gst_egl_readback
+3/9 Test #34: gst_egl_readback .................   Passed    1.91 sec
+    Start 35: gst_native_producer_linux
+4/9 Test #35: gst_native_producer_linux ........   Passed    0.19 sec
+    Start 36: gst_native_source
+5/9 Test #36: gst_native_source ................   Passed    0.45 sec
+    Start 37: gst_nv12_roundtrip
+6/9 Test #37: gst_nv12_roundtrip ...............   Passed    1.47 sec
+    Start 38: gst_rgb10a2_roundtrip
+7/9 Test #38: gst_rgb10a2_roundtrip ............   Passed    1.48 sec
+    Start 66: gst_timestamp_contract
+8/9 Test #66: gst_timestamp_contract ...........   Passed    0.23 sec
+    Start 74: gst_pool_policy
+9/9 Test #74: gst_pool_policy ..................   Passed    1.74 sec
+
+100% tests passed, 0 tests failed out of 9
+
+Label Time Summary:
+gst_video_regression    =   5.56 sec*proc (6 tests)
+
+Total Test time (real) =   9.71 sec

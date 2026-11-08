@@ -1,0 +1,51 @@
+{
+  "state": "finished",
+  "steps": [
+    {
+      "name": "windows-preflight",
+      "exit": 0
+    },
+    {
+      "name": "windows-build",
+      "exit": 0
+    },
+    {
+      "name": "windows-focused",
+      "exit": 0
+    },
+    {
+      "name": "android-arm64-build",
+      "exit": 0
+    },
+    {
+      "name": "android-x86_64-build",
+      "exit": 0
+    },
+    {
+      "name": "android-gst_pool_policy",
+      "exit": 0
+    },
+    {
+      "name": "android-gst_policy_generation",
+      "exit": 0
+    },
+    {
+      "name": "android-gst_av_src_bin",
+      "exit": 0
+    },
+    {
+      "name": "android-gst_av_qualification",
+      "exit": 0
+    },
+    {
+      "name": "android-nv12",
+      "exit": 0
+    },
+    {
+      "name": "android-rgb10a2",
+      "exit": 0
+    }
+  ],
+  "source_sha256": "f7e8f6f4f236060ee097476fb2ba185602f7f60aacef5e897a52f55f0bb241b0",
+  "ended": 1794103994.2755525
+}
