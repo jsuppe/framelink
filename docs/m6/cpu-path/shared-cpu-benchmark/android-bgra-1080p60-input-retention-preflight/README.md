@@ -1,0 +1,1 @@
+Production input-retention93283ac, documentation HEAD97f8be1, binarydee5c211. Android BGRA1080p60 5s preflight:300video240000PCM,500contiguous audio blocks,zero17ms video/audio misses, common A/V mapping0ns. Max video arrival 10.503694ms. Short preflight, not sustained qualification.
