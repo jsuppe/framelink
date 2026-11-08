@@ -1,0 +1,11 @@
+# Shared CPU producer input retention
+
+At d8023c4, temporary instrumentation separates source allocation/fill from sink release-wait, acquisition, copy and submission. Initial diagnostic failed to save raw results because its output directory was missing; preserved preflight.log is not qualification. Corrected 10s baseline produced 300 video/480000 PCM frames (1000 audio blocks), zero 34ms misses, max30.858282ms. Source second fill took32.811ms and8100 thread minor faults; later fills had0faults. Sink second release wait40us, acquire3us, copy7.198ms. Thus the phase-sensitive extra work is source first-touch, not a long ownership wait in this sample.
+
+Disabling only the CPU video sink's optional last-sample retention reduced second fill to9.430ms with0faults; allocation8us/0faults versus90us/1fault baseline. Control300video480000PCM, zero34ms misses,max29.022616ms. This demonstrates retention forcing a second fresh upstream buffer; it is not a sustained qualification or proof all historical misses share this cause. First fill's pattern generation/page faults remain, before initial PTS; nothing is dropped or rebased.
+
+Bounded production fix: only framelinkavsink's internal shared-CPU video child disables enable-last-sample during an active session. Restore the prior value on NULL/failed parent transition. Thin sinks and native mode keep existing preferences. Transport leases, synchronization, copy accounting and audio unchanged. The integrated CPU A/V test now weakly observes input destruction before sending the next frame; it still validates exact pixels/PCM/PTS and terminal errors.
+
+Raw evidence: <linux-home>/dev/evidence/m6-cpu-path/android-source-sink-audit. Diagnostic sources restored; production builds restored. Linux CPU A/V, native A/V bin and benchmark smoke3/3 passed. Both Android ABI builds passed; Android CPU A/V (including input-release regression) and native A/V bin2/2 passed. Windows affected build and native A/V bin/benchmark smoke2/2 passed. Production BGRA4K preflight/endurance pending.
+
+Thin-element users can explicitly select `enable-last-sample=false` when they do not need a retained snapshot. This fix does not override that public element preference. The internal bin setting is restored on teardown, not a global GStreamer allocator change.

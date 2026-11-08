@@ -1,0 +1,38 @@
+{
+  "steps": [
+    {
+      "name": "fix-arm64-build",
+      "exit": 0
+    },
+    {
+      "name": "fix-x86_64-build",
+      "exit": 0
+    },
+    {
+      "name": "android-mkdir",
+      "exit": 0
+    },
+    {
+      "name": "fl_gst_shared_cpu_av-push",
+      "exit": 0
+    },
+    {
+      "name": "fl_gst_av_bin-push",
+      "exit": 0
+    },
+    {
+      "name": "fl_gst_av_bench-push",
+      "exit": 0
+    },
+    {
+      "name": "fl_gst_shared_cpu_av-test",
+      "exit": 0
+    },
+    {
+      "name": "fl_gst_av_bin-test",
+      "exit": 0
+    }
+  ],
+  "binary_sha256": "dee5c211a99e0091410ee6f8a84c7e6711124ef49b8d276058d9a50d1daa43dd",
+  "state": "finished"
+}

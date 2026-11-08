@@ -47,7 +47,7 @@ typedef struct _GstFrameLinkAvSink {
  gchar*sessionPath,*tracks,*videoFormat,*audioFormat;
  guint width,height,fpsN,fpsD,rate,channels,connectMs,idleMs,audioQueueMs,videoQueue,videoPool;
  GstElement*video,*audio;GstPad*videoPad,*audioPad;
- FlGstSession*session;gboolean local,sharedCpu;
+ FlGstSession*session;gboolean local,sharedCpu,savedLastSample,lastSampleScoped;
  GCancellable*cancel;std::thread*worker;std::thread*drainer;Shared*shared;
  std::vector<GstMessage*>*heldEos;guint eosNeeded;gulong probes[2];
 } GstFrameLinkAvSink;
@@ -248,6 +248,14 @@ static GstStateChangeReturn changeState(GstElement*element,GstStateChange transi
  case GST_STATE_CHANGE_PAUSED_TO_READY:if(s->local)stopSession(s);break;
  default:break;
  }
+ // The CPU transport has copied the input when render returns. Retaining a
+ // display-style last sample pins an unrelated upstream pool buffer and can
+ // force first-touch allocation inside the next frame's deadline. Scope this
+ // to our internal CPU child; preserve thin-sink and native-path preferences.
+ if(transition==GST_STATE_CHANGE_NULL_TO_READY&&s->sharedCpu&&s->video){
+  g_object_get(s->video,"enable-last-sample",&s->savedLastSample,nullptr);
+  g_object_set(s->video,"enable-last-sample",FALSE,nullptr);s->lastSampleScoped=TRUE;
+ }
  auto result=GST_ELEMENT_CLASS(gst_framelink_av_sink_parent_class)->change_state(element,transition);
  if(s->local&&(transition==GST_STATE_CHANGE_READY_TO_NULL||(transition==GST_STATE_CHANGE_NULL_TO_READY&&result==GST_STATE_CHANGE_FAILURE))){
   stopSession(s);
@@ -256,6 +264,11 @@ static GstStateChangeReturn changeState(GstElement*element,GstStateChange transi
   for(int i=0;i<2;i++)if(pads[i]&&s->probes[i]){gst_pad_remove_probe(pads[i],s->probes[i]);s->probes[i]=0;}
   if(s->video)g_object_set(s->video,"async",TRUE,nullptr);
   resetSession(s);
+ }
+ if(s->lastSampleScoped&&(transition==GST_STATE_CHANGE_READY_TO_NULL||
+    (transition==GST_STATE_CHANGE_NULL_TO_READY&&result==GST_STATE_CHANGE_FAILURE))){
+  if(s->video)g_object_set(s->video,"enable-last-sample",s->savedLastSample,nullptr);
+  s->lastSampleScoped=FALSE;
  }
  return result;
 }

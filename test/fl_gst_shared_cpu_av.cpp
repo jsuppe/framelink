@@ -5,6 +5,7 @@
 #include <sys/socket.h>
 #include <glib/gstdio.h>
 #include <thread>
+#include <atomic>
 #include <initializer_list>
 #include <cstring>
 #include <cstdio>
@@ -118,9 +119,11 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
   auto*vi=gst_bin_get_by_name(GST_BIN(tx),"vi");auto*ai=gst_bin_get_by_name(GST_BIN(tx),"ai");auto*vo=gst_bin_get_by_name(GST_BIN(rx),"vo");auto*ao=gst_bin_get_by_name(GST_BIN(rx),"ao");
   GstVideoInfo info;gst_video_info_set_format(&info,nv12?GST_VIDEO_FORMAT_NV12:GST_VIDEO_FORMAT_BGRA,18,16);auto*vc=gst_video_info_to_caps(&info);gst_app_src_set_caps(GST_APP_SRC(vi),vc);gst_caps_unref(vc);
   CHECK(gst_element_set_state(rx,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);CHECK(gst_element_set_state(tx,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
+  std::atomic<unsigned> releasedInputs{0};
   const unsigned count=(mode==2||mode==3)?0:8;
   for(unsigned n=0;n<count;n++){
    auto*v=gst_buffer_new_allocate(nullptr,info.size,nullptr);gst_buffer_memset(v,0,n+1,info.size);GST_BUFFER_PTS(v)=37000000+n*1000000;GST_BUFFER_DURATION(v)=1000000;
+   if(bins)gst_mini_object_weak_ref(GST_MINI_OBJECT(v),[](gpointer data,GstMiniObject*){++*static_cast<std::atomic<unsigned>*>(data);},&releasedInputs);
    auto*a=gst_buffer_new_allocate(nullptr,192,nullptr);gst_buffer_memset(a,0,n+31,192);GST_BUFFER_PTS(a)=n*1000000;GST_BUFFER_DURATION(a)=1000000;
    CHECK(gst_app_src_push_buffer(GST_APP_SRC(vi),v)==GST_FLOW_OK);CHECK(gst_app_src_push_buffer(GST_APP_SRC(ai),a)==GST_FLOW_OK);
    auto*vs=gst_app_sink_try_pull_sample(GST_APP_SINK(vo),2*GST_SECOND);auto*ap=gst_app_sink_try_pull_sample(GST_APP_SINK(ao),2*GST_SECOND);CHECK(vs&&ap);
@@ -132,6 +135,9 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
    GstVideoInfo got;CHECK(gst_video_info_from_caps(&got,gst_sample_get_caps(vs)));GstVideoFrame vf{};CHECK(gst_video_frame_map(&vf,&got,vb,GST_MAP_READ));
    for(unsigned p=0;p<(nv12?2u:1u);p++)for(unsigned y=0;y<(p?8u:16u);y++)for(unsigned x=0;x<(nv12?18u:72u);x++)CHECK(static_cast<guint8*>(GST_VIDEO_FRAME_PLANE_DATA(&vf,p))[y*GST_VIDEO_FRAME_PLANE_STRIDE(&vf,p)+x]==n+1);
    gst_video_frame_unmap(&vf);gst_sample_unref(vs);gst_sample_unref(ap);
+   // With transport complete, the internal sink must not pin the upstream
+   // input until another frame arrives. This catches hidden last-sample refs.
+   if(bins){auto until=g_get_monotonic_time()+500000;while(releasedInputs.load()<n+1&&g_get_monotonic_time()<until)g_usleep(1000);CHECK(releasedInputs.load()==n+1);}
   }
   if(mode==4){
    // Contradictory independently received terminal accounting must not become
