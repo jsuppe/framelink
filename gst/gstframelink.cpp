@@ -241,7 +241,12 @@ typedef struct _GstFrameLinkSink {
     gboolean preserveTimestamps;
     gboolean preserveFrameMetadata;
     guint64 streamGeneration;
-    gboolean nativeMemory;
+    gboolean nativeMemory,sharedCpu;
+    volatile gint cpuFlushing;
+#ifndef _WIN32
+    flSharedCpuChannel* cpuChannel;
+    guint cpuSlots,cpuOutstanding;
+#endif
     gboolean memoryPolicyApplied;
     guint64 memoryPoolGeneration;
     GstFrameLinkMemoryPolicy memoryPolicy;
@@ -278,7 +283,7 @@ G_DEFINE_TYPE(GstFrameLinkSink, gst_framelink_sink, GST_TYPE_BASE_SINK)
 #define GST_FRAMELINK_SINK(o) \
     (G_TYPE_CHECK_INSTANCE_CAST((o), gst_framelink_sink_get_type(), GstFrameLinkSink))
 
-enum { SINK_PROP_0, SINK_PROP_CHANNEL, SINK_PROP_SLOTS, SINK_PROP_PRESERVE_TIMESTAMPS, SINK_PROP_FRAME_METADATA, SINK_PROP_CONNECT_TIMEOUT, SINK_PROP_BUFFER_WAIT, SINK_PROP_ERROR_ON_RING_FULL, SINK_PROP_NATIVE_MEMORY };
+enum { SINK_PROP_0, SINK_PROP_CHANNEL, SINK_PROP_SLOTS, SINK_PROP_PRESERVE_TIMESTAMPS, SINK_PROP_FRAME_METADATA, SINK_PROP_CONNECT_TIMEOUT, SINK_PROP_BUFFER_WAIT, SINK_PROP_ERROR_ON_RING_FULL, SINK_PROP_NATIVE_MEMORY, SINK_PROP_SHARED_CPU };
 
 #ifdef FL_GST_D3D11
 #define FL_SINK_CAPS FRAMELINK_CAPS ";" GST_VIDEO_CAPS_MAKE_WITH_FEATURES("memory:D3D11Memory", "{ BGRA, RGBA, NV12, RGB10A2_LE }")
@@ -294,6 +299,9 @@ static GstStaticPadTemplate sinkTemplate =
                             GST_STATIC_CAPS(FL_SINK_CAPS));
 
 static void sinkDisconnect(GstFrameLinkSink* self) {
+#ifndef _WIN32
+    if(self->cpuChannel){flSharedCpuClose(self->cpuChannel);self->cpuChannel=nullptr;}
+#endif
 #ifdef _WIN32
     g_clear_pointer(&self->uploadScratch, g_byte_array_unref);
 #endif
@@ -394,9 +402,19 @@ static bool validSessionContext(GstElement*element){
  if(session){g_object_unref(session);return true;}
  GST_ELEMENT_ERROR(element,RESOURCE,SETTINGS,("malformed FrameLink session context"),("refusing unauthenticated fallback"));return false;
 }
+#ifndef _WIN32
+#include "fl_gst_shared_cpu_sink.inc"
+#endif
 static gboolean sinkStart(GstBaseSink* base) {
     if(!validSessionContext(GST_ELEMENT(base)))return FALSE;
     auto* self=GST_FRAMELINK_SINK(base);
+    if(self->sharedCpu){
+#ifndef _WIN32
+        return sinkSharedCpuStart(self);
+#else
+        return FALSE;
+#endif
+    }
     if(self->session){
         if(fl_gst_session_get_config(self->session,&self->sessionConfig)!=FL_GST_SESSION_READY||!self->sessionConfig.videoTrackId||!self->delegated||
            (self->memoryPolicyApplied&&self->memoryPolicy.sessionGeneration!=self->sessionConfig.generation)){
@@ -493,6 +511,10 @@ static gboolean sinkSetCaps(GstBaseSink* base, GstCaps* caps) {
     if(self->session&&(guint(GST_VIDEO_INFO_WIDTH(&self->vinfo))!=self->sessionConfig.video.width||guint(GST_VIDEO_INFO_HEIGHT(&self->vinfo))!=self->sessionConfig.video.height||toFlFormat(GST_VIDEO_INFO_FORMAT(&self->vinfo))!=self->sessionConfig.video.format))return FALSE;
     if(GST_VIDEO_INFO_FORMAT(&self->vinfo)==GST_VIDEO_FORMAT_NV12 &&
        ((GST_VIDEO_INFO_WIDTH(&self->vinfo)&1)||(GST_VIDEO_INFO_HEIGHT(&self->vinfo)&1)))return FALSE;
+    if(self->sharedCpu){
+        if(!gst_caps_features_contains(gst_caps_get_features(caps,0),GST_CAPS_FEATURE_MEMORY_SYSTEM_MEMORY))return FALSE;
+        self->haveInfo=TRUE;return TRUE;
+    }
     if(self->memoryPolicyApplied && (!self->ch || GST_VIDEO_INFO_WIDTH(&self->vinfo)!=(int)self->cinfo.width ||
        GST_VIDEO_INFO_HEIGHT(&self->vinfo)!=(int)self->cinfo.height || toFlFormat(GST_VIDEO_INFO_FORMAT(&self->vinfo))!=self->cinfo.format))return FALSE;
     if(self->nativeMemory){
@@ -541,6 +563,12 @@ static GstFlowReturn sinkRenderImpl(GstBaseSink* base, GstBuffer* buffer) {
                           GST_CLOCK_TIME_IS_VALID(pts) ? (int64_t)pts : -1, 0});
     };
     account("gst.frame_receive");
+#ifndef _WIN32
+    if(self->sharedCpu){auto result=sinkSharedCpuRender(self,buffer);
+        if(result!=GST_FLOW_OK){++self->dropped;account("gst.frame_drop.shared_cpu_error");}
+        return trace.result(result);
+    }
+#endif
     if(self->memoryPolicyApplied){
         flChannelInfo info{};
         if(!self->ch || flQuery(self->ch,&info)!=FL_OK || info.generation!=self->memoryPoolGeneration){
@@ -801,6 +829,9 @@ static gboolean sinkEventImpl(GstBaseSink* base, GstEvent* event) {
     }
     if (GST_EVENT_TYPE(event) == GST_EVENT_EOS) {
         auto* self = GST_FRAMELINK_SINK(base);
+#ifndef _WIN32
+        if(self->sharedCpu&&!sinkSharedCpuEos(self))return FALSE;
+#endif
         if(self->session&&fl_gst_session_video_eos(self->session,self->sessionConfig.generation,self->sessionFrames,self->sessionLastPts)!=FL_GST_SESSION_READY){GST_ELEMENT_ERROR(self,STREAM,FAILED,("invalid coordinated video EOS"),(NULL));return FALSE;}
         if(self->session&&fl_gst_session_has_event_stream(self->session,self->sessionConfig.generation)){FlGstVideoEvent record{FL_GST_VIDEO_END,self->sessionFrames,self->sessionLastPts<0?0:guint64(self->sessionLastPts),0};if(fl_gst_session_send_video_event(self->session,self->sessionConfig.generation,&record)!=FL_GST_SESSION_READY)return FALSE;}
         auto* stats = gst_structure_new("framelink-sink-stats",
@@ -834,6 +865,9 @@ static void sinkSetProperty(GObject* obj, guint id, const GValue* value, GParamS
     if(self->session&&GST_STATE(self)!=GST_STATE_NULL){GST_WARNING_OBJECT(self,"session configuration immutable outside NULL");return;}
     if(self->memoryPolicyApplied){GST_WARNING_OBJECT(self,"authenticated session properties are immutable; create a new element/session");return;}
     switch (id) {
+        case SINK_PROP_SHARED_CPU:
+            if(GST_STATE(self)!=GST_STATE_NULL||self->ch)return;
+            self->sharedCpu=g_value_get_boolean(value);break;
         case SINK_PROP_BUFFER_WAIT:
             if(GST_STATE(self)>GST_STATE_READY){GST_WARNING_OBJECT(self,"buffer wait cannot change while running");break;}
             self->bufferWaitMs=g_value_get_uint(value);break;
@@ -865,6 +899,7 @@ static void sinkSetProperty(GObject* obj, guint id, const GValue* value, GParamS
 static void sinkGetProperty(GObject* obj, guint id, GValue* value, GParamSpec* spec) {
     GstFrameLinkSink* self = GST_FRAMELINK_SINK(obj);
     switch (id) {
+        case SINK_PROP_SHARED_CPU: g_value_set_boolean(value,self->sharedCpu);break;
         case SINK_PROP_BUFFER_WAIT: g_value_set_uint(value,self->bufferWaitMs);break;
         case SINK_PROP_ERROR_ON_RING_FULL: g_value_set_boolean(value,self->errorOnRingFull);break;
         case SINK_PROP_CONNECT_TIMEOUT: g_value_set_uint(value,self->connectTimeoutMs);break;
@@ -888,7 +923,7 @@ static void sinkFinalize(GObject* obj) {
 // Action signal accepts one OWNED producer channel only in NULL. TRUE transfers
 // ownership; FALSE leaves it with the caller. No allocation/lookup is performed.
 static gboolean sinkAdoptChannel(GstFrameLinkSink* self,flChannel* channel) {
-    if(GST_STATE(self)!=GST_STATE_NULL || self->ch || !channel || self->memoryPolicyApplied)return FALSE;
+    if(GST_STATE(self)!=GST_STATE_NULL || self->ch || !channel || self->memoryPolicyApplied || self->sharedCpu)return FALSE;
     flChannelInfo info{};if(flQuery(channel,&info)!=FL_OK)return FALSE;
     uint32_t consumerFlags=0;if(flQueryConsumerFlags(channel,&consumerFlags)==FL_OK)return FALSE;
     self->ch=channel;self->cinfo=info;self->delegated=TRUE;return TRUE;
@@ -916,6 +951,8 @@ static gboolean sinkSendEvent(GstElement* element,GstEvent* event){
     if(GST_EVENT_TYPE(event)==GST_EVENT_SEEK&&self->session){GST_WARNING_OBJECT(self,"seek refused: coordinated sessions are forward rate1 only");gst_event_unref(event);return FALSE;}
     return GST_ELEMENT_CLASS(gst_framelink_sink_parent_class)->send_event(element,event);
 }
+static gboolean sinkUnlock(GstBaseSink*base){auto*self=GST_FRAMELINK_SINK(base);g_atomic_int_set(&self->cpuFlushing,1);if(self->sharedCpu&&self->session)fl_gst_session_cancel(self->session);return TRUE;}
+static gboolean sinkUnlockStop(GstBaseSink*base){g_atomic_int_set(&GST_FRAMELINK_SINK(base)->cpuFlushing,0);return TRUE;}
 static void gst_framelink_sink_class_init(GstFrameLinkSinkClass* klass) {
     GObjectClass* gobject = G_OBJECT_CLASS(klass);
     GstElementClass* element = GST_ELEMENT_CLASS(klass);
@@ -938,6 +975,9 @@ static void gst_framelink_sink_class_init(GstFrameLinkSinkClass* klass) {
     g_signal_new_class_handler("acquire-native-buffer",G_TYPE_FROM_CLASS(klass),
         GSignalFlags(G_SIGNAL_RUN_LAST|G_SIGNAL_ACTION),G_CALLBACK(sinkAcquireNative),
         nullptr,nullptr,nullptr,G_TYPE_POINTER,1,G_TYPE_UINT);
+    g_object_class_install_property(gobject,SINK_PROP_SHARED_CPU,
+        g_param_spec_boolean("shared-cpu","Shared CPU sink","Explicit broker-bound video-only CPU copy-in with bounded ownership wait; negotiated COPY required",
+            FALSE,(GParamFlags)(G_PARAM_READWRITE|G_PARAM_STATIC_STRINGS)));
     g_object_class_install_property(gobject,SINK_PROP_NATIVE_MEMORY,
         g_param_spec_boolean("native-memory","Native producer allocations",
             "Strict native buffers acquired from this sink; no implicit copy fallback",FALSE,
@@ -988,6 +1028,7 @@ static void gst_framelink_sink_class_init(GstFrameLinkSinkClass* klass) {
     basesink->render = sinkRender;
     basesink->event = sinkEvent;
     basesink->stop = sinkStop;
+    basesink->unlock=sinkUnlock;basesink->unlock_stop=sinkUnlockStop;
 }
 
 static void gst_framelink_sink_init(GstFrameLinkSink* self) {

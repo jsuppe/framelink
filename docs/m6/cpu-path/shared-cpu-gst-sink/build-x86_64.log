@@ -1,0 +1,13 @@
+[0/1] Re-running CMake...
+-- Configuring done (0.1s)
+-- Generating done (0.0s)
+-- Build files have been written to: <linux-home>/dev/build/framelink-m6-x86_64
+[1/9] Building CXX object CMakeFiles/fl_gst_shared_cpu_roundtrip.dir/test/fl_gst_shared_cpu_roundtrip.cpp.o
+[2/9] Building CXX object CMakeFiles/gstframelink.dir/gst/gstframelink.cpp.o
+[3/9] Linking CXX static library libgstframelink.a
+[4/9] Linking CXX executable fl_gst_nv12
+[5/9] Linking CXX executable fl_gst_shared_cpu_source
+[6/9] Linking CXX executable fl_gst_shared_cpu_roundtrip
+[7/9] Linking CXX executable fl_gst_pool_policy
+[8/9] Linking CXX executable fl_gst_av_timeline
+[9/9] Linking CXX executable fl_gst_av_bin
