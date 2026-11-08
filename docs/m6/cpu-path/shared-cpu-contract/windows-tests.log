@@ -1,0 +1,21 @@
+#< CLIXML
+Test project <win-home>/dev/framelink-m6-20261106/build
+    Start  4: session_contract
+1/7 Test  #4: session_contract .................   Passed    0.04 sec
+    Start  6: session_contract_c_api
+2/7 Test  #6: session_contract_c_api ...........   Passed    0.02 sec
+    Start  7: memory_boundary
+3/7 Test  #7: memory_boundary ..................   Passed    0.02 sec
+    Start  8: shared_cpu_contract
+4/7 Test  #8: shared_cpu_contract ..............   Passed    0.02 sec
+    Start  9: shared_cpu_contract_c_api
+5/7 Test  #9: shared_cpu_contract_c_api ........   Passed    0.02 sec
+    Start 10: memory_contract
+6/7 Test #10: memory_contract ..................   Passed    0.02 sec
+    Start 11: memory_contract_c_api
+7/7 Test #11: memory_contract_c_api ............   Passed    0.02 sec
+
+100% tests passed, 0 tests failed out of 7
+
+Total Test time (real) =   0.59 sec
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04"><Obj S="progress" RefId="0"><TN RefId="0"><T>System.Management.Automation.PSCustomObject</T><T>System.Object</T></TN><MS><I64 N="SourceId">1</I64><PR N="Record"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj></Objs>

@@ -1,0 +1,18 @@
+{
+  "state": "failed",
+  "source_sha256": {
+    "CMakeLists.txt": "e7ed82838f7c1606ff2dec64f128aa58b6555e9a1a44b3c69a92f9ce364046a9",
+    "include/framelink_shared_cpu.h": "c0ae50f26dedd12bda5bf9ecdea124d9206e593087abb1b55673f5cac03fa2c9",
+    "src/framelink_shared_cpu.cpp": "62c7be11e91cc631b9c7e0e0b4121d9855331794679c6fe1dec9e20121626146",
+    "test/fl_shared_cpu_contract.cpp": "fe642f6b07039e66f22d93d8e139c34fe9a5f9177eb9d3948f8c6b71f7132c5e",
+    "test/fl_shared_cpu_c_api.c": "d66504d77032e5e534821a66f563ea9146979527d32d2751b7ffc0f9740fea29"
+  },
+  "steps": [
+    {
+      "name": "windows-preflight",
+      "exit": 0
+    }
+  ],
+  "error": "unknown remote CMake changes",
+  "ended": 1794104296.7863379
+}

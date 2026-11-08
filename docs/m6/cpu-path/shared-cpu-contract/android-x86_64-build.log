@@ -1,0 +1,15 @@
+[0/1] Re-running CMake...
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: <linux-home>/dev/build/framelink-m6-x86_64
+[1/11] Building C object CMakeFiles/fl_shared_cpu_c_api.dir/test/fl_shared_cpu_c_api.c.o
+[2/11] Building CXX object CMakeFiles/framelink.dir/src/framelink_shared_cpu.cpp.o
+[3/11] Linking CXX static library libframelink.a
+[4/11] Linking CXX executable fl_session_c_api
+[5/11] Linking CXX executable fl_session_contract
+[6/11] Linking CXX executable fl_memory_boundary
+[7/11] Linking CXX executable fl_memory_contract
+[8/11] Linking CXX executable fl_shared_cpu_c_api
+[9/11] Linking CXX executable fl_memory_c_api
+[10/11] Building CXX object CMakeFiles/fl_shared_cpu_contract.dir/test/fl_shared_cpu_contract.cpp.o
+[11/11] Linking CXX executable fl_shared_cpu_contract
