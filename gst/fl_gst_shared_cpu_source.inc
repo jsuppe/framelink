@@ -2,7 +2,7 @@
 static gboolean srcSharedCpuStart(GstFrameLinkSrc*self){
  if(!self->session||self->ch||self->nativeMemory||self->gpuReadback||self->memoryPolicyApplied||self->maxQueueAgeMs||
     fl_gst_session_get_config(self->session,&self->sessionConfig)!=FL_GST_SESSION_READY||
-    !self->sessionConfig.videoTrackId||self->sessionConfig.audioTrackId)return FALSE;
+    !self->sessionConfig.videoTrackId||(self->sessionConfig.audioTrackId&&!fl_gst_session_has_event_stream(self->session,self->sessionConfig.generation)))return FALSE;
  auto fmt=toGstFormat(flFormat(self->sessionConfig.video.format));if(fmt==GST_VIDEO_FORMAT_UNKNOWN)return FALSE;
  self->cpuChannel=fl_gst_session_claim_shared_cpu(self->session,FALSE,self->sessionConfig.generation);
  if(!self->cpuChannel)return FALSE;

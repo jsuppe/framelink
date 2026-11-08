@@ -976,7 +976,7 @@ static void gst_framelink_sink_class_init(GstFrameLinkSinkClass* klass) {
         GSignalFlags(G_SIGNAL_RUN_LAST|G_SIGNAL_ACTION),G_CALLBACK(sinkAcquireNative),
         nullptr,nullptr,nullptr,G_TYPE_POINTER,1,G_TYPE_UINT);
     g_object_class_install_property(gobject,SINK_PROP_SHARED_CPU,
-        g_param_spec_boolean("shared-cpu","Shared CPU sink","Explicit broker-bound video-only CPU copy-in with bounded ownership wait; negotiated COPY required",
+        g_param_spec_boolean("shared-cpu","Shared CPU sink","Explicit broker-bound CPU copy-in with bounded ownership wait; COPY required; A/V requires event stream",
             FALSE,(GParamFlags)(G_PARAM_READWRITE|G_PARAM_STATIC_STRINGS)));
     g_object_class_install_property(gobject,SINK_PROP_NATIVE_MEMORY,
         g_param_spec_boolean("native-memory","Native producer allocations",
@@ -1920,7 +1920,7 @@ static void gst_framelink_src_class_init(GstFrameLinkSrcClass* klass) {
 
     g_object_class_install_property(gobject,SRC_PROP_SHARED_CPU,
         g_param_spec_boolean("shared-cpu","Shared CPU source",
-            "Explicit broker-bound video-only shared CPU source; negotiated COPY required; no native fallback",
+            "Explicit broker-bound CPU source; COPY required; A/V requires event stream; no native fallback",
             FALSE,(GParamFlags)(G_PARAM_READWRITE|G_PARAM_STATIC_STRINGS)));
     g_object_class_install_property(gobject,SRC_PROP_GPU_READBACK,
         g_param_spec_boolean("gpu-readback","Explicit GPU readback",

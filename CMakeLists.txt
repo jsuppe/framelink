@@ -1190,6 +1190,25 @@ if(FRAMELINK_BUILD_TESTS AND TARGET framelink_gst_session AND NOT WIN32)
     set_tests_properties(gst_shared_cpu_roundtrip PROPERTIES TIMEOUT 20)
 endif()
 if(FRAMELINK_BUILD_TESTS AND TARGET framelink_gst_session AND NOT WIN32)
+    add_executable(fl_gst_shared_cpu_av test/fl_gst_shared_cpu_av.cpp)
+    target_link_libraries(fl_gst_shared_cpu_av PRIVATE framelink_gst_session)
+    if(ANDROID)
+        target_link_libraries(fl_gst_shared_cpu_av PRIVATE gstframelink
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstapp.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstcoreelements.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstgdp.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstgio.a"
+            ${FL_ANDROID_SESSION_GIO_STATIC_LDFLAGS} ${FL_ANDROID_GST_STATIC_LDFLAGS})
+    elseif(WIN32)
+        target_link_libraries(fl_gst_shared_cpu_av PRIVATE gstapp-1.0.lib)
+    else()
+        target_link_libraries(fl_gst_shared_cpu_av PRIVATE PkgConfig::FL_GST_APP)
+    endif()
+    add_dependencies(fl_gst_shared_cpu_av gstframelink)
+    add_test(NAME gst_shared_cpu_av COMMAND fl_gst_shared_cpu_av $<TARGET_FILE:gstframelink>)
+    set_tests_properties(gst_shared_cpu_av PROPERTIES TIMEOUT 20)
+endif()
+if(FRAMELINK_BUILD_TESTS AND TARGET framelink_gst_session AND NOT WIN32)
     add_executable(fl_gst_shared_cpu_events test/fl_gst_shared_cpu_events.cpp)
     target_link_libraries(fl_gst_shared_cpu_events PRIVATE framelink_gst_session)
     if(ANDROID)

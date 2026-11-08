@@ -21,3 +21,5 @@ cancellation. Require aggregate EOS only after both streams finish. Then wire th
 explicit selection through A/V bins and authenticated rendezvous; no implicit
 fallback or native-channel casting. Windows allocator and rate/endurance gates
 remain open. M6 remains incomplete; hold before M7 unchanged.
+
+Follow-up: SHARED_CPU_AV.md supersedes the audioTrackId rejection above with tested explicit A/V support; convenience bins/rendezvous remain pending.
