@@ -38,7 +38,7 @@ CPU generation, allocation, validation and release are outside the reported
 readback interval. First-import cost is included in draw for the first frame.
 No A/V, NV12, device-loss, cross-process or concurrent renderer qualification is
 implied. The GL output is RGBA; preserving BGRA in a production path needs an
-explicit channel arrangement/format check. No production code is changed.
+explicit channel arrangement/format check. The diagnostic probes themselves do not change production code; the later explicit staging implementation is linked below.
 
 ## Visibility negative (must not be discarded)
 
