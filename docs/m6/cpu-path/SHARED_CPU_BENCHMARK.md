@@ -95,3 +95,22 @@ Single-format control NV12 at identical resolution/rate/options passes300video/
 proof of a memcpy root cause. Advance this ready NV12 sustained cell sequentially
 while BGRA qualification remains suspended for diagnosis. Evidence directories:
 `shared-cpu-benchmark/android-{bgra,nv12}-1080p60-preflight/`.
+
+## Android sustained NV12 and next diagnostic
+
+NV121080p60 1800s passes108000video/86400000PCM,180000contiguous audio
+blocks, zero17ms video/audio misses, p95=12.031767ms,max=16.375776ms;
+inferred A/V mapping0ns. RSS consumer/producer -75.10/-86.40KB/min,
+CPU61.19%/30.76%, handle/thread slopes nonpositive.
+NV124K30 5s preflight counts150video/240000PCM pass, but first3frames exceed
+34ms (max48.378655ms); original startup failure retained, no endurance launched.
+
+BGRA1080p60 traced diagnostic retains exact300copies per endpoint, but copy
+events have zero duration: they cannot isolate memcpy time. srcCreate includes
+waiting and is not copy cost. Local no-transport BGRA control300video/240000PCM
+passes zero17ms misses,max0.99ms, CPU39.81% (includes local test-source cost).
+This narrows investigation to transport/allocation/copy, not a proven root cause.
+Source review finds new output allocation and full-buffer zero followed by
+row copies on every frame. Next bounded Android memory control compares
+allocation/zero/row-copy versus no-zero/contiguous-copy/reused allocation.
+No production edit or threshold change yet. BGRA and4Kstartup acceptance open.

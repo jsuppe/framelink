@@ -1,0 +1,159 @@
+{
+  "join": "inferred_constant_pts_mapping",
+  "frames": 300,
+  "pts_offset_ns": 3853005560900609,
+  "arrival_budget_ns": 17000000,
+  "arrival_misses": 11,
+  "late_frames": [
+    {
+      "index": 0,
+      "producer_pts_ns": 71181538,
+      "consumer_pts_ns": 3853005632082147,
+      "push_lateness_ns": 93770,
+      "arrival_lateness_ns": 25463654,
+      "post_push_residual_ns": 25369884
+    },
+    {
+      "index": 1,
+      "producer_pts_ns": 87848204,
+      "consumer_pts_ns": 3853005648748813,
+      "push_lateness_ns": 8554257,
+      "arrival_lateness_ns": 32160296,
+      "post_push_residual_ns": 23606039
+    },
+    {
+      "index": 2,
+      "producer_pts_ns": 104514871,
+      "consumer_pts_ns": 3853005665415480,
+      "push_lateness_ns": 7969744,
+      "arrival_lateness_ns": 28329937,
+      "post_push_residual_ns": 20360193
+    },
+    {
+      "index": 3,
+      "producer_pts_ns": 121181538,
+      "consumer_pts_ns": 3853005682082147,
+      "push_lateness_ns": 2630385,
+      "arrival_lateness_ns": 26903039,
+      "post_push_residual_ns": 24272654
+    },
+    {
+      "index": 4,
+      "producer_pts_ns": 137848204,
+      "consumer_pts_ns": 3853005698748813,
+      "push_lateness_ns": 85257,
+      "arrival_lateness_ns": 25096680,
+      "post_push_residual_ns": 25011423
+    },
+    {
+      "index": 5,
+      "producer_pts_ns": 154514871,
+      "consumer_pts_ns": 3853005715415480,
+      "push_lateness_ns": 233437,
+      "arrival_lateness_ns": 20292167,
+      "post_push_residual_ns": 20058730
+    },
+    {
+      "index": 200,
+      "producer_pts_ns": 3404514871,
+      "consumer_pts_ns": 3853008965415480,
+      "push_lateness_ns": 402975,
+      "arrival_lateness_ns": 17243860,
+      "post_push_residual_ns": 16840885
+    },
+    {
+      "index": 201,
+      "producer_pts_ns": 3421181538,
+      "consumer_pts_ns": 3853008982082147,
+      "push_lateness_ns": 500231,
+      "arrival_lateness_ns": 21024501,
+      "post_push_residual_ns": 20524270
+    },
+    {
+      "index": 261,
+      "producer_pts_ns": 4421181538,
+      "consumer_pts_ns": 3853009982082147,
+      "push_lateness_ns": 275001,
+      "arrival_lateness_ns": 17426424,
+      "post_push_residual_ns": 17151423
+    },
+    {
+      "index": 262,
+      "producer_pts_ns": 4437848204,
+      "consumer_pts_ns": 3853009998748813,
+      "push_lateness_ns": 522488,
+      "arrival_lateness_ns": 19086142,
+      "post_push_residual_ns": 18563654
+    },
+    {
+      "index": 263,
+      "producer_pts_ns": 4454514871,
+      "consumer_pts_ns": 3853010015415480,
+      "push_lateness_ns": 869744,
+      "arrival_lateness_ns": 20127475,
+      "post_push_residual_ns": 19257731
+    }
+  ],
+  "push_ms": {
+    "p50": 0.295616,
+    "p95": 0.37795,
+    "p99": 0.869744,
+    "max": 8.554257
+  },
+  "arrival_ms": {
+    "p50": 14.040475,
+    "p95": 16.153604,
+    "p99": 25.463654,
+    "max": 32.160296
+  },
+  "post_push_residual_ms": {
+    "p50": 13.755962,
+    "p95": 15.848577,
+    "p99": 23.606039,
+    "max": 25.369884
+  },
+  "scope": "All frames including startup/drain. Offset inferred from first records: cannot independently exclude a whole-stream constant shift; not identity proof. Residual includes producer copy, transport, consumer work and clock-mapping error; not a root-cause proof.",
+  "audio": {
+    "blocks": 500,
+    "contiguous_10ms_pts": true,
+    "arrival_misses": 0,
+    "arrival_ms": {
+      "p50": 1.202116,
+      "p95": 1.751654,
+      "p99": 1.891039,
+      "max": 2.237424
+    },
+    "scope": "PTS continuity only; PCM bytes/counts require the benchmark summary."
+  },
+  "av_mapping": {
+    "audio": {
+      "join": "inferred_constant_pts_mapping",
+      "frames": 500,
+      "pts_offset_ns": 3853005560900609,
+      "arrival_budget_ns": 17000000,
+      "arrival_misses": 0,
+      "late_frames": [],
+      "push_ms": {
+        "p50": 0.320847,
+        "p95": 0.587308,
+        "p99": 0.690385,
+        "max": 0.871078
+      },
+      "arrival_ms": {
+        "p50": 1.202116,
+        "p95": 1.751654,
+        "p99": 1.891039,
+        "max": 2.237424
+      },
+      "post_push_residual_ms": {
+        "p50": 0.865731,
+        "p95": 1.223654,
+        "p99": 1.417192,
+        "max": 1.910731
+      },
+      "scope": "All frames including startup/drain. Offset inferred from first records: cannot independently exclude a whole-stream constant shift; not identity proof. Residual includes producer copy, transport, consumer work and clock-mapping error; not a root-cause proof."
+    },
+    "av_mapping_delta_ns": 0,
+    "scope": "Both tracks preserve the same inferred constant PTS mapping. No independent allocation identity or physical playback claim."
+  }
+}
