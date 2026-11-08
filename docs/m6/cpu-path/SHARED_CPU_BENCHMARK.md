@@ -66,3 +66,32 @@ pass64KB/min; CPU35.32%/45.96%, handle/thread slopes nonpositive.
 Evidence: `shared-cpu-benchmark/linux-bgra-4k30-sustained/`.
 Same transport-only/inferred-mapping scope, no physical-output or full-stream
 pixel-identity claim. Linux sustained cells3/4 complete.
+
+## Fourth sustained cell — Linux matrix complete
+
+NV12 3840x2160@30,1800s, docs81996d0/unchanged65a1268 binaries:
+54000video/86400000PCM,180000contiguous audio blocks, zero34ms video/audio
+arrival misses, p95=10.382194ms,max=23.787211ms, inferred A/V mapping delta0ns.
+Consumer/producer RSS slopes3.24KB/min each pass64; CPU17.99%/25.44%,
+handle/thread slopes nonpositive. Evidence: `shared-cpu-benchmark/linux-nv12-4k30-sustained/`.
+All four Linux BGRA/NV12 1080p60/4K30 cells pass count, frozen diagnostic
+timing and resource gates. Transport-consumer scope only; not physical output,
+full-stream pixel identity, zero-copy, or resolution of existing M6 acceptance
+decisions. Android full-resolution qualification and Windows support remain open.
+
+## Android full-resolution preflight: BGRA timing failure retained
+
+Same deployed binary hash verified against local arm64 build. BGRA1080p60
+5s delivers300/300video and240000PCM but fails17ms diagnostic:20/300 late
+frames, p95=19.511436ms,max=37.949795ms. First11frames are late; nine other
+misses remain, so startup exclusion would not explain all failures. Consumer
+CPU97.36%, producer54.70%. Audio500contiguous blocks, zero misses, A/V mapping0ns.
+No endurance launched for this failed cell. Five-second RSS slopes are not
+endurance evidence. Root cause unresolved; Evelyn owns bounded copy/consumer
+profiling before BGRA qualification can resume. No budget waiver.
+
+Single-format control NV12 at identical resolution/rate/options passes300video/
+240000PCM and zero17ms misses. Payload/format sensitivity is supported, not
+proof of a memcpy root cause. Advance this ready NV12 sustained cell sequentially
+while BGRA qualification remains suspended for diagnosis. Evidence directories:
+`shared-cpu-benchmark/android-{bgra,nv12}-1080p60-preflight/`.
