@@ -1,0 +1,126 @@
+{
+  "reviewed_at": "2026-11-07T18:49:48.779615-05:00",
+  "rows": 96,
+  "complete_row_identity_set": true,
+  "exit_status": "unavailable; original process no longer retained",
+  "limitations": [
+    "Each emitted row follows a full output-byte check; final cleanup exit status unavailable.",
+    "Fixed method order, only eight samples; allocation and page faults not measured.",
+    "Cached copy is a distinct memory control, not a repaired transport path.",
+    "BGRA1080 has substantial phase variation; do not reduce to a single causal claim."
+  ],
+  "map_ms_range": [
+    0.001447,
+    0.015403
+  ],
+  "copy_groups": [
+    {
+      "format": "NV12",
+      "width": 1920,
+      "height": 1080,
+      "method": "memcpy",
+      "min_ms": 145.37917,
+      "median_ms": 145.4896425,
+      "max_ms": 146.914182
+    },
+    {
+      "format": "NV12",
+      "width": 1920,
+      "height": 1080,
+      "method": "stream",
+      "min_ms": 79.69174,
+      "median_ms": 80.96086,
+      "max_ms": 83.37656
+    },
+    {
+      "format": "NV12",
+      "width": 1920,
+      "height": 1080,
+      "method": "cached",
+      "min_ms": 0.143135,
+      "median_ms": 0.202657,
+      "max_ms": 0.316901
+    },
+    {
+      "format": "BGRA",
+      "width": 1920,
+      "height": 1080,
+      "method": "memcpy",
+      "min_ms": 162.593205,
+      "median_ms": 785.2282545,
+      "max_ms": 911.811971
+    },
+    {
+      "format": "BGRA",
+      "width": 1920,
+      "height": 1080,
+      "method": "stream",
+      "min_ms": 115.406226,
+      "median_ms": 664.936678,
+      "max_ms": 674.323041
+    },
+    {
+      "format": "BGRA",
+      "width": 1920,
+      "height": 1080,
+      "method": "cached",
+      "min_ms": 0.824628,
+      "median_ms": 0.8782669999999999,
+      "max_ms": 1.064547
+    },
+    {
+      "format": "NV12",
+      "width": 3840,
+      "height": 2160,
+      "method": "memcpy",
+      "min_ms": 244.026948,
+      "median_ms": 245.780597,
+      "max_ms": 333.908628
+    },
+    {
+      "format": "NV12",
+      "width": 3840,
+      "height": 2160,
+      "method": "stream",
+      "min_ms": 152.113911,
+      "median_ms": 172.0151925,
+      "max_ms": 175.384094
+    },
+    {
+      "format": "NV12",
+      "width": 3840,
+      "height": 2160,
+      "method": "cached",
+      "min_ms": 1.321363,
+      "median_ms": 1.398063,
+      "max_ms": 1.525893
+    },
+    {
+      "format": "BGRA",
+      "width": 3840,
+      "height": 2160,
+      "method": "memcpy",
+      "min_ms": 659.955553,
+      "median_ms": 661.9596595,
+      "max_ms": 682.417321
+    },
+    {
+      "format": "BGRA",
+      "width": 3840,
+      "height": 2160,
+      "method": "stream",
+      "min_ms": 420.995369,
+      "median_ms": 463.194215,
+      "max_ms": 464.976453
+    },
+    {
+      "format": "BGRA",
+      "width": 3840,
+      "height": 2160,
+      "method": "cached",
+      "min_ms": 2.950025,
+      "median_ms": 3.2210965,
+      "max_ms": 3.250958
+    }
+  ]
+}

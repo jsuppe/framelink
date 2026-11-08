@@ -1,0 +1,80 @@
+{
+  "rows": 96,
+  "exit_status": 0,
+  "exit_evidence": "<linux-home>/dev/evidence/m6-cpu-path/recovery-20261107-1850/resources.txt",
+  "groups": {
+    "NV12-1920x1080-memcpy": {
+      "n": 8,
+      "median_ms": 69.71094,
+      "min_ms": 69.041311,
+      "max_ms": 108.962911
+    },
+    "NV12-1920x1080-stream": {
+      "n": 8,
+      "median_ms": 31.036275,
+      "min_ms": 29.876913,
+      "max_ms": 51.04017
+    },
+    "NV12-1920x1080-cached": {
+      "n": 8,
+      "median_ms": 0.189922,
+      "min_ms": 0.115246,
+      "max_ms": 0.38132
+    },
+    "BGRA-1920x1080-memcpy": {
+      "n": 8,
+      "median_ms": 163.701124,
+      "min_ms": 162.051367,
+      "max_ms": 224.390667
+    },
+    "BGRA-1920x1080-stream": {
+      "n": 8,
+      "median_ms": 117.59313850000001,
+      "min_ms": 106.729743,
+      "max_ms": 118.919652
+    },
+    "BGRA-1920x1080-cached": {
+      "n": 8,
+      "median_ms": 0.7385785,
+      "min_ms": 0.612783,
+      "max_ms": 0.877508
+    },
+    "NV12-3840x2160-memcpy": {
+      "n": 8,
+      "median_ms": 245.7843905,
+      "min_ms": 243.509784,
+      "max_ms": 336.476758
+    },
+    "NV12-3840x2160-stream": {
+      "n": 8,
+      "median_ms": 174.071464,
+      "min_ms": 152.977251,
+      "max_ms": 177.658793
+    },
+    "NV12-3840x2160-cached": {
+      "n": 8,
+      "median_ms": 1.4192529999999999,
+      "min_ms": 1.270431,
+      "max_ms": 1.99312
+    },
+    "BGRA-3840x2160-memcpy": {
+      "n": 8,
+      "median_ms": 666.1225185000001,
+      "min_ms": 662.311835,
+      "max_ms": 673.740227
+    },
+    "BGRA-3840x2160-stream": {
+      "n": 8,
+      "median_ms": 472.5435635,
+      "min_ms": 425.539915,
+      "max_ms": 473.747619
+    },
+    "BGRA-3840x2160-cached": {
+      "n": 8,
+      "median_ms": 3.1249504999999997,
+      "min_ms": 2.894545,
+      "max_ms": 3.159486
+    }
+  },
+  "scope": "Allocation diagnostic only; not production throughput qualification. Process pagefaults not stage-attributed."
+}

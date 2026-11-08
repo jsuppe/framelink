@@ -1,0 +1,13 @@
+{
+  "revision": "24bcd78feebeb951abd4870a4b243d55d26cb5cc",
+  "host": "<linux-host>",
+  "kernel": "7.0.0-42-generic",
+  "command": "/usr/bin/time -v -o resources.txt ./probe > results.csv 2> stderr.txt",
+  "build": "c++ -O2 -Wall -Wextra probe.cpp -o probe $(pkg-config --cflags --libs gbm libdrm)",
+  "sha256": {
+    "probe.cpp": "a03fb960df296ecec0ce0ee4c6f3a70d5a5bf91d33cf43b41d51154fb698ec3f",
+    "probe": "95da4060d01f5adf2e1b84ddbe09ad4b137257826653f9138676d4101ab52f41"
+  },
+  "scope": "Standalone BGRA allocation diagnostic; alternating map order; exact x/y/iteration byte pattern. Not a FrameLink session or NV12/target-rate qualification.",
+  "gpu": "NVIDIA GeForce RTX 3090, 580.178.04"
+}

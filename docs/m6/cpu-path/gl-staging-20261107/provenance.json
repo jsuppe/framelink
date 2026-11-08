@@ -1,0 +1,13 @@
+{
+  "revision": "24bcd78feebeb951abd4870a4b243d55d26cb5cc",
+  "command": "/usr/bin/time -v -o resources.txt ./probe > results.csv 2> stderr.txt",
+  "build": "c++ -O2 probe.cpp -I <linux-home>/dev/framelink-m6/include -L <linux-home>/dev/build/framelink-m6-linux -Wl,-rpath,<linux-home>/dev/build/framelink-m6-linux -lframelink -lEGL -lGLESv2 -o probe",
+  "sha256": {
+    "probe.cpp": "6b5fd9f7e7c547bd92a24eb36f31a7a8881bfe8b112b1a1c7e93c83964937123",
+    "probe": "9551ffdbd1e493c01904ae2a77b13e9a40e8770f41ae6cc6417fec96eb334498",
+    "gpu.hpp": "cf0dd792b39e82f391e189429ae524da29eb7073715489c59e977dbd0f3e8448"
+  },
+  "library_sha256": "d8aa35103a466b674054fc2dbff9158317f3a615c7f55a77f10386b9d7464e25",
+  "gpu": "NVIDIA RTX3090 driver580.178.04",
+  "scope": "Same-process producer/consumer allocation probe; explicit GPU copy and full readback, not native zero-copy or paced A/V qualification."
+}
