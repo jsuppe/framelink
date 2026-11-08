@@ -1,0 +1,43 @@
+Internal ctest changing into directory: <linux-home>/dev/build/framelink-m6-linux
+Test project <linux-home>/dev/build/framelink-m6-linux
+      Start  13: shared_cpu_reconnect
+ 1/17 Test  #13: shared_cpu_reconnect .............   Passed    0.03 sec
+      Start  14: shared_cpu_eos
+ 2/17 Test  #14: shared_cpu_eos ...................   Passed    0.00 sec
+      Start  15: shared_cpu_channel_c
+ 3/17 Test  #15: shared_cpu_channel_c .............   Passed    0.00 sec
+      Start  16: shared_cpu_channel
+ 4/17 Test  #16: shared_cpu_channel ...............   Passed    0.06 sec
+      Start  17: shared_cpu_release
+ 5/17 Test  #17: shared_cpu_release ...............   Passed    0.04 sec
+      Start  18: shared_cpu_control
+ 6/17 Test  #18: shared_cpu_control ...............   Passed    0.04 sec
+      Start  19: shared_cpu_imported_pool
+ 7/17 Test  #19: shared_cpu_imported_pool .........   Passed    0.01 sec
+      Start  20: shared_cpu_allocation
+ 8/17 Test  #20: shared_cpu_allocation ............   Passed    0.01 sec
+      Start  21: shared_cpu_pool
+ 9/17 Test  #21: shared_cpu_pool ..................   Passed    0.00 sec
+      Start  22: shared_cpu_contract
+10/17 Test  #22: shared_cpu_contract ..............   Passed    0.00 sec
+      Start  23: shared_cpu_contract_c_api
+11/17 Test  #23: shared_cpu_contract_c_api ........   Passed    0.00 sec
+      Start 120: gst_shared_cpu_session
+12/17 Test #120: gst_shared_cpu_session ...........   Passed    0.03 sec
+      Start 124: gst_shared_cpu_source
+13/17 Test #124: gst_shared_cpu_source ............   Passed    0.08 sec
+      Start 125: gst_shared_cpu_roundtrip
+14/17 Test #125: gst_shared_cpu_roundtrip .........   Passed    0.11 sec
+      Start 126: gst_shared_cpu_av
+15/17 Test #126: gst_shared_cpu_av ................   Passed    0.80 sec
+      Start 127: gst_shared_cpu_events
+16/17 Test #127: gst_shared_cpu_events ............   Passed    0.12 sec
+      Start 130: gst_av_bin
+17/17 Test #130: gst_av_bin .......................   Passed   24.89 sec
+
+100% tests passed, 0 tests failed out of 17
+
+Label Time Summary:
+m5b_av    =  24.89 sec*proc (1 test)
+
+Total Test time (real) =  26.23 sec

@@ -76,7 +76,16 @@ static GstFlowReturn srcSharedCpuCreate(GstFrameLinkSrc*self,GstBuffer**out){
  struct Buffer{GstBuffer*p;~Buffer(){if(p)gst_buffer_unref(p);}} owned{buf};
  GstMapInfo map{};if(!gst_buffer_map(buf,&map,GST_MAP_WRITE))return GST_FLOW_ERROR;
  bool valid=view.planes==GST_VIDEO_INFO_N_PLANES(&info);guint64 bytes=0;
- memset(map.data,0,map.size);
+ // Skip initialization only when every output byte will be overwritten.
+ // Padded/offset layouts retain full zeroing, including reused cache buffers.
+ gsize packedBytes=0;bool packed=true;
+ for(guint p=0;p<GST_VIDEO_INFO_N_PLANES(&info);p++){
+  const guint rows=p?self->height/2:self->height;
+  const guint rowBytes=self->sessionConfig.video.format==FL_FORMAT_NV12?self->width:self->width*4;
+  packed=packed&&info.stride[p]==gint(rowBytes)&&info.offset[p]==packedBytes;
+  packedBytes+=gsize(rows)*rowBytes;
+ }
+ if(!packed||packedBytes!=map.size)memset(map.data,0,map.size);
  for(guint p=0;p<view.planes&&valid;p++){
   const guint rows=p?self->height/2:self->height;
   const guint rowBytes=self->sessionConfig.video.format==FL_FORMAT_NV12?self->width:self->width*4;

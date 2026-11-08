@@ -1,0 +1,16 @@
+{
+  "state": "finished",
+  "started": 1794141465.8962493,
+  "binary": {
+    "base": "555d366",
+    "binary_sha256": "dab5486a6e2fa02938437562ef7eb78dc0c3fe90710669fe6e97d13cc16000de",
+    "source_hashes": {
+      "fl_gst_shared_cpu_source.inc": "eef4809b6c863854c9ada8af2c70ba4c2f349f80ba25226b40d6e5f644876585",
+      "fl_gst_shared_cpu_sink.inc": "392a7d3f7ceaec117b5eb55cabb78da97cb5aa4311c643d08a8dec8877d2e288"
+    }
+  },
+  "command": "cd /data/local/tmp/framelink-cpu-stageprobe && mkdir sample450 && ./fl_gst_av_bench static --shared-cpu --seconds 450 --size 3840x2160 --fps 30 --format BGRA --pool 2 --video-queue 1 --latency-ms 0 --arrival-budget-ms 34 --transport-only --no-output-preroll --output-queue-buffers 1 --raw --out /data/local/tmp/framelink-cpu-stageprobe/sample450 --label stage450",
+  "exit": 0,
+  "pull_exit": 0,
+  "ended": 1794141917.4678555
+}

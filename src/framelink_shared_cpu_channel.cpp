@@ -40,7 +40,19 @@ flResult flSharedCpuOpenConsumerFdEx(int fd,uint32_t timeout,const flSessionConf
   state->control=std::make_unique<fl::SharedCpuControl>(std::move(link));
   auto result=state->control->negotiate(false,*s,*r,ops,flags&FL_SHARED_CPU_FRAME_METADATA,flags&FL_SHARED_CPU_ORDERED_EOS);if(result!=FL_OK)return result;
   Fds fds;
+  const auto prepareEnd=std::chrono::steady_clock::now()+std::chrono::milliseconds(timeout);
   for(size_t i=0;i<count;i++){result=fl::SharedCpuAllocation::create(d[i],state->owners[i]);if(result!=FL_OK)return result;
+   // Populate this consumer's read mapping before publishing the pool. Producer
+   // write preparation cannot populate another process's page-table entries.
+   fl::SharedCpuAllocation::Mapping prepared;
+   result=state->owners[i].map(false,prepared);if(result!=FL_OK)return result;
+   const auto& view=prepared.view();
+   for(unsigned plane=0;plane<view.planes;plane++)for(unsigned row=0;row<view.plane[plane].rows;row++){
+    if(std::chrono::steady_clock::now()>=prepareEnd)return FL_TIMEOUT;
+    const volatile unsigned char* pixels=static_cast<const unsigned char*>(view.plane[plane].pixels)+uint64_t(row)*view.plane[plane].stride;
+    // 4KiB steps also cover larger system pages; touch only active bytes.
+    for(unsigned x=0;x<view.plane[plane].rowBytes;x+=4096){(void)pixels[x];}
+   }
    result=state->owners[i].exportFd(true,fds.values[i]);if(result!=FL_OK)return result;}
   result=state->control->sendPool(d,fds.values.data(),count);if(result!=FL_OK)return result;
   auto channel=std::make_unique<flSharedCpuChannel>();channel->state=std::move(state);*out=channel.release();return FL_OK;
