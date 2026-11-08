@@ -44,3 +44,14 @@ The third established gateway dynamic-tool timeout600000ms despite requested
 2000s, with no surviving process or result. Native execution completed and
 was collected successfully. No threshold, duration or binary changed.
 Other Linux formats/rates, Android endurance and Windows support remain open.
+
+## Second sustained cell
+
+Linux NV12 1920x1080@60,1800s, docs revision16ddeba with unchanged65a1268
+binaries:108000video/86400000PCM,180000contiguous audio blocks, complete
+queues and zero17ms video/audio arrival misses. Video p95=2.504085ms,
+max=4.297075ms, inferred A/V mapping delta0ns. Consumer/producer RSS slopes
+3.23KB/min each, CPU9.62%/13.07%; handle/thread slopes nonpositive.
+Evidence: `shared-cpu-benchmark/linux-nv12-1080p60-sustained/`.
+Same transport-only and inferred-mapping limitations apply; no physical output
+or full-stream pixel-identity claim. Linux sustained cells2/4 complete.
