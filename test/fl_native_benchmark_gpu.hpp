@@ -1,4 +1,5 @@
 #pragma once
+#include <vector>
 // Verification output is private; imported source allocations are sampled only.
 class BenchmarkGpu {
  EGLDisplay d=EGL_NO_DISPLAY;EGLContext c=EGL_NO_CONTEXT;EGLSurface s=EGL_NO_SURFACE;
@@ -47,6 +48,16 @@ public:
  bool retired=false;for(unsigned i=0;i<2000;i++){auto r=flCollectReadLeases(channel);if(r==FL_OK){retired=true;break;}CHECK(r==FL_BUSY);usleep(1000);}CHECK(retired);const auto retiredAt=std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
  // Read only private verification output, never map/read back the shared source.
  glReadPixels(0,0,8,1,GL_RGBA,GL_UNSIGNED_BYTE,header);unsigned char pixel[4]{};glReadPixels(imageWidth-1,imageHeight-1,1,1,GL_RGBA,GL_UNSIGNED_BYTE,pixel);CHECK(glGetError()==GL_NO_ERROR);for(auto v:pixel)CHECK(v==(unsigned char)n);return retiredAt;
+ }
+ // Opt-in full-frame check for functional regressions, never timed benchmark work.
+ void verifyUniform(unsigned char expected){
+  std::vector<unsigned char> pixels(size_t(imageWidth)*imageHeight*4);
+  glBindFramebuffer(GL_FRAMEBUFFER,fbo);
+  glReadPixels(0,0,imageWidth,imageHeight,GL_RGBA,GL_UNSIGNED_BYTE,pixels.data());
+  CHECK(glGetError()==GL_NO_ERROR);
+  for(size_t i=0;i<pixels.size();++i)if(pixels[i]!=expected){
+   fprintf(stderr,"full-frame mismatch offset=%zu expected=%u actual=%u\n",i,unsigned(expected),unsigned(pixels[i]));CHECK(false);
+  }
  }
  ~BenchmarkGpu(){if(d==EGL_NO_DISPLAY)return;for(auto&v:images)if(v.source){glDeleteTextures(1,&v.texture);destroy(d,v.image);}glDeleteProgram(program);glDeleteShader(vs);glDeleteShader(fs);glDeleteFramebuffers(1,&fbo);glDeleteTextures(1,&output);eglMakeCurrent(d,EGL_NO_SURFACE,EGL_NO_SURFACE,EGL_NO_CONTEXT);eglDestroyContext(d,c);eglDestroySurface(d,s);eglTerminate(d);}
 };

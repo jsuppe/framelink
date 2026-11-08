@@ -60,10 +60,19 @@ promising Linux GPU-allocation→CPU path. Cached shared-CPU allocation remains 
 separate candidate for CPU-only producers/consumers; the heap-copy control is
 not an implementation or cross-process validation of that candidate.
 
-Next bounded task: turn the image-refresh negative into a durable full-frame
-regression, repair the reusable benchmark helper's external-write refresh, and
-validate Linux/Android affected native consumers. Then implement an **explicitly
-selected and negotiated** Linux staging path without changing native defaults.
+A durable `native_cpu_write_visibility` regression now runs 32 full-frame checks
+through the **existing native-fence** benchmark helper on Linux (BGRA) and Android
+(RGBA). Both pass without adding image rebinding. An intentional interior-byte
+corruption is rejected by the full-frame checker, after the existing header and
+last-pixel checks pass. This distinguishes the standalone `glFinish` staging
+failure from the existing fence path: **no existing benchmark visibility defect
+has been demonstrated**, and its sampling path was not changed. The new full-frame
+verification method is opt-in and adds no readback to timed benchmark runs.
+Linux CTest passes, Android arm64 execution passes, and both Android ABIs build;
+see `visibility-regression/`. Windows does not build this EGL-only test.
+
+Next bounded task: implement an **explicitly selected and negotiated** Linux
+staging path without changing native defaults.
 Do not smuggle readback into a CPU-copy-only or strict native agreement:
 `FL_MEMORY_COPY|FL_MEMORY_READBACK` must be permitted and reported, including
 payload byte counts. Preserve source leases until GPU completion; make context,

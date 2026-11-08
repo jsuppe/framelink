@@ -1,0 +1,17 @@
+{
+  "source_base": "a0567ec633e280b88b6e5df3e15ab561a74d12f5",
+  "sha256": {
+    "test/fl_native_cpu_write_visibility.cpp": "a8bf657a983a8f1a1e03266157e9e37e238f0dfa01336df6036bf1919b10c7d7",
+    "test/fl_native_benchmark_gpu.hpp": "31f6d347e7b4d4a1532768ef13ab0392543fd1f2cdbd157b56fdacf6d2439892",
+    "CMakeLists.txt": "35f0e53054fef0ee4588d9f414fdfb880b142406a9b5c84a78290466ddf7881b"
+  },
+  "result": "Linux CTest 1/1; Android arm64 32 frames; arm64/x86_64 builds passed; deliberate interior corruption fails exact expected pixel (BGRA source B is RGBA output channel 2).",
+  "commands": [
+    "cmake --build <linux-home>/dev/build/framelink-m6-linux --target fl_native_cpu_write_visibility -j4",
+    "ctest --test-dir <linux-home>/dev/build/framelink-m6-linux -R ^native_cpu_write_visibility$ --output-on-failure",
+    "fl_native_cpu_write_visibility --corrupt-interior",
+    "cmake --build <linux-home>/dev/build/framelink-m6-arm64 --target fl_native_cpu_write_visibility -j4",
+    "cmake --build <linux-home>/dev/build/framelink-m6-x86_64 --target fl_native_cpu_write_visibility -j4",
+    "adb shell TMPDIR=/data/local/tmp/framelink-m6-20261106 LD_LIBRARY_PATH=/data/local/tmp/framelink-m6-20261106 /data/local/tmp/framelink-m6-20261106/fl_native_cpu_write_visibility"
+  ]
+}
