@@ -9,3 +9,7 @@ Bounded production fix: only framelinkavsink's internal shared-CPU video child d
 Raw evidence: <linux-home>/dev/evidence/m6-cpu-path/android-source-sink-audit. Diagnostic sources restored; production builds restored. Linux CPU A/V, native A/V bin and benchmark smoke3/3 passed. Both Android ABI builds passed; Android CPU A/V (including input-release regression) and native A/V bin2/2 passed. Windows affected build and native A/V bin/benchmark smoke2/2 passed. Production BGRA4K preflight/endurance pending.
 
 Thin-element users can explicitly select `enable-last-sample=false` when they do not need a retained snapshot. This fix does not override that public element preference. The internal bin setting is restored on teardown, not a global GStreamer allocator change.
+
+## Production preflight at93283ac
+
+All150video/240000PCM frames delivered,500contiguousaudio blocks, process/pull/complete success. Timing FAIL: indices27–29 exceed34ms (max37.353243ms). Producer maxpush0.733538ms; each miss has >34ms post-push residual. No startup miss in this sample. Retention fix addresses the identified input-allocation mechanism, not this residual transport failure. No BGRA4K endurance qualification started. Next bounded450s diagnostic measures full sink wait/acquire/copy/submit and consumer receive/output/copy/release/metadata, copy faults/CPU and fallback allocations. No threshold waiver.
