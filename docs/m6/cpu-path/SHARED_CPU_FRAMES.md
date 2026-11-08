@@ -38,6 +38,19 @@ cover epoch, zero/replayed sequence, invalid slot, reserved/tag/PTS/type/length,
 unexpected FD and reuse of a still-held slot; failures preserve output and FD
 baseline. Existing setup and ACK negatives remain passing.
 
-Remaining focused protocol tests: hostile release spoof/replay, out-of-order
-independent slot releases, multi-slot saturation and death while holding frames.
-Then lease API integration and current channel/coordinator/GStreamer routing.
+Focused release qualification now passes: `shared_cpu_release` saturates all 16
+slots, confirms all reject reuse with BUSY, releases in reverse order and reuses
+all slots with newer sequences. Fifteen hostile cases cover tag/version/epoch,
+zero or wrong outstanding sequence, nonzero release PTS, invalid slot, reserved
+bytes, legacy type, short payload, unsolicited FD, duplicate release, stale release
+after resubmission, peer death and silence while slots remain held. Invalid input
+preserves receive output and closes acceptance; submitting afterward cannot
+recycle a slot. Retained mappings survive destruction of the failed control and
+imported pool. Every case returns FD count to baseline. Silent-peer wait uses a
+30ms bound and must complete within one second. No production correction was
+needed for these cases.
+
+Linux eight shared-CPU/IPC tests pass. Android release test and both ABI builds
+pass; raw evidence and source hash are in `shared-cpu-release/`. These are internal
+protocol checks, not public channel or GPU lease qualification. Next: integrate
+actual borrow/lease ownership with channel/coordinator/GStreamer routing.

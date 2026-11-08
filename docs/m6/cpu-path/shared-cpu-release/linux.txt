@@ -1,0 +1,22 @@
+Internal ctest changing into directory: <linux-home>/dev/build/framelink-m6-linux
+Test project <linux-home>/dev/build/framelink-m6-linux
+    Start 13: shared_cpu_release
+1/8 Test #13: shared_cpu_release ...............   Passed    0.03 sec
+    Start 14: shared_cpu_control
+2/8 Test #14: shared_cpu_control ...............   Passed    0.04 sec
+    Start 15: shared_cpu_imported_pool
+3/8 Test #15: shared_cpu_imported_pool .........   Passed    0.01 sec
+    Start 16: shared_cpu_allocation
+4/8 Test #16: shared_cpu_allocation ............   Passed    0.01 sec
+    Start 17: shared_cpu_pool
+5/8 Test #17: shared_cpu_pool ..................   Passed    0.00 sec
+    Start 18: shared_cpu_contract
+6/8 Test #18: shared_cpu_contract ..............   Passed    0.00 sec
+    Start 19: shared_cpu_contract_c_api
+7/8 Test #19: shared_cpu_contract_c_api ........   Passed    0.00 sec
+    Start 33: ipc_connected_fd
+8/8 Test #33: ipc_connected_fd .................   Passed    0.05 sec
+
+100% tests passed, 0 tests failed out of 8
+
+Total Test time (real) =   0.15 sec
