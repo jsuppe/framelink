@@ -117,7 +117,6 @@ FL_GST_SESSION_API gboolean fl_gst_session_apply_pipeline_clock(FlGstSession*,Gs
  gboolean producer,GstClockTime latency,GError**);
 G_END_DECLS
 
-#if !defined(_WIN32)
 #include "framelink_shared_cpu_channel.h"
 G_BEGIN_DECLS
 // Explicit CPU-only broker seam, NOT authentication or local discovery. Caller
@@ -128,17 +127,29 @@ G_BEGIN_DECLS
 // Consumer supplies 2..16 matching descriptors; producer supplies NULL/0.
 // Bounded per-I/O by timeout_ms. Session cancel/reconfigure shuts down this
 // socket, including while setup is blocked. Does not mark a track ready.
+#ifndef _WIN32
 FL_GST_SESSION_API FlGstSessionResult fl_gst_session_bind_shared_cpu_fd(
  FlGstSession*,gboolean producer,guint64 generation,int fd,guint timeout_ms,
  const flMemoryRequirements*,guint operations,const flSharedCpuDescriptor*,gsize count);
+#else
+// Windows broker seam: caller authenticates/delegates this exact connected local
+// OVERLAPPED message pipe and pinned peer process. Consumes pipe on every path;
+// borrows peerProcess for the call. Same mandatory metadata/EOS and role/generation
+// contract as the FD seam. Caller holds a session reference throughout this
+// worker-thread call. Per-I/O timeout, no native fallback. Session owns a
+// manual-reset cancellation event shared with setup and claimed channels.
+FL_GST_SESSION_API FlGstSessionResult fl_gst_session_bind_shared_cpu_pipe(
+ FlGstSession*,gboolean producer,guint64 generation,void* pipe,void* peerProcess,
+ guint timeout_ms,const flMemoryRequirements*,guint operations,
+ const flSharedCpuDescriptor*,gsize count);
+#endif
 // Transfer-full, once per generation, exact role. Caller externally serializes
 // channel/lease calls and closes the channel. Session retains only a socket
-// shutdown handle: cancel/reconfigure interrupts I/O but never frees claimed
-// channels/leases; held mappings survive. Unclaimed channels are session-owned.
+// shutdown handle (POSIX) or shared cancellation event (Windows). Cancel and
+// reconfigure interrupt I/O but never free claimed channels/leases; held mappings survive. Unclaimed channels are session-owned.
 FL_GST_SESSION_API flSharedCpuChannel* fl_gst_session_claim_shared_cpu(
  FlGstSession*,gboolean producer,guint64 generation);
 G_END_DECLS
-#endif
 
 #ifdef __linux__
 G_BEGIN_DECLS

@@ -1,0 +1,23 @@
+{
+  "legacy_count": 59,
+  "current_count": 75,
+  "removed": [],
+  "added": [
+    "flSharedCpuAcquireWrite",
+    "flSharedCpuCancelWrite",
+    "flSharedCpuClose",
+    "flSharedCpuOpenConsumerPipe",
+    "flSharedCpuOpenProducerPipe",
+    "flSharedCpuQuery",
+    "flSharedCpuReadMetadata",
+    "flSharedCpuReceive",
+    "flSharedCpuReceiveEvent",
+    "flSharedCpuReceiveRelease",
+    "flSharedCpuReleaseRead",
+    "flSharedCpuRetainRead",
+    "flSharedCpuSendEos",
+    "flSharedCpuSubmit",
+    "flSharedCpuSubmitWithMetadata",
+    "flSharedCpuWaitReadable"
+  ]
+}

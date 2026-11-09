@@ -3,11 +3,12 @@
 **Current additive CPU implementation:** `d8f97c244696c42bb4ad4124674d8b462df4a9ed`.
 Focused tests pass7/7 Windows,8/8 Linux,8/8 Android plusdualABIbuilds; all59 old
 DLL exports preserved plus16 CPU symbols. A clean exact-revision full Windows/API
-validation is currently running; do not infer its outcome from these staged tests.
+validation passed **127/127**; [pinned evidence](../windows-integrated-d8f97c2/README.md)
+includes DLL hashes, runtime properties and all59 retained legacy export names.
 The CPU factories require separately authenticated delegated pipes/processes;
 coordinator/GStreamer integration and all unresolved M6 acceptance gates remain.
 
-**Previously verified candidate** exact revision: `609cb74031a5de2cee782619007a6e87ab7fbccd`.
+**Historical candidate** exact revision: `609cb74031a5de2cee782619007a6e87ab7fbccd`.
 Clean isolated Windows source archive SHA256:
 `ab8efb73b7b8282a9d64d8edf226cb379d18b3c89d39ae4e606c956e083d6da6`.
 Remote source/build: `<win-home>/dev/framelink-m6-windows-609cb74`.
@@ -25,8 +26,8 @@ specific tests, not full M6 qualification. Source headers are pinned in
 | D3D11 platform header | External immutable texture ring, same adapter, explicit GPU completion; borrowed texture/device references | Existing tests pass; coordinated real-producer M6.9 not closed |
 | Memory policy | v1 requirements; no operations allowed after init; both endpoints permit actual COPY/READBACK/UPLOAD/CONVERT union | Policy is not driver capability or zero-copy proof |
 | Session | v1 A/V, explicit v2 optional tracks,160-byte wire; newer generation and shared A/V clock mapping | C/C++/peer tests pass |
-| CPU descriptor | v1 FCS1,128-byte wire; Windows allocationBytes explicitly page-padded | Unchanged portable layout; actual Windows channel NOT AVAILABLE |
-| CPU channel | Opaque channel/lease API currently Linux/Android, FD factories behind !WIN32 | Future Windows factory must be additive; never reinterpret int FD as HANDLE |
+| CPU descriptor | v1 FCS1,128-byte wire; Windows allocationBytes explicitly page-padded | Unchanged portable layout; Windows pipe channel available explicitly |
+| CPU channel | Portable opaque channel/lease API; POSIX FD and additive Windows pipe factories | Separate typed platform factories; never reinterpret int FD as HANDLE |
 | GStreamer coordinator | `framelink.session.v1`, typed strong reference, authenticated stream binding, finite cancellation | Existing native stream tests pass; CPU Windows binding pending |
 | GStreamer bins | `shared-cpu=false`; native output opt-in on avsrc; avsink lacks native producer selection | Windows CPU property presence does not imply platform support |
 
@@ -59,19 +60,18 @@ set `latency-ms=150` explicitly. Final presentation synchronization remains the
 application's responsibility; don't indiscriminately disable final sinks.
 
 Planned Linux/Android integration can preserve opaque CPU channel/lease types,
-FCS1 descriptor,160-byte session, memory policy, metadata and EOS versions. A future
-Windows factory can accept a separately authenticated connected pipe/handle
+FCS1 descriptor,160-byte session, memory policy, metadata and EOS versions. The additive Windows factories accept a separately authenticated connected pipe/handle
 without changing POSIX factories. Any new wire transport envelope must be tagged
 and explicitly selected; do not append handle integers to legacy POSIX packets.
 Windows HANDLE values are process-local; bind the process identity, transfer exact
 rights, acknowledge adoption, reject stale epochs and retain held old leases.
 
-Remaining gates before a Windows-ready API baseline: bounded authenticated CPU
-control/handle transfer, CPU lease/channel/coordinator/bin integration, D3D11 native
+Remaining gates before a Windows-ready API baseline: authenticated CPU
+discovery/delegation and coordinator/bin integration, D3D11 native
 producer coordinated-session integration, strict overload property/profile review,
 resource-growth/timing/fault fixes and exact-head compatibility tests. Real decoder,
 two-hop PCM and all-platform M6 acceptance remain separate. This candidate is a
-reviewable inventory, **not a freeze, supported new CPU API, or M6 closure**.
+reviewable inventory, **not a freeze, full Windows app-integration acceptance, or M6 closure**.
 
 ## Reproduction / environment
 
@@ -89,8 +89,9 @@ passed. This is not a clean-install qualification (M7 remains on hold).
 [frame protocol](../cpu-path/windows-cpu-frames/README.md) now pass focused tests.
 FCW1 is a separately tagged Windows section envelope; POSIX FCP1 and public
 headers are unchanged. FCF1/FCR1, FCM1 and FCE1 retain existing portable layouts.
-This does not expose a Windows CPU factory or replace the exact609cb74 candidate
-above. Authentication/delegation and public lease integration remain required.
+Those internal prerequisites alone did not expose a Windows CPU factory. The
+subsequent d8f97c2 candidate below adds explicit public factories and leases;
+automatic authenticated discovery/delegation and bin integration remain required.
 
 ## Additive Windows CPU API implementation
 
@@ -99,6 +100,15 @@ now pass7/7 focused Windows tests and8/8 each Linux/Android shared regressions.
 `framelink_shared_cpu_win.h` accepts authenticated pipe/process handles separately;
 POSIX factories remain unchanged. All59 legacy DLL exports are retained plus16
 new CPU symbols. This supersedes the “Windows channel unavailable” implementation
-status above, **not** the pinned609cb74 candidate artifact. A fresh exact-revision
-Windows/API build is next; new coordinator/GStreamer CPU binding, readiness timing,
+status above; the pinned609cb74 artifact is historical, superseded by tested d8f97c2. The exact d8f97c2
+Windows/API build passed127/127; new coordinator/GStreamer CPU binding, readiness timing,
 native producer integration and product-policy decisions remain open. No freeze.
+
+## Subsequent coordinator implementation
+
+[Windows broker seam](../cpu-path/windows-cpu-coordinator/README.md) now adds exact
+generation/role binding and cancellation to the portable single-claim API.
+Windows6/6, Linux4/4 and Android4/4 plusdualABI builds pass. This is newer than
+the pinned d8f97c2 candidate; clean exact-head integration is pending. Automatic
+authentication/discovery, CPU elements/bins and coordinated native producer gates
+remain open. No API freeze or overload/default decision is inferred.

@@ -1,0 +1,34 @@
+Test project <win-home>/dev/framelink-m6-windows-d8f97c2/build
+    Start 114: gst_shared_cpu_session_win
+1/1 Test #114: gst_shared_cpu_session_win .......***Failed    1.11 sec
+idle-before-work 0 handles=314
+idle-before-work 1 handles=487
+idle-before-work 2 handles=663
+idle-before-work 3 handles=819
+idle-before-work 4 handles=876
+idle-before-work 5 handles=911
+idle-before-work 6 handles=1102
+idle-before-work 7 handles=1259
+idle-before-work 8 handles=1436
+idle-before-work 9 handles=1607
+idle-before-work 10 handles=1742
+idle-before-work 11 handles=1887
+idle-before-work 12 handles=2018
+idle-before-work 13 handles=2144
+idle-before-work 14 handles=2263
+idle-before-work 15 handles=2377
+idle-before-work 16 handles=2464
+idle-before-work 17 handles=2464
+idle-before-work 18 handles=2469
+idle-before-work 19 handles=2468
+mode=0 baseline=2468 actual=2469
+line 67: actualHandles==baseline error=1460
+
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) =   1.13 sec
+
+The following tests FAILED:
+	114 - gst_shared_cpu_session_win (Failed)
+Errors while running CTest

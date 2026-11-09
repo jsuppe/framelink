@@ -1,0 +1,14 @@
+Test project <win-home>/dev/framelink-m6-windows-d8f97c2/build
+    Start 114: gst_shared_cpu_session_win
+1/1 Test #114: gst_shared_cpu_session_win .......***Failed    0.04 sec
+mode=0 baseline=171 actual=173
+line 64: actualHandles==baseline error=1460
+
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) =   0.07 sec
+
+The following tests FAILED:
+	114 - gst_shared_cpu_session_win (Failed)
+Errors while running CTest
