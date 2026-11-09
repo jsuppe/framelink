@@ -1,6 +1,6 @@
 // Explicit broker-composed two-hop diagnostic. No automatic-discovery promise:
 // the broker supplies the SAME immutable allocation pool to both video rings.
-#include "../samples/native_relay.h"
+#include "../samples/session_native_relay.h"
 #include "../samples/session_relay_contract.h"
 #include <dxgi1_3.h>
 #include <wrl/client.h>
@@ -49,7 +49,7 @@ static void relaySessionNegatives(flSessionConfig cfg,const flSessionCapabilitie
  }
  printf("relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed\n");
 }
-static void nativeRelayAv(bool empty){
+static void nativeRelayAv(bool empty,unsigned fault=0){
  using Microsoft::WRL::ComPtr;
  FlGstSession* sessions[4]{};
  GstElement* pipes[4]{},*ports[4]{};
@@ -105,12 +105,13 @@ static void nativeRelayAv(bool empty){
  CHECK(flCreateChannelFromD3D11Handles((name+".up").c_str(),64,32,FL_FORMAT_RGBA8,2,flags,nullptr,handles,&up)==FL_OK);
  CHECK(flCreateChannelFromD3D11Handles((name+".down").c_str(),64,32,FL_FORMAT_RGBA8,2,flags,nullptr,reversed,&down)==FL_OK);
  CHECK(flOpenProducer((name+".up").c_str(),&writer)==FL_OK);CHECK(flOpenProducer((name+".down").c_str(),&forward)==FL_OK);
- flsample::NativeRelay relay(up,forward,relaySame);CHECK(relay.initialize()==FL_OK);
+ flsample::SessionNativeRelay relay(sessions[1],sessions[2],up,forward,relaySame);CHECK(relay.initialize()==FL_OK);
  for(auto*session:sessions)CHECK(fl_gst_session_track_ready(session,FL_GST_TRACK_VIDEO,1)==FL_GST_SESSION_READY);
  for(auto i:{3,2,1,0})CHECK(gst_element_set_state(pipes[i],GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
  flBuffer spare{};CHECK(flAcquireBuffer(writer,&spare,1000)==FL_OK);
  const unsigned frames=empty?0:16;
  for(unsigned n=0;n<frames;++n){
+  if(fault&&n)break;
   flBuffer input{};CHECK(flAcquireBuffer(writer,&input,1000)==FL_OK);
   // Explicit producer upload and final pixel-oracle readback; relay never maps.
   flMappedImage pixels{};CHECK(flImageMapPlanes(input.image,&pixels)==FL_OK);
@@ -118,13 +119,36 @@ static void nativeRelayAv(bool empty){
   flImageUnmap(input.image);
   const uint64_t audioPts=n*1000000,videoPts=audioPts+37000000;
   flFrameMetadata metadata{1,FL_FRAME_HAS_DTS|FL_FRAME_HAS_DURATION,int64_t(videoPts-100),1000000,1,{}};
+  if(fault==1)metadata.streamGeneration=2;
   CHECK(flSetFrameMetadata(writer,&input,&metadata)==FL_OK);CHECK(flSubmit(writer,&input,videoPts)==FL_OK);
-  flFrame incoming{};CHECK(flAcquireFrame(up,&incoming,1000)==FL_OK);CHECK(contract.check()==FL_GST_SESSION_READY);CHECK(relay.forward(incoming)==FL_OK);
+  flFrame incoming{};CHECK(flAcquireFrame(up,&incoming,1000)==FL_OK);CHECK(contract.check()==FL_GST_SESSION_READY);
+  if(fault==2)fl_gst_session_cancel(sessions[1]);
+  if(fault==3)fl_gst_session_cancel(sessions[2]);
+  if(fault==4){auto replacement=cfg;replacement.sessionId.bytes[0]=2;++replacement.generation;
+   CHECK(fl_gst_session_configure(sessions[2],&replacement,&offer,&offer)==FL_GST_SESSION_READY);}
+  if(fault&&fault<5){
+   CHECK(relay.forward(incoming)==(fault==1?FL_INVALID:FL_DISCONNECTED));
+   CHECK(relay.sessionStatus()==(fault==1?FL_GST_SESSION_READY:fault==4?FL_GST_SESSION_STALE:FL_GST_SESSION_CANCELLED));
+   CHECK(relay.count()==0&&relay.pending()==0);
+   flFrame absent{};CHECK(flAcquireFrame(down,&absent,0)==FL_TIMEOUT);
+   CHECK(relay.forward(incoming)==FL_INVALID); // permanent publication stop
+   flRelease(up,&incoming);break;
+  }
+  CHECK(relay.forward(incoming)==FL_OK);
   flFrame output{};CHECK(flAcquireFrame(down,&output,1000)==FL_OK&&output.ptsNs==videoPts&&relaySame(input.image,output.image));
   flFrameMetadata received{};CHECK(flGetFrameMetadata(down,&output,&received)==FL_OK);
   CHECK(received.dtsNs==metadata.dtsNs&&received.durationNs==metadata.durationNs&&received.streamGeneration==1);
   uint64_t lease=0;CHECK(flLeaseFrame(down,&output,&lease)==FL_OK);
   flBuffer blocked{};CHECK(flAcquireBuffer(writer,&blocked,0)==FL_TIMEOUT&&relay.pending()==1);
+  if(fault==5){
+   fl_gst_session_cancel(sessions[1]);
+   CHECK(relay.finish()==FL_BUSY&&relay.pending()==1);
+   CHECK(flAcquireBuffer(writer,&blocked,0)==FL_TIMEOUT);
+   CHECK(flCompleteReadLease(down,lease)==FL_OK);CHECK(flCollectReadLeases(down)==FL_OK);
+   const auto drainDeadline=g_get_monotonic_time()+1000000;
+   while(relay.pending()){CHECK(g_get_monotonic_time()<drainDeadline);CHECK(relay.collect()==FL_OK);g_usleep(100);}
+   break;
+  }
   auto*pcm=gst_buffer_new_allocate(nullptr,192,nullptr);gst_buffer_memset(pcm,0,n+31,192);GST_BUFFER_PTS(pcm)=audioPts;GST_BUFFER_DURATION(pcm)=1000000;
   CHECK(gst_app_src_push_buffer(GST_APP_SRC(ports[0]),pcm)==GST_FLOW_OK);
   auto*first=gst_app_sink_try_pull_sample(GST_APP_SINK(ports[1]),2*GST_SECOND);CHECK(first);
@@ -151,8 +175,9 @@ static void nativeRelayAv(bool empty){
   CHECK(fl_gst_session_receive_video_event(sessions[3],1,1000,&end)==FL_GST_SESSION_READY);
   CHECK(end.kind==sent.kind&&end.afterFrames==sent.afterFrames&&end.ptsNs==sent.ptsNs&&end.durationNs==0);
  }
- CHECK(relay.count()==frames&&relay.finish()==FL_OK);CHECK(flCancelBuffer(writer,&spare)==FL_OK);
+ CHECK(relay.count()==(fault?(fault==5?1:0):frames)&&relay.finish()==FL_OK);CHECK(flCancelBuffer(writer,&spare)==FL_OK);
  // PCM EOS authenticates the first-hop video terminal before relay publication.
+ if(!fault){
  const gint64 lastPts=frames?gint64(37000000)+gint64(frames-1)*1000000:gint64(-1);
  CHECK(fl_gst_session_video_eos(sessions[0],1,frames,lastPts)==FL_GST_SESSION_READY);
  CHECK(gst_app_src_end_of_stream(GST_APP_SRC(ports[0]))==GST_FLOW_OK);avTerminal(pipes[1],GST_MESSAGE_EOS);
@@ -161,7 +186,9 @@ static void nativeRelayAv(bool empty){
  CHECK(fl_gst_session_video_eos(sessions[2],1,count,pts)==FL_GST_SESSION_READY);
  CHECK(gst_app_src_end_of_stream(GST_APP_SRC(ports[2]))==GST_FLOW_OK);avTerminal(pipes[3],GST_MESSAGE_EOS);
  CHECK(fl_gst_session_wait_video_eos(sessions[3],1,1000,&count,&pts)==FL_GST_SESSION_READY&&count==frames&&pts==lastPts);
+ }
  for(unsigned i=0;i<4;++i){CHECK(gst_element_set_state(pipes[i],GST_STATE_NULL)!=GST_STATE_CHANGE_FAILURE);gst_object_unref(ports[i]);gst_object_unref(pipes[i]);g_object_unref(sessions[i]);}
  flClose(forward);flClose(writer);flClose(down);flClose(up);for(auto handle:handles)CloseHandle(handle);
+ if(fault){printf("checked native relay fault %u: no unauthorized publication, retained ownership and safe drain passed\n",fault);return;}
  printf("coordinated native relay: %u same-allocation video frames / %u PCM frames, two authenticated sessions, exact metadata, 37ms offset, ordered barriers, held-reader backpressure and terminal drain passed\n",frames,frames*48);
 }
