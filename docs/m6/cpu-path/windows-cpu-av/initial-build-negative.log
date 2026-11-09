@@ -1,0 +1,23 @@
+-- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.26300.
+-- framelink: building GStreamer elements (gstframelink)
+-- Configuring done (0.8s)
+-- Generating done (1.0s)
+-- Build files have been written to: <win-home>/dev/framelink-m6-windows-cf7408d/build
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  1>Checking Build System
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-cf7408d/CMakeLists.txt
+  framelink.vcxproj -> <win-home>\dev\framelink-m6-windows-cf7408d\build\Release\framelink.dll
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-cf7408d/CMakeLists.txt
+  framelink_gst_session.vcxproj -> <win-home>\dev\framelink-m6-windows-cf7408d\build\Release\framelink_gst_session.dll
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-cf7408d/CMakeLists.txt
+  gstframelink.vcxproj -> <win-home>\dev\framelink-m6-windows-cf7408d\build\Release\gstframelink.dll
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <win-home>\dev\framelink-m6-windows-cf7408d\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> <win-home>\dev\framelink-m6-windows-cf7408d\build\Release\framelink_gst_session.dll
+  gstframelink.vcxproj -> <win-home>\dev\framelink-m6-windows-cf7408d\build\Release\gstframelink.dll
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-cf7408d/CMakeLists.txt
+  fl_gst_shared_cpu_av.cpp
+<win-home>\dev\framelink-m6-windows-cf7408d\test\fl_gst_shared_cpu_av.cpp(108,36): error C3861: 'fl_gst_session_open_local_cpu': identifier not found [<win-home>\dev\framelink-m6-windows-cf7408d\build\fl_gst_shared_cpu_av.vcxproj]
+<win-home>\dev\framelink-m6-windows-cf7408d\test\fl_gst_shared_cpu_av.cpp(110,12): error C3861: 'fl_gst_session_open_local_cpu': identifier not found [<win-home>\dev\framelink-m6-windows-cf7408d\build\fl_gst_shared_cpu_av.vcxproj]

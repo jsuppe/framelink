@@ -2,7 +2,6 @@
 #include <gst/app/gstappsrc.h>
 #include <gst/app/gstappsink.h>
 #include <gst/video/video.h>
-#include <sys/socket.h>
 #include <glib/gstdio.h>
 #include <thread>
 #include <atomic>
@@ -14,6 +13,22 @@
 extern "C" {GST_PLUGIN_STATIC_DECLARE(framelink);GST_PLUGIN_STATIC_DECLARE(app);GST_PLUGIN_STATIC_DECLARE(coreelements);GST_PLUGIN_STATIC_DECLARE(gdp);GST_PLUGIN_STATIC_DECLARE(gio);}
 #endif
 #define CHECK(x) do{if(!(x)){fprintf(stderr,"line%d %s\n",__LINE__,#x);exit(1);}}while(0)
+#include "fl_gst_cpu_test_pair.hpp"
+static void streamPair(GSocketConnection**a,GSocketConnection**b){
+#ifdef _WIN32
+ auto*listener=g_socket_listener_new();
+ auto port=g_socket_listener_add_any_inet_port(listener,nullptr,nullptr);CHECK(port);
+ std::thread accept([&]{*a=g_socket_listener_accept(listener,nullptr,nullptr,nullptr);});
+ auto*client=g_socket_client_new();g_socket_client_set_timeout(client,2);
+ *b=g_socket_client_connect_to_host(client,"127.0.0.1",port,nullptr,nullptr);
+ accept.join();CHECK(*a&&*b);g_object_unref(client);g_object_unref(listener);
+#else
+ int fd[2];CHECK(!socketpair(AF_UNIX,SOCK_STREAM,0,fd));
+ auto*sa=g_socket_new_from_fd(fd[0],nullptr);auto*sb=g_socket_new_from_fd(fd[1],nullptr);CHECK(sa&&sb);
+ *a=g_socket_connection_factory_create_connection(sa);*b=g_socket_connection_factory_create_connection(sb);
+ g_object_unref(sa);g_object_unref(sb);
+#endif
+}
 static GstElement* pipeline(const char*text){GError*e=nullptr;auto*p=gst_parse_launch(text,&e);CHECK(p&&!e);return p;}
 static void context(GstElement*e,FlGstSession*s){auto*c=fl_gst_session_create_context(s);gst_element_set_context(e,c);gst_context_unref(c);}
 static void terminal(GstElement*p,GstMessageType type){auto*b=gst_element_get_bus(p);auto*m=gst_bus_timed_pop_filtered(b,3*GST_SECOND,GstMessageType(GST_MESSAGE_EOS|GST_MESSAGE_ERROR));if(m&&GST_MESSAGE_TYPE(m)==GST_MESSAGE_ERROR){GError*e=nullptr;gchar*debug=nullptr;gst_message_parse_error(m,&e,&debug);fprintf(stderr,"bus: %s %s\n",e->message,debug?debug:"");g_free(debug);g_clear_error(&e);}CHECK(m&&GST_MESSAGE_TYPE(m)==type);gst_message_unref(m);gst_object_unref(b);}
@@ -33,6 +48,18 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
   CHECK(gst_element_set_state(b,GST_STATE_READY)==GST_STATE_CHANGE_FAILURE);
   gst_element_set_state(b,GST_STATE_NULL);gst_object_unref(b);
  }
+#ifdef _WIN32
+ // Discovery remains unsupported: explicit selection must reject, not silently
+ // create a native channel. Broker-bound A/V is independently tested below.
+ for(const char*name:{"framelinkavsink","framelinkavsrc"}){
+  auto*b=gst_element_factory_make(name,nullptr);CHECK(b);
+  g_object_set(b,"shared-cpu",TRUE,"session","unsupported-cpu-discovery",nullptr);
+  CHECK(gst_element_set_state(b,GST_STATE_READY)==GST_STATE_CHANGE_FAILURE);
+  gst_element_set_state(b,GST_STATE_NULL);gst_object_unref(b);
+ }
+ constexpr unsigned variants=12;
+#else
+ constexpr unsigned variants=20;
  // Discovery has a whole-operation deadline and cannot fall back to native.
  for(unsigned negative=0;negative<4;++negative){
   auto*path=g_dir_make_tmp("framelink-cpu-negative-XXXXXX",nullptr);CHECK(path);
@@ -66,12 +93,14 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
   auto start=g_get_monotonic_time();CHECK(gst_element_set_state(p,GST_STATE_NULL)!=GST_STATE_CHANGE_FAILURE);CHECK(g_get_monotonic_time()-start<1000000);gst_object_unref(p);
   auto*lock=g_build_filename(path,".owner.lock",nullptr);g_remove(lock);g_free(lock);CHECK(g_rmdir(path)==0);g_free(path);
  }
- for(unsigned variant=0;variant<20;variant++){
+#endif
+ for(unsigned variant=0;variant<variants;variant++){
   const bool localBins=variant>=16;const bool localSetup=variant>=12&&!localBins;const unsigned mode=localBins?variant-16:localSetup?variant-12:variant%6;const bool bins=variant>=6;
   fprintf(stderr,"mode %u\n",mode);bool nv12=mode%2==1;auto*s=fl_gst_session_new(3);auto*r=fl_gst_session_new(3);
-  flSessionConfig cfg{};cfg.version=2;cfg.sessionId.bytes[0]=1;cfg.clockId.bytes[0]=2;cfg.generation=1;cfg.videoTrackId=1;cfg.audioTrackId=2;cfg.audio={FL_PCM_S16,48000,2};cfg.audioQueueMs=80;cfg.video={nv12?FL_FORMAT_NV12:FL_FORMAT_BGRA8,18,16,60,1};cfg.videoQueueFrames=1;cfg.connectTimeoutMs=cfg.idleTimeoutMs=1000;
+  flSessionConfig cfg{};cfg.version=2;cfg.sessionId.bytes[0]=1;cfg.clockId.bytes[0]=2;cfg.generation=1;cfg.videoTrackId=1;cfg.audioTrackId=2;cfg.audio={FL_PCM_S16,48000,2};cfg.audioQueueMs=80;cfg.video={uint32_t(nv12?FL_FORMAT_NV12:FL_FORMAT_BGRA8),18,16,60,1};cfg.videoQueueFrames=1;cfg.connectTimeoutMs=cfg.idleTimeoutMs=1000;
   flSessionCapabilities offers{};offers.version=2;offers.videoCount=1;offers.video[0]=cfg.video;offers.audioCount=1;offers.audio[0]=cfg.audio;
   GSocketConnection*bc=nullptr;gint64 expectedBase=1000000;gchar*localPath=nullptr;
+#ifndef _WIN32
   if(localBins){localPath=g_dir_make_tmp("framelink-cpu-bins-XXXXXX",nullptr);CHECK(localPath);}
   else if(localSetup){
    localPath=g_dir_make_tmp("framelink-cpu-local-XXXXXX",nullptr);CHECK(localPath);
@@ -85,27 +114,38 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
    CHECK(fl_gst_session_get_config(s,&cfg)==FL_GST_SESSION_READY);
    CHECK(fl_gst_session_map_pts(r,cfg.generation,0,&expectedBase)==FL_GST_SESSION_READY);
    CHECK(fl_gst_session_local_ready(r,FALSE,1000,nullptr));CHECK(fl_gst_session_local_ready(s,TRUE,1000,nullptr));
-  }else{
+  }else
+#endif
+  {
   CHECK(fl_gst_session_configure(s,&cfg,&offers,&offers)==FL_GST_SESSION_READY);CHECK(fl_gst_session_configure(r,&cfg,&offers,&offers)==FL_GST_SESSION_READY);
-  int ev[2];CHECK(!socketpair(AF_UNIX,SOCK_STREAM,0,ev));auto*sa=g_socket_new_from_fd(ev[0],nullptr);auto*sb=g_socket_new_from_fd(ev[1],nullptr);CHECK(sa&&sb);auto*ea=g_socket_connection_factory_create_connection(sa);auto*eb=g_socket_connection_factory_create_connection(sb);g_object_unref(sa);g_object_unref(sb);
+  GSocketConnection*ea=nullptr,*eb=nullptr;streamPair(&ea,&eb);
   guint8 secret[32]{};secret[0]=73;auto*key=g_bytes_new(secret,32);gboolean auth=FALSE;
   std::thread authenticate([&]{auth=fl_gst_session_authenticate_event_stream(s,ea,TRUE,key,1000,nullptr,nullptr);});CHECK(fl_gst_session_authenticate_event_stream(r,eb,FALSE,key,1000,nullptr,nullptr));authenticate.join();CHECK(auth);g_bytes_unref(key);g_object_unref(ea);g_object_unref(eb);
   flClockMapping mapping{};mapping.sourceClockId=cfg.clockId;mapping.targetClockId.bytes[0]=8;mapping.targetAnchorNs=1000000;CHECK(fl_gst_session_set_mapping(r,1,&mapping,0)==FL_GST_SESSION_READY);
   flSharedCpuDescriptor d[2]{};for(unsigned i=0;i<2;i++){auto&v=d[i];v.version=1;v.resourceType=FL_MEMORY_SHARED_CPU;v.format=cfg.video.format;v.width=18;v.height=16;v.planeCount=nv12?2:1;v.generation=1;v.allocationId=i+1;v.planeStride[0]=nv12?32:80;v.allocationBytes=v.planeStride[0]*16;if(nv12){v.planeOffset[1]=v.allocationBytes+64;v.planeStride[1]=32;v.allocationBytes+=64+256;}}
   flMemoryRequirements req{};CHECK(flMemoryRequirementsInit(&req)==FL_MEMORY_OK);req.allowedResourceTypes=FL_MEMORY_SHARED_CPU;req.allowedOperations=FL_MEMORY_COPY;
+  FlGstSessionResult opened=FL_GST_SESSION_INVALID;
+#ifdef _WIN32
+  SYSTEM_INFO systemInfo{};GetSystemInfo(&systemInfo);
+  for(auto&descriptor:d)descriptor.allocationBytes=(descriptor.allocationBytes+systemInfo.dwPageSize-1)/systemInfo.dwPageSize*systemInfo.dwPageSize;
+  // Test broker explicitly owns/delegates both pipe ends and pins this process.
+  // This does not claim authenticated Windows discovery/endpoint transfer.
+  CpuTestPair pair;auto client=pair.take(true),server=pair.take(false);
+  std::thread setup([&]{opened=fl_gst_session_bind_shared_cpu_pipe(s,TRUE,1,client,GetCurrentProcess(),60000,&req,FL_MEMORY_COPY,nullptr,0);});
+  CHECK(fl_gst_session_bind_shared_cpu_pipe(r,FALSE,1,server,GetCurrentProcess(),60000,&req,FL_MEMORY_COPY,d,2)==FL_GST_SESSION_READY);
+#else
   int fd[2]={-1,-1},boot[2];CHECK(!socketpair(AF_UNIX,SOCK_STREAM,0,boot));
   auto*bs=g_socket_new_from_fd(boot[0],nullptr);auto*br=g_socket_new_from_fd(boot[1],nullptr);
   auto*bp=g_socket_connection_factory_create_connection(bs);auto*bq=g_socket_connection_factory_create_connection(br);g_object_unref(bs);g_object_unref(br);
   key=g_bytes_new(secret,32);gboolean endpointOk=FALSE;
   std::thread bootstrap([&]{endpointOk=fl_gst_session_create_cpu_endpoint(s,bp,TRUE,key,1000,nullptr,&fd[1],nullptr);});
   CHECK(fl_gst_session_create_cpu_endpoint(r,bq,FALSE,key,1000,nullptr,&fd[0],nullptr));bootstrap.join();CHECK(endpointOk);g_bytes_unref(key);g_object_unref(bp);g_object_unref(bq);
-  FlGstSessionResult opened=FL_GST_SESSION_INVALID;
   std::thread setup([&]{opened=fl_gst_session_bind_shared_cpu_fd(s,TRUE,1,fd[1],60000,&req,FL_MEMORY_COPY,nullptr,0);});
-  CHECK(fl_gst_session_bind_shared_cpu_fd(r,FALSE,1,fd[0],60000,&req,FL_MEMORY_COPY,d,2)==FL_GST_SESSION_READY);setup.join();CHECK(opened==FL_GST_SESSION_READY);
+  CHECK(fl_gst_session_bind_shared_cpu_fd(r,FALSE,1,fd[0],60000,&req,FL_MEMORY_COPY,d,2)==FL_GST_SESSION_READY);
+#endif
+  setup.join();CHECK(opened==FL_GST_SESSION_READY);
   // Independently authenticated PCM stream, sharing only session/clock identity.
-  int af[2];CHECK(!socketpair(AF_UNIX,SOCK_STREAM,0,af));
-  auto*as=g_socket_new_from_fd(af[0],nullptr);auto*ar=g_socket_new_from_fd(af[1],nullptr);
-  auto*ac=g_socket_connection_factory_create_connection(as);bc=g_socket_connection_factory_create_connection(ar);g_object_unref(as);g_object_unref(ar);
+  GSocketConnection*ac=nullptr;streamPair(&ac,&bc);
   key=g_bytes_new(secret,32);auth=FALSE;
   std::thread aa([&]{auth=fl_gst_session_authenticate_audio_stream(s,ac,TRUE,key,1000,nullptr,nullptr);});
   CHECK(fl_gst_session_authenticate_audio_stream(r,bc,FALSE,key,1000,nullptr,nullptr));aa.join();CHECK(auth);g_bytes_unref(key);g_object_unref(ac);
