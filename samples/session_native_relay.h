@@ -67,7 +67,7 @@ class SessionNativeRelay {
       return fail(FL_GST_SESSION_INVALID);
     status=fl_gst_session_send_video_event(destination,generation,&event);
     if(status!=FL_GST_SESSION_READY)return fail(status);
-    if(event.kind==FL_GST_VIDEO_END)stopped=true;
+    if(event.kind==FL_GST_VIDEO_END){stopped=true;ended=true;}
     return status;
   }
   // Session cancellation must NOT force-complete a downstream reader's lease.
@@ -78,6 +78,8 @@ class SessionNativeRelay {
     if(!initialized)return FL_INVALID;
     stopped=true;auto r=native.finish();if(r==FL_OK)initialized=false;return r;
   }
+  bool videoEnded()const{return ended;}
+  gint64 finalPts()const{return lastPts;}
   unsigned pending()const{return native.pending();}
   uint64_t count()const{return native.count();}
   FlGstSessionResult sessionStatus()const{return status;}
@@ -85,7 +87,7 @@ class SessionNativeRelay {
   flResult stop(flResult result){stopped=true;return result;}
   FlGstSession* session;FlGstSession* destination;flChannel*up;SessionRelayContract contract;NativeRelay native;
   gint64 lastPts=-1;
-  guint64 generation=0;bool attempted=false,initialized=false,stopped=false;
+  guint64 generation=0;bool attempted=false,initialized=false,stopped=false,ended=false;
   FlGstSessionResult status=FL_GST_SESSION_INVALID;
 };
 }

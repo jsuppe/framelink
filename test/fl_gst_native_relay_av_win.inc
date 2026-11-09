@@ -1,6 +1,7 @@
 // Explicit broker-composed two-hop diagnostic. No automatic-discovery promise:
 // the broker supplies the SAME immutable allocation pool to both video rings.
 #include "../samples/session_native_relay.h"
+#include "../samples/session_pcm_relay.h"
 #include "../samples/session_relay_contract.h"
 #include <dxgi1_3.h>
 #include <wrl/client.h>
@@ -49,6 +50,61 @@ static void relaySessionNegatives(flSessionConfig cfg,const flSessionCapabilitie
  }
  printf("relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed\n");
 }
+// Deterministic app-queue controls, separate from authenticated transport above.
+static void relayPcmControls(flSessionConfig cfg,const flSessionCapabilities&offer){
+ cfg.sessionId.bytes[0]=1;cfg.audioQueueMs=1;
+ for(unsigned fault=0;fault<7;++fault){
+  auto*a=fl_gst_session_new(3);auto*b=fl_gst_session_new(3);auto other=cfg;other.sessionId.bytes[0]=2;
+  CHECK(fl_gst_session_configure(a,&cfg,&offer,&offer)==FL_GST_SESSION_READY);
+  CHECK(fl_gst_session_configure(b,&other,&offer,&offer)==FL_GST_SESSION_READY);
+  flClockMapping m{};m.sourceClockId=cfg.clockId;m.targetClockId.bytes[0]=9;m.sourceAnchorNs=cfg.epochNs;
+  CHECK(fl_gst_session_set_mapping(a,1,&m,0)==FL_GST_SESSION_READY);
+  auto*in=gst_parse_launch("appsrc name=writer is-live=true format=time caps=audio/x-raw,format=S16LE,layout=interleaved,rate=48000,channels=2 ! appsink name=reader max-buffers=2 sync=false async=false",nullptr);
+  auto*out=gst_parse_launch("appsrc name=writer is-live=true format=time caps=audio/x-raw,format=S16LE,layout=interleaved,rate=48000,channels=2 ! appsink name=reader max-buffers=2 sync=false async=false",nullptr);
+  auto*producer=gst_bin_get_by_name(GST_BIN(in),"writer");auto*source=gst_bin_get_by_name(GST_BIN(in),"reader");
+  auto*sink=gst_bin_get_by_name(GST_BIN(out),"writer");auto*consumer=gst_bin_get_by_name(GST_BIN(out),"reader");
+  if(fault==1)g_object_set(sink,"block",TRUE,nullptr);
+  if(fault==2)g_object_set(sink,"leaky-type",2,nullptr);
+  if(fault==3)g_object_set(source,"drop",TRUE,nullptr);
+  if(fault==4)g_object_set(sink,"format",GST_FORMAT_BYTES,nullptr);
+  if(fault==6)g_object_set(source,"max-buffers",0u,nullptr);
+  if(fault==5){auto*caps=gst_caps_from_string("audio/x-raw,format=F32LE,layout=interleaved,rate=48000,channels=2");gst_app_src_set_caps(GST_APP_SRC(sink),caps);gst_caps_unref(caps);}
+  {
+   flsample::SessionPcmRelay relay(a,b,GST_APP_SINK(source),GST_APP_SRC(sink));
+   CHECK(relay.initialize()==(fault?FL_GST_SESSION_INVALID:FL_GST_SESSION_READY));
+   if(fault){flSessionConfig cancelled{};CHECK(fl_gst_session_get_config(b,&cancelled)==FL_GST_SESSION_CANCELLED);}
+   else{
+    CHECK(gst_element_set_state(out,GST_STATE_PAUSED)!=GST_STATE_CHANGE_FAILURE);
+    CHECK(gst_element_get_state(out,nullptr,nullptr,GST_SECOND)!=GST_STATE_CHANGE_FAILURE);
+    CHECK(gst_element_set_state(in,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
+    auto push=[&](unsigned n){auto*pcm=gst_buffer_new_allocate(nullptr,192,nullptr);gst_buffer_memset(pcm,0,n+41,192);
+     GST_BUFFER_PTS(pcm)=(n<2?100+n:200+n-2)*GST_MSECOND;GST_BUFFER_DURATION(pcm)=GST_MSECOND;
+     if(n==2)GST_BUFFER_FLAG_SET(pcm,GST_BUFFER_FLAG_DISCONT);
+     CHECK(gst_app_src_push_buffer(GST_APP_SRC(producer),pcm)==GST_FLOW_OK);};
+    auto pull=[&](unsigned n){auto*sample=gst_app_sink_try_pull_sample(GST_APP_SINK(consumer),GST_SECOND);CHECK(sample);
+     auto*pcm=gst_sample_get_buffer(sample);guint8 bytes[192];
+     CHECK(GST_BUFFER_PTS(pcm)==(n<2?100+n:200+n-2)*GST_MSECOND&&GST_BUFFER_DURATION(pcm)==GST_MSECOND);
+     if(n==2)CHECK(GST_BUFFER_FLAG_IS_SET(pcm,GST_BUFFER_FLAG_DISCONT));
+     CHECK(gst_buffer_extract(pcm,0,bytes,sizeof bytes)==sizeof bytes);for(auto value:bytes)CHECK(value==n+41);gst_sample_unref(sample);};
+    push(0);CHECK(relay.forward(1000)==FL_GST_SESSION_READY);
+    CHECK(gst_app_src_get_current_level_bytes(GST_APP_SRC(sink))==192);
+    push(1);CHECK(relay.forward(1000)==FL_GST_SESSION_TIMEOUT);
+    CHECK(relay.forward(0)==FL_GST_SESSION_TIMEOUT&&relay.frameCount()==48&&relay.blockCount()==1);
+    CHECK(gst_element_set_state(out,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);pull(0);
+    CHECK(relay.forward(1000)==FL_GST_SESSION_READY);pull(1);
+    for(unsigned n=2;n<4;++n){push(n);CHECK(relay.forward(1000)==FL_GST_SESSION_READY);pull(n);}
+    CHECK(relay.frameCount()==192&&relay.byteCount()==768&&relay.blockCount()==4);
+    CHECK(!gst_app_sink_try_pull_sample(GST_APP_SINK(consumer),0));
+    fl_gst_session_cancel(a);CHECK(relay.forward(0)==FL_GST_SESSION_CANCELLED);
+    CHECK(relay.forward(0)==FL_GST_SESSION_INVALID);
+   }
+  }
+  for(auto*p:{in,out}){CHECK(gst_element_set_state(p,GST_STATE_NULL)!=GST_STATE_CHANGE_FAILURE);gst_object_unref(p);}
+  for(auto*p:{producer,source,sink,consumer})gst_object_unref(p);
+  g_object_unref(a);g_object_unref(b);
+ }
+ printf("PCM queue controls: bounded retry, exact 4-block delivery, nonzero origin/discontinuity, cancellation and 6 configuration negatives passed\n");
+}
 static void nativeRelayAv(bool empty,unsigned fault=0){
  using Microsoft::WRL::ComPtr;
  FlGstSession* sessions[4]{};
@@ -58,6 +114,7 @@ static void nativeRelayAv(bool empty,unsigned fault=0){
  cfg.video={FL_FORMAT_RGBA8,64,32,1000,1};cfg.videoQueueFrames=1;cfg.connectTimeoutMs=cfg.idleTimeoutMs=2000;
  flSessionCapabilities offer{};offer.version=2;offer.videoCount=offer.audioCount=1;offer.video[0]=cfg.video;offer.audio[0]=cfg.audio;
  cfg.sessionId.bytes[0]=1;relaySessionNegatives(cfg,offer);
+ if(!empty&&!fault)relayPcmControls(cfg,offer);
  for(unsigned hop=0;hop<2;++hop){
   cfg.sessionId.bytes[0]=static_cast<uint8_t>(hop+1);
   for(unsigned role=0;role<2;++role){
@@ -84,7 +141,7 @@ static void nativeRelayAv(bool empty,unsigned fault=0){
   CHECK(fl_gst_session_set_mapping(sessions[2*hop+1],1,&mapping,0)==FL_GST_SESSION_READY);
   for(unsigned role=0;role<2;++role){
    const auto i=hop*2+role;GError*error=nullptr;
-   pipes[i]=gst_parse_launch(role?"framelinkaudiosrc tracks=av ! appsink name=port sync=false async=false enable-last-sample=false":"appsrc name=port is-live=true format=time caps=audio/x-raw,format=S16LE,layout=interleaved,rate=48000,channels=2,channel-mask=(bitmask)0x3 ! framelinkaudiosink tracks=av",&error);
+   pipes[i]=gst_parse_launch(role?"framelinkaudiosrc tracks=av ! appsink name=port max-buffers=2 sync=false async=false enable-last-sample=false":"appsrc name=port is-live=true format=time caps=audio/x-raw,format=S16LE,layout=interleaved,rate=48000,channels=2,channel-mask=(bitmask)0x3 ! framelinkaudiosink tracks=av",&error);
    CHECK(pipes[i]&&!error);ports[i]=gst_bin_get_by_name(GST_BIN(pipes[i]),"port");CHECK(ports[i]);
    auto*context=fl_gst_session_create_context(sessions[i]);gst_element_set_context(pipes[i],context);gst_context_unref(context);
   }
@@ -109,8 +166,24 @@ static void nativeRelayAv(bool empty,unsigned fault=0){
  CHECK(relay.forwardEvent(0)==FL_GST_SESSION_TIMEOUT);
  for(auto*session:sessions)CHECK(fl_gst_session_track_ready(session,FL_GST_TRACK_VIDEO,1)==FL_GST_SESSION_READY);
  for(auto i:{3,2,1,0})CHECK(gst_element_set_state(pipes[i],GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
+ flsample::SessionPcmRelay pcmRelay(sessions[1],sessions[2],GST_APP_SINK(ports[1]),GST_APP_SRC(ports[2]));
+ CHECK(pcmRelay.initialize()==FL_GST_SESSION_READY);
+ CHECK(pcmRelay.initialize()==FL_GST_SESSION_INVALID);
+ CHECK(pcmRelay.forward(0)==FL_GST_SESSION_TIMEOUT);
+ CHECK(pcmRelay.finish(relay,0)==FL_GST_SESSION_TIMEOUT);
+ if(fault>=9&&fault<=11){
+  auto*pad=gst_element_get_static_pad(ports[1],"sink");
+  gst_pad_add_probe(pad,GST_PAD_PROBE_TYPE_BUFFER,[](GstPad*,GstPadProbeInfo*info,gpointer data)->GstPadProbeReturn{
+   auto*b=gst_buffer_make_writable(GST_PAD_PROBE_INFO_BUFFER(info));GST_PAD_PROBE_INFO_DATA(info)=b;
+   const auto which=GPOINTER_TO_UINT(data);
+   if(which==9)GST_BUFFER_DURATION(b)+=1000;
+   if(which==10)GST_BUFFER_PTS(b)=GST_CLOCK_TIME_NONE;
+   if(which==11)gst_buffer_resize(b,0,gst_buffer_get_size(b)-1);
+   return GST_PAD_PROBE_OK;
+  },GUINT_TO_POINTER(fault),nullptr);gst_object_unref(pad);
+ }
  flBuffer spare{};CHECK(flAcquireBuffer(writer,&spare,1000)==FL_OK);
- const unsigned frames=empty?0:16;
+ const unsigned frames=empty?0:(fault>=9?1:16);
  for(unsigned n=0;n<frames;++n){
   if(fault&&n)break;
   flBuffer input{};CHECK(flAcquireBuffer(writer,&input,1000)==FL_OK);
@@ -141,7 +214,7 @@ static void nativeRelayAv(bool empty,unsigned fault=0){
   CHECK(received.dtsNs==metadata.dtsNs&&received.durationNs==metadata.durationNs&&received.streamGeneration==1);
   uint64_t lease=0;CHECK(flLeaseFrame(down,&output,&lease)==FL_OK);
   flBuffer blocked{};CHECK(flAcquireBuffer(writer,&blocked,0)==FL_TIMEOUT&&relay.pending()==1);
-  if(fault>=5){
+  if(fault>=5&&fault<=8){
    if(fault==5)fl_gst_session_cancel(sessions[1]);
    else {
     FlGstVideoEvent bad{fault==6?FL_GST_VIDEO_GAP:fault==7?FL_GST_VIDEO_END:FL_GST_VIDEO_FLUSH,
@@ -160,10 +233,19 @@ static void nativeRelayAv(bool empty,unsigned fault=0){
   }
   auto*pcm=gst_buffer_new_allocate(nullptr,192,nullptr);gst_buffer_memset(pcm,0,n+31,192);GST_BUFFER_PTS(pcm)=audioPts;GST_BUFFER_DURATION(pcm)=1000000;
   CHECK(gst_app_src_push_buffer(GST_APP_SRC(ports[0]),pcm)==GST_FLOW_OK);
-  auto*first=gst_app_sink_try_pull_sample(GST_APP_SINK(ports[1]),2*GST_SECOND);CHECK(first);
-  auto*middle=gst_sample_get_buffer(first);CHECK(GST_BUFFER_PTS(middle)==audioPts);
-  CHECK(contract.check()==FL_GST_SESSION_READY);
-  CHECK(gst_app_src_push_buffer(GST_APP_SRC(ports[2]),gst_buffer_ref(middle))==GST_FLOW_OK);gst_sample_unref(first);
+  if(fault>=9&&fault<=11){
+   CHECK(pcmRelay.forward(2000)==FL_GST_SESSION_INVALID);
+   CHECK(pcmRelay.frameCount()==0&&pcmRelay.byteCount()==0&&pcmRelay.blockCount()==0);
+   CHECK(pcmRelay.forward(0)==FL_GST_SESSION_INVALID);
+   flSessionConfig cancelled{};CHECK(fl_gst_session_get_config(sessions[2],&cancelled)==FL_GST_SESSION_CANCELLED);
+   CHECK(relay.finish()==FL_BUSY&&relay.pending()==1);
+   CHECK(flCompleteReadLease(down,lease)==FL_OK);CHECK(flCollectReadLeases(down)==FL_OK);
+   const auto deadline=g_get_monotonic_time()+1000000;
+   while(relay.pending()){CHECK(g_get_monotonic_time()<deadline);CHECK(relay.collect()==FL_OK);g_usleep(100);}
+   break;
+  }
+  CHECK(pcmRelay.forward(2000)==FL_GST_SESSION_READY);
+  CHECK(pcmRelay.frameCount()==(n+1)*48&&pcmRelay.byteCount()==(n+1)*192&&pcmRelay.blockCount()==n+1);
   auto*last=gst_app_sink_try_pull_sample(GST_APP_SINK(ports[3]),2*GST_SECOND);CHECK(last);auto*audio=gst_sample_get_buffer(last);
   gint64 mappedVideo=-1;CHECK(fl_gst_session_map_running_time(sessions[3],1,output.ptsNs,TRUE,&mappedVideo)==FL_GST_SESSION_READY);
   CHECK(GST_BUFFER_PTS(audio)==audioPts+1000000&&uint64_t(mappedVideo)-GST_BUFFER_PTS(audio)==37000000&&GST_BUFFER_DURATION(audio)==1000000);
@@ -183,7 +265,7 @@ static void nativeRelayAv(bool empty,unsigned fault=0){
   CHECK(end.kind==sent.kind&&end.afterFrames==sent.afterFrames&&end.ptsNs==sent.ptsNs&&end.durationNs==sent.durationNs);
   }
  }
- if(!fault){
+ if(!fault||fault==12){
   FlGstVideoEvent end{FL_GST_VIDEO_END,frames,frames?37000000+(frames-1)*1000000:0,0},received{};
   CHECK(fl_gst_session_send_video_event(sessions[0],1,&end)==FL_GST_SESSION_READY);
   CHECK(relay.forwardEvent(1000)==FL_GST_SESSION_READY);
@@ -193,15 +275,22 @@ static void nativeRelayAv(bool empty,unsigned fault=0){
  }
  CHECK(relay.count()==(fault?(fault>=5?1:0):frames)&&relay.finish()==FL_OK);CHECK(flCancelBuffer(writer,&spare)==FL_OK);
  // PCM EOS authenticates the first-hop video terminal before relay publication.
- if(!fault){
+ if(!fault||fault==12){
  const gint64 lastPts=frames?gint64(37000000)+gint64(frames-1)*1000000:gint64(-1);
- CHECK(fl_gst_session_video_eos(sessions[0],1,frames,lastPts)==FL_GST_SESSION_READY);
+ CHECK(fl_gst_session_video_eos(sessions[0],1,frames+(fault==12?1:0),lastPts)==FL_GST_SESSION_READY);
  CHECK(gst_app_src_end_of_stream(GST_APP_SRC(ports[0]))==GST_FLOW_OK);avTerminal(pipes[1],GST_MESSAGE_EOS);
- guint64 count=99;gint64 pts=-2;CHECK(fl_gst_session_wait_video_eos(sessions[1],1,1000,&count,&pts)==FL_GST_SESSION_READY&&count==frames&&pts==lastPts);
- CHECK(contract.check()==FL_GST_SESSION_READY);
- CHECK(fl_gst_session_video_eos(sessions[2],1,count,pts)==FL_GST_SESSION_READY);
- CHECK(gst_app_src_end_of_stream(GST_APP_SRC(ports[2]))==GST_FLOW_OK);avTerminal(pipes[3],GST_MESSAGE_EOS);
- CHECK(fl_gst_session_wait_video_eos(sessions[3],1,1000,&count,&pts)==FL_GST_SESSION_READY&&count==frames&&pts==lastPts);
+ if(fault==12){
+  CHECK(pcmRelay.finish(relay,1000)==FL_GST_SESSION_INVALID);
+  flSessionConfig cancelled{};CHECK(fl_gst_session_get_config(sessions[2],&cancelled)==FL_GST_SESSION_CANCELLED);
+  CHECK(pcmRelay.finish(relay,0)==FL_GST_SESSION_INVALID);
+ }else{
+  CHECK(pcmRelay.finish(relay,1000)==FL_GST_SESSION_READY);
+  CHECK(pcmRelay.finish(relay,0)==FL_GST_SESSION_INVALID&&pcmRelay.forward(0)==FL_GST_SESSION_INVALID);
+  avTerminal(pipes[3],GST_MESSAGE_EOS);
+  guint64 count=99;gint64 pts=-2;
+  CHECK(fl_gst_session_wait_video_eos(sessions[3],1,1000,&count,&pts)==FL_GST_SESSION_READY&&count==frames&&pts==lastPts);
+ }
+
  }
  for(unsigned i=0;i<4;++i){CHECK(gst_element_set_state(pipes[i],GST_STATE_NULL)!=GST_STATE_CHANGE_FAILURE);gst_object_unref(ports[i]);gst_object_unref(pipes[i]);g_object_unref(sessions[i]);}
  flClose(forward);flClose(writer);flClose(down);flClose(up);for(auto handle:handles)CloseHandle(handle);
