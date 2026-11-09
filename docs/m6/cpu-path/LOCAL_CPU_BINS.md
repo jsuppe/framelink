@@ -6,8 +6,8 @@ workers use the authenticated Unix CPU setup helper. The producer preserves
 the bin-selected clock epoch. Media release claims the coordinator CPU channel
 instead of trying native adopt-channel. Startup readiness and terminal drain
 remain unchanged. Native defaults are unchanged, there is no native/TCP fallback,
-and audio-only or native-memory combinations remain invalid. Other platforms
-reject local CPU discovery explicitly. Android cross-UID clients still need an
+and audio-only or native-memory combinations remain invalid. Windows support was subsequently implemented and validated in
+[Windows local bins](windows-local-cpu-bins/README.md). Android cross-UID clients still need an
 authorized broker; this mode is current-user only.
 
 Functional evidence:

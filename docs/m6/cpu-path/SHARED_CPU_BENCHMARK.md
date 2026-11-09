@@ -1,12 +1,14 @@
 # Explicit shared-CPU benchmark selection
 
 The existing independent-process A/V benchmark now accepts `--shared-cpu` in
-bin mode on Linux/Android. It selects the public authenticated CPU session path
+bin mode on Linux/Android/Windows. It selects the public authenticated CPU session path
 on both ends, propagates selection to child processes, and labels summaries
 `shared-cpu` rather than conflating this path with native-memory CPU readback.
 Default behavior is unchanged. Native-memory, element mode, source-only,
 local-consumer and lifecycle combinations reject before launching children.
-Windows explicitly rejects selection until its allocator/endpoint exists.
+Windows uses the same explicit CPU selection after the allocator, authenticated
+named-pipe setup and local bins were implemented. See
+[Windows benchmark integration](windows-cpu-benchmark/README.md).
 
 Small traced smoke: BGRA and NV12, 64x64 at30fps for5s on Linux and Android.
 Each independently accounts150video frames,240000PCM frames and complete output

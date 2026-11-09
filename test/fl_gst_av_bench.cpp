@@ -340,9 +340,6 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
  CHECK(o.stallStage.empty()?(o.stallFrame==0&&o.stallMs==0):
    ((o.stallStage=="source"||o.stallStage=="post-push")&&o.stallFrame>0&&o.stallFrame<guint64(o.seconds)*gFps&&o.stallMs>0&&o.stallMs<=1000&&!o.cycles&&!o.sourceOnly&&!o.localConsumer));
  CHECK(!gSharedCpu||(o.mode=="bin"&&!o.native&&!o.sourceOnly&&!o.localConsumer&&!o.cycles));
-#ifdef _WIN32
- CHECK(!gSharedCpu); // No Windows shared-CPU allocator/endpoint implementation yet.
-#endif
  CHECK(!o.localConsumer||(((role=="consumer"&&!o.cycles)||(role=="lifecycle-consumer"&&o.cycles>0))&&o.mode=="bin"&&!o.native&&!o.sourceOnly&&!result.empty()));
  CHECK(o.seconds>=WARMUP_S+3&&(o.mode=="bin"||o.mode=="element"));gRunLimit=(o.seconds+30)*GST_SECOND;
  // Ring: ceil(latency x fps) + 2 images (documented sizing), at least the default 8.

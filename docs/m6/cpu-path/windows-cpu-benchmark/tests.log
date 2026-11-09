@@ -1,0 +1,13 @@
+Test project <win-home>/dev/framelink-m6-windows-d60f683/build
+    Start 120: gst_shared_cpu_av
+1/4 Test #120: gst_shared_cpu_av ................   Passed    3.06 sec
+    Start 127: gst_av_bench_smoke
+2/4 Test #127: gst_av_bench_smoke ...............   Passed    6.95 sec
+    Start 128: gst_av_bench_shared_cpu_BGRA
+3/4 Test #128: gst_av_bench_shared_cpu_BGRA .....   Passed    5.43 sec
+    Start 129: gst_av_bench_shared_cpu_NV12
+4/4 Test #129: gst_av_bench_shared_cpu_NV12 .....   Passed    5.44 sec
+
+100% tests passed, 0 tests failed out of 4
+
+Total Test time (real) =  20.93 sec

@@ -1411,6 +1411,17 @@ if(FRAMELINK_BUILD_TESTS AND TARGET framelink_gst_session)
     add_dependencies(fl_gst_av_bench gstframelink)
     add_test(NAME gst_av_bench_smoke COMMAND fl_gst_av_bench $<TARGET_FILE:gstframelink> --seconds 6 --size 160x90 --out ${CMAKE_CURRENT_BINARY_DIR} --label bench-smoke)
     set_tests_properties(gst_av_bench_smoke PROPERTIES TIMEOUT 120)
+    if(WIN32)
+        foreach(cpu_format BGRA NV12)
+            add_test(NAME gst_av_bench_shared_cpu_${cpu_format}
+                COMMAND fl_gst_av_bench $<TARGET_FILE:gstframelink>
+                --shared-cpu --seconds 5 --size 64x64 --fps 30
+                --format ${cpu_format} --latency-ms 0 --transport-only
+                --no-output-preroll --pool 2 --video-queue 1
+                --out ${CMAKE_CURRENT_BINARY_DIR} --label cpu-${cpu_format})
+            set_tests_properties(gst_av_bench_shared_cpu_${cpu_format} PROPERTIES TIMEOUT 60)
+        endforeach()
+    endif()
     add_executable(fl_gst_local_av test/fl_gst_local_av.cpp)
     target_link_libraries(fl_gst_local_av PRIVATE framelink_gst_session)
     if(ANDROID)
