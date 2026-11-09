@@ -1,8 +1,8 @@
 # Windows API integration baseline candidate — NOT FROZEN
 
-**Current verified integrated candidate:** `32963c51fba63caf768d1dee0cd9aa4bd11a0ad8`.
+**Current verified integrated candidate:** `9d113ef93c7e1d418898066eb38c5530fe8f2c77`.
 Clean exact-revision Windows build/API/full suite **135/135 passed**;
-[pinned evidence](../windows-integrated-32963c5/README.md) includes DLL hashes,
+[pinned evidence](../windows-integrated-9d113ef/README.md) includes DLL hashes,
 runtime properties and exports. All 119 prior exported names retained (119 total).
 Export-name retention is not proof of behavioral or ordinal ABI compatibility.
 
@@ -232,7 +232,7 @@ suite. API not frozen.
 
 Current real-decoder prerequisite: [8/8 actual private NV12 buffers reject without implicit copy](../windows-decoder-contract/README.md). A caps match does not authorize decoder array import or completion semantics.
 
-## Explicit render-producer extension (newer than pinned candidate)
+## Explicit render-producer extension (included in the pinned candidate)
 
 Windows local native helper and both bins additionally accept producer
 `paths[0].supportedUsage = GPU_SAMPLE | GPU_RENDER`, `operations = 0`;
@@ -246,19 +246,21 @@ silently changing the contract. Wire layouts, C symbols and defaults are unchang
 [Real-decoder A/V evidence](../windows-decoder-render/README.md) covers explicit
 upstream GPU conversion/scaling into the issued ring, exact relative video timing,
 synthetic PCM and both receiver profiles. Raw private decoder arrays are still
-not accepted. This implementation needs its clean exact-revision integration
-check before replacing the pinned candidate. Two-hop/timing/lifetime acceptance
+not accepted. This implementation is included in the pinned clean integrated candidate. Two-hop/timing/lifetime acceptance
 and D2/D3 remain open; this is not API freeze or full Windows acceptance.
 
 ## Checked relay sample: serialized PCM events
 
-The Windows checked PCM relay sample now fails closed on GAP and unsupported
-serialized media events, including queued events immediately before EOS. It does
-not silently discard them or synthesize silence. Existing explicit buffer DISCONT
-is preserved. Apps requiring successful GAP forwarding still need a bounded,
-ordered event-capable adapter; this safety repair is not that implementation.
-The public C/wire/properties/defaults are unchanged. See
-[negative controls and focused Windows checks](../windows-relay-audio-events/README.md).
+The Windows checked PCM relay sample defaults to rejecting GAP and unsupported
+serialized media events, including queued events immediately before EOS. In the
+pinned candidate, the explicit `forwardGaps=true` constructor option forwards
+ordered GAPs with one appsrc queue credit and bounded pending/in-flight state.
+The broker must also bound upstream event production: appsink max-buffers bounds
+samples, not serialized events. No silence is synthesized; explicit buffer DISCONT
+is preserved. Local event seqnums survive the relay, but GDP does not preserve
+seqnums as wire identities; use order and timing, not seqnums, across transport.
+C symbols, wire formats, properties and existing defaults are unchanged. See
+[GAP forwarding checks and limits](../windows-relay-gap-forward/README.md).
 
 ## Checked relay sample: terminal wait cancellation
 
@@ -267,3 +269,11 @@ session while awaiting authenticated upstream terminal state. Waits are sliced
 without resetting the caller deadline; ordinary timeout is retryable. This sample
 repair does not change C symbols, wire layouts, properties or defaults. See
 [Windows negative control and checks](../windows-relay-terminal-cancel/README.md).
+
+## Checked relay sample: native event wait cancellation (newer than candidate)
+
+Native event forwarding now observes either session's cancellation/replacement
+between bounded event waits. A finite caller deadline is not reset; zero-timeout
+polls and retry after ordinary timeout remain supported. No native lease is
+force-completed. [Pre-fix negative and Windows controls](../windows-relay-event-cancel/README.md)
+pass; clean exact-revision integration is pending. No API freeze is inferred.

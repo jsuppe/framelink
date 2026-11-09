@@ -308,6 +308,38 @@ static void nativeRelayAv(bool empty,unsigned fault=0){
  CHECK(flOpenProducer((name+".up").c_str(),&writer)==FL_OK);CHECK(flOpenProducer((name+".down").c_str(),&forward)==FL_OK);
  flsample::SessionNativeRelay relay(sessions[1],sessions[2],up,forward,relaySame);CHECK(relay.initialize()==FL_OK);
  CHECK(relay.forwardEvent(0)==FL_GST_SESSION_TIMEOUT);
+ if(fault>=15){
+  // No upstream event is queued: downstream cancellation cannot wake that
+  // channel directly. Both sessions must be checked while the wait is pending.
+  if(fault==18){
+   auto start=g_get_monotonic_time();CHECK(relay.forwardEvent(100)==FL_GST_SESSION_TIMEOUT);
+   auto elapsed=g_get_monotonic_time()-start;CHECK(elapsed>=80000&&elapsed<500000);
+   FlGstVideoEvent sent{FL_GST_VIDEO_BARRIER,0,0,0},received{};
+   std::thread sender([&]{std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    CHECK(fl_gst_session_send_video_event(sessions[0],1,&sent)==FL_GST_SESSION_READY);});
+   auto result=relay.forwardEvent(1000);sender.join();CHECK(result==FL_GST_SESSION_READY);
+   CHECK(fl_gst_session_receive_video_event(sessions[3],1,1000,&received)==FL_GST_SESSION_READY);
+   CHECK(received.kind==sent.kind&&received.afterFrames==0&&received.ptsNs==0);
+   CHECK(fl_gst_session_receive_video_event(sessions[3],1,0,&received)==FL_GST_SESSION_TIMEOUT);
+   CHECK(relay.forwardEvent(0)==FL_GST_SESSION_TIMEOUT);
+  }else{
+   std::thread interrupt([&]{std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    if(fault==17){auto replacement=cfg;++replacement.generation;
+     CHECK(fl_gst_session_configure(sessions[2],&replacement,&offer,&offer)==FL_GST_SESSION_READY);}
+    else fl_gst_session_cancel(sessions[fault==15?2:1]);
+   });
+   auto start=g_get_monotonic_time();auto result=relay.forwardEvent(1000);
+   auto elapsed=g_get_monotonic_time()-start;interrupt.join();
+   printf("native event interruption fault=%u result=%d elapsed_us=%lld\n",fault,int(result),static_cast<long long>(elapsed));fflush(stdout);
+   CHECK(result==(fault==17?FL_GST_SESSION_STALE:FL_GST_SESSION_CANCELLED));CHECK(elapsed<500000);
+   CHECK(relay.forwardEvent(0)==FL_GST_SESSION_INVALID);
+   flSessionConfig cancelled{};CHECK(fl_gst_session_get_config(sessions[2],&cancelled)==FL_GST_SESSION_CANCELLED);
+  }
+  CHECK(relay.count()==0&&relay.pending()==0&&relay.finish()==FL_OK);
+  for(unsigned i=0;i<4;++i){gst_object_unref(ports[i]);gst_object_unref(pipes[i]);g_object_unref(sessions[i]);}
+  flClose(forward);flClose(writer);flClose(down);flClose(up);for(auto handle:handles)CloseHandle(handle);
+  printf("native event wait control %u passed\n",fault);return;
+ }
  for(auto*session:sessions)CHECK(fl_gst_session_track_ready(session,FL_GST_TRACK_VIDEO,1)==FL_GST_SESSION_READY);
  for(auto i:{3,2,1,0})CHECK(gst_element_set_state(pipes[i],GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
  std::atomic<unsigned> terminalGaps{0};

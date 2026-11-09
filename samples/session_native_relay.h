@@ -57,10 +57,22 @@ class SessionNativeRelay {
     };
     status=contract.check();if(status!=FL_GST_SESSION_READY)return fail(status);
     FlGstVideoEvent event{};
-    status=fl_gst_session_receive_video_event(session,generation,timeoutMs,&event);
-    if(status==FL_GST_SESSION_TIMEOUT)return status;
-    if(status!=FL_GST_SESSION_READY)return fail(status);
-    status=contract.check();if(status!=FL_GST_SESSION_READY)return fail(status);
+    // The upstream event queue cannot wake on downstream session changes.
+    // Bound each wait, keeping one caller deadline and consuming at most one
+    // event. A timeout consumes nothing; cancellation permanently stops relay.
+    if(timeoutMs>60000)return fail(FL_GST_SESSION_INVALID);
+    const gint64 deadline=g_get_monotonic_time()+gint64(timeoutMs)*1000;
+    do{
+      status=contract.check();if(status!=FL_GST_SESSION_READY)return fail(status);
+      const gint64 remaining=deadline-g_get_monotonic_time();
+      const guint slice=remaining<=0?0:guint(remaining>=10000?10:(remaining+999)/1000);
+      auto received=fl_gst_session_receive_video_event(session,generation,slice,&event);
+      status=contract.check();if(status!=FL_GST_SESSION_READY)return fail(status);
+      status=received;
+      if(status==FL_GST_SESSION_READY)break;
+      if(status!=FL_GST_SESSION_TIMEOUT)return fail(status);
+      if(g_get_monotonic_time()>=deadline)return status;
+    }while(true);
     if(event.afterFrames!=count()||
        (event.kind!=FL_GST_VIDEO_GAP&&event.kind!=FL_GST_VIDEO_BARRIER&&event.kind!=FL_GST_VIDEO_END)||
        (event.kind==FL_GST_VIDEO_END&&event.ptsNs!=(lastPts<0?0:guint64(lastPts))))
