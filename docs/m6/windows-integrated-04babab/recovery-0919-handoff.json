@@ -1,0 +1,17 @@
+{
+  "utc": "2026-11-09T09:20:45.685772+00:00",
+  "wake": "cron:794c5600-be66-471f-a7c9-c679bc9bb0d7",
+  "task": "exact04babab Windows integrated collection",
+  "evidence": "MainPID=2377128\nExecMainStatus=0\nActiveState=active\n",
+  "status": {
+    "revision": "04bababf68a37d125522fc61389a58027722fe0e",
+    "state": "testing",
+    "utc": "2026-11-09T09:12:15.959989+00:00",
+    "remote": "<win-home>/dev/framelink-m6-windows-04babab",
+    "archive_sha256": "dda4bd94ecd6d7208def09e424022174d49944353b2e61fa842f9531dadfecba",
+    "build_exit": 0,
+    "api_exit": 0
+  },
+  "test_tail": "125/136 Test #125: gst_av_validation .....................   Passed   17.91 sec\n        Start 126: gst_av_bin\n126/136 Test #126: gst_av_bin ............................   Passed   25.67 sec\n        Start 127: gst_av_src_bin\n127/136 Test #127: gst_av_src_bin ........................   Passed   15.93 sec\n        Start 128: gst_av_parity\n128/136 Test #128: gst_av_parity .........................   Passed  108.23 sec\n        Start 129: gst_av_qualification",
+  "action": "Bounded wait completed; existing durable executor continues. No duplicate or deferred campaign launched. Next wake collect terminal status/exports before next Windows implementation."
+}

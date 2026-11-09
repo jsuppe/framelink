@@ -1,8 +1,8 @@
 # Windows API integration baseline candidate — NOT FROZEN
 
-**Current verified integrated candidate:** `1fdbaa607a846a2b9be2ac3365a591726014401f`.
-Clean exact-revision Windows build/API/full suite **135/135 passed**;
-[pinned evidence](../windows-integrated-1fdbaa6/README.md) includes DLL hashes,
+**Current verified integrated candidate:** `04bababf68a37d125522fc61389a58027722fe0e`.
+Clean exact-revision Windows build/API/full suite **136/136 passed**;
+[pinned evidence](../windows-integrated-04babab/README.md) includes DLL hashes,
 runtime properties and exports. All 119 prior exported names retained (119 total).
 Export-name retention is not proof of behavioral or ordinal ABI compatibility.
 
@@ -278,7 +278,7 @@ polls and retry after ordinary timeout remain supported. No native lease is
 force-completed. [Pre-fix negative and Windows controls](../windows-relay-event-cancel/README.md)
 pass; the pinned candidate also passed clean exact-revision integration. No API freeze is inferred.
 
-## Independent-process checked relay verification (newer test overlay)
+## Independent-process checked relay verification (included in candidate)
 
 [Three-process Windows integration](../windows-relay-process/README.md) now
 checks the existing raw-native/PCM sample composition against independent producer,
@@ -286,4 +286,11 @@ relay and final receiver processes. Both original allocations, complete pixels/P
 metadata,37ms A/V separation, held-reader exclusion, events and nonempty/empty
 terminal accounting pass. This is not automatic decoder/bin relay, a production
 broker or target-rate/lifetime acceptance. Public runtime APIs are unchanged;
-the pinned runtime candidate above remains the last clean integrated verification.
+this verification is included in the pinned clean integrated candidate.
+
+## Independent-process reservation coverage (newer test overlay)
+
+[Reservation relay](../windows-relay-reservation/README.md) verifies the actual
+source GstMemory adapter across both process boundaries: remote completion alone
+does not permit reuse until final local unref. No runtime API/default changes.
+This is not real-decoder or automatic-bin relay acceptance.

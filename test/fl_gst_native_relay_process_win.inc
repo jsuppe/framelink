@@ -77,6 +77,42 @@ static int producer(const std::string&name,guint16 port,bool empty){
  CHECK(gst_app_src_end_of_stream(GST_APP_SRC(e.port))==GST_FLOW_OK);wait(done);
  flClose(writer);for(auto h:{held,checked,done})CloseHandle(h);return 0;
 }
+// Actual GstMemory reservations in the source process: neither downstream
+// completion nor dropping only the GstBuffer permits reuse of retained memory.
+static int reservedProducer(const std::string&name,guint16 port){
+ freopen((name+".producer.log").c_str(),"w",stderr);setvbuf(stderr,nullptr,_IONBF,0);
+ Endpoint e(0,true,port);flChannel*writer=nullptr;CHECK(flOpenProducer((name+".up").c_str(),&writer)==FL_OK);
+ auto owner=std::make_shared<FrameLinkD3DProducer>(writer);CHECK(owner->valid());
+ auto attached=signal(name+".attached");CHECK(SetEvent(attached));CloseHandle(attached);
+ auto held=signal(name+".held"),checked=signal(name+".checked"),drained=signal(name+".drained"),done=signal(name+".done");e.start();
+ GstBuffer*slots[2]={owner->acquire(1000),owner->acquire(1000)};CHECK(slots[0]&&slots[1]&&!owner->acquire(0));
+ for(unsigned n=0;n<Frames;++n){
+  auto*&buffer=slots[n%2];auto*memory=gst_buffer_peek_memory(buffer,0);
+  auto*reservation=(FrameLinkD3DReservation*)gst_mini_object_get_qdata(GST_MINI_OBJECT(memory),FrameLinkD3DProducer::key());CHECK(reservation);
+  auto image=reservation->buffer.image;
+  CHECK(gst_d3d11_memory_get_resource_handle(GST_D3D11_MEMORY_CAST(memory))==(ID3D11Resource*)flImageD3D11(image));
+  std::vector<unsigned char> pixels(64*32*4,n+1);ID3D11DeviceContext*context=nullptr;
+  flChannelD3D11Device(writer)->GetImmediateContext(&context);gst_d3d11_device_lock(owner->device);
+  context->UpdateSubresource(flImageD3D11(image),0,nullptr,pixels.data(),256,0);
+  gst_d3d11_device_unlock(owner->device);context->Release(); // explicit source upload only
+  const uint64_t pts=37000000+n*1000000;flFrameMetadata metadata{1,FL_FRAME_HAS_DTS|FL_FRAME_HAS_DURATION,int64_t(pts-100),1000000,1,{}};
+  CHECK(owner->submit(buffer,pts,&metadata)==FL_OK);CHECK(owner->submit(buffer,pts,&metadata)==FL_INVALID);
+  auto*pcm=gst_buffer_new_allocate(nullptr,192,nullptr);gst_buffer_memset(pcm,0,n+31,192);GST_BUFFER_PTS(pcm)=n*1000000;GST_BUFFER_DURATION(pcm)=1000000;
+  CHECK(gst_app_src_push_buffer(GST_APP_SRC(e.port),pcm)==GST_FLOW_OK);
+  wait(held);CHECK(!owner->acquire(0));CHECK(SetEvent(checked));
+  wait(drained);CHECK(!owner->acquire(0)); // every remote reader released, local GstMemory still held
+  auto*retained=gst_memory_ref(memory);gst_buffer_unref(buffer);buffer=nullptr;CHECK(!owner->acquire(0));
+  gst_memory_unref(retained);buffer=owner->acquire(1000);CHECK(buffer);
+  auto*next=(FrameLinkD3DReservation*)gst_mini_object_get_qdata(GST_MINI_OBJECT(gst_buffer_peek_memory(buffer,0)),FrameLinkD3DProducer::key());CHECK(next&&relaySame(image,next->buffer.image));
+  for(auto kind:{FL_GST_VIDEO_GAP,FL_GST_VIDEO_BARRIER}){FlGstVideoEvent event{kind,n+1,pts,kind==FL_GST_VIDEO_GAP?123u:0u};CHECK(fl_gst_session_send_video_event(e.session,1,&event)==FL_GST_SESSION_READY);}
+ }
+ for(auto*buffer:slots)gst_buffer_unref(buffer); // cancel the two unused reservations
+ FlGstVideoEvent end{FL_GST_VIDEO_END,Frames,37000000+(Frames-1)*1000000,0};CHECK(fl_gst_session_send_video_event(e.session,1,&end)==FL_GST_SESSION_READY);
+ CHECK(fl_gst_session_video_eos(e.session,1,Frames,gint64(end.ptsNs))==FL_GST_SESSION_READY);
+ CHECK(gst_app_src_end_of_stream(GST_APP_SRC(e.port))==GST_FLOW_OK);wait(done);
+ owner.reset();for(auto h:{held,checked,drained,done})CloseHandle(h);
+ fprintf(stderr,"16 source GstMemory reservations: remote drain plus final local reference required; duplicate submit rejected; both original allocations reused\n");return 0;
+}
 static int relay(const std::string&name,guint16 port,HANDLE h0,HANDLE h1,HANDLE notify,bool empty){
  freopen((name+".relay.log").c_str(),"w",stderr);setvbuf(stderr,nullptr,_IONBF,0);fprintf(stderr,"relay start\n");
  void*handles[2]={h0,h1};flChannel*up=nullptr,*down=nullptr;
@@ -95,6 +131,7 @@ static int relay(const std::string&name,guint16 port,HANDLE h0,HANDLE h1,HANDLE 
    auto deadline=g_get_monotonic_time()+5000000;FlGstSessionResult r;
    do{r=pcm.forward(100);CHECK(r==FL_GST_SESSION_READY||r==FL_GST_SESSION_TIMEOUT);CHECK(g_get_monotonic_time()<deadline);}while(r==FL_GST_SESSION_TIMEOUT);
    while(video.pending()){CHECK(g_get_monotonic_time()<deadline);CHECK(video.collect()==FL_OK);g_usleep(100);}
+   auto drained=signal(name+".drained");CHECK(SetEvent(drained));CloseHandle(drained);
    CHECK(video.forwardEvent(5000)==FL_GST_SESSION_READY);CHECK(video.forwardEvent(5000)==FL_GST_SESSION_READY);
   }
   CHECK(video.forwardEvent(5000)==FL_GST_SESSION_READY&&video.videoEnded());CHECK(video.finish()==FL_OK);
@@ -104,13 +141,13 @@ static int relay(const std::string&name,guint16 port,HANDLE h0,HANDLE h1,HANDLE 
  }
  flClose(down);flClose(up);CloseHandle(h0);CloseHandle(h1);return 0;
 }
-static void run(const std::string&plugin,bool empty){
+static void run(const std::string&plugin,bool empty,bool reserved=false){
  using Microsoft::WRL::ComPtr;
  ComPtr<ID3D11Device> device;ComPtr<ID3D11DeviceContext> context;CHECK(SUCCEEDED(D3D11CreateDevice(nullptr,D3D_DRIVER_TYPE_HARDWARE,nullptr,0,nullptr,0,D3D11_SDK_VERSION,&device,nullptr,&context)));
  D3D11_TEXTURE2D_DESC d{};d.Width=64;d.Height=32;d.ArraySize=d.MipLevels=d.SampleDesc.Count=1;d.Format=DXGI_FORMAT_R8G8B8A8_UNORM;d.Usage=D3D11_USAGE_DEFAULT;d.BindFlags=D3D11_BIND_SHADER_RESOURCE|D3D11_BIND_RENDER_TARGET;d.MiscFlags=D3D11_RESOURCE_MISC_SHARED|D3D11_RESOURCE_MISC_SHARED_NTHANDLE;
  ComPtr<ID3D11Texture2D> textures[2];HANDLE handles[2]{};
  for(unsigned i=0;i<2;++i){CHECK(SUCCEEDED(device->CreateTexture2D(&d,nullptr,&textures[i])));ComPtr<IDXGIResource1> resource;CHECK(SUCCEEDED(textures[i].As(&resource)));CHECK(SUCCEEDED(resource->CreateSharedHandle(nullptr,DXGI_SHARED_RESOURCE_READ|DXGI_SHARED_RESOURCE_WRITE,nullptr,&handles[i])));}
- auto name="gst-relay-process-"+std::to_string(GetCurrentProcessId())+"-"+std::to_string(empty);
+ auto name="gst-relay-process-"+std::to_string(GetCurrentProcessId())+"-"+std::to_string(empty)+"-"+std::to_string(reserved);
  auto held=signal(name+".held"),checked=signal(name+".checked"),done=signal(name+".done"),relaydone=signal(name+".relaydone");
  void*reversed[2]={handles[1],handles[0]};flChannel*down=nullptr;CHECK(flCreateChannelFromD3D11Handles((name+".down").c_str(),64,32,FL_FORMAT_RGBA8,2,FL_MAP_CPU|FL_DEFER_RELEASE|FL_REQUIRE_FRAME_METADATA,nullptr,reversed,&down)==FL_OK);
  HANDLE read=nullptr,write=nullptr;CHECK(CreatePipe(&read,&write,nullptr,0));guint16 port=0;auto*l=listener(&port);
@@ -119,7 +156,7 @@ static void run(const std::string&plugin,bool empty){
  {
   Endpoint receiver(1,false,0,l);g_object_unref(l);guint16 upstreamPort=0;DWORD bytes=0;
   CHECK(ReadFile(read,&upstreamPort,sizeof upstreamPort,&bytes,nullptr)&&bytes==sizeof upstreamPort);CloseHandle(read);
-  auto first=spawn("\""+plugin+"\" --relay-process-producer "+name+" "+std::to_string(upstreamPort)+" "+std::to_string(empty));receiver.start();
+  auto first=spawn("\""+plugin+(reserved?"\" --relay-reserved-producer ":"\" --relay-process-producer ")+name+" "+std::to_string(upstreamPort)+" "+std::to_string(empty));receiver.start();
   unsigned count=empty?0:Frames;unsigned seen=0;
   for(unsigned n=0;n<count;++n){
    flFrame frame{};CHECK(flAcquireFrame(down,&frame,5000)==FL_OK&&frame.ptsNs==37000000+n*1000000);
