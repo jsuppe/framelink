@@ -1,6 +1,13 @@
 # Windows API integration baseline candidate — NOT FROZEN
 
-Exact revision: `609cb74031a5de2cee782619007a6e87ab7fbccd`.
+**Current additive CPU implementation:** `d8f97c244696c42bb4ad4124674d8b462df4a9ed`.
+Focused tests pass7/7 Windows,8/8 Linux,8/8 Android plusdualABIbuilds; all59 old
+DLL exports preserved plus16 CPU symbols. A clean exact-revision full Windows/API
+validation is currently running; do not infer its outcome from these staged tests.
+The CPU factories require separately authenticated delegated pipes/processes;
+coordinator/GStreamer integration and all unresolved M6 acceptance gates remain.
+
+**Previously verified candidate** exact revision: `609cb74031a5de2cee782619007a6e87ab7fbccd`.
 Clean isolated Windows source archive SHA256:
 `ab8efb73b7b8282a9d64d8edf226cb379d18b3c89d39ae4e606c956e083d6da6`.
 Remote source/build: `<win-home>/dev/framelink-m6-windows-609cb74`.
