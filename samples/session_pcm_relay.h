@@ -38,7 +38,18 @@ class SessionPcmRelay {
   FlGstSessionResult forward(guint timeoutMs){
     if(!initialized||failed||ended)return FL_GST_SESSION_INVALID;
     auto r=contract.check();if(r!=FL_GST_SESSION_READY)return fail(r);
-    if(!pending)pending=gst_app_sink_try_pull_sample(source,guint64(timeoutMs)*GST_MSECOND);
+    if(!pending){
+      // appsink has no knowledge of session cancellation/replacement. Poll in
+      // bounded slices against one monotonic deadline, never the full timeout.
+      const gint64 deadline=g_get_monotonic_time()+gint64(timeoutMs)*1000;
+      do{
+        const gint64 remaining=deadline-g_get_monotonic_time();
+        const guint64 slice=remaining<=0?0:guint64(remaining<10000?remaining:10000)*1000;
+        pending=gst_app_sink_try_pull_sample(source,slice);
+        r=contract.check();if(r!=FL_GST_SESSION_READY)return fail(r);
+        if(pending||gst_app_sink_is_eos(source)||g_get_monotonic_time()>=deadline)break;
+      }while(true);
+    }
     if(!pending){r=contract.check();return r==FL_GST_SESSION_READY?FL_GST_SESSION_TIMEOUT:fail(r);}
     r=contract.check();if(r!=FL_GST_SESSION_READY)return fail(r);
     auto*b=gst_sample_get_buffer(pending);auto*segment=gst_sample_get_segment(pending);

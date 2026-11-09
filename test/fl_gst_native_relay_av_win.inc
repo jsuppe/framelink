@@ -53,7 +53,8 @@ static void relaySessionNegatives(flSessionConfig cfg,const flSessionCapabilitie
 // Deterministic app-queue controls, separate from authenticated transport above.
 static void relayPcmControls(flSessionConfig cfg,const flSessionCapabilities&offer){
  cfg.sessionId.bytes[0]=1;cfg.audioQueueMs=1;
- for(unsigned fault=0;fault<7;++fault){
+ for(unsigned fault=0;fault<9;++fault){
+  const bool badConfig=fault>0&&fault<7;
   auto*a=fl_gst_session_new(3);auto*b=fl_gst_session_new(3);auto other=cfg;other.sessionId.bytes[0]=2;
   CHECK(fl_gst_session_configure(a,&cfg,&offer,&offer)==FL_GST_SESSION_READY);
   CHECK(fl_gst_session_configure(b,&other,&offer,&offer)==FL_GST_SESSION_READY);
@@ -71,8 +72,8 @@ static void relayPcmControls(flSessionConfig cfg,const flSessionCapabilities&off
   if(fault==5){auto*caps=gst_caps_from_string("audio/x-raw,format=F32LE,layout=interleaved,rate=48000,channels=2");gst_app_src_set_caps(GST_APP_SRC(sink),caps);gst_caps_unref(caps);}
   {
    flsample::SessionPcmRelay relay(a,b,GST_APP_SINK(source),GST_APP_SRC(sink));
-   CHECK(relay.initialize()==(fault?FL_GST_SESSION_INVALID:FL_GST_SESSION_READY));
-   if(fault){flSessionConfig cancelled{};CHECK(fl_gst_session_get_config(b,&cancelled)==FL_GST_SESSION_CANCELLED);}
+   CHECK(relay.initialize()==(badConfig?FL_GST_SESSION_INVALID:FL_GST_SESSION_READY));
+   if(badConfig){flSessionConfig cancelled{};CHECK(fl_gst_session_get_config(b,&cancelled)==FL_GST_SESSION_CANCELLED);}
    else{
     CHECK(gst_element_set_state(out,GST_STATE_PAUSED)!=GST_STATE_CHANGE_FAILURE);
     CHECK(gst_element_get_state(out,nullptr,nullptr,GST_SECOND)!=GST_STATE_CHANGE_FAILURE);
@@ -95,7 +96,18 @@ static void relayPcmControls(flSessionConfig cfg,const flSessionCapabilities&off
     for(unsigned n=2;n<4;++n){push(n);CHECK(relay.forward(1000)==FL_GST_SESSION_READY);pull(n);}
     CHECK(relay.frameCount()==192&&relay.byteCount()==768&&relay.blockCount()==4);
     CHECK(!gst_app_sink_try_pull_sample(GST_APP_SINK(consumer),0));
-    fl_gst_session_cancel(a);CHECK(relay.forward(0)==FL_GST_SESSION_CANCELLED);
+    // Session cancellation must interrupt a waiting PCM pull, not wait for
+    // the caller's entire media timeout when no samples arrive.
+    if(fault==8){
+     auto start=g_get_monotonic_time();CHECK(relay.forward(100)==FL_GST_SESSION_TIMEOUT);
+     auto elapsed=g_get_monotonic_time()-start;CHECK(elapsed>=80000&&elapsed<500000);
+     CHECK(relay.forward(0)==FL_GST_SESSION_TIMEOUT);
+    }
+    std::thread cancel([&]{std::this_thread::sleep_for(std::chrono::milliseconds(50));fl_gst_session_cancel(fault==7?b:a);});
+    auto start=g_get_monotonic_time();auto result=relay.forward(1000);
+    auto elapsed=g_get_monotonic_time()-start;cancel.join();
+    CHECK(result==FL_GST_SESSION_CANCELLED);CHECK(elapsed<500000);
+    CHECK(relay.frameCount()==192&&relay.blockCount()==4);
     CHECK(relay.forward(0)==FL_GST_SESSION_INVALID);
    }
   }
@@ -103,7 +115,7 @@ static void relayPcmControls(flSessionConfig cfg,const flSessionCapabilities&off
   for(auto*p:{producer,source,sink,consumer})gst_object_unref(p);
   g_object_unref(a);g_object_unref(b);
  }
- printf("PCM queue controls: bounded retry, exact 4-block delivery, nonzero origin/discontinuity, cancellation and 6 configuration negatives passed\n");
+ printf("PCM queue controls: bounded retry, exact 4-block delivery, nonzero origin/discontinuity, bounded upstream/downstream cancellation, empty timeout and 6 configuration negatives passed\n");
 }
 static void nativeRelayAv(bool empty,unsigned fault=0){
  using Microsoft::WRL::ComPtr;
