@@ -7,6 +7,7 @@
 #endif
 #include <windows.h>
 #include "fl_ipc.h"
+#include "fl_shared_cpu_allocation_win.h"
 #include <array>
 #include <memory>
 #include <cstring>
@@ -88,6 +89,25 @@ public:
             s->event.value=CreateEventW(nullptr,TRUE,FALSE,nullptr);if(!s->event.value)return FL_OOM;
             s->pipe.value=pipe.value;pipe.value=nullptr;out.state_=std::move(s);return FL_OK;
         }catch(const std::bad_alloc&){return FL_OOM;}
+    }
+    // Pull a section from the already authenticated, pinned peer process.
+    // Wire values are NEVER treated as local handles or closed in the peer.
+    // SAME_ACCESS prevents upgrading an RO offer. Failed validation closes only
+    // our duplicate. The sender retains its export until the pool ACK arrives.
+    flResult importPeerSection(uint64_t value,const flSharedCpuDescriptor& descriptor,
+                               SharedCpuAllocationWin& out){
+        if(!state_)return FL_DISCONNECTED;
+        if(!value||value>uint64_t(INTPTR_MAX))return FL_INVALID;
+        auto& s=*state_;
+        if(WaitForSingleObject(s.peer.value,0)!=WAIT_TIMEOUT||
+           (s.cancel.value&&WaitForSingleObject(s.cancel.value,0)!=WAIT_TIMEOUT)){
+            close();return FL_DISCONNECTED;
+        }
+        Handle local;
+        if(!DuplicateHandle(s.peer.value,reinterpret_cast<HANDLE>(uintptr_t(value)),
+             GetCurrentProcess(),&local.value,0,FALSE,DUPLICATE_SAME_ACCESS))return FL_ACCESS_DENIED;
+        return SharedCpuAllocationWin::importHandle(descriptor,local.value,
+            descriptor.generation,descriptor.allocationId,out);
     }
     flResult send(MsgType type,const void* payload,size_t size){
         if(!state_)return FL_DISCONNECTED;

@@ -1,0 +1,14 @@
+CMake is re-running because <win-home>/dev/framelink-m6-windows-b997e7c/build/CMakeFiles/generate.stamp is out-of-date.
+  the file '<win-home>/dev/framelink-m6-windows-b997e7c/CMakeLists.txt'
+  is newer than '<win-home>/dev/framelink-m6-windows-b997e7c/build/CMakeFiles/generate.stamp.depend'
+  result='-1'
+-- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.26300.
+-- framelink: building GStreamer elements (gstframelink)
+-- Configuring done (0.8s)
+-- Generating done (1.6s)
+-- Build files have been written to: <win-home>/dev/framelink-m6-windows-b997e7c/build
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <win-home>\dev\framelink-m6-windows-b997e7c\build\Release\framelink.dll
+  fl_shared_cpu_control_win.cpp
+<win-home>\dev\framelink-m6-windows-b997e7c\test\fl_shared_cpu_control_win.cpp(26,15): error C2397: conversion from 'flFormat' to 'uint32_t' requires a narrowing conversion [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]

@@ -1,0 +1,325 @@
+CMake is re-running because <win-home>/dev/framelink-m6-windows-b997e7c/build/CMakeFiles/generate.stamp is out-of-date.
+  the file '<win-home>/dev/framelink-m6-windows-b997e7c/CMakeLists.txt'
+  is newer than '<win-home>/dev/framelink-m6-windows-b997e7c/build/CMakeFiles/generate.stamp.depend'
+  result='-1'
+-- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.26300.
+-- framelink: building GStreamer elements (gstframelink)
+-- Configuring done (0.8s)
+-- Generating done (0.9s)
+-- Build files have been written to: <win-home>/dev/framelink-m6-windows-b997e7c/build
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  1>Checking Build System
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-b997e7c/CMakeLists.txt
+  framelink.vcxproj -> <win-home>\dev\framelink-m6-windows-b997e7c\build\Release\framelink.dll
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-b997e7c/CMakeLists.txt
+  fl_shared_cpu_control_win.cpp
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pipe_win.h(113,9): error C2059: syntax error: 'if' [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pipe_win.h(113,42): error C2238: unexpected token(s) preceding ';' [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pipe_win.h(114,9): error C2059: syntax error: 'if' [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pipe_win.h(114,76): error C2238: unexpected token(s) preceding ';' [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pipe_win.h(116,16): error C2061: syntax error: identifier 'wire' [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pipe_win.h(116,40): error C2059: syntax error: ')' [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pipe_win.h(116,41): error C2143: syntax error: missing ')' before ';' [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pipe_win.h(116,9): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pipe_win.h(116,9): warning C4183: 'memcpy': missing return type; assumed to be a member function returning 'int' [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pipe_win.h(116,42): error C2059: syntax error: 'if' [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pipe_win.h(116,92): error C2238: unexpected token(s) preceding ';' [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pipe_win.h(117,34): error C2853: 'r': a non-static data member cannot have a type that contains 'auto' [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pipe_win.h(118,9): error C2059: syntax error: 'if' [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pipe_win.h(118,29): error C2238: unexpected token(s) preceding ';' [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pipe_win.h(119,9): error C2059: syntax error: 'if' [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pipe_win.h(119,40): error C2334: unexpected token(s) preceding '{'; skipping apparent function body [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pipe_win.h(119,73): error C2059: syntax error: 'return' [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pipe_win.h(119,85): error C2238: unexpected token(s) preceding ';' [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pipe_win.h(115,61): error C2065: 'type': undeclared identifier [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pipe_win.h(115,75): error C2065: 'size': undeclared identifier [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pipe_win.h(117,72): error C2065: 'size': undeclared identifier [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pipe_win.h(121,14): error C2146: syntax error: missing ';' before identifier 'receive' [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pipe_win.h(121,14): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pipe_win.h(123,16): error C3861: 'io': identifier not found [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pipe_win.h(123,73): error C2677: binary '!=': no global operator found which takes type 'flResult' (or there is no acceptable conversion) [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pipe_win.h(124,43): error C3861: 'close': identifier not found [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pipe_win.h(126,67): error C3861: 'close': identifier not found [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pipe_win.h(130,39): error C3861: 'close': identifier not found [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pipe_win.h(133,1): error C2059: syntax error: '}' [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pipe_win.h(133,1): error C2143: syntax error: missing ';' before '}' [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\include\framelink_session.h(6,12): error C2143: syntax error: missing ';' before '{' [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\include\framelink_session.h(6,12): error C2447: '{': missing function header (old-style formal list?) [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pool.h(8,45): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pool.h(8,66): error C2143: syntax error: missing ',' before '*' [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pool.h(12,10): error C2065: 'session': undeclared identifier [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pool.h(12,22): error C2065: 'images': undeclared identifier [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pool.h(12,33): error C2065: 'endpoints': undeclared identifier [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pool.h(12,47): error C2065: 'operations': undeclared identifier [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pool.h(12,62): error C2065: 'decisions': undeclared identifier [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pool.h(13,9): error C2065: 'count': undeclared identifier [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pool.h(13,22): error C2065: 'count': undeclared identifier [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pool.h(14,39): error C2065: 'session': undeclared identifier [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pool.h(14,21): error C3861: 'flSessionValidate': identifier not found [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pool.h(15,15): error C2065: 'FL_SESSION_VERSION_ERROR': undeclared identifier [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pool.h(16,15): error C2065: 'FL_SESSION_OK': undeclared identifier [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pool.h(17,10): error C2065: 'session': undeclared identifier [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pool.h(19,9): error C2065: 'session': undeclared identifier [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pool.h(19,42): error C2065: 'session': undeclared identifier [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pool.h(19,74): error C2065: 'count': undeclared identifier [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pool.h(22,28): error C2065: 'count': undeclared identifier [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pool.h(23,25): error C2065: 'images': undeclared identifier [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pool.h(23,23): error C2530: 'd': references must be initialized [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pool.h(24,55): error C3536: 'd': cannot be used before it is initialized [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pool.h(24,24): error C2664: 'flMemoryResult flSharedCpuDescriptorValidate(const flSharedCpuDescriptor *)': cannot convert argument 1 from '<error type> *' to 'const flSharedCpuDescriptor *' [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+      <win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pool.h(24,54):
+      Types pointed to are unrelated; conversion requires reinterpret_cast, C-style cast or parenthesized function-style cast
+      <win-home>\dev\framelink-m6-windows-b997e7c\include\framelink_shared_cpu.h(32,23):
+      see declaration of 'flSharedCpuDescriptorValidate'
+      <win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pool.h(24,24):
+      while trying to match the argument list '(<error type> *)'
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pool.h(26,29): error C2065: 'session': undeclared identifier [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pool.h(26,64): error C2065: 'session': undeclared identifier [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pool.h(27,24): error C2065: 'session': undeclared identifier [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pool.h(27,60): error C2065: 'session': undeclared identifier [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pool.h(30,35): error C2065: 'images': undeclared identifier [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pool.h(39,13): error C2065: 'operations': undeclared identifier [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pool.h(43,31): error C2065: 'operations': undeclared identifier [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pool.h(47,37): error C2065: 'endpoints': undeclared identifier [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pool.h(47,58): error C2065: 'decisions': undeclared identifier [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_imported_pool_win.h(11,21): error C3646: 'session_': unknown override specifier [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_imported_pool_win.h(11,29): error C2059: syntax error: '{' [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_imported_pool_win.h(11,29): error C2334: unexpected token(s) preceding '{'; skipping apparent function body [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_imported_pool_win.h(35,21): error C3646: 'adopt': unknown override specifier [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_imported_pool_win.h(35,27): error C2059: syntax error: 'const' [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_imported_pool_win.h(38,54): error C2334: unexpected token(s) preceding '{'; skipping apparent function body [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_imported_pool_win.h(75,14): error C3646: 'map': unknown override specifier [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_imported_pool_win.h(75,17): error C2059: syntax error: '(' [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_imported_pool_win.h(75,72): error C2334: unexpected token(s) preceding '{'; skipping apparent function body [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_imported_pool_win.h(25,59): error C2065: 'session_': undeclared identifier [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_imported_pool_win.h(25,74): error C2039: 'session_': is not a member of 'fl::SharedCpuImportedPoolWin' [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+      <win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_imported_pool_win.h(9,7):
+      see declaration of 'fl::SharedCpuImportedPoolWin'
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_imported_pool_win.h(31,46): error C2065: 'session_': undeclared identifier [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_control_win.h(14,21): error C3646: 'session_': unknown override specifier [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_control_win.h(14,29): error C2059: syntax error: '{' [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_control_win.h(14,29): error C2334: unexpected token(s) preceding '{'; skipping apparent function body [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_control_win.h(24,14): error C3646: 'fail': unknown override specifier [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_control_win.h(24,18): error C2059: syntax error: '(' [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_control_win.h(24,41): error C2334: unexpected token(s) preceding '{'; skipping apparent function body [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_control_win.h(32,14): error C3646: 'negotiate': unknown override specifier [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_control_win.h(32,23): error C2059: syntax error: '(' [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_control_win.h(33,63): error C2334: unexpected token(s) preceding '{'; skipping apparent function body [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_control_win.h(63,14): error C3646: 'sendPool': unknown override specifier [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_control_win.h(63,22): error C2059: syntax error: '(' [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_control_win.h(63,92): error C2334: unexpected token(s) preceding '{'; skipping apparent function body [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_control_win.h(87,14): error C3646: 'receivePool': unknown override specifier [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_control_win.h(87,25): error C2059: syntax error: '(' [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_control_win.h(87,56): error C2334: unexpected token(s) preceding '{'; skipping apparent function body [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+  (compiling source file '../test/fl_shared_cpu_control_win.cpp')
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\test\fl_shared_cpu_control_win.cpp(24,8): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+<win-home>\dev\framelink-m6-windows-b997e7c\test\fl_shared_cpu_control_win.cpp(24,24): error C2146: syntax error: missing ';' before identifier 'session' [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+<win-home>\dev\framelink-m6-windows-b997e7c\test\fl_shared_cpu_control_win.cpp(24,32): error C2062: type 'bool' unexpected [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+<win-home>\dev\framelink-m6-windows-b997e7c\test\fl_shared_cpu_control_win.cpp(24,48): error C2143: syntax error: missing ';' before '{' [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+<win-home>\dev\framelink-m6-windows-b997e7c\test\fl_shared_cpu_control_win.cpp(24,48): error C2447: '{': missing function header (old-style formal list?) [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+<win-home>\dev\framelink-m6-windows-b997e7c\test\fl_shared_cpu_control_win.cpp(51,16): error C2039: 'receive': is not a member of 'fl::SharedCpuPipeWin' [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+      <win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pipe_win.h(15,7):
+      see declaration of 'fl::SharedCpuPipeWin'
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\test\fl_shared_cpu_control_win.cpp(59,2): error C2039: 'send': is not a member of 'fl::SharedCpuPipeWin' [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+      <win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_pipe_win.h(15,7):
+      see declaration of 'fl::SharedCpuPipeWin'
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\test\fl_shared_cpu_control_win.cpp(64,40): error C2039: 'negotiate': is not a member of 'fl::SharedCpuControlWin' [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+      <win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_control_win.h(12,7):
+      see declaration of 'fl::SharedCpuControlWin'
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\test\fl_shared_cpu_control_win.cpp(64,40): error C2039: '__this': is not a member of 'fl::SharedCpuControlWin' [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+      <win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_control_win.h(12,7):
+      see declaration of 'fl::SharedCpuControlWin'
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\test\fl_shared_cpu_control_win.cpp(64,55): error C3861: 'session': identifier not found [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+<win-home>\dev\framelink-m6-windows-b997e7c\test\fl_shared_cpu_control_win.cpp(65,35): error C2039: 'receivePool': is not a member of 'fl::SharedCpuControlWin' [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+      <win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_control_win.h(12,7):
+      see declaration of 'fl::SharedCpuControlWin'
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\test\fl_shared_cpu_control_win.cpp(65,35): error C2039: '__this': is not a member of 'fl::SharedCpuControlWin' [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
+      <win-home>\dev\framelink-m6-windows-b997e7c\src\fl_shared_cpu_control_win.h(12,7):
+      see declaration of 'fl::SharedCpuControlWin'
+  
+<win-home>\dev\framelink-m6-windows-b997e7c\test\fl_shared_cpu_control_win.cpp(65,35): error C1003: error count exceeds 100; stopping compilation [<win-home>\dev\framelink-m6-windows-b997e7c\build\fl_shared_cpu_control_win.vcxproj]
