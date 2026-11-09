@@ -39,6 +39,7 @@ struct Shared {
  bool flushing[2]={false,false};
  guint eosSeen=0; // protected with heldEos and drainer publication by mutex
  gint64 epoch=-1;
+ GstFrameLinkMemoryPolicy bound{};
  std::string error;flChannel*channel=nullptr;
 };
 }
@@ -49,6 +50,7 @@ typedef struct _GstFrameLinkAvSink {
  guint width,height,fpsN,fpsD,rate,channels,connectMs,idleMs,audioQueueMs,videoQueue,videoPool,bufferWaitMs;
  GstElement*video,*audio;GstPad*videoPad,*audioPad;
  FlGstSession*session;gboolean errorOnRingFull,local,sharedCpu,nativeMemory,policyBound,nativeAdopted,savedLastSample,lastSampleScoped;
+ GstFrameLinkMemoryPolicy nativeCandidate;gboolean candidateSet,nativeUsed,channelAdopted;
  GCancellable*cancel;std::thread*worker;std::thread*drainer;Shared*shared;
  std::vector<GstMessage*>*heldEos;guint eosNeeded;gulong probes[2];
 } GstFrameLinkAvSink;
@@ -128,6 +130,11 @@ static void releaseMedia(GstElement*element,gpointer){
  {std::lock_guard<std::mutex> lock(sh->mutex);epoch=sh->epoch;}
  if(gint64(base)!=epoch){if(channel)flClose(channel);return fail("pipeline base time changed after framelinkavsink set it to the session epoch");}
  if(s->video&&!s->sharedCpu){gboolean adopted=FALSE;g_signal_emit_by_name(s->video,"adopt-channel",channel,&adopted);if(!adopted){if(channel)flClose(channel);return fail("video channel lease rejected");}}
+ if(s->candidateSet){
+  auto policy=sh->bound;
+  gboolean accepted=FALSE;g_signal_emit_by_name(s->video,"apply-memory-policy",&policy,&accepted);
+  if(!accepted)return fail("authenticated local native policy rejected");
+ }
  auto*context=fl_gst_session_create_context(s->session);
  for(auto*child:{s->video,s->audio}){
   if(!child)continue;gst_element_set_context(child,context);
@@ -149,6 +156,11 @@ static void startWorker(GstFrameLinkAvSink*s){
  s->worker=new std::thread([s,caps,path]{
   GError*error=nullptr;flChannel*channel=nullptr;
   bool ok=false;
+#if defined(_WIN32)
+  if(s->candidateSet)ok=fl_gst_session_open_local_native_epoch(s->session,TRUE,path.c_str(),&caps,s->videoQueue,s->videoPool,s->audioQueueMs,s->connectMs,s->idleMs,
+   &s->nativeCandidate,&s->shared->bound,&channel,chooseEpoch,s,s->cancel,&error);
+  else
+#endif
 #if defined(__linux__) || defined(_WIN32)
   if(s->sharedCpu)ok=fl_gst_session_open_local_cpu_epoch(s->session,TRUE,path.c_str(),&caps,s->videoQueue,s->videoPool,s->audioQueueMs,s->connectMs,s->idleMs,chooseEpoch,s,s->cancel,&error);
   else
@@ -204,7 +216,9 @@ static GstStateChangeReturn changeState(GstElement*element,GstStateChange transi
  auto*s=reinterpret_cast<GstFrameLinkAvSink*>(element);
  switch(transition){
  case GST_STATE_CHANGE_NULL_TO_READY:{
-  if(s->nativeMemory&&(!s->policyBound||!wantVideo(s)||s->sharedCpu||(s->sessionPath&&*s->sessionPath))){GST_ELEMENT_ERROR(s,RESOURCE,SETTINGS,("native-memory requires policy-bound broker video and forbids shared-cpu or automatic discovery"),(nullptr));return GST_STATE_CHANGE_FAILURE;}
+  if(s->candidateSet&&s->nativeUsed){GST_ELEMENT_ERROR(s,RESOURCE,SETTINGS,("local native bins are single-session; create a new bin for reconnect"),(nullptr));return GST_STATE_CHANGE_FAILURE;}
+
+  if(s->nativeMemory&&(!wantVideo(s)||s->sharedCpu||(!s->candidateSet&&(!s->policyBound||(s->sessionPath&&*s->sessionPath))))){GST_ELEMENT_ERROR(s,RESOURCE,SETTINGS,("native-memory requires broker policy or an explicit local native candidate and forbids shared-cpu"),(nullptr));return GST_STATE_CHANGE_FAILURE;}
   if(s->sharedCpu&&(!wantVideo(s))){GST_ELEMENT_ERROR(s,RESOURCE,SETTINGS,("shared-cpu requires a video track and forbids native memory"),(nullptr));return GST_STATE_CHANGE_FAILURE;}
 #if !defined(__linux__) && !defined(_WIN32)
   if(s->sharedCpu&&s->sessionPath&&*s->sessionPath){GST_ELEMENT_ERROR(s,RESOURCE,SETTINGS,("local shared-cpu discovery unavailable on this platform"),(nullptr));return GST_STATE_CHANGE_FAILURE;}
@@ -234,6 +248,7 @@ static GstStateChangeReturn changeState(GstElement*element,GstStateChange transi
    if(s->video)g_object_set(s->video,"async",FALSE,nullptr); // no re-preroll inside a PLAYING pipeline
    GstPad*pads[2]={s->videoPad,s->audioPad};
    for(int i=0;i<2;i++)s->probes[i]=pads[i]?gst_pad_add_probe(pads[i],GstPadProbeType(GST_PAD_PROBE_TYPE_DATA_DOWNSTREAM|GST_PAD_PROBE_TYPE_EVENT_FLUSH),holdProbe,s,nullptr):0;
+   if(s->candidateSet)s->nativeUsed=TRUE;
    startWorker(s);
   }
   break;}
@@ -311,20 +326,38 @@ static void handleMessage(GstBin*bin,GstMessage*message){
 }
 
 static gboolean adoptChannel(GstFrameLinkAvSink*s,flChannel*channel){
- if(s->sharedCpu||s->local||!s->video||GST_STATE(s)!=GST_STATE_NULL)return FALSE;
- gboolean adopted=FALSE;g_signal_emit_by_name(s->video,"adopt-channel",channel,&adopted);if(adopted&&s->nativeMemory)s->nativeAdopted=TRUE;return adopted;
+ if(s->candidateSet||s->sharedCpu||s->local||!s->video||GST_STATE(s)!=GST_STATE_NULL)return FALSE;
+ gboolean adopted=FALSE;g_signal_emit_by_name(s->video,"adopt-channel",channel,&adopted);if(adopted)s->channelAdopted=TRUE;if(adopted&&s->nativeMemory)s->nativeAdopted=TRUE;return adopted;
 }
 
 static gboolean applyMemoryPolicy(GstFrameLinkAvSink*s,GstFrameLinkMemoryPolicy*policy){
- if(s->sharedCpu||s->local||!s->video||!s->nativeMemory||s->policyBound||
+ if(s->candidateSet||s->sharedCpu||s->local||!s->video||!s->nativeMemory||s->policyBound||
     (s->sessionPath&&*s->sessionPath)||GST_STATE(s)!=GST_STATE_NULL)return FALSE;
  gboolean accepted=FALSE;g_signal_emit_by_name(s->video,"apply-memory-policy",policy,&accepted);
  if(accepted)s->policyBound=TRUE;return accepted;
 }
 
+// Provisional producer-ordered template, never an authenticated policy. Copy
+// it while NULL; the worker authenticates BOTH peers before allocating a channel.
+static gboolean setLocalNativeCandidate(GstFrameLinkAvSink*s,GstFrameLinkMemoryPolicy*policy){
+#if defined(_WIN32)
+ if(!policy||s->candidateSet||s->policyBound||s->local||s->sharedCpu||!wantVideo(s)||!s->video||
+    !s->sessionPath||!*s->sessionPath||GST_STATE(s)!=GST_STATE_NULL||!s->nativeMemory||s->channelAdopted)return FALSE;
+ flMemoryDecision decisions[2]{};
+ if(policy->version!=1||policy->reserved||policy->sessionGeneration||
+    flMemoryEvaluateBoundary(policy->requirements,policy->paths,2,decisions)!=FL_MEMORY_OK||
+    policy->paths[0].resourceType!=FL_MEMORY_D3D11||policy->paths[1].resourceType!=FL_MEMORY_D3D11||
+    policy->paths[0].operations||policy->paths[1].operations!=(FL_MEMORY_COPY|FL_MEMORY_READBACK)||
+    policy->paths[0].supportedUsage!=FL_MEMORY_GPU_SAMPLE||policy->paths[1].supportedUsage!=FL_MEMORY_CPU_READ)return FALSE;
+ s->nativeCandidate=*policy;s->candidateSet=TRUE;return TRUE;
+#else
+ (void)s;(void)policy;return FALSE;
+#endif
+}
+
 static void setProperty(GObject*object,guint id,const GValue*value,GParamSpec*spec){
  auto*s=reinterpret_cast<GstFrameLinkAvSink*>(object);
- if(s->policyBound||s->nativeAdopted){g_warning("framelinkavsink: authenticated properties are immutable; create a new bin/session");return;}
+ if(s->candidateSet||s->policyBound||s->nativeAdopted){g_warning("framelinkavsink: authenticated properties are immutable; create a new bin/session");return;}
  if(GST_STATE(s)!=GST_STATE_NULL){g_warning("framelinkavsink: %s can only change in NULL",spec->name);return;}
  switch(id){
  case PROP_NATIVE:s->nativeMemory=g_value_get_boolean(value);if(s->video)g_object_set(s->video,"native-memory",s->nativeMemory,nullptr);break;
@@ -416,12 +449,14 @@ static void gst_framelink_av_sink_class_init(GstFrameLinkAvSinkClass*klass){
  g_object_class_install_property(o,PROP_AUDIO_QUEUE,g_param_spec_uint("audio-queue-ms","Audio queue","Hard audio queue budget, not target latency",1,2000,80,rw));
  g_object_class_install_property(o,PROP_VIDEO_QUEUE,g_param_spec_uint("video-queue-frames","Video queue","Coordinated video queue budget",1,16,2,rw));
  g_object_class_install_property(o,PROP_VIDEO_POOL,g_param_spec_uint("video-pool","Video pool","Consumer ring images requested (0: consumer default)",0,FL_MAX_POOL_SIZE,0,rw));
- g_object_class_install_property(o,PROP_NATIVE,g_param_spec_boolean("native-memory","Native memory","Strict broker-bound native producer; requires adopted channel and authenticated memory policy; no automatic discovery or copy fallback",FALSE,rw));
+ g_object_class_install_property(o,PROP_NATIVE,g_param_spec_boolean("native-memory","Native memory","Strict native producer; broker-bound policy or session= with explicit set-local-native-candidate; no implicit fallback",FALSE,rw));
  g_object_class_install_property(o,PROP_SHARED_CPU,g_param_spec_boolean("shared-cpu","Shared CPU","Explicit CPU video copy path; broker context or current-user session= discovery, no native fallback",FALSE,rw));
  g_object_class_install_property(o,PROP_ID,g_param_spec_string("session-id","Session identity","Negotiated identity, not a secret",nullptr,ro));
  g_object_class_install_property(o,PROP_GENERATION,g_param_spec_uint64("generation","Generation","Negotiated session generation",0,G_MAXUINT64,0,ro));
  g_object_class_install_property(o,PROP_AUDIO_ID,g_param_spec_uint("audio-track-id","Audio track","Negotiated audio identity, zero when absent",0,G_MAXUINT,0,ro));
  g_object_class_install_property(o,PROP_VIDEO_ID,g_param_spec_uint("video-track-id","Video track","Negotiated video identity, zero when absent",0,G_MAXUINT,0,ro));
+ g_signal_new_class_handler("set-local-native-candidate",G_TYPE_FROM_CLASS(klass),GSignalFlags(G_SIGNAL_RUN_LAST|G_SIGNAL_ACTION),G_CALLBACK(setLocalNativeCandidate),
+  nullptr,nullptr,nullptr,G_TYPE_BOOLEAN,1,G_TYPE_POINTER);
  g_signal_new_class_handler("apply-memory-policy",G_TYPE_FROM_CLASS(klass),GSignalFlags(G_SIGNAL_RUN_LAST|G_SIGNAL_ACTION),G_CALLBACK(applyMemoryPolicy),
   nullptr,nullptr,nullptr,G_TYPE_BOOLEAN,1,G_TYPE_POINTER);
  g_signal_new_class_handler("adopt-channel",G_TYPE_FROM_CLASS(klass),GSignalFlags(G_SIGNAL_RUN_LAST|G_SIGNAL_ACTION),G_CALLBACK(adoptChannel),

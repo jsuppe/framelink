@@ -1,0 +1,20 @@
+[0/1] Re-running CMake...
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: <linux-home>/dev/build/framelink-m6-x86_64
+[1/16] Building CXX object CMakeFiles/gstframelink.dir/gst/fl_gst_audio_startup.cpp.o
+[2/16] Building CXX object CMakeFiles/gstframelink.dir/gst/gstframelinkaudio.cpp.o
+[3/16] Building CXX object CMakeFiles/gstframelink.dir/gst/gstframelinkaudiosrc.cpp.o
+[4/16] Building CXX object CMakeFiles/gstframelink.dir/gst/gstframelink.cpp.o
+[5/16] Building CXX object CMakeFiles/gstframelink.dir/gst/gstframelinkavsink.cpp.o
+[6/16] Building CXX object CMakeFiles/gstframelink.dir/gst/gstframelinkavsrc.cpp.o
+[7/16] Building CXX object CMakeFiles/framelink_gst_session.dir/gst/framelink_session_context.cpp.o
+[8/16] Building CXX object CMakeFiles/fl_gst_shared_cpu_av.dir/test/fl_gst_shared_cpu_av.cpp.o
+[9/16] Building CXX object CMakeFiles/framelink_gst_session.dir/gst/framelink_session_transport.cpp.o
+[10/16] Linking CXX static library libframelink_gst_session.a
+[11/16] Linking CXX static library libgstframelink.a
+[12/16] Linking CXX executable fl_gst_shared_cpu_av
+[13/16] Building CXX object CMakeFiles/fl_gst_av_src_bin.dir/test/fl_gst_av_src_bin.cpp.o
+[14/16] Building CXX object CMakeFiles/fl_gst_av_bin.dir/test/fl_gst_av_bin.cpp.o
+[15/16] Linking CXX executable fl_gst_av_src_bin
+[16/16] Linking CXX executable fl_gst_av_bin

@@ -29,7 +29,7 @@ struct NativeEpochProbe {gint64 epoch;unsigned calls=0;};
 static gint64 nativeEpoch(gpointer data,GstClockTime now){
  auto*p=static_cast<NativeEpochProbe*>(data);CHECK(now>0);++p->calls;return p->epoch;
 }
-static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=false){
+static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=false,bool automatic=false){
  fprintf(stderr,"native AV mode %u local=%d\n",mode,local);
  auto*s=fl_gst_session_new(3);auto*r=fl_gst_session_new(3);
  flSessionConfig cfg{};cfg.version=2;cfg.sessionId.bytes[0]=1;cfg.clockId.bytes[0]=2;cfg.generation=1;
@@ -39,7 +39,7 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
  flChannel*channel=nullptr;flChannel*producer=nullptr;
  auto policy=nativeAvPolicy(local?0:cfg.generation);
  GSocketConnection*audioPeer=nullptr;
- if(local){
+ if(local&&!automatic){
   gchar*dir=g_dir_make_tmp("framelink-native-XXXXXX",nullptr);CHECK(dir);std::string path=std::string(dir)+"/session";g_free(dir);
   GstFrameLinkMemoryPolicy receiverPolicy{};gboolean opened=FALSE;GError*se=nullptr,*ce=nullptr;
   auto candidate=policy;
@@ -55,7 +55,7 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
   flSessionConfig remote{};CHECK(fl_gst_session_get_config(r,&remote)==FL_GST_SESSION_READY);
   CHECK(!ignored.calls&&remote.epochNs==cfg.epochNs);
   CHECK(epoch.calls==(customEpoch?1u:0u));if(customEpoch)CHECK(cfg.epochNs==epoch.epoch);
- }else{
+ }else if(!automatic){
  CHECK(fl_gst_session_configure(s,&cfg,&offer,&offer)==FL_GST_SESSION_READY);
  CHECK(fl_gst_session_configure(r,&cfg,&offer,&offer)==FL_GST_SESSION_READY);
  guint8 secret[32]{};secret[0]=73;auto*key=g_bytes_new(secret,32);
@@ -69,16 +69,16 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
  g_bytes_unref(key);
  }
  flClockMapping mapping{};mapping.sourceClockId=cfg.clockId;mapping.targetClockId.bytes[0]=8;mapping.targetAnchorNs=1000000;mapping.sourceAnchorNs=cfg.epochNs;
- if(!local)CHECK(fl_gst_session_set_mapping(r,1,&mapping,0)==FL_GST_SESSION_READY);
- gint64 mappedBase=0;CHECK(fl_gst_session_map_running_time(r,1,0,TRUE,&mappedBase)==FL_GST_SESSION_READY);
+ if(!local&&!automatic)CHECK(fl_gst_session_set_mapping(r,1,&mapping,0)==FL_GST_SESSION_READY);
+ gint64 mappedBase=0;if(!automatic)CHECK(fl_gst_session_map_running_time(r,1,0,TRUE,&mappedBase)==FL_GST_SESSION_READY);
  auto name="native-av-"+std::to_string(g_get_monotonic_time());
- if(!local)CHECK(flCreateChannelEx(name.c_str(),64,32,FL_FORMAT_RGBA8,2,FL_MAP_CPU|FL_REQUIRE_FRAME_METADATA,&channel)==FL_OK);
+ if(!local&&!automatic)CHECK(flCreateChannelEx(name.c_str(),64,32,FL_FORMAT_RGBA8,2,FL_MAP_CPU|FL_REQUIRE_FRAME_METADATA,&channel)==FL_OK);
  GError*e=nullptr;
  auto*tx=gst_parse_launch("framelinkavsink name=transport native-memory=true appsrc name=vi is-live=true format=time caps=video/x-raw(memory:D3D11Memory),format=RGBA,width=64,height=32,framerate=30/1 ! transport.video_sink appsrc name=ai is-live=true format=time caps=audio/x-raw,format=S16LE,layout=interleaved,rate=48000,channels=2,channel-mask=(bitmask)0x3 ! transport.audio_sink",&e);CHECK(tx&&!e);
  auto*rx=gst_parse_launch("framelinkavsrc name=transport video-format=RGBA width=64 height=32 framerate=30/1 transport.video_src ! appsink name=vo sync=false async=false transport.audio_src ! appsink name=ao sync=false async=false",&e);CHECK(rx&&!e);
  auto*sink=gst_bin_get_by_name(GST_BIN(tx),"transport");auto*src=gst_bin_get_by_name(GST_BIN(rx),"transport");
  // Both endpoints authenticate the exact producer-ordered policy before use.
- if(!local){
+ if(!local&&!automatic){
  guint8 secret[32]{};secret[0]=73;auto*key=g_bytes_new(secret,32);
  GSocketConnection*ma=nullptr,*mb=nullptr;avStreamPair(&ma,&mb);gboolean agreed=FALSE;
  std::thread agreement([&]{agreed=fl_gst_session_authenticate_native_memory(s,ma,TRUE,key,&policy,1000,nullptr,nullptr);});
@@ -87,6 +87,7 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
  g_object_unref(ma);g_object_unref(mb);g_bytes_unref(key);
  CHECK(flOpenProducer(name.c_str(),&producer)==FL_OK);
  }
+ if(!automatic){
  gboolean accepted=FALSE;
  g_signal_emit_by_name(sink,"adopt-channel",producer,&accepted);CHECK(accepted);
  g_signal_emit_by_name(sink,"apply-memory-policy",&policy,&accepted);CHECK(accepted);
@@ -95,8 +96,29 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
  g_signal_emit_by_name(src,"apply-memory-policy",&consumerPolicy,&accepted);CHECK(accepted);
  auto*video=gst_bin_get_by_name(GST_BIN(sink),"video");g_object_set(video,"async",FALSE,"enable-last-sample",FALSE,nullptr);gst_object_unref(video);
  for(auto entry:{std::make_pair(tx,s),std::make_pair(rx,r)}){auto*c=fl_gst_session_create_context(entry.second);gst_element_set_context(entry.first,c);gst_context_unref(c);}
+ }else{
+  gchar*dir=g_dir_make_tmp("framelink-native-bins-XXXXXX",nullptr);CHECK(dir);std::string path=std::string(dir)+"/session";g_free(dir);
+  for(auto*bin:{sink,src})g_object_set(bin,"session",path.c_str(),"video-format","RGBA","width",64u,"height",32u,
+    "video-pool",2u,"video-queue-frames",1u,"connect-timeout-ms",2000u,"idle-timeout-ms",1000u,nullptr);
+  policy=nativeAvPolicy(0);gboolean accepted=FALSE;
+  for(auto*bin:{sink,src}){auto candidate=policy;g_signal_emit_by_name(bin,"set-local-native-candidate",&candidate,&accepted);CHECK(accepted);
+   candidate.version=99; // the bin must retain a copy, not this caller-owned pointer
+  }
+ }
  auto*vi=gst_bin_get_by_name(GST_BIN(tx),"vi");auto*ai=gst_bin_get_by_name(GST_BIN(tx),"ai");auto*vo=gst_bin_get_by_name(GST_BIN(rx),"vo");auto*ao=gst_bin_get_by_name(GST_BIN(rx),"ao");
  CHECK(gst_element_set_state(rx,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);CHECK(gst_element_set_state(tx,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
+ if(automatic){
+  for(auto entry:{std::make_pair(sink,&s),std::make_pair(src,&r)}){
+   auto*child=gst_bin_get_by_name(GST_BIN(entry.first),"video");CHECK(child);
+   GstState state=GST_STATE_NULL;const auto end=g_get_monotonic_time()+5000000;
+   do {gst_element_get_state(child,&state,nullptr,0);if(state==GST_STATE_PLAYING)break;g_usleep(1000);}while(g_get_monotonic_time()<end);
+   CHECK(state==GST_STATE_PLAYING);auto*context=gst_element_get_context(child,"framelink.session.v1");CHECK(context);
+   g_object_unref(*entry.second);*entry.second=fl_gst_session_from_context(context);CHECK(*entry.second);gst_context_unref(context);gst_object_unref(child);
+  }
+  CHECK(fl_gst_session_get_config(s,&cfg)==FL_GST_SESSION_READY);
+  CHECK(cfg.epochNs==gint64(gst_element_get_base_time(tx)));
+  CHECK(fl_gst_session_map_running_time(r,cfg.generation,0,TRUE,&mappedBase)==FL_GST_SESSION_READY);
+ }
  auto*caps=gst_caps_from_string("video/x-raw(memory:D3D11Memory),format=RGBA,width=64,height=32,framerate=30/1");
  auto*q=gst_query_new_allocation(caps,TRUE);
  guint8 reqWire[FL_MEMORY_REQUIREMENTS_WIRE_SIZE];CHECK(flMemoryRequirementsEncode(&policy.requirements[0],reqWire,sizeof reqWire)==FL_MEMORY_OK);
@@ -130,9 +152,13 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
   CHECK(gst_app_src_end_of_stream(GST_APP_SRC(mode%2?vi:ai))==GST_FLOW_OK);
   auto*bus=gst_element_get_bus(rx);CHECK(!gst_bus_timed_pop_filtered(bus,30*GST_MSECOND,GstMessageType(GST_MESSAGE_EOS|GST_MESSAGE_ERROR)));gst_object_unref(bus);
   CHECK(gst_app_src_end_of_stream(GST_APP_SRC(mode%2?ai:vi))==GST_FLOW_OK);avTerminal(tx,GST_MESSAGE_EOS);avTerminal(rx,GST_MESSAGE_EOS);
-  guint64 frames=999;gint64 last=999;CHECK(fl_gst_session_wait_video_eos(r,1,0,&frames,&last)==FL_GST_SESSION_READY&&frames==count&&last==(count?37000000+(count-1)*1000000:-1LL));
+  guint64 frames=999;gint64 last=999;CHECK(fl_gst_session_wait_video_eos(r,cfg.generation,0,&frames,&last)==FL_GST_SESSION_READY&&frames==count&&last==(count?37000000+(count-1)*1000000:-1LL));
  }
  auto start=g_get_monotonic_time();gst_element_set_state(tx,GST_STATE_NULL);gst_element_set_state(rx,GST_STATE_NULL);CHECK(g_get_monotonic_time()-start<1000000);
+ if(automatic){
+  CHECK(gst_element_set_state(sink,GST_STATE_READY)==GST_STATE_CHANGE_FAILURE);
+  CHECK(gst_element_set_state(src,GST_STATE_READY)==GST_STATE_CHANGE_FAILURE);
+ }
  CHECK(gst_buffer_pool_set_active(pool,FALSE));gst_object_unref(pool);
  for(auto*object:{vi,ai,vo,ao,sink,src,tx,rx})gst_object_unref(object);
  if(audioPeer)g_object_unref(audioPeer);g_object_unref(s);g_object_unref(r);
@@ -179,4 +205,45 @@ static void nativeLocalNegatives(){
   CHECK(g_get_monotonic_time()-start<1500000);g_object_unref(s);g_object_unref(r);
  }
  puts("native local setup: invalid policies, candidate mismatch, legacy isolation, capacity and cancellation pass");
+}
+
+static void nativeBinNegatives(){
+ for(bool producer:{false,true}){
+  for(unsigned mode=0;mode<10;++mode){
+   auto*bin=gst_element_factory_make(producer?"framelinkavsink":"framelinkavsrc",nullptr);CHECK(bin);
+   g_object_set(bin,"session","unused-native-negative","native-memory",producer,nullptr);
+   auto candidate=nativeAvPolicy(0);
+   if(mode==0)candidate.version=2;
+   if(mode==1)candidate.sessionGeneration=1;
+   if(mode==2)candidate.paths[1].operations=0;
+   if(mode==3)candidate.requirements[0].allowedOperations=0;
+   if(mode==4)g_object_set(bin,"session",nullptr,nullptr);
+   if(mode==5)g_object_set(bin,"shared-cpu",TRUE,nullptr);
+   if(mode==6)g_object_set(bin,"tracks","audio",nullptr);
+   if(mode==7)g_object_set(bin,"native-memory",!producer,nullptr);
+   gboolean accepted=TRUE;g_signal_emit_by_name(bin,"set-local-native-candidate",mode==8?nullptr:&candidate,&accepted);
+   CHECK(accepted==(mode==9));
+   if(mode==9){
+    accepted=TRUE;g_signal_emit_by_name(bin,"set-local-native-candidate",&candidate,&accepted);CHECK(!accepted);
+    accepted=TRUE;g_signal_emit_by_name(bin,"apply-memory-policy",&candidate,&accepted);CHECK(!accepted);
+    accepted=TRUE;g_signal_emit_by_name(bin,"adopt-channel",nullptr,&accepted);CHECK(!accepted);
+    g_object_set(bin,"width",96u,nullptr);guint width=0;g_object_get(bin,"width",&width,nullptr);CHECK(width==1280);
+   }
+   gst_object_unref(bin);
+  }
+  // Setup cancellation must interrupt an absent peer's 60-second deadline.
+  auto*pipeline=gst_pipeline_new(nullptr);
+  auto*bin=gst_element_factory_make(producer?"framelinkavsink":"framelinkavsrc",nullptr);CHECK(bin);
+  gst_bin_add(GST_BIN(pipeline),bin);
+  gchar*dir=g_dir_make_tmp("framelink-native-cancel-XXXXXX",nullptr);CHECK(dir);std::string path=std::string(dir)+"/session";g_free(dir);
+  g_object_set(bin,"session",path.c_str(),"native-memory",producer,"connect-timeout-ms",60000u,nullptr);
+  auto candidate=nativeAvPolicy(0);gboolean accepted=FALSE;
+  g_signal_emit_by_name(bin,"set-local-native-candidate",&candidate,&accepted);CHECK(accepted);
+  CHECK(gst_element_set_state(pipeline,GST_STATE_READY)!=GST_STATE_CHANGE_FAILURE);
+  accepted=TRUE;g_signal_emit_by_name(bin,"set-local-native-candidate",&candidate,&accepted);CHECK(!accepted);
+  g_usleep(30000);auto start=g_get_monotonic_time();
+  CHECK(gst_element_set_state(pipeline,GST_STATE_NULL)!=GST_STATE_CHANGE_FAILURE);
+  CHECK(g_get_monotonic_time()-start<1000000);gst_object_unref(pipeline);
+ }
+ puts("native bins: 20 configuration controls, immutable copies and both-role bounded cancellation pass");
 }

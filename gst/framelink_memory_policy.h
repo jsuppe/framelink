@@ -19,3 +19,18 @@ typedef struct GstFrameLinkMemoryPolicy {
 // ALLOCATION query field "framelink-memory-requirements": G_TYPE_BYTES containing
 // FL_MEMORY_REQUIREMENTS_WIRE_SIZE bytes. Required on policy-bound native sinks.
 // This request is evaluated alongside BOTH authenticated endpoint requirements.
+
+// Windows A/V bins additionally expose set-local-native-candidate(pointer).
+// This is an UNAUTHENTICATED producer-ordered template, not apply-memory-policy.
+// Configure all properties first in NULL, including a nonempty session= path;
+// producer native-memory=true, receiver native-memory=false (explicit readback),
+// neither shared-cpu nor audio-only. Version 1, generation 0, D3D11 GPU_SAMPLE
+// producer operations=0 and CPU_READ receiver operations=COPY|READBACK only.
+// Both requirements must permit the chosen paths. The action copies the value
+// and freezes configuration. Both peers must provide identical templates.
+// The setup worker authenticates it before allocating/adopting/applying channels;
+// it reorders endpoints for the receiver and preserves the producer pipeline epoch.
+// Return TRUE means template accepted, NOT peer authentication or setup success.
+// Errors surface on the bus. One setup attempt per bin; use new bins to reconnect,
+// including after cancellation/failure. No implicit fallback. Other platforms
+// return FALSE. Existing broker actions and unbound defaults remain unchanged.

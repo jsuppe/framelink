@@ -224,7 +224,8 @@ G_BEGIN_DECLS
 // this call. Failure clears outputs and cancels session. One deadline covers
 // cancellable setup I/O; native allocation calls are synchronous platform calls.
 // Caller GCancellable interrupts I/O. Existing defaults/protocols unchanged.
-// native-memory + session= bin automation is not enabled by this helper.
+// A/V bins select this profile only via set-local-native-candidate; see
+// framelink_memory_policy.h. Setting native-memory alone does not select it.
 FL_GST_SESSION_API gboolean fl_gst_session_open_local_native(FlGstSession*,gboolean producer,
  const gchar* session_path,const flSessionCapabilities*,guint video_queue_frames,guint video_pool,
  guint audio_queue_ms,guint connect_timeout_ms,guint idle_timeout_ms,
@@ -235,8 +236,8 @@ FL_GST_SESSION_API gboolean fl_gst_session_open_local_native(FlGstSession*,gbool
 // a nonnegative monotonic system-clock timestamp; negative rejects setup. The
 // callback must not block and its data must outlive the call. Consumer ignores
 // the callback: its epoch always comes from the authenticated producer. Null
-// callback preserves open_local_native's now+200ms epoch. This is a prerequisite
-// for bin setup, not automatic native-memory/session= support on its own.
+// callback preserves open_local_native's now+200ms epoch. The explicit local
+// native bin profile passes its already-selected pipeline epoch here.
 typedef gint64 (*FlGstNativeEpochFunc)(gpointer data,GstClockTime now);
 FL_GST_SESSION_API gboolean fl_gst_session_open_local_native_epoch(FlGstSession*,gboolean producer,
  const gchar* session_path,const flSessionCapabilities*,guint video_queue_frames,guint video_pool,

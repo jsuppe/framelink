@@ -175,3 +175,31 @@ negative checks](../windows-native-epoch/README.md) passed. This is an automatic
 bin prerequisite, not completed bin wiring or a frozen integration contract.
 The prior exact [34a391d baseline](../windows-integrated-34a391d/README.md) passed
 133/133 tests; clean integration of this additive API is the next gate.
+
+
+## Explicit automatic native A/V bin profile
+
+Both A/V bins expose `set-local-native-candidate(pointer) -> gboolean`. Configure
+all properties in NULL first, including the same nonempty `session=` path.
+The producer selects `native-memory=true`; the receiver selects
+`native-memory=false` because v1 explicitly performs CPU readback. Both use
+`shared-cpu=false` and include video. Pass the same producer-ordered
+`GstFrameLinkMemoryPolicy` template: version 1, generation 0, D3D11 GPU_SAMPLE
+producer with operations 0, CPU_READ receiver with COPY|READBACK. Both endpoint
+requirements must authorize the paths. Unsupported profiles reject; no fallback.
+
+Success copies the template and freezes configuration; it is NOT authentication
+success. Worker setup authenticates the exact candidate before allocating channels,
+then adopts and applies the bound policy internally (reordered for the receiver).
+Only after setup/consumer readiness does media proceed. The producer pipeline
+base time is the session epoch. Setup errors surface on the bus. Each configured
+bin allows one setup attempt: create new bins for reconnect, including after
+cancellation/failure. Broker actions cannot be mixed with the candidate action.
+
+The action is discoverable with `g_signal_lookup`; other platforms return false
+until supported, preserving their existing profiles. Existing native C structs,
+wire formats and overload/fallback defaults are unchanged. This Windows profile
+is not end-to-end zero-copy, arbitrary decoder compatibility or full M6 acceptance.
+See [implementation and focused evidence](../windows-native-bins/README.md).
+The preceding exact [c8ff226 baseline](../windows-integrated-c8ff226/README.md)
+passed134/134; the new bin implementation requires its own clean integrated check.
