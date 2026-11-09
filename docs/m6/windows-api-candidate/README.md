@@ -1,19 +1,20 @@
 # Windows API integration baseline candidate — NOT FROZEN
 
-**Current integrated candidate:** 3f45f7b6465fcd994c2aac274ff41d333e078c5c.
-Clean exact-revision Windows build/API/full suite **131/131 passed**;
-[pinned evidence](../windows-integrated-3f45f7b/README.md) includes DLL hashes,
-runtime properties and exports. Named authenticated CPU provisioning is available.
-No API freeze or full M6 acceptance is implied.
+**Current integrated candidate:** `d9585a8a80b3e0117631ca361b093166a5d685cf`.
+Clean exact-revision Windows build/API/full suite **133/133 passed**;
+[pinned evidence](../windows-integrated-d9585a8/README.md) includes DLL hashes,
+runtime properties and exports. All 114 exported names from the earlier
+`3f45f7b` candidate remain, with two additive local-CPU setup names (116 total).
+Export-name retention is not by itself proof of behavioral or ordinal ABI compatibility.
 
-**Newer tested-source addition:** `d60f683b2ede9731332bd33cefbf28b70db0f488` adds typed protected
-FAR3 discovery and Windows local CPU A/V setup, including `shared-cpu=true session=`
-bins. Windows4/4, Linux3/3 and Android1/1 final-bin regressions pass (dual Android
-ABI builds); preceding setup tests Windows4/4,Linux3/3,Android3/3 also pass.
-All39 prior session DLL exports retained, plus the public local-CPU factory and
-internal epoch helper. [Exact contract, hashes and compatibility evidence](../cpu-path/windows-local-cpu-bins/README.md).
-Clean integrated build/API/full-suite gate is owned and running; collect before
-advancing the pinned candidate. Existing overload/fallback defaults unchanged.
+Windows authenticated CPU discovery/delegation and `shared-cpu=true session=`
+bins are implemented and tested. `native-memory=true` producer bins support
+broker-bound channel and memory-policy adoption; [native producer with PCM](../windows-native-producer-av/README.md)
+checks original producer allocation, exact pixels/audio, clock mapping and terminal
+semantics. Its receiver explicitly uses CPU readback. Authenticated native policy
+agreement/discovery, real decoder integration and zero-copy consumer/relay gates
+remain open. The earlier Windows startup timing failure is not waived by the
+later integrated pass. API not frozen; M6 not complete.
 
 **Historical candidate** exact revision: `609cb74031a5de2cee782619007a6e87ab7fbccd`.
 Clean isolated Windows source archive SHA256:
@@ -36,7 +37,7 @@ specific tests, not full M6 qualification. Source headers are pinned in
 | CPU descriptor | v1 FCS1,128-byte wire; Windows allocationBytes explicitly page-padded | Unchanged portable layout; Windows pipe channel available explicitly |
 | CPU channel | Portable opaque channel/lease API; POSIX FD and additive Windows pipe factories | Separate typed platform factories; never reinterpret int FD as HANDLE |
 | GStreamer coordinator | `framelink.session.v1`, typed strong reference, authenticated stream binding, finite cancellation | Windows explicit binding or protected local authenticated composition available |
-| GStreamer bins | `shared-cpu=false`; native output opt-in on avsrc; avsink lacks native producer selection | Windows broker-context and explicit CPU session= discovery tested; current-user-only directory required |
+| GStreamer bins | `shared-cpu=false`; native output opt-in on avsrc; broker-bound native producer opt-in on avsink | Windows broker-context and explicit CPU session= discovery tested; current-user-only directory required |
 
 ## Observed defaults, not a new product decision
 
@@ -58,7 +59,7 @@ profiles explicitly enable their own failure policy. D2 uniform realtime/lossles
 policy remains unresolved and Jon-owned. D3 convenience defaults remain unresolved;
 no automatic native-to-CPU fallback was added. No new default was silently chosen.
 An app requiring no unexpected loss must select explicit strict policy and observe
-loss counters; current avsink property coverage needs further stabilization.
+loss counters; avsink now exposes the same explicit video ring-full controls in the tested-source addition below.
 
 ## Migration and pending integration
 
@@ -73,9 +74,9 @@ and explicitly selected; do not append handle integers to legacy POSIX packets.
 Windows HANDLE values are process-local; bind the process identity, transfer exact
 rights, acknowledge adoption, reject stale epochs and retain held old leases.
 
-Remaining gates before a Windows-ready API baseline: authenticated CPU
-discovery/delegation and coordinator/bin integration, D3D11 native
-producer coordinated-session integration, strict overload property/profile review,
+Remaining gates before a Windows-ready API baseline: authenticated native
+policy agreement/discovery, native producer/consumer/relay integration,
+strict overload profile review,
 resource-growth/timing/fault fixes and exact-head compatibility tests. Real decoder,
 two-hop PCM and all-platform M6 acceptance remain separate. This candidate is a
 reviewable inventory, **not a freeze, full Windows app-integration acceptance, or M6 closure**.
@@ -119,3 +120,21 @@ Windows6/6, Linux4/4 and Android4/4 plusdualABI builds pass. This is newer than
 the pinned d8f97c2 candidate; clean exact-head integration is pending. Automatic
 authentication/discovery, CPU elements/bins and coordinated native producer gates
 remain open. No API freeze or overload/default decision is inferred.
+
+## Additive video overload controls (after d9585a8)
+
+`framelinkavsink` exposes `buffer-wait-ms` (0..1000, default 5) and
+`error-on-ring-full` (default false). Set these in NULL **before** adopting the
+native channel/policy. Selection survives internal video child reconstruction;
+state/policy-bound mutation is refused. Copy-in ring exhaustion preserves the
+existing bounded drop-and-count default, or reports an error when explicitly
+selected. `buffer-wait-ms` is allocation waiting, not playout latency.
+
+These controls do not weaken native producer reservation/completion contracts,
+select a hidden copy fallback, or permit PCM sample loss. Shared-CPU remains its
+existing strict channel policy; `error-on-ring-full=false` does not make it lossy.
+This additive surface does not settle D2's product-wide overload default or D3.
+Use a runtime property check when supporting older bins. Native C structs and
+wire versions remain unchanged.
+
+Focused verification: [Windows4/4, Linux3/3, Android3/3 and dual ABI builds](../windows-bin-overload/README.md).

@@ -46,9 +46,9 @@ struct Shared {
 typedef struct _GstFrameLinkAvSink {
  GstBin parent;
  gchar*sessionPath,*tracks,*videoFormat,*audioFormat;
- guint width,height,fpsN,fpsD,rate,channels,connectMs,idleMs,audioQueueMs,videoQueue,videoPool;
+ guint width,height,fpsN,fpsD,rate,channels,connectMs,idleMs,audioQueueMs,videoQueue,videoPool,bufferWaitMs;
  GstElement*video,*audio;GstPad*videoPad,*audioPad;
- FlGstSession*session;gboolean local,sharedCpu,nativeMemory,policyBound,nativeAdopted,savedLastSample,lastSampleScoped;
+ FlGstSession*session;gboolean errorOnRingFull,local,sharedCpu,nativeMemory,policyBound,nativeAdopted,savedLastSample,lastSampleScoped;
  GCancellable*cancel;std::thread*worker;std::thread*drainer;Shared*shared;
  std::vector<GstMessage*>*heldEos;guint eosNeeded;gulong probes[2];
 } GstFrameLinkAvSink;
@@ -66,7 +66,7 @@ static GstStaticPadTemplate audioTemplate=GST_STATIC_PAD_TEMPLATE("audio_sink",G
  GST_STATIC_CAPS("audio/x-raw,format={S16LE,F32LE},layout=interleaved,rate=[8000,192000],channels=[1,2]"));
 
 enum {PROP_0,PROP_SESSION,PROP_TRACKS,PROP_VIDEO_FORMAT,PROP_WIDTH,PROP_HEIGHT,PROP_FRAMERATE,PROP_AUDIO_FORMAT,PROP_RATE,PROP_CHANNELS,
- PROP_CONNECT,PROP_IDLE,PROP_AUDIO_QUEUE,PROP_VIDEO_QUEUE,PROP_VIDEO_POOL,PROP_SHARED_CPU,PROP_NATIVE,PROP_ID,PROP_GENERATION,PROP_AUDIO_ID,PROP_VIDEO_ID};
+ PROP_CONNECT,PROP_IDLE,PROP_AUDIO_QUEUE,PROP_VIDEO_QUEUE,PROP_VIDEO_POOL,PROP_SHARED_CPU,PROP_NATIVE,PROP_BUFFER_WAIT,PROP_ERROR_ON_RING_FULL,PROP_ID,PROP_GENERATION,PROP_AUDIO_ID,PROP_VIDEO_ID};
 
 static bool wantVideo(GstFrameLinkAvSink*s){return s->tracks&&(!strcmp(s->tracks,"av")||!strcmp(s->tracks,"video"));}
 static bool wantAudio(GstFrameLinkAvSink*s){return s->tracks&&(!strcmp(s->tracks,"av")||!strcmp(s->tracks,"audio"));}
@@ -196,7 +196,7 @@ static void rebuild(GstFrameLinkAvSink*s){
   gst_element_add_pad(GST_ELEMENT(s),*pad);
  };
  if(wantVideo(s))add("framelinksink","video",&videoTemplate,&s->video,&s->videoPad);
- if(s->video)g_object_set(s->video,"native-memory",s->nativeMemory,nullptr);
+ if(s->video)g_object_set(s->video,"native-memory",s->nativeMemory,"buffer-wait-ms",s->bufferWaitMs,"error-on-ring-full",s->errorOnRingFull,nullptr);
  if(wantAudio(s)){add("framelinkaudiosink","audio",&audioTemplate,&s->audio,&s->audioPad);if(s->audio)g_object_set(s->audio,"tracks",wantVideo(s)?"av":"audio",nullptr);}
 }
 
@@ -328,6 +328,8 @@ static void setProperty(GObject*object,guint id,const GValue*value,GParamSpec*sp
  if(GST_STATE(s)!=GST_STATE_NULL){g_warning("framelinkavsink: %s can only change in NULL",spec->name);return;}
  switch(id){
  case PROP_NATIVE:s->nativeMemory=g_value_get_boolean(value);if(s->video)g_object_set(s->video,"native-memory",s->nativeMemory,nullptr);break;
+ case PROP_BUFFER_WAIT:s->bufferWaitMs=g_value_get_uint(value);if(s->video)g_object_set(s->video,"buffer-wait-ms",s->bufferWaitMs,nullptr);break;
+ case PROP_ERROR_ON_RING_FULL:s->errorOnRingFull=g_value_get_boolean(value);if(s->video)g_object_set(s->video,"error-on-ring-full",s->errorOnRingFull,nullptr);break;
  case PROP_SHARED_CPU:s->sharedCpu=g_value_get_boolean(value);break;
  case PROP_SESSION:g_free(s->sessionPath);s->sessionPath=g_value_dup_string(value);break;
  case PROP_TRACKS:{const char*t=g_value_get_string(value);if(!t||(strcmp(t,"av")&&strcmp(t,"audio")&&strcmp(t,"video"))){g_warning("framelinkavsink: tracks must be audio, video or av");break;}
@@ -349,6 +351,8 @@ static void getProperty(GObject*object,guint id,GValue*value,GParamSpec*spec){
   if(session){if(fl_gst_session_get_config(session,&c)!=FL_GST_SESSION_READY)c={};g_object_unref(session);}}
  switch(id){
  case PROP_NATIVE:g_value_set_boolean(value,s->nativeMemory);break;
+ case PROP_BUFFER_WAIT:g_value_set_uint(value,s->bufferWaitMs);break;
+ case PROP_ERROR_ON_RING_FULL:g_value_set_boolean(value,s->errorOnRingFull);break;
  case PROP_SHARED_CPU:g_value_set_boolean(value,s->sharedCpu);break;
  case PROP_SESSION:g_value_set_string(value,s->sessionPath);break;case PROP_TRACKS:g_value_set_string(value,s->tracks);break;
  case PROP_VIDEO_FORMAT:g_value_set_string(value,s->videoFormat);break;
@@ -381,7 +385,7 @@ static void finalize(GObject*object){
 static void gst_framelink_av_sink_init(GstFrameLinkAvSink*s){
  s->tracks=g_strdup("av");s->videoFormat=g_strdup("BGRA");s->audioFormat=g_strdup("S16LE");
  s->width=1280;s->height=720;s->fpsN=30;s->fpsD=1;s->rate=48000;s->channels=2;
- s->connectMs=15000;s->idleMs=15000;s->audioQueueMs=80;s->videoQueue=2;s->videoPool=0;
+ s->connectMs=15000;s->idleMs=15000;s->audioQueueMs=80;s->videoQueue=2;s->videoPool=0;s->bufferWaitMs=5;s->errorOnRingFull=FALSE;
  s->shared=new Shared;s->heldEos=new std::vector<GstMessage*>;
  rebuild(s);
 }
@@ -394,6 +398,10 @@ static void gst_framelink_av_sink_class_init(GstFrameLinkAvSinkClass*klass){
  gst_element_class_add_static_pad_template(e,&videoTemplate);gst_element_class_add_static_pad_template(e,&audioTemplate);
  const auto rw=GParamFlags(G_PARAM_READWRITE|G_PARAM_STATIC_STRINGS|GST_PARAM_MUTABLE_READY);
  const auto ro=GParamFlags(G_PARAM_READABLE|G_PARAM_STATIC_STRINGS);
+ // Additive controls preserve the thin sink's existing defaults. They select
+ // video copy-in ring exhaustion only; PCM and native ownership stay strict.
+ g_object_class_install_property(o,PROP_BUFFER_WAIT,g_param_spec_uint("buffer-wait-ms","Video buffer wait budget","Maximum video allocation wait; zero is nonblocking, not a presentation delay; set before channel/policy binding",0,1000,5,rw));
+ g_object_class_install_property(o,PROP_ERROR_ON_RING_FULL,g_param_spec_boolean("error-on-ring-full","Reject video overload","Fail video copy-in on exhausted ring instead of drop-and-count; does not relax PCM or native ownership rules",FALSE,rw));
  g_object_class_install_property(o,PROP_SESSION,g_param_spec_string("session","Session","Private current-user local discovery directory (not a secret or URL); unset: use an installed framelink.session.v1 context",nullptr,rw));
  g_object_class_install_property(o,PROP_TRACKS,g_param_spec_string("tracks","Tracks","Required track set: audio, video or av; only enabled pads exist","av",rw));
  g_object_class_install_property(o,PROP_VIDEO_FORMAT,g_param_spec_string("video-format","Video format","Offered video format with session= (BGRA, RGBA, NV12, RGB10A2_LE)","BGRA",rw));
