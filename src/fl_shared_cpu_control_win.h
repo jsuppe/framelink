@@ -30,6 +30,7 @@ class SharedCpuControlWin {
     flResult fail(flResult r=FL_INVALID){link_.close();agreed_=false;accepted_=false;return r;}
 public:
     explicit SharedCpuControlWin(SharedCpuPipeWin&& link):link_(std::move(link)){}
+    flResult waitReadable(uint32_t timeoutMs){return link_.waitReadable(timeoutMs);}
     bool agreed()const{return agreed_;}
     bool poolAccepted()const{return accepted_;}
     bool writableSlot(uint32_t slot)const{return accepted_&&producer_&&slot<poolCount_&&!slots_[slot]&&!ended_;}

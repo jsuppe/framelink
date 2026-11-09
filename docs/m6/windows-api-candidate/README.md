@@ -84,3 +84,14 @@ FCW1 is a separately tagged Windows section envelope; POSIX FCP1 and public
 headers are unchanged. FCF1/FCR1, FCM1 and FCE1 retain existing portable layouts.
 This does not expose a Windows CPU factory or replace the exact609cb74 candidate
 above. Authentication/delegation and public lease integration remain required.
+
+## Additive Windows CPU API implementation
+
+[Windows CPU factories and portable leases](../cpu-path/windows-cpu-channel/README.md)
+now pass7/7 focused Windows tests and8/8 each Linux/Android shared regressions.
+`framelink_shared_cpu_win.h` accepts authenticated pipe/process handles separately;
+POSIX factories remain unchanged. All59 legacy DLL exports are retained plus16
+new CPU symbols. This supersedes the “Windows channel unavailable” implementation
+status above, **not** the pinned609cb74 candidate artifact. A fresh exact-revision
+Windows/API build is next; new coordinator/GStreamer CPU binding, readiness timing,
+native producer integration and product-policy decisions remain open. No freeze.

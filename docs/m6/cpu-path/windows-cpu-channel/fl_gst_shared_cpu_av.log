@@ -1,0 +1,27 @@
+mode 0
+mode 1
+mode 2
+mode 3
+mode 4
+bus: Internal data stream error. ../libs/gst/base/gstbasesrc.c(3177): gst_base_src_loop (): /GstPipeline:pipeline11/GstFrameLinkSrc:framelinksrc4:
+streaming stopped, reason error (-5)
+mode 5
+bus: audio peer closed before GDP EOS <linux-home>/dev/framelink-m6/gst/gstframelinkaudiosrc.cpp(66): readChunkImpl (): /GstPipeline:pipeline13/GstFrameLinkAudioSrc:framelinkaudiosrc5/FlAudioReader:flaudioreader9
+mode 0
+mode 1
+mode 2
+mode 3
+mode 4
+bus: audio session cancelled <linux-home>/dev/framelink-m6/gst/gstframelinkaudiosrc.cpp(95): badInput (): /GstPipeline:pipeline23/GstFrameLinkAvSrc:transport/GstFrameLinkAudioSrc:audio:
+FrameLink consumer rejected received PCM
+mode 5
+bus: audio peer closed before GDP EOS <linux-home>/dev/framelink-m6/gst/gstframelinkaudiosrc.cpp(66): readChunkImpl (): /GstPipeline:pipeline25/GstFrameLinkAvSrc:transport/GstFrameLinkAudioSrc:audio/FlAudioReader:flaudioreader15
+mode 0
+mode 1
+mode 2
+mode 3
+mode 0
+mode 1
+mode 2
+mode 3
+CPU A/V: exact PCM/pixels, common mapping preserves37ms offset, both EOS submission orders, empty streams, terminal conflict and PCM death passed

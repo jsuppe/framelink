@@ -109,6 +109,25 @@ public:
         return SharedCpuAllocationWin::importHandle(descriptor,local.value,
             descriptor.generation,descriptor.allocationId,out);
     }
+    // Non-consuming readiness. Bounded 1ms polling is explicit on Windows;
+    // this is not a scheduling-delay or sub-millisecond latency guarantee.
+    // Peek is issued only on an OVERLAPPED pipe with serialized I/O.
+    flResult waitReadable(uint32_t timeoutMs){
+        if(!state_)return FL_DISCONNECTED;
+        if(timeoutMs>60000)return FL_INVALID;
+        const auto end=GetTickCount64()+timeoutMs;
+        for(;;){
+            auto& s=*state_;
+            if((s.cancel.value&&WaitForSingleObject(s.cancel.value,0)!=WAIT_TIMEOUT))return FL_DISCONNECTED;
+            DWORD available=0;
+            if(!PeekNamedPipe(s.pipe.value,nullptr,0,nullptr,&available,nullptr))return FL_OK; // receive resolves EOF/error
+            if(available)return FL_OK;
+            if(WaitForSingleObject(s.peer.value,0)!=WAIT_TIMEOUT)return FL_OK;
+            if(GetTickCount64()>=end)return FL_TIMEOUT;
+            HANDLE events[2]={s.peer.value,s.cancel.value};
+            WaitForMultipleObjects(s.cancel.value?2:1,events,FALSE,1);
+        }
+    }
     flResult send(MsgType type,const void* payload,size_t size){
         if(!state_)return FL_DISCONNECTED;
         if(size>65536-sizeof(MsgHeader)||(size&&!payload))return FL_INVALID;

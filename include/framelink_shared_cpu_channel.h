@@ -1,14 +1,15 @@
 #pragma once
-// Explicit CPU-only channel extension for Linux/Android. Separate opaque types
+// Explicit CPU-only channel extension. Platform-specific factories below. Separate opaque types
 // cannot be passed to native flChannel/flImage GPU APIs. No implicit fallback.
 #include "framelink_shared_cpu.h"
 #include "framelink_session.h"
-#if !defined(_WIN32)
 #ifdef __cplusplus
 extern "C" {
 #endif
 typedef struct flSharedCpuChannel flSharedCpuChannel;
 typedef struct flSharedCpuLease flSharedCpuLease;
+#define FL_SHARED_CPU_FRAME_METADATA 1u
+#define FL_SHARED_CPU_ORDERED_EOS 2u
 // Externally serialize ALL calls sharing a channel or its leases. The broker
 // authenticates/delegates the connected SOCK_SEQPACKET socket. Both endpoints
 // supply the same validated session selection and their actual memory policy.
@@ -16,6 +17,7 @@ typedef struct flSharedCpuLease flSharedCpuLease;
 // Open consumer allocates desc[count] (2..16 slots); producer imports that pool.
 // Operations currently 0 or COPY; callers declare all boundary payload copies.
 // Outputs unchanged on error. No native handles, GPU fences or conversions.
+#if !defined(_WIN32)
 FL_API flResult flSharedCpuOpenConsumerFd(int fd,uint32_t timeoutMs,
     const flSessionConfig*,const flMemoryRequirements*,uint32_t operations,
     const flSharedCpuDescriptor* desc,size_t count,flSharedCpuChannel** out);
@@ -24,14 +26,13 @@ FL_API flResult flSharedCpuOpenProducerFd(int fd,uint32_t timeoutMs,
     flSharedCpuChannel** out);
 // Strict explicit metadata mode: BOTH peers must select the same flag. No
 // downgrade to unextended peers. Original factories select flags=0 unchanged.
-#define FL_SHARED_CPU_FRAME_METADATA 1u
-#define FL_SHARED_CPU_ORDERED_EOS 2u
 FL_API flResult flSharedCpuOpenConsumerFdEx(int fd,uint32_t timeoutMs,
     const flSessionConfig*,const flMemoryRequirements*,uint32_t operations,
     const flSharedCpuDescriptor* desc,size_t count,uint32_t flags,flSharedCpuChannel** out);
 FL_API flResult flSharedCpuOpenProducerFdEx(int fd,uint32_t timeoutMs,
     const flSessionConfig*,const flMemoryRequirements*,uint32_t operations,
     uint32_t flags,flSharedCpuChannel** out);
+#endif // POSIX factories; Windows factories: framelink_shared_cpu_win.h
 // Metadata mode requires this submit API, and preserves DTS/duration/discontinuity
 // and independent nonzero media generation. Same write-lease consumption rules.
 FL_API flResult flSharedCpuSubmitWithMetadata(flSharedCpuLease*,uint64_t sequence,
@@ -82,5 +83,4 @@ FL_API flResult flSharedCpuRetainRead(flSharedCpuLease*);
 FL_API flResult flSharedCpuReleaseRead(flSharedCpuLease*);
 #ifdef __cplusplus
 }
-#endif
 #endif

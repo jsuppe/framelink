@@ -1,0 +1,212 @@
+[
+  {
+    "name": "arm64-build",
+    "command": [
+      "cmake",
+      "--build",
+      "<linux-home>/dev/build/framelink-m6-arm64",
+      "--target",
+      "fl_shared_cpu_channel",
+      "fl_shared_cpu_channel_c",
+      "fl_shared_cpu_reconnect",
+      "fl_shared_cpu_eos",
+      "fl_gst_shared_cpu_source",
+      "fl_gst_shared_cpu_roundtrip",
+      "fl_gst_shared_cpu_av",
+      "fl_gst_shared_cpu_events",
+      "-j",
+      "4"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "x86_64-build",
+    "command": [
+      "cmake",
+      "--build",
+      "<linux-home>/dev/build/framelink-m6-x86_64",
+      "--target",
+      "fl_shared_cpu_channel",
+      "fl_shared_cpu_channel_c",
+      "fl_shared_cpu_reconnect",
+      "fl_shared_cpu_eos",
+      "fl_gst_shared_cpu_source",
+      "fl_gst_shared_cpu_roundtrip",
+      "fl_gst_shared_cpu_av",
+      "fl_gst_shared_cpu_events",
+      "-j",
+      "4"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "android-mkdir",
+    "command": [
+      "adb",
+      "shell",
+      "mkdir -p /data/local/tmp/framelink-windows-api-regression"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "push-fl_shared_cpu_channel",
+    "command": [
+      "adb",
+      "push",
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_shared_cpu_channel",
+      "/data/local/tmp/framelink-windows-api-regression/"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "push-fl_shared_cpu_channel_c",
+    "command": [
+      "adb",
+      "push",
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_shared_cpu_channel_c",
+      "/data/local/tmp/framelink-windows-api-regression/"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "push-fl_shared_cpu_reconnect",
+    "command": [
+      "adb",
+      "push",
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_shared_cpu_reconnect",
+      "/data/local/tmp/framelink-windows-api-regression/"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "push-fl_shared_cpu_eos",
+    "command": [
+      "adb",
+      "push",
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_shared_cpu_eos",
+      "/data/local/tmp/framelink-windows-api-regression/"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "push-fl_gst_shared_cpu_source",
+    "command": [
+      "adb",
+      "push",
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_gst_shared_cpu_source",
+      "/data/local/tmp/framelink-windows-api-regression/"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "push-fl_gst_shared_cpu_roundtrip",
+    "command": [
+      "adb",
+      "push",
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_gst_shared_cpu_roundtrip",
+      "/data/local/tmp/framelink-windows-api-regression/"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "push-fl_gst_shared_cpu_av",
+    "command": [
+      "adb",
+      "push",
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_gst_shared_cpu_av",
+      "/data/local/tmp/framelink-windows-api-regression/"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "push-fl_gst_shared_cpu_events",
+    "command": [
+      "adb",
+      "push",
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_gst_shared_cpu_events",
+      "/data/local/tmp/framelink-windows-api-regression/"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "android-chmod",
+    "command": [
+      "adb",
+      "shell",
+      "chmod 755 /data/local/tmp/framelink-windows-api-regression/fl_*"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "fl_shared_cpu_channel",
+    "command": [
+      "adb",
+      "shell",
+      "cd /data/local/tmp/framelink-windows-api-regression && ./fl_shared_cpu_channel"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "fl_shared_cpu_channel_c",
+    "command": [
+      "adb",
+      "shell",
+      "cd /data/local/tmp/framelink-windows-api-regression && ./fl_shared_cpu_channel_c"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "fl_shared_cpu_reconnect",
+    "command": [
+      "adb",
+      "shell",
+      "cd /data/local/tmp/framelink-windows-api-regression && ./fl_shared_cpu_reconnect"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "fl_shared_cpu_eos",
+    "command": [
+      "adb",
+      "shell",
+      "cd /data/local/tmp/framelink-windows-api-regression && ./fl_shared_cpu_eos"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "fl_gst_shared_cpu_source",
+    "command": [
+      "adb",
+      "shell",
+      "cd /data/local/tmp/framelink-windows-api-regression && ./fl_gst_shared_cpu_source static"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "fl_gst_shared_cpu_roundtrip",
+    "command": [
+      "adb",
+      "shell",
+      "cd /data/local/tmp/framelink-windows-api-regression && ./fl_gst_shared_cpu_roundtrip static"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "fl_gst_shared_cpu_av",
+    "command": [
+      "adb",
+      "shell",
+      "cd /data/local/tmp/framelink-windows-api-regression && ./fl_gst_shared_cpu_av static"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "fl_gst_shared_cpu_events",
+    "command": [
+      "adb",
+      "shell",
+      "cd /data/local/tmp/framelink-windows-api-regression && ./fl_gst_shared_cpu_events static"
+    ],
+    "exit": 0
+  }
+]

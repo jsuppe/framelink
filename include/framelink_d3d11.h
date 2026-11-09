@@ -1,5 +1,6 @@
 // framelink D3D11 interop (Windows). The ONLY platform-specific header a
-// Windows integrator needs; the call sequence in framelink.h is unchanged.
+// native GPU integrator needs; the call sequence in framelink.h is unchanged.
+// Explicit CPU-only factories are separate: framelink_shared_cpu_win.h.
 //
 // The Linux and Android equivalents (framelink_dmabuf.h, framelink_ahb.h) and
 // the portable framelink_vulkan.h are not in the spike.

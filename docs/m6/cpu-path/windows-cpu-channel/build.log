@@ -1,0 +1,33 @@
+CMake is re-running because <win-home>/dev/framelink-m6-windows-b997e7c/build/CMakeFiles/generate.stamp is out-of-date.
+  the file '<win-home>/dev/framelink-m6-windows-b997e7c/CMakeLists.txt'
+  is newer than '<win-home>/dev/framelink-m6-windows-b997e7c/build/CMakeFiles/generate.stamp.depend'
+  result='-1'
+-- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.26300.
+-- framelink: building GStreamer elements (gstframelink)
+-- Configuring done (0.8s)
+-- Generating done (1.0s)
+-- Build files have been written to: <win-home>/dev/framelink-m6-windows-b997e7c/build
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink_shared_cpu_channel.cpp
+     Creating library <win-home>/dev/framelink-m6-windows-b997e7c/build/Release/framelink.lib and object <win-home>/dev/framelink-m6-windows-b997e7c/build/Release/framelink.exp
+  framelink.vcxproj -> <win-home>\dev\framelink-m6-windows-b997e7c\build\Release\framelink.dll
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-b997e7c/CMakeLists.txt
+  fl_shared_cpu_channel_win.cpp
+  fl_shared_cpu_channel_win.vcxproj -> <win-home>\dev\framelink-m6-windows-b997e7c\build\Release\fl_shared_cpu_channel_win.exe
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <win-home>\dev\framelink-m6-windows-b997e7c\build\Release\framelink.dll
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-b997e7c/CMakeLists.txt
+  fl_shared_cpu_channel_c.c
+  fl_shared_cpu_channel_c.vcxproj -> <win-home>\dev\framelink-m6-windows-b997e7c\build\Release\fl_shared_cpu_channel_c.exe
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <win-home>\dev\framelink-m6-windows-b997e7c\build\Release\framelink.dll
+  fl_shared_cpu_control_win.cpp
+  fl_shared_cpu_control_win.vcxproj -> <win-home>\dev\framelink-m6-windows-b997e7c\build\Release\fl_shared_cpu_control_win.exe
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <win-home>\dev\framelink-m6-windows-b997e7c\build\Release\framelink.dll
+  fl_shared_cpu_pipe_win.cpp
+  fl_shared_cpu_pipe_win.vcxproj -> <win-home>\dev\framelink-m6-windows-b997e7c\build\Release\fl_shared_cpu_pipe_win.exe
