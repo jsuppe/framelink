@@ -75,3 +75,12 @@ Runtime inspection requires BOTH GST_PLUGIN_PATH and PATH to include build/Relea
 plus the GStreamer bin directory, and an isolated GST_REGISTRY. A probe setting only
 GST_PLUGIN_PATH failed to resolve sibling DLLs; negative retained, corrected probe
 passed. This is not a clean-install qualification (M7 remains on hold).
+
+## Subsequent Windows-only internal prerequisites
+
+[Pool setup](../cpu-path/windows-cpu-control/README.md) and
+[frame protocol](../cpu-path/windows-cpu-frames/README.md) now pass focused tests.
+FCW1 is a separately tagged Windows section envelope; POSIX FCP1 and public
+headers are unchanged. FCF1/FCR1, FCM1 and FCE1 retain existing portable layouts.
+This does not expose a Windows CPU factory or replace the exact609cb74 candidate
+above. Authentication/delegation and public lease integration remain required.

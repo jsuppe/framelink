@@ -1,0 +1,22 @@
+Test project <win-home>/dev/framelink-m6-windows-b997e7c/build
+    Start  8: shared_cpu_control_win
+1/5 Test  #8: shared_cpu_control_win ...........***Failed    0.03 sec
+line120: control.submit(frame)==FL_OK&&!control.writableSlot(frame.slot) error=1656
+line144: control.receiveFrame(frame,&eos)==FL_OK&&!eos error=109
+
+    Start  9: shared_cpu_pipe_win
+2/5 Test  #9: shared_cpu_pipe_win ..............   Passed    0.10 sec
+    Start 10: shared_cpu_imported_pool_win
+3/5 Test #10: shared_cpu_imported_pool_win .....   Passed    0.02 sec
+    Start 11: shared_cpu_allocation_win
+4/5 Test #11: shared_cpu_allocation_win ........   Passed    0.15 sec
+    Start 20: ipc_framing_win
+5/5 Test #20: ipc_framing_win ..................   Passed    0.01 sec
+
+80% tests passed, 1 tests failed out of 5
+
+Total Test time (real) =   0.36 sec
+
+The following tests FAILED:
+	  8 - shared_cpu_control_win (Failed)
+Errors while running CTest
