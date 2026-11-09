@@ -1,12 +1,53 @@
 // Explicit broker-composed two-hop diagnostic. No automatic-discovery promise:
 // the broker supplies the SAME immutable allocation pool to both video rings.
 #include "../samples/native_relay.h"
+#include "../samples/session_relay_contract.h"
 #include <dxgi1_3.h>
 #include <wrl/client.h>
 static bool relaySame(flImage*a,flImage*b){
  using Compare=BOOL(WINAPI*)(HANDLE,HANDLE);
  auto compare=reinterpret_cast<Compare>(GetProcAddress(GetModuleHandleW(L"KernelBase.dll"),"CompareObjectHandles"));
  return compare&&compare(flImageSharedHandle(a),flImageSharedHandle(b));
+}
+static void relaySessionNegatives(flSessionConfig cfg,const flSessionCapabilities&offer){
+ auto second=cfg;second.sessionId.bytes[0]=2;
+ CHECK(flsample::SessionRelayContract::compatible(cfg,second));
+ for(unsigned fault=0;fault<14;++fault){
+  auto bad=second;
+  switch(fault){
+   case 0:bad.clockId.bytes[0]^=1;break;case 1:++bad.epochNs;break;
+   case 2:++bad.generation;break;case 3:bad.sessionId=cfg.sessionId;break;
+   case 4:++bad.video.width;break;case 5:++bad.video.height;break;
+   case 6:bad.video.format=FL_FORMAT_NV12;break;case 7:++bad.video.fpsNum;break;
+   case 8:++bad.video.fpsDen;break;case 9:bad.audio.pcm=FL_PCM_F32;break;
+   case 10:bad.audio.rate=44100;break;case 11:bad.audio.layout=FL_LAYOUT_MONO;break;
+   case 12:bad.videoTrackId=3;break;case 13:bad.audioTrackId=3;break;
+  }
+  CHECK(!flsample::SessionRelayContract::compatible(cfg,bad));
+ }
+ // Queue capacities are per-hop ownership limits, not media timeline changes.
+ auto queues=second;++queues.videoQueueFrames;++queues.audioQueueMs;
+ CHECK(flsample::SessionRelayContract::compatible(cfg,queues));
+ for(unsigned mode=0;mode<3;++mode){
+  auto*a=fl_gst_session_new(3);auto*b=fl_gst_session_new(3);
+  CHECK(fl_gst_session_configure(a,&cfg,&offer,&offer)==FL_GST_SESSION_READY);
+  CHECK(fl_gst_session_configure(b,&second,&offer,&offer)==FL_GST_SESSION_READY);
+  if(mode){flClockMapping m{};m.sourceClockId=cfg.clockId;m.targetClockId.bytes[0]=9;
+   m.sourceAnchorNs=cfg.epochNs;m.targetAnchorNs=mode==1?1000000:0;
+   CHECK(fl_gst_session_set_mapping(a,1,&m,0)==FL_GST_SESSION_READY);}
+  flsample::SessionRelayContract contract(a,b);
+  CHECK(contract.check()==FL_GST_SESSION_INVALID);
+  CHECK(contract.initialize()==(mode==2?FL_GST_SESSION_READY:FL_GST_SESSION_INVALID));
+  if(mode==2){
+   CHECK(contract.initialize()==FL_GST_SESSION_INVALID);CHECK(contract.check()==FL_GST_SESSION_READY);
+   auto replacement=second;++replacement.generation;
+   CHECK(fl_gst_session_configure(b,&replacement,&offer,&offer)==FL_GST_SESSION_READY);
+   CHECK(contract.check()==FL_GST_SESSION_STALE);
+   fl_gst_session_cancel(a);CHECK(contract.check()==FL_GST_SESSION_CANCELLED);
+  }
+  g_object_unref(a);g_object_unref(b);
+ }
+ printf("relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed\n");
 }
 static void nativeRelayAv(bool empty){
  using Microsoft::WRL::ComPtr;
@@ -16,6 +57,7 @@ static void nativeRelayAv(bool empty){
  cfg.videoTrackId=1;cfg.audioTrackId=2;cfg.audio={FL_PCM_S16,48000,2};cfg.audioQueueMs=80;
  cfg.video={FL_FORMAT_RGBA8,64,32,1000,1};cfg.videoQueueFrames=1;cfg.connectTimeoutMs=cfg.idleTimeoutMs=2000;
  flSessionCapabilities offer{};offer.version=2;offer.videoCount=offer.audioCount=1;offer.video[0]=cfg.video;offer.audio[0]=cfg.audio;
+ cfg.sessionId.bytes[0]=1;relaySessionNegatives(cfg,offer);
  for(unsigned hop=0;hop<2;++hop){
   cfg.sessionId.bytes[0]=static_cast<uint8_t>(hop+1);
   for(unsigned role=0;role<2;++role){
@@ -47,6 +89,8 @@ static void nativeRelayAv(bool empty){
    auto*context=fl_gst_session_create_context(sessions[i]);gst_element_set_context(pipes[i],context);gst_context_unref(context);
   }
  }
+ flsample::SessionRelayContract contract(sessions[1],sessions[2]);
+ CHECK(contract.initialize()==FL_GST_SESSION_READY);
  ComPtr<ID3D11Device> device;ComPtr<ID3D11DeviceContext> context;
  CHECK(SUCCEEDED(D3D11CreateDevice(nullptr,D3D_DRIVER_TYPE_HARDWARE,nullptr,0,nullptr,0,D3D11_SDK_VERSION,&device,nullptr,&context)));
  D3D11_TEXTURE2D_DESC desc{};desc.Width=64;desc.Height=32;desc.ArraySize=desc.MipLevels=desc.SampleDesc.Count=1;
@@ -75,7 +119,7 @@ static void nativeRelayAv(bool empty){
   const uint64_t audioPts=n*1000000,videoPts=audioPts+37000000;
   flFrameMetadata metadata{1,FL_FRAME_HAS_DTS|FL_FRAME_HAS_DURATION,int64_t(videoPts-100),1000000,1,{}};
   CHECK(flSetFrameMetadata(writer,&input,&metadata)==FL_OK);CHECK(flSubmit(writer,&input,videoPts)==FL_OK);
-  flFrame incoming{};CHECK(flAcquireFrame(up,&incoming,1000)==FL_OK);CHECK(relay.forward(incoming)==FL_OK);
+  flFrame incoming{};CHECK(flAcquireFrame(up,&incoming,1000)==FL_OK);CHECK(contract.check()==FL_GST_SESSION_READY);CHECK(relay.forward(incoming)==FL_OK);
   flFrame output{};CHECK(flAcquireFrame(down,&output,1000)==FL_OK&&output.ptsNs==videoPts&&relaySame(input.image,output.image));
   flFrameMetadata received{};CHECK(flGetFrameMetadata(down,&output,&received)==FL_OK);
   CHECK(received.dtsNs==metadata.dtsNs&&received.durationNs==metadata.durationNs&&received.streamGeneration==1);
@@ -85,6 +129,7 @@ static void nativeRelayAv(bool empty){
   CHECK(gst_app_src_push_buffer(GST_APP_SRC(ports[0]),pcm)==GST_FLOW_OK);
   auto*first=gst_app_sink_try_pull_sample(GST_APP_SINK(ports[1]),2*GST_SECOND);CHECK(first);
   auto*middle=gst_sample_get_buffer(first);CHECK(GST_BUFFER_PTS(middle)==audioPts);
+  CHECK(contract.check()==FL_GST_SESSION_READY);
   CHECK(gst_app_src_push_buffer(GST_APP_SRC(ports[2]),gst_buffer_ref(middle))==GST_FLOW_OK);gst_sample_unref(first);
   auto*last=gst_app_sink_try_pull_sample(GST_APP_SINK(ports[3]),2*GST_SECOND);CHECK(last);auto*audio=gst_sample_get_buffer(last);
   gint64 mappedVideo=-1;CHECK(fl_gst_session_map_running_time(sessions[3],1,output.ptsNs,TRUE,&mappedVideo)==FL_GST_SESSION_READY);
@@ -101,6 +146,7 @@ static void nativeRelayAv(bool empty){
   CHECK(fl_gst_session_send_video_event(sessions[0],1,&sent)==FL_GST_SESSION_READY);
   CHECK(fl_gst_session_receive_video_event(sessions[1],1,1000,&mid)==FL_GST_SESSION_READY);
   CHECK(mid.kind==sent.kind&&mid.afterFrames==relay.count()&&mid.ptsNs==sent.ptsNs);
+  CHECK(contract.check()==FL_GST_SESSION_READY);
   CHECK(fl_gst_session_send_video_event(sessions[2],1,&mid)==FL_GST_SESSION_READY);
   CHECK(fl_gst_session_receive_video_event(sessions[3],1,1000,&end)==FL_GST_SESSION_READY);
   CHECK(end.kind==sent.kind&&end.afterFrames==sent.afterFrames&&end.ptsNs==sent.ptsNs&&end.durationNs==0);
@@ -111,6 +157,7 @@ static void nativeRelayAv(bool empty){
  CHECK(fl_gst_session_video_eos(sessions[0],1,frames,lastPts)==FL_GST_SESSION_READY);
  CHECK(gst_app_src_end_of_stream(GST_APP_SRC(ports[0]))==GST_FLOW_OK);avTerminal(pipes[1],GST_MESSAGE_EOS);
  guint64 count=99;gint64 pts=-2;CHECK(fl_gst_session_wait_video_eos(sessions[1],1,1000,&count,&pts)==FL_GST_SESSION_READY&&count==frames&&pts==lastPts);
+ CHECK(contract.check()==FL_GST_SESSION_READY);
  CHECK(fl_gst_session_video_eos(sessions[2],1,count,pts)==FL_GST_SESSION_READY);
  CHECK(gst_app_src_end_of_stream(GST_APP_SRC(ports[2]))==GST_FLOW_OK);avTerminal(pipes[3],GST_MESSAGE_EOS);
  CHECK(fl_gst_session_wait_video_eos(sessions[3],1,1000,&count,&pts)==FL_GST_SESSION_READY&&count==frames&&pts==lastPts);
