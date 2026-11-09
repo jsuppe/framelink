@@ -97,6 +97,29 @@ int main(int argc,char** argv){
  auto mixed=e;mixed.unixName[0]=1;CHECK(!owner.publish(path,mixed,error));
  CHECK(owner.publish(path,e,error));
 #endif
+ // FAR3 is explicitly CPU-only: old TCP readers never accept it, nor does
+ // the CPU reader accept legacy records. All formats share the owner lock.
+ got.port=54321;CHECK(!av::readCpuControlEndpoint(path,got,error));CHECK(got.port==54321);
+ owner.close();auto cpu=e;cpu.cpuControl=true;
+ CHECK(owner.publish(path,cpu,error));CHECK(av::readCpuControlEndpoint(path,got,error));
+ CHECK(got.cpuControl&&got.port==e.port&&got.token==e.token);
+ CHECK(!av::readEndpoint(path,got,error));
+ {av::RendezvousOwner duplicate;CHECK(!duplicate.publish(path,e,error));}
+ owner.close();
+ for(int bad=0;bad<5;++bad){
+  CHECK(owner.publish(path,cpu,error));auto record=fs::path(path)/"endpoint";
+  std::ifstream in(record,std::ios::binary);std::string bytes((std::istreambuf_iterator<char>(in)),{});in.close();
+  CHECK(bytes.size()==38&&bytes.substr(0,4)=="FAR3");
+  if(bad==0)bytes.pop_back();if(bad==1)bytes+='x';
+  if(bad==2)bytes[4]=bytes[5]=0;if(bad==3)std::fill(bytes.begin()+6,bytes.end(),0);
+  if(bad==4)bytes[3]='9';
+  {std::ofstream out(record,std::ios::binary|std::ios::trunc);out.write(bytes.data(),bytes.size());}
+  got.port=54321;CHECK(!av::readCpuControlEndpoint(path,got,error));CHECK(got.port==54321);
+  CHECK(!av::readEndpoint(path,got,error));owner.close();fs::remove(record);
+ }
+ auto mixedCpu=cpu;mixedCpu.unixName[0]=1;CHECK(!owner.publish(path,mixedCpu,error));
+ for(int cycle=0;cycle<100;++cycle){CHECK(owner.publish(path,cpu,error));owner.close();}
+ CHECK(owner.publish(path,e,error));
  // Oversized or truncated records fail closed and leave caller's output alone.
  {std::ofstream f(fs::path(path)/"endpoint",std::ios::binary|std::ios::trunc);f<<"FAR1";}
  got.port=54321;CHECK(!av::readEndpoint(path,got,error));CHECK(got.port==54321);owner.close();
@@ -127,6 +150,7 @@ int main(int argc,char** argv){
  // A NULL DACL grants everyone access; neither reader nor publisher may accept it.
  CHECK(SetNamedSecurityInfoA(&path[0],SE_FILE_OBJECT,DACL_SECURITY_INFORMATION|PROTECTED_DACL_SECURITY_INFORMATION,nullptr,nullptr,nullptr,nullptr)==ERROR_SUCCESS);
  CHECK(!av::readEndpoint(path,got,error));CHECK(!owner.publish(path,e,error));
+ CHECK(!av::readCpuControlEndpoint(path,got,error));CHECK(!owner.publish(path,cpu,error));
 #endif
  fs::remove_all(root);puts("private rendezvous: agreement, owner exclusion, crash recovery, malformed data and access checks passed");return 0;
 }

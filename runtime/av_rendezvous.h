@@ -6,7 +6,9 @@
 namespace av {
 struct Endpoint { uint16_t port = 0; std::array<unsigned char, 32> token{};
     // Explicit FAR2 Unix record: port must be zero; name is independent of token.
-    std::array<unsigned char, 16> unixName{}; };
+    std::array<unsigned char, 16> unixName{};
+    // FAR3: Windows CPU session control over loopback, not legacy GPU TCP.
+    bool cpuControl = false; };
 // Local current-user trust boundary. Keep owner alive while listening. An OS
 // lifetime lock allows recovery after process death without trusting PID files.
 class RendezvousOwner {
@@ -44,5 +46,6 @@ std::string unixAddress(const Endpoint&);
 bool readUnixEndpoint(const std::string&, Endpoint&, std::string& error);
 #endif
 bool readEndpoint(const std::string& directory, Endpoint&, std::string& error);
+bool readCpuControlEndpoint(const std::string& directory, Endpoint&, std::string& error);
 bool secureRandom(void*, size_t, std::string& error);
 }
