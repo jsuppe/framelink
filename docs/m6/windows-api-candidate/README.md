@@ -1,20 +1,25 @@
 # Windows API integration baseline candidate — NOT FROZEN
 
-**Current integrated candidate:** `d9585a8a80b3e0117631ca361b093166a5d685cf`.
+**Current verified integrated candidate:** `8583411e32db38a658c39dba47851ce09fa35fa8`.
 Clean exact-revision Windows build/API/full suite **133/133 passed**;
-[pinned evidence](../windows-integrated-d9585a8/README.md) includes DLL hashes,
-runtime properties and exports. All 114 exported names from the earlier
-`3f45f7b` candidate remain, with two additive local-CPU setup names (116 total).
-Export-name retention is not by itself proof of behavioral or ordinal ABI compatibility.
+[pinned evidence](../windows-integrated-8583411/README.md) includes DLL hashes,
+runtime properties and exports. All 117 prior exported names retained (117 total).
+Export-name retention is not proof of behavioral or ordinal ABI compatibility.
+
+**New tested source, clean integration pending:** `cde2f0d` adds explicit Windows
+`fl_gst_session_open_local_native`: typed FAR4 discovery and native candidate
+agreement before channel allocation. [Scope and checks](../windows-local-native/README.md):
+Windows5/5, Linux4/4, Android3/3 plus both ABI builds. This remains an explicit
+D3D11-producer/CPU-readback profile, not automatic native bin discovery.
 
 Windows authenticated CPU discovery/delegation and `shared-cpu=true session=`
-bins are implemented and tested. `native-memory=true` producer bins support
-broker-bound channel and memory-policy adoption; [native producer with PCM](../windows-native-producer-av/README.md)
-checks original producer allocation, exact pixels/audio, clock mapping and terminal
-semantics. Its receiver explicitly uses CPU readback. Authenticated native policy
-agreement/discovery, real decoder integration and zero-copy consumer/relay gates
-remain open. The earlier Windows startup timing failure is not waived by the
-later integrated pass. API not frozen; M6 not complete.
+bins are implemented and tested. Native producer and receiver bins support
+broker-bound channel and immutable policy adoption. Full configured session and
+native policy candidates can now be authenticated through either explicit
+connected streams or the Windows local helper. Exact pixels/PCM and37ms mapping
+pass; native receiver, real decoder and two-hop gates remain open. The earlier
+Windows startup failure is not waived by later integrated passes. API not frozen;
+M6 not complete.
 
 **Historical candidate** exact revision: `609cb74031a5de2cee782619007a6e87ab7fbccd`.
 Clean isolated Windows source archive SHA256:
@@ -49,7 +54,8 @@ Runtime `gst-inspect-1.0` was checked against the isolated build's actual DLL.
 - `framelinksrc`: `max-queue-age-ms=0`, `pool-size=4`, native/shared CPU opt-ins off.
 - `framelinkavsrc`: `latency-ms=0`, `video-pool=8`, `video-queue-frames=2`,
   `audio-queue-ms=80`; these capacities are NOT a fill-to-depth scheduling delay.
-- `framelinkavsink`: `video-pool=0` (consumer-selected), `video-queue-frames=2`.
+- `framelinkavsink`: `video-pool=0` (consumer-selected), `video-queue-frames=2`,
+  `video-buffer-wait-ms=5`, `video-error-on-ring-full=false`.
 - CPU strict channel returns BUSY for held ownership, never overwrites; its
   explicit copy path remains separate from native GPU types.
 
@@ -59,7 +65,7 @@ profiles explicitly enable their own failure policy. D2 uniform realtime/lossles
 policy remains unresolved and Jon-owned. D3 convenience defaults remain unresolved;
 no automatic native-to-CPU fallback was added. No new default was silently chosen.
 An app requiring no unexpected loss must select explicit strict policy and observe
-loss counters; avsink now exposes the same explicit video ring-full controls in the tested-source addition below.
+loss counters; avsink exposes explicit video ring-full controls (4a49a92 onward).
 
 ## Migration and pending integration
 
@@ -74,8 +80,8 @@ and explicitly selected; do not append handle integers to legacy POSIX packets.
 Windows HANDLE values are process-local; bind the process identity, transfer exact
 rights, acknowledge adoption, reject stale epochs and retain held old leases.
 
-Remaining gates before a Windows-ready API baseline: authenticated native
-policy agreement/discovery, native producer/consumer/relay integration,
+Remaining gates before a Windows-ready API baseline: automatic native bin
+discovery, native consumer/real-producer/relay integration,
 strict overload profile review,
 resource-growth/timing/fault fixes and exact-head compatibility tests. Real decoder,
 two-hop PCM and all-platform M6 acceptance remain separate. This candidate is a
