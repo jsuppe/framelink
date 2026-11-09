@@ -5,6 +5,7 @@
 #define NOMINMAX
 #include <windows.h>
 #include "framelink_shared_cpu_win.h"
+#include "fl_gst_cpu_pipe_auth_win.h"
 #endif
 #ifndef _WIN32
 #include <unistd.h>
@@ -247,9 +248,9 @@ FlGstSessionResult fl_gst_session_bind_shared_cpu_fd(FlGstSession*s,gboolean pro
  s->cpuChannel=channel;s->cpuProducer=!!producer;return FL_GST_SESSION_READY;
 }
 #else
-FlGstSessionResult fl_gst_session_bind_shared_cpu_pipe(FlGstSession*s,gboolean producer,
+static FlGstSessionResult bindCpuPipe(FlGstSession*s,gboolean producer,
  guint64 generation,void* pipe,void* peer,guint timeout,const flMemoryRequirements*requirements,
- guint operations,const flSharedCpuDescriptor*desc,gsize count){
+ guint operations,const flSharedCpuDescriptor*desc,gsize count,GBytes* secret,bool authenticate){
  struct Handle{HANDLE value;~Handle(){if(value&&value!=INVALID_HANDLE_VALUE)CloseHandle(value);}} owned{pipe},cancel{nullptr};
  if(!valid(s)||!pipe||pipe==INVALID_HANDLE_VALUE||!peer||!requirements||!timeout||timeout>60000||
     (producer?(desc||count):(!desc||count<2||count>FL_MAX_POOL_SIZE)))return FL_GST_SESSION_INVALID;
@@ -268,16 +269,29 @@ FlGstSessionResult fl_gst_session_bind_shared_cpu_pipe(FlGstSession*s,gboolean p
   }
   s->cpuOpening=TRUE;config=s->config;
  }
- flSharedCpuChannel*channel=nullptr;owned.value=nullptr;
+ flSharedCpuChannel*channel=nullptr;
+ auto result=authenticate?flAuthenticateCpuPipe(pipe,peer,cancel.value,timeout,config,producer,secret):FL_OK;
  const guint flags=FL_SHARED_CPU_FRAME_METADATA|FL_SHARED_CPU_ORDERED_EOS;
- auto result=producer?flSharedCpuOpenProducerPipe(pipe,peer,cancel.value,timeout,&config,requirements,operations,flags,&channel):
+ if(result==FL_OK){owned.value=nullptr;
+ result=producer?flSharedCpuOpenProducerPipe(pipe,peer,cancel.value,timeout,&config,requirements,operations,flags,&channel):
   flSharedCpuOpenConsumerPipe(pipe,peer,cancel.value,timeout,&config,requirements,operations,desc,count,flags,&channel);
+ }
  Lock lock(&s->mutex);s->cpuOpening=FALSE;
  auto status=s->cancelled?FL_GST_SESSION_CANCELLED:
   (!s->configured||s->config.generation!=generation?FL_GST_SESSION_STALE:
    (result==FL_OK?FL_GST_SESSION_READY:FL_GST_SESSION_INVALID));
  if(status!=FL_GST_SESSION_READY){if(channel)flSharedCpuClose(channel);resetCpu(s);return status;}
  s->cpuChannel=channel;s->cpuProducer=!!producer;return FL_GST_SESSION_READY;
+}
+FlGstSessionResult fl_gst_session_bind_shared_cpu_pipe(FlGstSession*s,gboolean producer,
+ guint64 generation,void* pipe,void* peer,guint timeout,const flMemoryRequirements* req,
+ guint operations,const flSharedCpuDescriptor* desc,gsize count){
+ return bindCpuPipe(s,producer,generation,pipe,peer,timeout,req,operations,desc,count,nullptr,false);
+}
+FlGstSessionResult fl_gst_session_bind_authenticated_cpu_pipe(FlGstSession*s,gboolean producer,
+ guint64 generation,void* pipe,void* peer,GBytes* secret,guint timeout,const flMemoryRequirements* req,
+ guint operations,const flSharedCpuDescriptor* desc,gsize count){
+ return bindCpuPipe(s,producer,generation,pipe,peer,timeout,req,operations,desc,count,secret,true);
 }
 #endif
 flSharedCpuChannel* fl_gst_session_claim_shared_cpu(FlGstSession*s,gboolean producer,guint64 generation){

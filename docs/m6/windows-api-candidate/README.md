@@ -1,14 +1,19 @@
 # Windows API integration baseline candidate — NOT FROZEN
 
-**Current integrated candidate:** cf7408d8527391e5029f118579205af591b9acf6.
-Clean exact-revision Windows build/API/full suite **130/130 passed**;
-[pinned evidence](../windows-integrated-cf7408d/README.md) includes DLL hashes,
+**Current integrated candidate:** 67c15235e7f00a43efe857f84923f0698c3920bf.
+Clean exact-revision Windows build/API/full suite **131/131 passed**;
+[pinned evidence](../windows-integrated-67c1523/README.md) includes DLL hashes,
 runtime properties and exports. Explicit CPU source/sink and broker-context
 coordinator are available; callers authenticate/delegate the pipe and pinned
 process. Newer broker-bound Windows CPU A/V/bin checks pass 12 variants plus
 five invalid selections ([scope](../cpu-path/windows-cpu-av/README.md)).
 Discovery and automatic authenticated endpoint delegation are not available.
 All unresolved M6 acceptance gates remain.
+
+Newer staged-source authenticated CPU pipe binding passes Windows6/6 and final2/2,
+Linux3/3, Android3/3 plusdualABI. All31 session DLL exports retained+1 additive
+API. [Scope and preserved cold-handle observation](../cpu-path/windows-cpu-auth/README.md).
+Exact integrated candidate update awaits the following clean full suite.
 
 **Historical candidate** exact revision: `609cb74031a5de2cee782619007a6e87ab7fbccd`.
 Clean isolated Windows source archive SHA256:

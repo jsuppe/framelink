@@ -1,0 +1,20 @@
+[1/20] Building CXX object CMakeFiles/framelink.dir/src/fl_ipc_posix.cpp.o
+[2/20] Building CXX object CMakeFiles/framelink.dir/src/framelink_shared_cpu_channel.cpp.o
+[3/20] Building CXX object CMakeFiles/gstframelink.dir/gst/gstframelinkaudio.cpp.o
+[4/20] Building CXX object CMakeFiles/framelink.dir/src/framelink_linux.cpp.o
+[5/20] Linking CXX shared library libframelink.so.0.1.0
+[6/20] Creating library symlink libframelink.so
+[7/20] Building CXX object CMakeFiles/gstframelink.dir/gst/fl_gst_audio_startup.cpp.o
+[8/20] Building CXX object CMakeFiles/gstframelink.dir/gst/gstframelinkaudiosrc.cpp.o
+[9/20] Building CXX object CMakeFiles/gstframelink.dir/gst/gstframelink.cpp.o
+[10/20] Building CXX object CMakeFiles/gstframelink.dir/gst/gstframelinkavsrc.cpp.o
+[11/20] Building CXX object CMakeFiles/gstframelink.dir/gst/gstframelinkavsink.cpp.o
+[12/20] Building CXX object CMakeFiles/framelink_gst_session.dir/gst/framelink_session_context.cpp.o
+[13/20] Building CXX object CMakeFiles/framelink_gst_session.dir/gst/framelink_session_transport.cpp.o
+[14/20] Linking CXX shared library libframelink_gst_session.so
+[15/20] Linking CXX executable fl_gst_session_context
+[16/20] Linking CXX shared module libgstframelink.so
+[17/20] Building CXX object CMakeFiles/fl_gst_shared_cpu_av.dir/test/fl_gst_shared_cpu_av.cpp.o
+[18/20] Building CXX object CMakeFiles/fl_gst_session_transport.dir/test/fl_gst_session_transport.cpp.o
+[19/20] Linking CXX executable fl_gst_shared_cpu_av
+[20/20] Linking CXX executable fl_gst_session_transport

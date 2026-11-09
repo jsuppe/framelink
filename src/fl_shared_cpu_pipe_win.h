@@ -61,6 +61,11 @@ public:
     SharedCpuPipeWin& operator=(const SharedCpuPipeWin&)=delete;
     bool connected()const{return bool(state_);}
     void close(){state_.reset();}
+    // Bound each operation by the remaining whole-handshake budget.
+    bool setIoTimeout(uint32_t ms){
+        if(!state_||!ms||ms>60000)return false;
+        state_->timeout=ms;return true;
+    }
     // Consumes input on EVERY path. Borrows then duplicates peer/cancel handles.
     // Broker guarantees the pipe is local and authenticated; PID equality alone
     // is not authorization. Stable process handle prevents PID-reuse confusion.

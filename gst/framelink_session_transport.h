@@ -142,6 +142,17 @@ FL_GST_SESSION_API FlGstSessionResult fl_gst_session_bind_shared_cpu_pipe(
  FlGstSession*,gboolean producer,guint64 generation,void* pipe,void* peerProcess,
  guint timeout_ms,const flMemoryRequirements*,guint operations,
  const flSharedCpuDescriptor*,gsize count);
+// Explicit authenticated Windows profile. Consumes pipe on every path; borrows
+// pinned peer process and 32-byte nonzero root credential. Authenticates on THIS
+// pipe before pool negotiation: full config, fresh nonces, directional roles and
+// both process IDs are HMAC-bound. No STREAM-auth substitution or fallback.
+// timeout_ms bounds the whole authentication, then each pool I/O. Session
+// cancel/reconfigure interrupts both phases; failure publishes no CPU channel.
+// Discovery/connection and protected credential distribution remain caller-owned.
+FL_GST_SESSION_API FlGstSessionResult fl_gst_session_bind_authenticated_cpu_pipe(
+ FlGstSession*,gboolean producer,guint64 generation,void* pipe,void* peerProcess,
+ GBytes* root_secret,guint timeout_ms,const flMemoryRequirements*,guint operations,
+ const flSharedCpuDescriptor*,gsize count);
 #endif
 // Transfer-full, once per generation, exact role. Caller externally serializes
 // channel/lease calls and closes the channel. Session retains only a socket

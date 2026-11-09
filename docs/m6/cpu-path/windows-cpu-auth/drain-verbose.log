@@ -1,0 +1,58 @@
+Start testing: Nov 08 20:27 Eastern Standard Time
+----------------------------------------------------------
+114/131 Testing: gst_shared_cpu_session_win
+114/131 Test: gst_shared_cpu_session_win
+Command: "<win-home>/dev/framelink-m6-windows-67c1523/build/Release/fl_gst_shared_cpu_session_win.exe"
+Directory: <win-home>/dev/framelink-m6-windows-67c1523/build
+"gst_shared_cpu_session_win" start time: Nov 08 20:27 Eastern Standard Time
+Output:
+----------------------------------------------------------
+warm mode=0 baseline before=1475 after=1475
+warm mode=1 baseline before=1475 after=1475
+warm mode=2 baseline before=1475 after=1475
+warm mode=3 baseline before=1475 after=1475
+warm mode=4 baseline before=1475 after=1475
+Authenticated CPU coordinator: 8 mismatch/downgrade negatives, silent deadline, exact generation/role, one claim, metadata/EOS, held mappings through cancel/replacement, blocked setup interruption and 100-session handle cleanup passed
+<end of output>
+Test time =   1.86 sec
+----------------------------------------------------------
+Test Passed.
+"gst_shared_cpu_session_win" end time: Nov 08 20:27 Eastern Standard Time
+"gst_shared_cpu_session_win" time elapsed: 00:00:01
+----------------------------------------------------------
+
+120/131 Testing: gst_shared_cpu_av
+120/131 Test: gst_shared_cpu_av
+Command: "<win-home>/dev/framelink-m6-windows-67c1523/build/Release/fl_gst_shared_cpu_av.exe" "<win-home>/dev/framelink-m6-windows-67c1523/build/Release/gstframelink.dll"
+Directory: <win-home>/dev/framelink-m6-windows-67c1523/build
+"gst_shared_cpu_av" start time: Nov 08 20:27 Eastern Standard Time
+Output:
+----------------------------------------------------------
+mode 0
+mode 1
+mode 2
+mode 3
+mode 4
+bus: invalid coordinated video terminal record <win-home>\dev\framelink-m6-windows-67c1523\gst\gstframelinkaudiosrc.cpp(95): badInput (): /GstPipeline:pipeline9/GstFrameLinkAudioSrc:framelinkaudiosrc4:
+FrameLink consumer rejected received PCM
+mode 5
+bus: Socket I/O timed out <win-home>\dev\framelink-m6-windows-67c1523\gst\gstframelinkaudiosrc.cpp(66): readChunkImpl (): /GstPipeline:pipeline11/GstFrameLinkAudioSrc:framelinkaudiosrc5/FlAudioReader:flaudioreader9
+mode 0
+mode 1
+mode 2
+mode 3
+mode 4
+bus: invalid coordinated video terminal record <win-home>\dev\framelink-m6-windows-67c1523\gst\gstframelinkaudiosrc.cpp(95): badInput (): /GstPipeline:pipeline21/GstFrameLinkAvSrc:transport/GstFrameLinkAudioSrc:audio:
+FrameLink consumer rejected received PCM
+mode 5
+bus: Socket I/O timed out <win-home>\dev\framelink-m6-windows-67c1523\gst\gstframelinkaudiosrc.cpp(66): readChunkImpl (): /GstPipeline:pipeline23/GstFrameLinkAvSrc:transport/GstFrameLinkAudioSrc:audio/FlAudioReader:flaudioreader15
+CPU A/V: exact PCM/pixels, common mapping preserves37ms offset, both EOS submission orders, empty streams, terminal conflict and PCM death passed
+<end of output>
+Test time =   2.45 sec
+----------------------------------------------------------
+Test Passed.
+"gst_shared_cpu_av" end time: Nov 08 20:27 Eastern Standard Time
+"gst_shared_cpu_av" time elapsed: 00:00:02
+----------------------------------------------------------
+
+End testing: Nov 08 20:27 Eastern Standard Time

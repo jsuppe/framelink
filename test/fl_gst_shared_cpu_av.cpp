@@ -129,10 +129,11 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
   SYSTEM_INFO systemInfo{};GetSystemInfo(&systemInfo);
   for(auto&descriptor:d)descriptor.allocationBytes=(descriptor.allocationBytes+systemInfo.dwPageSize-1)/systemInfo.dwPageSize*systemInfo.dwPageSize;
   // Test broker explicitly owns/delegates both pipe ends and pins this process.
-  // This does not claim authenticated Windows discovery/endpoint transfer.
+  // Authenticate this actual pipe before pool exchange; discovery remains separate.
+  key=g_bytes_new(secret,32);
   CpuTestPair pair;auto client=pair.take(true),server=pair.take(false);
-  std::thread setup([&]{opened=fl_gst_session_bind_shared_cpu_pipe(s,TRUE,1,client,GetCurrentProcess(),60000,&req,FL_MEMORY_COPY,nullptr,0);});
-  CHECK(fl_gst_session_bind_shared_cpu_pipe(r,FALSE,1,server,GetCurrentProcess(),60000,&req,FL_MEMORY_COPY,d,2)==FL_GST_SESSION_READY);
+  std::thread setup([&]{opened=fl_gst_session_bind_authenticated_cpu_pipe(s,TRUE,1,client,GetCurrentProcess(),key,60000,&req,FL_MEMORY_COPY,nullptr,0);});
+  CHECK(fl_gst_session_bind_authenticated_cpu_pipe(r,FALSE,1,server,GetCurrentProcess(),key,60000,&req,FL_MEMORY_COPY,d,2)==FL_GST_SESSION_READY);
 #else
   int fd[2]={-1,-1},boot[2];CHECK(!socketpair(AF_UNIX,SOCK_STREAM,0,boot));
   auto*bs=g_socket_new_from_fd(boot[0],nullptr);auto*br=g_socket_new_from_fd(boot[1],nullptr);
@@ -144,6 +145,9 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
   CHECK(fl_gst_session_bind_shared_cpu_fd(r,FALSE,1,fd[0],60000,&req,FL_MEMORY_COPY,d,2)==FL_GST_SESSION_READY);
 #endif
   setup.join();CHECK(opened==FL_GST_SESSION_READY);
+#ifdef _WIN32
+  g_bytes_unref(key);
+#endif
   // Independently authenticated PCM stream, sharing only session/clock identity.
   GSocketConnection*ac=nullptr;streamPair(&ac,&bc);
   key=g_bytes_new(secret,32);auth=FALSE;
