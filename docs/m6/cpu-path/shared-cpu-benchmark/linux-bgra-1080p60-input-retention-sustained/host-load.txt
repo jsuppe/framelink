@@ -1,0 +1,383 @@
+    PID %CPU %MEM COMMAND
+      1  0.0  0.0 systemd
+      2  0.0  0.0 kthreadd
+      3  0.0  0.0 pool_workqueue_release
+      4  0.0  0.0 kworker/R-rcu_gp
+      5  0.0  0.0 kworker/R-sync_wq
+      6  0.0  0.0 kworker/R-kvfree_rcu_reclaim
+      7  0.0  0.0 kworker/R-slub_flushwq
+      8  0.0  0.0 kworker/R-netns
+     10  0.0  0.0 kworker/0:0H-kblockd
+     13  0.0  0.0 kworker/R-mm_percpu_wq
+     14  0.0  0.0 ksoftirqd/0
+     15  0.0  0.0 rcu_preempt
+     16  0.0  0.0 rcu_exp_par_gp_kthread_worker/0
+     17  0.0  0.0 rcu_exp_gp_kthread_worker
+     18  0.0  0.0 migration/0
+     19  0.0  0.0 kprobe-optimizer
+     20  0.0  0.0 idle_inject/0
+     21  0.0  0.0 cpuhp/0
+     22  0.0  0.0 cpuhp/1
+     23  0.0  0.0 idle_inject/1
+     24  0.0  0.0 migration/1
+     25  0.0  0.0 ksoftirqd/1
+     27  0.0  0.0 kworker/1:0H-kblockd
+     28  0.0  0.0 cpuhp/2
+     29  0.0  0.0 idle_inject/2
+     30  0.0  0.0 migration/2
+     31  0.0  0.0 ksoftirqd/2
+     33  0.0  0.0 kworker/2:0H-kblockd
+     34  0.0  0.0 cpuhp/3
+     35  0.0  0.0 idle_inject/3
+     36  0.0  0.0 migration/3
+     37  0.0  0.0 ksoftirqd/3
+     39  0.0  0.0 kworker/3:0H-kblockd
+     40  0.0  0.0 cpuhp/4
+     41  0.0  0.0 idle_inject/4
+     42  0.0  0.0 migration/4
+     43  0.0  0.0 ksoftirqd/4
+     45  0.0  0.0 kworker/4:0H-kblockd
+     46  0.0  0.0 cpuhp/5
+     47  0.0  0.0 idle_inject/5
+     48  0.0  0.0 migration/5
+     49  0.0  0.0 ksoftirqd/5
+     51  0.0  0.0 kworker/5:0H-kblockd
+     52  0.0  0.0 cpuhp/6
+     53  0.0  0.0 idle_inject/6
+     54  0.0  0.0 migration/6
+     55  0.0  0.0 ksoftirqd/6
+     57  0.0  0.0 kworker/6:0H-kblockd
+     58  0.0  0.0 cpuhp/7
+     59  0.0  0.0 idle_inject/7
+     60  0.0  0.0 migration/7
+     61  0.0  0.0 ksoftirqd/7
+     63  0.0  0.0 kworker/7:0H-kblockd
+     64  0.0  0.0 cpuhp/8
+     65  0.0  0.0 idle_inject/8
+     66  0.0  0.0 migration/8
+     67  0.0  0.0 ksoftirqd/8
+     69  0.0  0.0 kworker/8:0H-kblockd
+     70  0.0  0.0 cpuhp/9
+     71  0.0  0.0 idle_inject/9
+     72  0.0  0.0 migration/9
+     73  0.0  0.0 ksoftirqd/9
+     75  0.0  0.0 kworker/9:0H-kblockd
+     76  0.0  0.0 kdevtmpfs
+     77  0.0  0.0 kworker/R-inet_frag_wq
+     78  0.0  0.0 rcu_tasks_kthread
+     79  0.0  0.0 rcu_tasks_rude_kthread
+     80  0.0  0.0 kauditd
+     81  0.0  0.0 khungtaskd
+     83  0.0  0.0 oom_reaper
+     85  0.0  0.0 kworker/R-writeback
+     86  0.0  0.0 kcompactd0
+     87  0.0  0.0 ksmd
+     88  0.0  0.0 khugepaged
+     89  0.0  0.0 kworker/R-kblockd
+     90  0.0  0.0 kworker/R-blkcg_punt_bio
+     91  0.0  0.0 kworker/R-kintegrityd
+     93  0.0  0.0 irq/9-acpi
+     95  0.0  0.0 kworker/R-tpm_dev_wq
+     96  0.0  0.0 kworker/R-ata_sff
+     97  0.0  0.0 kworker/R-md_bitmap
+     98  0.0  0.0 kworker/R-md_llbitmap_io
+     99  0.0  0.0 kworker/R-md_llbitmap_unplug
+    100  0.0  0.0 kworker/R-edac-poller
+    101  0.0  0.0 kworker/R-devfreq_wq
+    102  0.0  0.0 watchdogd
+    103  0.0  0.0 kworker/R-quota_events_unbound
+    105  0.0  0.0 kswapd0
+    106  0.0  0.0 ecryptfs-kthread
+    107  0.0  0.0 kworker/R-kthrotld
+    109  0.0  0.0 kworker/R-acpi_thermal_pm
+    112  0.0  0.0 hwrng
+    114  0.0  0.0 kworker/R-mld
+    115  0.0  0.0 kworker/R-ipv6_addrconf
+    116  0.0  0.0 kworker/R-kstrp
+    122  0.0  0.0 kworker/u41:0-rb_allocator
+    133  0.0  0.0 kworker/R-charger_manager
+    217  0.0  0.0 kworker/R-nvme-wq
+    218  0.0  0.0 kworker/R-nvme-reset-wq
+    219  0.0  0.0 kworker/R-nvme-delete-wq
+    220  0.0  0.0 kworker/R-nvme-auth-wq
+    241  0.0  0.0 scsi_eh_0
+    242  0.0  0.0 kworker/R-scsi_tmf_0
+    243  0.0  0.0 scsi_eh_1
+    244  0.0  0.0 kworker/R-scsi_tmf_1
+    245  0.0  0.0 scsi_eh_2
+    246  0.0  0.0 kworker/R-scsi_tmf_2
+    247  0.0  0.0 scsi_eh_3
+    248  0.0  0.0 kworker/R-scsi_tmf_3
+    249  0.0  0.0 scsi_eh_4
+    250  0.0  0.0 kworker/R-scsi_tmf_4
+    251  0.0  0.0 scsi_eh_5
+    252  0.0  0.0 kworker/R-scsi_tmf_5
+    284  3.2  0.0 plymouthd
+    304  0.0  0.0 kworker/5:1H-kblockd
+    306  0.0  0.0 jbd2/nvme1n1p2-8
+    307  0.0  0.0 kworker/R-ext4-rsv-conversion
+    364  0.1  0.2 systemd-journal
+    397  0.0  0.0 kworker/R-usbip_event
+    398  0.0  0.0 kworker/1:1H-kblockd
+    400  0.0  0.0 kworker/7:1H-kblockd
+    402  0.0  0.0 systemd-udevd
+    426  0.0  0.0 kworker/0:1H-kblockd
+    427  0.0  0.0 kworker/4:1H-kblockd
+    433  0.0  0.0 kworker/2:1H-kblockd
+    434  0.0  0.0 kworker/6:1H-kblockd
+    449  0.0  0.0 kworker/8:1H-kblockd
+    458  0.0  0.0 kworker/3:1H-kblockd
+    461  0.0  0.0 kworker/9:1H-kblockd
+    467  0.0  0.0 psimon
+    559  0.0  0.0 irq/159-mei_me
+    561  0.0  0.0 kworker/R-cfg80211
+    603  0.0  0.0 irq/160-iwlwifi:default_queue
+    604  0.0  0.0 irq/161-iwlwifi:queue_1
+    605  0.0  0.0 irq/162-iwlwifi:queue_2
+    606  0.0  0.0 irq/163-iwlwifi:queue_3
+    607  0.0  0.0 irq/164-iwlwifi:queue_4
+    608  0.0  0.0 irq/165-iwlwifi:queue_5
+    609  0.0  0.0 irq/166-iwlwifi:queue_6
+    610  0.0  0.0 irq/167-iwlwifi:queue_7
+    611  0.0  0.0 irq/168-iwlwifi:queue_8
+    612  0.0  0.0 irq/169-iwlwifi:queue_9
+    614  0.0  0.0 irq/170-iwlwifi:queue_10
+    615  0.0  0.0 irq/171-iwlwifi:exception
+    621  0.0  0.0 kworker/u41:1-hci0
+    682  0.0  0.0 nv_queue
+    683  0.0  0.0 nv_queue
+    685  0.0  0.0 nv_open_q
+    691  0.0  0.0 nvidia-modeset/kthread_q
+    692  0.0  0.0 nvidia-modeset/deferred_close_kthread_q
+    694  0.0  0.0 irq/173-nvidia
+    695  0.0  0.0 nvidia
+    696  0.0  0.0 nv_queue
+    710  0.0  0.0 jbd2/nvme0n1p2-8
+    724  0.0  0.0 kworker/R-ext4-rsv-conversion
+   1117  0.0  0.0 UVM global queue
+   1118  0.0  0.0 UVM deferred release queue
+   1119  0.0  0.0 UVM Tools Event Queue
+   1193  0.0  0.0 systemd-oomd
+   1194  0.0  0.0 systemd-resolve
+   1195  0.0  0.0 systemd-timesyn
+   1206  0.0  0.0 avahi-daemon
+   1207  0.0  0.0 bluetoothd
+   1208  0.1  0.0 dbus-daemon
+   1211  0.0  0.0 gnome-remote-de
+   1219  0.0  0.0 polkitd
+   1223  0.0  0.0 power-profiles-
+   1227  0.0  0.0 smartd
+   1230  0.0  0.0 nvidia-persiste
+   1232  0.0  0.0 snapd
+   1237  0.0  0.0 accounts-daemon
+   1239  0.0  0.0 cron
+   1240  0.0  0.0 switcheroo-cont
+   1243  0.0  0.0 systemd-logind
+   1245  0.0  0.0 thermald
+   1247  0.0  0.0 udisksd
+   1259  0.0  0.0 avahi-daemon
+   1310  0.2  0.0 NetworkManager
+   1328  0.0  0.0 wpa_supplicant
+   1333  0.0  0.0 rsyslogd
+   1366  0.0  0.0 ModemManager
+   1584  0.0  0.0 turnserver
+   1592  0.0  0.0 canonical-livep
+   1594  0.1  0.0 tailscaled
+   1595  0.0  0.0 unattended-upgr
+   1602  0.1  0.0 containerd
+   1608  0.0  0.0 plymouth
+   1609  0.0  0.0 systemd
+   1610  0.0  0.0 systemd
+   1611  0.0  0.0 systemd
+   1620  0.0  0.0 colord
+   1623  0.0  0.0 (sd-pam)
+   1624  0.0  0.0 (sd-pam)
+   1625  0.0  0.0 (sd-pam)
+   1656  0.0  0.0 gdm3
+   1703  0.0  0.0 postgres
+   1707  0.0  0.0 gdm-session-wor
+   1725  0.0  0.0 systemd
+   1729  0.0  0.0 postgres
+   1730  0.0  0.0 postgres
+   1732  0.0  0.0 (sd-pam)
+   1735  0.0  0.0 postgres
+   1736  0.0  0.0 postgres
+   1737  0.0  0.0 postgres
+   1777  0.0  0.3 node
+   1778  0.0  0.0 python3
+   1779  0.0  0.0 pipewire
+   1780  0.1  0.0 python3
+   1781  0.0  0.0 python3
+   1782  0.0  0.0 python3
+   1783  0.0  0.0 pipewire
+   1784  0.0  0.0 pipewire
+   1785  0.0  0.0 python3
+   1786  0.0  0.0 pipewire
+   1787  0.0  0.0 user-session-he
+   1788  0.0  0.0 python3
+   1791  0.0  0.0 user-session-he
+   1792  0.0  0.0 wireplumber
+   1795  0.0  0.0 python3
+   1796  0.0  0.0 wireplumber
+   1797  0.0  0.0 pipewire-pulse
+   1798  0.0  0.0 pipewire-pulse
+   1799  0.0  0.0 np64-relay
+   1806  0.1  0.0 python3
+   1809  0.0  0.0 dbus-daemon
+   1812  0.9  0.0 python3
+   1827  8.4  3.7 MainThread
+   1829  0.0  0.0 dbus-daemon
+   1831  0.0  0.0 pipewire
+   1832  0.0  0.0 pipewire
+   1833  0.0  0.0 user-session-he
+   1847  0.2  3.6 python
+   1852  0.0  0.1 npm run start
+   1862  0.0  0.0 wireplumber
+   1868  0.0  0.0 pipewire-pulse
+   1872  0.0  0.0 pipewire
+   1873  0.0  0.0 pipewire
+   1877  0.0  0.0 dbus-daemon
+   1878  0.0  0.0 gdm-x-session
+   1880  0.0  0.0 wireplumber
+   1883  0.0  0.0 pipewire-pulse
+   1884  0.0  0.0 rtkit-daemon
+   1887  0.0  0.1 Xorg
+   1911  0.0  0.0 jackdbus
+   1914  0.0  0.0 jackdbus
+   1916  0.0  0.0 dbus-daemon
+   1935  0.0  0.0 jackdbus
+   1992  0.0  0.0 jackdbus
+   2083  0.0  0.0 xdg-document-po
+   2091  0.0  0.0 xdg-document-po
+   2104  0.0  0.0 xdg-permission-
+   2106  0.0  0.0 xdg-permission-
+   2122  0.0  0.0 fusermount3
+   2125  0.0  0.0 fusermount3
+   2168  0.0  0.0 xdg-document-po
+   2175  0.0  0.0 xdg-permission-
+   2189  0.0  0.0 fusermount3
+   2197  0.0  0.0 xdg-document-po
+   2202  0.0  0.0 xdg-permission-
+   2210  0.0  0.0 fusermount3
+   2231  0.0  0.0 acpid
+   2232  0.0  0.0 nvidia-drm/timeline-6
+   2273  0.0  0.0 dbus-run-sessio
+   2274  0.0  0.0 dbus-daemon
+   2275  0.0  0.0 gnome-session-b
+   2286  0.0  0.0 at-spi-bus-laun
+   2292  0.0  0.0 dbus-daemon
+   2338  0.0  0.0 krfcommd
+   2339  0.0  0.0 sh
+   2340  0.0  0.3 next-server (v1
+   2355  0.2  0.3 gnome-shell
+   2762  0.0  0.0 nvidia-drm/timeline-8
+   2765  0.0  0.1 mutter-x11-fram
+   2768  0.0  0.0 at-spi2-registr
+   2813  0.0  0.0 xdg-permission-
+   2822  0.0  0.0 gjs
+   2832  0.0  0.0 upowerd
+   2839  0.1  0.0 gsd-sharing
+   2840  0.0  0.0 gsd-wacom
+   2848  0.0  0.0 gsd-color
+   2851  0.0  0.0 gsd-keyboard
+   2855  0.0  0.0 gsd-print-notif
+   2859  0.0  0.0 gsd-rfkill
+   2863  0.0  0.0 gsd-smartcard
+   2866  0.0  0.0 gsd-datetime
+   2869  0.0  0.0 gsd-media-keys
+   2872  0.0  0.0 gsd-screensaver
+   2875  0.0  0.0 gsd-sound
+   2878  0.0  0.0 gsd-a11y-settin
+   2881  0.0  0.0 gsd-housekeepin
+   2884  0.0  0.0 gsd-power
+   2891  0.0  0.0 ibus-daemon
+   2993  0.0  0.0 gjs
+   3001  0.0  0.0 ibus-dconf
+   3007  0.0  0.0 ibus-x11
+   3023  0.0  0.0 ibus-portal
+   3055  0.0  0.0 ibus-engine-sim
+   3093  0.0  0.0 gsd-printer
+   3194  0.0  0.0 vidmem lazy free
+   3195  0.0  0.0 UVM GPU1 BH
+   3196  0.0  0.0 UVM GPU1 KC
+   3228  0.0  0.1 dockerd
+   3232  0.0  0.0 ollama
+   3242  0.0  0.0 kerneloops
+   3247  0.0  0.0 kerneloops
+   3262  0.0  0.0 operator
+   3293  0.0  0.0 cloudflared
+   3365  0.0  0.0 dnsmasq
+   3373  0.0  0.0 nmbd
+   3461  0.0  0.0 smbd
+   3550  0.0  0.0 dnsmasq
+   3557  0.0  0.0 smbd-notifyd
+   3559  0.0  0.0 smbd-cleanupd
+   3648  0.0  0.1 npm exec tsx sr
+   3680  0.0  0.0 sh
+   3681  0.0  0.0 node
+   3692  0.0  0.2 node
+   3703  0.3  0.0 cloudflared
+   3704  0.3  0.0 cloudflared
+   4017  0.0  0.0 containerd-shim
+   4040  0.0  0.0 postgres
+   4089  0.0  0.0 docker-proxy
+   4096  0.0  0.0 docker-proxy
+   4149  0.0  0.0 postgres
+   4150  0.0  0.0 postgres
+   4152  0.0  0.0 postgres
+   4153  0.0  0.0 postgres
+   4154  0.0  0.0 postgres
+   4234  0.0  0.1 MainThread
+   4271  0.0  0.1 MainThread
+   4500  0.0  0.1 MainThread
+   4576  0.0  0.0 MainThread
+   4590  0.0  0.2 codex
+   4669  0.0  0.0 MainThread
+   4682  0.0  0.2 codex
+   4785  0.0  0.0 MainThread
+   4804  0.0  0.2 codex
+   4906  0.0  0.0 MainThread
+   4922  0.0  0.2 codex
+   8813  0.0  0.0 fwupd
+ 186016  0.0  0.0 kworker/R-tls-strp
+ 244387  0.0  0.0 sshd
+ 246355  0.0  0.0 psimon
+ 584003  0.0  0.0 gvfsd
+ 584009  0.0  0.0 gvfsd-fuse
+ 584137  0.0  0.0 gpg-agent
+ 584141  0.2  0.0 adb
+1506256  0.0  0.0 cupsd
+1506279  0.0  0.0 cups-browsed
+1854755  0.0  0.0 MainThread
+1854797  0.0  0.3 codex
+1854945  0.0  0.0 codex-code-mode
+2000877  0.0  0.0 kworker/9:2-mm_percpu_wq
+2016928  0.0  0.0 kworker/5:1-events
+2052198  0.0  0.0 kworker/0:1-events
+2055615  0.0  0.0 kworker/u40:4-flush-259:0
+2071317  0.0  0.0 kworker/6:0-events
+2082705  0.0  0.0 kworker/u40:0-events_power_efficient
+2087781  0.0  0.0 kworker/8:1-cgroup_free
+2091689  0.0  0.0 kworker/4:2-mm_percpu_wq
+2096350  0.0  0.0 kworker/9:1
+2096696  0.0  0.0 kworker/u40:2-pm
+2116948  0.0  0.0 kworker/1:1-cgroup_release
+2116949  0.0  0.0 kworker/2:2-events
+2117832  0.0  0.0 kworker/7:0-cgroup_free
+2121620  0.0  0.0 kworker/7:1-mm_percpu_wq
+2125130  0.0  0.0 kworker/0:2-cgroup_offline
+2125655  0.0  0.0 kworker/8:0-events
+2127547  0.0  0.0 kworker/6:2-cgroup_free
+2127907  0.0  0.0 kworker/3:2-events
+2129337  0.0  0.0 kworker/u40:5-iou_exit
+2130436  0.0  0.0 kworker/5:2-events
+2132535  0.0  0.0 kworker/4:0-cgroup_free
+2133290  0.0  0.0 kworker/1:0-cgroup_free
+2135795  0.0  0.0 kworker/3:0-events
+2137039  0.0  0.0 kworker/2:1
+2138488  0.0  0.0 kworker/1:2-events
+2138526  0.0  0.0 MainThread
+2138534  3.7  0.4 codex
+2138674  0.1  0.0 codex-code-mode
+2139217 60.0  0.0 python3
+2139219  0.0  0.0 ps
