@@ -2,7 +2,6 @@
 #include <gst/app/gstappsrc.h>
 #include <gst/app/gstappsink.h>
 #include <gst/video/video.h>
-#include <sys/socket.h>
 #include <thread>
 #include <cstring>
 #include <cstdio>
@@ -11,6 +10,7 @@
 extern "C" {GST_PLUGIN_STATIC_DECLARE(framelink);GST_PLUGIN_STATIC_DECLARE(app);GST_PLUGIN_STATIC_DECLARE(coreelements);}
 #endif
 #define CHECK(x) do{if(!(x)){fprintf(stderr,"line%d %s\n",__LINE__,#x);exit(1);}}while(0)
+#include "fl_gst_cpu_test_pair.hpp"
 static GstElement* pipeline(const char*text){GError*e=nullptr;auto*p=gst_parse_launch(text,&e);CHECK(p&&!e);return p;}
 static void context(GstElement*e,FlGstSession*s){auto*c=fl_gst_session_create_context(s);gst_element_set_context(e,c);gst_context_unref(c);}
 static void terminal(GstElement*p,GstMessageType type){auto*b=gst_element_get_bus(p);auto*m=gst_bus_timed_pop_filtered(b,3*GST_SECOND,GstMessageType(GST_MESSAGE_EOS|GST_MESSAGE_ERROR));if(m&&GST_MESSAGE_TYPE(m)==GST_MESSAGE_ERROR){GError*e=nullptr;gchar*debug=nullptr;gst_message_parse_error(m,&e,&debug);fprintf(stderr,"bus: %s %s\n",e->message,debug?debug:"");g_free(debug);g_clear_error(&e);}CHECK(m&&GST_MESSAGE_TYPE(m)==type);gst_message_unref(m);gst_object_unref(b);}
@@ -22,18 +22,37 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
 #endif
  for(unsigned mode=0;mode<8;mode++){
   fprintf(stderr,"mode %u\n",mode);bool nv12=mode==1;auto*s=fl_gst_session_new(1);auto*r=fl_gst_session_new(1);
-  flSessionConfig cfg{};cfg.version=2;cfg.sessionId.bytes[0]=1;cfg.clockId.bytes[0]=2;cfg.generation=1;cfg.videoTrackId=1;cfg.video={nv12?FL_FORMAT_NV12:FL_FORMAT_BGRA8,18,16,60,1};cfg.videoQueueFrames=1;cfg.connectTimeoutMs=cfg.idleTimeoutMs=1000;
+  flSessionConfig cfg{};cfg.version=2;cfg.sessionId.bytes[0]=1;cfg.clockId.bytes[0]=2;cfg.generation=1;cfg.videoTrackId=1;cfg.video={uint32_t(nv12?FL_FORMAT_NV12:FL_FORMAT_BGRA8),18,16,60,1};cfg.videoQueueFrames=1;cfg.connectTimeoutMs=cfg.idleTimeoutMs=1000;
   flSessionCapabilities offers{};offers.version=2;offers.videoCount=1;offers.video[0]=cfg.video;
   CHECK(fl_gst_session_configure(s,&cfg,&offers,&offers)==FL_GST_SESSION_READY);CHECK(fl_gst_session_configure(r,&cfg,&offers,&offers)==FL_GST_SESSION_READY);
+#ifdef _WIN32
+  auto*listener=g_socket_listener_new();auto port=g_socket_listener_add_any_inet_port(listener,nullptr,nullptr);CHECK(port);
+  GSocketConnection*ea=nullptr;std::thread accept([&]{ea=g_socket_listener_accept(listener,nullptr,nullptr,nullptr);});
+  auto*eventClient=g_socket_client_new();auto*eb=g_socket_client_connect_to_host(eventClient,"127.0.0.1",port,nullptr,nullptr);accept.join();CHECK(ea&&eb);g_object_unref(eventClient);g_object_unref(listener);
+#else
   int ev[2];CHECK(!socketpair(AF_UNIX,SOCK_STREAM,0,ev));auto*sa=g_socket_new_from_fd(ev[0],nullptr);auto*sb=g_socket_new_from_fd(ev[1],nullptr);CHECK(sa&&sb);auto*ea=g_socket_connection_factory_create_connection(sa);auto*eb=g_socket_connection_factory_create_connection(sb);g_object_unref(sa);g_object_unref(sb);
+#endif
   guint8 secret[32]{};secret[0]=73;auto*key=g_bytes_new(secret,32);gboolean auth=FALSE;
   std::thread authenticate([&]{auth=fl_gst_session_authenticate_event_stream(s,ea,TRUE,key,1000,nullptr,nullptr);});CHECK(fl_gst_session_authenticate_event_stream(r,eb,FALSE,key,1000,nullptr,nullptr));authenticate.join();CHECK(auth);g_bytes_unref(key);g_object_unref(ea);g_object_unref(eb);
   flClockMapping mapping{};mapping.sourceClockId=cfg.clockId;mapping.targetClockId.bytes[0]=8;mapping.targetAnchorNs=1000000;CHECK(fl_gst_session_set_mapping(r,1,&mapping,0)==FL_GST_SESSION_READY);
   flSharedCpuDescriptor d[2]{};for(unsigned i=0;i<2;i++){auto&v=d[i];v.version=1;v.resourceType=FL_MEMORY_SHARED_CPU;v.format=cfg.video.format;v.width=18;v.height=16;v.planeCount=nv12?2:1;v.generation=1;v.allocationId=i+1;v.planeStride[0]=nv12?32:80;v.allocationBytes=v.planeStride[0]*16;if(nv12){v.planeOffset[1]=v.allocationBytes+64;v.planeStride[1]=32;v.allocationBytes+=64+256;}}
+#ifdef _WIN32
+  // Windows section size is page-rounded; keep exact exported allocation size.
+  SYSTEM_INFO systemInfo{};GetSystemInfo(&systemInfo);
+  for(auto& descriptor:d)descriptor.allocationBytes=(descriptor.allocationBytes+systemInfo.dwPageSize-1)/systemInfo.dwPageSize*systemInfo.dwPageSize;
+#endif
   flMemoryRequirements req{};CHECK(flMemoryRequirementsInit(&req)==FL_MEMORY_OK);req.allowedResourceTypes=FL_MEMORY_SHARED_CPU;req.allowedOperations=FL_MEMORY_COPY;
-  int fd[2];CHECK(!socketpair(AF_UNIX,SOCK_SEQPACKET|SOCK_CLOEXEC,0,fd));FlGstSessionResult opened=FL_GST_SESSION_INVALID;
+  FlGstSessionResult opened=FL_GST_SESSION_INVALID;
+#ifdef _WIN32
+  CpuTestPair pair;auto client=pair.take(true),server=pair.take(false);
+  std::thread setup([&]{opened=fl_gst_session_bind_shared_cpu_pipe(s,TRUE,1,client,GetCurrentProcess(),60000,&req,mode==2?0:FL_MEMORY_COPY,nullptr,0);});
+  CHECK(fl_gst_session_bind_shared_cpu_pipe(r,FALSE,1,server,GetCurrentProcess(),60000,&req,FL_MEMORY_COPY,d,2)==FL_GST_SESSION_READY);
+#else
+  int fd[2];CHECK(!socketpair(AF_UNIX,SOCK_SEQPACKET|SOCK_CLOEXEC,0,fd));
   std::thread setup([&]{opened=fl_gst_session_bind_shared_cpu_fd(s,TRUE,1,fd[1],60000,&req,mode==2?0:FL_MEMORY_COPY,nullptr,0);});
-  CHECK(fl_gst_session_bind_shared_cpu_fd(r,FALSE,1,fd[0],60000,&req,FL_MEMORY_COPY,d,2)==FL_GST_SESSION_READY);setup.join();CHECK(opened==FL_GST_SESSION_READY);
+  CHECK(fl_gst_session_bind_shared_cpu_fd(r,FALSE,1,fd[0],60000,&req,FL_MEMORY_COPY,d,2)==FL_GST_SESSION_READY);
+#endif
+  setup.join();CHECK(opened==FL_GST_SESSION_READY);
   auto*tx=pipeline("appsrc name=input is-live=true format=time ! framelinksink name=send shared-cpu=true");auto*input=gst_bin_get_by_name(GST_BIN(tx),"input");auto*send=gst_bin_get_by_name(GST_BIN(tx),"send");context(send,s);
   GstVideoInfo info;gst_video_info_set_format(&info,nv12?GST_VIDEO_FORMAT_NV12:GST_VIDEO_FORMAT_BGRA,mode==3?20:18,16);auto*caps=gst_video_info_to_caps(&info);gst_app_src_set_caps(GST_APP_SRC(input),caps);gst_caps_unref(caps);
   GstElement*rx=nullptr,*output=nullptr;flSharedCpuChannel*raw=nullptr;

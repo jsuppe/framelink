@@ -243,10 +243,8 @@ typedef struct _GstFrameLinkSink {
     guint64 streamGeneration;
     gboolean nativeMemory,sharedCpu;
     volatile gint cpuFlushing;
-#ifndef _WIN32
     flSharedCpuChannel* cpuChannel;
     guint cpuSlots,cpuOutstanding;
-#endif
     gboolean memoryPolicyApplied;
     guint64 memoryPoolGeneration;
     GstFrameLinkMemoryPolicy memoryPolicy;
@@ -299,9 +297,7 @@ static GstStaticPadTemplate sinkTemplate =
                             GST_STATIC_CAPS(FL_SINK_CAPS));
 
 static void sinkDisconnect(GstFrameLinkSink* self) {
-#ifndef _WIN32
     if(self->cpuChannel){flSharedCpuClose(self->cpuChannel);self->cpuChannel=nullptr;}
-#endif
 #ifdef _WIN32
     g_clear_pointer(&self->uploadScratch, g_byte_array_unref);
 #endif
@@ -402,18 +398,12 @@ static bool validSessionContext(GstElement*element){
  if(session){g_object_unref(session);return true;}
  GST_ELEMENT_ERROR(element,RESOURCE,SETTINGS,("malformed FrameLink session context"),("refusing unauthenticated fallback"));return false;
 }
-#ifndef _WIN32
 #include "fl_gst_shared_cpu_sink.inc"
-#endif
 static gboolean sinkStart(GstBaseSink* base) {
     if(!validSessionContext(GST_ELEMENT(base)))return FALSE;
     auto* self=GST_FRAMELINK_SINK(base);
     if(self->sharedCpu){
-#ifndef _WIN32
         return sinkSharedCpuStart(self);
-#else
-        return FALSE;
-#endif
     }
     if(self->session){
         if(fl_gst_session_get_config(self->session,&self->sessionConfig)!=FL_GST_SESSION_READY||!self->sessionConfig.videoTrackId||!self->delegated||
@@ -563,12 +553,10 @@ static GstFlowReturn sinkRenderImpl(GstBaseSink* base, GstBuffer* buffer) {
                           GST_CLOCK_TIME_IS_VALID(pts) ? (int64_t)pts : -1, 0});
     };
     account("gst.frame_receive");
-#ifndef _WIN32
     if(self->sharedCpu){auto result=sinkSharedCpuRender(self,buffer);
         if(result!=GST_FLOW_OK){++self->dropped;account("gst.frame_drop.shared_cpu_error");}
         return trace.result(result);
     }
-#endif
     if(self->memoryPolicyApplied){
         flChannelInfo info{};
         if(!self->ch || flQuery(self->ch,&info)!=FL_OK || info.generation!=self->memoryPoolGeneration){
@@ -829,9 +817,7 @@ static gboolean sinkEventImpl(GstBaseSink* base, GstEvent* event) {
     }
     if (GST_EVENT_TYPE(event) == GST_EVENT_EOS) {
         auto* self = GST_FRAMELINK_SINK(base);
-#ifndef _WIN32
         if(self->sharedCpu&&!sinkSharedCpuEos(self))return FALSE;
-#endif
         if(self->session&&fl_gst_session_video_eos(self->session,self->sessionConfig.generation,self->sessionFrames,self->sessionLastPts)!=FL_GST_SESSION_READY){GST_ELEMENT_ERROR(self,STREAM,FAILED,("invalid coordinated video EOS"),(NULL));return FALSE;}
         if(self->session&&fl_gst_session_has_event_stream(self->session,self->sessionConfig.generation)){FlGstVideoEvent record{FL_GST_VIDEO_END,self->sessionFrames,self->sessionLastPts<0?0:guint64(self->sessionLastPts),0};if(fl_gst_session_send_video_event(self->session,self->sessionConfig.generation,&record)!=FL_GST_SESSION_READY)return FALSE;}
         auto* stats = gst_structure_new("framelink-sink-stats",
@@ -1086,9 +1072,7 @@ typedef struct _GstFrameLinkSrc {
     gboolean nativeMemory;
     gboolean gpuReadback;
     gboolean sharedCpu;
-#ifndef _WIN32
     flSharedCpuChannel* cpuChannel;
-#endif
 #ifdef FL_GST_EGL_READBACK
     FrameLinkEglReadback* eglReadback;
 #endif
@@ -1221,20 +1205,14 @@ static GstCaps* srcGetCaps(GstBaseSrc* base, GstCaps* filter) {
     return caps;
 }
 
-#ifndef _WIN32
 static bool srcEmitGaps(GstFrameLinkSrc*);
 #include "fl_gst_shared_cpu_source.inc"
-#endif
 
 static gboolean srcStart(GstBaseSrc* base) {
     if(!validSessionContext(GST_ELEMENT(base)))return FALSE;
     GstFrameLinkSrc* self = GST_FRAMELINK_SRC(base);
     if(self->sharedCpu){
-#ifndef _WIN32
         return srcSharedCpuStart(self);
-#else
-        return FALSE;
-#endif
     }
     if(self->gpuReadback){
 #ifdef FL_GST_EGL_READBACK
@@ -1318,9 +1296,7 @@ static gboolean srcStop(GstBaseSrc* base) {
     GstFrameLinkSrc* self = GST_FRAMELINK_SRC(base);
     srcDropCpuOutput(self);
     gst_clear_buffer(&self->pendingDelivery);
-#ifndef _WIN32
     if(self->cpuChannel){flSharedCpuClose(self->cpuChannel);self->cpuChannel=nullptr;}
-#endif
 #ifdef FL_GST_EGL_READBACK
     delete self->eglReadback;self->eglReadback=nullptr;
 #endif
@@ -1477,9 +1453,7 @@ static GstFlowReturn srcCreateImpl(GstPushSrc* push, GstBuffer** outbuf) {
         }while(result==FL_GST_SESSION_TIMEOUT);
         if(result!=FL_GST_SESSION_READY){GST_ELEMENT_ERROR(self,RESOURCE,READ,("coordinated session not ready or cancelled"),(NULL));return GST_FLOW_ERROR;}
     }
-#ifndef _WIN32
     if(self->sharedCpu)return srcSharedCpuCreate(self,outbuf);
-#endif
     const gint64 idleDeadline=g_get_monotonic_time()+gint64(self->sessionConfig.idleTimeoutMs)*1000;
     flFrame frame = {};
     for (;;) {
@@ -1822,9 +1796,7 @@ static void srcFinalize(GObject* obj) {
     srcDropStaging(self);
 #endif
     gst_clear_buffer(&self->pendingDelivery);
-#ifndef _WIN32
     if(self->cpuChannel){flSharedCpuClose(self->cpuChannel);self->cpuChannel=nullptr;}
-#endif
 #ifdef FL_GST_EGL_READBACK
     delete self->eglReadback;self->eglReadback=nullptr;
 #endif

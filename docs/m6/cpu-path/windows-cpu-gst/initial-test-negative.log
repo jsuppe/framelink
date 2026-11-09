@@ -1,0 +1,32 @@
+Test project <win-home>/dev/framelink-m6-windows-02509f7/build
+    Start 113: gst_session_transport
+1/7 Test #113: gst_session_transport ............   Passed    0.33 sec
+    Start 114: gst_shared_cpu_session_win
+2/7 Test #114: gst_shared_cpu_session_win .......   Passed    1.77 sec
+    Start 115: gst_session_context
+3/7 Test #115: gst_session_context ..............   Passed    0.08 sec
+    Start 118: gst_shared_cpu_source
+4/7 Test #118: gst_shared_cpu_source ............***Failed    0.09 sec
+line 32: fl_gst_session_bind_shared_cpu_pipe(s,FALSE,1,server,GetCurrentProcess(),mode==7?60000:1000,&req,mode==2?0:FL_MEMORY_COPY,d,2)==FL_GST_SESSION_READY
+
+    Start 119: gst_shared_cpu_roundtrip
+5/7 Test #119: gst_shared_cpu_roundtrip .........***Failed    0.08 sec
+mode 0
+line44 fl_gst_session_bind_shared_cpu_pipe(r,FALSE,1,server,GetCurrentProcess(),60000,&req,FL_MEMORY_COPY,d,2)==FL_GST_SESSION_READY
+
+    Start 122: gst_av_bin
+6/7 Test #122: gst_av_bin .......................   Passed   25.66 sec
+    Start 130: gst_event_channel
+7/7 Test #130: gst_event_channel ................   Passed    2.31 sec
+
+71% tests passed, 2 tests failed out of 7
+
+Label Time Summary:
+m5b_av    =  28.38 sec*proc (4 tests)
+
+Total Test time (real) =  30.36 sec
+
+The following tests FAILED:
+	118 - gst_shared_cpu_source (Failed)
+	119 - gst_shared_cpu_roundtrip (Failed)
+Errors while running CTest

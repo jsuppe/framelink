@@ -3,7 +3,6 @@
 #include <gst/app/gstappsink.h>
 #include <gst/video/video.h>
 #include <gst/base/gstbasesrc.h>
-#include <sys/socket.h>
 #include <thread>
 #include <cstring>
 #include <cstdio>
@@ -12,6 +11,7 @@
 extern "C" { GST_PLUGIN_STATIC_DECLARE(framelink);GST_PLUGIN_STATIC_DECLARE(app);GST_PLUGIN_STATIC_DECLARE(coreelements); }
 #endif
 #define CHECK(x) do{if(!(x)){fprintf(stderr,"line %d: %s\n",__LINE__,#x);exit(1);}}while(0)
+#include "fl_gst_cpu_test_pair.hpp"
 int main(int argc,char**argv){gst_init(&argc,&argv);
 #ifdef __ANDROID__
  GST_PLUGIN_STATIC_REGISTER(framelink);GST_PLUGIN_STATIC_REGISTER(app);GST_PLUGIN_STATIC_REGISTER(coreelements);
@@ -19,15 +19,28 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
  CHECK(argc>1);GError*err=nullptr;auto*plugin=gst_plugin_load_file(argv[1],&err);CHECK(plugin&&!err);gst_object_unref(plugin);
 #endif
  for(unsigned mode=0;mode<8;mode++){
-  const bool nv12=mode==1;auto*s=fl_gst_session_new(1);flSessionConfig cfg{};cfg.version=2;cfg.sessionId.bytes[0]=1;cfg.clockId.bytes[0]=2;cfg.generation=1;cfg.videoTrackId=1;cfg.video={nv12?FL_FORMAT_NV12:FL_FORMAT_BGRA8,18,16,60,1};cfg.videoQueueFrames=1;cfg.connectTimeoutMs=cfg.idleTimeoutMs=1000;
+  const bool nv12=mode==1;auto*s=fl_gst_session_new(1);flSessionConfig cfg{};cfg.version=2;cfg.sessionId.bytes[0]=1;cfg.clockId.bytes[0]=2;cfg.generation=1;cfg.videoTrackId=1;cfg.video={uint32_t(nv12?FL_FORMAT_NV12:FL_FORMAT_BGRA8),18,16,60,1};cfg.videoQueueFrames=1;cfg.connectTimeoutMs=cfg.idleTimeoutMs=1000;
   flSessionCapabilities caps{};caps.version=2;caps.videoCount=1;caps.video[0]=cfg.video;CHECK(fl_gst_session_configure(s,&cfg,&caps,&caps)==FL_GST_SESSION_READY);
   flClockMapping mapping{};mapping.sourceClockId=cfg.clockId;mapping.targetClockId.bytes[0]=8;mapping.targetAnchorNs=1000000;
   if(mode!=3)CHECK(fl_gst_session_set_mapping(s,1,&mapping,0)==FL_GST_SESSION_READY);
   flSharedCpuDescriptor d[2]{};for(unsigned i=0;i<2;i++){auto&v=d[i];v.version=1;v.resourceType=FL_MEMORY_SHARED_CPU;v.format=cfg.video.format;v.width=18;v.height=16;v.planeCount=nv12?2:1;v.generation=1;v.allocationId=i+1;v.planeStride[0]=nv12?32:80;v.allocationBytes=v.planeStride[0]*16;if(nv12){v.planeOffset[1]=v.allocationBytes+64;v.planeStride[1]=32;v.allocationBytes+=64+32*8;}}
+#ifdef _WIN32
+  // Windows section size is page-rounded; keep exact exported allocation size.
+  SYSTEM_INFO systemInfo{};GetSystemInfo(&systemInfo);
+  for(auto& descriptor:d)descriptor.allocationBytes=(descriptor.allocationBytes+systemInfo.dwPageSize-1)/systemInfo.dwPageSize*systemInfo.dwPageSize;
+#endif
   flMemoryRequirements req{};CHECK(flMemoryRequirementsInit(&req)==FL_MEMORY_OK);req.allowedResourceTypes=FL_MEMORY_SHARED_CPU;req.allowedOperations=FL_MEMORY_COPY;
-  int fd[2];CHECK(!socketpair(AF_UNIX,SOCK_SEQPACKET|SOCK_CLOEXEC,0,fd));flSharedCpuChannel*p=nullptr;flResult opened=FL_INVALID;
+  flSharedCpuChannel*p=nullptr;flResult opened=FL_INVALID;
+#ifdef _WIN32
+  CpuTestPair pair;auto client=pair.take(true),server=pair.take(false);
+  std::thread setup([&]{opened=flSharedCpuOpenProducerPipe(client,GetCurrentProcess(),nullptr,mode==7?60000:1000,&cfg,&req,0,FL_SHARED_CPU_FRAME_METADATA|FL_SHARED_CPU_ORDERED_EOS,&p);});
+  CHECK(fl_gst_session_bind_shared_cpu_pipe(s,FALSE,1,server,GetCurrentProcess(),mode==7?60000:1000,&req,mode==2?0:FL_MEMORY_COPY,d,2)==FL_GST_SESSION_READY);
+#else
+  int fd[2];CHECK(!socketpair(AF_UNIX,SOCK_SEQPACKET|SOCK_CLOEXEC,0,fd));
   std::thread setup([&]{opened=flSharedCpuOpenProducerFdEx(fd[1],mode==7?60000:1000,&cfg,&req,0,FL_SHARED_CPU_FRAME_METADATA|FL_SHARED_CPU_ORDERED_EOS,&p);});
-  CHECK(fl_gst_session_bind_shared_cpu_fd(s,FALSE,1,fd[0],mode==7?60000:1000,&req,mode==2?0:FL_MEMORY_COPY,d,2)==FL_GST_SESSION_READY);setup.join();CHECK(opened==FL_OK);
+  CHECK(fl_gst_session_bind_shared_cpu_fd(s,FALSE,1,fd[0],mode==7?60000:1000,&req,mode==2?0:FL_MEMORY_COPY,d,2)==FL_GST_SESSION_READY);
+#endif
+  setup.join();CHECK(opened==FL_OK);
   GError*error=nullptr;auto*pipeline=gst_parse_launch("framelinksrc shared-cpu=true name=source ! appsink name=output sync=false",&error);CHECK(pipeline&&!error);
   auto*source=gst_bin_get_by_name(GST_BIN(pipeline),"source");auto*output=gst_bin_get_by_name(GST_BIN(pipeline),"output");auto*context=fl_gst_session_create_context(s);gst_element_set_context(source,context);gst_context_unref(context);
   auto*bus=gst_element_get_bus(pipeline);

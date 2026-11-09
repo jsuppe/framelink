@@ -1,12 +1,14 @@
 # Windows API integration baseline candidate — NOT FROZEN
 
-**Current additive CPU implementation:** `d8f97c244696c42bb4ad4124674d8b462df4a9ed`.
-Focused tests pass7/7 Windows,8/8 Linux,8/8 Android plusdualABIbuilds; all59 old
-DLL exports preserved plus16 CPU symbols. A clean exact-revision full Windows/API
-validation passed **127/127**; [pinned evidence](../windows-integrated-d8f97c2/README.md)
-includes DLL hashes, runtime properties and all59 retained legacy export names.
-The CPU factories require separately authenticated delegated pipes/processes;
-coordinator/GStreamer integration and all unresolved M6 acceptance gates remain.
+**Current integrated candidate:** `02509f78776467b6c2109a6365e3cbe6963195e1`.
+Clean exact-revision Windows build/API/full suite **128/128 passed**;
+[pinned evidence](../windows-integrated-02509f7/README.md) includes DLL hashes,
+runtime properties, header hashes and all59 retained legacy exports plus16 CPU
+symbols. Windows broker-bound coordinator binding is available with single-claim,
+generation and cancellation checks. Callers still authenticate/delegate the exact
+pipe and pinned process; this is not discovery or automatic peer authentication.
+Newer Windows CPU element integration is tracked separately until its exact-source
+integrated run is collected. All unresolved M6 acceptance gates remain.
 
 **Historical candidate** exact revision: `609cb74031a5de2cee782619007a6e87ab7fbccd`.
 Clean isolated Windows source archive SHA256:
@@ -28,7 +30,7 @@ specific tests, not full M6 qualification. Source headers are pinned in
 | Session | v1 A/V, explicit v2 optional tracks,160-byte wire; newer generation and shared A/V clock mapping | C/C++/peer tests pass |
 | CPU descriptor | v1 FCS1,128-byte wire; Windows allocationBytes explicitly page-padded | Unchanged portable layout; Windows pipe channel available explicitly |
 | CPU channel | Portable opaque channel/lease API; POSIX FD and additive Windows pipe factories | Separate typed platform factories; never reinterpret int FD as HANDLE |
-| GStreamer coordinator | `framelink.session.v1`, typed strong reference, authenticated stream binding, finite cancellation | Existing native stream tests pass; CPU Windows binding pending |
+| GStreamer coordinator | `framelink.session.v1`, typed strong reference, authenticated stream binding, finite cancellation | Explicit Windows CPU pipe binding available; caller authenticates/delegates |
 | GStreamer bins | `shared-cpu=false`; native output opt-in on avsrc; avsink lacks native producer selection | Windows CPU property presence does not imply platform support |
 
 ## Observed defaults, not a new product decision
