@@ -169,6 +169,11 @@ static void sinkPipeline(bool coordinated,bool bin=false){
 int main(int argc,char**argv){gst_init(&argc,&argv);CHECK(argc==2||argc==3);GError*e=nullptr;auto*plugin=gst_plugin_load_file(argv[1],&e);CHECK(plugin&&!e);gst_object_unref(plugin);
  if(argc==3){
   if(std::string(argv[2])=="--decoder-contract-diagnostic"){decoderContractDiagnostic();return 0;}
+  if(std::string(argv[2])=="--decoder-av-diagnostic"){
+   for(bool nativeReceiver:{false,true})for(unsigned mode=0;mode<2;++mode)
+    nativeProducerAv(mode,true,false,true,nativeReceiver,true);
+   return 0;
+  }
   CHECK(std::string(argv[2])=="--lifecycle-diagnostic");
   auto memoryInfo=reinterpret_cast<BOOL(WINAPI*)(HANDLE,PPROCESS_MEMORY_COUNTERS,DWORD)>(GetProcAddress(GetModuleHandleW(L"kernel32.dll"),"K32GetProcessMemoryInfo"));CHECK(memoryInfo);
   // Explicit diagnostic: no acceptance thresholds are changed or waived.

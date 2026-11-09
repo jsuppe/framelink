@@ -1,0 +1,19 @@
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <win-home>\dev\framelink-m6-windows-a6b05da\build\Release\framelink.dll
+  framelink_session_transport.cpp
+     Creating library <win-home>/dev/framelink-m6-windows-a6b05da/build/Release/framelink_gst_session.lib and object <win-home>/dev/framelink-m6-windows-a6b05da/build/Release/framelink_gst_session.exp
+  framelink_gst_session.vcxproj -> <win-home>\dev\framelink-m6-windows-a6b05da\build\Release\framelink_gst_session.dll
+  fl_gst_native_producer_win.cpp
+  The d3d11 library from gst-plugins-bad is unstable API and may change in future.
+  You can define GST_USE_UNSTABLE_API to avoid this warning.
+  fl_gst_native_producer_win.vcxproj -> <win-home>\dev\framelink-m6-windows-a6b05da\build\Release\fl_gst_native_producer_win.exe
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <win-home>\dev\framelink-m6-windows-a6b05da\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> <win-home>\dev\framelink-m6-windows-a6b05da\build\Release\framelink_gst_session.dll
+  gstframelinkavsink.cpp
+  gstframelinkavsrc.cpp
+  Generating Code...
+     Creating library <win-home>/dev/framelink-m6-windows-a6b05da/build/Release/gstframelink.lib and object <win-home>/dev/framelink-m6-windows-a6b05da/build/Release/gstframelink.exp
+  gstframelink.vcxproj -> <win-home>\dev\framelink-m6-windows-a6b05da\build\Release\gstframelink.dll

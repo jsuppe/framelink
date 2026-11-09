@@ -1,5 +1,5 @@
-// Broker-bound native producer + authenticated PCM/event integration. The
-// receiver intentionally selects CPU readback: this is not end-to-end zero-copy.
+// Native producer + authenticated PCM/event integration with explicit CPU
+// readback or native receiver. Decoder mode adds a declared upstream transform.
 #include "../gst/framelink_session_transport.h"
 #include <gst/app/gstappsink.h>
 static void avStreamPair(GSocketConnection**a,GSocketConnection**b){
@@ -13,7 +13,7 @@ static void avTerminal(GstElement*p,GstMessageType expected){
  if(m&&GST_MESSAGE_TYPE(m)==GST_MESSAGE_ERROR){GError*e=nullptr;gchar*d=nullptr;gst_message_parse_error(m,&e,&d);fprintf(stderr,"native AV: %s %s\n",e->message,d?d:"");g_clear_error(&e);g_free(d);}
  CHECK(m&&GST_MESSAGE_TYPE(m)==expected);gst_message_unref(m);gst_object_unref(bus);
 }
-static GstFrameLinkMemoryPolicy nativeAvPolicy(guint64 generation,bool nativeReceiver=false){
+static GstFrameLinkMemoryPolicy nativeAvPolicy(guint64 generation,bool nativeReceiver=false,bool renderProducer=false){
  GstFrameLinkMemoryPolicy policy{};policy.version=1;policy.sessionGeneration=generation;
  for(unsigned i=0;i<2;++i){flMemoryRequirementsInit(&policy.requirements[i]);
   policy.requirements[i].allowedResourceTypes=FL_MEMORY_D3D11;
@@ -28,6 +28,7 @@ static GstFrameLinkMemoryPolicy nativeAvPolicy(guint64 generation,bool nativeRec
    policy.paths[i].operations=0;
    policy.paths[i].supportedUsage=policy.requirements[i].requiredUsage=FL_MEMORY_GPU_SAMPLE;}
  }
+ if(renderProducer)policy.paths[0].supportedUsage=policy.requirements[0].requiredUsage=FL_MEMORY_GPU_SAMPLE|FL_MEMORY_GPU_RENDER;
  return policy;
 }
 // The appsink consumer completes its synchronous pixel oracle before releasing
@@ -46,7 +47,7 @@ struct NativeEpochProbe {gint64 epoch;unsigned calls=0;};
 static gint64 nativeEpoch(gpointer data,GstClockTime now){
  auto*p=static_cast<NativeEpochProbe*>(data);CHECK(now>0);++p->calls;return p->epoch;
 }
-static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=false,bool automatic=false,bool nativeReceiver=false){
+static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=false,bool automatic=false,bool nativeReceiver=false,bool decoder=false){
  fprintf(stderr,"native AV mode %u local=%d\n",mode,local);
  auto*s=fl_gst_session_new(3);auto*r=fl_gst_session_new(3);
  flSessionConfig cfg{};cfg.version=2;cfg.sessionId.bytes[0]=1;cfg.clockId.bytes[0]=2;cfg.generation=1;
@@ -54,7 +55,7 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
  cfg.video={FL_FORMAT_RGBA8,64,32,30,1};cfg.videoQueueFrames=1;cfg.connectTimeoutMs=cfg.idleTimeoutMs=1000;
  flSessionCapabilities offer{};offer.version=2;offer.videoCount=1;offer.video[0]=cfg.video;offer.audioCount=1;offer.audio[0]=cfg.audio;
  flChannel*channel=nullptr;flChannel*producer=nullptr;
- auto policy=nativeAvPolicy(local?0:cfg.generation,nativeReceiver);
+ auto policy=nativeAvPolicy(local?0:cfg.generation,nativeReceiver,decoder);
  GSocketConnection*audioPeer=nullptr;
  if(local&&!automatic){
   gchar*dir=g_dir_make_tmp("framelink-native-XXXXXX",nullptr);CHECK(dir);std::string path=std::string(dir)+"/session";g_free(dir);
@@ -118,7 +119,7 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
   gchar*dir=g_dir_make_tmp("framelink-native-bins-XXXXXX",nullptr);CHECK(dir);std::string path=std::string(dir)+"/session";g_free(dir);
   for(auto*bin:{sink,src})g_object_set(bin,"session",path.c_str(),"video-format","RGBA","width",64u,"height",32u,
     "video-pool",2u,"video-queue-frames",1u,"connect-timeout-ms",2000u,"idle-timeout-ms",1000u,nullptr);
-  policy=nativeAvPolicy(0,nativeReceiver);gboolean accepted=FALSE;
+  policy=nativeAvPolicy(0,nativeReceiver,decoder);gboolean accepted=FALSE;
   for(auto*bin:{sink,src}){auto candidate=policy;g_signal_emit_by_name(bin,"set-local-native-candidate",&candidate,&accepted);CHECK(accepted);
    candidate.version=99; // the bin must retain a copy, not this caller-owned pointer
   }
@@ -152,6 +153,8 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
  gst_query_unref(q);gst_caps_unref(caps);gst_object_unref(pad);CHECK(gst_buffer_pool_set_active(pool,TRUE));
  GstMemory* retainedReceiver=nullptr;
  GstMemory* retainedFinal=nullptr;ID3D11Resource* retainedIdentity=nullptr;
+ GstElement*decode=nullptr,*decoded=nullptr;GstD3D11Converter*converter=nullptr;
+ GstClockTime decoderOrigin=GST_CLOCK_TIME_NONE;guint64 finalPts=0;
  const unsigned count=mode==2?0:8;
  for(unsigned n=0;n<count;++n){
   GstBuffer*b=nullptr;CHECK(gst_buffer_pool_acquire_buffer(pool,&b,nullptr)==GST_FLOW_OK);
@@ -159,10 +162,50 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
   auto*reservation=(FrameLinkD3DReservation*)gst_mini_object_get_qdata(GST_MINI_OBJECT(mem),FrameLinkD3DProducer::key());CHECK(reservation);
   auto*texture=(ID3D11Texture2D*)gst_d3d11_memory_get_resource_handle(GST_D3D11_MEMORY_CAST(mem));CHECK(texture==flImageD3D11(reservation->buffer.image));
   ID3D11Device*d=nullptr;texture->GetDevice(&d);ID3D11DeviceContext*c=nullptr;d->GetImmediateContext(&c);
-  std::vector<unsigned char>pixels(64*32*4,static_cast<unsigned char>(n+1));c->UpdateSubresource(texture,0,nullptr,pixels.data(),256,0);c->Release();d->Release();
+  std::vector<unsigned char>pixels(64*32*4,static_cast<unsigned char>(n+1));
+  guint64 audioPts=n*1000000,videoDuration=1000000;
+  if(decoder){
+   D3D11_TEXTURE2D_DESC target{};texture->GetDesc(&target);
+   CHECK((target.BindFlags&(D3D11_BIND_RENDER_TARGET|D3D11_BIND_SHADER_RESOURCE))==(D3D11_BIND_RENDER_TARGET|D3D11_BIND_SHADER_RESOURCE));
+   auto*device=GST_D3D11_MEMORY_CAST(mem)->device;
+   if(!decode){
+    decode=gst_parse_launch("videotestsrc num-buffers=8 pattern=black ! video/x-raw,format=NV12,width=320,height=240,framerate=30/1 ! x264enc tune=zerolatency speed-preset=ultrafast key-int-max=30 ! h264parse ! d3d11h264dec ! video/x-raw(memory:D3D11Memory),format=NV12 ! appsink name=decoded sync=false enable-last-sample=false max-buffers=1",&e);CHECK(decode&&!e);
+    auto*context=gst_d3d11_context_new(device);gst_element_set_context(decode,context);gst_context_unref(context);
+    decoded=gst_bin_get_by_name(GST_BIN(decode),"decoded");CHECK(decoded);
+    CHECK(gst_element_set_state(decode,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
+   }
+   auto*sample=gst_app_sink_try_pull_sample(GST_APP_SINK(decoded),5*GST_SECOND);CHECK(sample);
+   auto*input=gst_sample_get_buffer(sample);CHECK(gst_buffer_n_memory(input)==1);
+   auto*memory=gst_buffer_peek_memory(input,0);CHECK(gst_is_d3d11_memory(memory));
+   CHECK(GST_D3D11_MEMORY_CAST(memory)->device==device);
+   CHECK(GST_CLOCK_TIME_IS_VALID(GST_BUFFER_PTS(input))&&GST_CLOCK_TIME_IS_VALID(GST_BUFFER_DURATION(input)));
+   CHECK(!GST_CLOCK_TIME_IS_VALID(GST_BUFFER_DTS(input)));
+   if(!n)decoderOrigin=GST_BUFFER_PTS(input);
+   audioPts=GST_BUFFER_PTS(input)-decoderOrigin;videoDuration=GST_BUFFER_DURATION(input);
+   CHECK(audioPts==gst_util_uint64_scale(n,GST_SECOND,30));
+   if(!converter){GstVideoInfo in{},out{};CHECK(gst_video_info_from_caps(&in,gst_sample_get_caps(sample)));
+    gst_video_info_set_format(&out,GST_VIDEO_FORMAT_RGBA,64,32);out.colorimetry.range=GST_VIDEO_COLOR_RANGE_0_255;
+    converter=gst_d3d11_converter_new(device,&in,&out,nullptr);CHECK(converter);}
+   // Explicit upstream decode/color/scale adapter, NOT a transport fallback.
+   CHECK(gst_d3d11_converter_convert_buffer(converter,input,b));
+   D3D11_QUERY_DESC description{D3D11_QUERY_EVENT,0};ID3D11Query*done=nullptr;
+   CHECK(SUCCEEDED(d->CreateQuery(&description,&done)));
+   gst_d3d11_device_lock(device);c->End(done);c->Flush();
+   const auto deadline=g_get_monotonic_time()+2000000;HRESULT result;
+   do{result=c->GetData(done,nullptr,0,0);if(result==S_FALSE)g_usleep(100);}while(result==S_FALSE&&g_get_monotonic_time()<deadline);
+   gst_d3d11_device_unlock(device);done->Release();CHECK(result==S_OK);
+   gst_sample_unref(sample); // decoder storage may now be reused
+   // Readback is a pixel oracle, separate from the declared GPU transform.
+   auto*meta=gst_buffer_get_video_meta(b);CHECK(meta);GstMapInfo map{};CHECK(gst_memory_map(mem,&map,GST_MAP_READ));
+   for(unsigned y=0;y<32;++y)for(unsigned x=0;x<256;++x){auto value=map.data[meta->offset[0]+y*meta->stride[0]+x];
+    CHECK(x%4==3?value==255:value<=2);pixels[y*256+x]=value;}
+   gst_memory_unmap(mem,&map);
+  }else c->UpdateSubresource(texture,0,nullptr,pixels.data(),256,0);
+  c->Release();d->Release();
   if(n+1==count){retainedFinal=gst_memory_ref(mem);retainedIdentity=texture;}
-  GST_BUFFER_PTS(b)=37000000+n*1000000;GST_BUFFER_DTS(b)=GST_BUFFER_PTS(b)-100;GST_BUFFER_DURATION(b)=1000000;
-  auto*a=gst_buffer_new_allocate(nullptr,192,nullptr);gst_buffer_memset(a,0,n+31,192);GST_BUFFER_PTS(a)=n*1000000;GST_BUFFER_DURATION(a)=1000000;
+  GST_BUFFER_PTS(b)=finalPts=37000000+audioPts;GST_BUFFER_DTS(b)=decoder?GST_CLOCK_TIME_NONE:GST_BUFFER_PTS(b)-100;GST_BUFFER_DURATION(b)=videoDuration;
+  const gsize pcmBytes=decoder?6400:192;
+  auto*a=gst_buffer_new_allocate(nullptr,pcmBytes,nullptr);gst_buffer_memset(a,0,n+31,pcmBytes);GST_BUFFER_PTS(a)=audioPts;GST_BUFFER_DURATION(a)=decoder?gst_util_uint64_scale(1600,GST_SECOND,48000):1000000;
   CHECK(gst_app_src_push_buffer(GST_APP_SRC(vi),b)==GST_FLOW_OK);CHECK(gst_app_src_push_buffer(GST_APP_SRC(ai),a)==GST_FLOW_OK);
   auto*vs=gst_app_sink_try_pull_sample(GST_APP_SINK(vo),2*GST_SECOND);auto*as=gst_app_sink_try_pull_sample(GST_APP_SINK(ao),2*GST_SECOND);if(!vs||!as){
    fprintf(stderr,"native receiver=%d frame=%u video=%p audio=%p\n",nativeReceiver,n,vs,as);
@@ -173,9 +216,10 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
     gst_object_unref(bus);}
   }CHECK(vs&&as);
   auto*vb=gst_sample_get_buffer(vs);auto*ab=gst_sample_get_buffer(as);
-  CHECK(GST_BUFFER_PTS(vb)==guint64(mappedBase)+37000000+n*1000000&&GST_BUFFER_DTS(vb)==GST_BUFFER_PTS(vb)-100);
-  CHECK(GST_BUFFER_PTS(ab)==guint64(mappedBase)+n*1000000&&GST_BUFFER_PTS(vb)-GST_BUFFER_PTS(ab)==37000000);
-  CHECK(GST_BUFFER_DURATION(vb)==1000000&&GST_BUFFER_DURATION(ab)==1000000);
+  CHECK(GST_BUFFER_PTS(vb)==guint64(mappedBase)+37000000+audioPts);
+  CHECK(GST_BUFFER_DTS(vb)==(decoder?GST_CLOCK_TIME_NONE:GST_BUFFER_PTS(vb)-100));
+  CHECK(GST_BUFFER_PTS(ab)==guint64(mappedBase)+audioPts&&GST_BUFFER_PTS(vb)-GST_BUFFER_PTS(ab)==37000000);
+  CHECK(GST_BUFFER_DURATION(vb)==videoDuration&&GST_BUFFER_DURATION(ab)==(decoder?gst_util_uint64_scale(1600,GST_SECOND,48000):1000000));
   if(nativeReceiver){
    CHECK(gst_buffer_n_memory(vb)==1);
    auto*memory=gst_buffer_peek_memory(vb,0);CHECK(gst_is_d3d11_memory(memory));
@@ -183,13 +227,13 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
    auto*meta=gst_buffer_get_video_meta(vb);CHECK(meta&&meta->n_planes==1);
    // Explicit test-oracle readback, not a transport fallback. Respect device pitch.
    GstMapInfo map{};CHECK(gst_memory_map(memory,&map,GST_MAP_READ));
-   for(unsigned y=0;y<32;++y)for(unsigned x=0;x<256;++x)CHECK(map.data[meta->offset[0]+y*meta->stride[0]+x]==n+1);
+   for(unsigned y=0;y<32;++y)for(unsigned x=0;x<256;++x)CHECK(map.data[meta->offset[0]+y*meta->stride[0]+x]==pixels[y*256+x]);
    gst_memory_unmap(memory,&map);
    if(n+1==count)retainedReceiver=gst_memory_ref(memory);
   }else{
-   GstMapInfo map{};CHECK(gst_buffer_map(vb,&map,GST_MAP_READ));CHECK(map.size==pixels.size());for(gsize i=0;i<map.size;++i)CHECK(map.data[i]==n+1);gst_buffer_unmap(vb,&map);
+   GstMapInfo map{};CHECK(gst_buffer_map(vb,&map,GST_MAP_READ));CHECK(map.size==pixels.size());for(gsize i=0;i<map.size;++i)CHECK(map.data[i]==pixels[i]);gst_buffer_unmap(vb,&map);
   }
-  guint8 pcm[192];CHECK(gst_buffer_extract(ab,0,pcm,192)==192);for(auto v:pcm)CHECK(v==n+31);
+  std::vector<guint8>pcm(pcmBytes);CHECK(gst_buffer_get_size(ab)==pcmBytes&&gst_buffer_extract(ab,0,pcm.data(),pcmBytes)==pcmBytes);for(auto v:pcm)CHECK(v==n+31);
   gst_sample_unref(vs);gst_sample_unref(as);
  }
  if(mode==3){CHECK(audioPeer);CHECK(g_socket_shutdown(g_socket_connection_get_socket(audioPeer),TRUE,TRUE,nullptr));avTerminal(rx,GST_MESSAGE_ERROR);}
@@ -197,8 +241,11 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
   CHECK(gst_app_src_end_of_stream(GST_APP_SRC(mode%2?vi:ai))==GST_FLOW_OK);
   auto*bus=gst_element_get_bus(rx);CHECK(!gst_bus_timed_pop_filtered(bus,30*GST_MSECOND,GstMessageType(GST_MESSAGE_EOS|GST_MESSAGE_ERROR)));gst_object_unref(bus);
   CHECK(gst_app_src_end_of_stream(GST_APP_SRC(mode%2?ai:vi))==GST_FLOW_OK);avTerminal(tx,GST_MESSAGE_EOS);avTerminal(rx,GST_MESSAGE_EOS);
-  guint64 frames=999;gint64 last=999;CHECK(fl_gst_session_wait_video_eos(r,cfg.generation,0,&frames,&last)==FL_GST_SESSION_READY&&frames==count&&last==(count?37000000+(count-1)*1000000:-1LL));
+  guint64 frames=999;gint64 last=999;CHECK(fl_gst_session_wait_video_eos(r,cfg.generation,0,&frames,&last)==FL_GST_SESSION_READY&&frames==count&&last==(count?gint64(finalPts):-1LL));
  }
+ if(decode){CHECK(!gst_app_sink_try_pull_sample(GST_APP_SINK(decoded),5*GST_SECOND));CHECK(gst_app_sink_is_eos(GST_APP_SINK(decoded)));avTerminal(decode,GST_MESSAGE_EOS);
+  gst_element_set_state(decode,GST_STATE_NULL);gst_object_unref(converter);gst_object_unref(decoded);gst_object_unref(decode);
+  printf("real decoder AV: %u upstream GPU color/scale transforms, source PTS origin=%llu explicitly normalized, exact pixels/PCM/37ms, no raw decoder zero-copy claim\n",count,static_cast<unsigned long long>(decoderOrigin));}
  auto start=g_get_monotonic_time();gst_element_set_state(tx,GST_STATE_NULL);gst_element_set_state(rx,GST_STATE_NULL);CHECK(g_get_monotonic_time()-start<1000000);
  if(automatic){
   CHECK(gst_element_set_state(sink,GST_STATE_READY)==GST_STATE_CHANGE_FAILURE);
@@ -267,7 +314,7 @@ static void nativeLocalNegatives(bool nativeReceiver=false){
 
 static void nativeBinNegatives(bool nativeReceiver=false){
  for(bool producer:{false,true}){
-  for(unsigned mode=0;mode<10;++mode){
+  for(unsigned mode=0;mode<13;++mode){
    auto*bin=gst_element_factory_make(producer?"framelinkavsink":"framelinkavsrc",nullptr);CHECK(bin);
    g_object_set(bin,"session","unused-native-negative","native-memory",producer||nativeReceiver,nullptr);
    auto candidate=nativeAvPolicy(0,nativeReceiver);
@@ -279,9 +326,12 @@ static void nativeBinNegatives(bool nativeReceiver=false){
    if(mode==5)g_object_set(bin,"shared-cpu",TRUE,nullptr);
    if(mode==6)g_object_set(bin,"tracks","audio",nullptr);
    if(mode==7)g_object_set(bin,"native-memory",!(producer||nativeReceiver),nullptr);
+   if(mode==10)candidate.paths[0].supportedUsage=candidate.requirements[0].requiredUsage=FL_MEMORY_GPU_SAMPLE|FL_MEMORY_GPU_RENDER|FL_MEMORY_CPU_WRITE;
+   if(mode==11)candidate.paths[0].supportedUsage=candidate.requirements[0].requiredUsage=FL_MEMORY_GPU_RENDER;
+   if(mode==12)candidate=nativeAvPolicy(0,nativeReceiver,true);
    gboolean accepted=TRUE;g_signal_emit_by_name(bin,"set-local-native-candidate",mode==8?nullptr:&candidate,&accepted);
-   CHECK(accepted==(mode==9));
-   if(mode==9){
+   CHECK(accepted==(mode==9||mode==12));
+   if(mode==9||mode==12){
     accepted=TRUE;g_signal_emit_by_name(bin,"set-local-native-candidate",&candidate,&accepted);CHECK(!accepted);
     accepted=TRUE;g_signal_emit_by_name(bin,"apply-memory-policy",&candidate,&accepted);CHECK(!accepted);
     accepted=TRUE;g_signal_emit_by_name(bin,"adopt-channel",nullptr,&accepted);CHECK(!accepted);
@@ -303,5 +353,5 @@ static void nativeBinNegatives(bool nativeReceiver=false){
   CHECK(gst_element_set_state(pipeline,GST_STATE_NULL)!=GST_STATE_CHANGE_FAILURE);
   CHECK(g_get_monotonic_time()-start<1000000);gst_object_unref(pipeline);
  }
- puts("native bins: 20 configuration controls, immutable copies and both-role bounded cancellation pass");
+ puts("native bins: 26 configuration controls, immutable copies and both-role bounded cancellation pass");
 }

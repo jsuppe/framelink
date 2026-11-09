@@ -1,0 +1,17 @@
+{
+  "base": "a6b05da69f89fbceb69f5ec35ec3bdf550334462",
+  "state": "finished",
+  "start": "2026-11-09T06:13:35.980252+00:00",
+  "preflight_exit": 0,
+  "hashes": {
+    "test/fl_gst_native_producer_win.cpp": "6ccfb028f3fc0387a1973a4569370312b2f542a1b2d7dbb0c5dfaa6825ea3557",
+    "test/fl_gst_decoder_contract_win.inc": "bf60d54d31d4a935fbb8b1f523d674770c945cf1d3408fa831cfcaca2a4374ce",
+    "test/fl_gst_native_producer_av_win.inc": "c4659032f49cd66dca8fb9ad2151872889954f9769cacc6670693d30324702fc",
+    "gst/gstframelinkavsink.cpp": "f3b9b1c37bbf3b87f267bfd159eff54493fd535baeda869fadd09f2c7cbc257d",
+    "gst/gstframelinkavsrc.cpp": "f5c935f235856fe901e11fc7ab665d6d2477d0a6cd226362889df20500c5d479",
+    "gst/framelink_session_transport.cpp": "f3e15d5c8cdce17dea5451bc1092a01135dcde2c9bcf82d83fd9e0147be7550b"
+  },
+  "build_exit": 0,
+  "decoder-diagnostic_exit": 0,
+  "end": "2026-11-09T06:13:45.540730+00:00"
+}

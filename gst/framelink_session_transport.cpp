@@ -577,12 +577,15 @@ gboolean fl_gst_session_open_local_native_epoch(FlGstSession*session,gboolean pr
     flMemoryEvaluateBoundary(policy.requirements,policy.paths,2,decisions)!=FL_MEMORY_OK||
     policy.paths[0].resourceType!=FL_MEMORY_D3D11||policy.paths[1].resourceType!=FL_MEMORY_D3D11||
     policy.paths[0].operations!=0||(!nativeReceiver&&!readbackReceiver)||
-    policy.paths[0].supportedUsage!=FL_MEMORY_GPU_SAMPLE){
+    (policy.paths[0].supportedUsage!=FL_MEMORY_GPU_SAMPLE&&
+     policy.paths[0].supportedUsage!=(FL_MEMORY_GPU_SAMPLE|FL_MEMORY_GPU_RENDER))){
   if(session)fl_gst_session_cancel(session);
-  g_set_error_literal(error,G_IO_ERROR,G_IO_ERROR_INVALID_ARGUMENT,"unsupported local native candidate (D3D11 sample with explicit native or CPU readback receiver required)");return FALSE;
+  g_set_error_literal(error,G_IO_ERROR,G_IO_ERROR_INVALID_ARGUMENT,"unsupported local native candidate (D3D11 sample or sample+render producer with explicit native or CPU readback receiver required)");return FALSE;
  }
  if(!open_local_av_impl(session,producer,path,local,videoQueue,pool,queueMs,timeout,idle,
-     FL_MAP_CPU|FL_REQUIRE_FRAME_METADATA|(nativeReceiver?FL_DEFER_RELEASE:0),channel,producer?epochFunc:nullptr,epochData,outer,error,false,&policy))return FALSE;
+     FL_MAP_CPU|FL_REQUIRE_FRAME_METADATA|(nativeReceiver?FL_DEFER_RELEASE:0)|
+     ((policy.paths[0].supportedUsage&FL_MEMORY_GPU_RENDER)?FL_GPU_RENDER:0),
+     channel,producer?epochFunc:nullptr,epochData,outer,error,false,&policy))return FALSE;
  flSessionConfig cfg{};
  if(fl_gst_session_get_config(session,&cfg)!=FL_GST_SESSION_READY){
   if(*channel)flClose(*channel);*channel=nullptr;fl_gst_session_cancel(session);

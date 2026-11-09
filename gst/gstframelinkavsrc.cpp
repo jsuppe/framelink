@@ -301,7 +301,8 @@ static gboolean setLocalNativeCandidate(GstFrameLinkAvSrc*s,GstFrameLinkMemoryPo
     flMemoryEvaluateBoundary(policy->requirements,policy->paths,2,decisions)!=FL_MEMORY_OK||
     policy->paths[0].resourceType!=FL_MEMORY_D3D11||policy->paths[1].resourceType!=FL_MEMORY_D3D11||
     policy->paths[0].operations||(!nativeReceiver&&!readbackReceiver)||
-    policy->paths[0].supportedUsage!=FL_MEMORY_GPU_SAMPLE||bool(s->nativeMemory)!=nativeReceiver)return FALSE;
+    (policy->paths[0].supportedUsage!=FL_MEMORY_GPU_SAMPLE&&
+     policy->paths[0].supportedUsage!=(FL_MEMORY_GPU_SAMPLE|FL_MEMORY_GPU_RENDER))||bool(s->nativeMemory)!=nativeReceiver)return FALSE;
  s->nativeCandidate=*policy;s->candidateSet=TRUE;return TRUE;
 #else
  (void)s;(void)policy;return FALSE;

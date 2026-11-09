@@ -206,7 +206,7 @@ The preceding exact [c8ff226 baseline](../windows-integrated-c8ff226/README.md)
 passed134/134; the new bin implementation requires its own clean integrated check.
 
 
-## Explicit native receiver extension (included in pinned b4eb366)
+## Explicit native receiver extension (included in the pinned candidate)
 
 Windows local helper and `set-local-native-candidate` also accept D3D11
 GPU_SAMPLE at both endpoints with operations=0. Select `native-memory=true`
@@ -227,7 +227,25 @@ no hidden driver work, target-rate performance or bounded lifetime resources.
 [Local native receiver evidence](../windows-local-native-receiver/README.md)
 separates broker, helper and automatic-bin tests. Real decoder and two-hop PCM
 qualification, original startup/lifetime failures, and D2/D3 remain open.
-The pinned b4eb366 artifact includes this extension and passed the clean integrated
+The pinned candidate artifact includes this extension and passed the clean integrated
 suite. API not frozen.
 
 Current real-decoder prerequisite: [8/8 actual private NV12 buffers reject without implicit copy](../windows-decoder-contract/README.md). A caps match does not authorize decoder array import or completion semantics.
+
+## Explicit render-producer extension (newer than pinned candidate)
+
+Windows local native helper and both bins additionally accept producer
+`paths[0].supportedUsage = GPU_SAMPLE | GPU_RENDER`, `operations = 0`;
+set producer `requiredUsage` to the usage the application actually needs.
+The helper requests `FL_GPU_RENDER` on the channel. Receiver profiles stay
+explicit GPU_SAMPLE/0 or CPU_READ/COPY|READBACK. Render-only and unrelated masks
+are not supported by this profile. Existing sampling-only callers are unchanged.
+Older helpers reject the additional profile; handle that rejection without
+silently changing the contract. Wire layouts, C symbols and defaults are unchanged.
+
+[Real-decoder A/V evidence](../windows-decoder-render/README.md) covers explicit
+upstream GPU conversion/scaling into the issued ring, exact relative video timing,
+synthetic PCM and both receiver profiles. Raw private decoder arrays are still
+not accepted. This implementation needs its clean exact-revision integration
+check before replacing the pinned candidate. Two-hop/timing/lifetime acceptance
+and D2/D3 remain open; this is not API freeze or full Windows acceptance.
