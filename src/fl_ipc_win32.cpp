@@ -149,7 +149,7 @@ std::optional<Message> Channel::recv() {
         return std::nullopt;
     }
     const auto* hdr = (const MsgHeader*)buf;
-    if (hdr->magic != kMagic || sizeof(MsgHeader) + hdr->payloadSize > read) {
+    if (hdr->magic != kMagic || hdr->payloadSize != read - sizeof(MsgHeader)) {
         connected_ = false;
         return std::nullopt;
     }

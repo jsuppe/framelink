@@ -1,0 +1,53 @@
+Test project <win-home>/dev/framelink-m6-20261106/build
+      Start  15: read_lease_d3d11
+ 1/21 Test  #15: read_lease_d3d11 ......................   Passed    0.42 sec
+      Start  16: read_lease_d3d11_producer_death
+ 2/21 Test  #16: read_lease_d3d11_producer_death .......   Passed    0.36 sec
+      Start  17: read_lease_d3d11_delayed_completion
+ 3/21 Test  #17: read_lease_d3d11_delayed_completion ...   Passed    0.43 sec
+      Start  18: ipc_framing_win
+ 4/21 Test  #18: ipc_framing_win .......................   Passed    0.01 sec
+      Start  19: import_failure_win
+ 5/21 Test  #19: import_failure_win ....................   Passed    0.22 sec
+      Start  20: external_pool_1
+ 6/21 Test  #20: external_pool_1 .......................   Passed    0.27 sec
+      Start  21: external_pool_2
+ 7/21 Test  #21: external_pool_2 .......................   Passed    0.26 sec
+      Start  22: external_pool_3
+ 8/21 Test  #22: external_pool_3 .......................   Passed    0.27 sec
+      Start  23: external_pool_4
+ 9/21 Test  #23: external_pool_4 .......................   Passed    0.26 sec
+      Start  25: submit_ownership
+10/21 Test  #25: submit_ownership ......................   Passed    0.56 sec
+      Start  32: receive_queue
+11/21 Test  #32: receive_queue .........................   Passed    1.66 sec
+      Start  33: roundtrip
+12/21 Test  #33: roundtrip .............................   Passed    2.46 sec
+      Start  34: roundtrip_reattach
+13/21 Test  #34: roundtrip_reattach ....................   Passed    0.66 sec
+      Start  36: gst_native_producer_win
+14/21 Test  #36: gst_native_producer_win ...............   Passed    0.71 sec
+      Start  37: gst_native_source_win
+15/21 Test  #37: gst_native_source_win .................   Passed    2.82 sec
+      Start  38: gst_native_source_win_copy_negative
+16/21 Test  #38: gst_native_source_win_copy_negative ...   Passed    0.25 sec
+      Start  54: disconnect_full_ring
+17/21 Test  #54: disconnect_full_ring ..................   Passed    0.20 sec
+      Start  65: ready_fence_timeout
+18/21 Test  #65: ready_fence_timeout ...................   Passed    0.25 sec
+      Start  66: reconnect_held
+19/21 Test  #66: reconnect_held ........................   Passed    0.29 sec
+      Start  68: gst_av_faults
+20/21 Test  #68: gst_av_faults .........................   Passed    2.62 sec
+      Start 108: gst_session_transport
+21/21 Test #108: gst_session_transport .................   Passed    0.38 sec
+
+100% tests passed, 0 tests failed out of 21
+
+Label Time Summary:
+gpu                     =   1.66 sec*proc (1 test)
+gst_video_regression    =   3.79 sec*proc (3 tests)
+integration             =   1.66 sec*proc (1 test)
+m5b_av                  =   0.38 sec*proc (1 test)
+
+Total Test time (real) =  15.40 sec
