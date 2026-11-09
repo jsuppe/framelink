@@ -1,5 +1,7 @@
 # Authenticated native-memory agreement
 
+Implementation revision `c1a517f`.
+
 Adds `fl_gst_session_authenticate_native_memory` to the public session transport API. Both endpoints explicitly supply the same producer-ordered candidate. The full encoded session, policy version/generation, both 64-byte requirements and canonical path fields derive a separate HMAC credential; existing fresh directional challenges prove agreement. Host padding is never transmitted/hashed. Rejects invalid versions/reserved fields, incompatible operations and CPU-only resources. Success leaves the dedicated stream owned by the caller; failure closes it and cancels the session. Deadline and caller cancellation are bounded.
 
 This is exact candidate agreement, **not offer selection, protected discovery, native handle transfer or a device/layout probe**. The broker must supply the protected root credential and verify actual allocations/completion contracts. No automatic coordinator publication or element application is implied; callers must apply the verified policy before starting media, swapping endpoints for the consumer. These limitations remain explicit M6.9 work, not a frozen API or a zero-copy claim.
