@@ -1,0 +1,73 @@
+Test project <win-home>/dev/framelink-m6-windows-609cb74/build
+      Start   4: session_contract
+ 1/31 Test   #4: session_contract ......................   Passed    0.04 sec
+      Start   6: session_contract_c_api
+ 2/31 Test   #6: session_contract_c_api ................   Passed    0.03 sec
+      Start   8: shared_cpu_imported_pool_win
+ 3/31 Test   #8: shared_cpu_imported_pool_win ..........   Passed    0.04 sec
+      Start   9: shared_cpu_allocation_win
+ 4/31 Test   #9: shared_cpu_allocation_win .............   Passed    0.17 sec
+      Start  10: shared_cpu_pool
+ 5/31 Test  #10: shared_cpu_pool .......................   Passed    0.02 sec
+      Start  11: shared_cpu_contract
+ 6/31 Test  #11: shared_cpu_contract ...................   Passed    0.02 sec
+      Start  12: shared_cpu_contract_c_api
+ 7/31 Test  #12: shared_cpu_contract_c_api .............   Passed    0.02 sec
+      Start  13: memory_contract
+ 8/31 Test  #13: memory_contract .......................   Passed    0.02 sec
+      Start  14: memory_contract_c_api
+ 9/31 Test  #14: memory_contract_c_api .................   Passed    0.02 sec
+      Start  15: read_lease_d3d11
+10/31 Test  #15: read_lease_d3d11 ......................   Passed    0.40 sec
+      Start  16: read_lease_d3d11_producer_death
+11/31 Test  #16: read_lease_d3d11_producer_death .......   Passed    0.36 sec
+      Start  17: read_lease_d3d11_delayed_completion
+12/31 Test  #17: read_lease_d3d11_delayed_completion ...   Passed    0.42 sec
+      Start  18: ipc_framing_win
+13/31 Test  #18: ipc_framing_win .......................   Passed    0.02 sec
+      Start  19: import_failure_win
+14/31 Test  #19: import_failure_win ....................   Passed    0.22 sec
+      Start  20: external_pool_1
+15/31 Test  #20: external_pool_1 .......................   Passed    0.28 sec
+      Start  21: external_pool_2
+16/31 Test  #21: external_pool_2 .......................   Passed    0.26 sec
+      Start  22: external_pool_3
+17/31 Test  #22: external_pool_3 .......................   Passed    0.27 sec
+      Start  23: external_pool_4
+18/31 Test  #23: external_pool_4 .......................   Passed    0.29 sec
+      Start  25: submit_ownership
+19/31 Test  #25: submit_ownership ......................   Passed    0.63 sec
+      Start  32: receive_queue
+20/31 Test  #32: receive_queue .........................   Passed    1.67 sec
+      Start  33: roundtrip
+21/31 Test  #33: roundtrip .............................   Passed    0.46 sec
+      Start  34: roundtrip_reattach
+22/31 Test  #34: roundtrip_reattach ....................   Passed    0.67 sec
+      Start  37: gst_native_producer_win
+23/31 Test  #37: gst_native_producer_win ...............   Passed    0.72 sec
+      Start  38: gst_native_source_win
+24/31 Test  #38: gst_native_source_win .................   Passed    2.81 sec
+      Start  39: gst_native_source_win_copy_negative
+25/31 Test  #39: gst_native_source_win_copy_negative ...   Passed    0.26 sec
+      Start  55: disconnect_full_ring
+26/31 Test  #55: disconnect_full_ring ..................   Passed    0.21 sec
+      Start  66: ready_fence_timeout
+27/31 Test  #66: ready_fence_timeout ...................   Passed    0.25 sec
+      Start  67: reconnect_held
+28/31 Test  #67: reconnect_held ........................   Passed    0.30 sec
+      Start  69: gst_av_faults
+29/31 Test  #69: gst_av_faults .........................   Passed    2.61 sec
+      Start  71: session_contract_peers
+30/31 Test  #71: session_contract_peers ................   Passed    0.28 sec
+      Start 109: gst_session_transport
+31/31 Test #109: gst_session_transport .................   Passed    0.35 sec
+
+100% tests passed, 0 tests failed out of 31
+
+Label Time Summary:
+gpu                     =   1.67 sec*proc (1 test)
+gst_video_regression    =   3.79 sec*proc (3 tests)
+integration             =   1.67 sec*proc (1 test)
+m5b_av                  =   0.35 sec*proc (1 test)
+
+Total Test time (real) =  15.14 sec
