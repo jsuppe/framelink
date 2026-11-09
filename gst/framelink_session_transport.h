@@ -206,3 +206,29 @@ FL_GST_SESSION_API gboolean fl_gst_session_open_local_cpu(FlGstSession*,gboolean
  guint audio_queue_ms,guint connect_timeout_ms,guint idle_timeout_ms,GCancellable*,GError**);
 G_END_DECLS
 #endif
+
+#ifdef _WIN32
+G_BEGIN_DECLS
+// Explicit current-user native profile, worker-thread only. FAR4 discovery is
+// separate from legacy/CPU profiles. Negotiates session, authenticates the exact
+// producer-ordered candidate BEFORE allocation, then clock/PCM/events and channel.
+// v1 supports D3D11 GPU_SAMPLE producer (operations=0) -> CPU_READ receiver
+// (operations=COPY|READBACK), authorized by BOTH requirements. Other paths reject;
+// this is explicit readback, not end-to-end zero-copy or automatic fallback.
+// candidate.version=1, candidate.sessionGeneration=0 (template). Both peers must
+// supply the same candidate. Success returns producer-ordered bound policy with
+// negotiated generation and owned channel; configure/adopt/apply through bins
+// before starting, swapping policy endpoints for receiver. Actual device/layout
+// and upstream completion checks still run at channel/allocation integration.
+// Hold a session reference and do not reconfigure it or mutate arguments during
+// this call. Failure clears outputs and cancels session. One deadline covers
+// cancellable setup I/O; native allocation calls are synchronous platform calls.
+// Caller GCancellable interrupts I/O. Existing defaults/protocols unchanged.
+// native-memory + session= bin automation is not enabled by this helper.
+FL_GST_SESSION_API gboolean fl_gst_session_open_local_native(FlGstSession*,gboolean producer,
+ const gchar* session_path,const flSessionCapabilities*,guint video_queue_frames,guint video_pool,
+ guint audio_queue_ms,guint connect_timeout_ms,guint idle_timeout_ms,
+ const GstFrameLinkMemoryPolicy* candidate,GstFrameLinkMemoryPolicy* bound,flChannel** channel,
+ GCancellable*,GError**);
+G_END_DECLS
+#endif

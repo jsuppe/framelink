@@ -120,6 +120,26 @@ int main(int argc,char** argv){
  auto mixedCpu=cpu;mixedCpu.unixName[0]=1;CHECK(!owner.publish(path,mixedCpu,error));
  for(int cycle=0;cycle<100;++cycle){CHECK(owner.publish(path,cpu,error));owner.close();}
  CHECK(owner.publish(path,e,error));
+ // FAR4 native policy setup never aliases legacy/CPU records.
+ CHECK(!av::readNativeControlEndpoint(path,got,error));owner.close();
+ auto native=e;native.nativeControl=true;
+ CHECK(owner.publish(path,native,error));CHECK(av::readNativeControlEndpoint(path,got,error));
+ CHECK(got.nativeControl&&!got.cpuControl&&got.port==e.port&&got.token==e.token);
+ CHECK(!av::readEndpoint(path,got,error));CHECK(!av::readCpuControlEndpoint(path,got,error));
+ {av::RendezvousOwner duplicate;CHECK(!duplicate.publish(path,cpu,error));}
+ owner.close();auto mixedNative=native;mixedNative.cpuControl=true;CHECK(!owner.publish(path,mixedNative,error));
+ mixedNative=native;mixedNative.unixName[0]=1;CHECK(!owner.publish(path,mixedNative,error));
+ for(int bad=0;bad<5;++bad){
+  CHECK(owner.publish(path,native,error));auto record=fs::path(path)/"endpoint";
+  std::ifstream in(record,std::ios::binary);std::string bytes((std::istreambuf_iterator<char>(in)),{});in.close();
+  CHECK(bytes.size()==38&&bytes.substr(0,4)=="FAR4");
+  if(bad==0)bytes.pop_back();if(bad==1)bytes+='x';
+  if(bad==2)bytes[4]=bytes[5]=0;if(bad==3)std::fill(bytes.begin()+6,bytes.end(),0);if(bad==4)bytes[3]='9';
+  {std::ofstream out(record,std::ios::binary|std::ios::trunc);out.write(bytes.data(),bytes.size());}
+  got.port=54321;CHECK(!av::readNativeControlEndpoint(path,got,error));CHECK(got.port==54321);
+  owner.close();fs::remove(record);
+ }
+ CHECK(owner.publish(path,e,error));
  // Oversized or truncated records fail closed and leave caller's output alone.
  {std::ofstream f(fs::path(path)/"endpoint",std::ios::binary|std::ios::trunc);f<<"FAR1";}
  got.port=54321;CHECK(!av::readEndpoint(path,got,error));CHECK(got.port==54321);owner.close();

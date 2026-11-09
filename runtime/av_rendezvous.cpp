@@ -33,20 +33,22 @@ std::vector<unsigned char> encode(const Endpoint& e) {
     std::vector<unsigned char> b(unixSocket?unixWireSize:wireSize);
     if(unixSocket){
         // A mixed TCP/Unix endpoint is invalid, never silently select one.
-        if(e.port||e.cpuControl)return {};
+        if(e.port||e.cpuControl||e.nativeControl)return {};
         memcpy(b.data(),"FAR2",4);
         std::copy(e.token.begin(),e.token.end(),b.begin()+4);
         std::copy(e.unixName.begin(),e.unixName.end(),b.begin()+36);
     }else{
-        memcpy(b.data(),e.cpuControl?"FAR3":"FAR1",4);b[4]=e.port&255;b[5]=e.port>>8;
+        if(e.cpuControl&&e.nativeControl)return {};
+        memcpy(b.data(),e.nativeControl?"FAR4":(e.cpuControl?"FAR3":"FAR1"),4);b[4]=e.port&255;b[5]=e.port>>8;
         std::copy(e.token.begin(),e.token.end(),b.begin()+6);
     }
     return b;
 }
 bool decode(const unsigned char* b,size_t n,Endpoint& e,std::string& error) {
     Endpoint tmp;
-    if(n==wireSize&&(!memcmp(b,"FAR1",4)||!memcmp(b,"FAR3",4))){
+    if(n==wireSize&&(!memcmp(b,"FAR1",4)||!memcmp(b,"FAR3",4)||!memcmp(b,"FAR4",4))){
         tmp.cpuControl=!memcmp(b,"FAR3",4);
+        tmp.nativeControl=!memcmp(b,"FAR4",4);
         tmp.port=uint16_t(b[4]|(unsigned(b[5])<<8));
         std::copy(b+6,b+38,tmp.token.begin());
         if(!tmp.port){error="invalid TCP rendezvous endpoint";return false;}
@@ -245,12 +247,17 @@ static bool readAnyEndpoint(const std::string& directory,Endpoint& endpoint,std:
 }
 bool readEndpoint(const std::string& directory,Endpoint& endpoint,std::string& error){
     Endpoint e;if(!readAnyEndpoint(directory,e,error))return false;
-    if(!e.port||e.cpuControl)return fail(error,"legacy TCP rendezvous required");
+    if(!e.port||e.cpuControl||e.nativeControl)return fail(error,"legacy TCP rendezvous required");
     endpoint=e;return true;
 }
 bool readCpuControlEndpoint(const std::string& directory,Endpoint& endpoint,std::string& error){
     Endpoint e;if(!readAnyEndpoint(directory,e,error))return false;
-    if(!e.port||!e.cpuControl)return fail(error,"CPU control rendezvous required");
+    if(!e.port||!e.cpuControl||e.nativeControl)return fail(error,"CPU control rendezvous required");
+    endpoint=e;return true;
+}
+bool readNativeControlEndpoint(const std::string& directory,Endpoint& endpoint,std::string& error){
+    Endpoint e;if(!readAnyEndpoint(directory,e,error))return false;
+    if(!e.port||!e.nativeControl||e.cpuControl)return fail(error,"native control rendezvous required");
     endpoint=e;return true;
 }
 #ifdef __linux__

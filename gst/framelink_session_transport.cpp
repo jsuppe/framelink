@@ -340,7 +340,7 @@ gboolean fl_gst_session_open_local_av(FlGstSession*session,gboolean producer,con
 }
 static gboolean open_local_av_impl(FlGstSession*session,gboolean producer,const gchar*path,
  const flSessionCapabilities*local,guint videoQueue,guint pool,guint queueMs,guint timeout,guint idle,guint flags,
- flChannel**channel,FlGstEpochFunc epochFunc,gpointer epochData,GCancellable*outer,GError**error,bool cpu){
+ flChannel**channel,FlGstEpochFunc epochFunc,gpointer epochData,GCancellable*outer,GError**error,bool cpu,const GstFrameLinkMemoryPolicy*native=nullptr){
  if(channel)*channel=nullptr;
  auto fail=[&](const char*message){fl_gst_session_cancel(session);g_set_error_literal(error,G_IO_ERROR,G_IO_ERROR_FAILED,message);return FALSE;};
  if(!session||!path||!*path||!local||!channel||(cpu&&!local->videoCount)||local->version!=FL_SESSION_OPTIONAL_TRACKS_VERSION||(!local->videoCount&&!local->audioCount)||
@@ -387,15 +387,15 @@ static gboolean open_local_av_impl(FlGstSession*session,gboolean producer,const 
   GSocketAddress*effective=nullptr;const bool bound=g_socket_listener_add_address(l,bind,G_SOCKET_TYPE_STREAM,G_SOCKET_PROTOCOL_TCP,nullptr,&effective,nullptr);g_object_unref(bind);
   if(!bound)return fail("cannot bind private loopback session listener");
   endpoint.port=g_inet_socket_address_get_port(G_INET_SOCKET_ADDRESS(effective));g_object_unref(effective);
-  endpoint.cpuControl=cpu;
+  endpoint.cpuControl=cpu;endpoint.nativeControl=native!=nullptr;
   if(!owner.publish(path,endpoint,reason))return fail(reason.c_str());
   }
  }else{
   while(!g_cancellable_is_cancelled(deadline.cancel)){
 #ifdef __linux__
-   bool found=cpu?av::readUnixEndpoint(path,endpoint,reason):av::readEndpoint(path,endpoint,reason);
+   bool found=native?av::readNativeControlEndpoint(path,endpoint,reason):cpu?av::readUnixEndpoint(path,endpoint,reason):av::readEndpoint(path,endpoint,reason);
 #else
-   bool found=cpu?av::readCpuControlEndpoint(path,endpoint,reason):av::readEndpoint(path,endpoint,reason);
+   bool found=native?av::readNativeControlEndpoint(path,endpoint,reason):cpu?av::readCpuControlEndpoint(path,endpoint,reason):av::readEndpoint(path,endpoint,reason);
 #endif
    if(found)break;g_usleep(5000);
   }
@@ -434,6 +434,13 @@ static gboolean open_local_av_impl(FlGstSession*session,gboolean producer,const 
   const guint actualPool=pool?pool:4u;
   const guint capacity=actualPool>3?actualPool-2:1;
   if(selected.videoQueueFrames>capacity)return fail("negotiated video queue exceeds ring capacity");
+ }
+ // Exact native candidate agreement precedes clock/media streams and allocation.
+ // FAR4 prevents legacy/CPU callers from reaching this protocol accidentally.
+ if(native){
+  auto bound=*native;bound.sessionGeneration=selected.generation;
+  StreamOwner agreement;if(!next(agreement))return ioFail("native agreement connection failed");
+  if(!fl_gst_session_authenticate_native_memory(session,agreement.p,producer,secret,&bound,timeout,deadline.cancel,error))return FALSE;
  }
  // Authenticated clock offset: consumer nonce, producer time + HMAC over both.
  constexpr char clockLabel[]="FrameLink public clock v1";
@@ -544,6 +551,35 @@ gboolean fl_gst_session_open_local_cpu_epoch(FlGstSession*session,gboolean produ
  FlGstEpochFunc epochFunc,gpointer epochData,GCancellable*outer,GError**error){
  flChannel*unused=nullptr;
  return open_local_av_impl(session,producer,path,local,videoQueue,pool,queueMs,timeout,idle,0,&unused,epochFunc,epochData,outer,error,true);
+}
+#endif
+#ifdef _WIN32
+gboolean fl_gst_session_open_local_native(FlGstSession*session,gboolean producer,const gchar*path,
+ const flSessionCapabilities*local,guint videoQueue,guint pool,guint queueMs,guint timeout,guint idle,
+ const GstFrameLinkMemoryPolicy*candidate,GstFrameLinkMemoryPolicy*bound,flChannel**channel,
+ GCancellable*outer,GError**error){
+ // v1 implements the existing D3D11 producer -> explicit CPU readback path.
+ // Do not accept policies promising native receiver output or hidden copies.
+ GstFrameLinkMemoryPolicy policy{};if(candidate)policy=*candidate;
+ if(bound)*bound={};if(channel)*channel=nullptr;
+ flMemoryDecision decisions[2]{};
+ if(!session||!local||!local->videoCount||!candidate||!bound||!channel||
+    policy.version!=1||policy.reserved||policy.sessionGeneration||
+    flMemoryEvaluateBoundary(policy.requirements,policy.paths,2,decisions)!=FL_MEMORY_OK||
+    policy.paths[0].resourceType!=FL_MEMORY_D3D11||policy.paths[1].resourceType!=FL_MEMORY_D3D11||
+    policy.paths[0].operations!=0||policy.paths[1].operations!=(FL_MEMORY_COPY|FL_MEMORY_READBACK)||
+    policy.paths[0].supportedUsage!=FL_MEMORY_GPU_SAMPLE||policy.paths[1].supportedUsage!=FL_MEMORY_CPU_READ){
+  if(session)fl_gst_session_cancel(session);
+  g_set_error_literal(error,G_IO_ERROR,G_IO_ERROR_INVALID_ARGUMENT,"unsupported local native candidate (D3D11 sample/explicit CPU readback required)");return FALSE;
+ }
+ if(!open_local_av_impl(session,producer,path,local,videoQueue,pool,queueMs,timeout,idle,
+     FL_MAP_CPU|FL_REQUIRE_FRAME_METADATA,channel,nullptr,nullptr,outer,error,false,&policy))return FALSE;
+ flSessionConfig cfg{};
+ if(fl_gst_session_get_config(session,&cfg)!=FL_GST_SESSION_READY){
+  if(*channel)flClose(*channel);*channel=nullptr;fl_gst_session_cancel(session);
+  g_set_error_literal(error,G_IO_ERROR,G_IO_ERROR_CANCELLED,"native session changed during setup");return FALSE;
+ }
+ policy.sessionGeneration=cfg.generation;*bound=policy;return TRUE;
 }
 #endif
 gboolean fl_gst_session_local_ready(FlGstSession*session,gboolean producer,guint timeout,GError**error){
