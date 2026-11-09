@@ -1,0 +1,15 @@
+{
+  "base": "a6b05da69f89fbceb69f5ec35ec3bdf550334462",
+  "state": "failed",
+  "start": "2026-11-09T06:10:58.160496+00:00",
+  "preflight_exit": 0,
+  "hashes": {
+    "test/fl_gst_native_producer_win.cpp": "a56b1cf87e7fb9a3c37615a781e36465e464746a3b10627d79c63cdefd196c0e",
+    "test/fl_gst_decoder_contract_win.inc": "1d2e377edcde840741dc81d4e4019ce6b040edef4323f5921ccc79e4773f095f"
+  },
+  "build_exit": 0,
+  "regression_exit": 0,
+  "decoder-diagnostic_exit": 1,
+  "error": "",
+  "end": "2026-11-09T06:11:28.928080+00:00"
+}

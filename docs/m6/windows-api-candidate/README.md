@@ -1,8 +1,8 @@
 # Windows API integration baseline candidate — NOT FROZEN
 
-**Current verified integrated candidate:** `b4eb366b4837d8132da7b6643d5aa300fe4d18ea`.
+**Current verified integrated candidate:** `a6b05da69f89fbceb69f5ec35ec3bdf550334462`.
 Clean exact-revision Windows build/API/full suite **134/134 passed**;
-[pinned evidence](../windows-integrated-b4eb366/README.md) includes DLL hashes,
+[pinned evidence](../windows-integrated-a6b05da/README.md) includes DLL hashes,
 runtime properties and exports. All 119 prior exported names retained (119 total).
 Export-name retention is not proof of behavioral or ordinal ABI compatibility.
 
@@ -57,7 +57,7 @@ Runtime `gst-inspect-1.0` was checked against the isolated build's actual DLL.
 - `framelinkavsrc`: `latency-ms=0`, `video-pool=8`, `video-queue-frames=2`,
   `audio-queue-ms=80`; these capacities are NOT a fill-to-depth scheduling delay.
 - `framelinkavsink`: `video-pool=0` (consumer-selected), `video-queue-frames=2`,
-  `video-buffer-wait-ms=5`, `video-error-on-ring-full=false`.
+  `buffer-wait-ms=5`, `error-on-ring-full=false`.
 - CPU strict channel returns BUSY for held ownership, never overwrites; its
   explicit copy path remains separate from native GPU types.
 
@@ -182,8 +182,8 @@ The prior exact [34a391d baseline](../windows-integrated-34a391d/README.md) pass
 
 Both A/V bins expose `set-local-native-candidate(pointer) -> gboolean`. Configure
 all properties in NULL first, including the same nonempty `session=` path.
-The producer selects `native-memory=true`; the receiver selects
-`native-memory=false` because v1 explicitly performs CPU readback. Both use
+The producer selects `native-memory=true`. For the CPU-readback profile the receiver selects
+`native-memory=false`; the later explicit GPU receiver profile below selects true. Both use
 `shared-cpu=false` and include video. Pass the same producer-ordered
 `GstFrameLinkMemoryPolicy` template: version 1, generation 0, D3D11 GPU_SAMPLE
 producer with operations 0, CPU_READ receiver with COPY|READBACK. Both endpoint
@@ -229,3 +229,5 @@ separates broker, helper and automatic-bin tests. Real decoder and two-hop PCM
 qualification, original startup/lifetime failures, and D2/D3 remain open.
 The pinned b4eb366 artifact includes this extension and passed the clean integrated
 suite. API not frozen.
+
+Current real-decoder prerequisite: [8/8 actual private NV12 buffers reject without implicit copy](../windows-decoder-contract/README.md). A caps match does not authorize decoder array import or completion semantics.

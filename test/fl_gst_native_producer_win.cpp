@@ -165,8 +165,10 @@ static void sinkPipeline(bool coordinated,bool bin=false){
  puts("native sink pipeline: exact texture pixels/metadata, foreign allocation rejection, retained buffer after stop pass");
 }
 #include "fl_gst_native_producer_av_win.inc"
+#include "fl_gst_decoder_contract_win.inc"
 int main(int argc,char**argv){gst_init(&argc,&argv);CHECK(argc==2||argc==3);GError*e=nullptr;auto*plugin=gst_plugin_load_file(argv[1],&e);CHECK(plugin&&!e);gst_object_unref(plugin);
  if(argc==3){
+  if(std::string(argv[2])=="--decoder-contract-diagnostic"){decoderContractDiagnostic();return 0;}
   CHECK(std::string(argv[2])=="--lifecycle-diagnostic");
   auto memoryInfo=reinterpret_cast<BOOL(WINAPI*)(HANDLE,PPROCESS_MEMORY_COUNTERS,DWORD)>(GetProcAddress(GetModuleHandleW(L"kernel32.dll"),"K32GetProcessMemoryInfo"));CHECK(memoryInfo);
   // Explicit diagnostic: no acceptance thresholds are changed or waived.

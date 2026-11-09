@@ -1,0 +1,21 @@
+
+(fl_gst_native_producer_win.exe:44760): GStreamer-D3D11-CRITICAL **: 01:10:52.981: gst_d3d11_allocation_params_set_array_size: assertion 'size > 0' failed
+
+(fl_gst_native_producer_win.exe:44760): GStreamer-D3D11-CRITICAL **: 01:10:52.982: gst_d3d11_memory_get_decoder_output_view: assertion 'decoder != NULL' failed
+
+(fl_gst_native_producer_win.exe:44760): GStreamer-D3D11-CRITICAL **: 01:10:52.982: gst_d3d11_memory_get_decoder_output_view: assertion 'decoder != NULL' failed
+
+(fl_gst_native_producer_win.exe:44760): GStreamer-D3D11-CRITICAL **: 01:10:52.982: gst_d3d11_memory_get_decoder_output_view: assertion 'decoder != NULL' failed
+
+(fl_gst_native_producer_win.exe:44760): GStreamer-D3D11-CRITICAL **: 01:10:52.982: gst_d3d11_memory_get_decoder_output_view: assertion 'decoder != NULL' failed
+
+(fl_gst_native_producer_win.exe:44760): GStreamer-D3D11-CRITICAL **: 01:10:52.982: gst_d3d11_memory_get_decoder_output_view: assertion 'decoder != NULL' failed
+
+(fl_gst_native_producer_win.exe:44760): GStreamer-D3D11-CRITICAL **: 01:10:52.982: gst_d3d11_memory_get_decoder_output_view: assertion 'decoder != NULL' failed
+
+(fl_gst_native_producer_win.exe:44760): GStreamer-D3D11-CRITICAL **: 01:10:52.982: gst_d3d11_memory_get_decoder_output_view: assertion 'decoder != NULL' failed
+
+(fl_gst_native_producer_win.exe:44760): GStreamer-D3D11-CRITICAL **: 01:10:52.982: gst_d3d11_memory_get_decoder_output_view: assertion 'decoder != NULL' failed
+native AV: No valid frames decoded before end of stream ../gst-libs/gst/video/gstvideodecoder.c(1423): gst_video_decoder_sink_event_default (): /GstPipeline:pipeline0/GstD3D11H264Dec:d3d11h264dec0:
+no valid frames found
+line 14: m&&GST_MESSAGE_TYPE(m)==expected
