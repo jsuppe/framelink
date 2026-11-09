@@ -134,4 +134,5 @@ static void sinkPipeline(bool coordinated,bool bin=false){
  CHECK(gst_is_d3d11_memory(gst_buffer_peek_memory(b,0)));gst_buffer_unref(b);flClose(c);if(session)g_object_unref(session);
  puts("native sink pipeline: exact texture pixels/metadata, foreign allocation rejection, retained buffer after stop pass");
 }
-int main(int argc,char**argv){gst_init(&argc,&argv);run(false);run(true);CHECK(argc==2);GError*e=nullptr;auto*plugin=gst_plugin_load_file(argv[1],&e);CHECK(plugin&&!e);gst_object_unref(plugin);sinkPipeline(false);coordinatedPolicyNegative(false);coordinatedPolicyNegative(true);sinkPipeline(true);sinkPipeline(true,true);binConfigurationNegatives();coordinatedPolicyNegative(false,true);coordinatedPolicyNegative(true,true);}
+#include "fl_gst_native_producer_av_win.inc"
+int main(int argc,char**argv){gst_init(&argc,&argv);run(false);run(true);CHECK(argc==2);GError*e=nullptr;auto*plugin=gst_plugin_load_file(argv[1],&e);CHECK(plugin&&!e);gst_object_unref(plugin);sinkPipeline(false);coordinatedPolicyNegative(false);coordinatedPolicyNegative(true);sinkPipeline(true);sinkPipeline(true,true);binConfigurationNegatives();coordinatedPolicyNegative(false,true);coordinatedPolicyNegative(true,true);for(unsigned mode=0;mode<4;++mode)nativeProducerAv(mode);}

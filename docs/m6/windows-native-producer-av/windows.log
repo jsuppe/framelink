@@ -1,0 +1,44 @@
+CMake is re-running because <win-home>/dev/framelink-m6-windows-d9585a8/build/CMakeFiles/generate.stamp is out-of-date.
+  the file '<win-home>/dev/framelink-m6-windows-d9585a8/CMakeLists.txt'
+  is newer than '<win-home>/dev/framelink-m6-windows-d9585a8/build/CMakeFiles/generate.stamp.depend'
+  result='-1'
+-- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.26300.
+-- framelink: building GStreamer elements (gstframelink)
+-- Configuring done (0.8s)
+-- Generating done (1.0s)
+-- Build files have been written to: <win-home>/dev/framelink-m6-windows-d9585a8/build
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  1>Checking Build System
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-d9585a8/CMakeLists.txt
+  framelink.vcxproj -> <win-home>\dev\framelink-m6-windows-d9585a8\build\Release\framelink.dll
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-d9585a8/CMakeLists.txt
+  framelink_gst_session.vcxproj -> <win-home>\dev\framelink-m6-windows-d9585a8\build\Release\framelink_gst_session.dll
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-d9585a8/CMakeLists.txt
+  gstframelink.vcxproj -> <win-home>\dev\framelink-m6-windows-d9585a8\build\Release\gstframelink.dll
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <win-home>\dev\framelink-m6-windows-d9585a8\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> <win-home>\dev\framelink-m6-windows-d9585a8\build\Release\framelink_gst_session.dll
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-d9585a8/CMakeLists.txt
+  fl_gst_native_producer_win.cpp
+  The d3d11 library from gst-plugins-bad is unstable API and may change in future.
+  You can define GST_USE_UNSTABLE_API to avoid this warning.
+  fl_gst_native_producer_win.vcxproj -> <win-home>\dev\framelink-m6-windows-d9585a8\build\Release\fl_gst_native_producer_win.exe
+Test project <win-home>/dev/framelink-m6-windows-d9585a8/build
+    Start  41: gst_native_producer_win
+1/4 Test  #41: gst_native_producer_win ..........   Passed    4.83 sec
+    Start  81: gst_pool_policy
+2/4 Test  #81: gst_pool_policy ..................   Passed    3.81 sec
+    Start 120: gst_shared_cpu_av
+3/4 Test #120: gst_shared_cpu_av ................   Passed    3.05 sec
+    Start 123: gst_av_bin
+4/4 Test #123: gst_av_bin .......................   Passed   25.73 sec
+
+100% tests passed, 0 tests failed out of 4
+
+Label Time Summary:
+gst_video_regression    =   8.63 sec*proc (2 tests)
+m5b_av                  =  25.73 sec*proc (1 test)
+
+Total Test time (real) =  37.44 sec
