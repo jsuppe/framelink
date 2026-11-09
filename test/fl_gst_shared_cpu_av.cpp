@@ -66,19 +66,7 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
   CHECK(gst_element_set_state(b,GST_STATE_READY)==GST_STATE_CHANGE_FAILURE);
   gst_element_set_state(b,GST_STATE_NULL);gst_object_unref(b);
  }
-#ifdef _WIN32
- // Discovery remains unsupported: explicit selection must reject, not silently
- // create a native channel. Broker-bound A/V is independently tested below.
- for(const char*name:{"framelinkavsink","framelinkavsrc"}){
-  auto*b=gst_element_factory_make(name,nullptr);CHECK(b);
-  g_object_set(b,"shared-cpu",TRUE,"session","unsupported-cpu-discovery",nullptr);
-  CHECK(gst_element_set_state(b,GST_STATE_READY)==GST_STATE_CHANGE_FAILURE);
-  gst_element_set_state(b,GST_STATE_NULL);gst_object_unref(b);
- }
- constexpr unsigned variants=16;
-#else
  constexpr unsigned variants=20;
-#endif
  // Discovery has a whole-operation deadline and cannot fall back to native.
  for(unsigned negative=0;negative<4;++negative){
   auto*path=sessionPath("framelink-cpu-negative-XXXXXX");CHECK(path);
@@ -101,7 +89,6 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
   CHECK(!fl_gst_session_claim_shared_cpu(s,TRUE,1)&&!fl_gst_session_claim_shared_cpu(r,FALSE,1));
   g_object_unref(s);g_object_unref(r);removeSessionPath(path);
  }
-#ifndef _WIN32
  // A state change must cancel discovery promptly even with a 60s deadline.
  for(bool producer:{false,true}){
   auto*path=sessionPath("framelink-cpu-bin-cancel-XXXXXX");CHECK(path);
@@ -113,7 +100,6 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
   auto start=g_get_monotonic_time();CHECK(gst_element_set_state(p,GST_STATE_NULL)!=GST_STATE_CHANGE_FAILURE);CHECK(g_get_monotonic_time()-start<1000000);gst_object_unref(p);
   removeSessionPath(path);
  }
-#endif
  for(unsigned variant=0;variant<variants;variant++){
   const bool localBins=variant>=16;const bool localSetup=variant>=12&&!localBins;const unsigned mode=localBins?variant-16:localSetup?variant-12:variant%6;const bool bins=variant>=6;
   fprintf(stderr,"mode %u\n",mode);bool nv12=mode%2==1;auto*s=fl_gst_session_new(3);auto*r=fl_gst_session_new(3);

@@ -143,7 +143,7 @@ static void startWorker(GstFrameLinkAvSink*s){
  s->worker=new std::thread([s,caps,path]{
   GError*error=nullptr;flChannel*channel=nullptr;
   bool ok=false;
-#ifdef __linux__
+#if defined(__linux__) || defined(_WIN32)
   if(s->sharedCpu)ok=fl_gst_session_open_local_cpu_epoch(s->session,TRUE,path.c_str(),&caps,s->videoQueue,s->videoPool,s->audioQueueMs,s->connectMs,s->idleMs,chooseEpoch,s,s->cancel,&error);
   else
 #endif
@@ -198,7 +198,7 @@ static GstStateChangeReturn changeState(GstElement*element,GstStateChange transi
  switch(transition){
  case GST_STATE_CHANGE_NULL_TO_READY:{
   if(s->sharedCpu&&(!wantVideo(s))){GST_ELEMENT_ERROR(s,RESOURCE,SETTINGS,("shared-cpu requires a video track and forbids native memory"),(nullptr));return GST_STATE_CHANGE_FAILURE;}
-#ifndef __linux__
+#if !defined(__linux__) && !defined(_WIN32)
   if(s->sharedCpu&&s->sessionPath&&*s->sessionPath){GST_ELEMENT_ERROR(s,RESOURCE,SETTINGS,("local shared-cpu discovery unavailable on this platform"),(nullptr));return GST_STATE_CHANGE_FAILURE;}
 #endif
   if(s->video)g_object_set(s->video,"shared-cpu",s->sharedCpu,nullptr);
@@ -390,7 +390,7 @@ static void gst_framelink_av_sink_class_init(GstFrameLinkAvSinkClass*klass){
  g_object_class_install_property(o,PROP_AUDIO_QUEUE,g_param_spec_uint("audio-queue-ms","Audio queue","Hard audio queue budget, not target latency",1,2000,80,rw));
  g_object_class_install_property(o,PROP_VIDEO_QUEUE,g_param_spec_uint("video-queue-frames","Video queue","Coordinated video queue budget",1,16,2,rw));
  g_object_class_install_property(o,PROP_VIDEO_POOL,g_param_spec_uint("video-pool","Video pool","Consumer ring images requested (0: consumer default)",0,FL_MAX_POOL_SIZE,0,rw));
- g_object_class_install_property(o,PROP_SHARED_CPU,g_param_spec_boolean("shared-cpu","Shared CPU","Explicit CPU video copy path; broker context or Linux/Android session= discovery, no native fallback",FALSE,rw));
+ g_object_class_install_property(o,PROP_SHARED_CPU,g_param_spec_boolean("shared-cpu","Shared CPU","Explicit CPU video copy path; broker context or current-user session= discovery, no native fallback",FALSE,rw));
  g_object_class_install_property(o,PROP_ID,g_param_spec_string("session-id","Session identity","Negotiated identity, not a secret",nullptr,ro));
  g_object_class_install_property(o,PROP_GENERATION,g_param_spec_uint64("generation","Generation","Negotiated session generation",0,G_MAXUINT64,0,ro));
  g_object_class_install_property(o,PROP_AUDIO_ID,g_param_spec_uint("audio-track-id","Audio track","Negotiated audio identity, zero when absent",0,G_MAXUINT,0,ro));
