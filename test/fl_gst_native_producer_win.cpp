@@ -169,10 +169,17 @@ static void sinkPipeline(bool coordinated,bool bin=false){
 #include "fl_gst_native_relay_av_win.inc"
 #include "fl_gst_native_relay_process_win.inc"
 int main(int argc,char**argv){gst_init(&argc,&argv);CHECK(argc>=2);GError*e=nullptr;auto*plugin=gst_plugin_load_file(argv[1],&e);CHECK(plugin&&!e);gst_object_unref(plugin);
- if(argc==9&&std::string(argv[2])=="--relay-process-child")return relayprocess::relay(argv[3],guint16(atoi(argv[4])),(HANDLE)(uintptr_t)strtoull(argv[5],nullptr,10),(HANDLE)(uintptr_t)strtoull(argv[6],nullptr,10),(HANDLE)(uintptr_t)strtoull(argv[7],nullptr,10),atoi(argv[8])!=0);
+ if(argc==10&&std::string(argv[2])=="--relay-process-child")return relayprocess::relay(argv[3],guint16(atoi(argv[4])),(HANDLE)(uintptr_t)strtoull(argv[5],nullptr,10),(HANDLE)(uintptr_t)strtoull(argv[6],nullptr,10),(HANDLE)(uintptr_t)strtoull(argv[7],nullptr,10),atoi(argv[8])!=0,atoi(argv[9])!=0);
  if(argc==6&&std::string(argv[2])=="--relay-process-producer")return relayprocess::producer(argv[3],guint16(atoi(argv[4])),atoi(argv[5])!=0);
  if(argc==6&&std::string(argv[2])=="--relay-reserved-producer")return relayprocess::reservedProducer(argv[3],guint16(atoi(argv[4])));
+ if(argc==6&&std::string(argv[2])=="--relay-decoder-producer")return relayprocess::reservedProducer(argv[3],guint16(atoi(argv[4])),true);
  CHECK(argc==2||argc==3);
+ if(argc==3&&std::string(argv[2])=="--relay-decoder-diagnostic"){
+  for(auto name:{"videotestsrc","x264enc","h264parse","d3d11h264dec"}){
+   auto*factory=gst_element_factory_find(name);if(!factory){fprintf(stderr,"SKIP: required decoder fixture element %s unavailable\n",name);return 77;}gst_object_unref(factory);
+  }
+  relayprocess::run(argv[1],false,true,true);return 0;
+ }
  if(argc==3&&std::string(argv[2])=="--relay-reservation-diagnostic"){relayprocess::run(argv[1],false,true);return 0;}
  if(argc==3&&std::string(argv[2])=="--relay-process-diagnostic"){relayprocess::run(argv[1],false);relayprocess::run(argv[1],true);return 0;}
  if(argc==3){
