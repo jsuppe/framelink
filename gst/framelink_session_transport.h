@@ -153,6 +153,21 @@ FL_GST_SESSION_API FlGstSessionResult fl_gst_session_bind_authenticated_cpu_pipe
  FlGstSession*,gboolean producer,guint64 generation,void* pipe,void* peerProcess,
  GBytes* root_secret,guint timeout_ms,const flMemoryRequirements*,guint operations,
  const flSharedCpuDescriptor*,gsize count);
+// Configured-session named endpoint profile (Windows only, worker thread).
+// Consumer creates a first-instance current-user-only local message pipe;
+// producer may start first. UTF-8 name must be \\.\pipe\framelink-cpu- followed
+// by ASCII letters/digits/hyphens (max240 total characters). Names are not secrets.
+// Obtains/pins the kernel peer and authenticates THIS pipe before pool exchange.
+// Caller still supplies protected root credential and authenticated config:
+// no discovery record, offer negotiation, PCM/events or track readiness implied.
+// Connection plus authentication share one timeout_ms deadline; subsequent pool
+// I/O uses timeout_ms per operation, matching bind_authenticated_cpu_pipe.
+// Session cancel/reconfigure interrupts all phases. No fallback or handle input.
+FL_GST_SESSION_API FlGstSessionResult fl_gst_session_open_named_cpu_pipe(
+ FlGstSession*,gboolean producer,guint64 generation,const gchar* pipe_name,
+ GBytes* root_secret,guint timeout_ms,const flMemoryRequirements*,guint operations,
+ const flSharedCpuDescriptor*,gsize count);
+
 #endif
 // Transfer-full, once per generation, exact role. Caller externally serializes
 // channel/lease calls and closes the channel. Session retains only a socket

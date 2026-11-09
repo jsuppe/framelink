@@ -9,6 +9,11 @@ available. Discovery and automatic authenticated endpoint provisioning remain
 pending. Existing overload/fallback defaults are unchanged. This is a tested
 app-integration candidate, not an API freeze or full M6 acceptance.
 
+**Newer staged-source addition:** Windows named CPU endpoint factory passes
+five Windows and three Linux focused regressions; all38 session DLL exports
+retained plus one additive API. [Contract/evidence](../cpu-path/windows-named-cpu-session/README.md).
+Exact clean full-suite validation pending; the pinned candidate above is unchanged.
+
 **Historical candidate** exact revision: `609cb74031a5de2cee782619007a6e87ab7fbccd`.
 Clean isolated Windows source archive SHA256:
 `ab8efb73b7b8282a9d64d8edf226cb379d18b3c89d39ae4e606c956e083d6da6`.

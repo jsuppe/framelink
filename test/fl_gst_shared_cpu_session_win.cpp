@@ -31,11 +31,8 @@ static flSessionConfig config(){flSessionConfig c{};c.version=2;c.sessionId.byte
 static void configure(FlGstSession*s,const flSessionConfig&c){flSessionCapabilities caps{};caps.version=2;caps.videoCount=1;caps.video[0]=c.video;CHECK(fl_gst_session_configure(s,&c,&caps,&caps)==FL_GST_SESSION_READY);}
 static flMemoryRequirements cpuRequirements(){flMemoryRequirements r{};CHECK(flMemoryRequirementsInit(&r)==FL_MEMORY_OK);r.allowedResourceTypes=FL_MEMORY_SHARED_CPU;return r;}
 static int child(const char*name,DWORD pid,GBytes*key){
- HANDLE peer=nullptr,pipe=nullptr;std::string narrow=name;std::wstring wide(narrow.begin(),narrow.end());
- CHECK(fl::SharedCpuEndpointWin::connect(wide,nullptr,3000,pipe,peer)==FL_OK);
- CHECK(GetProcessId(peer)==pid);
- auto*s=fl_gst_session_new(1);configure(s,config());auto req=cpuRequirements();
- CHECK(fl_gst_session_bind_authenticated_cpu_pipe(s,TRUE,1,pipe,peer,key,3000,&req,0,nullptr,0)==FL_GST_SESSION_READY);CloseHandle(peer);
+ (void)pid;auto*s=fl_gst_session_new(1);configure(s,config());auto req=cpuRequirements();
+ CHECK(fl_gst_session_open_named_cpu_pipe(s,TRUE,1,name,key,3000,&req,0,nullptr,0)==FL_GST_SESSION_READY);
  auto*c=fl_gst_session_claim_shared_cpu(s,TRUE,1);CHECK(c);
  for(unsigned seq=1;seq<=8;seq++){
   flSharedCpuLease*w=nullptr;flMappedImage v{};CHECK(flSharedCpuAcquireWrite(c,0,&w,&v)==FL_OK);memset(v.plane[0].pixels,seq,1024);
@@ -48,18 +45,12 @@ static int child(const char*name,DWORD pid,GBytes*key){
 }
 static void crossProcess(GBytes*key){
  static unsigned serial=0;std::string name="\\\\.\\pipe\\framelink-cpu-auth-"+std::to_string(GetCurrentProcessId())+"-"+std::to_string(++serial);
- std::wstring wide(name.begin(),name.end());HANDLE server=nullptr;
- CHECK(fl::SharedCpuEndpointWin::listen(wide,server)==FL_OK);
- HANDLE duplicate=nullptr;CHECK(fl::SharedCpuEndpointWin::listen(wide,duplicate)==FL_ACCESS_DENIED&&!duplicate);
  char exe[MAX_PATH];CHECK(GetModuleFileNameA(nullptr,exe,MAX_PATH));
  std::string cmd="\""+std::string(exe)+"\" --child "+name+" "+std::to_string(GetCurrentProcessId());
  STARTUPINFOA si{};si.cb=sizeof(si);PROCESS_INFORMATION pi{};CHECK(CreateProcessA(nullptr,cmd.data(),nullptr,nullptr,FALSE,0,nullptr,nullptr,&si,&pi));CloseHandle(pi.hThread);
- HANDLE pinned=nullptr;CHECK(fl::SharedCpuEndpointWin::accept(server,nullptr,5000,pinned)==FL_OK);
- CHECK(GetProcessId(pinned)==pi.dwProcessId);
  auto*s=fl_gst_session_new(1);configure(s,config());auto req=cpuRequirements();
  flSharedCpuDescriptor d[2]{};for(unsigned i=0;i<2;i++){auto&v=d[i];v.version=1;v.resourceType=FL_MEMORY_SHARED_CPU;v.format=FL_FORMAT_BGRA8;v.width=v.height=16;v.planeCount=1;v.generation=1;v.allocationId=i+1;v.planeStride[0]=64;v.allocationBytes=4096;}
- CHECK(fl_gst_session_bind_authenticated_cpu_pipe(s,FALSE,1,server,pinned,key,3000,&req,0,d,2)==FL_GST_SESSION_READY);
- CloseHandle(pinned);
+ CHECK(fl_gst_session_open_named_cpu_pipe(s,FALSE,1,name.c_str(),key,3000,&req,0,d,2)==FL_GST_SESSION_READY);
  auto*c=fl_gst_session_claim_shared_cpu(s,FALSE,1);CHECK(c);
  for(unsigned seq=1;seq<=8;seq++){
   flSharedCpuLease*r=nullptr;flMappedImage v{};uint64_t actual=0;int64_t pts=0;int eos=-1;
@@ -91,6 +82,7 @@ int main(int argc,char**argv){
   CHECK(Endpoint::connect(name,nullptr,30,client,peer)==FL_TIMEOUT&&!client&&!peer);
   CHECK(GetTickCount64()-start<1000);
   CHECK(Endpoint::listen(name,server)==FL_OK);
+  HANDLE duplicate=nullptr;CHECK(Endpoint::listen(name,duplicate)==FL_ACCESS_DENIED&&!duplicate);
   start=GetTickCount64();CHECK(Endpoint::accept(server,nullptr,30,peer)==FL_TIMEOUT&&!peer);
   CHECK(GetTickCount64()-start<1000);CloseHandle(server);
   HANDLE cancel=CreateEventW(nullptr,TRUE,FALSE,nullptr);CHECK(cancel);
@@ -182,6 +174,20 @@ int main(int argc,char**argv){
   worker.join();CHECK(g_get_monotonic_time()-start<1000000);CHECK(result==(replace?FL_GST_SESSION_STALE:FL_GST_SESSION_CANCELLED));
   CHECK(!fl_gst_session_claim_shared_cpu(s,TRUE,1));g_object_unref(s);CloseHandle(pair.server);pair.server=nullptr;CHECK(handles()==baseline);
  }
+ // Named endpoint provisioning is interrupted by the coordinator itself,
+ // both while waiting for a missing server and accepting a missing client.
+ for(bool producer:{false,true})for(bool replace:{false,true}){
+  auto*s=fl_gst_session_new(1);auto cfg=config();configure(s,cfg);
+  std::string name="\\\\.\\pipe\\framelink-cpu-cancel-"+std::to_string(GetCurrentProcessId());
+  flSharedCpuDescriptor d[2]{};for(unsigned i=0;i<2;i++){auto&v=d[i];v.version=1;v.resourceType=FL_MEMORY_SHARED_CPU;v.format=FL_FORMAT_BGRA8;v.width=v.height=16;v.planeCount=1;v.generation=1;v.allocationId=i+1;v.planeStride[0]=64;v.allocationBytes=4096;}
+  FlGstSessionResult result=FL_GST_SESSION_READY;
+  std::thread worker([&]{result=fl_gst_session_open_named_cpu_pipe(s,producer,1,name.c_str(),key,60000,&req,0,producer?nullptr:d,producer?0:2);});
+  Sleep(30);auto start=GetTickCount64();
+  if(replace){cfg.generation=2;configure(s,cfg);}else fl_gst_session_cancel(s);
+  worker.join();CHECK(GetTickCount64()-start<1000);
+  CHECK(result==(replace?FL_GST_SESSION_STALE:FL_GST_SESSION_CANCELLED));
+  CHECK(!fl_gst_session_claim_shared_cpu(s,producer,1));g_object_unref(s);CHECK(handles()==baseline);
+ }
  // Different credentials/configuration/roles cannot authorize the same pipe.
  for(unsigned mode=0;mode<8;mode++){
   auto*s=fl_gst_session_new(1);auto*c=fl_gst_session_new(1);auto cfg=config();configure(s,cfg);
@@ -198,6 +204,21 @@ int main(int argc,char**argv){
   p.join();CHECK(sr!=FL_GST_SESSION_READY&&cr!=FL_GST_SESSION_READY);
   CHECK(!fl_gst_session_claim_shared_cpu(s,TRUE,1)&&!fl_gst_session_claim_shared_cpu(c,FALSE,cfg.generation));
   CHECK(g_get_monotonic_time()-start<1000000);g_object_unref(s);g_object_unref(c);CHECK(handles()==baseline);
+ }
+ // Named-profile integration must retain authentication/configuration rejection.
+ for(unsigned mode=0;mode<3;++mode){
+  auto*s=fl_gst_session_new(1);auto*c=fl_gst_session_new(1);auto cfg=config();configure(s,cfg);
+  if(mode==1)cfg.epochNs++;
+  configure(c,cfg);std::string name="\\\\.\\pipe\\framelink-cpu-reject-"+std::to_string(GetCurrentProcessId());
+  flSharedCpuDescriptor d[2]{};for(unsigned i=0;i<2;i++){auto&v=d[i];v.version=1;v.resourceType=FL_MEMORY_SHARED_CPU;v.format=FL_FORMAT_BGRA8;v.width=v.height=16;v.planeCount=1;v.generation=1;v.allocationId=i+1;v.planeStride[0]=64;v.allocationBytes=4096;}
+  FlGstSessionResult sr=FL_GST_SESSION_READY;
+  auto start=GetTickCount64();
+  std::thread producer([&]{sr=fl_gst_session_open_named_cpu_pipe(s,TRUE,1,name.c_str(),key,150,&req,0,nullptr,0);});
+  auto cr=fl_gst_session_open_named_cpu_pipe(c,FALSE,1,name.c_str(),mode==0?wrong:mode==2?nullptr:key,150,&req,0,d,2);
+  producer.join();CHECK(sr!=FL_GST_SESSION_READY&&cr!=FL_GST_SESSION_READY);
+  CHECK(GetTickCount64()-start<1000);
+  CHECK(!fl_gst_session_claim_shared_cpu(s,TRUE,1)&&!fl_gst_session_claim_shared_cpu(c,FALSE,1));
+  g_object_unref(s);g_object_unref(c);CHECK(handles()==baseline);
  }
  // Silent authenticated peer: finite whole-authentication deadline and no pool.
  {auto*s=fl_gst_session_new(1);configure(s,config());Pair pair;auto start=g_get_monotonic_time();

@@ -6,6 +6,7 @@
 #include <windows.h>
 #include "framelink_shared_cpu_win.h"
 #include "fl_gst_cpu_pipe_auth_win.h"
+#include "../src/fl_shared_cpu_endpoint_win.h"
 #endif
 #ifndef _WIN32
 #include <unistd.h>
@@ -250,9 +251,10 @@ FlGstSessionResult fl_gst_session_bind_shared_cpu_fd(FlGstSession*s,gboolean pro
 #else
 static FlGstSessionResult bindCpuPipe(FlGstSession*s,gboolean producer,
  guint64 generation,void* pipe,void* peer,guint timeout,const flMemoryRequirements*requirements,
- guint operations,const flSharedCpuDescriptor*desc,gsize count,GBytes* secret,bool authenticate){
- struct Handle{HANDLE value;~Handle(){if(value&&value!=INVALID_HANDLE_VALUE)CloseHandle(value);}} owned{pipe},cancel{nullptr};
- if(!valid(s)||!pipe||pipe==INVALID_HANDLE_VALUE||!peer||!requirements||!timeout||timeout>60000||
+ guint operations,const flSharedCpuDescriptor*desc,gsize count,GBytes* secret,bool authenticate,
+ const std::wstring* endpointName=nullptr){
+ struct Handle{HANDLE value;~Handle(){if(value&&value!=INVALID_HANDLE_VALUE)CloseHandle(value);}} owned{pipe},cancel{nullptr},endpointPeer{nullptr};
+ if(!valid(s)||(!endpointName&&(!pipe||pipe==INVALID_HANDLE_VALUE||!peer))||!requirements||!timeout||timeout>60000||
     (producer?(desc||count):(!desc||count<2||count>FL_MAX_POOL_SIZE)))return FL_GST_SESSION_INVALID;
  flSessionConfig config{};
  {
@@ -270,7 +272,23 @@ static FlGstSessionResult bindCpuPipe(FlGstSession*s,gboolean producer,
   s->cpuOpening=TRUE;config=s->config;
  }
  flSharedCpuChannel*channel=nullptr;
- auto result=authenticate?flAuthenticateCpuPipe(pipe,peer,cancel.value,timeout,config,producer,secret):FL_OK;
+ flResult result=FL_OK;guint authTimeout=timeout;
+ if(endpointName){
+  const auto end=GetTickCount64()+timeout;
+  if(producer)result=fl::SharedCpuEndpointWin::connect(*endpointName,cancel.value,timeout,owned.value,endpointPeer.value);
+  else{
+   result=fl::SharedCpuEndpointWin::listen(*endpointName,owned.value);
+   if(result==FL_OK){
+    auto now=GetTickCount64();
+    result=now>=end?FL_TIMEOUT:fl::SharedCpuEndpointWin::accept(owned.value,cancel.value,guint(end-now),endpointPeer.value);
+   }
+  }
+  pipe=owned.value;peer=endpointPeer.value;
+  auto now=GetTickCount64();
+  if(result==FL_OK&&now>=end)result=FL_TIMEOUT;
+  if(result==FL_OK)authTimeout=guint(end-now);
+ }
+ if(result==FL_OK&&authenticate)result=flAuthenticateCpuPipe(pipe,peer,cancel.value,authTimeout,config,producer,secret);
  const guint flags=FL_SHARED_CPU_FRAME_METADATA|FL_SHARED_CPU_ORDERED_EOS;
  if(result==FL_OK){owned.value=nullptr;
  result=producer?flSharedCpuOpenProducerPipe(pipe,peer,cancel.value,timeout,&config,requirements,operations,flags,&channel):
@@ -292,6 +310,17 @@ FlGstSessionResult fl_gst_session_bind_authenticated_cpu_pipe(FlGstSession*s,gbo
  guint64 generation,void* pipe,void* peer,GBytes* secret,guint timeout,const flMemoryRequirements* req,
  guint operations,const flSharedCpuDescriptor* desc,gsize count){
  return bindCpuPipe(s,producer,generation,pipe,peer,timeout,req,operations,desc,count,secret,true);
+}
+FlGstSessionResult fl_gst_session_open_named_cpu_pipe(FlGstSession*s,gboolean producer,
+ guint64 generation,const gchar* name,GBytes* secret,guint timeout,const flMemoryRequirements* req,
+ guint operations,const flSharedCpuDescriptor* desc,gsize count){
+ if(!name||!g_utf8_validate(name,-1,nullptr)||!secret)return FL_GST_SESSION_INVALID;
+ gsize size=0;auto*key=static_cast<const guint8*>(g_bytes_get_data(secret,&size));
+ if(size!=32)return FL_GST_SESSION_INVALID;
+ guint nonzero=0;for(gsize i=0;i<size;++i)nonzero|=key[i];if(!nonzero)return FL_GST_SESSION_INVALID;
+ auto*wide=g_utf8_to_utf16(name,-1,nullptr,nullptr,nullptr);if(!wide)return FL_GST_SESSION_INVALID;
+ std::wstring endpointName(reinterpret_cast<const wchar_t*>(wide));g_free(wide);
+ return bindCpuPipe(s,producer,generation,nullptr,nullptr,timeout,req,operations,desc,count,secret,true,&endpointName);
 }
 #endif
 flSharedCpuChannel* fl_gst_session_claim_shared_cpu(FlGstSession*s,gboolean producer,guint64 generation){
