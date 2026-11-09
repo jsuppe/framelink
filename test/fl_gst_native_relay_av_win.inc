@@ -53,7 +53,7 @@ static void relaySessionNegatives(flSessionConfig cfg,const flSessionCapabilitie
 // Deterministic app-queue controls, separate from authenticated transport above.
 static void relayPcmControls(flSessionConfig cfg,const flSessionCapabilities&offer){
  cfg.sessionId.bytes[0]=1;cfg.audioQueueMs=1;
- for(unsigned fault=0;fault<9;++fault){
+ for(unsigned fault=0;fault<11;++fault){
   const bool badConfig=fault>0&&fault<7;
   auto*a=fl_gst_session_new(3);auto*b=fl_gst_session_new(3);auto other=cfg;other.sessionId.bytes[0]=2;
   CHECK(fl_gst_session_configure(a,&cfg,&offer,&offer)==FL_GST_SESSION_READY);
@@ -87,6 +87,19 @@ static void relayPcmControls(flSessionConfig cfg,const flSessionCapabilities&off
      CHECK(GST_BUFFER_PTS(pcm)==(n<2?100+n:200+n-2)*GST_MSECOND&&GST_BUFFER_DURATION(pcm)==GST_MSECOND);
      if(n==2)CHECK(GST_BUFFER_FLAG_IS_SET(pcm,GST_BUFFER_FLAG_DISCONT));
      CHECK(gst_buffer_extract(pcm,0,bytes,sizeof bytes)==sizeof bytes);for(auto value:bytes)CHECK(value==n+41);gst_sample_unref(sample);};
+    if(fault>=9){
+     CHECK(gst_element_set_state(out,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
+     if(fault==10){push(0);CHECK(relay.forward(1000)==FL_GST_SESSION_READY);pull(0);}
+     // Serialized GAP must never disappear behind a sample-only appsink pull.
+     // Until bounded ordered event forwarding is implemented, fail closed.
+     CHECK(gst_element_send_event(producer,gst_event_new_gap((fault==9?100:101)*GST_MSECOND,GST_MSECOND)));
+     push(fault==9?0:1);
+     CHECK(relay.forward(1000)==FL_GST_SESSION_INVALID);
+     CHECK(relay.frameCount()==(fault==9?0:48)&&relay.blockCount()==(fault==9?0:1));
+     CHECK(!gst_app_sink_try_pull_sample(GST_APP_SINK(consumer),0));
+     CHECK(relay.forward(0)==FL_GST_SESSION_INVALID);
+     flSessionConfig cancelled{};CHECK(fl_gst_session_get_config(b,&cancelled)==FL_GST_SESSION_CANCELLED);
+    }else{
     push(0);CHECK(relay.forward(1000)==FL_GST_SESSION_READY);
     CHECK(gst_app_src_get_current_level_bytes(GST_APP_SRC(sink))==192);
     push(1);CHECK(relay.forward(1000)==FL_GST_SESSION_TIMEOUT);
@@ -109,13 +122,14 @@ static void relayPcmControls(flSessionConfig cfg,const flSessionCapabilities&off
     CHECK(result==FL_GST_SESSION_CANCELLED);CHECK(elapsed<500000);
     CHECK(relay.frameCount()==192&&relay.blockCount()==4);
     CHECK(relay.forward(0)==FL_GST_SESSION_INVALID);
+    }
    }
   }
   for(auto*p:{in,out}){CHECK(gst_element_set_state(p,GST_STATE_NULL)!=GST_STATE_CHANGE_FAILURE);gst_object_unref(p);}
   for(auto*p:{producer,source,sink,consumer})gst_object_unref(p);
   g_object_unref(a);g_object_unref(b);
  }
- printf("PCM queue controls: bounded retry, exact 4-block delivery, nonzero origin/discontinuity, bounded upstream/downstream cancellation, empty timeout and 6 configuration negatives passed\n");
+ printf("PCM queue controls: bounded retry, exact 4-block delivery, nonzero origin/discontinuity, bounded upstream/downstream cancellation, empty timeout, fail-closed initial/midstream GAP and 6 configuration negatives passed\n");
 }
 static void nativeRelayAv(bool empty,unsigned fault=0){
  using Microsoft::WRL::ComPtr;
@@ -277,7 +291,7 @@ static void nativeRelayAv(bool empty,unsigned fault=0){
   CHECK(end.kind==sent.kind&&end.afterFrames==sent.afterFrames&&end.ptsNs==sent.ptsNs&&end.durationNs==sent.durationNs);
   }
  }
- if(!fault||fault==12){
+ if(!fault||fault>=12){
   FlGstVideoEvent end{FL_GST_VIDEO_END,frames,frames?37000000+(frames-1)*1000000:0,0},received{};
   CHECK(fl_gst_session_send_video_event(sessions[0],1,&end)==FL_GST_SESSION_READY);
   CHECK(relay.forwardEvent(1000)==FL_GST_SESSION_READY);
@@ -287,11 +301,12 @@ static void nativeRelayAv(bool empty,unsigned fault=0){
  }
  CHECK(relay.count()==(fault?(fault>=5?1:0):frames)&&relay.finish()==FL_OK);CHECK(flCancelBuffer(writer,&spare)==FL_OK);
  // PCM EOS authenticates the first-hop video terminal before relay publication.
- if(!fault||fault==12){
+ if(!fault||fault>=12){
  const gint64 lastPts=frames?gint64(37000000)+gint64(frames-1)*1000000:gint64(-1);
  CHECK(fl_gst_session_video_eos(sessions[0],1,frames+(fault==12?1:0),lastPts)==FL_GST_SESSION_READY);
+ if(fault==13)CHECK(gst_element_send_event(ports[0],gst_event_new_gap(GST_MSECOND,GST_MSECOND)));
  CHECK(gst_app_src_end_of_stream(GST_APP_SRC(ports[0]))==GST_FLOW_OK);avTerminal(pipes[1],GST_MESSAGE_EOS);
- if(fault==12){
+ if(fault>=12){
   CHECK(pcmRelay.finish(relay,1000)==FL_GST_SESSION_INVALID);
   flSessionConfig cancelled{};CHECK(fl_gst_session_get_config(sessions[2],&cancelled)==FL_GST_SESSION_CANCELLED);
   CHECK(pcmRelay.finish(relay,0)==FL_GST_SESSION_INVALID);

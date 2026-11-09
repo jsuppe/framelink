@@ -11,6 +11,8 @@ namespace flsample {
 // plus the destination audioQueueMs byte budget bounds
 // this adapter's buffering (transport/in-flight buffers are separately bounded).
 // No payload copy, timestamp rebasing, leaky queue or silent PCM loss.
+// Serialized media events (including GAP) are currently unsupported and fail
+// closed. Never use sample-only pulls here: they silently discard these events.
 class SessionPcmRelay {
  public:
   SessionPcmRelay(FlGstSession* up,FlGstSession* down,GstAppSink* input,GstAppSrc* output)
@@ -45,7 +47,8 @@ class SessionPcmRelay {
       do{
         const gint64 remaining=deadline-g_get_monotonic_time();
         const guint64 slice=remaining<=0?0:guint64(remaining<10000?remaining:10000)*1000;
-        pending=gst_app_sink_try_pull_sample(source,slice);
+        auto*object=gst_app_sink_try_pull_object(source,slice);
+        if(object){r=acceptObject(object);if(r!=FL_GST_SESSION_READY)return r;}
         r=contract.check();if(r!=FL_GST_SESSION_READY)return fail(r);
         if(pending||gst_app_sink_is_eos(source)||g_get_monotonic_time()>=deadline)break;
       }while(true);
@@ -82,6 +85,16 @@ class SessionPcmRelay {
     if(!initialized||failed||ended)return FL_GST_SESSION_INVALID;
     auto r=contract.check();if(r!=FL_GST_SESSION_READY)return fail(r);
     if(pending||!gst_app_sink_is_eos(source)||!video.videoEnded()||video.pending())return FL_GST_SESSION_TIMEOUT;
+    // is_eos() only guarantees no queued samples; serialized events can
+    // remain. Inspect them before publishing a successful terminal. Bound the
+    // work per call; TIMEOUT retries never discard uninspected events.
+    for(unsigned n=0;;++n){
+      if(n==32)return FL_GST_SESSION_TIMEOUT;
+      auto*object=gst_app_sink_try_pull_object(source,0);
+      if(!object)break;
+      r=acceptObject(object);if(r!=FL_GST_SESSION_READY)return r;
+      if(pending)return FL_GST_SESSION_TIMEOUT;
+    }
     guint64 frames=0;gint64 last=-1;
     r=fl_gst_session_wait_video_eos(session,config.generation,timeoutMs,&frames,&last);
     if(r==FL_GST_SESSION_TIMEOUT)return r;
@@ -97,6 +110,18 @@ class SessionPcmRelay {
   guint64 byteCount()const{return totalBytes;}
   guint64 blockCount()const{return blocks;}
  private:
+  FlGstSessionResult acceptObject(GstMiniObject*object){
+    if(GST_IS_SAMPLE(object)){pending=GST_SAMPLE(object);return FL_GST_SESSION_READY;}
+    // Caps/segment are validated again on every sample. Stream setup and tags
+    // carry no missing PCM. Unsupported events must never vanish from a relay.
+    const bool setup=GST_IS_EVENT(object)&&
+      (GST_EVENT_TYPE(object)==GST_EVENT_STREAM_START||
+       GST_EVENT_TYPE(object)==GST_EVENT_CAPS||
+       GST_EVENT_TYPE(object)==GST_EVENT_SEGMENT||
+       GST_EVENT_TYPE(object)==GST_EVENT_TAG);
+    gst_mini_object_unref(object);
+    return setup?FL_GST_SESSION_READY:fail(FL_GST_SESSION_INVALID);
+  }
   static guint64 difference(guint64 a,guint64 b){return a>b?a-b:b-a;}
   bool validCaps(GstCaps*caps)const{
     if(!caps||!gst_caps_is_fixed(caps)||gst_caps_get_size(caps)!=1)return false;

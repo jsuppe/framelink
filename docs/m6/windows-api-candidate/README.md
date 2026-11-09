@@ -1,8 +1,8 @@
 # Windows API integration baseline candidate — NOT FROZEN
 
-**Current verified integrated candidate:** `14096e3e9dc9143f9441c8188555d5dcff87b94d`.
+**Current verified integrated candidate:** `b0cad2fb88e82a045957712e118e05078c72495c`.
 Clean exact-revision Windows build/API/full suite **135/135 passed**;
-[pinned evidence](../windows-integrated-14096e3/README.md) includes DLL hashes,
+[pinned evidence](../windows-integrated-b0cad2f/README.md) includes DLL hashes,
 runtime properties and exports. All 119 prior exported names retained (119 total).
 Export-name retention is not proof of behavioral or ordinal ABI compatibility.
 
@@ -249,3 +249,13 @@ synthetic PCM and both receiver profiles. Raw private decoder arrays are still
 not accepted. This implementation needs its clean exact-revision integration
 check before replacing the pinned candidate. Two-hop/timing/lifetime acceptance
 and D2/D3 remain open; this is not API freeze or full Windows acceptance.
+
+## Checked relay sample: serialized PCM events
+
+The Windows checked PCM relay sample now fails closed on GAP and unsupported
+serialized media events, including queued events immediately before EOS. It does
+not silently discard them or synthesize silence. Existing explicit buffer DISCONT
+is preserved. Apps requiring successful GAP forwarding still need a bounded,
+ordered event-capable adapter; this safety repair is not that implementation.
+The public C/wire/properties/defaults are unchanged. See
+[negative controls and focused Windows checks](../windows-relay-audio-events/README.md).
