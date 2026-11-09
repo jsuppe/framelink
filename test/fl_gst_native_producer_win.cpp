@@ -47,6 +47,35 @@ static void run(bool nv12){
  gst_memory_unref(last);CHECK(weak.expired());flClose(c);
  printf("%s native producer: original texture, ready fence, exact pixels/metadata, local reference reuse and owner lifetime pass\n",nv12?"NV12":"RGBA");
 }
+// Cached wrappers must still download fresh pixels and describe a resized ring.
+static void producerLayoutReuse(bool nv12){
+ auto name="native-producer-layout-"+std::to_string(g_get_monotonic_time());flChannel*c=nullptr,*p=nullptr;
+ const auto format=nv12?FL_FORMAT_NV12:FL_FORMAT_RGBA8;
+ CHECK(flCreateChannelEx(name.c_str(),64,32,format,2,FL_MAP_CPU,&c)==FL_OK);
+ CHECK(flOpenProducer(name.c_str(),&p)==FL_OK);auto owner=std::make_shared<FrameLinkD3DProducer>(p);CHECK(owner->valid());
+ for(unsigned step=0;step<3;++step){
+  const unsigned width=step==1?640:64,height=32,pitch=width*(nv12?1:4);
+  if(step){CHECK(flRequestGeometry(p,width,height,format)==FL_OK);flChannelInfo info{};CHECK(flQuery(p,&info)==FL_OK&&info.width==width);}
+  for(unsigned n=0;n<32;++n){
+   auto*b=owner->acquire(1000);CHECK(b);auto*memory=gst_buffer_peek_memory(b,0);
+   auto*meta=gst_buffer_get_video_meta(b);CHECK(meta&&meta->width==width&&meta->height==height&&meta->n_planes==(nv12?2u:1u));
+   auto*texture=(ID3D11Texture2D*)gst_d3d11_memory_get_resource_handle(GST_D3D11_MEMORY_CAST(memory));
+   const auto value=static_cast<unsigned char>(31+step*32+n);
+   std::vector<unsigned char> pixels(pitch*(nv12?height*3/2:height),value);
+   ID3D11DeviceContext*context=nullptr;flChannelD3D11Device(p)->GetImmediateContext(&context);
+   gst_d3d11_device_lock(owner->device);context->UpdateSubresource(texture,0,nullptr,pixels.data(),pitch,0);gst_d3d11_device_unlock(owner->device);context->Release();
+   // Readback is the explicit test oracle, not a producer transport operation.
+   GstMapInfo map{};CHECK(gst_memory_map(memory,&map,GST_MAP_READ));
+   for(unsigned plane=0;plane<meta->n_planes;++plane){const unsigned rows=plane?height/2:height;
+    CHECK(meta->stride[plane]>=gint(pitch)&&map.size>=meta->offset[plane]+gsize(rows-1)*meta->stride[plane]+pitch);
+    for(unsigned y=0;y<rows;++y)for(unsigned x=0;x<pitch;++x)CHECK(map.data[meta->offset[plane]+y*meta->stride[plane]+x]==value);
+   }
+   gst_memory_unmap(memory,&map);gst_buffer_unref(b); // cancel only after the GPU readback completes
+  }
+ }
+ owner.reset();flClose(c);
+ puts("native producer layout: repeated fresh pixels, exact planes, grow/shrink and cancelled reservations pass");
+}
 static FlGstSession* bindSession(GstElement* sink,guint64 generation){
  auto* session=fl_gst_session_new(FL_GST_TRACK_VIDEO);
  flSessionConfig config{};config.version=FL_SESSION_OPTIONAL_TRACKS_VERSION;
@@ -150,4 +179,4 @@ int main(int argc,char**argv){gst_init(&argc,&argv);CHECK(argc==2||argc==3);GErr
   }
   return 0;
  }
- run(false);run(true);sinkPipeline(false);coordinatedPolicyNegative(false);coordinatedPolicyNegative(true);sinkPipeline(true);sinkPipeline(true,true);binConfigurationNegatives();coordinatedPolicyNegative(false,true);coordinatedPolicyNegative(true,true);for(unsigned mode=0;mode<4;++mode)nativeProducerAv(mode);for(unsigned mode=0;mode<4;++mode)nativeProducerAv(mode,false,false,false,true);for(unsigned mode=0;mode<3;++mode){nativeProducerAv(mode,true,false,false,true);nativeProducerAv(mode,true,true,false,true);nativeProducerAv(mode,true,false,true,true);}for(unsigned mode=0;mode<3;++mode)nativeProducerAv(mode,true);for(unsigned mode=0;mode<3;++mode)nativeProducerAv(mode,true,true);nativeLocalNegatives();nativeLocalNegatives(true);nativeBinNegatives();nativeBinNegatives(true);for(unsigned mode=0;mode<3;++mode)nativeProducerAv(mode,true,false,true);}
+ run(false);run(true);producerLayoutReuse(false);producerLayoutReuse(true);sinkPipeline(false);coordinatedPolicyNegative(false);coordinatedPolicyNegative(true);sinkPipeline(true);sinkPipeline(true,true);binConfigurationNegatives();coordinatedPolicyNegative(false,true);coordinatedPolicyNegative(true,true);for(unsigned mode=0;mode<4;++mode)nativeProducerAv(mode);for(unsigned mode=0;mode<4;++mode)nativeProducerAv(mode,false,false,false,true);for(unsigned mode=0;mode<3;++mode){nativeProducerAv(mode,true,false,false,true);nativeProducerAv(mode,true,true,false,true);nativeProducerAv(mode,true,false,true,true);}for(unsigned mode=0;mode<3;++mode)nativeProducerAv(mode,true);for(unsigned mode=0;mode<3;++mode)nativeProducerAv(mode,true,true);nativeLocalNegatives();nativeLocalNegatives(true);nativeBinNegatives();nativeBinNegatives(true);for(unsigned mode=0;mode<3;++mode)nativeProducerAv(mode,true,false,true);}

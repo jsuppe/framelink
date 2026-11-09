@@ -1,8 +1,8 @@
 # Windows API integration baseline candidate — NOT FROZEN
 
-**Current verified integrated candidate:** `6d7e6be7a6a1f6acb3dcdaea0a4c98a55456d985`.
+**Current verified integrated candidate:** `b4eb366b4837d8132da7b6643d5aa300fe4d18ea`.
 Clean exact-revision Windows build/API/full suite **134/134 passed**;
-[pinned evidence](../windows-integrated-6d7e6be/README.md) includes DLL hashes,
+[pinned evidence](../windows-integrated-b4eb366/README.md) includes DLL hashes,
 runtime properties and exports. All 119 prior exported names retained (119 total).
 Export-name retention is not proof of behavioral or ordinal ABI compatibility.
 
@@ -11,15 +11,15 @@ This revision includes explicit Windows local native setup, the additive
 via `set-local-native-candidate`. [Native bin contract and checks](../windows-native-bins/README.md):
 configure all properties before copying the immutable candidate; fresh bins are
 required for each setup attempt, including reconnect after failure/cancellation.
-This remains an explicit D3D11-producer/CPU-readback profile, not a native GPU
-receiver, real decoder or two-hop qualification. No overload/fallback defaults changed.
+This includes explicit D3D11 GPU_SAMPLE/operations=0 receiver support as well as
+the CPU-readback profile. Neither qualifies a real decoder or two-hop pipeline. No overload/fallback defaults changed.
 
 Windows authenticated CPU discovery/delegation and `shared-cpu=true session=`
 bins are implemented and tested. Native producer and receiver bins support
 broker-bound channel and immutable policy adoption. Full configured session and
 native policy candidates can now be authenticated through either explicit
 connected streams, the Windows local helper or explicitly candidate-bound bins. Exact pixels/PCM and37ms mapping
-pass; native receiver, real decoder and two-hop gates remain open. The earlier
+pass; real decoder and two-hop gates remain open. The earlier
 Windows startup failure is not waived by later integrated passes. API not frozen;
 M6 not complete.
 
@@ -82,8 +82,7 @@ and explicitly selected; do not append handle integers to legacy POSIX packets.
 Windows HANDLE values are process-local; bind the process identity, transfer exact
 rights, acknowledge adoption, reject stale epochs and retain held old leases.
 
-Remaining gates before a Windows-ready API baseline: exact-head validation of the
-explicit native receiver extension below, real-producer/relay integration,
+Remaining gates before a Windows-ready API baseline: real-producer/relay integration,
 strict overload profile review,
 resource-growth/timing/fault fixes and exact-head compatibility tests. Real decoder,
 two-hop PCM and all-platform M6 acceptance remain separate. This candidate is a
@@ -207,7 +206,7 @@ The preceding exact [c8ff226 baseline](../windows-integrated-c8ff226/README.md)
 passed134/134; the new bin implementation requires its own clean integrated check.
 
 
-## Explicit native receiver extension (after pinned 6d7e6be)
+## Explicit native receiver extension (included in pinned b4eb366)
 
 Windows local helper and `set-local-native-candidate` also accept D3D11
 GPU_SAMPLE at both endpoints with operations=0. Select `native-memory=true`
@@ -228,5 +227,5 @@ no hidden driver work, target-rate performance or bounded lifetime resources.
 [Local native receiver evidence](../windows-local-native-receiver/README.md)
 separates broker, helper and automatic-bin tests. Real decoder and two-hop PCM
 qualification, original startup/lifetime failures, and D2/D3 remain open.
-The preceding pinned artifact does not contain this extension; clean exact-head
-integration is required before moving the candidate. API not frozen.
+The pinned b4eb366 artifact includes this extension and passed the clean integrated
+suite. API not frozen.
