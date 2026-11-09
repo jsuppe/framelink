@@ -307,7 +307,7 @@ static gboolean open_local_av_impl(FlGstSession*session,gboolean producer,const 
  ObjectOwner listener,client;StreamOwner control,audio,events;
 #ifdef __linux__
  av::UnixRendezvousOwner unixOwner;
-#else
+#elif !defined(_WIN32)
  if(cpu)return fail("local CPU discovery unavailable on this platform");
 #endif
  std::string ioReason;
@@ -343,6 +343,7 @@ static gboolean open_local_av_impl(FlGstSession*session,gboolean producer,const 
   GSocketAddress*effective=nullptr;const bool bound=g_socket_listener_add_address(l,bind,G_SOCKET_TYPE_STREAM,G_SOCKET_PROTOCOL_TCP,nullptr,&effective,nullptr);g_object_unref(bind);
   if(!bound)return fail("cannot bind private loopback session listener");
   endpoint.port=g_inet_socket_address_get_port(G_INET_SOCKET_ADDRESS(effective));g_object_unref(effective);
+  endpoint.cpuControl=cpu;
   if(!owner.publish(path,endpoint,reason))return fail(reason.c_str());
   }
  }else{
@@ -350,7 +351,7 @@ static gboolean open_local_av_impl(FlGstSession*session,gboolean producer,const 
 #ifdef __linux__
    bool found=cpu?av::readUnixEndpoint(path,endpoint,reason):av::readEndpoint(path,endpoint,reason);
 #else
-   bool found=av::readEndpoint(path,endpoint,reason);
+   bool found=cpu?av::readCpuControlEndpoint(path,endpoint,reason):av::readEndpoint(path,endpoint,reason);
 #endif
    if(found)break;g_usleep(5000);
   }
@@ -365,7 +366,8 @@ static gboolean open_local_av_impl(FlGstSession*session,gboolean producer,const 
  if(!next(control))return ioFail("local control connection deadline or failure");
  // Small control records (clock request, ready/drain markers) must not wait
  // behind Nagle/delayed-ACK: that skews the round-trip midpoint by tens of ms.
- if(!cpu)g_socket_set_option(g_socket_connection_get_socket(control.p),IPPROTO_TCP,TCP_NODELAY,1,nullptr);
+ if(g_socket_get_family(g_socket_connection_get_socket(control.p))!=G_SOCKET_FAMILY_UNIX)
+  g_socket_set_option(g_socket_connection_get_socket(control.p),IPPROTO_TCP,TCP_NODELAY,1,nullptr);
  auto*secret=g_bytes_new(endpoint.token.data(),endpoint.token.size());
  struct BytesOwner{GBytes*p;~BytesOwner(){g_bytes_unref(p);}} secretOwner{secret};
  auto*clock=gst_system_clock_obtain();struct ClockOwner{GstClock*p;~ClockOwner(){gst_object_unref(p);}} clockOwner{clock};
@@ -419,11 +421,13 @@ static gboolean open_local_av_impl(FlGstSession*session,gboolean producer,const 
   if(!next(events))return ioFail("local event connection deadline or failure");
   if(!fl_gst_session_authenticate_event_stream(session,events.p,producer,secret,timeout,deadline.cancel,error))return FALSE;
   g_object_unref(events.p);events.p=nullptr;
-#ifdef __linux__
+#if defined(__linux__) || defined(_WIN32)
   if(cpu){
+#ifndef _WIN32
    StreamOwner bootstrap;if(!next(bootstrap))return ioFail("CPU bootstrap connection failed");
    int fd=-1;
    if(!fl_gst_session_create_cpu_endpoint(session,bootstrap.p,producer,secret,timeout,deadline.cancel,&fd,error))return FALSE;
+#endif
    flMemoryRequirements req{};flMemoryRequirementsInit(&req);
    req.allowedResourceTypes=FL_MEMORY_SHARED_CPU;req.allowedOperations=FL_MEMORY_COPY;
    std::array<flSharedCpuDescriptor,16> descriptors{};guint count=pool?pool:4;
@@ -434,11 +438,23 @@ static gboolean open_local_av_impl(FlGstSession*session,gboolean producer,const 
     const bool nv12=d.format==FL_FORMAT_NV12;d.planeCount=nv12?2:1;
     d.planeStride[0]=guint64(d.width)*(nv12?1:4);d.allocationBytes=d.planeStride[0]*d.height;
     if(nv12){d.planeOffset[1]=d.allocationBytes;d.planeStride[1]=d.width;d.allocationBytes+=guint64(d.width)*(d.height/2);}
+#ifdef _WIN32
+    SYSTEM_INFO info{};GetSystemInfo(&info);
+    d.allocationBytes=(d.allocationBytes+info.dwPageSize-1)/info.dwPageSize*info.dwPageSize;
+#endif
    }
    // The setup deadline must also interrupt the channel/pool handshake. The
    // channel retains the independently negotiated idle timeout after setup.
    auto cancelId=g_cancellable_connect(deadline.cancel,G_CALLBACK(+[](GCancellable*,gpointer p){fl_gst_session_cancel(static_cast<FlGstSession*>(p));}),session,nullptr);
+#ifdef _WIN32
+   // Names identify the session, not its authority. The actual pipe exchanges
+   // a fresh full-config/PID/role-bound proof before duplicating any pool handle.
+   std::string pipe="\\\\.\\pipe\\framelink-cpu-";
+   for(auto c:selected.sessionId.bytes){pipe+="0123456789abcdef"[c>>4];pipe+="0123456789abcdef"[c&15];}
+   auto result=fl_gst_session_open_named_cpu_pipe(session,producer,selected.generation,pipe.c_str(),secret,idle,&req,FL_MEMORY_COPY,producer?nullptr:descriptors.data(),producer?0:count);
+#else
    auto result=fl_gst_session_bind_shared_cpu_fd(session,producer,selected.generation,fd,idle,&req,FL_MEMORY_COPY,producer?nullptr:descriptors.data(),producer?0:count);
+#endif
    if(cancelId)g_cancellable_disconnect(deadline.cancel,cancelId);
    if(result!=FL_GST_SESSION_READY||g_cancellable_is_cancelled(deadline.cancel))return fail("CPU pool setup failed or cancelled");
   }else
@@ -473,7 +489,7 @@ gboolean fl_gst_session_open_local_av_epoch(FlGstSession*session,gboolean produc
  flChannel**channel,FlGstEpochFunc epochFunc,gpointer epochData,GCancellable*outer,GError**error){
  return open_local_av_impl(session,producer,path,local,videoQueue,pool,queueMs,timeout,idle,flags,channel,epochFunc,epochData,outer,error,false);
 }
-#ifdef __linux__
+#if defined(__linux__) || defined(_WIN32)
 gboolean fl_gst_session_open_local_cpu(FlGstSession*session,gboolean producer,const gchar*path,
  const flSessionCapabilities*local,guint videoQueue,guint pool,guint queueMs,guint timeout,guint idle,
  GCancellable*outer,GError**error){

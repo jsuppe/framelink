@@ -177,12 +177,13 @@ FL_GST_SESSION_API flSharedCpuChannel* fl_gst_session_claim_shared_cpu(
  FlGstSession*,gboolean producer,guint64 generation);
 G_END_DECLS
 
-#ifdef __linux__
+#if defined(__linux__) || defined(_WIN32)
 G_BEGIN_DECLS
-// Explicit current-user Linux/Android CPU session setup. Authenticated Unix
-// discovery/negotiation, common clock, PCM/events, endpoint and CPU pool setup.
+// Explicit current-user CPU setup: Linux/Android authenticated Unix discovery;
+// Windows typed FAR3 loopback control and authenticated named message pipe.
+// Negotiates common clock, PCM/events, endpoint and CPU pool setup.
 // Video is required. Both callers explicitly authorize shared-CPU COPY by using
-// this API; no native/TCP fallback. Same queue/pool limits and whole setup
+// this API; no native fallback or legacy discovery downgrade. Same queue/pool limits and whole setup
 // deadline as open_local_av. On success elements claim the coordinator's CPU
 // channel; use local_ready/finish_local for startup/drain. Worker thread only.
 FL_GST_SESSION_API gboolean fl_gst_session_open_local_cpu(FlGstSession*,gboolean,

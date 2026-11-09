@@ -29,6 +29,24 @@ static void streamPair(GSocketConnection**a,GSocketConnection**b){
  g_object_unref(sa);g_object_unref(sb);
 #endif
 }
+static gchar* sessionPath(const char* pattern){
+ auto*root=g_dir_make_tmp(pattern,nullptr);CHECK(root);
+#ifdef _WIN32
+ // Production creates/verifies the current-user-only child itself. A generic
+ // temp directory inherits a broader DACL and must not be used as the record.
+ auto*path=g_build_filename(root,"private",nullptr);g_free(root);return path;
+#else
+ return root;
+#endif
+}
+static void removeSessionPath(gchar*path){
+ auto*lock=g_build_filename(path,".owner.lock",nullptr);g_remove(lock);g_free(lock);
+ if(g_file_test(path,G_FILE_TEST_EXISTS))CHECK(g_rmdir(path)==0);
+#ifdef _WIN32
+ auto*root=g_path_get_dirname(path);CHECK(g_rmdir(root)==0);g_free(root);
+#endif
+ g_free(path);
+}
 static GstElement* pipeline(const char*text){GError*e=nullptr;auto*p=gst_parse_launch(text,&e);CHECK(p&&!e);return p;}
 static void context(GstElement*e,FlGstSession*s){auto*c=fl_gst_session_create_context(s);gst_element_set_context(e,c);gst_context_unref(c);}
 static void terminal(GstElement*p,GstMessageType type){auto*b=gst_element_get_bus(p);auto*m=gst_bus_timed_pop_filtered(b,3*GST_SECOND,GstMessageType(GST_MESSAGE_EOS|GST_MESSAGE_ERROR));if(m&&GST_MESSAGE_TYPE(m)==GST_MESSAGE_ERROR){GError*e=nullptr;gchar*debug=nullptr;gst_message_parse_error(m,&e,&debug);fprintf(stderr,"bus: %s %s\n",e->message,debug?debug:"");g_free(debug);g_clear_error(&e);}CHECK(m&&GST_MESSAGE_TYPE(m)==type);gst_message_unref(m);gst_object_unref(b);}
@@ -57,12 +75,13 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
   CHECK(gst_element_set_state(b,GST_STATE_READY)==GST_STATE_CHANGE_FAILURE);
   gst_element_set_state(b,GST_STATE_NULL);gst_object_unref(b);
  }
- constexpr unsigned variants=12;
+ constexpr unsigned variants=16;
 #else
  constexpr unsigned variants=20;
+#endif
  // Discovery has a whole-operation deadline and cannot fall back to native.
  for(unsigned negative=0;negative<4;++negative){
-  auto*path=g_dir_make_tmp("framelink-cpu-negative-XXXXXX",nullptr);CHECK(path);
+  auto*path=sessionPath("framelink-cpu-negative-XXXXXX");CHECK(path);
   auto*session=fl_gst_session_new(1);auto*cancel=g_cancellable_new();
   flSessionCapabilities caps{};caps.version=2;caps.videoCount=1;caps.video[0]={FL_FORMAT_BGRA8,18,16,60,1};
   if(negative>=2)g_cancellable_cancel(cancel);
@@ -71,27 +90,28 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
   CHECK(g_get_monotonic_time()-begin<500000);
   CHECK(!fl_gst_session_claim_shared_cpu(session,negative%2,1));
   g_object_unref(cancel);g_object_unref(session);
-  auto*lock=g_build_filename(path,".owner.lock",nullptr);g_remove(lock);g_free(lock);CHECK(g_rmdir(path)==0);g_free(path);
+  removeSessionPath(path);
  }
  {
-  auto*path=g_dir_make_tmp("framelink-cpu-mismatch-XXXXXX",nullptr);CHECK(path);
+  auto*path=sessionPath("framelink-cpu-mismatch-XXXXXX");CHECK(path);
   auto*s=fl_gst_session_new(1);auto*r=fl_gst_session_new(1);
   flSessionCapabilities a{};a.version=2;a.videoCount=1;a.video[0]={FL_FORMAT_BGRA8,18,16,60,1};auto b=a;b.video[0].format=FL_FORMAT_NV12;
   gboolean result=TRUE;std::thread peer([&]{result=fl_gst_session_open_local_cpu(r,FALSE,path,&b,1,2,0,200,60000,nullptr,nullptr);});
   CHECK(!fl_gst_session_open_local_cpu(s,TRUE,path,&a,1,2,0,200,60000,nullptr,nullptr));peer.join();CHECK(!result);
   CHECK(!fl_gst_session_claim_shared_cpu(s,TRUE,1)&&!fl_gst_session_claim_shared_cpu(r,FALSE,1));
-  g_object_unref(s);g_object_unref(r);auto*lock=g_build_filename(path,".owner.lock",nullptr);g_remove(lock);g_free(lock);CHECK(g_rmdir(path)==0);g_free(path);
+  g_object_unref(s);g_object_unref(r);removeSessionPath(path);
  }
+#ifndef _WIN32
  // A state change must cancel discovery promptly even with a 60s deadline.
  for(bool producer:{false,true}){
-  auto*path=g_dir_make_tmp("framelink-cpu-bin-cancel-XXXXXX",nullptr);CHECK(path);
+  auto*path=sessionPath("framelink-cpu-bin-cancel-XXXXXX");CHECK(path);
   auto*p=pipeline(producer?
    "framelinkavsink name=transport shared-cpu=true appsrc is-live=true format=time ! transport.video_sink appsrc is-live=true format=time ! transport.audio_sink":
    "framelinkavsrc name=transport shared-cpu=true transport.video_src ! fakesink sync=false async=false transport.audio_src ! fakesink sync=false async=false");
   auto*b=gst_bin_get_by_name(GST_BIN(p),"transport");CHECK(b);g_object_set(b,"session",path,"connect-timeout-ms",60000u,nullptr);gst_object_unref(b);
   CHECK(gst_element_set_state(p,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);g_usleep(20000);
   auto start=g_get_monotonic_time();CHECK(gst_element_set_state(p,GST_STATE_NULL)!=GST_STATE_CHANGE_FAILURE);CHECK(g_get_monotonic_time()-start<1000000);gst_object_unref(p);
-  auto*lock=g_build_filename(path,".owner.lock",nullptr);g_remove(lock);g_free(lock);CHECK(g_rmdir(path)==0);g_free(path);
+  removeSessionPath(path);
  }
 #endif
  for(unsigned variant=0;variant<variants;variant++){
@@ -100,10 +120,9 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
   flSessionConfig cfg{};cfg.version=2;cfg.sessionId.bytes[0]=1;cfg.clockId.bytes[0]=2;cfg.generation=1;cfg.videoTrackId=1;cfg.audioTrackId=2;cfg.audio={FL_PCM_S16,48000,2};cfg.audioQueueMs=80;cfg.video={uint32_t(nv12?FL_FORMAT_NV12:FL_FORMAT_BGRA8),18,16,60,1};cfg.videoQueueFrames=1;cfg.connectTimeoutMs=cfg.idleTimeoutMs=1000;
   flSessionCapabilities offers{};offers.version=2;offers.videoCount=1;offers.video[0]=cfg.video;offers.audioCount=1;offers.audio[0]=cfg.audio;
   GSocketConnection*bc=nullptr;gint64 expectedBase=1000000;gchar*localPath=nullptr;
-#ifndef _WIN32
-  if(localBins){localPath=g_dir_make_tmp("framelink-cpu-bins-XXXXXX",nullptr);CHECK(localPath);}
+  if(localBins){localPath=sessionPath("framelink-cpu-bins-XXXXXX");CHECK(localPath);}
   else if(localSetup){
-   localPath=g_dir_make_tmp("framelink-cpu-local-XXXXXX",nullptr);CHECK(localPath);
+   localPath=sessionPath("framelink-cpu-local-XXXXXX");CHECK(localPath);
    gboolean opened=FALSE;GError*producerError=nullptr,*consumerError=nullptr;
    // Consumer starts first, exercising bounded discovery rather than inherited FDs.
    std::thread consumer([&]{opened=fl_gst_session_open_local_cpu(r,FALSE,localPath,&offers,1,2,80,1000,60000,nullptr,&consumerError);});
@@ -115,7 +134,6 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
    CHECK(fl_gst_session_map_pts(r,cfg.generation,0,&expectedBase)==FL_GST_SESSION_READY);
    CHECK(fl_gst_session_local_ready(r,FALSE,1000,nullptr));CHECK(fl_gst_session_local_ready(s,TRUE,1000,nullptr));
   }else
-#endif
   {
   CHECK(fl_gst_session_configure(s,&cfg,&offers,&offers)==FL_GST_SESSION_READY);CHECK(fl_gst_session_configure(r,&cfg,&offers,&offers)==FL_GST_SESSION_READY);
   GSocketConnection*ea=nullptr,*eb=nullptr;streamPair(&ea,&eb);
@@ -206,7 +224,7 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
   if(localSetup){CHECK(fl_gst_session_finish_local(r,FALSE,1000,nullptr));CHECK(fl_gst_session_finish_local(s,TRUE,1000,nullptr));}
   auto stop=g_get_monotonic_time();gst_element_set_state(tx,GST_STATE_NULL);gst_element_set_state(rx,GST_STATE_NULL);CHECK(g_get_monotonic_time()-stop<1000000);if(bc)g_object_unref(bc);
   gst_object_unref(vi);gst_object_unref(ai);gst_object_unref(vo);gst_object_unref(ao);gst_object_unref(tx);gst_object_unref(rx);g_object_unref(s);g_object_unref(r);
-  if(localPath){auto*lock=g_build_filename(localPath,".owner.lock",nullptr);g_remove(lock);g_free(lock);CHECK(g_rmdir(localPath)==0);g_free(localPath);}
+  if(localPath){removeSessionPath(localPath);}
  }
  puts("CPU A/V: exact PCM/pixels, common mapping preserves37ms offset, both EOS submission orders, empty streams, terminal conflict and PCM death passed");
 }

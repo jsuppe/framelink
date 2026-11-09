@@ -21,7 +21,7 @@ FL_GST_SESSION_API gboolean fl_gst_session_open_local_av_epoch(FlGstSession*,gbo
 FL_GST_SESSION_API gboolean fl_gst_session_local_ready_cancellable(FlGstSession*,gboolean producer,guint timeout_ms,GCancellable*,GError**);
 FL_GST_SESSION_API gboolean fl_gst_session_finish_local_cancellable(FlGstSession*,gboolean producer,guint timeout_ms,GCancellable*,GError**);
 
-#ifdef __linux__
+#if defined(__linux__) || defined(_WIN32)
 FL_GST_SESSION_API gboolean fl_gst_session_open_local_cpu_epoch(FlGstSession*,gboolean,
  const gchar*,const flSessionCapabilities*,guint,guint,guint,guint,guint,
  FlGstEpochFunc,gpointer,GCancellable*,GError**);
