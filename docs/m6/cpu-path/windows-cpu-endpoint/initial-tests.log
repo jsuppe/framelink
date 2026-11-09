@@ -1,0 +1,18 @@
+Test project <win-home>/dev/framelink-m6-windows-30d7a53/build
+    Start   8: shared_cpu_channel_win
+1/5 Test   #8: shared_cpu_channel_win ...........   Passed    2.99 sec
+    Start  11: shared_cpu_pipe_win
+2/5 Test  #11: shared_cpu_pipe_win ..............   Passed    0.09 sec
+    Start 113: gst_session_transport
+3/5 Test #113: gst_session_transport ............   Passed    0.34 sec
+    Start 114: gst_shared_cpu_session_win
+4/5 Test #114: gst_shared_cpu_session_win .......   Passed    1.97 sec
+    Start 120: gst_shared_cpu_av
+5/5 Test #120: gst_shared_cpu_av ................   Passed    2.45 sec
+
+100% tests passed, 0 tests failed out of 5
+
+Label Time Summary:
+m5b_av    =   0.34 sec*proc (1 test)
+
+Total Test time (real) =   7.87 sec

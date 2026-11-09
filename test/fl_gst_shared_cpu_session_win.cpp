@@ -1,4 +1,5 @@
 #include "framelink_session_transport.h"
+#include "../src/fl_shared_cpu_endpoint_win.h"
 #define NOMINMAX
 #include <windows.h>
 #include <thread>
@@ -30,9 +31,9 @@ static flSessionConfig config(){flSessionConfig c{};c.version=2;c.sessionId.byte
 static void configure(FlGstSession*s,const flSessionConfig&c){flSessionCapabilities caps{};caps.version=2;caps.videoCount=1;caps.video[0]=c.video;CHECK(fl_gst_session_configure(s,&c,&caps,&caps)==FL_GST_SESSION_READY);}
 static flMemoryRequirements cpuRequirements(){flMemoryRequirements r{};CHECK(flMemoryRequirementsInit(&r)==FL_MEMORY_OK);r.allowedResourceTypes=FL_MEMORY_SHARED_CPU;return r;}
 static int child(const char*name,DWORD pid,GBytes*key){
- HANDLE peer=OpenProcess(PROCESS_DUP_HANDLE|PROCESS_QUERY_LIMITED_INFORMATION|SYNCHRONIZE,FALSE,pid);CHECK(peer);
- HANDLE pipe=CreateFileA(name,GENERIC_READ|GENERIC_WRITE,0,nullptr,OPEN_EXISTING,FILE_FLAG_OVERLAPPED,nullptr);CHECK(pipe!=INVALID_HANDLE_VALUE);
- DWORD mode=PIPE_READMODE_MESSAGE;CHECK(SetNamedPipeHandleState(pipe,&mode,nullptr,nullptr));
+ HANDLE peer=nullptr,pipe=nullptr;std::string narrow=name;std::wstring wide(narrow.begin(),narrow.end());
+ CHECK(fl::SharedCpuEndpointWin::connect(wide,nullptr,3000,pipe,peer)==FL_OK);
+ CHECK(GetProcessId(peer)==pid);
  auto*s=fl_gst_session_new(1);configure(s,config());auto req=cpuRequirements();
  CHECK(fl_gst_session_bind_authenticated_cpu_pipe(s,TRUE,1,pipe,peer,key,3000,&req,0,nullptr,0)==FL_GST_SESSION_READY);CloseHandle(peer);
  auto*c=fl_gst_session_claim_shared_cpu(s,TRUE,1);CHECK(c);
@@ -46,18 +47,19 @@ static int child(const char*name,DWORD pid,GBytes*key){
  CHECK(flSharedCpuReceiveRelease(c)==FL_DISCONNECTED);flSharedCpuClose(c);g_object_unref(s);return 0;
 }
 static void crossProcess(GBytes*key){
- static unsigned serial=0;std::string name="\\\\.\\pipe\\fl-cpu-auth-"+std::to_string(GetCurrentProcessId())+"-"+std::to_string(++serial);
- HANDLE server=CreateNamedPipeA(name.c_str(),PIPE_ACCESS_DUPLEX|FILE_FLAG_OVERLAPPED|FILE_FLAG_FIRST_PIPE_INSTANCE,
-  PIPE_TYPE_MESSAGE|PIPE_READMODE_MESSAGE|PIPE_WAIT|PIPE_REJECT_REMOTE_CLIENTS,1,4096,4096,0,nullptr);CHECK(server!=INVALID_HANDLE_VALUE);
- HANDLE event=CreateEventW(nullptr,TRUE,FALSE,nullptr);CHECK(event);OVERLAPPED o{};o.hEvent=event;
- CHECK(!ConnectNamedPipe(server,&o)&&GetLastError()==ERROR_IO_PENDING);
+ static unsigned serial=0;std::string name="\\\\.\\pipe\\framelink-cpu-auth-"+std::to_string(GetCurrentProcessId())+"-"+std::to_string(++serial);
+ std::wstring wide(name.begin(),name.end());HANDLE server=nullptr;
+ CHECK(fl::SharedCpuEndpointWin::listen(wide,server)==FL_OK);
+ HANDLE duplicate=nullptr;CHECK(fl::SharedCpuEndpointWin::listen(wide,duplicate)==FL_ACCESS_DENIED&&!duplicate);
  char exe[MAX_PATH];CHECK(GetModuleFileNameA(nullptr,exe,MAX_PATH));
  std::string cmd="\""+std::string(exe)+"\" --child "+name+" "+std::to_string(GetCurrentProcessId());
  STARTUPINFOA si{};si.cb=sizeof(si);PROCESS_INFORMATION pi{};CHECK(CreateProcessA(nullptr,cmd.data(),nullptr,nullptr,FALSE,0,nullptr,nullptr,&si,&pi));CloseHandle(pi.hThread);
- CHECK(WaitForSingleObject(event,5000)==WAIT_OBJECT_0);DWORD ignored=0;CHECK(GetOverlappedResult(server,&o,&ignored,FALSE));CloseHandle(event);
+ HANDLE pinned=nullptr;CHECK(fl::SharedCpuEndpointWin::accept(server,nullptr,5000,pinned)==FL_OK);
+ CHECK(GetProcessId(pinned)==pi.dwProcessId);
  auto*s=fl_gst_session_new(1);configure(s,config());auto req=cpuRequirements();
  flSharedCpuDescriptor d[2]{};for(unsigned i=0;i<2;i++){auto&v=d[i];v.version=1;v.resourceType=FL_MEMORY_SHARED_CPU;v.format=FL_FORMAT_BGRA8;v.width=v.height=16;v.planeCount=1;v.generation=1;v.allocationId=i+1;v.planeStride[0]=64;v.allocationBytes=4096;}
- CHECK(fl_gst_session_bind_authenticated_cpu_pipe(s,FALSE,1,server,pi.hProcess,key,3000,&req,0,d,2)==FL_GST_SESSION_READY);
+ CHECK(fl_gst_session_bind_authenticated_cpu_pipe(s,FALSE,1,server,pinned,key,3000,&req,0,d,2)==FL_GST_SESSION_READY);
+ CloseHandle(pinned);
  auto*c=fl_gst_session_claim_shared_cpu(s,FALSE,1);CHECK(c);
  for(unsigned seq=1;seq<=8;seq++){
   flSharedCpuLease*r=nullptr;flMappedImage v{};uint64_t actual=0;int64_t pts=0;int eos=-1;
@@ -80,6 +82,58 @@ int main(int argc,char**argv){
  GList* apps=g_app_info_get_all();g_list_free_full(apps,g_object_unref);
  for(unsigned i=0;i<3;i++)crossProcess(key);
  auto*warm=fl_gst_session_new(1);auto warmConfig=config();configure(warm,warmConfig);flSessionConfig warmOut{};CHECK(fl_gst_session_wait(warm,1,1,&warmOut)==FL_GST_SESSION_TIMEOUT);g_object_unref(warm);DWORD baseline=handles();
+ {
+  using Endpoint=fl::SharedCpuEndpointWin;
+  std::wstring name=L"\\\\.\\pipe\\framelink-cpu-missing-"+std::to_wstring(GetCurrentProcessId());
+  HANDLE server=nullptr,peer=nullptr,client=nullptr;
+  CHECK(Endpoint::listen(L"\\\\remote\\pipe\\framelink-cpu-x",server)==FL_INVALID&&!server);
+  auto start=GetTickCount64();
+  CHECK(Endpoint::connect(name,nullptr,30,client,peer)==FL_TIMEOUT&&!client&&!peer);
+  CHECK(GetTickCount64()-start<1000);
+  CHECK(Endpoint::listen(name,server)==FL_OK);
+  start=GetTickCount64();CHECK(Endpoint::accept(server,nullptr,30,peer)==FL_TIMEOUT&&!peer);
+  CHECK(GetTickCount64()-start<1000);CloseHandle(server);
+  HANDLE cancel=CreateEventW(nullptr,TRUE,FALSE,nullptr);CHECK(cancel);
+  std::thread signal([&]{Sleep(20);SetEvent(cancel);});
+  start=GetTickCount64();CHECK(Endpoint::connect(name,cancel,60000,client,peer)==FL_DISCONNECTED&&!client&&!peer);
+  signal.join();CHECK(GetTickCount64()-start<1000);
+  ResetEvent(cancel);CHECK(Endpoint::listen(name,server)==FL_OK);
+  std::thread signalAccept([&]{Sleep(20);SetEvent(cancel);});
+  start=GetTickCount64();CHECK(Endpoint::accept(server,cancel,60000,peer)==FL_DISCONNECTED&&!peer);
+  signalAccept.join();CHECK(GetTickCount64()-start<1000);CloseHandle(server);CloseHandle(cancel);
+  // Client-first rendezvous and already-connected accept, with exact handle
+  // cleanup. Inspect the actual kernel DACL rather than trusting SDDL intent.
+  for(unsigned cycle=0;cycle<10;cycle++){
+   HANDLE clientPeer=nullptr;flResult result=FL_INTERNAL;
+   std::thread first([&]{result=Endpoint::connect(name,nullptr,1000,client,clientPeer);});
+   Sleep(10);CHECK(Endpoint::listen(name,server)==FL_OK);
+   DWORD securityBytes=0;
+   GetKernelObjectSecurity(server,DACL_SECURITY_INFORMATION,nullptr,0,&securityBytes);
+   CHECK(securityBytes);std::vector<unsigned char> security(securityBytes);
+   CHECK(GetKernelObjectSecurity(server,DACL_SECURITY_INFORMATION,security.data(),securityBytes,&securityBytes));
+   PACL dacl=nullptr;BOOL present=FALSE,defaulted=FALSE;
+   CHECK(GetSecurityDescriptorDacl(security.data(),&present,&dacl,&defaulted)&&present);
+   CHECK(dacl&&dacl->AceCount==1);
+   void* ace=nullptr;CHECK(GetAce(dacl,0,&ace));
+   auto* allow=static_cast<ACCESS_ALLOWED_ACE*>(ace);CHECK(allow->Header.AceType==ACCESS_ALLOWED_ACE_TYPE);
+   HANDLE token=nullptr;CHECK(OpenProcessToken(GetCurrentProcess(),TOKEN_QUERY,&token));
+   DWORD bytes=0;GetTokenInformation(token,TokenUser,nullptr,0,&bytes);std::vector<unsigned char> user(bytes);
+   CHECK(GetTokenInformation(token,TokenUser,user.data(),bytes,&bytes));
+   CHECK(EqualSid(&allow->SidStart,reinterpret_cast<TOKEN_USER*>(user.data())->User.Sid));
+   CloseHandle(token);
+   first.join();CHECK(result==FL_OK);
+   CHECK(Endpoint::accept(server,nullptr,1000,peer)==FL_OK);
+   CHECK(GetProcessId(peer)==GetCurrentProcessId()&&GetProcessId(clientPeer)==GetCurrentProcessId());
+   for(HANDLE h:{server,client,peer,clientPeer}){DWORD flags=0;CHECK(GetHandleInformation(h,&flags)&&!(flags&HANDLE_FLAG_INHERIT));CloseHandle(h);}
+   CHECK(handles()==baseline);
+  }
+  // A byte-mode impostor must never be mistaken for a CPU endpoint.
+  server=CreateNamedPipeW(name.c_str(),PIPE_ACCESS_DUPLEX|FILE_FLAG_OVERLAPPED|FILE_FLAG_FIRST_PIPE_INSTANCE,
+   PIPE_TYPE_BYTE|PIPE_WAIT|PIPE_REJECT_REMOTE_CLIENTS,1,4096,4096,0,nullptr);
+  CHECK(server!=INVALID_HANDLE_VALUE);
+  CHECK(Endpoint::connect(name,nullptr,1000,client,peer)==FL_INVALID&&!client&&!peer);
+  CloseHandle(server);CHECK(handles()==baseline);
+ }
  flMemoryRequirements req{};CHECK(flMemoryRequirementsInit(&req)==FL_MEMORY_OK);req.allowedResourceTypes=FL_MEMORY_SHARED_CPU;
  // Warm all five lifecycle paths, then require exact handle equality for 100 cycles.
  // Cold cancellation may initialize a Windows WaitCompletionPacket; retain each
