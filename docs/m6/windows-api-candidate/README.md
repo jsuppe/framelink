@@ -1,8 +1,8 @@
 # Windows API integration baseline candidate — NOT FROZEN
 
-**Current verified integrated candidate:** `a6b05da69f89fbceb69f5ec35ec3bdf550334462`.
+**Current verified integrated candidate:** `8025ddd1fe29ac4d03bb95f94f0950349094d438`.
 Clean exact-revision Windows build/API/full suite **134/134 passed**;
-[pinned evidence](../windows-integrated-a6b05da/README.md) includes DLL hashes,
+[pinned evidence](../windows-integrated-8025ddd/README.md) includes DLL hashes,
 runtime properties and exports. All 119 prior exported names retained (119 total).
 Export-name retention is not proof of behavioral or ordinal ABI compatibility.
 
@@ -12,7 +12,7 @@ via `set-local-native-candidate`. [Native bin contract and checks](../windows-na
 configure all properties before copying the immutable candidate; fresh bins are
 required for each setup attempt, including reconnect after failure/cancellation.
 This includes explicit D3D11 GPU_SAMPLE/operations=0 receiver support as well as
-the CPU-readback profile. Neither qualifies a real decoder or two-hop pipeline. No overload/fallback defaults changed.
+the CPU-readback profile. The explicit GPU_RENDER producer candidate supports the tested decoder/color/scale path; raw private decoder allocations are rejected. Neither qualifies a two-hop pipeline. No overload/fallback defaults changed.
 
 Windows authenticated CPU discovery/delegation and `shared-cpu=true session=`
 bins are implemented and tested. Native producer and receiver bins support

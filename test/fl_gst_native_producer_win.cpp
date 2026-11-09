@@ -168,6 +168,10 @@ static void sinkPipeline(bool coordinated,bool bin=false){
 #include "fl_gst_decoder_contract_win.inc"
 int main(int argc,char**argv){gst_init(&argc,&argv);CHECK(argc==2||argc==3);GError*e=nullptr;auto*plugin=gst_plugin_load_file(argv[1],&e);CHECK(plugin&&!e);gst_object_unref(plugin);
  if(argc==3){
+  if(std::string(argv[2])=="--relay-contract-diagnostic"){
+   for(unsigned mode=0;mode<2;++mode)nativeProducerAv(mode,true,false,true,true,false,true);
+   return 0;
+  }
   if(std::string(argv[2])=="--decoder-contract-diagnostic"){decoderContractDiagnostic();return 0;}
   if(std::string(argv[2])=="--decoder-av-diagnostic"){
    for(bool nativeReceiver:{false,true})for(unsigned mode=0;mode<2;++mode)

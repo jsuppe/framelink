@@ -47,7 +47,7 @@ struct NativeEpochProbe {gint64 epoch;unsigned calls=0;};
 static gint64 nativeEpoch(gpointer data,GstClockTime now){
  auto*p=static_cast<NativeEpochProbe*>(data);CHECK(now>0);++p->calls;return p->epoch;
 }
-static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=false,bool automatic=false,bool nativeReceiver=false,bool decoder=false){
+static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=false,bool automatic=false,bool nativeReceiver=false,bool decoder=false,bool relayNegative=false){
  fprintf(stderr,"native AV mode %u local=%d\n",mode,local);
  auto*s=fl_gst_session_new(3);auto*r=fl_gst_session_new(3);
  flSessionConfig cfg{};cfg.version=2;cfg.sessionId.bytes[0]=1;cfg.clockId.bytes[0]=2;cfg.generation=1;
@@ -152,6 +152,18 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
  GstBufferPool*pool=nullptr;guint size=0,min=0,max=0;gst_query_parse_nth_allocation_pool(q,0,&pool,&size,&min,&max);CHECK(pool&&max==2);
  gst_query_unref(q);gst_caps_unref(caps);gst_object_unref(pad);CHECK(gst_buffer_pool_set_active(pool,TRUE));
  GstMemory* retainedReceiver=nullptr;
+ // A separately allocated second hop cannot silently treat a first-hop reader
+ // lease as one of its producer reservations. Keep this negative explicit until
+ // a same-allocation relay adapter integrates both coordinators and lifetimes.
+ flChannel* relayConsumer=nullptr;
+ std::shared_ptr<FrameLinkD3DProducer> relayProducer;
+ if(relayNegative){
+  CHECK(nativeReceiver);
+  CHECK(flCreateChannelEx((name+"-relay").c_str(),64,32,FL_FORMAT_RGBA8,2,
+   FL_MAP_CPU|FL_REQUIRE_FRAME_METADATA,&relayConsumer)==FL_OK);
+  flChannel* writer=nullptr;CHECK(flOpenProducer((name+"-relay").c_str(),&writer)==FL_OK);
+  relayProducer=std::make_shared<FrameLinkD3DProducer>(writer);CHECK(relayProducer->valid());
+ }
  GstMemory* retainedFinal=nullptr;ID3D11Resource* retainedIdentity=nullptr;
  GstElement*decode=nullptr,*decoded=nullptr;GstD3D11Converter*converter=nullptr;
  GstClockTime decoderOrigin=GST_CLOCK_TIME_NONE;guint64 finalPts=0;
@@ -222,6 +234,14 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
   CHECK(GST_BUFFER_DURATION(vb)==videoDuration&&GST_BUFFER_DURATION(ab)==(decoder?gst_util_uint64_scale(1600,GST_SECOND,48000):1000000));
   if(nativeReceiver){
    CHECK(gst_buffer_n_memory(vb)==1);
+   if(relayNegative){
+    CHECK(relayProducer->submit(vb,GST_BUFFER_PTS(vb))==FL_INVALID);
+    flFrame absent{};CHECK(flAcquireFrame(relayConsumer,&absent,0)==FL_TIMEOUT);
+    // Rejection must not poison or reserve any second-hop slot.
+    auto* first=relayProducer->acquire(0);auto* second=relayProducer->acquire(0);
+    CHECK(first&&second&&!relayProducer->acquire(0));
+    gst_buffer_unref(first);gst_buffer_unref(second);
+   }
    auto*memory=gst_buffer_peek_memory(vb,0);CHECK(gst_is_d3d11_memory(memory));
    CHECK(gst_caps_features_contains(gst_caps_get_features(gst_sample_get_caps(vs),0),"memory:D3D11Memory"));
    auto*meta=gst_buffer_get_video_meta(vb);CHECK(meta&&meta->n_planes==1);
@@ -235,6 +255,10 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
   }
   std::vector<guint8>pcm(pcmBytes);CHECK(gst_buffer_get_size(ab)==pcmBytes&&gst_buffer_extract(ab,0,pcm.data(),pcmBytes)==pcmBytes);for(auto v:pcm)CHECK(v==n+31);
   gst_sample_unref(vs);gst_sample_unref(as);
+ }
+ if(relayNegative){
+  relayProducer.reset();flClose(relayConsumer);
+  printf("relay contract: %u imported first-hop buffers rejected by independent second-hop pool; no publication, no reservation leak; first-hop pixels/PCM/timing intact\n",count);
  }
  if(mode==3){CHECK(audioPeer);CHECK(g_socket_shutdown(g_socket_connection_get_socket(audioPeer),TRUE,TRUE,nullptr));avTerminal(rx,GST_MESSAGE_ERROR);}
  else{
