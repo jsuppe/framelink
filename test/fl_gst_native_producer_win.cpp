@@ -7,6 +7,7 @@
 #include <string>
 #include <cstdio>
 #include <cstdlib>
+#include <psapi.h>
 #define CHECK(x) do{if(!(x)){fprintf(stderr,"line %d: %s\n",__LINE__,#x);std::exit(1);}}while(0)
 #include "gst_memory_policy_fixture.h"
 static void run(bool nv12){
@@ -135,4 +136,18 @@ static void sinkPipeline(bool coordinated,bool bin=false){
  puts("native sink pipeline: exact texture pixels/metadata, foreign allocation rejection, retained buffer after stop pass");
 }
 #include "fl_gst_native_producer_av_win.inc"
-int main(int argc,char**argv){gst_init(&argc,&argv);run(false);run(true);CHECK(argc==2);GError*e=nullptr;auto*plugin=gst_plugin_load_file(argv[1],&e);CHECK(plugin&&!e);gst_object_unref(plugin);sinkPipeline(false);coordinatedPolicyNegative(false);coordinatedPolicyNegative(true);sinkPipeline(true);sinkPipeline(true,true);binConfigurationNegatives();coordinatedPolicyNegative(false,true);coordinatedPolicyNegative(true,true);for(unsigned mode=0;mode<4;++mode)nativeProducerAv(mode);for(unsigned mode=0;mode<3;++mode)nativeProducerAv(mode,true);for(unsigned mode=0;mode<3;++mode)nativeProducerAv(mode,true,true);nativeLocalNegatives();nativeBinNegatives();for(unsigned mode=0;mode<3;++mode)nativeProducerAv(mode,true,false,true);}
+int main(int argc,char**argv){gst_init(&argc,&argv);CHECK(argc==2||argc==3);GError*e=nullptr;auto*plugin=gst_plugin_load_file(argv[1],&e);CHECK(plugin&&!e);gst_object_unref(plugin);
+ if(argc==3){
+  CHECK(std::string(argv[2])=="--lifecycle-diagnostic");
+  auto memoryInfo=reinterpret_cast<BOOL(WINAPI*)(HANDLE,PPROCESS_MEMORY_COUNTERS,DWORD)>(GetProcAddress(GetModuleHandleW(L"kernel32.dll"),"K32GetProcessMemoryInfo"));CHECK(memoryInfo);
+  // Explicit diagnostic: no acceptance thresholds are changed or waived.
+  for(unsigned cycle=0;cycle<100;++cycle){
+   nativeProducerAv(cycle%3,true,false,true);gst_task_cleanup_all();
+   PROCESS_MEMORY_COUNTERS_EX memory{};memory.cb=sizeof(memory);DWORD handles=0;
+   CHECK(memoryInfo(GetCurrentProcess(),reinterpret_cast<PPROCESS_MEMORY_COUNTERS>(&memory),sizeof(memory)));
+   CHECK(GetProcessHandleCount(GetCurrentProcess(),&handles));
+   printf("LIFECYCLE,%u,%llu,%lu\n",cycle,static_cast<unsigned long long>(memory.PrivateUsage),static_cast<unsigned long>(handles));fflush(stdout);
+  }
+  return 0;
+ }
+ run(false);run(true);sinkPipeline(false);coordinatedPolicyNegative(false);coordinatedPolicyNegative(true);sinkPipeline(true);sinkPipeline(true,true);binConfigurationNegatives();coordinatedPolicyNegative(false,true);coordinatedPolicyNegative(true,true);for(unsigned mode=0;mode<4;++mode)nativeProducerAv(mode);for(unsigned mode=0;mode<3;++mode)nativeProducerAv(mode,true);for(unsigned mode=0;mode<3;++mode)nativeProducerAv(mode,true,true);nativeLocalNegatives();nativeBinNegatives();for(unsigned mode=0;mode<3;++mode)nativeProducerAv(mode,true,false,true);}

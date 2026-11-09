@@ -1,22 +1,24 @@
 # Windows API integration baseline candidate — NOT FROZEN
 
-**Current verified integrated candidate:** `8583411e32db38a658c39dba47851ce09fa35fa8`.
-Clean exact-revision Windows build/API/full suite **133/133 passed**;
-[pinned evidence](../windows-integrated-8583411/README.md) includes DLL hashes,
-runtime properties and exports. All 117 prior exported names retained (117 total).
+**Current verified integrated candidate:** `271c48b80ada9fab9f0cd1b037dd74b03da9f86f`.
+Clean exact-revision Windows build/API/full suite **134/134 passed**;
+[pinned evidence](../windows-integrated-271c48b/README.md) includes DLL hashes,
+runtime properties and exports. All 119 prior exported names retained (119 total).
 Export-name retention is not proof of behavioral or ordinal ABI compatibility.
 
-**New tested source, clean integration pending:** `cde2f0d` adds explicit Windows
-`fl_gst_session_open_local_native`: typed FAR4 discovery and native candidate
-agreement before channel allocation. [Scope and checks](../windows-local-native/README.md):
-Windows5/5, Linux4/4, Android3/3 plus both ABI builds. This remains an explicit
-D3D11-producer/CPU-readback profile, not automatic native bin discovery.
+This revision includes explicit Windows local native setup, the additive
+`fl_gst_session_open_local_native_epoch` API and automatic native A/V bin setup
+via `set-local-native-candidate`. [Native bin contract and checks](../windows-native-bins/README.md):
+configure all properties before copying the immutable candidate; fresh bins are
+required for each setup attempt, including reconnect after failure/cancellation.
+This remains an explicit D3D11-producer/CPU-readback profile, not a native GPU
+receiver, real decoder or two-hop qualification. No overload/fallback defaults changed.
 
 Windows authenticated CPU discovery/delegation and `shared-cpu=true session=`
 bins are implemented and tested. Native producer and receiver bins support
 broker-bound channel and immutable policy adoption. Full configured session and
 native policy candidates can now be authenticated through either explicit
-connected streams or the Windows local helper. Exact pixels/PCM and37ms mapping
+connected streams, the Windows local helper or explicitly candidate-bound bins. Exact pixels/PCM and37ms mapping
 pass; native receiver, real decoder and two-hop gates remain open. The earlier
 Windows startup failure is not waived by later integrated passes. API not frozen;
 M6 not complete.

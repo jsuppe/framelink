@@ -127,6 +127,7 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
  auto*pad=gst_element_get_static_pad(sink,"video_sink");CHECK(gst_pad_query(pad,q));
  GstBufferPool*pool=nullptr;guint size=0,min=0,max=0;gst_query_parse_nth_allocation_pool(q,0,&pool,&size,&min,&max);CHECK(pool&&max==2);
  gst_query_unref(q);gst_caps_unref(caps);gst_object_unref(pad);CHECK(gst_buffer_pool_set_active(pool,TRUE));
+ GstMemory* retainedFinal=nullptr;ID3D11Resource* retainedIdentity=nullptr;
  const unsigned count=mode==2?0:8;
  for(unsigned n=0;n<count;++n){
   GstBuffer*b=nullptr;CHECK(gst_buffer_pool_acquire_buffer(pool,&b,nullptr)==GST_FLOW_OK);
@@ -135,6 +136,7 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
   auto*texture=(ID3D11Texture2D*)gst_d3d11_memory_get_resource_handle(GST_D3D11_MEMORY_CAST(mem));CHECK(texture==flImageD3D11(reservation->buffer.image));
   ID3D11Device*d=nullptr;texture->GetDevice(&d);ID3D11DeviceContext*c=nullptr;d->GetImmediateContext(&c);
   std::vector<unsigned char>pixels(64*32*4,static_cast<unsigned char>(n+1));c->UpdateSubresource(texture,0,nullptr,pixels.data(),256,0);c->Release();d->Release();
+  if(n+1==count){retainedFinal=gst_memory_ref(mem);retainedIdentity=texture;}
   GST_BUFFER_PTS(b)=37000000+n*1000000;GST_BUFFER_DTS(b)=GST_BUFFER_PTS(b)-100;GST_BUFFER_DURATION(b)=1000000;
   auto*a=gst_buffer_new_allocate(nullptr,192,nullptr);gst_buffer_memset(a,0,n+31,192);GST_BUFFER_PTS(a)=n*1000000;GST_BUFFER_DURATION(a)=1000000;
   CHECK(gst_app_src_push_buffer(GST_APP_SRC(vi),b)==GST_FLOW_OK);CHECK(gst_app_src_push_buffer(GST_APP_SRC(ai),a)==GST_FLOW_OK);
@@ -162,7 +164,15 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
  CHECK(gst_buffer_pool_set_active(pool,FALSE));gst_object_unref(pool);
  for(auto*object:{vi,ai,vo,ao,sink,src,tx,rx})gst_object_unref(object);
  if(audioPeer)g_object_unref(audioPeer);g_object_unref(s);g_object_unref(r);
- puts("native producer AV: original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass");
+ if(retainedFinal){
+  CHECK(gst_is_d3d11_memory(retainedFinal));
+  auto*resource=gst_d3d11_memory_get_resource_handle(GST_D3D11_MEMORY_CAST(retainedFinal));
+  CHECK(resource==retainedIdentity);
+  ID3D11Device*device=nullptr;resource->GetDevice(&device);CHECK(device);
+  CHECK(SUCCEEDED(device->GetDeviceRemovedReason()));device->Release();
+  gst_memory_unref(retainedFinal);
+ }
+ puts("native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass");
 }
 static void nativeLocalNegatives(){
  for(unsigned mode=0;mode<11;++mode){
