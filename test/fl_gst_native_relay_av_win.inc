@@ -106,6 +106,7 @@ static void nativeRelayAv(bool empty,unsigned fault=0){
  CHECK(flCreateChannelFromD3D11Handles((name+".down").c_str(),64,32,FL_FORMAT_RGBA8,2,flags,nullptr,reversed,&down)==FL_OK);
  CHECK(flOpenProducer((name+".up").c_str(),&writer)==FL_OK);CHECK(flOpenProducer((name+".down").c_str(),&forward)==FL_OK);
  flsample::SessionNativeRelay relay(sessions[1],sessions[2],up,forward,relaySame);CHECK(relay.initialize()==FL_OK);
+ CHECK(relay.forwardEvent(0)==FL_GST_SESSION_TIMEOUT);
  for(auto*session:sessions)CHECK(fl_gst_session_track_ready(session,FL_GST_TRACK_VIDEO,1)==FL_GST_SESSION_READY);
  for(auto i:{3,2,1,0})CHECK(gst_element_set_state(pipes[i],GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
  flBuffer spare{};CHECK(flAcquireBuffer(writer,&spare,1000)==FL_OK);
@@ -140,8 +141,16 @@ static void nativeRelayAv(bool empty,unsigned fault=0){
   CHECK(received.dtsNs==metadata.dtsNs&&received.durationNs==metadata.durationNs&&received.streamGeneration==1);
   uint64_t lease=0;CHECK(flLeaseFrame(down,&output,&lease)==FL_OK);
   flBuffer blocked{};CHECK(flAcquireBuffer(writer,&blocked,0)==FL_TIMEOUT&&relay.pending()==1);
-  if(fault==5){
-   fl_gst_session_cancel(sessions[1]);
+  if(fault>=5){
+   if(fault==5)fl_gst_session_cancel(sessions[1]);
+   else {
+    FlGstVideoEvent bad{fault==6?FL_GST_VIDEO_GAP:fault==7?FL_GST_VIDEO_END:FL_GST_VIDEO_FLUSH,
+                        fault==6?2u:1u,videoPts+1,fault==6?1u:0u};
+    CHECK(fl_gst_session_send_video_event(sessions[0],1,&bad)==FL_GST_SESSION_READY);
+    CHECK(relay.forwardEvent(1000)==(fault==8?FL_GST_SESSION_CANCELLED:FL_GST_SESSION_INVALID));
+    flSessionConfig cancelled{};CHECK(fl_gst_session_get_config(sessions[2],&cancelled)==FL_GST_SESSION_CANCELLED);
+    CHECK(relay.forward(incoming)==FL_INVALID);
+   }
    CHECK(relay.finish()==FL_BUSY&&relay.pending()==1);
    CHECK(flAcquireBuffer(writer,&blocked,0)==FL_TIMEOUT);
    CHECK(flCompleteReadLease(down,lease)==FL_OK);CHECK(flCollectReadLeases(down)==FL_OK);
@@ -166,16 +175,23 @@ static void nativeRelayAv(bool empty,unsigned fault=0){
   CHECK(flCompleteReadLease(down,lease)==FL_OK);CHECK(flCollectReadLeases(down)==FL_OK);
   const auto deadline=g_get_monotonic_time()+1000000;
   while(relay.pending()){CHECK(g_get_monotonic_time()<deadline);CHECK(relay.collect()==FL_OK);g_usleep(100);}
-  FlGstVideoEvent sent{FL_GST_VIDEO_BARRIER,n+1,videoPts,0},mid{},end{};
+  for(auto kind:{FL_GST_VIDEO_GAP,FL_GST_VIDEO_BARRIER}){
+  FlGstVideoEvent sent{kind,n+1,videoPts,kind==FL_GST_VIDEO_GAP?123u:0u},end{};
   CHECK(fl_gst_session_send_video_event(sessions[0],1,&sent)==FL_GST_SESSION_READY);
-  CHECK(fl_gst_session_receive_video_event(sessions[1],1,1000,&mid)==FL_GST_SESSION_READY);
-  CHECK(mid.kind==sent.kind&&mid.afterFrames==relay.count()&&mid.ptsNs==sent.ptsNs);
-  CHECK(contract.check()==FL_GST_SESSION_READY);
-  CHECK(fl_gst_session_send_video_event(sessions[2],1,&mid)==FL_GST_SESSION_READY);
+  CHECK(relay.forwardEvent(1000)==FL_GST_SESSION_READY);
   CHECK(fl_gst_session_receive_video_event(sessions[3],1,1000,&end)==FL_GST_SESSION_READY);
-  CHECK(end.kind==sent.kind&&end.afterFrames==sent.afterFrames&&end.ptsNs==sent.ptsNs&&end.durationNs==0);
+  CHECK(end.kind==sent.kind&&end.afterFrames==sent.afterFrames&&end.ptsNs==sent.ptsNs&&end.durationNs==sent.durationNs);
+  }
  }
- CHECK(relay.count()==(fault?(fault==5?1:0):frames)&&relay.finish()==FL_OK);CHECK(flCancelBuffer(writer,&spare)==FL_OK);
+ if(!fault){
+  FlGstVideoEvent end{FL_GST_VIDEO_END,frames,frames?37000000+(frames-1)*1000000:0,0},received{};
+  CHECK(fl_gst_session_send_video_event(sessions[0],1,&end)==FL_GST_SESSION_READY);
+  CHECK(relay.forwardEvent(1000)==FL_GST_SESSION_READY);
+  CHECK(fl_gst_session_receive_video_event(sessions[3],1,1000,&received)==FL_GST_SESSION_READY);
+  CHECK(received.kind==end.kind&&received.afterFrames==end.afterFrames&&received.ptsNs==end.ptsNs&&received.durationNs==0);
+  flFrame forbidden{};CHECK(relay.forward(forbidden)==FL_INVALID&&relay.forwardEvent(0)==FL_GST_SESSION_INVALID);
+ }
+ CHECK(relay.count()==(fault?(fault>=5?1:0):frames)&&relay.finish()==FL_OK);CHECK(flCancelBuffer(writer,&spare)==FL_OK);
  // PCM EOS authenticates the first-hop video terminal before relay publication.
  if(!fault){
  const gint64 lastPts=frames?gint64(37000000)+gint64(frames-1)*1000000:gint64(-1);

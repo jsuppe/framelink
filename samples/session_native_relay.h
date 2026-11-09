@@ -1,11 +1,12 @@
 #pragma once
 #include "native_relay.h"
 #include "session_relay_contract.h"
+#include "../gst/framelink_session_transport.h"
 
 namespace flsample {
 // Checked VIDEO leg of a broker-composed coordinated relay. All objects are
-// borrowed; the owner serializes configuration/publication and owns PCM/events.
-// This does not authenticate peers, forward events, or infer terminal accounting.
+// borrowed; the owner serializes configuration/publication and owns PCM.
+// This does not authenticate peers or infer PCM terminal accounting.
 // No hidden copies. Preflight/metadata rejection leaves input with the caller.
 // Native submission failure may already own a lease (see NativeRelay); never
 // release it speculatively. Every error permanently stops publication, while
@@ -14,7 +15,7 @@ class SessionNativeRelay {
  public:
   SessionNativeRelay(FlGstSession* upstreamSession,FlGstSession* downstreamSession,
                      flChannel* upstream,flChannel* downstream,NativeRelay::SameAllocation same)
-      :session(upstreamSession),up(upstream),contract(upstreamSession,downstreamSession),
+      :session(upstreamSession),destination(downstreamSession),up(upstream),contract(upstreamSession,downstreamSession),
        native(upstream,downstream,std::move(same)){}
   SessionNativeRelay(const SessionNativeRelay&)=delete;
   SessionNativeRelay& operator=(const SessionNativeRelay&)=delete;
@@ -40,7 +41,34 @@ class SessionNativeRelay {
     if(r!=FL_OK)return stop(r);
     if(frame.ptsNs<0||metadata.version!=FL_FRAME_METADATA_VERSION||metadata.streamGeneration!=generation)
       return stop(FL_INVALID);
-    r=native.forward(frame);return r==FL_OK?r:stop(r);
+    r=native.forward(frame);if(r==FL_OK)lastPts=frame.ptsNs;
+    return r==FL_OK?r:stop(r);
+  }
+  // Call at the exact event boundary, after forwarding afterFrames frames.
+  // No arbitrary caller-supplied event is trusted: consume the authenticated
+  // upstream stream. Timeout consumes nothing and may be retried. Any other
+  // failure cancels downstream and poisons publication, without retiring leases.
+  // The transport reports FLUSH as cancellation, not as a forwardable record.
+  // END closes video publication only; PCM/aggregate EOS remain owner-managed.
+  FlGstSessionResult forwardEvent(guint timeoutMs){
+    if(!initialized||stopped)return FL_GST_SESSION_INVALID;
+    auto fail=[&](FlGstSessionResult r){
+      status=r;stopped=true;fl_gst_session_cancel(destination);return r;
+    };
+    status=contract.check();if(status!=FL_GST_SESSION_READY)return fail(status);
+    FlGstVideoEvent event{};
+    status=fl_gst_session_receive_video_event(session,generation,timeoutMs,&event);
+    if(status==FL_GST_SESSION_TIMEOUT)return status;
+    if(status!=FL_GST_SESSION_READY)return fail(status);
+    status=contract.check();if(status!=FL_GST_SESSION_READY)return fail(status);
+    if(event.afterFrames!=count()||
+       (event.kind!=FL_GST_VIDEO_GAP&&event.kind!=FL_GST_VIDEO_BARRIER&&event.kind!=FL_GST_VIDEO_END)||
+       (event.kind==FL_GST_VIDEO_END&&event.ptsNs!=(lastPts<0?0:guint64(lastPts))))
+      return fail(FL_GST_SESSION_INVALID);
+    status=fl_gst_session_send_video_event(destination,generation,&event);
+    if(status!=FL_GST_SESSION_READY)return fail(status);
+    if(event.kind==FL_GST_VIDEO_END)stopped=true;
+    return status;
   }
   // Session cancellation must NOT force-complete a downstream reader's lease.
   // Drain ignores the session gate, but NativeRelay still checks ring generation
@@ -55,7 +83,8 @@ class SessionNativeRelay {
   FlGstSessionResult sessionStatus()const{return status;}
  private:
   flResult stop(flResult result){stopped=true;return result;}
-  FlGstSession* session;flChannel*up;SessionRelayContract contract;NativeRelay native;
+  FlGstSession* session;FlGstSession* destination;flChannel*up;SessionRelayContract contract;NativeRelay native;
+  gint64 lastPts=-1;
   guint64 generation=0;bool attempted=false,initialized=false,stopped=false;
   FlGstSessionResult status=FL_GST_SESSION_INVALID;
 };
