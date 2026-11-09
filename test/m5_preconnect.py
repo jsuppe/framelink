@@ -9,7 +9,8 @@ for mode in ('ready','legacy'):
     env=dict(os.environ,FRAMELINK_TEST_PRODUCER_OPEN_DELAY_MS='350',FRAMELINK_GST_TRACE=str(out/'gst'))
     env.pop('FRAMELINK_TEST_LAZY_PRODUCER_OPEN',None)
     if mode=='legacy':env['FRAMELINK_TEST_LAZY_PRODUCER_OPEN']='1'
-    run=subprocess.run([sys.executable,str(pathlib.Path(__file__).with_name('m5_external_pipeline.py')),'--build',str(b),'--output',str(out),'--clock-policy','producer'],env=env,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,timeout=60)
+    control=['--preconnect-negative-control'] if mode=='legacy' else []
+    run=subprocess.run([sys.executable,str(pathlib.Path(__file__).with_name('m5_external_pipeline.py')),'--build',str(b),'--output',str(out),'--clock-policy','producer',*control],env=env,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,timeout=60)
     (out/'run.log').write_text(run.stdout)
     assert run.returncode==0,(mode,run.stdout)
     for fmt in ('BGRA','NV12'):

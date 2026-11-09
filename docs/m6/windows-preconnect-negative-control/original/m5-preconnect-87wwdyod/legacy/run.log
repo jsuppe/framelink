@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "<win-home>\dev\framelink-m6-windows-a2d25b4\test\m5_external_pipeline.py", line 39, in <module>
+    assert complete['video_late']<10,complete
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: {'event': 'playback-complete', 'audio_master': False, 'video_received': 88, 'video_late': 10, 'audio_blocks': 100, 'audio_samples': 96000, 'latency_ns': 100000000}

@@ -1,0 +1,6 @@
+PASS original negative rejected by normal gate
+PASS original negative accepted as injected control
+PASS healthy data cannot satisfy negative
+PASS healthy data passes normal gate
+PASS negative still rejects corrupt pixels
+PASS negative still rejects lost PCM
