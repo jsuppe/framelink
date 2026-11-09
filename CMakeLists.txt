@@ -455,6 +455,10 @@ if(FRAMELINK_BUILD_TESTS AND FL_GST_FOUND AND UNIX AND NOT ANDROID)
 endif()
 
 if(FRAMELINK_BUILD_TESTS AND FL_GST_FOUND AND WIN32)
+    add_executable(fl_gst_native_epoch_c_api test/fl_gst_native_epoch_c_api.c)
+    set_target_properties(fl_gst_native_epoch_c_api PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED ON)
+    target_link_libraries(fl_gst_native_epoch_c_api PRIVATE framelink_gst_session)
+    add_test(NAME gst_native_epoch_c_api COMMAND fl_gst_native_epoch_c_api)
     if(FL_GST_D3D11_FOUND)
     add_executable(fl_gst_native_source_win test/fl_gst_native_source_win.cpp)
     target_include_directories(fl_gst_native_source_win PRIVATE

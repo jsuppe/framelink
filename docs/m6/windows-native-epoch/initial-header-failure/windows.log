@@ -1,0 +1,18 @@
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <win-home>\dev\framelink-m6-windows-34a391d\build\Release\framelink.dll
+  framelink_session_context.cpp
+<win-home>\dev\framelink-m6-windows-34a391d\gst\framelink_session_transport.h(244,2): error C2061: syntax error: identifier 'FlGstEpochFunc' [<win-home>\dev\framelink-m6-windows-34a391d\build\framelink_gst_session.vcxproj]
+  (compiling source file '../gst/framelink_session_context.cpp')
+  
+  framelink_session_transport.cpp
+<win-home>\dev\framelink-m6-windows-34a391d\gst\framelink_session_transport.h(244,2): error C2061: syntax error: identifier 'FlGstEpochFunc' [<win-home>\dev\framelink-m6-windows-34a391d\build\framelink_gst_session.vcxproj]
+  (compiling source file '../gst/framelink_session_transport.cpp')
+  
+<win-home>\dev\framelink-m6-windows-34a391d\gst\framelink_session_transport.cpp(561,9): error C2660: 'fl_gst_session_open_local_native_epoch': function does not take 16 arguments [<win-home>\dev\framelink-m6-windows-34a391d\build\framelink_gst_session.vcxproj]
+      <win-home>\dev\framelink-m6-windows-34a391d\gst\framelink_session_transport.h(240,29):
+      see declaration of 'fl_gst_session_open_local_native_epoch'
+      <win-home>\dev\framelink-m6-windows-34a391d\gst\framelink_session_transport.cpp(561,9):
+      while trying to match the argument list '(FlGstSession *, gboolean, const gchar *, const flSessionCapabilities *, guint, guint, guint, guint, guint, const GstFrameLinkMemoryPolicy *, GstFrameLinkMemoryPolicy *, flChannel **, nullptr, nullptr, GCancellable *, GError **)'
+  
+  Generating Code...

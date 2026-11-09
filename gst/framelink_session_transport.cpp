@@ -558,6 +558,13 @@ gboolean fl_gst_session_open_local_native(FlGstSession*session,gboolean producer
  const flSessionCapabilities*local,guint videoQueue,guint pool,guint queueMs,guint timeout,guint idle,
  const GstFrameLinkMemoryPolicy*candidate,GstFrameLinkMemoryPolicy*bound,flChannel**channel,
  GCancellable*outer,GError**error){
+ return fl_gst_session_open_local_native_epoch(session,producer,path,local,videoQueue,pool,queueMs,timeout,idle,
+  candidate,bound,channel,nullptr,nullptr,outer,error);
+}
+gboolean fl_gst_session_open_local_native_epoch(FlGstSession*session,gboolean producer,const gchar*path,
+ const flSessionCapabilities*local,guint videoQueue,guint pool,guint queueMs,guint timeout,guint idle,
+ const GstFrameLinkMemoryPolicy*candidate,GstFrameLinkMemoryPolicy*bound,flChannel**channel,
+ FlGstNativeEpochFunc epochFunc,gpointer epochData,GCancellable*outer,GError**error){
  // v1 implements the existing D3D11 producer -> explicit CPU readback path.
  // Do not accept policies promising native receiver output or hidden copies.
  GstFrameLinkMemoryPolicy policy{};if(candidate)policy=*candidate;
@@ -573,7 +580,7 @@ gboolean fl_gst_session_open_local_native(FlGstSession*session,gboolean producer
   g_set_error_literal(error,G_IO_ERROR,G_IO_ERROR_INVALID_ARGUMENT,"unsupported local native candidate (D3D11 sample/explicit CPU readback required)");return FALSE;
  }
  if(!open_local_av_impl(session,producer,path,local,videoQueue,pool,queueMs,timeout,idle,
-     FL_MAP_CPU|FL_REQUIRE_FRAME_METADATA,channel,nullptr,nullptr,outer,error,false,&policy))return FALSE;
+     FL_MAP_CPU|FL_REQUIRE_FRAME_METADATA,channel,producer?epochFunc:nullptr,epochData,outer,error,false,&policy))return FALSE;
  flSessionConfig cfg{};
  if(fl_gst_session_get_config(session,&cfg)!=FL_GST_SESSION_READY){
   if(*channel)flClose(*channel);*channel=nullptr;fl_gst_session_cancel(session);

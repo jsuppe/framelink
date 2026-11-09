@@ -230,5 +230,18 @@ FL_GST_SESSION_API gboolean fl_gst_session_open_local_native(FlGstSession*,gbool
  guint audio_queue_ms,guint connect_timeout_ms,guint idle_timeout_ms,
  const GstFrameLinkMemoryPolicy* candidate,GstFrameLinkMemoryPolicy* bound,flChannel** channel,
  GCancellable*,GError**);
+// Same explicit profile, with producer-selected pipeline epoch. Called once on
+// the setup worker after control connection, before session negotiation. Return
+// a nonnegative monotonic system-clock timestamp; negative rejects setup. The
+// callback must not block and its data must outlive the call. Consumer ignores
+// the callback: its epoch always comes from the authenticated producer. Null
+// callback preserves open_local_native's now+200ms epoch. This is a prerequisite
+// for bin setup, not automatic native-memory/session= support on its own.
+typedef gint64 (*FlGstNativeEpochFunc)(gpointer data,GstClockTime now);
+FL_GST_SESSION_API gboolean fl_gst_session_open_local_native_epoch(FlGstSession*,gboolean producer,
+ const gchar* session_path,const flSessionCapabilities*,guint video_queue_frames,guint video_pool,
+ guint audio_queue_ms,guint connect_timeout_ms,guint idle_timeout_ms,
+ const GstFrameLinkMemoryPolicy* candidate,GstFrameLinkMemoryPolicy* bound,flChannel** channel,
+ FlGstNativeEpochFunc,gpointer,GCancellable*,GError**);
 G_END_DECLS
 #endif

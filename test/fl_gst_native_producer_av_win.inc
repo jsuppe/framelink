@@ -25,7 +25,11 @@ static GstFrameLinkMemoryPolicy nativeAvPolicy(guint64 generation){
  policy.paths[1].operations=FL_MEMORY_COPY|FL_MEMORY_READBACK;
  return policy;
 }
-static void nativeProducerAv(unsigned mode,bool local=false){
+struct NativeEpochProbe {gint64 epoch;unsigned calls=0;};
+static gint64 nativeEpoch(gpointer data,GstClockTime now){
+ auto*p=static_cast<NativeEpochProbe*>(data);CHECK(now>0);++p->calls;return p->epoch;
+}
+static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=false){
  fprintf(stderr,"native AV mode %u local=%d\n",mode,local);
  auto*s=fl_gst_session_new(3);auto*r=fl_gst_session_new(3);
  flSessionConfig cfg{};cfg.version=2;cfg.sessionId.bytes[0]=1;cfg.clockId.bytes[0]=2;cfg.generation=1;
@@ -39,12 +43,18 @@ static void nativeProducerAv(unsigned mode,bool local=false){
   gchar*dir=g_dir_make_tmp("framelink-native-XXXXXX",nullptr);CHECK(dir);std::string path=std::string(dir)+"/session";g_free(dir);
   GstFrameLinkMemoryPolicy receiverPolicy{};gboolean opened=FALSE;GError*se=nullptr,*ce=nullptr;
   auto candidate=policy;
-  std::thread peer([&]{opened=fl_gst_session_open_local_native(r,FALSE,path.c_str(),&offer,1,2,80,2000,1000,&candidate,&receiverPolicy,&channel,nullptr,&ce);});
-  gboolean sender=fl_gst_session_open_local_native(s,TRUE,path.c_str(),&offer,1,2,80,2000,1000,&candidate,&policy,&producer,nullptr,&se);
+  auto*clock=gst_system_clock_obtain();NativeEpochProbe epoch{gint64(gst_clock_get_time(clock)-GST_SECOND)},ignored{-1};gst_object_unref(clock);
+  std::thread peer([&]{opened=fl_gst_session_open_local_native_epoch(r,FALSE,path.c_str(),&offer,1,2,80,2000,1000,&candidate,&receiverPolicy,&channel,nativeEpoch,&ignored,nullptr,&ce);});
+  gboolean sender=customEpoch?
+   fl_gst_session_open_local_native_epoch(s,TRUE,path.c_str(),&offer,1,2,80,2000,1000,&candidate,&policy,&producer,nativeEpoch,&epoch,nullptr,&se):
+   fl_gst_session_open_local_native(s,TRUE,path.c_str(),&offer,1,2,80,2000,1000,&candidate,&policy,&producer,nullptr,&se);
   peer.join();if(se||ce)fprintf(stderr,"local native: %s / %s\n",se?se->message:"ok",ce?ce->message:"ok");
   CHECK(sender&&opened&&!se&&!ce&&channel&&producer);
   CHECK(policy.sessionGeneration&&policy.sessionGeneration==receiverPolicy.sessionGeneration);
   CHECK(fl_gst_session_get_config(s,&cfg)==FL_GST_SESSION_READY);
+  flSessionConfig remote{};CHECK(fl_gst_session_get_config(r,&remote)==FL_GST_SESSION_READY);
+  CHECK(!ignored.calls&&remote.epochNs==cfg.epochNs);
+  CHECK(epoch.calls==(customEpoch?1u:0u));if(customEpoch)CHECK(cfg.epochNs==epoch.epoch);
  }else{
  CHECK(fl_gst_session_configure(s,&cfg,&offer,&offer)==FL_GST_SESSION_READY);
  CHECK(fl_gst_session_configure(r,&cfg,&offer,&offer)==FL_GST_SESSION_READY);
@@ -129,7 +139,7 @@ static void nativeProducerAv(unsigned mode,bool local=false){
  puts("native producer AV: original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass");
 }
 static void nativeLocalNegatives(){
- for(unsigned mode=0;mode<10;++mode){
+ for(unsigned mode=0;mode<11;++mode){
   auto*s=fl_gst_session_new(3);auto*r=fl_gst_session_new(3);
   flSessionCapabilities caps{};caps.version=2;caps.videoCount=1;caps.video[0]={FL_FORMAT_RGBA8,64,32,30,1};
   caps.audioCount=1;caps.audio[0]={FL_PCM_S16,48000,2};
@@ -153,6 +163,13 @@ static void nativeLocalNegatives(){
    });
    CHECK(!fl_gst_session_open_local_native(s,TRUE,path.c_str(),&caps,mode==7?2:1,2,80,200,1000,&candidate,&a,&pch,nullptr,nullptr));
    receiver.join();CHECK(!peer&&!pch&&!rch&&!a.version&&!b.version);
+  }else if(mode==10){
+   NativeEpochProbe invalid{-1};GError*error=nullptr;
+   a.version=b.version=99;
+   std::thread receiver([&]{peer=fl_gst_session_open_local_native(r,FALSE,path.c_str(),&caps,1,2,80,500,1000,&other,&b,&rch,nullptr,nullptr);});
+   CHECK(!fl_gst_session_open_local_native_epoch(s,TRUE,path.c_str(),&caps,1,2,80,500,1000,&candidate,&a,&pch,nativeEpoch,&invalid,nullptr,&error));
+   receiver.join();CHECK(error&&strstr(error->message,"invalid session epoch"));g_clear_error(&error);
+   CHECK(invalid.calls==1&&!peer&&!pch&&!rch&&!a.version&&!b.version);
   }else{
    auto*cancel=g_cancellable_new();
    std::thread task([&]{peer=fl_gst_session_open_local_native(s,mode==8,path.c_str(),&caps,1,2,80,60000,1000,&candidate,&a,&pch,cancel,nullptr);});

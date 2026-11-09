@@ -164,3 +164,14 @@ Native C/wire layouts and existing unbound defaults are unchanged.
 See [receiver policy evidence and limits](../windows-receiver-policy/README.md).
 This removes the need to reach into the receiver child in broker-native A/V
 integration; it does not settle D2/D3 or freeze the app-integration contract.
+
+## Additive native-session epoch selection
+
+`fl_gst_session_open_local_native_epoch` accepts a producer-selected monotonic
+system-clock epoch through public `FlGstNativeEpochFunc`. Receiver callbacks are
+ignored; negative producer epochs reject setup. The original entrypoint retains
+its default and all 118 prior exports remain. [C11 linkage, exact epoch, A/V and
+negative checks](../windows-native-epoch/README.md) passed. This is an automatic
+bin prerequisite, not completed bin wiring or a frozen integration contract.
+The prior exact [34a391d baseline](../windows-integrated-34a391d/README.md) passed
+133/133 tests; clean integration of this additive API is the next gate.
