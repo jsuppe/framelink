@@ -1,0 +1,60 @@
+{
+  "cycles": 100,
+  "range": [
+    1524,
+    2544
+  ],
+  "first": 2544,
+  "last": 1524,
+  "first_last_types": {
+    "first": {
+      "3": 2,
+      "9": 19,
+      "17": 1,
+      "21": 62,
+      "22": 7,
+      "24": 22,
+      "25": 1,
+      "26": 6,
+      "29": 2,
+      "30": 1,
+      "35": 3,
+      "40": 9,
+      "41": 10,
+      "42": 34,
+      "48": 11,
+      "49": 13,
+      "50": 2193,
+      "56": 149
+    },
+    "last": {
+      "3": 2,
+      "9": 21,
+      "17": 1,
+      "21": 57,
+      "22": 7,
+      "24": 22,
+      "25": 1,
+      "26": 6,
+      "29": 2,
+      "30": 1,
+      "35": 3,
+      "40": 13,
+      "41": 9,
+      "42": 33,
+      "48": 3,
+      "49": 11,
+      "50": 1194,
+      "56": 138
+    }
+  },
+  "status": {
+    "revision": "3ca89e54e64d7a0baf8ba52e4c12ee0cdfd9c6f0",
+    "mode": "temporary test-only bin CPU 100-cycle handle-type diagnostic",
+    "state": "finished",
+    "utc": "2026-11-09T01:41:36.724793+00:00",
+    "build_exit": 0,
+    "test_exit": 0
+  },
+  "acceptance": "diagnostic only; original 130/131 integrated gate remains failed"
+}
