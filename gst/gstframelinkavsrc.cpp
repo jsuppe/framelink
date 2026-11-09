@@ -293,13 +293,15 @@ static gboolean applyMemoryPolicy(GstFrameLinkAvSrc*s,GstFrameLinkMemoryPolicy*p
 static gboolean setLocalNativeCandidate(GstFrameLinkAvSrc*s,GstFrameLinkMemoryPolicy*policy){
 #if defined(_WIN32)
  if(!policy||s->candidateSet||s->nativeAdopted||s->policyBound||s->local||s->sharedCpu||!wantVideo(s)||!s->video||
-    !s->sessionPath||!*s->sessionPath||GST_STATE(s)!=GST_STATE_NULL||s->nativeMemory)return FALSE;
+    !s->sessionPath||!*s->sessionPath||GST_STATE(s)!=GST_STATE_NULL)return FALSE;
+ const bool nativeReceiver=policy->paths[1].supportedUsage==FL_MEMORY_GPU_SAMPLE&&policy->paths[1].operations==0;
+ const bool readbackReceiver=policy->paths[1].supportedUsage==FL_MEMORY_CPU_READ&&policy->paths[1].operations==(FL_MEMORY_COPY|FL_MEMORY_READBACK);
  flMemoryDecision decisions[2]{};
  if(policy->version!=1||policy->reserved||policy->sessionGeneration||
     flMemoryEvaluateBoundary(policy->requirements,policy->paths,2,decisions)!=FL_MEMORY_OK||
     policy->paths[0].resourceType!=FL_MEMORY_D3D11||policy->paths[1].resourceType!=FL_MEMORY_D3D11||
-    policy->paths[0].operations||policy->paths[1].operations!=(FL_MEMORY_COPY|FL_MEMORY_READBACK)||
-    policy->paths[0].supportedUsage!=FL_MEMORY_GPU_SAMPLE||policy->paths[1].supportedUsage!=FL_MEMORY_CPU_READ)return FALSE;
+    policy->paths[0].operations||(!nativeReceiver&&!readbackReceiver)||
+    policy->paths[0].supportedUsage!=FL_MEMORY_GPU_SAMPLE||bool(s->nativeMemory)!=nativeReceiver)return FALSE;
  s->nativeCandidate=*policy;s->candidateSet=TRUE;return TRUE;
 #else
  (void)s;(void)policy;return FALSE;

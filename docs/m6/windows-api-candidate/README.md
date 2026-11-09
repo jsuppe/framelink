@@ -82,8 +82,8 @@ and explicitly selected; do not append handle integers to legacy POSIX packets.
 Windows HANDLE values are process-local; bind the process identity, transfer exact
 rights, acknowledge adoption, reject stale epochs and retain held old leases.
 
-Remaining gates before a Windows-ready API baseline: automatic native bin
-discovery, native consumer/real-producer/relay integration,
+Remaining gates before a Windows-ready API baseline: exact-head validation of the
+explicit native receiver extension below, real-producer/relay integration,
 strict overload profile review,
 resource-growth/timing/fault fixes and exact-head compatibility tests. Real decoder,
 two-hop PCM and all-platform M6 acceptance remain separate. This candidate is a
@@ -205,3 +205,28 @@ is not end-to-end zero-copy, arbitrary decoder compatibility or full M6 acceptan
 See [implementation and focused evidence](../windows-native-bins/README.md).
 The preceding exact [c8ff226 baseline](../windows-integrated-c8ff226/README.md)
 passed134/134; the new bin implementation requires its own clean integrated check.
+
+
+## Explicit native receiver extension (after pinned 6d7e6be)
+
+Windows local helper and `set-local-native-candidate` also accept D3D11
+GPU_SAMPLE at both endpoints with operations=0. Select `native-memory=true`
+on both bins before submitting the immutable candidate. The helper creates a
+consumer channel with deferred release. Receiver property and policy must match;
+a CPU_READ candidate still requires receiver `native-memory=false` and
+COPY|READBACK. No inferred fallback, new default, public struct, symbol or wire
+change. Older implementations reject the new GPU receiver profile; applications
+must handle setup rejection, never silently retry a different memory contract.
+
+The downstream native consumer must answer ALLOCATION with encoded
+`framelink-memory-requirements` and the explicit
+`framelink-reader-completion-contract=retain-memory-until-gpu-complete-v1`.
+Retain each GstMemory until its actual GPU work is complete. Missing agreement
+rejects negotiation. A policy declaration alone does not prove decoder support,
+no hidden driver work, target-rate performance or bounded lifetime resources.
+
+[Local native receiver evidence](../windows-local-native-receiver/README.md)
+separates broker, helper and automatic-bin tests. Real decoder and two-hop PCM
+qualification, original startup/lifetime failures, and D2/D3 remain open.
+The preceding pinned artifact does not contain this extension; clean exact-head
+integration is required before moving the candidate. API not frozen.

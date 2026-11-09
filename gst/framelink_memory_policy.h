@@ -23,9 +23,12 @@ typedef struct GstFrameLinkMemoryPolicy {
 // Windows A/V bins additionally expose set-local-native-candidate(pointer).
 // This is an UNAUTHENTICATED producer-ordered template, not apply-memory-policy.
 // Configure all properties first in NULL, including a nonempty session= path;
-// producer native-memory=true, receiver native-memory=false (explicit readback),
-// neither shared-cpu nor audio-only. Version 1, generation 0, D3D11 GPU_SAMPLE
-// producer operations=0 and CPU_READ receiver operations=COPY|READBACK only.
+// producer native-memory=true. Receiver native-memory=false selects CPU_READ
+// with operations=COPY|READBACK; true selects GPU_SAMPLE with operations=0.
+// Neither shared-cpu nor audio-only. Version 1, generation 0, D3D11 GPU_SAMPLE
+// producer operations=0. Receiver property and candidate must match. Native
+// receivers require downstream retain-memory-until-gpu-complete-v1 allocation
+// agreement and memory retention until actual GPU completion; no implicit copy.
 // Both requirements must permit the chosen paths. The action copies the value
 // and freezes configuration. Both peers must provide identical templates.
 // The setup worker authenticates it before allocating/adopting/applying channels;

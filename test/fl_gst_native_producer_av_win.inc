@@ -13,7 +13,7 @@ static void avTerminal(GstElement*p,GstMessageType expected){
  if(m&&GST_MESSAGE_TYPE(m)==GST_MESSAGE_ERROR){GError*e=nullptr;gchar*d=nullptr;gst_message_parse_error(m,&e,&d);fprintf(stderr,"native AV: %s %s\n",e->message,d?d:"");g_clear_error(&e);g_free(d);}
  CHECK(m&&GST_MESSAGE_TYPE(m)==expected);gst_message_unref(m);gst_object_unref(bus);
 }
-static GstFrameLinkMemoryPolicy nativeAvPolicy(guint64 generation){
+static GstFrameLinkMemoryPolicy nativeAvPolicy(guint64 generation,bool nativeReceiver=false){
  GstFrameLinkMemoryPolicy policy{};policy.version=1;policy.sessionGeneration=generation;
  for(unsigned i=0;i<2;++i){flMemoryRequirementsInit(&policy.requirements[i]);
   policy.requirements[i].allowedResourceTypes=FL_MEMORY_D3D11;
@@ -23,6 +23,11 @@ static GstFrameLinkMemoryPolicy nativeAvPolicy(guint64 generation){
  policy.paths[0].supportedUsage=policy.requirements[0].requiredUsage=FL_MEMORY_GPU_SAMPLE;
  policy.paths[1].supportedUsage=policy.requirements[1].requiredUsage=FL_MEMORY_CPU_READ;
  policy.paths[1].operations=FL_MEMORY_COPY|FL_MEMORY_READBACK;
+ if(nativeReceiver){
+  for(unsigned i=0;i<2;++i){policy.requirements[i].allowedOperations=0;
+   policy.paths[i].operations=0;
+   policy.paths[i].supportedUsage=policy.requirements[i].requiredUsage=FL_MEMORY_GPU_SAMPLE;}
+ }
  return policy;
 }
 // The appsink consumer completes its synchronous pixel oracle before releasing
@@ -49,13 +54,7 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
  cfg.video={FL_FORMAT_RGBA8,64,32,30,1};cfg.videoQueueFrames=1;cfg.connectTimeoutMs=cfg.idleTimeoutMs=1000;
  flSessionCapabilities offer{};offer.version=2;offer.videoCount=1;offer.video[0]=cfg.video;offer.audioCount=1;offer.audio[0]=cfg.audio;
  flChannel*channel=nullptr;flChannel*producer=nullptr;
- CHECK(!nativeReceiver||(!local&&!automatic));
- auto policy=nativeAvPolicy(local?0:cfg.generation);
- if(nativeReceiver){
-  for(unsigned i=0;i<2;++i){policy.requirements[i].allowedOperations=0;
-   policy.paths[i].operations=0;
-   policy.paths[i].supportedUsage=policy.requirements[i].requiredUsage=FL_MEMORY_GPU_SAMPLE;}
- }
+ auto policy=nativeAvPolicy(local?0:cfg.generation,nativeReceiver);
  GSocketConnection*audioPeer=nullptr;
  if(local&&!automatic){
   gchar*dir=g_dir_make_tmp("framelink-native-XXXXXX",nullptr);CHECK(dir);std::string path=std::string(dir)+"/session";g_free(dir);
@@ -119,7 +118,7 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
   gchar*dir=g_dir_make_tmp("framelink-native-bins-XXXXXX",nullptr);CHECK(dir);std::string path=std::string(dir)+"/session";g_free(dir);
   for(auto*bin:{sink,src})g_object_set(bin,"session",path.c_str(),"video-format","RGBA","width",64u,"height",32u,
     "video-pool",2u,"video-queue-frames",1u,"connect-timeout-ms",2000u,"idle-timeout-ms",1000u,nullptr);
-  policy=nativeAvPolicy(0);gboolean accepted=FALSE;
+  policy=nativeAvPolicy(0,nativeReceiver);gboolean accepted=FALSE;
   for(auto*bin:{sink,src}){auto candidate=policy;g_signal_emit_by_name(bin,"set-local-native-candidate",&candidate,&accepted);CHECK(accepted);
    candidate.version=99; // the bin must retain a copy, not this caller-owned pointer
   }
@@ -223,19 +222,19 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
  }
  puts("native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass");
 }
-static void nativeLocalNegatives(){
+static void nativeLocalNegatives(bool nativeReceiver=false){
  for(unsigned mode=0;mode<11;++mode){
   auto*s=fl_gst_session_new(3);auto*r=fl_gst_session_new(3);
   flSessionCapabilities caps{};caps.version=2;caps.videoCount=1;caps.video[0]={FL_FORMAT_RGBA8,64,32,30,1};
   caps.audioCount=1;caps.audio[0]={FL_PCM_S16,48000,2};
-  auto candidate=nativeAvPolicy(0),other=candidate;GstFrameLinkMemoryPolicy a{},b{};
+  auto candidate=nativeAvPolicy(0,nativeReceiver),other=candidate;GstFrameLinkMemoryPolicy a{},b{};
   gchar*dir=g_dir_make_tmp("framelink-native-negative-XXXXXX",nullptr);CHECK(dir);std::string path=std::string(dir)+"/session";g_free(dir);
   flChannel*pch=nullptr,*rch=nullptr;gboolean peer=TRUE;auto start=g_get_monotonic_time();
   if(mode<5){
    if(mode==0)candidate.sessionGeneration=1;
-   if(mode==1)candidate.paths[1].operations=0;
+   if(mode==1)candidate.paths[1].operations=nativeReceiver?FL_MEMORY_COPY:0;
    if(mode==2)candidate.paths[0].resourceType=FL_MEMORY_SHARED_CPU;
-   if(mode==3)candidate.requirements[0].allowedOperations=0;
+   if(mode==3)candidate.paths[0].operations=FL_MEMORY_COPY;
    if(mode==4)candidate.paths[0].supportedUsage=FL_MEMORY_GPU_RENDER;
    a.version=99;
    CHECK(!fl_gst_session_open_local_native(s,TRUE,path.c_str(),&caps,1,2,80,200,1000,&candidate,&a,&pch,nullptr,nullptr));
@@ -266,20 +265,20 @@ static void nativeLocalNegatives(){
  puts("native local setup: invalid policies, candidate mismatch, legacy isolation, capacity and cancellation pass");
 }
 
-static void nativeBinNegatives(){
+static void nativeBinNegatives(bool nativeReceiver=false){
  for(bool producer:{false,true}){
   for(unsigned mode=0;mode<10;++mode){
    auto*bin=gst_element_factory_make(producer?"framelinkavsink":"framelinkavsrc",nullptr);CHECK(bin);
-   g_object_set(bin,"session","unused-native-negative","native-memory",producer,nullptr);
-   auto candidate=nativeAvPolicy(0);
+   g_object_set(bin,"session","unused-native-negative","native-memory",producer||nativeReceiver,nullptr);
+   auto candidate=nativeAvPolicy(0,nativeReceiver);
    if(mode==0)candidate.version=2;
    if(mode==1)candidate.sessionGeneration=1;
-   if(mode==2)candidate.paths[1].operations=0;
-   if(mode==3)candidate.requirements[0].allowedOperations=0;
+   if(mode==2)candidate.paths[1].operations=nativeReceiver?FL_MEMORY_COPY:0;
+   if(mode==3)candidate.paths[0].operations=FL_MEMORY_COPY;
    if(mode==4)g_object_set(bin,"session",nullptr,nullptr);
    if(mode==5)g_object_set(bin,"shared-cpu",TRUE,nullptr);
    if(mode==6)g_object_set(bin,"tracks","audio",nullptr);
-   if(mode==7)g_object_set(bin,"native-memory",!producer,nullptr);
+   if(mode==7)g_object_set(bin,"native-memory",!(producer||nativeReceiver),nullptr);
    gboolean accepted=TRUE;g_signal_emit_by_name(bin,"set-local-native-candidate",mode==8?nullptr:&candidate,&accepted);
    CHECK(accepted==(mode==9));
    if(mode==9){
@@ -295,8 +294,8 @@ static void nativeBinNegatives(){
   auto*bin=gst_element_factory_make(producer?"framelinkavsink":"framelinkavsrc",nullptr);CHECK(bin);
   gst_bin_add(GST_BIN(pipeline),bin);
   gchar*dir=g_dir_make_tmp("framelink-native-cancel-XXXXXX",nullptr);CHECK(dir);std::string path=std::string(dir)+"/session";g_free(dir);
-  g_object_set(bin,"session",path.c_str(),"native-memory",producer,"connect-timeout-ms",60000u,nullptr);
-  auto candidate=nativeAvPolicy(0);gboolean accepted=FALSE;
+  g_object_set(bin,"session",path.c_str(),"native-memory",producer||nativeReceiver,"connect-timeout-ms",60000u,nullptr);
+  auto candidate=nativeAvPolicy(0,nativeReceiver);gboolean accepted=FALSE;
   g_signal_emit_by_name(bin,"set-local-native-candidate",&candidate,&accepted);CHECK(accepted);
   CHECK(gst_element_set_state(pipeline,GST_STATE_READY)!=GST_STATE_CHANGE_FAILURE);
   accepted=TRUE;g_signal_emit_by_name(bin,"set-local-native-candidate",&candidate,&accepted);CHECK(!accepted);

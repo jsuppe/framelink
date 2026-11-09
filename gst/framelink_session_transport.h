@@ -212,9 +212,12 @@ G_BEGIN_DECLS
 // Explicit current-user native profile, worker-thread only. FAR4 discovery is
 // separate from legacy/CPU profiles. Negotiates session, authenticates the exact
 // producer-ordered candidate BEFORE allocation, then clock/PCM/events and channel.
-// v1 supports D3D11 GPU_SAMPLE producer (operations=0) -> CPU_READ receiver
-// (operations=COPY|READBACK), authorized by BOTH requirements. Other paths reject;
-// this is explicit readback, not end-to-end zero-copy or automatic fallback.
+// v1 supports D3D11 GPU_SAMPLE producer (operations=0), with an explicit receiver:
+// CPU_READ (operations=COPY|READBACK), or GPU_SAMPLE (operations=0, deferred release).
+// BOTH requirements must authorize the path. Other paths reject; no fallback.
+// Native receivers must negotiate retain-memory-until-gpu-complete-v1 downstream
+// and retain each memory reference until actual GPU use completes. A policy is
+// not proof of arbitrary decoder compatibility or absence of layout-probe costs.
 // candidate.version=1, candidate.sessionGeneration=0 (template). Both peers must
 // supply the same candidate. Success returns producer-ordered bound policy with
 // negotiated generation and owned channel; configure/adopt/apply through bins
