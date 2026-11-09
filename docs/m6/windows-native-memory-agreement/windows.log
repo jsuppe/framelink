@@ -1,0 +1,50 @@
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <win-home>\dev\framelink-m6-windows-4a49a92\build\Release\framelink.dll
+  framelink_session_context.cpp
+  framelink_session_transport.cpp
+  Generating Code...
+     Creating library <win-home>/dev/framelink-m6-windows-4a49a92/build/Release/framelink_gst_session.lib and object <win-home>/dev/framelink-m6-windows-4a49a92/build/Release/framelink_gst_session.exp
+  framelink_gst_session.vcxproj -> <win-home>\dev\framelink-m6-windows-4a49a92\build\Release\framelink_gst_session.dll
+  fl_gst_audio_startup.cpp
+  gstframelink.cpp
+  The d3d11 library from gst-plugins-bad is unstable API and may change in future.
+  You can define GST_USE_UNSTABLE_API to avoid this warning.
+  gstframelinkaudio.cpp
+  gstframelinkaudiosrc.cpp
+  gstframelinkavsink.cpp
+  gstframelinkavsrc.cpp
+  Generating Code...
+     Creating library <win-home>/dev/framelink-m6-windows-4a49a92/build/Release/gstframelink.lib and object <win-home>/dev/framelink-m6-windows-4a49a92/build/Release/gstframelink.exp
+  gstframelink.vcxproj -> <win-home>\dev\framelink-m6-windows-4a49a92\build\Release\gstframelink.dll
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <win-home>\dev\framelink-m6-windows-4a49a92\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> <win-home>\dev\framelink-m6-windows-4a49a92\build\Release\framelink_gst_session.dll
+  fl_gst_session_transport.cpp
+  fl_gst_session_transport.vcxproj -> <win-home>\dev\framelink-m6-windows-4a49a92\build\Release\fl_gst_session_transport.exe
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <win-home>\dev\framelink-m6-windows-4a49a92\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> <win-home>\dev\framelink-m6-windows-4a49a92\build\Release\framelink_gst_session.dll
+  fl_gst_native_producer_win.cpp
+  The d3d11 library from gst-plugins-bad is unstable API and may change in future.
+  You can define GST_USE_UNSTABLE_API to avoid this warning.
+  fl_gst_native_producer_win.vcxproj -> <win-home>\dev\framelink-m6-windows-4a49a92\build\Release\fl_gst_native_producer_win.exe
+Test project <win-home>/dev/framelink-m6-windows-4a49a92/build
+    Start  41: gst_native_producer_win
+1/4 Test  #41: gst_native_producer_win ..........   Passed    4.80 sec
+    Start  81: gst_pool_policy
+2/4 Test  #81: gst_pool_policy ..................   Passed    4.88 sec
+    Start 113: gst_session_transport
+3/4 Test #113: gst_session_transport ............   Passed    0.79 sec
+    Start 123: gst_av_bin
+4/4 Test #123: gst_av_bin .......................   Passed   25.55 sec
+
+100% tests passed, 0 tests failed out of 4
+
+Label Time Summary:
+gst_video_regression    =   9.68 sec*proc (2 tests)
+m5b_av                  =  26.34 sec*proc (2 tests)
+
+Total Test time (real) =  36.06 sec

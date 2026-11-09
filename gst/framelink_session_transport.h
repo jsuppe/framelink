@@ -2,7 +2,22 @@
 #include "framelink_session_context.h"
 #include <gio/gio.h>
 #include "framelink.h"
+#include "framelink_memory_policy.h"
 G_BEGIN_DECLS
+// Explicit native-memory agreement on a dedicated connected STREAM. Both peers
+// supply the SAME exact candidate, in producer/consumer order (not element-local
+// order). Authenticates the full configured session, both requirements and paths,
+// and their generation using a separate credential domain and fresh challenges.
+// Requires a video session and compatible, non-CPU native paths. Does not choose
+// a candidate, transfer handles, probe devices, apply policy or mark tracks ready.
+// Broker/adapter must still verify exact allocation identity/layout/device and
+// completion contracts, then apply this policy (swap endpoints on the consumer).
+// Worker-thread only; caller retains all arguments. Success leaves stream open;
+// failure closes it and cancels session. Finite whole-call deadline/cancellation.
+// Legacy negotiation/wire/defaults unchanged; no implicit fallback/downgrade.
+FL_GST_SESSION_API gboolean fl_gst_session_authenticate_native_memory(
+ FlGstSession*,GSocketConnection*,gboolean producer,GBytes* root_secret,
+ const GstFrameLinkMemoryPolicy* producer_order,guint timeout_ms,GCancellable*,GError**);
 // Reusable synchronous control negotiation on a provider-authorized connected
 // STREAM socket. Caller owns stream/session/secret throughout this call. Invoke
 // from a worker, never a synchronous element state change. Secret is32bytes and

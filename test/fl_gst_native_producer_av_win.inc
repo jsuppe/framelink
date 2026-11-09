@@ -31,7 +31,6 @@ static void nativeProducerAv(unsigned mode){
   CHECK(authenticate(r,b,FALSE,key,1000,nullptr,nullptr));peer.join();CHECK(ok);
   g_object_unref(a);if(audio)audioPeer=b;else g_object_unref(b);
  }
- g_bytes_unref(key);
  flClockMapping mapping{};mapping.sourceClockId=cfg.clockId;mapping.targetClockId.bytes[0]=8;mapping.targetAnchorNs=1000000;
  CHECK(fl_gst_session_set_mapping(r,1,&mapping,0)==FL_GST_SESSION_READY);
  auto name="native-av-"+std::to_string(g_get_monotonic_time());flChannel*channel=nullptr;
@@ -40,14 +39,36 @@ static void nativeProducerAv(unsigned mode){
  auto*tx=gst_parse_launch("framelinkavsink name=transport native-memory=true appsrc name=vi is-live=true format=time caps=video/x-raw(memory:D3D11Memory),format=RGBA,width=64,height=32,framerate=30/1 ! transport.video_sink appsrc name=ai is-live=true format=time caps=audio/x-raw,format=S16LE,layout=interleaved,rate=48000,channels=2,channel-mask=(bitmask)0x3 ! transport.audio_sink",&e);CHECK(tx&&!e);
  auto*rx=gst_parse_launch("framelinkavsrc name=transport video-format=RGBA width=64 height=32 framerate=30/1 transport.video_src ! appsink name=vo sync=false async=false transport.audio_src ! appsink name=ao sync=false async=false",&e);CHECK(rx&&!e);
  auto*sink=gst_bin_get_by_name(GST_BIN(tx),"transport");auto*src=gst_bin_get_by_name(GST_BIN(rx),"transport");
- testBindNativePolicy(sink,name,FL_MEMORY_D3D11);
+ // Both endpoints authenticate the exact producer-ordered policy before use.
+ GstFrameLinkMemoryPolicy policy{};policy.version=1;policy.sessionGeneration=cfg.generation;
+ for(unsigned i=0;i<2;++i){flMemoryRequirementsInit(&policy.requirements[i]);
+  policy.requirements[i].allowedResourceTypes=FL_MEMORY_D3D11;
+  policy.requirements[i].allowedOperations=FL_MEMORY_COPY|FL_MEMORY_READBACK;
+  policy.paths[i].version=1;policy.paths[i].resourceType=FL_MEMORY_D3D11;
+ }
+ policy.paths[0].supportedUsage=policy.requirements[0].requiredUsage=FL_MEMORY_GPU_SAMPLE;
+ policy.paths[1].supportedUsage=policy.requirements[1].requiredUsage=FL_MEMORY_CPU_READ;
+ policy.paths[1].operations=FL_MEMORY_COPY|FL_MEMORY_READBACK;
+ GSocketConnection*ma=nullptr,*mb=nullptr;avStreamPair(&ma,&mb);gboolean agreed=FALSE;
+ std::thread agreement([&]{agreed=fl_gst_session_authenticate_native_memory(s,ma,TRUE,key,&policy,1000,nullptr,nullptr);});
+ CHECK(fl_gst_session_authenticate_native_memory(r,mb,FALSE,key,&policy,1000,nullptr,nullptr));agreement.join();CHECK(agreed);
+ g_io_stream_close(G_IO_STREAM(ma),nullptr,nullptr);g_io_stream_close(G_IO_STREAM(mb),nullptr,nullptr);
+ g_object_unref(ma);g_object_unref(mb);g_bytes_unref(key);
+ flChannel*producer=nullptr;CHECK(flOpenProducer(name.c_str(),&producer)==FL_OK);gboolean accepted=FALSE;
+ g_signal_emit_by_name(sink,"adopt-channel",producer,&accepted);CHECK(accepted);
+ g_signal_emit_by_name(sink,"apply-memory-policy",&policy,&accepted);CHECK(accepted);
  gboolean adopted=FALSE;g_signal_emit_by_name(src,"adopt-channel",channel,&adopted);CHECK(adopted);
+ auto consumerPolicy=policy;std::swap(consumerPolicy.requirements[0],consumerPolicy.requirements[1]);std::swap(consumerPolicy.paths[0],consumerPolicy.paths[1]);
+ auto*receiver=gst_bin_get_by_name(GST_BIN(src),"video");CHECK(receiver);
+ g_signal_emit_by_name(receiver,"apply-memory-policy",&consumerPolicy,&accepted);CHECK(accepted);gst_object_unref(receiver);
  auto*video=gst_bin_get_by_name(GST_BIN(sink),"video");g_object_set(video,"async",FALSE,"enable-last-sample",FALSE,nullptr);gst_object_unref(video);
  for(auto entry:{std::make_pair(tx,s),std::make_pair(rx,r)}){auto*c=fl_gst_session_create_context(entry.second);gst_element_set_context(entry.first,c);gst_context_unref(c);}
  auto*vi=gst_bin_get_by_name(GST_BIN(tx),"vi");auto*ai=gst_bin_get_by_name(GST_BIN(tx),"ai");auto*vo=gst_bin_get_by_name(GST_BIN(rx),"vo");auto*ao=gst_bin_get_by_name(GST_BIN(rx),"ao");
  CHECK(gst_element_set_state(rx,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);CHECK(gst_element_set_state(tx,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
  auto*caps=gst_caps_from_string("video/x-raw(memory:D3D11Memory),format=RGBA,width=64,height=32,framerate=30/1");
- auto*q=gst_query_new_allocation(caps,TRUE);testQueryMemoryRequirements(q,true);
+ auto*q=gst_query_new_allocation(caps,TRUE);
+ guint8 reqWire[FL_MEMORY_REQUIREMENTS_WIRE_SIZE];CHECK(flMemoryRequirementsEncode(&policy.requirements[0],reqWire,sizeof reqWire)==FL_MEMORY_OK);
+ auto*reqBytes=g_bytes_new(reqWire,sizeof reqWire);gst_structure_set(gst_query_writable_structure(q),"framelink-memory-requirements",G_TYPE_BYTES,reqBytes,nullptr);g_bytes_unref(reqBytes);
  gst_structure_set(gst_query_writable_structure(q),"framelink-completion-contract",G_TYPE_STRING,"same-device-before-abandon-v1",nullptr);
  auto*pad=gst_element_get_static_pad(sink,"video_sink");CHECK(gst_pad_query(pad,q));
  GstBufferPool*pool=nullptr;guint size=0,min=0,max=0;gst_query_parse_nth_allocation_pool(q,0,&pool,&size,&min,&max);CHECK(pool&&max==2);

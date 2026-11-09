@@ -100,6 +100,50 @@ gboolean fl_gst_session_negotiate_stream(FlGstSession*s,GSocketConnection*stream
  return TRUE;
 }
 
+gboolean fl_gst_session_authenticate_native_memory(FlGstSession*s,GSocketConnection*stream,gboolean producer,
+ GBytes*secret,const GstFrameLinkMemoryPolicy*policy,guint timeout,GCancellable*outer,GError**error){
+ auto fail=[&](const char*message){if(s&&G_TYPE_CHECK_INSTANCE_TYPE(s,fl_gst_session_get_type()))fl_gst_session_cancel(s);
+  if(stream&&G_IS_SOCKET_CONNECTION(stream))g_io_stream_close(G_IO_STREAM(stream),nullptr,nullptr);
+  g_set_error_literal(error,G_IO_ERROR,G_IO_ERROR_FAILED,message);return FALSE;};
+ flSessionConfig cfg{};Wire wire{};gsize n=0;
+ const auto*key=secret?static_cast<const guint8*>(g_bytes_get_data(secret,&n)):nullptr;
+ if(!stream||!G_IS_SOCKET_CONNECTION(stream)||!key||n!=32||!timeout||timeout>60000||!policy||
+    policy->version!=1||policy->reserved||fl_gst_session_get_config(s,&cfg)!=FL_GST_SESSION_READY||
+    !cfg.videoTrackId||cfg.version!=FL_SESSION_OPTIONAL_TRACKS_VERSION||
+    policy->sessionGeneration!=cfg.generation||flSessionEncode(&cfg,wire.data(),wire.size())!=FL_SESSION_OK)
+  return fail("invalid native memory agreement");
+ auto*socket=g_socket_connection_get_socket(stream);
+ if(g_socket_get_socket_type(socket)!=G_SOCKET_TYPE_STREAM||!g_socket_is_connected(socket))return fail("connected native memory STREAM required");
+ guint nonzero=0;for(gsize i=0;i<n;i++)nonzero|=key[i];if(!nonzero)return fail("invalid native memory credential");
+ flMemoryDecision decisions[2]{};
+ if(flMemoryEvaluateBoundary(policy->requirements,policy->paths,2,decisions)!=FL_MEMORY_OK||
+    policy->paths[0].resourceType==FL_MEMORY_SHARED_CPU)return fail("incompatible native memory paths");
+ // Canonical little-endian fields, never host struct bytes/padding. Reserved
+ // fields have already been rejected by the validators above.
+ std::array<guint8,16+2*(FL_MEMORY_REQUIREMENTS_WIRE_SIZE+16)> candidate{};
+ GST_WRITE_UINT32_LE(candidate.data(),policy->version);
+ GST_WRITE_UINT64_LE(candidate.data()+8,policy->sessionGeneration);
+ for(unsigned i=0;i<2;++i){auto*p=candidate.data()+16+i*(FL_MEMORY_REQUIREMENTS_WIRE_SIZE+16);
+  if(flMemoryRequirementsEncode(&policy->requirements[i],p,FL_MEMORY_REQUIREMENTS_WIRE_SIZE)!=FL_MEMORY_OK)return fail("invalid native memory requirements");
+  p+=FL_MEMORY_REQUIREMENTS_WIRE_SIZE;const auto&path=policy->paths[i];
+  GST_WRITE_UINT32_LE(p,path.version);GST_WRITE_UINT32_LE(p+4,path.resourceType);
+  GST_WRITE_UINT32_LE(p+8,path.supportedUsage);GST_WRITE_UINT32_LE(p+12,path.operations);
+ }
+ av::Endpoint ep{};auto*h=g_hmac_new(G_CHECKSUM_SHA256,key,n);
+ constexpr char label[]="FrameLink native memory agreement v1";
+ g_hmac_update(h,reinterpret_cast<const guint8*>(label),sizeof label);
+ g_hmac_update(h,wire.data(),wire.size());g_hmac_update(h,candidate.data(),candidate.size());
+ n=ep.token.size();g_hmac_get_digest(h,ep.token.data(),&n);g_hmac_unref(h);
+ Deadline deadline(timeout,outer);std::string reason;
+ const bool ok=producer?av::authenticateServerCancellable(stream,ep,'V',reason,deadline.cancel):av::authenticateClientCancellable(stream,ep,'V',reason,deadline.cancel);
+ if(!ok)return fail(reason.c_str());
+ flSessionConfig current{};Wire currentWire{};
+ if(g_cancellable_is_cancelled(deadline.cancel)||fl_gst_session_get_config(s,&current)!=FL_GST_SESSION_READY||
+    flSessionEncode(&current,currentWire.data(),currentWire.size())!=FL_SESSION_OK||currentWire!=wire)
+  return fail("native memory session changed during authentication");
+ return TRUE;
+}
+
 gboolean fl_gst_session_authenticate_audio_stream(FlGstSession*s,GSocketConnection*stream,gboolean producer,
  GBytes*secret,guint timeout,GCancellable*outer,GError**error){
  auto fail=[&](const char*message){if(s&&G_TYPE_CHECK_INSTANCE_TYPE(s,fl_gst_session_get_type()))fl_gst_session_cancel(s);

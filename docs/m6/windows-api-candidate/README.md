@@ -138,3 +138,9 @@ Use a runtime property check when supporting older bins. Native C structs and
 wire versions remain unchanged.
 
 Focused verification: [Windows4/4, Linux3/3, Android3/3 and dual ABI builds](../windows-bin-overload/README.md).
+
+## Additive authenticated native-memory agreement
+
+`fl_gst_session_authenticate_native_memory` proves exact producer-ordered policy agreement with the full configured session and a distinct credential domain. It does not select offers, probe/import native allocations, discover a peer or apply element policy. Legacy entrypoints/defaults/wires are unchanged. [Focused cross-platform checks and Windows A/V integration](../windows-native-memory-agreement/README.md) passed. API not frozen; clean integrated revision follows.
+
+The preceding clean [4a49a92 Windows candidate](../windows-integrated-4a49a92/README.md) passed133/133. Corrected dumpbin accounting includes decorated internal exports:116/116 prior names retained (earlier114 statements were incomplete counts, not lost exports). This is symbol-name compatibility, not a complete ABI proof.

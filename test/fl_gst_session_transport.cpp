@@ -25,7 +25,9 @@ static flSessionConfig config(unsigned tracks){flSessionConfig c{};c.version=2;c
  if(tracks&1){c.videoTrackId=1;c.video={FL_FORMAT_RGBA8,16,16,60,1};c.videoQueueFrames=2;}
  if(tracks&2){c.audioTrackId=2;c.audio={FL_PCM_F32,44100,FL_LAYOUT_STEREO};c.audioQueueMs=80;}return c;}
 static flSessionCapabilities offer(const flSessionConfig&c){flSessionCapabilities p{};p.version=2;if(c.videoTrackId){p.videoCount=1;p.video[0]=c.video;}if(c.audioTrackId){p.audioCount=1;p.audio[0]=c.audio;}return p;}
+#include "fl_gst_native_memory_auth.inc"
 int main(int argc,char**argv){gst_init(&argc,&argv);guint8 raw[32];memset(raw,3,sizeof raw);auto*key=g_bytes_new(raw,sizeof raw);raw[0]=5;auto*wrong=g_bytes_new(raw,sizeof raw);
+ nativeMemoryAgreement(key,wrong);
  for(unsigned tracks=1;tracks<=3;tracks++)for(unsigned mode=0;mode<4;mode++){
   Pair pair;auto*s=fl_gst_session_new(tracks);auto*c=fl_gst_session_new(tracks);auto proposal=config(tracks);auto a=offer(proposal),b=a;
   if(mode==2){b=offer(config(tracks==3?2:3));}
