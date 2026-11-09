@@ -1,8 +1,8 @@
 # Windows API integration baseline candidate — NOT FROZEN
 
-**Current verified integrated candidate:** `9d113ef93c7e1d418898066eb38c5530fe8f2c77`.
+**Current verified integrated candidate:** `1fdbaa607a846a2b9be2ac3365a591726014401f`.
 Clean exact-revision Windows build/API/full suite **135/135 passed**;
-[pinned evidence](../windows-integrated-9d113ef/README.md) includes DLL hashes,
+[pinned evidence](../windows-integrated-1fdbaa6/README.md) includes DLL hashes,
 runtime properties and exports. All 119 prior exported names retained (119 total).
 Export-name retention is not proof of behavioral or ordinal ABI compatibility.
 
@@ -270,10 +270,20 @@ without resetting the caller deadline; ordinary timeout is retryable. This sampl
 repair does not change C symbols, wire layouts, properties or defaults. See
 [Windows negative control and checks](../windows-relay-terminal-cancel/README.md).
 
-## Checked relay sample: native event wait cancellation (newer than candidate)
+## Checked relay sample: native event wait cancellation (included in candidate)
 
 Native event forwarding now observes either session's cancellation/replacement
 between bounded event waits. A finite caller deadline is not reset; zero-timeout
 polls and retry after ordinary timeout remain supported. No native lease is
 force-completed. [Pre-fix negative and Windows controls](../windows-relay-event-cancel/README.md)
-pass; clean exact-revision integration is pending. No API freeze is inferred.
+pass; the pinned candidate also passed clean exact-revision integration. No API freeze is inferred.
+
+## Independent-process checked relay verification (newer test overlay)
+
+[Three-process Windows integration](../windows-relay-process/README.md) now
+checks the existing raw-native/PCM sample composition against independent producer,
+relay and final receiver processes. Both original allocations, complete pixels/PCM,
+metadata,37ms A/V separation, held-reader exclusion, events and nonempty/empty
+terminal accounting pass. This is not automatic decoder/bin relay, a production
+broker or target-rate/lifetime acceptance. Public runtime APIs are unchanged;
+the pinned runtime candidate above remains the last clean integrated verification.

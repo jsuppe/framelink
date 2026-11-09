@@ -1,0 +1,7 @@
+line 123: flAcquireFrame(down,&frame,5000)==FL_OK&&frame.ptsNs==37000000+n*1000000
+producer start
+producer authenticated
+relay start
+relay downstream authenticated
+relay upstream authenticated
+line 92: video.forward(frame)==FL_OK
