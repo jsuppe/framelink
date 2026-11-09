@@ -1,0 +1,19 @@
+Test project <win-home>/dev/framelink-m6-windows-d60f683/build
+    Start  41: gst_native_producer_win
+1/5 Test  #41: gst_native_producer_win ..........   Passed    1.22 sec
+    Start  42: gst_native_source_win
+2/5 Test  #42: gst_native_source_win ............   Passed    2.77 sec
+    Start 113: gst_session_transport
+3/5 Test #113: gst_session_transport ............   Passed    0.33 sec
+    Start 115: gst_session_context
+4/5 Test #115: gst_session_context ..............   Passed    0.07 sec
+    Start 120: gst_shared_cpu_av
+5/5 Test #120: gst_shared_cpu_av ................   Passed    3.04 sec
+
+100% tests passed, 0 tests failed out of 5
+
+Label Time Summary:
+gst_video_regression    =   3.99 sec*proc (2 tests)
+m5b_av                  =   0.41 sec*proc (2 tests)
+
+Total Test time (real) =   7.83 sec

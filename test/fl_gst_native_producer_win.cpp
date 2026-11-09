@@ -1,4 +1,5 @@
 #include "../gst/fl_gst_d3d11_producer.hpp"
+#include "../gst/framelink_session_context.h"
 #include <vector>
 #include <thread>
 #include <chrono>
@@ -45,13 +46,38 @@ static void run(bool nv12){
  gst_memory_unref(last);CHECK(weak.expired());flClose(c);
  printf("%s native producer: original texture, ready fence, exact pixels/metadata, local reference reuse and owner lifetime pass\n",nv12?"NV12":"RGBA");
 }
-static void sinkPipeline(){
+static FlGstSession* bindSession(GstElement* sink,guint64 generation){
+ auto* session=fl_gst_session_new(FL_GST_TRACK_VIDEO);
+ flSessionConfig config{};config.version=FL_SESSION_OPTIONAL_TRACKS_VERSION;
+ config.sessionId.bytes[0]=1;config.clockId.bytes[0]=2;config.generation=generation;
+ config.epochNs=37000000;config.connectTimeoutMs=100;config.idleTimeoutMs=100;
+ config.videoTrackId=1;config.video={FL_FORMAT_RGBA8,64,32,30,1};config.videoQueueFrames=1;
+ flSessionCapabilities offer{};offer.version=config.version;offer.videoCount=1;offer.video[0]=config.video;
+ CHECK(fl_gst_session_configure(session,&config,&offer,&offer)==FL_GST_SESSION_READY);
+ auto* context=fl_gst_session_create_context(session);gst_element_set_context(sink,context);gst_context_unref(context);
+ return session;
+}
+static void coordinatedPolicyNegative(bool stale){
+ auto name="native-policy-"+std::to_string(g_get_monotonic_time());flChannel*c=nullptr;
+ CHECK(flCreateChannelEx(name.c_str(),64,32,FL_FORMAT_RGBA8,2,FL_REQUIRE_FRAME_METADATA,&c)==FL_OK);
+ auto*sink=gst_element_factory_make("framelinksink",nullptr);CHECK(sink);
+ g_object_set(sink,"native-memory",TRUE,"sync",FALSE,"async",FALSE,nullptr);
+ if(stale)testBindNativePolicy(sink,name,FL_MEMORY_D3D11);
+ else {flChannel*p=nullptr;CHECK(flOpenProducer(name.c_str(),&p)==FL_OK);gboolean adopted=FALSE;g_signal_emit_by_name(sink,"adopt-channel",p,&adopted);CHECK(adopted);}
+ auto*session=bindSession(sink,stale?2:1);
+ CHECK(gst_element_set_state(sink,GST_STATE_PAUSED)==GST_STATE_CHANGE_FAILURE);
+ gst_element_set_state(sink,GST_STATE_NULL);gst_object_unref(sink);g_object_unref(session);flClose(c);
+ puts(stale?"coordinated native stale policy rejected":"coordinated native missing policy rejected");
+}
+static void sinkPipeline(bool coordinated){
  auto name="native-sink-"+std::to_string(g_get_monotonic_time());flChannel*c=nullptr;
  CHECK(flCreateChannelEx(name.c_str(),64,32,FL_FORMAT_RGBA8,2,FL_MAP_CPU|FL_REQUIRE_FRAME_METADATA,&c)==FL_OK);
  GError* error=nullptr;
  auto*pipeline=gst_parse_launch(("appsrc name=in is-live=true format=time caps=video/x-raw(memory:D3D11Memory),format=RGBA,width=64,height=32,framerate=30/1 ! framelinksink name=sink native-memory=true preserve-frame-metadata=true channel="+name+" sync=false async=false enable-last-sample=false").c_str(),&error);CHECK(pipeline&&!error);
  auto*sink=gst_bin_get_by_name(GST_BIN(pipeline),"sink");auto*in=gst_bin_get_by_name(GST_BIN(pipeline),"in");
- testBindNativePolicy(sink,name,FL_MEMORY_D3D11);CHECK(gst_element_set_state(pipeline,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
+ testBindNativePolicy(sink,name,FL_MEMORY_D3D11);
+ auto*session=coordinated?bindSession(sink,1):nullptr;
+ CHECK(gst_element_set_state(pipeline,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
  auto*caps=gst_caps_from_string("video/x-raw(memory:D3D11Memory),format=RGBA,width=64,height=32,framerate=30/1");
  auto*pad=gst_element_get_static_pad(sink,"sink");auto*query=gst_query_new_allocation(caps,TRUE);testQueryMemoryRequirements(query,true);
  CHECK(!gst_pad_query(pad,query)); // unaware upstream cannot select unsafe completion semantics
@@ -80,6 +106,7 @@ static void sinkPipeline(){
  CHECK(gst_app_src_push_buffer(GST_APP_SRC(in),gst_buffer_ref(b))==GST_FLOW_OK);
  flFrame frame{};CHECK(flAcquireFrame(c,&frame,2000)==FL_OK&&frame.ptsNs==1000);
  flFrameMetadata meta{};CHECK(flGetFrameMetadata(c,&frame,&meta)==FL_OK&&meta.dtsNs==900&&meta.durationNs==12345);
+ if(coordinated)CHECK(meta.streamGeneration==1);
  flMappedImage map{};CHECK(flImageMapPlanes(frame.image,&map)==FL_OK);
  for(unsigned y=0;y<32;++y)for(unsigned x=0;x<256;++x)CHECK(((unsigned char*)map.plane[0].pixels)[y*map.plane[0].stride+x]==91);
  flImageUnmap(frame.image);CHECK(flRelease(c,&frame)==FL_OK);
@@ -90,7 +117,7 @@ static void sinkPipeline(){
  gst_element_set_state(pipeline,GST_STATE_NULL);gst_object_unref(in);gst_object_unref(sink);gst_object_unref(pipeline);
  CHECK(gst_buffer_pool_acquire_buffer(pool,&blocked,&params)==GST_FLOW_FLUSHING);
  CHECK(gst_buffer_pool_set_active(pool,FALSE));gst_object_unref(pool);
- CHECK(gst_is_d3d11_memory(gst_buffer_peek_memory(b,0)));gst_buffer_unref(b);flClose(c);
+ CHECK(gst_is_d3d11_memory(gst_buffer_peek_memory(b,0)));gst_buffer_unref(b);flClose(c);if(session)g_object_unref(session);
  puts("native sink pipeline: exact texture pixels/metadata, foreign allocation rejection, retained buffer after stop pass");
 }
-int main(int argc,char**argv){gst_init(&argc,&argv);run(false);run(true);CHECK(argc==2);GError*e=nullptr;auto*plugin=gst_plugin_load_file(argv[1],&e);CHECK(plugin&&!e);gst_object_unref(plugin);sinkPipeline();}
+int main(int argc,char**argv){gst_init(&argc,&argv);run(false);run(true);CHECK(argc==2);GError*e=nullptr;auto*plugin=gst_plugin_load_file(argv[1],&e);CHECK(plugin&&!e);gst_object_unref(plugin);sinkPipeline(false);coordinatedPolicyNegative(false);coordinatedPolicyNegative(true);sinkPipeline(true);}

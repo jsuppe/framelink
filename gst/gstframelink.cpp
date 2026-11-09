@@ -406,6 +406,12 @@ static gboolean sinkStart(GstBaseSink* base) {
         return sinkSharedCpuStart(self);
     }
     if(self->session){
+        // A coordinated native producer must bind both endpoints' negotiated
+        // memory requirements before exposing its allocation pool. Adopting a
+        // channel alone establishes ownership, not permission for its usage.
+        if(self->nativeMemory&&!self->memoryPolicyApplied){
+            GST_ELEMENT_ERROR(self,RESOURCE,SETTINGS,("coordinated native video requires a bound memory policy"),(NULL));return FALSE;
+        }
         if(fl_gst_session_get_config(self->session,&self->sessionConfig)!=FL_GST_SESSION_READY||!self->sessionConfig.videoTrackId||!self->delegated||
            (self->memoryPolicyApplied&&self->memoryPolicy.sessionGeneration!=self->sessionConfig.generation)){
             GST_ELEMENT_ERROR(self,RESOURCE,SETTINGS,("coordinated video requires an adopted channel and matching session generation"),(NULL));return FALSE;
