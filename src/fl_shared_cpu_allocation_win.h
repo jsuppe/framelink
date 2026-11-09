@@ -34,6 +34,23 @@ class SharedCpuAllocationWin {
         return d.allocationBytes%info.dwPageSize?FL_INVALID:FL_OK;
     }
 public:
+    // A weak identity token never prolongs storage lifetime. Comparing retained
+    // kernel objects catches duplicated handles, unlike numeric handle equality.
+    class Identity {
+        friend class SharedCpuAllocationWin;
+        std::weak_ptr<State> state_;
+    public:
+        bool expired()const{return state_.expired();}
+    };
+    Identity identity()const{Identity result;result.state_=state_;return result;}
+    flResult sameStorage(const Identity& other,bool& out)const{
+        auto state=state_;if(!state)return FL_INVALID;
+        auto previous=other.state_.lock();if(!previous){out=false;return FL_OK;}
+        using Compare=BOOL(WINAPI*)(HANDLE,HANDLE);
+        static auto compare=reinterpret_cast<Compare>(GetProcAddress(GetModuleHandleW(L"kernelbase.dll"),"CompareObjectHandles"));
+        if(!compare)return FL_FORMAT_UNSUPPORTED;
+        out=compare(state->handle.value,previous->handle.value)!=FALSE;return FL_OK;
+    }
     class Mapping {
         friend class SharedCpuAllocationWin;
         std::shared_ptr<State> owner_;
