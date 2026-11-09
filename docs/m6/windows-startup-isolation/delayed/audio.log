@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "<win-home>\dev\framelink-m6-windows-548fe19\test\m5_external_pipeline.py", line 29, in <module>
+    assert codes==(0,0),(fmt,codes,str(root))
+           ^^^^^^^^^^^^
+AssertionError: ('BGRA', (1, 1), '<win-home>\\dev\\framelink-m6-windows-548fe19\\startup-isolation-delayed-audio')

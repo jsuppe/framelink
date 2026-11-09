@@ -57,11 +57,12 @@ static FlGstSession* bindSession(GstElement* sink,guint64 generation){
  auto* context=fl_gst_session_create_context(session);gst_element_set_context(sink,context);gst_context_unref(context);
  return session;
 }
-static void coordinatedPolicyNegative(bool stale){
+static void coordinatedPolicyNegative(bool stale,bool bin=false){
  auto name="native-policy-"+std::to_string(g_get_monotonic_time());flChannel*c=nullptr;
  CHECK(flCreateChannelEx(name.c_str(),64,32,FL_FORMAT_RGBA8,2,FL_REQUIRE_FRAME_METADATA,&c)==FL_OK);
- auto*sink=gst_element_factory_make("framelinksink",nullptr);CHECK(sink);
- g_object_set(sink,"native-memory",TRUE,"sync",FALSE,"async",FALSE,nullptr);
+ auto*sink=gst_element_factory_make(bin?"framelinkavsink":"framelinksink",nullptr);CHECK(sink);
+ if(bin)g_object_set(sink,"tracks","video","native-memory",TRUE,nullptr);
+ else g_object_set(sink,"native-memory",TRUE,"sync",FALSE,"async",FALSE,nullptr);
  if(stale)testBindNativePolicy(sink,name,FL_MEMORY_D3D11);
  else {flChannel*p=nullptr;CHECK(flOpenProducer(name.c_str(),&p)==FL_OK);gboolean adopted=FALSE;g_signal_emit_by_name(sink,"adopt-channel",p,&adopted);CHECK(adopted);}
  auto*session=bindSession(sink,stale?2:1);
@@ -69,17 +70,30 @@ static void coordinatedPolicyNegative(bool stale){
  gst_element_set_state(sink,GST_STATE_NULL);gst_object_unref(sink);g_object_unref(session);flClose(c);
  puts(stale?"coordinated native stale policy rejected":"coordinated native missing policy rejected");
 }
-static void sinkPipeline(bool coordinated){
+static void binConfigurationNegatives(){
+ for(int mode=0;mode<4;++mode){
+  auto*sink=gst_element_factory_make("framelinkavsink",nullptr);CHECK(sink);
+  g_object_set(sink,"native-memory",TRUE,nullptr);
+  if(mode==1)g_object_set(sink,"tracks","audio",nullptr);
+  if(mode==2)g_object_set(sink,"shared-cpu",TRUE,nullptr);
+  if(mode==3)g_object_set(sink,"session","native-must-not-discover",nullptr);
+  CHECK(gst_element_set_state(sink,GST_STATE_READY)==GST_STATE_CHANGE_FAILURE);
+  gst_element_set_state(sink,GST_STATE_NULL);gst_object_unref(sink);
+ }
+ puts("native bin rejects missing policy, audio-only, shared CPU and automatic discovery");
+}
+static void sinkPipeline(bool coordinated,bool bin=false){
  auto name="native-sink-"+std::to_string(g_get_monotonic_time());flChannel*c=nullptr;
  CHECK(flCreateChannelEx(name.c_str(),64,32,FL_FORMAT_RGBA8,2,FL_MAP_CPU|FL_REQUIRE_FRAME_METADATA,&c)==FL_OK);
  GError* error=nullptr;
- auto*pipeline=gst_parse_launch(("appsrc name=in is-live=true format=time caps=video/x-raw(memory:D3D11Memory),format=RGBA,width=64,height=32,framerate=30/1 ! framelinksink name=sink native-memory=true preserve-frame-metadata=true channel="+name+" sync=false async=false enable-last-sample=false").c_str(),&error);CHECK(pipeline&&!error);
+ auto*pipeline=gst_parse_launch(("appsrc name=in is-live=true format=time caps=video/x-raw(memory:D3D11Memory),format=RGBA,width=64,height=32,framerate=30/1 ! "+(bin?std::string("framelinkavsink name=sink tracks=video native-memory=true"):"framelinksink name=sink native-memory=true preserve-frame-metadata=true channel="+name+" sync=false async=false enable-last-sample=false")).c_str(),&error);CHECK(pipeline&&!error);
  auto*sink=gst_bin_get_by_name(GST_BIN(pipeline),"sink");auto*in=gst_bin_get_by_name(GST_BIN(pipeline),"in");
+ if(bin){auto*child=gst_bin_get_by_name(GST_BIN(sink),"video");g_object_set(child,"sync",FALSE,"async",FALSE,"enable-last-sample",FALSE,nullptr);gst_object_unref(child);}
  testBindNativePolicy(sink,name,FL_MEMORY_D3D11);
  auto*session=coordinated?bindSession(sink,1):nullptr;
  CHECK(gst_element_set_state(pipeline,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
  auto*caps=gst_caps_from_string("video/x-raw(memory:D3D11Memory),format=RGBA,width=64,height=32,framerate=30/1");
- auto*pad=gst_element_get_static_pad(sink,"sink");auto*query=gst_query_new_allocation(caps,TRUE);testQueryMemoryRequirements(query,true);
+ auto*pad=gst_element_get_static_pad(sink,bin?"video_sink":"sink");auto*query=gst_query_new_allocation(caps,TRUE);testQueryMemoryRequirements(query,true);
  CHECK(!gst_pad_query(pad,query)); // unaware upstream cannot select unsafe completion semantics
  gst_structure_set(gst_query_writable_structure(query),"framelink-completion-contract",G_TYPE_STRING,"future-unknown-version",nullptr);
  CHECK(!gst_pad_query(pad,query));
@@ -120,4 +134,4 @@ static void sinkPipeline(bool coordinated){
  CHECK(gst_is_d3d11_memory(gst_buffer_peek_memory(b,0)));gst_buffer_unref(b);flClose(c);if(session)g_object_unref(session);
  puts("native sink pipeline: exact texture pixels/metadata, foreign allocation rejection, retained buffer after stop pass");
 }
-int main(int argc,char**argv){gst_init(&argc,&argv);run(false);run(true);CHECK(argc==2);GError*e=nullptr;auto*plugin=gst_plugin_load_file(argv[1],&e);CHECK(plugin&&!e);gst_object_unref(plugin);sinkPipeline(false);coordinatedPolicyNegative(false);coordinatedPolicyNegative(true);sinkPipeline(true);}
+int main(int argc,char**argv){gst_init(&argc,&argv);run(false);run(true);CHECK(argc==2);GError*e=nullptr;auto*plugin=gst_plugin_load_file(argv[1],&e);CHECK(plugin&&!e);gst_object_unref(plugin);sinkPipeline(false);coordinatedPolicyNegative(false);coordinatedPolicyNegative(true);sinkPipeline(true);sinkPipeline(true,true);binConfigurationNegatives();coordinatedPolicyNegative(false,true);coordinatedPolicyNegative(true,true);}

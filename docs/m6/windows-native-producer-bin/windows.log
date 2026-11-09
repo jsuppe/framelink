@@ -1,0 +1,32 @@
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <win-home>\dev\framelink-m6-windows-548fe19\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> <win-home>\dev\framelink-m6-windows-548fe19\build\Release\framelink_gst_session.dll
+  gstframelinkavsink.cpp
+     Creating library <win-home>/dev/framelink-m6-windows-548fe19/build/Release/gstframelink.lib and object <win-home>/dev/framelink-m6-windows-548fe19/build/Release/gstframelink.exp
+  gstframelink.vcxproj -> <win-home>\dev\framelink-m6-windows-548fe19\build\Release\gstframelink.dll
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <win-home>\dev\framelink-m6-windows-548fe19\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> <win-home>\dev\framelink-m6-windows-548fe19\build\Release\framelink_gst_session.dll
+  fl_gst_native_producer_win.cpp
+  The d3d11 library from gst-plugins-bad is unstable API and may change in future.
+  You can define GST_USE_UNSTABLE_API to avoid this warning.
+  fl_gst_native_producer_win.vcxproj -> <win-home>\dev\framelink-m6-windows-548fe19\build\Release\fl_gst_native_producer_win.exe
+Test project <win-home>/dev/framelink-m6-windows-548fe19/build
+    Start  41: gst_native_producer_win
+1/4 Test  #41: gst_native_producer_win ..........   Passed    1.69 sec
+    Start  81: gst_pool_policy
+2/4 Test  #81: gst_pool_policy ..................   Passed    3.83 sec
+    Start 120: gst_shared_cpu_av
+3/4 Test #120: gst_shared_cpu_av ................   Passed    3.05 sec
+    Start 123: gst_av_bin
+4/4 Test #123: gst_av_bin .......................   Passed   25.82 sec
+
+100% tests passed, 0 tests failed out of 4
+
+Label Time Summary:
+gst_video_regression    =   5.52 sec*proc (2 tests)
+m5b_av                  =  25.82 sec*proc (1 test)
+
+Total Test time (real) =  34.41 sec
