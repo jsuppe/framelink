@@ -1,18 +1,19 @@
 # Windows API integration baseline candidate — NOT FROZEN
 
-**Current integrated candidate:** 30d7a53cbeb04ce0505e316b1c407c98655b75e4.
+**Current integrated candidate:** 3f45f7b6465fcd994c2aac274ff41d333e078c5c.
 Clean exact-revision Windows build/API/full suite **131/131 passed**;
-[pinned evidence](../windows-integrated-30d7a53/README.md) includes DLL hashes,
-runtime properties, exports and header hashes. Explicit CPU source/sink,
-broker-context A/V bins and authenticated exact-pipe coordinator binding are
-available. Discovery and automatic authenticated endpoint provisioning remain
-pending. Existing overload/fallback defaults are unchanged. This is a tested
-app-integration candidate, not an API freeze or full M6 acceptance.
+[pinned evidence](../windows-integrated-3f45f7b/README.md) includes DLL hashes,
+runtime properties and exports. Named authenticated CPU provisioning is available.
+No API freeze or full M6 acceptance is implied.
 
-**Newer staged-source addition:** Windows named CPU endpoint factory passes
-five Windows and three Linux focused regressions; all38 session DLL exports
-retained plus one additive API. [Contract/evidence](../cpu-path/windows-named-cpu-session/README.md).
-Exact clean full-suite validation pending; the pinned candidate above is unchanged.
+**Newer tested-source addition:** `d60f683b2ede9731332bd33cefbf28b70db0f488` adds typed protected
+FAR3 discovery and Windows local CPU A/V setup, including `shared-cpu=true session=`
+bins. Windows4/4, Linux3/3 and Android1/1 final-bin regressions pass (dual Android
+ABI builds); preceding setup tests Windows4/4,Linux3/3,Android3/3 also pass.
+All39 prior session DLL exports retained, plus the public local-CPU factory and
+internal epoch helper. [Exact contract, hashes and compatibility evidence](../cpu-path/windows-local-cpu-bins/README.md).
+Clean integrated build/API/full-suite gate is owned and running; collect before
+advancing the pinned candidate. Existing overload/fallback defaults unchanged.
 
 **Historical candidate** exact revision: `609cb74031a5de2cee782619007a6e87ab7fbccd`.
 Clean isolated Windows source archive SHA256:
@@ -34,8 +35,8 @@ specific tests, not full M6 qualification. Source headers are pinned in
 | Session | v1 A/V, explicit v2 optional tracks,160-byte wire; newer generation and shared A/V clock mapping | C/C++/peer tests pass |
 | CPU descriptor | v1 FCS1,128-byte wire; Windows allocationBytes explicitly page-padded | Unchanged portable layout; Windows pipe channel available explicitly |
 | CPU channel | Portable opaque channel/lease API; POSIX FD and additive Windows pipe factories | Separate typed platform factories; never reinterpret int FD as HANDLE |
-| GStreamer coordinator | `framelink.session.v1`, typed strong reference, authenticated stream binding, finite cancellation | Explicit Windows CPU pipe binding available; caller authenticates/delegates |
-| GStreamer bins | `shared-cpu=false`; native output opt-in on avsrc; avsink lacks native producer selection | Windows broker-context CPU A/V tested; CPU session= discovery rejects |
+| GStreamer coordinator | `framelink.session.v1`, typed strong reference, authenticated stream binding, finite cancellation | Windows explicit binding or protected local authenticated composition available |
+| GStreamer bins | `shared-cpu=false`; native output opt-in on avsrc; avsink lacks native producer selection | Windows broker-context and explicit CPU session= discovery tested; current-user-only directory required |
 
 ## Observed defaults, not a new product decision
 
