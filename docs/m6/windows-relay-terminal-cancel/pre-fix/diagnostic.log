@@ -1,0 +1,4 @@
+relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+PCM queue controls: bounded retry, exact 4-block delivery, nonzero origin/discontinuity, bounded upstream/downstream cancellation, empty timeout, fail-closed initial/midstream GAP and 6 configuration negatives passed
+PCM terminal interruption mode=0 result=1 elapsed_us=1000104
+line 171: result==(mode==2?FL_GST_SESSION_STALE:FL_GST_SESSION_CANCELLED)

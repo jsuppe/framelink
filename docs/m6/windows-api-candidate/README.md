@@ -1,8 +1,8 @@
 # Windows API integration baseline candidate — NOT FROZEN
 
-**Current verified integrated candidate:** `b0cad2fb88e82a045957712e118e05078c72495c`.
+**Current verified integrated candidate:** `4761f6958ca2933507b639e604e39db89df9384c`.
 Clean exact-revision Windows build/API/full suite **135/135 passed**;
-[pinned evidence](../windows-integrated-b0cad2f/README.md) includes DLL hashes,
+[pinned evidence](../windows-integrated-4761f69/README.md) includes DLL hashes,
 runtime properties and exports. All 119 prior exported names retained (119 total).
 Export-name retention is not proof of behavioral or ordinal ABI compatibility.
 
@@ -259,3 +259,11 @@ is preserved. Apps requiring successful GAP forwarding still need a bounded,
 ordered event-capable adapter; this safety repair is not that implementation.
 The public C/wire/properties/defaults are unchanged. See
 [negative controls and focused Windows checks](../windows-relay-audio-events/README.md).
+
+## Checked relay sample: terminal wait cancellation
+
+The checked PCM terminal rendezvous observes cancellation/replacement of either
+session while awaiting authenticated upstream terminal state. Waits are sliced
+without resetting the caller deadline; ordinary timeout is retryable. This sample
+repair does not change C symbols, wire layouts, properties or defaults. See
+[Windows negative control and checks](../windows-relay-terminal-cancel/README.md).

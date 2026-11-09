@@ -96,10 +96,21 @@ class SessionPcmRelay {
       if(pending)return FL_GST_SESSION_TIMEOUT;
     }
     guint64 frames=0;gint64 last=-1;
-    r=fl_gst_session_wait_video_eos(session,config.generation,timeoutMs,&frames,&last);
-    if(r==FL_GST_SESSION_TIMEOUT)return r;
-    if(r!=FL_GST_SESSION_READY)return fail(r);
-    r=contract.check();if(r!=FL_GST_SESSION_READY)return fail(r);
+    // The upstream condition variable cannot wake for downstream cancellation
+    // or replacement. Observe both sessions between bounded waits against one
+    // deadline, just as forward() does for the independent appsink queue.
+    if(timeoutMs>60000)return fail(FL_GST_SESSION_INVALID);
+    const gint64 deadline=g_get_monotonic_time()+gint64(timeoutMs)*1000;
+    do{
+      r=contract.check();if(r!=FL_GST_SESSION_READY)return fail(r);
+      const gint64 remaining=deadline-g_get_monotonic_time();
+      const guint slice=remaining<=0?0:guint(remaining>=10000?10:(remaining+999)/1000);
+      r=fl_gst_session_wait_video_eos(session,config.generation,slice,&frames,&last);
+      auto state=contract.check();if(state!=FL_GST_SESSION_READY)return fail(state);
+      if(r==FL_GST_SESSION_READY)break;
+      if(r!=FL_GST_SESSION_TIMEOUT)return fail(r);
+      if(g_get_monotonic_time()>=deadline)return FL_GST_SESSION_TIMEOUT;
+    }while(true);
     if(frames!=video.count()||last!=video.finalPts())return fail(FL_GST_SESSION_INVALID);
     r=fl_gst_session_video_eos(destination,config.generation,frames,last);
     if(r!=FL_GST_SESSION_READY)return fail(r);

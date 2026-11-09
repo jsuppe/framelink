@@ -131,6 +131,54 @@ static void relayPcmControls(flSessionConfig cfg,const flSessionCapabilities&off
  }
  printf("PCM queue controls: bounded retry, exact 4-block delivery, nonzero origin/discontinuity, bounded upstream/downstream cancellation, empty timeout, fail-closed initial/midstream GAP and 6 configuration negatives passed\n");
 }
+// Isolate the terminal rendezvous from transport arrival timing. Use a real
+// drained native END but deliberately withhold the upstream audio terminal.
+static void relayPcmTerminalControls(flSessionConfig cfg,const flSessionCapabilities&offer,
+                                     const flsample::SessionNativeRelay&video){
+ for(unsigned mode=0;mode<4;++mode){
+  cfg.sessionId.bytes[0]=1;auto other=cfg;other.sessionId.bytes[0]=2;
+  auto*a=fl_gst_session_new(3);auto*b=fl_gst_session_new(3);
+  CHECK(fl_gst_session_configure(a,&cfg,&offer,&offer)==FL_GST_SESSION_READY);
+  CHECK(fl_gst_session_configure(b,&other,&offer,&offer)==FL_GST_SESSION_READY);
+  flClockMapping m{};m.sourceClockId=cfg.clockId;m.targetClockId.bytes[0]=9;m.sourceAnchorNs=cfg.epochNs;
+  CHECK(fl_gst_session_set_mapping(a,1,&m,0)==FL_GST_SESSION_READY);
+  auto*in=gst_parse_launch("appsrc name=writer is-live=true format=time caps=audio/x-raw,format=S16LE,layout=interleaved,rate=48000,channels=2 ! appsink name=reader max-buffers=2 sync=false async=false",nullptr);
+  auto*out=gst_parse_launch("appsrc name=writer is-live=true format=time caps=audio/x-raw,format=S16LE,layout=interleaved,rate=48000,channels=2 ! fakesink sync=false async=false",nullptr);
+  auto*producer=gst_bin_get_by_name(GST_BIN(in),"writer");auto*source=gst_bin_get_by_name(GST_BIN(in),"reader");
+  auto*sink=gst_bin_get_by_name(GST_BIN(out),"writer");
+  {
+   flsample::SessionPcmRelay pcm(a,b,GST_APP_SINK(source),GST_APP_SRC(sink));
+   CHECK(pcm.initialize()==FL_GST_SESSION_READY);
+   CHECK(gst_element_set_state(in,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
+   CHECK(gst_element_set_state(out,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
+   CHECK(gst_app_src_end_of_stream(GST_APP_SRC(producer))==GST_FLOW_OK);avTerminal(in,GST_MESSAGE_EOS);
+   // Polling and finite timeout remain retryable, with no terminal publication.
+   CHECK(pcm.finish(video,0)==FL_GST_SESSION_TIMEOUT);
+   if(mode==3){
+    auto start=g_get_monotonic_time();CHECK(pcm.finish(video,100)==FL_GST_SESSION_TIMEOUT);
+    auto elapsed=g_get_monotonic_time()-start;CHECK(elapsed>=80000&&elapsed<500000);
+    guint64 count=0;gint64 pts=0;CHECK(fl_gst_session_wait_video_eos(b,1,0,&count,&pts)==FL_GST_SESSION_TIMEOUT);
+    CHECK(fl_gst_session_video_eos(a,1,video.count(),video.finalPts())==FL_GST_SESSION_READY);
+    CHECK(pcm.finish(video,1000)==FL_GST_SESSION_READY);avTerminal(out,GST_MESSAGE_EOS);
+   }else{
+    std::thread interrupt([&]{std::this_thread::sleep_for(std::chrono::milliseconds(50));
+     if(mode==2){++other.generation;CHECK(fl_gst_session_configure(b,&other,&offer,&offer)==FL_GST_SESSION_READY);}
+     else fl_gst_session_cancel(mode==0?b:a);
+    });
+    auto start=g_get_monotonic_time();auto result=pcm.finish(video,1000);
+    auto elapsed=g_get_monotonic_time()-start;interrupt.join();
+    printf("PCM terminal interruption mode=%u result=%d elapsed_us=%lld\n",mode,int(result),static_cast<long long>(elapsed));fflush(stdout);
+    CHECK(result==(mode==2?FL_GST_SESSION_STALE:FL_GST_SESSION_CANCELLED));CHECK(elapsed<500000);
+    CHECK(pcm.finish(video,0)==FL_GST_SESSION_INVALID);
+    flSessionConfig cancelled{};CHECK(fl_gst_session_get_config(b,&cancelled)==FL_GST_SESSION_CANCELLED);
+   }
+   CHECK(pcm.frameCount()==0&&pcm.byteCount()==0&&pcm.blockCount()==0);
+  }
+  for(auto*p:{in,out}){CHECK(gst_element_set_state(p,GST_STATE_NULL)!=GST_STATE_CHANGE_FAILURE);gst_object_unref(p);}
+  for(auto*p:{producer,source,sink})gst_object_unref(p);g_object_unref(a);g_object_unref(b);
+ }
+ printf("PCM terminal controls: bounded both-session cancellation/replacement, polling, finite timeout and retry passed\n");
+}
 static void nativeRelayAv(bool empty,unsigned fault=0){
  using Microsoft::WRL::ComPtr;
  FlGstSession* sessions[4]{};
@@ -319,6 +367,7 @@ static void nativeRelayAv(bool empty,unsigned fault=0){
  }
 
  }
+ if(!empty&&!fault)relayPcmTerminalControls(cfg,offer,relay);
  for(unsigned i=0;i<4;++i){CHECK(gst_element_set_state(pipes[i],GST_STATE_NULL)!=GST_STATE_CHANGE_FAILURE);gst_object_unref(ports[i]);gst_object_unref(pipes[i]);g_object_unref(sessions[i]);}
  flClose(forward);flClose(writer);flClose(down);flClose(up);for(auto handle:handles)CloseHandle(handle);
  if(fault){printf("checked native relay fault %u: no unauthorized publication, retained ownership and safe drain passed\n",fault);return;}
