@@ -20,6 +20,7 @@
 //    "adopt-channel" action and applies the pipeline clock itself.
 #include "framelink_session_transport.h"
 #include "fl_gst_session_internal.h"
+#include "framelink_memory_policy.h"
 #include <condition_variable>
 #include <mutex>
 #include <string>
@@ -43,7 +44,7 @@ typedef struct _GstFrameLinkAvSrc {
  gchar*sessionPath,*tracks,*videoFormat,*audioFormat;
  guint width,height,fpsN,fpsD,rate,channels,connectMs,idleMs,audioQueueMs,videoQueue,videoPool,latencyMs;gboolean nativeMemory;
  GstElement*video,*audio;GstPad*videoPad,*audioPad;
- FlGstSession*session;gboolean local,sharedCpu;
+ FlGstSession*session;gboolean local,sharedCpu,policyBound;
  GCancellable*cancel;std::thread*worker;std::thread*drainer;Shared*shared;gulong probes[2];
 } GstFrameLinkAvSrc;
 typedef struct _GstFrameLinkAvSrcClass {GstBinClass parent;} GstFrameLinkAvSrcClass;
@@ -179,7 +180,7 @@ static void rebuild(GstFrameLinkAvSrc*s){
 
 // Inner elements carry the negotiated geometry and PCM shape in both modes.
 static void configureChildren(GstFrameLinkAvSrc*s){
- if(s->video)g_object_set(s->video,"width",gint(s->width),"height",gint(s->height),"format",s->videoFormat,"native-memory",s->nativeMemory,nullptr);
+ if(s->video&&!s->policyBound)g_object_set(s->video,"width",gint(s->width),"height",gint(s->height),"format",s->videoFormat,"native-memory",s->nativeMemory,nullptr);
  if(s->audio)g_object_set(s->audio,"format",s->audioFormat,"rate",s->rate,"channels",s->channels,"audio-queue-ms",s->audioQueueMs,
   "connect-timeout-ms",s->connectMs,"idle-timeout-ms",s->idleMs,nullptr);
 }
@@ -261,8 +262,19 @@ static gboolean adoptChannel(GstFrameLinkAvSrc*s,flChannel*channel){
  gboolean adopted=FALSE;g_signal_emit_by_name(s->video,"adopt-channel",channel,&adopted);return adopted;
 }
 
+// Endpoint zero is the receiver, exactly as for the thin source action.
+// The trusted caller authenticates the policy and validates the adopted resource.
+static gboolean applyMemoryPolicy(GstFrameLinkAvSrc*s,GstFrameLinkMemoryPolicy*policy){
+ if(s->sharedCpu||s->local||!s->video||s->policyBound||
+    (s->sessionPath&&*s->sessionPath)||GST_STATE(s)!=GST_STATE_NULL)return FALSE;
+ configureChildren(s);
+ gboolean accepted=FALSE;g_signal_emit_by_name(s->video,"apply-memory-policy",policy,&accepted);
+ if(accepted)s->policyBound=TRUE;return accepted;
+}
+
 static void setProperty(GObject*object,guint id,const GValue*value,GParamSpec*spec){
  auto*s=reinterpret_cast<GstFrameLinkAvSrc*>(object);
+ if(s->policyBound){g_warning("framelinkavsrc: authenticated properties are immutable; create a new bin/session");return;}
  if(GST_STATE(s)!=GST_STATE_NULL){g_warning("framelinkavsrc: %s can only change in NULL",spec->name);return;}
  switch(id){
  case PROP_SHARED_CPU:s->sharedCpu=g_value_get_boolean(value);break;
@@ -352,6 +364,8 @@ static void gst_framelink_av_src_class_init(GstFrameLinkAvSrcClass*klass){
  g_object_class_install_property(o,PROP_GENERATION,g_param_spec_uint64("generation","Generation","Negotiated session generation",0,G_MAXUINT64,0,ro));
  g_object_class_install_property(o,PROP_AUDIO_ID,g_param_spec_uint("audio-track-id","Audio track","Negotiated audio identity, zero when absent",0,G_MAXUINT,0,ro));
  g_object_class_install_property(o,PROP_VIDEO_ID,g_param_spec_uint("video-track-id","Video track","Negotiated video identity, zero when absent",0,G_MAXUINT,0,ro));
+ g_signal_new_class_handler("apply-memory-policy",G_TYPE_FROM_CLASS(klass),GSignalFlags(G_SIGNAL_RUN_LAST|G_SIGNAL_ACTION),G_CALLBACK(applyMemoryPolicy),
+  nullptr,nullptr,nullptr,G_TYPE_BOOLEAN,1,G_TYPE_POINTER);
  g_signal_new_class_handler("adopt-channel",G_TYPE_FROM_CLASS(klass),GSignalFlags(G_SIGNAL_RUN_LAST|G_SIGNAL_ACTION),G_CALLBACK(adoptChannel),
   nullptr,nullptr,nullptr,G_TYPE_BOOLEAN,1,G_TYPE_POINTER);
 }

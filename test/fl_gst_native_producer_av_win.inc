@@ -59,8 +59,7 @@ static void nativeProducerAv(unsigned mode){
  g_signal_emit_by_name(sink,"apply-memory-policy",&policy,&accepted);CHECK(accepted);
  gboolean adopted=FALSE;g_signal_emit_by_name(src,"adopt-channel",channel,&adopted);CHECK(adopted);
  auto consumerPolicy=policy;std::swap(consumerPolicy.requirements[0],consumerPolicy.requirements[1]);std::swap(consumerPolicy.paths[0],consumerPolicy.paths[1]);
- auto*receiver=gst_bin_get_by_name(GST_BIN(src),"video");CHECK(receiver);
- g_signal_emit_by_name(receiver,"apply-memory-policy",&consumerPolicy,&accepted);CHECK(accepted);gst_object_unref(receiver);
+ g_signal_emit_by_name(src,"apply-memory-policy",&consumerPolicy,&accepted);CHECK(accepted);
  auto*video=gst_bin_get_by_name(GST_BIN(sink),"video");g_object_set(video,"async",FALSE,"enable-last-sample",FALSE,nullptr);gst_object_unref(video);
  for(auto entry:{std::make_pair(tx,s),std::make_pair(rx,r)}){auto*c=fl_gst_session_create_context(entry.second);gst_element_set_context(entry.first,c);gst_context_unref(c);}
  auto*vi=gst_bin_get_by_name(GST_BIN(tx),"vi");auto*ai=gst_bin_get_by_name(GST_BIN(tx),"ai");auto*vo=gst_bin_get_by_name(GST_BIN(rx),"vo");auto*ao=gst_bin_get_by_name(GST_BIN(rx),"ao");

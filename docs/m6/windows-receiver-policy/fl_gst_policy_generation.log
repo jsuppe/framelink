@@ -1,0 +1,37 @@
+
+(fl_gst_policy_generation:16379): GStreamer-CRITICAL **: 23:11:31.174: gst_ghost_pad_new_from_template: assertion 'GST_IS_PAD (target)' failed
+
+(fl_gst_policy_generation:16379): GStreamer-CRITICAL **: 23:11:31.176: gst_object_unref: assertion 'object != NULL' failed
+
+(fl_gst_policy_generation:16379): GStreamer-CRITICAL **: 23:11:31.176: gst_element_add_pad: assertion 'GST_IS_PAD (pad)' failed
+
+** (fl_gst_policy_generation:16379): WARNING **: 23:11:31.176: framelinkavsrc: authenticated properties are immutable; create a new bin/session
+
+** (fl_gst_policy_generation:16379): WARNING **: 23:11:31.177: framelinkavsrc: authenticated properties are immutable; create a new bin/session
+
+** (fl_gst_policy_generation:16379): WARNING **: 23:11:31.177: framelinkavsrc: authenticated properties are immutable; create a new bin/session
+
+** (fl_gst_policy_generation:16379): WARNING **: 23:11:31.177: framelinkavsrc: authenticated properties are immutable; create a new bin/session
+
+(fl_gst_policy_generation:16379): GStreamer-CRITICAL **: 23:11:31.217: gst_ghost_pad_new_from_template: assertion 'GST_IS_PAD (target)' failed
+
+(fl_gst_policy_generation:16379): GStreamer-CRITICAL **: 23:11:31.218: gst_object_unref: assertion 'object != NULL' failed
+
+(fl_gst_policy_generation:16379): GStreamer-CRITICAL **: 23:11:31.218: gst_element_add_pad: assertion 'GST_IS_PAD (pad)' failed
+
+** (fl_gst_policy_generation:16379): WARNING **: 23:11:31.219: framelinkavsrc: authenticated properties are immutable; create a new bin/session
+
+** (fl_gst_policy_generation:16379): WARNING **: 23:11:31.219: framelinkavsrc: authenticated properties are immutable; create a new bin/session
+
+** (fl_gst_policy_generation:16379): WARNING **: 23:11:31.219: framelinkavsrc: authenticated properties are immutable; create a new bin/session
+
+** (fl_gst_policy_generation:16379): WARNING **: 23:11:31.219: framelinkavsrc: authenticated properties are immutable; create a new bin/session
+legacy pool generation: renegotiates as before
+authenticated pool generation: fails closed before new-pool frame
+authenticated pool changed before start: rejected
+authenticated pool generation: fails closed before new-pool frame
+authenticated pool changed before start: rejected
+authenticated sink generation rejected before start
+authenticated sink generation rejected before submit
+native reader policy missing contract rejected before delivery
+native reader policy explicit completion/usage accepted

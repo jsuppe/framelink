@@ -4,6 +4,10 @@
 // verifying actual immutable resources. Endpoint 0 is this element. This is not
 // a replacement for authentication, driver probes or completion integration.
 // apply-memory-policy(pointer) returns gboolean; requires NULL + adopted channel.
+// The broker-bound framelinkavsrc/avsink bins forward this action to video.
+// Configure all bin properties first; successful binding freezes those properties
+// until destruction. Reconnect with a new bin/session, not a replacement policy.
+// The action does not authenticate its argument or enable session= discovery.
 // Once applied, native-memory mode is frozen for that delegated session.
 typedef struct GstFrameLinkMemoryPolicy {
     uint32_t version; // 1

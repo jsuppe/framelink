@@ -141,6 +141,20 @@ Focused verification: [Windows4/4, Linux3/3, Android3/3 and dual ABI builds](../
 
 ## Additive authenticated native-memory agreement
 
-`fl_gst_session_authenticate_native_memory` proves exact producer-ordered policy agreement with the full configured session and a distinct credential domain. It does not select offers, probe/import native allocations, discover a peer or apply element policy. Legacy entrypoints/defaults/wires are unchanged. [Focused cross-platform checks and Windows A/V integration](../windows-native-memory-agreement/README.md) passed. API not frozen; clean integrated revision follows.
+`fl_gst_session_authenticate_native_memory` proves exact producer-ordered policy agreement with the full configured session and a distinct credential domain. It does not select offers, probe/import native allocations, discover a peer or apply element policy. Legacy entrypoints/defaults/wires are unchanged. [Focused cross-platform checks and Windows A/V integration](../windows-native-memory-agreement/README.md) passed. API not frozen. The exact [c1a517f integrated candidate](../windows-integrated-c1a517f/README.md) passed133/133 with clean build/API exit0 and all116 prior exports retained (117 total).
 
 The preceding clean [4a49a92 Windows candidate](../windows-integrated-4a49a92/README.md) passed133/133. Corrected dumpbin accounting includes decorated internal exports:116/116 prior names retained (earlier114 statements were incomplete counts, not lost exports). This is symbol-name compatibility, not a complete ABI proof.
+
+## Additive receiver-bin policy action
+
+`framelinkavsrc` now forwards `apply-memory-policy` for broker-adopted video,
+including explicitly permitted readback. Endpoint zero is the receiver; callers
+must reorder both requirements and paths from producer-ordered agreement.
+Set all properties before binding. Success freezes bin configuration; a new
+bin/session is required for reconnect. No automatic discovery or authentication
+is implied by this action. Check `g_signal_lookup` when supporting older bins.
+Native C/wire layouts and existing unbound defaults are unchanged.
+
+See [receiver policy evidence and limits](../windows-receiver-policy/README.md).
+This removes the need to reach into the receiver child in broker-native A/V
+integration; it does not settle D2/D3 or freeze the app-integration contract.
