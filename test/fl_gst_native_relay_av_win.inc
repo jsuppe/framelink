@@ -131,6 +131,76 @@ static void relayPcmControls(flSessionConfig cfg,const flSessionCapabilities&off
  }
  printf("PCM queue controls: bounded retry, exact 4-block delivery, nonzero origin/discontinuity, bounded upstream/downstream cancellation, empty timeout, fail-closed initial/midstream GAP and 6 configuration negatives passed\n");
 }
+// Explicit GAP mode: preserve serialized order and timing without synthesizing
+// PCM. Paused output proves zero-byte events cannot form an unbounded queue.
+static void relayPcmGapControls(flSessionConfig cfg,const flSessionCapabilities&offer){
+ cfg.sessionId.bytes[0]=1;cfg.audioQueueMs=1;
+ for(unsigned mode=0;mode<7;++mode){
+  auto*a=fl_gst_session_new(3);auto*b=fl_gst_session_new(3);auto other=cfg;other.sessionId.bytes[0]=2;
+  CHECK(fl_gst_session_configure(a,&cfg,&offer,&offer)==FL_GST_SESSION_READY);
+  CHECK(fl_gst_session_configure(b,&other,&offer,&offer)==FL_GST_SESSION_READY);
+  flClockMapping m{};m.sourceClockId=cfg.clockId;m.targetClockId.bytes[0]=9;m.sourceAnchorNs=cfg.epochNs;
+  CHECK(fl_gst_session_set_mapping(a,1,&m,0)==FL_GST_SESSION_READY);
+  auto*in=gst_parse_launch("appsrc name=writer is-live=true format=time caps=audio/x-raw,format=S16LE,layout=interleaved,rate=48000,channels=2 ! appsink name=reader max-buffers=2 sync=false async=false",nullptr);
+  auto*out=gst_parse_launch("appsrc name=writer is-live=true format=time caps=audio/x-raw,format=S16LE,layout=interleaved,rate=48000,channels=2 ! appsink name=reader max-buffers=2 sync=false async=false",nullptr);
+  auto*producer=gst_bin_get_by_name(GST_BIN(in),"writer");auto*source=gst_bin_get_by_name(GST_BIN(in),"reader");
+  auto*sink=gst_bin_get_by_name(GST_BIN(out),"writer");auto*consumer=gst_bin_get_by_name(GST_BIN(out),"reader");
+  {
+   flsample::SessionPcmRelay pcm(a,b,GST_APP_SINK(source),GST_APP_SRC(sink),true);
+   CHECK(pcm.initialize()==FL_GST_SESSION_READY);
+   CHECK(gst_element_set_state(out,GST_STATE_PAUSED)!=GST_STATE_CHANGE_FAILURE);
+   CHECK(gst_element_get_state(out,nullptr,nullptr,GST_SECOND)!=GST_STATE_CHANGE_FAILURE);
+   CHECK(gst_element_set_state(in,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
+   auto push=[&](guint64 ms){auto*buf=gst_buffer_new_allocate(nullptr,192,nullptr);gst_buffer_memset(buf,0,73,192);
+    GST_BUFFER_PTS(buf)=ms*GST_MSECOND;GST_BUFFER_DURATION(buf)=GST_MSECOND;
+    CHECK(gst_app_src_push_buffer(GST_APP_SRC(producer),buf)==GST_FLOW_OK);};
+   auto gap=[&](guint64 ms,GstClockTime duration,guint32 seq){auto*event=gst_event_new_gap(ms*GST_MSECOND,duration);
+    gst_event_set_seqnum(event,seq);CHECK(gst_element_send_event(producer,event));};
+   auto pull=[&](bool wantGap,guint64 ms,guint32 seq){
+    for(unsigned i=0;i<16;++i){auto*object=gst_app_sink_try_pull_object(GST_APP_SINK(consumer),GST_SECOND);CHECK(object);
+     if(GST_IS_SAMPLE(object)){CHECK(!wantGap);auto*buf=gst_sample_get_buffer(GST_SAMPLE(object));
+      CHECK(GST_BUFFER_PTS(buf)==ms*GST_MSECOND&&GST_BUFFER_DURATION(buf)==GST_MSECOND);
+      guint8 bytes[192];CHECK(gst_buffer_extract(buf,0,bytes,sizeof bytes)==sizeof bytes);for(auto value:bytes)CHECK(value==73);
+      gst_mini_object_unref(object);return;}
+     CHECK(GST_IS_EVENT(object));auto*event=GST_EVENT(object);
+     if(GST_EVENT_TYPE(event)==GST_EVENT_GAP){CHECK(wantGap);GstClockTime pts=0,duration=0;gst_event_parse_gap(event,&pts,&duration);
+      CHECK(pts==ms*GST_MSECOND&&duration==GST_MSECOND&&gst_event_get_seqnum(event)==seq);
+      gst_mini_object_unref(object);return;}
+     gst_mini_object_unref(object);
+    }CHECK(false);
+   };
+   // mode0 has a leading GAP; all others have one real PCM block first.
+   if(mode!=0){push(100);CHECK(pcm.forward(1000)==FL_GST_SESSION_READY);}
+   gap(mode==0?100:mode==3?103:101,mode==4?GST_CLOCK_TIME_NONE:GST_MSECOND,701);
+   if(mode==3||mode==4){
+    CHECK(pcm.forward(1000)==FL_GST_SESSION_INVALID);CHECK(pcm.gapCount()==0);
+    flSessionConfig cancelled{};CHECK(fl_gst_session_get_config(b,&cancelled)==FL_GST_SESSION_CANCELLED);
+   }else{
+    CHECK(pcm.forward(1000)==FL_GST_SESSION_READY);CHECK(pcm.gapCount()==1);
+    if(mode==2||mode==5){
+     gap(102,GST_MSECOND,702);CHECK(pcm.forward(1000)==FL_GST_SESSION_TIMEOUT);
+     CHECK(pcm.forward(0)==FL_GST_SESSION_TIMEOUT&&pcm.gapCount()==1);
+    }
+    if(mode==5){fl_gst_session_cancel(b);CHECK(pcm.forward(0)==FL_GST_SESSION_CANCELLED);CHECK(pcm.gapCount()==1);}
+    else{
+     CHECK(gst_element_set_state(out,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
+     if(mode!=0)pull(false,100,0);pull(true,mode==0?100:101,701);
+     if(mode==2){CHECK(pcm.forward(0)==FL_GST_SESSION_READY);pull(true,102,702);}
+     auto next=mode==0?101u:mode==2?103u:102u;push(next);
+     CHECK(pcm.forward(1000)==FL_GST_SESSION_READY);pull(false,next,0);
+     if(mode==6){push(next+2);CHECK(pcm.forward(1000)==FL_GST_SESSION_INVALID);}
+     CHECK(pcm.frameCount()==(mode==0?48:96)&&pcm.byteCount()==(mode==0?192:384));
+     CHECK(pcm.gapCount()==(mode==2?2:1));
+    }
+   }
+   CHECK(gst_element_set_state(in,GST_STATE_NULL)!=GST_STATE_CHANGE_FAILURE);
+   CHECK(gst_element_set_state(out,GST_STATE_NULL)!=GST_STATE_CHANGE_FAILURE);
+  }
+  for(auto*p:{producer,source,sink,consumer,in,out})gst_object_unref(p);g_object_unref(a);g_object_unref(b);
+ }
+ printf("PCM GAP controls: opt-in leading/midstream order/seqnum/pixels, bounded zero-byte queue/retry, malformed timing, discontinuity and pending cancellation passed\n");
+}
+
 // Isolate the terminal rendezvous from transport arrival timing. Use a real
 // drained native END but deliberately withhold the upstream audio terminal.
 static void relayPcmTerminalControls(flSessionConfig cfg,const flSessionCapabilities&offer,
@@ -188,7 +258,7 @@ static void nativeRelayAv(bool empty,unsigned fault=0){
  cfg.video={FL_FORMAT_RGBA8,64,32,1000,1};cfg.videoQueueFrames=1;cfg.connectTimeoutMs=cfg.idleTimeoutMs=2000;
  flSessionCapabilities offer{};offer.version=2;offer.videoCount=offer.audioCount=1;offer.video[0]=cfg.video;offer.audio[0]=cfg.audio;
  cfg.sessionId.bytes[0]=1;relaySessionNegatives(cfg,offer);
- if(!empty&&!fault)relayPcmControls(cfg,offer);
+ if(!empty&&!fault){relayPcmControls(cfg,offer);relayPcmGapControls(cfg,offer);}
  for(unsigned hop=0;hop<2;++hop){
   cfg.sessionId.bytes[0]=static_cast<uint8_t>(hop+1);
   for(unsigned role=0;role<2;++role){
@@ -240,7 +310,32 @@ static void nativeRelayAv(bool empty,unsigned fault=0){
  CHECK(relay.forwardEvent(0)==FL_GST_SESSION_TIMEOUT);
  for(auto*session:sessions)CHECK(fl_gst_session_track_ready(session,FL_GST_TRACK_VIDEO,1)==FL_GST_SESSION_READY);
  for(auto i:{3,2,1,0})CHECK(gst_element_set_state(pipes[i],GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
- flsample::SessionPcmRelay pcmRelay(sessions[1],sessions[2],GST_APP_SINK(ports[1]),GST_APP_SRC(ports[2]));
+ std::atomic<unsigned> terminalGaps{0};
+ std::atomic<guint32> inputGapSeq{0},outputGapSeq{0};
+ if(fault==14){
+  for(unsigned leg=0;leg<2;++leg){
+   auto*pad=gst_element_get_static_pad(ports[leg?2:1],leg?"src":"sink");
+   gst_pad_add_probe(pad,GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM,[](GstPad*,GstPadProbeInfo*info,gpointer data)->GstPadProbeReturn{
+    auto*event=GST_PAD_PROBE_INFO_EVENT(info);
+    if(GST_EVENT_TYPE(event)==GST_EVENT_GAP){GstClockTime pts=0,duration=0;gst_event_parse_gap(event,&pts,&duration);
+     CHECK(pts==GST_MSECOND&&duration==GST_MSECOND);
+     static_cast<std::atomic<guint32>*>(data)->store(gst_event_get_seqnum(event));
+    }return GST_PAD_PROBE_OK;
+   },leg?&outputGapSeq:&inputGapSeq,nullptr);gst_object_unref(pad);
+  }
+ }
+ if(fault==14){auto*pad=gst_element_get_static_pad(ports[3],"sink");
+  gst_pad_add_probe(pad,GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM,[](GstPad*,GstPadProbeInfo*info,gpointer data)->GstPadProbeReturn{
+   auto*event=GST_PAD_PROBE_INFO_EVENT(info);
+   if(GST_EVENT_TYPE(event)==GST_EVENT_GAP){GstClockTime pts=0,duration=0;gst_event_parse_gap(event,&pts,&duration);
+    printf("terminal GAP mapped_pts=%llu duration=%llu seqnum=%u original_seqnum=1701\n",static_cast<unsigned long long>(pts),static_cast<unsigned long long>(duration),gst_event_get_seqnum(event));fflush(stdout);
+    // GDP serializes event structure/timing, not stable GstEvent seqnums.
+    CHECK(pts==2*GST_MSECOND&&duration==GST_MSECOND);
+    ++*static_cast<std::atomic<unsigned>*>(data);
+   }return GST_PAD_PROBE_OK;
+  },&terminalGaps,nullptr);gst_object_unref(pad);
+ }
+ flsample::SessionPcmRelay pcmRelay(sessions[1],sessions[2],GST_APP_SINK(ports[1]),GST_APP_SRC(ports[2]),fault==14);
  CHECK(pcmRelay.initialize()==FL_GST_SESSION_READY);
  CHECK(pcmRelay.initialize()==FL_GST_SESSION_INVALID);
  CHECK(pcmRelay.forward(0)==FL_GST_SESSION_TIMEOUT);
@@ -347,21 +442,25 @@ static void nativeRelayAv(bool empty,unsigned fault=0){
   CHECK(received.kind==end.kind&&received.afterFrames==end.afterFrames&&received.ptsNs==end.ptsNs&&received.durationNs==0);
   flFrame forbidden{};CHECK(relay.forward(forbidden)==FL_INVALID&&relay.forwardEvent(0)==FL_GST_SESSION_INVALID);
  }
- CHECK(relay.count()==(fault?(fault>=5?1:0):frames)&&relay.finish()==FL_OK);CHECK(flCancelBuffer(writer,&spare)==FL_OK);
+ CHECK(relay.count()==(fault?(fault>=5&&!empty?1:0):frames)&&relay.finish()==FL_OK);CHECK(flCancelBuffer(writer,&spare)==FL_OK);
  // PCM EOS authenticates the first-hop video terminal before relay publication.
  if(!fault||fault>=12){
  const gint64 lastPts=frames?gint64(37000000)+gint64(frames-1)*1000000:gint64(-1);
  CHECK(fl_gst_session_video_eos(sessions[0],1,frames+(fault==12?1:0),lastPts)==FL_GST_SESSION_READY);
- if(fault==13)CHECK(gst_element_send_event(ports[0],gst_event_new_gap(GST_MSECOND,GST_MSECOND)));
+ if(fault==13||fault==14){auto*gap=gst_event_new_gap(GST_MSECOND,GST_MSECOND);gst_event_set_seqnum(gap,1701);CHECK(gst_element_send_event(ports[0],gap));}
  CHECK(gst_app_src_end_of_stream(GST_APP_SRC(ports[0]))==GST_FLOW_OK);avTerminal(pipes[1],GST_MESSAGE_EOS);
- if(fault>=12){
+ if(fault==12||fault==13){
   CHECK(pcmRelay.finish(relay,1000)==FL_GST_SESSION_INVALID);
   flSessionConfig cancelled{};CHECK(fl_gst_session_get_config(sessions[2],&cancelled)==FL_GST_SESSION_CANCELLED);
   CHECK(pcmRelay.finish(relay,0)==FL_GST_SESSION_INVALID);
  }else{
   CHECK(pcmRelay.finish(relay,1000)==FL_GST_SESSION_READY);
+  if(fault==14)CHECK(pcmRelay.gapCount()==1);
   CHECK(pcmRelay.finish(relay,0)==FL_GST_SESSION_INVALID&&pcmRelay.forward(0)==FL_GST_SESSION_INVALID);
   avTerminal(pipes[3],GST_MESSAGE_EOS);
+  if(fault==14){CHECK(terminalGaps.load()==1&&inputGapSeq.load()!=0&&inputGapSeq.load()==outputGapSeq.load());
+   printf("terminal GAP relay seqnum input=%u output=%u preserved locally; GDP seqnum not a wire identity\n",inputGapSeq.load(),outputGapSeq.load());
+  }
   guint64 count=99;gint64 pts=-2;
   CHECK(fl_gst_session_wait_video_eos(sessions[3],1,1000,&count,&pts)==FL_GST_SESSION_READY&&count==frames&&pts==lastPts);
  }

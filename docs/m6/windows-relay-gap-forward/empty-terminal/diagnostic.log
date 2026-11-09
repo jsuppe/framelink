@@ -1,0 +1,44 @@
+relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+PCM queue controls: bounded retry, exact 4-block delivery, nonzero origin/discontinuity, bounded upstream/downstream cancellation, empty timeout, fail-closed initial/midstream GAP and 6 configuration negatives passed
+PCM GAP controls: opt-in leading/midstream order/seqnum/pixels, bounded zero-byte queue/retry, malformed timing, discontinuity and pending cancellation passed
+PCM terminal interruption mode=0 result=2 elapsed_us=54829
+PCM terminal interruption mode=1 result=2 elapsed_us=50218
+PCM terminal interruption mode=2 result=4 elapsed_us=55882
+PCM terminal controls: bounded both-session cancellation/replacement, polling, finite timeout and retry passed
+coordinated native relay: 16 same-allocation video frames / 768 PCM frames, two authenticated sessions, exact metadata, 37ms offset, ordered barriers, held-reader backpressure and terminal drain passed
+relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+coordinated native relay: 0 same-allocation video frames / 0 PCM frames, two authenticated sessions, exact metadata, 37ms offset, ordered barriers, held-reader backpressure and terminal drain passed
+relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+checked native relay fault 1: no unauthorized publication, retained ownership and safe drain passed
+relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+checked native relay fault 2: no unauthorized publication, retained ownership and safe drain passed
+relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+checked native relay fault 3: no unauthorized publication, retained ownership and safe drain passed
+relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+checked native relay fault 4: no unauthorized publication, retained ownership and safe drain passed
+relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+checked native relay fault 5: no unauthorized publication, retained ownership and safe drain passed
+relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+checked native relay fault 6: no unauthorized publication, retained ownership and safe drain passed
+relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+checked native relay fault 7: no unauthorized publication, retained ownership and safe drain passed
+relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+checked native relay fault 8: no unauthorized publication, retained ownership and safe drain passed
+relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+checked native relay fault 9: no unauthorized publication, retained ownership and safe drain passed
+relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+checked native relay fault 10: no unauthorized publication, retained ownership and safe drain passed
+relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+checked native relay fault 11: no unauthorized publication, retained ownership and safe drain passed
+relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+checked native relay fault 12: no unauthorized publication, retained ownership and safe drain passed
+relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+checked native relay fault 13: no unauthorized publication, retained ownership and safe drain passed
+relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+terminal GAP mapped_pts=2000000 duration=1000000 seqnum=5856 original_seqnum=1701
+terminal GAP relay seqnum input=5842 output=5842 preserved locally; GDP seqnum not a wire identity
+checked native relay fault 14: no unauthorized publication, retained ownership and safe drain passed
+relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+terminal GAP mapped_pts=2000000 duration=1000000 seqnum=6191 original_seqnum=1701
+terminal GAP relay seqnum input=6161 output=6161 preserved locally; GDP seqnum not a wire identity
+checked native relay fault 14: no unauthorized publication, retained ownership and safe drain passed
