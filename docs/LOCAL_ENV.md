@@ -24,8 +24,8 @@ On commit (`clean`), local values become placeholders; on checkout (`smudge`),
 placeholders become this machine's values, so archived scripts such as
 `docs/m6/*/run.py` run unchanged. Without `local.env` the filter passes content
 through, so `python3 tools/check_local_identity.py` runs in CI and fails on any
-`/home/<name>` or `C:\Users\<name>` path. Run it with `--cached` before
-committing to also check the exact `local.env` user and host names.
+`/home/<name>` or `C:\Users\<name>` path. It checks staged content, so run it before
+committing; with `local.env` present it also checks the exact user and host names.
 
 Never commit a whole-machine snapshot (process lists, environment dumps,
 registry caches); keep those beside the evidence outside the repository.
