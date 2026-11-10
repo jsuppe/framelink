@@ -4,9 +4,9 @@ MSBuild version 17.14.23+b0019275e for .NET Framework
   framelink.vcxproj -> <windows-checkout>\build\Release\framelink.dll
   framelink_gst_session.vcxproj -> <windows-checkout>\build\Release\framelink_gst_session.dll
   gstframelinkavsrc.cpp
-     Creating library C:/Users/jonsu/dev/framelink-m6-20261106/build/Release/gstframelink.lib and object C:/Users/jonsu/dev/framelink-m6-20261106/build/Release/gstframelink.exp
+     Creating library <win-home>/dev/framelink-m6-20261106/build/Release/gstframelink.lib and object <win-home>/dev/framelink-m6-20261106/build/Release/gstframelink.exp
   gstframelink.vcxproj -> <windows-checkout>\build\Release\gstframelink.dll
-  Building Custom Rule C:/Users/jonsu/dev/framelink-m6-20261106/CMakeLists.txt
+  Building Custom Rule <win-home>/dev/framelink-m6-20261106/CMakeLists.txt
   fl_gst_av_src_bin.cpp
   fl_gst_av_src_bin.vcxproj -> <windows-checkout>\build\Release\fl_gst_av_src_bin.exe
 MSBuild version 17.14.23+b0019275e for .NET Framework
@@ -15,7 +15,7 @@ MSBuild version 17.14.23+b0019275e for .NET Framework
   framelink_gst_session.vcxproj -> <windows-checkout>\build\Release\framelink_gst_session.dll
   gstframelink.vcxproj -> <windows-checkout>\build\Release\gstframelink.dll
   fl_gst_av_bench.vcxproj -> <windows-checkout>\build\Release\fl_gst_av_bench.exe
-Test project C:/Users/jonsu/dev/framelink-m6-20261106/build
+Test project <win-home>/dev/framelink-m6-20261106/build
     Start 105: gst_av_src_bin
 1/2 Test #105: gst_av_src_bin ...................   Passed   15.91 sec
     Start 108: gst_av_bench_smoke

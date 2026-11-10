@@ -1,20 +1,20 @@
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
-  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\framelink.dll
-  framelink_gst_session.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\framelink_gst_session.dll
+  framelink.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\framelink_gst_session.dll
   gstframelink.cpp
   The d3d11 library from gst-plugins-bad is unstable API and may change in future.
   You can define GST_USE_UNSTABLE_API to avoid this warning.
-     Creating library C:/Users/jonsu/dev/framelink-m6-20261106/build/Release/gstframelink.lib and object C:/Users/jonsu/dev/framelink-m6-20261106/build/Release/gstframelink.exp
-  gstframelink.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\gstframelink.dll
+     Creating library <win-home>/dev/framelink-m6-20261106/build/Release/gstframelink.lib and object <win-home>/dev/framelink-m6-20261106/build/Release/gstframelink.exp
+  gstframelink.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\gstframelink.dll
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
-  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\framelink.dll
+  framelink.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\framelink.dll
   fl_gst_native_source_win.cpp
   The d3d11 library from gst-plugins-bad is unstable API and may change in future.
   You can define GST_USE_UNSTABLE_API to avoid this warning.
-  fl_gst_native_source_win.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_gst_native_source_win.exe
-Test project C:/Users/jonsu/dev/framelink-m6-20261106/build
+  fl_gst_native_source_win.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_gst_native_source_win.exe
+Test project <win-home>/dev/framelink-m6-20261106/build
     Start  30: gst_native_source_win
 1/5 Test  #30: gst_native_source_win .................   Passed    1.90 sec
     Start  31: gst_native_source_win_copy_negative

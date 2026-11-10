@@ -1,6 +1,6 @@
 # Linux audio/video first-stage evidence (2026-10-29)
 
-Host melchior, Linux, NVIDIA RTX3090 FrameLink GBM CPU-map path; Release build.
+Host <linux-host>, Linux, NVIDIA RTX3090 FrameLink GBM CPU-map path; Release build.
 GStreamer 1.20+ required (host details via gst-inspect below).
 
 - Full existing + new suite: 29/29 passed (`linux-suite.txt`).

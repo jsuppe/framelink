@@ -1,105 +1,105 @@
 #< CLIXML
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
-  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\framelink.dll
-  framelink_gst_session.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\framelink_gst_session.dll
+  framelink.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\framelink_gst_session.dll
   gstframelink.cpp
   The d3d11 library from gst-plugins-bad is unstable API and may change in future.
   You can define GST_USE_UNSTABLE_API to avoid this warning.
-     Creating library C:/Users/jonsu/dev/framelink-m6-20261106/build/Release/gstframelink.lib and object C:/Users/jonsu/dev/framelink-m6-20261106/build/Release/gstframelink.exp
-  gstframelink.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\gstframelink.dll
-  framelink_av_playback.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\framelink_av_playback.lib
-  fl_av_rendezvous.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_av_rendezvous.exe
-  fl_audio_segment.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_audio_segment.exe
-  fl_av_offer_bounds.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_av_offer_bounds.exe
-  fl_buffer_references.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_buffer_references.exe
-  fl_av_memory_agreement.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_av_memory_agreement.exe
-  fl_consume.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_consume.exe
-  fl_audio_alignment.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_audio_alignment.exe
-  fl_d3d_decode_consumer.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_d3d_decode_consumer.exe
-  fl_d3d_decode_producer.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_d3d_decode_producer.exe
-  fl_d3d_decoder_probe.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_d3d_decoder_probe.exe
-  fl_av_auth.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_av_auth.exe
-  fl_av_memory_adversarial.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_av_memory_adversarial.exe
-  fl_d3d_memory_binding.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_d3d_memory_binding.exe
-  fl_disconnect_win.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_disconnect_win.exe
-  fl_expanded_pool.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_expanded_pool.exe
-  fl_frame_metadata_contract.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_frame_metadata_contract.exe
-  fl_external_pool_win.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_external_pool_win.exe
-  fl_frame_metadata.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_frame_metadata.exe
-  fl_gst_audio_sink.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_gst_audio_sink.exe
-  fl_gst_audio_source.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_gst_audio_source.exe
-  fl_gst_av_bin.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_gst_av_bin.exe
-  fl_gst_av_bench.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_gst_av_bench.exe
-  fl_gst_av_src_bin.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_gst_av_src_bin.exe
-  fl_gst_av_timeline.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_gst_av_timeline.exe
+     Creating library <win-home>/dev/framelink-m6-20261106/build/Release/gstframelink.lib and object <win-home>/dev/framelink-m6-20261106/build/Release/gstframelink.exp
+  gstframelink.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\gstframelink.dll
+  framelink_av_playback.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\framelink_av_playback.lib
+  fl_av_rendezvous.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_av_rendezvous.exe
+  fl_audio_segment.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_audio_segment.exe
+  fl_av_offer_bounds.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_av_offer_bounds.exe
+  fl_buffer_references.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_buffer_references.exe
+  fl_av_memory_agreement.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_av_memory_agreement.exe
+  fl_consume.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_consume.exe
+  fl_audio_alignment.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_audio_alignment.exe
+  fl_d3d_decode_consumer.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_d3d_decode_consumer.exe
+  fl_d3d_decode_producer.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_d3d_decode_producer.exe
+  fl_d3d_decoder_probe.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_d3d_decoder_probe.exe
+  fl_av_auth.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_av_auth.exe
+  fl_av_memory_adversarial.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_av_memory_adversarial.exe
+  fl_d3d_memory_binding.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_d3d_memory_binding.exe
+  fl_disconnect_win.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_disconnect_win.exe
+  fl_expanded_pool.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_expanded_pool.exe
+  fl_frame_metadata_contract.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_frame_metadata_contract.exe
+  fl_external_pool_win.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_external_pool_win.exe
+  fl_frame_metadata.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_frame_metadata.exe
+  fl_gst_audio_sink.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_gst_audio_sink.exe
+  fl_gst_audio_source.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_gst_audio_source.exe
+  fl_gst_av_bin.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_gst_av_bin.exe
+  fl_gst_av_bench.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_gst_av_bench.exe
+  fl_gst_av_src_bin.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_gst_av_src_bin.exe
+  fl_gst_av_timeline.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_gst_av_timeline.exe
   fl_gst_av_parity.cpp
   fl_gst_av_qualification.cpp
-  fl_gst_av_validation.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_gst_av_validation.exe
-  fl_gst_event_channel.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_gst_event_channel.exe
-  fl_gst_local_audio.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_gst_local_audio.exe
-  fl_gst_local_av.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_gst_local_av.exe
-  fl_gst_native_producer_win.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_gst_native_producer_win.exe
-  fl_gst_nv12.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_gst_nv12.exe
-  fl_gst_policy_generation.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_gst_policy_generation.exe
+  fl_gst_av_validation.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_gst_av_validation.exe
+  fl_gst_event_channel.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_gst_event_channel.exe
+  fl_gst_local_audio.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_gst_local_audio.exe
+  fl_gst_local_av.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_gst_local_av.exe
+  fl_gst_native_producer_win.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_gst_native_producer_win.exe
+  fl_gst_nv12.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_gst_nv12.exe
+  fl_gst_policy_generation.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_gst_policy_generation.exe
   fl_gst_native_source_win.cpp
-  fl_gst_pool_policy.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_gst_pool_policy.exe
-  fl_gst_preconnect_slots.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_gst_preconnect_slots.exe
-  fl_gst_session_context.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_gst_session_context.exe
-  fl_gst_session_transport.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_gst_session_transport.exe
-  fl_gst_sink_stats.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_gst_sink_stats.exe
-  fl_gst_timestamps.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_gst_timestamps.exe
-  fl_import_failure_win.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_import_failure_win.exe
-  fl_memory_boundary.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_memory_boundary.exe
-  fl_m4_transport_timing.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_m4_transport_timing.exe
-  fl_memory_c_api.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_memory_c_api.exe
-  fl_memory_contract.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_memory_contract.exe
-  fl_memory_resource.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_memory_resource.exe
-  fl_native_relay_win.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_native_relay_win.exe
-  fl_native_boundary_benchmark_win.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_native_boundary_benchmark_win.exe
-  fl_native_relay_process_win.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_native_relay_process_win.exe
-  fl_nv12_layout.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_nv12_layout.exe
-  fl_nv12_win.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_nv12_win.exe
-  fl_playback_recovery.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_playback_recovery.exe
-  fl_portable_map.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_portable_map.exe
-  fl_produce.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_produce.exe
-  fl_read_lease_d3d11.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_read_lease_d3d11.exe
-  fl_read_leases.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_read_leases.exe
-  fl_read_ledger.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_read_ledger.exe
-  fl_ready_timeout_win.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_ready_timeout_win.exe
-  fl_receive_queue.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_receive_queue.exe
-  fl_reconnect_held.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_reconnect_held.exe
-  fl_session_c_api.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_session_c_api.exe
-  fl_session_contract.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_session_contract.exe
+  fl_gst_pool_policy.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_gst_pool_policy.exe
+  fl_gst_preconnect_slots.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_gst_preconnect_slots.exe
+  fl_gst_session_context.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_gst_session_context.exe
+  fl_gst_session_transport.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_gst_session_transport.exe
+  fl_gst_sink_stats.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_gst_sink_stats.exe
+  fl_gst_timestamps.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_gst_timestamps.exe
+  fl_import_failure_win.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_import_failure_win.exe
+  fl_memory_boundary.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_memory_boundary.exe
+  fl_m4_transport_timing.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_m4_transport_timing.exe
+  fl_memory_c_api.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_memory_c_api.exe
+  fl_memory_contract.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_memory_contract.exe
+  fl_memory_resource.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_memory_resource.exe
+  fl_native_relay_win.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_native_relay_win.exe
+  fl_native_boundary_benchmark_win.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_native_boundary_benchmark_win.exe
+  fl_native_relay_process_win.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_native_relay_process_win.exe
+  fl_nv12_layout.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_nv12_layout.exe
+  fl_nv12_win.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_nv12_win.exe
+  fl_playback_recovery.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_playback_recovery.exe
+  fl_portable_map.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_portable_map.exe
+  fl_produce.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_produce.exe
+  fl_read_lease_d3d11.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_read_lease_d3d11.exe
+  fl_read_leases.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_read_leases.exe
+  fl_read_ledger.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_read_ledger.exe
+  fl_ready_timeout_win.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_ready_timeout_win.exe
+  fl_receive_queue.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_receive_queue.exe
+  fl_reconnect_held.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_reconnect_held.exe
+  fl_session_c_api.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_session_c_api.exe
+  fl_session_contract.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_session_contract.exe
   The d3d11 library from gst-plugins-bad is unstable API and may change in future.
   You can define GST_USE_UNSTABLE_API to avoid this warning.
-  fl_session_optional_tracks.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_session_optional_tracks.exe
-  fl_session_peer.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_session_peer.exe
-  fl_startup_win.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_startup_win.exe
-  fl_submit_ownership.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_submit_ownership.exe
-  fl_trace_compiled_out.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_trace_compiled_out.exe
-  fl_trace_test.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_trace_test.exe
-  framelink_av_consumer.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\framelink_av_consumer.exe
-  framelink_av_producer.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\framelink_av_producer.exe
-  framelink_av_session.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\framelink_av_session.exe
-  framelink_consumer.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\framelink_consumer.exe
-  framelink_gst_av.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\framelink_gst_av.exe
-  framelink_producer.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\framelink_producer.exe
-C:\Users\jonsu\dev\framelink-m6-20261106\test\fl_gst_native_source_win.cpp(94,1): warning C4002: too many arguments for function-like macro invocation 'G_CALLBACK' [C:\Users\jonsu\dev\framelink-m6-20261106\build\fl_gst_native_source_win.vcxproj]
-C:\Users\jonsu\dev\framelink-m6-20261106\test\fl_gst_native_source_win.cpp(88,49): error C2187: syntax error: ')' was unexpected here [C:\Users\jonsu\dev\framelink-m6-20261106\build\fl_gst_native_source_win.vcxproj]
-C:\Users\jonsu\dev\framelink-m6-20261106\test\fl_gst_native_source_win.cpp(95,2): error C3493: 'p' cannot be implicitly captured because no default capture mode has been specified [C:\Users\jonsu\dev\framelink-m6-20261106\build\fl_gst_native_source_win.vcxproj]
-C:\Users\jonsu\dev\framelink-m6-20261106\test\fl_gst_native_source_win.cpp(96,29): error C3493: 'name' cannot be implicitly captured because no default capture mode has been specified [C:\Users\jonsu\dev\framelink-m6-20261106\build\fl_gst_native_source_win.vcxproj]
-C:\Users\jonsu\dev\framelink-m6-20261106\test\fl_gst_native_source_win.cpp(107,92): error C3493: 'out' cannot be implicitly captured because no default capture mode has been specified [C:\Users\jonsu\dev\framelink-m6-20261106\build\fl_gst_native_source_win.vcxproj]
-C:\Users\jonsu\dev\framelink-m6-20261106\test\fl_gst_native_source_win.cpp(110,1): error C2062: type 'int' unexpected [C:\Users\jonsu\dev\framelink-m6-20261106\build\fl_gst_native_source_win.vcxproj]
-C:\Users\jonsu\dev\framelink-m6-20261106\test\fl_gst_native_source_win.cpp(110,30): error C2143: syntax error: missing ';' before '{' [C:\Users\jonsu\dev\framelink-m6-20261106\build\fl_gst_native_source_win.vcxproj]
-C:\Users\jonsu\dev\framelink-m6-20261106\test\fl_gst_native_source_win.cpp(110,30): error C2143: syntax error: missing ')' before ';' [C:\Users\jonsu\dev\framelink-m6-20261106\build\fl_gst_native_source_win.vcxproj]
-C:\Users\jonsu\dev\framelink-m6-20261106\test\fl_gst_native_source_win.cpp(110,41): error C2065: 'argc': undeclared identifier [C:\Users\jonsu\dev\framelink-m6-20261106\build\fl_gst_native_source_win.vcxproj]
-C:\Users\jonsu\dev\framelink-m6-20261106\test\fl_gst_native_source_win.cpp(110,47): error C2065: 'argv': undeclared identifier [C:\Users\jonsu\dev\framelink-m6-20261106\build\fl_gst_native_source_win.vcxproj]
-C:\Users\jonsu\dev\framelink-m6-20261106\test\fl_gst_native_source_win.cpp(110,53): error C2065: 'argc': undeclared identifier [C:\Users\jonsu\dev\framelink-m6-20261106\build\fl_gst_native_source_win.vcxproj]
-C:\Users\jonsu\dev\framelink-m6-20261106\test\fl_gst_native_source_win.cpp(110,90): error C2065: 'argc': undeclared identifier [C:\Users\jonsu\dev\framelink-m6-20261106\build\fl_gst_native_source_win.vcxproj]
-C:\Users\jonsu\dev\framelink-m6-20261106\test\fl_gst_native_source_win.cpp(110,143): error C2065: 'argv': undeclared identifier [C:\Users\jonsu\dev\framelink-m6-20261106\build\fl_gst_native_source_win.vcxproj]
-C:\Users\jonsu\dev\framelink-m6-20261106\test\fl_gst_native_source_win.cpp(110,155): error C3536: 'p': cannot be used before it is initialized [C:\Users\jonsu\dev\framelink-m6-20261106\build\fl_gst_native_source_win.vcxproj]
-C:\Users\jonsu\dev\framelink-m6-20261106\test\fl_gst_native_source_win.cpp(82,31): error C1075: '{': no matching token found [C:\Users\jonsu\dev\framelink-m6-20261106\build\fl_gst_native_source_win.vcxproj]
-  fl_gst_av_parity.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_gst_av_parity.exe
-  fl_gst_av_qualification.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_gst_av_qualification.exe
+  fl_session_optional_tracks.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_session_optional_tracks.exe
+  fl_session_peer.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_session_peer.exe
+  fl_startup_win.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_startup_win.exe
+  fl_submit_ownership.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_submit_ownership.exe
+  fl_trace_compiled_out.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_trace_compiled_out.exe
+  fl_trace_test.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_trace_test.exe
+  framelink_av_consumer.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\framelink_av_consumer.exe
+  framelink_av_producer.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\framelink_av_producer.exe
+  framelink_av_session.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\framelink_av_session.exe
+  framelink_consumer.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\framelink_consumer.exe
+  framelink_gst_av.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\framelink_gst_av.exe
+  framelink_producer.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\framelink_producer.exe
+<win-home>\dev\framelink-m6-20261106\test\fl_gst_native_source_win.cpp(94,1): warning C4002: too many arguments for function-like macro invocation 'G_CALLBACK' [<win-home>\dev\framelink-m6-20261106\build\fl_gst_native_source_win.vcxproj]
+<win-home>\dev\framelink-m6-20261106\test\fl_gst_native_source_win.cpp(88,49): error C2187: syntax error: ')' was unexpected here [<win-home>\dev\framelink-m6-20261106\build\fl_gst_native_source_win.vcxproj]
+<win-home>\dev\framelink-m6-20261106\test\fl_gst_native_source_win.cpp(95,2): error C3493: 'p' cannot be implicitly captured because no default capture mode has been specified [<win-home>\dev\framelink-m6-20261106\build\fl_gst_native_source_win.vcxproj]
+<win-home>\dev\framelink-m6-20261106\test\fl_gst_native_source_win.cpp(96,29): error C3493: 'name' cannot be implicitly captured because no default capture mode has been specified [<win-home>\dev\framelink-m6-20261106\build\fl_gst_native_source_win.vcxproj]
+<win-home>\dev\framelink-m6-20261106\test\fl_gst_native_source_win.cpp(107,92): error C3493: 'out' cannot be implicitly captured because no default capture mode has been specified [<win-home>\dev\framelink-m6-20261106\build\fl_gst_native_source_win.vcxproj]
+<win-home>\dev\framelink-m6-20261106\test\fl_gst_native_source_win.cpp(110,1): error C2062: type 'int' unexpected [<win-home>\dev\framelink-m6-20261106\build\fl_gst_native_source_win.vcxproj]
+<win-home>\dev\framelink-m6-20261106\test\fl_gst_native_source_win.cpp(110,30): error C2143: syntax error: missing ';' before '{' [<win-home>\dev\framelink-m6-20261106\build\fl_gst_native_source_win.vcxproj]
+<win-home>\dev\framelink-m6-20261106\test\fl_gst_native_source_win.cpp(110,30): error C2143: syntax error: missing ')' before ';' [<win-home>\dev\framelink-m6-20261106\build\fl_gst_native_source_win.vcxproj]
+<win-home>\dev\framelink-m6-20261106\test\fl_gst_native_source_win.cpp(110,41): error C2065: 'argc': undeclared identifier [<win-home>\dev\framelink-m6-20261106\build\fl_gst_native_source_win.vcxproj]
+<win-home>\dev\framelink-m6-20261106\test\fl_gst_native_source_win.cpp(110,47): error C2065: 'argv': undeclared identifier [<win-home>\dev\framelink-m6-20261106\build\fl_gst_native_source_win.vcxproj]
+<win-home>\dev\framelink-m6-20261106\test\fl_gst_native_source_win.cpp(110,53): error C2065: 'argc': undeclared identifier [<win-home>\dev\framelink-m6-20261106\build\fl_gst_native_source_win.vcxproj]
+<win-home>\dev\framelink-m6-20261106\test\fl_gst_native_source_win.cpp(110,90): error C2065: 'argc': undeclared identifier [<win-home>\dev\framelink-m6-20261106\build\fl_gst_native_source_win.vcxproj]
+<win-home>\dev\framelink-m6-20261106\test\fl_gst_native_source_win.cpp(110,143): error C2065: 'argv': undeclared identifier [<win-home>\dev\framelink-m6-20261106\build\fl_gst_native_source_win.vcxproj]
+<win-home>\dev\framelink-m6-20261106\test\fl_gst_native_source_win.cpp(110,155): error C3536: 'p': cannot be used before it is initialized [<win-home>\dev\framelink-m6-20261106\build\fl_gst_native_source_win.vcxproj]
+<win-home>\dev\framelink-m6-20261106\test\fl_gst_native_source_win.cpp(82,31): error C1075: '{': no matching token found [<win-home>\dev\framelink-m6-20261106\build\fl_gst_native_source_win.vcxproj]
+  fl_gst_av_parity.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_gst_av_parity.exe
+  fl_gst_av_qualification.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_gst_av_qualification.exe
 <Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04"><Obj S="progress" RefId="0"><TN RefId="0"><T>System.Management.Automation.PSCustomObject</T><T>System.Object</T></TN><MS><I64 N="SourceId">1</I64><PR N="Record"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj></Objs>

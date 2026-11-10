@@ -9,14 +9,14 @@
 -- Detecting CXX compile features - done
 -- Configuring done (1.8s)
 -- Generating done (0.0s)
--- Build files have been written to: C:/Users/jonsu/dev/m6-cpu-alloc-probe/build
+-- Build files have been written to: <win-home>/dev/m6-cpu-alloc-probe/build
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
   1>Checking Build System
-  Building Custom Rule C:/Users/jonsu/dev/m6-cpu-alloc-probe/CMakeLists.txt
+  Building Custom Rule <win-home>/dev/m6-cpu-alloc-probe/CMakeLists.txt
   probe.cpp
-  cpu_alloc_probe.vcxproj -> C:\Users\jonsu\dev\m6-cpu-alloc-probe\build\Release\cpu_alloc_probe.exe
-  Building Custom Rule C:/Users/jonsu/dev/m6-cpu-alloc-probe/CMakeLists.txt
+  cpu_alloc_probe.vcxproj -> <win-home>\dev\m6-cpu-alloc-probe\build\Release\cpu_alloc_probe.exe
+  Building Custom Rule <win-home>/dev/m6-cpu-alloc-probe/CMakeLists.txt
 mode=allocate count=6000 bytes=33177600 version=GStreamer 1.28.0
 mode=pool count=6000 bytes=33177600 version=GStreamer 1.28.0
 mode=allocate count=6000 bytes=33177600 version=GStreamer 1.28.0

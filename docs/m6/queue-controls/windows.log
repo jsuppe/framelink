@@ -1,11 +1,11 @@
 #< CLIXML
 MSBuild version 17.14.23+b0019275e for .NET Framework
 
-  framelink.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\framelink.dll
+  framelink.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\framelink.dll
   fl_gst_pool_policy.cpp
-  fl_gst_pool_policy.vcxproj -> C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_gst_pool_policy.exe
-UpdateCTestConfiguration  from :C:/Users/jonsu/dev/framelink-m6-20261106/build/DartConfiguration.tcl
-Test project C:/Users/jonsu/dev/framelink-m6-20261106/build
+  fl_gst_pool_policy.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_gst_pool_policy.exe
+UpdateCTestConfiguration  from :<win-home>/dev/framelink-m6-20261106/build/DartConfiguration.tcl
+Test project <win-home>/dev/framelink-m6-20261106/build
 Constructing a list of tests
 Done constructing a list of tests
 Updating test list for fixtures
@@ -15,8 +15,8 @@ Checking test dependency graph end
 test 66
     Start 66: gst_pool_policy
 
-66: Test command: C:\Users\jonsu\dev\framelink-m6-20261106\build\Release\fl_gst_pool_policy.exe "C:/Users/jonsu/dev/framelink-m6-20261106/build/Release/gstframelink.dll"
-66: Working Directory: C:/Users/jonsu/dev/framelink-m6-20261106/build
+66: Test command: <win-home>\dev\framelink-m6-20261106\build\Release\fl_gst_pool_policy.exe "<win-home>/dev/framelink-m6-20261106/build/Release/gstframelink.dll"
+66: Working Directory: <win-home>/dev/framelink-m6-20261106/build
 66: Test timeout computed to be: 30
 66: pool2: single-frame no-fill, producer gap, exact PTS/pixels and no invented sequence loss pass
 66: pool3: single-frame no-fill, producer gap, exact PTS/pixels and no invented sequence loss pass

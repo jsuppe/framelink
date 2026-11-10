@@ -36,12 +36,12 @@ CASE content fault=drop-audio-after-transport
 CASE content fault=producer-audio-gap
 EOS wait got error flaudioreader8: audio peer closed before GDP EOS
 {"case":"content","fault":"producer-audio-gap","video_frames":6,"audio_buffers":9,"audio_samples":6385,"av_offset_error_ns":0,"audio_drift_ns":0,"video_drift_ns":0,"arrival_us":{"video":{"p50":2920,"p95":4011,"max":4011},"audio":{"p50":2355,"p95":7671,"max":7671}},"failures":3,"result":"fail"}
-producer asink: PCM sample duration/continuity mismatch (/home/melchior/dev/framelink-m6/gst/gstframelinkaudio.cpp(28): reject (): /GstPipeline:pipeline17/GstFrameLinkAudioSink:asink:
+producer asink: PCM sample duration/continuity mismatch (<linux-home>/dev/framelink-m6/gst/gstframelinkaudio.cpp(28): reject (): /GstPipeline:pipeline17/GstFrameLinkAudioSink:asink:
 FrameLink audio rejected before serialization)
-producer video: coordinated session not ready or cancelled (/home/melchior/dev/framelink-m6/gst/gstframelink.cpp(516): sinkRenderImpl (): /GstPipeline:pipeline17/GstFrameLinkSink:video)
+producer video: coordinated session not ready or cancelled (<linux-home>/dev/framelink-m6/gst/gstframelink.cpp(516): sinkRenderImpl (): /GstPipeline:pipeline17/GstFrameLinkSink:video)
 producer vin: Internal data stream error. (../libs/gst/base/gstbasesrc.c(3177): gst_base_src_loop (): /GstPipeline:pipeline17/GstAppSrc:vin:
 streaming stopped, reason error (-5))
-producer video: invalid coordinated video EOS (/home/melchior/dev/framelink-m6/gst/gstframelink.cpp(798): sinkEventImpl (): /GstPipeline:pipeline17/GstFrameLinkSink:video)
+producer video: invalid coordinated video EOS (<linux-home>/dev/framelink-m6/gst/gstframelink.cpp(798): sinkEventImpl (): /GstPipeline:pipeline17/GstFrameLinkSink:video)
   validator: pipeline did not reach EOS
   validator: video frame count 6 != 50
   validator: audio samples 6385 != 49537
