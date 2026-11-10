@@ -1,0 +1,10 @@
+{
+  "state": "finished",
+  "started": 1794142150.5328295,
+  "revision": "d8023c4",
+  "binary_sha256": "f8a426517a8e523ade138b94a30d955f7eaaaa2c7e160f7aeb3f3e70ccb06c9a",
+  "command": "cd /data/local/tmp/framelink-cpu-readprep && mkdir source450 && ./fl_gst_av_bench static --source-only --seconds 450 --size 3840x2160 --fps 30 --format BGRA --pool 2 --video-queue 1 --latency-ms 0 --arrival-budget-ms 34 --transport-only --no-output-preroll --output-queue-buffers 1 --raw --out /data/local/tmp/framelink-cpu-readprep/source450 --label source450",
+  "exit": 0,
+  "pull_exit": 0,
+  "ended": 1794142601.3256433
+}
