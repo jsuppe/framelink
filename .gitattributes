@@ -1,0 +1,11 @@
+# Machine-local paths, users and hosts become placeholders in commits; see
+# tools/localenv_filter.py and run tools/setup_local_env.py once per clone.
+docs/** filter=localenv
+tools/** filter=localenv
+samples/** filter=localenv
+test/** filter=localenv
+*.md filter=localenv
+# The filter itself and its example must not be rewritten.
+tools/localenv_filter.py -filter
+tools/check_local_identity.py -filter
+local.env.example -filter

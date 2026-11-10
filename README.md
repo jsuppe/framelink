@@ -138,6 +138,10 @@ missing fence wait fails — not merely "no pixels arrived".
 
 Set `FRAMELINK_DEBUG=1` for connection diagnostics. Errors always print.
 
+Before committing evidence or scripts, run `python3 tools/setup_local_env.py` once
+per clone so machine-local paths, users and hosts are committed as placeholders;
+see [docs/LOCAL_ENV.md](docs/LOCAL_ENV.md).
+
 ## Status
 
 Consumer-owned rings, one producer per channel, bounded backpressure, version

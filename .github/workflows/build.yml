@@ -21,6 +21,8 @@ jobs:
           cmake --build build --parallel 4
       - name: Validate M6 gate accounting
         run: python tools/test_m6_validation.py
+      - name: No machine-local identity in tracked files
+        run: python3 tools/check_local_identity.py
       - name: Require A/V test registration
         run: python3 tools/check_av_test_registration.py build
       - name: Inspect public GStreamer elements
