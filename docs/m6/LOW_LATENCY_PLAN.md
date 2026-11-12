@@ -239,10 +239,13 @@ M6 remains open; M7 remains held.
 | D2 / D3 | Unresolved public overload/convenience-fallback decisions; existing explicit profiles/defaults preserved | Jon; no automatic default change or hidden native-to-CPU fallback |
 | Linux / Android campaigns | Broad work deferred under Windows-first direction. Prior Linux BGRA and other completed campaigns collected, not repeated. Android BGRA4K and NV121080 residual failures remain suspended; clean trace diagnostics did not waive them | Evelyn; resume deferred integration only after Windows priority permits; causal fixes required for suspended failed cells |
 
-**Windows runtime owner:** native worker `qualification_recovery`, exec76334,
-final-build NV12 4K30 five-second trace-off/on pair at exact a50841a.
-Evidence: `windows-native-final-target-prepared/runs/native-nv12-4k-a50841a-20261112t1148z`.
-Started 11:47:40Z. No competing runtime. Report pair result before duration.
+**Windows runtime owner:** native worker `qualification_recovery`, exec31547,
+one final-build NV12 4K30 1800-second trace-off duration at exact a50841a.
+Evidence: `windows-native-final-duration-prepared/runs/native-nv12-4k-duration-a50841a-20261112t1149z`.
+Started about11:49Z; expected finish about12:19Z. No competing runtime.
+The [final 4K short pair](windows-native-final-nv12-4k-a50841a/README.md) passed:
+both150video/240000PCM, zero34ms misses, maximum arrival5.534367/9.271867ms;
+all64hashes verified and runtime idle. Reported to root before duration.
 
 The prior NV12 1080p60 1800s run **PASSED**, completed09:07:02Z and recovered11:47Z
 without rerun. All43 collected hashes/full coverage, five unchanged pins, profile,
@@ -284,7 +287,7 @@ removes that concurrent workload from replay but does not waive on-demand failur
 The default path, actual decoder, full-pixel oracle, native leases, PCM and all
 17/34ms gates remain unchanged. Both modes retain explicit scope labels.
 
-Collect the current final-build NV12 4K short pair and report to root before another duration. Other native4K and sharedCPU NV124K
+Collect the current final-build NV12 4K duration before any other Windows workload. Other native4K and sharedCPU NV124K
 qualification remain ready afterward. The duration adapter requires matching
 integrated/pair proof and unchanged gates;25 local validator tests and independent
 review passed. The review-found uncertain-SSH collection race was corrected and
