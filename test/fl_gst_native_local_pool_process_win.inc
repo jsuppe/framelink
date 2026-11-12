@@ -303,6 +303,7 @@ static void localPoolPauseState(GstElement*pipe,GstState state){
  CHECK(g_get_monotonic_time()-began<1500000);
 }
 static int localPoolPauseReader(const char*path,HANDLE notice,HANDLE command,bool cancelPaused){
+ CHECK(freopen((std::string(path)+".pause-reader.log").c_str(),"w",stderr));setvbuf(stderr,nullptr,_IONBF,0);
  GError*error=nullptr;
  auto*pipe=gst_parse_launch("framelinkavsrc name=transport native-memory=true video-format=RGBA width=64 height=32 framerate=30/1 video-pool=2 video-queue-frames=1 transport.video_src ! appsink name=video max-buffers=1 sync=false async=false enable-last-sample=false transport.audio_src ! appsink name=audio max-buffers=1 sync=false async=false enable-last-sample=false",&error);CHECK(pipe&&!error);
  auto*src=gst_bin_get_by_name(GST_BIN(pipe),"transport");auto*video=gst_bin_get_by_name(GST_BIN(pipe),"video");auto*audio=gst_bin_get_by_name(GST_BIN(pipe),"audio");
@@ -355,7 +356,7 @@ static int localPoolPauseReader(const char*path,HANDLE notice,HANDLE command,boo
   fprintf(stderr,"pause final memory refs before NULL: %d\n",GST_MINI_OBJECT_REFCOUNT_VALUE(held));
   localPoolPauseState(pipe,GST_STATE_NULL);localPoolPauseMemory(held,heldOffset,heldStride,18);
   fprintf(stderr,"pause final memory refs after NULL: %d\n",GST_MINI_OBJECT_REFCOUNT_VALUE(held));
-  gst_memory_unref(held);held=nullptr;CHECK(SetEvent(notice));relayprocess::wait(command);
+  gst_memory_unref(held);held=nullptr;fprintf(stderr,"pause final unref returned\n");CHECK(SetEvent(notice));relayprocess::wait(command);
  }
  for(unsigned i=0;i<2;++i){gst_pad_remove_probe(eosPads[i],eosProbes[i]);gst_object_unref(eosPads[i]);}
  gst_object_unref(src);gst_object_unref(video);gst_object_unref(audio);gst_object_unref(pipe);
@@ -444,8 +445,13 @@ static void localPoolPauseControl(const char*plugin,bool cancelPaused){
    relayprocess::wait(notice.value);supervisor.stop();CHECK(supervisor.status()==FL_GST_SESSION_READY);
    CHECK(fl_gst_session_finish_local(down,TRUE,1000,nullptr));CHECK(SetEvent(command.value));relayprocess::wait(notice.value);
    const auto deadline=g_get_monotonic_time()+2000000;while(video.pending()){
-    const auto collected=video.collect();CHECK(collected==FL_OK);
-    if(g_get_monotonic_time()>=deadline){fprintf(stderr,"pause final pending after reader unref: %u\n",video.pending());CHECK(false);}
+    const auto collected=video.collect();
+    if(collected!=FL_OK||g_get_monotonic_time()>=deadline){
+     gchar*log=nullptr;gsize length=0;if(g_file_get_contents((outputPath+".pause-reader.log").c_str(),&log,&length,nullptr)){fwrite(log,1,length,stderr);g_free(log);}
+     flChannelInfo inputInfo{},outputInfo{};const auto inputQuery=flQuery(setup.input,&inputInfo),outputQuery=flQuery(setup.output,&outputInfo);
+     DWORD exitCode=0;CHECK(GetExitCodeProcess(child.hProcess,&exitCode));
+     fprintf(stderr,"pause final collect=%d pending=%u inputQuery=%d inputGeneration=%llu outputQuery=%d outputGeneration=%llu childExit=%lu\n",int(collected),video.pending(),int(inputQuery),(unsigned long long)inputInfo.generation,int(outputQuery),(unsigned long long)outputInfo.generation,(unsigned long)exitCode);CHECK(false);
+    }
     g_usleep(100);
    }
    CHECK(video.finish()==FL_OK);CHECK(SetEvent(command.value));relayprocess::join(child);
