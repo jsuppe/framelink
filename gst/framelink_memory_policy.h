@@ -25,8 +25,8 @@ typedef struct GstFrameLinkMemoryPolicy {
 // Configure all properties first in NULL, including a nonempty session= path;
 // producer native-memory=true. Receiver native-memory=false selects CPU_READ
 // with operations=COPY|READBACK; true selects GPU_SAMPLE with operations=0.
-// Neither shared-cpu nor audio-only. Version 1, generation 0, D3D11 GPU_SAMPLE
-// producer operations=0. Receiver property and candidate must match. Native
+// Neither shared-cpu nor audio-only. Version 1, generation 0, D3D11 producer
+// GPU_SAMPLE or GPU_SAMPLE|GPU_RENDER, operations=0 (GPU_RENDER alone rejects). Receiver property and candidate must match. Native
 // receivers require downstream retain-memory-until-gpu-complete-v1 allocation
 // agreement and memory retention until actual GPU completion; no implicit copy.
 // Both requirements must permit the chosen paths. The action copies the value

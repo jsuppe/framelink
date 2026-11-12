@@ -212,7 +212,8 @@ G_BEGIN_DECLS
 // Explicit current-user native profile, worker-thread only. FAR4 discovery is
 // separate from legacy/CPU profiles. Negotiates session, authenticates the exact
 // producer-ordered candidate BEFORE allocation, then clock/PCM/events and channel.
-// v1 supports D3D11 GPU_SAMPLE producer (operations=0), with an explicit receiver:
+// v1 supports a D3D11 GPU_SAMPLE or GPU_SAMPLE|GPU_RENDER producer
+// (operations=0; GPU_RENDER alone rejects), with an explicit receiver:
 // CPU_READ (operations=COPY|READBACK), or GPU_SAMPLE (operations=0, deferred release).
 // BOTH requirements must authorize the path. Other paths reject; no fallback.
 // Native receivers must negotiate retain-memory-until-gpu-complete-v1 downstream
@@ -279,6 +280,11 @@ FL_GST_SESSION_API gboolean fl_gst_session_open_local_native_relay_pool(FlGstSes
  guint audio_queue_ms,guint connect_timeout_ms,guint idle_timeout_ms,
  const GstFrameLinkMemoryPolicy* candidate,const guint8* adapter_luid,void*const* shared_handles,
  GstFrameLinkMemoryPolicy* bound,flChannel** channel,GCancellable*,GError**);
+// Receiver half of FAR5 setup; FAR4/native and FAR3/CPU endpoints reject.
+// The returned policy is producer-ordered: swap endpoints before receiver binding.
+// Own the returned channel on success; outputs clear on failure. Configure and
+// bind tracks before local_ready, then finish_local only after real aggregate
+// drain. This does not create bins, forward media, or install a supervisor.
 FL_GST_SESSION_API gboolean fl_gst_session_open_local_native_pool_receiver(FlGstSession*,
  const gchar* session_path,const flSessionCapabilities*,guint video_queue_frames,guint video_pool,
  guint audio_queue_ms,guint connect_timeout_ms,guint idle_timeout_ms,
