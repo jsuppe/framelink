@@ -22,3 +22,16 @@ and diagnosis remain archived. Subsequent [nine-test focused validation atb247e5
 also passed. This closes that narrow functional coverage gap, not all fault or
 endurance qualification. Neither these passes nor Linux/Android3a passes close
 the suspended Windows resource acceptance, the failed100-cycle profile or allM6.
+
+## November12 deferred-reclaim attribution (not acceptance)
+
+[Six serial diagnostic arms](device-causal-controls-20261112/README.md) separate
+hardware/WARP and device-only/texture churn. Hardware empty/textures grow
+63.524/61.586KiB per fast cycle; WARP0.050/0.936. Hardware memory substantially
+reclaims around6s after churn stops. Three batches settle to13524/15072/14804KiB,
+not monotonic retained growth. An independent live hardware anchor does not
+prevent that deferred reclamation. No transport or rendering was involved;
+50ms cycles/feature level11.0 differ from historical production and5s probes.
+These observations identify delayed device-path retention, not exact allocation
+stacks or complete cause of the failed production slopes. No sleep/cache/Trim
+patch or gate change follows. Default production remains suspended, not waived.

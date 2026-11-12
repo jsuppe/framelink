@@ -1,0 +1,190 @@
+{
+  "hardware-empty": {
+    "cycles": 100,
+    "settle_samples": 30,
+    "postwarm_KiB_per_cycle": {
+      "private_bytes": 63.524300111982086,
+      "committed_private": 63.506886898096305,
+      "committed_mapped": 0.0,
+      "committed_image": 0.0
+    },
+    "last_cycle": {
+      "phase": "cycle",
+      "cycle": 99,
+      "tick_ms": 744059234,
+      "private_bytes": 38928384,
+      "handles": 241,
+      "device_release_refs": 0,
+      "committed_private": 32960512,
+      "committed_mapped": 8683520,
+      "committed_image": 62521344,
+      "reserved_bytes": 4428152832
+    },
+    "last_settle": {
+      "phase": "settle",
+      "cycle": 30,
+      "tick_ms": 744089265,
+      "private_bytes": 14848000,
+      "handles": 239,
+      "device_release_refs": 0,
+      "committed_private": 8994816,
+      "committed_mapped": 8683520,
+      "committed_image": 62521344,
+      "reserved_bytes": 4352503808
+    },
+    "settle_private_delta": -24080384,
+    "baseline": {
+      "phase": "baseline",
+      "cycle": 0,
+      "tick_ms": 744041328,
+      "private_bytes": 1052672,
+      "handles": 90,
+      "device_release_refs": 0,
+      "committed_private": 335872,
+      "committed_mapped": 3305472,
+      "committed_image": 19492864,
+      "reserved_bytes": 4340285440
+    }
+  },
+  "warp-textures": {
+    "cycles": 100,
+    "settle_samples": 30,
+    "postwarm_KiB_per_cycle": {
+      "private_bytes": 0.9363381858902575,
+      "committed_private": 0.9363381858902575,
+      "committed_mapped": 0.0,
+      "committed_image": 0.0
+    },
+    "last_cycle": {
+      "phase": "cycle",
+      "cycle": 99,
+      "tick_ms": 744177859,
+      "private_bytes": 1982464,
+      "handles": 134,
+      "device_release_refs": 0,
+      "committed_private": 753664,
+      "committed_mapped": 5246976,
+      "committed_image": 26791936,
+      "reserved_bytes": 4376100864
+    },
+    "last_settle": {
+      "phase": "settle",
+      "cycle": 30,
+      "tick_ms": 744207875,
+      "private_bytes": 1937408,
+      "handles": 134,
+      "device_release_refs": 0,
+      "committed_private": 708608,
+      "committed_mapped": 5246976,
+      "committed_image": 26791936,
+      "reserved_bytes": 4341542912
+    },
+    "settle_private_delta": -45056,
+    "baseline": {
+      "phase": "baseline",
+      "cycle": 0,
+      "tick_ms": 744172562,
+      "private_bytes": 1024000,
+      "handles": 84,
+      "device_release_refs": 0,
+      "committed_private": 331776,
+      "committed_mapped": 3305472,
+      "committed_image": 18837504,
+      "reserved_bytes": 4340273152
+    }
+  },
+  "warp-empty": {
+    "cycles": 100,
+    "settle_samples": 30,
+    "postwarm_KiB_per_cycle": {
+      "private_bytes": 0.04977603583426653,
+      "committed_private": 0.049776035834266506,
+      "committed_mapped": 0.0,
+      "committed_image": 0.0
+    },
+    "last_cycle": {
+      "phase": "cycle",
+      "cycle": 99,
+      "tick_ms": 744142531,
+      "private_bytes": 1761280,
+      "handles": 134,
+      "device_release_refs": 0,
+      "committed_private": 532480,
+      "committed_mapped": 5246976,
+      "committed_image": 26791936,
+      "reserved_bytes": 4374224896
+    },
+    "last_settle": {
+      "phase": "settle",
+      "cycle": 30,
+      "tick_ms": 744172546,
+      "private_bytes": 1712128,
+      "handles": 134,
+      "device_release_refs": 0,
+      "committed_private": 487424,
+      "committed_mapped": 5246976,
+      "committed_image": 26791936,
+      "reserved_bytes": 4339666944
+    },
+    "settle_private_delta": -49152,
+    "baseline": {
+      "phase": "baseline",
+      "cycle": 0,
+      "tick_ms": 744137234,
+      "private_bytes": 1028096,
+      "handles": 84,
+      "device_release_refs": 0,
+      "committed_private": 323584,
+      "committed_mapped": 3305472,
+      "committed_image": 18837504,
+      "reserved_bytes": 4340281344
+    }
+  },
+  "hardware-textures": {
+    "cycles": 100,
+    "settle_samples": 30,
+    "postwarm_KiB_per_cycle": {
+      "private_bytes": 61.585778275475924,
+      "committed_private": 61.56713325867861,
+      "committed_mapped": 0.0,
+      "committed_image": 0.0
+    },
+    "last_cycle": {
+      "phase": "cycle",
+      "cycle": 99,
+      "tick_ms": 744107171,
+      "private_bytes": 39358464,
+      "handles": 235,
+      "device_release_refs": 0,
+      "committed_private": 33402880,
+      "committed_mapped": 8683520,
+      "committed_image": 61865984,
+      "reserved_bytes": 4427694080
+    },
+    "last_settle": {
+      "phase": "settle",
+      "cycle": 30,
+      "tick_ms": 744137218,
+      "private_bytes": 13594624,
+      "handles": 233,
+      "device_release_refs": 0,
+      "committed_private": 7761920,
+      "committed_mapped": 8683520,
+      "committed_image": 61865984,
+      "reserved_bytes": 4353720320
+    },
+    "settle_private_delta": -25763840,
+    "baseline": {
+      "phase": "baseline",
+      "cycle": 0,
+      "tick_ms": 744089281,
+      "private_bytes": 1032192,
+      "handles": 84,
+      "device_release_refs": 0,
+      "committed_private": 327680,
+      "committed_mapped": 3305472,
+      "committed_image": 18837504,
+      "reserved_bytes": 4340277248
+    }
+  }
+}

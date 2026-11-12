@@ -1,7 +1,7 @@
 # M6 low-latency and native-memory resolution plan
 
-Revision 1 — 2026-11-04. Owner: project executor. Independent work may run in
-parallel under the November 12 override; Windows runtime has one exclusive owner.
+Revision 1 — 2026-11-04. Owner: project executor. Single-task serial execution restored by Jon on November 12 at 06:49 EST;
+one task and one executor, with no parallel implementation, investigation or validation.
 Status: approved user requirements plus implementation proposals; no new runtime
 qualification is claimed by this document. Applies to FrameLink and vkrender.
 
@@ -203,17 +203,17 @@ Receive-depth gate evidence: [review and platform tests](receive-depth/README.md
 ## Immediate next action and coordination
 
 ### Execution-order override — Jon, 2026-11-12
-The then-running exact7b8a274 integrated campaign was preserved and collected; do not repeat it. Complete remaining Windows implementation and API-contract work using focused builds/checks, with independent parallel work permitted and only one Windows runtime owner. Batch full integrated suites, broad fault/endurance/performance campaigns and final compatibility qualification after planned Windows code/API changes. Fix validation failures and qualify the final exact revision before readiness claims. Code complete is not validated/API frozen/M6 complete. Linux/Android broad campaigns remain deferred; M7 hold unchanged.
+The then-running exact7b8a274 integrated campaign was preserved and collected; do not repeat it. Complete remaining Windows implementation and API-contract work using focused builds/checks, with one task and one executor at a time. Batch full integrated suites, broad fault/endurance/performance campaigns and final compatibility qualification after planned Windows code/API changes. Fix validation failures and qualify the final exact revision before readiness claims. Code complete is not validated/API frozen/M6 complete. Linux/Android broad campaigns remain deferred; M7 hold unchanged.
 
 ## Priority override — Jon, 2026-11-08 16:29 EST
 Jon requests completing all remaining Windows-specific changes first and stabilizing the API. This supersedes the previous Linux/Android refresh order. The then-running Linux BGRA1080p60 test was preserved and collected. Do NOT launch the queued Linux NV12 refresh under this override. Defer additional Linux/Android campaigns except focused checks required by shared API/code changes.
 
-Inventory and execute remaining Windows M6 implementation and repairs under the current parallel-work/exclusive-runtime policy: shared-CPU allocator/transport integration; Windows D3D11 native-producer integration into coordinated sessions (M6.9); reconnect/device lifetime memory growth; outstanding Windows timing/queue defects and required fault handling. Validate each change with focused Windows checks. Track genuine blocked items with owner/evidence/resume condition, not silent acceptance.
+Inventory and execute remaining Windows M6 implementation and repairs under the current single-task serial policy: shared-CPU allocator/transport integration; Windows D3D11 native-producer integration into coordinated sessions (M6.9); reconnect/device lifetime memory growth; outstanding Windows timing/queue defects and required fault handling. Validate each change with focused Windows checks. Track genuine blocked items with owner/evidence/resume condition, not silent acceptance.
 
 Make API stabilization an explicit deliverable alongside this Windows-first work: audit native C/platform APIs and GStreamer properties/session contracts, resolve overload/fallback defaults, preserve compatibility or document versioned migration, and check planned Linux/Android integration will not require breaking the proposed contract. Publish an exact revision and compatibility checks for an app-integration baseline. Do not claim the API is frozen until reviewed/tested; do not equate a Windows-ready API baseline with full cross-platform M6 completion. Bring forward API stabilization work, not unrelated M7 packaging/release; retain maintenance hold before M7.
 
 
-Parallel independent work is authorized (Jon, 2026-11-12). Keep non-overlapping source ownership and one Windows runtime executor. M6 is not complete.
+Jon reinstated single-task serial execution on 2026-11-12 at 06:49 EST, superseding earlier parallel authorization. qualification_recovery is sole executor; parent handles conversation only. M6 is not complete.
 
 ### Authoritative execution state — 2026-11-12
 
@@ -240,7 +240,14 @@ M6 remains open; M7 remains held.
 | Linux / Android campaigns | Broad work deferred under Windows-first direction. Prior Linux BGRA and other completed campaigns collected, not repeated. Android BGRA4K and NV121080 residual failures remain suspended; clean trace diagnostics did not waive them | Evelyn; resume deferred integration only after Windows priority permits; causal fixes required for suspended failed cells |
 
 **Windows runtime ownership:** no workload live after diagnostic collection13:51:12Z;
-`qualification_recovery` owns serial result integration/remaining-task handoff.
+`qualification_recovery` resumed as sole serial executor at 16:55Z.
+EXECUTION_GAP since 13:54Z is recorded, not described as active work.
+Current task: Windows device-lifetime causal evidence integration. Six bounded
+serial arms collected17:03:49Z;800 cycles/270 settle observations. Hardware-only
+growth and delayed reclamation reproduced without FrameLink, textures or GStreamer;
+a live anchor does not prevent reclamation. [Evidence](lifecycle/device-causal-controls-20261112/README.md).
+This is diagnostic attribution, not a repeat or waiver of the failed 100-cycle
+production gate. No production/API/default change is authorized by a clean control.
 Bounded [stall diagnostic](windows-native-stall-diagnostic-a50841a/README.md) complete:
 both5s controls300video/240000PCM pass17ms/fulltrace; source CSV max0.1192/0.1323ms.
 Explicit350.1415ms sourcepause causes relay queue1 replacement(sequence62),
