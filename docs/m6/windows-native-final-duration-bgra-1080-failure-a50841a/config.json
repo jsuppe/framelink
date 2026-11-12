@@ -1,0 +1,33 @@
+{
+  "revision": "a50841aad44fbc9431234a4f326bad036d193bf5",
+  "binary_directory": "<win-home>/dev/framelink-final-final-windows-a50841a-toolpath-20261112t0822z/build/Release",
+  "artifact_paths": {
+    "fl_gst_local_native_bench_win.exe": "<win-home>/dev/framelink-final-final-windows-a50841a-toolpath-20261112t0822z/build/Release/fl_gst_local_native_bench_win.exe",
+    "gstframelink.dll": "<win-home>/dev/framelink-final-final-windows-a50841a-toolpath-20261112t0822z/build/Release/gstframelink.dll",
+    "framelink_gst_session.dll": "<win-home>/dev/framelink-final-final-windows-a50841a-toolpath-20261112t0822z/build/Release/framelink_gst_session.dll",
+    "framelink.dll": "<win-home>/dev/framelink-final-final-windows-a50841a-toolpath-20261112t0822z/build/Release/framelink.dll",
+    "fl_gst_native_producer_win.exe": "<win-home>/dev/framelink-final-final-windows-a50841a-toolpath-20261112t0822z/build/Release/fl_gst_native_producer_win.exe"
+  },
+  "integrated_dll_sha256": {
+    "framelink.dll": "258817c2a2ca7df704575a3c15f539c302c87d471056fd964f868ef2fa50ea10",
+    "framelink_gst_session.dll": "9fb7da31cbc38ccce5a0cb87456dbaeb5d8ea0cc61558af0682eedbbcd9c681f",
+    "gstframelink.dll": "8143c8b65d9c93eeb98c68c74586128912ccd9a8f7b1fbdc809b4ad2d693b994"
+  },
+  "source_archive_sha256": "5165a16e28c4fec7c5ea30ededfb897c42c2c650b9e06e3fb3eee2fb97db1c3b",
+  "source_analyzer_sha256": "9679b765eb5359c2a3cdb8e406e6c3dc2e633a1a815a8798793f5f956df668d9",
+  "format": "BGRA",
+  "width": 1920,
+  "height": 1080,
+  "fps": 60,
+  "final_build_run": "<linux-home>/dev/evidence/m6-cpu-path/windows-final-integrated-prepared/runs/final-windows-a50841a-toolpath-20261112t0822z",
+  "seconds": 1800,
+  "binary_sha256": {
+    "fl_gst_local_native_bench_win.exe": "36235c4447efdddadaf9a9859ffa1c3f57164ed433d0a7724862c2027f15cf41",
+    "fl_gst_native_producer_win.exe": "91c30697090970ee6c5ebb23491b2d28cfd8fe691a930faa26926b6326de927c",
+    "framelink.dll": "258817c2a2ca7df704575a3c15f539c302c87d471056fd964f868ef2fa50ea10",
+    "framelink_gst_session.dll": "9fb7da31cbc38ccce5a0cb87456dbaeb5d8ea0cc61558af0682eedbbcd9c681f",
+    "gstframelink.dll": "8143c8b65d9c93eeb98c68c74586128912ccd9a8f7b1fbdc809b4ad2d693b994"
+  },
+  "pair_run": "<linux-home>/dev/evidence/m6-cpu-path/windows-native-final-target-prepared/runs/native-bgra-1080-a50841a-20261112t1324z",
+  "runtime_lane_released": true
+}

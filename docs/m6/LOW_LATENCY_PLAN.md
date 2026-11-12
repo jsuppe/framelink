@@ -240,17 +240,18 @@ M6 remains open; M7 remains held.
 | Linux / Android campaigns | Broad work deferred under Windows-first direction. Prior Linux BGRA and other completed campaigns collected, not repeated. Android BGRA4K and NV121080 residual failures remain suspended; clean trace diagnostics did not waive them | Evelyn; resume deferred integration only after Windows priority permits; causal fixes required for suspended failed cells |
 
 **Windows runtime owner:** native worker `qualification_recovery`, single-task/serial only.
-SharedCPU NV124K30 preflight+duration exec82000 collected PASS13:21:53Z, frozen461584b.
-54000video/86400000PCM/180000audio, zero34ms misses; maximum video11.573167ms/audio2.6603ms;
-memory6.329599/3.283390KB/min, handles/threads pass.35original hashes/fullcoverage,
-upload bytes/four pins/local raw reanalysis verified; live idle13:22:15Z.
-[CPU NV124K archive](cpu-path/windows-cpu-nv12-4k30-461584b/README.md).
-Finalcandidate native BGRA4K and NV124K durations also PASS, each54000video/86400000PCM,
-zero34ms misses, resource gates pass and43hashes/pins/idle verified:
-[BGRA4K](windows-native-final-duration-bgra-4k-a50841a/README.md),
-[NV124K](windows-native-final-duration-nv12-4k-a50841a/README.md).
-Next scoped task: finalcandidate BGRA1080 shortpair then duration only ifpass.
-Existing BGRA1080 duration remains valid for11d1b65, not final checked-helper candidate.
+Finalcandidate BGRA1080duration exec52689 **FAILED**, collected13:35:55Z, idle-after0.
+[Failure archive](windows-native-final-duration-bgra-1080-failure-a50841a/README.md).
+Source acquire assertion/receiver PTS mismatch around695s; source frame41713
+pre-acquire delay323.211334ms (actual acquire0.0031ms), then catch-up burst.
+PCM continues through gap. Delay location pacing/previous CSV write/scheduling
+unresolved; receiver CSV tail truncated.39hashes/uploads/five pins verified;
+exact analyzer fails incomplete run, no repeat/waiver. No production changes.
+Next single task: diagnostic-only in-memory source pace/CSV phases and exact
+failure expected/actual PTS/result capture; bounded source-delay control separates
+catch-up/default queue1 replacement from original stall attribution.
+Prior finalcandidate native NV121080/NV124K/BGRA4K durations PASS.
+SharedCPU NV124K30 frozen461584b PASS archived605d205/f1f1dcc.
 
 The prior NV12 1080p60 1800s run **PASSED**, completed09:07:02Z and recovered11:47Z
 without rerun. All43 collected hashes/full coverage, five unchanged pins, profile,
@@ -292,7 +293,7 @@ removes that concurrent workload from replay but does not waive on-demand failur
 The default path, actual decoder, full-pixel oracle, native leases, PCM and all
 17/34ms gates remain unchanged. Both modes retain explicit scope labels.
 
-Advance finalcandidate BGRA1080 gate serially; no competing Windows work. Other native4K and sharedCPU NV124K
+Diagnose finalcandidate BGRA1080 pre-acquire stall/catch-up failure serially; no clean repeat. Other native4K and sharedCPU NV124K
 qualification remain ready afterward. The duration adapter requires matching
 integrated/pair proof and unchanged gates;25 local validator tests and independent
 review passed. The review-found uncertain-SSH collection race was corrected and
