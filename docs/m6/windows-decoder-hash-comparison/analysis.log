@@ -1,0 +1,61 @@
+{
+  "timings": {
+    "1080p-packed/glib-rows": {
+      "p50_ms": 18.05375,
+      "min_ms": 17.9117,
+      "max_ms": 18.4877
+    },
+    "1080p-packed/cng-rows-reusable": {
+      "p50_ms": 3.2428,
+      "min_ms": 3.2371,
+      "max_ms": 3.2471
+    },
+    "1080p-packed/cng-packed-reusable": {
+      "p50_ms": 3.2351,
+      "min_ms": 3.231,
+      "max_ms": 3.2498
+    },
+    "1080p-padded/glib-rows": {
+      "p50_ms": 18.048949999999998,
+      "min_ms": 17.923,
+      "max_ms": 18.5483
+    },
+    "1080p-padded/cng-rows-reusable": {
+      "p50_ms": 3.2427,
+      "min_ms": 3.2363,
+      "max_ms": 3.2869
+    },
+    "4k-packed/glib-rows": {
+      "p50_ms": 72.681,
+      "min_ms": 72.0856,
+      "max_ms": 76.9998
+    },
+    "4k-packed/cng-rows-reusable": {
+      "p50_ms": 12.95465,
+      "min_ms": 12.9483,
+      "max_ms": 12.9981
+    },
+    "4k-packed/cng-packed-reusable": {
+      "p50_ms": 12.94115,
+      "min_ms": 12.9355,
+      "max_ms": 14.4175
+    },
+    "4k-padded/glib-rows": {
+      "p50_ms": 72.59815,
+      "min_ms": 72.0053,
+      "max_ms": 73.6232
+    },
+    "4k-padded/cng-rows-reusable": {
+      "p50_ms": 12.953050000000001,
+      "min_ms": 12.9412,
+      "max_ms": 12.9751
+    }
+  },
+  "pass": true,
+  "samples": 120,
+  "python_sha256": {
+    "1080p": "941a29733dc218b5f5db19dfbce12732c2bd6343f6d71ff4d0f3a03836fc6248",
+    "4k": "8faa155f059dec86bdbf9ba8e5a7caa925c96b4a2af752cd299cee06c7c72041"
+  },
+  "scope": "warm CPU buffer SHA256 feasibility only; no media or qualification"
+}
