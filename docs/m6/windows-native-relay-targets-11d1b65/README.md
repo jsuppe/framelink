@@ -41,3 +41,7 @@ Exact run directories:
 `collected-sha256.json` paths are relative to each original capture root, not this compact archive. CSVs, tar files, binaries, source trees and discovery credentials are not copied here. `archive-sha256.json` independently hashes the files actually archived. Run-name time suffixes are labels; use receipt timestamps for actual execution order/times.
 
 This evidence does not establish decoder integration, physical playback, long-run native resource/lifetime acceptance, an isolated-hop latency contract or M6 completion. API not frozen; M7 held.
+
+### Repository path normalization
+
+`archive-sha256.json` preserves the original local, pre-commit archive hashes. The repository clean filter normalizes machine-specific paths, so those hashes are not hashes of normalized Git blobs. `git-blob-sha256.json` separately hashes the exact committed file bytes (excluding itself). Original external evidence hashes and runtime binary pins remain unchanged.

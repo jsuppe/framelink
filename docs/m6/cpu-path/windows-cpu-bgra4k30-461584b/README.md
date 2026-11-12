@@ -39,3 +39,7 @@ The eight raw CSV files are under that directory's `data/` case folders; they ar
 `run.py` is the original generic single-format controller; the executed format/run ID are fixed in `controller-status.json` and `config.json`. `artifact-sha256.json` describes the uploaded runner files. Retaining a runner is not authorization to rerun it or take the runtime lane.
 
 This establishes this shared-CPU transport profile's accounting, timing and resource gates. It does **not** establish payload hashes, physical playback, native allocation identity, native two-hop rate qualification or completion of M6. Prior startup/native-lifetime failures remain separate and are not waived. API not frozen; M7 held.
+
+### Repository path normalization
+
+`archive-sha256.json` preserves the original local, pre-commit archive hashes. The repository clean filter normalizes machine-specific paths, so those hashes are not hashes of normalized Git blobs. `git-blob-sha256.json` separately hashes the exact committed file bytes (excluding itself). Original external evidence hashes and runtime binary pins remain unchanged.

@@ -31,3 +31,7 @@ Original evidence:
 All five uploaded-artifact hashes were checked, including the source archive. All29 collected evidence-tar members were compared byte-for-byte with the local collected files. `evidence-verification.json` retains these hashes and the original evidence-tar hash. This compact archive includes the small raw CSVs, summaries, stderr logs and independent analysis; it excludes tar files, the source tree, build products and discovery credentials. `archive-sha256.json` hashes the archived files.
 
 Earlier smoke attempts are separate evidence and are not overwritten by this corrected result. Target-rate preflight, sustained/native lifecycle qualification and full M6 acceptance remain separate. No physical-playback or M7 release claim.
+
+### Repository path normalization
+
+`archive-sha256.json` preserves the original local, pre-commit archive hashes. The repository clean filter normalizes machine-specific paths, so those hashes are not hashes of normalized Git blobs. `git-blob-sha256.json` separately hashes the exact committed file bytes (excluding itself). Original external evidence hashes and runtime binary pins remain unchanged.
