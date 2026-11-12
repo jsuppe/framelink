@@ -116,7 +116,7 @@ Physical scanout/acoustic alignment are separate from API completion and PTS.
 
 All unchecked tasks below are pending, not newly completed by prior large-queue
 runs. Every validation records revision, host/driver, settings, exact command,
-trace state, all failures, and raw evidence. Execute sequentially.
+trace state, all failures, and raw evidence. Independent non-overlapping work may run concurrently under Jon’s2026-11-12 authorization; Windows runtime campaigns retain one exclusive owner.
 
 ### M6.2 — Acceptance suspended; evidence published
 
@@ -225,15 +225,15 @@ since the candidate. M6 remains open; M7 remains held.
 | Windows relay implementation | Validated: source-relative input, safe consumer-pool snapshot, FAR5 same-allocation output, actual three-process native/PCM, held-reader replacement/source-death, explicit automatic receiver and transactional unpublished setup | Evelyn; implementation complete within identified Windows scope; no invented convenience API |
 | Integrated Windows/API | Clean candidate build/API + **169/169 tests in655.72s**, no skips;119 prior export names retained +9 additive =128. [Evidence](windows-integrated-461584b/README.md) | Collected; do not repeat diagnostics already in CTest |
 | Old-client compatibility | **3/3 unchanged7b8a274-built clients** pass against baseline and candidate DLLs; exact binary hashes verified. Source review found no existing public layout/enum/signature break. [Evidence](windows-compat-461584b/README.md) | Collected; bounded proof, not all-version/ordinal ABI freeze |
-| Windows sharedCPU NV12 1080p60 | **In progress** on exact candidate.5s preflight300video/240000PCM/500audio passes, no17ms misses; maxima4.0679/2.0695ms. One1800s run started06:24:34Z, expected~06:54:36Z | Sole runtime owner native `separate_process_av`, exec33430, remote driver57372. Collect108000video/86400000PCM/180000audio, all-frame17ms timing and64KB/min resource gate. No competing runtime |
-| Windows other sharedCPU targets | Older76a65d2 BGRA1080p60 sustained pass retained; BGRA4K30 and NV124K30 remain unqualified. [Scope](cpu-path/windows-cpu-benchmark/README.md) | Evelyn; after current cell, take next unqualified Windows cell with preflight then sustained only if pass; preserve failures, no blind repeats |
+| Windows sharedCPU NV12 1080p60 | **PASS** exact461584b: one1800s run,108000video/86400000PCM/180000audio; zero17ms misses, inferred A/V delta0ns; memory7.233/7.569KB/min below64, handle/thread gates pass. [Evidence](cpu-path/windows-cpu-nv12-1080p60-461584b/README.md) | Collected and independently reanalyzed; four binary hashes unchanged. Runtime released06:54:44Z; do not repeat |
+| Windows other sharedCPU targets | Older76a65d2 BGRA1080p60 sustained pass retained. BGRA4K30 preflight passed150video/240000PCM/500audio; one1800s gate started06:55:45Z, native `separate_process_av`, exec48718; NV124K30 next unqualified cell. [Scope](cpu-path/windows-cpu-benchmark/README.md) | Sole Windows runtime owner child; root integrates evidence. Preserve failures, no blind repeats |
 | Historical Windows startup | **Suspended, not waived.** Original1529.4514ms is source-to-receive, not proven producer-open time. New buffered phases show current158–164ms opens dominated by device creation; legacy94/100 vs coordinated100/100, exactPCM, no reproduction. [Evidence](windows-startup-phase-461584b/README.md) | Evelyn; resume on original-scale phase/wait evidence plus compatible remedy, not equivalent clean repeats |
 | Windows native lifetime | **Suspended, not waived:**21.10/84.09KiB/cycle exceed16KB/cycle. Raw device churn/reuse/Trim controls identify a contribution, not complete attribution. [Contract](lifecycle/WINDOWS_DEVICE_LIFETIME.md) | Evelyn owns investigation; driver/backend remedy or explicitly approved device-lifetime contract required. Jon owns contract/acceptance changes |
 | D2 / D3 | Unresolved public overload/convenience-fallback decisions; existing explicit profiles/defaults preserved | Jon; no automatic default change or hidden native-to-CPU fallback |
 | Linux / Android campaigns | Broad work deferred under Windows-first direction. Prior Linux BGRA and other completed campaigns collected, not repeated. Android BGRA4K and NV121080 residual failures remain suspended; clean trace diagnostics did not waive them | Evelyn; resume deferred integration only after Windows priority permits; causal fixes required for suspended failed cells |
 
-**Runtime evidence directory:**
-`<linux-home>/dev/evidence/m6-cpu-path/windows-cpu-nv12-1080p60-461584b`.
+**Active runtime evidence directory:**
+`<linux-home>/dev/evidence/m6-cpu-path/windows-cpu-4k-461584b-prepared/runs/bgra-4k30-20261112t0655z`.
 Root owns documentation/result integration while the named child owns the single
 Windows workload. Check actual executor state before takeover; never infer idle
 from a checkpoint. On completion, collect, review and advance the next ready M6

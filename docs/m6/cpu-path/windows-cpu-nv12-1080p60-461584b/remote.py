@@ -1,0 +1,61 @@
+from pathlib import Path
+import os,sys,json,subprocess,hashlib,datetime,importlib.util,math
+ROOT=Path(__file__).resolve().parent
+REPO=Path('<win-home>/dev/framelink-m6-windows-461584b')
+BUILD=REPO/'build/Release'
+REV='461584bbf5a6b8b70cec1578d69d35cb4b1ea2ff'
+NAMES=['fl_gst_av_bench.exe','gstframelink.dll','framelink_gst_session.dll','framelink.dll']
+def hashes():return {n:hashlib.sha256((BUILD/n).read_bytes()).hexdigest() for n in NAMES}
+def stamp():return datetime.datetime.now(datetime.timezone.utc).isoformat()
+def save(path,value):path.write_text(json.dumps(value,indent=2)+'\n')
+spec=importlib.util.spec_from_file_location('timing',ROOT/'m6_raw_timing.py');timing=importlib.util.module_from_spec(spec);spec.loader.exec_module(timing)
+def analyze(folder,seconds):
+ label=folder.name
+ fields=dict(x.split('=',1) for x in (folder/(label+'.summary.txt')).read_text().splitlines() if '=' in x)
+ r={'checks':{},'scope':'shared CPU transport, inferred constant PTS mapping; not physical playback or native allocation identity'}
+ check=r['checks']
+ for k,v in {'complete':'yes','expected.frames':str(seconds*60),'expected.samples':str(seconds*48000),'consumer.frames':str(seconds*60),'producer.pushed.frames':str(seconds*60),'consumer.samples':str(seconds*48000),'producer.pushed.samples':str(seconds*48000),'consumer.audio.contiguous':'yes','consumer.queue.accounting':'complete','producer.result':'EOS','consumer.result':'EOS','video.pool':'2','video.queue':'1','playback.latency_ms':'0','output.queue_buffers':'1','output.async':'false','output.sync':'false','arrival.budget_ms':'17'}.items():check[k]=fields.get(k)==v
+ for track in ['audio','video']:
+  for tail in ['pending','unmatched']:check[track+'.'+tail]=fields.get('consumer.'+track+'.output_queue.'+tail)=='0'
+ r['video']=timing.analyze(timing.read(folder/(label+'-producer.txt.push.csv')),timing.read(folder/(label+'-consumer.txt.video.csv')),seconds*60,17000000)
+ r['audio']=timing.audio_continuity(timing.read(folder/(label+'-consumer.txt.audio.csv')),seconds*100,17000000)
+ r['av_mapping']=timing.av_mapping(r['video'],timing.read(folder/(label+'-producer.txt.audio-push.csv')),timing.read(folder/(label+'-consumer.txt.audio.csv')),seconds*100,17000000)
+ check['video_17ms']=r['video']['arrival_misses']==0;check['audio_17ms']=r['audio']['arrival_misses']==0
+ r['resources']={}
+ for side in ['consumer','producer']:
+  series=[[float(x) for x in row.split(':')] for row in fields[side+'.series.t_cpums_memkb_handles_threads'].strip(';').split(';')]
+  steady=[row for row in series[:-1] if row[0]>=2];half=steady[len(steady)//2:]
+  def slope(col):
+   n=len(half);sx=sum(x[0] for x in half);sy=sum(x[col] for x in half);den=n*sum(x[0]**2 for x in half)-sx*sx
+   return (n*sum(x[0]*x[col] for x in half)-sx*sy)/den*60 if den>0 else 0
+  v={'mem_kb_per_min':slope(2),'handles_per_min':slope(3),'threads_per_min':slope(4),'cpu_percent':float(fields[side+'.cpu.percent']),'sample_count':len(series),'rounded_series':True}
+  r['resources'][side]=v
+  if seconds>=600:
+   for k,limit in [('mem_kb_per_min',64),('handles_per_min',1),('threads_per_min',.5)]:check[side+'.'+k]=math.isfinite(v[k]) and v[k]<=limit
+ r['pass']=all(check.values());save(folder/'independent-analysis.json',r);return r['pass']
+if __name__=='__main__':
+ s={'revision':REV,'state':'starting','started_utc':stamp(),'binary_sha256':hashes(),'trace':False};save(ROOT/'status.json',s)
+ known={'framelink.dll':'09f302958b85d65ce6dfc9c2b2f45ba7d41dfe2cd603dd6bc90c3681c07708a4','framelink_gst_session.dll':'3329bef0da3a27d645c6348b4b509790c576550694046373649c8c03ba803a99'}
+ try:
+  assert all(s['binary_sha256'][k]==v for k,v in known.items()),'production integrated binary mismatch'
+  env=dict(os.environ)
+  for k in list(env):
+   if k.upper().startswith(('FRAMELINK_','GST_DEBUG','GST_TRACER')):env.pop(k)
+  env['PATH']=str(BUILD)+';C:/Program Files/gstreamer/1.0/msvc_x86_64/bin;'+env['PATH'];env['GST_PLUGIN_PATH']=str(BUILD)
+  save(ROOT/'environment.json',{k:v for k,v in env.items() if k.startswith(('FRAMELINK','GST_'))})
+  for seconds in [5,1800]:
+   assert hashes()==s['binary_sha256'],'binary changed between cases'
+   label=f'windows-shared-nv12-1920x1080-60-{seconds}';folder=ROOT/label;folder.mkdir(exist_ok=False)
+   cmd=[str(BUILD/'fl_gst_av_bench.exe'),str(BUILD/'gstframelink.dll'),'--shared-cpu','--seconds',str(seconds),'--size','1920x1080','--fps','60','--format','NV12','--pool','2','--video-queue','1','--latency-ms','0','--arrival-budget-ms','17','--transport-only','--no-output-preroll','--output-queue-buffers','1','--raw','--out',folder.as_posix(),'--label',label]
+   save(folder/'command.json',cmd);s.update(state='running',case=label);save(ROOT/'status.json',s);print('START '+label+' '+stamp(),flush=True)
+   with (folder/'run.log').open('w') as f:
+    proc=subprocess.Popen(cmd,env=env,stdout=f,stderr=subprocess.STDOUT);s['driver_pid']=proc.pid;save(ROOT/'status.json',s);rc=proc.wait()
+   s[label]={'exit':rc,'ended_utc':stamp(),'binary_sha256':hashes()};save(ROOT/'status.json',s)
+   assert rc==0,'benchmark failed, no retry'
+   assert hashes()==s['binary_sha256'],'binary changed during case'
+   assert analyze(folder,seconds),'independent acceptance check failed, no retry'
+   print('PASS '+label+' '+stamp(),flush=True)
+  s['state']='finished'
+ except Exception as e:s.update(state='failed',error=str(e))
+ finally:s['ended_utc']=stamp();save(ROOT/'status.json',s)
+ print(json.dumps(s,indent=2),flush=True);sys.exit(0 if s['state']=='finished' else 1)
