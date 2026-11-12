@@ -107,7 +107,7 @@ static void control(const char*plugin){
 // Three independent processes: source child, this relay, final reader child.
 // Uses the committed backend snapshot contract, never inherited texture handles.
 struct HeldGraph { flSessionConfig config{};void*handles[2]{}; };
-static void threeProcess(const char*plugin,bool audio=false,bool replaceWhileHeld=false,const HeldGraph*old=nullptr,bool failedSource=false){
+static void threeProcess(const char*plugin,bool audio=false,bool replaceWhileHeld=false,const HeldGraph*old=nullptr,bool failedSource=false,bool binFinal=false){
  gchar*dir=g_dir_make_tmp("framelink-three-local-XXXXXX",nullptr);CHECK(dir);
  const std::string root=dir;g_free(dir);const auto inputPath=root+"/input",outputPath=root+"/output";
  Peer source(plugin,inputPath,audio);
@@ -124,7 +124,7 @@ static void threeProcess(const char*plugin,bool audio=false,bool replaceWhileHel
  flnative::Handle held,release,exitEvent;
  held.value=CreateEventW(nullptr,TRUE,FALSE,nullptr);release.value=CreateEventW(nullptr,TRUE,FALSE,nullptr);exitEvent.value=CreateEventW(nullptr,TRUE,FALSE,nullptr);
  CHECK(held.value&&release.value&&exitEvent.value);
- const auto command=std::string("\"")+plugin+(failedSource?"\" --relay-local-reader-failed \"":(audio?"\" --relay-local-reader-av \"":"\" --relay-local-reader-generic \""))+outputPath+"\" "+
+ const auto command=std::string("\"")+plugin+(binFinal?"\" --relay-local-reader-bin \"":(failedSource?"\" --relay-local-reader-failed \"":(audio?"\" --relay-local-reader-av \"":"\" --relay-local-reader-generic \"")))+outputPath+"\" "+
    std::to_string(uintptr_t(held.value))+" "+std::to_string(uintptr_t(release.value))+" "+std::to_string(uintptr_t(exitEvent.value));
  auto final=relayprocess::spawn(command,{held.value,release.value,exitEvent.value});
  CHECK(fl_gst_session_open_local_native_relay_pool(down,up,outputPath.c_str(),&caps,1,2,80,5000,5000,
@@ -151,6 +151,7 @@ static void threeProcess(const char*plugin,bool audio=false,bool replaceWhileHel
  flsample::SessionRelaySupervisor supervisor(up,down);CHECK(supervisor.start()==FL_GST_SESSION_READY);
  CHECK(fl_gst_session_local_ready(down,TRUE,1000,nullptr));
  CHECK(fl_gst_session_local_ready(up,FALSE,1000,nullptr));
+ if(binFinal){FlGstVideoEvent barrier{FL_GST_VIDEO_BARRIER,0,guint64(pts(0)),0};CHECK(fl_gst_session_send_video_event(down,original.generation,&barrier)==FL_GST_SESSION_READY);}
  for(unsigned n=0;n<Frames;++n){
   source.next();flFrame frame{};CHECK(flAcquireFrame(input,&frame,1000)==FL_OK);
   CHECK(frame.ptsNs==pts(n));CHECK(relay.forward(frame)==FL_OK);
@@ -159,7 +160,7 @@ static void threeProcess(const char*plugin,bool audio=false,bool replaceWhileHel
    do{result=pcm->forward(100);CHECK(result==FL_GST_SESSION_READY||result==FL_GST_SESSION_TIMEOUT);CHECK(g_get_monotonic_time()<until);}while(result==FL_GST_SESSION_TIMEOUT);
   }
   if(n+1==Frames){
-   relayprocess::wait(held.value);CHECK(relay.pending()==1);
+   relayprocess::wait(held.value);CHECK(relay.collect()==FL_OK&&relay.pending()==1);
    // Collection cannot retire the source lease while the final reader holds it.
    // Do not call SessionNativeRelay::finish here: that closes publication
    // before the source's authenticated END can be forwarded.
@@ -177,7 +178,7 @@ static void threeProcess(const char*plugin,bool audio=false,bool replaceWhileHel
     if(!failedSource)CHECK(relay.collect()==FL_OK);
     if(!failedSource){flSessionConfig unchanged{};CHECK(fl_gst_session_get_config(up,&unchanged)==FL_GST_SESSION_READY);CHECK(memcmp(&unchanged,&original,sizeof original)==0);}
    }
-   CHECK(SetEvent(release.value));
+   if(!binFinal)CHECK(SetEvent(release.value));
    if(failedSource){
     // Source is already stopped. Retire the entire failed graph only after
     // the old final reader has completed its real lease and exited.
@@ -191,20 +192,31 @@ static void threeProcess(const char*plugin,bool audio=false,bool replaceWhileHel
    }
   }
   const auto deadline=g_get_monotonic_time()+2000000;
-  while(relay.pending()){CHECK(g_get_monotonic_time()<deadline);CHECK(relay.collect()==FL_OK);g_usleep(100);}
-  // A control acknowledgment follows real final-reader lease completion only.
+  while(relay.pending()>(binFinal?1u:0u)){CHECK(g_get_monotonic_time()<deadline);CHECK(relay.collect()==FL_OK);g_usleep(100);}
+  // Raw readers acknowledge actual retirement. Streaming appsink permits one
+  // in-flight sample; this gate permits the next write attempt, whose native
+  // acquisition still enforces actual slot ownership. It never completes a lease.
   source.release();
  }
  CHECK(relay.count()==Frames);
  if(audio){
   CHECK(relay.forwardEvent(5000)==FL_GST_SESSION_READY&&relay.videoEnded());
   avTerminal(pcmInput->pipe,GST_MESSAGE_EOS);
-  CHECK(pcm->finish(relay,5000)==FL_GST_SESSION_READY);
+  if(binFinal){
+   CHECK(relay.pending()==1&&pcm->finish(relay,0)==FL_GST_SESSION_TIMEOUT);
+   CHECK(pcm->endPublication(relay,5000)==FL_GST_SESSION_READY);
+   supervisor.stop();CHECK(supervisor.status()==FL_GST_SESSION_READY);
+   CHECK(fl_gst_session_finish_local(down,TRUE,1000,nullptr));CHECK(SetEvent(release.value));
+   relayprocess::wait(exitEvent.value);CHECK(relay.pending()==1&&relay.finish()==FL_BUSY);
+   CHECK(ResetEvent(exitEvent.value));CHECK(SetEvent(release.value));
+   const auto deadline=g_get_monotonic_time()+2000000;
+   while(relay.pending()){CHECK(g_get_monotonic_time()<deadline);CHECK(relay.collect()==FL_OK);g_usleep(100);}
+  }else CHECK(pcm->finish(relay,5000)==FL_GST_SESSION_READY);
   CHECK(pcm->blockCount()==8&&pcm->frameCount()==384&&pcm->byteCount()==1536);
  }
  CHECK(relay.finish()==FL_OK);
  supervisor.stop();CHECK(supervisor.status()==FL_GST_SESSION_READY);
- CHECK(SetEvent(exitEvent.value));CHECK(fl_gst_session_finish_local(down,TRUE,1000,nullptr));
+ CHECK(SetEvent(exitEvent.value));if(!binFinal)CHECK(fl_gst_session_finish_local(down,TRUE,1000,nullptr));
  CHECK(fl_gst_session_finish_local(up,FALSE,1000,nullptr));
  relayprocess::join(final);source.join();
  // The snapshot pins the source epoch for the ENTIRE graph, not only import.

@@ -15,6 +15,10 @@
 //    PTS are receiver system-clock times. Once every enabled track delivered
 //    EOS downstream the bin reports the drain, releasing the producer's EOS.
 //    A new session (reconnect) requires NULL, as for the producer bin.
+//    Windows native profiles are explicit, copied while NULL: the existing
+//    set-local-native-candidate selects FAR4; set-local-native-pool-candidate
+//    selects the FAR5 A/V receiver for a caller-pinned relay pool. Neither
+//    profile falls back, and native reconnect requires a fresh bin.
 //  - no session: thin composition. The application installs the
 //    framelink.session.v1 context, adopts the video channel through the bin's
 //    "adopt-channel" action and applies the pipeline clock itself.
@@ -46,7 +50,7 @@ typedef struct _GstFrameLinkAvSrc {
  guint width,height,fpsN,fpsD,rate,channels,connectMs,idleMs,audioQueueMs,videoQueue,videoPool,latencyMs;gboolean nativeMemory;
  GstElement*video,*audio;GstPad*videoPad,*audioPad;
  FlGstSession*session;gboolean local,sharedCpu,policyBound,nativeAdopted;
- GstFrameLinkMemoryPolicy nativeCandidate;gboolean candidateSet,nativeUsed;
+ GstFrameLinkMemoryPolicy nativeCandidate;gboolean candidateSet,nativeUsed,nativePoolReceiver;
  GCancellable*cancel;std::thread*worker;std::thread*drainer;Shared*shared;gulong probes[2];
 } GstFrameLinkAvSrc;
 typedef struct _GstFrameLinkAvSrcClass {GstBinClass parent;} GstFrameLinkAvSrcClass;
@@ -120,8 +124,12 @@ static void startWorker(GstFrameLinkAvSrc*s){
   auto*sh=s->shared;GError*error=nullptr;flChannel*channel=nullptr;
   bool ok=false;
 #if defined(_WIN32)
-  if(s->candidateSet)ok=fl_gst_session_open_local_native_epoch(s->session,FALSE,path.c_str(),&caps,s->videoQueue,s->videoPool,s->audioQueueMs,s->connectMs,s->idleMs,
-   &s->nativeCandidate,&s->shared->bound,&channel,nullptr,nullptr,s->cancel,&error);
+  if(s->candidateSet){
+   if(s->nativePoolReceiver)ok=fl_gst_session_open_local_native_pool_receiver(s->session,path.c_str(),&caps,s->videoQueue,s->videoPool,s->audioQueueMs,s->connectMs,s->idleMs,
+    &s->nativeCandidate,&s->shared->bound,&channel,s->cancel,&error);
+   else ok=fl_gst_session_open_local_native_epoch(s->session,FALSE,path.c_str(),&caps,s->videoQueue,s->videoPool,s->audioQueueMs,s->connectMs,s->idleMs,
+    &s->nativeCandidate,&s->shared->bound,&channel,nullptr,nullptr,s->cancel,&error);
+  }
   else
 #endif
 #if defined(__linux__) || defined(_WIN32)
@@ -290,10 +298,13 @@ static gboolean applyMemoryPolicy(GstFrameLinkAvSrc*s,GstFrameLinkMemoryPolicy*p
 
 // Provisional producer-ordered template, never an authenticated policy. Copy
 // it while NULL; the worker authenticates BOTH peers before allocating a channel.
-static gboolean setLocalNativeCandidate(GstFrameLinkAvSrc*s,GstFrameLinkMemoryPolicy*policy){
+static gboolean setLocalNativeProfile(GstFrameLinkAvSrc*s,GstFrameLinkMemoryPolicy*policy,bool poolReceiver){
 #if defined(_WIN32)
  if(!policy||s->candidateSet||s->nativeAdopted||s->policyBound||s->local||s->sharedCpu||!wantVideo(s)||!s->video||
     !s->sessionPath||!*s->sessionPath||GST_STATE(s)!=GST_STATE_NULL)return FALSE;
+ // FAR5 preserves an existing A/V session and imports an exact-sized pool;
+ // unlike FAR4, zero cannot request a newly allocated default-sized pool.
+ if(poolReceiver&&(!wantAudio(s)||!s->audio||s->videoPool<2||s->videoPool>FL_MAX_POOL_SIZE))return FALSE;
  const bool nativeReceiver=policy->paths[1].supportedUsage==FL_MEMORY_GPU_SAMPLE&&policy->paths[1].operations==0;
  const bool readbackReceiver=policy->paths[1].supportedUsage==FL_MEMORY_CPU_READ&&policy->paths[1].operations==(FL_MEMORY_COPY|FL_MEMORY_READBACK);
  flMemoryDecision decisions[2]{};
@@ -303,10 +314,16 @@ static gboolean setLocalNativeCandidate(GstFrameLinkAvSrc*s,GstFrameLinkMemoryPo
     policy->paths[0].operations||(!nativeReceiver&&!readbackReceiver)||
     (policy->paths[0].supportedUsage!=FL_MEMORY_GPU_SAMPLE&&
      policy->paths[0].supportedUsage!=(FL_MEMORY_GPU_SAMPLE|FL_MEMORY_GPU_RENDER))||bool(s->nativeMemory)!=nativeReceiver)return FALSE;
- s->nativeCandidate=*policy;s->candidateSet=TRUE;return TRUE;
+ s->nativeCandidate=*policy;s->nativePoolReceiver=poolReceiver;s->candidateSet=TRUE;return TRUE;
 #else
- (void)s;(void)policy;return FALSE;
+ (void)s;(void)policy;(void)poolReceiver;return FALSE;
 #endif
+}
+static gboolean setLocalNativeCandidate(GstFrameLinkAvSrc*s,GstFrameLinkMemoryPolicy*policy){
+ return setLocalNativeProfile(s,policy,false);
+}
+static gboolean setLocalNativePoolCandidate(GstFrameLinkAvSrc*s,GstFrameLinkMemoryPolicy*policy){
+ return setLocalNativeProfile(s,policy,true);
 }
 
 static void setProperty(GObject*object,guint id,const GValue*value,GParamSpec*spec){
@@ -402,6 +419,8 @@ static void gst_framelink_av_src_class_init(GstFrameLinkAvSrcClass*klass){
  g_object_class_install_property(o,PROP_AUDIO_ID,g_param_spec_uint("audio-track-id","Audio track","Negotiated audio identity, zero when absent",0,G_MAXUINT,0,ro));
  g_object_class_install_property(o,PROP_VIDEO_ID,g_param_spec_uint("video-track-id","Video track","Negotiated video identity, zero when absent",0,G_MAXUINT,0,ro));
  g_signal_new_class_handler("set-local-native-candidate",G_TYPE_FROM_CLASS(klass),GSignalFlags(G_SIGNAL_RUN_LAST|G_SIGNAL_ACTION),G_CALLBACK(setLocalNativeCandidate),
+  nullptr,nullptr,nullptr,G_TYPE_BOOLEAN,1,G_TYPE_POINTER);
+ g_signal_new_class_handler("set-local-native-pool-candidate",G_TYPE_FROM_CLASS(klass),GSignalFlags(G_SIGNAL_RUN_LAST|G_SIGNAL_ACTION),G_CALLBACK(setLocalNativePoolCandidate),
   nullptr,nullptr,nullptr,G_TYPE_BOOLEAN,1,G_TYPE_POINTER);
  g_signal_new_class_handler("apply-memory-policy",G_TYPE_FROM_CLASS(klass),GSignalFlags(G_SIGNAL_RUN_LAST|G_SIGNAL_ACTION),G_CALLBACK(applyMemoryPolicy),
   nullptr,nullptr,nullptr,G_TYPE_BOOLEAN,1,G_TYPE_POINTER);

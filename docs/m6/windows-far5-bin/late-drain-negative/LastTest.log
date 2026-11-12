@@ -1,0 +1,19 @@
+Start testing: Nov 12 01:06 Eastern Standard Time
+----------------------------------------------------------
+51/168 Testing: gst_relay_local_bin_win
+51/168 Test: gst_relay_local_bin_win
+Command: "<win-home>/dev/framelink-relay-486bf04/build/Release/fl_gst_native_producer_win.exe" "<win-home>/dev/framelink-relay-486bf04/build/Release/gstframelink.dll" "--relay-local-bin"
+Directory: <win-home>/dev/framelink-relay-486bf04/build
+"gst_relay_local_bin_win" start time: Nov 12 01:06 Eastern Standard Time
+Output:
+----------------------------------------------------------
+line 217: fl_gst_session_finish_local(down,TRUE,1000,nullptr)
+<end of output>
+Test time =   1.21 sec
+----------------------------------------------------------
+Test Failed.
+"gst_relay_local_bin_win" end time: Nov 12 01:06 Eastern Standard Time
+"gst_relay_local_bin_win" time elapsed: 00:00:01
+----------------------------------------------------------
+
+End testing: Nov 12 01:06 Eastern Standard Time

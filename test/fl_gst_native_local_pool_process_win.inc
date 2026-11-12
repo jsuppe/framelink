@@ -85,6 +85,88 @@ static int localPoolProcessReader(const char*path,HANDLE held,HANDLE release,HAN
  else{fl_gst_session_cancel(session);CHECK(!gst_app_sink_is_eos(GST_APP_SINK(pcm->port)));}
  pcm.reset();flClose(channel);g_object_unref(session);return 0;
 }
+// Explicit automatic FAR5 receiver: no external session context or adoption.
+static int localPoolBinReader(const char*path,HANDLE held,HANDLE release,HANDLE exitEvent){
+ GError*error=nullptr;
+ auto*pipe=gst_parse_launch("framelinkavsrc name=transport native-memory=true video-format=RGBA width=64 height=32 framerate=30/1 video-pool=2 video-queue-frames=1 transport.video_src ! appsink name=video max-buffers=1 sync=false async=false enable-last-sample=false transport.audio_src ! appsink name=audio max-buffers=1 sync=false async=false enable-last-sample=false",&error);CHECK(pipe&&!error);
+ auto*src=gst_bin_get_by_name(GST_BIN(pipe),"transport");auto*video=gst_bin_get_by_name(GST_BIN(pipe),"video");auto*audio=gst_bin_get_by_name(GST_BIN(pipe),"audio");
+ auto candidate=nativeAvPolicy(0,true);g_object_set(src,"session",path,nullptr);
+ gboolean accepted=FALSE;g_signal_emit_by_name(src,"set-local-native-pool-candidate",&candidate,&accepted);CHECK(accepted);
+ g_object_set(video,"emit-signals",TRUE,nullptr);g_signal_connect(video,"propose-allocation",G_CALLBACK(nativeAvReaderAllocation),&candidate);
+ CHECK(gst_element_set_state(pipe,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
+ GstClockTime first=GST_CLOCK_TIME_NONE;guint64 frames=0;GstMemory*retained=nullptr;gsize finalOffset=0;gint finalStride=0;
+ for(unsigned n=0;n<8;++n){
+  auto*v=gst_app_sink_try_pull_sample(GST_APP_SINK(video),5*GST_SECOND);auto*a=gst_app_sink_try_pull_sample(GST_APP_SINK(audio),5*GST_SECOND);CHECK(v&&a);
+  auto*vb=gst_sample_get_buffer(v);auto*ab=gst_sample_get_buffer(a);auto*memory=gst_buffer_peek_memory(vb,0);CHECK(gst_is_d3d11_memory(memory));
+  auto*meta=gst_buffer_get_video_meta(vb);auto*identity=gst_buffer_get_framelink_frame_meta(vb);guint64 generation=0;g_object_get(src,"generation",&generation,nullptr);
+  CHECK(identity&&identity->frame.streamGeneration==generation&&generation);
+  CHECK(GST_BUFFER_PTS(vb)-GST_BUFFER_PTS(ab)==37000000&&GST_BUFFER_DTS(vb)==GST_BUFFER_PTS(vb));
+  if(!n)first=GST_BUFFER_PTS(ab);
+  CHECK(GST_BUFFER_PTS(ab)==first+n*1000000&&GST_BUFFER_DURATION(ab)==1000000&&GST_BUFFER_DURATION(vb)==1000000);
+  GstMapInfo map{};CHECK(meta&&gst_memory_map(memory,&map,GST_MAP_READ));
+  for(unsigned y=0;y<32;++y)for(unsigned x=0;x<256;++x)CHECK(map.data[meta->offset[0]+y*meta->stride[0]+x]==n+11);
+  gst_memory_unmap(memory,&map);guint8 bytes[192];CHECK(gst_buffer_get_size(ab)==sizeof bytes&&gst_buffer_extract(ab,0,bytes,sizeof bytes)==sizeof bytes);
+  for(unsigned i=0;i<sizeof bytes;++i)CHECK(bytes[i]==guint8((n*29+i*7+31)&255));frames+=48;
+  if(n==7){retained=gst_memory_ref(memory);finalOffset=meta->offset[0];finalStride=meta->stride[0];}
+  gst_sample_unref(v);gst_sample_unref(a);
+  if(retained)CHECK(SetEvent(held));
+ }
+ CHECK(frames==384);avTerminal(pipe,GST_MESSAGE_EOS);CHECK(gst_app_sink_is_eos(GST_APP_SINK(video))&&gst_app_sink_is_eos(GST_APP_SINK(audio)));
+ // Keep the control session live until the sender accepts the real drain.
+ relayprocess::wait(release);CHECK(ResetEvent(release));
+ CHECK(gst_element_set_state(pipe,GST_STATE_NULL)!=GST_STATE_CHANGE_FAILURE);
+ CHECK(retained);GstMapInfo stable{};CHECK(gst_memory_map(retained,&stable,GST_MAP_READ));
+ for(unsigned y=0;y<32;++y)for(unsigned col=0;col<256;++col)CHECK(stable.data[finalOffset+y*finalStride+col]==18);
+ gst_memory_unmap(retained,&stable);CHECK(SetEvent(exitEvent));relayprocess::wait(release);gst_memory_unref(retained);relayprocess::wait(exitEvent);
+ gst_object_unref(src);gst_object_unref(video);gst_object_unref(audio);gst_object_unref(pipe);
+ puts("automatic FAR5 receiver bin:8 native/384 PCM, exact bytes/37ms, held GstMemory and authenticated EOS");return 0;
+}
+
+static void localPoolBinNegatives(){
+ for(unsigned mode=0;mode<10;++mode){
+  auto*bin=gst_element_factory_make("framelinkavsrc",nullptr);CHECK(bin);
+  g_object_set(bin,"session","unused-far5-negative","native-memory",TRUE,"video-pool",2u,"video-queue-frames",1u,nullptr);
+  auto candidate=nativeAvPolicy(0,true);
+  if(mode==1)g_object_set(bin,"session",nullptr,nullptr);
+  if(mode==2)g_object_set(bin,"tracks","video",nullptr);
+  if(mode==3)g_object_set(bin,"video-pool",0u,nullptr);
+  if(mode==4)g_object_set(bin,"video-pool",1u,nullptr);
+  if(mode==5)g_object_set(bin,"shared-cpu",TRUE,nullptr);
+  if(mode==6)candidate.sessionGeneration=1;
+  if(mode==7)g_object_set(bin,"native-memory",FALSE,nullptr);
+  gboolean accepted=FALSE;
+  if(mode==9){g_signal_emit_by_name(bin,"set-local-native-candidate",&candidate,&accepted);CHECK(accepted);}
+  accepted=TRUE;g_signal_emit_by_name(bin,"set-local-native-pool-candidate",mode==8?nullptr:&candidate,&accepted);
+  CHECK(accepted==(mode==0));
+  if(mode==0){
+   g_signal_emit_by_name(bin,"set-local-native-pool-candidate",&candidate,&accepted);CHECK(!accepted);
+   g_signal_emit_by_name(bin,"set-local-native-candidate",&candidate,&accepted);CHECK(!accepted);
+   g_signal_emit_by_name(bin,"adopt-channel",nullptr,&accepted);CHECK(!accepted);
+   g_signal_emit_by_name(bin,"apply-memory-policy",&candidate,&accepted);CHECK(!accepted);
+   g_object_set(bin,"width",96u,nullptr);guint width=0;g_object_get(bin,"width",&width,nullptr);CHECK(width==1280);
+  }
+  gst_object_unref(bin);
+ }
+ for(bool mismatch:{false,true}){
+  auto*pipe=gst_pipeline_new(nullptr);auto*bin=gst_element_factory_make("framelinkavsrc",nullptr);CHECK(pipe&&bin);gst_bin_add(GST_BIN(pipe),bin);
+  gchar*directory=g_dir_make_tmp("framelink-far5-bin-negative-XXXXXX",nullptr);CHECK(directory);std::string path=std::string(directory)+"/session";g_free(directory);
+  g_object_set(bin,"session",path.c_str(),"native-memory",TRUE,"video-format","RGBA","width",64u,"height",32u,
+    "video-pool",2u,"video-queue-frames",1u,"connect-timeout-ms",mismatch?1000u:60000u,nullptr);
+  gst_util_set_object_arg(G_OBJECT(bin),"framerate","30/1");
+  auto candidate=nativeAvPolicy(0,true);gboolean accepted=FALSE;g_signal_emit_by_name(bin,"set-local-native-pool-candidate",&candidate,&accepted);CHECK(accepted);
+  CHECK(gst_element_set_state(pipe,GST_STATE_READY)!=GST_STATE_CHANGE_FAILURE);
+  if(mismatch){
+   auto*session=fl_gst_session_new(3);auto caps=localPoolProcessCaps();GstFrameLinkMemoryPolicy bound{};flChannel*channel=nullptr;GError*error=nullptr;
+   // Existing FAR4 producer must not silently downgrade this explicit FAR5 bin.
+   gboolean ok=fl_gst_session_open_local_native(session,TRUE,path.c_str(),&caps,1,2,80,1000,1000,&candidate,&bound,&channel,nullptr,&error);
+   CHECK(!ok&&!channel&&!bound.version&&error);g_clear_error(&error);g_object_unref(session);avTerminal(pipe,GST_MESSAGE_ERROR);
+  }else g_usleep(30000);
+  const auto began=g_get_monotonic_time();CHECK(gst_element_set_state(pipe,GST_STATE_NULL)!=GST_STATE_CHANGE_FAILURE);
+  CHECK(g_get_monotonic_time()-began<1000000);gst_object_unref(pipe);
+ }
+ puts("FAR5 bin controls: explicit immutable profile, invalid candidates, FAR4 mismatch/no fallback, bounded missing-peer cancellation");
+}
+
 static void localPoolProcess(const char*plugin){
  auto caps=localPoolProcessCaps();auto candidate=nativeAvPolicy(0,true);GstFrameLinkMemoryPolicy bound{};
  auto*up=fl_gst_session_new(3);auto*down=fl_gst_session_new(3);

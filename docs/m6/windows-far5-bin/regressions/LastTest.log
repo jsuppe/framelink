@@ -1,0 +1,224 @@
+Start testing: Nov 12 01:07 Eastern Standard Time
+----------------------------------------------------------
+49/168 Testing: gst_relay_local_replacement_win
+49/168 Test: gst_relay_local_replacement_win
+Command: "<win-home>/dev/framelink-relay-486bf04/build/Release/fl_gst_native_producer_win.exe" "<win-home>/dev/framelink-relay-486bf04/build/Release/gstframelink.dll" "--relay-local-replacement"
+Directory: <win-home>/dev/framelink-relay-486bf04/build
+"gst_relay_local_replacement_win" start time: Nov 12 01:07 Eastern Standard Time
+Output:
+----------------------------------------------------------
+three-process local authenticated A/V: 384 exact PCM frames/1536 bytes, 37ms offset, real END/EOS, final native lease held
+three-process local native relay: FAR4 source-time input + FAR5 snapshot transfer, no inherited textures, 8 exact final pixels/metadata, held final lease, real drain
+fresh-session replacement: distinct session/clock/native allocations; old reader held through complete replacement A/V graph; old pixels rechecked before real release
+three-process local authenticated A/V: 384 exact PCM frames/1536 bytes, 37ms offset, real END/EOS, final native lease held
+three-process local native relay: FAR4 source-time input + FAR5 snapshot transfer, no inherited textures, 8 exact final pixels/metadata, held final lease, real drain
+<end of output>
+Test time =   1.87 sec
+----------------------------------------------------------
+Test Passed.
+"gst_relay_local_replacement_win" end time: Nov 12 01:07 Eastern Standard Time
+"gst_relay_local_replacement_win" time elapsed: 00:00:01
+----------------------------------------------------------
+
+50/168 Testing: gst_relay_local_recovery_win
+50/168 Test: gst_relay_local_recovery_win
+Command: "<win-home>/dev/framelink-relay-486bf04/build/Release/fl_gst_native_producer_win.exe" "<win-home>/dev/framelink-relay-486bf04/build/Release/gstframelink.dll" "--relay-local-recovery"
+Directory: <win-home>/dev/framelink-relay-486bf04/build
+"gst_relay_local_recovery_win" start time: Nov 12 01:07 Eastern Standard Time
+Output:
+----------------------------------------------------------
+three-process local authenticated A/V: 384 exact PCM frames/1536 bytes, 37ms offset, real END/EOS, final native lease held
+three-process local native relay: FAR4 source-time input + FAR5 snapshot transfer, no inherited textures, 8 exact final pixels/metadata, held final lease, real drain
+source-death replacement: bounded cancellation, no synthetic END/EOS, fresh A/V graph with disjoint allocations, old held pixels intact before final-reader completion
+<end of output>
+Test time =   1.87 sec
+----------------------------------------------------------
+Test Passed.
+"gst_relay_local_recovery_win" end time: Nov 12 01:07 Eastern Standard Time
+"gst_relay_local_recovery_win" time elapsed: 00:00:01
+----------------------------------------------------------
+
+55/168 Testing: gst_relay_local_events_win
+55/168 Test: gst_relay_local_events_win
+Command: "<win-home>/dev/framelink-relay-486bf04/build/Release/fl_gst_native_producer_win.exe" "<win-home>/dev/framelink-relay-486bf04/build/Release/gstframelink.dll" "--relay-local-events"
+Directory: <win-home>/dev/framelink-relay-486bf04/build
+"gst_relay_local_events_win" start time: Nov 12 01:07 Eastern Standard Time
+Output:
+----------------------------------------------------------
+native AV mode 15 local=0
+bin relay n=0 collect=0 pending=1
+bin relay n=1 collect=0 pending=1
+bin relay n=2 collect=0 pending=1
+bin relay n=3 collect=0 pending=1
+bin relay n=4 collect=0 pending=1
+bin relay n=5 collect=0 pending=1
+bin relay n=6 collect=0 pending=1
+bin relay n=7 collect=0 pending=1
+authenticated native pool: same-allocation imported ring attached
+broker bin serialized GAP: exact 4,4,8 frame boundaries, negotiated mapping, durations 250/750/500us, DISCONT preserved, trailing GAP before EOS
+local native relay: retained authenticated discovery sessions, mapped A/V, genuine final-reader completion before drain acknowledgment
+broker native bin relay: 8 frames over two original allocations / 384 PCM frames; identity intermediate mapping, negotiated final mapping and exact 37ms A/V, authenticated session; final reader retained beyond upstream and downstream bin teardown
+native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+<end of output>
+Test time =   0.69 sec
+----------------------------------------------------------
+Test Passed.
+"gst_relay_local_events_win" end time: Nov 12 01:07 Eastern Standard Time
+"gst_relay_local_events_win" time elapsed: 00:00:00
+----------------------------------------------------------
+
+66/168 Testing: gst_native_bin_relay_win
+66/168 Test: gst_native_bin_relay_win
+Command: "<win-home>/dev/framelink-relay-486bf04/build/Release/fl_gst_native_producer_win.exe" "<win-home>/dev/framelink-relay-486bf04/build/Release/gstframelink.dll" "--bin-relay-diagnostic"
+Directory: <win-home>/dev/framelink-relay-486bf04/build
+"gst_native_bin_relay_win" start time: Nov 12 01:07 Eastern Standard Time
+Output:
+----------------------------------------------------------
+native AV mode 0 local=0
+bin relay n=0 collect=0 pending=1
+bin relay n=1 collect=0 pending=1
+bin relay n=2 collect=0 pending=1
+bin relay n=3 collect=0 pending=1
+bin relay n=4 collect=0 pending=1
+bin relay n=5 collect=0 pending=1
+bin relay n=6 collect=0 pending=1
+bin relay n=7 collect=0 pending=1
+broker native bin relay: 8 frames over two original allocations / 384 PCM frames; identity intermediate mapping, negotiated final mapping and exact 37ms A/V, authenticated session; final reader retained beyond upstream and downstream bin teardown
+native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+<end of output>
+Test time =   0.66 sec
+----------------------------------------------------------
+Test Passed.
+"gst_native_bin_relay_win" end time: Nov 12 01:07 Eastern Standard Time
+"gst_native_bin_relay_win" time elapsed: 00:00:00
+----------------------------------------------------------
+
+68/168 Testing: gst_automatic_relay_negative_win
+68/168 Test: gst_automatic_relay_negative_win
+Command: "<win-home>/dev/framelink-relay-486bf04/build/Release/fl_gst_native_producer_win.exe" "<win-home>/dev/framelink-relay-486bf04/build/Release/gstframelink.dll" "--automatic-relay-negative"
+Directory: <win-home>/dev/framelink-relay-486bf04/build
+"gst_automatic_relay_negative_win" start time: Nov 12 01:07 Eastern Standard Time
+Output:
+----------------------------------------------------------
+native AV mode 0 local=1
+automatic second hop: own reservation pixels/PCM/37ms passed; first-hop reader rejected 0.052ms (native sink requires its own reserved allocation and valid metadata; no copy fallback)
+native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+<end of output>
+Test time =   1.05 sec
+----------------------------------------------------------
+Test Passed.
+"gst_automatic_relay_negative_win" end time: Nov 12 01:07 Eastern Standard Time
+"gst_automatic_relay_negative_win" time elapsed: 00:00:01
+----------------------------------------------------------
+
+69/168 Testing: gst_native_bin_cancel_win
+69/168 Test: gst_native_bin_cancel_win
+Command: "<win-home>/dev/framelink-relay-486bf04/build/Release/fl_gst_native_producer_win.exe" "<win-home>/dev/framelink-relay-486bf04/build/Release/gstframelink.dll" "--bin-cancel-diagnostic"
+Directory: <win-home>/dev/framelink-relay-486bf04/build
+"gst_native_bin_cancel_win" start time: Nov 12 01:07 Eastern Standard Time
+Output:
+----------------------------------------------------------
+native AV mode 4 local=1
+native AV: coordinated session not ready or cancelled <win-home>\dev\framelink-relay-486bf04\gst\gstframelink.cpp(537): sinkRenderImpl (): /GstPipeline:pipeline0/GstFrameLinkAvSink:transport/GstFrameLinkSink:video
+native AV mode 5 local=1
+native AV: audio peer closed before GDP EOS <win-home>\dev\framelink-relay-486bf04\gst\gstframelinkaudiosrc.cpp(66): readChunkImpl (): /GstPipeline:pipeline3/GstFrameLinkAvSrc:transport/GstFrameLinkAudioSrc:audio/FlAudioReader:flaudioreader1
+automatic native bin receiver cancellation: error in 103.545ms, no source EOS, native memories retained
+native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+automatic native bin producer cancellation: error in 0.313ms, no source EOS, native memories retained
+native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+<end of output>
+Test time =   1.15 sec
+----------------------------------------------------------
+Test Passed.
+"gst_native_bin_cancel_win" end time: Nov 12 01:07 Eastern Standard Time
+"gst_native_bin_cancel_win" time elapsed: 00:00:01
+----------------------------------------------------------
+
+70/168 Testing: gst_native_relay_av_win
+70/168 Test: gst_native_relay_av_win
+Command: "<win-home>/dev/framelink-relay-486bf04/build/Release/fl_gst_native_producer_win.exe" "<win-home>/dev/framelink-relay-486bf04/build/Release/gstframelink.dll" "--relay-av-diagnostic"
+Directory: <win-home>/dev/framelink-relay-486bf04/build
+"gst_native_relay_av_win" start time: Nov 12 01:07 Eastern Standard Time
+Output:
+----------------------------------------------------------
+relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+PCM queue controls: bounded retry, exact 4-block delivery, nonzero origin/discontinuity, bounded upstream/downstream cancellation, empty timeout, fail-closed initial/midstream GAP and 6 configuration negatives passed
+PCM GAP controls: opt-in leading/midstream order/seqnum/pixels, bounded zero-byte queue/retry, malformed timing, discontinuity and pending cancellation passed
+PCM terminal interruption mode=0 result=2 elapsed_us=55809
+PCM terminal interruption mode=1 result=2 elapsed_us=50605
+PCM terminal interruption mode=2 result=4 elapsed_us=53511
+PCM terminal controls: bounded both-session cancellation/replacement, polling, finite timeout and retry passed
+coordinated native relay: 16 same-allocation video frames / 768 PCM frames, two authenticated sessions, exact metadata, 37ms offset, ordered barriers, held-reader backpressure and terminal drain passed
+relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+coordinated native relay: 0 same-allocation video frames / 0 PCM frames, two authenticated sessions, exact metadata, 37ms offset, ordered barriers, held-reader backpressure and terminal drain passed
+relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+checked native relay fault 1: no unauthorized publication, retained ownership and safe drain passed
+relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+checked native relay fault 2: no unauthorized publication, retained ownership and safe drain passed
+relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+checked native relay fault 3: no unauthorized publication, retained ownership and safe drain passed
+relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+checked native relay fault 4: no unauthorized publication, retained ownership and safe drain passed
+relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+checked native relay fault 5: no unauthorized publication, retained ownership and safe drain passed
+relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+checked native relay fault 6: no unauthorized publication, retained ownership and safe drain passed
+relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+checked native relay fault 7: no unauthorized publication, retained ownership and safe drain passed
+relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+checked native relay fault 8: no unauthorized publication, retained ownership and safe drain passed
+relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+checked native relay fault 9: no unauthorized publication, retained ownership and safe drain passed
+relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+checked native relay fault 10: no unauthorized publication, retained ownership and safe drain passed
+relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+checked native relay fault 11: no unauthorized publication, retained ownership and safe drain passed
+relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+checked native relay fault 12: no unauthorized publication, retained ownership and safe drain passed
+relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+checked native relay fault 13: no unauthorized publication, retained ownership and safe drain passed
+relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+terminal GAP mapped_pts=2000000 duration=1000000 seqnum=5856 original_seqnum=1701
+terminal GAP relay seqnum input=5842 output=5842 preserved locally; GDP seqnum not a wire identity
+checked native relay fault 14: no unauthorized publication, retained ownership and safe drain passed
+relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+native event interruption fault=15 result=2 elapsed_us=53470
+native event wait control 15 passed
+relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+native event interruption fault=16 result=2 elapsed_us=50552
+native event wait control 16 passed
+relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+native event interruption fault=17 result=4 elapsed_us=55642
+native event wait control 17 passed
+relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+native event wait control 18 passed
+relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+terminal GAP mapped_pts=2000000 duration=1000000 seqnum=6479 original_seqnum=1701
+terminal GAP relay seqnum input=6449 output=6449 preserved locally; GDP seqnum not a wire identity
+checked native relay fault 14: no unauthorized publication, retained ownership and safe drain passed
+<end of output>
+Test time =   5.86 sec
+----------------------------------------------------------
+Test Passed.
+"gst_native_relay_av_win" end time: Nov 12 01:07 Eastern Standard Time
+"gst_native_relay_av_win" time elapsed: 00:00:05
+----------------------------------------------------------
+
+71/168 Testing: gst_native_relay_process_win
+71/168 Test: gst_native_relay_process_win
+Command: "<win-home>/dev/framelink-relay-486bf04/build/Release/fl_gst_native_producer_win.exe" "<win-home>/dev/framelink-relay-486bf04/build/Release/gstframelink.dll" "--relay-process-diagnostic"
+Directory: <win-home>/dev/framelink-relay-486bf04/build
+"gst_native_relay_process_win" start time: Nov 12 01:07 Eastern Standard Time
+Output:
+----------------------------------------------------------
+three-process coordinated relay: 16 same-allocation video frames, 768 exact PCM frames; nonempty: both reversed slots / 37ms offset / held-reader exclusion; ordered GAP/barrier/END and authenticated terminal passed
+three-process coordinated relay: 0 same-allocation video frames, 0 exact PCM frames; nonempty: both reversed slots / 37ms offset / held-reader exclusion; ordered GAP/barrier/END and authenticated terminal passed
+<end of output>
+Test time =   1.56 sec
+----------------------------------------------------------
+Test Passed.
+"gst_native_relay_process_win" end time: Nov 12 01:07 Eastern Standard Time
+"gst_native_relay_process_win" time elapsed: 00:00:01
+----------------------------------------------------------
+
+End testing: Nov 12 01:07 Eastern Standard Time

@@ -105,9 +105,28 @@ class SessionPcmRelay {
   // Input appsink must be fully drained; no queue discard is allowed. READY means
   // downstream EOS accepted, not downstream playback/native completion proof.
   FlGstSessionResult finish(const SessionNativeRelay&video,guint timeoutMs){
+    return endPublicationImpl(video,timeoutMs,true);
+  }
+  // End publication after authenticated upstream audio EOS and forwarded video
+  // END, without waiting for final native readers. Some sinks retain their last
+  // sample until EOS/shutdown, so requiring native drain here would deadlock.
+  // READY is not native completion or permission to destroy/reuse the graph:
+  // the owner MUST retain the native adapter/channels and collect/finish video
+  // after actual final-consumer release. This method never completes a lease.
+  // Single terminal operation: after success neither finish nor this method
+  // may be called again; the separate native finish remains mandatory.
+  FlGstSessionResult endPublication(const SessionNativeRelay&video,guint timeoutMs){
+    return endPublicationImpl(video,timeoutMs,false);
+  }
+  guint64 gapCount()const{return gaps;}
+  guint64 frameCount()const{return totalFrames;}
+  guint64 byteCount()const{return totalBytes;}
+  guint64 blockCount()const{return blocks;}
+ private:
+  FlGstSessionResult endPublicationImpl(const SessionNativeRelay&video,guint timeoutMs,bool requireNativeDrain){
     if(!initialized||failed||ended)return FL_GST_SESSION_INVALID;
     auto r=contract.check();if(r!=FL_GST_SESSION_READY)return fail(r);
-    if(pending||!gst_app_sink_is_eos(source)||!video.videoEnded()||video.pending())return FL_GST_SESSION_TIMEOUT;
+    if(pending||!gst_app_sink_is_eos(source)||!video.videoEnded()||(requireNativeDrain&&video.pending()))return FL_GST_SESSION_TIMEOUT;
     if(pendingGap){r=forwardGap();if(r!=FL_GST_SESSION_READY)return r;}
     // is_eos() only guarantees no queued samples; serialized events can
     // remain. Inspect them before publishing a successful terminal. Bound the
@@ -142,11 +161,6 @@ class SessionPcmRelay {
     if(gst_app_src_end_of_stream(sink)!=GST_FLOW_OK)return fail(FL_GST_SESSION_CANCELLED);
     ended=true;return FL_GST_SESSION_READY;
   }
-  guint64 gapCount()const{return gaps;}
-  guint64 frameCount()const{return totalFrames;}
-  guint64 byteCount()const{return totalBytes;}
-  guint64 blockCount()const{return blocks;}
- private:
   struct GapQueue {std::atomic<bool> queued{false};};
   static GQuark gapTag(){return g_quark_from_static_string("framelink-pcm-relay-gap-owner");}
   FlGstSessionResult forwardGap(){

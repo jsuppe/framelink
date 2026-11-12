@@ -11,7 +11,7 @@ Implementation: `c4f164a`, `c0aa02e`, `0a430f9`. These additive APIs are not a f
 | `open_local_native_relay` | `open_local_native` | FAR4, preserved upstream timeline but **independent** downstream pool |
 | `open_local_native_relay_pool` | `open_local_native_pool_receiver` | FAR5, authenticated import of caller-pinned original allocations |
 
-Names above omit the `fl_gst_session_` prefix. FAR5 rejects FAR4, CPU FAR3 and legacy endpoints; it never falls back to another profile. The A/V bin `set-local-native-candidate` action selects FAR4, **not** FAR5. Setting `native-memory` alone selects neither authenticated local profile.
+Names above omit the `fl_gst_session_` prefix. FAR5 rejects FAR4, CPU FAR3 and legacy endpoints; it never falls back to another profile. The A/V bin `set-local-native-candidate` action selects FAR4, **not** FAR5. The receiver-only `set-local-native-pool-candidate` action explicitly selects FAR5 for A/V with a fixed pool size. Setting `native-memory` alone selects neither authenticated local profile.
 
 A version-1 candidate has generation zero and producer-first endpoints on both peers. The producer path is D3D11 `GPU_SAMPLE` or `GPU_SAMPLE|GPU_RENDER`, operations zero; `GPU_RENDER` alone is not accepted. Receiver choices are `GPU_SAMPLE` with operations zero, or explicit `CPU_READ` with `COPY|READBACK`. Both requirements must authorize the selected boundary. Neither policy acceptance nor handle authentication proves arbitrary decoder compatibility or GPU completion.
 
@@ -54,3 +54,5 @@ The explicit `open_local_native_relay_input` receiver authenticates the usual FA
 The added `gst_relay_local_three_process_av_win` runs source/relay/final-reader as distinct processes with actual authenticated PCM and native frame forwarding. Focused four-test batch passes3.43s, including the prior video-only graph. The reader independently checks384PCM frames/1536 bytes and37ms mapping, video END/audio EOS and held-native lease release. See [evidence](windows-three-process-av/README.md). This is not repeated reconnect, resource, throughput or final ABI qualification.
 
 [Replacement/source-death controls](windows-local-recovery/README.md) verify a fresh complete A/V graph while an old native reader remains held, including source exit73 and bounded failure propagation. Old frame contents are rechecked before actual final-reader completion. Session/clock IDs and kernel allocations are distinct; media generation may restart at1 in a fresh session. This is not same-path hot replacement or a repeated resource gate.
+
+[Automatic FAR5 receiver bin evidence](windows-far5-bin/README.md) covers explicit profile setup/negatives, actual three-process A/V and final GstMemory beyond EOS/binNULL. Intermediate source-relative setup, snapshot lifetime and writer binding remain explicit and must withhold upstream readiness until complete.

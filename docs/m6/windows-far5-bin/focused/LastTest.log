@@ -1,0 +1,57 @@
+Start testing: Nov 12 01:06 Eastern Standard Time
+----------------------------------------------------------
+48/168 Testing: gst_relay_local_three_process_av_win
+48/168 Test: gst_relay_local_three_process_av_win
+Command: "<win-home>/dev/framelink-relay-486bf04/build/Release/fl_gst_native_producer_win.exe" "<win-home>/dev/framelink-relay-486bf04/build/Release/gstframelink.dll" "--relay-three-local-av"
+Directory: <win-home>/dev/framelink-relay-486bf04/build
+"gst_relay_local_three_process_av_win" start time: Nov 12 01:06 Eastern Standard Time
+Output:
+----------------------------------------------------------
+three-process local authenticated A/V: 384 exact PCM frames/1536 bytes, 37ms offset, real END/EOS, final native lease held
+three-process local native relay: FAR4 source-time input + FAR5 snapshot transfer, no inherited textures, 8 exact final pixels/metadata, held final lease, real drain
+<end of output>
+Test time =   1.08 sec
+----------------------------------------------------------
+Test Passed.
+"gst_relay_local_three_process_av_win" end time: Nov 12 01:07 Eastern Standard Time
+"gst_relay_local_three_process_av_win" time elapsed: 00:00:01
+----------------------------------------------------------
+
+51/168 Testing: gst_relay_local_bin_win
+51/168 Test: gst_relay_local_bin_win
+Command: "<win-home>/dev/framelink-relay-486bf04/build/Release/fl_gst_native_producer_win.exe" "<win-home>/dev/framelink-relay-486bf04/build/Release/gstframelink.dll" "--relay-local-bin"
+Directory: <win-home>/dev/framelink-relay-486bf04/build
+"gst_relay_local_bin_win" start time: Nov 12 01:07 Eastern Standard Time
+Output:
+----------------------------------------------------------
+three-process local authenticated A/V: 384 exact PCM frames/1536 bytes, 37ms offset, real END/EOS, final native lease held
+three-process local native relay: FAR4 source-time input + FAR5 snapshot transfer, no inherited textures, 8 exact final pixels/metadata, held final lease, real drain
+<end of output>
+Test time =   1.18 sec
+----------------------------------------------------------
+Test Passed.
+"gst_relay_local_bin_win" end time: Nov 12 01:07 Eastern Standard Time
+"gst_relay_local_bin_win" time elapsed: 00:00:01
+----------------------------------------------------------
+
+52/168 Testing: gst_relay_local_bin_negatives_win
+52/168 Test: gst_relay_local_bin_negatives_win
+Command: "<win-home>/dev/framelink-relay-486bf04/build/Release/fl_gst_native_producer_win.exe" "<win-home>/dev/framelink-relay-486bf04/build/Release/gstframelink.dll" "--relay-local-bin-negatives"
+Directory: <win-home>/dev/framelink-relay-486bf04/build
+"gst_relay_local_bin_negatives_win" start time: Nov 12 01:07 Eastern Standard Time
+Output:
+----------------------------------------------------------
+
+** (fl_gst_native_producer_win.exe:25100): WARNING **: 01:07:01.355: framelinkavsrc: authenticated properties are immutable; create a new bin/session
+native AV: local session discovery deadline or cancellation <win-home>\dev\framelink-relay-486bf04\gst\gstframelinkavsrc.cpp(151): startWorker::<lambda_3c5a84aab78f08748c061352c1c2c282>::operator () (): /GstPipeline:pipeline1/GstFrameLinkAvSrc:framelinkavsrc11:
+framelinkavsrc local session setup
+FAR5 bin controls: explicit immutable profile, invalid candidates, FAR4 mismatch/no fallback, bounded missing-peer cancellation
+<end of output>
+Test time =   1.11 sec
+----------------------------------------------------------
+Test Passed.
+"gst_relay_local_bin_negatives_win" end time: Nov 12 01:07 Eastern Standard Time
+"gst_relay_local_bin_negatives_win" time elapsed: 00:00:01
+----------------------------------------------------------
+
+End testing: Nov 12 01:07 Eastern Standard Time
