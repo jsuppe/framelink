@@ -19,5 +19,12 @@ matching names in <linux-home>/dev/evidence/m6-lifecycle. Executables/DLLs remai
 external (excluded from repository archive); committed text uses localenv path
 normalization, so separately pin Git blobs. Original failure is not relabeled pass.
 
-Next serial task: opposite persistent role, same limits and production DLLs.
+Persistent producer / fresh consumer:2x5s control PASS,100x5s PASS23:40:48Z.
+Same exact30000video/24000000PCM. Slopes **-2.282195KiB/cycle**, handles
+**-0.139558**, threads **-0.071235**, all original limits met. Independent raw
+count/slope reconstruction plus126remote hashes/fullcoverage and idle0 verified.
+Both roles for this exact target are now collected; other targets remain open.
+
+Next serial task: remaining shared-CPU target/role lifecycle cells using the same
+production DLLs, test-only benchmark and original gates. No native failure retry.
 M6 open; M7 held.
