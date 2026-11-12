@@ -99,3 +99,7 @@ decoded-pixel digests, actual decoder PTS/duration/absent DTS, synthetic PCM37ms
 alignment, held-reader proof and explicit conversion/oracle-readback accounting.
 Then extend to paced target resolution. No new public decoder API is justified;
 only transport/relay **after conversion** can claim no payload copy at that boundary.
+
+## Decoder functional gate completed; paced extension pending
+
+The proposed tiny authenticated decoder fixture passed at4d38a09: [source, build and runtime evidence](windows-local-decoder-4d38a09/README.md). This closes the tiny functional discovery gap only. A separate test-only rate executable is now being implemented: unchanged decoded pixels, independent source/final full-pixel digests joined offline, autonomous pacing, exact decoder PTS/duration/absentDTS, separate100Hz PCM, same allocation/real fence completion, explicit conversion/readback bytes and per-process resource series. The immutable synthetic11d1b65 duration run is unaffected. Initial decoder-rate smoke/preflight must pass before any duration qualification.
