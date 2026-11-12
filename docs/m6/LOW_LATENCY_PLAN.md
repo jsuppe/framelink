@@ -239,13 +239,18 @@ M6 remains open; M7 remains held.
 | D2 / D3 | Unresolved public overload/convenience-fallback decisions; existing explicit profiles/defaults preserved | Jon; no automatic default change or hidden native-to-CPU fallback |
 | Linux / Android campaigns | Broad work deferred under Windows-first direction. Prior Linux BGRA and other completed campaigns collected, not repeated. Android BGRA4K and NV121080 residual failures remain suspended; clean trace diagnostics did not waive them | Evelyn; resume deferred integration only after Windows priority permits; causal fixes required for suspended failed cells |
 
-**Windows runtime owner:** root, exec49966: exactc539d99 build, nine focused
-tests and tiny decoder smoke. The reviewed scheduling control adds only a
-nonleaky two-AU queue after parsed H264, permitting encoder/decoder overlap;
-the encoder, full-pixel oracle, native pool and timing gates remain unchanged.
-Two is the queue-resident buffer limit, not total in-flight pipeline memory.
-If the focused batch passes, run the corrected4K30 preflight once; preserve any
-failure, and do not claim this isolates encoder throughput or decode latency.
+**Windows runtime owner:** root; idle verified08:13:24.7934383Z after the
+c539d99 scheduling control. Clean build,9/9 focused tests and tiny decoder smoke
+passed. The bounded two-AU encoded queue was insufficient:4K30 delivered all150
+distinct frames/240000PCM, but118 video arrivals exceeded34ms (max542.183067ms),
+with no audio misses. Source decoder-pull median21.7833ms remains the largest
+phase. [Control evidence](windows-decoder-queue-c539d99/README.md) preserves
+successes and failure; trace-on and endurance did not run.
+
+Next: bounded measurement of on-demand fixture generation and encoding
+throughput before asserting a decoder or transport cause. No repeated target
+without a concrete discriminating control. Existing queue limit is only for
+resident compressed AUs, not all pipeline buffers or a total byte cap.
 The final integrated/API/unchanged-old-client runner is prepared and reviewed,
 including per-DLL export sets and full collection/compatibility verification;
 20 local validator tests passed. No full integration has run on the newer helper.
