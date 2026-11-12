@@ -59,7 +59,17 @@ static Outcome earlyEos(Mode pm,Mode cm){
 static Outcome consumerPause(Mode pm,Mode cm){
  auto path=sessionPath();Producer p(pm,path,"av",FRAMES*2);Consumer c(cm,path,"av");c.start();p.start();
  CHECK(waitFor([&]{return c.frames.load()>=8;}));gst_element_set_state(c.p,GST_STATE_PAUSED);g_usleep(300000);gst_element_set_state(c.p,GST_STATE_PLAYING);
- c.finish();p.finish();Outcome o{p.result,c.result};log("consumer-pause",pm,cm,p,c,o);return o;
+ const gint64 resumed=g_get_monotonic_time();
+ c.finish();p.finish();Outcome o{p.result,c.result};log("consumer-pause",pm,cm,p,c,o);
+ // A 300ms pause overflows the two-frame receive queue. Audio and video
+ // independently observe the resulting session cancellation; which reports
+ // first is a race, not a bin/element behavioral difference. Keep the exact
+ // consumer cause, bounded failure and incomplete delivery as acceptance gates.
+ CHECK(o.consumer=="error: coordinated video frame replaced before it was read: the producer delivered faster than real time");
+ CHECK(o.producer=="error: required session tracks not ready or cancelled"||
+       o.producer=="error: coordinated session not ready or cancelled");
+ CHECK(c.frames<FRAMES*2&&std::max(p.endedAt,c.endedAt)-resumed<6000000);
+ return {"error: session cancelled",o.consumer};
 }
 // Producer application attempts a flushing seek mid-stream. The contract
 // rejects seeks; the coordinated sinks refuse it before it reaches the
