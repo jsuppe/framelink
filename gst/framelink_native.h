@@ -12,3 +12,18 @@ static inline AHardwareBuffer* gst_framelink_memory_get_hardware_buffer(GstMemor
         g_quark_from_static_string("framelink-ahb"));
 }
 #endif
+
+#ifdef _WIN32
+// Borrowed NT allocation handle for an intact FrameLink native reader memory.
+// NULL for other memory (including ordinary D3D11 allocations). Do not close,
+// write through, or transfer it without broker authorization. Retain this exact
+// GstMemory until downstream GPU completion: duplicating a handle does NOT hold
+// the reader lease. Intended for same-allocation identity checks/composition;
+// metadata and public in-process qdata are not an authentication boundary.
+static inline void* gst_framelink_memory_get_d3d11_shared_handle(GstMemory* memory) {
+    if(!memory || !gst_memory_is_type(memory,"D3D11Memory") ||
+       !gst_mini_object_get_qdata(GST_MINI_OBJECT(memory),g_quark_from_static_string("framelink-reader")))return NULL;
+    return gst_mini_object_get_qdata(GST_MINI_OBJECT(memory),
+        g_quark_from_static_string("framelink-d3d11-reader-shared-handle"));
+}
+#endif

@@ -1388,6 +1388,11 @@ static GstBuffer* srcNativeBuffer(GstFrameLinkSrc* self,const flFrame& frame) {
     auto*reader=new NativeSourceReader{*self->nativeOwner,token};
     gst_mini_object_set_qdata(GST_MINI_OBJECT(mem),g_quark_from_static_string("framelink-reader"),reader,
         [](gpointer p){delete static_cast<NativeSourceReader*>(p);});
+    // Borrowed from the reader-owned channel; handle duplication alone must not
+    // be mistaken for retaining the FrameLink lease. No re-export/allocation.
+    gst_mini_object_set_qdata(GST_MINI_OBJECT(mem),
+        g_quark_from_static_string("framelink-d3d11-reader-shared-handle"),
+        flImageSharedHandle(frame.image),nullptr);
     // A later explicit CPU map must download current shared pixels, regardless
     // of how layout was obtained. Native GPU consumers use the original texture.
     GST_MINI_OBJECT_FLAG_SET(mem,GST_D3D11_MEMORY_TRANSFER_NEED_DOWNLOAD);

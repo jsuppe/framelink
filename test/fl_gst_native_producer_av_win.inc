@@ -2,6 +2,7 @@
 // readback or native receiver. Decoder mode adds a declared upstream transform.
 #include "../gst/framelink_session_transport.h"
 #include <gst/app/gstappsink.h>
+#include "../samples/native_gst_d3d11_relay.h"
 static void avStreamPair(GSocketConnection**a,GSocketConnection**b){
  auto*l=g_socket_listener_new();auto port=g_socket_listener_add_any_inet_port(l,nullptr,nullptr);CHECK(port);
  std::thread peer([&]{*a=g_socket_listener_accept(l,nullptr,nullptr,nullptr);});
@@ -118,7 +119,7 @@ struct NativeEpochProbe {gint64 epoch;unsigned calls=0;};
 static gint64 nativeEpoch(gpointer data,GstClockTime now){
  auto*p=static_cast<NativeEpochProbe*>(data);CHECK(now>0);++p->calls;return p->epoch;
 }
-static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=false,bool automatic=false,bool nativeReceiver=false,bool decoder=false,bool relayNegative=false,bool automaticRelay=false){
+static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=false,bool automatic=false,bool nativeReceiver=false,bool decoder=false,bool relayNegative=false,bool automaticRelay=false,bool leaseRelay=false){
  fprintf(stderr,"native AV mode %u local=%d\n",mode,local);
  auto*s=fl_gst_session_new(3);auto*r=fl_gst_session_new(3);
  flSessionConfig cfg{};cfg.version=2;cfg.sessionId.bytes[0]=1;cfg.clockId.bytes[0]=2;cfg.generation=1;
@@ -222,6 +223,24 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
  auto*pad=gst_element_get_static_pad(sink,"video_sink");CHECK(gst_pad_query(pad,q));
  GstBufferPool*pool=nullptr;guint size=0,min=0,max=0;gst_query_parse_nth_allocation_pool(q,0,&pool,&size,&min,&max);CHECK(pool&&max==2);
  gst_query_unref(q);gst_caps_unref(caps);gst_object_unref(pad);CHECK(gst_buffer_pool_set_active(pool,TRUE));
+ flChannel* leaseReader=nullptr;flChannel* leaseWriter=nullptr;
+ std::unique_ptr<flsample::NativeGstD3D11Relay> leaseAdapter;
+ flFrame heldRelayFrame{};uint64_t heldRelayLease=0;std::atomic<bool> finalReaderRetired{false};
+ if(leaseRelay){
+  CHECK(nativeReceiver&&!automatic&&!local);
+  GstBuffer* reservations[2]{};void* handles[2]{};
+  for(unsigned i=0;i<2;++i){
+   CHECK(gst_buffer_pool_acquire_buffer(pool,&reservations[i],nullptr)==GST_FLOW_OK);
+   auto*memory=gst_buffer_peek_memory(reservations[i],0);
+   auto*reservation=(FrameLinkD3DReservation*)gst_mini_object_get_qdata(GST_MINI_OBJECT(memory),FrameLinkD3DProducer::key());CHECK(reservation);
+   handles[1-i]=flImageSharedHandle(reservation->buffer.image);
+  }
+  CHECK(flCreateChannelFromD3D11Handles((name+"-lease").c_str(),64,32,FL_FORMAT_RGBA8,2,
+    FL_MAP_CPU|FL_DEFER_RELEASE|FL_REQUIRE_FRAME_METADATA,nullptr,handles,&leaseReader)==FL_OK);
+  CHECK(flOpenProducer((name+"-lease").c_str(),&leaseWriter)==FL_OK);
+  for(auto*b:reservations)gst_buffer_unref(b);
+  leaseAdapter.reset(new flsample::NativeGstD3D11Relay(leaseWriter,cfg.generation));CHECK(leaseAdapter->initialize()==FL_OK);
+ }
  GstMemory* retainedReceiver=nullptr;
  // A separately allocated second hop cannot silently treat a first-hop reader
  // lease as one of its producer reservations. Keep this negative explicit until
@@ -324,6 +343,57 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
   }else{
    GstMapInfo map{};CHECK(gst_buffer_map(vb,&map,GST_MAP_READ));CHECK(map.size==pixels.size());for(gsize i=0;i<map.size;++i)CHECK(map.data[i]==pixels[i]);gst_buffer_unmap(vb,&map);
   }
+  if(leaseRelay){
+   auto*bad=gst_buffer_new_allocate(nullptr,64*32*4,nullptr);GST_BUFFER_PTS(bad)=GST_BUFFER_PTS(vb);
+   CHECK(leaseAdapter->forward(bad)==FL_INVALID);gst_buffer_unref(bad);
+   auto*untimed=gst_buffer_copy(vb);GST_BUFFER_PTS(untimed)=GST_CLOCK_TIME_NONE;
+   CHECK(leaseAdapter->forward(untimed)==FL_INVALID);gst_buffer_unref(untimed);
+   auto*stale=gst_buffer_copy(vb);auto*staleMeta=gst_buffer_get_framelink_frame_meta(stale);CHECK(staleMeta);++staleMeta->frame.streamGeneration;
+   CHECK(leaseAdapter->forward(stale)==FL_INVALID);gst_buffer_unref(stale);
+   CHECK(gst_framelink_memory_get_d3d11_shared_handle(gst_buffer_peek_memory(vb,0)));
+   if(!n){
+    CHECK(!gst_framelink_memory_get_d3d11_shared_handle(nullptr));
+    flChannel* unrelatedReader=nullptr,*unrelatedWriter=nullptr;
+    CHECK(flCreateChannelEx((name+"-unrelated").c_str(),64,32,FL_FORMAT_RGBA8,2,
+      FL_MAP_CPU|FL_DEFER_RELEASE|FL_REQUIRE_FRAME_METADATA,&unrelatedReader)==FL_OK);
+    CHECK(flOpenProducer((name+"-unrelated").c_str(),&unrelatedWriter)==FL_OK);
+    flsample::NativeGstD3D11Relay unrelated(unrelatedWriter,cfg.generation);CHECK(unrelated.initialize()==FL_OK);
+    CHECK(unrelated.forward(vb)==FL_FORMAT_UNSUPPORTED&&unrelated.pending()==0&&unrelated.count()==0);
+    flFrame absent{};CHECK(flAcquireFrame(unrelatedReader,&absent,0)==FL_TIMEOUT);
+    CHECK(unrelated.finish()==FL_OK);flClose(unrelatedWriter);flClose(unrelatedReader);
+   }
+   CHECK(leaseAdapter->forward(vb)==FL_OK&&leaseAdapter->pending()==1);
+   flFrame output{};CHECK(flAcquireFrame(leaseReader,&output,1000)==FL_OK);
+   CHECK(output.ptsNs==gint64(GST_BUFFER_PTS(vb)));
+   flFrameMetadata metadata{};CHECK(flGetFrameMetadata(leaseReader,&output,&metadata)==FL_OK);
+   CHECK(metadata.streamGeneration==cfg.generation&&metadata.dtsNs==gint64(GST_BUFFER_DTS(vb))&&metadata.durationNs==GST_BUFFER_DURATION(vb));
+   uint64_t lease=0;CHECK(flLeaseFrame(leaseReader,&output,&lease)==FL_OK);
+   CHECK(leaseAdapter->finish()==FL_BUSY&&leaseAdapter->pending()==1);
+   // Drop the actual upstream sample before using downstream pixels. Only the
+   // adapter's memory reference (and the explicit final-frame oracle) holds it.
+   if(n+1==count)gst_mini_object_weak_ref(GST_MINI_OBJECT(gst_buffer_peek_memory(vb,0)),
+    [](gpointer data,GstMiniObject*){static_cast<std::atomic<bool>*>(data)->store(true);},&finalReaderRetired);
+   printf("lease input refs frame=%u sample=%d buffer=%d memory=%d\n",n,GST_MINI_OBJECT_REFCOUNT_VALUE(vs),GST_MINI_OBJECT_REFCOUNT_VALUE(vb),GST_MINI_OBJECT_REFCOUNT_VALUE(gst_buffer_peek_memory(vb,0)));
+   gst_sample_unref(vs);vs=nullptr;
+   GstBuffer* available=nullptr,*blocked=nullptr;GstBufferPoolAcquireParams noWait{};noWait.flags=GST_BUFFER_POOL_ACQUIRE_FLAG_DONTWAIT;
+   CHECK(gst_buffer_pool_acquire_buffer(pool,&available,&noWait)==GST_FLOW_OK);
+   CHECK(gst_buffer_pool_acquire_buffer(pool,&blocked,&noWait)==GST_FLOW_EOS&&!blocked);
+   CHECK(!gst_framelink_memory_get_d3d11_shared_handle(gst_buffer_peek_memory(available,0)));
+   gst_buffer_unref(available);
+   flMappedImage mapped{};CHECK(flImageMapPlanes(output.image,&mapped)==FL_OK);
+   for(unsigned y=0;y<32;++y)for(unsigned x=0;x<256;++x)CHECK(((unsigned char*)mapped.plane[0].pixels)[y*mapped.plane[0].stride+x]==n+1);
+   flImageUnmap(output.image);
+   if(n+1==count){heldRelayFrame=output;heldRelayLease=lease;}
+   else{
+    CHECK(flCompleteReadLease(leaseReader,lease)==FL_OK);CHECK(flCollectReadLeases(leaseReader)==FL_OK);
+    auto deadline=g_get_monotonic_time()+1000000;
+    while(leaseAdapter->pending()){CHECK(g_get_monotonic_time()<deadline);CHECK(leaseAdapter->collect()==FL_OK);g_usleep(100);}
+   }
+   // Appsink retains its current sample internally until the next pull or
+   // shutdown. Do not demand both upstream slots be free at this boundary.
+   // The final lease is instead checked after every upstream object is gone.
+
+  }
   if(automaticRelay&&n+1==count){
    automaticRelayNegative(vb);
    // The rejected shallow copy must not mutate the original metadata or pixels.
@@ -335,8 +405,9 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
    gst_memory_unmap(memory,&map);
   }
   std::vector<guint8>pcm(pcmBytes);CHECK(gst_buffer_get_size(ab)==pcmBytes&&gst_buffer_extract(ab,0,pcm.data(),pcmBytes)==pcmBytes);for(auto v:pcm)CHECK(v==n+31);
-  gst_sample_unref(vs);gst_sample_unref(as);
+  if(vs)gst_sample_unref(vs);gst_sample_unref(as);
  }
+ if(leaseRelay)CHECK(leaseAdapter->count()==count&&leaseAdapter->pending()==1&&leaseAdapter->finish()==FL_BUSY);
  if(relayNegative){
   relayProducer.reset();flClose(relayConsumer);
   printf("relay contract: %u imported first-hop buffers rejected by independent second-hop pool; no publication, no reservation leak; first-hop pixels/PCM/timing intact\n",count);
@@ -389,6 +460,18 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
   ID3D11Device*device=nullptr;resource->GetDevice(&device);CHECK(device);
   CHECK(SUCCEEDED(device->GetDeviceRemovedReason()));device->Release();
   gst_memory_unref(retainedFinal);
+ }
+ if(leaseRelay){
+  CHECK(!finalReaderRetired.load()&&leaseAdapter->finish()==FL_BUSY);
+  flMappedImage finalPixels{};CHECK(flImageMapPlanes(heldRelayFrame.image,&finalPixels)==FL_OK);
+  for(unsigned y=0;y<32;++y)for(unsigned x=0;x<256;++x)CHECK(((unsigned char*)finalPixels.plane[0].pixels)[y*finalPixels.plane[0].stride+x]==count);
+  flImageUnmap(heldRelayFrame.image);
+  CHECK(flCompleteReadLease(leaseReader,heldRelayLease)==FL_OK);CHECK(flCollectReadLeases(leaseReader)==FL_OK);
+  auto deadline=g_get_monotonic_time()+1000000;
+  while(leaseAdapter->pending()){CHECK(g_get_monotonic_time()<deadline);CHECK(leaseAdapter->collect()==FL_OK);g_usleep(100);}
+  CHECK(finalReaderRetired.load()&&leaseAdapter->finish()==FL_OK);
+  leaseAdapter.reset();flClose(leaseWriter);flClose(leaseReader);
+  puts("native GstMemory lease adapter: 8 frames, reversed same-allocation slots, exact mapped timestamps/pixels, invalid/foreign inputs rejected; final upstream reader retained after complete bin teardown and retired only after downstream completion");
  }
  puts("native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass");
 }

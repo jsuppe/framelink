@@ -1,0 +1,6 @@
+** WARNING: connection is not using a post-quantum key exchange algorithm.
+** This session may be vulnerable to "store now, decrypt later" attacks.
+** The server may need to be upgraded. See https://openssh.com/pq.html
+native AV mode 0 local=1
+automatic second hop: own reservation pixels/PCM/37ms passed; first-hop reader rejected 0.074ms (native sink requires its own reserved allocation and valid metadata; no copy fallback)
+native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass

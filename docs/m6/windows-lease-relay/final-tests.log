@@ -1,0 +1,25 @@
+** WARNING: connection is not using a post-quantum key exchange algorithm.
+** This session may be vulnerable to "store now, decrypt later" attacks.
+** The server may need to be upgraded. See https://openssh.com/pq.html
+Test project <win-home>/dev/framelink-m6-lease-relay-e11da24/build
+    Start 42: gst_native_producer_win
+1/7 Test #42: gst_native_producer_win ...............   Passed   18.65 sec
+    Start 43: gst_native_lease_relay_win
+2/7 Test #43: gst_native_lease_relay_win ............   Passed    0.52 sec
+    Start 44: gst_automatic_relay_negative_win
+3/7 Test #44: gst_automatic_relay_negative_win ......   Passed    1.05 sec
+    Start 45: gst_native_bin_cancel_win
+4/7 Test #45: gst_native_bin_cancel_win .............   Passed    1.21 sec
+    Start 46: gst_native_relay_av_win
+5/7 Test #46: gst_native_relay_av_win ...............   Passed    5.82 sec
+    Start 53: gst_native_source_win
+6/7 Test #53: gst_native_source_win .................   Passed    2.82 sec
+    Start 54: gst_native_source_win_copy_negative
+7/7 Test #54: gst_native_source_win_copy_negative ...   Passed    0.26 sec
+
+100% tests passed, 0 tests failed out of 7
+
+Label Time Summary:
+gst_video_regression    =  21.73 sec*proc (3 tests)
+
+Total Test time (real) =  30.35 sec
