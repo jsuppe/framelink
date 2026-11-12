@@ -239,9 +239,27 @@ M6 remains open; M7 remains held.
 | D2 / D3 | Unresolved public overload/convenience-fallback decisions; existing explicit profiles/defaults preserved | Jon; no automatic default change or hidden native-to-CPU fallback |
 | Linux / Android campaigns | Broad work deferred under Windows-first direction. Prior Linux BGRA and other completed campaigns collected, not repeated. Android BGRA4K and NV121080 residual failures remain suspended; clean trace diagnostics did not waive them | Evelyn; resume deferred integration only after Windows priority permits; causal fixes required for suspended failed cells |
 
-**Windows runtime ownership:** no workload live after collected failure; `qualification_recovery`
-returns this completed qualification slice to root for the next diagnostic continuation.
-Single-task/serial only; next ready diagnostic is not an all-work-blocked state.
+**Windows runtime ownership:** no workload live after diagnostic collection13:51:12Z;
+`qualification_recovery` owns serial result integration/remaining-task handoff.
+Bounded [stall diagnostic](windows-native-stall-diagnostic-a50841a/README.md) complete:
+both5s controls300video/240000PCM pass17ms/fulltrace; source CSV max0.1192/0.1323ms.
+Explicit350.1415ms sourcepause causes relay queue1 replacement(sequence62),
+expectedPTS1037000000 vs1053666666, then sourceFL_TIMEOUT at1999.5518ms.
+99hashes/fullcoverage/uploads/diagnosticpins/overlay/finalidle verified; local
+phase+baseline gates rerun. Injected original gate FAILED as required, not qualification.
+No natural323ms gap reproduced; source delay mechanism established, original
+pause cause unresolved. No production fix/default change or clean-repeat waiver.
+Read-only orchestration correlation: execution SSH disconnect13:35:52.451Z
+AFTER remote failedstatus13:35:52.316Z and post-run hashes/idle. No recorded
+timeout/cancel/kill/reboot/suspend; security process auditing unavailable.
+Source audio33observations/max10.0087ms throughout339.257ms video gap argues
+against full-process/host suspension for that gap; selective scheduling/I/O or
+unlogged interference remains possible. No categorical orchestration exclusion.
+Further original-stall attribution needs original-scale phase/thread/I/O evidence;
+no additional uninstrumented endurance run or unsupported repair is ready.
+Root to select the next previously authorized Windows M6 task serially;
+this diagnostic evidence dependency does not declare the entire milestone blocked.
+
 Finalcandidate BGRA1080duration exec52689 **FAILED**, collected13:35:55Z, idle-after0.
 [Failure archive](windows-native-final-duration-bgra-1080-failure-a50841a/README.md).
 Source acquire assertion/receiver PTS mismatch around695s; source frame41713
@@ -249,9 +267,8 @@ pre-acquire delay323.211334ms (actual acquire0.0031ms), then catch-up burst.
 PCM continues through gap. Delay location pacing/previous CSV write/scheduling
 unresolved; receiver CSV tail truncated.39hashes/uploads/five pins verified;
 exact analyzer fails incomplete run, no repeat/waiver. No production changes.
-Next single task: diagnostic-only in-memory source pace/CSV phases and exact
-failure expected/actual PTS/result capture; bounded source-delay control separates
-catch-up/default queue1 replacement from original stall attribution.
+Completed bounded diagnostic separates catch-up/default queue1 replacement
+from original stall attribution. Original failure remains open pending causal evidence.
 Prior finalcandidate native NV121080/NV124K/BGRA4K durations PASS.
 SharedCPU NV124K30 frozen461584b PASS archived605d205/f1f1dcc.
 
@@ -295,7 +312,7 @@ removes that concurrent workload from replay but does not waive on-demand failur
 The default path, actual decoder, full-pixel oracle, native leases, PCM and all
 17/34ms gates remain unchanged. Both modes retain explicit scope labels.
 
-Diagnose finalcandidate BGRA1080 pre-acquire stall/catch-up failure serially; no clean repeat. Other native4K and sharedCPU NV124K
+Preserve unresolved natural BGRA1080 stall; advance other ready authorized Windows work serially, no clean repeat. Other native4K and sharedCPU NV124K
 qualification remain ready afterward. The duration adapter requires matching
 integrated/pair proof and unchanged gates;25 local validator tests and independent
 review passed. The review-found uncertain-SSH collection race was corrected and
