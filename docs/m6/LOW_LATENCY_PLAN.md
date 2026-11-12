@@ -217,17 +217,17 @@ Parallel independent work is authorized (Jon, 2026-11-12). Keep non-overlapping 
 
 ### Authoritative execution state — 2026-11-12
 
-API candidate: **`461584bbf5a6b8b70cec1578d69d35cb4b1ea2ff`, NOT FROZEN**.
-Runtime DLL sources remain unchanged from the candidate. Checked relay sample
-fix `462fa5f` is newer: it avoids an unnecessary acquisition after real native
-drain; eight focused Windows tests passed. It still requires final integration.
+API candidate: **`a50841aad44fbc9431234a4f326bad036d193bf5`, NOT FROZEN**.
+Runtime DLL sources remain unchanged from `461584b`. Checked relay sample
+fix `462fa5f` avoids an unnecessary acquisition after real native drain and is
+now included in the verified exact-revision integrated build.
 M6 remains open; M7 remains held.
 
 | Work | Concrete state and evidence | Owner / next action |
 | --- | --- | --- |
 | Windows relay implementation | Validated: source-relative input, safe consumer-pool snapshot, FAR5 same-allocation output, actual three-process native/PCM, held-reader replacement/source-death, explicit automatic receiver and transactional unpublished setup | Evelyn; implementation complete within identified Windows scope; no invented convenience API |
-| Integrated Windows/API | Clean candidate build/API + **169/169 tests in655.72s**, no skips;119 prior export names retained +9 additive =128. [Evidence](windows-integrated-461584b/README.md) | Collected; do not repeat diagnostics already in CTest |
-| Old-client compatibility | **3/3 unchanged7b8a274-built clients** pass against baseline and candidate DLLs; exact binary hashes verified. Source review found no existing public layout/enum/signature break. [Evidence](windows-compat-461584b/README.md) | Collected; bounded proof, not all-version/ordinal ABI freeze |
+| Integrated Windows/API | Exacta50841a clean build/API + **178/178 tests in665.56s**, no skips;119 prior export names retained +9 additive =128. Four candidate plugin inspections passed. [Current evidence](windows-integrated-a50841a/README.md); previous461584b evidence retained | Collected, archived and independently checked; do not repeat diagnostics already in CTest |
+| Old-client compatibility | **3/3 unchanged7b8a274-built clients** pass against exacta50841a DLLs, with exact binary hashes verified; prior baseline control retained. Source review found no existing public layout/enum/signature break. [Prior control](windows-compat-461584b/README.md) | Collected; bounded proof, not all-version/ordinal ABI freeze |
 | Windows sharedCPU NV12 1080p60 | **PASS** exact461584b: one1800s run,108000video/86400000PCM/180000audio; zero17ms misses, inferred A/V delta0ns; memory7.233/7.569KB/min below64, handle/thread gates pass. [Evidence](cpu-path/windows-cpu-nv12-1080p60-461584b/README.md) | Collected and independently reanalyzed; four binary hashes unchanged. Runtime released06:54:44Z; do not repeat |
 | Windows other sharedCPU targets | **BGRA4K30 PASS** exact461584b:1800s,54000video/86400000PCM/180000audio, zero34ms misses; memory7.166/7.389KB/min, handle/thread gates pass. [Evidence](cpu-path/windows-cpu-bgra4k30-461584b/README.md). Older76a65d2 BGRA1080p60 pass retained; NV124K30 unqualified | Collected and independently reanalyzed;58 original hashes verified. Runtime released07:25:52Z; do not repeat |
 | Native two-hop qualification harness | All4 BGRA/NV12 1080p60/4K30 matched5s trace-off/trace-on profiles **PASS** at11d1b65, exact video/PCM and zero17/34ms misses; both trace boundaries joined without relay payload copies. [Verified targets](windows-native-relay-targets-11d1b65/README.md). Initial MSVC and collection separator failures preserved | BGRA1080p60 native1800s **PASS**:108000video/86400000PCM, zero17ms misses; memory slopes0/0.400218/0KB per minute and handle/thread gates pass. Root independent raw analysis passed; [duration evidence](windows-native-relay-duration-bgra1080-11d1b65/README.md) archived. Remaining three native duration cells unqualified |
@@ -239,13 +239,16 @@ M6 remains open; M7 remains held.
 | D2 / D3 | Unresolved public overload/convenience-fallback decisions; existing explicit profiles/defaults preserved | Jon; no automatic default change or hidden native-to-CPU fallback |
 | Linux / Android campaigns | Broad work deferred under Windows-first direction. Prior Linux BGRA and other completed campaigns collected, not repeated. Android BGRA4K and NV121080 residual failures remain suspended; clean trace diagnostics did not waive them | Evelyn; resume deferred integration only after Windows priority permits; causal fixes required for suspended failed cells |
 
-**Windows runtime owner:** root, exec5910 / CTest PID57984: exacta50841a
-clean integrated build, full178-test inventory, per-DLL API and unchanged-client
-qualification. Current evidence:
-`windows-final-integrated-prepared/runs/final-windows-a50841a-toolpath-20261112t0822z`.
-The corrected batch passed build/export/element inspection stages and entered
-serial CTest; current counts are reported by the live progress card. Prior runner-only PDB and inspection
-path failures were preserved; neither earlier attempt reached CTest.
+**Windows runtime owner:** root, exec77533: isolated exacta50841a plus reviewed
+external Map/SHA/Unmap diagnostic overlay. Existing pinned4K tape, one5s off/on
+pair only, no production edits or timing-failure waiver. Evidence:
+`windows-decoder-oracle-phase-prepared/runs/oracle-phase-a50841a-20261112t0834z`.
+
+Previous integrated exec5910 finished: exacta50841a clean build,178/178 tests,
+per-DLL API128 and3/3 unchanged clients passed. Root independently verified all44
+collected hashes/full coverage, no skips, plugin identities and final idle at
+08:33:27.7018315Z. Prior runner-only PDB and inspection path failures are preserved;
+neither earlier attempt reached CTest. [Archive/API evidence](windows-integrated-a50841a/README.md) published and independently verified.
 
 Previously collected b247e5d explicit4K30 AU replay pair: The clean build and9/9 focused checks
 passed10.09s; existing on-demand tiny smoke passed60 distinct frames/96000PCM.
@@ -263,8 +266,9 @@ removes that concurrent workload from replay but does not waive on-demand failur
 The default path, actual decoder, full-pixel oracle, native leases, PCM and all
 17/34ms gates remain unchanged. Both modes retain explicit scope labels.
 
-After the current integrated batch is collected, run the reviewed external
-Map/SHA/Unmap causal diagnostic without modifying the qualified implementation.
+Collect the running external Map/SHA/Unmap causal diagnostic without modifying
+the qualified implementation. If it does not reproduce the outlier, retain the
+original failure and advance ready native final-build target/duration qualification.
 Integrated runner verification includes per-DLL exports, complete collection,
 compatibility pins, and26 passing local validator tests. No final API freeze or full M6 qualification is
 claimed by this batch; historical startup/lifetime and D2/D3 remain open.
