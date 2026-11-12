@@ -39,6 +39,7 @@ must be documented; no new uniform D2/D3 default is selected.
   PCM and trace-loss checks at0ms and100ms. Original undersized trace capture retained as failed.
 - [x] Existinga50841a integrated178/178,128exports retaining119,3unchangedclients archived.
 - [x] Named shared-CPU and three passing native duration cells archived; failed cells retained.
+- [x] Shared-CPU NV121080p60 persistent-consumer100cycle production control: original resource limits pass; [evidence](cpu-path/windows-cpu-lifecycle-nv12-1080/README.md). Other roles/targets are not inferred.
 - [ ] Publish a **validated bounded lifecycle** for every advertised path. Existing
   persistent producer/consumer100-cycle results exceed16KiB/cycle; delayed raw-driver
   reclamation is not production equivalence. Do not advertise unrestricted reconnect.
