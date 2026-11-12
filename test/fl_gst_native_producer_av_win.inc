@@ -230,6 +230,26 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
  flFrame heldRelayFrame{};uint64_t heldRelayLease=0;std::atomic<bool> finalReaderRetired{false};
  if(leaseRelay||binRelay){
   CHECK(nativeReceiver&&!automatic&&!local);
+  if(mode==10){
+   DWORD baseline=0;
+   for(unsigned cycle=0;cycle<=100;++cycle){
+    auto testName=name+"-cycle-"+std::to_string(cycle);
+    flChannel*reader=nullptr,*writer=nullptr;
+    CHECK(flsample::createNativeD3D11RelayPool(pool,testName.c_str(),cfg,2,true,&reader,&writer)==FL_OK);
+    flsample::NativeGstD3D11Relay adapter(writer,cfg.generation);
+    CHECK(adapter.initialize()==FL_OK&&adapter.pending()==0&&adapter.finish()==FL_OK);
+    flClose(writer);flClose(reader);
+    DWORD handles=0;CHECK(GetProcessHandleCount(GetCurrentProcess(),&handles));
+    if(!cycle)baseline=handles; // one explicit driver setup warmup
+    if(cycle%10==0)printf("relay pool cleanup cycle=%u handles=%lu baseline=%lu\n",cycle,(unsigned long)handles,(unsigned long)baseline);
+    if(cycle==100){
+     const auto deadline=g_get_monotonic_time()+1000000;
+     while(handles>baseline&&g_get_monotonic_time()<deadline){g_usleep(1000);CHECK(GetProcessHandleCount(GetCurrentProcess(),&handles));}
+     CHECK(handles<=baseline);
+    }
+   }
+   puts("relay pool cleanup: 100 complete setup/adapter-reservation/close cycles, no net handle growth after one warmup; same upstream pool remains usable");
+  }
   if(mode==8){
    GstBuffer*held=nullptr;CHECK(gst_buffer_pool_acquire_buffer(pool,&held,nullptr)==GST_FLOW_OK);
    auto before=g_get_monotonic_time();
