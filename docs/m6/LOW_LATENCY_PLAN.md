@@ -239,17 +239,24 @@ M6 remains open; M7 remains held.
 | D2 / D3 | Unresolved public overload/convenience-fallback decisions; existing explicit profiles/defaults preserved | Jon; no automatic default change or hidden native-to-CPU fallback |
 | Linux / Android campaigns | Broad work deferred under Windows-first direction. Prior Linux BGRA and other completed campaigns collected, not repeated. Android BGRA4K and NV121080 residual failures remain suspended; clean trace diagnostics did not waive them | Evelyn; resume deferred integration only after Windows priority permits; causal fixes required for suspended failed cells |
 
-**Windows runtime owner:** root; idle verified08:11:11.0736704Z after the
-4K30 preflight. No competing Windows executor. Current local work: isolate the
-on-demand fixture generation/encoding contribution before a corrected control;
-review and repair the prepared final integrated/API/old-client runner's
-per-DLL export and collection-verification checks. Original4K evidence:
-`<linux-home>/dev/evidence/m6-cpu-path/windows-decoder-rate-target-prepared/runs/decoder-4k30-cng-77afa1a-20261112t0812z`.
+**Windows runtime owner:** root, exec49966: exactc539d99 build, nine focused
+tests and tiny decoder smoke. The reviewed scheduling control adds only a
+nonleaky two-AU queue after parsed H264, permitting encoder/decoder overlap;
+the encoder, full-pixel oracle, native pool and timing gates remain unchanged.
+Two is the queue-resident buffer limit, not total in-flight pipeline memory.
+If the focused batch passes, run the corrected4K30 preflight once; preserve any
+failure, and do not claim this isolates encoder throughput or decode latency.
+The final integrated/API/unchanged-old-client runner is prepared and reviewed,
+including per-DLL export sets and full collection/compatibility verification;
+20 local validator tests passed. No full integration has run on the newer helper.
+
 CNG comparison preserved identical full SHA256 across120 samples/known vectors;
 1080p hash median18.05→3.24ms,4K72.68→12.95ms. Initial unavailable MAXULONG
 build failure preserved; typed-limit correction77afa1a passed9/9 tests.
-Original native BGRA duration remains valid for its pinned11d1b65 scope, not a
-final qualification of the newer checked relay helper. M7 held.
+[Corrected1080p and failed4K evidence](windows-decoder-cng-77afa1a/README.md)
+is archived with134 independently verified committed blob hashes. Original
+native BGRA duration remains valid for its pinned11d1b65 scope, not final
+qualification of the newer checked relay helper. M7 held.
 
 ### Qualification exclusions retained
 
