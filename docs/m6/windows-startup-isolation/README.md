@@ -29,3 +29,14 @@ is **suspended**, owner Evelyn; resume with original-scale delay attribution
 (native device/import versus OS scheduling) and an explicit compatible remedy.
 Continue Windows producer-bin/native-session integration while retaining this
 gate. D2/D3 and cross-platform acceptance remain open; no M7/API freeze.
+
+
+## Later phase attribution (461584b, no waiver)
+
+[Buffered native phase diagnostics](../windows-startup-phase-461584b/README.md)
+measure current open157.997–164.118ms, almost entirely device creation. Exact
+PCM survives; legacy receives94/100 video per format, coordinated100/100.
+The original1529.4514ms was source-to-receive latency, not proven open time,
+and was not reproduced. Missing legacy PTS0 prevents equivalent first-frame
+measurement. The original acceptance remains suspended, with no compatible
+production remedy inferred and no repeat campaign authorized by a clean result.

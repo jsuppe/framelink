@@ -1,0 +1,16 @@
+<linux-home>/dev/evidence/m6-cpu-path/windows-startup-phase-461584b/resume.py:19: SyntaxWarning: "\F" is an invalid escape sequence. Such sequences will not work in the future. Did you mean "\\F"? A raw string is also an option.
+  $mutex=New-Object System.Threading.Mutex($false,'Local\FrameLinkFocusedWindowsValidation')
+{
+  "evidence_complete": true,
+  "issues": [],
+  "report": "<linux-home>/dev/evidence/m6-cpu-path/windows-startup-phase-461584b/runs/20261112T062145Z-e9d244c0/resumed-results/results/analysis.json",
+  "acceptance_claim": false
+}
+{
+  "remote": "<win-home>/dev/framelink-startup-phase-461584b-20261112T062145Z-e9d244c0",
+  "state": "finished",
+  "started": "2026-11-12T06:22:30.450149+00:00",
+  "exit": 0,
+  "pull_exit": 0,
+  "analysis_exit": 0
+}

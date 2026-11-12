@@ -1,0 +1,2251 @@
+{
+  "scope": "diagnostic evidence only; no timing/resource/API/M6 acceptance claim",
+  "arms": {
+    "audio": {
+      "formats": {
+        "BGRA": {
+          "issues": [],
+          "source_video_count": 100,
+          "received_video_count": 94,
+          "missing_video_pts": [
+            0,
+            40000000,
+            60000000,
+            80000000,
+            120000000,
+            140000000
+          ],
+          "source_audio_count": 100,
+          "received_audio_count": 100,
+          "received_audio_bytes": 384000,
+          "terminal": [
+            {
+              "event": "playback-complete",
+              "audio_master": false,
+              "video_received": 94,
+              "video_late": 0,
+              "audio_blocks": 100,
+              "audio_samples": 96000,
+              "latency_ns": 100000000
+            }
+          ],
+          "schedule_summary": [
+            {
+              "event": "video-schedule-summary",
+              "received": 94,
+              "scheduled": 94,
+              "handed_off": 0,
+              "late": 0,
+              "overflow": 0,
+              "peak_pending": 6,
+              "pending_limit": 8,
+              "peak_bytes": 345600,
+              "byte_limit": 134217728
+            }
+          ],
+          "pts0_source_to_receive": null,
+          "first_common_identity_gap": {
+            "pts_ns": 20000000,
+            "source_to_receive_ms": 1.4135
+          },
+          "max_source_to_receive_ms": 23.0732,
+          "identity_gaps": [
+            {
+              "pts_ns": 20000000,
+              "source_to_receive_ms": 1.4135
+            },
+            {
+              "pts_ns": 100000000,
+              "source_to_receive_ms": 0.5053
+            },
+            {
+              "pts_ns": 160000000,
+              "source_to_receive_ms": 1.4555
+            },
+            {
+              "pts_ns": 180000000,
+              "source_to_receive_ms": 13.1664
+            },
+            {
+              "pts_ns": 200000000,
+              "source_to_receive_ms": 22.5648
+            },
+            {
+              "pts_ns": 220000000,
+              "source_to_receive_ms": 22.0411
+            },
+            {
+              "pts_ns": 240000000,
+              "source_to_receive_ms": 21.0213
+            },
+            {
+              "pts_ns": 260000000,
+              "source_to_receive_ms": 22.0505
+            },
+            {
+              "pts_ns": 280000000,
+              "source_to_receive_ms": 22.5586
+            },
+            {
+              "pts_ns": 300000000,
+              "source_to_receive_ms": 22.5088
+            },
+            {
+              "pts_ns": 320000000,
+              "source_to_receive_ms": 20.0324
+            },
+            {
+              "pts_ns": 340000000,
+              "source_to_receive_ms": 23.0548
+            },
+            {
+              "pts_ns": 360000000,
+              "source_to_receive_ms": 22.0205
+            },
+            {
+              "pts_ns": 380000000,
+              "source_to_receive_ms": 20.0213
+            },
+            {
+              "pts_ns": 400000000,
+              "source_to_receive_ms": 22.5427
+            },
+            {
+              "pts_ns": 420000000,
+              "source_to_receive_ms": 22.0401
+            },
+            {
+              "pts_ns": 440000000,
+              "source_to_receive_ms": 22.0353
+            },
+            {
+              "pts_ns": 460000000,
+              "source_to_receive_ms": 21.0447
+            },
+            {
+              "pts_ns": 480000000,
+              "source_to_receive_ms": 20.5418
+            },
+            {
+              "pts_ns": 500000000,
+              "source_to_receive_ms": 20.5401
+            },
+            {
+              "pts_ns": 520000000,
+              "source_to_receive_ms": 21.0297
+            },
+            {
+              "pts_ns": 540000000,
+              "source_to_receive_ms": 21.0279
+            },
+            {
+              "pts_ns": 560000000,
+              "source_to_receive_ms": 21.0097
+            },
+            {
+              "pts_ns": 580000000,
+              "source_to_receive_ms": 21.0247
+            },
+            {
+              "pts_ns": 600000000,
+              "source_to_receive_ms": 22.5424
+            },
+            {
+              "pts_ns": 620000000,
+              "source_to_receive_ms": 22.0237
+            },
+            {
+              "pts_ns": 640000000,
+              "source_to_receive_ms": 20.0086
+            },
+            {
+              "pts_ns": 660000000,
+              "source_to_receive_ms": 21.0511
+            },
+            {
+              "pts_ns": 680000000,
+              "source_to_receive_ms": 21.0438
+            },
+            {
+              "pts_ns": 700000000,
+              "source_to_receive_ms": 22.0446
+            },
+            {
+              "pts_ns": 720000000,
+              "source_to_receive_ms": 22.0347
+            },
+            {
+              "pts_ns": 740000000,
+              "source_to_receive_ms": 21.0335
+            },
+            {
+              "pts_ns": 760000000,
+              "source_to_receive_ms": 22.0641
+            },
+            {
+              "pts_ns": 780000000,
+              "source_to_receive_ms": 22.0248
+            },
+            {
+              "pts_ns": 800000000,
+              "source_to_receive_ms": 21.5284
+            },
+            {
+              "pts_ns": 820000000,
+              "source_to_receive_ms": 21.0376
+            },
+            {
+              "pts_ns": 840000000,
+              "source_to_receive_ms": 23.048
+            },
+            {
+              "pts_ns": 860000000,
+              "source_to_receive_ms": 20.0173
+            },
+            {
+              "pts_ns": 880000000,
+              "source_to_receive_ms": 21.0574
+            },
+            {
+              "pts_ns": 900000000,
+              "source_to_receive_ms": 20.5409
+            },
+            {
+              "pts_ns": 920000000,
+              "source_to_receive_ms": 21.0279
+            },
+            {
+              "pts_ns": 940000000,
+              "source_to_receive_ms": 23.0732
+            },
+            {
+              "pts_ns": 960000000,
+              "source_to_receive_ms": 22.0691
+            },
+            {
+              "pts_ns": 980000000,
+              "source_to_receive_ms": 20.0158
+            },
+            {
+              "pts_ns": 1000000000,
+              "source_to_receive_ms": 22.5394
+            },
+            {
+              "pts_ns": 1020000000,
+              "source_to_receive_ms": 22.0266
+            },
+            {
+              "pts_ns": 1040000000,
+              "source_to_receive_ms": 22.0347
+            },
+            {
+              "pts_ns": 1060000000,
+              "source_to_receive_ms": 22.0235
+            },
+            {
+              "pts_ns": 1080000000,
+              "source_to_receive_ms": 21.5481
+            },
+            {
+              "pts_ns": 1100000000,
+              "source_to_receive_ms": 20.5306
+            },
+            {
+              "pts_ns": 1120000000,
+              "source_to_receive_ms": 21.0463
+            },
+            {
+              "pts_ns": 1140000000,
+              "source_to_receive_ms": 21.0358
+            },
+            {
+              "pts_ns": 1160000000,
+              "source_to_receive_ms": 23.0528
+            },
+            {
+              "pts_ns": 1180000000,
+              "source_to_receive_ms": 20.0307
+            },
+            {
+              "pts_ns": 1200000000,
+              "source_to_receive_ms": 22.535
+            },
+            {
+              "pts_ns": 1220000000,
+              "source_to_receive_ms": 22.0371
+            },
+            {
+              "pts_ns": 1240000000,
+              "source_to_receive_ms": 22.0343
+            },
+            {
+              "pts_ns": 1260000000,
+              "source_to_receive_ms": 21.0532
+            },
+            {
+              "pts_ns": 1280000000,
+              "source_to_receive_ms": 21.5459
+            },
+            {
+              "pts_ns": 1300000000,
+              "source_to_receive_ms": 20.5316
+            },
+            {
+              "pts_ns": 1320000000,
+              "source_to_receive_ms": 23.0437
+            },
+            {
+              "pts_ns": 1340000000,
+              "source_to_receive_ms": 20.033
+            },
+            {
+              "pts_ns": 1360000000,
+              "source_to_receive_ms": 23.0359
+            },
+            {
+              "pts_ns": 1380000000,
+              "source_to_receive_ms": 20.0326
+            },
+            {
+              "pts_ns": 1400000000,
+              "source_to_receive_ms": 21.2239
+            },
+            {
+              "pts_ns": 1420000000,
+              "source_to_receive_ms": 21.0201
+            },
+            {
+              "pts_ns": 1440000000,
+              "source_to_receive_ms": 22.5406
+            },
+            {
+              "pts_ns": 1460000000,
+              "source_to_receive_ms": 22.0352
+            },
+            {
+              "pts_ns": 1480000000,
+              "source_to_receive_ms": 20.5475
+            },
+            {
+              "pts_ns": 1500000000,
+              "source_to_receive_ms": 21.5425
+            },
+            {
+              "pts_ns": 1520000000,
+              "source_to_receive_ms": 20.9965
+            },
+            {
+              "pts_ns": 1540000000,
+              "source_to_receive_ms": 23.0536
+            },
+            {
+              "pts_ns": 1560000000,
+              "source_to_receive_ms": 20.0345
+            },
+            {
+              "pts_ns": 1580000000,
+              "source_to_receive_ms": 21.0283
+            },
+            {
+              "pts_ns": 1600000000,
+              "source_to_receive_ms": 20.5418
+            },
+            {
+              "pts_ns": 1620000000,
+              "source_to_receive_ms": 21.0405
+            },
+            {
+              "pts_ns": 1640000000,
+              "source_to_receive_ms": 21.0204
+            },
+            {
+              "pts_ns": 1660000000,
+              "source_to_receive_ms": 23.0473
+            },
+            {
+              "pts_ns": 1680000000,
+              "source_to_receive_ms": 20.0406
+            },
+            {
+              "pts_ns": 1700000000,
+              "source_to_receive_ms": 22.0338
+            },
+            {
+              "pts_ns": 1720000000,
+              "source_to_receive_ms": 22.0448
+            },
+            {
+              "pts_ns": 1740000000,
+              "source_to_receive_ms": 22.0366
+            },
+            {
+              "pts_ns": 1760000000,
+              "source_to_receive_ms": 21.0313
+            },
+            {
+              "pts_ns": 1780000000,
+              "source_to_receive_ms": 22.0512
+            },
+            {
+              "pts_ns": 1800000000,
+              "source_to_receive_ms": 21.5307
+            },
+            {
+              "pts_ns": 1820000000,
+              "source_to_receive_ms": 21.0476
+            },
+            {
+              "pts_ns": 1840000000,
+              "source_to_receive_ms": 21.0301
+            },
+            {
+              "pts_ns": 1860000000,
+              "source_to_receive_ms": 21.0325
+            },
+            {
+              "pts_ns": 1880000000,
+              "source_to_receive_ms": 21.0278
+            },
+            {
+              "pts_ns": 1900000000,
+              "source_to_receive_ms": 21.5389
+            },
+            {
+              "pts_ns": 1920000000,
+              "source_to_receive_ms": 21.0211
+            },
+            {
+              "pts_ns": 1940000000,
+              "source_to_receive_ms": 23.043
+            },
+            {
+              "pts_ns": 1960000000,
+              "source_to_receive_ms": 20.0756
+            },
+            {
+              "pts_ns": 1980000000,
+              "source_to_receive_ms": 21.0458
+            }
+          ],
+          "first_source_monotonic_ns": 706023843578000,
+          "legacy_script_late_gate": true,
+          "coordinated_control_complete_zero_late": false
+        },
+        "NV12": {
+          "issues": [],
+          "source_video_count": 100,
+          "received_video_count": 94,
+          "missing_video_pts": [
+            0,
+            20000000,
+            40000000,
+            100000000,
+            120000000,
+            140000000
+          ],
+          "source_audio_count": 100,
+          "received_audio_count": 100,
+          "received_audio_bytes": 384000,
+          "terminal": [
+            {
+              "event": "playback-complete",
+              "audio_master": false,
+              "video_received": 94,
+              "video_late": 0,
+              "audio_blocks": 100,
+              "audio_samples": 96000,
+              "latency_ns": 100000000
+            }
+          ],
+          "schedule_summary": [
+            {
+              "event": "video-schedule-summary",
+              "received": 94,
+              "scheduled": 94,
+              "handed_off": 0,
+              "late": 0,
+              "overflow": 0,
+              "peak_pending": 7,
+              "pending_limit": 8,
+              "peak_bytes": 151200,
+              "byte_limit": 134217728
+            }
+          ],
+          "pts0_source_to_receive": null,
+          "first_common_identity_gap": {
+            "pts_ns": 60000000,
+            "source_to_receive_ms": 1.6787
+          },
+          "max_source_to_receive_ms": 23.5404,
+          "identity_gaps": [
+            {
+              "pts_ns": 60000000,
+              "source_to_receive_ms": 1.6787
+            },
+            {
+              "pts_ns": 80000000,
+              "source_to_receive_ms": 2.0827
+            },
+            {
+              "pts_ns": 160000000,
+              "source_to_receive_ms": 1.7921
+            },
+            {
+              "pts_ns": 180000000,
+              "source_to_receive_ms": 15.5849
+            },
+            {
+              "pts_ns": 200000000,
+              "source_to_receive_ms": 22.5177
+            },
+            {
+              "pts_ns": 220000000,
+              "source_to_receive_ms": 22.0163
+            },
+            {
+              "pts_ns": 240000000,
+              "source_to_receive_ms": 22.0392
+            },
+            {
+              "pts_ns": 260000000,
+              "source_to_receive_ms": 22.0476
+            },
+            {
+              "pts_ns": 280000000,
+              "source_to_receive_ms": 21.0431
+            },
+            {
+              "pts_ns": 300000000,
+              "source_to_receive_ms": 21.5524
+            },
+            {
+              "pts_ns": 320000000,
+              "source_to_receive_ms": 21.035
+            },
+            {
+              "pts_ns": 340000000,
+              "source_to_receive_ms": 21.026
+            },
+            {
+              "pts_ns": 360000000,
+              "source_to_receive_ms": 22.0408
+            },
+            {
+              "pts_ns": 380000000,
+              "source_to_receive_ms": 21.5218
+            },
+            {
+              "pts_ns": 400000000,
+              "source_to_receive_ms": 21.5232
+            },
+            {
+              "pts_ns": 420000000,
+              "source_to_receive_ms": 21.0432
+            },
+            {
+              "pts_ns": 440000000,
+              "source_to_receive_ms": 22.0169
+            },
+            {
+              "pts_ns": 460000000,
+              "source_to_receive_ms": 21.0166
+            },
+            {
+              "pts_ns": 480000000,
+              "source_to_receive_ms": 21.0257
+            },
+            {
+              "pts_ns": 500000000,
+              "source_to_receive_ms": 21.5258
+            },
+            {
+              "pts_ns": 520000000,
+              "source_to_receive_ms": 21.0406
+            },
+            {
+              "pts_ns": 540000000,
+              "source_to_receive_ms": 23.0193
+            },
+            {
+              "pts_ns": 560000000,
+              "source_to_receive_ms": 20.0428
+            },
+            {
+              "pts_ns": 580000000,
+              "source_to_receive_ms": 21.0278
+            },
+            {
+              "pts_ns": 600000000,
+              "source_to_receive_ms": 21.0494
+            },
+            {
+              "pts_ns": 620000000,
+              "source_to_receive_ms": 23.0359
+            },
+            {
+              "pts_ns": 640000000,
+              "source_to_receive_ms": 20.0247
+            },
+            {
+              "pts_ns": 660000000,
+              "source_to_receive_ms": 21.0455
+            },
+            {
+              "pts_ns": 680000000,
+              "source_to_receive_ms": 21.0304
+            },
+            {
+              "pts_ns": 700000000,
+              "source_to_receive_ms": 21.5441
+            },
+            {
+              "pts_ns": 720000000,
+              "source_to_receive_ms": 21.0366
+            },
+            {
+              "pts_ns": 740000000,
+              "source_to_receive_ms": 21.0507
+            },
+            {
+              "pts_ns": 760000000,
+              "source_to_receive_ms": 22.0334
+            },
+            {
+              "pts_ns": 780000000,
+              "source_to_receive_ms": 22.0241
+            },
+            {
+              "pts_ns": 800000000,
+              "source_to_receive_ms": 21.5506
+            },
+            {
+              "pts_ns": 820000000,
+              "source_to_receive_ms": 21.0267
+            },
+            {
+              "pts_ns": 840000000,
+              "source_to_receive_ms": 21.049
+            },
+            {
+              "pts_ns": 860000000,
+              "source_to_receive_ms": 23.0547
+            },
+            {
+              "pts_ns": 880000000,
+              "source_to_receive_ms": 20.0335
+            },
+            {
+              "pts_ns": 900000000,
+              "source_to_receive_ms": 21.5183
+            },
+            {
+              "pts_ns": 920000000,
+              "source_to_receive_ms": 21.0312
+            },
+            {
+              "pts_ns": 940000000,
+              "source_to_receive_ms": 22.0566
+            },
+            {
+              "pts_ns": 960000000,
+              "source_to_receive_ms": 21.055
+            },
+            {
+              "pts_ns": 980000000,
+              "source_to_receive_ms": 22.0485
+            },
+            {
+              "pts_ns": 1000000000,
+              "source_to_receive_ms": 21.5564
+            },
+            {
+              "pts_ns": 1020000000,
+              "source_to_receive_ms": 21.4336
+            },
+            {
+              "pts_ns": 1040000000,
+              "source_to_receive_ms": 23.0513
+            },
+            {
+              "pts_ns": 1060000000,
+              "source_to_receive_ms": 19.1212
+            },
+            {
+              "pts_ns": 1080000000,
+              "source_to_receive_ms": 22.3274
+            },
+            {
+              "pts_ns": 1100000000,
+              "source_to_receive_ms": 21.545
+            },
+            {
+              "pts_ns": 1120000000,
+              "source_to_receive_ms": 23.0238
+            },
+            {
+              "pts_ns": 1140000000,
+              "source_to_receive_ms": 22.0428
+            },
+            {
+              "pts_ns": 1160000000,
+              "source_to_receive_ms": 22.032
+            },
+            {
+              "pts_ns": 1180000000,
+              "source_to_receive_ms": 22.537
+            },
+            {
+              "pts_ns": 1200000000,
+              "source_to_receive_ms": 20.5364
+            },
+            {
+              "pts_ns": 1220000000,
+              "source_to_receive_ms": 21.0418
+            },
+            {
+              "pts_ns": 1240000000,
+              "source_to_receive_ms": 21.0221
+            },
+            {
+              "pts_ns": 1260000000,
+              "source_to_receive_ms": 21.028
+            },
+            {
+              "pts_ns": 1280000000,
+              "source_to_receive_ms": 21.0414
+            },
+            {
+              "pts_ns": 1300000000,
+              "source_to_receive_ms": 22.6768
+            },
+            {
+              "pts_ns": 1320000000,
+              "source_to_receive_ms": 22.0276
+            },
+            {
+              "pts_ns": 1340000000,
+              "source_to_receive_ms": 22.0292
+            },
+            {
+              "pts_ns": 1360000000,
+              "source_to_receive_ms": 22.0411
+            },
+            {
+              "pts_ns": 1380000000,
+              "source_to_receive_ms": 19.5419
+            },
+            {
+              "pts_ns": 1400000000,
+              "source_to_receive_ms": 22.5483
+            },
+            {
+              "pts_ns": 1420000000,
+              "source_to_receive_ms": 22.0384
+            },
+            {
+              "pts_ns": 1440000000,
+              "source_to_receive_ms": 22.051
+            },
+            {
+              "pts_ns": 1460000000,
+              "source_to_receive_ms": 22.0418
+            },
+            {
+              "pts_ns": 1480000000,
+              "source_to_receive_ms": 22.0232
+            },
+            {
+              "pts_ns": 1500000000,
+              "source_to_receive_ms": 20.5441
+            },
+            {
+              "pts_ns": 1520000000,
+              "source_to_receive_ms": 22.0639
+            },
+            {
+              "pts_ns": 1540000000,
+              "source_to_receive_ms": 22.0255
+            },
+            {
+              "pts_ns": 1560000000,
+              "source_to_receive_ms": 21.0381
+            },
+            {
+              "pts_ns": 1580000000,
+              "source_to_receive_ms": 21.0431
+            },
+            {
+              "pts_ns": 1600000000,
+              "source_to_receive_ms": 22.0476
+            },
+            {
+              "pts_ns": 1620000000,
+              "source_to_receive_ms": 22.0309
+            },
+            {
+              "pts_ns": 1640000000,
+              "source_to_receive_ms": 21.0382
+            },
+            {
+              "pts_ns": 1660000000,
+              "source_to_receive_ms": 22.0297
+            },
+            {
+              "pts_ns": 1680000000,
+              "source_to_receive_ms": 21.0297
+            },
+            {
+              "pts_ns": 1700000000,
+              "source_to_receive_ms": 21.5454
+            },
+            {
+              "pts_ns": 1720000000,
+              "source_to_receive_ms": 21.0343
+            },
+            {
+              "pts_ns": 1740000000,
+              "source_to_receive_ms": 21.0536
+            },
+            {
+              "pts_ns": 1760000000,
+              "source_to_receive_ms": 21.0162
+            },
+            {
+              "pts_ns": 1780000000,
+              "source_to_receive_ms": 23.5404
+            },
+            {
+              "pts_ns": 1800000000,
+              "source_to_receive_ms": 20.535
+            },
+            {
+              "pts_ns": 1820000000,
+              "source_to_receive_ms": 22.0395
+            },
+            {
+              "pts_ns": 1840000000,
+              "source_to_receive_ms": 22.0268
+            },
+            {
+              "pts_ns": 1860000000,
+              "source_to_receive_ms": 22.0402
+            },
+            {
+              "pts_ns": 1880000000,
+              "source_to_receive_ms": 22.0286
+            },
+            {
+              "pts_ns": 1900000000,
+              "source_to_receive_ms": 21.5452
+            },
+            {
+              "pts_ns": 1920000000,
+              "source_to_receive_ms": 21.0458
+            },
+            {
+              "pts_ns": 1940000000,
+              "source_to_receive_ms": 21.0232
+            },
+            {
+              "pts_ns": 1960000000,
+              "source_to_receive_ms": 21.0455
+            },
+            {
+              "pts_ns": 1980000000,
+              "source_to_receive_ms": 21.0341
+            }
+          ],
+          "first_source_monotonic_ns": 706026879621100,
+          "legacy_script_late_gate": true,
+          "coordinated_control_complete_zero_late": false
+        }
+      },
+      "phases": {
+        "issues": [],
+        "warnings": [],
+        "records": [
+          {
+            "file": "open-phases-36740.csv",
+            "record": 0,
+            "pid": 36740,
+            "tid": 55464,
+            "success": true,
+            "issues": [],
+            "total_wall_ms": 160.9698,
+            "intervals": [
+              {
+                "from": "enter",
+                "to": "connect_begin",
+                "wall_ms": 0.0138,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "connect_begin",
+                "to": "connect_end",
+                "wall_ms": 0.0416,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "connect_end",
+                "to": "hello_receive_begin",
+                "wall_ms": 0.0004,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "hello_receive_begin",
+                "to": "hello_receive_end",
+                "wall_ms": 0.0664,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "hello_receive_end",
+                "to": "hello_send_begin",
+                "wall_ms": 0.0024,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "hello_send_begin",
+                "to": "hello_send_end",
+                "wall_ms": 0.006,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "hello_send_end",
+                "to": "device_create_begin",
+                "wall_ms": 0.0004,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "device_create_begin",
+                "to": "device_create_end",
+                "wall_ms": 160.3623,
+                "thread_cpu_ms": 156.25
+              },
+              {
+                "from": "device_create_end",
+                "to": "device_setup_begin",
+                "wall_ms": 0.0015,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "device_setup_begin",
+                "to": "device_setup_end",
+                "wall_ms": 0.0029,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "device_setup_end",
+                "to": "ring_receive_begin",
+                "wall_ms": 0.0005,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "ring_receive_begin",
+                "to": "ring_receive_end",
+                "wall_ms": 0.0059,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "ring_receive_end",
+                "to": "import_begin",
+                "wall_ms": 0.0004,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "import_begin",
+                "to": "import_end",
+                "wall_ms": 0.4625,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "import_end",
+                "to": "return",
+                "wall_ms": 0.0028,
+                "thread_cpu_ms": 0.0
+              }
+            ],
+            "steady_begin_ns": 706027206051000,
+            "steady_end_ns": 706027367019300,
+            "gst_begin_ns": 706027206051100,
+            "gst_end_ns": 706027367019300,
+            "gst_minus_steady_ns_range": [
+              0,
+              200
+            ],
+            "nearest_format_heuristic": "NV12",
+            "open_begin_minus_first_source_ms": 326.43
+          },
+          {
+            "file": "open-phases-46172.csv",
+            "record": 0,
+            "pid": 46172,
+            "tid": 58184,
+            "success": true,
+            "issues": [],
+            "total_wall_ms": 164.1182,
+            "intervals": [
+              {
+                "from": "enter",
+                "to": "connect_begin",
+                "wall_ms": 0.0133,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "connect_begin",
+                "to": "connect_end",
+                "wall_ms": 0.0376,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "connect_end",
+                "to": "hello_receive_begin",
+                "wall_ms": 0.0004,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "hello_receive_begin",
+                "to": "hello_receive_end",
+                "wall_ms": 0.0602,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "hello_receive_end",
+                "to": "hello_send_begin",
+                "wall_ms": 0.0062,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "hello_send_begin",
+                "to": "hello_send_end",
+                "wall_ms": 0.0051,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "hello_send_end",
+                "to": "device_create_begin",
+                "wall_ms": 0.0004,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "device_create_begin",
+                "to": "device_create_end",
+                "wall_ms": 163.5418,
+                "thread_cpu_ms": 156.25
+              },
+              {
+                "from": "device_create_end",
+                "to": "device_setup_begin",
+                "wall_ms": 0.0015,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "device_setup_begin",
+                "to": "device_setup_end",
+                "wall_ms": 0.003,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "device_setup_end",
+                "to": "ring_receive_begin",
+                "wall_ms": 0.0005,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "ring_receive_begin",
+                "to": "ring_receive_end",
+                "wall_ms": 0.0047,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "ring_receive_end",
+                "to": "import_begin",
+                "wall_ms": 0.0004,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "import_begin",
+                "to": "import_end",
+                "wall_ms": 0.4408,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "import_end",
+                "to": "return",
+                "wall_ms": 0.0023,
+                "thread_cpu_ms": 0.0
+              }
+            ],
+            "steady_begin_ns": 706024106426100,
+            "steady_end_ns": 706024270542900,
+            "gst_begin_ns": 706024106426200,
+            "gst_end_ns": 706024270542900,
+            "gst_minus_steady_ns_range": [
+              0,
+              300
+            ],
+            "nearest_format_heuristic": "BGRA",
+            "open_begin_minus_first_source_ms": 262.8482
+          }
+        ],
+        "trace_files": [
+          "native.csv.50360.csv",
+          "native.csv.46172.csv",
+          "native.csv.36740.csv",
+          "native.csv.31520.csv",
+          "gst.csv.36740.csv",
+          "gst.csv.31520.csv",
+          "gst.csv.46172.csv",
+          "gst.csv.50360.csv"
+        ]
+      }
+    },
+    "audio-coordinated": {
+      "formats": {
+        "BGRA": {
+          "issues": [],
+          "source_video_count": 100,
+          "received_video_count": 100,
+          "missing_video_pts": [],
+          "source_audio_count": 100,
+          "received_audio_count": 100,
+          "received_audio_bytes": 384000,
+          "terminal": [
+            {
+              "event": "playback-complete",
+              "audio_master": false,
+              "video_received": 100,
+              "video_late": 0,
+              "audio_blocks": 100,
+              "audio_samples": 96000,
+              "latency_ns": 100000000
+            }
+          ],
+          "schedule_summary": [
+            {
+              "event": "video-schedule-summary",
+              "received": 100,
+              "scheduled": 100,
+              "handed_off": 0,
+              "late": 0,
+              "overflow": 0,
+              "peak_pending": 4,
+              "pending_limit": 8,
+              "peak_bytes": 230400,
+              "byte_limit": 134217728
+            }
+          ],
+          "pts0_source_to_receive": {
+            "pts_ns": 0,
+            "source_to_receive_ms": 51.9786
+          },
+          "first_common_identity_gap": {
+            "pts_ns": 0,
+            "source_to_receive_ms": 51.9786
+          },
+          "max_source_to_receive_ms": 51.9786,
+          "identity_gaps": [
+            {
+              "pts_ns": 0,
+              "source_to_receive_ms": 51.9786
+            },
+            {
+              "pts_ns": 20000000,
+              "source_to_receive_ms": 21.6166
+            },
+            {
+              "pts_ns": 40000000,
+              "source_to_receive_ms": 20.9284
+            },
+            {
+              "pts_ns": 60000000,
+              "source_to_receive_ms": 20.5553
+            },
+            {
+              "pts_ns": 80000000,
+              "source_to_receive_ms": 21.528
+            },
+            {
+              "pts_ns": 100000000,
+              "source_to_receive_ms": 21.9893
+            },
+            {
+              "pts_ns": 120000000,
+              "source_to_receive_ms": 21.0401
+            },
+            {
+              "pts_ns": 140000000,
+              "source_to_receive_ms": 22.0295
+            },
+            {
+              "pts_ns": 160000000,
+              "source_to_receive_ms": 21.5115
+            },
+            {
+              "pts_ns": 180000000,
+              "source_to_receive_ms": 21.0195
+            },
+            {
+              "pts_ns": 200000000,
+              "source_to_receive_ms": 21.0333
+            },
+            {
+              "pts_ns": 220000000,
+              "source_to_receive_ms": 21.0185
+            },
+            {
+              "pts_ns": 240000000,
+              "source_to_receive_ms": 21.0292
+            },
+            {
+              "pts_ns": 260000000,
+              "source_to_receive_ms": 22.5629
+            },
+            {
+              "pts_ns": 280000000,
+              "source_to_receive_ms": 20.0527
+            },
+            {
+              "pts_ns": 300000000,
+              "source_to_receive_ms": 23.0499
+            },
+            {
+              "pts_ns": 320000000,
+              "source_to_receive_ms": 20.0249
+            },
+            {
+              "pts_ns": 340000000,
+              "source_to_receive_ms": 21.0375
+            },
+            {
+              "pts_ns": 360000000,
+              "source_to_receive_ms": 21.5458
+            },
+            {
+              "pts_ns": 380000000,
+              "source_to_receive_ms": 21.022
+            },
+            {
+              "pts_ns": 400000000,
+              "source_to_receive_ms": 21.0377
+            },
+            {
+              "pts_ns": 420000000,
+              "source_to_receive_ms": 22.0049
+            },
+            {
+              "pts_ns": 440000000,
+              "source_to_receive_ms": 21.0399
+            },
+            {
+              "pts_ns": 460000000,
+              "source_to_receive_ms": 20.5228
+            },
+            {
+              "pts_ns": 480000000,
+              "source_to_receive_ms": 21.5446
+            },
+            {
+              "pts_ns": 500000000,
+              "source_to_receive_ms": 22.5268
+            },
+            {
+              "pts_ns": 520000000,
+              "source_to_receive_ms": 20.0583
+            },
+            {
+              "pts_ns": 540000000,
+              "source_to_receive_ms": 23.0471
+            },
+            {
+              "pts_ns": 560000000,
+              "source_to_receive_ms": 19.5425
+            },
+            {
+              "pts_ns": 580000000,
+              "source_to_receive_ms": 22.5041
+            },
+            {
+              "pts_ns": 600000000,
+              "source_to_receive_ms": 22.0383
+            },
+            {
+              "pts_ns": 620000000,
+              "source_to_receive_ms": 21.0442
+            },
+            {
+              "pts_ns": 640000000,
+              "source_to_receive_ms": 21.028
+            },
+            {
+              "pts_ns": 660000000,
+              "source_to_receive_ms": 21.5327
+            },
+            {
+              "pts_ns": 680000000,
+              "source_to_receive_ms": 21.0307
+            },
+            {
+              "pts_ns": 700000000,
+              "source_to_receive_ms": 21.0203
+            },
+            {
+              "pts_ns": 720000000,
+              "source_to_receive_ms": 21.0371
+            },
+            {
+              "pts_ns": 740000000,
+              "source_to_receive_ms": 22.0136
+            },
+            {
+              "pts_ns": 760000000,
+              "source_to_receive_ms": 20.5491
+            },
+            {
+              "pts_ns": 780000000,
+              "source_to_receive_ms": 21.3663
+            },
+            {
+              "pts_ns": 800000000,
+              "source_to_receive_ms": 21.0044
+            },
+            {
+              "pts_ns": 820000000,
+              "source_to_receive_ms": 23.0276
+            },
+            {
+              "pts_ns": 840000000,
+              "source_to_receive_ms": 20.038
+            },
+            {
+              "pts_ns": 860000000,
+              "source_to_receive_ms": 22.0253
+            },
+            {
+              "pts_ns": 880000000,
+              "source_to_receive_ms": 22.0244
+            },
+            {
+              "pts_ns": 900000000,
+              "source_to_receive_ms": 22.0219
+            },
+            {
+              "pts_ns": 920000000,
+              "source_to_receive_ms": 22.0114
+            },
+            {
+              "pts_ns": 940000000,
+              "source_to_receive_ms": 21.0382
+            },
+            {
+              "pts_ns": 960000000,
+              "source_to_receive_ms": 21.5353
+            },
+            {
+              "pts_ns": 980000000,
+              "source_to_receive_ms": 21.5292
+            },
+            {
+              "pts_ns": 1000000000,
+              "source_to_receive_ms": 21.0022
+            },
+            {
+              "pts_ns": 1020000000,
+              "source_to_receive_ms": 21.0294
+            },
+            {
+              "pts_ns": 1040000000,
+              "source_to_receive_ms": 21.0336
+            },
+            {
+              "pts_ns": 1060000000,
+              "source_to_receive_ms": 21.5155
+            },
+            {
+              "pts_ns": 1080000000,
+              "source_to_receive_ms": 22.5419
+            },
+            {
+              "pts_ns": 1100000000,
+              "source_to_receive_ms": 22.0367
+            },
+            {
+              "pts_ns": 1120000000,
+              "source_to_receive_ms": 22.0315
+            },
+            {
+              "pts_ns": 1140000000,
+              "source_to_receive_ms": 22.0289
+            },
+            {
+              "pts_ns": 1160000000,
+              "source_to_receive_ms": 21.5361
+            },
+            {
+              "pts_ns": 1180000000,
+              "source_to_receive_ms": 21.0893
+            },
+            {
+              "pts_ns": 1200000000,
+              "source_to_receive_ms": 21.0458
+            },
+            {
+              "pts_ns": 1220000000,
+              "source_to_receive_ms": 23.0299
+            },
+            {
+              "pts_ns": 1240000000,
+              "source_to_receive_ms": 20.0343
+            },
+            {
+              "pts_ns": 1260000000,
+              "source_to_receive_ms": 20.5576
+            },
+            {
+              "pts_ns": 1280000000,
+              "source_to_receive_ms": 22.5664
+            },
+            {
+              "pts_ns": 1300000000,
+              "source_to_receive_ms": 22.0281
+            },
+            {
+              "pts_ns": 1320000000,
+              "source_to_receive_ms": 22.0266
+            },
+            {
+              "pts_ns": 1340000000,
+              "source_to_receive_ms": 21.0481
+            },
+            {
+              "pts_ns": 1360000000,
+              "source_to_receive_ms": 21.5379
+            },
+            {
+              "pts_ns": 1380000000,
+              "source_to_receive_ms": 22.0242
+            },
+            {
+              "pts_ns": 1400000000,
+              "source_to_receive_ms": 22.0495
+            },
+            {
+              "pts_ns": 1420000000,
+              "source_to_receive_ms": 22.0027
+            },
+            {
+              "pts_ns": 1440000000,
+              "source_to_receive_ms": 21.042
+            },
+            {
+              "pts_ns": 1460000000,
+              "source_to_receive_ms": 21.5673
+            },
+            {
+              "pts_ns": 1480000000,
+              "source_to_receive_ms": 22.0599
+            },
+            {
+              "pts_ns": 1500000000,
+              "source_to_receive_ms": 21.3633
+            },
+            {
+              "pts_ns": 1520000000,
+              "source_to_receive_ms": 22.0466
+            },
+            {
+              "pts_ns": 1540000000,
+              "source_to_receive_ms": 21.0463
+            },
+            {
+              "pts_ns": 1560000000,
+              "source_to_receive_ms": 20.5372
+            },
+            {
+              "pts_ns": 1580000000,
+              "source_to_receive_ms": 22.5442
+            },
+            {
+              "pts_ns": 1600000000,
+              "source_to_receive_ms": 22.0251
+            },
+            {
+              "pts_ns": 1620000000,
+              "source_to_receive_ms": 22.0263
+            },
+            {
+              "pts_ns": 1640000000,
+              "source_to_receive_ms": 22.013
+            },
+            {
+              "pts_ns": 1660000000,
+              "source_to_receive_ms": 21.5305
+            },
+            {
+              "pts_ns": 1680000000,
+              "source_to_receive_ms": 22.0397
+            },
+            {
+              "pts_ns": 1700000000,
+              "source_to_receive_ms": 22.0449
+            },
+            {
+              "pts_ns": 1720000000,
+              "source_to_receive_ms": 22.0324
+            },
+            {
+              "pts_ns": 1740000000,
+              "source_to_receive_ms": 22.0373
+            },
+            {
+              "pts_ns": 1760000000,
+              "source_to_receive_ms": 21.5472
+            },
+            {
+              "pts_ns": 1780000000,
+              "source_to_receive_ms": 21.5216
+            },
+            {
+              "pts_ns": 1800000000,
+              "source_to_receive_ms": 21.0285
+            },
+            {
+              "pts_ns": 1820000000,
+              "source_to_receive_ms": 21.0812
+            },
+            {
+              "pts_ns": 1840000000,
+              "source_to_receive_ms": 23.1341
+            },
+            {
+              "pts_ns": 1860000000,
+              "source_to_receive_ms": 20.071
+            },
+            {
+              "pts_ns": 1880000000,
+              "source_to_receive_ms": 21.5249
+            },
+            {
+              "pts_ns": 1900000000,
+              "source_to_receive_ms": 21.0279
+            },
+            {
+              "pts_ns": 1920000000,
+              "source_to_receive_ms": 20.4501
+            },
+            {
+              "pts_ns": 1940000000,
+              "source_to_receive_ms": 21.82
+            },
+            {
+              "pts_ns": 1960000000,
+              "source_to_receive_ms": 21.5678
+            },
+            {
+              "pts_ns": 1980000000,
+              "source_to_receive_ms": 22.0628
+            }
+          ],
+          "first_source_monotonic_ns": 706030679771500,
+          "legacy_script_late_gate": true,
+          "coordinated_control_complete_zero_late": true
+        },
+        "NV12": {
+          "issues": [],
+          "source_video_count": 100,
+          "received_video_count": 100,
+          "missing_video_pts": [],
+          "source_audio_count": 100,
+          "received_audio_count": 100,
+          "received_audio_bytes": 384000,
+          "terminal": [
+            {
+              "event": "playback-complete",
+              "audio_master": false,
+              "video_received": 100,
+              "video_late": 0,
+              "audio_blocks": 100,
+              "audio_samples": 96000,
+              "latency_ns": 100000000
+            }
+          ],
+          "schedule_summary": [
+            {
+              "event": "video-schedule-summary",
+              "received": 100,
+              "scheduled": 100,
+              "handed_off": 0,
+              "late": 0,
+              "overflow": 0,
+              "peak_pending": 4,
+              "pending_limit": 8,
+              "peak_bytes": 86400,
+              "byte_limit": 134217728
+            }
+          ],
+          "pts0_source_to_receive": {
+            "pts_ns": 0,
+            "source_to_receive_ms": 54.5492
+          },
+          "first_common_identity_gap": {
+            "pts_ns": 0,
+            "source_to_receive_ms": 54.5492
+          },
+          "max_source_to_receive_ms": 54.5492,
+          "identity_gaps": [
+            {
+              "pts_ns": 0,
+              "source_to_receive_ms": 54.5492
+            },
+            {
+              "pts_ns": 20000000,
+              "source_to_receive_ms": 19.5602
+            },
+            {
+              "pts_ns": 40000000,
+              "source_to_receive_ms": 21.3825
+            },
+            {
+              "pts_ns": 60000000,
+              "source_to_receive_ms": 21.0384
+            },
+            {
+              "pts_ns": 80000000,
+              "source_to_receive_ms": 20.9989
+            },
+            {
+              "pts_ns": 100000000,
+              "source_to_receive_ms": 21.0232
+            },
+            {
+              "pts_ns": 120000000,
+              "source_to_receive_ms": 21.5903
+            },
+            {
+              "pts_ns": 140000000,
+              "source_to_receive_ms": 22.0128
+            },
+            {
+              "pts_ns": 160000000,
+              "source_to_receive_ms": 22.0295
+            },
+            {
+              "pts_ns": 180000000,
+              "source_to_receive_ms": 22.028
+            },
+            {
+              "pts_ns": 200000000,
+              "source_to_receive_ms": 21.0149
+            },
+            {
+              "pts_ns": 220000000,
+              "source_to_receive_ms": 21.5513
+            },
+            {
+              "pts_ns": 240000000,
+              "source_to_receive_ms": 21.0381
+            },
+            {
+              "pts_ns": 260000000,
+              "source_to_receive_ms": 21.0315
+            },
+            {
+              "pts_ns": 280000000,
+              "source_to_receive_ms": 22.0395
+            },
+            {
+              "pts_ns": 300000000,
+              "source_to_receive_ms": 22.0581
+            },
+            {
+              "pts_ns": 320000000,
+              "source_to_receive_ms": 21.5544
+            },
+            {
+              "pts_ns": 340000000,
+              "source_to_receive_ms": 21.0351
+            },
+            {
+              "pts_ns": 360000000,
+              "source_to_receive_ms": 23.046
+            },
+            {
+              "pts_ns": 380000000,
+              "source_to_receive_ms": 20.0193
+            },
+            {
+              "pts_ns": 400000000,
+              "source_to_receive_ms": 21.0589
+            },
+            {
+              "pts_ns": 420000000,
+              "source_to_receive_ms": 21.5526
+            },
+            {
+              "pts_ns": 440000000,
+              "source_to_receive_ms": 20.3136
+            },
+            {
+              "pts_ns": 460000000,
+              "source_to_receive_ms": 21.7497
+            },
+            {
+              "pts_ns": 480000000,
+              "source_to_receive_ms": 23.0407
+            },
+            {
+              "pts_ns": 500000000,
+              "source_to_receive_ms": 19.3457
+            },
+            {
+              "pts_ns": 520000000,
+              "source_to_receive_ms": 22.5389
+            },
+            {
+              "pts_ns": 540000000,
+              "source_to_receive_ms": 22.0613
+            },
+            {
+              "pts_ns": 560000000,
+              "source_to_receive_ms": 21.0242
+            },
+            {
+              "pts_ns": 580000000,
+              "source_to_receive_ms": 22.0197
+            },
+            {
+              "pts_ns": 600000000,
+              "source_to_receive_ms": 21.0415
+            },
+            {
+              "pts_ns": 620000000,
+              "source_to_receive_ms": 21.5476
+            },
+            {
+              "pts_ns": 640000000,
+              "source_to_receive_ms": 21.0174
+            },
+            {
+              "pts_ns": 660000000,
+              "source_to_receive_ms": 21.0403
+            },
+            {
+              "pts_ns": 680000000,
+              "source_to_receive_ms": 22.0525
+            },
+            {
+              "pts_ns": 700000000,
+              "source_to_receive_ms": 21.0562
+            },
+            {
+              "pts_ns": 720000000,
+              "source_to_receive_ms": 22.4678
+            },
+            {
+              "pts_ns": 740000000,
+              "source_to_receive_ms": 21.453
+            },
+            {
+              "pts_ns": 760000000,
+              "source_to_receive_ms": 22.0331
+            },
+            {
+              "pts_ns": 780000000,
+              "source_to_receive_ms": 21.0381
+            },
+            {
+              "pts_ns": 800000000,
+              "source_to_receive_ms": 21.5293
+            },
+            {
+              "pts_ns": 820000000,
+              "source_to_receive_ms": 21.5479
+            },
+            {
+              "pts_ns": 840000000,
+              "source_to_receive_ms": 21.0868
+            },
+            {
+              "pts_ns": 860000000,
+              "source_to_receive_ms": 21.7785
+            },
+            {
+              "pts_ns": 880000000,
+              "source_to_receive_ms": 21.2534
+            },
+            {
+              "pts_ns": 900000000,
+              "source_to_receive_ms": 22.1626
+            },
+            {
+              "pts_ns": 920000000,
+              "source_to_receive_ms": 20.5444
+            },
+            {
+              "pts_ns": 940000000,
+              "source_to_receive_ms": 22.7573
+            },
+            {
+              "pts_ns": 960000000,
+              "source_to_receive_ms": 21.5018
+            },
+            {
+              "pts_ns": 980000000,
+              "source_to_receive_ms": 21.1942
+            },
+            {
+              "pts_ns": 1000000000,
+              "source_to_receive_ms": 22.8796
+            },
+            {
+              "pts_ns": 1020000000,
+              "source_to_receive_ms": 21.0398
+            },
+            {
+              "pts_ns": 1040000000,
+              "source_to_receive_ms": 22.047
+            },
+            {
+              "pts_ns": 1060000000,
+              "source_to_receive_ms": 22.0315
+            },
+            {
+              "pts_ns": 1080000000,
+              "source_to_receive_ms": 21.0306
+            },
+            {
+              "pts_ns": 1100000000,
+              "source_to_receive_ms": 21.0369
+            },
+            {
+              "pts_ns": 1120000000,
+              "source_to_receive_ms": 21.0787
+            },
+            {
+              "pts_ns": 1140000000,
+              "source_to_receive_ms": 21.1346
+            },
+            {
+              "pts_ns": 1160000000,
+              "source_to_receive_ms": 23.0469
+            },
+            {
+              "pts_ns": 1180000000,
+              "source_to_receive_ms": 20.0376
+            },
+            {
+              "pts_ns": 1200000000,
+              "source_to_receive_ms": 21.0558
+            },
+            {
+              "pts_ns": 1220000000,
+              "source_to_receive_ms": 22.5399
+            },
+            {
+              "pts_ns": 1240000000,
+              "source_to_receive_ms": 22.03
+            },
+            {
+              "pts_ns": 1260000000,
+              "source_to_receive_ms": 22.0442
+            },
+            {
+              "pts_ns": 1280000000,
+              "source_to_receive_ms": 20.0369
+            },
+            {
+              "pts_ns": 1300000000,
+              "source_to_receive_ms": 21.0347
+            },
+            {
+              "pts_ns": 1320000000,
+              "source_to_receive_ms": 22.5488
+            },
+            {
+              "pts_ns": 1340000000,
+              "source_to_receive_ms": 22.0375
+            },
+            {
+              "pts_ns": 1360000000,
+              "source_to_receive_ms": 22.0443
+            },
+            {
+              "pts_ns": 1380000000,
+              "source_to_receive_ms": 22.0493
+            },
+            {
+              "pts_ns": 1400000000,
+              "source_to_receive_ms": 22.0408
+            },
+            {
+              "pts_ns": 1420000000,
+              "source_to_receive_ms": 21.529
+            },
+            {
+              "pts_ns": 1440000000,
+              "source_to_receive_ms": 21.0694
+            },
+            {
+              "pts_ns": 1460000000,
+              "source_to_receive_ms": 22.0508
+            },
+            {
+              "pts_ns": 1480000000,
+              "source_to_receive_ms": 22.0359
+            },
+            {
+              "pts_ns": 1500000000,
+              "source_to_receive_ms": 21.0282
+            },
+            {
+              "pts_ns": 1520000000,
+              "source_to_receive_ms": 22.5497
+            },
+            {
+              "pts_ns": 1540000000,
+              "source_to_receive_ms": 22.05
+            },
+            {
+              "pts_ns": 1560000000,
+              "source_to_receive_ms": 22.0432
+            },
+            {
+              "pts_ns": 1580000000,
+              "source_to_receive_ms": 21.0337
+            },
+            {
+              "pts_ns": 1600000000,
+              "source_to_receive_ms": 22.0557
+            },
+            {
+              "pts_ns": 1620000000,
+              "source_to_receive_ms": 21.5554
+            },
+            {
+              "pts_ns": 1640000000,
+              "source_to_receive_ms": 21.0419
+            },
+            {
+              "pts_ns": 1660000000,
+              "source_to_receive_ms": 21.0428
+            },
+            {
+              "pts_ns": 1680000000,
+              "source_to_receive_ms": 22.0395
+            },
+            {
+              "pts_ns": 1700000000,
+              "source_to_receive_ms": 22.0432
+            },
+            {
+              "pts_ns": 1720000000,
+              "source_to_receive_ms": 22.5657
+            },
+            {
+              "pts_ns": 1740000000,
+              "source_to_receive_ms": 22.0802
+            },
+            {
+              "pts_ns": 1760000000,
+              "source_to_receive_ms": 21.0318
+            },
+            {
+              "pts_ns": 1780000000,
+              "source_to_receive_ms": 21.0189
+            },
+            {
+              "pts_ns": 1800000000,
+              "source_to_receive_ms": 20.5543
+            },
+            {
+              "pts_ns": 1820000000,
+              "source_to_receive_ms": 21.5758
+            },
+            {
+              "pts_ns": 1840000000,
+              "source_to_receive_ms": 22.0574
+            },
+            {
+              "pts_ns": 1860000000,
+              "source_to_receive_ms": 22.0704
+            },
+            {
+              "pts_ns": 1880000000,
+              "source_to_receive_ms": 22.0614
+            },
+            {
+              "pts_ns": 1900000000,
+              "source_to_receive_ms": 22.0654
+            },
+            {
+              "pts_ns": 1920000000,
+              "source_to_receive_ms": 21.5449
+            },
+            {
+              "pts_ns": 1940000000,
+              "source_to_receive_ms": 21.0678
+            },
+            {
+              "pts_ns": 1960000000,
+              "source_to_receive_ms": 22.059
+            },
+            {
+              "pts_ns": 1980000000,
+              "source_to_receive_ms": 21.0496
+            }
+          ],
+          "first_source_monotonic_ns": 706033728384100,
+          "legacy_script_late_gate": true,
+          "coordinated_control_complete_zero_late": true
+        }
+      },
+      "phases": {
+        "issues": [],
+        "warnings": [],
+        "records": [
+          {
+            "file": "open-phases-35588.csv",
+            "record": 0,
+            "pid": 35588,
+            "tid": 8488,
+            "success": true,
+            "issues": [],
+            "total_wall_ms": 157.9971,
+            "intervals": [
+              {
+                "from": "enter",
+                "to": "connect_begin",
+                "wall_ms": 0.0149,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "connect_begin",
+                "to": "connect_end",
+                "wall_ms": 0.0277,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "connect_end",
+                "to": "hello_receive_begin",
+                "wall_ms": 0.0004,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "hello_receive_begin",
+                "to": "hello_receive_end",
+                "wall_ms": 0.0611,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "hello_receive_end",
+                "to": "hello_send_begin",
+                "wall_ms": 0.0027,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "hello_send_begin",
+                "to": "hello_send_end",
+                "wall_ms": 0.0046,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "hello_send_end",
+                "to": "device_create_begin",
+                "wall_ms": 0.0003,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "device_create_begin",
+                "to": "device_create_end",
+                "wall_ms": 157.3722,
+                "thread_cpu_ms": 156.25
+              },
+              {
+                "from": "device_create_end",
+                "to": "device_setup_begin",
+                "wall_ms": 0.0021,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "device_setup_begin",
+                "to": "device_setup_end",
+                "wall_ms": 0.0027,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "device_setup_end",
+                "to": "ring_receive_begin",
+                "wall_ms": 0.0004,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "ring_receive_begin",
+                "to": "ring_receive_end",
+                "wall_ms": 0.0046,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "ring_receive_end",
+                "to": "import_begin",
+                "wall_ms": 0.0003,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "import_begin",
+                "to": "import_end",
+                "wall_ms": 0.5007,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "import_end",
+                "to": "return",
+                "wall_ms": 0.0024,
+                "thread_cpu_ms": 0.0
+              }
+            ],
+            "steady_begin_ns": 706030354278300,
+            "steady_end_ns": 706030512273900,
+            "gst_begin_ns": 706030354278400,
+            "gst_end_ns": 706030512273900,
+            "gst_minus_steady_ns_range": [
+              0,
+              500
+            ],
+            "nearest_format_heuristic": "BGRA",
+            "open_begin_minus_first_source_ms": -325.4931
+          },
+          {
+            "file": "open-phases-55736.csv",
+            "record": 0,
+            "pid": 55736,
+            "tid": 21540,
+            "success": true,
+            "issues": [],
+            "total_wall_ms": 158.8667,
+            "intervals": [
+              {
+                "from": "enter",
+                "to": "connect_begin",
+                "wall_ms": 0.0191,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "connect_begin",
+                "to": "connect_end",
+                "wall_ms": 0.0294,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "connect_end",
+                "to": "hello_receive_begin",
+                "wall_ms": 0.0004,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "hello_receive_begin",
+                "to": "hello_receive_end",
+                "wall_ms": 0.0585,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "hello_receive_end",
+                "to": "hello_send_begin",
+                "wall_ms": 0.0027,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "hello_send_begin",
+                "to": "hello_send_end",
+                "wall_ms": 0.0048,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "hello_send_end",
+                "to": "device_create_begin",
+                "wall_ms": 0.0003,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "device_create_begin",
+                "to": "device_create_end",
+                "wall_ms": 158.2891,
+                "thread_cpu_ms": 140.625
+              },
+              {
+                "from": "device_create_end",
+                "to": "device_setup_begin",
+                "wall_ms": 0.0024,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "device_setup_begin",
+                "to": "device_setup_end",
+                "wall_ms": 0.0031,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "device_setup_end",
+                "to": "ring_receive_begin",
+                "wall_ms": 0.0004,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "ring_receive_begin",
+                "to": "ring_receive_end",
+                "wall_ms": 0.0051,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "ring_receive_end",
+                "to": "import_begin",
+                "wall_ms": 0.0004,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "import_begin",
+                "to": "import_end",
+                "wall_ms": 0.4487,
+                "thread_cpu_ms": 0.0
+              },
+              {
+                "from": "import_end",
+                "to": "return",
+                "wall_ms": 0.0023,
+                "thread_cpu_ms": 0.0
+              }
+            ],
+            "steady_begin_ns": 706033403667900,
+            "steady_end_ns": 706033562533600,
+            "gst_begin_ns": 706033403668000,
+            "gst_end_ns": 706033562533600,
+            "gst_minus_steady_ns_range": [
+              0,
+              600
+            ],
+            "nearest_format_heuristic": "NV12",
+            "open_begin_minus_first_source_ms": -324.7161
+          }
+        ],
+        "trace_files": [
+          "native.csv.45832.csv",
+          "native.csv.35588.csv",
+          "native.csv.55736.csv",
+          "native.csv.31916.csv",
+          "gst.csv.45832.csv",
+          "gst.csv.31916.csv",
+          "gst.csv.55736.csv",
+          "gst.csv.35588.csv"
+        ]
+      }
+    }
+  },
+  "issues": [],
+  "runner_status": {
+    "finishedUtc": "2026-11-12T06:22:42.6933772Z",
+    "audioExit": 0,
+    "scope": "diagnostic, not acceptance",
+    "revision": "461584bbf5a6b8b70cec1578d69d35cb4b1ea2ff",
+    "status": "finished",
+    "audio-coordinatedExit": 0
+  },
+  "evidence_complete": true
+}

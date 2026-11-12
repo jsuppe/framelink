@@ -1,0 +1,149 @@
+--- a/src/framelink_win.cpp
++++ b/src/framelink_win.cpp
+@@ -32,6 +32,7 @@
+ #include <wrl/client.h>
+ 
+ #include <atomic>
++#include <cstdio>
+ #include <cstdlib>
+ #include <cstring>
+ #include <mutex>
+@@ -587,7 +588,72 @@
+ 
+ static flResult importRing(flChannel*, const fl::RingDescMsg*);
+ 
++
++// DIAGNOSTIC ONLY. Fixed storage; no allocation, file I/O or locking in a phase.
++// Export completed records only at normal DLL/CRT teardown, after media work.
++// Forced termination can lose this evidence; absence is not a zero-duration open.
++namespace startup_phase_diag {
++struct Stamp { const char* name=nullptr; LONGLONG wall=0; ULONGLONG kernel=0,user=0,steady=0,gst=0; bool cpu=false; };
++struct Record { DWORD tid=0; unsigned size=0; bool done=false,success=false; Stamp stamps[24]{}; };
++struct Store {
++    Record records[64]{};
++    std::atomic<unsigned> used{0};
++    LARGE_INTEGER frequency{};
++    char directory[MAX_PATH]{};
++    bool enabled=false;
++    using GstTimestamp = ULONGLONG (__cdecl*)();
++    GstTimestamp gstTimestamp=nullptr;
++    Store() {
++        const DWORD n=GetEnvironmentVariableA("FRAMELINK_SETUP_PHASE_DIR",directory,MAX_PATH);
++        enabled=n>0&&n<MAX_PATH&&QueryPerformanceFrequency(&frequency);
++        // Optional bridge to the SAME timestamp API used by media-trace rows.
++        // Query already loaded modules only; never load/link a GStreamer DLL.
++        HMODULE module=GetModuleHandleA("gstreamer-1.0-0.dll");
++        if(!module)module=GetModuleHandleA("libgstreamer-1.0-0.dll");
++        if(module)gstTimestamp=reinterpret_cast<GstTimestamp>(GetProcAddress(module,"gst_util_get_timestamp"));
++    }
++    ~Store() {
++        if(!enabled)return;
++        // Diagnostic normal-exit dump only: no worker, join or GPU calls here.
++        char path[MAX_PATH+64]{};
++        std::snprintf(path,sizeof path,"%s/open-phases-%lu.csv",directory,GetCurrentProcessId());
++        FILE* f=std::fopen(path,"w");if(!f)return;
++        std::fprintf(f,"record,pid,tid,success,phase,qpc,qpc_hz,steady_ns,gst_ns,kernel_100ns,user_100ns,cpu_valid,attempts,capacity\n");
++        const auto count=used.load();
++        for(unsigned i=0;i<count&&i<64;++i){const auto&r=records[i];if(!r.done)continue;
++            for(unsigned j=0;j<r.size;++j){const auto&s=r.stamps[j];
++                std::fprintf(f,"%u,%lu,%lu,%u,%s,%lld,%lld,%llu,%llu,%llu,%llu,%u,%u,64\n",i,GetCurrentProcessId(),r.tid,
++                    unsigned(r.success),s.name,s.wall,frequency.QuadPart,s.steady,s.gst,s.kernel,s.user,unsigned(s.cpu),count);
++            }
++        }
++        std::fclose(f);
++    }
++};
++static Store store;
++static ULONGLONG ticks(FILETIME value){return (ULONGLONG(value.dwHighDateTime)<<32)|value.dwLowDateTime;}
++struct Open {
++    Record* record=nullptr;
++    explicit Open(bool legacy) {
++        if(!legacy||!store.enabled)return;
++        const auto i=store.used.fetch_add(1);if(i>=64)return;
++        record=&store.records[i];record->tid=GetCurrentThreadId();mark("enter");
++    }
++    void mark(const char* name) {
++        if(!record||record->size>=24)return;
++        auto&s=record->stamps[record->size++];s.name=name;
++        LARGE_INTEGER now{};QueryPerformanceCounter(&now);s.wall=now.QuadPart;s.steady=fltrace::clockNs();
++        if(store.gstTimestamp)s.gst=store.gstTimestamp();
++        FILETIME created{},ended{},kernel{},user{};
++        s.cpu=GetThreadTimes(GetCurrentThread(),&created,&ended,&kernel,&user)!=FALSE;
++        if(s.cpu){s.kernel=ticks(kernel);s.user=ticks(user);}
++    }
++    void success(){if(record)record->success=true;}
++    ~Open(){mark("return");if(record)record->done=true;}
++};
++}
++
+ static flResult openProducer(const char* name, flChannel** out, SetupDeadline* setup) {
++    startup_phase_diag::Open phase(setup==nullptr);
+     fltrace::Scope trace("flOpenProducer",fltrace::id(name));
+ 
+     if (!name || !out) return trace.result(FL_INVALID);
+@@ -608,7 +674,9 @@
+         const ULONGLONG remaining=now<setup->deadline?setup->deadline-now:0;
+         connectTimeout=(uint32_t)(remaining<250?remaining:250);
+     }
++    phase.mark("connect_begin");
+     ch->link = fl::Channel::connect(name, connectTimeout, &busy);
++    phase.mark("connect_end");
+     if (!ch->link.connected()) {
+         delete ch;
+         return trace.result(busy ? FL_BUSY : FL_NOT_FOUND);
+@@ -616,7 +684,9 @@
+ 
+     // The consumer speaks first, so a version mismatch is caught before it
+     // duplicates any handle to us.
++    phase.mark("hello_receive_begin");
+     auto helloMsg = ch->link.recv();
++    phase.mark("hello_receive_end");
+     const auto* srv = helloMsg && helloMsg->type == fl::MsgType::Hello && helloMsg->payload.size()==sizeof(fl::HelloMsg)
+                           ? helloMsg->as<fl::HelloMsg>()
+                           : nullptr;
+@@ -637,23 +707,31 @@
+     mine.version = FL_VERSION;
+     mine._pad=features;
+     mine.pid = GetCurrentProcessId();
++    phase.mark("hello_send_begin");
+     if (!ch->link.send(fl::MsgType::Hello, mine)) {
+         delete ch;
+         return trace.result(FL_INTERNAL);
+     }
++    phase.mark("hello_send_end");
+     // Open on the consumer's adapter. Getting this wrong is the cross-adapter
+     // failure the API promises to refuse rather than crash on.
+     bool adapterMissing=false;
++    phase.mark("device_create_begin");
+     ch->device = createDevice(srv->adapterLUID, srv->luidValid != 0, &adapterMissing);
++    phase.mark("device_create_end");
+     if (adapterMissing) { flClose(ch); return trace.result(FL_ADAPTER_MISMATCH); }
++    phase.mark("device_setup_begin");
+     if (!ch->device || !finishDeviceSetup(ch)) {
+         flClose(ch);
+         return trace.result(FL_INTERNAL);
+     }
++    phase.mark("device_setup_end");
+     memcpy(ch->info.adapterLUID, srv->adapterLUID, 8);
+ 
+     if(setup && setup->check()!=FL_OK){flClose(ch);return setup->check();}
++    phase.mark("ring_receive_begin");
+     auto poolMsg = ch->link.recv();
++    phase.mark("ring_receive_end");
+     if(poolMsg && poolMsg->type==fl::MsgType::Busy){flClose(ch);return trace.result(FL_BUSY);}
+     if (!poolMsg || poolMsg->type != fl::MsgType::RingDesc) {
+         flClose(ch);
+@@ -666,10 +744,13 @@
+     }
+ 
+     ch->peerFeatures=setup?(srv->_pad|(kPullRingFeature<<16)):srv->_pad;
++    phase.mark("import_begin");
+     auto imported=importRing(ch,pd);
++    phase.mark("import_end");
+     if(imported!=FL_OK){flClose(ch);return trace.result(imported);}
+     ch->info.version=FL_VERSION;
+     *out = ch;
++    phase.success();
+     return trace.result(FL_OK);
+ }
+ 
