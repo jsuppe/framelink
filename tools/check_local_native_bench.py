@@ -48,6 +48,15 @@ def analyze(root):
         offset=a[0]['observed_pts_ns']-a[0]['pts_ns']
         require(all(r['observed_pts_ns']-r['pts_ns']==offset for r in a),role+' changing audio mapping')
         require(all(r['mapped_pts_ns']-r['pts_ns']==offset for r in v),role+' video/audio mapping mismatch')
+        source_phases=('acquire_begin_ns','acquired_ns','upload_begin_ns','uploaded_ns','submit_begin_ns','submitted_ns')
+        relay_phases=('forward_begin_ns','forwarded_ns')
+        for row in v:
+            if role=='source':
+                require(0<row['acquire_begin_ns']<=row['acquired_ns']<=row['source_ns']<=row['upload_begin_ns']<=row['uploaded_ns']<=row['submit_begin_ns']<=row['submitted_ns']<=row['arrival_ns'],role+' invalid source phase order')
+            else:require(all(row[k]==0 for k in source_phases),role+' unexpected source phases')
+            if role=='relay':
+                require(row['arrival_ns']<=row['forward_begin_ns']<=row['forwarded_ns']<=row['completed_ns'],role+' invalid forward phase order')
+            else:require(all(row[k]==0 for k in relay_phases),role+' unexpected relay phases')
         require(all(r['copy_bytes']==(0 if role=='relay' else expected_bytes) for r in v),role+' copy accounting')
         s=json.loads((root/(role+'.summary.json')).read_text())
         require(s['terminal'] is True and s['video']==n and s['audio_blocks']==audio and s['pcm_frames']==seconds*48000,role+' terminal accounting')
@@ -75,7 +84,11 @@ def analyze(root):
         'scheduled_to_final_arrival':distribution([r['arrival_ns']-s['scheduled_ns'] for s,r in zip(videos['source'],videos['receiver'])]),
         'source_marker_to_relay':distribution([r['arrival_ns']-s['source_ns'] for s,r in zip(videos['source'],videos['relay'])]),
         'source_marker_to_final':distribution([r['arrival_ns']-s['source_ns'] for s,r in zip(videos['source'],videos['receiver'])]),
-        'relay_forward_call':distribution([r['completed_ns']-r['arrival_ns'] for r in videos['relay']]),
+        'source_acquire_call':distribution([r['acquired_ns']-r['acquire_begin_ns'] for r in videos['source']]),
+        'source_upload_call':distribution([r['uploaded_ns']-r['upload_begin_ns'] for r in videos['source']]),
+        'source_submit_call':distribution([r['submitted_ns']-r['submit_begin_ns'] for r in videos['source']]),
+        'relay_acquire_to_record':distribution([r['completed_ns']-r['arrival_ns'] for r in videos['relay']]),
+        'relay_forward_call':distribution([r['forwarded_ns']-r['forward_begin_ns'] for r in videos['relay']]),
         'final_acquire_to_completion':distribution([r['completed_ns']-r['arrival_ns'] for r in videos['receiver']]),
         'audio_scheduled_to_final':distribution([r['arrival_ns']-s['scheduled_ns'] for s,r in zip(audios['source'],audios['receiver'])])}
     if c['trace']:

@@ -1,6 +1,6 @@
 # Authenticated Windows native relay rate qualification
 
-Status: **test-harness implemented/reviewed;25 analyzer cases pass; Windows build/runtime pending**.
+Status: **test-harness implemented/reviewed;28 analyzer cases pass; Windows build/runtime pending**.
 See [local evidence](windows-native-relay-rate-harness/README.md).
 Owner: Evelyn; native `ledger_review` owns the new harness/analyzer, root owns
 review and evidence integration. Windows execution remains exclusive and must
@@ -41,7 +41,8 @@ all existing regression modes and public contracts unchanged.
 - Real authenticated END/EOS and exact video/PCM terminal counts are mandatory.
   Publication completion and native drain are separate observations.
 - Source upload and final private verification-copy/readback are explicit work,
-  not zero-copy claims. Relay must perform no payload map/copy/upload/readback.
+  not zero-copy claims. The native-video relay must perform no payload map/copy/upload/readback.
+  PCM transport/verification is recorded separately and is not a video zero-copy claim.
 - Capture raw resource series for all three processes. Apply the existing
   steady-state second-half regression method at1800s: memory≤64KB/min,
   handles≤1/min, threads≤0.5/min. Short tests do not establish these slopes.

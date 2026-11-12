@@ -11,6 +11,11 @@ class Checks(unittest.TestCase):
    for n in range(30):
     due=1000000000+n*10**9//30
     rows.append(dict(identity=n,pts_ns=37000000+n*10**9//30,scheduled_ns=0 if role=='relay' else due,source_ns=0 if role=='relay' else due+100,arrival_ns=due+{'source':200,'relay':300,'receiver':500}[role],completed_ns=0 if role=='source' else due+{'relay':400,'receiver':600}[role],copy_bytes=0 if role=='relay' else 8192,sequence=n,slot=n%2,generation=1,dts_ns=37000000+n*10**9//30,duration_ns=(n+1)*10**9//30-n*10**9//30,lease=n+1 if role=='receiver' else 0,completion_value=n+1 if role=='receiver' else 0,mapped_pts_ns=37000000+n*10**9//30))
+   for r in rows:
+    due=1000000000+r['identity']*10**9//30
+    for key,delta in [('acquire_begin_ns',10),('acquired_ns',30),('upload_begin_ns',110),('uploaded_ns',130),('submit_begin_ns',150),('submitted_ns',180)]:r[key]=due+delta if role=='source' else 0
+    r['forward_begin_ns']=due+320 if role=='relay' else 0
+    r['forwarded_ns']=due+380 if role=='relay' else 0
    self.write(role+'.video.csv',rows)
    self.write(role+'.audio.csv',[dict(identity=n,pts_ns=n*10000000,scheduled_ns=1000000000+n*10000000,source_ns=1000000100+n*10000000,arrival_ns=1000000000+n*10000000+{'source':200,'relay':300,'receiver':400}[role],samples=480,bytes=1920,observed_pts_ns=n*10000000,mapped_pts_ns=n*10000000) for n in range(100)])
    self.write(role+'.resources.csv',[dict(t_ns=1000000000+n*1000000000,cpu_ns=n*1000000,memory_kb=1000,handles=20,threads=4) for n in range(3)])
@@ -99,6 +104,19 @@ class Checks(unittest.TestCase):
  def test_resource_degenerate(self):
   r=self.resources();r[1]['t_ns']=0
   with self.assertRaisesRegex(ValueError,'nonmonotonic'):resource_analysis(r,600,'test')
+ def test_source_phase_order(self):
+  self.mutate('source.video.csv',0,'uploaded_ns',1000000109)
+  with self.assertRaisesRegex(ValueError,'source phase order'):analyze(self.root)
+ def test_relay_phase_order(self):
+  self.mutate('relay.video.csv',0,'forwarded_ns',1000000319)
+  with self.assertRaisesRegex(ValueError,'forward phase order'):analyze(self.root)
+ def test_phase_distributions(self):
+  timing=analyze(self.root)['timing_ms']
+  self.assertAlmostEqual(timing['source_acquire_call']['max'],20/1e6)
+  self.assertAlmostEqual(timing['source_upload_call']['max'],20/1e6)
+  self.assertAlmostEqual(timing['source_submit_call']['max'],30/1e6)
+  self.assertAlmostEqual(timing['relay_forward_call']['max'],60/1e6)
+  self.assertAlmostEqual(timing['relay_acquire_to_record']['max'],100/1e6)
  def test_unfinished(self):
   p=self.root/'relay.summary.json';s=json.loads(p.read_text());s['terminal']=False;p.write_text(json.dumps(s))
   with self.assertRaisesRegex(ValueError,'terminal'):analyze(self.root)
