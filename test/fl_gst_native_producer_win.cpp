@@ -169,14 +169,19 @@ static void sinkPipeline(bool coordinated,bool bin=false){
 #include "fl_gst_native_relay_av_win.inc"
 #include "fl_gst_native_relay_process_win.inc"
 #include "fl_gst_video_relay_events.inc"
+#include "fl_gst_native_local_pool_process_win.inc"
 int main(int argc,char**argv){gst_init(&argc,&argv);CHECK(argc>=2);GError*e=nullptr;auto*plugin=gst_plugin_load_file(argv[1],&e);CHECK(plugin&&!e);gst_object_unref(plugin);
  if(argc==11&&std::string(argv[2])=="--relay-process-child")return relayprocess::relay(argv[3],guint16(atoi(argv[4])),(HANDLE)(uintptr_t)strtoull(argv[5],nullptr,10),(HANDLE)(uintptr_t)strtoull(argv[6],nullptr,10),(HANDLE)(uintptr_t)strtoull(argv[7],nullptr,10),atoi(argv[8])!=0,atoi(argv[9])!=0,unsigned(atoi(argv[10])));
  if(argc==7&&std::string(argv[2])=="--relay-process-producer")return relayprocess::producer(argv[3],guint16(atoi(argv[4])),atoi(argv[5])!=0,atoi(argv[6])!=0);
  if(argc==7&&std::string(argv[2])=="--relay-reserved-producer")return relayprocess::reservedProducer(argv[3],guint16(atoi(argv[4])),false,atoi(argv[6])!=0);
  if(argc==7&&std::string(argv[2])=="--relay-decoder-producer")return relayprocess::reservedProducer(argv[3],guint16(atoi(argv[4])),true,atoi(argv[6])!=0);
  if(argc==7&&std::string(argv[2])=="--relay-death-reader")return relayprocess::deathReader(argv[3],(HANDLE)(uintptr_t)strtoull(argv[4],nullptr,10),(HANDLE)(uintptr_t)strtoull(argv[5],nullptr,10),(HANDLE)(uintptr_t)strtoull(argv[6],nullptr,10));
+ if(argc==7&&std::string(argv[2])=="--relay-local-reader")return localPoolProcessReader(argv[3],(HANDLE)(uintptr_t)strtoull(argv[4],nullptr,10),(HANDLE)(uintptr_t)strtoull(argv[5],nullptr,10),(HANDLE)(uintptr_t)strtoull(argv[6],nullptr,10));
  CHECK(argc==2||argc==3);
  if(argc==3&&std::string(argv[2])=="--video-relay-event-controls"){videoRelayEventControls();return 0;}
+ if(argc==3&&std::string(argv[2])=="--relay-local-pool-failures"){localPoolFailureControls();return 0;}
+ if(argc==3&&std::string(argv[2])=="--relay-local-process"){localPoolProcess(argv[1]);return 0;}
+ if(argc==3&&std::string(argv[2])=="--relay-local-pool"){nativeProducerAv(12,false,false,false,true,false,false,false,false,true);return 0;}
  if(argc==3&&std::string(argv[2])=="--relay-authenticated-pool"){nativeProducerAv(11,false,false,false,true,false,false,false,false,true);return 0;}
  if(argc==3&&std::string(argv[2])=="--relay-local-session"){nativeLocalRelaySession();return 0;}
  if(argc==3&&std::string(argv[2])=="--relay-pool-lifetime"){nativeProducerAv(10,false,false,false,true,false,false,false,false,true);return 0;}

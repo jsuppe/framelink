@@ -27,6 +27,16 @@ int main(int argc,char**argv) {
         1,2,80,100,100,&candidate,&bound,&channel,NULL,&error);
     if(ok||!error||channel||bound.version) return 3;
     g_clear_error(&error);
+    bound.version=99;
+    ok=fl_gst_session_open_local_native_relay_pool(session,session,"unused",&caps,
+        1,2,80,100,100,&candidate,NULL,NULL,&bound,&channel,NULL,&error);
+    if(ok||!error||channel||bound.version) return 4;
+    g_clear_error(&error);
+    bound.version=99;
+    ok=fl_gst_session_open_local_native_pool_receiver(session,"unused",&caps,
+        1,0,80,100,100,&candidate,&bound,&channel,NULL,&error);
+    if(ok||!error||channel||bound.version) return 5;
+    g_clear_error(&error);
     g_object_unref(session);
     return 0;
 }

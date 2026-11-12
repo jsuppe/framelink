@@ -55,6 +55,14 @@ inline flResult transferRelayPool(HANDLE input,HANDLE peer,HANDLE cancel,guint t
   return pipe.receive(message);
  };
  struct Channel {flChannel*value=nullptr;~Channel(){if(value)flClose(value);}} channel;
+ auto validateRing=[&]()->flResult{
+  flChannelInfo info{};auto r=flQuery(channel.value,&info);if(r!=FL_OK)return r;
+  // Backend device creation may otherwise select its default when an explicit
+  // LUID is unavailable. A relay must reject that substitution before ACK.
+  return info.width==config.video.width&&info.height==config.video.height&&
+   info.format==config.video.format&&info.poolSize==count&&
+   !memcmp(info.adapterLUID,packet.data()+16,8)?FL_OK:FL_FORMAT_UNSUPPORTED;
+ };
  fl::Message message;
  if(producer){
   memcpy(packet.data()+16,adapter,8);
@@ -70,6 +78,7 @@ inline flResult transferRelayPool(HANDLE input,HANDLE peer,HANDLE cancel,guint t
   if(!remaining())return FL_TIMEOUT;
   if(WaitForSingleObject(cancel,0)!=WAIT_TIMEOUT)return FL_DISCONNECTED;
   result=flOpenProducer(name,&channel.value);if(result!=FL_OK)return result;
+  result=validateRing();if(result!=FL_OK)return result;
   result=send(attachedType,packet.data(),packet.size());if(result!=FL_OK)return result;
  }else{
   result=receive(message);if(result!=FL_OK)return result;
@@ -100,6 +109,7 @@ inline flResult transferRelayPool(HANDLE input,HANDLE peer,HANDLE cancel,guint t
    FL_DEFER_RELEASE|FL_REQUIRE_FRAME_METADATA|(cpuAccess?FL_MAP_CPU:0),
    packet.data()+16,imports.data(),&channel.value);
   if(result!=FL_OK)return result;
+  result=validateRing();if(result!=FL_OK)return result;
   result=send(readyType,packet.data(),packet.size());if(result!=FL_OK)return result;
   result=receive(message);if(result!=FL_OK)return result;
   if(message.type!=attachedType||message.payload.size()!=packet.size()||

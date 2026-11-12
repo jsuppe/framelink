@@ -140,6 +140,21 @@ int main(int argc,char** argv){
   owner.close();fs::remove(record);
  }
  CHECK(owner.publish(path,e,error));
+ // FAR5 imports native relay pools; never accepted by FAR1/3/4 consumers.
+ CHECK(!av::readNativeRelayEndpoint(path,got,error));owner.close();
+ auto relay=e;relay.nativeRelayControl=true;
+ CHECK(owner.publish(path,relay,error));CHECK(av::readNativeRelayEndpoint(path,got,error));
+ CHECK(got.nativeRelayControl&&!got.nativeControl&&!got.cpuControl&&got.token==e.token);
+ got.port=54321;
+ CHECK(!av::readEndpoint(path,got,error)&&got.port==54321);
+ CHECK(!av::readCpuControlEndpoint(path,got,error)&&got.port==54321);
+ CHECK(!av::readNativeControlEndpoint(path,got,error)&&got.port==54321);
+ owner.close();
+ for(unsigned kind=0;kind<3;++kind){
+  auto mixed=relay;if(kind==0)mixed.nativeControl=true;if(kind==1)mixed.cpuControl=true;if(kind==2)mixed.unixName[0]=1;
+  CHECK(!owner.publish(path,mixed,error));
+ }
+ CHECK(owner.publish(path,e,error));
  // Oversized or truncated records fail closed and leave caller's output alone.
  {std::ofstream f(fs::path(path)/"endpoint",std::ios::binary|std::ios::trunc);f<<"FAR1";}
  got.port=54321;CHECK(!av::readEndpoint(path,got,error));CHECK(got.port==54321);owner.close();

@@ -33,6 +33,7 @@ struct BrokerNativeBinRelay {
  flSessionConfig config{};
  GstMemory* held=nullptr;
  guint64 count=0,pcmFrames=0;gint64 last=-1;
+ bool localControl=false;
  bool events=false;unsigned forwardedGaps=0;BinRelayEvents upstreamEvents,downstreamEvents;
  flsample::SessionVideoRelayEvents eventAdapter;
  std::unique_ptr<flsample::SessionRelayContract> eventContract;
@@ -69,20 +70,25 @@ struct BrokerNativeBinRelay {
   const guint64 positions[]={4,4,8},times[]={41000000,41250000,46000000},durations[]={250000,750000,500000};
   for(unsigned i=0;i<3;++i){const auto&u=upstreamEvents.gaps[i];const auto&d=downstreamEvents.gaps[i];
    CHECK(u.afterFrames==positions[i]&&u.ptsNs==times[i]&&u.durationNs==durations[i]);
-   CHECK(d.afterFrames==u.afterFrames&&d.ptsNs==u.ptsNs+5000000&&d.durationNs==u.durationNs);
+   CHECK(d.afterFrames==u.afterFrames&&d.ptsNs==mapped(u.ptsNs)&&d.durationNs==u.durationNs);
   }
   CHECK((upstreamEvents.discont&17)==17&&downstreamEvents.discont==upstreamEvents.discont);
   puts("broker bin serialized GAP: exact 4,4,8 frame boundaries, +5ms mapping, durations 250/750/500us, DISCONT preserved, trailing GAP before EOS");
  }
  BrokerNativeBinRelay(FlGstSession* source,const flSessionConfig& original,
-   const GstFrameLinkMemoryPolicy& policy,flChannel* channel,flsample::NativeGstD3D11Relay& adapter)
+   const GstFrameLinkMemoryPolicy& policy,flChannel* channel,flsample::NativeGstD3D11Relay& adapter,
+   FlGstSession*localSender=nullptr,FlGstSession*localReceiver=nullptr)
    :up(source),native(adapter),config(original){
+  localControl=localSender&&localReceiver;
+  if(localControl){
+   g_object_unref(sender);g_object_unref(receiver);
+   sender=static_cast<FlGstSession*>(g_object_ref(localSender));receiver=static_cast<FlGstSession*>(g_object_ref(localReceiver));
+   CHECK(fl_gst_session_get_config(sender,&config)==FL_GST_SESSION_READY);
+  }else{
   config.sessionId.bytes[0]^=0x40;
   flSessionCapabilities caps{};caps.version=config.version;caps.videoCount=caps.audioCount=1;
   caps.video[0]=config.video;caps.audio[0]=config.audio;
   for(auto*s:{sender,receiver})CHECK(fl_gst_session_configure(s,&config,&caps,&caps)==FL_GST_SESSION_READY);
-  flsample::SessionRelayContract contract(up,sender);CHECK(contract.initialize()==FL_GST_SESSION_READY);
-  CHECK(fl_gst_session_register_track(sender,FL_GST_TRACK_VIDEO)==FL_GST_SESSION_READY);
   guint8 secret[32]{};secret[0]=99;auto*key=g_bytes_new(secret,32);
   for(unsigned kind=0;kind<3;++kind){
    GSocketConnection*a=nullptr,*b=nullptr;avStreamPair(&a,&b);gboolean ok=FALSE;
@@ -98,6 +104,9 @@ struct BrokerNativeBinRelay {
   flClockMapping mapping{};mapping.sourceClockId=config.clockId;mapping.targetClockId.bytes[0]=9;
   mapping.sourceAnchorNs=config.epochNs;mapping.targetAnchorNs=5000000;
   CHECK(fl_gst_session_set_mapping(receiver,config.generation,&mapping,0)==FL_GST_SESSION_READY);
+  }
+  flsample::SessionRelayContract contract(up,sender);CHECK(contract.initialize()==FL_GST_SESSION_READY);
+  CHECK(fl_gst_session_register_track(sender,FL_GST_TRACK_VIDEO)==FL_GST_SESSION_READY);
   GError*error=nullptr;
   tx=gst_parse_launch("appsrc name=input is-live=true format=time max-bytes=192 block=false caps=audio/x-raw,format=S16LE,layout=interleaved,rate=48000,channels=2,channel-mask=(bitmask)0x3 ! framelinkaudiosink tracks=av",&error);CHECK(tx&&!error);
   rx=gst_parse_launch("framelinkavsrc name=transport native-memory=true video-format=RGBA width=64 height=32 framerate=30/1 transport.video_src ! appsink name=video max-buffers=1 sync=false async=false enable-last-sample=false transport.audio_src ! appsink name=audio max-buffers=1 sync=false async=false enable-last-sample=false",&error);CHECK(rx&&!error);
@@ -115,6 +124,14 @@ struct BrokerNativeBinRelay {
   CHECK(fl_gst_session_track_ready(sender,FL_GST_TRACK_VIDEO,config.generation)==FL_GST_SESSION_READY);
   CHECK(gst_element_set_state(rx,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
   CHECK(gst_element_set_state(tx,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
+  if(localControl){
+   CHECK(fl_gst_session_local_ready(receiver,FALSE,1000,nullptr));
+   CHECK(fl_gst_session_local_ready(sender,TRUE,1000,nullptr));
+  }
+ }
+ guint64 mapped(guint64 pts){
+  gint64 result=-1;CHECK(fl_gst_session_map_running_time(receiver,config.generation,pts,TRUE,&result)==FL_GST_SESSION_READY&&result>=0);
+  return guint64(result);
  }
  void forward(GstSample* vs,GstSample* as,unsigned n){
   flsample::SessionRelayContract contract(up,sender);CHECK(contract.initialize()==FL_GST_SESSION_READY);
@@ -137,9 +154,9 @@ struct BrokerNativeBinRelay {
   auto*outV=gst_app_sink_try_pull_sample(GST_APP_SINK(video),2*GST_SECOND);
   auto*outA=gst_app_sink_try_pull_sample(GST_APP_SINK(audio),2*GST_SECOND);CHECK(outV&&outA);
   auto*vb=gst_sample_get_buffer(outV);auto*ab=gst_sample_get_buffer(outA);
-  CHECK(GST_BUFFER_PTS(vb)==GST_BUFFER_PTS(v)+5000000&&GST_BUFFER_DTS(vb)==GST_BUFFER_DTS(v)+5000000);
+  CHECK(GST_BUFFER_PTS(vb)==mapped(GST_BUFFER_PTS(v))&&GST_BUFFER_DTS(vb)==mapped(GST_BUFFER_DTS(v)));
   CHECK(GST_BUFFER_DURATION(vb)==GST_BUFFER_DURATION(v));
-  CHECK(GST_BUFFER_PTS(ab)==GST_BUFFER_PTS(a)+5000000&&GST_BUFFER_DURATION(ab)==GST_BUFFER_DURATION(a));
+  CHECK(GST_BUFFER_PTS(ab)==mapped(GST_BUFFER_PTS(a))&&GST_BUFFER_DURATION(ab)==GST_BUFFER_DURATION(a));
   CHECK(GST_BUFFER_PTS(vb)-GST_BUFFER_PTS(ab)==37000000);
   if(events&&n==4)CHECK(GST_BUFFER_FLAG_IS_SET(a,GST_BUFFER_FLAG_DISCONT)&&GST_BUFFER_FLAG_IS_SET(ab,GST_BUFFER_FLAG_DISCONT));
   auto*metadata=gst_buffer_get_framelink_frame_meta(vb);CHECK(metadata&&metadata->frame.streamGeneration==config.generation);
@@ -226,8 +243,14 @@ struct BrokerNativeBinRelay {
   gst_memory_unref(held);held=nullptr;
   auto deadline=g_get_monotonic_time()+1000000;
   while(native.pending()){CHECK(g_get_monotonic_time()<deadline);CHECK(native.collect()==FL_OK);g_usleep(100);}
-  CHECK(native.finish()==FL_OK);g_object_unref(sender);g_object_unref(receiver);
-  puts("broker native bin relay: 8 frames over two original allocations / 384 PCM frames; identity intermediate mapping, final +5ms and exact 37ms A/V, authenticated session; final reader retained beyond upstream and downstream bin teardown");
+  CHECK(native.finish()==FL_OK);
+  if(localControl){
+   CHECK(fl_gst_session_finish_local(receiver,FALSE,1000,nullptr));
+   CHECK(fl_gst_session_finish_local(sender,TRUE,1000,nullptr));
+   puts("local native relay: retained authenticated discovery sessions, mapped A/V, genuine final-reader completion before drain acknowledgment");
+  }
+  g_object_unref(sender);g_object_unref(receiver);
+  puts("broker native bin relay: 8 frames over two original allocations / 384 PCM frames; identity intermediate mapping, negotiated final mapping and exact 37ms A/V, authenticated session; final reader retained beyond upstream and downstream bin teardown");
  }
 };
 

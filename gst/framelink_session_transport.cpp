@@ -5,6 +5,8 @@
 #include <algorithm>
 #ifdef _WIN32
 #include <winsock2.h>
+#include "fl_gst_native_relay_pool_win.h"
+#include "../src/fl_shared_cpu_endpoint_win.h"
 #else
 #include <sys/socket.h>
 #include <unistd.h>
@@ -338,9 +340,10 @@ gboolean fl_gst_session_open_local_av(FlGstSession*session,gboolean producer,con
  flChannel**channel,GCancellable*outer,GError**error){
  return fl_gst_session_open_local_av_epoch(session,producer,path,local,videoQueue,pool,queueMs,timeout,idle,flags,channel,nullptr,nullptr,outer,error);
 }
+struct NativeRelayPool { const void* adapter=nullptr; void*const* handles=nullptr; };
 static gboolean open_local_av_impl(FlGstSession*session,gboolean producer,const gchar*path,
  const flSessionCapabilities*local,guint videoQueue,guint pool,guint queueMs,guint timeout,guint idle,guint flags,
- flChannel**channel,FlGstEpochFunc epochFunc,gpointer epochData,GCancellable*outer,GError**error,bool cpu,const GstFrameLinkMemoryPolicy*native=nullptr,const flSessionConfig*relay=nullptr){
+ flChannel**channel,FlGstEpochFunc epochFunc,gpointer epochData,GCancellable*outer,GError**error,bool cpu,const GstFrameLinkMemoryPolicy*native=nullptr,const flSessionConfig*relay=nullptr,const NativeRelayPool*relayPool=nullptr){
  if(channel)*channel=nullptr;
  auto fail=[&](const char*message){fl_gst_session_cancel(session);g_set_error_literal(error,G_IO_ERROR,G_IO_ERROR_FAILED,message);return FALSE;};
  if(!session||!path||!*path||!local||!channel||(cpu&&!local->videoCount)||local->version!=FL_SESSION_OPTIONAL_TRACKS_VERSION||(!local->videoCount&&!local->audioCount)||
@@ -387,15 +390,16 @@ static gboolean open_local_av_impl(FlGstSession*session,gboolean producer,const 
   GSocketAddress*effective=nullptr;const bool bound=g_socket_listener_add_address(l,bind,G_SOCKET_TYPE_STREAM,G_SOCKET_PROTOCOL_TCP,nullptr,&effective,nullptr);g_object_unref(bind);
   if(!bound)return fail("cannot bind private loopback session listener");
   endpoint.port=g_inet_socket_address_get_port(G_INET_SOCKET_ADDRESS(effective));g_object_unref(effective);
-  endpoint.cpuControl=cpu;endpoint.nativeControl=native!=nullptr;
+  endpoint.cpuControl=cpu;endpoint.nativeControl=native&&!relayPool;
+  endpoint.nativeRelayControl=relayPool!=nullptr;
   if(!owner.publish(path,endpoint,reason))return fail(reason.c_str());
   }
  }else{
   while(!g_cancellable_is_cancelled(deadline.cancel)){
 #ifdef __linux__
-   bool found=native?av::readNativeControlEndpoint(path,endpoint,reason):cpu?av::readUnixEndpoint(path,endpoint,reason):av::readEndpoint(path,endpoint,reason);
+   bool found=relayPool?av::readNativeRelayEndpoint(path,endpoint,reason):native?av::readNativeControlEndpoint(path,endpoint,reason):cpu?av::readUnixEndpoint(path,endpoint,reason):av::readEndpoint(path,endpoint,reason);
 #else
-   bool found=native?av::readNativeControlEndpoint(path,endpoint,reason):cpu?av::readCpuControlEndpoint(path,endpoint,reason):av::readEndpoint(path,endpoint,reason);
+   bool found=relayPool?av::readNativeRelayEndpoint(path,endpoint,reason):native?av::readNativeControlEndpoint(path,endpoint,reason):cpu?av::readCpuControlEndpoint(path,endpoint,reason):av::readEndpoint(path,endpoint,reason);
 #endif
    if(found)break;g_usleep(5000);
   }
@@ -528,6 +532,32 @@ static gboolean open_local_av_impl(FlGstSession*session,gboolean producer,const 
   auto id=labelled(endpoint,"FrameLink public video channel v1",wire.data(),wire.size(),nullptr,0);
   gchar name[5+24+1]="flav-";for(int i=0;i<12;i++)g_snprintf(name+5+2*i,3,"%02x",id[i]);
   guint8 ready=0;flChannel*ch=nullptr;
+#ifdef _WIN32
+  if(relayPool){
+   // FAR5 selects an explicit same-allocation bootstrap, never FAR4 fallback.
+   // Authenticate this kernel-pinned pipe separately from the TCP control stream.
+   flnative::Handle cancel,pipe,peer;
+   cancel.value=CreateEventW(nullptr,TRUE,FALSE,nullptr);
+   if(!cancel.value)return fail("cannot create relay pool cancellation event");
+   const auto handler=g_cancellable_connect(deadline.cancel,G_CALLBACK(+[](GCancellable*,gpointer p){SetEvent(p);}),cancel.value,nullptr);
+   struct Disconnect {GCancellable*c;gulong id;~Disconnect(){if(id)g_cancellable_disconnect(c,id);}} disconnect{deadline.cancel,handler};
+   std::wstring pipeName=L"\\\\.\\pipe\\framelink-cpu-native-relay-";
+   for(auto c:selected.sessionId.bytes){pipeName+=L"0123456789abcdef"[c>>4];pipeName+=L"0123456789abcdef"[c&15];}
+   auto result=FL_OK;
+   if(producer)result=fl::SharedCpuEndpointWin::connect(pipeName,cancel.value,timeout,pipe.value,peer.value);
+   else{
+    result=fl::SharedCpuEndpointWin::listen(pipeName,pipe.value);
+    if(result==FL_OK)result=fl::SharedCpuEndpointWin::accept(pipe.value,cancel.value,timeout,peer.value);
+   }
+   if(result!=FL_OK)return fail("relay pool pipe connection failed");
+   auto input=pipe.value;pipe.value=nullptr;
+   result=flnative::transferRelayPool(input,peer.value,cancel.value,timeout,selected,producer,secret,
+      name,pool,(flags&FL_MAP_CPU)!=0,relayPool->adapter,relayPool->handles,&ch);
+   if(result!=FL_OK||g_cancellable_is_cancelled(deadline.cancel)){
+    if(ch)flClose(ch);return fail("authenticated relay pool transfer failed or cancelled");
+   }
+  }else
+#endif
   if(!producer){
    const auto format=flFormat(selected.video.format);
    if(flCreateChannelEx(name,selected.video.width,selected.video.height,format,pool?pool:4u,flags?flags:(FL_MAP_CPU|FL_REQUIRE_FRAME_METADATA),&ch)!=FL_OK||!ch)return fail("cannot create consumer video channel");
@@ -578,7 +608,7 @@ gboolean fl_gst_session_open_local_native(FlGstSession*session,gboolean producer
 static gboolean open_local_native_impl(FlGstSession*session,gboolean producer,const gchar*path,
  const flSessionCapabilities*local,guint videoQueue,guint pool,guint queueMs,guint timeout,guint idle,
  const GstFrameLinkMemoryPolicy*candidate,GstFrameLinkMemoryPolicy*bound,flChannel**channel,
- FlGstNativeEpochFunc epochFunc,gpointer epochData,GCancellable*outer,GError**error,const flSessionConfig*relay){
+ FlGstNativeEpochFunc epochFunc,gpointer epochData,GCancellable*outer,GError**error,const flSessionConfig*relay,const NativeRelayPool*relayPool=nullptr){
  // Explicit D3D11 receiver profiles: CPU readback or deferred native GPU use.
  // Neither profile permits automatic fallback or undeclared operations.
  GstFrameLinkMemoryPolicy policy{};if(candidate)policy=*candidate;
@@ -599,7 +629,7 @@ static gboolean open_local_native_impl(FlGstSession*session,gboolean producer,co
  if(!open_local_av_impl(session,producer,path,local,videoQueue,pool,queueMs,timeout,idle,
      FL_MAP_CPU|FL_REQUIRE_FRAME_METADATA|(nativeReceiver?FL_DEFER_RELEASE:0)|
      ((policy.paths[0].supportedUsage&FL_MEMORY_GPU_RENDER)?FL_GPU_RENDER:0),
-     channel,producer?epochFunc:nullptr,epochData,outer,error,false,&policy,relay))return FALSE;
+     channel,producer?epochFunc:nullptr,epochData,outer,error,false,&policy,relay,relayPool))return FALSE;
  flSessionConfig cfg{};
  if(fl_gst_session_get_config(session,&cfg)!=FL_GST_SESSION_READY){
   if(*channel)flClose(*channel);*channel=nullptr;fl_gst_session_cancel(session);
@@ -614,10 +644,10 @@ gboolean fl_gst_session_open_local_native_epoch(FlGstSession*session,gboolean pr
  return open_local_native_impl(session,producer,path,local,videoQueue,pool,queueMs,timeout,idle,
   candidate,bound,channel,epochFunc,epochData,outer,error,nullptr);
 }
-gboolean fl_gst_session_open_local_native_relay(FlGstSession*session,FlGstSession*upstream,const gchar*path,
+static gboolean open_local_native_relay_impl(FlGstSession*session,FlGstSession*upstream,const gchar*path,
  const flSessionCapabilities*local,guint videoQueue,guint pool,guint queueMs,guint timeout,guint idle,
  const GstFrameLinkMemoryPolicy*candidate,GstFrameLinkMemoryPolicy*bound,flChannel**channel,
- GCancellable*outer,GError**error){
+ GCancellable*outer,GError**error,const NativeRelayPool*relayPool){
  if(bound)*bound={};if(channel)*channel=nullptr;
  auto fail=[&](const char*message){
   if(channel&&*channel){flClose(*channel);*channel=nullptr;}if(bound)*bound={};
@@ -639,7 +669,7 @@ gboolean fl_gst_session_open_local_native_relay(FlGstSession*session,FlGstSessio
  exact.video[0]=before.video;exact.audio[0]=before.audio;
  g_object_ref(upstream);
  gboolean ok=open_local_native_impl(session,TRUE,path,&exact,videoQueue,pool,queueMs,timeout,idle,
-  candidate,bound,channel,nullptr,nullptr,outer,error,&before);
+  candidate,bound,channel,nullptr,nullptr,outer,error,&before,relayPool);
  mapped=-1;
  const bool unchanged=fl_gst_session_get_config(upstream,&after)==FL_GST_SESSION_READY&&
   flSessionEncode(&after,final.data(),final.size())==FL_SESSION_OK&&initial==final&&
@@ -648,6 +678,36 @@ gboolean fl_gst_session_open_local_native_relay(FlGstSession*session,FlGstSessio
  if(!ok||!unchanged)return fail("upstream changed or local relay setup failed");
  return TRUE;
 }
+gboolean fl_gst_session_open_local_native_relay(FlGstSession*s,FlGstSession*up,const gchar*path,
+ const flSessionCapabilities*local,guint queue,guint pool,guint audio,guint timeout,guint idle,
+ const GstFrameLinkMemoryPolicy*candidate,GstFrameLinkMemoryPolicy*bound,flChannel**channel,
+ GCancellable*cancel,GError**error){
+ return open_local_native_relay_impl(s,up,path,local,queue,pool,audio,timeout,idle,candidate,bound,channel,cancel,error,nullptr);
+}
+gboolean fl_gst_session_open_local_native_relay_pool(FlGstSession*s,FlGstSession*up,const gchar*path,
+ const flSessionCapabilities*local,guint queue,guint pool,guint audio,guint timeout,guint idle,
+ const GstFrameLinkMemoryPolicy*candidate,const guint8*adapter,void*const*handles,
+ GstFrameLinkMemoryPolicy*bound,flChannel**channel,GCancellable*cancel,GError**error){
+ if(!adapter||!handles||pool<2||pool>FL_MAX_POOL_SIZE){
+  if(bound)*bound={};if(channel)*channel=nullptr;
+  if(s&&s!=up)fl_gst_session_cancel(s);
+  g_set_error_literal(error,G_IO_ERROR,G_IO_ERROR_INVALID_ARGUMENT,"invalid borrowed relay pool");return FALSE;
+ }
+ const NativeRelayPool native{adapter,handles};
+ return open_local_native_relay_impl(s,up,path,local,queue,pool,audio,timeout,idle,candidate,bound,channel,cancel,error,&native);
+}
+gboolean fl_gst_session_open_local_native_pool_receiver(FlGstSession*s,const gchar*path,
+ const flSessionCapabilities*local,guint queue,guint pool,guint audio,guint timeout,guint idle,
+ const GstFrameLinkMemoryPolicy*candidate,GstFrameLinkMemoryPolicy*bound,flChannel**channel,
+ GCancellable*cancel,GError**error){
+ const NativeRelayPool native{};
+ if(pool<2||pool>FL_MAX_POOL_SIZE){
+  if(bound)*bound={};if(channel)*channel=nullptr;if(s)fl_gst_session_cancel(s);
+  g_set_error_literal(error,G_IO_ERROR,G_IO_ERROR_INVALID_ARGUMENT,"invalid relay pool capacity");return FALSE;
+ }
+ return open_local_native_impl(s,FALSE,path,local,queue,pool,audio,timeout,idle,candidate,bound,channel,nullptr,nullptr,cancel,error,nullptr,&native);
+}
+
 
 #endif
 gboolean fl_gst_session_local_ready(FlGstSession*session,gboolean producer,guint timeout,GError**error){

@@ -261,5 +261,26 @@ FL_GST_SESSION_API gboolean fl_gst_session_open_local_native_relay(FlGstSession*
  guint audio_queue_ms,guint connect_timeout_ms,guint idle_timeout_ms,
  const GstFrameLinkMemoryPolicy* candidate,GstFrameLinkMemoryPolicy* bound,flChannel** channel,
  GCancellable*,GError**);
+// Explicit FAR5 same-allocation relay setup, paired ONLY with pool_receiver.
+// Same timeline/serialization contract as native_relay. Borrow adapter LUID[8]
+// and exactly video_pool D3D11 shared NT handles from a fully pinned unpublished
+// upstream pool; retain its reservations for this entire call. Caller validates
+// their upstream origin and keeps that pool alive thereafter. No arbitrary
+// foreign-memory adoption: before source writes, bind a read-lease relay that
+// preserves upstream ownership through actual final GPU completion.
+// Performs separately authenticated, kernel-peer-pinned handle pull/import and
+// attach acknowledgment. All partial imports close on failure; no native/CPU
+// fallback. Pipe I/O is cancellable; native create/open calls are synchronous.
+// Success is setup only, not track readiness or automatic cancellation supervision.
+FL_GST_SESSION_API gboolean fl_gst_session_open_local_native_relay_pool(FlGstSession*,FlGstSession* upstream,
+ const gchar* session_path,const flSessionCapabilities*,guint video_queue_frames,guint video_pool,
+ guint audio_queue_ms,guint connect_timeout_ms,guint idle_timeout_ms,
+ const GstFrameLinkMemoryPolicy* candidate,const guint8* adapter_luid,void*const* shared_handles,
+ GstFrameLinkMemoryPolicy* bound,flChannel** channel,GCancellable*,GError**);
+FL_GST_SESSION_API gboolean fl_gst_session_open_local_native_pool_receiver(FlGstSession*,
+ const gchar* session_path,const flSessionCapabilities*,guint video_queue_frames,guint video_pool,
+ guint audio_queue_ms,guint connect_timeout_ms,guint idle_timeout_ms,
+ const GstFrameLinkMemoryPolicy* candidate,GstFrameLinkMemoryPolicy* bound,flChannel** channel,
+ GCancellable*,GError**);
 G_END_DECLS
 #endif

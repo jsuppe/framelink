@@ -1,0 +1,61 @@
+Start testing: Nov 12 00:49 Eastern Standard Time
+----------------------------------------------------------
+41/156 Testing: gst_native_epoch_c_api
+41/156 Test: gst_native_epoch_c_api
+Command: "<win-home>/dev/framelink-m6-windows-7b8a274/build/Release/fl_gst_native_epoch_c_api.exe"
+Directory: <win-home>/dev/framelink-m6-windows-7b8a274/build
+"gst_native_epoch_c_api" start time: Nov 12 00:49 Eastern Standard Time
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   0.09 sec
+----------------------------------------------------------
+Test Passed.
+"gst_native_epoch_c_api" end time: Nov 12 00:49 Eastern Standard Time
+"gst_native_epoch_c_api" time elapsed: 00:00:00
+----------------------------------------------------------
+
+44/156 Testing: gst_relay_local_pool_win
+44/156 Test: gst_relay_local_pool_win
+Command: "<win-home>/dev/framelink-m6-windows-7b8a274/build/Release/fl_gst_native_producer_win.exe" "<win-home>/dev/framelink-m6-windows-7b8a274/build/Release/gstframelink.dll" "--relay-local-pool"
+Directory: <win-home>/dev/framelink-m6-windows-7b8a274/build
+"gst_relay_local_pool_win" start time: Nov 12 00:49 Eastern Standard Time
+Output:
+----------------------------------------------------------
+native AV mode 12 local=0
+bin relay n=0 collect=0 pending=1
+bin relay n=1 collect=0 pending=1
+bin relay n=2 collect=0 pending=1
+bin relay n=3 collect=0 pending=1
+bin relay n=4 collect=0 pending=1
+bin relay n=5 collect=0 pending=1
+bin relay n=6 collect=0 pending=1
+bin relay n=7 collect=0 pending=1
+authenticated native pool: wrong key/generation/access and cancellation rejected; same-allocation imported ring attached
+broker native bin relay: 8 frames over two original allocations / 384 PCM frames; identity intermediate mapping, final +5ms and exact 37ms A/V, authenticated session; final reader retained beyond upstream and downstream bin teardown
+native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+<end of output>
+Test time =   0.83 sec
+----------------------------------------------------------
+Test Passed.
+"gst_relay_local_pool_win" end time: Nov 12 00:49 Eastern Standard Time
+"gst_relay_local_pool_win" time elapsed: 00:00:00
+----------------------------------------------------------
+
+99/156 Testing: av_rendezvous
+99/156 Test: av_rendezvous
+Command: "<win-home>/dev/framelink-m6-windows-7b8a274/build/Release/fl_av_rendezvous.exe"
+Directory: <win-home>/dev/framelink-m6-windows-7b8a274/build
+"av_rendezvous" start time: Nov 12 00:49 Eastern Standard Time
+Output:
+----------------------------------------------------------
+private rendezvous: agreement, owner exclusion, crash recovery, malformed data and access checks passed
+<end of output>
+Test time =   0.26 sec
+----------------------------------------------------------
+Test Passed.
+"av_rendezvous" end time: Nov 12 00:49 Eastern Standard Time
+"av_rendezvous" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Nov 12 00:49 Eastern Standard Time

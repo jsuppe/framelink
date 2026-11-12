@@ -1,0 +1,20 @@
+** WARNING: connection is not using a post-quantum key exchange algorithm.
+** This session may be vulnerable to "store now, decrypt later" attacks.
+** The server may need to be upgraded. See https://openssh.com/pq.html
+Test project <win-home>/dev/framelink-m6-windows-7b8a274/build
+    Start 44: gst_relay_local_pool_failures_win
+1/1 Test #44: gst_relay_local_pool_failures_win ...***Failed    0.42 sec
+pool negative mode=0 local=0 remote=0 localError=authenticated relay pool transfer failed or cancelled remoteError=authenticated relay pool transfer failed or cancelled
+pool negative mode=1 local=0 remote=0 localError=authenticated relay pool transfer failed or cancelled remoteError=authenticated relay pool transfer failed or cancelled
+pool negative mode=2 local=0 remote=0 localError=authenticated relay pool transfer failed or cancelled remoteError=authenticated relay pool transfer failed or cancelled
+pool negative mode=3 local=1 remote=1 localError=none remoteError=none
+line 117: !local&&!remote&&localError&&remoteError&&!p&&!c&&!bound.version&&!received.version
+
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) =   0.45 sec
+
+The following tests FAILED:
+	 44 - gst_relay_local_pool_failures_win (Failed)
+Errors while running CTest

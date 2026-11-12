@@ -1,0 +1,181 @@
+** WARNING: connection is not using a post-quantum key exchange algorithm.
+** This session may be vulnerable to "store now, decrypt later" attacks.
+** The server may need to be upgraded. See https://openssh.com/pq.html
+Microsoft (R) COFF/PE Dumper Version 14.44.35211.0
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+
+Dump of file build\Release\framelink.dll
+
+File Type: DLL
+
+  Section contains the following exports for framelink.dll
+
+    00000000 characteristics
+    FFFFFFFF time date stamp
+        0.00 version
+           1 ordinal base
+          75 number of functions
+          75 number of names
+
+    ordinal hint RVA      name
+
+          1    0 00006650 flAcquireBuffer
+          2    1 00006D70 flAcquireFrame
+          3    2 000070D0 flBeginSubmit
+          4    3 00007300 flCancelBuffer
+          5    4 000073C0 flChannelD3D11Device
+          6    5 000073D0 flClose
+          7    6 000076F0 flCollectReadLeases
+          8    7 00007B20 flCompleteReadLease
+          9    8 00007D80 flCompleteReadLeaseD3D11Fence
+         10    9 00007FC0 flCreateChannel
+         11    A 00007FF0 flCreateChannelEx
+         12    B 000081B0 flCreateChannelFromD3D11Handles
+         13    C 000081F0 flCreateChannelOnAdapter
+         14    D 00008240 flEndSubmit
+         15    E 00008540 flFrameAgeNs
+         16    F 00008690 flGetFrameMetadata
+         17   10 000087D0 flImageD3D11
+         18   11 000087E0 flImageMap
+         19   12 000088D0 flImageMapPlanes
+         20   13 00008C50 flImageMemoryInfo
+         21   14 00009150 flImageSharedHandle
+         22   15 00009160 flImageUnmap
+         23   16 00009300 flLeaseFrame
+         24   17 0000E3D0 flMemoryEvaluate
+         25   18 0000E540 flMemoryEvaluateBoundary
+         26   19 0000E880 flMemoryPathValidate
+         27   1A 0000E8E0 flMemoryRequirementsCombine
+         28   1B 0000EA50 flMemoryRequirementsDecode
+         29   1C 0000ED30 flMemoryRequirementsEncode
+         30   1D 0000EEB0 flMemoryRequirementsInit
+         31   1E 0000EEF0 flMemoryRequirementsValidate
+         32   1F 00009700 flOpenProducer
+         33   20 0000BBB0 flOpenProducerSlot
+         34   21 00009CE0 flQuery
+         35   22 00009D20 flQueryConsumerFlags
+         36   23 00009DC0 flReadLeaseFrame
+         37   24 00009E80 flRelease
+         38   25 0000A130 flReleaseBufferReference
+         39   26 0000A230 flRequestGeometry
+         40   27 0000A5C0 flResultString
+         41   28 0000A680 flRetainBufferReference
+         42   29 0000A810 flRetainReadLease
+         43   2A 0000D400 flSessionDecode
+         44   2B 0000D8D0 flSessionEncode
+         45   2C 0000DB70 flSessionMapPts
+         46   2D 0000DCE0 flSessionNegotiate
+         47   2E 0000DFA0 flSessionSampleOffset
+         48   2F 0000E010 flSessionValidate
+         49   30 0000E1B0 flSessionValidateReplacement
+         50   31 0000E240 flSessionValidateSelection
+         51   32 0000AA60 flSetFrameMetadata
+         52   33 0000AB70 flSetReceiveQueue
+         53   34 0000AC80 flSharedConsumedFence
+         54   35 00014AC0 flSharedCpuAcquireWrite
+         55   36 00014E60 flSharedCpuCancelWrite
+         56   37 00014F30 flSharedCpuClose
+         57   38 0000EF50 flSharedCpuDescriptorDecode
+         58   39 0000F560 flSharedCpuDescriptorEncode
+         59   3A 0000F830 flSharedCpuDescriptorValidate
+         60   3B 00014FB0 flSharedCpuOpenConsumerPipe
+         61   3C 000150B0 flSharedCpuOpenProducerPipe
+         62   3D 000151A0 flSharedCpuQuery
+         63   3E 000152E0 flSharedCpuReadMetadata
+         64   3F 00015320 flSharedCpuReceive
+         65   40 00015360 flSharedCpuReceiveEvent
+         66   41 00015910 flSharedCpuReceiveRelease
+         67   42 00015AE0 flSharedCpuReleaseRead
+         68   43 00015CF0 flSharedCpuRetainRead
+         69   44 00015D20 flSharedCpuSendEos
+         70   45 00015F50 flSharedCpuSubmit
+         71   46 00015F60 flSharedCpuSubmitWithMetadata
+         72   47 000161C0 flSharedCpuWaitReadable
+         73   48 0000ACB0 flSharedReadyFence
+         74   49 0000ACE0 flSubmit
+         75   4A 0000D200 flTraceFlush
+
+  Summary
+
+        1000 .data
+        2000 .pdata
+        6000 .rdata
+        1000 .reloc
+        1000 .rsrc
+       18000 .text
+Microsoft (R) COFF/PE Dumper Version 14.44.35211.0
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+
+Dump of file build\Release\framelink_gst_session.dll
+
+File Type: DLL
+
+  Section contains the following exports for framelink_gst_session.dll
+
+    00000000 characteristics
+    FFFFFFFF time date stamp
+        0.00 version
+           1 ordinal base
+          47 number of functions
+          47 number of names
+
+    ordinal hint RVA      name
+
+          1    0 00008D70 ?fl_gst_session_finish_local_cancellable@@YAHPEAU_FlGstSession@@HIPEAU_GCancellable@@PEAPEAU_GError@@@Z
+          2    1 00008F60 ?fl_gst_session_local_ready_cancellable@@YAHPEAU_FlGstSession@@HIPEAU_GCancellable@@PEAPEAU_GError@@@Z
+          3    2 00009150 ?fl_gst_session_open_local_av_epoch@@YAHPEAU_FlGstSession@@HPEBDPEBUflSessionCapabilities@@IIIIIIPEAPEAUflChannel@@P6A_JPEAX_K@Z4PEAU_GCancellable@@PEAPEAU_GError@@@Z
+          4    3 00009200 ?fl_gst_session_open_local_cpu_epoch@@YAHPEAU_FlGstSession@@HPEBDPEBUflSessionCapabilities@@IIIIIP6A_JPEAX_K@Z3PEAU_GCancellable@@PEAPEAU_GError@@@Z
+          5    4 00003C80 ?fl_gst_session_peek_video_end@@YA?AW4FlGstSessionResult@@PEAU_FlGstSession@@_KPEAUFlGstVideoEvent@@@Z
+          6    5 00003DC0 ?fl_gst_session_publish_audio@@YAHPEAU_FlGstSession@@PEBUflSessionConfig@@PEAU_GSocketConnection@@H@Z
+          7    6 00003F30 ?fl_gst_session_publish_events@@YAHPEAU_FlGstSession@@PEBUflSessionConfig@@PEAU_GSocketConnection@@H@Z
+          8    7 00005730 fl_gst_segment_running_time
+          9    8 0000C8F0 fl_gst_session_apply_pipeline_clock
+         10    9 0000CAD0 fl_gst_session_authenticate_audio_stream
+         11    A 0000D060 fl_gst_session_authenticate_cpu_bootstrap
+         12    B 0000D5E0 fl_gst_session_authenticate_event_stream
+         13    C 0000DB70 fl_gst_session_authenticate_native_memory
+         14    D 000057B0 fl_gst_session_bind_authenticated_cpu_pipe
+         15    E 00005830 fl_gst_session_bind_shared_cpu_pipe
+         16    F 000058A0 fl_gst_session_cancel
+         17   10 000059D0 fl_gst_session_claim_audio_stream
+         18   11 00005AC0 fl_gst_session_claim_shared_cpu
+         19   12 00005BA0 fl_gst_session_configure
+         20   13 00005DE0 fl_gst_session_create_context
+         21   14 0000E240 fl_gst_session_finish_local
+         22   15 00005EC0 fl_gst_session_from_context
+         23   16 00005F80 fl_gst_session_get_config
+         24   17 00006090 fl_gst_session_get_type
+         25   18 000060D0 fl_gst_session_has_event_stream
+         26   19 0000E260 fl_gst_session_local_ready
+         27   1A 00006150 fl_gst_session_map_pts
+         28   1B 00006260 fl_gst_session_map_running_time
+         29   1C 0000E280 fl_gst_session_negotiate_stream
+         30   1D 00006380 fl_gst_session_new
+         31   1E 0000F130 fl_gst_session_open_local_audio
+         32   1F 0000FA40 fl_gst_session_open_local_av
+         33   20 0000FAE0 fl_gst_session_open_local_cpu
+         34   21 0000FB80 fl_gst_session_open_local_native
+         35   22 0000FC20 fl_gst_session_open_local_native_epoch
+         36   23 0000FCD0 fl_gst_session_open_local_native_pool_receiver
+         37   24 0000FE20 fl_gst_session_open_local_native_relay
+         38   25 0000FEC0 fl_gst_session_open_local_native_relay_pool
+         39   26 000063E0 fl_gst_session_open_named_cpu_pipe
+         40   27 00006630 fl_gst_session_receive_video_event
+         41   28 00006810 fl_gst_session_register_track
+         42   29 000068D0 fl_gst_session_send_video_event
+         43   2A 00006970 fl_gst_session_set_mapping
+         44   2B 00006B20 fl_gst_session_track_ready
+         45   2C 00006C10 fl_gst_session_video_eos
+         46   2D 00006D40 fl_gst_session_wait
+         47   2E 00006F00 fl_gst_session_wait_video_eos
+
+  Summary
+
+        1000 .data
+        2000 .pdata
+        A000 .rdata
+        1000 .reloc
+        1000 .rsrc
+       14000 .text
