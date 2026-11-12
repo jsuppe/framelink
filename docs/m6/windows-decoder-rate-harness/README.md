@@ -1,4 +1,4 @@
-# Paced authenticated decoder relay — Windows validation pending
+# Paced authenticated decoder relay — focused Windows results
 
 Test-only implementation at49f9145 (base84ad91d), independent static review complete. The local checker has **30 passing cases**, including all-frame freshness, metadata/PCM mapping, real-completion records, resource slopes, trace losses and cross-boundary identity mismatches. Focused local CTest1/1 passed0.20s. Local GStreamer was unavailable; this does not establish Windows compilation or runtime success.
 
@@ -14,6 +14,18 @@ Test-only implementation at49f9145 (base84ad91d), independent static review comp
 
 `trace_checked` reports whether raw trace accounting was performed; `trace_qualified:false` avoids inferring complete rate qualification from that check. No physical-renderer or isolated-hop2ms acceptance claim.
 
-## Next execution
+## Windows results and next execution
 
-After the current exclusive Windows duration owner releases the machine, the prepared ready-batch runner builds the reviewed exact revision, runs the two new pause/cancel controls plus existing automatic-bin regression, then one2s decoder-rate smoke and independent analysis. Only a passing smoke permits target5s trace-off/trace-on checks. No full-suite or endurance result is claimed here.
+At77afa1a the clean Windows build,9/9 focused tests and2s decoder smoke passed.
+Full SHA256 now uses Windows CNG; all120 comparison samples and known vectors
+matched the former GLib oracle. No pixels or timing gates were weakened.
+Both5s1080p60 trace-off/on runs passed300 distinct decoded frames and240000PCM
+frames with zero17ms arrival misses (max10.1737/11.0694ms).
+
+The initial4K30 CNG preflight delivered all150 distinct frames and240000PCM
+frames, but140 video arrivals exceeded34ms. Decoder-pull p50 was22.0109ms,
+source readback/hash13.6742ms; no audio misses. Trace-on was not run.
+Local causal investigation must separate live fixture generation/encoding from
+actual decode before any correction or repeat. No decoder endurance result,
+physical presentation or isolated-hop budget is claimed. Initial GLib timing
+and CNG integration-build failures remain archived.
