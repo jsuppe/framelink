@@ -1,0 +1,112 @@
+{
+  "state": "finished",
+  "started_utc": "2026-11-12T08:14:36.485230+00:00",
+  "mode": "clean then instrumented counts",
+  "requested_frames": 150,
+  "scope": "upstream synthetic source throughput; no decoder/relay qualification",
+  "pins": {
+    "C:\\Program Files\\gstreamer\\1.0\\msvc_x86_64\\bin\\gst-launch-1.0.exe": "6474cd678b37e206cacb536ea78b69d88374b42138d5e6035926496e93be7f11",
+    "C:\\Program Files\\gstreamer\\1.0\\msvc_x86_64\\bin\\gstreamer-1.0-0.dll": "5fb52bba3ccf8ae4aae418e11092564837e77ce7b5c66818883dd3297287247c",
+    "C:\\Program Files\\gstreamer\\1.0\\msvc_x86_64\\lib\\gstreamer-1.0\\gstvideotestsrc.dll": "253a6fe1fc60ba047dbccdd4c1f722080c1f8d5c17d5fe989ad1307c3a2025cc",
+    "C:\\Program Files\\gstreamer\\1.0\\msvc_x86_64\\lib\\gstreamer-1.0\\gstx264.dll": "dd0e8f299b532332fbd26005d9c4c9e72baa37b071fcc3cc8e22941cdfb54055",
+    "C:\\Program Files\\gstreamer\\1.0\\msvc_x86_64\\lib\\gstreamer-1.0\\gstvideoparsersbad.dll": "8569c520ba4231343ac283c7e0bb4310757d4703ff82a4597f30e8f7833c0eb0",
+    "C:\\Program Files\\gstreamer\\1.0\\msvc_x86_64\\lib\\gstreamer-1.0\\gstcoreelements.dll": "a26144c1332ee6b3a5990808b230b72d7d25e94e053294b9c484ba3357c61bef",
+    "C:\\Program Files\\gstreamer\\1.0\\msvc_x86_64\\lib\\gstreamer-1.0\\gstcoretracers.dll": "de809b7ab6fc3f67bdae9c8cc51e56e8b7141e53d4684ea454046b6f97516972"
+  },
+  "current_arm": "encode-count",
+  "gen-clean": {
+    "command": [
+      "C:\\Program Files\\gstreamer\\1.0\\msvc_x86_64\\bin\\gst-launch-1.0.exe",
+      "-q",
+      "videotestsrc",
+      "num-buffers=150",
+      "pattern=snow",
+      "!",
+      "video/x-raw,format=NV12,width=3840,height=2160,framerate=30/1",
+      "!",
+      "fakesink",
+      "sync=false",
+      "async=false"
+    ],
+    "exit_code": 0,
+    "wall_ns": 5141849500
+  },
+  "encode-clean": {
+    "command": [
+      "C:\\Program Files\\gstreamer\\1.0\\msvc_x86_64\\bin\\gst-launch-1.0.exe",
+      "-q",
+      "videotestsrc",
+      "num-buffers=150",
+      "pattern=snow",
+      "!",
+      "video/x-raw,format=NV12,width=3840,height=2160,framerate=30/1",
+      "!",
+      "x264enc",
+      "tune=zerolatency",
+      "speed-preset=ultrafast",
+      "key-int-max=30",
+      "!",
+      "h264parse",
+      "!",
+      "video/x-h264,alignment=au",
+      "!",
+      "fakesink",
+      "sync=false",
+      "async=false"
+    ],
+    "exit_code": 0,
+    "wall_ns": 5562663300
+  },
+  "gen-count": {
+    "command": [
+      "C:\\Program Files\\gstreamer\\1.0\\msvc_x86_64\\bin\\gst-launch-1.0.exe",
+      "-v",
+      "videotestsrc",
+      "num-buffers=150",
+      "pattern=snow",
+      "!",
+      "video/x-raw,format=NV12,width=3840,height=2160,framerate=30/1",
+      "!",
+      "identity",
+      "name=probe",
+      "silent=false",
+      "!",
+      "fakesink",
+      "sync=false",
+      "async=false"
+    ],
+    "exit_code": 0,
+    "wall_ns": 5178491800
+  },
+  "encode-count": {
+    "command": [
+      "C:\\Program Files\\gstreamer\\1.0\\msvc_x86_64\\bin\\gst-launch-1.0.exe",
+      "-v",
+      "videotestsrc",
+      "num-buffers=150",
+      "pattern=snow",
+      "!",
+      "video/x-raw,format=NV12,width=3840,height=2160,framerate=30/1",
+      "!",
+      "x264enc",
+      "tune=zerolatency",
+      "speed-preset=ultrafast",
+      "key-int-max=30",
+      "!",
+      "h264parse",
+      "!",
+      "video/x-h264,alignment=au",
+      "!",
+      "identity",
+      "name=probe",
+      "silent=false",
+      "!",
+      "fakesink",
+      "sync=false",
+      "async=false"
+    ],
+    "exit_code": 0,
+    "wall_ns": 5622995400
+  },
+  "ended_utc": "2026-11-12T08:14:59.515054+00:00"
+}

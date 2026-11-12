@@ -1,0 +1,42 @@
+{
+  "scope": "upstream synthetic source throughput; no decoder/relay qualification",
+  "arms": {
+    "gen-clean": {
+      "wall_seconds": 5.1418495,
+      "exit_code": 0,
+      "requested_frames": 150,
+      "independent_count_and_pts": "not observed in clean wall-time arm"
+    },
+    "encode-clean": {
+      "wall_seconds": 5.5626633,
+      "exit_code": 0,
+      "requested_frames": 150,
+      "independent_count_and_pts": "not observed in clean wall-time arm"
+    },
+    "gen-count": {
+      "count": 150,
+      "pts_origin_ns": 0,
+      "pts_exact": true,
+      "wall_seconds": 5.1784918,
+      "exit_code": 0,
+      "probe_timing": "validated stats tracer buffer timestamps",
+      "first_to_last_ms": 5063.3607,
+      "interval_median_ms": 33.8578,
+      "interval_max_ms": 37.4222,
+      "interval_mean_ms": 33.982286577181206
+    },
+    "encode-count": {
+      "count": 150,
+      "pts_origin_ns": 3600000000000000,
+      "pts_exact": true,
+      "wall_seconds": 5.6229954,
+      "exit_code": 0,
+      "probe_timing": "validated stats tracer buffer timestamps",
+      "first_to_last_ms": 5489.6438,
+      "interval_median_ms": 36.5459,
+      "interval_max_ms": 40.8953,
+      "interval_mean_ms": 36.843246979865775
+    }
+  },
+  "caution": "Instrumented arms include tracer/verbose overhead; clean arms do not independently observe counts. Wall time includes process/plugin startup and drain. Fast arms do not exonerate combined-load contention; slow arms establish a ceiling only for this instrumented upstream workload."
+}

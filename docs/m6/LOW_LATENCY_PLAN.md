@@ -247,10 +247,20 @@ with no audio misses. Source decoder-pull median21.7833ms remains the largest
 phase. [Control evidence](windows-decoder-queue-c539d99/README.md) preserves
 successes and failure; trace-on and endurance did not run.
 
-Next: bounded measurement of on-demand fixture generation and encoding
-throughput before asserting a decoder or transport cause. No repeated target
-without a concrete discriminating control. Existing queue limit is only for
-resident compressed AUs, not all pipeline buffers or a total byte cap.
+Source-only [throughput diagnostic](windows-decoder-source-throughput/README.md)
+completed: quiet150-frame generation5.1418495s and generation/encoding5.5626633s;
+separate instrumented arms verified150 exact timestamps. Clean wall times include
+startup; instrumented intervals are not clean performance. This supports an
+on-demand fixture production contribution; it does not isolate hardware decode.
+Initial controller idle serialization failure is preserved, with independently
+verified fresh idle08:15:09.6637198Z and local recovery, no media rerun.
+
+Next: implement an **explicit pre-encoded-AU input control**, streamed from disk
+through bounded appsrc with original bytes/PTS/DTS/duration/flags. Preparation is
+outside the timed workload. Retain the failing on-demand path; no decoded cache,
+full-pixel oracle weakening or changed17/34ms gates. Root owns the idle Windows
+lane while implementation and matching runner preparation proceed locally.
+
 The final integrated/API/unchanged-old-client runner is prepared and reviewed,
 including per-DLL export sets and full collection/compatibility verification;
 20 local validator tests passed. No full integration has run on the newer helper.
