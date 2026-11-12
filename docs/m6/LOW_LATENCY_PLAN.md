@@ -245,7 +245,7 @@ NV12 4K30 duration exec31547 collected PASS at12:18:30Z; Windows idle.
 54000video/86400000PCM per role, zero34ms misses, maxvideo10.222667ms/audio4.7829ms;
 memory source42.868218/relay0/receiver0KB/min below64; handle/thread gates pass.
 All43hashes/fullcoverage/upload bytes/exact analyzer/five unchanged pins verified.
-Next ready task: final-build native BGRA4K short pair, then report before duration.
+Final-build BGRA4K short pair PASS:150video/240000PCM each arm, zero34ms misses, max11.2938/12.391167ms; all64hashes verified. [Pair archive](windows-native-final-bgra-4k-a50841a/README.md). Next: report then one1800s duration.
 The [NV12 4K short pair](windows-native-final-nv12-4k-a50841a/README.md) passed:
 both150video/240000PCM, zero34ms misses; all64hashes verified.
 
