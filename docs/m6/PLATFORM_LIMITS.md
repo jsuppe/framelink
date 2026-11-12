@@ -29,7 +29,7 @@ The older Windows CPU rows above refer to the native transport/readback path; th
 
 | Candidate / format | 1080p60 | 4K30 |
 | --- | --- | --- |
-| BGRA shared CPU | 1800s pass at older76a65d2; not final-candidate qualification | Unqualified; exact461584b campaign active in [execution ledger](LOW_LATENCY_PLAN.md) |
+| BGRA shared CPU | 1800s pass at older76a65d2; not final-candidate qualification | **1800s pass at461584b**,54000video/86400000PCM, zero34ms misses, resource gates met; [evidence](cpu-path/windows-cpu-bgra4k30-461584b/README.md) |
 | NV12 shared CPU | **1800s pass at461584b**,108000video/86400000PCM, zero17ms misses, resource slopes within gates; [evidence](cpu-path/windows-cpu-nv12-1080p60-461584b/README.md) | Unqualified |
 
 These are transport arrival/accounting/resource results, not physical playback, native identity, or a waiver of earlier native-path failures. Source production code remains461584b; later evidence commits do not change its binaries.

@@ -16,4 +16,8 @@ The sole 1800s validation at **76a65d2** finished with remote/pull/analysis exit
 
 ## Exact candidate NV12 1080p60 qualification
 
-At `461584b`, one preflight and one1800s run passed:108000video/86400000PCM/180000contiguous audio blocks, zero17ms timing misses and0ns inferred A/V mapping delta. Video max4.554967ms; audio max2.6284ms. Consumer/producer private-memory slopes7.233/7.569KB/min are below64; handle/thread gates also pass. Four binary hashes unchanged. [Reports and reproduction evidence](../windows-cpu-nv12-1080p60-461584b/README.md). No native-identity or physical-playback claim. BGRA4K30/NV124K30 remain unqualified pending their own runs.
+At `461584b`, one preflight and one1800s run passed:108000video/86400000PCM/180000contiguous audio blocks, zero17ms timing misses and0ns inferred A/V mapping delta. Video max4.554967ms; audio max2.6284ms. Consumer/producer private-memory slopes7.233/7.569KB/min are below64; handle/thread gates also pass. Four binary hashes unchanged. [Reports and reproduction evidence](../windows-cpu-nv12-1080p60-461584b/README.md). No native-identity or physical-playback claim. NV124K30 remains unqualified pending its own run.
+
+## Exact candidate BGRA 4K30 qualification
+
+At `461584b`, one preflight and one1800s run passed:54000video/86400000PCM/180000contiguous audio blocks, zero34ms misses, inferred A/V delta0ns. Video max10.7371ms; audio max4.0462ms. Consumer/producer memory7.166/7.389KB/min; handle/thread gates pass. Four binary hashes unchanged. [Reports and independently verified evidence](../windows-cpu-bgra4k30-461584b/README.md). Transport accounting/timing only; no native or physical-playback claim.

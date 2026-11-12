@@ -226,20 +226,18 @@ since the candidate. M6 remains open; M7 remains held.
 | Integrated Windows/API | Clean candidate build/API + **169/169 tests in655.72s**, no skips;119 prior export names retained +9 additive =128. [Evidence](windows-integrated-461584b/README.md) | Collected; do not repeat diagnostics already in CTest |
 | Old-client compatibility | **3/3 unchanged7b8a274-built clients** pass against baseline and candidate DLLs; exact binary hashes verified. Source review found no existing public layout/enum/signature break. [Evidence](windows-compat-461584b/README.md) | Collected; bounded proof, not all-version/ordinal ABI freeze |
 | Windows sharedCPU NV12 1080p60 | **PASS** exact461584b: one1800s run,108000video/86400000PCM/180000audio; zero17ms misses, inferred A/V delta0ns; memory7.233/7.569KB/min below64, handle/thread gates pass. [Evidence](cpu-path/windows-cpu-nv12-1080p60-461584b/README.md) | Collected and independently reanalyzed; four binary hashes unchanged. Runtime released06:54:44Z; do not repeat |
-| Windows other sharedCPU targets | Older76a65d2 BGRA1080p60 sustained pass retained. BGRA4K30 preflight passed150video/240000PCM/500audio; one1800s gate started06:55:45Z, native `separate_process_av`, exec48718; NV124K30 next unqualified cell. [Scope](cpu-path/windows-cpu-benchmark/README.md) | Sole Windows runtime owner child; root integrates evidence. Preserve failures, no blind repeats |
-| Native two-hop qualification harness | Implemented and statically reviewed;30 analyzer cases/1 focused local CTest pass. [Local evidence](windows-native-relay-rate-harness/README.md). Windows build/runtime still pending | Root owns focused build/short smoke after BGRA runtime release, then collected-result analysis. No production API changes; original native tests not repeated |
+| Windows other sharedCPU targets | **BGRA4K30 PASS** exact461584b:1800s,54000video/86400000PCM/180000audio, zero34ms misses; memory7.166/7.389KB/min, handle/thread gates pass. [Evidence](cpu-path/windows-cpu-bgra4k30-461584b/README.md). Older76a65d2 BGRA1080p60 pass retained; NV124K30 unqualified | Collected and independently reanalyzed;58 original hashes verified. Runtime released07:25:52Z; do not repeat |
+| Native two-hop qualification harness |30 analyzer cases/1 focused local CTest pass. First Windows build at4f46f42 failed MSVC C2397 before media; explicit format cast fixed1730a81. [Evidence](windows-native-relay-rate-harness/README.md) | Root owns next fresh focused build/2s smoke. Prior attempt exited and Windows idle07:26:25Z. No production API changes |
 | Authenticated real-decoder relay qualification | Existing broker-composed tiny decoder two-hop and tiny automatic one-hop checks passed in461584b; not authentic-discovery target-rate proof. [Next bounded gap](WINDOWS_NATIVE_RELAY_RATE_PLAN.md#following-gap-real-decoder-with-authenticated-discovery) | Root; after synthetic harness focused gate, adapt the supported explicit converter/reservation path to authenticated discovery. No new decoder API or raw-decoder zero-copy claim |
 | Historical Windows startup | **Suspended, not waived.** Original1529.4514ms is source-to-receive, not proven producer-open time. New buffered phases show current158–164ms opens dominated by device creation; legacy94/100 vs coordinated100/100, exactPCM, no reproduction. [Evidence](windows-startup-phase-461584b/README.md) | Evelyn; resume on original-scale phase/wait evidence plus compatible remedy, not equivalent clean repeats |
 | Windows native lifetime | **Suspended, not waived:**21.10/84.09KiB/cycle exceed16KB/cycle. Raw device churn/reuse/Trim controls identify a contribution, not complete attribution. [Contract](lifecycle/WINDOWS_DEVICE_LIFETIME.md) | Evelyn owns investigation; driver/backend remedy or explicitly approved device-lifetime contract required. Jon owns contract/acceptance changes |
 | D2 / D3 | Unresolved public overload/convenience-fallback decisions; existing explicit profiles/defaults preserved | Jon; no automatic default change or hidden native-to-CPU fallback |
 | Linux / Android campaigns | Broad work deferred under Windows-first direction. Prior Linux BGRA and other completed campaigns collected, not repeated. Android BGRA4K and NV121080 residual failures remain suspended; clean trace diagnostics did not waive them | Evelyn; resume deferred integration only after Windows priority permits; causal fixes required for suspended failed cells |
 
-**Active runtime evidence directory:**
-`<linux-home>/dev/evidence/m6-cpu-path/windows-cpu-4k-461584b-prepared/runs/bgra-4k30-20261112t0655z`.
-Root owns documentation/result integration while the named child owns the single
-Windows workload. Check actual executor state before takeover; never infer idle
-from a checkpoint. On completion, collect, review and advance the next ready M6
-task. A failed gate needs diagnosis, not a favorable repeat.
+**Windows runtime owner:** root. First native harness attempt collected from
+`<linux-home>/dev/evidence/m6-cpu-path/windows-native-relay-rate-prepared/runs/native-smoke-4f46f42-20261112t0726z`.
+Compile failure preserved; no media executed. Cast correction committed; fresh focused
+build/smoke is next. Check actual executor state before takeover; no competing workload.
 
 ### Qualification exclusions retained
 
