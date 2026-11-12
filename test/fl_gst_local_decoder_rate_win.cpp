@@ -25,6 +25,7 @@
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
+#include "win_sha256_rows.h"
 #define CHECK(x) do { if(!(x)){fprintf(stderr,"%s:%d: %s\n",__FILE__,__LINE__,#x);fflush(nullptr);ExitProcess(1);} } while(0)
 using Microsoft::WRL::ComPtr;
 namespace fs=std::filesystem;
@@ -75,7 +76,7 @@ static void writeRow(std::ofstream&f,const VideoRow&r){
 }
 static void metadata(VideoRow&r,const flFrameMetadata&m){r.generation=m.streamGeneration;r.version=m.version;r.flags=m.flags;r.dts=m.dtsNs;r.duration=m.durationNs;}
 static void frameInfo(VideoRow&r,const flFrame&f){r.pts=f.ptsNs;r.slot=f.slot;r.sequence=f.sequence;r.ready=f._readyValue;}
-static std::string digestRows(const unsigned char*data,size_t stride){CHECK(stride>=size_t(o.width)*4);auto*c=g_checksum_new(G_CHECKSUM_SHA256);CHECK(c);for(unsigned y=0;y<o.height;++y)g_checksum_update(c,data+size_t(y)*stride,size_t(o.width)*4);std::string result=g_checksum_get_string(c);g_checksum_free(c);return result;}
+static std::string digestRows(const unsigned char*data,size_t stride){static thread_local WinSha256Rows hash;auto result=hash.digest(data,stride,size_t(o.width)*4,o.height);CHECK(result.size()==64);return result;}
 static uint64_t pixelBytes(){return uint64_t(o.width)*o.height*4;}
 static unsigned inputWidth(){return o.width==64?320:o.width;}
 static unsigned inputHeight(){return o.height==32?240:o.height;}
@@ -133,7 +134,7 @@ static void relay(){HANDLE job=CreateJobObjectA(nullptr,nullptr);CHECK(job);JOBO
  join(last);join(first);flReleaseD3D11PoolSnapshot(setup.snapshot);flClose(setup.output);flClose(setup.input);g_object_unref(down);g_object_unref(up);CloseHandle(job);
 }
 int main(int argc,char**argv){CHECK(argc>=2);o.plugin=argv[1];for(int i=2;i<argc;++i){std::string key=argv[i];if(key=="--trace"){o.trace=true;continue;}CHECK(i+1<argc);std::string value=argv[++i];if(key=="--out")o.out=value;else if(key=="--role")o.role=value;else if(key=="--format")CHECK(value=="RGBA");else{char*end=nullptr;auto n=strtoul(value.c_str(),&end,10);CHECK(!value.empty()&&!*end&&n>0&&n<=100000);if(key=="--seconds")o.seconds=unsigned(n);else if(key=="--width")o.width=unsigned(n);else if(key=="--height")o.height=unsigned(n);else if(key=="--fps")o.fps=unsigned(n);else CHECK(false);}}
- CHECK(!o.trace||o.seconds<=5);CHECK(!o.out.empty()&&o.seconds<=1800&&((o.width==64&&o.height==32&&o.fps==30)||(o.width==1920&&o.height==1080&&o.fps==60)||(o.width==3840&&o.height==2160&&o.fps==30)));CHECK(o.role=="relay"||o.role=="source"||o.role=="receiver");o.out=fs::absolute(o.out).lexically_normal().string();if(o.role=="relay"){CHECK(fs::create_directory(o.out));auto f=file("config.json");f<<"{\"schema\":1,\"seconds\":"<<o.seconds<<",\"fps\":"<<o.fps<<",\"width\":"<<o.width<<",\"height\":"<<o.height<<",\"decoder_width\":"<<inputWidth()<<",\"decoder_height\":"<<inputHeight()<<",\"expected_video\":"<<frames()<<",\"expected_audio_blocks\":"<<o.seconds*100<<",\"expected_pcm_frames\":"<<o.seconds*48000<<",\"format\":\"RGBA\",\"trace\":"<<(o.trace?"true":"false")<<",\"trace_capacity_per_thread\":"<<(o.seconds*2500+frames()*32+1024)<<",\"clock\":\"QPC quotient-remainder nanoseconds\",\"pool\":2,\"queue\":1,\"offset_ns\":37000000,\"digest\":\"SHA256 active rows\"}\n";}
+ CHECK(!o.trace||o.seconds<=5);CHECK(!o.out.empty()&&o.seconds<=1800&&((o.width==64&&o.height==32&&o.fps==30)||(o.width==1920&&o.height==1080&&o.fps==60)||(o.width==3840&&o.height==2160&&o.fps==30)));CHECK(o.role=="relay"||o.role=="source"||o.role=="receiver");o.out=fs::absolute(o.out).lexically_normal().string();if(o.role=="relay"){CHECK(fs::create_directory(o.out));auto f=file("config.json");f<<"{\"schema\":1,\"seconds\":"<<o.seconds<<",\"fps\":"<<o.fps<<",\"width\":"<<o.width<<",\"height\":"<<o.height<<",\"decoder_width\":"<<inputWidth()<<",\"decoder_height\":"<<inputHeight()<<",\"expected_video\":"<<frames()<<",\"expected_audio_blocks\":"<<o.seconds*100<<",\"expected_pcm_frames\":"<<o.seconds*48000<<",\"format\":\"RGBA\",\"trace\":"<<(o.trace?"true":"false")<<",\"trace_capacity_per_thread\":"<<(o.seconds*2500+frames()*32+1024)<<",\"clock\":\"QPC quotient-remainder nanoseconds\",\"pool\":2,\"queue\":1,\"offset_ns\":37000000,\"digest\":\"SHA256 active rows\",\"digest_backend\":\"Windows CNG reusable SHA256\"}\n";}
  FILE*log=nullptr;CHECK(freopen_s(&log,path(o.role+".stderr.log").c_str(),"w",stderr)==0);setvbuf(stderr,nullptr,_IONBF,0);
  // Opt-in transport trace is short and bounded; it does not expose uninstrumented GPU copies.
  _putenv_s("FRAMELINK_TRACE",o.trace?path(o.role+".trace.csv").c_str():"");_putenv_s("FRAMELINK_TRACE_EVENTS",std::to_string(o.seconds*2500+frames()*32+1024).c_str());_putenv_s("FL_BENCH_TRACE","");_putenv_s("GST_TRACERS","");std::thread([]{Sleep((o.seconds+60)*1000);fprintf(stderr,"owned decoder-rate watchdog expired\n");ExitProcess(2);}).detach();gst_init(&argc,&argv);GError*error=nullptr;auto*plugin=gst_plugin_load_file(o.plugin.c_str(),&error);CHECK(plugin&&!error);{Resources resources;if(o.role=="source")source();else if(o.role=="receiver")receiver();else relay();}CHECK(flTraceFlush()==FL_OK);gst_object_unref(plugin);return 0;}
