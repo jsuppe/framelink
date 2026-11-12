@@ -173,6 +173,7 @@ int main(int argc,char**argv){gst_init(&argc,&argv);CHECK(argc>=2);GError*e=null
  if(argc==7&&std::string(argv[2])=="--relay-process-producer")return relayprocess::producer(argv[3],guint16(atoi(argv[4])),atoi(argv[5])!=0,atoi(argv[6])!=0);
  if(argc==7&&std::string(argv[2])=="--relay-reserved-producer")return relayprocess::reservedProducer(argv[3],guint16(atoi(argv[4])),false,atoi(argv[6])!=0);
  if(argc==7&&std::string(argv[2])=="--relay-decoder-producer")return relayprocess::reservedProducer(argv[3],guint16(atoi(argv[4])),true,atoi(argv[6])!=0);
+ if(argc==7&&std::string(argv[2])=="--relay-death-reader")return relayprocess::deathReader(argv[3],(HANDLE)(uintptr_t)strtoull(argv[4],nullptr,10),(HANDLE)(uintptr_t)strtoull(argv[5],nullptr,10),(HANDLE)(uintptr_t)strtoull(argv[6],nullptr,10));
  CHECK(argc==2||argc==3);
  if(argc==3&&std::string(argv[2])=="--relay-decoder-diagnostic"){
   for(auto name:{"videotestsrc","x264enc","h264parse","d3d11h264dec"}){
@@ -180,6 +181,7 @@ int main(int argc,char**argv){gst_init(&argc,&argv);CHECK(argc>=2);GError*e=null
   }
   relayprocess::run(argv[1],false,true,true);return 0;
  }
+ if(argc==3&&std::string(argv[2])=="--relay-downstream-death-diagnostic"){relayprocess::downstreamDeath(argv[1],false);relayprocess::downstreamDeath(argv[1],true);return 0;}
  if(argc==3&&std::string(argv[2])=="--relay-cancel-diagnostic"){relayprocess::run(argv[1],false,false,false,2);relayprocess::run(argv[1],false,true,false,2);return 0;}
  if(argc==3&&std::string(argv[2])=="--relay-death-diagnostic"){relayprocess::run(argv[1],false,false,false,true);relayprocess::run(argv[1],false,true,false,true);return 0;}
  if(argc==3&&std::string(argv[2])=="--relay-reservation-diagnostic"){relayprocess::run(argv[1],false,true);return 0;}

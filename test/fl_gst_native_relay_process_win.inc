@@ -190,15 +190,21 @@ static int relay(const std::string&name,guint16 port,HANDLE h0,HANDLE h1,HANDLE 
    if(fault){
     const auto began=g_get_monotonic_time();auto result=video.forwardEvent(2000);
     const auto elapsed=g_get_monotonic_time()-began;
-    fprintf(stderr,"%s: event result=%d elapsed_us=%lld pending=%u\n",fault==1?"producer death":"downstream cancellation",int(result),(long long)elapsed,video.pending());
+    fprintf(stderr,"%s: event result=%d elapsed_us=%lld pending=%u\n",fault==1?"producer death":(fault==3?"downstream death":"downstream cancellation"),int(result),(long long)elapsed,video.pending());
     CHECK(result!=FL_GST_SESSION_READY&&result!=FL_GST_SESSION_TIMEOUT&&elapsed<1500000);
     CHECK(!video.videoEnded()&&video.count()==1&&video.pending()==1);
-    CHECK(video.finish()==FL_BUSY&&video.pending()==1);
+    if(fault==3){
+     // Peer death is NOT consumed-fence completion. Abandon this graph, never
+     // synthesize release or recycle an allocation from the dead generation.
+     CHECK(video.finish()==FL_DISCONNECTED&&video.pending()==1);
+     CHECK(video.collect()==FL_INVALID&&video.pending()==1);
+    }else CHECK(video.finish()==FL_BUSY&&video.pending()==1);
     CHECK(video.forward(frame)==FL_INVALID);
     CHECK(pcm.forward(0)!=FL_GST_SESSION_READY);
     CHECK(pcm.blockCount()==1&&pcm.frameCount()==48&&pcm.byteCount()==192);
     auto observed=signal(name+".faultchecked");CHECK(SetEvent(observed));CloseHandle(observed);
    }
+   if(fault==3)break; // supervisor terminates upstream before graph teardown
    while(video.pending()){CHECK(g_get_monotonic_time()<deadline);CHECK(video.collect()==FL_OK);g_usleep(100);}
    if(fault){
     CHECK(video.finish()==FL_OK&&!video.videoEnded());
@@ -268,7 +274,7 @@ static void run(const std::string&plugin,bool empty,bool reserved=false,bool dec
    CHECK(SetEvent(relaydone));
    if(fault==2){CHECK(SetEvent(done));join(first);}
    join(middle);
-   printf("%s (%s): explicit failure, no synthetic END/EOS, held pixels intact, no premature lease completion, bounded native drain\n",fault==1?"producer death":"downstream cancellation",reserved?"GstMemory":"raw");
+   printf("%s (%s): explicit failure, no synthetic END/EOS, held pixels intact, no premature lease completion, bounded native drain\n",fault==1?"producer death":(fault==3?"downstream death":"downstream cancellation"),reserved?"GstMemory":"raw");
   }else{
   CHECK(empty||seen==3);
   FlGstVideoEvent end{};CHECK(fl_gst_session_receive_video_event(receiver.session,1,5000,&end)==FL_GST_SESSION_READY);CHECK(end.kind==FL_GST_VIDEO_END&&end.afterFrames==count&&end.ptsNs==(count?37000000+frameTime(count-1,decoder):0));
@@ -280,5 +286,68 @@ static void run(const std::string&plugin,bool empty,bool reserved=false,bool dec
   }
  }
  flClose(down);for(auto h:{handles[0],handles[1],held,checked,done,relaydone,faultchecked})CloseHandle(h);
+}
+}
+
+// Separate final reader for actual process-death qualification. The supervisor
+// owns the job and source/relay lifetimes, so killing this process cannot kill
+// the other actors or masquerade as graceful cancellation.
+namespace relayprocess {
+static int deathReader(const std::string&name,HANDLE h0,HANDLE h1,HANDLE notify){
+ freopen((name+".reader.log").c_str(),"w",stderr);setvbuf(stderr,nullptr,_IONBF,0);
+ void*handles[2]={h1,h0};flChannel*down=nullptr;
+ CHECK(flCreateChannelFromD3D11Handles((name+".down").c_str(),64,32,FL_FORMAT_RGBA8,2,
+  FL_MAP_CPU|FL_DEFER_RELEASE|FL_REQUIRE_FRAME_METADATA,nullptr,handles,&down)==FL_OK);
+ guint16 port=0;auto*l=listener(&port);DWORD written=0;
+ CHECK(WriteFile(notify,&port,sizeof port,&written,nullptr)&&written==sizeof port);CloseHandle(notify);
+ Endpoint receiver(1,false,0,l);g_object_unref(l);receiver.start();
+ flFrame frame{};CHECK(flAcquireFrame(down,&frame,5000)==FL_OK&&frame.ptsNs==37000000);
+ flFrameMetadata m{};CHECK(flGetFrameMetadata(down,&frame,&m)==FL_OK&&m.dtsNs==36999900&&m.durationNs==1000000&&m.streamGeneration==1);
+ using Compare=BOOL(WINAPI*)(HANDLE,HANDLE);auto compare=(Compare)GetProcAddress(GetModuleHandleW(L"KernelBase.dll"),"CompareObjectHandles");
+ CHECK(compare&&(compare(flImageSharedHandle(frame.image),h0)||compare(flImageSharedHandle(frame.image),h1)));
+ uint64_t lease=0;CHECK(flLeaseFrame(down,&frame,&lease)==FL_OK);
+ auto held=signal(name+".held"),checked=signal(name+".checked");CHECK(SetEvent(held));wait(checked);
+ auto*sample=gst_app_sink_try_pull_sample(GST_APP_SINK(receiver.port),5*GST_SECOND);CHECK(sample);
+ auto*audio=gst_sample_get_buffer(sample);guint8 pcm[192]{};gint64 mapped=0;
+ CHECK(fl_gst_session_map_running_time(receiver.session,1,frame.ptsNs,TRUE,&mapped)==FL_GST_SESSION_READY);
+ CHECK(GST_BUFFER_PTS(audio)==1000000&&mapped-gint64(GST_BUFFER_PTS(audio))==37000000&&GST_BUFFER_DURATION(audio)==1000000);
+ CHECK(gst_buffer_get_size(audio)==192&&gst_buffer_extract(audio,0,pcm,192)==192);for(auto b:pcm)CHECK(b==31);gst_sample_unref(sample);
+ flMappedImage pixels{};CHECK(flImageMapPlanes(frame.image,&pixels)==FL_OK);
+ for(unsigned y=0;y<32;++y)for(unsigned x=0;x<256;++x)CHECK(static_cast<unsigned char*>(pixels.plane[0].pixels)[y*pixels.plane[0].stride+x]==1);
+ flImageUnmap(frame.image);
+ fprintf(stderr,"reader verified same allocation, exact pixels/metadata/48 PCM frames, 37ms offset; lease retained; awaiting forced exit73\n");
+ auto ready=signal(name+".readerready");CHECK(SetEvent(ready));
+ auto never=signal(name+".never");wait(never);CHECK(false);return 1;
+}
+static void downstreamDeath(const std::string&plugin,bool reserved){
+ using Microsoft::WRL::ComPtr;
+ ComPtr<ID3D11Device> device;ComPtr<ID3D11DeviceContext> context;
+ CHECK(SUCCEEDED(D3D11CreateDevice(nullptr,D3D_DRIVER_TYPE_HARDWARE,nullptr,0,nullptr,0,D3D11_SDK_VERSION,&device,nullptr,&context)));
+ D3D11_TEXTURE2D_DESC d{};d.Width=64;d.Height=32;d.ArraySize=d.MipLevels=d.SampleDesc.Count=1;d.Format=DXGI_FORMAT_R8G8B8A8_UNORM;d.Usage=D3D11_USAGE_DEFAULT;
+ d.BindFlags=D3D11_BIND_SHADER_RESOURCE|D3D11_BIND_RENDER_TARGET;d.MiscFlags=D3D11_RESOURCE_MISC_SHARED|D3D11_RESOURCE_MISC_SHARED_NTHANDLE;
+ ComPtr<ID3D11Texture2D> textures[2];HANDLE handles[2]{};
+ for(unsigned i=0;i<2;++i){CHECK(SUCCEEDED(device->CreateTexture2D(&d,nullptr,&textures[i])));ComPtr<IDXGIResource1> resource;CHECK(SUCCEEDED(textures[i].As(&resource)));CHECK(SUCCEEDED(resource->CreateSharedHandle(nullptr,DXGI_SHARED_RESOURCE_READ|DXGI_SHARED_RESOURCE_WRITE,nullptr,&handles[i])));}
+ auto name="gst-relay-downstream-death-"+std::to_string(GetCurrentProcessId())+"-"+std::to_string(reserved);
+ auto ready=signal(name+".readerready"),observed=signal(name+".faultchecked"),done=signal(name+".relaydone");
+ HANDLE read=nullptr,write=nullptr;CHECK(CreatePipe(&read,&write,nullptr,0));
+ auto args="\""+plugin+"\" --relay-death-reader "+name+" "+std::to_string((uintptr_t)handles[0])+" "+std::to_string((uintptr_t)handles[1])+" "+std::to_string((uintptr_t)write);
+ auto last=spawn(args,{handles[0],handles[1],write});CloseHandle(write);guint16 port=0;DWORD bytes=0;
+ CHECK(ReadFile(read,&port,sizeof port,&bytes,nullptr)&&bytes==sizeof port);CloseHandle(read);
+ CHECK(CreatePipe(&read,&write,nullptr,0));
+ args="\""+plugin+"\" --relay-process-child "+name+" "+std::to_string(port)+" "+std::to_string((uintptr_t)handles[0])+" "+std::to_string((uintptr_t)handles[1])+" "+std::to_string((uintptr_t)write)+" 0 0 3";
+ auto middle=spawn(args,{handles[0],handles[1],write});CloseHandle(write);
+ CHECK(ReadFile(read,&port,sizeof port,&bytes,nullptr)&&bytes==sizeof port);CloseHandle(read);
+ auto first=spawn("\""+plugin+(reserved?"\" --relay-reserved-producer ":"\" --relay-process-producer ")+name+" "+std::to_string(port)+" 0 0");
+ wait(ready);CHECK(TerminateProcess(last.hProcess,73));wait(last.hProcess);DWORD code=0;
+ CHECK(GetExitCodeProcess(last.hProcess,&code)&&code==73);CloseHandle(last.hThread);CloseHandle(last.hProcess);
+ wait(observed);
+ // Source is still fenced out of the dead reader's allocation. Stop the
+ // complete old graph before destroying channels/handles; never fake drain.
+ CHECK(WaitForSingleObject(first.hProcess,0)==WAIT_TIMEOUT);
+ CHECK(TerminateProcess(first.hProcess,74));wait(first.hProcess);
+ CHECK(GetExitCodeProcess(first.hProcess,&code)&&code==74);CloseHandle(first.hThread);CloseHandle(first.hProcess);
+ CHECK(SetEvent(done));join(middle);
+ for(auto h:{handles[0],handles[1],ready,observed,done})CloseHandle(h);
+ printf("downstream process death (%s): reader exit73, exact pixels/PCM/37ms offset, bounded failure, lease retained, no synthetic drain; source exit74, relay exit0; old graph discarded\n",reserved?"GstMemory":"raw");
 }
 }

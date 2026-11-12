@@ -1,8 +1,8 @@
 # Windows API integration baseline candidate — NOT FROZEN
 
-**Current verified integrated candidate:** `ccd046038220a489d5b94ec3bdc823083df88d7a`.
-Clean exact-revision Windows build/API/full suite **139/139 passed**;
-[pinned evidence](../windows-integrated-ccd0460/README.md) includes DLL hashes,
+**Current verified integrated candidate:** `c5bea11d9d2192635d1e87bec8873a29e3794856`.
+Clean exact-revision Windows build/API/full suite **140/140 passed**;
+[pinned evidence](../windows-integrated-c5bea11/README.md) includes DLL hashes,
 runtime properties and exports. All 119 prior exported names retained (119 total).
 Export-name retention is not proof of behavioral or ordinal ABI compatibility.
 

@@ -1,0 +1,23 @@
+** WARNING: connection is not using a post-quantum key exchange algorithm.
+** This session may be vulnerable to "store now, decrypt later" attacks.
+** The server may need to be upgraded. See https://openssh.com/pq.html
+gst-relay-downstream-death-23104-0.producer.log
+producer start
+producer authenticated
+gst-relay-downstream-death-23104-0.reader.log
+reader verified same allocation, exact pixels/metadata/48 PCM frames, 37ms offset; lease retained; awaiting forced exit73
+gst-relay-downstream-death-23104-0.relay.log
+relay start
+relay downstream authenticated
+relay upstream authenticated
+frame 0 forwarded=0 session=0
+downstream death: event result=2 elapsed_us=34188 pending=1
+gst-relay-downstream-death-23104-1.producer.log
+gst-relay-downstream-death-23104-1.reader.log
+reader verified same allocation, exact pixels/metadata/48 PCM frames, 37ms offset; lease retained; awaiting forced exit73
+gst-relay-downstream-death-23104-1.relay.log
+relay start
+relay downstream authenticated
+relay upstream authenticated
+frame 0 forwarded=0 session=0
+downstream death: event result=2 elapsed_us=21704 pending=1
