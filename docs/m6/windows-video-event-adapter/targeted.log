@@ -1,0 +1,12 @@
+** WARNING: connection is not using a post-quantum key exchange algorithm.
+** This session may be vulnerable to "store now, decrypt later" attacks.
+** The server may need to be upgraded. See https://openssh.com/pq.html
+Test project <win-home>/dev/framelink-m6-windows-abba3eb/build
+    Start 43: gst_video_relay_event_controls_win
+1/2 Test #43: gst_video_relay_event_controls_win ...   Passed    0.08 sec
+    Start 44: gst_native_bin_relay_events_win
+2/2 Test #44: gst_native_bin_relay_events_win ......   Passed    0.79 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Total Test time (real) =   0.90 sec

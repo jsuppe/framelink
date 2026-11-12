@@ -1,0 +1,14 @@
+** WARNING: connection is not using a post-quantum key exchange algorithm.
+** This session may be vulnerable to "store now, decrypt later" attacks.
+** The server may need to be upgraded. See https://openssh.com/pq.html
+native AV mode 0 local=0
+lease input refs frame=0 sample=2 buffer=2 memory=2
+lease input refs frame=1 sample=2 buffer=1 memory=2
+lease input refs frame=2 sample=2 buffer=1 memory=2
+lease input refs frame=3 sample=2 buffer=1 memory=2
+lease input refs frame=4 sample=2 buffer=1 memory=2
+lease input refs frame=5 sample=2 buffer=1 memory=2
+lease input refs frame=6 sample=2 buffer=1 memory=2
+lease input refs frame=7 sample=2 buffer=1 memory=3
+native GstMemory lease adapter: 8 frames, reversed same-allocation slots, exact mapped timestamps/pixels, invalid/foreign inputs rejected; final upstream reader retained after complete bin teardown and retired only after downstream completion
+native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass

@@ -243,7 +243,7 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
   for(auto*b:reservations)gst_buffer_unref(b);
   leaseAdapter.reset(new flsample::NativeGstD3D11Relay(leaseWriter,cfg.generation));CHECK(leaseAdapter->initialize()==FL_OK);
   if(binRelay)binAdapter.reset(new BrokerNativeBinRelay(r,cfg,policy,leaseReader,*leaseAdapter));
-  if(mode==7){CHECK(binRelay);binAdapter->observeEvents(vo);}
+  if(mode==7||mode==6){CHECK(binRelay);binAdapter->observeEvents(vo,mode==7);}
  }
  GstMemory* retainedReceiver=nullptr;
  // A separately allocated second hop cannot silently treat a first-hop reader

@@ -3,6 +3,7 @@
 // This bounded fixture republishes barriers and optionally forwards actual
 // serialized GAP observations; arbitrary events/discovery are not supported.
 #include "../samples/session_relay_contract.h"
+#include "../samples/session_video_relay_events.h"
 #include <mutex>
 // A bounded observation queue: callbacks never perform network writes.
 struct BinRelayEvents {
@@ -30,14 +31,25 @@ struct BrokerNativeBinRelay {
  GstMemory* held=nullptr;
  guint64 count=0,pcmFrames=0;gint64 last=-1;
  bool events=false;unsigned forwardedGaps=0;BinRelayEvents upstreamEvents,downstreamEvents;
- void observeEvents(GstElement*upstream){events=true;upstreamEvents.attach(upstream);downstreamEvents.attach(video);}
+ flsample::SessionVideoRelayEvents eventAdapter;
+ std::unique_ptr<flsample::SessionRelayContract> eventContract;
+ void observeEvents(GstElement*upstream,bool withGaps=true){
+  events=withGaps;upstreamEvents.attach(upstream);downstreamEvents.attach(video);
+  eventContract=std::make_unique<flsample::SessionRelayContract>(up,sender);
+  CHECK(eventContract->initialize()==FL_GST_SESSION_READY);
+  auto*pad=gst_element_get_static_pad(upstream,"sink");CHECK(pad);
+  gst_pad_add_probe(pad,GstPadProbeType(GST_PAD_PROBE_TYPE_BUFFER|GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM|GST_PAD_PROBE_TYPE_EVENT_FLUSH),
+    flsample::SessionVideoRelayEvents::probe,&eventAdapter,nullptr);gst_object_unref(pad);
+ }
  void forwardGaps(){
-  if(!events)return;
-  std::lock_guard<std::mutex> lock(upstreamEvents.mutex);
-  while(forwardedGaps<upstreamEvents.size){const auto&gap=upstreamEvents.gaps[forwardedGaps];
-   CHECK(gap.afterFrames==count);
-   CHECK(fl_gst_session_send_video_event(sender,config.generation,&gap)==FL_GST_SESSION_READY);++forwardedGaps;
-  }
+  if(!eventContract)return;
+  CHECK(eventContract->check()==FL_GST_SESSION_READY);
+  CHECK(eventAdapter.drain(count,[&](const FlGstVideoEvent& gap){
+   auto result=eventContract->check();
+   if(result==FL_GST_SESSION_READY)result=fl_gst_session_send_video_event(sender,config.generation,&gap);
+   if(result==FL_GST_SESSION_READY)++forwardedGaps;
+   return result;
+  })==FL_GST_SESSION_READY);
  }
  void verifyEvents(){
   if(!events)return;
@@ -147,6 +159,11 @@ struct BrokerNativeBinRelay {
    if(result!=FL_GST_SESSION_READY)break;g_usleep(1000);
   }while(g_get_monotonic_time()-began<1000000);
   CHECK(result==FL_GST_SESSION_CANCELLED);
+  if(eventContract){
+   // Broker conveys the actual downstream failure, even with no queued GAP.
+   eventAdapter.cancel();
+   CHECK(eventAdapter.drain(count,[](const FlGstVideoEvent&){CHECK(false);return FL_GST_SESSION_READY;})==FL_GST_SESSION_CANCELLED);
+  }
   // Failure is not permission to retire a native reader or synthesize END.
   CHECK(native.pending()==1&&native.finish()==FL_BUSY);
   guint64 frames=999;gint64 pts=999;
