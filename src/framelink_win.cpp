@@ -61,6 +61,16 @@ struct LeaseCompletion {
     ComPtr<ID3D11Fence> fence;
 };
 
+struct flD3D11PoolSnapshot {
+    flChannelInfo info{};
+    std::vector<HANDLE> handles;
+    std::shared_ptr<std::atomic<uint32_t>> pins;
+    ~flD3D11PoolSnapshot() {
+        for(HANDLE handle:handles)if(handle)CloseHandle(handle);
+        if(pins)--*pins;
+    }
+};
+
 struct flChannel {
     bool isConsumer = false;
     bool externalPool = false;
@@ -70,6 +80,8 @@ struct flChannel {
     flFrameMetadata slotMetadata[FL_MAX_POOL_SIZE]{};
     flFrameMetadata heldMetadata{};
     std::string name;
+    std::recursive_mutex poolMutex; // snapshot versus ring/epoch replacement
+    std::shared_ptr<std::atomic<uint32_t>> poolPins = std::make_shared<std::atomic<uint32_t>>(0);
 
     ComPtr<ID3D11Device> device;
     ComPtr<ID3D11DeviceContext4> ctx;
@@ -109,8 +121,41 @@ struct flChannel {
 namespace {
 
 constexpr uint32_t kMaxPool = fl::kMaxPool;
+// Windows-only optional capability. Requiring it selects pull duplication,
+// so a cancelled setup cannot strand handles pushed into the caller process.
+constexpr uint32_t kPullRingFeature = 0x8000u;
 
-ComPtr<ID3D11Device> createDevice(const uint8_t luid[8], bool luidValid) {
+struct SetupDeadline {
+    HANDLE thread = nullptr, cancel = nullptr;
+    ULONGLONG deadline = 0;
+    std::atomic<bool> done{false};
+    std::atomic<int> failure{FL_OK};
+    std::thread watcher;
+    SetupDeadline(uint32_t timeout, HANDLE event) : cancel(event), deadline(GetTickCount64()+timeout) {
+        if (!DuplicateHandle(GetCurrentProcess(), GetCurrentThread(), GetCurrentProcess(),
+                             &thread, THREAD_TERMINATE, FALSE, 0)) { failure=FL_INTERNAL; return; }
+        watcher=std::thread([this] {
+            while (!done.load()) {
+                check();
+                if (failure.load()!=FL_OK) CancelSynchronousIo(thread);
+                Sleep(1);
+            }
+        });
+    }
+    flResult check() {
+        if (failure.load()!=FL_OK) return (flResult)failure.load();
+        DWORD state=cancel?WaitForSingleObject(cancel,0):WAIT_TIMEOUT;
+        int result=state==WAIT_OBJECT_0?FL_DISCONNECTED:
+            state==WAIT_FAILED?FL_INVALID:GetTickCount64()>=deadline?FL_TIMEOUT:FL_OK;
+        if(result!=FL_OK) { int expected=FL_OK; failure.compare_exchange_strong(expected,result); }
+        return (flResult)failure.load();
+    }
+    void finish() { done=true; if(watcher.joinable())watcher.join(); }
+    ~SetupDeadline() { finish(); if(thread)CloseHandle(thread); }
+};
+
+ComPtr<ID3D11Device> createDevice(const uint8_t luid[8], bool luidValid, bool* adapterMissing = nullptr) {
+    if(adapterMissing)*adapterMissing=false;
     ComPtr<IDXGIFactory1> factory;
     if (FAILED(CreateDXGIFactory1(IID_PPV_ARGS(&factory)))) return nullptr;
     ComPtr<IDXGIAdapter1> adapter, pick;
@@ -122,6 +167,8 @@ ComPtr<ID3D11Device> createDevice(const uint8_t luid[8], bool luidValid) {
             break;
         }
     }
+    // An explicitly selected adapter must never fall back to the default GPU.
+    if (luidValid && !pick) { if(adapterMissing)*adapterMissing=true; return nullptr; }
     ComPtr<ID3D11Device> dev;
     D3D_FEATURE_LEVEL fl = D3D_FEATURE_LEVEL_11_1;
     if (FAILED(D3D11CreateDevice(pick.Get(),
@@ -225,6 +272,8 @@ flResult adoptRing(flChannel* ch, void* const* handles, uint32_t count) {
 // fence handles are new, so anything that imported them (a Vulkan consumer's
 // timeline semaphores) is holding stale ones.
 bool resetSync(flChannel* ch) {
+    std::lock_guard<std::recursive_mutex> poolLock(ch->poolMutex);
+    if(ch->poolPins->load())return false;
     ComPtr<ID3D11Device5> dev5;
     if (FAILED(ch->device.As(&dev5))) return false;
     if (ch->readyShared) CloseHandle(ch->readyShared);
@@ -273,6 +322,13 @@ bool handOverRing(flChannel* ch, fl::Channel& link, uint32_t peerPid) {
     pd.height = ch->info.height;
     pd.format = (uint32_t)ch->info.format;
     pd.poolSize = (uint32_t)ch->images.size();
+    if (ch->peerFeatures & (kPullRingFeature << 16)) {
+        for(size_t i=0;i<ch->images.size();++i)pd.texture[i]=(uint64_t)(uintptr_t)ch->images[i]->shared;
+        pd.readyFence=(uint64_t)(uintptr_t)ch->readyShared;
+        pd.consumedFence=(uint64_t)(uintptr_t)ch->consumedShared;
+        CloseHandle(peerProc);
+        return link.send(fl::MsgType::RingDesc,pd);
+    }
     bool ok = true;
     for (size_t i = 0; i < ch->images.size() && ok; ++i) {
         HANDLE dup = nullptr;
@@ -318,7 +374,7 @@ void acceptLoop(flChannel* ch) {
         // might interpret differently.
         fl::HelloMsg hello{};
         hello.version = FL_VERSION;
-        hello._pad=fl::localFeatures(ch->flags);
+        hello._pad=fl::localFeatures(ch->flags)|kPullRingFeature;
         hello.pid = GetCurrentProcessId();
         hello.luidValid = 1;
         memcpy(hello.adapterLUID, ch->info.adapterLUID, 8);
@@ -341,15 +397,18 @@ void acceptLoop(flChannel* ch) {
         CloseHandle(peerProc);
 
         {
+            std::lock_guard<std::recursive_mutex> poolLock(ch->poolMutex);
+            {
             std::lock_guard<std::mutex> hold(ch->pendingMutex);
             ch->peerFeatures=ph->_pad;
-            if(!ch->readers.empty() || ch->frameHeld || ch->consumedFence->GetCompletedValue()<ch->heldReady ||
+            if(ch->poolPins->load() || !ch->readers.empty() || ch->frameHeld || ch->consumedFence->GetCompletedValue()<ch->heldReady ||
                !ch->pending.all([ch](const fl::PendingFrame& f){return ch->readyFence->GetCompletedValue()>=f.ready;})) {
                 link.send(fl::MsgType::Busy);
                 continue;
             }
         }
         if (!resetSync(ch) || !handOverRing(ch, link, link.peerPid())) continue;
+        }
 
         ch->peerGone = false;
         FL_LOG("framelink: producer pid %u attached to '%s'", link.peerPid(),
@@ -360,11 +419,12 @@ void acceptLoop(flChannel* ch) {
             if (!msg || msg->type == fl::MsgType::Bye) break;
             if (ch->stop.load()) return; // flClose cancelled our I/O - leave now
             if (msg->type == fl::MsgType::RequestGeometry) {
+                std::lock_guard<std::recursive_mutex> poolLock(ch->poolMutex);
                 const auto* g = msg->as<fl::GeometryMsg>();
                 // Honour it only when it actually differs and is sane. A
                 // refusal is silent by design: the producer re-reads flQuery
                 // and adapts, so there is nothing for it to handle.
-                if (!ch->externalPool && g && g->format == (uint32_t)ch->info.format && fl::validGeometry(g->width,g->height,ch->info.format) &&
+                if (!ch->externalPool && !ch->poolPins->load() && g && g->format == (uint32_t)ch->info.format && fl::validGeometry(g->width,g->height,ch->info.format) &&
                     (g->width != ch->info.width || g->height != ch->info.height)) {
                     // Scoped, not held across the rebuild: resetSync takes the
                     // same mutex, and std::mutex is not recursive. Clearing
@@ -458,7 +518,11 @@ static flResult createChannel(const char* name, uint32_t width, uint32_t height,
     ch->isConsumer = true;
     ch->flags = flags;
     ch->name = name;
-    ch->device = createDevice(adapterLUID, adapterLUID != nullptr);
+    const uint8_t zeroLuid[8]{};
+    const bool explicitAdapter = adapterLUID && memcmp(adapterLUID, zeroLuid, 8) != 0;
+    bool adapterMissing=false;
+    ch->device = createDevice(adapterLUID, explicitAdapter, &adapterMissing);
+    if (adapterMissing) { flClose(ch); return trace.result(FL_ADAPTER_MISMATCH); }
     if (!ch->device || !finishDeviceSetup(ch)) {
         flClose(ch);
         return trace.result(FL_INTERNAL);
@@ -523,10 +587,12 @@ FL_API flResult flCreateChannel(const char* name, uint32_t width, uint32_t heigh
 
 static flResult importRing(flChannel*, const fl::RingDescMsg*);
 
-FL_API flResult flOpenProducer(const char* name, flChannel** out) {
+static flResult openProducer(const char* name, flChannel** out, SetupDeadline* setup) {
     fltrace::Scope trace("flOpenProducer",fltrace::id(name));
 
     if (!name || !out) return trace.result(FL_INVALID);
+    *out=nullptr;
+    if(setup && setup->check()!=FL_OK)return setup->check();
     auto* ch = new flChannel();
     ch->isConsumer = false;
     ch->name = name;
@@ -535,7 +601,14 @@ FL_API flResult flOpenProducer(const char* name, flChannel** out) {
     bool busy = false;
     // Short timeout: a producer attaches to a channel or it does not. Walking a
     // set of slots must not take seconds per slot.
-    ch->link = fl::Channel::connect(name, 250, &busy);
+    uint32_t connectTimeout=250;
+    if(setup) {
+        if(setup->check()!=FL_OK){delete ch;return setup->check();}
+        const ULONGLONG now=GetTickCount64();
+        const ULONGLONG remaining=now<setup->deadline?setup->deadline-now:0;
+        connectTimeout=(uint32_t)(remaining<250?remaining:250);
+    }
+    ch->link = fl::Channel::connect(name, connectTimeout, &busy);
     if (!ch->link.connected()) {
         delete ch;
         return trace.result(busy ? FL_BUSY : FL_NOT_FOUND);
@@ -557,11 +630,12 @@ FL_API flResult flOpenProducer(const char* name, flChannel** out) {
         delete ch;
         return trace.result(FL_VERSION_MISMATCH);
     }
-    if(!fl::compatibleFeatures(fl::localFeatures(0),srv->_pad)){delete ch;return trace.result(FL_VERSION_MISMATCH);}
+    const uint32_t features=fl::localFeatures(0)|(setup?(kPullRingFeature|(kPullRingFeature<<16)):0);
+    if(!fl::compatibleFeatures(features,srv->_pad)){delete ch;return trace.result(FL_VERSION_MISMATCH);}
     ch->peerFeatures=srv->_pad;
     fl::HelloMsg mine{};
     mine.version = FL_VERSION;
-    mine._pad=fl::localFeatures(0);
+    mine._pad=features;
     mine.pid = GetCurrentProcessId();
     if (!ch->link.send(fl::MsgType::Hello, mine)) {
         delete ch;
@@ -569,13 +643,16 @@ FL_API flResult flOpenProducer(const char* name, flChannel** out) {
     }
     // Open on the consumer's adapter. Getting this wrong is the cross-adapter
     // failure the API promises to refuse rather than crash on.
-    ch->device = createDevice(srv->adapterLUID, srv->luidValid != 0);
+    bool adapterMissing=false;
+    ch->device = createDevice(srv->adapterLUID, srv->luidValid != 0, &adapterMissing);
+    if (adapterMissing) { flClose(ch); return trace.result(FL_ADAPTER_MISMATCH); }
     if (!ch->device || !finishDeviceSetup(ch)) {
         flClose(ch);
         return trace.result(FL_INTERNAL);
     }
     memcpy(ch->info.adapterLUID, srv->adapterLUID, 8);
 
+    if(setup && setup->check()!=FL_OK){flClose(ch);return setup->check();}
     auto poolMsg = ch->link.recv();
     if(poolMsg && poolMsg->type==fl::MsgType::Busy){flClose(ch);return trace.result(FL_BUSY);}
     if (!poolMsg || poolMsg->type != fl::MsgType::RingDesc) {
@@ -588,6 +665,7 @@ FL_API flResult flOpenProducer(const char* name, flChannel** out) {
         return trace.result(FL_INTERNAL);
     }
 
+    ch->peerFeatures=setup?(srv->_pad|(kPullRingFeature<<16)):srv->_pad;
     auto imported=importRing(ch,pd);
     if(imported!=FL_OK){flClose(ch);return trace.result(imported);}
     ch->info.version=FL_VERSION;
@@ -595,9 +673,34 @@ FL_API flResult flOpenProducer(const char* name, flChannel** out) {
     return trace.result(FL_OK);
 }
 
+FL_API flResult flOpenProducer(const char* name, flChannel** out) {
+    return openProducer(name,out,nullptr);
+}
+
+FL_API flResult flOpenProducerD3D11Bounded(const char* name, uint32_t timeoutMs,
+                                         void* cancelEvent, flChannel** out) {
+    if(out)*out=nullptr;
+    if(!name || !out || !timeoutMs || timeoutMs>60000)return FL_INVALID;
+    SetupDeadline setup(timeoutMs,(HANDLE)cancelEvent);
+    flResult result=openProducer(name,out,&setup);
+    // Establish one completion boundary: the watcher cannot observe a later
+    // cancellation after this final check but before success publication.
+    setup.finish();
+    flResult stopped=setup.check();
+    if(stopped!=FL_OK) {
+        if(*out){(*out)->link=fl::Channel();flClose(*out);*out=nullptr;}
+        return stopped;
+    }
+    return result;
+}
+
 // Producer: replace our view of the ring from a RingDesc. Used at attach and
 // again whenever the consumer reallocates.
-static flResult importRing(flChannel* ch, const fl::RingDescMsg* pd) {
+static flResult importRing(flChannel* ch, const fl::RingDescMsg* source) {
+    fl::RingDescMsg local=*source;
+    const bool pull=(ch->peerFeatures & (kPullRingFeature<<16))!=0;
+    if(pull) { memset(local.texture,0,sizeof(local.texture)); local.readyFence=local.consumedFence=0; }
+    const fl::RingDescMsg* pd=&local;
     // Descriptor ownership transfers on receipt, including every failure path.
     // Stage all imports before replacing the old ring and borrowed image identity.
     struct Incoming {
@@ -616,6 +719,22 @@ static flResult importRing(flChannel* ch, const fl::RingDescMsg* pd) {
             }
         }
     } incoming{pd};
+    if(pull) {
+        if(!source->poolSize || source->poolSize>FL_MAX_POOL_SIZE)return FL_INVALID;
+        HANDLE process=OpenProcess(PROCESS_DUP_HANDLE,FALSE,ch->link.peerPid());
+        if(!process)return FL_ACCESS_DENIED;
+        auto duplicate=[process](uint64_t value,uint64_t& dest) {
+            HANDLE handle=nullptr;
+            if(!value || !DuplicateHandle(process,(HANDLE)(uintptr_t)value,GetCurrentProcess(),&handle,
+                                         0,FALSE,DUPLICATE_SAME_ACCESS))return false;
+            dest=(uint64_t)(uintptr_t)handle;return true;
+        };
+        bool ok=true;
+        for(uint32_t i=0;i<source->poolSize && ok;++i)ok=duplicate(source->texture[i],local.texture[i]);
+        ok=ok && duplicate(source->readyFence,local.readyFence) && duplicate(source->consumedFence,local.consumedFence);
+        CloseHandle(process);
+        if(!ok)return FL_ACCESS_DENIED;
+    }
     if(!pd->poolSize || pd->poolSize>FL_MAX_POOL_SIZE ||
        !fl::validGeometry(pd->width,pd->height,(flFormat)pd->format))return FL_INVALID;
     ComPtr<ID3D11Device1> dev1;
@@ -679,6 +798,7 @@ FL_API flResult flRequestGeometry(flChannel* ch, uint32_t width, uint32_t height
                          : nullptr;
     if (!pd || pd->poolSize == 0 || pd->poolSize > kMaxPool) return trace.result(FL_DISCONNECTED);
     if(pd->generation==ch->info.generation) {
+        if(ch->peerFeatures & (kPullRingFeature<<16))return trace.result(FL_OK);
         // Refusal/no-op: these are newly duplicated handles to the SAME storage.
         // Keep slot reservations, borrowed image identity and fence counters.
         for(uint32_t i=0;i<pd->poolSize;i++)
@@ -1002,6 +1122,38 @@ FL_API void flClose(flChannel* ch) {
     if (ch->waitEvent) CloseHandle(ch->waitEvent);
     delete ch;
 }
+
+FL_API flResult flSnapshotD3D11ConsumerPool(flChannel* ch, flD3D11PoolSnapshot** out) {
+    if(out)*out=nullptr;
+    if(!ch || !ch->isConsumer || !out)return FL_INVALID;
+    std::lock_guard<std::recursive_mutex> poolLock(ch->poolMutex);
+    if(ch->stop.load() || !ch->info.generation || ch->images.size()!=ch->info.poolSize)return FL_DISCONNECTED;
+    if(FAILED(ch->device->GetDeviceRemovedReason()))return FL_DISCONNECTED;
+    auto snapshot=std::make_unique<flD3D11PoolSnapshot>();
+    snapshot->info=ch->info;
+    snapshot->handles.resize(ch->images.size(),nullptr);
+    for(size_t i=0;i<ch->images.size();++i) {
+        if(!DuplicateHandle(GetCurrentProcess(),ch->images[i]->shared,GetCurrentProcess(),
+                            &snapshot->handles[i],0,FALSE,DUPLICATE_SAME_ACCESS))return FL_INTERNAL;
+    }
+    snapshot->pins=ch->poolPins;
+    ++*snapshot->pins;
+    *out=snapshot.release();
+    return FL_OK;
+}
+
+FL_API flResult flQueryD3D11PoolSnapshot(const flD3D11PoolSnapshot* snapshot, flChannelInfo* out) {
+    if(!snapshot || !out)return FL_INVALID;
+    *out=snapshot->info;
+    return FL_OK;
+}
+
+FL_API void* flD3D11PoolSnapshotHandle(const flD3D11PoolSnapshot* snapshot, uint32_t slot) {
+    if(!snapshot || slot>=snapshot->handles.size())return nullptr;
+    return snapshot->handles[slot];
+}
+
+FL_API void flReleaseD3D11PoolSnapshot(flD3D11PoolSnapshot* snapshot) { delete snapshot; }
 
 // ---- D3D11 interop -----------------------------------------------------------
 

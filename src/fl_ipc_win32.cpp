@@ -86,6 +86,8 @@ Channel Channel::connect(const std::string& name, uint32_t timeoutMs, bool* busy
         if (pipe != INVALID_HANDLE_VALUE) {
             DWORD mode = PIPE_READMODE_MESSAGE;
             SetNamedPipeHandleState(pipe, &mode, nullptr, nullptr);
+            ULONG pid=0;
+            if(GetNamedPipeServerProcessId(pipe,&pid))ch.peerPid_=(uint32_t)pid;
             ch.handle_ = pipe;
             ch.connected_ = true;
             return ch;
