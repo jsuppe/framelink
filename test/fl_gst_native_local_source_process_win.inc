@@ -65,10 +65,12 @@ static void control(const char*plugin){
  Peer source(plugin,path);
  auto caps=localPoolProcessCaps();auto candidate=nativeAvPolicy(0,true);GstFrameLinkMemoryPolicy bound{};
  auto*session=fl_gst_session_new(3);flChannel*channel=nullptr;GError*error=nullptr;
- CHECK(fl_gst_session_open_local_native(session,FALSE,path.c_str(),&caps,1,2,80,5000,5000,
+ CHECK(fl_gst_session_open_local_native_relay_input(session,path.c_str(),&caps,1,2,80,5000,5000,
    &candidate,&bound,&channel,nullptr,&error));
  flSessionConfig cfg{};CHECK(fl_gst_session_get_config(session,&cfg)==FL_GST_SESSION_READY);
  CHECK(cfg.generation&&bound.sessionGeneration==cfg.generation);
+ for(gint64 input:{gint64(0),gint64(37000000)}){gint64 mapped=-1;
+  CHECK(fl_gst_session_map_running_time(session,cfg.generation,input,TRUE,&mapped)==FL_GST_SESSION_READY&&mapped==input);}
  CHECK(fl_gst_session_local_ready(session,FALSE,1000,nullptr));
  for(unsigned n=0;n<Frames;++n){
   source.next();flFrame frame{};CHECK(flAcquireFrame(channel,&frame,1000)==FL_OK);
@@ -81,4 +83,57 @@ static void control(const char*plugin){
  flClose(channel);g_object_unref(session);
  puts("separate local source control: authenticated FAR4, 8 exact frames/metadata, no inherited textures, real read leases before control acknowledgment");
 }
+// Three independent processes: source child, this relay, final reader child.
+// Uses the committed backend snapshot contract, never inherited texture handles.
+static void threeProcess(const char*plugin){
+ gchar*dir=g_dir_make_tmp("framelink-three-local-XXXXXX",nullptr);CHECK(dir);
+ const std::string root=dir;g_free(dir);const auto inputPath=root+"/input",outputPath=root+"/output";
+ Peer source(plugin,inputPath);
+ auto caps=localPoolProcessCaps();auto candidate=nativeAvPolicy(0,true);GstFrameLinkMemoryPolicy inputPolicy{},outputPolicy{};
+ auto*up=fl_gst_session_new(3);auto*down=fl_gst_session_new(3);
+ flChannel*input=nullptr,*output=nullptr;GError*error=nullptr;
+ CHECK(fl_gst_session_open_local_native_relay_input(up,inputPath.c_str(),&caps,1,2,80,5000,5000,
+   &candidate,&inputPolicy,&input,nullptr,&error));
+ flSessionConfig original{};CHECK(fl_gst_session_get_config(up,&original)==FL_GST_SESSION_READY);
+ // Attachment already happened, but source has not been told to publish.
+ flD3D11PoolSnapshot*snapshot=nullptr;CHECK(flSnapshotD3D11ConsumerPool(input,&snapshot)==FL_OK);
+ flChannelInfo info{};CHECK(flQueryD3D11PoolSnapshot(snapshot,&info)==FL_OK&&info.poolSize==2);
+ void*handles[2]{};for(unsigned n=0;n<2;++n){handles[1-n]=flD3D11PoolSnapshotHandle(snapshot,n);CHECK(handles[1-n]);}
+ flnative::Handle held,release,exitEvent;
+ held.value=CreateEventW(nullptr,TRUE,FALSE,nullptr);release.value=CreateEventW(nullptr,TRUE,FALSE,nullptr);exitEvent.value=CreateEventW(nullptr,TRUE,FALSE,nullptr);
+ CHECK(held.value&&release.value&&exitEvent.value);
+ const auto command=std::string("\"")+plugin+"\" --relay-local-reader-generic \""+outputPath+"\" "+
+   std::to_string(uintptr_t(held.value))+" "+std::to_string(uintptr_t(release.value))+" "+std::to_string(uintptr_t(exitEvent.value));
+ auto final=relayprocess::spawn(command,{held.value,release.value,exitEvent.value});
+ CHECK(fl_gst_session_open_local_native_relay_pool(down,up,outputPath.c_str(),&caps,1,2,80,5000,5000,
+   &candidate,info.adapterLUID,handles,&outputPolicy,&output,nullptr,&error));
+ flSessionConfig forwarded{};CHECK(fl_gst_session_get_config(down,&forwarded)==FL_GST_SESSION_READY);
+ CHECK(flsample::SessionRelayContract::compatible(original,forwarded));
+ using Compare=BOOL(WINAPI*)(HANDLE,HANDLE);
+ auto compare=reinterpret_cast<Compare>(GetProcAddress(GetModuleHandleW(L"KernelBase.dll"),"CompareObjectHandles"));CHECK(compare);
+ flsample::NativeRelay relay(input,output,[&](flImage*a,flImage*b){return compare(flImageSharedHandle(a),flImageSharedHandle(b))!=FALSE;});
+ CHECK(relay.initialize()==FL_OK);
+ flsample::SessionRelaySupervisor supervisor(up,down);CHECK(supervisor.start()==FL_GST_SESSION_READY);
+ CHECK(fl_gst_session_local_ready(down,TRUE,1000,nullptr));
+ CHECK(fl_gst_session_local_ready(up,FALSE,1000,nullptr));
+ for(unsigned n=0;n<Frames;++n){
+  source.next();flFrame frame{};CHECK(flAcquireFrame(input,&frame,1000)==FL_OK);
+  CHECK(frame.ptsNs==pts(n));CHECK(relay.forward(frame)==FL_OK);
+  if(n+1==Frames){relayprocess::wait(held.value);CHECK(relay.pending()==1&&relay.finish()==FL_BUSY);CHECK(SetEvent(release.value));}
+  const auto deadline=g_get_monotonic_time()+2000000;
+  while(relay.pending()){CHECK(g_get_monotonic_time()<deadline);CHECK(relay.collect()==FL_OK);g_usleep(100);}
+  // A control acknowledgment follows real final-reader lease completion only.
+  source.release();
+ }
+ CHECK(relay.count()==Frames&&relay.finish()==FL_OK);
+ supervisor.stop();CHECK(supervisor.status()==FL_GST_SESSION_READY);
+ CHECK(SetEvent(exitEvent.value));CHECK(fl_gst_session_finish_local(down,TRUE,1000,nullptr));
+ CHECK(fl_gst_session_finish_local(up,FALSE,1000,nullptr));
+ relayprocess::join(final);source.join();
+ // The snapshot pins the source epoch for the ENTIRE graph, not only import.
+ flReleaseD3D11PoolSnapshot(snapshot);flClose(output);flClose(input);
+ g_object_unref(down);g_object_unref(up);
+ puts("three-process local native relay: FAR4 source-time input + FAR5 snapshot transfer, no inherited textures, 8 exact final pixels/metadata, held final lease, real drain");
+}
+
 }

@@ -248,6 +248,18 @@ FL_GST_SESSION_API gboolean fl_gst_session_open_local_native_epoch(FlGstSession*
  guint audio_queue_ms,guint connect_timeout_ms,guint idle_timeout_ms,
  const GstFrameLinkMemoryPolicy* candidate,GstFrameLinkMemoryPolicy* bound,flChannel** channel,
  FlGstNativeEpochFunc,gpointer,GCancellable*,GError**);
+// Explicit intermediate receiver for source-time relay forwarding, paired with
+// the ordinary FAR4 native producer. Authenticates the same clock exchange but
+// installs a source-relative running-time mapping BEFORE tracks are exposed.
+// Both PCM/video preserve source PTS; this is not local playback synchronization.
+// Do not schedule local rendering with this mapping. A final receiver uses the
+// ordinary mapped profile. Same setup/ownership rules as open_local_native;
+// no pool export, forwarding, supervisor or automatic reconnect is installed.
+FL_GST_SESSION_API gboolean fl_gst_session_open_local_native_relay_input(FlGstSession*,
+ const gchar* session_path,const flSessionCapabilities*,guint video_queue_frames,guint video_pool,
+ guint audio_queue_ms,guint connect_timeout_ms,guint idle_timeout_ms,
+ const GstFrameLinkMemoryPolicy* candidate,GstFrameLinkMemoryPolicy* bound,flChannel** channel,
+ GCancellable*,GError**);
 // Producer-side explicit local relay session. The consumer uses the existing
 // open_local_native API. Requires a distinct live, identity-mapped A/V upstream;
 // pins its exact media, clock ID, generation, epoch and track IDs. New hop session
@@ -264,9 +276,10 @@ FL_GST_SESSION_API gboolean fl_gst_session_open_local_native_relay(FlGstSession*
  GCancellable*,GError**);
 // Explicit FAR5 same-allocation relay setup, paired ONLY with pool_receiver.
 // Same timeline/serialization contract as native_relay. Borrow adapter LUID[8]
-// and exactly video_pool D3D11 shared NT handles from a fully pinned unpublished
-// upstream pool; retain its reservations for this entire call. Caller validates
-// their upstream origin and keeps that pool alive thereafter. No arbitrary
+// and exactly video_pool D3D11 shared NT handles from a fully pinned upstream
+// pool BEFORE media publication. Use unpublished producer reservations for this
+// call, or a consumer snapshot retained for the ENTIRE relay graph lifetime.
+// Caller validates upstream origin and keeps the source pool alive. No arbitrary
 // foreign-memory adoption: before source writes, bind a read-lease relay that
 // preserves upstream ownership through actual final GPU completion.
 // Performs separately authenticated, kernel-peer-pinned handle pull/import and

@@ -344,7 +344,7 @@ gboolean fl_gst_session_open_local_av(FlGstSession*session,gboolean producer,con
 struct NativeRelayPool { const void* adapter=nullptr; void*const* handles=nullptr; };
 static gboolean open_local_av_impl(FlGstSession*session,gboolean producer,const gchar*path,
  const flSessionCapabilities*local,guint videoQueue,guint pool,guint queueMs,guint timeout,guint idle,guint flags,
- flChannel**channel,FlGstEpochFunc epochFunc,gpointer epochData,GCancellable*outer,GError**error,bool cpu,const GstFrameLinkMemoryPolicy*native=nullptr,const flSessionConfig*relay=nullptr,const NativeRelayPool*relayPool=nullptr){
+ flChannel**channel,FlGstEpochFunc epochFunc,gpointer epochData,GCancellable*outer,GError**error,bool cpu,const GstFrameLinkMemoryPolicy*native=nullptr,const flSessionConfig*relay=nullptr,const NativeRelayPool*relayPool=nullptr,bool preserveSourceTimeline=false){
  if(channel)*channel=nullptr;
  auto fail=[&](const char*message){fl_gst_session_cancel(session);g_set_error_literal(error,G_IO_ERROR,G_IO_ERROR_FAILED,message);return FALSE;};
  if(!session||!path||!*path||!local||!channel||(cpu&&!local->videoCount)||local->version!=FL_SESSION_OPTIONAL_TRACKS_VERSION||(!local->videoCount&&!local->audioCount)||
@@ -480,6 +480,12 @@ static gboolean open_local_av_impl(FlGstSession*session,gboolean producer,const 
   if(!av::secureRandom(mapping.targetClockId.bytes,16,reason))return fail(reason.c_str());
   if(t1<t0||source>guint64(G_MAXINT64)||t1>guint64(G_MAXINT64))return fail("invalid clock exchange");
   mapping.sourceAnchorNs=gint64(source);mapping.targetAnchorNs=gint64(t0+(t1-t0)/2);mapping.uncertaintyNs=(t1-t0+1)/2;
+  if(mapping.uncertaintyNs>50*GST_MSECOND)return fail("clock uncertainty exceeds 50ms or mapping rejected");
+  if(preserveSourceTimeline){
+   // Explicit intermediate forwarding domain: source-relative running time,
+   // not local playback time. Still authenticate/check the clock exchange.
+   mapping.sourceAnchorNs=selected.epochNs;mapping.targetAnchorNs=0;mapping.uncertaintyNs=0;
+  }
   if(fl_gst_session_set_mapping(session,selected.generation,&mapping,50*GST_MSECOND)!=FL_GST_SESSION_READY)return fail("clock uncertainty exceeds 50ms or mapping rejected");
  }
  if(selected.audioTrackId){
@@ -609,7 +615,7 @@ gboolean fl_gst_session_open_local_native(FlGstSession*session,gboolean producer
 static gboolean open_local_native_impl(FlGstSession*session,gboolean producer,const gchar*path,
  const flSessionCapabilities*local,guint videoQueue,guint pool,guint queueMs,guint timeout,guint idle,
  const GstFrameLinkMemoryPolicy*candidate,GstFrameLinkMemoryPolicy*bound,flChannel**channel,
- FlGstNativeEpochFunc epochFunc,gpointer epochData,GCancellable*outer,GError**error,const flSessionConfig*relay,const NativeRelayPool*relayPool=nullptr){
+ FlGstNativeEpochFunc epochFunc,gpointer epochData,GCancellable*outer,GError**error,const flSessionConfig*relay,const NativeRelayPool*relayPool=nullptr,bool preserveSourceTimeline=false){
  // Explicit D3D11 receiver profiles: CPU readback or deferred native GPU use.
  // Neither profile permits automatic fallback or undeclared operations.
  GstFrameLinkMemoryPolicy policy{};if(candidate)policy=*candidate;
@@ -630,7 +636,7 @@ static gboolean open_local_native_impl(FlGstSession*session,gboolean producer,co
  if(!open_local_av_impl(session,producer,path,local,videoQueue,pool,queueMs,timeout,idle,
      FL_MAP_CPU|FL_REQUIRE_FRAME_METADATA|(nativeReceiver?FL_DEFER_RELEASE:0)|
      ((policy.paths[0].supportedUsage&FL_MEMORY_GPU_RENDER)?FL_GPU_RENDER:0),
-     channel,producer?epochFunc:nullptr,epochData,outer,error,false,&policy,relay,relayPool))return FALSE;
+     channel,producer?epochFunc:nullptr,epochData,outer,error,false,&policy,relay,relayPool,preserveSourceTimeline))return FALSE;
  flSessionConfig cfg{};
  if(fl_gst_session_get_config(session,&cfg)!=FL_GST_SESSION_READY){
   if(*channel)flClose(*channel);*channel=nullptr;fl_gst_session_cancel(session);
@@ -644,6 +650,13 @@ gboolean fl_gst_session_open_local_native_epoch(FlGstSession*session,gboolean pr
  FlGstNativeEpochFunc epochFunc,gpointer epochData,GCancellable*outer,GError**error){
  return open_local_native_impl(session,producer,path,local,videoQueue,pool,queueMs,timeout,idle,
   candidate,bound,channel,epochFunc,epochData,outer,error,nullptr);
+}
+gboolean fl_gst_session_open_local_native_relay_input(FlGstSession*session,const gchar*path,
+ const flSessionCapabilities*local,guint queue,guint pool,guint audio,guint timeout,guint idle,
+ const GstFrameLinkMemoryPolicy*candidate,GstFrameLinkMemoryPolicy*bound,flChannel**channel,
+ GCancellable*cancel,GError**error){
+ return open_local_native_impl(session,FALSE,path,local,queue,pool,audio,timeout,idle,
+  candidate,bound,channel,nullptr,nullptr,cancel,error,nullptr,nullptr,true);
 }
 // A source can fail while downstream discovery/handshake is still waiting.
 // Observe only session state; never touch native leases or manufacture EOS.

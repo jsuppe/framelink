@@ -40,9 +40,9 @@ try {
     $manifest | ConvertTo-Json -Depth 3 | Set-Content (Join-Path $evidence 'source-sha256.json')
         & cmake -S . -B $BuildDirectory -G 'Visual Studio 17 2022' -DFRAMELINK_BUILD_TESTS=ON -DFRAMELINK_BUILD_GST=ON *> (Join-Path $evidence 'configure.log')
         if ($LASTEXITCODE -ne 0) { throw 'Configure failed; see configure.log.' }
-        & cmake --build $BuildDirectory --config Release --target fl_gst_native_producer_win gstframelink *> (Join-Path $evidence 'build.log')
+        & cmake --build $BuildDirectory --config Release --target fl_gst_native_producer_win gstframelink fl_gst_native_epoch_c_api *> (Join-Path $evidence 'build.log')
         if ($LASTEXITCODE -ne 0) { throw 'Build failed; see build.log.' }
-        $tests = @('gst_relay_local_source_control_win', 'gst_relay_local_events_win', 'gst_relay_local_process_win', 'gst_relay_local_pool_win')
+        $tests = @('gst_native_epoch_c_api', 'gst_relay_local_three_process_win', 'gst_relay_local_source_control_win', 'gst_relay_local_events_win', 'gst_relay_local_process_win', 'gst_relay_local_pool_win')
         $regex = '^(' + ($tests -join '|') + ')$'
         $inventory = & ctest --test-dir $BuildDirectory -C Release -N --show-only=json-v1 -R $regex
         if ($LASTEXITCODE -ne 0) { throw 'Cannot enumerate the focused tests.' }

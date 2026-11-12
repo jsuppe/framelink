@@ -1,0 +1,7 @@
+# Explicit source-time relay input and separate-process integration
+
+Prepared against backend `d4c32cc` snapshot/bounded-open contract. New intermediate receiver API installs a source-relative forwarding mapping during authenticated FAR4 setup; final receiver mapping/defaults unchanged. Shared session code compiled locally; focused Linux session transport/context 2/2 passed in 1.13s (raw LastTest.log retained). This is not validation of Windows-only branches.
+
+Windows-only work pending compile/runtime: additive relay-input C11 symbol probe; independent FAR4 source child; FAR5 serialized event control; three-process raw native relay using graph-lifetime consumer snapshot and real read leases; bounded producer attach in FAR5. No inherited texture handles. All source pixels/PTS/DTS/duration/generation checked at final reader. The raw three-process fixture negotiates A/V capabilities but does not send PCM: do not claim three-process A/V qualification. Separate live A/V/event fixture remains its own focused oracle.
+
+Parent backend worker owns the Windows execution lane. No Windows build/test was launched by primary in this phase. Prepared tools/validate_local_native_relay.ps1 requires explicit lane handoff and exact clean revision, selects six named checks, and preserves failure evidence. Its Windows parse/execution is also pending. No full suite, ABI freeze, throughput or lifecycle acceptance claim.

@@ -5,19 +5,20 @@ static flSessionCapabilities localPoolProcessCaps(){
  flSessionCapabilities caps{};caps.version=2;caps.videoCount=caps.audioCount=1;
  caps.video[0]={FL_FORMAT_RGBA8,64,32,30,1};caps.audio[0]={FL_PCM_S16,48000,2};return caps;
 }
-static int localPoolProcessReader(const char*path,HANDLE held,HANDLE release,HANDLE exitEvent){
+static int localPoolProcessReader(const char*path,HANDLE held,HANDLE release,HANDLE exitEvent,bool fixedFixture=true){
  auto caps=localPoolProcessCaps();auto candidate=nativeAvPolicy(0,true);GstFrameLinkMemoryPolicy bound{};
  auto*session=fl_gst_session_new(3);flChannel*channel=nullptr;GError*error=nullptr;
  CHECK(fl_gst_session_open_local_native_pool_receiver(session,path,&caps,1,2,80,5000,5000,
    &candidate,&bound,&channel,nullptr,&error));
  flSessionConfig cfg{};CHECK(fl_gst_session_get_config(session,&cfg)==FL_GST_SESSION_READY);
- CHECK(cfg.generation==19&&cfg.clockId.bytes[0]==73&&cfg.videoTrackId==7&&cfg.audioTrackId==8);
+ CHECK(flSessionValidate(&cfg)==FL_SESSION_OK&&bound.sessionGeneration==cfg.generation);
+ if(fixedFixture)CHECK(cfg.generation==19&&cfg.clockId.bytes[0]==73&&cfg.videoTrackId==7&&cfg.audioTrackId==8);
  CHECK(fl_gst_session_local_ready(session,FALSE,1000,nullptr));
  for(unsigned n=0;n<8;++n){
   flFrame frame{};CHECK(flAcquireFrame(channel,&frame,5000)==FL_OK);
   CHECK(frame.ptsNs==37000000+n*1000000);
   flFrameMetadata meta{};CHECK(flGetFrameMetadata(channel,&frame,&meta)==FL_OK);
-  CHECK(meta.streamGeneration==19&&meta.durationNs==1000000&&meta.dtsNs==frame.ptsNs);
+  CHECK(meta.streamGeneration==cfg.generation&&meta.durationNs==1000000&&meta.dtsNs==frame.ptsNs);
   flMappedImage map{};CHECK(flImageMapPlanes(frame.image,&map)==FL_OK);
   for(unsigned y=0;y<32;++y)for(unsigned x=0;x<256;++x)
    CHECK(static_cast<unsigned char*>(map.plane[0].pixels)[y*map.plane[0].stride+x]==n+11);

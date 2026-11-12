@@ -7,6 +7,7 @@ Implementation: `c4f164a`, `c0aa02e`, `0a430f9`. These additive APIs are not a f
 | API | Peer API | Pool contract |
 | --- | --- | --- |
 | `open_local_native` / `open_local_native_epoch` | `open_local_native` | FAR4, newly allocated native pool |
+| `open_local_native_relay_input` | `open_local_native` (producer) | FAR4 intermediate receiver, source-relative timeline; no playback mapping |
 | `open_local_native_relay` | `open_local_native` | FAR4, preserved upstream timeline but **independent** downstream pool |
 | `open_local_native_relay_pool` | `open_local_native_pool_receiver` | FAR5, authenticated import of caller-pinned original allocations |
 
@@ -29,7 +30,7 @@ A version-1 candidate has generation zero and producer-first endpoints on both p
 - FAR5 setup watches upstream cancellation/configuration changes and interrupts pending discovery/transport I/O. Its whole-call I/O budget is not a hard bound on synchronous native driver/create/open calls. Ongoing post-setup cancellation needs the installed supervisor.
 - Queue 1 permits pool 2; queue greater than 1 requires pool at least queue+2. This is capacity, not a mandatory fill delay. Legacy defaults are unchanged. No new universal latest/lossless policy is implied; product D2/D3 decisions remain open.
 - `error-on-ring-full` is not a universal delivery policy. Explicit CPU/readback choices are not automatic fallback. Never silently copy after native authentication or import failure.
-- There is no public pre-media enumeration/pinning API for a separate native receiver to export an entire source pool. Current composition requires caller-owned source exports. The existing real-process test covers source/relay in one process and final reader in another; it is **not** qualification of a general three-process A/V app.
+- Backend `d4c32cc` adds an explicit consumer-pool snapshot. Snapshot handles remain borrowed until release; keep the snapshot through the entire graph to pin source reconfiguration. The new three-process fixture uses the committed snapshot API, not inherited textures. Windows compile/runtime of that integration is pending; this is **not** qualification of a general three-process A/V app.
 - Native local setup is Windows-only. No Linux/Android automatic-native parity, full ABI compatibility, timing/endurance acceptance or M6 completion is claimed.
 
 ## Focused evidence
@@ -44,4 +45,6 @@ Read-only independent review found no actionable defects in the authentication, 
 
 Commit `94e8952` adds an independent authenticated FAR4 source child and upstream-only control (`gst_relay_local_source_control_win`), plus FAR5 serialized GAP/DISCONT/trailing-GAP integration (`gst_relay_local_events_win`). These are scaffolding and focused checks, not a completed three-process snapshot integration. Their compile/runtime results remain pending the backend owner's Windows-lane handoff.
 
-`tools/validate_local_native_relay.ps1` is an explicit post-handoff runner. It requires the coordinator's runtime release switch, a clean exact revision and a new evidence directory; refuses an observed existing build/test executor; checks that all four named tests are selected; and records source hashes, build/test logs and terminal status. It does not run automatically, qualify ABI/performance or replace the coordinator's host ownership. PowerShell execution/parse validation is pending on Windows.
+`tools/validate_local_native_relay.ps1` is an explicit post-handoff runner. It requires the coordinator's runtime release switch, a clean exact revision and a new evidence directory; refuses an observed existing build/test executor; checks that all six named tests are selected; and records source hashes, build/test logs and terminal status. It does not run automatically, qualify ABI/performance or replace the coordinator's host ownership. PowerShell execution/parse validation is pending on Windows.
+
+The explicit `open_local_native_relay_input` receiver authenticates the usual FAR4 clock exchange, then installs a source-relative forwarding domain before exposing tracks. Normal receiver mappings are immutable and cannot be replaced afterward; final playback continues to use the ordinary receiver API. Do not use the intermediate mapping to schedule local rendering. The shared setup code builds on Linux and its two affected session checks pass (1.13s); this does not validate the Windows-only API. The new source control asserts identity mapping at zero and 37ms, and the C11 linkage probe includes the new symbol. Both remain pending Windows validation. FAR5 producer attachment now opts into the backend bounded pull-handle setup; driver calls remain synchronous.

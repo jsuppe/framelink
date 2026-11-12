@@ -1,0 +1,66 @@
+Start testing: Nov 12 00:59 EST
+----------------------------------------------------------
+119/138 Testing: gst_session_transport
+119/138 Test: gst_session_transport
+Command: "<linux-home>/dev/build/framelink-m6-event-linux-20261112/fl_gst_session_transport"
+Directory: <linux-home>/dev/build/framelink-m6-event-linux-20261112
+"gst_session_transport" start time: Nov 12 00:59 EST
+Output:
+----------------------------------------------------------
+native memory agreement mode 0
+native memory agreement mode 1
+native memory agreement mode 2
+native memory agreement mode 3
+native memory agreement mode 4
+native memory agreement mode 5
+native memory agreement mode 6
+native memory agreement mode 7
+native memory agreement mode 8
+native memory agreement mode 9
+native memory agreement mode 10
+native memory agreement mode 11
+native memory agreement mode 12
+native memory agreement mode 13
+native memory agreement mode 14
+native memory agreement mode 15
+native memory agreement mode 16
+native memory agreement mode 17
+native memory agreement mode 18
+native memory agreement mode 19
+CPU bootstrap mode 0
+CPU bootstrap mode 1
+CPU bootstrap mode 2
+CPU bootstrap mode 3
+CPU bootstrap mode 4
+CPU bootstrap mode 5
+CPU bootstrap mode 6
+native memory exact agreement: success, 19 mismatch/invalid/domain negatives, deadline and cancellation passed
+authenticated session transport: all track modes, wrong key, mismatch, invalid config, timeout and cancel passed
+<end of output>
+Test time =   1.11 sec
+----------------------------------------------------------
+Test Passed.
+"gst_session_transport" end time: Nov 12 00:59 EST
+"gst_session_transport" time elapsed: 00:00:01
+----------------------------------------------------------
+
+121/138 Testing: gst_session_context
+121/138 Test: gst_session_context
+Command: "<linux-home>/dev/build/framelink-m6-event-linux-20261112/fl_gst_session_context"
+Directory: <linux-home>/dev/build/framelink-m6-event-linux-20261112
+"gst_session_context" start time: Nov 12 00:59 EST
+Output:
+----------------------------------------------------------
+session context: ownership, readiness, track masks, generations and cancellation passed
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"gst_session_context" end time: Nov 12 00:59 EST
+"gst_session_context" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Nov 12 00:59 EST
+
+m5b_av =   1.13 sec*proc
+

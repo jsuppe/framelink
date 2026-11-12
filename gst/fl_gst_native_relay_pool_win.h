@@ -15,8 +15,8 @@ struct Handle {
 // Receiver PULLS duplicates from the pinned producer; wire integers are never
 // closed or interpreted as local handles. Both sides must agree on config,
 // capacity, CPU access and secret-derived channel name. Output owned on success.
-// Native D3D allocation and legacy flOpenProducer remain synchronous; all pipe
-// I/O uses the remaining whole-call budget. Caller serializes pool/session use.
+// Native D3D driver calls remain synchronous; producer attach uses the bounded
+// pull-handle API and remaining whole-call budget. Caller serializes pool/session use.
 // This only creates the ring: caller MUST install the read-lease relay and
 // cancellation supervision before any source writes. No independent writers.
 inline flResult transferRelayPool(HANDLE input,HANDLE peer,HANDLE cancel,guint timeout,
@@ -77,7 +77,7 @@ inline flResult transferRelayPool(HANDLE input,HANDLE peer,HANDLE cancel,guint t
      memcmp(message.payload.data(),packet.data(),packet.size()))return FL_INVALID;
   if(!remaining())return FL_TIMEOUT;
   if(WaitForSingleObject(cancel,0)!=WAIT_TIMEOUT)return FL_DISCONNECTED;
-  result=flOpenProducer(name,&channel.value);if(result!=FL_OK)return result;
+  result=flOpenProducerD3D11Bounded(name,remaining(),cancel,&channel.value);if(result!=FL_OK)return result;
   result=validateRing();if(result!=FL_OK)return result;
   result=send(attachedType,packet.data(),packet.size());if(result!=FL_OK)return result;
  }else{
