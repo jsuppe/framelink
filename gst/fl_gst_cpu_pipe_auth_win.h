@@ -6,8 +6,9 @@
 #include <array>
 #include <algorithm>
 
-inline flResult flAuthenticateCpuPipe(HANDLE input,HANDLE peer,HANDLE cancel,
- guint timeout,const flSessionConfig& config,bool producer,GBytes* secret){
+inline flResult flAuthenticatePipeProfile(HANDLE input,HANDLE peer,HANDLE cancel,
+ guint timeout,const flSessionConfig& config,bool producer,GBytes* secret,const char*label){
+ if(!label||!*label)return FL_INVALID;
  gsize size=0;const auto* key=secret?static_cast<const guint8*>(g_bytes_get_data(secret,&size)):nullptr;
  if(!key||size!=32)return FL_INVALID;
  guint nonzero=0;for(gsize i=0;i<size;i++)nonzero|=key[i];if(!nonzero)return FL_INVALID;
@@ -38,8 +39,7 @@ inline flResult flAuthenticateCpuPipe(HANDLE input,HANDLE peer,HANDLE cancel,
  GST_WRITE_UINT32_LE(identities+4,producer?peerPid:localPid);
  auto proof=[&](guint8 direction){
   auto*h=g_hmac_new(G_CHECKSUM_SHA256,key,size);
-  constexpr char label[]="FrameLink authenticated Windows CPU pipe v1";
-  g_hmac_update(h,reinterpret_cast<const guint8*>(label),sizeof label);
+  g_hmac_update(h,reinterpret_cast<const guint8*>(label),strlen(label)+1);
   g_hmac_update(h,&direction,1);g_hmac_update(h,wire.data(),wire.size());
   g_hmac_update(h,identities,sizeof identities);g_hmac_update(h,pn.data(),pn.size());g_hmac_update(h,cn.data(),cn.size());
   std::array<guint8,32> digest{};gsize n=digest.size();g_hmac_get_digest(h,digest.data(),&n);g_hmac_unref(h);return digest;
@@ -55,4 +55,11 @@ inline flResult flAuthenticateCpuPipe(HANDLE input,HANDLE peer,HANDLE cancel,
  if(GetTickCount64()>=end)return FL_TIMEOUT;
  if(WaitForSingleObject(cancel,0)!=WAIT_TIMEOUT||WaitForSingleObject(peer,0)!=WAIT_TIMEOUT)return FL_DISCONNECTED;
  return FL_OK;
+}
+
+// Preserve the existing CPU wire transcript byte-for-byte, including trailing NUL.
+inline flResult flAuthenticateCpuPipe(HANDLE input,HANDLE peer,HANDLE cancel,
+ guint timeout,const flSessionConfig&config,bool producer,GBytes*secret){
+ return flAuthenticatePipeProfile(input,peer,cancel,timeout,config,producer,secret,
+   "FrameLink authenticated Windows CPU pipe v1");
 }

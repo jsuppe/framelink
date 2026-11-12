@@ -14,25 +14,29 @@ namespace flsample {
 // Output channels are owned by the caller only on success. Partial failures
 // return both null and release every temporary upstream reservation. BUSY is a
 // nonblocking setup failure, not permission to run with a partial pool.
-inline flResult createNativeD3D11RelayPool(GstBufferPool* pool,const char* name,
-    const flSessionConfig& config,unsigned capacity,bool cpuAccess,
-    flChannel** reader,flChannel** writer){
-  if(reader)*reader=nullptr;if(writer)*writer=nullptr;
-  if(!reader||!writer||reader==writer||!name||!*name||!GST_IS_BUFFER_POOL(pool)||
-     !gst_buffer_pool_is_active(pool)||capacity<2||capacity>FL_MAX_POOL_SIZE||
-     flSessionValidate(&config)!=FL_SESSION_OK)return FL_INVALID;
-  struct Reservations {
-    std::array<GstBuffer*,FL_MAX_POOL_SIZE> items{};
-    ~Reservations(){for(auto*b:items)if(b)gst_buffer_unref(b);}
-  } reservations;
-  std::array<void*,FL_MAX_POOL_SIZE> handles{};
+// A single-attempt export guard. Retain it until the authenticated receiver has
+// imported the handles and acknowledged attachment. Failure also releases all
+// partial reservations; never expose borrowed handles after destroying this guard.
+class NativeD3D11RelayPoolExport {
+  std::array<GstBuffer*,FL_MAX_POOL_SIZE> items{};
   std::array<bool,FL_MAX_POOL_SIZE> seen{};
   std::shared_ptr<FrameLinkD3DProducer> owner;
+  bool attempted=false;
+public:
+  std::array<void*,FL_MAX_POOL_SIZE> handles{};
   flChannelInfo first{};
+  NativeD3D11RelayPoolExport()=default;
+  NativeD3D11RelayPoolExport(const NativeD3D11RelayPoolExport&)=delete;
+  NativeD3D11RelayPoolExport& operator=(const NativeD3D11RelayPoolExport&)=delete;
+  ~NativeD3D11RelayPoolExport(){for(auto*b:items)if(b)gst_buffer_unref(b);}
+  flResult prepare(GstBufferPool*pool,const flSessionConfig&config,unsigned capacity){
+  if(attempted)return FL_INVALID;attempted=true;
+  if(!GST_IS_BUFFER_POOL(pool)||!gst_buffer_pool_is_active(pool)||capacity<2||
+     capacity>FL_MAX_POOL_SIZE||flSessionValidate(&config)!=FL_SESSION_OK)return FL_INVALID;
   GstBufferPoolAcquireParams nonblocking{};nonblocking.flags=GST_BUFFER_POOL_ACQUIRE_FLAG_DONTWAIT;
   for(unsigned n=0;n<capacity;++n){
-    if(gst_buffer_pool_acquire_buffer(pool,&reservations.items[n],&nonblocking)!=GST_FLOW_OK)return FL_BUSY;
-    auto*b=reservations.items[n];
+    if(gst_buffer_pool_acquire_buffer(pool,&items[n],&nonblocking)!=GST_FLOW_OK)return FL_BUSY;
+    auto*b=items[n];
     if(!b||gst_buffer_n_memory(b)!=1)return FL_FORMAT_UNSUPPORTED;
     auto*m=gst_buffer_peek_memory(b,0);
     if(!gst_is_d3d11_memory(m))return FL_FORMAT_UNSUPPORTED;
@@ -58,6 +62,17 @@ inline flResult createNativeD3D11RelayPool(GstBufferPool* pool,const char* name,
   flChannelInfo now{};auto result=flQuery(owner->channel,&now);
   if(result!=FL_OK)return result;
   if(now.generation!=first.generation)return FL_DISCONNECTED;
+  return FL_OK;
+  }
+};
+inline flResult createNativeD3D11RelayPool(GstBufferPool* pool,const char* name,
+    const flSessionConfig& config,unsigned capacity,bool cpuAccess,
+    flChannel** reader,flChannel** writer){
+  if(reader)*reader=nullptr;if(writer)*writer=nullptr;
+  if(!reader||!writer||reader==writer||!name||!*name)return FL_INVALID;
+  NativeD3D11RelayPoolExport reservations;
+  auto result=reservations.prepare(pool,config,capacity);if(result!=FL_OK)return result;
+  const auto&first=reservations.first;const auto&handles=reservations.handles;
   flChannel*consumer=nullptr;flChannel*producer=nullptr;
   result=flCreateChannelFromD3D11Handles(name,config.video.width,config.video.height,static_cast<flFormat>(config.video.format),capacity,
       FL_DEFER_RELEASE|FL_REQUIRE_FRAME_METADATA|(cpuAccess?FL_MAP_CPU:0),first.adapterLUID,handles.data(),&consumer);

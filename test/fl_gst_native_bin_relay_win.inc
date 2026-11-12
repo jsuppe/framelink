@@ -6,6 +6,7 @@
 #include "../samples/session_video_relay_events.h"
 #include "../samples/session_relay_supervisor.h"
 #include "../samples/native_d3d11_relay_pool.h"
+#include "../samples/native_d3d11_relay_transfer.h"
 #include <mutex>
 // A bounded observation queue: callbacks never perform network writes.
 struct BinRelayEvents {

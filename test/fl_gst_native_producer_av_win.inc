@@ -274,7 +274,39 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
    CHECK(!leaseReader&&!leaseWriter);
    puts("relay pool setup: held-slot BUSY is bounded; geometry/capacity mismatch rejects; all temporary reservations returned");
   }
+  if(mode==11){
+   auto pipeName=std::wstring(L"\\\\.\\pipe\\framelink-cpu-native-relay-")+std::to_wstring(g_get_monotonic_time());
+   flnative::Handle cancellation;cancellation.value=CreateEventW(nullptr,TRUE,FALSE,nullptr);CHECK(cancellation.value);
+   guint8 secret[32]{};secret[0]=93;auto*key=g_bytes_new(secret,sizeof secret);
+   auto ring=name+"-lease";
+   // Every negative must return no channels and all source reservations. The
+   // positive immediately following is also the exact native media/lease oracle.
+   for(unsigned negative=0;negative<4;++negative){
+    auto bad=cfg;if(negative==1)++bad.generation;
+    guint8 wrong[32]{};wrong[0]=94;auto*wrongKey=g_bytes_new(wrong,sizeof wrong);
+    flResult received=FL_INTERNAL;flChannel*reader=nullptr,*writer=nullptr;
+    auto endpoint=pipeName+L"-negative-"+std::to_wstring(negative);
+    auto before=g_get_monotonic_time();
+    if(negative==3)CHECK(SetEvent(cancellation.value));
+    std::thread peer([&]{received=flsample::createAuthenticatedNativeD3D11RelayPool(false,nullptr,
+      endpoint,ring.c_str(),bad,2,negative!=2,negative==0?wrongKey:key,cancellation.value,500,&reader);});
+    auto sent=flsample::createAuthenticatedNativeD3D11RelayPool(true,pool,endpoint,ring.c_str(),cfg,
+      2,true,key,cancellation.value,500,&writer);
+    peer.join();CHECK(sent!=FL_OK&&received!=FL_OK&&!reader&&!writer);
+    CHECK(g_get_monotonic_time()-before<1500000);CHECK(ResetEvent(cancellation.value));
+    g_bytes_unref(wrongKey);
+   }
+   flResult received=FL_INTERNAL;
+   std::thread peer([&]{received=flsample::createAuthenticatedNativeD3D11RelayPool(false,nullptr,
+     pipeName,ring.c_str(),cfg,2,true,key,cancellation.value,5000,&leaseReader);});
+   auto sent=flsample::createAuthenticatedNativeD3D11RelayPool(true,pool,pipeName,ring.c_str(),cfg,
+      2,true,key,cancellation.value,5000,&leaseWriter);
+   peer.join();g_bytes_unref(key);
+   CHECK(sent==FL_OK&&received==FL_OK&&leaseReader&&leaseWriter);
+   puts("authenticated native pool: wrong key/generation/access and cancellation rejected; same-allocation imported ring attached");
+  }else{
   CHECK(flsample::createNativeD3D11RelayPool(pool,(name+"-lease").c_str(),cfg,2,true,&leaseReader,&leaseWriter)==FL_OK);
+  }
   leaseAdapter.reset(new flsample::NativeGstD3D11Relay(leaseWriter,cfg.generation));CHECK(leaseAdapter->initialize()==FL_OK);
   if(binRelay)binAdapter.reset(new BrokerNativeBinRelay(r,cfg,policy,leaseReader,*leaseAdapter));
   if(mode==7||mode==6||mode==8||mode==9){CHECK(binRelay);binAdapter->observeEvents(vo,mode==7);}
