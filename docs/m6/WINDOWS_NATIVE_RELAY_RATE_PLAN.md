@@ -1,6 +1,7 @@
 # Authenticated Windows native relay rate qualification
 
-Status: **test-harness implementation in progress, no new runtime result**.
+Status: **test-harness implemented/reviewed;25 analyzer cases pass; Windows build/runtime pending**.
+See [local evidence](windows-native-relay-rate-harness/README.md).
 Owner: Evelyn; native `ledger_review` owns the new harness/analyzer, root owns
 review and evidence integration. Windows execution remains exclusive and must
 wait for the current shared-CPU campaign to release its lane.
