@@ -1,0 +1,11 @@
+** WARNING: connection is not using a post-quantum key exchange algorithm.
+** This session may be vulnerable to "store now, decrypt later" attacks.
+** The server may need to be upgraded. See https://openssh.com/pq.html
+native AV mode 4 local=1
+native AV: coordinated session not ready or cancelled <win-home>\dev\framelink-m6-windows-7b8a274\gst\gstframelink.cpp(537): sinkRenderImpl (): /GstPipeline:pipeline0/GstFrameLinkAvSink:transport/GstFrameLinkSink:video
+native AV mode 5 local=1
+native AV: audio peer closed before GDP EOS <win-home>\dev\framelink-m6-windows-7b8a274\gst\gstframelinkaudiosrc.cpp(66): readChunkImpl (): /GstPipeline:pipeline3/GstFrameLinkAvSrc:transport/GstFrameLinkAudioSrc:audio/FlAudioReader:flaudioreader1
+automatic native bin receiver cancellation: error in 110.036ms, no source EOS, native memories retained
+native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+automatic native bin producer cancellation: error in 0.307ms, no source EOS, native memories retained
+native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass

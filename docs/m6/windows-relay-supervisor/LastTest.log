@@ -1,0 +1,174 @@
+Start testing: Nov 12 00:16 Eastern Standard Time
+----------------------------------------------------------
+44/151 Testing: gst_relay_supervisor_controls_win
+44/151 Test: gst_relay_supervisor_controls_win
+Command: "<win-home>/dev/framelink-m6-windows-7b8a274/build/Release/fl_gst_native_producer_win.exe" "<win-home>/dev/framelink-m6-windows-7b8a274/build/Release/gstframelink.dll" "--relay-supervisor-controls"
+Directory: <win-home>/dev/framelink-m6-windows-7b8a274/build
+"gst_relay_supervisor_controls_win" start time: Nov 12 00:16 Eastern Standard Time
+Output:
+----------------------------------------------------------
+supervisor controls: unrelated/cancelled graph rejects without propagation; stopped-before-start rejects; stop joins without cancellation; single-use lifecycle
+<end of output>
+Test time =   0.08 sec
+----------------------------------------------------------
+Test Passed.
+"gst_relay_supervisor_controls_win" end time: Nov 12 00:16 Eastern Standard Time
+"gst_relay_supervisor_controls_win" time elapsed: 00:00:00
+----------------------------------------------------------
+
+45/151 Testing: gst_native_bin_relay_supervised_downstream_win
+45/151 Test: gst_native_bin_relay_supervised_downstream_win
+Command: "<win-home>/dev/framelink-m6-windows-7b8a274/build/Release/fl_gst_native_producer_win.exe" "<win-home>/dev/framelink-m6-windows-7b8a274/build/Release/gstframelink.dll" "--bin-relay-supervised-downstream"
+Directory: <win-home>/dev/framelink-m6-windows-7b8a274/build
+"gst_native_bin_relay_supervised_downstream_win" start time: Nov 12 00:16 Eastern Standard Time
+Output:
+----------------------------------------------------------
+native AV mode 8 local=0
+bin relay n=0 collect=0 pending=1
+bin relay n=1 collect=0 pending=1
+bin relay n=2 collect=0 pending=1
+bin relay n=3 collect=0 pending=1
+bin relay n=4 collect=0 pending=1
+bin relay n=5 collect=0 pending=1
+bin relay n=6 collect=0 pending=1
+bin relay n=7 collect=0 pending=1
+broker bin downstream cancellation: 98.440ms, automatic idle supervisor propagation, no END/EOS, final reader still held
+broker bin original producer observes cancellation: 0.062ms, no EOS
+broker native bin relay: 8 frames over two original allocations / 384 PCM frames; identity intermediate mapping, final +5ms and exact 37ms A/V, authenticated session; final reader retained beyond upstream and downstream bin teardown
+native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+<end of output>
+Test time =   0.67 sec
+----------------------------------------------------------
+Test Passed.
+"gst_native_bin_relay_supervised_downstream_win" end time: Nov 12 00:16 Eastern Standard Time
+"gst_native_bin_relay_supervised_downstream_win" time elapsed: 00:00:00
+----------------------------------------------------------
+
+46/151 Testing: gst_native_bin_relay_supervised_upstream_win
+46/151 Test: gst_native_bin_relay_supervised_upstream_win
+Command: "<win-home>/dev/framelink-m6-windows-7b8a274/build/Release/fl_gst_native_producer_win.exe" "<win-home>/dev/framelink-m6-windows-7b8a274/build/Release/gstframelink.dll" "--bin-relay-supervised-upstream"
+Directory: <win-home>/dev/framelink-m6-windows-7b8a274/build
+"gst_native_bin_relay_supervised_upstream_win" start time: Nov 12 00:16 Eastern Standard Time
+Output:
+----------------------------------------------------------
+native AV mode 9 local=0
+bin relay n=0 collect=0 pending=1
+bin relay n=1 collect=0 pending=1
+bin relay n=2 collect=0 pending=1
+bin relay n=3 collect=0 pending=1
+bin relay n=4 collect=0 pending=1
+bin relay n=5 collect=0 pending=1
+bin relay n=6 collect=0 pending=1
+bin relay n=7 collect=0 pending=1
+broker bin upstream cancellation: 5.801ms, automatic idle supervisor propagation, no END/EOS, final reader still held
+broker bin original producer observes cancellation: 0.009ms, no EOS
+broker native bin relay: 8 frames over two original allocations / 384 PCM frames; identity intermediate mapping, final +5ms and exact 37ms A/V, authenticated session; final reader retained beyond upstream and downstream bin teardown
+native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+<end of output>
+Test time =   0.66 sec
+----------------------------------------------------------
+Test Passed.
+"gst_native_bin_relay_supervised_upstream_win" end time: Nov 12 00:16 Eastern Standard Time
+"gst_native_bin_relay_supervised_upstream_win" time elapsed: 00:00:00
+----------------------------------------------------------
+
+47/151 Testing: gst_native_bin_relay_events_win
+47/151 Test: gst_native_bin_relay_events_win
+Command: "<win-home>/dev/framelink-m6-windows-7b8a274/build/Release/fl_gst_native_producer_win.exe" "<win-home>/dev/framelink-m6-windows-7b8a274/build/Release/gstframelink.dll" "--bin-relay-events-diagnostic"
+Directory: <win-home>/dev/framelink-m6-windows-7b8a274/build
+"gst_native_bin_relay_events_win" start time: Nov 12 00:16 Eastern Standard Time
+Output:
+----------------------------------------------------------
+native AV mode 7 local=0
+bin relay n=0 collect=0 pending=1
+bin relay n=1 collect=0 pending=1
+bin relay n=2 collect=0 pending=1
+bin relay n=3 collect=0 pending=1
+bin relay n=4 collect=0 pending=1
+bin relay n=5 collect=0 pending=1
+bin relay n=6 collect=0 pending=1
+bin relay n=7 collect=0 pending=1
+broker bin serialized GAP: exact 4,4,8 frame boundaries, +5ms mapping, durations 250/750/500us, DISCONT preserved, trailing GAP before EOS
+broker native bin relay: 8 frames over two original allocations / 384 PCM frames; identity intermediate mapping, final +5ms and exact 37ms A/V, authenticated session; final reader retained beyond upstream and downstream bin teardown
+native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+<end of output>
+Test time =   0.77 sec
+----------------------------------------------------------
+Test Passed.
+"gst_native_bin_relay_events_win" end time: Nov 12 00:16 Eastern Standard Time
+"gst_native_bin_relay_events_win" time elapsed: 00:00:00
+----------------------------------------------------------
+
+48/151 Testing: gst_native_bin_relay_cancel_win
+48/151 Test: gst_native_bin_relay_cancel_win
+Command: "<win-home>/dev/framelink-m6-windows-7b8a274/build/Release/fl_gst_native_producer_win.exe" "<win-home>/dev/framelink-m6-windows-7b8a274/build/Release/gstframelink.dll" "--bin-relay-cancel-diagnostic"
+Directory: <win-home>/dev/framelink-m6-windows-7b8a274/build
+"gst_native_bin_relay_cancel_win" start time: Nov 12 00:16 Eastern Standard Time
+Output:
+----------------------------------------------------------
+native AV mode 6 local=0
+bin relay n=0 collect=0 pending=1
+bin relay n=1 collect=0 pending=1
+bin relay n=2 collect=0 pending=1
+bin relay n=3 collect=0 pending=1
+bin relay n=4 collect=0 pending=1
+bin relay n=5 collect=0 pending=1
+bin relay n=6 collect=0 pending=1
+bin relay n=7 collect=0 pending=1
+broker bin downstream cancellation: 109.968ms, explicit broker propagation, no END/EOS, final reader still held
+broker bin original producer observes cancellation: 0.045ms, no EOS
+broker native bin relay: 8 frames over two original allocations / 384 PCM frames; identity intermediate mapping, final +5ms and exact 37ms A/V, authenticated session; final reader retained beyond upstream and downstream bin teardown
+native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+<end of output>
+Test time =   0.78 sec
+----------------------------------------------------------
+Test Passed.
+"gst_native_bin_relay_cancel_win" end time: Nov 12 00:16 Eastern Standard Time
+"gst_native_bin_relay_cancel_win" time elapsed: 00:00:00
+----------------------------------------------------------
+
+49/151 Testing: gst_native_bin_relay_win
+49/151 Test: gst_native_bin_relay_win
+Command: "<win-home>/dev/framelink-m6-windows-7b8a274/build/Release/fl_gst_native_producer_win.exe" "<win-home>/dev/framelink-m6-windows-7b8a274/build/Release/gstframelink.dll" "--bin-relay-diagnostic"
+Directory: <win-home>/dev/framelink-m6-windows-7b8a274/build
+"gst_native_bin_relay_win" start time: Nov 12 00:16 Eastern Standard Time
+Output:
+----------------------------------------------------------
+native AV mode 0 local=0
+bin relay n=0 collect=0 pending=1
+bin relay n=1 collect=0 pending=1
+bin relay n=2 collect=0 pending=1
+bin relay n=3 collect=0 pending=1
+bin relay n=4 collect=0 pending=1
+bin relay n=5 collect=0 pending=1
+bin relay n=6 collect=0 pending=1
+bin relay n=7 collect=0 pending=1
+broker native bin relay: 8 frames over two original allocations / 384 PCM frames; identity intermediate mapping, final +5ms and exact 37ms A/V, authenticated session; final reader retained beyond upstream and downstream bin teardown
+native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+<end of output>
+Test time =   0.77 sec
+----------------------------------------------------------
+Test Passed.
+"gst_native_bin_relay_win" end time: Nov 12 00:16 Eastern Standard Time
+"gst_native_bin_relay_win" time elapsed: 00:00:00
+----------------------------------------------------------
+
+51/151 Testing: gst_automatic_relay_negative_win
+51/151 Test: gst_automatic_relay_negative_win
+Command: "<win-home>/dev/framelink-m6-windows-7b8a274/build/Release/fl_gst_native_producer_win.exe" "<win-home>/dev/framelink-m6-windows-7b8a274/build/Release/gstframelink.dll" "--automatic-relay-negative"
+Directory: <win-home>/dev/framelink-m6-windows-7b8a274/build
+"gst_automatic_relay_negative_win" start time: Nov 12 00:16 Eastern Standard Time
+Output:
+----------------------------------------------------------
+native AV mode 0 local=1
+automatic second hop: own reservation pixels/PCM/37ms passed; first-hop reader rejected 0.055ms (native sink requires its own reserved allocation and valid metadata; no copy fallback)
+native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+<end of output>
+Test time =   0.94 sec
+----------------------------------------------------------
+Test Passed.
+"gst_automatic_relay_negative_win" end time: Nov 12 00:16 Eastern Standard Time
+"gst_automatic_relay_negative_win" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Nov 12 00:16 Eastern Standard Time

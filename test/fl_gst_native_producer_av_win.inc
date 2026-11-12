@@ -243,7 +243,8 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
   for(auto*b:reservations)gst_buffer_unref(b);
   leaseAdapter.reset(new flsample::NativeGstD3D11Relay(leaseWriter,cfg.generation));CHECK(leaseAdapter->initialize()==FL_OK);
   if(binRelay)binAdapter.reset(new BrokerNativeBinRelay(r,cfg,policy,leaseReader,*leaseAdapter));
-  if(mode==7||mode==6){CHECK(binRelay);binAdapter->observeEvents(vo,mode==7);}
+  if(mode==7||mode==6||mode==8||mode==9){CHECK(binRelay);binAdapter->observeEvents(vo,mode==7);}
+  if(mode==7||mode==8||mode==9)binAdapter->startSupervision();
  }
  GstMemory* retainedReceiver=nullptr;
  // A separately allocated second hop cannot silently treat a first-hop reader
@@ -429,8 +430,8 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
   relayProducer.reset();flClose(relayConsumer);
   printf("relay contract: %u imported first-hop buffers rejected by independent second-hop pool; no publication, no reservation leak; first-hop pixels/PCM/timing intact\n",count);
  }
- if(mode==6){
-  CHECK(binRelay);binAdapter->cancelDownstream();
+ if(mode==6||mode==8||mode==9){
+  CHECK(binRelay);binAdapter->cancelDownstream(mode!=6,mode==9?tx:nullptr);
   // Observe cancellation at the actual original producer, while its last
   // native allocation remains held by the final downstream reader.
   flSessionConfig snapshot{};auto began=g_get_monotonic_time();
@@ -469,7 +470,7 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
   CHECK(gst_app_src_end_of_stream(GST_APP_SRC(mode%2?ai:vi))==GST_FLOW_OK);avTerminal(tx,GST_MESSAGE_EOS);avTerminal(rx,GST_MESSAGE_EOS);
   guint64 frames=999;gint64 last=999;CHECK(fl_gst_session_wait_video_eos(r,cfg.generation,0,&frames,&last)==FL_GST_SESSION_READY&&frames==count&&last==(count?gint64(finalPts):-1LL));
  }
- if(binRelay&&mode!=6)binAdapter->terminal();
+ if(binRelay&&mode!=6&&mode!=8&&mode!=9)binAdapter->terminal();
  if(decode){CHECK(!gst_app_sink_try_pull_sample(GST_APP_SINK(decoded),5*GST_SECOND));CHECK(gst_app_sink_is_eos(GST_APP_SINK(decoded)));avTerminal(decode,GST_MESSAGE_EOS);
   gst_element_set_state(decode,GST_STATE_NULL);gst_object_unref(converter);gst_object_unref(decoded);gst_object_unref(decode);
   printf("real decoder AV: %u upstream GPU color/scale transforms, source PTS origin=%llu explicitly normalized, exact pixels/PCM/37ms, no raw decoder zero-copy claim\n",count,static_cast<unsigned long long>(decoderOrigin));}
