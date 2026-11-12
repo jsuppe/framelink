@@ -1,5 +1,18 @@
 # FrameLink + vkrender — executable roadmap checklist
 
+## Approved M6 Windows readiness scope — 2026-11-12 18:14 EST
+
+Jon approved readiness for explicitly named Windows configurations, not universal
+Windows support. This supersedes older broad M6 completion requirements below;
+historical results and failed gates remain evidence, not silently passed tasks.
+Authoritative reviewable scope/checklist: [M6 Windows readiness](m6/M6_WINDOWS_READINESS.md).
+M6 remains OPEN; M7 maintenance hold remains. Correct media/timeline/ownership,
+fault handling, validated bounded lifecycle and final exact-revision integrated/API
+compatibility gates remain mandatory. No new budget, D2/D3 default or device-owner
+API approval is inferred. Failed native BGRA1080 and decoder4K are NOT QUALIFIED
+and excluded from initial advertised support. One task and one executor, serially.
+
+
 Updated 2026-11-04. This is the checkable execution view of
 [the milestone roadmap](REMAINING_ROADMAP.md); the detailed acceptance contracts
 remain authoritative. Checked means implemented, reviewed and validated within
@@ -7,7 +20,7 @@ the stated scope—not universal hardware support or physical-output qualificati
 
 Remaining execution order: **M6 → M7**, one task at a time. No concurrent
 implementation/review/validation streams. Finish the current milestone before
-starting the next. Hourly reporting is not an implementation executor.
+starting the next. Automated status reporting remains cancelled.
 
 ## Completed milestones
 

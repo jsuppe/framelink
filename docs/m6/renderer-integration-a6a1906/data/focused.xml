@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="(empty)"
+	tests="4"
+	failures="0"
+	disabled="0"
+	skipped="0"
+	hostname=""
+	time="0"
+	timestamp="2026-11-12T18:08:49"
+	>
+	<testcase name="av_schedule" classname="av_schedule" time="0.0235819" status="run">
+		<properties/>
+		<system-out></system-out>
+	</testcase>
+	<testcase name="av_clock_contract" classname="av_clock_contract" time="0.136054" status="run">
+		<properties/>
+		<system-out>Independent segment/shared-epoch/latency/clock-drift/late-boundary/pause policy fixtures passed; physical playback not tested
+</system-out>
+	</testcase>
+	<testcase name="headless_pacer" classname="headless_pacer" time="0.0205841" status="run">
+		<properties/>
+		<system-out></system-out>
+	</testcase>
+	<testcase name="nv12_cpu" classname="nv12_cpu" time="0.0212727" status="run">
+		<properties/>
+		<system-out></system-out>
+	</testcase>
+</testsuite>

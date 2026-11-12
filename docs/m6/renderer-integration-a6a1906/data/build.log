@@ -1,0 +1,196 @@
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  1>Checking Build System
+  Building Custom Rule <win-home>/dev/m6-renderer9f74b9d-framelinka50841a-20261112/build/_deps/glslang-src/glslang/CMakeLists.txt
+  Building Custom Rule <win-home>/dev/m6-renderer9f74b9d-framelinka50841a-20261112/build/_deps/glslang-src/glslang/CMakeLists.txt
+  cmake_pch.cxx
+  ResourceLimits.cpp
+  resource_limits_c.cpp
+  Generating Code...
+  glslang-default-resource-limits.vcxproj -> <win-home>\dev\m6-renderer9f74b9d-framelinka50841a-20261112\build\_deps\glslang-build\glslang\Release\glslang-default-resource-limits.lib
+  glslang_c_interface.cpp
+  CodeGen.cpp
+  Link.cpp
+  ossource.cpp
+  glslang_tab.cpp
+  attribute.cpp
+  Constant.cpp
+  iomapper.cpp
+  InfoSink.cpp
+  Initialize.cpp
+  IntermTraverse.cpp
+  Intermediate.cpp
+  ParseContextBase.cpp
+  ParseHelper.cpp
+  PoolAlloc.cpp
+  RemoveTree.cpp
+  Scan.cpp
+  ShaderLang.cpp
+  SpirvIntrinsics.cpp
+  SymbolTable.cpp
+  Generating Code...
+  Compiling...
+  Versions.cpp
+  intermOut.cpp
+  limits.cpp
+  linkValidate.cpp
+  parseConst.cpp
+  reflection.cpp
+  Pp.cpp
+  PpAtom.cpp
+  PpContext.cpp
+  PpScanner.cpp
+  PpTokens.cpp
+  propagateNoContraction.cpp
+  GlslangToSpv.cpp
+  InReadableOrder.cpp
+  Logger.cpp
+  SpvBuilder.cpp
+  SpvPostProcess.cpp
+  doc.cpp
+  SpvTools.cpp
+  disassemble.cpp
+  Generating Code...
+  Compiling...
+  spirv_c_interface.cpp
+  Generating Code...
+  glslang.vcxproj -> <win-home>\dev\m6-renderer9f74b9d-framelinka50841a-20261112\build\_deps\glslang-build\glslang\Release\glslang.lib
+  Generating <win-home>/dev/m6-renderer9f74b9d-framelinka50841a-20261112/build/include/glslang/glsl_intrinsic_header.h
+  Building Custom Rule <win-home>/dev/m6-renderer9f74b9d-framelinka50841a-20261112/build/_deps/glslang-src/StandAlone/CMakeLists.txt
+  StandAlone.cpp
+  glslang-standalone.vcxproj -> <win-home>\dev\m6-renderer9f74b9d-framelinka50841a-20261112\build\_deps\glslang-build\StandAlone\Release\glslang.exe
+  Compiling cube.vert -> SPIR-V
+  <win-home>/dev/m6-renderer9f74b9d-framelinka50841a-20261112/renderer/renderer/shaders/cube.vert
+  Compiling fullscreen.vert -> SPIR-V
+  <win-home>/dev/m6-renderer9f74b9d-framelinka50841a-20261112/renderer/renderer/shaders/fullscreen.vert
+  Compiling nv12_cube.frag -> SPIR-V
+  <win-home>/dev/m6-renderer9f74b9d-framelinka50841a-20261112/renderer/renderer/shaders/nv12_cube.frag
+  Compiling nv12_planar.frag -> SPIR-V
+  <win-home>/dev/m6-renderer9f74b9d-framelinka50841a-20261112/renderer/renderer/shaders/nv12_planar.frag
+  Compiling vaporwave.frag -> SPIR-V
+  <win-home>/dev/m6-renderer9f74b9d-framelinka50841a-20261112/renderer/renderer/shaders/vaporwave.frag
+  Compiling video_ycbcr.frag -> SPIR-V
+  <win-home>/dev/m6-renderer9f74b9d-framelinka50841a-20261112/renderer/renderer/shaders/video_ycbcr.frag
+  Building Custom Rule <win-home>/dev/m6-renderer9f74b9d-framelinka50841a-20261112/renderer/CMakeLists.txt
+  Building Custom Rule <win-home>/dev/m6-renderer9f74b9d-framelinka50841a-20261112/framelink/CMakeLists.txt
+  Building Custom Rule <win-home>/dev/m6-renderer9f74b9d-framelinka50841a-20261112/build/_deps/glfw-src/src/CMakeLists.txt
+  framelink_win.cpp
+  Building Custom Rule <win-home>/dev/m6-renderer9f74b9d-framelinka50841a-20261112/renderer/CMakeLists.txt
+  context.c
+  ipc_win32.cpp
+  init.c
+  input.c
+  monitor.c
+  platform.c
+  vulkan.c
+  window.c
+  egl_context.c
+  osmesa_context.c
+  framelink_slots.cpp
+  null_init.c
+  null_monitor.c
+  fl_ipc_win32.cpp
+  null_window.c
+  null_joystick.c
+  win32_module.c
+  vkr_common.vcxproj -> <win-home>\dev\m6-renderer9f74b9d-framelinka50841a-20261112\build\Release\vkr_common.lib
+  Building Custom Rule <win-home>/dev/m6-renderer9f74b9d-framelinka50841a-20261112/build/_deps/volk-src/CMakeLists.txt
+  win32_time.c
+  volk.c
+  win32_thread.c
+  fl_trace.cpp
+  win32_init.c
+  volk.vcxproj -> <win-home>\dev\m6-renderer9f74b9d-framelinka50841a-20261112\build\_deps\volk-build\Release\volk.lib
+  win32_joystick.c
+  framelink_session.cpp
+  win32_monitor.c
+  framelink_memory.cpp
+  framelink_shared_cpu.cpp
+  win32_window.c
+  framelink_shared_cpu_channel.cpp
+  Generating Code...
+  Compiling...
+  wgl_context.c
+  Generating Code...
+  Generating Code...
+  glfw.vcxproj -> <win-home>\dev\m6-renderer9f74b9d-framelinka50841a-20261112\build\_deps\glfw-build\src\Release\glfw3.lib
+     Creating library <win-home>/dev/m6-renderer9f74b9d-framelinka50841a-20261112/build/framelink/Release/framelink.lib and object <win-home>/dev/m6-renderer9f74b9d-framelinka50841a-20261112/build/framelink/Release/framelink.exp
+  framelink.vcxproj -> <win-home>\dev\m6-renderer9f74b9d-framelinka50841a-20261112\build\Release\framelink.dll
+  Building Custom Rule <win-home>/dev/m6-renderer9f74b9d-framelinka50841a-20261112/framelink/CMakeLists.txt
+  av_apps.cpp
+  av_rendezvous.cpp
+  av_auth.cpp
+  av_memory_agreement.cpp
+  Generating Code...
+  framelink_av_playback.vcxproj -> <win-home>\dev\m6-renderer9f74b9d-framelinka50841a-20261112\build\framelink\Release\framelink_av_playback.lib
+  Building Custom Rule <win-home>/dev/m6-renderer9f74b9d-framelinka50841a-20261112/renderer/CMakeLists.txt
+  main.cpp
+  vk_context.cpp
+  external_video_image.cpp
+  video_pass.cpp
+  background_pass.cpp
+  nv12_output.cpp
+  portable_output.cpp
+  portable_input.cpp
+  dump_util.cpp
+  scene_host.cpp
+  control_api.cpp
+  win_service.cpp
+  Generating Code...
+  civetweb.c
+  vkrenderer.vcxproj -> <win-home>\dev\m6-renderer9f74b9d-framelinka50841a-20261112\build\Release\vkrenderer.exe
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <win-home>\dev\m6-renderer9f74b9d-framelinka50841a-20261112\build\Release\framelink.dll
+  Building Custom Rule <win-home>/dev/m6-renderer9f74b9d-framelinka50841a-20261112/framelink/CMakeLists.txt
+  framelink_session_context.cpp
+  framelink_session_transport.cpp
+  av_auth.cpp
+  av_rendezvous.cpp
+  Generating Code...
+     Creating library <win-home>/dev/m6-renderer9f74b9d-framelinka50841a-20261112/build/framelink/Release/framelink_gst_session.lib and object <win-home>/dev/m6-renderer9f74b9d-framelinka50841a-20261112/build/framelink/Release/framelink_gst_session.exp
+  framelink_gst_session.vcxproj -> <win-home>\dev\m6-renderer9f74b9d-framelinka50841a-20261112\build\framelink\Release\framelink_gst_session.dll
+  Building Custom Rule <win-home>/dev/m6-renderer9f74b9d-framelinka50841a-20261112/framelink/CMakeLists.txt
+  gstframelink.cpp
+  The d3d11 library from gst-plugins-bad is unstable API and may change in future.
+  You can define GST_USE_UNSTABLE_API to avoid this warning.
+  gstframelinkaudio.cpp
+  gstframelinkaudiosrc.cpp
+  fl_gst_audio_startup.cpp
+  gstframelinkavsink.cpp
+  gstframelinkavsrc.cpp
+  Generating Code...
+     Creating library <win-home>/dev/m6-renderer9f74b9d-framelinka50841a-20261112/build/framelink/Release/gstframelink.lib and object <win-home>/dev/m6-renderer9f74b9d-framelinka50841a-20261112/build/framelink/Release/gstframelink.exp
+  gstframelink.vcxproj -> <win-home>\dev\m6-renderer9f74b9d-framelinka50841a-20261112\build\framelink\Release\gstframelink.dll
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <win-home>\dev\m6-renderer9f74b9d-framelinka50841a-20261112\build\Release\framelink.dll
+  Building Custom Rule <win-home>/dev/m6-renderer9f74b9d-framelinka50841a-20261112/framelink/CMakeLists.txt
+  av_apps.cpp
+  av_rendezvous.cpp
+  av_auth.cpp
+  av_memory_agreement.cpp
+  Generating Code...
+  framelink_av_producer.vcxproj -> <win-home>\dev\m6-renderer9f74b9d-framelinka50841a-20261112\build\framelink\Release\framelink_av_producer.exe
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  Building Custom Rule <win-home>/dev/m6-renderer9f74b9d-framelinka50841a-20261112/renderer/CMakeLists.txt
+  av_schedule_test.cpp
+  vkr_av_schedule_test.vcxproj -> <win-home>\dev\m6-renderer9f74b9d-framelinka50841a-20261112\build\Release\vkr_av_schedule_test.exe
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <win-home>\dev\m6-renderer9f74b9d-framelinka50841a-20261112\build\Release\framelink.dll
+  framelink_av_playback.vcxproj -> <win-home>\dev\m6-renderer9f74b9d-framelinka50841a-20261112\build\framelink\Release\framelink_av_playback.lib
+  Building Custom Rule <win-home>/dev/m6-renderer9f74b9d-framelinka50841a-20261112/renderer/CMakeLists.txt
+  av_clock_contract_test.cpp
+  vkr_av_clock_contract_test.vcxproj -> <win-home>\dev\m6-renderer9f74b9d-framelinka50841a-20261112\build\Release\vkr_av_clock_contract_test.exe
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  Building Custom Rule <win-home>/dev/m6-renderer9f74b9d-framelinka50841a-20261112/renderer/CMakeLists.txt
+  headless_pacer_test.cpp
+  vkr_headless_pacer_test.vcxproj -> <win-home>\dev\m6-renderer9f74b9d-framelinka50841a-20261112\build\Release\vkr_headless_pacer_test.exe
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  Building Custom Rule <win-home>/dev/m6-renderer9f74b9d-framelinka50841a-20261112/renderer/CMakeLists.txt
+  nv12_cpu_test.cpp
+  vkr_nv12_cpu_test.vcxproj -> <win-home>\dev\m6-renderer9f74b9d-framelinka50841a-20261112\build\Release\vkr_nv12_cpu_test.exe

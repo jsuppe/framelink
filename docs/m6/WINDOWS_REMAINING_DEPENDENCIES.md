@@ -1,5 +1,18 @@
 # Windows remaining execution dependencies — 2026-11-12
 
+## Approved M6 Windows readiness scope — 2026-11-12 18:14 EST
+
+Jon approved readiness for explicitly named Windows configurations, not universal
+Windows support. This supersedes older broad M6 completion requirements below;
+historical results and failed gates remain evidence, not silently passed tasks.
+Authoritative reviewable scope/checklist: [M6 Windows readiness](M6_WINDOWS_READINESS.md).
+M6 remains OPEN; M7 maintenance hold remains. Correct media/timeline/ownership,
+fault handling, validated bounded lifecycle and final exact-revision integrated/API
+compatibility gates remain mandatory. No new budget, D2/D3 default or device-owner
+API approval is inferred. Failed native BGRA1080 and decoder4K are NOT QUALIFIED
+and excluded from initial advertised support. One task and one executor, serially.
+
+
 After collection of the missing shared-CPU BGRA1080 cell, no runtime is active.
 All four frozen461584b shared-CPU cells are collected passes. Exacta50841a178/178,
 128exports and3 unchanged clients are already collected; do not repeat them.

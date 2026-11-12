@@ -1,0 +1,43 @@
+{
+  "state": "built",
+  "renderer": "9f74b9d1fae7e13d520bc5d4ae9827ac568704f6",
+  "framelink": "a50841aad44fbc9431234a4f326bad036d193bf5",
+  "commands": [
+    [
+      "cmake",
+      "-S",
+      "<win-home>\\dev\\m6-renderer9f74b9d-framelinka50841a-20261112\\renderer",
+      "-B",
+      "<win-home>\\dev\\m6-renderer9f74b9d-framelinka50841a-20261112\\build",
+      "-A",
+      "x64",
+      "-DFRAMELINK_DIR=<win-home>\\dev\\m6-renderer9f74b9d-framelinka50841a-20261112\\framelink",
+      "-DFRAMELINK_BUILD_GST=ON",
+      "-DFRAMELINK_BUILD_SAMPLES=ON",
+      "-DFRAMELINK_BUILD_TESTS=OFF"
+    ],
+    [
+      "cmake",
+      "--build",
+      "<win-home>\\dev\\m6-renderer9f74b9d-framelinka50841a-20261112\\build",
+      "--config",
+      "Release",
+      "--target",
+      "vkrenderer",
+      "gstframelink",
+      "framelink_av_producer",
+      "vkr_av_schedule_test",
+      "vkr_av_clock_contract_test",
+      "vkr_headless_pacer_test",
+      "vkr_nv12_cpu_test",
+      "--",
+      "/nr:false",
+      "/m:2"
+    ]
+  ],
+  "renderer_verified_files": 1624,
+  "framelink_verified_files": 7796,
+  "configure_exit": 0,
+  "build_exit": 0,
+  "ended_utc": "2026-11-12T23:07:46.436988+00:00"
+}

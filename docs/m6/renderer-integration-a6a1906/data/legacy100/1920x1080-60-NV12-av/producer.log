@@ -1,0 +1,135 @@
+0:00:00.000534000      35704      55676 INFO      GST_PLUGIN_LOADING gstplugin.c:332:_priv_gst_plugin_initialize: registering 0 static plugins
+0:00:00.000801300      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:233:gst_plugin_register_static: attempting to load static plugin "staticelements" now...
+0:00:00.000945200      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:526:gst_plugin_register_func: plugin "(NULL)" looks good
+0:00:00.001094800      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:553:gst_plugin_register_func: plugin "(NULL)" initialised
+0:00:00.001203200      35704      55676 INFO      GST_PLUGIN_LOADING gstplugin.c:236:gst_plugin_register_static: registered static plugin "staticelements"
+0:00:00.001377200      35704      55676 INFO      GST_PLUGIN_LOADING gstplugin.c:238:gst_plugin_register_static: added static plugin "staticelements", result: 1
+0:00:00.023910900      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:1824:gst_plugin_ext_dep_get_stat_hash:<plugin271> start
+0:00:00.024086400      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:1618:gst_plugin_ext_dep_extract_env_vars_paths:<plugin271> expanding FREI0R_PATH = '(NULL)' (path suffix: (NULL))
+0:00:00.024169000      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:1618:gst_plugin_ext_dep_extract_env_vars_paths:<plugin271> expanding HOME = '<win-home>' (path suffix: .frei0r-1/lib)
+0:00:00.024247000      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:1647:gst_plugin_ext_dep_extract_env_vars_paths:<plugin271> path: '<win-home>\.frei0r-1\lib'
+0:00:00.024343700      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:1662:gst_plugin_ext_dep_extract_env_vars_paths:<plugin271> Extracted 1 paths from environment
+0:00:00.024456100      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:1857:gst_plugin_ext_dep_get_stat_hash:<plugin271> path: 'C'
+0:00:00.024529900      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:1857:gst_plugin_ext_dep_get_stat_hash:<plugin271> path: '/projects/repos/cerbero.git/build/dist/msvc_x86_64/lib/frei0r-1'
+0:00:00.024605400      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:1857:gst_plugin_ext_dep_get_stat_hash:<plugin271> path: '/usr/lib/frei0r-1'
+0:00:00.024696700      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:1857:gst_plugin_ext_dep_get_stat_hash:<plugin271> path: '/usr/local/lib/frei0r-1'
+0:00:00.024771000      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:1857:gst_plugin_ext_dep_get_stat_hash:<plugin271> path: '/usr/lib32/frei0r-1'
+0:00:00.024845200      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:1857:gst_plugin_ext_dep_get_stat_hash:<plugin271> path: '/usr/local/lib32/frei0r-1'
+0:00:00.024929300      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:1857:gst_plugin_ext_dep_get_stat_hash:<plugin271> path: '/usr/lib64/frei0r-1'
+0:00:00.025012800      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:1857:gst_plugin_ext_dep_get_stat_hash:<plugin271> path: '/usr/local/lib64/frei0r-1'
+0:00:00.025120800      35704      55676 DEBUG     GST_PLUGIN_LOADING gstplugin.c:1722:gst_plugin_ext_dep_scan_dir_and_match_names:<plugin271> g_dir_open(<win-home>\.frei0r-1\lib) failed: Error opening directory ?<win-home>\.frei0r-1\lib?: No such file or directory
+0:00:00.025285300      35704      55676 DEBUG     GST_PLUGIN_LOADING gstplugin.c:1722:gst_plugin_ext_dep_scan_dir_and_match_names:<plugin271> g_dir_open(C) failed: Error opening directory ?C?: No such file or directory
+0:00:00.025459100      35704      55676 DEBUG     GST_PLUGIN_LOADING gstplugin.c:1722:gst_plugin_ext_dep_scan_dir_and_match_names:<plugin271> g_dir_open(/projects/repos/cerbero.git/build/dist/msvc_x86_64/lib/frei0r-1) failed: Error opening directory ?/projects/repos/cerbero.git/build/dist/msvc_x86_64/lib/frei0r-1?: No such file or directory
+0:00:00.025634100      35704      55676 DEBUG     GST_PLUGIN_LOADING gstplugin.c:1722:gst_plugin_ext_dep_scan_dir_and_match_names:<plugin271> g_dir_open(/usr/lib/frei0r-1) failed: Error opening directory ?/usr/lib/frei0r-1?: No such file or directory
+0:00:00.025780700      35704      55676 DEBUG     GST_PLUGIN_LOADING gstplugin.c:1722:gst_plugin_ext_dep_scan_dir_and_match_names:<plugin271> g_dir_open(/usr/local/lib/frei0r-1) failed: Error opening directory ?/usr/local/lib/frei0r-1?: No such file or directory
+0:00:00.025890900      35704      55676 DEBUG     GST_PLUGIN_LOADING gstplugin.c:1722:gst_plugin_ext_dep_scan_dir_and_match_names:<plugin271> g_dir_open(/usr/lib32/frei0r-1) failed: Error opening directory ?/usr/lib32/frei0r-1?: No such file or directory
+0:00:00.026105400      35704      55676 DEBUG     GST_PLUGIN_LOADING gstplugin.c:1722:gst_plugin_ext_dep_scan_dir_and_match_names:<plugin271> g_dir_open(/usr/local/lib32/frei0r-1) failed: Error opening directory ?/usr/local/lib32/frei0r-1?: No such file or directory
+0:00:00.026223200      35704      55676 DEBUG     GST_PLUGIN_LOADING gstplugin.c:1722:gst_plugin_ext_dep_scan_dir_and_match_names:<plugin271> g_dir_open(/usr/lib64/frei0r-1) failed: Error opening directory ?/usr/lib64/frei0r-1?: No such file or directory
+0:00:00.026358500      35704      55676 DEBUG     GST_PLUGIN_LOADING gstplugin.c:1722:gst_plugin_ext_dep_scan_dir_and_match_names:<plugin271> g_dir_open(/usr/local/lib64/frei0r-1) failed: Error opening directory ?/usr/local/lib64/frei0r-1?: No such file or directory
+0:00:00.026477000      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:1872:gst_plugin_ext_dep_get_stat_hash:<plugin271> done, scan_hash: fffffff7
+0:00:00.027233200      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:1824:gst_plugin_ext_dep_get_stat_hash:<plugin96> start
+0:00:00.027314000      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:1662:gst_plugin_ext_dep_extract_env_vars_paths:<plugin96> Extracted 0 paths from environment
+0:00:00.027413800      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:1857:gst_plugin_ext_dep_get_stat_hash:<plugin96> path: 'C'
+0:00:00.027498500      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:1857:gst_plugin_ext_dep_get_stat_hash:<plugin96> path: '/projects/repos/cerbero.git/build/dist/msvc_x86_64\share\gvfs\mounts'
+0:00:00.027610100      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:1799:gst_plugin_ext_dep_scan_path_with_filenames:<plugin96> stat: C (error: No such file or directory)
+0:00:00.027708600      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:1799:gst_plugin_ext_dep_scan_path_with_filenames:<plugin96> stat: /projects/repos/cerbero.git/build/dist/msvc_x86_64\share\gvfs\mounts (error: No such file or directory)
+0:00:00.027806500      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:1872:gst_plugin_ext_dep_get_stat_hash:<plugin96> done, scan_hash: fffffffe
+0:00:00.027908500      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:1824:gst_plugin_ext_dep_get_stat_hash:<plugin96> start
+0:00:00.028007500      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:1662:gst_plugin_ext_dep_extract_env_vars_paths:<plugin96> Extracted 0 paths from environment
+0:00:00.028111500      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:1857:gst_plugin_ext_dep_get_stat_hash:<plugin96> path: 'C'
+0:00:00.028201500      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:1857:gst_plugin_ext_dep_get_stat_hash:<plugin96> path: '/projects/repos/cerbero.git/build/dist/msvc_x86_64/lib/gio/modules'
+0:00:00.028311900      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:1799:gst_plugin_ext_dep_scan_path_with_filenames:<plugin96> stat: C (error: No such file or directory)
+0:00:00.028406400      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:1799:gst_plugin_ext_dep_scan_path_with_filenames:<plugin96> stat: /projects/repos/cerbero.git/build/dist/msvc_x86_64/lib/gio/modules (error: No such file or directory)
+0:00:00.028483500      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:1872:gst_plugin_ext_dep_get_stat_hash:<plugin96> done, scan_hash: fffffffe
+0:00:00.031053800      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:1824:gst_plugin_ext_dep_get_stat_hash:<plugin123> start
+0:00:00.031182200      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:1618:gst_plugin_ext_dep_extract_env_vars_paths:<plugin123> expanding LADSPA_PATH = '(NULL)' (path suffix: (NULL))
+0:00:00.031309300      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:1618:gst_plugin_ext_dep_extract_env_vars_paths:<plugin123> expanding APPDATA = '<win-home>\AppData\Roaming' (path suffix: LADSPA)
+0:00:00.031445900      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:1647:gst_plugin_ext_dep_extract_env_vars_paths:<plugin123> path: '<win-home>\AppData\Roaming\LADSPA'
+0:00:00.031530500      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:1618:gst_plugin_ext_dep_extract_env_vars_paths:<plugin123> expanding COMMONPROGRAMFILES = 'C:\Program Files\Common Files' (path suffix: LADSPA)
+0:00:00.031611300      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:1647:gst_plugin_ext_dep_extract_env_vars_paths:<plugin123> path: 'C:\Program Files\Common Files\LADSPA'
+0:00:00.031684700      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:1662:gst_plugin_ext_dep_extract_env_vars_paths:<plugin123> Extracted 2 paths from environment
+0:00:00.031791500      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:1799:gst_plugin_ext_dep_scan_path_with_filenames:<plugin123> stat: <win-home>\AppData\Roaming\LADSPA (error: No such file or directory)
+0:00:00.031935200      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:1799:gst_plugin_ext_dep_scan_path_with_filenames:<plugin123> stat: C:\Program Files\Common Files\LADSPA (error: No such file or directory)
+0:00:00.032020900      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:1872:gst_plugin_ext_dep_get_stat_hash:<plugin123> done, scan_hash: fffffffe
+0:00:00.057672800      35704      55676 DEBUG     GST_PLUGIN_LOADING gstplugin.c:844:_priv_gst_plugin_load_file_for_registry: attempt to load plugin "<win-home>\dev\m6-renderer9f74b9d-framelinka50841a-20261112\build\framelink\Release\gstframelink.dll"
+0:00:00.059883300      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:974:_priv_gst_plugin_load_file_for_registry: Plugin 0000026131DE5F20 for file "<win-home>\dev\m6-renderer9f74b9d-framelinka50841a-20261112\build\framelink\Release\gstframelink.dll" prepared, calling entry function...
+0:00:00.060066900      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:981:_priv_gst_plugin_load_file_for_registry: Plugin 0000026131DE5F20 for file "<win-home>\dev\m6-renderer9f74b9d-framelinka50841a-20261112\build\framelink\Release\gstframelink.dll" prepared, registering...
+0:00:00.060180500      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:526:gst_plugin_register_func: plugin "<win-home>\dev\m6-renderer9f74b9d-framelinka50841a-20261112\build\framelink\Release\gstframelink.dll" looks good
+0:00:00.060741800      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:553:gst_plugin_register_func: plugin "<win-home>\dev\m6-renderer9f74b9d-framelinka50841a-20261112\build\framelink\Release\gstframelink.dll" initialised
+0:00:00.060874300      35704      55676 INFO      GST_PLUGIN_LOADING gstplugin.c:999:_priv_gst_plugin_load_file_for_registry: plugin "<win-home>\dev\m6-renderer9f74b9d-framelinka50841a-20261112\build\framelink\Release\gstframelink.dll" loaded
+0:00:00.418079100      35704      55676 DEBUG     GST_PLUGIN_LOADING gstpluginfeature.c:107:gst_plugin_feature_load: loading plugin for feature 0000026131D60040; 'videotestsrc'
+0:00:00.418223200      35704      55676 DEBUG     GST_PLUGIN_LOADING gstpluginfeature.c:111:gst_plugin_feature_load: loading plugin videotestsrc
+0:00:00.418337400      35704      55676 DEBUG     GST_PLUGIN_LOADING gstplugin.c:1427:gst_plugin_load_by_name: looking up plugin videotestsrc in default registry
+0:00:00.418492900      35704      55676 DEBUG     GST_PLUGIN_LOADING gstplugin.c:1439:gst_plugin_load_by_name: loading plugin videotestsrc from file C:\Program Files\gstreamer\1.0\msvc_x86_64\lib\gstreamer-1.0\gstvideotestsrc.dll
+0:00:00.418580900      35704      55676 DEBUG     GST_PLUGIN_LOADING gstplugin.c:844:_priv_gst_plugin_load_file_for_registry: attempt to load plugin "C:\Program Files\gstreamer\1.0\msvc_x86_64\lib\gstreamer-1.0\gstvideotestsrc.dll"
+0:00:00.419036900      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:974:_priv_gst_plugin_load_file_for_registry: Plugin 0000026131DE5C80 for file "C:\Program Files\gstreamer\1.0\msvc_x86_64\lib\gstreamer-1.0\gstvideotestsrc.dll" prepared, calling entry function...
+0:00:00.419126400      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:981:_priv_gst_plugin_load_file_for_registry: Plugin 0000026131DE5C80 for file "C:\Program Files\gstreamer\1.0\msvc_x86_64\lib\gstreamer-1.0\gstvideotestsrc.dll" prepared, registering...
+0:00:00.419205000      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:526:gst_plugin_register_func: plugin "C:\Program Files\gstreamer\1.0\msvc_x86_64\lib\gstreamer-1.0\gstvideotestsrc.dll" looks good
+0:00:00.419293000      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:553:gst_plugin_register_func: plugin "C:\Program Files\gstreamer\1.0\msvc_x86_64\lib\gstreamer-1.0\gstvideotestsrc.dll" initialised
+0:00:00.419367500      35704      55676 INFO      GST_PLUGIN_LOADING gstplugin.c:999:_priv_gst_plugin_load_file_for_registry: plugin "C:\Program Files\gstreamer\1.0\msvc_x86_64\lib\gstreamer-1.0\gstvideotestsrc.dll" loaded
+0:00:00.419476300      35704      55676 DEBUG     GST_PLUGIN_LOADING gstpluginfeature.c:116:gst_plugin_feature_load: loaded plugin videotestsrc
+0:00:00.419696800      35704      55676 DEBUG     GST_PLUGIN_LOADING gstpluginfeature.c:107:gst_plugin_feature_load: loading plugin for feature 0000026131D60040; 'videotestsrc'
+0:00:00.419860200      35704      55676 DEBUG     GST_PLUGIN_LOADING gstpluginfeature.c:107:gst_plugin_feature_load: loading plugin for feature 0000026130D0F8D0; 'identity'
+0:00:00.419970300      35704      55676 DEBUG     GST_PLUGIN_LOADING gstpluginfeature.c:111:gst_plugin_feature_load: loading plugin coreelements
+0:00:00.420077000      35704      55676 DEBUG     GST_PLUGIN_LOADING gstplugin.c:1427:gst_plugin_load_by_name: looking up plugin coreelements in default registry
+0:00:00.420192700      35704      55676 DEBUG     GST_PLUGIN_LOADING gstplugin.c:1439:gst_plugin_load_by_name: loading plugin coreelements from file C:\Program Files\gstreamer\1.0\msvc_x86_64\lib\gstreamer-1.0\gstcoreelements.dll
+0:00:00.420267800      35704      55676 DEBUG     GST_PLUGIN_LOADING gstplugin.c:844:_priv_gst_plugin_load_file_for_registry: attempt to load plugin "C:\Program Files\gstreamer\1.0\msvc_x86_64\lib\gstreamer-1.0\gstcoreelements.dll"
+0:00:00.420671600      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:974:_priv_gst_plugin_load_file_for_registry: Plugin 0000026130D64350 for file "C:\Program Files\gstreamer\1.0\msvc_x86_64\lib\gstreamer-1.0\gstcoreelements.dll" prepared, calling entry function...
+0:00:00.420763200      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:981:_priv_gst_plugin_load_file_for_registry: Plugin 0000026130D64350 for file "C:\Program Files\gstreamer\1.0\msvc_x86_64\lib\gstreamer-1.0\gstcoreelements.dll" prepared, registering...
+0:00:00.420844300      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:526:gst_plugin_register_func: plugin "C:\Program Files\gstreamer\1.0\msvc_x86_64\lib\gstreamer-1.0\gstcoreelements.dll" looks good
+0:00:00.421063500      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:553:gst_plugin_register_func: plugin "C:\Program Files\gstreamer\1.0\msvc_x86_64\lib\gstreamer-1.0\gstcoreelements.dll" initialised
+0:00:00.421146000      35704      55676 INFO      GST_PLUGIN_LOADING gstplugin.c:999:_priv_gst_plugin_load_file_for_registry: plugin "C:\Program Files\gstreamer\1.0\msvc_x86_64\lib\gstreamer-1.0\gstcoreelements.dll" loaded
+0:00:00.421225700      35704      55676 DEBUG     GST_PLUGIN_LOADING gstpluginfeature.c:116:gst_plugin_feature_load: loaded plugin coreelements
+0:00:00.421377300      35704      55676 DEBUG     GST_PLUGIN_LOADING gstpluginfeature.c:107:gst_plugin_feature_load: loading plugin for feature 0000026130D0F8D0; 'identity'
+0:00:00.421480000      35704      55676 DEBUG     GST_PLUGIN_LOADING gstpluginfeature.c:107:gst_plugin_feature_load: loading plugin for feature 0000026131E78F90; 'framelinksink'
+0:00:00.421677100      35704      55676 DEBUG     GST_PLUGIN_LOADING gstpluginfeature.c:107:gst_plugin_feature_load: loading plugin for feature 0000026131E78F90; 'framelinksink'
+0:00:00.421821500      35704      55676 DEBUG     GST_PLUGIN_LOADING gstpluginfeature.c:107:gst_plugin_feature_load: loading plugin for feature 0000026130D51C60; 'audiotestsrc'
+0:00:00.421901800      35704      55676 DEBUG     GST_PLUGIN_LOADING gstpluginfeature.c:111:gst_plugin_feature_load: loading plugin audiotestsrc
+0:00:00.421999200      35704      55676 DEBUG     GST_PLUGIN_LOADING gstplugin.c:1427:gst_plugin_load_by_name: looking up plugin audiotestsrc in default registry
+0:00:00.422130800      35704      55676 DEBUG     GST_PLUGIN_LOADING gstplugin.c:1439:gst_plugin_load_by_name: loading plugin audiotestsrc from file C:\Program Files\gstreamer\1.0\msvc_x86_64\lib\gstreamer-1.0\gstaudiotestsrc.dll
+0:00:00.422212100      35704      55676 DEBUG     GST_PLUGIN_LOADING gstplugin.c:844:_priv_gst_plugin_load_file_for_registry: attempt to load plugin "C:\Program Files\gstreamer\1.0\msvc_x86_64\lib\gstreamer-1.0\gstaudiotestsrc.dll"
+0:00:00.423258500      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:974:_priv_gst_plugin_load_file_for_registry: Plugin 0000026130D420A0 for file "C:\Program Files\gstreamer\1.0\msvc_x86_64\lib\gstreamer-1.0\gstaudiotestsrc.dll" prepared, calling entry function...
+0:00:00.423400100      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:981:_priv_gst_plugin_load_file_for_registry: Plugin 0000026130D420A0 for file "C:\Program Files\gstreamer\1.0\msvc_x86_64\lib\gstreamer-1.0\gstaudiotestsrc.dll" prepared, registering...
+0:00:00.423483000      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:526:gst_plugin_register_func: plugin "C:\Program Files\gstreamer\1.0\msvc_x86_64\lib\gstreamer-1.0\gstaudiotestsrc.dll" looks good
+0:00:00.423615200      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:553:gst_plugin_register_func: plugin "C:\Program Files\gstreamer\1.0\msvc_x86_64\lib\gstreamer-1.0\gstaudiotestsrc.dll" initialised
+0:00:00.423723200      35704      55676 INFO      GST_PLUGIN_LOADING gstplugin.c:999:_priv_gst_plugin_load_file_for_registry: plugin "C:\Program Files\gstreamer\1.0\msvc_x86_64\lib\gstreamer-1.0\gstaudiotestsrc.dll" loaded
+0:00:00.423830100      35704      55676 DEBUG     GST_PLUGIN_LOADING gstpluginfeature.c:116:gst_plugin_feature_load: loaded plugin audiotestsrc
+0:00:00.423960800      35704      55676 DEBUG     GST_PLUGIN_LOADING gstpluginfeature.c:107:gst_plugin_feature_load: loading plugin for feature 0000026130D51C60; 'audiotestsrc'
+0:00:00.424072000      35704      55676 DEBUG     GST_PLUGIN_LOADING gstpluginfeature.c:107:gst_plugin_feature_load: loading plugin for feature 0000026130D0F8D0; 'identity'
+0:00:00.424150500      35704      55676 DEBUG     GST_PLUGIN_LOADING gstpluginfeature.c:107:gst_plugin_feature_load: loading plugin for feature 0000026130D0F8D0; 'identity'
+0:00:00.424248200      35704      55676 DEBUG     GST_PLUGIN_LOADING gstpluginfeature.c:107:gst_plugin_feature_load: loading plugin for feature 0000026130D0F240; 'queue'
+0:00:00.424375600      35704      55676 DEBUG     GST_PLUGIN_LOADING gstpluginfeature.c:107:gst_plugin_feature_load: loading plugin for feature 0000026130D0F240; 'queue'
+0:00:00.424513700      35704      55676 DEBUG     GST_PLUGIN_LOADING gstpluginfeature.c:107:gst_plugin_feature_load: loading plugin for feature 0000026131BE8500; 'gdppay'
+0:00:00.424594800      35704      55676 DEBUG     GST_PLUGIN_LOADING gstpluginfeature.c:111:gst_plugin_feature_load: loading plugin gdp
+0:00:00.424667200      35704      55676 DEBUG     GST_PLUGIN_LOADING gstplugin.c:1427:gst_plugin_load_by_name: looking up plugin gdp in default registry
+0:00:00.424773300      35704      55676 DEBUG     GST_PLUGIN_LOADING gstplugin.c:1439:gst_plugin_load_by_name: loading plugin gdp from file C:\Program Files\gstreamer\1.0\msvc_x86_64\lib\gstreamer-1.0\gstgdp.dll
+0:00:00.424851900      35704      55676 DEBUG     GST_PLUGIN_LOADING gstplugin.c:844:_priv_gst_plugin_load_file_for_registry: attempt to load plugin "C:\Program Files\gstreamer\1.0\msvc_x86_64\lib\gstreamer-1.0\gstgdp.dll"
+0:00:00.425206400      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:974:_priv_gst_plugin_load_file_for_registry: Plugin 0000026131BEF7F0 for file "C:\Program Files\gstreamer\1.0\msvc_x86_64\lib\gstreamer-1.0\gstgdp.dll" prepared, calling entry function...
+0:00:00.425318000      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:981:_priv_gst_plugin_load_file_for_registry: Plugin 0000026131BEF7F0 for file "C:\Program Files\gstreamer\1.0\msvc_x86_64\lib\gstreamer-1.0\gstgdp.dll" prepared, registering...
+0:00:00.425393800      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:526:gst_plugin_register_func: plugin "C:\Program Files\gstreamer\1.0\msvc_x86_64\lib\gstreamer-1.0\gstgdp.dll" looks good
+0:00:00.425488200      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:553:gst_plugin_register_func: plugin "C:\Program Files\gstreamer\1.0\msvc_x86_64\lib\gstreamer-1.0\gstgdp.dll" initialised
+0:00:00.425649900      35704      55676 INFO      GST_PLUGIN_LOADING gstplugin.c:999:_priv_gst_plugin_load_file_for_registry: plugin "C:\Program Files\gstreamer\1.0\msvc_x86_64\lib\gstreamer-1.0\gstgdp.dll" loaded
+0:00:00.425764300      35704      55676 DEBUG     GST_PLUGIN_LOADING gstpluginfeature.c:116:gst_plugin_feature_load: loaded plugin gdp
+0:00:00.425875800      35704      55676 DEBUG     GST_PLUGIN_LOADING gstpluginfeature.c:107:gst_plugin_feature_load: loading plugin for feature 0000026131BE8500; 'gdppay'
+0:00:00.425994200      35704      55676 DEBUG     GST_PLUGIN_LOADING gstpluginfeature.c:107:gst_plugin_feature_load: loading plugin for feature 0000026130D80330; 'giostreamsink'
+0:00:00.426066900      35704      55676 DEBUG     GST_PLUGIN_LOADING gstpluginfeature.c:111:gst_plugin_feature_load: loading plugin gio
+0:00:00.426136900      35704      55676 DEBUG     GST_PLUGIN_LOADING gstplugin.c:1427:gst_plugin_load_by_name: looking up plugin gio in default registry
+0:00:00.426248300      35704      55676 DEBUG     GST_PLUGIN_LOADING gstplugin.c:1439:gst_plugin_load_by_name: loading plugin gio from file C:\Program Files\gstreamer\1.0\msvc_x86_64\lib\gstreamer-1.0\gstgio.dll
+0:00:00.426350800      35704      55676 DEBUG     GST_PLUGIN_LOADING gstplugin.c:844:_priv_gst_plugin_load_file_for_registry: attempt to load plugin "C:\Program Files\gstreamer\1.0\msvc_x86_64\lib\gstreamer-1.0\gstgio.dll"
+0:00:00.426751300      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:974:_priv_gst_plugin_load_file_for_registry: Plugin 0000026131BEFD30 for file "C:\Program Files\gstreamer\1.0\msvc_x86_64\lib\gstreamer-1.0\gstgio.dll" prepared, calling entry function...
+0:00:00.426842400      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:981:_priv_gst_plugin_load_file_for_registry: Plugin 0000026131BEFD30 for file "C:\Program Files\gstreamer\1.0\msvc_x86_64\lib\gstreamer-1.0\gstgio.dll" prepared, registering...
+0:00:00.426935500      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:526:gst_plugin_register_func: plugin "C:\Program Files\gstreamer\1.0\msvc_x86_64\lib\gstreamer-1.0\gstgio.dll" looks good
+0:00:00.427033300      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:1971:gst_plugin_add_dependency:<plugin96> dependency already registered
+0:00:00.427127700      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:1971:gst_plugin_add_dependency:<plugin96> dependency already registered
+0:00:00.427258100      35704      55676 LOG       GST_PLUGIN_LOADING gstplugin.c:553:gst_plugin_register_func: plugin "C:\Program Files\gstreamer\1.0\msvc_x86_64\lib\gstreamer-1.0\gstgio.dll" initialised
+0:00:00.427371200      35704      55676 INFO      GST_PLUGIN_LOADING gstplugin.c:999:_priv_gst_plugin_load_file_for_registry: plugin "C:\Program Files\gstreamer\1.0\msvc_x86_64\lib\gstreamer-1.0\gstgio.dll" loaded
+0:00:00.427468100      35704      55676 DEBUG     GST_PLUGIN_LOADING gstpluginfeature.c:116:gst_plugin_feature_load: loaded plugin gio
+0:00:00.427619100      35704      55676 DEBUG     GST_PLUGIN_LOADING gstpluginfeature.c:107:gst_plugin_feature_load: loading plugin for feature 0000026130D80330; 'giostreamsink'
+0:00:00.427753700      35704      55676 DEBUG     GST_PLUGIN_LOADING gstpluginfeature.c:107:gst_plugin_feature_load: loading plugin for feature 0000026130CC8750; 'pipeline'
+0:00:00.427887800      35704      55676 DEBUG     GST_PLUGIN_LOADING gstpluginfeature.c:107:gst_plugin_feature_load: loading plugin for feature 0000026130D7E0B0; 'capsfilter'
+0:00:00.428158700      35704      55676 DEBUG     GST_PLUGIN_LOADING gstpluginfeature.c:107:gst_plugin_feature_load: loading plugin for feature 0000026130D7E0B0; 'capsfilter'
+{"event":"session-ready","instance":"f5bc55952411e25a1c1e4c530a424e4f","generation":1,"format":"NV12","video_frames":0,"audio_blocks":0,"audio_offset_ns":0}
+{"event":"startup-released","epoch_ns":766473898806900}
+{"event":"video-transport-summary","received":300,"submitted":300,"dropped":0,"ring_full_drops":0}
+{"event":"session-complete","instance":"f5bc55952411e25a1c1e4c530a424e4f","generation":1,"format":"NV12","video_frames":300,"audio_blocks":300,"audio_offset_ns":0}
+{"role":"producer","ok":true,"sessions":1,"video_frames":300,"audio_blocks":300,"errors":0,"disconnects":0}

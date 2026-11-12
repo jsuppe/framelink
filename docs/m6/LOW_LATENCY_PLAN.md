@@ -1,5 +1,18 @@
 # M6 low-latency and native-memory resolution plan
 
+## Approved M6 Windows readiness scope — 2026-11-12 18:14 EST
+
+Jon approved readiness for explicitly named Windows configurations, not universal
+Windows support. This supersedes older broad M6 completion requirements below;
+historical results and failed gates remain evidence, not silently passed tasks.
+Authoritative reviewable scope/checklist: [M6 Windows readiness](M6_WINDOWS_READINESS.md).
+M6 remains OPEN; M7 maintenance hold remains. Correct media/timeline/ownership,
+fault handling, validated bounded lifecycle and final exact-revision integrated/API
+compatibility gates remain mandatory. No new budget, D2/D3 default or device-owner
+API approval is inferred. Failed native BGRA1080 and decoder4K are NOT QUALIFIED
+and excluded from initial advertised support. One task and one executor, serially.
+
+
 Revision 1 — 2026-11-04. Owner: project executor. Single-task serial execution restored by Jon on November 12 at 06:49 EST;
 one task and one executor, with no parallel implementation, investigation or validation.
 Status: approved user requirements plus implementation proposals; no new runtime
@@ -239,15 +252,16 @@ M6 remains open; M7 remains held.
 | D2 / D3 | Unresolved public overload/convenience-fallback decisions; existing explicit profiles/defaults preserved | Jon; no automatic default change or hidden native-to-CPU fallback |
 | Linux / Android campaigns | Broad work deferred under Windows-first direction. Prior Linux BGRA and other completed campaigns collected, not repeated. Android BGRA4K and NV121080 residual failures remain suspended; clean trace diagnostics did not waive them | Evelyn; resume deferred integration only after Windows priority permits; causal fixes required for suspended failed cells |
 
-**Windows runtime ownership:** idle after verified shared-CPU collection19:51:34Z.
-qualification_recovery was sole serial executor; parent handles conversation.
-EXECUTION_GAP17:07–19:19:58Z was recorded and corrected by actual execution.
-Shared-CPU candidate cells are now complete. Current-renderer provenance recovered from approved M5 closure and GitHubPR13:
-merged9f74b9d; isolated clean source and137-file historical comparison pinned.
-No source-selection decision is required from Jon. qualification_recovery owns
-next routine isolated integration build/contract review, prepared not executed.
-No runtime is being described as active.
-[Exact remaining dependencies and source findings](WINDOWS_REMAINING_DEPENDENCIES.md).
+**Windows runtime ownership:** idle verified23:13:39Z after isolated renderer integration.
+qualification_recovery is sole serial executor; parent handles conversation.
+Current task: archive completed integration and apply approved Windows readiness scope,
+then advance supported-profile/lifecycle gates serially. No media runtime is active.
+Approved renderer9f74b9d+FrameLinka50841a built; renderer repaira6a1906 accepts explicit0ms
+without changing100ms default. Four focused tests and9CLI controls pass; three lossless
+5s identity captures cover0/100ms,300video/240000PCM each.67remote result hashes and
+complete local coverage verified; original trace-capacity failure retained.
+[Integration evidence](renderer-integration-a6a1906/README.md).
+[Approved scope and remaining gates](M6_WINDOWS_READINESS.md).
 Windows device-lifetime causal evidence collected and integrated as64f7728. Six bounded
 serial arms collected17:03:49Z;800 cycles/270 settle observations. Hardware-only
 growth and delayed reclamation reproduced without FrameLink, textures or GStreamer;
@@ -270,8 +284,7 @@ against full-process/host suspension for that gap; selective scheduling/I/O or
 unlogged interference remains possible. No categorical orchestration exclusion.
 Further original-stall attribution needs original-scale phase/thread/I/O evidence;
 no additional uninstrumented endurance run or unsupported repair is ready.
-Current-renderer isolated integration is the next ready work after provenance recovery;
-other owner/resume conditions are listed above, not replaced by speculative reruns.
+Current-renderer isolated integration is collected; supported-profile/lifecycle and final closure gates remain open. Other owner/resume conditions above are not replaced by speculative reruns.
 
 Finalcandidate BGRA1080duration exec52689 **FAILED**, collected13:35:55Z, idle-after0.
 [Failure archive](windows-native-final-duration-bgra-1080-failure-a50841a/README.md).
