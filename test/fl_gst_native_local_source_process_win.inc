@@ -1,3 +1,4 @@
+#include "../samples/local_native_relay_setup.h"
 // Independent upstream process scaffold for the separate-source FAR5 relay.
 // Uses the existing FAR4 API only: no guessed consumer snapshot interface.
 // Only test-control events are inherited, never textures or credentials.
@@ -114,21 +115,22 @@ static void threeProcess(const char*plugin,bool audio=false,bool replaceWhileHel
  auto caps=localPoolProcessCaps();auto candidate=nativeAvPolicy(0,true);GstFrameLinkMemoryPolicy inputPolicy{},outputPolicy{};
  auto*up=fl_gst_session_new(3);auto*down=fl_gst_session_new(3);
  flChannel*input=nullptr,*output=nullptr;GError*error=nullptr;
- CHECK(fl_gst_session_open_local_native_relay_input(up,inputPath.c_str(),&caps,1,2,80,5000,5000,
-   &candidate,&inputPolicy,&input,nullptr,&error));
- flSessionConfig original{};CHECK(fl_gst_session_get_config(up,&original)==FL_GST_SESSION_READY);
- // Attachment already happened, but source has not been told to publish.
- flD3D11PoolSnapshot*snapshot=nullptr;CHECK(flSnapshotD3D11ConsumerPool(input,&snapshot)==FL_OK);
- flChannelInfo info{};CHECK(flQueryD3D11PoolSnapshot(snapshot,&info)==FL_OK&&info.poolSize==2);
- void*handles[2]{};for(unsigned n=0;n<2;++n){handles[1-n]=flD3D11PoolSnapshotHandle(snapshot,n);CHECK(handles[1-n]);}
  flnative::Handle held,release,exitEvent;
  held.value=CreateEventW(nullptr,TRUE,FALSE,nullptr);release.value=CreateEventW(nullptr,TRUE,FALSE,nullptr);exitEvent.value=CreateEventW(nullptr,TRUE,FALSE,nullptr);
  CHECK(held.value&&release.value&&exitEvent.value);
  const auto command=std::string("\"")+plugin+(binFinal?"\" --relay-local-reader-bin \"":(failedSource?"\" --relay-local-reader-failed \"":(audio?"\" --relay-local-reader-av \"":"\" --relay-local-reader-generic \"")))+outputPath+"\" "+
    std::to_string(uintptr_t(held.value))+" "+std::to_string(uintptr_t(release.value))+" "+std::to_string(uintptr_t(exitEvent.value));
  auto final=relayprocess::spawn(command,{held.value,release.value,exitEvent.value});
- CHECK(fl_gst_session_open_local_native_relay_pool(down,up,outputPath.c_str(),&caps,1,2,80,5000,5000,
-   &candidate,info.adapterLUID,handles,&outputPolicy,&output,nullptr,&error));
+ flsample::LocalNativeRelaySetup prepared{};
+ CHECK(flsample::setupLocalNativeRelay(up,down,inputPath.c_str(),outputPath.c_str(),&caps,&candidate,
+   1,2,80,5000,5000,nullptr,&prepared,&error));
+ input=prepared.input;output=prepared.output;inputPolicy=prepared.inputPolicy;outputPolicy=prepared.outputPolicy;
+ auto*snapshot=prepared.snapshot;
+ flSessionConfig original{};CHECK(fl_gst_session_get_config(up,&original)==FL_GST_SESSION_READY);
+ flChannelInfo info{};CHECK(flQueryD3D11PoolSnapshot(snapshot,&info)==FL_OK&&info.poolSize==2);
+ void*handles[2]{};for(unsigned n=0;n<2;++n){handles[1-n]=flD3D11PoolSnapshotHandle(snapshot,n);CHECK(handles[1-n]);}
+ // Both channels are ready, but the source is still forbidden to publish.
+ CHECK(WaitForSingleObject(source.published.value,0)==WAIT_TIMEOUT);
  flSessionConfig forwarded{};CHECK(fl_gst_session_get_config(down,&forwarded)==FL_GST_SESSION_READY);
  CHECK(flsample::SessionRelayContract::compatible(original,forwarded));
  using Compare=BOOL(WINAPI*)(HANDLE,HANDLE);
@@ -226,6 +228,33 @@ static void threeProcess(const char*plugin,bool audio=false,bool replaceWhileHel
  if(replaceWhileHeld)puts("fresh-session replacement: distinct session/clock/native allocations; old reader held through complete replacement A/V graph; old pixels rechecked before real release");
  if(audio)puts("three-process local authenticated A/V: 384 exact PCM frames/1536 bytes, 37ms offset, real END/EOS, final native lease held");
  puts("three-process local native relay: FAR4 source-time input + FAR5 snapshot transfer, no inherited textures, 8 exact final pixels/metadata, held final lease, real drain");
+}
+
+static void setupNegatives(){
+ for(bool cancelSetup:{false,true}){
+  gchar*directory=g_dir_make_tmp("framelink-relay-setup-XXXXXX",nullptr);CHECK(directory);std::string root=directory;g_free(directory);
+  const auto inputPath=root+"/input",outputPath=root+"/absent-output";
+  auto*producerSession=fl_gst_session_new(3);auto*up=fl_gst_session_new(3);auto*down=fl_gst_session_new(3);
+  auto caps=localPoolProcessCaps();auto candidate=nativeAvPolicy(0,true);auto*cancel=g_cancellable_new();
+  std::atomic<bool> opened{false};bool producerReady=true;
+  std::thread source([&]{
+   GstFrameLinkMemoryPolicy bound{};flChannel*channel=nullptr;GError*error=nullptr;
+   CHECK(fl_gst_session_open_local_native(producerSession,TRUE,inputPath.c_str(),&caps,1,2,80,2000,2000,&candidate,&bound,&channel,nullptr,&error));
+   opened.store(true);producerReady=fl_gst_session_local_ready(producerSession,TRUE,2000,nullptr);
+   CHECK(!producerReady);fl_gst_session_cancel(producerSession);flClose(channel);
+  });
+  std::thread stop;
+  if(cancelSetup)stop=std::thread([&]{const auto deadline=g_get_monotonic_time()+2000000;while(!opened.load()){CHECK(g_get_monotonic_time()<deadline);g_usleep(1000);}g_usleep(30000);g_cancellable_cancel(cancel);});
+  flsample::LocalNativeRelaySetup result{};GError*error=nullptr;const auto began=g_get_monotonic_time();
+  CHECK(!flsample::setupLocalNativeRelay(up,down,inputPath.c_str(),outputPath.c_str(),&caps,&candidate,
+    1,2,80,cancelSetup?60000u:500u,2000,cancel,&result,&error));
+  CHECK(error&&!result.input&&!result.output&&!result.snapshot&&!result.inputPolicy.version&&!result.outputPolicy.version);
+  CHECK(g_get_monotonic_time()-began<1500000);source.join();if(stop.joinable())stop.join();
+  CHECK(opened.load()&&!producerReady);flSessionConfig config{};
+  CHECK(fl_gst_session_get_config(up,&config)==FL_GST_SESSION_CANCELLED&&fl_gst_session_get_config(down,&config)==FL_GST_SESSION_CANCELLED);
+  g_clear_error(&error);g_object_unref(cancel);g_object_unref(up);g_object_unref(down);g_object_unref(producerSession);
+ }
+ puts("transactional relay setup: downstream absent/cancelled, clear outputs, both sessions cancelled, source never readied");
 }
 
 }
