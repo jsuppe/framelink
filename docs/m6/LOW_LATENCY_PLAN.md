@@ -242,10 +242,11 @@ M6 remains open; M7 remains held.
 **Windows runtime ownership:** idle after verified shared-CPU collection19:51:34Z.
 qualification_recovery was sole serial executor; parent handles conversation.
 EXECUTION_GAP17:07–19:19:58Z was recorded and corrected by actual execution.
-Shared-CPU candidate cells are now complete. Current-renderer readiness review
-found conflicting/non-Git historical source identities; authoritative baseline
-selection is the next dependency, owned by parent/project coordination, then
-Evelyn implements/checks serially. No runtime is being described as active.
+Shared-CPU candidate cells are now complete. Current-renderer provenance recovered from approved M5 closure and GitHubPR13:
+merged9f74b9d; isolated clean source and137-file historical comparison pinned.
+No source-selection decision is required from Jon. qualification_recovery owns
+next routine isolated integration build/contract review, prepared not executed.
+No runtime is being described as active.
 [Exact remaining dependencies and source findings](WINDOWS_REMAINING_DEPENDENCIES.md).
 Windows device-lifetime causal evidence collected and integrated as64f7728. Six bounded
 serial arms collected17:03:49Z;800 cycles/270 settle observations. Hardware-only
@@ -269,7 +270,7 @@ against full-process/host suspension for that gap; selective scheduling/I/O or
 unlogged interference remains possible. No categorical orchestration exclusion.
 Further original-stall attribution needs original-scale phase/thread/I/O evidence;
 no additional uninstrumented endurance run or unsupported repair is ready.
-Current-renderer source selection is the next identified ready-work dependency;
+Current-renderer isolated integration is the next ready work after provenance recovery;
 other owner/resume conditions are listed above, not replaced by speculative reruns.
 
 Finalcandidate BGRA1080duration exec52689 **FAILED**, collected13:35:55Z, idle-after0.

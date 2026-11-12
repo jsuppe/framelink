@@ -6,7 +6,7 @@ All four frozen461584b shared-CPU cells are collected passes. Exacta50841a178/17
 Controlled Windows GPU-delay, existing-policy metadata/audio faults, held-reader,
 pause/death/cancellation functional checks already exist in that suite.
 
-## Concrete next dependency: current renderer source selection
+## Resolved dependency: current renderer source selection
 
 M6.6a/9d current-renderer integration is distinct from the legacy presentation
 probe. Existing evidence explicitly uses100ms scheduling and no active display;
@@ -23,12 +23,13 @@ Read-only source lookup on November12 found:
 
 Do not silently replace an unrelated current checkout, claim the old binary is
 current, or choose a new renderer architecture from these different baselines.
-**Parent/project coordination supplies/selects the authoritative M6 renderer
-revision/tree**, or explicitly selects the legacy source tree for a hash-pinned
-rebuild. Evelyn then owns isolated source capture, contract/clock integration
-review, focused build and submission-identity checks. No physical-output claim
-or new performance budget is inferred. This is the next concrete source-selection
-question, not a request to reapprove routine implementation.
+**Resolved by approved plans and GitHub PR13:** merged9f74b9d is the existing
+approved baseline. Clean isolated source and137-file historical comparison are
+[pinned here](renderer-provenance-9f74b9d/README.md). No new Jon architecture
+choice is needed. Evelyn owns the next routine isolated integration build and
+contract/clock review, then newly affected submission-identity checks. No physical-output claim
+or new performance budget is inferred. The earlier source-selection question is closed; implementation can proceed
+serially from the recovered baseline without asking Jon to reapprove it.
 
 ## Other dependencies, owners and resume conditions
 
@@ -46,6 +47,5 @@ question, not a request to reapprove routine implementation.
 
 No additional supported Windows missing-cell duration or unrun existing-policy
 functional check was identified in this reconciliation. This does not assert
-that all project work is mathematically impossible; it identifies why the next
-renderer implementation cannot honestly be labelled active before baseline
-selection. Do not launch speculative repeats merely to keep a process running.
+that all project work is mathematically impossible; the source blocker has now been resolved and the next isolated renderer
+integration step is prepared, not yet executed. Do not launch speculative repeats merely to keep a process running.
