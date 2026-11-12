@@ -26,3 +26,6 @@ FL_GST_SESSION_API gboolean fl_gst_session_open_local_cpu_epoch(FlGstSession*,gb
  const gchar*,const flSessionCapabilities*,guint,guint,guint,guint,guint,
  FlGstEpochFunc,gpointer,GCancellable*,GError**);
 #endif
+
+// Private to the session library, not an exported application API.
+G_GNUC_INTERNAL void fl_gst_session_complete_local(FlGstSession*);

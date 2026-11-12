@@ -101,6 +101,7 @@ static void pair(const std::string&tracks,bool producerFirst,guint producerLeadM
  if(producerFirst){g_usleep(producerLeadMs*1000);consumer=std::thread([&]{c.run(path,video,audio);});}
  auto*m=finish(p,25*GST_SECOND);std::string perr=!m?"producer EOS timeout":GST_MESSAGE_TYPE(m)==GST_MESSAGE_ERROR?errorText(m):"";if(m)gst_message_unref(m);
  consumer.join();
+ // Peer is gone after authenticated drain; negotiated metadata must survive.
  auto*s=gst_bin_get_by_name(GST_BIN(p),"s");guint64 generation=0;guint vid=0,aid=0;gchar*id=nullptr;
  g_object_get(s,"generation",&generation,"video-track-id",&vid,"audio-track-id",&aid,"session-id",&id,nullptr);gst_object_unref(s);
  gst_element_set_state(p,GST_STATE_NULL);gst_object_unref(p);

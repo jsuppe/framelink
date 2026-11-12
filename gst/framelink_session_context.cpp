@@ -28,7 +28,7 @@ struct _FlGstSession {
  GMutex mutex;
  GCond changed;
  guint required,registered,ready;
- gboolean configured,cancelled,mapped,videoEnded;
+ gboolean configured,cancelled,mapped,videoEnded,localFinished;
  guint64 videoFrames;gint64 videoLastPts;
  flClockMapping mapping;
  guint64 maxUncertainty;
@@ -91,7 +91,7 @@ FlGstSessionResult fl_gst_session_configure(FlGstSession* s,const flSessionConfi
  resetCpu(s);s->cpuClaimed=FALSE;
  if(s->audioConnection){g_socket_shutdown(g_socket_connection_get_socket(s->audioConnection),TRUE,TRUE,nullptr);g_object_unref(s->audioConnection);s->audioConnection=nullptr;}
  if(*s->events)(*s->events)->cancel();s->events->reset();
- s->audioClaimed=FALSE;s->videoEnded=FALSE;s->videoFrames=0;s->videoLastPts=-1;s->config=*c;s->mapped=FALSE;s->configured=TRUE;s->cancelled=FALSE;s->ready=0;g_cond_broadcast(&s->changed);return FL_GST_SESSION_READY;
+ s->localFinished=FALSE;s->audioClaimed=FALSE;s->videoEnded=FALSE;s->videoFrames=0;s->videoLastPts=-1;s->config=*c;s->mapped=FALSE;s->configured=TRUE;s->cancelled=FALSE;s->ready=0;g_cond_broadcast(&s->changed);return FL_GST_SESSION_READY;
 }
 FlGstSessionResult fl_gst_session_register_track(FlGstSession* s,guint track) {
  if(!valid(s)||(track!=1&&track!=2))return FL_GST_SESSION_INVALID;
@@ -149,12 +149,21 @@ FlGstSessionResult fl_gst_session_map_pts(FlGstSession* s,guint64 generation,gin
 FlGstSessionResult fl_gst_session_get_config(FlGstSession* s,flSessionConfig* out) {
  if(!valid(s)||!out)return FL_GST_SESSION_INVALID;
  Lock lock(&s->mutex);
- if(*s->events&&(*s->events)->failed()){s->cancelled=TRUE;s->ready=0;
+ if(!s->localFinished&&*s->events&&(*s->events)->failed()){s->cancelled=TRUE;s->ready=0;
  resetCpu(s);
  if(s->audioConnection)g_socket_shutdown(g_socket_connection_get_socket(s->audioConnection),TRUE,TRUE,nullptr);g_cond_broadcast(&s->changed);}
  if(s->cancelled)return FL_GST_SESSION_CANCELLED;
  if(!s->configured)return FL_GST_SESSION_STALE;
  *out=s->config;return FL_GST_SESSION_READY;
+}
+
+// Only the authenticated local drain handshake retires event liveness checks.
+// A sent END alone is not proof of consumer drain. Preserve explicit cancellation
+// and all native ownership; terminal metadata stays queryable until NULL/reset.
+void fl_gst_session_complete_local(FlGstSession* s) {
+ if(!valid(s))return;
+ Lock lock(&s->mutex);s->localFinished=TRUE;
+ if(*s->events)(*s->events)->cancel();
 }
 
 gboolean fl_gst_session_publish_audio(FlGstSession* s,const flSessionConfig* config,GSocketConnection* stream,gboolean producer){
@@ -211,7 +220,7 @@ gboolean fl_gst_session_publish_events(FlGstSession*s,const flSessionConfig*c,GS
  *s->events=std::make_shared<FlGstEventChannel>(stream,producer,c->generation,c->idleTimeoutMs);return TRUE;
 }
 static std::shared_ptr<FlGstEventChannel> eventChannel(FlGstSession*s,guint64 generation){
- if(!valid(s))return {};Lock lock(&s->mutex);if(s->cancelled||!s->configured||s->config.generation!=generation)return {};return *s->events;
+ if(!valid(s))return {};Lock lock(&s->mutex);if(s->cancelled||s->localFinished||!s->configured||s->config.generation!=generation)return {};return *s->events;
 }
 gboolean fl_gst_session_has_event_stream(FlGstSession*s,guint64 generation){return bool(eventChannel(s,generation));}
 FlGstSessionResult fl_gst_session_send_video_event(FlGstSession*s,guint64 generation,const FlGstVideoEvent*event){auto channel=eventChannel(s,generation);return channel&&event?channel->send(*event):FL_GST_SESSION_INVALID;}

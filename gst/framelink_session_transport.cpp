@@ -617,6 +617,7 @@ gboolean fl_gst_session_finish_local_cancellable(FlGstSession*session,gboolean p
  if(producer)ok=exact(control,false,&marker,1,deadline.cancel)&&marker=='D';
  else ok=exact(control,true,&marker,1,deadline.cancel);
  g_io_stream_close(G_IO_STREAM(control),nullptr,nullptr);g_object_unref(control);
+ if(ok)fl_gst_session_complete_local(session);
  if(!ok)g_set_error_literal(error,G_IO_ERROR,G_IO_ERROR_TIMED_OUT,producer?"consumer did not report drain before the deadline":"drain report failed");
  return ok;
 }
