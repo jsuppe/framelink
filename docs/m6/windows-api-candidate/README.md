@@ -6,6 +6,11 @@ Clean exact-revision Windows build/API/full suite **148/148 passed**;
 runtime properties and exports. All 119 prior exported names retained (119 total).
 Export-name retention is not proof of behavioral or ordinal ABI compatibility.
 
+For current profile selection, setup ordering, ownership, overload accounting and
+remaining decisions, see the [Windows app contract](../WINDOWS_APP_CONTRACT.md).
+The implementation snapshot there includes focused work through `7e1e8c5`; it
+does not move this integrated baseline or turn historical manifests into current ones.
+
 This revision includes explicit Windows local native setup, the additive
 `fl_gst_session_open_local_native_epoch` API and automatic native A/V bin setup
 via `set-local-native-candidate`. [Native bin contract and checks](../windows-native-bins/README.md):
@@ -49,6 +54,7 @@ specific tests, not full M6 qualification. Source headers are pinned in
 ## Observed defaults, not a new product decision
 
 Runtime `gst-inspect-1.0` was checked against the isolated build's actual DLL.
+Copy-in overload controls below do not define shared-CPU or PCM loss policy.
 - Thin `framelinksink`: `buffer-wait-ms=5`, `error-on-ring-full=false`,
   `native-memory=false`, `shared-cpu=false`. Full-ring timeout therefore counts
   a dropped frame and continues unless caller explicitly enables errors.
@@ -68,6 +74,10 @@ policy remains unresolved and Jon-owned. D3 convenience defaults remain unresolv
 no automatic native-to-CPU fallback was added. No new default was silently chosen.
 An app requiring no unexpected loss must select explicit strict policy and observe
 loss counters; avsink exposes explicit video ring-full controls (4a49a92 onward).
+The `framelink-sink-stats` element message comes from the internal video sink
+on successful video EOS, not from a top-level bin stats property. It reports
+aggregate received/submitted/dropped/ring-full-drops, not continuous identity
+telemetry or a guaranteed snapshot after error/cancellation.
 
 ## Migration and pending integration
 
@@ -98,7 +108,14 @@ plus the GStreamer bin directory, and an isolated GST_REGISTRY. A probe setting 
 GST_PLUGIN_PATH failed to resolve sibling DLLs; negative retained, corrected probe
 passed. This is not a clean-install qualification (M7 remains on hold).
 
-## Subsequent Windows-only internal prerequisites
+## Historical implementation progression
+
+The following implementation-stage notes preserve their original evidence scope.
+Statements that work was pending describe that stage, not a reversal of later
+completed work. Use the integrated baseline above and the final relay update below
+to distinguish integrated from focused-only coverage.
+
+### Subsequent Windows-only internal prerequisites
 
 [Pool setup](../cpu-path/windows-cpu-control/README.md) and
 [frame protocol](../cpu-path/windows-cpu-frames/README.md) now pass focused tests.
@@ -316,4 +333,19 @@ exact-revision validation is collected. API is not frozen.
 
 ## Additive local relay setup entrypoint (not yet integrated baseline)
 
-`fl_gst_session_open_local_native_relay` pins an identity-mapped upstream A/V timeline for a distinct FAR4 downstream session. Existing consumer entrypoints and wire/default behavior are unchanged. It still creates an independent pool; this is not automatic zero-copy local relay support. [Contract and focused evidence](../windows-local-relay-session/README.md). C11 and initial runtime2/2 pass; final export/regression check pending. The pinned7b8a274 baseline remains119 exports; the new revision is expected to add exactly this one symbol, not remove any. API not frozen.
+`fl_gst_session_open_local_native_relay` pins an identity-mapped upstream A/V
+timeline for a distinct FAR4 downstream session. It still creates an independent
+pool and alone is not a same-allocation relay. [Focused evidence](../windows-local-relay-session/README.md)
+collected at `ab91cac`: Windows 5/5, Linux 2/2 and 119 retained names plus this
+symbol (120 total). These checks do not replace the pinned integrated baseline.
+
+The later FAR5 APIs `fl_gst_session_open_local_native_relay_pool` and
+`fl_gst_session_open_local_native_pool_receiver` provide authenticated explicit
+same-allocation setup. [Pool evidence](../windows-local-relay-pool/README.md)
+records 122 exported names with all 119 retained; see the
+[current recipe and cancellation contract](../WINDOWS_LOCAL_NATIVE_RELAY.md).
+Focused actual-session A/V and separate-process native controls passed; the raw
+process control is not cross-process PCM/bin end-to-end qualification. General
+separate-process composition still needs the safe consumer-pool export/backend
+integration. No final integrated suite or endurance result is implied by these
+focused passes. No existing default or FAR4 behavior was changed. API not frozen.
