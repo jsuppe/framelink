@@ -34,12 +34,12 @@ class WinSha256Rows {
   // Empty return means invalid layout or CNG failure, never a digest to accept.
   std::string digest(const unsigned char* data, size_t stride,
                      size_t rowBytes, size_t rows) {
-    if(!ready || stride<rowBytes || rowBytes>MAXULONG ||
+    if(!ready || stride<rowBytes || rowBytes>(std::numeric_limits<ULONG>::max)() ||
        (rowBytes && rows && !data) ||
        (rows>1 && stride>((std::numeric_limits<size_t>::max)()-rowBytes)/(rows-1)))
       return {};
     if(rowBytes && rows) {
-      if(stride==rowBytes && rows<=MAXULONG/rowBytes) {
+      if(stride==rowBytes && rows<=(std::numeric_limits<ULONG>::max)()/rowBytes) {
         if(!update(data,static_cast<ULONG>(rowBytes*rows))) return {};
       } else {
         for(size_t y=0;y<rows;++y)
