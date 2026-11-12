@@ -203,12 +203,12 @@ Receive-depth gate evidence: [review and platform tests](receive-depth/README.md
 ## Immediate next action and coordination
 
 ### Execution-order override — Jon, 2026-11-12
-Preserve and collect the already-running exact 7b8a274 integrated campaign; do not cancel or repeat it. Thereafter complete remaining Windows implementation and API-contract work sequentially, using builds and narrowly targeted checks for immediate defects. Batch full integrated suites, broad fault/endurance/performance campaigns and final compatibility qualification after planned Windows code/API changes. Fix validation failures and qualify the final exact revision before readiness claims. Code complete is not validated/API frozen/M6 complete. Linux/Android broad campaigns remain deferred; M7 hold unchanged.
+The then-running exact7b8a274 integrated campaign was preserved and collected; do not repeat it. Complete remaining Windows implementation and API-contract work using focused builds/checks, with independent parallel work permitted and only one Windows runtime owner. Batch full integrated suites, broad fault/endurance/performance campaigns and final compatibility qualification after planned Windows code/API changes. Fix validation failures and qualify the final exact revision before readiness claims. Code complete is not validated/API frozen/M6 complete. Linux/Android broad campaigns remain deferred; M7 hold unchanged.
 
 ## Priority override — Jon, 2026-11-08 16:29 EST
-Jon requests completing all remaining Windows-specific changes first and stabilizing the API. This supersedes the previous Linux/Android refresh order. Preserve and collect the currently running Linux BGRA1080p60 test (already near completion), then do NOT launch the queued Linux NV12 refresh. Defer additional Linux/Android campaigns except focused checks required by shared API/code changes.
+Jon requests completing all remaining Windows-specific changes first and stabilizing the API. This supersedes the previous Linux/Android refresh order. The then-running Linux BGRA1080p60 test was preserved and collected. Do NOT launch the queued Linux NV12 refresh under this override. Defer additional Linux/Android campaigns except focused checks required by shared API/code changes.
 
-Next, inventory and execute remaining Windows M6 implementation and repairs sequentially: shared-CPU allocator/transport integration; Windows D3D11 native-producer integration into coordinated sessions (M6.9); reconnect/device lifetime memory growth; outstanding Windows timing/queue defects and required fault handling. Validate each change with focused Windows checks. Track genuine blocked items with owner/evidence/resume condition, not silent acceptance.
+Inventory and execute remaining Windows M6 implementation and repairs under the current parallel-work/exclusive-runtime policy: shared-CPU allocator/transport integration; Windows D3D11 native-producer integration into coordinated sessions (M6.9); reconnect/device lifetime memory growth; outstanding Windows timing/queue defects and required fault handling. Validate each change with focused Windows checks. Track genuine blocked items with owner/evidence/resume condition, not silent acceptance.
 
 Make API stabilization an explicit deliverable alongside this Windows-first work: audit native C/platform APIs and GStreamer properties/session contracts, resolve overload/fallback defaults, preserve compatibility or document versioned migration, and check planned Linux/Android integration will not require breaking the proposed contract. Publish an exact revision and compatibility checks for an app-integration baseline. Do not claim the API is frozen until reviewed/tested; do not equate a Windows-ready API baseline with full cross-platform M6 completion. Bring forward API stabilization work, not unrelated M7 packaging/release; retain maintenance hold before M7.
 
@@ -232,15 +232,22 @@ M6 remains open; M7 remains held.
 | Windows other sharedCPU targets | **BGRA4K30 PASS** exact461584b:1800s,54000video/86400000PCM/180000audio, zero34ms misses; memory7.166/7.389KB/min, handle/thread gates pass. [Evidence](cpu-path/windows-cpu-bgra4k30-461584b/README.md). Older76a65d2 BGRA1080p60 pass retained; NV124K30 unqualified | Collected and independently reanalyzed;58 original hashes verified. Runtime released07:25:52Z; do not repeat |
 | Native two-hop qualification harness | All4 BGRA/NV12 1080p60/4K30 matched5s trace-off/trace-on profiles **PASS** at11d1b65, exact video/PCM and zero17/34ms misses; both trace boundaries joined without relay payload copies. [Verified targets](windows-native-relay-targets-11d1b65/README.md). Initial MSVC and collection separator failures preserved | BGRA1080p60 native1800s **PASS**:108000video/86400000PCM, zero17ms misses; memory slopes0/0.400218/0KB per minute and handle/thread gates pass. Root independent raw analysis passed; [duration evidence](windows-native-relay-duration-bgra1080-11d1b65/README.md) archived. Remaining three native duration cells unqualified |
 | Authenticated real-decoder relay qualification | New4d38a09 tiny real-decoder FAR4→FAR5 fixture clean Windows build/test/analysis **PASS**:16 distinct decoded frames,25600PCM,37ms offset and held-reader proof;7 checker cases/1 local CTest pass | Collected and independently checked; [evidence archived](windows-local-decoder-4d38a09/README.md). Explicit conversion/source-final readbacks, not target-rate or direct decoder-zero-copy proof |
-| Paced real-decoder relay | Corrected CNG full-SHA256 harness at77afa1a: clean build,9/9 focused tests,2s smoke and both5s1080p60 trace arms **PASS** (300distinct/240000PCM each, zero17ms misses). Initial GLib failure retained. 4K30 preflight **FAILED**:150distinct/240000PCM exact,140video34ms misses; decoder-pull p5022.0109ms and source oracle13.6742ms | Root; local causal investigation of on-demand fixture generation/encoding versus decode. No 4K trace-on or decoder endurance run; full oracle and gates retained |
+| Paced real-decoder relay | CNG77afa1a1080p60 matched short pair PASS; on-demand4K failed at77afa1a and queue-controlc539d99. Explicit AU replayb247e5d:4K trace-off PASS150distinct/240000PCM/max30.735534ms; trace-on exact media/accounting but two34ms misses (max36.6673ms), overall pair FAILED | Root; archived replay evidence. Next buffered Map/SHA/Unmap causal diagnostic after integration; no decoder4K endurance or timing waiver |
 | Automatic FAR5 native receiver pause/resume | **PASS** after462fa5f checked-sample fix: collect only missing reservations, no post-drain extra acquire. Windows8/8 focused tests passed10.08s, including original pause case and genuine outstanding-reader death | Root; [initial failure](windows-native-pause-validation/initial-failure-9ea51d4/README.md), [diagnostics](windows-native-pause-validation/diagnostics/README.md), [fix evidence](windows-native-pause-validation/fix-462fa5f/README.md) archived. Real ownership/error checks retained |
 | Historical Windows startup | **Suspended, not waived.** Original1529.4514ms is source-to-receive, not proven producer-open time. New buffered phases show current158–164ms opens dominated by device creation; legacy94/100 vs coordinated100/100, exactPCM, no reproduction. [Evidence](windows-startup-phase-461584b/README.md) | Evelyn; resume on original-scale phase/wait evidence plus compatible remedy, not equivalent clean repeats |
 | Windows native lifetime | **Suspended, not waived:**21.10/84.09KiB/cycle exceed16KB/cycle. Raw device churn/reuse/Trim controls identify a contribution, not complete attribution. [Contract](lifecycle/WINDOWS_DEVICE_LIFETIME.md) | Evelyn owns investigation; driver/backend remedy or explicitly approved device-lifetime contract required. Jon owns contract/acceptance changes |
 | D2 / D3 | Unresolved public overload/convenience-fallback decisions; existing explicit profiles/defaults preserved | Jon; no automatic default change or hidden native-to-CPU fallback |
 | Linux / Android campaigns | Broad work deferred under Windows-first direction. Prior Linux BGRA and other completed campaigns collected, not repeated. Android BGRA4K and NV121080 residual failures remain suspended; clean trace diagnostics did not waive them | Evelyn; resume deferred integration only after Windows priority permits; causal fixes required for suspended failed cells |
 
-**Windows runtime owner:** root; idle verified08:17:36.9361895Z after the
-first b247e5d explicit4K30 AU replay pair. The clean build and9/9 focused checks
+**Windows runtime owner:** root, exec5910 / CTest PID57984: exacta50841a
+clean integrated build, full178-test inventory, per-DLL API and unchanged-client
+qualification. Current evidence:
+`windows-final-integrated-prepared/runs/final-windows-a50841a-toolpath-20261112t0822z`.
+The corrected batch passed build/export/element inspection stages and entered
+serial CTest; current counts are reported by the live progress card. Prior runner-only PDB and inspection
+path failures were preserved; neither earlier attempt reached CTest.
+
+Previously collected b247e5d explicit4K30 AU replay pair: The clean build and9/9 focused checks
 passed10.09s; existing on-demand tiny smoke passed60 distinct frames/96000PCM.
 Replay fixture preparation and independent local tape parsing/SHA256 passed:
 150 AUs,650192 bytes. Trace-off passed150 distinct frames/240000PCM with zero
@@ -256,10 +263,10 @@ removes that concurrent workload from replay but does not waive on-demand failur
 The default path, actual decoder, full-pixel oracle, native leases, PCM and all
 17/34ms gates remain unchanged. Both modes retain explicit scope labels.
 
-Next Windows work is the reviewed integrated/API/unchanged-old-client batch on
-the committed implementation, while the two replay misses are reviewed locally.
-Its per-DLL export sets, complete collection/compatibility verification and20
-local validator tests passed. No final API freeze or full M6 qualification is
+After the current integrated batch is collected, run the reviewed external
+Map/SHA/Unmap causal diagnostic without modifying the qualified implementation.
+Integrated runner verification includes per-DLL exports, complete collection,
+compatibility pins, and26 passing local validator tests. No final API freeze or full M6 qualification is
 claimed by this batch; historical startup/lifetime and D2/D3 remain open.
 
 CNG comparison preserved identical full SHA256 across120 samples/known vectors;

@@ -5,9 +5,10 @@ and all four matched short target pairs passed; BGRA1080p60 1800s passed**.
 See [smoke evidence](windows-native-relay-rate-smoke-11d1b65/README.md) and
 [target pairs](windows-native-relay-targets-11d1b65/README.md). The separate
 [paced real-decoder extension](windows-decoder-rate-harness/README.md) is
-passed focused Windows checks and the1080p60 short pair at77afa1a;4K30 remains
-a failed timing gate under investigation. The newer helper462fa5f still needs
-final integrated qualification.
+passed focused Windows checks and the1080p60 short pair at77afa1a. The first
+explicit4K30 replay pair atb247e5d passed trace-off but failed two trace-on
+deadlines;4K30 remains unqualified. The newer helper462fa5f still needs
+final integrated qualification; the current integrated batch is not yet a result.
 Owner: Evelyn. Windows execution remains exclusive; consult the
 [current execution ledger](LOW_LATENCY_PLAN.md#authoritative-execution-state--2026-11-12)
 for the live owner before starting any runtime work.
@@ -114,8 +115,25 @@ The separate paced extension passed a clean build,9/9 focused tests, tiny smoke,
 and both short1080p60 trace arms with full SHA256 at77afa1a. The4K30 preflight
 failed timing despite exact distinct frame/PCM delivery; a bounded encoded-AU
 queue control atc539d99 also failed. See [CNG results](windows-decoder-cng-77afa1a/README.md)
-and [queue control](windows-decoder-queue-c539d99/README.md). Source-generation
-and encoding throughput are being isolated; no decoder duration has run.
+and [queue control](windows-decoder-queue-c539d99/README.md).
+
+The completed [source-only diagnostic](windows-decoder-source-throughput/README.md)
+measured clean150-frame generation5.1418495s and generation/encoding5.5626633s;
+those wall times include startup/drain. Separate instrumented arms established
+exact150-buffer/PTS accounting, not a clean performance result. This does not
+waive either on-demand4K failure.
+
+Atb247e5d, [explicit compressed-AU replay](windows-decoder-replay-b247e5d/README.md)
+moves generation/encoding into a separate preparation step while preserving
+actual decoding, full-pixel SHA256, PCM and real native completion. The first
+five-second4K30 trace-off arm passed150 distinct frames/240000PCM with zero34ms
+misses (max30.735534ms). Its matched trace-on arm retained exact media and passed
+trace accounting, but missed deadlines for identities116/117 (max36.6673ms).
+The pair therefore **FAILED**; no decoder endurance run has occurred. Source
+oracle readback/hash reached31.6217ms. A bounded source-oracle phase diagnostic
+is prepared to separate Map/SHA/Unmap observations; it is not a qualified result
+or a waiver. Its buffered logging changes observation overhead, so it cannot
+retroactively qualify this original failed pair.
 
 The immutable synthetic11d1b65 [BGRA1080p60 duration](windows-native-relay-duration-bgra1080-11d1b65/README.md)
 passed1800s,108000 video frames/86400000PCM frames, zero17ms misses and resource
