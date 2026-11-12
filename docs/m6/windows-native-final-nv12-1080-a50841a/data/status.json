@@ -1,0 +1,57 @@
+{
+  "revision": "a50841aad44fbc9431234a4f326bad036d193bf5",
+  "state": "finished",
+  "started_utc": "2026-11-12T08:36:10.848038+00:00",
+  "step": "trace-on-analysis",
+  "command": [
+    "<win-home>\\AppData\\Local\\Microsoft\\WindowsApps\\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\\python.exe",
+    "-E",
+    "<win-home>\\dev\\framelink-native-final-target-native-nv12-1080-a50841a-20261112t0837z\\check_local_native_bench.py",
+    "<win-home>\\dev\\framelink-native-final-target-native-nv12-1080-a50841a-20261112t0837z\\trace-on"
+  ],
+  "pin-idle-before_exit": 0,
+  "binary_before": {
+    "fl_gst_local_native_bench_win.exe": "36235c4447efdddadaf9a9859ffa1c3f57164ed433d0a7724862c2027f15cf41",
+    "fl_gst_native_producer_win.exe": "91c30697090970ee6c5ebb23491b2d28cfd8fe691a930faa26926b6326de927c",
+    "framelink.dll": "258817c2a2ca7df704575a3c15f539c302c87d471056fd964f868ef2fa50ea10",
+    "framelink_gst_session.dll": "9fb7da31cbc38ccce5a0cb87456dbaeb5d8ea0cc61558af0682eedbbcd9c681f",
+    "gstframelink.dll": "8143c8b65d9c93eeb98c68c74586128912ccd9a8f7b1fbdc809b4ad2d693b994"
+  },
+  "trace-off-idle-before_exit": 0,
+  "trace-off_binary_before": {
+    "fl_gst_local_native_bench_win.exe": "36235c4447efdddadaf9a9859ffa1c3f57164ed433d0a7724862c2027f15cf41",
+    "fl_gst_native_producer_win.exe": "91c30697090970ee6c5ebb23491b2d28cfd8fe691a930faa26926b6326de927c",
+    "framelink.dll": "258817c2a2ca7df704575a3c15f539c302c87d471056fd964f868ef2fa50ea10",
+    "framelink_gst_session.dll": "9fb7da31cbc38ccce5a0cb87456dbaeb5d8ea0cc61558af0682eedbbcd9c681f",
+    "gstframelink.dll": "8143c8b65d9c93eeb98c68c74586128912ccd9a8f7b1fbdc809b4ad2d693b994"
+  },
+  "trace-off_exit": 0,
+  "trace-off_binary_after": {
+    "fl_gst_local_native_bench_win.exe": "36235c4447efdddadaf9a9859ffa1c3f57164ed433d0a7724862c2027f15cf41",
+    "fl_gst_native_producer_win.exe": "91c30697090970ee6c5ebb23491b2d28cfd8fe691a930faa26926b6326de927c",
+    "framelink.dll": "258817c2a2ca7df704575a3c15f539c302c87d471056fd964f868ef2fa50ea10",
+    "framelink_gst_session.dll": "9fb7da31cbc38ccce5a0cb87456dbaeb5d8ea0cc61558af0682eedbbcd9c681f",
+    "gstframelink.dll": "8143c8b65d9c93eeb98c68c74586128912ccd9a8f7b1fbdc809b4ad2d693b994"
+  },
+  "trace-off-idle-after_exit": 0,
+  "trace-off-analysis_exit": 0,
+  "trace-on-idle-before_exit": 0,
+  "trace-on_binary_before": {
+    "fl_gst_local_native_bench_win.exe": "36235c4447efdddadaf9a9859ffa1c3f57164ed433d0a7724862c2027f15cf41",
+    "fl_gst_native_producer_win.exe": "91c30697090970ee6c5ebb23491b2d28cfd8fe691a930faa26926b6326de927c",
+    "framelink.dll": "258817c2a2ca7df704575a3c15f539c302c87d471056fd964f868ef2fa50ea10",
+    "framelink_gst_session.dll": "9fb7da31cbc38ccce5a0cb87456dbaeb5d8ea0cc61558af0682eedbbcd9c681f",
+    "gstframelink.dll": "8143c8b65d9c93eeb98c68c74586128912ccd9a8f7b1fbdc809b4ad2d693b994"
+  },
+  "trace-on_exit": 0,
+  "trace-on_binary_after": {
+    "fl_gst_local_native_bench_win.exe": "36235c4447efdddadaf9a9859ffa1c3f57164ed433d0a7724862c2027f15cf41",
+    "fl_gst_native_producer_win.exe": "91c30697090970ee6c5ebb23491b2d28cfd8fe691a930faa26926b6326de927c",
+    "framelink.dll": "258817c2a2ca7df704575a3c15f539c302c87d471056fd964f868ef2fa50ea10",
+    "framelink_gst_session.dll": "9fb7da31cbc38ccce5a0cb87456dbaeb5d8ea0cc61558af0682eedbbcd9c681f",
+    "gstframelink.dll": "8143c8b65d9c93eeb98c68c74586128912ccd9a8f7b1fbdc809b4ad2d693b994"
+  },
+  "trace-on-idle-after_exit": 0,
+  "trace-on-analysis_exit": 0,
+  "ended_utc": "2026-11-12T08:36:26.849874+00:00"
+}
