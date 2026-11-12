@@ -228,7 +228,7 @@ since the candidate. M6 remains open; M7 remains held.
 | Old-client compatibility | **3/3 unchanged7b8a274-built clients** pass against baseline and candidate DLLs; exact binary hashes verified. Source review found no existing public layout/enum/signature break. [Evidence](windows-compat-461584b/README.md) | Collected; bounded proof, not all-version/ordinal ABI freeze |
 | Windows sharedCPU NV12 1080p60 | **PASS** exact461584b: one1800s run,108000video/86400000PCM/180000audio; zero17ms misses, inferred A/V delta0ns; memory7.233/7.569KB/min below64, handle/thread gates pass. [Evidence](cpu-path/windows-cpu-nv12-1080p60-461584b/README.md) | Collected and independently reanalyzed; four binary hashes unchanged. Runtime released06:54:44Z; do not repeat |
 | Windows other sharedCPU targets | **BGRA4K30 PASS** exact461584b:1800s,54000video/86400000PCM/180000audio, zero34ms misses; memory7.166/7.389KB/min, handle/thread gates pass. [Evidence](cpu-path/windows-cpu-bgra4k30-461584b/README.md). Older76a65d2 BGRA1080p60 pass retained; NV124K30 unqualified | Collected and independently reanalyzed;58 original hashes verified. Runtime released07:25:52Z; do not repeat |
-| Native two-hop qualification harness | All4 BGRA/NV12 1080p60/4K30 matched5s trace-off/trace-on profiles **PASS** at11d1b65, exact video/PCM and zero17/34ms misses; both trace boundaries joined without relay payload copies. [Verified targets](windows-native-relay-targets-11d1b65/README.md). Initial MSVC and collection separator failures preserved | Sole Windows owner native separate_process_av, exec48715/PID53480: one BGRA1080p60 native1800s run started07:31:21Z. Resource/rate qualification pending, not inferred from preflights |
+| Native two-hop qualification harness | All4 BGRA/NV12 1080p60/4K30 matched5s trace-off/trace-on profiles **PASS** at11d1b65, exact video/PCM and zero17/34ms misses; both trace boundaries joined without relay payload copies. [Verified targets](windows-native-relay-targets-11d1b65/README.md). Initial MSVC and collection separator failures preserved | BGRA1080p60 native1800s **PASS**:108000video/86400000PCM, zero17ms misses; memory slopes0/0.400218/0KB per minute and handle/thread gates pass. Root independent raw analysis passed; archive in progress. Remaining three native duration cells unqualified |
 | Authenticated real-decoder relay qualification | New4d38a09 tiny real-decoder FAR4→FAR5 fixture clean Windows build/test/analysis **PASS**:16 distinct decoded frames,25600PCM,37ms offset and held-reader proof;7 checker cases/1 local CTest pass | Collected and independently checked; [evidence archived](windows-local-decoder-4d38a09/README.md). Explicit conversion/source-final readbacks, not target-rate or direct decoder-zero-copy proof |
 | Paced real-decoder relay | Separate test harness49f9145 implemented/reviewed,30 analyzer cases +1 local CTest pass. [Contract and local evidence](windows-decoder-rate-harness/README.md). Actual Windows build/runtime pending | Root; ready-batch decoder2s smoke follows exclusive duration release, then gated target trace-off/on. No qualified rate claim |
 | Automatic FAR5 native receiver pause/resume | Narrow additional coverage implemented3914aa6 with durable EOS observation49c9c03, statically reviewed but Windows build/runtime pending: PLAYING→PAUSED→PLAYING with retained native GstMemory, plus paused cancellation. Existing NULL teardown and generic copied-memory pause tests already passed | Root owns prepared three-test Windows runner; no execution until current duration owner releases. Source admission controlled while paused; no new D2 default |
@@ -237,12 +237,15 @@ since the candidate. M6 remains open; M7 remains held.
 | D2 / D3 | Unresolved public overload/convenience-fallback decisions; existing explicit profiles/defaults preserved | Jon; no automatic default change or hidden native-to-CPU fallback |
 | Linux / Android campaigns | Broad work deferred under Windows-first direction. Prior Linux BGRA and other completed campaigns collected, not repeated. Android BGRA4K and NV121080 residual failures remain suspended; clean trace diagnostics did not waive them | Evelyn; resume deferred integration only after Windows priority permits; causal fixes required for suspended failed cells |
 
-**Windows runtime owner:** native `separate_process_av`, exec48715, benchmark PID53480.
-One native BGRA1080p60 duration run started07:31:21Z, expected near08:01:24Z:
+**Windows runtime owner:** root, exec94840, exact `9ea51d4` ready batch.
+Prior native BGRA1080p60 duration collected with32 hash-verified entries and
+four unchanged binary pins; final idle08:01:29.912Z. Raw evidence:
 `<linux-home>/dev/evidence/m6-cpu-path/windows-native-relay-duration-prepared/runs/native-bgra1080-1800-11d1b65-20261112t0732z`.
-It reuses the four pinned11d1b65 binaries and prior matched preflight; no repeated
-preflight or concurrent Windows build/test. Root integrates local test-only work.
-Collect raw result and verified idle before next Windows task. M7 remains held.
+Now building the reviewed pause/decoder overlay and running exactly three
+pause-related tests plus a2s decoder-rate smoke. Evidence:
+`<linux-home>/dev/evidence/m6-cpu-path/windows-native-ready-batch-prepared/runs/ready-9ea51d4-20261112t0802z`.
+No competing Windows workload; duration archival is local-only. Collect and
+resolve findings before decoder target pairs or another duration cell. M7 held.
 
 ### Qualification exclusions retained
 
