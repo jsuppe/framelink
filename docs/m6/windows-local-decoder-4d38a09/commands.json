@@ -1,0 +1,59 @@
+{
+  "provenance": "Expanded from archived remote.py and config; not a new runtime invocation",
+  "remote_working_directory": "<win-home>/dev/framelink-local-decoder-decoder-4d38a09-20261112t0730z",
+  "steps": [
+    [
+      "tar",
+      "-xf",
+      "source.tar"
+    ],
+    [
+      "cmake",
+      "-S",
+      ".",
+      "-B",
+      "build",
+      "-G",
+      "Visual Studio 17 2022",
+      "-DFRAMELINK_BUILD_TESTS=ON",
+      "-DFRAMELINK_BUILD_GST=ON"
+    ],
+    [
+      "cmake",
+      "--build",
+      "build",
+      "--config",
+      "Release",
+      "--target",
+      "fl_gst_local_decoder_win",
+      "gstframelink",
+      "-j",
+      "4",
+      "--",
+      "/nr:false"
+    ],
+    [
+      "ctest",
+      "--test-dir",
+      "build",
+      "-C",
+      "Release",
+      "-N",
+      "--show-only=json-v1",
+      "-R",
+      "^gst_local_decoder_discovery_win$"
+    ],
+    [
+      "<win-home>/dev/framelink-local-decoder-decoder-4d38a09-20261112t0730z/build/Release/fl_gst_local_decoder_win.exe",
+      "<win-home>/dev/framelink-local-decoder-decoder-4d38a09-20261112t0730z/build/Release/gstframelink.dll",
+      "--out",
+      "<win-home>/dev/framelink-local-decoder-decoder-4d38a09-20261112t0730z/smoke"
+    ],
+    [
+      "python",
+      "test/fl_gst_local_decoder_check.py",
+      "--check-only",
+      "<win-home>/dev/framelink-local-decoder-decoder-4d38a09-20261112t0730z/smoke"
+    ]
+  ]
+}
