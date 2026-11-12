@@ -1,0 +1,106 @@
+{
+  "bgra1080": {
+    "original_run": "<linux-home>/dev/evidence/m6-cpu-path/windows-native-relay-target-prepared/runs/native-bgra1080-11d1b65-20261112t0729z",
+    "controller_state": "failed",
+    "recovery": true,
+    "manifest_verified": 55,
+    "raw_csvs": 21,
+    "raw_bytes": 1613733,
+    "arms": {
+      "trace-off": {
+        "video": 300,
+        "pcm_frames": 240000,
+        "video_max_ms": 4.998134,
+        "audio_max_ms": 0.7996,
+        "budget_ms": 17.0,
+        "trace_checked": false
+      },
+      "trace-on": {
+        "video": 300,
+        "pcm_frames": 240000,
+        "video_max_ms": 7.053334,
+        "audio_max_ms": 0.7442,
+        "budget_ms": 17.0,
+        "trace_checked": true
+      }
+    }
+  },
+  "nv121080": {
+    "original_run": "<linux-home>/dev/evidence/m6-cpu-path/windows-native-relay-target-prepared/runs/native-nv121080-11d1b65-20261112t0730z",
+    "controller_state": "finished",
+    "recovery": false,
+    "manifest_verified": 55,
+    "raw_csvs": 21,
+    "raw_bytes": 1622196,
+    "arms": {
+      "trace-off": {
+        "video": 300,
+        "pcm_frames": 240000,
+        "video_max_ms": 4.5713,
+        "audio_max_ms": 0.6287,
+        "budget_ms": 17.0,
+        "trace_checked": false
+      },
+      "trace-on": {
+        "video": 300,
+        "pcm_frames": 240000,
+        "video_max_ms": 5.352967,
+        "audio_max_ms": 1.1763,
+        "budget_ms": 17.0,
+        "trace_checked": true
+      }
+    }
+  },
+  "bgra4k": {
+    "original_run": "<linux-home>/dev/evidence/m6-cpu-path/windows-native-relay-target-prepared/runs/native-bgra4k-11d1b65-20261112t0730z",
+    "controller_state": "finished",
+    "recovery": false,
+    "manifest_verified": 55,
+    "raw_csvs": 21,
+    "raw_bytes": 994207,
+    "arms": {
+      "trace-off": {
+        "video": 150,
+        "pcm_frames": 240000,
+        "video_max_ms": 8.8069,
+        "audio_max_ms": 2.199,
+        "budget_ms": 34.0,
+        "trace_checked": false
+      },
+      "trace-on": {
+        "video": 150,
+        "pcm_frames": 240000,
+        "video_max_ms": 11.314067,
+        "audio_max_ms": 1.0007,
+        "budget_ms": 34.0,
+        "trace_checked": true
+      }
+    }
+  },
+  "nv124k": {
+    "original_run": "<linux-home>/dev/evidence/m6-cpu-path/windows-native-relay-target-prepared/runs/native-nv124k-11d1b65-20261112t0731z",
+    "controller_state": "finished",
+    "recovery": false,
+    "manifest_verified": 55,
+    "raw_csvs": 21,
+    "raw_bytes": 991898,
+    "arms": {
+      "trace-off": {
+        "video": 150,
+        "pcm_frames": 240000,
+        "video_max_ms": 6.2235,
+        "audio_max_ms": 0.739,
+        "budget_ms": 34.0,
+        "trace_checked": false
+      },
+      "trace-on": {
+        "video": 150,
+        "pcm_frames": 240000,
+        "video_max_ms": 7.6759,
+        "audio_max_ms": 0.8854,
+        "budget_ms": 34.0,
+        "trace_checked": true
+      }
+    }
+  }
+}

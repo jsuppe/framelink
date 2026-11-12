@@ -1,0 +1,234 @@
+** WARNING: connection is not using a post-quantum key exchange algorithm.
+** This session may be vulnerable to "store now, decrypt later" attacks.
+** The server may need to be upgraded. See https://openssh.com/pq.html
+{
+  "revision": "11d1b65a84029c3fc84509e3b024b984bc240424",
+  "state": "finished",
+  "started_utc": "2026-11-12T07:28:21.437789+00:00",
+  "binary_before": {
+    "fl_gst_local_native_bench_win.exe": "aea536d880a0c3fe4fe8e3246a23cfec8b77d58b45b4fdd56e2f77eebc5aaed2",
+    "gstframelink.dll": "21f50fb75d9f8f9f96560ba0d48e1b9262454677d881e1ba1e786aae851db023",
+    "framelink.dll": "3a48efa50a42b6f4f291871538cefa970a82391db87b9bbcfb4b27c23876caf3",
+    "framelink_gst_session.dll": "f965f02a55758a76002459ce24261c870d46aa221868bc41de00cd9115c3a6f9"
+  },
+  "step": "trace-on-analysis",
+  "command": [
+    "<win-home>\\AppData\\Local\\Microsoft\\WindowsApps\\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\\python.exe",
+    "-E",
+    "<win-home>\\dev\\framelink-native-target-native-bgra1080-11d1b65-20261112t0729z\\check_local_native_bench.py",
+    "<win-home>\\dev\\framelink-native-target-native-bgra1080-11d1b65-20261112t0729z\\trace-on"
+  ],
+  "trace-off-idle-before_exit": 0,
+  "trace-off_exit": 0,
+  "trace-off-idle-after_exit": 0,
+  "trace-off_binary_after": {
+    "fl_gst_local_native_bench_win.exe": "aea536d880a0c3fe4fe8e3246a23cfec8b77d58b45b4fdd56e2f77eebc5aaed2",
+    "gstframelink.dll": "21f50fb75d9f8f9f96560ba0d48e1b9262454677d881e1ba1e786aae851db023",
+    "framelink.dll": "3a48efa50a42b6f4f291871538cefa970a82391db87b9bbcfb4b27c23876caf3",
+    "framelink_gst_session.dll": "f965f02a55758a76002459ce24261c870d46aa221868bc41de00cd9115c3a6f9"
+  },
+  "trace-off-analysis_exit": 0,
+  "trace-off_analysis": {
+    "scope": "synthetic authenticated transport; explicit upload/verification copies; no physical playback or isolated-hop budget claim",
+    "budget_ns": 17000000,
+    "roles": {
+      "source": {
+        "video": 300,
+        "pcm_frames": 240000,
+        "resource_slopes_per_min": {},
+        "cpu_percent": 60.18708490053848
+      },
+      "relay": {
+        "video": 300,
+        "pcm_frames": 240000,
+        "resource_slopes_per_min": {},
+        "cpu_percent": 10.279608161543655
+      },
+      "receiver": {
+        "video": 300,
+        "pcm_frames": 240000,
+        "resource_slopes_per_min": {},
+        "cpu_percent": 57.57245748525186
+      }
+    },
+    "timing_ms": {
+      "scheduled_to_final_arrival": {
+        "p50": 3.732767,
+        "p95": 4.896934,
+        "p99": 4.979534,
+        "max": 4.998134
+      },
+      "source_marker_to_relay": {
+        "p50": 1.7585,
+        "p95": 2.6114,
+        "p99": 2.6775,
+        "max": 2.8144
+      },
+      "source_marker_to_final": {
+        "p50": 3.4642,
+        "p95": 4.595,
+        "p99": 4.6781,
+        "max": 4.8149
+      },
+      "source_acquire_call": {
+        "p50": 0.0006,
+        "p95": 0.0007,
+        "p99": 0.0008,
+        "max": 0.0058
+      },
+      "source_upload_call": {
+        "p50": 0.3547,
+        "p95": 0.395,
+        "p99": 0.474,
+        "max": 0.9658
+      },
+      "source_submit_call": {
+        "p50": 0.0643,
+        "p95": 0.0814,
+        "p99": 0.0886,
+        "max": 0.1413
+      },
+      "relay_acquire_to_record": {
+        "p50": 0.0457,
+        "p95": 0.0625,
+        "p99": 0.0702,
+        "max": 0.078
+      },
+      "relay_forward_call": {
+        "p50": 0.0451,
+        "p95": 0.0613,
+        "p99": 0.0696,
+        "max": 0.0773
+      },
+      "final_acquire_to_completion": {
+        "p50": 2.0242,
+        "p95": 2.0342,
+        "p99": 2.0388,
+        "max": 2.0413
+      },
+      "audio_scheduled_to_final": {
+        "p50": 0.1658,
+        "p95": 0.2224,
+        "p99": 0.2534,
+        "max": 0.7996
+      }
+    },
+    "pass_all": true,
+    "video_arrival_misses": 0,
+    "audio_arrival_misses": 0,
+    "trace_checked": false
+  },
+  "trace-on-idle-before_exit": 0,
+  "trace-on_exit": 0,
+  "trace-on-idle-after_exit": 0,
+  "trace-on_binary_after": {
+    "fl_gst_local_native_bench_win.exe": "aea536d880a0c3fe4fe8e3246a23cfec8b77d58b45b4fdd56e2f77eebc5aaed2",
+    "gstframelink.dll": "21f50fb75d9f8f9f96560ba0d48e1b9262454677d881e1ba1e786aae851db023",
+    "framelink.dll": "3a48efa50a42b6f4f291871538cefa970a82391db87b9bbcfb4b27c23876caf3",
+    "framelink_gst_session.dll": "f965f02a55758a76002459ce24261c870d46aa221868bc41de00cd9115c3a6f9"
+  },
+  "trace-on-analysis_exit": 0,
+  "trace-on_analysis": {
+    "scope": "synthetic authenticated transport; explicit upload/verification copies; no physical playback or isolated-hop budget claim",
+    "budget_ns": 17000000,
+    "roles": {
+      "source": {
+        "video": 300,
+        "pcm_frames": 240000,
+        "resource_slopes_per_min": {},
+        "cpu_percent": 59.89591398919097,
+        "trace_counts": {
+          "sent": 300,
+          "received": 0
+        }
+      },
+      "relay": {
+        "video": 300,
+        "pcm_frames": 240000,
+        "resource_slopes_per_min": {},
+        "cpu_percent": 35.48502447037903,
+        "trace_counts": {
+          "sent": 300,
+          "received": 300
+        }
+      },
+      "receiver": {
+        "video": 300,
+        "pcm_frames": 240000,
+        "resource_slopes_per_min": {},
+        "cpu_percent": 56.88484077962849,
+        "trace_counts": {
+          "sent": 0,
+          "received": 300
+        }
+      }
+    },
+    "timing_ms": {
+      "scheduled_to_final_arrival": {
+        "p50": 4.425067,
+        "p95": 5.7413,
+        "p99": 6.382667,
+        "max": 7.053334
+      },
+      "source_marker_to_relay": {
+        "p50": 2.2417,
+        "p95": 3.5404,
+        "p99": 4.5686,
+        "max": 4.74
+      },
+      "source_marker_to_final": {
+        "p50": 4.1193,
+        "p95": 5.4499,
+        "p99": 6.0773,
+        "max": 6.7504
+      },
+      "source_acquire_call": {
+        "p50": 0.001,
+        "p95": 0.0011,
+        "p99": 0.0042,
+        "max": 0.0106
+      },
+      "source_upload_call": {
+        "p50": 0.3556,
+        "p95": 0.4013,
+        "p99": 0.4357,
+        "max": 0.8968
+      },
+      "source_submit_call": {
+        "p50": 0.0649,
+        "p95": 0.079,
+        "p99": 0.0887,
+        "max": 0.1504
+      },
+      "relay_acquire_to_record": {
+        "p50": 0.048,
+        "p95": 0.0635,
+        "p99": 0.0695,
+        "max": 0.0862
+      },
+      "relay_forward_call": {
+        "p50": 0.0474,
+        "p95": 0.0631,
+        "p99": 0.069,
+        "max": 0.0855
+      },
+      "final_acquire_to_completion": {
+        "p50": 2.0248,
+        "p95": 2.043,
+        "p99": 4.0265,
+        "max": 4.0304
+      },
+      "audio_scheduled_to_final": {
+        "p50": 0.1611,
+        "p95": 0.2111,
+        "p99": 0.2492,
+        "max": 0.7442
+      }
+    },
+    "pass_all": true,
+    "video_arrival_misses": 0,
+    "audio_arrival_misses": 0,
+    "trace_checked": true
+  },
+  "ended_utc": "2026-11-12T07:28:37.108902+00:00"
+}

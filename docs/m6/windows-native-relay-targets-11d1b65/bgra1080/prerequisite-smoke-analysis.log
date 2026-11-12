@@ -1,0 +1,90 @@
+{
+  "scope": "synthetic authenticated transport; explicit upload/verification copies; no physical playback or isolated-hop budget claim",
+  "budget_ns": 34000000,
+  "roles": {
+    "source": {
+      "video": 60,
+      "pcm_frames": 96000,
+      "resource_slopes_per_min": {},
+      "cpu_percent": 84.85654705954737
+    },
+    "relay": {
+      "video": 60,
+      "pcm_frames": 96000,
+      "resource_slopes_per_min": {},
+      "cpu_percent": 12.480555588053942
+    },
+    "receiver": {
+      "video": 60,
+      "pcm_frames": 96000,
+      "resource_slopes_per_min": {},
+      "cpu_percent": 84.43190945638325
+    }
+  },
+  "timing_ms": {
+    "scheduled_to_final_arrival": {
+      "p50": 3.215234,
+      "p95": 4.0843,
+      "p99": 4.352,
+      "max": 4.352
+    },
+    "source_marker_to_relay": {
+      "p50": 1.2142,
+      "p95": 2.0816,
+      "p99": 2.3424,
+      "max": 2.3424
+    },
+    "source_marker_to_final": {
+      "p50": 3.214,
+      "p95": 4.0821,
+      "p99": 4.3469,
+      "max": 4.3469
+    },
+    "source_acquire_call": {
+      "p50": 0.0006,
+      "p95": 0.0008,
+      "p99": 0.0045,
+      "max": 0.0045
+    },
+    "source_upload_call": {
+      "p50": 0.0068,
+      "p95": 0.0091,
+      "p99": 0.1177,
+      "max": 0.1177
+    },
+    "source_submit_call": {
+      "p50": 0.0661,
+      "p95": 0.0775,
+      "p99": 0.1942,
+      "max": 0.1942
+    },
+    "relay_acquire_to_record": {
+      "p50": 0.0451,
+      "p95": 0.0584,
+      "p99": 0.0715,
+      "max": 0.0715
+    },
+    "relay_forward_call": {
+      "p50": 0.0445,
+      "p95": 0.0579,
+      "p99": 0.0703,
+      "max": 0.0703
+    },
+    "final_acquire_to_completion": {
+      "p50": 2.0254,
+      "p95": 2.0347,
+      "p99": 2.0385,
+      "max": 2.0385
+    },
+    "audio_scheduled_to_final": {
+      "p50": 0.1708,
+      "p95": 0.2311,
+      "p99": 0.2665,
+      "max": 0.5998
+    }
+  },
+  "pass_all": true,
+  "video_arrival_misses": 0,
+  "audio_arrival_misses": 0,
+  "trace_checked": false
+}
