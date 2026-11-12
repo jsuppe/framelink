@@ -1,0 +1,14 @@
+{
+  "observed_utc": "2026-11-12T08:34:40.476351+00:00",
+  "only_mismatched_path": "test/fl_gst_local_decoder_rate_win.cpp",
+  "actual_sha256": "618461c88f182bf39000589a673b34f1ad50ece6977e8058386f2b8f6785aaf5",
+  "expected_sha256": "92379f768fdb5aaa67c9e3adf8e05c3925581903220e73f75cbe49db2f210f71",
+  "actual_bytes": 33340,
+  "expected_bytes": 33179,
+  "actual_crlf": 161,
+  "actual_lf": 161,
+  "expected_crlf": 0,
+  "expected_lf": 161,
+  "equal_after_crlf_to_lf": true,
+  "scope": "git apply platform line ending conversion; build/media not reached"
+}

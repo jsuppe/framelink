@@ -1,0 +1,37 @@
+{
+  "revision": "a50841aad44fbc9431234a4f326bad036d193bf5",
+  "remote": "<win-home>/dev/framelink-oracle-oracle-phase-a50841a-20261112t0834z",
+  "state": "failed",
+  "started_utc": "2026-11-12T08:33:46.357353+00:00",
+  "final_build_run": "<linux-home>/dev/evidence/m6-cpu-path/windows-final-integrated-prepared/runs/final-windows-a50841a-toolpath-20261112t0822z",
+  "remote_exit": 1,
+  "package_exit": 0,
+  "pull_exit": 0,
+  "final_idle": {
+    "activeRuntime": [],
+    "utc": "2026-11-12T08:34:24.2408550Z"
+  },
+  "remote_status": {
+    "revision": "a50841aad44fbc9431234a4f326bad036d193bf5",
+    "state": "failed",
+    "started_utc": "2026-11-12T08:33:53.395717+00:00",
+    "fixture_initial": {
+      "path": "<win-home>/dev/framelink-decoder-replay-replay-4k30-b247e5d-20261112t0818z/fixture.flau",
+      "bytes": 650192,
+      "sha256": "5c3797a3fe9d4c86992cd3be15627fa18bb184334cb557606b3224c30554cb1e"
+    },
+    "step": "patch-apply",
+    "command": [
+      "git",
+      "apply",
+      "<win-home>\\dev\\framelink-oracle-oracle-phase-a50841a-20261112t0834z\\diagnostic.patch"
+    ],
+    "extract_exit": 0,
+    "patch-check_exit": 0,
+    "patch-apply_exit": 0,
+    "error": "overlay changed unexpected source",
+    "ended_utc": "2026-11-12T08:34:24.128494+00:00"
+  },
+  "collection_error": "missing raw arm: trace-off",
+  "ended_utc": "2026-11-12T08:34:29.051678+00:00"
+}
