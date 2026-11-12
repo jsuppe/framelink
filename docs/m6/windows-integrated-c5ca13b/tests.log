@@ -1,0 +1,306 @@
+** WARNING: connection is not using a post-quantum key exchange algorithm.
+** This session may be vulnerable to "store now, decrypt later" attacks.
+** The server may need to be upgraded. See https://openssh.com/pq.html
+Test project <win-home>/dev/framelink-m6-windows-c5ca13b/build
+        Start   1: read_leases
+  1/146 Test   #1: read_leases .............................   Passed    0.32 sec
+        Start   2: frame_metadata_contract
+  2/146 Test   #2: frame_metadata_contract .................   Passed    0.02 sec
+        Start   3: read_ledger
+  3/146 Test   #3: read_ledger .............................   Passed    0.06 sec
+        Start   4: session_contract
+  4/146 Test   #4: session_contract ........................   Passed    0.02 sec
+        Start   5: session_optional_tracks
+  5/146 Test   #5: session_optional_tracks .................   Passed    0.02 sec
+        Start   6: session_contract_c_api
+  6/146 Test   #6: session_contract_c_api ..................   Passed    0.02 sec
+        Start   7: memory_boundary
+  7/146 Test   #7: memory_boundary .........................   Passed    0.02 sec
+        Start   8: shared_cpu_channel_win
+  8/146 Test   #8: shared_cpu_channel_win ..................   Passed    3.04 sec
+        Start   9: shared_cpu_channel_c
+  9/146 Test   #9: shared_cpu_channel_c ....................   Passed    0.02 sec
+        Start  10: shared_cpu_control_win
+ 10/146 Test  #10: shared_cpu_control_win ..................   Passed    1.65 sec
+        Start  11: shared_cpu_pipe_win
+ 11/146 Test  #11: shared_cpu_pipe_win .....................   Passed    0.11 sec
+        Start  12: shared_cpu_imported_pool_win
+ 12/146 Test  #12: shared_cpu_imported_pool_win ............   Passed    0.04 sec
+        Start  13: shared_cpu_allocation_win
+ 13/146 Test  #13: shared_cpu_allocation_win ...............   Passed    0.17 sec
+        Start  14: shared_cpu_pool
+ 14/146 Test  #14: shared_cpu_pool .........................   Passed    0.02 sec
+        Start  15: shared_cpu_contract
+ 15/146 Test  #15: shared_cpu_contract .....................   Passed    0.02 sec
+        Start  16: shared_cpu_contract_c_api
+ 16/146 Test  #16: shared_cpu_contract_c_api ...............   Passed    0.02 sec
+        Start  17: memory_contract
+ 17/146 Test  #17: memory_contract .........................   Passed    0.02 sec
+        Start  18: memory_contract_c_api
+ 18/146 Test  #18: memory_contract_c_api ...................   Passed    0.02 sec
+        Start  19: read_lease_d3d11
+ 19/146 Test  #19: read_lease_d3d11 ........................   Passed    0.39 sec
+        Start  20: read_lease_d3d11_producer_death
+ 20/146 Test  #20: read_lease_d3d11_producer_death .........   Passed    0.36 sec
+        Start  21: read_lease_d3d11_delayed_completion
+ 21/146 Test  #21: read_lease_d3d11_delayed_completion .....   Passed    0.42 sec
+        Start  22: ipc_framing_win
+ 22/146 Test  #22: ipc_framing_win .........................   Passed    0.02 sec
+        Start  23: import_failure_win
+ 23/146 Test  #23: import_failure_win ......................   Passed    0.22 sec
+        Start  24: external_pool_1
+ 24/146 Test  #24: external_pool_1 .........................   Passed    0.29 sec
+        Start  25: external_pool_2
+ 25/146 Test  #25: external_pool_2 .........................   Passed    0.27 sec
+        Start  26: external_pool_3
+ 26/146 Test  #26: external_pool_3 .........................   Passed    0.26 sec
+        Start  27: external_pool_4
+ 27/146 Test  #27: external_pool_4 .........................   Passed    0.27 sec
+        Start  28: buffer_references
+ 28/146 Test  #28: buffer_references .......................   Passed    0.30 sec
+        Start  29: submit_ownership
+ 29/146 Test  #29: submit_ownership ........................   Passed    0.57 sec
+        Start  30: memory_resource_1
+ 30/146 Test  #30: memory_resource_1 .......................   Passed    0.21 sec
+        Start  31: memory_resource_2
+ 31/146 Test  #31: memory_resource_2 .......................   Passed    0.20 sec
+        Start  32: memory_resource_3
+ 32/146 Test  #32: memory_resource_3 .......................   Passed    0.20 sec
+        Start  33: memory_resource_4
+ 33/146 Test  #33: memory_resource_4 .......................   Passed    0.20 sec
+        Start  34: frame_metadata
+ 34/146 Test  #34: frame_metadata ..........................   Passed    0.89 sec
+        Start  35: expanded_pool
+ 35/146 Test  #35: expanded_pool ...........................   Passed    0.41 sec
+        Start  36: receive_queue
+ 36/146 Test  #36: receive_queue ...........................   Passed    1.68 sec
+        Start  37: roundtrip
+ 37/146 Test  #37: roundtrip ...............................   Passed    0.46 sec
+        Start  38: roundtrip_reattach
+ 38/146 Test  #38: roundtrip_reattach ......................   Passed    0.78 sec
+        Start  39: nv12_layout
+ 39/146 Test  #39: nv12_layout .............................   Passed    0.02 sec
+        Start  40: nv21_conversion
+ 40/146 Test  #40: nv21_conversion .........................   Passed    0.22 sec
+        Start  41: gst_native_epoch_c_api
+ 41/146 Test  #41: gst_native_epoch_c_api ..................   Passed    0.08 sec
+        Start  42: gst_native_producer_win
+ 42/146 Test  #42: gst_native_producer_win .................   Passed   18.87 sec
+        Start  43: gst_native_bin_relay_cancel_win
+ 43/146 Test  #43: gst_native_bin_relay_cancel_win .........   Passed    0.76 sec
+        Start  44: gst_native_bin_relay_win
+ 44/146 Test  #44: gst_native_bin_relay_win ................   Passed    0.78 sec
+        Start  45: gst_native_lease_relay_win
+ 45/146 Test  #45: gst_native_lease_relay_win ..............   Passed    0.52 sec
+        Start  46: gst_automatic_relay_negative_win
+ 46/146 Test  #46: gst_automatic_relay_negative_win ........   Passed    0.94 sec
+        Start  47: gst_native_bin_cancel_win
+ 47/146 Test  #47: gst_native_bin_cancel_win ...............   Passed    1.20 sec
+        Start  48: gst_native_relay_av_win
+ 48/146 Test  #48: gst_native_relay_av_win .................   Passed    5.92 sec
+        Start  49: gst_native_relay_process_win
+ 49/146 Test  #49: gst_native_relay_process_win ............   Passed    1.58 sec
+        Start  50: gst_native_relay_reservation_win
+ 50/146 Test  #50: gst_native_relay_reservation_win ........   Passed    0.92 sec
+        Start  51: gst_native_relay_death_win
+ 51/146 Test  #51: gst_native_relay_death_win ..............   Passed    1.54 sec
+        Start  52: gst_native_relay_downstream_death_win
+ 52/146 Test  #52: gst_native_relay_downstream_death_win ...   Passed    1.97 sec
+        Start  53: gst_native_relay_cancel_win
+ 53/146 Test  #53: gst_native_relay_cancel_win .............   Passed    1.52 sec
+        Start  54: gst_native_relay_decoder_win
+ 54/146 Test  #54: gst_native_relay_decoder_win ............   Passed    1.02 sec
+        Start  55: gst_native_source_win
+ 55/146 Test  #55: gst_native_source_win ...................   Passed    2.86 sec
+        Start  56: gst_native_source_win_copy_negative
+ 56/146 Test  #56: gst_native_source_win_copy_negative .....   Passed    0.26 sec
+        Start  57: gst_nv12_roundtrip
+ 57/146 Test  #57: gst_nv12_roundtrip ......................   Passed    1.99 sec
+        Start  58: gst_rgb10a2_roundtrip
+ 58/146 Test  #58: gst_rgb10a2_roundtrip ...................   Passed    1.97 sec
+        Start  59: nv12_windows_roundtrip
+ 59/146 Test  #59: nv12_windows_roundtrip ..................   Passed    0.45 sec
+        Start  60: nv12_windows_1080p
+ 60/146 Test  #60: nv12_windows_1080p ......................   Passed    0.49 sec
+        Start  61: sample_bgra
+ 61/146 Test  #61: sample_bgra .............................   Passed    0.51 sec
+        Start  62: sample_nv12
+ 62/146 Test  #62: sample_nv12 .............................   Passed    0.47 sec
+        Start  63: sample_slow
+ 63/146 Test  #63: sample_slow .............................   Passed    0.71 sec
+        Start  64: sample_metadata
+ 64/146 Test  #64: sample_metadata .........................   Passed    0.47 sec
+        Start  65: sample_reconnect
+ 65/146 Test  #65: sample_reconnect ........................   Passed    0.75 sec
+        Start  66: sample_geometry
+ 66/146 Test  #66: sample_geometry .........................   Passed    0.47 sec
+        Start  67: sample_slots
+ 67/146 Test  #67: sample_slots ............................   Passed    0.47 sec
+        Start  68: sample_gpu_sync
+ 68/146 Test  #68: sample_gpu_sync .........................   Passed    0.47 sec
+        Start  69: sample_invalid_cli
+ 69/146 Test  #69: sample_invalid_cli ......................   Passed    0.01 sec
+        Start  70: sample_wrong_role
+ 70/146 Test  #70: sample_wrong_role .......................   Passed    0.01 sec
+        Start  71: sample_corruption
+ 71/146 Test  #71: sample_corruption .......................   Passed    0.55 sec
+        Start  72: disconnect_full_ring
+ 72/146 Test  #72: disconnect_full_ring ....................   Passed    0.21 sec
+        Start  73: trace_disabled
+ 73/146 Test  #73: trace_disabled ..........................   Passed    0.02 sec
+        Start  74: trace_default_capacity
+ 74/146 Test  #74: trace_default_capacity ..................   Passed    0.02 sec
+        Start  75: trace_override_capacity
+ 75/146 Test  #75: trace_override_capacity .................   Passed    0.03 sec
+        Start  76: trace_invalid_capacity
+ 76/146 Test  #76: trace_invalid_capacity ..................   Passed    0.02 sec
+        Start  77: trace_bounded_concurrent
+ 77/146 Test  #77: trace_bounded_concurrent ................   Passed    0.02 sec
+        Start  78: trace_thread_limit
+ 78/146 Test  #78: trace_thread_limit ......................   Passed    0.02 sec
+        Start  79: portable_map_nv12
+ 79/146 Test  #79: portable_map_nv12 .......................   Passed    0.23 sec
+        Start  80: portable_map_rgba
+ 80/146 Test  #80: portable_map_rgba .......................   Passed    0.21 sec
+        Start  81: portable_map_bgra
+ 81/146 Test  #81: portable_map_bgra .......................   Passed    0.21 sec
+        Start  82: portable_map_rgb10a2
+ 82/146 Test  #82: portable_map_rgb10a2 ....................   Passed    0.21 sec
+        Start  83: ready_fence_timeout
+ 83/146 Test  #83: ready_fence_timeout .....................   Passed    0.24 sec
+        Start  84: reconnect_held
+ 84/146 Test  #84: reconnect_held ..........................   Passed    0.29 sec
+        Start  85: gst_av_session
+ 85/146 Test  #85: gst_av_session ..........................   Passed    3.51 sec
+        Start  86: gst_av_faults
+ 86/146 Test  #86: gst_av_faults ...........................   Passed    2.60 sec
+        Start  87: gst_timestamp_contract
+ 87/146 Test  #87: gst_timestamp_contract ..................   Passed    1.74 sec
+        Start  88: session_contract_peers
+ 88/146 Test  #88: session_contract_peers ..................   Passed    0.26 sec
+        Start  89: av_rendezvous
+ 89/146 Test  #89: av_rendezvous ...........................   Passed    0.25 sec
+        Start  90: av_auth
+ 90/146 Test  #90: av_auth .................................   Passed    0.04 sec
+        Start  91: av_producer_help
+ 91/146 Test  #91: av_producer_help ........................   Passed    0.03 sec
+        Start  92: av_consumer_help
+ 92/146 Test  #92: av_consumer_help ........................   Passed    0.03 sec
+        Start  93: m3_av_apps
+ 93/146 Test  #93: m3_av_apps ..............................   Passed   30.18 sec
+        Start  94: gst_pool_policy
+ 94/146 Test  #94: gst_pool_policy .........................   Passed    4.92 sec
+        Start  95: m5a_transport_relay
+ 95/146 Test  #95: m5a_transport_relay .....................   Passed    1.45 sec
+        Start  96: m5a_transport_relay_audio_leads
+ 96/146 Test  #96: m5a_transport_relay_audio_leads .........   Passed    1.42 sec
+        Start  97: m5a_transport_relay_sync_negative
+ 97/146 Test  #97: m5a_transport_relay_sync_negative .......   Passed    0.70 sec
+        Start  98: m4_transport_audio_lags
+ 98/146 Test  #98: m4_transport_audio_lags .................   Passed    0.82 sec
+        Start  99: m4_transport_audio_leads
+ 99/146 Test  #99: m4_transport_audio_leads ................   Passed    0.82 sec
+        Start 100: m4_transport_jitter_drift
+100/146 Test #100: m4_transport_jitter_drift ...............   Passed    1.02 sec
+        Start 101: m4_transport_negative_retimestamps
+101/146 Test #101: m4_transport_negative_retimestamps ......   Passed    0.43 sec
+        Start 102: audio_alignment
+102/146 Test #102: audio_alignment .........................   Passed    0.14 sec
+        Start 103: av_offer_bounds
+103/146 Test #103: av_offer_bounds .........................   Passed    0.08 sec
+        Start 104: m4_av_recovery
+104/146 Test #104: m4_av_recovery ..........................   Passed   10.30 sec
+        Start 105: m5_finite_budget
+105/146 Test #105: m5_finite_budget ........................   Passed   18.69 sec
+        Start 106: m4_authenticated_offsets
+106/146 Test #106: m4_authenticated_offsets ................   Passed    6.48 sec
+        Start 107: m4_source_drift
+107/146 Test #107: m4_source_drift .........................   Passed   39.13 sec
+        Start 108: av_audio_segment
+108/146 Test #108: av_audio_segment ........................   Passed    0.07 sec
+        Start 109: windows_endpoint_ready
+109/146 Test #109: windows_endpoint_ready ..................   Passed    1.92 sec
+        Start 110: m5_external_pipeline
+110/146 Test #110: m5_external_pipeline ....................   Passed    6.33 sec
+        Start 111: gst_sink_stats
+111/146 Test #111: gst_sink_stats ..........................   Passed    0.08 sec
+        Start 112: gst_preconnect_slots
+112/146 Test #112: gst_preconnect_slots ....................   Passed    0.94 sec
+        Start 113: m5_startup
+113/146 Test #113: m5_startup ..............................   Passed   34.60 sec
+        Start 114: m5_preconnect
+114/146 Test #114: m5_preconnect ...........................   Passed   21.95 sec
+        Start 115: m5_consumer_drain
+115/146 Test #115: m5_consumer_drain .......................   Passed   28.56 sec
+        Start 116: frame_accounting_negative_controls
+116/146 Test #116: frame_accounting_negative_controls ......   Passed    0.16 sec
+        Start 117: av_memory_agreement
+117/146 Test #117: av_memory_agreement .....................   Passed    0.04 sec
+        Start 118: d3d_memory_binding
+118/146 Test #118: d3d_memory_binding ......................   Passed    0.41 sec
+        Start 119: gst_policy_generation
+119/146 Test #119: gst_policy_generation ...................   Passed    3.30 sec
+        Start 120: native_relay_win
+120/146 Test #120: native_relay_win ........................   Passed    0.51 sec
+        Start 121: trace_details
+121/146 Test #121: trace_details ...........................   Passed    0.01 sec
+        Start 122: trace_compiled_out
+122/146 Test #122: trace_compiled_out ......................   Passed    0.02 sec
+        Start 123: av_memory_adversarial
+123/146 Test #123: av_memory_adversarial ...................   Passed    0.04 sec
+        Start 124: native_relay_process_win
+124/146 Test #124: native_relay_process_win ................   Passed    0.84 sec
+        Start 125: boundary_av_analyzer
+125/146 Test #125: boundary_av_analyzer ....................   Passed    0.68 sec
+        Start 126: gst_session_transport
+126/146 Test #126: gst_session_transport ...................   Passed    0.79 sec
+        Start 127: gst_shared_cpu_session_win
+127/146 Test #127: gst_shared_cpu_session_win ..............   Passed    2.40 sec
+        Start 128: gst_session_context
+128/146 Test #128: gst_session_context .....................   Passed    0.09 sec
+        Start 129: gst_audio_sink
+129/146 Test #129: gst_audio_sink ..........................   Passed    1.26 sec
+        Start 130: gst_audio_source
+130/146 Test #130: gst_audio_source ........................   Passed    1.31 sec
+        Start 131: gst_shared_cpu_source
+131/146 Test #131: gst_shared_cpu_source ...................   Passed    0.14 sec
+        Start 132: gst_shared_cpu_roundtrip
+132/146 Test #132: gst_shared_cpu_roundtrip ................   Passed    0.17 sec
+        Start 133: gst_shared_cpu_av
+133/146 Test #133: gst_shared_cpu_av .......................   Passed    3.06 sec
+        Start 134: gst_av_timeline
+134/146 Test #134: gst_av_timeline .........................   Passed    4.44 sec
+        Start 135: gst_av_validation
+135/146 Test #135: gst_av_validation .......................   Passed   17.98 sec
+        Start 136: gst_av_bin
+136/146 Test #136: gst_av_bin ..............................   Passed   25.68 sec
+        Start 137: gst_av_src_bin
+137/146 Test #137: gst_av_src_bin ..........................   Passed   15.90 sec
+        Start 138: gst_av_parity
+138/146 Test #138: gst_av_parity ...........................   Passed  108.66 sec
+        Start 139: gst_av_qualification
+139/146 Test #139: gst_av_qualification ....................   Passed   64.27 sec
+        Start 140: gst_av_bench_smoke
+140/146 Test #140: gst_av_bench_smoke ......................   Passed    6.98 sec
+        Start 141: gst_av_bench_shared_cpu_BGRA
+141/146 Test #141: gst_av_bench_shared_cpu_BGRA ............   Passed    5.44 sec
+        Start 142: gst_av_bench_shared_cpu_NV12
+142/146 Test #142: gst_av_bench_shared_cpu_NV12 ............   Passed    5.41 sec
+        Start 143: gst_local_av
+143/146 Test #143: gst_local_av ............................   Passed    3.06 sec
+        Start 144: m5b_gst_av_example
+144/146 Test #144: m5b_gst_av_example ......................   Passed   62.62 sec
+        Start 145: gst_local_audio
+145/146 Test #145: gst_local_audio .........................   Passed    0.23 sec
+        Start 146: gst_event_channel
+146/146 Test #146: gst_event_channel .......................   Passed    2.43 sec
+
+100% tests passed, 0 tests failed out of 146
+
+Label Time Summary:
+gpu                     =  94.47 sec*proc (7 tests)
+gst_video_regression    =  40.50 sec*proc (13 tests)
+integration             =  94.47 sec*proc (7 tests)
+m5b_av                  = 308.71 sec*proc (14 tests)
+
+Total Test time (real) = 625.65 sec

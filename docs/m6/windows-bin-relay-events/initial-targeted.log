@@ -1,0 +1,25 @@
+** WARNING: connection is not using a post-quantum key exchange algorithm.
+** This session may be vulnerable to "store now, decrypt later" attacks.
+** The server may need to be upgraded. See https://openssh.com/pq.html
+Test project <win-home>/dev/framelink-m6-windows-c5ca13b/build
+    Start 43: gst_native_bin_relay_events_win
+1/1 Test #43: gst_native_bin_relay_events_win ...***Failed    2.36 sec
+native AV mode 7 local=0
+bin relay n=0 collect=0 pending=1
+bin relay n=1 collect=0 pending=1
+bin relay n=2 collect=0 pending=1
+bin relay n=3 collect=0 pending=1
+native receiver=1 frame=4 video=0000000000000000 audio=0000000000000000
+pipeline error: PCM sample duration/continuity mismatch <win-home>\dev\framelink-m6-windows-c5ca13b\gst\gstframelinkaudio.cpp(28): reject (): /GstPipeline:pipeline0/GstFrameLinkAvSink:transport/GstFrameLinkAudioSink:audio:
+FrameLink audio rejected before serialization
+pipeline error: audio peer closed before GDP EOS <win-home>\dev\framelink-m6-windows-c5ca13b\gst\gstframelinkaudiosrc.cpp(66): readChunkImpl (): /GstPipeline:pipeline1/GstFrameLinkAvSrc:transport/GstFrameLinkAudioSrc:audio/FlAudioReader:flaudioreader0
+line 328: vs&&as
+
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) =   2.39 sec
+
+The following tests FAILED:
+	 43 - gst_native_bin_relay_events_win (Failed)
+Errors while running CTest

@@ -1,8 +1,27 @@
 // Broker-owned positive composition fixture, not an automatic discovery API.
 // The first avsrc has already authenticated/consumed upstream video events.
-// This bounded sample-only fixture republishes barriers from validated buffers
-// and joins actual upstream EOS; arbitrary GAP/event forwarding is not claimed.
+// This bounded fixture republishes barriers and optionally forwards actual
+// serialized GAP observations; arbitrary events/discovery are not supported.
 #include "../samples/session_relay_contract.h"
+#include <mutex>
+// A bounded observation queue: callbacks never perform network writes.
+struct BinRelayEvents {
+ std::mutex mutex;
+ FlGstVideoEvent gaps[32]{};unsigned size=0;guint64 frames=0,discont=0;
+ static GstPadProbeReturn observe(GstPad*,GstPadProbeInfo*info,gpointer data){
+  auto&self=*static_cast<BinRelayEvents*>(data);std::lock_guard<std::mutex> lock(self.mutex);
+  if(GST_PAD_PROBE_INFO_TYPE(info)&GST_PAD_PROBE_TYPE_BUFFER){
+   if(GST_BUFFER_FLAG_IS_SET(GST_PAD_PROBE_INFO_BUFFER(info),GST_BUFFER_FLAG_DISCONT))self.discont|=1ull<<self.frames;
+   CHECK(self.frames<8);++self.frames;
+  }else if(GST_EVENT_TYPE(GST_PAD_PROBE_INFO_EVENT(info))==GST_EVENT_GAP){
+   CHECK(self.size<32);GstClockTime pts,duration;gst_event_parse_gap(GST_PAD_PROBE_INFO_EVENT(info),&pts,&duration);
+   self.gaps[self.size++]={FL_GST_VIDEO_GAP,self.frames,pts,duration};
+  }
+  return GST_PAD_PROBE_OK;
+ }
+ void attach(GstElement*element){auto*pad=gst_element_get_static_pad(element,"sink");CHECK(pad);
+  gst_pad_add_probe(pad,GstPadProbeType(GST_PAD_PROBE_TYPE_BUFFER|GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM),observe,this,nullptr);gst_object_unref(pad);}
+};
 struct BrokerNativeBinRelay {
  FlGstSession *up,*sender=fl_gst_session_new(3),*receiver=fl_gst_session_new(3);
  GstElement *tx=nullptr,*rx=nullptr,*input=nullptr,*video=nullptr,*audio=nullptr;
@@ -10,6 +29,29 @@ struct BrokerNativeBinRelay {
  flSessionConfig config{};
  GstMemory* held=nullptr;
  guint64 count=0,pcmFrames=0;gint64 last=-1;
+ bool events=false;unsigned forwardedGaps=0;BinRelayEvents upstreamEvents,downstreamEvents;
+ void observeEvents(GstElement*upstream){events=true;upstreamEvents.attach(upstream);downstreamEvents.attach(video);}
+ void forwardGaps(){
+  if(!events)return;
+  std::lock_guard<std::mutex> lock(upstreamEvents.mutex);
+  while(forwardedGaps<upstreamEvents.size){const auto&gap=upstreamEvents.gaps[forwardedGaps];
+   CHECK(gap.afterFrames==count);
+   CHECK(fl_gst_session_send_video_event(sender,config.generation,&gap)==FL_GST_SESSION_READY);++forwardedGaps;
+  }
+ }
+ void verifyEvents(){
+  if(!events)return;
+  std::lock_guard<std::mutex> a(upstreamEvents.mutex),b(downstreamEvents.mutex);
+  CHECK(upstreamEvents.frames==8&&downstreamEvents.frames==8&&forwardedGaps==3);
+  CHECK(upstreamEvents.size==3&&downstreamEvents.size==3);
+  const guint64 positions[]={4,4,8},times[]={41000000,41250000,46000000},durations[]={250000,750000,500000};
+  for(unsigned i=0;i<3;++i){const auto&u=upstreamEvents.gaps[i];const auto&d=downstreamEvents.gaps[i];
+   CHECK(u.afterFrames==positions[i]&&u.ptsNs==times[i]&&u.durationNs==durations[i]);
+   CHECK(d.afterFrames==u.afterFrames&&d.ptsNs==u.ptsNs+5000000&&d.durationNs==u.durationNs);
+  }
+  CHECK((upstreamEvents.discont&17)==17&&downstreamEvents.discont==upstreamEvents.discont);
+  puts("broker bin serialized GAP: exact 4,4,8 frame boundaries, +5ms mapping, durations 250/750/500us, DISCONT preserved, trailing GAP before EOS");
+ }
  BrokerNativeBinRelay(FlGstSession* source,const flSessionConfig& original,
    const GstFrameLinkMemoryPolicy& policy,flChannel* channel,flsample::NativeGstD3D11Relay& adapter)
    :up(source),native(adapter),config(original){
@@ -55,12 +97,14 @@ struct BrokerNativeBinRelay {
  void forward(GstSample* vs,GstSample* as,unsigned n){
   flsample::SessionRelayContract contract(up,sender);CHECK(contract.initialize()==FL_GST_SESSION_READY);
   auto*v=gst_sample_get_buffer(vs);auto*a=gst_sample_get_buffer(as);
-  CHECK(v&&a&&n==count&&GST_BUFFER_PTS(v)==37000000+n*1000000&&GST_BUFFER_PTS(a)==n*1000000);
+  const guint64 offset=events&&n>=4?1000000:0;
+  CHECK(v&&a&&n==count&&GST_BUFFER_PTS(v)==37000000+n*1000000+offset&&GST_BUFFER_PTS(a)==n*1000000+offset);
   for(auto*sample:{vs,as}){
    GstClockTime running=GST_CLOCK_TIME_NONE;auto*b=gst_sample_get_buffer(sample);
    CHECK(fl_gst_segment_running_time(gst_sample_get_segment(sample),GST_BUFFER_PTS(b),&running)&&running==GST_BUFFER_PTS(b));
   }
   CHECK(gst_buffer_get_size(a)==192&&GST_BUFFER_DURATION(a)==1000000);
+  forwardGaps();
   if(!count||GST_BUFFER_FLAG_IS_SET(v,GST_BUFFER_FLAG_DISCONT)){
    FlGstVideoEvent barrier{FL_GST_VIDEO_BARRIER,count,GST_BUFFER_PTS(v),0};
    CHECK(fl_gst_session_send_video_event(sender,config.generation,&barrier)==FL_GST_SESSION_READY);
@@ -75,6 +119,7 @@ struct BrokerNativeBinRelay {
   CHECK(GST_BUFFER_DURATION(vb)==GST_BUFFER_DURATION(v));
   CHECK(GST_BUFFER_PTS(ab)==GST_BUFFER_PTS(a)+5000000&&GST_BUFFER_DURATION(ab)==GST_BUFFER_DURATION(a));
   CHECK(GST_BUFFER_PTS(vb)-GST_BUFFER_PTS(ab)==37000000);
+  if(events&&n==4)CHECK(GST_BUFFER_FLAG_IS_SET(a,GST_BUFFER_FLAG_DISCONT)&&GST_BUFFER_FLAG_IS_SET(ab,GST_BUFFER_FLAG_DISCONT));
   auto*metadata=gst_buffer_get_framelink_frame_meta(vb);CHECK(metadata&&metadata->frame.streamGeneration==config.generation);
   auto*memory=gst_buffer_peek_memory(vb,0);CHECK(gst_is_d3d11_memory(memory));
   using Compare=BOOL(WINAPI*)(HANDLE,HANDLE);
@@ -119,11 +164,12 @@ struct BrokerNativeBinRelay {
   CHECK(fl_gst_session_wait_video_eos(up,config.generation,0,&frames,&pts)==FL_GST_SESSION_READY);
   CHECK(frames==count&&pts==last&&count==8&&pcmFrames==384);
   auto*bus=gst_element_get_bus(rx);CHECK(!gst_bus_pop_filtered(bus,GstMessageType(GST_MESSAGE_ERROR|GST_MESSAGE_EOS)));gst_object_unref(bus);
+  forwardGaps();
   FlGstVideoEvent end{FL_GST_VIDEO_END,count,guint64(last),0};
   CHECK(fl_gst_session_send_video_event(sender,config.generation,&end)==FL_GST_SESSION_READY);
   CHECK(fl_gst_session_video_eos(sender,config.generation,count,last)==FL_GST_SESSION_READY);
   CHECK(gst_app_src_end_of_stream(GST_APP_SRC(input))==GST_FLOW_OK);
-  avTerminal(tx,GST_MESSAGE_EOS);avTerminal(rx,GST_MESSAGE_EOS);
+  avTerminal(tx,GST_MESSAGE_EOS);avTerminal(rx,GST_MESSAGE_EOS);verifyEvents();
   CHECK(fl_gst_session_wait_video_eos(receiver,config.generation,0,&frames,&pts)==FL_GST_SESSION_READY&&frames==count&&pts==last);
   CHECK(native.finish()==FL_BUSY&&held);
  }

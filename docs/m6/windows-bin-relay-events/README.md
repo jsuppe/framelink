@@ -1,0 +1,13 @@
+# Broker native bin serialized GAP control
+
+Base `c5ca13b67377b42ca3f450c93887969002529ab1`, whose clean Windows146/146/API/fourteen diagnostics were collected without repetition. Exact source overlays, SHA256 manifests, commands and raw results: `<linux-home>/dev/evidence/m6-cpu-path/windows-bin-relay-events-c5ca13b`.
+
+The fixture injects two serialized video GAPs at the original producer after four frames and a trailing GAP after eight frames, before actual EOS. A bounded32-entry observer on the first native receiver records **actual** GAP events and their buffer boundaries. The broker forwards these authenticated observations before the next native frame barrier or terminal END. An independent observer on the final receiver verifies exact boundaries **4,4,8**, original timestamps **41ms,41.25ms,46ms** translated by the final **+5ms** mapping, and durations **250us,750us,500us**. The final GAP is not lost at EOS.
+
+All eight video frames retain the existing original-allocation identity, pixel and metadata checks (two allocations), alongside384 PCM frames. The middle GAPs produce the expected native video DISCONT; both observers must match. To preserve37ms A/V offset, later source timestamps advance1ms on both tracks and the source PCM buffer explicitly marks DISCONT. The fixture verifies that marker survives both hops. This is not an audio GAP-event forwarding claim. The held final native reader continues through complete upstream/downstream teardown and is retired only on actual reader release.
+
+The initial fixture omitted the required PCM discontinuity marker and correctly failed with `PCM sample duration/continuity mismatch`. Its overlay, logs and status are retained under `initial-*`. The fixture was corrected, not the production validator. The trailing GAP was also moved to the end of the last frame (46ms); neither failure nor test adjustments are presented as a production fix.
+
+This is a Windows-only bounded composition fixture, **not a reusable public session/event adapter**. Changed segments, arbitrary events, automatic discovery composition, dead-generation reuse and generalized reconnect remain unqualified. No production implementation, public API, DLL export, wire format or default changed. API not frozen; M6 open/M7 hold. Loom CLI unavailable in PATH; accepted requirements and the authoritative ledger were read directly.
+
+Corrected targeted **1/1** and affected **11/11 (58.87s)** passed, with detailed diagnostic exit0. The exact committed clean integrated run is the next acceptance step; current verified API candidate remains c5ca13b. No deferred Linux/Android or target-rate campaign ran.

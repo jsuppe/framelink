@@ -243,6 +243,7 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
   for(auto*b:reservations)gst_buffer_unref(b);
   leaseAdapter.reset(new flsample::NativeGstD3D11Relay(leaseWriter,cfg.generation));CHECK(leaseAdapter->initialize()==FL_OK);
   if(binRelay)binAdapter.reset(new BrokerNativeBinRelay(r,cfg,policy,leaseReader,*leaseAdapter));
+  if(mode==7){CHECK(binRelay);binAdapter->observeEvents(vo);}
  }
  GstMemory* retainedReceiver=nullptr;
  // A separately allocated second hop cannot silently treat a first-hop reader
@@ -262,13 +263,18 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
  GstClockTime decoderOrigin=GST_CLOCK_TIME_NONE;guint64 finalPts=0;
  const unsigned count=mode==2?0:8;
  for(unsigned n=0;n<count;++n){
+  if(mode==7&&n==4){
+   auto*pad=gst_element_get_static_pad(vi,"src");
+   CHECK(gst_pad_push_event(pad,gst_event_new_gap(41000000,250000)));
+   CHECK(gst_pad_push_event(pad,gst_event_new_gap(41250000,750000)));gst_object_unref(pad);
+  }
   GstBuffer*b=nullptr;CHECK(gst_buffer_pool_acquire_buffer(pool,&b,nullptr)==GST_FLOW_OK);
   auto*mem=gst_buffer_peek_memory(b,0);CHECK(gst_is_d3d11_memory(mem));
   auto*reservation=(FrameLinkD3DReservation*)gst_mini_object_get_qdata(GST_MINI_OBJECT(mem),FrameLinkD3DProducer::key());CHECK(reservation);
   auto*texture=(ID3D11Texture2D*)gst_d3d11_memory_get_resource_handle(GST_D3D11_MEMORY_CAST(mem));CHECK(texture==flImageD3D11(reservation->buffer.image));
   ID3D11Device*d=nullptr;texture->GetDevice(&d);ID3D11DeviceContext*c=nullptr;d->GetImmediateContext(&c);
   std::vector<unsigned char>pixels(64*32*4,static_cast<unsigned char>(n+1));
-  guint64 audioPts=n*1000000,videoDuration=1000000;
+  guint64 audioPts=n*1000000+(mode==7&&n>=4?1000000:0),videoDuration=1000000;
   if(decoder){
    D3D11_TEXTURE2D_DESC target{};texture->GetDesc(&target);
    CHECK((target.BindFlags&(D3D11_BIND_RENDER_TARGET|D3D11_BIND_SHADER_RESOURCE))==(D3D11_BIND_RENDER_TARGET|D3D11_BIND_SHADER_RESOURCE));
@@ -311,6 +317,7 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
   GST_BUFFER_PTS(b)=finalPts=37000000+audioPts;GST_BUFFER_DTS(b)=decoder?GST_CLOCK_TIME_NONE:GST_BUFFER_PTS(b)-100;GST_BUFFER_DURATION(b)=videoDuration;
   const gsize pcmBytes=decoder?6400:192;
   auto*a=gst_buffer_new_allocate(nullptr,pcmBytes,nullptr);gst_buffer_memset(a,0,n+31,pcmBytes);GST_BUFFER_PTS(a)=audioPts;GST_BUFFER_DURATION(a)=decoder?gst_util_uint64_scale(1600,GST_SECOND,48000):1000000;
+  if(mode==7&&n==4)GST_BUFFER_FLAG_SET(a,GST_BUFFER_FLAG_DISCONT);
   CHECK(gst_app_src_push_buffer(GST_APP_SRC(vi),b)==GST_FLOW_OK);CHECK(gst_app_src_push_buffer(GST_APP_SRC(ai),a)==GST_FLOW_OK);
   auto*vs=gst_app_sink_try_pull_sample(GST_APP_SINK(vo),2*GST_SECOND);auto*as=gst_app_sink_try_pull_sample(GST_APP_SINK(ao),2*GST_SECOND);if(!vs||!as){
    fprintf(stderr,"native receiver=%d frame=%u video=%p audio=%p\n",nativeReceiver,n,vs,as);
@@ -415,6 +422,8 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
   std::vector<guint8>pcm(pcmBytes);CHECK(gst_buffer_get_size(ab)==pcmBytes&&gst_buffer_extract(ab,0,pcm.data(),pcmBytes)==pcmBytes);for(auto v:pcm)CHECK(v==n+31);
   if(vs)gst_sample_unref(vs);gst_sample_unref(as);
  }
+ if(mode==7){auto*pad=gst_element_get_static_pad(vi,"src");
+  CHECK(gst_pad_push_event(pad,gst_event_new_gap(46000000,500000)));gst_object_unref(pad);}
  if(leaseRelay)CHECK(leaseAdapter->count()==count&&leaseAdapter->pending()==1&&leaseAdapter->finish()==FL_BUSY);
  if(relayNegative){
   relayProducer.reset();flClose(relayConsumer);
