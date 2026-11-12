@@ -239,7 +239,9 @@ M6 remains open; M7 remains held.
 | D2 / D3 | Unresolved public overload/convenience-fallback decisions; existing explicit profiles/defaults preserved | Jon; no automatic default change or hidden native-to-CPU fallback |
 | Linux / Android campaigns | Broad work deferred under Windows-first direction. Prior Linux BGRA and other completed campaigns collected, not repeated. Android BGRA4K and NV121080 residual failures remain suspended; clean trace diagnostics did not waive them | Evelyn; resume deferred integration only after Windows priority permits; causal fixes required for suspended failed cells |
 
-**Windows runtime owner:** native worker `qualification_recovery`, single-task/serial only.
+**Windows runtime ownership:** no workload live after collected failure; `qualification_recovery`
+returns this completed qualification slice to root for the next diagnostic continuation.
+Single-task/serial only; next ready diagnostic is not an all-work-blocked state.
 Finalcandidate BGRA1080duration exec52689 **FAILED**, collected13:35:55Z, idle-after0.
 [Failure archive](windows-native-final-duration-bgra-1080-failure-a50841a/README.md).
 Source acquire assertion/receiver PTS mismatch around695s; source frame41713
