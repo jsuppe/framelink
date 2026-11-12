@@ -1,0 +1,96 @@
+{
+  "scope": "diagnostic only, not qualification or original-stall attribution",
+  "injected": false,
+  "phase_rows": 300,
+  "phases": {
+    "pace": {
+      "count": 300,
+      "max_ms": 199.9725,
+      "slowest": [
+        {
+          "identity": 0,
+          "ms": 199.9725
+        },
+        {
+          "identity": 257,
+          "ms": 16.1797
+        },
+        {
+          "identity": 125,
+          "ms": 16.0622
+        },
+        {
+          "identity": 83,
+          "ms": 16.0527
+        },
+        {
+          "identity": 146,
+          "ms": 16.0499
+        }
+      ]
+    },
+    "pause": {
+      "count": 0,
+      "max_ms": 0,
+      "slowest": []
+    },
+    "row": {
+      "count": 300,
+      "max_ms": 0.1192,
+      "slowest": [
+        {
+          "identity": 17,
+          "ms": 0.1192
+        },
+        {
+          "identity": 75,
+          "ms": 0.0721
+        },
+        {
+          "identity": 150,
+          "ms": 0.0654
+        },
+        {
+          "identity": 36,
+          "ms": 0.0574
+        },
+        {
+          "identity": 281,
+          "ms": 0.0327
+        }
+      ]
+    },
+    "acquire": {
+      "count": 300,
+      "max_ms": 0.0111,
+      "slowest": [
+        {
+          "identity": 153,
+          "ms": 0.0111
+        },
+        {
+          "identity": 0,
+          "ms": 0.005
+        },
+        {
+          "identity": 272,
+          "ms": 0.0019
+        },
+        {
+          "identity": 22,
+          "ms": 0.0017
+        },
+        {
+          "identity": 21,
+          "ms": 0.0016
+        }
+      ]
+    }
+  },
+  "queue_replacements": [],
+  "errors": {
+    "source": "",
+    "relay": "",
+    "receiver": ""
+  }
+}

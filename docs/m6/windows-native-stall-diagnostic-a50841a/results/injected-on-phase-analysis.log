@@ -1,0 +1,109 @@
+{
+  "scope": "diagnostic only, not qualification or original-stall attribution",
+  "injected": true,
+  "phase_rows": 63,
+  "phases": {
+    "pace": {
+      "count": 63,
+      "max_ms": 199.9648,
+      "slowest": [
+        {
+          "identity": 0,
+          "ms": 199.9648
+        },
+        {
+          "identity": 49,
+          "ms": 16.0207
+        },
+        {
+          "identity": 24,
+          "ms": 16.0137
+        },
+        {
+          "identity": 3,
+          "ms": 15.9919
+        },
+        {
+          "identity": 31,
+          "ms": 15.9917
+        }
+      ]
+    },
+    "pause": {
+      "count": 1,
+      "max_ms": 350.1415,
+      "slowest": [
+        {
+          "identity": 60,
+          "ms": 350.1415
+        }
+      ]
+    },
+    "row": {
+      "count": 62,
+      "max_ms": 0.1321,
+      "slowest": [
+        {
+          "identity": 17,
+          "ms": 0.1321
+        },
+        {
+          "identity": 36,
+          "ms": 0.0643
+        },
+        {
+          "identity": 56,
+          "ms": 0.0316
+        },
+        {
+          "identity": 21,
+          "ms": 0.0116
+        },
+        {
+          "identity": 20,
+          "ms": 0.0108
+        }
+      ]
+    },
+    "acquire": {
+      "count": 63,
+      "max_ms": 1999.5518,
+      "slowest": [
+        {
+          "identity": 62,
+          "ms": 1999.5518
+        },
+        {
+          "identity": 0,
+          "ms": 0.0064
+        },
+        {
+          "identity": 39,
+          "ms": 0.0038
+        },
+        {
+          "identity": 42,
+          "ms": 0.0038
+        },
+        {
+          "identity": 36,
+          "ms": 0.0037
+        }
+      ]
+    }
+  },
+  "queue_replacements": [
+    {
+      "file": "relay.trace.csv.55404.csv",
+      "sequence": "62",
+      "pts_ns": "1053666666",
+      "channel_id": "9958448971560886708",
+      "start_ns": "732939234479500"
+    }
+  ],
+  "errors": {
+    "source": "SOURCE_ACQUIRE n=62 expected_pts=1070333333 result=1 begin_ns=732939234481600 end_ns=732941234033400\nDIAGNOSTIC_FAILURE role=source thread=49564 at_ns=732941234123300 <win-home>\\dev\\framelink-native-stall-native-stall-a50841a-20261112t1353z\\source\\test\\fl_gst_local_native_bench_win.cpp:90: acquireResult==FL_OK\n",
+    "relay": "VIDEO_PTS role=relay n=60 expected_pts=1037000000 actual_pts=1053666666 sequence=62 slot=1 at_ns=732939234970900\nDIAGNOSTIC_FAILURE role=relay thread=26572 at_ns=732939235060100 <win-home>\\dev\\framelink-native-stall-native-stall-a50841a-20261112t1353z\\source\\test\\fl_gst_local_native_bench_win.cpp:112: f.ptsNs==int64_t(vpts(n))\nDIAGNOSTIC_FAILURE role=relay thread=35308 at_ns=732941273587100 <win-home>\\dev\\framelink-native-stall-native-stall-a50841a-20261112t1353z\\source\\test\\fl_gst_local_native_bench_win.cpp:111: r==FL_GST_SESSION_READY||r==FL_GST_SESSION_TIMEOUT\n",
+    "receiver": ""
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "window_start_qpc_ns": 732025131662200,
+  "window_end_qpc_ns": 732025470919100,
+  "video_gap_ms": 339.2569,
+  "audio_observations": 33,
+  "first_identity": "69521",
+  "last_identity": "69553",
+  "max_audio_source_gap_ms": 10.0087,
+  "interpretation": "Source audio thread executed throughout the main-video gap; inconsistent with whole-source-process or whole-host suspension lasting the full gap. Does not exclude selective thread scheduling/I/O/interference."
+}

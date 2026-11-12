@@ -1,0 +1,20 @@
+{
+  "checked_utc": "2026-11-12T13:48:46.833087+00:00",
+  "execution_ssh": {
+    "accepted_utc": "2026-11-12T13:24:11.5722703Z",
+    "disconnected_utc": "2026-11-12T13:35:52.4514093Z"
+  },
+  "remote_status_ended_utc": "2026-11-12T13:35:52.316775Z",
+  "benchmark_exit": 1,
+  "controller_remote_exit": 1,
+  "benchmark_timeout_seconds": 1950,
+  "ssh_timeout_seconds": 2400,
+  "post_failure_hash_and_idle_success": true,
+  "transport_timeout_error_recorded": false,
+  "last_boot_utc": "2026-11-04T02:15:26.8357080Z",
+  "system_events_at_failure": [],
+  "security_process_events_available": false,
+  "conclusion": "Recorded test assertions and benchmark exit1 precede orderly SSH disconnect and evidence packaging. No captured timeout/cancel/kill/reboot/suspend explains original interruption. Does not exclude unlogged process/thread interruption or host scheduling/I/O; original pre-acquire323ms gap still unresolved.",
+  "unrelated_context": "BITS job-limit errors13:28:54\u201313:29:24 and service change13:31:35; no established causal correlation with13:35 failure.",
+  "diagnostic_state": "Prepared local overlay only; no Windows code change or rerun during this correlation"
+}

@@ -1,0 +1,90 @@
+{
+  "state": "collected",
+  "revision": "a50841aad44fbc9431234a4f326bad036d193bf5",
+  "remote": "<win-home>/dev/framelink-native-stall-native-stall-a50841a-20261112t1353z",
+  "started_utc": "2026-11-12T13:49:52.085860+00:00",
+  "remote_exit": 0,
+  "package_exit": 0,
+  "pull_exit": 0,
+  "remote_status": {
+    "state": "diagnostic-complete",
+    "revision": "a50841aad44fbc9431234a4f326bad036d193bf5",
+    "started_utc": "2026-11-12T13:49:58.185203+00:00",
+    "step": "injected-on-phase-analysis",
+    "command": [
+      "<win-home>\\AppData\\Local\\Microsoft\\WindowsApps\\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\\python.exe",
+      "-E",
+      "<win-home>\\dev\\framelink-native-stall-native-stall-a50841a-20261112t1353z\\analyze_diagnostic.py",
+      "<win-home>\\dev\\framelink-native-stall-native-stall-a50841a-20261112t1353z\\results\\injected-on",
+      "injected"
+    ],
+    "extract_exit": 0,
+    "patch-check_exit": 0,
+    "patch-apply_exit": 0,
+    "overlay_source_sha256": "c9fc47a794b1b37479d33b026766d9866139fc13ecad40a79356cbd18c7fe62b",
+    "configure_exit": 0,
+    "build_exit": 0,
+    "binary_before": {
+      "fl_gst_local_native_bench_win.exe": "c02bd8133f5467f99cad41a60a3252e790d409eb9110f1315081880aef09e3a1",
+      "gstframelink.dll": "4cb9ebc52523cc699fb74323d1085ae4b26ced2782f7dc1c72eeedb151c3e33a",
+      "framelink.dll": "0899d89959980ef23eb090b18534d444894c9b1c85e5a64052257f803d412273",
+      "framelink_gst_session.dll": "a8c9083be6317ffdaafaa368bee5aaab92ffefe25988ca264a3dbd2d8237781c"
+    },
+    "control-off-idle-before_exit": 0,
+    "control-off_binary_before": {
+      "fl_gst_local_native_bench_win.exe": "c02bd8133f5467f99cad41a60a3252e790d409eb9110f1315081880aef09e3a1",
+      "gstframelink.dll": "4cb9ebc52523cc699fb74323d1085ae4b26ced2782f7dc1c72eeedb151c3e33a",
+      "framelink.dll": "0899d89959980ef23eb090b18534d444894c9b1c85e5a64052257f803d412273",
+      "framelink_gst_session.dll": "a8c9083be6317ffdaafaa368bee5aaab92ffefe25988ca264a3dbd2d8237781c"
+    },
+    "control-off_exit": 0,
+    "control-off_binary_after": {
+      "fl_gst_local_native_bench_win.exe": "c02bd8133f5467f99cad41a60a3252e790d409eb9110f1315081880aef09e3a1",
+      "gstframelink.dll": "4cb9ebc52523cc699fb74323d1085ae4b26ced2782f7dc1c72eeedb151c3e33a",
+      "framelink.dll": "0899d89959980ef23eb090b18534d444894c9b1c85e5a64052257f803d412273",
+      "framelink_gst_session.dll": "a8c9083be6317ffdaafaa368bee5aaab92ffefe25988ca264a3dbd2d8237781c"
+    },
+    "control-off-idle-after_exit": 0,
+    "control-off-qualification-analysis_exit": 0,
+    "control-off-phase-analysis_exit": 0,
+    "control-on-idle-before_exit": 0,
+    "control-on_binary_before": {
+      "fl_gst_local_native_bench_win.exe": "c02bd8133f5467f99cad41a60a3252e790d409eb9110f1315081880aef09e3a1",
+      "gstframelink.dll": "4cb9ebc52523cc699fb74323d1085ae4b26ced2782f7dc1c72eeedb151c3e33a",
+      "framelink.dll": "0899d89959980ef23eb090b18534d444894c9b1c85e5a64052257f803d412273",
+      "framelink_gst_session.dll": "a8c9083be6317ffdaafaa368bee5aaab92ffefe25988ca264a3dbd2d8237781c"
+    },
+    "control-on_exit": 0,
+    "control-on_binary_after": {
+      "fl_gst_local_native_bench_win.exe": "c02bd8133f5467f99cad41a60a3252e790d409eb9110f1315081880aef09e3a1",
+      "gstframelink.dll": "4cb9ebc52523cc699fb74323d1085ae4b26ced2782f7dc1c72eeedb151c3e33a",
+      "framelink.dll": "0899d89959980ef23eb090b18534d444894c9b1c85e5a64052257f803d412273",
+      "framelink_gst_session.dll": "a8c9083be6317ffdaafaa368bee5aaab92ffefe25988ca264a3dbd2d8237781c"
+    },
+    "control-on-idle-after_exit": 0,
+    "control-on-qualification-analysis_exit": 0,
+    "control-on-phase-analysis_exit": 0,
+    "injected-on-idle-before_exit": 0,
+    "injected-on_binary_before": {
+      "fl_gst_local_native_bench_win.exe": "c02bd8133f5467f99cad41a60a3252e790d409eb9110f1315081880aef09e3a1",
+      "gstframelink.dll": "4cb9ebc52523cc699fb74323d1085ae4b26ced2782f7dc1c72eeedb151c3e33a",
+      "framelink.dll": "0899d89959980ef23eb090b18534d444894c9b1c85e5a64052257f803d412273",
+      "framelink_gst_session.dll": "a8c9083be6317ffdaafaa368bee5aaab92ffefe25988ca264a3dbd2d8237781c"
+    },
+    "injected-on_exit": 1,
+    "injected-on_binary_after": {
+      "fl_gst_local_native_bench_win.exe": "c02bd8133f5467f99cad41a60a3252e790d409eb9110f1315081880aef09e3a1",
+      "gstframelink.dll": "4cb9ebc52523cc699fb74323d1085ae4b26ced2782f7dc1c72eeedb151c3e33a",
+      "framelink.dll": "0899d89959980ef23eb090b18534d444894c9b1c85e5a64052257f803d412273",
+      "framelink_gst_session.dll": "a8c9083be6317ffdaafaa368bee5aaab92ffefe25988ca264a3dbd2d8237781c"
+    },
+    "injected-on-idle-after_exit": 0,
+    "injected-on-qualification-analysis_exit": 1,
+    "injected-on-phase-analysis_exit": 0,
+    "qualification_pass": false,
+    "ended_utc": "2026-11-12T13:51:09.186842+00:00"
+  },
+  "collected_hashes": 99,
+  "collection_verified": true,
+  "ended_utc": "2026-11-12T13:51:12.221196+00:00"
+}
