@@ -39,3 +39,9 @@ A version-1 candidate has generation zero and producer-first endpoints on both p
 - [Source-setup cancellation and bidirectional live supervision](windows-local-relay-cancel/README.md)
 
 Read-only independent review found no actionable defects in the authentication, cleanup, identity and cancellation scope. It ran no runtime tests and does not remove the bounds or qualification gaps above.
+
+## Prepared next focused controls (not yet run)
+
+Commit `94e8952` adds an independent authenticated FAR4 source child and upstream-only control (`gst_relay_local_source_control_win`), plus FAR5 serialized GAP/DISCONT/trailing-GAP integration (`gst_relay_local_events_win`). These are scaffolding and focused checks, not a completed three-process snapshot integration. Their compile/runtime results remain pending the backend owner's Windows-lane handoff.
+
+`tools/validate_local_native_relay.ps1` is an explicit post-handoff runner. It requires the coordinator's runtime release switch, a clean exact revision and a new evidence directory; refuses an observed existing build/test executor; checks that all four named tests are selected; and records source hashes, build/test logs and terminal status. It does not run automatically, qualify ABI/performance or replace the coordinator's host ownership. PowerShell execution/parse validation is pending on Windows.
