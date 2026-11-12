@@ -232,23 +232,37 @@ M6 remains open; M7 remains held.
 | Windows other sharedCPU targets | **BGRA4K30 PASS** exact461584b:1800s,54000video/86400000PCM/180000audio, zero34ms misses; memory7.166/7.389KB/min, handle/thread gates pass. [Evidence](cpu-path/windows-cpu-bgra4k30-461584b/README.md). Older76a65d2 BGRA1080p60 pass retained; NV124K30 unqualified | Collected and independently reanalyzed;58 original hashes verified. Runtime released07:25:52Z; do not repeat |
 | Native two-hop qualification harness | All4 BGRA/NV12 1080p60/4K30 matched5s trace-off/trace-on profiles **PASS** at11d1b65, exact video/PCM and zero17/34ms misses; both trace boundaries joined without relay payload copies. [Verified targets](windows-native-relay-targets-11d1b65/README.md). Initial MSVC and collection separator failures preserved | BGRA1080p60 native1800s **PASS**:108000video/86400000PCM, zero17ms misses; memory slopes0/0.400218/0KB per minute and handle/thread gates pass. Root independent raw analysis passed; [duration evidence](windows-native-relay-duration-bgra1080-11d1b65/README.md) archived. Remaining three native duration cells unqualified |
 | Authenticated real-decoder relay qualification | New4d38a09 tiny real-decoder FAR4→FAR5 fixture clean Windows build/test/analysis **PASS**:16 distinct decoded frames,25600PCM,37ms offset and held-reader proof;7 checker cases/1 local CTest pass | Collected and independently checked; [evidence archived](windows-local-decoder-4d38a09/README.md). Explicit conversion/source-final readbacks, not target-rate or direct decoder-zero-copy proof |
-| Paced real-decoder relay | CNG77afa1a1080p60 matched short pair PASS; on-demand4K failed at77afa1a and queue-controlc539d99. Explicit AU replayb247e5d:4K trace-off PASS150distinct/240000PCM/max30.735534ms; trace-on exact media/accounting but two34ms misses (max36.6673ms), overall pair FAILED | Root; archived replay evidence. Next buffered Map/SHA/Unmap causal diagnostic after integration; no decoder4K endurance or timing waiver |
+| Paced real-decoder relay | CNG77afa1a1080p60 matched short pair PASS; on-demand4K failed at77afa1a and queue-controlc539d99. Explicit AU replayb247e5d:4K trace-off PASS150distinct/240000PCM/max30.735534ms; trace-on exact media/accounting but two34ms misses (max36.6673ms), overall pair FAILED | Root; archived replay and phase diagnostic. Phase control did not reproduce original outlier; no decoder4K endurance, repeat or timing waiver |
 | Automatic FAR5 native receiver pause/resume | **PASS** after462fa5f checked-sample fix: collect only missing reservations, no post-drain extra acquire. Windows8/8 focused tests passed10.08s, including original pause case and genuine outstanding-reader death | Root; [initial failure](windows-native-pause-validation/initial-failure-9ea51d4/README.md), [diagnostics](windows-native-pause-validation/diagnostics/README.md), [fix evidence](windows-native-pause-validation/fix-462fa5f/README.md) archived. Real ownership/error checks retained |
 | Historical Windows startup | **Suspended, not waived.** Original1529.4514ms is source-to-receive, not proven producer-open time. New buffered phases show current158–164ms opens dominated by device creation; legacy94/100 vs coordinated100/100, exactPCM, no reproduction. [Evidence](windows-startup-phase-461584b/README.md) | Evelyn; resume on original-scale phase/wait evidence plus compatible remedy, not equivalent clean repeats |
 | Windows native lifetime | **Suspended, not waived:**21.10/84.09KiB/cycle exceed16KB/cycle. Raw device churn/reuse/Trim controls identify a contribution, not complete attribution. [Contract](lifecycle/WINDOWS_DEVICE_LIFETIME.md) | Evelyn owns investigation; driver/backend remedy or explicitly approved device-lifetime contract required. Jon owns contract/acceptance changes |
 | D2 / D3 | Unresolved public overload/convenience-fallback decisions; existing explicit profiles/defaults preserved | Jon; no automatic default change or hidden native-to-CPU fallback |
 | Linux / Android campaigns | Broad work deferred under Windows-first direction. Prior Linux BGRA and other completed campaigns collected, not repeated. Android BGRA4K and NV121080 residual failures remain suspended; clean trace diagnostics did not waive them | Evelyn; resume deferred integration only after Windows priority permits; causal fixes required for suspended failed cells |
 
-**Windows runtime owner:** root, exec77533: isolated exacta50841a plus reviewed
-external Map/SHA/Unmap diagnostic overlay. Existing pinned4K tape, one5s off/on
-pair only, no production edits or timing-failure waiver. Evidence:
-`windows-decoder-oracle-phase-prepared/runs/oracle-phase-a50841a-20261112t0834z`.
+**Windows runtime owner:** root, exec12979 / native PID34508: exacta50841a native NV12 1080p60,
+one1800s trace-off qualification. Evidence:
+`windows-native-final-duration-prepared/runs/native-nv12-1080-duration-a50841a-20261112t0837z`.
+Started about08:37Z; expected finish about09:07Z. Do not start another Windows
+workload until full collection and idle verification. Matching final-build short
+pair [passed](windows-native-final-nv12-1080-a50841a/README.md): both300video and
+240000PCM, zero17ms misses, maximum arrival4.7345/5.322534ms. All64 raw hashes
+and70 archive blob hashes independently verified. DLLs match integrated pins;
+EXE pins were first observed after build under the exclusive lane.
+
+The [isolated oracle diagnostic](windows-decoder-oracle-a50841a/README.md) was
+collected: both150video/240000PCM, zero34ms misses, maximum arrival23.4155/25.0974ms.
+Map median0.76895/0.89575ms, max2.4424/4.8582ms; SHA median12.9635/12.97265ms.
+Original31.6217ms source-oracle outlier did not recur; added phase probes and
+buffered source CSV mean this is diagnostic evidence, not qualification or a
+waiver. No repeat planned. Initial Git LF-to-CRLF setup failure was preserved;
+per-command LF control corrected it without weakening exact source hashes.
 
 Previous integrated exec5910 finished: exacta50841a clean build,178/178 tests,
 per-DLL API128 and3/3 unchanged clients passed. Root independently verified all44
 collected hashes/full coverage, no skips, plugin identities and final idle at
 08:33:27.7018315Z. Prior runner-only PDB and inspection path failures are preserved;
-neither earlier attempt reached CTest. [Archive/API evidence](windows-integrated-a50841a/README.md) published and independently verified.
+neither earlier attempt reached CTest. [Archive/API evidence](windows-integrated-a50841a/README.md)
+published and independently verified.
 
 Previously collected b247e5d explicit4K30 AU replay pair: The clean build and9/9 focused checks
 passed10.09s; existing on-demand tiny smoke passed60 distinct frames/96000PCM.
@@ -257,7 +271,7 @@ Replay fixture preparation and independent local tape parsing/SHA256 passed:
 34ms misses (max30.735534ms). Trace-on retained exact media and complete joined
 trace accounting, but **failed two video deadlines** (116/117,max36.6673ms).
 Pair remains FAILED; no decoder endurance run. Source readback/hash reached
-31.6217ms; local phase review is active, with no speculative timing rerun.
+31.6217ms; completed phase diagnosis did not reproduce it. No speculative timing rerun.
 
 The source-only [throughput diagnostic](windows-decoder-source-throughput/README.md)
 previously measured quiet150-frame generation5.1418495s and generation/encoding
@@ -266,12 +280,13 @@ removes that concurrent workload from replay but does not waive on-demand failur
 The default path, actual decoder, full-pixel oracle, native leases, PCM and all
 17/34ms gates remain unchanged. Both modes retain explicit scope labels.
 
-Collect the running external Map/SHA/Unmap causal diagnostic without modifying
-the qualified implementation. If it does not reproduce the outlier, retain the
-original failure and advance ready native final-build target/duration qualification.
-Integrated runner verification includes per-DLL exports, complete collection,
-compatibility pins, and26 passing local validator tests. No final API freeze or full M6 qualification is
-claimed by this batch; historical startup/lifetime and D2/D3 remain open.
+Collect the running native duration before starting another Windows workload.
+If it passes, advance remaining native4K final-build target/duration cells or the
+ready sharedCPU NV124K qualification. The duration adapter requires matching
+integrated/pair proof and unchanged gates;25 local validator tests and independent
+review passed. The review-found uncertain-SSH collection race was corrected and
+re-reviewed before launch. Historical startup/lifetime and D2/D3 remain open.
+
 
 CNG comparison preserved identical full SHA256 across120 samples/known vectors;
 1080p hash median18.05→3.24ms,4K72.68→12.95ms. Initial unavailable MAXULONG
