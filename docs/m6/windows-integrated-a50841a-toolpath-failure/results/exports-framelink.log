@@ -1,0 +1,108 @@
+Microsoft (R) COFF/PE Dumper Version 14.44.35211.0
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+
+Dump of file <win-home>\dev\framelink-final-final-windows-a50841a-symbolfix-20261112t0821z\build\Release\framelink.dll
+
+File Type: DLL
+
+  Section contains the following exports for framelink.dll
+
+    00000000 characteristics
+    FFFFFFFF time date stamp
+        0.00 version
+           1 ordinal base
+          80 number of functions
+          80 number of names
+
+    ordinal hint RVA      name
+
+          1    0 00006C90 flAcquireBuffer
+          2    1 000073B0 flAcquireFrame
+          3    2 00007710 flBeginSubmit
+          4    3 00007940 flCancelBuffer
+          5    4 00007A00 flChannelD3D11Device
+          6    5 00007A10 flClose
+          7    6 00007CF0 flCollectReadLeases
+          8    7 00008120 flCompleteReadLease
+          9    8 00008380 flCompleteReadLeaseD3D11Fence
+         10    9 000085C0 flCreateChannel
+         11    A 000085F0 flCreateChannelEx
+         12    B 000087B0 flCreateChannelFromD3D11Handles
+         13    C 000087F0 flCreateChannelOnAdapter
+         14    D 00008840 flD3D11PoolSnapshotHandle
+         15    E 00008870 flEndSubmit
+         16    F 00008B70 flFrameAgeNs
+         17   10 00008CC0 flGetFrameMetadata
+         18   11 00008E00 flImageD3D11
+         19   12 00008E10 flImageMap
+         20   13 00008F00 flImageMapPlanes
+         21   14 00009280 flImageMemoryInfo
+         22   15 00009780 flImageSharedHandle
+         23   16 00009790 flImageUnmap
+         24   17 00009930 flLeaseFrame
+         25   18 0000F480 flMemoryEvaluate
+         26   19 0000F5F0 flMemoryEvaluateBoundary
+         27   1A 0000F930 flMemoryPathValidate
+         28   1B 0000F990 flMemoryRequirementsCombine
+         29   1C 0000FB00 flMemoryRequirementsDecode
+         30   1D 0000FDE0 flMemoryRequirementsEncode
+         31   1E 0000FF60 flMemoryRequirementsInit
+         32   1F 0000FFA0 flMemoryRequirementsValidate
+         33   20 00009D30 flOpenProducer
+         34   21 00009D40 flOpenProducerD3D11Bounded
+         35   22 0000CC40 flOpenProducerSlot
+         36   23 0000A000 flQuery
+         37   24 0000A040 flQueryConsumerFlags
+         38   25 0000A0E0 flQueryD3D11PoolSnapshot
+         39   26 0000A110 flReadLeaseFrame
+         40   27 0000A1D0 flRelease
+         41   28 0000A480 flReleaseBufferReference
+         42   29 0000A580 flReleaseD3D11PoolSnapshot
+         43   2A 0000A590 flRequestGeometry
+         44   2B 0000A940 flResultString
+         45   2C 0000AA00 flRetainBufferReference
+         46   2D 0000AB90 flRetainReadLease
+         47   2E 0000E4B0 flSessionDecode
+         48   2F 0000E980 flSessionEncode
+         49   30 0000EC20 flSessionMapPts
+         50   31 0000ED90 flSessionNegotiate
+         51   32 0000F050 flSessionSampleOffset
+         52   33 0000F0C0 flSessionValidate
+         53   34 0000F260 flSessionValidateReplacement
+         54   35 0000F2F0 flSessionValidateSelection
+         55   36 0000ADE0 flSetFrameMetadata
+         56   37 0000AEF0 flSetReceiveQueue
+         57   38 0000B000 flSharedConsumedFence
+         58   39 00015AF0 flSharedCpuAcquireWrite
+         59   3A 00015E90 flSharedCpuCancelWrite
+         60   3B 00015F60 flSharedCpuClose
+         61   3C 00010000 flSharedCpuDescriptorDecode
+         62   3D 00010610 flSharedCpuDescriptorEncode
+         63   3E 000108E0 flSharedCpuDescriptorValidate
+         64   3F 00015FE0 flSharedCpuOpenConsumerPipe
+         65   40 000160E0 flSharedCpuOpenProducerPipe
+         66   41 000161D0 flSharedCpuQuery
+         67   42 00016310 flSharedCpuReadMetadata
+         68   43 00016350 flSharedCpuReceive
+         69   44 00016390 flSharedCpuReceiveEvent
+         70   45 00016940 flSharedCpuReceiveRelease
+         71   46 00016B10 flSharedCpuReleaseRead
+         72   47 00016D20 flSharedCpuRetainRead
+         73   48 00016D50 flSharedCpuSendEos
+         74   49 00016F80 flSharedCpuSubmit
+         75   4A 00016F90 flSharedCpuSubmitWithMetadata
+         76   4B 000171F0 flSharedCpuWaitReadable
+         77   4C 0000B030 flSharedReadyFence
+         78   4D 0000B060 flSnapshotD3D11ConsumerPool
+         79   4E 0000B4F0 flSubmit
+         80   4F 0000E2B0 flTraceFlush
+
+  Summary
+
+        1000 .data
+        2000 .pdata
+        7000 .rdata
+        1000 .reloc
+        1000 .rsrc
+       19000 .text

@@ -1,0 +1,20 @@
+{
+  "revision": "a50841aad44fbc9431234a4f326bad036d193bf5",
+  "state": "failed",
+  "started_utc": "2026-11-12T08:20:35.358758+00:00",
+  "failures": [],
+  "step": "inspect-framelinksink",
+  "command": [
+    "gst-inspect-1.0",
+    "framelinksink"
+  ],
+  "extract_exit": 0,
+  "configure_exit": 0,
+  "build-all_exit": 0,
+  "inventory_exit": 0,
+  "expected_tests": 178,
+  "exports-framelink_exit": 0,
+  "exports-framelink_gst_session_exit": 0,
+  "error": "[WinError 2] The system cannot find the file specified",
+  "ended_utc": "2026-11-12T08:21:16.936327+00:00"
+}
