@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Independent artifact gates for the trace-off authenticated decoder-rate fixture.
+"""Independent artifact gates for the authenticated decoder-rate fixture.
 Full active-row digests are joined offline; no synthetic bytes replace video pixels.
 """
 import argparse,csv,json,math,pathlib,re,statistics
@@ -25,9 +25,49 @@ def resource_analysis(rows,seconds):
             require(math.isfinite(slope) and slope<=limit,'resource slope gate: '+key);result['slopes_per_min'][key]=slope
     return result
 
+def trace_analysis(root,c,video):
+    n=c['expected_video'];capacity=c['seconds']*2500+n*32+1024
+    require(c['seconds']<=5 and c.get('trace_capacity_per_thread')==capacity,'trace duration/capacity contract')
+    boundaries={};counts={}
+    for role in ('source','relay','receiver'):
+        paths=list(root.glob(role+'.trace.csv.*.csv'))
+        require(len(paths)==1,role+' missing/ambiguous trace')
+        lines=paths[0].read_text().splitlines()
+        require(len([x for x in lines if x.startswith('# schema=2,clock=steady_ns,')])==1,role+' trace schema/clock')
+        footer=[x for x in lines if x.startswith('# dropped_events=')]
+        require(footer==[f'# dropped_events=0,rejected_threads=0,capacity_per_thread={capacity}'],role+' trace loss/capacity')
+        records=list(csv.DictReader(x for x in lines if not x.startswith('#')))
+        if role=='relay':
+            require(not any(r['operation'] in ('flImageMap','flImageMapPlanes') for r in records),'relay payload map')
+            require(not any(int(r['payload_bytes'])!=0 or r['operation'] in ('image.gpu_readback_issued','image.gpu_upload_issued') for r in records),'relay payload copy')
+        counts[role]={}
+        for op,label in [('flEndSubmit','sent'),('flAcquireFrame','received')]:
+            rows=[r for r in records if r['operation']==op and r['result']=='0']
+            expected=0 if (role=='source' and label=='received') or (role=='receiver' and label=='sent') else n
+            require(len(rows)==expected,role+' trace role counts');counts[role][label]=len(rows)
+            if not rows:continue
+            require(len({r['channel_id'] for r in rows})==1,role+' trace mixed channel')
+            bypts={int(r['pts_ns']):r for r in rows}
+            require(len(bypts)==n and set(bypts)=={v['pts_ns'] for v in video[role]},role+' trace PTS identities')
+            for v in video[role]:
+                r=bypts[v['pts_ns']]
+                # Submit scopes expose slot/fence but not sequence. Receive scopes expose all three.
+                if label=='received':
+                    require((int(r['slot']),int(r['fence']),int(r['sequence']))==(v['slot'],v['ready_value'],v['sequence']),role+' trace CSV native identity')
+                elif role=='source':require(int(r['slot'])==v['slot'],'source trace CSV slot')
+            boundaries[(role,label)]=bypts
+    up=boundaries[('source','sent')];up_in=boundaries[('relay','received')]
+    down=boundaries[('relay','sent')];down_in=boundaries[('receiver','received')]
+    require(next(iter(up.values()))['channel_id']!=next(iter(down.values()))['channel_id'],'trace requires two distinct channels')
+    for sent,received in [(up,up_in),(down,down_in)]:
+        for pts,r in sent.items():
+            other=received[pts]
+            require(all(r[k]==other[k] for k in ('channel_id','fence','slot','pts_ns')),'trace boundary identities')
+    return counts
+
 def analyze(root):
     root=pathlib.Path(root);c=json.loads((root/'config.json').read_text())
-    require(c['schema']==1 and c['format']=='RGBA' and c['trace'] is False,'unsupported schema/profile/trace claim')
+    require(c['schema']==1 and c['format']=='RGBA' and type(c['trace']) is bool,'unsupported schema/profile/trace claim')
     require(c['clock']=='QPC quotient-remainder nanoseconds' and c['digest']=='SHA256 active rows','clock/digest contract')
     seconds=c['seconds'];fps=c['fps'];n=seconds*fps;audio=seconds*100;size=c['width']*c['height']*4
     require(isinstance(seconds,int) and 1<=seconds<=1800,'duration')
@@ -99,6 +139,10 @@ def analyze(root):
     result.update(video_frames=n,pcm_frames=seconds*48000,source_distinct_digests=len({r['digest'] for r in source}),video_arrival_misses=late,audio_arrival_misses=audio_late,source_conversion_bytes=n*size,source_readback_bytes=n*size,final_readback_bytes=n*size)
     result['timing_ms']={'scheduled_to_final_arrival':distribution([r['arrival_ns']-s['scheduled_ns'] for s,r in zip(source,final)]),'audio_scheduled_to_final':distribution([r['arrival_ns']-s['scheduled_ns'] for s,r in zip(pcm['source'],pcm['receiver'])])}
     for name,rows,a,b in [('source_acquire',source,'acquire_begin_ns','acquired_ns'),('decoder_pull_wait',source,'decode_begin_ns','decoded_ns'),('conversion_call',source,'convert_begin_ns','converted_ns'),('conversion_until_gpu_observed_done',source,'convert_begin_ns','conversion_done_ns'),('source_oracle_readback_and_hash',source,'oracle_begin_ns','oracle_done_ns'),('source_submit',source,'submit_begin_ns','submitted_ns'),('relay_forward',relay,'forward_begin_ns','forwarded_ns'),('final_acquire_until_lease_done',final,'arrival_ns','lease_done_ns'),('final_staging_map_and_hash',final,'hash_begin_ns','hash_done_ns')]:result['timing_ms'][name]=distribution([r[b]-r[a] for r in rows])
+    result['trace_checked']=False
+    if c['trace']:
+        result['trace_counts']=trace_analysis(root,c,video);result['trace_checked']=True
+    result['trace_scope']='FrameLink transport instrumentation only; uninstrumented GStreamer/D3D conversion and oracle copies are not inferred absent'
     result['pass']=not late and not audio_late
     return result
 

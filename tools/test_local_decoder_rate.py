@@ -94,6 +94,45 @@ class DecoderRateChecks(unittest.TestCase):
   self.config.update(width=1920,height=1080,fps=60,expected_video=60)
   (self.root/'config.json').write_text(json.dumps(self.config))
   with self.assertRaisesRegex(ValueError,'input not target'):analyze(self.root)
+ def traces(self):
+  self.config.update(trace=True,trace_capacity_per_thread=4484)
+  (self.root/'config.json').write_text(json.dumps(self.config))
+  for role,ops in [('source',[('flEndSubmit','up','relay')]),('relay',[('flAcquireFrame','up','relay'),('flEndSubmit','down','receiver')]),('receiver',[('flAcquireFrame','down','receiver')])]:
+   rows=[]
+   for op,channel,observed in ops:
+    with (self.root/(observed+'.video.csv')).open() as f:video=list(csv.DictReader(f))
+    rows.extend(dict(operation=op,channel_id=channel,fence=v['ready_value'],slot=v['slot'],sequence=v['sequence'] if op=='flAcquireFrame' else 0,pts_ns=v['pts_ns'],result=0,payload_bytes=0) for v in video)
+   name=role+'.trace.csv.1.csv';self.write(name,rows)
+   path=self.root/name
+   path.write_text('# schema=2,clock=steady_ns,pid=1,origin_ns=0,wall_ns=0\n'+path.read_text()+'# dropped_events=0,rejected_threads=0,capacity_per_thread=4484\n')
+ def trace_change(self,role,old,new):
+  path=self.root/(role+'.trace.csv.1.csv');path.write_text(path.read_text().replace(old,new,1))
+ def test_valid_trace(self):
+  self.traces();result=analyze(self.root)
+  self.assertTrue(result['trace_checked']);self.assertFalse(result['trace_qualified']);self.assertTrue(result['pass'])
+  self.assertEqual(result['trace_counts']['relay'],dict(sent=30,received=30))
+ def test_trace_loss_and_rejected_threads(self):
+  for old,new in [('dropped_events=0','dropped_events=1'),('rejected_threads=0','rejected_threads=1'),('capacity_per_thread=4484','capacity_per_thread=4485')]:
+   self.traces();self.trace_change('relay',old,new)
+   with self.assertRaisesRegex(ValueError,'trace loss/capacity'):analyze(self.root)
+ def test_trace_native_identity(self):
+  self.traces();self.trace_change('receiver',',1,1,1,37000000',',1,1,9,37000000')
+  with self.assertRaisesRegex(ValueError,'CSV native identity'):analyze(self.root)
+ def test_trace_boundary_identity(self):
+  self.traces();self.trace_change('source','flEndSubmit,up,1,','flEndSubmit,up,99,')
+  with self.assertRaisesRegex(ValueError,'boundary identities'):analyze(self.root)
+ def test_trace_relay_copy(self):
+  self.traces();self.trace_change('relay',',37000000,0,0',',37000000,0,8192')
+  with self.assertRaisesRegex(ValueError,'payload copy'):analyze(self.root)
+ def test_trace_relay_map(self):
+  self.traces();self.trace_change('relay','flAcquireFrame','flImageMapPlanes')
+  with self.assertRaisesRegex(ValueError,'payload map'):analyze(self.root)
+ def test_trace_truncated(self):
+  self.traces();path=self.root/'source.trace.csv.1.csv';lines=path.read_text().splitlines();del lines[3];path.write_text('\n'.join(lines)+'\n')
+  with self.assertRaisesRegex(ValueError,'role counts'):analyze(self.root)
+ def test_trace_duration_limit(self):
+  from check_local_decoder_rate import trace_analysis
+  with self.assertRaisesRegex(ValueError,'duration/capacity'):trace_analysis(self.root,dict(seconds=6,expected_video=180),{})
  def resources(self,seconds=600,growth=10):return [dict(t_ns=n*10**9,cpu_ns=n*10000000,memory_kb=1000+n*growth/60,handles=20,threads=4) for n in range(seconds+1)]
  def test_resource_positive(self):
   for seconds in [600,1800]:self.assertAlmostEqual(resource_analysis(self.resources(seconds),seconds)['slopes_per_min']['memory_kb'],10)
