@@ -1,32 +1,29 @@
 # Windows API integration baseline candidate — NOT FROZEN
 
-**Current verified integrated candidate:** `7b8a2741416a59be1fbd66df13a4e88e95bb9bd9`.
-Clean exact-revision Windows build/API/full suite **148/148 passed**;
-[pinned evidence](../windows-integrated-7b8a274/README.md) includes DLL hashes,
-runtime properties and exports. All 119 prior exported names retained (119 total).
-Export-name retention is not proof of behavioral or ordinal ABI compatibility.
+**Current verified integrated candidate:** `461584bbf5a6b8b70cec1578d69d35cb4b1ea2ff`.
+Clean exact-revision Windows build/API/full suite **169/169 passed (655.72s)**;
+[pinned evidence](../windows-integrated-461584b/README.md) includes DLL hashes,
+runtime properties, public-header manifest and exports. All119 prior names
+retained, nine additive functions,128 total. Source review identified no existing
+public layout/enum/signature break; name retention is not ordinal ABI proof.
 
-For current profile selection, setup ordering, ownership, overload accounting and
-remaining decisions, see the [Windows app contract](../WINDOWS_APP_CONTRACT.md).
-The implementation snapshot there includes focused work through `7e1e8c5`; it
-does not move this integrated baseline or turn historical manifests into current ones.
+For profile selection, setup ordering, ownership, migration notes and remaining
+decisions, see the [Windows app contract](../WINDOWS_APP_CONTRACT.md). Actual
+three-process same-allocation native/PCM forwarding, replacement with held old
+readers, source-death isolation, automatic explicit FAR5 receiver and unpublished
+transactional setup are now included in this integrated candidate. Follow the
+[local relay recipe](../WINDOWS_LOCAL_NATIVE_RELAY.md); snapshot pinning is for
+the entire graph and never replaces frame-reader ownership.
 
-This revision includes explicit Windows local native setup, the additive
-`fl_gst_session_open_local_native_epoch` API and automatic native A/V bin setup
-via `set-local-native-candidate`. [Native bin contract and checks](../windows-native-bins/README.md):
-configure all properties before copying the immutable candidate; fresh bins are
-required for each setup attempt, including reconnect after failure/cancellation.
-This includes explicit D3D11 GPU_SAMPLE/operations=0 receiver support as well as
-the CPU-readback profile. The explicit GPU_RENDER producer candidate supports the tested decoder/color/scale path; raw private decoder allocations are rejected. Neither qualifies a two-hop pipeline. No overload/fallback defaults changed.
+Three unchanged baseline-built C11/native clients passed against both old and
+new DLLs, with binary hashes verified; [compatibility evidence](../windows-compat-461584b/README.md).
+Existing FAR4 selection and overload/fallback defaults remain unchanged. The
+explicit unavailable-adapter rejection and producer-open failed-output details
+are documented in the app contract and compatibility review.
 
-Windows authenticated CPU discovery/delegation and `shared-cpu=true session=`
-bins are implemented and tested. Native producer and receiver bins support
-broker-bound channel and immutable policy adoption. Full configured session and
-native policy candidates can now be authenticated through either explicit
-connected streams, the Windows local helper or explicitly candidate-bound bins. Exact pixels/PCM and37ms mapping
-pass; real decoder and two-hop gates remain open. The earlier
-Windows startup failure is not waived by later integrated passes. API not frozen;
-M6 not complete.
+Historical startup/resource failures remain suspended, not waived by a passing
+integrated suite. Final-rate/lifetime and all-platform M6 gates, D2/D3 decisions
+and broader qualification remain open. **API not frozen; M6 not complete; M7 held.**
 
 **Historical candidate** exact revision: `609cb74031a5de2cee782619007a6e87ab7fbccd`.
 Clean isolated Windows source archive SHA256:
@@ -92,10 +89,9 @@ and explicitly selected; do not append handle integers to legacy POSIX packets.
 Windows HANDLE values are process-local; bind the process identity, transfer exact
 rights, acknowledge adoption, reject stale epochs and retain held old leases.
 
-Remaining gates before a Windows-ready API baseline: real-producer/relay integration,
-strict overload profile review,
-resource-growth/timing/fault fixes and exact-head compatibility tests. Real decoder,
-two-hop PCM and all-platform M6 acceptance remain separate. This candidate is a
+Remaining gates before a Windows-ready API baseline include strict overload profile review,
+resource-growth/timing remedies and broader compatibility qualification. Real decoder
+and two-hop functional checks do not establish final-rate or all-platform M6 acceptance. This candidate is a
 reviewable inventory, **not a freeze, full Windows app-integration acceptance, or M6 closure**.
 
 ## Reproduction / environment
@@ -313,7 +309,7 @@ does not permit reuse until final local unref. No runtime API/default changes.
 This is not real-decoder or automatic-bin relay acceptance.
 
 
-## Readiness after peer cancellation (pending next integrated candidate)
+## Readiness after peer cancellation (included in current candidate)
 
 `fl_gst_session_wait` now checks authenticated event-channel liveness before
 returning cached READY, using the same failure state as `get_config`. While
@@ -327,25 +323,18 @@ now raises ERROR instead of accepting cached readiness; producer teardown also
 raises receiver ERROR without invented EOS. Idle producers still need an API
 operation to observe the failure; this is not a new asynchronous bus monitor.
 Evidence: [bin cancellation repair](../windows-bin-cancel/README.md).
-The pinned integrated baseline above remains unchanged until the next clean
-exact-revision validation is collected. API is not frozen.
+This behavior is included in the current pinned integrated candidate. API is not frozen.
 
 
-## Additive local relay setup entrypoint (not yet integrated baseline)
+## Additive local relay setup APIs (included in current candidate)
 
-`fl_gst_session_open_local_native_relay` pins an identity-mapped upstream A/V
-timeline for a distinct FAR4 downstream session. It still creates an independent
-pool and alone is not a same-allocation relay. [Focused evidence](../windows-local-relay-session/README.md)
-collected at `ab91cac`: Windows 5/5, Linux 2/2 and 119 retained names plus this
-symbol (120 total). These checks do not replace the pinned integrated baseline.
-
-The later FAR5 APIs `fl_gst_session_open_local_native_relay_pool` and
-`fl_gst_session_open_local_native_pool_receiver` provide authenticated explicit
-same-allocation setup. [Pool evidence](../windows-local-relay-pool/README.md)
-records 122 exported names with all 119 retained; see the
-[current recipe and cancellation contract](../WINDOWS_LOCAL_NATIVE_RELAY.md).
-Focused actual-session A/V and separate-process native controls passed; the raw
-process control is not cross-process PCM/bin end-to-end qualification. General
-separate-process composition still needs the safe consumer-pool export/backend
-integration. No final integrated suite or endurance result is implied by these
-focused passes. No existing default or FAR4 behavior was changed. API not frozen.
+`fl_gst_session_open_local_native_relay` creates a timeline-bound FAR4 output
+with an independent pool. It alone is not a same-allocation relay. FAR5 output
+uses `fl_gst_session_open_local_native_relay_pool` with a whole-graph consumer
+snapshot pin; final receivers explicitly select
+`fl_gst_session_open_local_native_pool_receiver` or the automatic bin action.
+Source-relative input uses `fl_gst_session_open_local_native_relay_input`.
+The [current recipe](../WINDOWS_LOCAL_NATIVE_RELAY.md) documents the validated
+transactional helper, actual separate-process A/V, strict native completion,
+replacement and cancellation controls. These are integrated functional results,
+not endurance, target-rate or API-freeze claims.

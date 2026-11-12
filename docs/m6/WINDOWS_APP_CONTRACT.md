@@ -1,11 +1,12 @@
 # Windows application integration contract — not frozen
 
-This is an app-facing reading of the implemented contracts at `7e1e8c5`, not a
+This is an app-facing reading of the implemented contracts at `461584b`, not a
 new default, an ABI freeze or final Windows qualification. The
 [API candidate](windows-api-candidate/README.md) separates the last integrated
 baseline from later focused evidence. Follow the
 [local native relay recipe](WINDOWS_LOCAL_NATIVE_RELAY.md) for FAR5 setup;
-its remaining backend dependencies are not resolved by this document.
+its setup, pool snapshot, separate-process A/V and automatic FAR5 receiver
+contracts are implemented. Functional verification is not timing/resource acceptance.
 
 ## Select a profile explicitly
 
@@ -39,6 +40,10 @@ Windows-only; a property/action being present is not proof of platform support.
    (`sessionGeneration=0`) into both bins with `set-local-native-candidate`.
    Check its Boolean result. TRUE only accepts and freezes the template; it
    does not mean peer authentication, allocation or readiness succeeded.
+   For a FAR5 same-allocation relay output, the final receiver instead uses
+   `set-local-native-pool-candidate`: A/V only, explicit pool >=2, and the same
+   NULL-only copied/frozen template contract. This is explicit selection, not
+   fallback from FAR4. Check action availability for older plugins.
 3. Observe the bus for asynchronous setup errors. For explicit broker adoption,
    authenticate offers and verify the immutable allocation binding first;
    `apply-memory-policy` requires an adopted channel and a nonzero generation,
@@ -119,7 +124,40 @@ setup-I/O deadline but still includes synchronous platform allocation calls.
 Do not derive an end-to-end GPU/driver cancellation guarantee from
 `connect-timeout-ms`. See the function-specific headers for the exact scope.
 
+## Same-allocation relay ownership
+
+`flSnapshotD3D11ConsumerPool` creates an opaque snapshot that pins the input
+pool/epoch while its borrowed handles establish the explicit FAR5 output.
+Retain that snapshot for the entire relay graph, not just setup. Release it
+using its API; it is not a reader lease and does not grant
+permission to reuse a frame still held by a reader. Pool replacement and new
+producer attachment remain excluded while the snapshot pins that pool.
+
+The checked sample `setupLocalNativeRelay` composes source-relative FAR4 input,
+snapshot and FAR5 output as one unpublished transaction. It clears empty output
+resources on failure and cancels the two fresh caller-owned sessions, but does
+not publish readiness, install media adapters or own a running graph's teardown.
+Its remaining setup-I/O deadline does not bound synchronous driver calls. Install
+adapters/supervision before downstream-then-upstream readiness.
+
+`SessionPcmRelay::endPublication` permits authenticated terminal publication
+with outstanding native readers; `finish` retains its strict drain requirement.
+Neither EOS, cancellation nor terminal publication completes native reads.
+Accept real control drain before closing the session, retain native GstMemory
+through actual GPU completion, and collect genuine releases before reclaiming
+native resources. The application may retain its own native GstMemory reference
+across receiver bin NULL; an unreferenced buffer is not retained merely by stopping the bin.
+
 ## Compatibility and decisions still open
+
+Two Windows behavioral changes require caller attention: an explicitly selected
+unavailable D3D adapter now returns `FL_ADAPTER_MISMATCH` instead of silently
+choosing the default adapter; legacy producer-open failure clears the output
+after valid name/output argument checks (a null name returns before clearing it).
+Always check the result and do not pass storage holding a live channel.
+The additive bounded producer-open path requires negotiated pull-handle support
+and returns `FL_VERSION_MISMATCH` for an older peer; the legacy protocol remains
+available. FAR1–FAR4 formats and existing bin defaults are unchanged.
 
 Before calling a new API from a client supporting older DLLs/plugins, detect its
 symbol/action/property availability and reject unavailable capabilities
