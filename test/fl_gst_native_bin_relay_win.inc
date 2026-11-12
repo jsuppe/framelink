@@ -73,7 +73,7 @@ struct BrokerNativeBinRelay {
    CHECK(d.afterFrames==u.afterFrames&&d.ptsNs==mapped(u.ptsNs)&&d.durationNs==u.durationNs);
   }
   CHECK((upstreamEvents.discont&17)==17&&downstreamEvents.discont==upstreamEvents.discont);
-  puts("broker bin serialized GAP: exact 4,4,8 frame boundaries, +5ms mapping, durations 250/750/500us, DISCONT preserved, trailing GAP before EOS");
+  puts("broker bin serialized GAP: exact 4,4,8 frame boundaries, negotiated mapping, durations 250/750/500us, DISCONT preserved, trailing GAP before EOS");
  }
  BrokerNativeBinRelay(FlGstSession* source,const flSessionConfig& original,
    const GstFrameLinkMemoryPolicy& policy,flChannel* channel,flsample::NativeGstD3D11Relay& adapter,
