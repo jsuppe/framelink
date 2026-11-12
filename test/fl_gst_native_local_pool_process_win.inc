@@ -352,7 +352,9 @@ static int localPoolPauseReader(const char*path,HANDLE notice,HANDLE command,boo
   CHECK(received==8&&pcmFrames==384&&held);avTerminal(pipe,GST_MESSAGE_EOS);CHECK(eosEvents.load()==2);
   CHECK(gst_app_sink_is_eos(GST_APP_SINK(video))&&gst_app_sink_is_eos(GST_APP_SINK(audio)));identity();
   CHECK(SetEvent(notice));relayprocess::wait(command); // parent accepts authenticated terminal before teardown
+  fprintf(stderr,"pause final memory refs before NULL: %d\n",GST_MINI_OBJECT_REFCOUNT_VALUE(held));
   localPoolPauseState(pipe,GST_STATE_NULL);localPoolPauseMemory(held,heldOffset,heldStride,18);
+  fprintf(stderr,"pause final memory refs after NULL: %d\n",GST_MINI_OBJECT_REFCOUNT_VALUE(held));
   gst_memory_unref(held);held=nullptr;CHECK(SetEvent(notice));relayprocess::wait(command);
  }
  for(unsigned i=0;i<2;++i){gst_pad_remove_probe(eosPads[i],eosProbes[i]);gst_object_unref(eosPads[i]);}
@@ -441,7 +443,11 @@ static void localPoolPauseControl(const char*plugin,bool cancelPaused){
    CHECK(video.pending()==1&&pcm.finish(video,0)==FL_GST_SESSION_TIMEOUT);CHECK(pcm.endPublication(video,5000)==FL_GST_SESSION_READY);avTerminal(output.pipe,GST_MESSAGE_EOS);
    relayprocess::wait(notice.value);supervisor.stop();CHECK(supervisor.status()==FL_GST_SESSION_READY);
    CHECK(fl_gst_session_finish_local(down,TRUE,1000,nullptr));CHECK(SetEvent(command.value));relayprocess::wait(notice.value);
-   const auto deadline=g_get_monotonic_time()+2000000;while(video.pending()){CHECK(g_get_monotonic_time()<deadline&&video.collect()==FL_OK);g_usleep(100);}
+   const auto deadline=g_get_monotonic_time()+2000000;while(video.pending()){
+    const auto collected=video.collect();CHECK(collected==FL_OK);
+    if(g_get_monotonic_time()>=deadline){fprintf(stderr,"pause final pending after reader unref: %u\n",video.pending());CHECK(false);}
+    g_usleep(100);
+   }
    CHECK(video.finish()==FL_OK);CHECK(SetEvent(command.value));relayprocess::join(child);
    CHECK(fl_gst_session_finish_local(up,FALSE,1000,nullptr));producer.join();
   }
