@@ -21,6 +21,7 @@
 #include <array>
 #include <cstring>
 #include <mutex>
+#include <memory>
 #include <thread>
 #include <condition_variable>
 #include <chrono>
@@ -644,6 +645,28 @@ gboolean fl_gst_session_open_local_native_epoch(FlGstSession*session,gboolean pr
  return open_local_native_impl(session,producer,path,local,videoQueue,pool,queueMs,timeout,idle,
   candidate,bound,channel,epochFunc,epochData,outer,error,nullptr);
 }
+// A source can fail while downstream discovery/handshake is still waiting.
+// Observe only session state; never touch native leases or manufacture EOS.
+struct NativeRelaySetupWatch {
+ Deadline deadline;
+ std::mutex mutex;std::condition_variable changed;bool stopped=false;
+ std::thread worker;
+ NativeRelaySetupWatch(FlGstSession*upstream,const Wire&initial,guint timeout,GCancellable*outer)
+  :deadline(timeout,outer),worker([this,upstream,initial]{
+   std::unique_lock<std::mutex> lock(mutex);
+   while(!stopped){
+    lock.unlock();flSessionConfig config{};Wire current{};gint64 mapped=-1;
+    const bool live=fl_gst_session_get_config(upstream,&config)==FL_GST_SESSION_READY&&
+     flSessionEncode(&config,current.data(),current.size())==FL_SESSION_OK&&current==initial&&
+     fl_gst_session_map_running_time(upstream,config.generation,0,TRUE,&mapped)==FL_GST_SESSION_READY&&mapped==0;
+    if(!live){g_cancellable_cancel(deadline.cancel);return;}
+    lock.lock();changed.wait_for(lock,std::chrono::milliseconds(10),[this]{return stopped;});
+   }
+  }){}
+ ~NativeRelaySetupWatch(){
+  {std::lock_guard<std::mutex> lock(mutex);stopped=true;}changed.notify_all();worker.join();
+ }
+};
 static gboolean open_local_native_relay_impl(FlGstSession*session,FlGstSession*upstream,const gchar*path,
  const flSessionCapabilities*local,guint videoQueue,guint pool,guint queueMs,guint timeout,guint idle,
  const GstFrameLinkMemoryPolicy*candidate,GstFrameLinkMemoryPolicy*bound,flChannel**channel,
@@ -668,8 +691,11 @@ static gboolean open_local_native_relay_impl(FlGstSession*session,FlGstSession*u
  flSessionCapabilities exact{};exact.version=before.version;exact.videoCount=exact.audioCount=1;
  exact.video[0]=before.video;exact.audio[0]=before.audio;
  g_object_ref(upstream);
+ std::unique_ptr<NativeRelaySetupWatch> watch;
+ if(relayPool)watch=std::make_unique<NativeRelaySetupWatch>(upstream,initial,timeout,outer);
  gboolean ok=open_local_native_impl(session,TRUE,path,&exact,videoQueue,pool,queueMs,timeout,idle,
-  candidate,bound,channel,nullptr,nullptr,outer,error,&before,relayPool);
+  candidate,bound,channel,nullptr,nullptr,watch?watch->deadline.cancel:outer,error,&before,relayPool);
+ watch.reset();
  mapped=-1;
  const bool unchanged=fl_gst_session_get_config(upstream,&after)==FL_GST_SESSION_READY&&
   flSessionEncode(&after,final.data(),final.size())==FL_SESSION_OK&&initial==final&&

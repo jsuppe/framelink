@@ -121,6 +121,7 @@ static gint64 nativeEpoch(gpointer data,GstClockTime now){
 }
 #include "fl_gst_native_bin_relay_win.inc"
 static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=false,bool automatic=false,bool nativeReceiver=false,bool decoder=false,bool relayNegative=false,bool automaticRelay=false,bool leaseRelay=false,bool binRelay=false){
+ const bool localPoolRelay=mode>=12&&mode<=14;
  fprintf(stderr,"native AV mode %u local=%d\n",mode,local);
  auto*s=fl_gst_session_new(3);auto*r=fl_gst_session_new(3);
  flSessionConfig cfg{};cfg.version=2;cfg.sessionId.bytes[0]=1;cfg.clockId.bytes[0]=2;cfg.generation=1;
@@ -128,8 +129,8 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
  cfg.video={FL_FORMAT_RGBA8,64,32,30,1};cfg.videoQueueFrames=1;cfg.connectTimeoutMs=cfg.idleTimeoutMs=1000;
  // This fixture deliberately spends seconds exercising pre-media pool setup.
  // Keep the usual one-second failure controls unchanged in every other mode.
- if(mode==10||mode==12)cfg.connectTimeoutMs=cfg.idleTimeoutMs=30000;
- if(mode==12){auto*clock=gst_system_clock_obtain();cfg.epochNs=gst_clock_get_time(clock)-GST_SECOND;gst_object_unref(clock);}
+ if(mode==10||localPoolRelay)cfg.connectTimeoutMs=cfg.idleTimeoutMs=30000;
+ if(localPoolRelay){auto*clock=gst_system_clock_obtain();cfg.epochNs=gst_clock_get_time(clock)-GST_SECOND;gst_object_unref(clock);}
  flSessionCapabilities offer{};offer.version=2;offer.videoCount=1;offer.video[0]=cfg.video;offer.audioCount=1;offer.audio[0]=cfg.audio;
  flChannel*channel=nullptr;flChannel*producer=nullptr;
  auto policy=nativeAvPolicy(local?0:cfg.generation,nativeReceiver,decoder);
@@ -276,14 +277,14 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
    CHECK(!leaseReader&&!leaseWriter);
    puts("relay pool setup: held-slot BUSY is bounded; geometry/capacity mismatch rejects; all temporary reservations returned");
   }
-  if(mode==11||mode==12){
+  if(mode==11||localPoolRelay){
    auto pipeName=std::wstring(L"\\\\.\\pipe\\framelink-cpu-native-relay-")+std::to_wstring(g_get_monotonic_time());
    flnative::Handle cancellation;cancellation.value=CreateEventW(nullptr,TRUE,FALSE,nullptr);CHECK(cancellation.value);
    guint8 secret[32]{};secret[0]=93;auto*key=g_bytes_new(secret,sizeof secret);
    auto ring=name+"-lease";
    // Every negative must return no channels and all source reservations. The
    // positive immediately following is also the exact native media/lease oracle.
-   for(unsigned negative=0;negative<4;++negative){
+   for(unsigned negative=0;negative<(mode<13?4u:0u);++negative){
     auto bad=cfg;if(negative==1)++bad.generation;
     guint8 wrong[32]{};wrong[0]=94;auto*wrongKey=g_bytes_new(wrong,sizeof wrong);
     flResult received=FL_INTERNAL;flChannel*reader=nullptr,*writer=nullptr;
@@ -298,7 +299,7 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
     CHECK(g_get_monotonic_time()-before<1500000);CHECK(ResetEvent(cancellation.value));
     g_bytes_unref(wrongKey);
    }
-   if(mode==12){
+   if(localPoolRelay){
     gchar*dir=g_dir_make_tmp("framelink-relay-pool-XXXXXX",nullptr);CHECK(dir);
     std::string path=std::string(dir)+"/session";g_free(dir);
     flSessionCapabilities localRelayCaps{};localRelayCaps.version=2;localRelayCaps.videoCount=localRelayCaps.audioCount=1;
@@ -331,15 +332,15 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
    CHECK(sent==FL_OK&&received==FL_OK&&leaseReader&&leaseWriter);
    }
    g_bytes_unref(key);
-   puts("authenticated native pool: wrong key/generation/access and cancellation rejected; same-allocation imported ring attached");
+   puts("authenticated native pool: same-allocation imported ring attached");
   }else{
   CHECK(flsample::createNativeD3D11RelayPool(pool,(name+"-lease").c_str(),cfg,2,true,&leaseReader,&leaseWriter)==FL_OK);
   }
   leaseAdapter.reset(new flsample::NativeGstD3D11Relay(leaseWriter,cfg.generation));CHECK(leaseAdapter->initialize()==FL_OK);
   if(binRelay)binAdapter.reset(new BrokerNativeBinRelay(r,cfg,policy,leaseReader,*leaseAdapter,localRelaySender,localRelayReceiver));
   if(localRelaySender){g_object_unref(localRelaySender);g_object_unref(localRelayReceiver);}
-  if(mode==7||mode==6||mode==8||mode==9||mode==12){CHECK(binRelay);binAdapter->observeEvents(vo,mode==7);}
-  if(mode==7||mode==8||mode==9||mode==12)binAdapter->startSupervision();
+  if(mode==7||mode==6||mode==8||mode==9||localPoolRelay){CHECK(binRelay);binAdapter->observeEvents(vo,mode==7);}
+  if(mode==7||mode==8||mode==9||localPoolRelay)binAdapter->startSupervision();
  }
  GstMemory* retainedReceiver=nullptr;
  // A separately allocated second hop cannot silently treat a first-hop reader
@@ -525,8 +526,8 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
   relayProducer.reset();flClose(relayConsumer);
   printf("relay contract: %u imported first-hop buffers rejected by independent second-hop pool; no publication, no reservation leak; first-hop pixels/PCM/timing intact\n",count);
  }
- if(mode==6||mode==8||mode==9){
-  CHECK(binRelay);binAdapter->cancelDownstream(mode!=6,mode==9?tx:nullptr);
+ if(mode==6||mode==8||mode==9||mode==13||mode==14){
+  CHECK(binRelay);binAdapter->cancelDownstream(mode!=6,(mode==9||mode==14)?tx:nullptr);
   // Observe cancellation at the actual original producer, while its last
   // native allocation remains held by the final downstream reader.
   flSessionConfig snapshot{};auto began=g_get_monotonic_time();
@@ -565,7 +566,7 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
   CHECK(gst_app_src_end_of_stream(GST_APP_SRC(mode%2?ai:vi))==GST_FLOW_OK);avTerminal(tx,GST_MESSAGE_EOS);avTerminal(rx,GST_MESSAGE_EOS);
   guint64 frames=999;gint64 last=999;CHECK(fl_gst_session_wait_video_eos(r,cfg.generation,0,&frames,&last)==FL_GST_SESSION_READY&&frames==count&&last==(count?gint64(finalPts):-1LL));
  }
- if(binRelay&&mode!=6&&mode!=8&&mode!=9)binAdapter->terminal();
+ if(binRelay&&!binAdapter->failureObserved)binAdapter->terminal();
  if(decode){CHECK(!gst_app_sink_try_pull_sample(GST_APP_SINK(decoded),5*GST_SECOND));CHECK(gst_app_sink_is_eos(GST_APP_SINK(decoded)));avTerminal(decode,GST_MESSAGE_EOS);
   gst_element_set_state(decode,GST_STATE_NULL);gst_object_unref(converter);gst_object_unref(decoded);gst_object_unref(decode);
   printf("real decoder AV: %u upstream GPU color/scale transforms, source PTS origin=%llu explicitly normalized, exact pixels/PCM/37ms, no raw decoder zero-copy claim\n",count,static_cast<unsigned long long>(decoderOrigin));}

@@ -181,6 +181,8 @@ int main(int argc,char**argv){gst_init(&argc,&argv);CHECK(argc>=2);GError*e=null
  if(argc==3&&std::string(argv[2])=="--video-relay-event-controls"){videoRelayEventControls();return 0;}
  if(argc==3&&std::string(argv[2])=="--relay-local-pool-failures"){localPoolFailureControls();return 0;}
  if(argc==3&&std::string(argv[2])=="--relay-local-process"){localPoolProcess(argv[1]);return 0;}
+ if(argc==3&&std::string(argv[2])=="--relay-local-cancel-downstream"){nativeProducerAv(13,false,false,false,true,false,false,false,false,true);return 0;}
+ if(argc==3&&std::string(argv[2])=="--relay-local-cancel-upstream"){nativeProducerAv(14,false,false,false,true,false,false,false,false,true);return 0;}
  if(argc==3&&std::string(argv[2])=="--relay-local-pool"){nativeProducerAv(12,false,false,false,true,false,false,false,false,true);return 0;}
  if(argc==3&&std::string(argv[2])=="--relay-authenticated-pool"){nativeProducerAv(11,false,false,false,true,false,false,false,false,true);return 0;}
  if(argc==3&&std::string(argv[2])=="--relay-local-session"){nativeLocalRelaySession();return 0;}

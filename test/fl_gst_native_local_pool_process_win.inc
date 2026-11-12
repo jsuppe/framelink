@@ -122,6 +122,22 @@ static void localPoolFailureControls(){
   for(auto&b:slots)CHECK(GetHandleInformation(flImageSharedHandle(b.image),&flags));
   g_clear_error(&localError);g_clear_error(&remoteError);g_object_unref(s);g_object_unref(r);
  }
+ // Missing downstream must not mask a subsequently cancelled upstream for
+ // the full two-second discovery budget. The native source slots stay pinned.
+ {
+  auto*down=fl_gst_session_new(3);GstFrameLinkMemoryPolicy bound{};flChannel*output=nullptr;GError*error=nullptr;
+  void*handles[]={flImageSharedHandle(slots[0].image),flImageSharedHandle(slots[1].image)};
+  gchar*dir=g_dir_make_tmp("framelink-pool-source-cancel-XXXXXX",nullptr);CHECK(dir);
+  std::string path=std::string(dir)+"/session";g_free(dir);
+  const auto began=g_get_monotonic_time();
+  std::thread cancel([&]{g_usleep(30000);fl_gst_session_cancel(up);});
+  auto ok=fl_gst_session_open_local_native_relay_pool(down,up,path.c_str(),&caps,1,2,80,2000,1000,
+    &candidate,info.adapterLUID,handles,&bound,&output,nullptr,&error);
+  cancel.join();const auto elapsed=g_get_monotonic_time()-began;
+  CHECK(!ok&&error&&!output&&!bound.version&&elapsed<500000);
+  fprintf(stderr,"upstream cancellation during missing-downstream setup: %.3fms\n",elapsed/1000.0);
+  g_clear_error(&error);g_object_unref(down);
+ }
  for(auto&b:slots)CHECK(flCancelBuffer(writer,&b)==FL_OK);
  for(auto&b:slots)CHECK(flAcquireBuffer(writer,&b,1000)==FL_OK);
  for(auto&b:slots)CHECK(flCancelBuffer(writer,&b)==FL_OK);

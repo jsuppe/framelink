@@ -1,0 +1,70 @@
+Start testing: Nov 12 00:52 Eastern Standard Time
+----------------------------------------------------------
+44/158 Testing: gst_relay_local_pool_failures_win
+44/158 Test: gst_relay_local_pool_failures_win
+Command: "<win-home>/dev/framelink-m6-windows-7b8a274/build/Release/fl_gst_native_producer_win.exe" "<win-home>/dev/framelink-m6-windows-7b8a274/build/Release/gstframelink.dll" "--relay-local-pool-failures"
+Directory: <win-home>/dev/framelink-m6-windows-7b8a274/build
+"gst_relay_local_pool_failures_win" start time: Nov 12 00:52 Eastern Standard Time
+Output:
+----------------------------------------------------------
+pool negative mode=0 local=0 remote=0 localError=authenticated relay pool transfer failed or cancelled remoteError=authenticated relay pool transfer failed or cancelled
+pool negative mode=1 local=0 remote=0 localError=authenticated relay pool transfer failed or cancelled remoteError=authenticated relay pool transfer failed or cancelled
+pool negative mode=2 local=0 remote=0 localError=authenticated relay pool transfer failed or cancelled remoteError=authenticated relay pool transfer failed or cancelled
+pool negative mode=3 local=0 remote=0 localError=authenticated relay pool transfer failed or cancelled remoteError=authenticated relay pool transfer failed or cancelled
+pool negative mode=4 local=0 remote=0 localError=authenticated relay pool transfer failed or cancelled remoteError=authenticated relay pool transfer failed or cancelled
+pool negative mode=5 local=0 remote=0 localError=local control connection deadline or failure: Operation was cancelled remoteError=local session discovery deadline or cancellation
+upstream cancellation during missing-downstream setup: 32.057ms
+FAR5 pool failures: duplicate/invalid/non-texture handles, wrong LUID/capacity, legacy receiver reject; outputs clear, source/event handles and source pool survive
+<end of output>
+Test time =   0.97 sec
+----------------------------------------------------------
+Test Passed.
+"gst_relay_local_pool_failures_win" end time: Nov 12 00:52 Eastern Standard Time
+"gst_relay_local_pool_failures_win" time elapsed: 00:00:00
+----------------------------------------------------------
+
+45/158 Testing: gst_relay_local_process_win
+45/158 Test: gst_relay_local_process_win
+Command: "<win-home>/dev/framelink-m6-windows-7b8a274/build/Release/fl_gst_native_producer_win.exe" "<win-home>/dev/framelink-m6-windows-7b8a274/build/Release/gstframelink.dll" "--relay-local-process"
+Directory: <win-home>/dev/framelink-m6-windows-7b8a274/build
+"gst_relay_local_process_win" start time: Nov 12 00:52 Eastern Standard Time
+Output:
+----------------------------------------------------------
+FAR5 cross-process: no inherited textures; 8 exact frames/metadata; source lease retained until actual remote reader release; authenticated drain
+<end of output>
+Test time =   0.81 sec
+----------------------------------------------------------
+Test Passed.
+"gst_relay_local_process_win" end time: Nov 12 00:52 Eastern Standard Time
+"gst_relay_local_process_win" time elapsed: 00:00:00
+----------------------------------------------------------
+
+46/158 Testing: gst_relay_local_pool_win
+46/158 Test: gst_relay_local_pool_win
+Command: "<win-home>/dev/framelink-m6-windows-7b8a274/build/Release/fl_gst_native_producer_win.exe" "<win-home>/dev/framelink-m6-windows-7b8a274/build/Release/gstframelink.dll" "--relay-local-pool"
+Directory: <win-home>/dev/framelink-m6-windows-7b8a274/build
+"gst_relay_local_pool_win" start time: Nov 12 00:52 Eastern Standard Time
+Output:
+----------------------------------------------------------
+native AV mode 12 local=0
+bin relay n=0 collect=0 pending=1
+bin relay n=1 collect=0 pending=1
+bin relay n=2 collect=0 pending=1
+bin relay n=3 collect=0 pending=1
+bin relay n=4 collect=0 pending=1
+bin relay n=5 collect=0 pending=1
+bin relay n=6 collect=0 pending=1
+bin relay n=7 collect=0 pending=1
+authenticated native pool: wrong key/generation/access and cancellation rejected; same-allocation imported ring attached
+local native relay: retained authenticated discovery sessions, mapped A/V, genuine final-reader completion before drain acknowledgment
+broker native bin relay: 8 frames over two original allocations / 384 PCM frames; identity intermediate mapping, negotiated final mapping and exact 37ms A/V, authenticated session; final reader retained beyond upstream and downstream bin teardown
+native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+<end of output>
+Test time =   0.79 sec
+----------------------------------------------------------
+Test Passed.
+"gst_relay_local_pool_win" end time: Nov 12 00:52 Eastern Standard Time
+"gst_relay_local_pool_win" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Nov 12 00:52 Eastern Standard Time

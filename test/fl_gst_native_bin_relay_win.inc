@@ -33,7 +33,7 @@ struct BrokerNativeBinRelay {
  flSessionConfig config{};
  GstMemory* held=nullptr;
  guint64 count=0,pcmFrames=0;gint64 last=-1;
- bool localControl=false;
+ bool localControl=false,failureObserved=false;
  bool events=false;unsigned forwardedGaps=0;BinRelayEvents upstreamEvents,downstreamEvents;
  flsample::SessionVideoRelayEvents eventAdapter;
  std::unique_ptr<flsample::SessionRelayContract> eventContract;
@@ -179,7 +179,7 @@ struct BrokerNativeBinRelay {
   CHECK(count==8&&pcmFrames==384&&held&&native.pending()==1);
   flSessionConfig snapshot{};
   CHECK(fl_gst_session_wait(sender,config.generation,1000,&snapshot)==FL_GST_SESSION_READY);
-  const auto began=g_get_monotonic_time();
+  const auto began=g_get_monotonic_time();failureObserved=true;
   CHECK(gst_element_set_state(failedUpstream?failedUpstream:rx,GST_STATE_NULL)!=GST_STATE_CHANGE_FAILURE);
   FlGstSessionResult result=FL_GST_SESSION_READY;
   do{result=fl_gst_session_wait(sender,config.generation,50,&snapshot);
@@ -244,7 +244,7 @@ struct BrokerNativeBinRelay {
   auto deadline=g_get_monotonic_time()+1000000;
   while(native.pending()){CHECK(g_get_monotonic_time()<deadline);CHECK(native.collect()==FL_OK);g_usleep(100);}
   CHECK(native.finish()==FL_OK);
-  if(localControl){
+  if(localControl&&!failureObserved){
    CHECK(fl_gst_session_finish_local(receiver,FALSE,1000,nullptr));
    CHECK(fl_gst_session_finish_local(sender,TRUE,1000,nullptr));
    puts("local native relay: retained authenticated discovery sessions, mapped A/V, genuine final-reader completion before drain acknowledgment");

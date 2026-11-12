@@ -271,7 +271,9 @@ FL_GST_SESSION_API gboolean fl_gst_session_open_local_native_relay(FlGstSession*
 // Performs separately authenticated, kernel-peer-pinned handle pull/import and
 // attach acknowledgment. All partial imports close on failure; no native/CPU
 // fallback. Pipe I/O is cancellable; native create/open calls are synchronous.
-// Success is setup only, not track readiness or automatic cancellation supervision.
+// Setup observes upstream cancellation/config changes and interrupts pending I/O.
+// It never retires native leases. Success is setup only, not track readiness or
+// ongoing post-setup cancellation supervision.
 FL_GST_SESSION_API gboolean fl_gst_session_open_local_native_relay_pool(FlGstSession*,FlGstSession* upstream,
  const gchar* session_path,const flSessionCapabilities*,guint video_queue_frames,guint video_pool,
  guint audio_queue_ms,guint connect_timeout_ms,guint idle_timeout_ms,
