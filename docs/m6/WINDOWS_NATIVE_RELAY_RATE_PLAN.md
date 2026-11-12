@@ -73,3 +73,29 @@ No result here establishes physical scanout/acoustic alignment, arbitrary decode
 compatibility, real-decoder two-hop performance, other platforms, API freeze or
 M6 completion. Existing startup/native-lifetime failures remain suspended rather
 than waived. Product D2/D3 and isolated performance-budget decisions remain Jon's.
+
+## Following gap: real decoder with authenticated discovery
+
+Read-only inventory confirms the existing `gst_native_relay_decoder_win` passed
+at461584b (1.02s):16 distinct decoded frames/25600 synthetic PCM sample frames,
+reversed same-allocation identities,37ms offset, held-reader and terminal checks.
+See [decoder relay evidence](windows-relay-decoder/README.md) and
+[integrated receipt](windows-integrated-461584b/LastTest.log). That fixture is
+broker-composed with inherited handles and per-frame controls, not FAR4→FAR5
+discovery or rate qualification. Existing automatic authenticated decoder A/V
+evidence comprises four tiny same-process sessions; it is not a target-rate
+three-process result.
+
+The stock `d3d11h264dec` private decoder arrays are not directly exportable into
+this pool. Supported integration uses `FrameLinkD3DProducer::acquire()`, the exact
+shared GstD3D11Device wrapper and `gst_d3d11_converter_convert_buffer()` into the
+issued reservation, retaining decoder storage until actual GPU completion, then
+`submit()`. This needs GPU_SAMPLE|GPU_RENDER and explicitly performs conversion.
+
+After the new synthetic harness passes its focused Windows gate, the next bounded
+validation implementation is a separate authentic-discovery decoder-conversion
+fixture. First retain the proven320×240 decoder input/tiny output, distinct
+decoded-pixel digests, actual decoder PTS/duration/absent DTS, synthetic PCM37ms
+alignment, held-reader proof and explicit conversion/oracle-readback accounting.
+Then extend to paced target resolution. No new public decoder API is justified;
+only transport/relay **after conversion** can claim no payload copy at that boundary.
