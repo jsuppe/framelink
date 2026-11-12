@@ -187,6 +187,9 @@ int main(int argc,char**argv){gst_init(&argc,&argv);CHECK(argc>=2);GError*e=null
  if(argc==3&&std::string(argv[2])=="--relay-reservation-diagnostic"){relayprocess::run(argv[1],false,true);return 0;}
  if(argc==3&&std::string(argv[2])=="--relay-process-diagnostic"){relayprocess::run(argv[1],false);relayprocess::run(argv[1],true);return 0;}
  if(argc==3){
+  if(std::string(argv[2])=="--automatic-relay-negative"){
+   nativeProducerAv(0,true,false,true,true,false,false,true);return 0;
+  }
   if(std::string(argv[2])=="--bin-cancel-diagnostic"){
    nativeProducerAv(4,true,false,true,true);
    nativeProducerAv(5,true,false,true,true);

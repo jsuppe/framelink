@@ -1,0 +1,28 @@
+** WARNING: connection is not using a post-quantum key exchange algorithm.
+** This session may be vulnerable to "store now, decrypt later" attacks.
+** The server may need to be upgraded. See https://openssh.com/pq.html
+UpdateCTestConfiguration  from :<win-home>/dev/framelink-m6-windows-3b210e6/build/DartConfiguration.tcl
+Test project <win-home>/dev/framelink-m6-windows-3b210e6/build
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 43
+    Start 43: gst_automatic_relay_negative_win
+
+43: Test command: <win-home>\dev\framelink-m6-windows-3b210e6\build\Release\fl_gst_native_producer_win.exe "<win-home>/dev/framelink-m6-windows-3b210e6/build/Release/gstframelink.dll" "--automatic-relay-negative"
+43: Working Directory: <win-home>/dev/framelink-m6-windows-3b210e6/build
+43: Test timeout computed to be: 25
+43: native AV mode 0 local=1
+43: automatic second hop: own reservation pixels/PCM/37ms passed; first-hop reader rejected 0.052ms (native sink requires its own reserved allocation and valid metadata; no copy fallback)
+43: native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+1/1 Test #43: gst_automatic_relay_negative_win ...   Passed    1.01 sec
+
+The following tests passed:
+	gst_automatic_relay_negative_win
+
+100% tests passed, 0 tests failed out of 1
+
+Total Test time (real) =   1.04 sec
