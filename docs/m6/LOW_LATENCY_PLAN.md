@@ -242,7 +242,7 @@ M6 remains open; M7 remains held.
 **Windows runtime owner:** native worker `qualification_recovery`, exec31547,
 one final-build NV12 4K30 1800-second trace-off duration at exact a50841a.
 Evidence: `windows-native-final-duration-prepared/runs/native-nv12-4k-duration-a50841a-20261112t1149z`.
-Started about11:49Z; expected finish about12:19Z. No competing runtime.
+Started11:48:11Z; expected finish about12:18Z. No competing runtime.
 The [final 4K short pair](windows-native-final-nv12-4k-a50841a/README.md) passed:
 both150video/240000PCM, zero34ms misses, maximum arrival5.534367/9.271867ms;
 all64hashes verified and runtime idle. Reported to root before duration.
