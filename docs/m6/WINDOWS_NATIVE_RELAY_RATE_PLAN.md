@@ -1,11 +1,13 @@
 # Authenticated Windows native relay rate qualification
 
 Status: **synthetic harness validated at 11d1b65: focused build, tiny smoke,
-and all four matched short target pairs passed; first 1800s run in progress**.
+and all four matched short target pairs passed; BGRA1080p60 1800s passed**.
 See [smoke evidence](windows-native-relay-rate-smoke-11d1b65/README.md) and
 [target pairs](windows-native-relay-targets-11d1b65/README.md). The separate
 [paced real-decoder extension](windows-decoder-rate-harness/README.md) is
-implemented and locally reviewed, but its Windows build/runtime remain pending.
+passed focused Windows checks and the1080p60 short pair at77afa1a;4K30 remains
+a failed timing gate under investigation. The newer helper462fa5f still needs
+final integrated qualification.
 Owner: Evelyn. Windows execution remains exclusive; consult the
 [current execution ledger](LOW_LATENCY_PLAN.md#authoritative-execution-state--2026-11-12)
 for the live owner before starting any runtime work.
@@ -104,6 +106,18 @@ alignment, held-reader proof and explicit conversion/oracle-readback accounting.
 Then extend to paced target resolution. No new public decoder API is justified;
 only transport/relay **after conversion** can claim no payload copy at that boundary.
 
-## Decoder functional gate completed; paced extension pending
+## Decoder functional gate completed; paced extension partially validated
 
-The proposed tiny authenticated decoder fixture passed at4d38a09: [source, build and runtime evidence](windows-local-decoder-4d38a09/README.md). This closes the tiny functional discovery gap only. A separate test-only rate executable is implemented at49f9145 and awaits Windows validation: unchanged decoded pixels, independent source/final full-pixel digests joined offline, autonomous pacing, exact decoder PTS/duration/absentDTS, separate100Hz PCM, same allocation/real fence completion, explicit conversion/readback bytes and per-process resource series. The immutable synthetic11d1b65 duration run is unaffected. Initial decoder-rate smoke/preflight must pass before any duration qualification.
+The tiny authenticated decoder fixture passed at4d38a09:
+[source, build and runtime evidence](windows-local-decoder-4d38a09/README.md).
+The separate paced extension passed a clean build,9/9 focused tests, tiny smoke,
+and both short1080p60 trace arms with full SHA256 at77afa1a. The4K30 preflight
+failed timing despite exact distinct frame/PCM delivery; a bounded encoded-AU
+queue control atc539d99 also failed. See [CNG results](windows-decoder-cng-77afa1a/README.md)
+and [queue control](windows-decoder-queue-c539d99/README.md). Source-generation
+and encoding throughput are being isolated; no decoder duration has run.
+
+The immutable synthetic11d1b65 [BGRA1080p60 duration](windows-native-relay-duration-bgra1080-11d1b65/README.md)
+passed1800s,108000 video frames/86400000PCM frames, zero17ms misses and resource
+gates. This does not qualify the newer checked helper, remaining native duration
+cells, decoder performance, or physical presentation.
