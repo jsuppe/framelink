@@ -239,31 +239,28 @@ M6 remains open; M7 remains held.
 | D2 / D3 | Unresolved public overload/convenience-fallback decisions; existing explicit profiles/defaults preserved | Jon; no automatic default change or hidden native-to-CPU fallback |
 | Linux / Android campaigns | Broad work deferred under Windows-first direction. Prior Linux BGRA and other completed campaigns collected, not repeated. Android BGRA4K and NV121080 residual failures remain suspended; clean trace diagnostics did not waive them | Evelyn; resume deferred integration only after Windows priority permits; causal fixes required for suspended failed cells |
 
-**Windows runtime owner:** root; idle verified08:13:24.7934383Z after the
-c539d99 scheduling control. Clean build,9/9 focused tests and tiny decoder smoke
-passed. The bounded two-AU encoded queue was insufficient:4K30 delivered all150
-distinct frames/240000PCM, but118 video arrivals exceeded34ms (max542.183067ms),
-with no audio misses. Source decoder-pull median21.7833ms remains the largest
-phase. [Control evidence](windows-decoder-queue-c539d99/README.md) preserves
-successes and failure; trace-on and endurance did not run.
+**Windows runtime owner:** root; idle verified08:17:36.9361895Z after the
+first b247e5d explicit4K30 AU replay pair. The clean build and9/9 focused checks
+passed10.09s; existing on-demand tiny smoke passed60 distinct frames/96000PCM.
+Replay fixture preparation and independent local tape parsing/SHA256 passed:
+150 AUs,650192 bytes. Trace-off passed150 distinct frames/240000PCM with zero
+34ms misses (max30.735534ms). Trace-on retained exact media and complete joined
+trace accounting, but **failed two video deadlines** (116/117,max36.6673ms).
+Pair remains FAILED; no decoder endurance run. Source readback/hash reached
+31.6217ms; local phase review is active, with no speculative timing rerun.
 
-Source-only [throughput diagnostic](windows-decoder-source-throughput/README.md)
-completed: quiet150-frame generation5.1418495s and generation/encoding5.5626633s;
-separate instrumented arms verified150 exact timestamps. Clean wall times include
-startup; instrumented intervals are not clean performance. This supports an
-on-demand fixture production contribution; it does not isolate hardware decode.
-Initial controller idle serialization failure is preserved, with independently
-verified fresh idle08:15:09.6637198Z and local recovery, no media rerun.
+The source-only [throughput diagnostic](windows-decoder-source-throughput/README.md)
+previously measured quiet150-frame generation5.1418495s and generation/encoding
+5.5626633s; separate instrumented arms verified150 exact timestamps. Preparation
+removes that concurrent workload from replay but does not waive on-demand failures.
+The default path, actual decoder, full-pixel oracle, native leases, PCM and all
+17/34ms gates remain unchanged. Both modes retain explicit scope labels.
 
-Next: implement an **explicit pre-encoded-AU input control**, streamed from disk
-through bounded appsrc with original bytes/PTS/DTS/duration/flags. Preparation is
-outside the timed workload. Retain the failing on-demand path; no decoded cache,
-full-pixel oracle weakening or changed17/34ms gates. Root owns the idle Windows
-lane while implementation and matching runner preparation proceed locally.
-
-The final integrated/API/unchanged-old-client runner is prepared and reviewed,
-including per-DLL export sets and full collection/compatibility verification;
-20 local validator tests passed. No full integration has run on the newer helper.
+Next Windows work is the reviewed integrated/API/unchanged-old-client batch on
+the committed implementation, while the two replay misses are reviewed locally.
+Its per-DLL export sets, complete collection/compatibility verification and20
+local validator tests passed. No final API freeze or full M6 qualification is
+claimed by this batch; historical startup/lifetime and D2/D3 remain open.
 
 CNG comparison preserved identical full SHA256 across120 samples/known vectors;
 1080p hash median18.05→3.24ms,4K72.68→12.95ms. Initial unavailable MAXULONG

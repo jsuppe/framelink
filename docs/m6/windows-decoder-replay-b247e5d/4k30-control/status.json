@@ -1,0 +1,97 @@
+{
+  "revision": "b247e5d11b3ba540f78beeef172874f0606e83fc",
+  "state": "failed",
+  "started_utc": "2026-11-12T08:17:14.765891+00:00",
+  "binary_before": {
+    "fl_gst_native_producer_win.exe": "dce448fb23015391429a125e734b89605888d3d0f8c75287d7c46744c3f17259",
+    "fl_gst_local_decoder_rate_win.exe": "83beb07e811b9646ea9c3f009b5395747c74eef5125929d74398392886f946f2",
+    "gstframelink.dll": "1d4be17417c732856e27dc54cd4e6c4a5df4d91903276e8f198503877d82bcbc",
+    "framelink.dll": "9479de7e0c912e0912eff459e7905b32b86438f0db76814737333226b008a69c",
+    "framelink_gst_session.dll": "7d7e19e5b7b716502c9f199dcffaf98243f21ab81a11abe00c47514c2b078242"
+  },
+  "step": "trace-on-analysis",
+  "command": [
+    "<win-home>\\AppData\\Local\\Microsoft\\WindowsApps\\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\\python.exe",
+    "-E",
+    "<win-home>\\dev\\framelink-decoder-replay-replay-4k30-b247e5d-20261112t0818z\\check_local_decoder_rate.py",
+    "<win-home>\\dev\\framelink-decoder-replay-replay-4k30-b247e5d-20261112t0818z\\trace-on"
+  ],
+  "prepare-idle-before_exit": 0,
+  "prepare_exit": 0,
+  "prepare_binary_after": {
+    "fl_gst_native_producer_win.exe": "dce448fb23015391429a125e734b89605888d3d0f8c75287d7c46744c3f17259",
+    "fl_gst_local_decoder_rate_win.exe": "83beb07e811b9646ea9c3f009b5395747c74eef5125929d74398392886f946f2",
+    "gstframelink.dll": "1d4be17417c732856e27dc54cd4e6c4a5df4d91903276e8f198503877d82bcbc",
+    "framelink.dll": "9479de7e0c912e0912eff459e7905b32b86438f0db76814737333226b008a69c",
+    "framelink_gst_session.dll": "7d7e19e5b7b716502c9f199dcffaf98243f21ab81a11abe00c47514c2b078242"
+  },
+  "prepare-idle-after_exit": 0,
+  "fixture_pin": {
+    "path": "<win-home>/dev/framelink-decoder-replay-replay-4k30-b247e5d-20261112t0818z/fixture.flau",
+    "bytes": 650192,
+    "sha256": "5c3797a3fe9d4c86992cd3be15627fa18bb184334cb557606b3224c30554cb1e"
+  },
+  "trace-off-idle-before_exit": 0,
+  "trace-off_binary_before": {
+    "fl_gst_native_producer_win.exe": "dce448fb23015391429a125e734b89605888d3d0f8c75287d7c46744c3f17259",
+    "fl_gst_local_decoder_rate_win.exe": "83beb07e811b9646ea9c3f009b5395747c74eef5125929d74398392886f946f2",
+    "gstframelink.dll": "1d4be17417c732856e27dc54cd4e6c4a5df4d91903276e8f198503877d82bcbc",
+    "framelink.dll": "9479de7e0c912e0912eff459e7905b32b86438f0db76814737333226b008a69c",
+    "framelink_gst_session.dll": "7d7e19e5b7b716502c9f199dcffaf98243f21ab81a11abe00c47514c2b078242"
+  },
+  "trace-off_fixture_before": {
+    "path": "<win-home>/dev/framelink-decoder-replay-replay-4k30-b247e5d-20261112t0818z/fixture.flau",
+    "bytes": 650192,
+    "sha256": "5c3797a3fe9d4c86992cd3be15627fa18bb184334cb557606b3224c30554cb1e"
+  },
+  "trace-off_exit": 0,
+  "trace-off_fixture_after": {
+    "path": "<win-home>/dev/framelink-decoder-replay-replay-4k30-b247e5d-20261112t0818z/fixture.flau",
+    "bytes": 650192,
+    "sha256": "5c3797a3fe9d4c86992cd3be15627fa18bb184334cb557606b3224c30554cb1e"
+  },
+  "trace-off_binary_after": {
+    "fl_gst_native_producer_win.exe": "dce448fb23015391429a125e734b89605888d3d0f8c75287d7c46744c3f17259",
+    "fl_gst_local_decoder_rate_win.exe": "83beb07e811b9646ea9c3f009b5395747c74eef5125929d74398392886f946f2",
+    "gstframelink.dll": "1d4be17417c732856e27dc54cd4e6c4a5df4d91903276e8f198503877d82bcbc",
+    "framelink.dll": "9479de7e0c912e0912eff459e7905b32b86438f0db76814737333226b008a69c",
+    "framelink_gst_session.dll": "7d7e19e5b7b716502c9f199dcffaf98243f21ab81a11abe00c47514c2b078242"
+  },
+  "trace-off-idle-after_exit": 0,
+  "trace-off-analysis_exit": 0,
+  "trace-on-idle-before_exit": 0,
+  "trace-on_binary_before": {
+    "fl_gst_native_producer_win.exe": "dce448fb23015391429a125e734b89605888d3d0f8c75287d7c46744c3f17259",
+    "fl_gst_local_decoder_rate_win.exe": "83beb07e811b9646ea9c3f009b5395747c74eef5125929d74398392886f946f2",
+    "gstframelink.dll": "1d4be17417c732856e27dc54cd4e6c4a5df4d91903276e8f198503877d82bcbc",
+    "framelink.dll": "9479de7e0c912e0912eff459e7905b32b86438f0db76814737333226b008a69c",
+    "framelink_gst_session.dll": "7d7e19e5b7b716502c9f199dcffaf98243f21ab81a11abe00c47514c2b078242"
+  },
+  "trace-on_fixture_before": {
+    "path": "<win-home>/dev/framelink-decoder-replay-replay-4k30-b247e5d-20261112t0818z/fixture.flau",
+    "bytes": 650192,
+    "sha256": "5c3797a3fe9d4c86992cd3be15627fa18bb184334cb557606b3224c30554cb1e"
+  },
+  "trace-on_exit": 0,
+  "trace-on_fixture_after": {
+    "path": "<win-home>/dev/framelink-decoder-replay-replay-4k30-b247e5d-20261112t0818z/fixture.flau",
+    "bytes": 650192,
+    "sha256": "5c3797a3fe9d4c86992cd3be15627fa18bb184334cb557606b3224c30554cb1e"
+  },
+  "trace-on_binary_after": {
+    "fl_gst_native_producer_win.exe": "dce448fb23015391429a125e734b89605888d3d0f8c75287d7c46744c3f17259",
+    "fl_gst_local_decoder_rate_win.exe": "83beb07e811b9646ea9c3f009b5395747c74eef5125929d74398392886f946f2",
+    "gstframelink.dll": "1d4be17417c732856e27dc54cd4e6c4a5df4d91903276e8f198503877d82bcbc",
+    "framelink.dll": "9479de7e0c912e0912eff459e7905b32b86438f0db76814737333226b008a69c",
+    "framelink_gst_session.dll": "7d7e19e5b7b716502c9f199dcffaf98243f21ab81a11abe00c47514c2b078242"
+  },
+  "trace-on-idle-after_exit": 0,
+  "trace-on-analysis_exit": 1,
+  "error": "trace-on-analysis failed; no next phase",
+  "fixture_observed_final": {
+    "path": "<win-home>/dev/framelink-decoder-replay-replay-4k30-b247e5d-20261112t0818z/fixture.flau",
+    "bytes": 650192,
+    "sha256": "5c3797a3fe9d4c86992cd3be15627fa18bb184334cb557606b3224c30554cb1e"
+  },
+  "ended_utc": "2026-11-12T08:17:36.836258+00:00"
+}

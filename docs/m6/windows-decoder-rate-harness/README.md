@@ -49,5 +49,8 @@ not a two-frame total memory bound. No decoded frames are cached.
 The runner must pin the entire tape SHA256 before and after replay. Actual D3D11
 decode/conversion, all-pixel SHA256, native ownership, PCM and17/34ms gates remain
 unchanged. Replay results must be labeled separately: they cannot waive the
-on-demand failures. Initial Windows build validation is underway; no replay
-performance or endurance success is claimed yet.
+on-demand failures. Atb247e5d, Windows build/9 focused tests and the existing tiny smoke passed.
+The4K30 replay trace-off arm passed all150 distinct frames/240000PCM within34ms
+(max30.735534ms). Trace-on delivered all media and matched trace records but
+missed two deadlines (max36.6673ms); the pair remains FAILED. No decoder endurance
+qualification is claimed.
