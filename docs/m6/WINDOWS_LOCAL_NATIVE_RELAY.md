@@ -30,7 +30,7 @@ A version-1 candidate has generation zero and producer-first endpoints on both p
 - FAR5 setup watches upstream cancellation/configuration changes and interrupts pending discovery/transport I/O. Its whole-call I/O budget is not a hard bound on synchronous native driver/create/open calls. Ongoing post-setup cancellation needs the installed supervisor.
 - Queue 1 permits pool 2; queue greater than 1 requires pool at least queue+2. This is capacity, not a mandatory fill delay. Legacy defaults are unchanged. No new universal latest/lossless policy is implied; product D2/D3 decisions remain open.
 - `error-on-ring-full` is not a universal delivery policy. Explicit CPU/readback choices are not automatic fallback. Never silently copy after native authentication or import failure.
-- Backend `d4c32cc` adds an explicit consumer-pool snapshot. Snapshot handles remain borrowed until release; keep the snapshot through the entire graph to pin source reconfiguration. The new three-process fixture uses the committed snapshot API, not inherited textures. Windows exact `486bf04` build and focused runtime now pass; the three-process fixture is video-only, so this is **not** qualification of a general three-process A/V app.
+- Backend `d4c32cc` adds an explicit consumer-pool snapshot. Snapshot handles remain borrowed until release; keep the snapshot through the entire graph to pin source reconfiguration. The new three-process fixture uses the committed snapshot API, not inherited textures. Windows exact `486bf04` build and focused video runtime passed; `881c6f8` subsequently adds real separate-process PCM coverage below. This is not general throughput or resource qualification.
 - Native local setup is Windows-only. No Linux/Android automatic-native parity, full ABI compatibility, timing/endurance acceptance or M6 completion is claimed.
 
 ## Focused evidence
@@ -41,7 +41,7 @@ A version-1 candidate has generation zero and producer-first endpoints on both p
 
 Read-only independent review found no actionable defects in the authentication, cleanup, identity and cancellation scope. It ran no runtime tests and does not remove the bounds or qualification gaps above.
 
-## Prepared next focused controls (not yet run)
+## Focused setup and source-time controls
 
 Commit `94e8952` adds an independent authenticated FAR4 source child and upstream-only control (`gst_relay_local_source_control_win`), plus FAR5 serialized GAP/DISCONT/trailing-GAP integration (`gst_relay_local_events_win`). These are scaffolding and focused checks, not a completed three-process snapshot integration. Their exact `486bf04` Windows build/runtime checks passed after the explicit runtime handoff.
 
@@ -52,3 +52,5 @@ The explicit `open_local_native_relay_input` receiver authenticates the usual FA
 ## Separate-process A/V functional integration
 
 The added `gst_relay_local_three_process_av_win` runs source/relay/final-reader as distinct processes with actual authenticated PCM and native frame forwarding. Focused four-test batch passes3.43s, including the prior video-only graph. The reader independently checks384PCM frames/1536 bytes and37ms mapping, video END/audio EOS and held-native lease release. See [evidence](windows-three-process-av/README.md). This is not repeated reconnect, resource, throughput or final ABI qualification.
+
+[Replacement/source-death controls](windows-local-recovery/README.md) verify a fresh complete A/V graph while an old native reader remains held, including source exit73 and bounded failure propagation. Old frame contents are rechecked before actual final-reader completion. Session/clock IDs and kernel allocations are distinct; media generation may restart at1 in a fresh session. This is not same-path hot replacement or a repeated resource gate.

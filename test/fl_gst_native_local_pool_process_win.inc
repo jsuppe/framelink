@@ -22,7 +22,7 @@ struct LocalProcessAudio {
  void start(){CHECK(gst_element_set_state(pipe,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);}
  ~LocalProcessAudio(){CHECK(gst_element_set_state(pipe,GST_STATE_NULL)!=GST_STATE_CHANGE_FAILURE);gst_object_unref(port);gst_object_unref(pipe);}
 };
-static int localPoolProcessReader(const char*path,HANDLE held,HANDLE release,HANDLE exitEvent,bool fixedFixture=true,bool audio=false){
+static int localPoolProcessReader(const char*path,HANDLE held,HANDLE release,HANDLE exitEvent,bool fixedFixture=true,bool audio=false,bool failedSource=false){
  auto caps=localPoolProcessCaps();auto candidate=nativeAvPolicy(0,true);GstFrameLinkMemoryPolicy bound{};
  auto*session=fl_gst_session_new(3);flChannel*channel=nullptr;GError*error=nullptr;
  CHECK(fl_gst_session_open_local_native_pool_receiver(session,path,&caps,1,2,80,5000,5000,
@@ -57,10 +57,20 @@ static int localPoolProcessReader(const char*path,HANDLE held,HANDLE release,HAN
    audioFrames+=48;audioBytes+=sizeof bytes;gst_sample_unref(sample);
   }
   uint64_t lease=0;CHECK(flLeaseFrame(channel,&frame,&lease)==FL_OK);
-  if(n==7){CHECK(SetEvent(held));relayprocess::wait(release);}
+  if(n==7){
+   CHECK(SetEvent(held));relayprocess::wait(release);
+   // Re-read through the still-live lease after an optional replacement graph.
+   flFrame retained{};uint64_t generation=0;
+   CHECK(flReadLeaseFrame(channel,lease,&retained,&generation)==FL_OK);
+   CHECK(retained.ptsNs==44000000);
+   flMappedImage stable{};CHECK(flImageMapPlanes(retained.image,&stable)==FL_OK);
+   for(unsigned y=0;y<32;++y)for(unsigned x=0;x<256;++x)
+    CHECK(static_cast<unsigned char*>(stable.plane[0].pixels)[y*stable.plane[0].stride+x]==18);
+   flImageUnmap(retained.image);
+  }
   CHECK(flCompleteReadLease(channel,lease)==FL_OK);CHECK(flCollectReadLeases(channel)==FL_OK);
  }
- if(audio){
+ if(audio&&!failedSource){
   FlGstVideoEvent end{};CHECK(fl_gst_session_receive_video_event(session,cfg.generation,5000,&end)==FL_GST_SESSION_READY);
   CHECK(end.kind==FL_GST_VIDEO_END&&end.afterFrames==8&&end.ptsNs==44000000);
   CHECK(!gst_app_sink_try_pull_sample(GST_APP_SINK(pcm->port),5*GST_SECOND));
@@ -71,7 +81,8 @@ static int localPoolProcessReader(const char*path,HANDLE held,HANDLE release,HAN
   flFrame extra{};CHECK(flAcquireFrame(channel,&extra,0)==FL_TIMEOUT);
  }
  relayprocess::wait(exitEvent);
- CHECK(fl_gst_session_finish_local(session,FALSE,1000,nullptr));
+ if(!failedSource)CHECK(fl_gst_session_finish_local(session,FALSE,1000,nullptr));
+ else{fl_gst_session_cancel(session);CHECK(!gst_app_sink_is_eos(GST_APP_SINK(pcm->port)));}
  pcm.reset();flClose(channel);g_object_unref(session);return 0;
 }
 static void localPoolProcess(const char*plugin){

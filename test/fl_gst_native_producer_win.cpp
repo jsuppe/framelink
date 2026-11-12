@@ -182,7 +182,10 @@ int main(int argc,char**argv){gst_init(&argc,&argv);CHECK(argc>=2);GError*e=null
  if(argc==7&&std::string(argv[2])=="--relay-local-source")return localsource::producer(argv[3],(HANDLE)(uintptr_t)strtoull(argv[4],nullptr,10),(HANDLE)(uintptr_t)strtoull(argv[5],nullptr,10),(HANDLE)(uintptr_t)strtoull(argv[6],nullptr,10));
  if(argc==7&&std::string(argv[2])=="--relay-local-source-av")return localsource::producer(argv[3],(HANDLE)(uintptr_t)strtoull(argv[4],nullptr,10),(HANDLE)(uintptr_t)strtoull(argv[5],nullptr,10),(HANDLE)(uintptr_t)strtoull(argv[6],nullptr,10),true);
  if(argc==7&&std::string(argv[2])=="--relay-local-reader-av")return localPoolProcessReader(argv[3],(HANDLE)(uintptr_t)strtoull(argv[4],nullptr,10),(HANDLE)(uintptr_t)strtoull(argv[5],nullptr,10),(HANDLE)(uintptr_t)strtoull(argv[6],nullptr,10),false,true);
+ if(argc==7&&std::string(argv[2])=="--relay-local-reader-failed")return localPoolProcessReader(argv[3],(HANDLE)(uintptr_t)strtoull(argv[4],nullptr,10),(HANDLE)(uintptr_t)strtoull(argv[5],nullptr,10),(HANDLE)(uintptr_t)strtoull(argv[6],nullptr,10),false,true,true);
  CHECK(argc==2||argc==3);
+ if(argc==3&&std::string(argv[2])=="--relay-local-recovery"){localsource::threeProcess(argv[1],true,true,nullptr,true);return 0;}
+ if(argc==3&&std::string(argv[2])=="--relay-local-replacement"){localsource::threeProcess(argv[1],true,true);return 0;}
  if(argc==3&&std::string(argv[2])=="--relay-three-local-av"){localsource::threeProcess(argv[1],true);return 0;}
  if(argc==3&&std::string(argv[2])=="--relay-local-three-process"){localsource::threeProcess(argv[1]);return 0;}
  if(argc==3&&std::string(argv[2])=="--relay-local-source-control"){localsource::control(argv[1]);return 0;}

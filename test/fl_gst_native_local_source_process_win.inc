@@ -72,6 +72,11 @@ struct Peer {
  void next(){CHECK(SetEvent(advance.value));relayprocess::wait(published.value);}
  void release(){CHECK(SetEvent(retired.value));}
  void join(){relayprocess::join(child);child={};}
+ void fail(){
+  CHECK(TerminateProcess(child.hProcess,73));relayprocess::wait(child.hProcess);
+  DWORD result=0;CHECK(GetExitCodeProcess(child.hProcess,&result)&&result==73);
+  CloseHandle(child.hThread);CloseHandle(child.hProcess);child={};
+ }
 };
 // A focused upstream-only control for the new source child. This does not claim
 // a three-process relay: the consumer snapshot integration is a separate step.
@@ -101,7 +106,8 @@ static void control(const char*plugin){
 }
 // Three independent processes: source child, this relay, final reader child.
 // Uses the committed backend snapshot contract, never inherited texture handles.
-static void threeProcess(const char*plugin,bool audio=false){
+struct HeldGraph { flSessionConfig config{};void*handles[2]{}; };
+static void threeProcess(const char*plugin,bool audio=false,bool replaceWhileHeld=false,const HeldGraph*old=nullptr,bool failedSource=false){
  gchar*dir=g_dir_make_tmp("framelink-three-local-XXXXXX",nullptr);CHECK(dir);
  const std::string root=dir;g_free(dir);const auto inputPath=root+"/input",outputPath=root+"/output";
  Peer source(plugin,inputPath,audio);
@@ -118,7 +124,7 @@ static void threeProcess(const char*plugin,bool audio=false){
  flnative::Handle held,release,exitEvent;
  held.value=CreateEventW(nullptr,TRUE,FALSE,nullptr);release.value=CreateEventW(nullptr,TRUE,FALSE,nullptr);exitEvent.value=CreateEventW(nullptr,TRUE,FALSE,nullptr);
  CHECK(held.value&&release.value&&exitEvent.value);
- const auto command=std::string("\"")+plugin+(audio?"\" --relay-local-reader-av \"":"\" --relay-local-reader-generic \"")+outputPath+"\" "+
+ const auto command=std::string("\"")+plugin+(failedSource?"\" --relay-local-reader-failed \"":(audio?"\" --relay-local-reader-av \"":"\" --relay-local-reader-generic \""))+outputPath+"\" "+
    std::to_string(uintptr_t(held.value))+" "+std::to_string(uintptr_t(release.value))+" "+std::to_string(uintptr_t(exitEvent.value));
  auto final=relayprocess::spawn(command,{held.value,release.value,exitEvent.value});
  CHECK(fl_gst_session_open_local_native_relay_pool(down,up,outputPath.c_str(),&caps,1,2,80,5000,5000,
@@ -127,6 +133,12 @@ static void threeProcess(const char*plugin,bool audio=false){
  CHECK(flsample::SessionRelayContract::compatible(original,forwarded));
  using Compare=BOOL(WINAPI*)(HANDLE,HANDLE);
  auto compare=reinterpret_cast<Compare>(GetProcAddress(GetModuleHandleW(L"KernelBase.dll"),"CompareObjectHandles"));CHECK(compare);
+ if(old){
+  CHECK(memcmp(original.sessionId.bytes,old->config.sessionId.bytes,16)!=0);
+  CHECK(memcmp(original.clockId.bytes,old->config.clockId.bytes,16)!=0);
+  CHECK(!flsample::SessionRelayContract::compatible(old->config,forwarded));
+  for(auto current:handles)for(auto prior:old->handles)CHECK(!compare(current,prior));
+ }
  flsample::SessionNativeRelay relay(up,down,input,output,[&](flImage*a,flImage*b){return compare(flImageSharedHandle(a),flImageSharedHandle(b))!=FALSE;});
  CHECK(relay.initialize()==FL_OK);
  std::unique_ptr<LocalProcessAudio> pcmInput,pcmOutput;
@@ -151,7 +163,32 @@ static void threeProcess(const char*plugin,bool audio=false){
    // Collection cannot retire the source lease while the final reader holds it.
    // Do not call SessionNativeRelay::finish here: that closes publication
    // before the source's authenticated END can be forwarded.
-   CHECK(relay.collect()==FL_OK&&relay.pending()==1);CHECK(SetEvent(release.value));
+   CHECK(relay.collect()==FL_OK&&relay.pending()==1);
+   if(failedSource){
+    source.fail();const auto deadline=g_get_monotonic_time()+1000000;
+    while(supervisor.status()==FL_GST_SESSION_READY){CHECK(g_get_monotonic_time()<deadline);g_usleep(1000);}
+    CHECK(supervisor.status()!=FL_GST_SESSION_READY&&relay.pending()==1&&!relay.videoEnded());
+    FlGstVideoEvent event{};CHECK(fl_gst_session_receive_video_event(up,original.generation,0,&event)!=FL_GST_SESSION_READY);
+   }
+   if(replaceWhileHeld){
+    HeldGraph heldGraph{original,{handles[0],handles[1]}};
+    threeProcess(plugin,true,false,&heldGraph);
+    CHECK(relay.pending()==1);
+    if(!failedSource)CHECK(relay.collect()==FL_OK);
+    if(!failedSource){flSessionConfig unchanged{};CHECK(fl_gst_session_get_config(up,&unchanged)==FL_GST_SESSION_READY);CHECK(memcmp(&unchanged,&original,sizeof original)==0);}
+   }
+   CHECK(SetEvent(release.value));
+   if(failedSource){
+    // Source is already stopped. Retire the entire failed graph only after
+    // the old final reader has completed its real lease and exited.
+    CHECK(SetEvent(exitEvent.value));relayprocess::join(final);
+    CHECK(relay.pending()==1&&!relay.videoEnded());supervisor.stop();
+    pcm.reset();pcmOutput.reset();pcmInput.reset();
+    flReleaseD3D11PoolSnapshot(snapshot);flClose(output);flClose(input);
+    g_object_unref(down);g_object_unref(up);
+    puts("source-death replacement: bounded cancellation, no synthetic END/EOS, fresh A/V graph with disjoint allocations, old held pixels intact before final-reader completion");
+    return;
+   }
   }
   const auto deadline=g_get_monotonic_time()+2000000;
   while(relay.pending()){CHECK(g_get_monotonic_time()<deadline);CHECK(relay.collect()==FL_OK);g_usleep(100);}
@@ -174,6 +211,7 @@ static void threeProcess(const char*plugin,bool audio=false){
  pcm.reset();pcmOutput.reset();pcmInput.reset();
  flReleaseD3D11PoolSnapshot(snapshot);flClose(output);flClose(input);
  g_object_unref(down);g_object_unref(up);
+ if(replaceWhileHeld)puts("fresh-session replacement: distinct session/clock/native allocations; old reader held through complete replacement A/V graph; old pixels rechecked before real release");
  if(audio)puts("three-process local authenticated A/V: 384 exact PCM frames/1536 bytes, 37ms offset, real END/EOS, final native lease held");
  puts("three-process local native relay: FAR4 source-time input + FAR5 snapshot transfer, no inherited textures, 8 exact final pixels/metadata, held final lease, real drain");
 }
