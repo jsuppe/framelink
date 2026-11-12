@@ -1,0 +1,11 @@
+gst-relay-process-35028-0-0-0-2.producer.log
+producer start
+producer authenticated
+line 117: flAcquireBuffer(writer,&released,5000)==FL_OK&&relaySame(input.image,released.image)
+gst-relay-process-35028-0-0-0-2.relay.log
+relay start
+relay downstream authenticated
+relay upstream authenticated
+frame 0 forwarded=0 session=0
+downstream cancellation: event result=1 elapsed_us=2001999 pending=1
+line 194: result!=FL_GST_SESSION_READY&&result!=FL_GST_SESSION_TIMEOUT&&elapsed<1500000

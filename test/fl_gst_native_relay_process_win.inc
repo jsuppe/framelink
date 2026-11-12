@@ -100,7 +100,7 @@ struct Endpoint {
  void start(){CHECK(fl_gst_session_track_ready(session,FL_GST_TRACK_VIDEO,1)==FL_GST_SESSION_READY);CHECK(gst_element_set_state(pipe,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);}
  ~Endpoint(){CHECK(gst_element_set_state(pipe,GST_STATE_NULL)!=GST_STATE_CHANGE_FAILURE);gst_object_unref(port);gst_object_unref(pipe);g_object_unref(session);}
 };
-static int producer(const std::string&name,guint16 port,bool empty){
+static int producer(const std::string&name,guint16 port,bool empty,bool cancelled=false){
  freopen((name+".producer.log").c_str(),"w",stderr);setvbuf(stderr,nullptr,_IONBF,0);fprintf(stderr,"producer start\n");
  Endpoint e(0,true,port);fprintf(stderr,"producer authenticated\n");flChannel*writer=nullptr;CHECK(flOpenProducer((name+".up").c_str(),&writer)==FL_OK);
  auto attached=signal(name+".attached");CHECK(SetEvent(attached));CloseHandle(attached);
@@ -115,17 +115,21 @@ static int producer(const std::string&name,guint16 port,bool empty){
   CHECK(gst_app_src_push_buffer(GST_APP_SRC(e.port),pcm)==GST_FLOW_OK);
   wait(held);flBuffer blocked{};CHECK(flAcquireBuffer(writer,&blocked,0)==FL_TIMEOUT);CHECK(SetEvent(checked));
   flBuffer released{};CHECK(flAcquireBuffer(writer,&released,5000)==FL_OK&&relaySame(input.image,released.image));input=released;
+  if(cancelled)break;
   for(auto kind:{FL_GST_VIDEO_GAP,FL_GST_VIDEO_BARRIER}){FlGstVideoEvent event{kind,n+1,pts,kind==FL_GST_VIDEO_GAP?123u:0u};CHECK(fl_gst_session_send_video_event(e.session,1,&event)==FL_GST_SESSION_READY);}
  }
  for(auto&slot:slots)CHECK(flCancelBuffer(writer,&slot)==FL_OK);
+ if(!cancelled){
  FlGstVideoEvent end{FL_GST_VIDEO_END,count,count?37000000+(count-1)*1000000:0,0};CHECK(fl_gst_session_send_video_event(e.session,1,&end)==FL_GST_SESSION_READY);
  CHECK(fl_gst_session_video_eos(e.session,1,count,count?gint64(end.ptsNs):-1)==FL_GST_SESSION_READY);
- CHECK(gst_app_src_end_of_stream(GST_APP_SRC(e.port))==GST_FLOW_OK);wait(done);
+ CHECK(gst_app_src_end_of_stream(GST_APP_SRC(e.port))==GST_FLOW_OK);
+ }
+ wait(done);
  flClose(writer);for(auto h:{held,checked,done})CloseHandle(h);return 0;
 }
 // Actual GstMemory reservations in the source process: neither downstream
 // completion nor dropping only the GstBuffer permits reuse of retained memory.
-static int reservedProducer(const std::string&name,guint16 port,bool decoder=false){
+static int reservedProducer(const std::string&name,guint16 port,bool decoder=false,bool cancelled=false){
  freopen((name+".producer.log").c_str(),"w",stderr);setvbuf(stderr,nullptr,_IONBF,0);
  Endpoint e(0,true,port,nullptr,decoder);Decoder decoded;flChannel*writer=nullptr;CHECK(flOpenProducer((name+".up").c_str(),&writer)==FL_OK);
  auto owner=std::make_shared<FrameLinkD3DProducer>(writer);CHECK(owner->valid());
@@ -153,16 +157,20 @@ static int reservedProducer(const std::string&name,guint16 port,bool decoder=fal
   auto*retained=gst_memory_ref(memory);gst_buffer_unref(buffer);buffer=nullptr;CHECK(!owner->acquire(0));
   gst_memory_unref(retained);buffer=owner->acquire(1000);CHECK(buffer);
   auto*next=(FrameLinkD3DReservation*)gst_mini_object_get_qdata(GST_MINI_OBJECT(gst_buffer_peek_memory(buffer,0)),FrameLinkD3DProducer::key());CHECK(next&&relaySame(image,next->buffer.image));
+  if(cancelled)break;
   for(auto kind:{FL_GST_VIDEO_GAP,FL_GST_VIDEO_BARRIER}){FlGstVideoEvent event{kind,n+1,pts,kind==FL_GST_VIDEO_GAP?123u:0u};CHECK(fl_gst_session_send_video_event(e.session,1,&event)==FL_GST_SESSION_READY);}
  }
  for(auto*buffer:slots)gst_buffer_unref(buffer); // cancel the two unused reservations
+ if(!cancelled){
  FlGstVideoEvent end{FL_GST_VIDEO_END,Frames,37000000+frameTime(Frames-1,decoder),0};CHECK(fl_gst_session_send_video_event(e.session,1,&end)==FL_GST_SESSION_READY);
  CHECK(fl_gst_session_video_eos(e.session,1,Frames,gint64(end.ptsNs))==FL_GST_SESSION_READY);
- CHECK(gst_app_src_end_of_stream(GST_APP_SRC(e.port))==GST_FLOW_OK);wait(done);
+ CHECK(gst_app_src_end_of_stream(GST_APP_SRC(e.port))==GST_FLOW_OK);
+ }
+ wait(done);
  owner.reset();for(auto h:{held,checked,drained,done})CloseHandle(h);
- fprintf(stderr,"16 source GstMemory reservations: remote drain plus final local reference required; duplicate submit rejected; both original allocations reused\n");return 0;
+ fprintf(stderr,"source GstMemory reservations: remote drain plus final local reference required; duplicate submit rejected; exact allocation reused\n");return 0;
 }
-static int relay(const std::string&name,guint16 port,HANDLE h0,HANDLE h1,HANDLE notify,bool empty,bool decoder=false,bool producerDeath=false){
+static int relay(const std::string&name,guint16 port,HANDLE h0,HANDLE h1,HANDLE notify,bool empty,bool decoder=false,unsigned fault=0){
  freopen((name+".relay.log").c_str(),"w",stderr);setvbuf(stderr,nullptr,_IONBF,0);fprintf(stderr,"relay start\n");
  void*handles[2]={h0,h1};flChannel*up=nullptr,*down=nullptr;
  CHECK(flCreateChannelFromD3D11Handles((name+".up").c_str(),64,32,FL_FORMAT_RGBA8,2,FL_MAP_CPU|FL_DEFER_RELEASE|FL_REQUIRE_FRAME_METADATA|(decoder?FL_GPU_RENDER:0),nullptr,handles,&up)==FL_OK);
@@ -179,22 +187,28 @@ static int relay(const std::string&name,guint16 port,HANDLE h0,HANDLE h1,HANDLE 
    flFrame frame{};CHECK(flAcquireFrame(up,&frame,5000)==FL_OK);auto forwarded=video.forward(frame);fprintf(stderr,"frame %u forwarded=%d session=%d\n",n,int(forwarded),int(video.sessionStatus()));CHECK(forwarded==FL_OK);
    auto deadline=g_get_monotonic_time()+5000000;FlGstSessionResult r;
    do{r=pcm.forward(100);CHECK(r==FL_GST_SESSION_READY||r==FL_GST_SESSION_TIMEOUT);CHECK(g_get_monotonic_time()<deadline);}while(r==FL_GST_SESSION_TIMEOUT);
-   if(producerDeath){
+   if(fault){
     const auto began=g_get_monotonic_time();auto result=video.forwardEvent(2000);
     const auto elapsed=g_get_monotonic_time()-began;
-    fprintf(stderr,"producer death: event result=%d elapsed_us=%lld pending=%u\n",int(result),(long long)elapsed,video.pending());
+    fprintf(stderr,"%s: event result=%d elapsed_us=%lld pending=%u\n",fault==1?"producer death":"downstream cancellation",int(result),(long long)elapsed,video.pending());
     CHECK(result!=FL_GST_SESSION_READY&&result!=FL_GST_SESSION_TIMEOUT&&elapsed<1500000);
     CHECK(!video.videoEnded()&&video.count()==1&&video.pending()==1);
     CHECK(video.finish()==FL_BUSY&&video.pending()==1);
     CHECK(video.forward(frame)==FL_INVALID);
+    CHECK(pcm.forward(0)!=FL_GST_SESSION_READY);
+    CHECK(pcm.blockCount()==1&&pcm.frameCount()==48&&pcm.byteCount()==192);
     auto observed=signal(name+".faultchecked");CHECK(SetEvent(observed));CloseHandle(observed);
    }
    while(video.pending()){CHECK(g_get_monotonic_time()<deadline);CHECK(video.collect()==FL_OK);g_usleep(100);}
-   if(producerDeath){CHECK(video.finish()==FL_OK&&!video.videoEnded());break;}
+   if(fault){
+    CHECK(video.finish()==FL_OK&&!video.videoEnded());
+    if(fault==2){auto drained=signal(name+".drained");CHECK(SetEvent(drained));CloseHandle(drained);}
+    break;
+   }
    auto drained=signal(name+".drained");CHECK(SetEvent(drained));CloseHandle(drained);
    CHECK(video.forwardEvent(5000)==FL_GST_SESSION_READY);CHECK(video.forwardEvent(5000)==FL_GST_SESSION_READY);
   }
-  if(!producerDeath){
+  if(!fault){
   CHECK(video.forwardEvent(5000)==FL_GST_SESSION_READY&&video.videoEnded());CHECK(video.finish()==FL_OK);
   avTerminal(input.pipe,GST_MESSAGE_EOS);CHECK(pcm.finish(video,5000)==FL_GST_SESSION_READY);
   CHECK(pcm.frameCount()==count*(decoder?1600:48)&&pcm.byteCount()==count*(decoder?6400:192)&&pcm.blockCount()==count);
@@ -203,22 +217,22 @@ static int relay(const std::string&name,guint16 port,HANDLE h0,HANDLE h1,HANDLE 
  }
  flClose(down);flClose(up);CloseHandle(h0);CloseHandle(h1);return 0;
 }
-static void run(const std::string&plugin,bool empty,bool reserved=false,bool decoder=false,bool producerDeath=false){
+static void run(const std::string&plugin,bool empty,bool reserved=false,bool decoder=false,unsigned fault=0){
  using Microsoft::WRL::ComPtr;
  ComPtr<ID3D11Device> device;ComPtr<ID3D11DeviceContext> context;CHECK(SUCCEEDED(D3D11CreateDevice(nullptr,D3D_DRIVER_TYPE_HARDWARE,nullptr,0,nullptr,0,D3D11_SDK_VERSION,&device,nullptr,&context)));
  D3D11_TEXTURE2D_DESC d{};d.Width=64;d.Height=32;d.ArraySize=d.MipLevels=d.SampleDesc.Count=1;d.Format=DXGI_FORMAT_R8G8B8A8_UNORM;d.Usage=D3D11_USAGE_DEFAULT;d.BindFlags=D3D11_BIND_SHADER_RESOURCE|D3D11_BIND_RENDER_TARGET;d.MiscFlags=D3D11_RESOURCE_MISC_SHARED|D3D11_RESOURCE_MISC_SHARED_NTHANDLE;
  ComPtr<ID3D11Texture2D> textures[2];HANDLE handles[2]{};
  for(unsigned i=0;i<2;++i){CHECK(SUCCEEDED(device->CreateTexture2D(&d,nullptr,&textures[i])));ComPtr<IDXGIResource1> resource;CHECK(SUCCEEDED(textures[i].As(&resource)));CHECK(SUCCEEDED(resource->CreateSharedHandle(nullptr,DXGI_SHARED_RESOURCE_READ|DXGI_SHARED_RESOURCE_WRITE,nullptr,&handles[i])));}
- auto name="gst-relay-process-"+std::to_string(GetCurrentProcessId())+"-"+std::to_string(empty)+"-"+std::to_string(reserved)+"-"+std::to_string(decoder)+"-"+std::to_string(producerDeath);
+ auto name="gst-relay-process-"+std::to_string(GetCurrentProcessId())+"-"+std::to_string(empty)+"-"+std::to_string(reserved)+"-"+std::to_string(decoder)+"-"+std::to_string(fault);
  auto held=signal(name+".held"),checked=signal(name+".checked"),done=signal(name+".done"),relaydone=signal(name+".relaydone"),faultchecked=signal(name+".faultchecked");
  void*reversed[2]={handles[1],handles[0]};flChannel*down=nullptr;CHECK(flCreateChannelFromD3D11Handles((name+".down").c_str(),64,32,FL_FORMAT_RGBA8,2,FL_MAP_CPU|FL_DEFER_RELEASE|FL_REQUIRE_FRAME_METADATA|(decoder?FL_GPU_RENDER:0),nullptr,reversed,&down)==FL_OK);
  HANDLE read=nullptr,write=nullptr;CHECK(CreatePipe(&read,&write,nullptr,0));guint16 port=0;auto*l=listener(&port);
- auto args="\""+plugin+"\" --relay-process-child "+name+" "+std::to_string(port)+" "+std::to_string((uintptr_t)handles[0])+" "+std::to_string((uintptr_t)handles[1])+" "+std::to_string((uintptr_t)write)+" "+std::to_string(empty)+" "+std::to_string(decoder)+" "+std::to_string(producerDeath);
+ auto args="\""+plugin+"\" --relay-process-child "+name+" "+std::to_string(port)+" "+std::to_string((uintptr_t)handles[0])+" "+std::to_string((uintptr_t)handles[1])+" "+std::to_string((uintptr_t)write)+" "+std::to_string(empty)+" "+std::to_string(decoder)+" "+std::to_string(fault);
  auto middle=spawn(args,{handles[0],handles[1],write});CloseHandle(write);
  {
   Endpoint receiver(1,false,0,l,decoder);g_object_unref(l);guint16 upstreamPort=0;DWORD bytes=0;
   CHECK(ReadFile(read,&upstreamPort,sizeof upstreamPort,&bytes,nullptr)&&bytes==sizeof upstreamPort);CloseHandle(read);
-  auto first=spawn("\""+plugin+(decoder?"\" --relay-decoder-producer ":(reserved?"\" --relay-reserved-producer ":"\" --relay-process-producer "))+name+" "+std::to_string(upstreamPort)+" "+std::to_string(empty));receiver.start();
+  auto first=spawn("\""+plugin+(decoder?"\" --relay-decoder-producer ":(reserved?"\" --relay-reserved-producer ":"\" --relay-process-producer "))+name+" "+std::to_string(upstreamPort)+" "+std::to_string(empty)+" "+std::to_string(fault==2));receiver.start();
   unsigned count=empty?0:Frames;unsigned seen=0;
   for(unsigned n=0;n<count;++n){
    flFrame frame{};CHECK(flAcquireFrame(down,&frame,5000)==FL_OK&&frame.ptsNs==37000000+frameTime(n,decoder));
@@ -231,24 +245,30 @@ static void run(const std::string&plugin,bool empty,bool reserved=false,bool dec
    CHECK(fl_gst_session_map_running_time(receiver.session,1,frame.ptsNs,TRUE,&mapped)==FL_GST_SESSION_READY);
    CHECK(GST_BUFFER_PTS(audio)==1000000+frameTime(n,decoder)&&mapped-gint64(GST_BUFFER_PTS(audio))==37000000&&GST_BUFFER_DURATION(audio)==(decoder?gst_util_uint64_scale(1600,GST_SECOND,48000):1000000));
    CHECK(gst_buffer_get_size(audio)==pcm.size()&&gst_buffer_extract(audio,0,pcm.data(),pcm.size())==pcm.size());uint64_t expectedHash=0;if(decoder)memcpy(&expectedHash,pcm.data(),sizeof expectedHash);for(size_t i=decoder?8:0;i<pcm.size();++i)CHECK(pcm[i]==n+31);gst_sample_unref(sample);
-   if(producerDeath){
+   if(fault==2){
+    // The actual final reader cancels its authenticated session in another
+    // process from the relay. Keep its native lease live throughout propagation.
+    fl_gst_session_cancel(receiver.session);wait(faultchecked);
+   }else if(fault==1){
     CHECK(TerminateProcess(first.hProcess,73));wait(first.hProcess);DWORD exitCode=0;
     CHECK(GetExitCodeProcess(first.hProcess,&exitCode)&&exitCode==73);
     CloseHandle(first.hThread);CloseHandle(first.hProcess);wait(faultchecked);
    }
    flMappedImage pixels{};CHECK(flImageMapPlanes(frame.image,&pixels)==FL_OK);if(decoder)CHECK(pixelHash(static_cast<unsigned char*>(pixels.plane[0].pixels),pixels.plane[0].stride)==expectedHash);else for(unsigned y=0;y<32;++y)for(unsigned x=0;x<256;++x)CHECK(static_cast<unsigned char*>(pixels.plane[0].pixels)[y*pixels.plane[0].stride+x]==n+1);flImageUnmap(frame.image);
    CHECK(flCompleteReadLease(down,lease)==FL_OK&&flCollectReadLeases(down)==FL_OK);
-   if(producerDeath)break;
+   if(fault)break;
    for(auto kind:{FL_GST_VIDEO_GAP,FL_GST_VIDEO_BARRIER}){FlGstVideoEvent e{};CHECK(fl_gst_session_receive_video_event(receiver.session,1,5000,&e)==FL_GST_SESSION_READY);CHECK(e.kind==kind&&e.afterFrames==n+1&&e.ptsNs==frame.ptsNs&&e.durationNs==(kind==FL_GST_VIDEO_GAP?123:0));}
   }
-  if(producerDeath){
+  if(fault){
    FlGstVideoEvent event{};const auto began=g_get_monotonic_time();
    auto result=fl_gst_session_receive_video_event(receiver.session,1,2000,&event);
    CHECK(result!=FL_GST_SESSION_READY&&result!=FL_GST_SESSION_TIMEOUT&&g_get_monotonic_time()-began<1500000);
    guint64 count=99;gint64 pts=-2;
    CHECK(fl_gst_session_wait_video_eos(receiver.session,1,0,&count,&pts)!=FL_GST_SESSION_READY);
-   CHECK(SetEvent(relaydone));join(middle);
-   printf("producer death (%s): explicit failure, no synthetic END/EOS, held pixels intact, no premature lease completion, bounded native drain\n",reserved?"GstMemory":"raw");
+   CHECK(SetEvent(relaydone));
+   if(fault==2){CHECK(SetEvent(done));join(first);}
+   join(middle);
+   printf("%s (%s): explicit failure, no synthetic END/EOS, held pixels intact, no premature lease completion, bounded native drain\n",fault==1?"producer death":"downstream cancellation",reserved?"GstMemory":"raw");
   }else{
   CHECK(empty||seen==3);
   FlGstVideoEvent end{};CHECK(fl_gst_session_receive_video_event(receiver.session,1,5000,&end)==FL_GST_SESSION_READY);CHECK(end.kind==FL_GST_VIDEO_END&&end.afterFrames==count&&end.ptsNs==(count?37000000+frameTime(count-1,decoder):0));

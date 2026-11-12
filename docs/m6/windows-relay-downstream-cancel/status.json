@@ -1,0 +1,16 @@
+{
+  "revision": "efb1e5f79ede231fcd4d423f5015ffa370463f43",
+  "state": "failed",
+  "utc": "2026-11-12T01:53:54.142901+00:00",
+  "remote": "<win-home>/dev/framelink-m6-relay-cancel-20261112",
+  "overlays": {
+    "CMakeLists.txt": "1c714f1f8515dc980052c83653a3196fbf04cf3a25fb8e7af9d46a3bb23ab69d",
+    "test/fl_gst_native_producer_win.cpp": "e95ef186e147491e8f41f8b1a6ba55be51e7e61c54de1ea0179469219aadde49",
+    "test/fl_gst_native_relay_process_win.inc": "bbe73cae076cb7d474b494719dfa87a4c61af4a956eee8defd0df77ae471ef80"
+  },
+  "archive_sha256": "c62c654c8a36983902d4911ea0ddd59848aef864f63307ee24ffe1962d35a135",
+  "build_exit": 0,
+  "test_exit": 8,
+  "error": "",
+  "ended_utc": "2026-11-12T01:55:03.020367+00:00"
+}
