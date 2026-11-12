@@ -48,6 +48,15 @@ static void resetCpu(FlGstSession*s){
  if(s->cpuChannel){flSharedCpuClose(s->cpuChannel);s->cpuChannel=nullptr;}
  // Do not reset cpuOpening: an old setup must return before a new one starts.
 }
+// Caller holds the session mutex. Readiness is not a permanent liveness grant:
+// a peer may disappear while the producer is between video/audio submissions.
+static void refreshEventFailure(FlGstSession*s){
+ if(!s->localFinished&&*s->events&&(*s->events)->failed()){
+  s->cancelled=TRUE;s->ready=0;resetCpu(s);
+  if(s->audioConnection)g_socket_shutdown(g_socket_connection_get_socket(s->audioConnection),TRUE,TRUE,nullptr);
+  g_cond_broadcast(&s->changed);
+ }
+}
 static void finalize(GObject* object) {
  auto* s=reinterpret_cast<FlGstSession*>(object);
  resetCpu(s);
@@ -112,10 +121,17 @@ FlGstSessionResult fl_gst_session_wait(FlGstSession* s,guint64 generation,guint 
  const gint64 deadline=g_get_monotonic_time()+gint64(timeout)*1000;
  Lock lock(&s->mutex);
  while(true) {
+  refreshEventFailure(s);
   if(s->cancelled)return FL_GST_SESSION_CANCELLED;
   if(s->configured&&s->config.generation!=generation)return FL_GST_SESSION_STALE;
   if(s->configured&&s->ready==s->required){*out=s->config;return FL_GST_SESSION_READY;}
-  if(!g_cond_wait_until(&s->changed,&s->mutex,deadline))return FL_GST_SESSION_TIMEOUT;
+  // Event socket failure has no session-condvar notifier. Bound observation
+  // without imposing periodic traffic or shortening the caller's deadline.
+  const auto now=g_get_monotonic_time();
+  if(now>=deadline)return FL_GST_SESSION_TIMEOUT;
+  const auto poll=now+50000;
+  const auto wake=(!s->localFinished&&*s->events&&poll<deadline)?poll:deadline;
+  g_cond_wait_until(&s->changed,&s->mutex,wake);
  }
 }
 void fl_gst_session_cancel(FlGstSession* s) {
@@ -149,9 +165,7 @@ FlGstSessionResult fl_gst_session_map_pts(FlGstSession* s,guint64 generation,gin
 FlGstSessionResult fl_gst_session_get_config(FlGstSession* s,flSessionConfig* out) {
  if(!valid(s)||!out)return FL_GST_SESSION_INVALID;
  Lock lock(&s->mutex);
- if(!s->localFinished&&*s->events&&(*s->events)->failed()){s->cancelled=TRUE;s->ready=0;
- resetCpu(s);
- if(s->audioConnection)g_socket_shutdown(g_socket_connection_get_socket(s->audioConnection),TRUE,TRUE,nullptr);g_cond_broadcast(&s->changed);}
+ refreshEventFailure(s);
  if(s->cancelled)return FL_GST_SESSION_CANCELLED;
  if(!s->configured)return FL_GST_SESSION_STALE;
  *out=s->config;return FL_GST_SESSION_READY;

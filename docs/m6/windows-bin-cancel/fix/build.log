@@ -1,0 +1,54 @@
+** WARNING: connection is not using a post-quantum key exchange algorithm.
+** This session may be vulnerable to "store now, decrypt later" attacks.
+** The server may need to be upgraded. See https://openssh.com/pq.html
+CMake is re-running because <win-home>/dev/framelink-m6-windows-8b057a1/build/CMakeFiles/generate.stamp is out-of-date.
+  the file '<win-home>/dev/framelink-m6-windows-8b057a1/CMakeLists.txt'
+  is newer than '<win-home>/dev/framelink-m6-windows-8b057a1/build/CMakeFiles/generate.stamp.depend'
+  result='-1'
+-- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.26300.
+-- framelink: building GStreamer elements (gstframelink)
+-- Configuring done (0.8s)
+-- Generating done (1.7s)
+-- Build files have been written to: <win-home>/dev/framelink-m6-windows-8b057a1/build
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <win-home>\dev\framelink-m6-windows-8b057a1\build\Release\framelink.dll
+  framelink_session_context.cpp
+     Creating library <win-home>/dev/framelink-m6-windows-8b057a1/build/Release/framelink_gst_session.lib and object <win-home>/dev/framelink-m6-windows-8b057a1/build/Release/framelink_gst_session.exp
+  framelink_gst_session.vcxproj -> <win-home>\dev\framelink-m6-windows-8b057a1\build\Release\framelink_gst_session.dll
+  fl_gst_native_producer_win.cpp
+  The d3d11 library from gst-plugins-bad is unstable API and may change in future.
+  You can define GST_USE_UNSTABLE_API to avoid this warning.
+  fl_gst_native_producer_win.vcxproj -> <win-home>\dev\framelink-m6-windows-8b057a1\build\Release\fl_gst_native_producer_win.exe
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <win-home>\dev\framelink-m6-windows-8b057a1\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> <win-home>\dev\framelink-m6-windows-8b057a1\build\Release\framelink_gst_session.dll
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-8b057a1/CMakeLists.txt
+  fl_gst_event_channel.cpp
+  fl_gst_event_channel.vcxproj -> <win-home>\dev\framelink-m6-windows-8b057a1\build\Release\fl_gst_event_channel.exe
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <win-home>\dev\framelink-m6-windows-8b057a1\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> <win-home>\dev\framelink-m6-windows-8b057a1\build\Release\framelink_gst_session.dll
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-8b057a1/CMakeLists.txt
+  gstframelink.vcxproj -> <win-home>\dev\framelink-m6-windows-8b057a1\build\Release\gstframelink.dll
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-8b057a1/CMakeLists.txt
+  fl_gst_av_bin.vcxproj -> <win-home>\dev\framelink-m6-windows-8b057a1\build\Release\fl_gst_av_bin.exe
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <win-home>\dev\framelink-m6-windows-8b057a1\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> <win-home>\dev\framelink-m6-windows-8b057a1\build\Release\framelink_gst_session.dll
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-8b057a1/CMakeLists.txt
+  fl_gst_session_context.vcxproj -> <win-home>\dev\framelink-m6-windows-8b057a1\build\Release\fl_gst_session_context.exe
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <win-home>\dev\framelink-m6-windows-8b057a1\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> <win-home>\dev\framelink-m6-windows-8b057a1\build\Release\framelink_gst_session.dll
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-8b057a1/CMakeLists.txt
+  fl_gst_session_transport.vcxproj -> <win-home>\dev\framelink-m6-windows-8b057a1\build\Release\fl_gst_session_transport.exe
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <win-home>\dev\framelink-m6-windows-8b057a1\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> <win-home>\dev\framelink-m6-windows-8b057a1\build\Release\framelink_gst_session.dll
+  gstframelink.vcxproj -> <win-home>\dev\framelink-m6-windows-8b057a1\build\Release\gstframelink.dll

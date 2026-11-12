@@ -1,8 +1,8 @@
 # Windows API integration baseline candidate — NOT FROZEN
 
-**Current verified integrated candidate:** `c5bea11d9d2192635d1e87bec8873a29e3794856`.
-Clean exact-revision Windows build/API/full suite **140/140 passed**;
-[pinned evidence](../windows-integrated-c5bea11/README.md) includes DLL hashes,
+**Current verified integrated candidate:** `8b057a15680b8f65f50e6887d1694c5865d78925`.
+Clean exact-revision Windows build/API/full suite **141/141 passed**;
+[pinned evidence](../windows-integrated-8b057a1/README.md) includes DLL hashes,
 runtime properties and exports. All 119 prior exported names retained (119 total).
 Export-name retention is not proof of behavioral or ordinal ABI compatibility.
 
@@ -294,3 +294,21 @@ this verification is included in the pinned clean integrated candidate.
 source GstMemory adapter across both process boundaries: remote completion alone
 does not permit reuse until final local unref. No runtime API/default changes.
 This is not real-decoder or automatic-bin relay acceptance.
+
+
+## Readiness after peer cancellation (pending next integrated candidate)
+
+`fl_gst_session_wait` now checks authenticated event-channel liveness before
+returning cached READY, using the same failure state as `get_config`. While
+waiting for track readiness it observes peer failure in bounded 50ms checks
+under the original caller deadline; this is not a per-frame delay or a network
+heartbeat. Authenticated completed-local-drain metadata remains queryable.
+No symbol, structure, wire, overload or fallback default changes.
+
+Automatic native A/V bin receiver teardown followed by another producer buffer
+now raises ERROR instead of accepting cached readiness; producer teardown also
+raises receiver ERROR without invented EOS. Idle producers still need an API
+operation to observe the failure; this is not a new asynchronous bus monitor.
+Evidence: [bin cancellation repair](../windows-bin-cancel/README.md).
+The pinned integrated baseline above remains unchanged until the next clean
+exact-revision validation is collected. API is not frozen.

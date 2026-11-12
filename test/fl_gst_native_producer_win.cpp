@@ -187,6 +187,11 @@ int main(int argc,char**argv){gst_init(&argc,&argv);CHECK(argc>=2);GError*e=null
  if(argc==3&&std::string(argv[2])=="--relay-reservation-diagnostic"){relayprocess::run(argv[1],false,true);return 0;}
  if(argc==3&&std::string(argv[2])=="--relay-process-diagnostic"){relayprocess::run(argv[1],false);relayprocess::run(argv[1],true);return 0;}
  if(argc==3){
+  if(std::string(argv[2])=="--bin-cancel-diagnostic"){
+   nativeProducerAv(4,true,false,true,true);
+   nativeProducerAv(5,true,false,true,true);
+   return 0;
+  }
   if(std::string(argv[2])=="--relay-av-diagnostic"){nativeRelayAv(false);nativeRelayAv(true);for(unsigned fault=1;fault<=18;++fault)nativeRelayAv(false,fault);nativeRelayAv(true,14);return 0;}
   if(std::string(argv[2])=="--relay-contract-diagnostic"){
    for(unsigned mode=0;mode<2;++mode)nativeProducerAv(mode,true,false,true,true,false,true);

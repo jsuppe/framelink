@@ -260,7 +260,25 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
   relayProducer.reset();flClose(relayConsumer);
   printf("relay contract: %u imported first-hop buffers rejected by independent second-hop pool; no publication, no reservation leak; first-hop pixels/PCM/timing intact\n",count);
  }
- if(mode==3){CHECK(audioPeer);CHECK(g_socket_shutdown(g_socket_connection_get_socket(audioPeer),TRUE,TRUE,nullptr));avTerminal(rx,GST_MESSAGE_ERROR);}
+ if(mode==4||mode==5){
+  CHECK(automatic&&nativeReceiver&&!decoder);
+  // Exercise the actual bin teardown, not direct cancellation of a fixture's
+  // coordinator. The final native reader and producer memories remain held.
+  GstBuffer* pending=nullptr;
+  if(mode==4)CHECK(gst_buffer_pool_acquire_buffer(pool,&pending,nullptr)==GST_FLOW_OK);
+  const auto began=g_get_monotonic_time();
+  CHECK(gst_element_set_state(mode==4?rx:tx,GST_STATE_NULL)!=GST_STATE_CHANGE_FAILURE);
+  if(pending){
+   GST_BUFFER_PTS(pending)=finalPts+1000000;GST_BUFFER_DURATION(pending)=1000000;
+   // appsrc success means queued, not accepted by the cancelled transport.
+   CHECK(gst_app_src_push_buffer(GST_APP_SRC(vi),pending)==GST_FLOW_OK);
+  }
+  avTerminal(mode==4?tx:rx,GST_MESSAGE_ERROR);
+  const auto elapsed=g_get_monotonic_time()-began;CHECK(elapsed<1500000);
+  printf("automatic native bin %s cancellation: error in %.3fms, no source EOS, native memories retained\n",
+   mode==4?"receiver":"producer",elapsed/1000.0);
+ }
+ else if(mode==3){CHECK(audioPeer);CHECK(g_socket_shutdown(g_socket_connection_get_socket(audioPeer),TRUE,TRUE,nullptr));avTerminal(rx,GST_MESSAGE_ERROR);}
  else{
   CHECK(gst_app_src_end_of_stream(GST_APP_SRC(mode%2?vi:ai))==GST_FLOW_OK);
   auto*bus=gst_element_get_bus(rx);CHECK(!gst_bus_timed_pop_filtered(bus,30*GST_MSECOND,GstMessageType(GST_MESSAGE_EOS|GST_MESSAGE_ERROR)));gst_object_unref(bus);

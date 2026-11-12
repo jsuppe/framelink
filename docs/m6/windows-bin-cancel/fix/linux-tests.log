@@ -1,0 +1,16 @@
+Test project <linux-home>/dev/build/framelink-m6-event-linux-20261112
+    Start 119: gst_session_transport
+1/4 Test #119: gst_session_transport ............   Passed    1.10 sec
+    Start 121: gst_session_context
+2/4 Test #121: gst_session_context ..............   Passed    0.02 sec
+    Start 130: gst_av_bin
+3/4 Test #130: gst_av_bin .......................   Passed   24.94 sec
+    Start 138: gst_event_channel
+4/4 Test #138: gst_event_channel ................   Passed    2.46 sec
+
+100% tests passed, 0 tests failed out of 4
+
+Label Time Summary:
+m5b_av    =  28.53 sec*proc (4 tests)
+
+Total Test time (real) =  28.53 sec

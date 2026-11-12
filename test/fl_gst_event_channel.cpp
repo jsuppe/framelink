@@ -40,6 +40,17 @@ static void run(int mode){
   for(int i=0;i<33;i++)CHECK(fl_gst_session_send_video_event(p,1,&event)==FL_GST_SESSION_READY);g_usleep(100000);int count=0;while(fl_gst_session_receive_video_event(c,1,1000,&out)==FL_GST_SESSION_READY)++count;CHECK(count==32);
  }else if(mode==3){
   FlGstSessionResult result=FL_GST_SESSION_READY;std::thread wait([&]{result=fl_gst_session_receive_video_event(c,1,5000,&out);});g_usleep(20000);auto start=g_get_monotonic_time();fl_gst_session_cancel(c);wait.join();CHECK(result==FL_GST_SESSION_CANCELLED&&g_get_monotonic_time()-start<1000000);
+ }else if(mode==10||mode==11){
+  CHECK(fl_gst_session_register_track(p,1)==FL_GST_SESSION_READY);
+  if(mode==10)CHECK(fl_gst_session_track_ready(p,1,1)==FL_GST_SESSION_READY);
+  // Both already-ready and not-yet-ready waiters must observe peer failure
+  // without another thread calling get_config or sending an event first.
+  std::thread cancel([&]{g_usleep(30000);fl_gst_session_cancel(c);});
+  const auto start=g_get_monotonic_time();flSessionConfig current{};
+  FlGstSessionResult result;
+  do{result=fl_gst_session_wait(p,1,5000,&current);if(result!=FL_GST_SESSION_READY)break;g_usleep(1000);}
+  while(g_get_monotonic_time()-start<1000000);
+  cancel.join();CHECK(result==FL_GST_SESSION_CANCELLED&&g_get_monotonic_time()-start<1000000);
  }else if(mode>=6){
   const auto start=g_get_monotonic_time();
   if(mode==9){
@@ -66,4 +77,4 @@ static void run(int mode){
  }
  auto start=g_get_monotonic_time();g_object_unref(p);g_object_unref(c);CHECK(g_get_monotonic_time()-start<1000000);
 }
-int main(int argc,char**argv){gst_init(&argc,&argv);for(int i=0;i<10;i++)run(i);puts("event channel: authenticated ordered bounded controls; quiet idle, stale generation, queue overflow, partial-record deadline and cancellation passed");}
+int main(int argc,char**argv){gst_init(&argc,&argv);for(int i=0;i<12;i++)run(i);puts("event channel: authenticated ordered bounded controls; quiet idle, stale generation, queue overflow, partial-record deadline, readiness wait and cancellation passed");}
