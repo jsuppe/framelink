@@ -15,13 +15,15 @@ static void verify(flChannel*channel,const flFrame&frame,unsigned n,guint64 gene
   CHECK(static_cast<unsigned char*>(map.plane[0].pixels)[y*map.plane[0].stride+x]==n+11);
  flImageUnmap(frame.image);
 }
-static int producer(const char*path,HANDLE advance,HANDLE published,HANDLE retired){
+static int producer(const char*path,HANDLE advance,HANDLE published,HANDLE retired,bool audio=false){
  auto caps=localPoolProcessCaps();auto candidate=nativeAvPolicy(0,true);GstFrameLinkMemoryPolicy bound{};
  auto*session=fl_gst_session_new(3);flChannel*channel=nullptr;GError*error=nullptr;
  CHECK(fl_gst_session_open_local_native(session,TRUE,path,&caps,1,2,80,5000,5000,
    &candidate,&bound,&channel,nullptr,&error));
  flSessionConfig cfg{};CHECK(fl_gst_session_get_config(session,&cfg)==FL_GST_SESSION_READY);
  CHECK(bound.sessionGeneration==cfg.generation);
+ std::unique_ptr<LocalProcessAudio> pcm;
+ if(audio){pcm.reset(new LocalProcessAudio(session,true));pcm->start();}
  // Future relay parent waits to signal readiness until snapshot import and
  // actual same-allocation read-lease adapter binding have succeeded.
  CHECK(fl_gst_session_local_ready(session,TRUE,5000,nullptr));
@@ -33,22 +35,36 @@ static int producer(const char*path,HANDLE advance,HANDLE published,HANDLE retir
   context->UpdateSubresource(flImageD3D11(buffer.image),0,nullptr,pixels.data(),256,0);
   flFrameMetadata meta{FL_FRAME_METADATA_VERSION,FL_FRAME_HAS_DTS|FL_FRAME_HAS_DURATION,pts(n),1000000,cfg.generation,{}};
   CHECK(flSetFrameMetadata(channel,&buffer,&meta)==FL_OK);CHECK(flSubmit(channel,&buffer,pts(n))==FL_OK);
+  if(audio){
+   auto*buffer=gst_buffer_new_allocate(nullptr,192,nullptr);guint8 bytes[192];
+   for(unsigned i=0;i<sizeof bytes;++i)bytes[i]=guint8((n*29+i*7+31)&255);
+   CHECK(gst_buffer_fill(buffer,0,bytes,sizeof bytes)==sizeof bytes);
+   GST_BUFFER_PTS(buffer)=n*1000000;GST_BUFFER_DURATION(buffer)=1000000;
+   CHECK(gst_app_src_push_buffer(GST_APP_SRC(pcm->port),buffer)==GST_FLOW_OK);
+  }
   CHECK(SetEvent(published));
   // A control gate bounds the fixture's outstanding frames; it is not proof
   // of native completion. The parent signals only after the real lease retires.
   relayprocess::wait(retired);
  }
- context->Release();CHECK(fl_gst_session_finish_local(session,TRUE,5000,nullptr));
+ context->Release();
+ if(audio){
+  FlGstVideoEvent end{FL_GST_VIDEO_END,Frames,guint64(pts(Frames-1)),0};
+  CHECK(fl_gst_session_send_video_event(session,cfg.generation,&end)==FL_GST_SESSION_READY);
+  CHECK(fl_gst_session_video_eos(session,cfg.generation,Frames,pts(Frames-1))==FL_GST_SESSION_READY);
+  CHECK(gst_app_src_end_of_stream(GST_APP_SRC(pcm->port))==GST_FLOW_OK);
+ }
+ CHECK(fl_gst_session_finish_local(session,TRUE,5000,nullptr));pcm.reset();
  flClose(channel);g_object_unref(session);return 0;
 }
 struct Peer {
  flnative::Handle advance,published,retired;PROCESS_INFORMATION child{};
- Peer(const char*plugin,const std::string&path){
+ Peer(const char*plugin,const std::string&path,bool audio=false){
   advance.value=CreateEventW(nullptr,FALSE,FALSE,nullptr);
   published.value=CreateEventW(nullptr,FALSE,FALSE,nullptr);
   retired.value=CreateEventW(nullptr,FALSE,FALSE,nullptr);
   CHECK(advance.value&&published.value&&retired.value);
-  const auto command=std::string("\"")+plugin+"\" --relay-local-source \""+path+"\" "+
+  const auto command=std::string("\"")+plugin+(audio?"\" --relay-local-source-av \"":"\" --relay-local-source \"")+path+"\" "+
     std::to_string(uintptr_t(advance.value))+" "+std::to_string(uintptr_t(published.value))+" "+std::to_string(uintptr_t(retired.value));
   child=relayprocess::spawn(command,{advance.value,published.value,retired.value});
  }
@@ -85,10 +101,10 @@ static void control(const char*plugin){
 }
 // Three independent processes: source child, this relay, final reader child.
 // Uses the committed backend snapshot contract, never inherited texture handles.
-static void threeProcess(const char*plugin){
+static void threeProcess(const char*plugin,bool audio=false){
  gchar*dir=g_dir_make_tmp("framelink-three-local-XXXXXX",nullptr);CHECK(dir);
  const std::string root=dir;g_free(dir);const auto inputPath=root+"/input",outputPath=root+"/output";
- Peer source(plugin,inputPath);
+ Peer source(plugin,inputPath,audio);
  auto caps=localPoolProcessCaps();auto candidate=nativeAvPolicy(0,true);GstFrameLinkMemoryPolicy inputPolicy{},outputPolicy{};
  auto*up=fl_gst_session_new(3);auto*down=fl_gst_session_new(3);
  flChannel*input=nullptr,*output=nullptr;GError*error=nullptr;
@@ -102,7 +118,7 @@ static void threeProcess(const char*plugin){
  flnative::Handle held,release,exitEvent;
  held.value=CreateEventW(nullptr,TRUE,FALSE,nullptr);release.value=CreateEventW(nullptr,TRUE,FALSE,nullptr);exitEvent.value=CreateEventW(nullptr,TRUE,FALSE,nullptr);
  CHECK(held.value&&release.value&&exitEvent.value);
- const auto command=std::string("\"")+plugin+"\" --relay-local-reader-generic \""+outputPath+"\" "+
+ const auto command=std::string("\"")+plugin+(audio?"\" --relay-local-reader-av \"":"\" --relay-local-reader-generic \"")+outputPath+"\" "+
    std::to_string(uintptr_t(held.value))+" "+std::to_string(uintptr_t(release.value))+" "+std::to_string(uintptr_t(exitEvent.value));
  auto final=relayprocess::spawn(command,{held.value,release.value,exitEvent.value});
  CHECK(fl_gst_session_open_local_native_relay_pool(down,up,outputPath.c_str(),&caps,1,2,80,5000,5000,
@@ -111,28 +127,54 @@ static void threeProcess(const char*plugin){
  CHECK(flsample::SessionRelayContract::compatible(original,forwarded));
  using Compare=BOOL(WINAPI*)(HANDLE,HANDLE);
  auto compare=reinterpret_cast<Compare>(GetProcAddress(GetModuleHandleW(L"KernelBase.dll"),"CompareObjectHandles"));CHECK(compare);
- flsample::NativeRelay relay(input,output,[&](flImage*a,flImage*b){return compare(flImageSharedHandle(a),flImageSharedHandle(b))!=FALSE;});
+ flsample::SessionNativeRelay relay(up,down,input,output,[&](flImage*a,flImage*b){return compare(flImageSharedHandle(a),flImageSharedHandle(b))!=FALSE;});
  CHECK(relay.initialize()==FL_OK);
+ std::unique_ptr<LocalProcessAudio> pcmInput,pcmOutput;
+ std::unique_ptr<flsample::SessionPcmRelay> pcm;
+ if(audio){
+  pcmInput.reset(new LocalProcessAudio(up,false));pcmOutput.reset(new LocalProcessAudio(down,true));
+  pcm.reset(new flsample::SessionPcmRelay(up,down,GST_APP_SINK(pcmInput->port),GST_APP_SRC(pcmOutput->port)));
+  CHECK(pcm->initialize()==FL_GST_SESSION_READY);pcmOutput->start();pcmInput->start();
+ }
  flsample::SessionRelaySupervisor supervisor(up,down);CHECK(supervisor.start()==FL_GST_SESSION_READY);
  CHECK(fl_gst_session_local_ready(down,TRUE,1000,nullptr));
  CHECK(fl_gst_session_local_ready(up,FALSE,1000,nullptr));
  for(unsigned n=0;n<Frames;++n){
   source.next();flFrame frame{};CHECK(flAcquireFrame(input,&frame,1000)==FL_OK);
   CHECK(frame.ptsNs==pts(n));CHECK(relay.forward(frame)==FL_OK);
-  if(n+1==Frames){relayprocess::wait(held.value);CHECK(relay.pending()==1&&relay.finish()==FL_BUSY);CHECK(SetEvent(release.value));}
+  if(audio){
+   const auto until=g_get_monotonic_time()+5000000;FlGstSessionResult result;
+   do{result=pcm->forward(100);CHECK(result==FL_GST_SESSION_READY||result==FL_GST_SESSION_TIMEOUT);CHECK(g_get_monotonic_time()<until);}while(result==FL_GST_SESSION_TIMEOUT);
+  }
+  if(n+1==Frames){
+   relayprocess::wait(held.value);CHECK(relay.pending()==1);
+   // Collection cannot retire the source lease while the final reader holds it.
+   // Do not call SessionNativeRelay::finish here: that closes publication
+   // before the source's authenticated END can be forwarded.
+   CHECK(relay.collect()==FL_OK&&relay.pending()==1);CHECK(SetEvent(release.value));
+  }
   const auto deadline=g_get_monotonic_time()+2000000;
   while(relay.pending()){CHECK(g_get_monotonic_time()<deadline);CHECK(relay.collect()==FL_OK);g_usleep(100);}
   // A control acknowledgment follows real final-reader lease completion only.
   source.release();
  }
- CHECK(relay.count()==Frames&&relay.finish()==FL_OK);
+ CHECK(relay.count()==Frames);
+ if(audio){
+  CHECK(relay.forwardEvent(5000)==FL_GST_SESSION_READY&&relay.videoEnded());
+  avTerminal(pcmInput->pipe,GST_MESSAGE_EOS);
+  CHECK(pcm->finish(relay,5000)==FL_GST_SESSION_READY);
+  CHECK(pcm->blockCount()==8&&pcm->frameCount()==384&&pcm->byteCount()==1536);
+ }
+ CHECK(relay.finish()==FL_OK);
  supervisor.stop();CHECK(supervisor.status()==FL_GST_SESSION_READY);
  CHECK(SetEvent(exitEvent.value));CHECK(fl_gst_session_finish_local(down,TRUE,1000,nullptr));
  CHECK(fl_gst_session_finish_local(up,FALSE,1000,nullptr));
  relayprocess::join(final);source.join();
  // The snapshot pins the source epoch for the ENTIRE graph, not only import.
+ pcm.reset();pcmOutput.reset();pcmInput.reset();
  flReleaseD3D11PoolSnapshot(snapshot);flClose(output);flClose(input);
  g_object_unref(down);g_object_unref(up);
+ if(audio)puts("three-process local authenticated A/V: 384 exact PCM frames/1536 bytes, 37ms offset, real END/EOS, final native lease held");
  puts("three-process local native relay: FAR4 source-time input + FAR5 snapshot transfer, no inherited textures, 8 exact final pixels/metadata, held final lease, real drain");
 }
 

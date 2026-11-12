@@ -5,7 +5,24 @@ static flSessionCapabilities localPoolProcessCaps(){
  flSessionCapabilities caps{};caps.version=2;caps.videoCount=caps.audioCount=1;
  caps.video[0]={FL_FORMAT_RGBA8,64,32,30,1};caps.audio[0]={FL_PCM_S16,48000,2};return caps;
 }
-static int localPoolProcessReader(const char*path,HANDLE held,HANDLE release,HANDLE exitEvent,bool fixedFixture=true){
+// Borrow the already authenticated audio connection from the local session.
+struct LocalProcessAudio {
+ GstElement*pipe=nullptr,*port=nullptr;
+ LocalProcessAudio(FlGstSession*session,bool producer){
+  CHECK(fl_gst_session_register_track(session,FL_GST_TRACK_VIDEO)==FL_GST_SESSION_READY);
+  flSessionConfig cfg{};CHECK(fl_gst_session_get_config(session,&cfg)==FL_GST_SESSION_READY);
+  GError*error=nullptr;
+  pipe=gst_parse_launch(producer?
+   "appsrc name=port is-live=true format=time max-bytes=15360 caps=audio/x-raw,format=S16LE,layout=interleaved,rate=48000,channels=2,channel-mask=(bitmask)0x3 ! framelinkaudiosink tracks=av":
+   "framelinkaudiosrc tracks=av ! appsink name=port max-buffers=2 sync=false async=false enable-last-sample=false",&error);
+  CHECK(pipe&&!error);port=gst_bin_get_by_name(GST_BIN(pipe),"port");CHECK(port);
+  auto*context=fl_gst_session_create_context(session);gst_element_set_context(pipe,context);gst_context_unref(context);
+  CHECK(fl_gst_session_track_ready(session,FL_GST_TRACK_VIDEO,cfg.generation)==FL_GST_SESSION_READY);
+ }
+ void start(){CHECK(gst_element_set_state(pipe,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);}
+ ~LocalProcessAudio(){CHECK(gst_element_set_state(pipe,GST_STATE_NULL)!=GST_STATE_CHANGE_FAILURE);gst_object_unref(port);gst_object_unref(pipe);}
+};
+static int localPoolProcessReader(const char*path,HANDLE held,HANDLE release,HANDLE exitEvent,bool fixedFixture=true,bool audio=false){
  auto caps=localPoolProcessCaps();auto candidate=nativeAvPolicy(0,true);GstFrameLinkMemoryPolicy bound{};
  auto*session=fl_gst_session_new(3);flChannel*channel=nullptr;GError*error=nullptr;
  CHECK(fl_gst_session_open_local_native_pool_receiver(session,path,&caps,1,2,80,5000,5000,
@@ -13,6 +30,9 @@ static int localPoolProcessReader(const char*path,HANDLE held,HANDLE release,HAN
  flSessionConfig cfg{};CHECK(fl_gst_session_get_config(session,&cfg)==FL_GST_SESSION_READY);
  CHECK(flSessionValidate(&cfg)==FL_SESSION_OK&&bound.sessionGeneration==cfg.generation);
  if(fixedFixture)CHECK(cfg.generation==19&&cfg.clockId.bytes[0]==73&&cfg.videoTrackId==7&&cfg.audioTrackId==8);
+ std::unique_ptr<LocalProcessAudio> pcm;
+ if(audio){pcm.reset(new LocalProcessAudio(session,false));pcm->start();}
+ guint64 audioFrames=0,audioBytes=0;
  CHECK(fl_gst_session_local_ready(session,FALSE,1000,nullptr));
  for(unsigned n=0;n<8;++n){
   flFrame frame{};CHECK(flAcquireFrame(channel,&frame,5000)==FL_OK);
@@ -23,13 +43,36 @@ static int localPoolProcessReader(const char*path,HANDLE held,HANDLE release,HAN
   for(unsigned y=0;y<32;++y)for(unsigned x=0;x<256;++x)
    CHECK(static_cast<unsigned char*>(map.plane[0].pixels)[y*map.plane[0].stride+x]==n+11);
   flImageUnmap(frame.image);
+  if(audio){
+   auto*sample=gst_app_sink_try_pull_sample(GST_APP_SINK(pcm->port),5*GST_SECOND);CHECK(sample);
+   auto*buffer=gst_sample_get_buffer(sample);guint8 bytes[192]{};gint64 mapped=-1;
+   CHECK(gst_buffer_get_size(buffer)==sizeof bytes&&gst_buffer_extract(buffer,0,bytes,sizeof bytes)==sizeof bytes);
+   // Independent expected source sequence, not data reported by the relay.
+   for(unsigned i=0;i<sizeof bytes;++i)CHECK(bytes[i]==guint8((n*29+i*7+31)&255));
+   CHECK(GST_BUFFER_DURATION(buffer)==1000000);
+   CHECK(fl_gst_session_map_running_time(session,cfg.generation,frame.ptsNs,TRUE,&mapped)==FL_GST_SESSION_READY);
+   CHECK(mapped>=37000000&&guint64(mapped-37000000)==GST_BUFFER_PTS(buffer));
+   CHECK(fl_gst_session_map_running_time(session,cfg.generation,n*1000000,TRUE,&mapped)==FL_GST_SESSION_READY);
+   CHECK(GST_BUFFER_PTS(buffer)==guint64(mapped));
+   audioFrames+=48;audioBytes+=sizeof bytes;gst_sample_unref(sample);
+  }
   uint64_t lease=0;CHECK(flLeaseFrame(channel,&frame,&lease)==FL_OK);
   if(n==7){CHECK(SetEvent(held));relayprocess::wait(release);}
   CHECK(flCompleteReadLease(channel,lease)==FL_OK);CHECK(flCollectReadLeases(channel)==FL_OK);
  }
+ if(audio){
+  FlGstVideoEvent end{};CHECK(fl_gst_session_receive_video_event(session,cfg.generation,5000,&end)==FL_GST_SESSION_READY);
+  CHECK(end.kind==FL_GST_VIDEO_END&&end.afterFrames==8&&end.ptsNs==44000000);
+  CHECK(!gst_app_sink_try_pull_sample(GST_APP_SINK(pcm->port),5*GST_SECOND));
+  CHECK(gst_app_sink_is_eos(GST_APP_SINK(pcm->port)));avTerminal(pcm->pipe,GST_MESSAGE_EOS);
+  guint64 count=0;gint64 last=-1;
+  CHECK(fl_gst_session_wait_video_eos(session,cfg.generation,1000,&count,&last)==FL_GST_SESSION_READY);
+  CHECK(count==8&&last==44000000&&audioFrames==384&&audioBytes==1536);
+  flFrame extra{};CHECK(flAcquireFrame(channel,&extra,0)==FL_TIMEOUT);
+ }
  relayprocess::wait(exitEvent);
  CHECK(fl_gst_session_finish_local(session,FALSE,1000,nullptr));
- flClose(channel);g_object_unref(session);return 0;
+ pcm.reset();flClose(channel);g_object_unref(session);return 0;
 }
 static void localPoolProcess(const char*plugin){
  auto caps=localPoolProcessCaps();auto candidate=nativeAvPolicy(0,true);GstFrameLinkMemoryPolicy bound{};
