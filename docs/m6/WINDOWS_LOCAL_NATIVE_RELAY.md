@@ -1,6 +1,6 @@
 # Windows local native relay integration contract
 
-Implementation: `c4f164a`, `c0aa02e`, `0a430f9`. These additive APIs are not a frozen app baseline. The current integrated Windows candidate is `461584b`: clean build/API and169/169 CTest cases passed, and3/3 unchanged baseline-built clients passed the bounded compatibility check. See [integrated evidence](windows-integrated-461584b/README.md) and [compatibility evidence](windows-compat-461584b/README.md). Focused development evidence is retained below.
+Implementation: `c4f164a`, `c0aa02e`, `0a430f9`. These additive APIs are not a frozen app baseline. The current integrated Windows candidate is `a50841a`: clean build/API and178/178 CTest cases passed in665.56s with no skips,128 exports retain all119 baseline names, and3/3 unchanged7b8a274-built clients passed the bounded compatibility check. See [integrated evidence](windows-integrated-a50841a/README.md) and [current compatibility evidence](windows-integrated-a50841a/local-compatibility.json). The [earlier baseline control](windows-compat-461584b/README.md) remains archived. Focused development evidence is retained below.
 
 ## Choose the explicit setup profile
 

@@ -4,11 +4,15 @@ Status: **synthetic harness validated at 11d1b65: focused build, tiny smoke,
 and all four matched short target pairs passed; BGRA1080p60 1800s passed**.
 See [smoke evidence](windows-native-relay-rate-smoke-11d1b65/README.md) and
 [target pairs](windows-native-relay-targets-11d1b65/README.md). The separate
-[paced real-decoder extension](windows-decoder-rate-harness/README.md) is
+[paced real-decoder extension](windows-decoder-rate-harness/README.md) has
 passed focused Windows checks and the1080p60 short pair at77afa1a. The first
 explicit4K30 replay pair atb247e5d passed trace-off but failed two trace-on
-deadlines;4K30 remains unqualified. The newer helper462fa5f still needs
-final integrated qualification; the current integrated batch is not yet a result.
+deadlines;4K30 remains unqualified. The newer helper462fa5f is included in
+[the successful a50841a integrated batch](windows-integrated-a50841a/README.md):
+178/178 tests, API checks and3/3 unchanged clients. This is not duration acceptance.
+The [final-candidate native NV12 1080p60 short pair](windows-native-final-nv12-1080-a50841a/README.md)
+passed both arms. Its1800s trace-off run is active under root exec12979 / PID34508
+as recorded in the ledger; no duration result is claimed.
 Owner: Evelyn. Windows execution remains exclusive; consult the
 [current execution ledger](LOW_LATENCY_PLAN.md#authoritative-execution-state--2026-11-12)
 for the live owner before starting any runtime work.
@@ -130,10 +134,13 @@ five-second4K30 trace-off arm passed150 distinct frames/240000PCM with zero34ms
 misses (max30.735534ms). Its matched trace-on arm retained exact media and passed
 trace accounting, but missed deadlines for identities116/117 (max36.6673ms).
 The pair therefore **FAILED**; no decoder endurance run has occurred. Source
-oracle readback/hash reached31.6217ms. A bounded source-oracle phase diagnostic
-is prepared to separate Map/SHA/Unmap observations; it is not a qualified result
-or a waiver. Its buffered logging changes observation overhead, so it cannot
-retroactively qualify this original failed pair.
+oracle readback/hash reached31.6217ms. The completed
+[isolated source-oracle diagnostic](windows-decoder-oracle-a50841a/README.md)
+recorded both150-frame/240000PCM arms with zero34ms misses, maximum arrival
+23.4155/25.0974ms, and Map/SHA/Unmap phases. The original outlier did not recur.
+Added probes and buffered source CSV change observation overhead: this is not a
+qualified result, causal fix or waiver of the original pair. No diagnostic repeat
+is planned. See the ledger for the exclusive owner and subsequent ready work.
 
 The immutable synthetic11d1b65 [BGRA1080p60 duration](windows-native-relay-duration-bgra1080-11d1b65/README.md)
 passed1800s,108000 video frames/86400000PCM frames, zero17ms misses and resource

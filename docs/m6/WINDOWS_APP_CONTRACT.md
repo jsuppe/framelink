@@ -1,9 +1,12 @@
 # Windows application integration contract — not frozen
 
-This is an app-facing reading of the implemented contracts at `461584b`, not a
+This is an app-facing reading of the implemented contracts integrated at
+`a50841a`, with runtime DLL source contracts unchanged from `461584b`, not a
 new default, an ABI freeze or final Windows qualification. The
-[API candidate](windows-api-candidate/README.md) separates the last integrated
-baseline from later focused evidence. Follow the
+[API candidate](windows-api-candidate/README.md) records178/178 integrated tests,
+128 retained/additive exports and3/3 unchanged baseline clients;
+[exact evidence](windows-integrated-a50841a/README.md) separates those checks
+from timing, resource and duration acceptance. Follow the
 [local native relay recipe](WINDOWS_LOCAL_NATIVE_RELAY.md) for FAR5 setup;
 its setup, pool snapshot, separate-process A/V and automatic FAR5 receiver
 contracts are implemented. Functional verification is not timing/resource acceptance.
