@@ -242,7 +242,7 @@ M6 remains open; M7 remains held.
 **Windows runtime ownership:** no workload live after diagnostic collection13:51:12Z;
 `qualification_recovery` resumed as sole serial executor at 16:55Z.
 EXECUTION_GAP since 13:54Z is recorded, not described as active work.
-Current task: Windows device-lifetime causal evidence integration. Six bounded
+Windows device-lifetime causal evidence collected and integrated as64f7728. Six bounded
 serial arms collected17:03:49Z;800 cycles/270 settle observations. Hardware-only
 growth and delayed reclamation reproduced without FrameLink, textures or GStreamer;
 a live anchor does not prevent reclamation. [Evidence](lifecycle/device-causal-controls-20261112/README.md).
@@ -353,3 +353,5 @@ in [the execution archive](LEDGER_HISTORY_20261112.md) and
 [earlier relay handoffs](windows-lease-relay/prior-ledger.md). Those snapshots do
 not supersede this current state. Notify Jon at verified full M6 closure and hold
 before M7 maintenance.
+
+Device-lifetime next boundary: [reviewable opt-in contract](lifecycle/DEVICE_LIFETIME_OPTION.md) prepared; not adopted or implemented. Evelyn owns implementation/measurements only after the product-contract decision; Jon owns whether an additional opt-in profile is acceptable while default-profile failures remain open. No equivalent teardown probes or unsupported cache/sleep fix are queued. Windows runtime idle after17:03:49Z. M6 remains open; this is not a declaration that every remaining task is blocked.

@@ -35,3 +35,8 @@ prevent that deferred reclamation. No transport or rendering was involved;
 These observations identify delayed device-path retention, not exact allocation
 stacks or complete cause of the failed production slopes. No sleep/cache/Trim
 patch or gate change follows. Default production remains suspended, not waived.
+
+The [explicit lifetime option](DEVICE_LIFETIME_OPTION.md) now makes the decision
+reviewable: additive opt-in owner, one attached channel, fresh generation
+resources, explicit teardown and complete session/bin propagation. It is not
+approved or implemented and cannot qualify the unchanged default profile.
