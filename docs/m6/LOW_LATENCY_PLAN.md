@@ -239,7 +239,8 @@ M6 remains open; M7 remains held.
 | D2 / D3 | Unresolved public overload/convenience-fallback decisions; existing explicit profiles/defaults preserved | Jon; no automatic default change or hidden native-to-CPU fallback |
 | Linux / Android campaigns | Broad work deferred under Windows-first direction. Prior Linux BGRA and other completed campaigns collected, not repeated. Android BGRA4K and NV121080 residual failures remain suspended; clean trace diagnostics did not waive them | Evelyn; resume deferred integration only after Windows priority permits; causal fixes required for suspended failed cells |
 
-**Windows runtime owner:** root, exec12979 / native PID34508: exacta50841a native NV12 1080p60,
+**Windows runtime owner:** native worker `separate_process_av`, existing
+exec12979 / native PID34508 (explicit root handoff, no new runtime): exacta50841a native NV12 1080p60,
 one1800s trace-off qualification. Evidence:
 `windows-native-final-duration-prepared/runs/native-nv12-1080-duration-a50841a-20261112t0837z`.
 Started about08:37Z; expected finish about09:07Z. Do not start another Windows
@@ -281,8 +282,9 @@ The default path, actual decoder, full-pixel oracle, native leases, PCM and all
 17/34ms gates remain unchanged. Both modes retain explicit scope labels.
 
 Collect the running native duration before starting another Windows workload.
-If it passes, advance remaining native4K final-build target/duration cells or the
-ready sharedCPU NV124K qualification. The duration adapter requires matching
+If it passes, the worker runs the final-build native NV124K short pair and
+reports to root before another duration. Other native4K and sharedCPU NV124K
+qualification remain ready afterward. The duration adapter requires matching
 integrated/pair proof and unchanged gates;25 local validator tests and independent
 review passed. The review-found uncertain-SSH collection race was corrected and
 re-reviewed before launch. Historical startup/lifetime and D2/D3 remain open.

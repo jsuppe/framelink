@@ -11,7 +11,7 @@ deadlines;4K30 remains unqualified. The newer helper462fa5f is included in
 [the successful a50841a integrated batch](windows-integrated-a50841a/README.md):
 178/178 tests, API checks and3/3 unchanged clients. This is not duration acceptance.
 The [final-candidate native NV12 1080p60 short pair](windows-native-final-nv12-1080-a50841a/README.md)
-passed both arms. Its1800s trace-off run is active under root exec12979 / PID34508
+passed both arms. Its1800s trace-off run is active under native worker `separate_process_av`, existing exec12979 / PID34508
 as recorded in the ledger; no duration result is claimed.
 Owner: Evelyn. Windows execution remains exclusive; consult the
 [current execution ledger](LOW_LATENCY_PLAN.md#authoritative-execution-state--2026-11-12)
