@@ -1,0 +1,30 @@
+** WARNING: connection is not using a post-quantum key exchange algorithm.
+** This session may be vulnerable to "store now, decrypt later" attacks.
+** The server may need to be upgraded. See https://openssh.com/pq.html
+Test project <win-home>/dev/framelink-m6-windows-14996d0/build
+    Start  42: gst_native_producer_win
+1/9 Test  #42: gst_native_producer_win .................   Passed   18.62 sec
+    Start  43: gst_native_bin_relay_win
+2/9 Test  #43: gst_native_bin_relay_win ................   Passed    0.65 sec
+    Start  44: gst_native_lease_relay_win
+3/9 Test  #44: gst_native_lease_relay_win ..............   Passed    0.51 sec
+    Start  45: gst_automatic_relay_negative_win
+4/9 Test  #45: gst_automatic_relay_negative_win ........   Passed    1.05 sec
+    Start  46: gst_native_bin_cancel_win
+5/9 Test  #46: gst_native_bin_cancel_win ...............   Passed    1.20 sec
+    Start  47: gst_native_relay_av_win
+6/9 Test  #47: gst_native_relay_av_win .................   Passed    5.84 sec
+    Start  48: gst_native_relay_process_win
+7/9 Test  #48: gst_native_relay_process_win ............   Passed    1.55 sec
+    Start  51: gst_native_relay_downstream_death_win
+8/9 Test  #51: gst_native_relay_downstream_death_win ...   Passed    1.95 sec
+    Start 135: gst_av_bin
+9/9 Test #135: gst_av_bin ..............................   Passed   25.72 sec
+
+100% tests passed, 0 tests failed out of 9
+
+Label Time Summary:
+gst_video_regression    =  18.62 sec*proc (1 test)
+m5b_av                  =  25.72 sec*proc (1 test)
+
+Total Test time (real) =  57.09 sec

@@ -30,7 +30,11 @@ class NativeGstD3D11Relay {
   flResult collect(){
     if(!initialized||failed)return FL_INVALID;
     flChannelInfo now{};if(flQuery(down,&now)!=FL_OK||now.generation!=info.generation){failed=true;return FL_DISCONNECTED;}
-    for(unsigned n=0;n<info.poolSize;++n){
+    // Never probe beyond the unreserved slots. Once the final reader has
+    // completed and closed its channel, an extra acquire would report peer
+    // disconnection despite every outstanding lease already being retired.
+    unsigned missing=0;for(unsigned n=0;n<info.poolSize;++n)if(!slots[n].reserved)++missing;
+    for(unsigned n=0;n<missing;++n){
       flBuffer b{};auto r=flAcquireBuffer(down,&b,0);if(r==FL_TIMEOUT)return FL_OK;
       if(r!=FL_OK){failed=true;return r;}
       if(b.slot>=info.poolSize||slots[b.slot].reserved){failed=true;return FL_INVALID;}

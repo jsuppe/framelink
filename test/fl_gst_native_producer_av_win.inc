@@ -119,7 +119,8 @@ struct NativeEpochProbe {gint64 epoch;unsigned calls=0;};
 static gint64 nativeEpoch(gpointer data,GstClockTime now){
  auto*p=static_cast<NativeEpochProbe*>(data);CHECK(now>0);++p->calls;return p->epoch;
 }
-static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=false,bool automatic=false,bool nativeReceiver=false,bool decoder=false,bool relayNegative=false,bool automaticRelay=false,bool leaseRelay=false){
+#include "fl_gst_native_bin_relay_win.inc"
+static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=false,bool automatic=false,bool nativeReceiver=false,bool decoder=false,bool relayNegative=false,bool automaticRelay=false,bool leaseRelay=false,bool binRelay=false){
  fprintf(stderr,"native AV mode %u local=%d\n",mode,local);
  auto*s=fl_gst_session_new(3);auto*r=fl_gst_session_new(3);
  flSessionConfig cfg{};cfg.version=2;cfg.sessionId.bytes[0]=1;cfg.clockId.bytes[0]=2;cfg.generation=1;
@@ -158,7 +159,7 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
  }
  g_bytes_unref(key);
  }
- flClockMapping mapping{};mapping.sourceClockId=cfg.clockId;mapping.targetClockId.bytes[0]=8;mapping.targetAnchorNs=1000000;mapping.sourceAnchorNs=cfg.epochNs;
+ flClockMapping mapping{};mapping.sourceClockId=cfg.clockId;mapping.targetClockId.bytes[0]=8;mapping.targetAnchorNs=binRelay?0:1000000;mapping.sourceAnchorNs=cfg.epochNs;
  if(!local&&!automatic)CHECK(fl_gst_session_set_mapping(r,1,&mapping,0)==FL_GST_SESSION_READY);
  gint64 mappedBase=0;if(!automatic)CHECK(fl_gst_session_map_running_time(r,1,0,TRUE,&mappedBase)==FL_GST_SESSION_READY);
  auto name="native-av-"+std::to_string(g_get_monotonic_time());
@@ -225,8 +226,9 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
  gst_query_unref(q);gst_caps_unref(caps);gst_object_unref(pad);CHECK(gst_buffer_pool_set_active(pool,TRUE));
  flChannel* leaseReader=nullptr;flChannel* leaseWriter=nullptr;
  std::unique_ptr<flsample::NativeGstD3D11Relay> leaseAdapter;
+ std::unique_ptr<BrokerNativeBinRelay> binAdapter;
  flFrame heldRelayFrame{};uint64_t heldRelayLease=0;std::atomic<bool> finalReaderRetired{false};
- if(leaseRelay){
+ if(leaseRelay||binRelay){
   CHECK(nativeReceiver&&!automatic&&!local);
   GstBuffer* reservations[2]{};void* handles[2]{};
   for(unsigned i=0;i<2;++i){
@@ -240,6 +242,7 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
   CHECK(flOpenProducer((name+"-lease").c_str(),&leaseWriter)==FL_OK);
   for(auto*b:reservations)gst_buffer_unref(b);
   leaseAdapter.reset(new flsample::NativeGstD3D11Relay(leaseWriter,cfg.generation));CHECK(leaseAdapter->initialize()==FL_OK);
+  if(binRelay)binAdapter.reset(new BrokerNativeBinRelay(r,cfg,policy,leaseReader,*leaseAdapter));
  }
  GstMemory* retainedReceiver=nullptr;
  // A separately allocated second hop cannot silently treat a first-hop reader
@@ -343,6 +346,11 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
   }else{
    GstMapInfo map{};CHECK(gst_buffer_map(vb,&map,GST_MAP_READ));CHECK(map.size==pixels.size());for(gsize i=0;i<map.size;++i)CHECK(map.data[i]==pixels[i]);gst_buffer_unmap(vb,&map);
   }
+  if(binRelay){
+   if(n+1==count)gst_mini_object_weak_ref(GST_MINI_OBJECT(gst_buffer_peek_memory(vb,0)),
+    [](gpointer data,GstMiniObject*){static_cast<std::atomic<bool>*>(data)->store(true);},&finalReaderRetired);
+   binAdapter->forward(vs,as,n);
+  }
   if(leaseRelay){
    auto*bad=gst_buffer_new_allocate(nullptr,64*32*4,nullptr);GST_BUFFER_PTS(bad)=GST_BUFFER_PTS(vb);
    CHECK(leaseAdapter->forward(bad)==FL_INVALID);gst_buffer_unref(bad);
@@ -437,6 +445,7 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
   CHECK(gst_app_src_end_of_stream(GST_APP_SRC(mode%2?ai:vi))==GST_FLOW_OK);avTerminal(tx,GST_MESSAGE_EOS);avTerminal(rx,GST_MESSAGE_EOS);
   guint64 frames=999;gint64 last=999;CHECK(fl_gst_session_wait_video_eos(r,cfg.generation,0,&frames,&last)==FL_GST_SESSION_READY&&frames==count&&last==(count?gint64(finalPts):-1LL));
  }
+ if(binRelay)binAdapter->terminal();
  if(decode){CHECK(!gst_app_sink_try_pull_sample(GST_APP_SINK(decoded),5*GST_SECOND));CHECK(gst_app_sink_is_eos(GST_APP_SINK(decoded)));avTerminal(decode,GST_MESSAGE_EOS);
   gst_element_set_state(decode,GST_STATE_NULL);gst_object_unref(converter);gst_object_unref(decoded);gst_object_unref(decode);
   printf("real decoder AV: %u upstream GPU color/scale transforms, source PTS origin=%llu explicitly normalized, exact pixels/PCM/37ms, no raw decoder zero-copy claim\n",count,static_cast<unsigned long long>(decoderOrigin));}
@@ -460,6 +469,11 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
   ID3D11Device*device=nullptr;resource->GetDevice(&device);CHECK(device);
   CHECK(SUCCEEDED(device->GetDeviceRemovedReason()));device->Release();
   gst_memory_unref(retainedFinal);
+ }
+ if(binRelay){
+  CHECK(!finalReaderRetired.load());binAdapter->releaseAfterUpstreamTeardown();
+  CHECK(finalReaderRetired.load());binAdapter.reset();leaseAdapter.reset();flClose(leaseWriter);
+  // leaseReader was adopted and is owned by the downstream avsrc/reader memory.
  }
  if(leaseRelay){
   CHECK(!finalReaderRetired.load()&&leaseAdapter->finish()==FL_BUSY);
