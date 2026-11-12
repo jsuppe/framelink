@@ -117,7 +117,7 @@ Physical scanout/acoustic alignment are separate from API completion and PTS.
 
 All unchecked tasks below are pending, not newly completed by prior large-queue
 runs. Every validation records revision, host/driver, settings, exact command,
-trace state, all failures, and raw evidence. Independent non-overlapping work may run concurrently under Jon’s2026-11-12 authorization; Windows runtime campaigns retain one exclusive owner.
+trace state, all failures, and raw evidence. Jon restored single-task serial execution on2026-11-12 at06:49EST; one task and one executor, no parallel work.
 
 ### M6.2 — Acceptance suspended; evidence published
 
@@ -229,7 +229,7 @@ M6 remains open; M7 remains held.
 | Integrated Windows/API | Exacta50841a clean build/API + **178/178 tests in665.56s**, no skips;119 prior export names retained +9 additive =128. Four candidate plugin inspections passed. [Current evidence](windows-integrated-a50841a/README.md); previous461584b evidence retained | Collected, archived and independently checked; do not repeat diagnostics already in CTest |
 | Old-client compatibility | **3/3 unchanged7b8a274-built clients** pass against exacta50841a DLLs, with exact binary hashes verified; prior baseline control retained. Source review found no existing public layout/enum/signature break. [Prior control](windows-compat-461584b/README.md) | Collected; bounded proof, not all-version/ordinal ABI freeze |
 | Windows sharedCPU NV12 1080p60 | **PASS** exact461584b: one1800s run,108000video/86400000PCM/180000audio; zero17ms misses, inferred A/V delta0ns; memory7.233/7.569KB/min below64, handle/thread gates pass. [Evidence](cpu-path/windows-cpu-nv12-1080p60-461584b/README.md) | Collected and independently reanalyzed; four binary hashes unchanged. Runtime released06:54:44Z; do not repeat |
-| Windows other sharedCPU targets | **BGRA4K30 PASS** exact461584b:1800s,54000video/86400000PCM/180000audio, zero34ms misses; memory7.166/7.389KB/min, handle/thread gates pass. [Evidence](cpu-path/windows-cpu-bgra4k30-461584b/README.md). Older76a65d2 BGRA1080p60 pass retained; NV124K30 PASS461584b:1800s54000video/86400000PCM, zero34ms misses; [evidence](cpu-path/windows-cpu-nv12-4k30-461584b/README.md) | Collected and independently reanalyzed;58 original hashes verified. Runtime released07:25:52Z; do not repeat |
+| Windows other sharedCPU targets | **BGRA4K30 PASS** exact461584b:1800s,54000video/86400000PCM/180000audio, zero34ms misses; memory7.166/7.389KB/min, handle/thread gates pass. [Evidence](cpu-path/windows-cpu-bgra4k30-461584b/README.md). Frozen461584b BGRA1080p60 PASS:108000video/86400000PCM, zero17ms misses, resource gates met; [evidence](cpu-path/windows-cpu-bgra1080p60-461584b/README.md). Older76a65d2 evidence retained; NV124K30 PASS461584b:1800s54000video/86400000PCM, zero34ms misses; [evidence](cpu-path/windows-cpu-nv12-4k30-461584b/README.md) | Collected and independently reanalyzed;58 original hashes verified. Runtime released07:25:52Z; do not repeat |
 | Native two-hop qualification harness | All4 BGRA/NV12 1080p60/4K30 matched5s trace-off/trace-on profiles **PASS** at11d1b65, exact video/PCM and zero17/34ms misses; both trace boundaries joined without relay payload copies. [Verified targets](windows-native-relay-targets-11d1b65/README.md). Initial MSVC and collection separator failures preserved | BGRA1080p60 native1800s **PASS**:108000video/86400000PCM, zero17ms misses; memory slopes0/0.400218/0KB per minute and handle/thread gates pass. Root independent raw analysis passed; [duration evidence](windows-native-relay-duration-bgra1080-11d1b65/README.md) archived. Final-candidate NV12 1080p60 duration also PASS; final-candidate NV12 4K30 duration also PASS; final-candidate BGRA 4K30 duration also PASS |
 | Authenticated real-decoder relay qualification | New4d38a09 tiny real-decoder FAR4→FAR5 fixture clean Windows build/test/analysis **PASS**:16 distinct decoded frames,25600PCM,37ms offset and held-reader proof;7 checker cases/1 local CTest pass | Collected and independently checked; [evidence archived](windows-local-decoder-4d38a09/README.md). Explicit conversion/source-final readbacks, not target-rate or direct decoder-zero-copy proof |
 | Paced real-decoder relay | CNG77afa1a1080p60 matched short pair PASS; on-demand4K failed at77afa1a and queue-controlc539d99. Explicit AU replayb247e5d:4K trace-off PASS150distinct/240000PCM/max30.735534ms; trace-on exact media/accounting but two34ms misses (max36.6673ms), overall pair FAILED | Root; archived replay and phase diagnostic. Phase control did not reproduce original outlier; no decoder4K endurance, repeat or timing waiver |
@@ -320,7 +320,7 @@ The default path, actual decoder, full-pixel oracle, native leases, PCM and all
 17/34ms gates remain unchanged. Both modes retain explicit scope labels.
 
 Preserve unresolved natural BGRA1080 stall; advance other ready authorized Windows work serially, no clean repeat. Other native4K and sharedCPU NV124K
-qualification remain ready afterward. The duration adapter requires matching
+qualification were subsequently collected as passes; do not schedule them again. The duration adapter requires matching
 integrated/pair proof and unchanged gates;25 local validator tests and independent
 review passed. The review-found uncertain-SSH collection race was corrected and
 re-reviewed before launch. Historical startup/lifetime and D2/D3 remain open.
@@ -355,3 +355,8 @@ not supersede this current state. Notify Jon at verified full M6 closure and hol
 before M7 maintenance.
 
 Device-lifetime next boundary: [reviewable opt-in contract](lifecycle/DEVICE_LIFETIME_OPTION.md) prepared; not adopted or implemented. Evelyn owns implementation/measurements only after the product-contract decision; Jon owns whether an additional opt-in profile is acceptable while default-profile failures remain open. No equivalent teardown probes or unsupported cache/sleep fix are queued. Windows runtime idle after17:03:49Z. M6 remains open; this is not a declaration that every remaining task is blocked.
+
+### Serial recovery19:20Z
+EXECUTION_GAP since17:07Z recorded. qualification_recovery is sole executor, parent conversation only. Evidence reconciliation confirms controlled Windows GPU-delay and existing-policy faults already passed in exacta50841a178/178. Next ready task: missing frozen461584b **shared-CPU BGRA1080p60** cell (older76a65d2 evidence only), using existing pinned binaries, required5s preflight then1800s only on unchanged gate pass. This is not the failed native two-hop BGRA1080 path; no retry/waiver of that failure. Device-lifetime proposal awaits Jon and is not implemented.
+
+Shared-CPU BGRA1080p60 frozen461584b completed19:51:34Z:PASS,108000video/86400000PCM, zero17ms misses, maxvideo5.263817ms/audio3.17085ms, A/Vdelta0, memory -0.066858/6.609057KiB/min and handle/thread gates pass.37 original hashes/fullcoverage/uploads/four pins verified; local raw checker PASS; runtime idle count0. All four frozen461584b shared-CPU cells collected, not all native/cross-platform M6. No runtime currently active.

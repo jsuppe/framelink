@@ -29,8 +29,8 @@ The older Windows CPU rows above refer to the native transport/readback path; th
 
 | Candidate / format | 1080p60 | 4K30 |
 | --- | --- | --- |
-| BGRA shared CPU | 1800s pass at older76a65d2; not final-candidate qualification | **1800s pass at461584b**,54000video/86400000PCM, zero34ms misses, resource gates met; [evidence](cpu-path/windows-cpu-bgra4k30-461584b/README.md) |
-| NV12 shared CPU | **1800s pass at461584b**,108000video/86400000PCM, zero17ms misses, resource slopes within gates; [evidence](cpu-path/windows-cpu-nv12-1080p60-461584b/README.md) | Unqualified |
+| BGRA shared CPU | **1800s pass at461584b**,108000video/86400000PCM, zero17ms misses; [evidence](cpu-path/windows-cpu-bgra1080p60-461584b/README.md) | **1800s pass at461584b**,54000video/86400000PCM, zero34ms misses, resource gates met; [evidence](cpu-path/windows-cpu-bgra4k30-461584b/README.md) |
+| NV12 shared CPU | **1800s pass at461584b**,108000video/86400000PCM, zero17ms misses, resource slopes within gates; [evidence](cpu-path/windows-cpu-nv12-1080p60-461584b/README.md) | **1800s pass at461584b**,54000video/86400000PCM, zero34ms misses; [evidence](cpu-path/windows-cpu-nv12-4k30-461584b/README.md) |
 
 These are transport arrival/accounting/resource results, not physical playback, native identity, or a waiver of earlier native-path failures. Source production code remains461584b; later evidence commits do not change its binaries.
 
@@ -41,3 +41,5 @@ These are transport arrival/accounting/resource results, not physical playback, 
 - Linux/Android controlled native GPU-delay injection unavailable (skip77); ordinary completion/death checks are not equivalent. M6.4 retains this gap.
 - Legacy Windows renderer evidence uses100ms scheduling and hidden/no-active-display fixture.300 unique presentation submissions and zero-loss traces are not physical presentation or current primary renderer qualification. M6.9d remains open.
 - CPU/GPU/isolated-hop product budgets and public overload default remain unresolved. No retrospective threshold adjustment. M6.6 must measure trace overhead and per-boundary identities; M6.7/9 require exact final integrated revision validation.
+
+Final native a50841a two-hop cells: NV121080, NV124K and BGRA4K duration pass; BGRA1080 duration failed around695s and remains unqualified. Older table passes retain historical scope and do not waive that failure. See LOW_LATENCY_PLAN.md for exact archives and unresolved cause.
