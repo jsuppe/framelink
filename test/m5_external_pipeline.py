@@ -3,6 +3,7 @@
 Hashes trace-mode media; this is a correctness test, not a throughput benchmark.
 """
 import argparse,json,os,pathlib,subprocess,tempfile
+from m5_capture import CapturedProcess
 p=argparse.ArgumentParser();p.add_argument('--build',required=True);p.add_argument('--output');p.add_argument('--audio-sink',default='fakesink');p.add_argument('--clock-policy',choices=['audio','producer','audio-coordinated'],default='audio')
 p.add_argument('--preconnect-negative-control',action='store_true',help='Require loss/late video from deliberately delayed lazy producer open')
 a=p.parse_args()
@@ -25,8 +26,8 @@ for fmt in ('BGRA','NV12'):
     args=[str(plugin),'--session',str(root/('session-'+fmt)),'--format',fmt,'--frames','100','--timeout-ms','15000','--trace-media']
     plog=root/(fmt+'-producer.log');clog=root/(fmt+'-consumer.log')
     with plog.open('w') as pf,clog.open('w') as cf:
-        producer=subprocess.Popen([str(b/('framelink_av_producer'+exe)),*args,'--input-pipeline',str(pipeline)],stdout=pf,stderr=subprocess.STDOUT)
-        consumer=subprocess.Popen([str(b/('framelink_av_consumer'+exe)),*args,'--stream','--audio-sink',a.audio_sink,'--clock-policy',a.clock_policy],stdout=cf,stderr=subprocess.STDOUT)
+        producer=CapturedProcess([str(b/('framelink_av_producer'+exe)),*args,'--input-pipeline',str(pipeline)],stdout=pf,stderr=subprocess.STDOUT)
+        consumer=CapturedProcess([str(b/('framelink_av_consumer'+exe)),*args,'--stream','--audio-sink',a.audio_sink,'--clock-policy',a.clock_policy],stdout=cf,stderr=subprocess.STDOUT)
         try:
             codes=(producer.wait(timeout=25),consumer.wait(timeout=25))
         finally:
