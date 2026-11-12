@@ -312,3 +312,8 @@ operation to observe the failure; this is not a new asynchronous bus monitor.
 Evidence: [bin cancellation repair](../windows-bin-cancel/README.md).
 The pinned integrated baseline above remains unchanged until the next clean
 exact-revision validation is collected. API is not frozen.
+
+
+## Additive local relay setup entrypoint (not yet integrated baseline)
+
+`fl_gst_session_open_local_native_relay` pins an identity-mapped upstream A/V timeline for a distinct FAR4 downstream session. Existing consumer entrypoints and wire/default behavior are unchanged. It still creates an independent pool; this is not automatic zero-copy local relay support. [Contract and focused evidence](../windows-local-relay-session/README.md). C11 and initial runtime2/2 pass; final export/regression check pending. The pinned7b8a274 baseline remains119 exports; the new revision is expected to add exactly this one symbol, not remove any. API not frozen.

@@ -22,6 +22,11 @@ int main(int argc,char**argv) {
     if(ok||!error||channel||bound.version||calls) return 1;
     if(error->domain!=G_IO_ERROR||error->code!=G_IO_ERROR_INVALID_ARGUMENT) return 2;
     g_clear_error(&error);
+    bound.version=99;
+    ok=fl_gst_session_open_local_native_relay(session,session,"unused",&caps,
+        1,2,80,100,100,&candidate,&bound,&channel,NULL,&error);
+    if(ok||!error||channel||bound.version) return 3;
+    g_clear_error(&error);
     g_object_unref(session);
     return 0;
 }

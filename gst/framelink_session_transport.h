@@ -247,5 +247,19 @@ FL_GST_SESSION_API gboolean fl_gst_session_open_local_native_epoch(FlGstSession*
  guint audio_queue_ms,guint connect_timeout_ms,guint idle_timeout_ms,
  const GstFrameLinkMemoryPolicy* candidate,GstFrameLinkMemoryPolicy* bound,flChannel** channel,
  FlGstNativeEpochFunc,gpointer,GCancellable*,GError**);
+// Producer-side explicit local relay session. The consumer uses the existing
+// open_local_native API. Requires a distinct live, identity-mapped A/V upstream;
+// pins its exact media, clock ID, generation, epoch and track IDs. New hop session
+// identity/credentials and queue budgets remain independent. Caller holds and
+// serializes both sessions throughout setup; upstream is rechecked before success.
+// Cancellation/failure clears outputs and cancels only the downstream session.
+// This creates an INDEPENDENT downstream pool, NOT a zero-copy pool graft: foreign
+// upstream buffers still reject. Compose a separately validated allocation relay
+// before forwarding media. No automatic supervision, reconnect or fallback.
+FL_GST_SESSION_API gboolean fl_gst_session_open_local_native_relay(FlGstSession*,FlGstSession* upstream,
+ const gchar* session_path,const flSessionCapabilities*,guint video_queue_frames,guint video_pool,
+ guint audio_queue_ms,guint connect_timeout_ms,guint idle_timeout_ms,
+ const GstFrameLinkMemoryPolicy* candidate,GstFrameLinkMemoryPolicy* bound,flChannel** channel,
+ GCancellable*,GError**);
 G_END_DECLS
 #endif

@@ -634,3 +634,57 @@ static void nativeBinNegatives(bool nativeReceiver=false){
  }
  puts("native bins: 26 configuration controls, immutable copies and both-role bounded cancellation pass");
 }
+
+// Local-discovery composition prerequisite only. No foreign-pool media forwarding.
+static void nativeLocalRelaySession(){
+ flSessionConfig original{};original.version=2;original.sessionId.bytes[0]=31;
+ original.clockId.bytes[0]=73;original.generation=19;original.epochNs=123456789;
+ original.videoTrackId=7;original.audioTrackId=8;
+ original.video={FL_FORMAT_RGBA8,64,32,30,1};original.audio={FL_PCM_S16,48000,2};
+ original.videoQueueFrames=1;original.audioQueueMs=80;
+ original.connectTimeoutMs=original.idleTimeoutMs=1000;
+ flSessionCapabilities caps{};caps.version=2;caps.videoCount=caps.audioCount=1;
+ caps.video[0]=original.video;caps.audio[0]=original.audio;
+ flClockMapping mapping{};mapping.sourceClockId=original.clockId;mapping.targetClockId.bytes[0]=81;
+ mapping.sourceAnchorNs=original.epochNs;mapping.targetAnchorNs=0;
+ auto candidate=nativeAvPolicy(0,true);
+ for(unsigned mode=0;mode<6;++mode){
+  auto*up=fl_gst_session_new(3);
+  CHECK(fl_gst_session_configure(up,&original,&caps,&caps)==FL_GST_SESSION_READY);
+  mapping.targetAnchorNs=mode==1?1:0;
+  CHECK(fl_gst_session_set_mapping(up,19,&mapping,0)==FL_GST_SESSION_READY);
+  auto*s=fl_gst_session_new(3);auto*r=fl_gst_session_new(3);
+  auto offered=caps;
+  GstFrameLinkMemoryPolicy bound{},received{};bound.version=99;
+  flChannel*p=nullptr,*c=nullptr;GError*error=nullptr,*remoteError=nullptr;
+  gchar*dir=g_dir_make_tmp("framelink-relay-session-XXXXXX",nullptr);CHECK(dir);
+  std::string path=std::string(dir)+"/session";g_free(dir);
+  if(mode==2)offered.video[0].width=128;
+  if(mode==3)fl_gst_session_cancel(up);
+  if(mode<4){
+   gboolean remote=FALSE;std::thread peer;
+   if(!mode)peer=std::thread([&]{remote=fl_gst_session_open_local_native(r,FALSE,path.c_str(),&caps,1,2,80,2000,1000,&candidate,&received,&c,nullptr,&remoteError);});
+   auto ok=fl_gst_session_open_local_native_relay(s,up,path.c_str(),&offered,1,2,80,2000,1000,&candidate,&bound,&p,nullptr,&error);
+   if(!mode){
+    peer.join();CHECK(ok&&remote&&!error&&!remoteError&&p&&c);
+    flSessionConfig a{},b{};CHECK(fl_gst_session_get_config(s,&a)==FL_GST_SESSION_READY);
+    CHECK(fl_gst_session_get_config(r,&b)==FL_GST_SESSION_READY);
+    CHECK(flsample::SessionRelayContract::compatible(original,a));
+    guint8 x[FL_SESSION_WIRE_SIZE]{},y[FL_SESSION_WIRE_SIZE]{};
+    CHECK(flSessionEncode(&a,x,sizeof x)==FL_SESSION_OK&&flSessionEncode(&b,y,sizeof y)==FL_SESSION_OK&&!memcmp(x,y,sizeof x));
+    CHECK(a.generation==19&&a.epochNs==123456789&&a.videoTrackId==7&&a.audioTrackId==8);
+    CHECK(bound.sessionGeneration==19&&received.sessionGeneration==19);
+    flClose(p);flClose(c);
+   }else CHECK(!ok&&error&&!p&&!bound.version);
+  }else{
+   // A cancelled setup must not claim or cancel the separately owned upstream.
+   auto*cancel=g_cancellable_new();g_cancellable_cancel(cancel);
+   auto ok=fl_gst_session_open_local_native_relay(mode==5?up:s,up,path.c_str(),&caps,1,2,80,2000,1000,&candidate,&bound,&p,cancel,&error);
+   CHECK(!ok&&error&&!p&&!bound.version);
+   flSessionConfig still{};CHECK(fl_gst_session_get_config(up,&still)==FL_GST_SESSION_READY);
+   g_object_unref(cancel);
+  }
+  g_clear_error(&error);g_clear_error(&remoteError);g_object_unref(s);g_object_unref(r);g_object_unref(up);
+ }
+ puts("local relay session: exact media/clock/epoch/generation/tracks, fresh hop identity; mapping/media/cancel/alias negatives; independent pools only");
+}

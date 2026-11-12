@@ -1,0 +1,34 @@
+Start testing: Nov 12 00:22 Eastern Standard Time
+----------------------------------------------------------
+41/154 Testing: gst_native_epoch_c_api
+41/154 Test: gst_native_epoch_c_api
+Command: "<win-home>/dev/framelink-m6-windows-7b8a274/build/Release/fl_gst_native_epoch_c_api.exe"
+Directory: <win-home>/dev/framelink-m6-windows-7b8a274/build
+"gst_native_epoch_c_api" start time: Nov 12 00:22 Eastern Standard Time
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   0.09 sec
+----------------------------------------------------------
+Test Passed.
+"gst_native_epoch_c_api" end time: Nov 12 00:22 Eastern Standard Time
+"gst_native_epoch_c_api" time elapsed: 00:00:00
+----------------------------------------------------------
+
+44/154 Testing: gst_relay_local_session_win
+44/154 Test: gst_relay_local_session_win
+Command: "<win-home>/dev/framelink-m6-windows-7b8a274/build/Release/fl_gst_native_producer_win.exe" "<win-home>/dev/framelink-m6-windows-7b8a274/build/Release/gstframelink.dll" "--relay-local-session"
+Directory: <win-home>/dev/framelink-m6-windows-7b8a274/build
+"gst_relay_local_session_win" start time: Nov 12 00:22 Eastern Standard Time
+Output:
+----------------------------------------------------------
+line 661: fl_gst_session_set_mapping(up,19,&mapping,0)==FL_GST_SESSION_READY
+<end of output>
+Test time =   0.30 sec
+----------------------------------------------------------
+Test Failed.
+"gst_relay_local_session_win" end time: Nov 12 00:22 Eastern Standard Time
+"gst_relay_local_session_win" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Nov 12 00:22 Eastern Standard Time

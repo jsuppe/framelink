@@ -340,7 +340,7 @@ gboolean fl_gst_session_open_local_av(FlGstSession*session,gboolean producer,con
 }
 static gboolean open_local_av_impl(FlGstSession*session,gboolean producer,const gchar*path,
  const flSessionCapabilities*local,guint videoQueue,guint pool,guint queueMs,guint timeout,guint idle,guint flags,
- flChannel**channel,FlGstEpochFunc epochFunc,gpointer epochData,GCancellable*outer,GError**error,bool cpu,const GstFrameLinkMemoryPolicy*native=nullptr){
+ flChannel**channel,FlGstEpochFunc epochFunc,gpointer epochData,GCancellable*outer,GError**error,bool cpu,const GstFrameLinkMemoryPolicy*native=nullptr,const flSessionConfig*relay=nullptr){
  if(channel)*channel=nullptr;
  auto fail=[&](const char*message){fl_gst_session_cancel(session);g_set_error_literal(error,G_IO_ERROR,G_IO_ERROR_FAILED,message);return FALSE;};
  if(!session||!path||!*path||!local||!channel||(cpu&&!local->videoCount)||local->version!=FL_SESSION_OPTIONAL_TRACKS_VERSION||(!local->videoCount&&!local->audioCount)||
@@ -423,11 +423,25 @@ static gboolean open_local_av_impl(FlGstSession*session,gboolean producer,const 
  proposal.epochNs=epochFunc?epochFunc(epochData,gst_clock_get_time(clock)):gint64(gst_clock_get_time(clock)+200*GST_MSECOND);
  if(producer&&proposal.epochNs<0)return fail("invalid session epoch");
  if(producer&&(!av::secureRandom(proposal.sessionId.bytes,16,reason)||!av::secureRandom(proposal.clockId.bytes,16,reason)))return fail(reason.c_str());
+ if(relay&&producer){
+  // A new hop has independent authority/session identity, but the media timeline
+  // belongs to the original producer. Never independently rebase audio/video.
+  proposal.clockId=relay->clockId;proposal.generation=relay->generation;
+  proposal.epochNs=relay->epochNs;proposal.videoTrackId=relay->videoTrackId;
+  proposal.audioTrackId=relay->audioTrackId;
+  if(!std::memcmp(&proposal.sessionId,&relay->sessionId,sizeof proposal.sessionId))
+   return fail("relay session identity collision");
+ }
  if(!fl_gst_session_negotiate_stream(session,control.p,producer,secret,local,producer?&proposal:nullptr,timeout,deadline.cancel,error))return FALSE;
  flSessionConfig selected{};Wire wire{};
  if(fl_gst_session_get_config(session,&selected)!=FL_GST_SESSION_READY||flSessionEncode(&selected,wire.data(),wire.size())!=FL_SESSION_OK)return fail("negotiated session unavailable");
  if(bool(selected.videoTrackId)!=bool(local->videoCount)||bool(selected.audioTrackId)!=bool(local->audioCount))return fail("peer track set differs from local tracks");
  if((selected.audioTrackId&&selected.audioQueueMs>queueMs)||(selected.videoTrackId&&selected.videoQueueFrames>videoQueue))return fail("peer queue budget exceeds local limit");
+ if(relay&&(selected.video.format!=relay->video.format||selected.video.width!=relay->video.width||
+    selected.video.height!=relay->video.height||selected.video.fpsNum!=relay->video.fpsNum||
+    selected.video.fpsDen!=relay->video.fpsDen||selected.audio.pcm!=relay->audio.pcm||
+    selected.audio.rate!=relay->audio.rate||selected.audio.layout!=relay->audio.layout))
+  return fail("relay peer selected incompatible media");
  // Validate the agreed queue before allocating or announcing any video ring.
  // A queue is a negotiated capacity, not permission to silently clamp it.
  if(!producer&&selected.videoTrackId){
@@ -561,10 +575,10 @@ gboolean fl_gst_session_open_local_native(FlGstSession*session,gboolean producer
  return fl_gst_session_open_local_native_epoch(session,producer,path,local,videoQueue,pool,queueMs,timeout,idle,
   candidate,bound,channel,nullptr,nullptr,outer,error);
 }
-gboolean fl_gst_session_open_local_native_epoch(FlGstSession*session,gboolean producer,const gchar*path,
+static gboolean open_local_native_impl(FlGstSession*session,gboolean producer,const gchar*path,
  const flSessionCapabilities*local,guint videoQueue,guint pool,guint queueMs,guint timeout,guint idle,
  const GstFrameLinkMemoryPolicy*candidate,GstFrameLinkMemoryPolicy*bound,flChannel**channel,
- FlGstNativeEpochFunc epochFunc,gpointer epochData,GCancellable*outer,GError**error){
+ FlGstNativeEpochFunc epochFunc,gpointer epochData,GCancellable*outer,GError**error,const flSessionConfig*relay){
  // Explicit D3D11 receiver profiles: CPU readback or deferred native GPU use.
  // Neither profile permits automatic fallback or undeclared operations.
  GstFrameLinkMemoryPolicy policy{};if(candidate)policy=*candidate;
@@ -585,7 +599,7 @@ gboolean fl_gst_session_open_local_native_epoch(FlGstSession*session,gboolean pr
  if(!open_local_av_impl(session,producer,path,local,videoQueue,pool,queueMs,timeout,idle,
      FL_MAP_CPU|FL_REQUIRE_FRAME_METADATA|(nativeReceiver?FL_DEFER_RELEASE:0)|
      ((policy.paths[0].supportedUsage&FL_MEMORY_GPU_RENDER)?FL_GPU_RENDER:0),
-     channel,producer?epochFunc:nullptr,epochData,outer,error,false,&policy))return FALSE;
+     channel,producer?epochFunc:nullptr,epochData,outer,error,false,&policy,relay))return FALSE;
  flSessionConfig cfg{};
  if(fl_gst_session_get_config(session,&cfg)!=FL_GST_SESSION_READY){
   if(*channel)flClose(*channel);*channel=nullptr;fl_gst_session_cancel(session);
@@ -593,6 +607,48 @@ gboolean fl_gst_session_open_local_native_epoch(FlGstSession*session,gboolean pr
  }
  policy.sessionGeneration=cfg.generation;*bound=policy;return TRUE;
 }
+gboolean fl_gst_session_open_local_native_epoch(FlGstSession*session,gboolean producer,const gchar*path,
+ const flSessionCapabilities*local,guint videoQueue,guint pool,guint queueMs,guint timeout,guint idle,
+ const GstFrameLinkMemoryPolicy*candidate,GstFrameLinkMemoryPolicy*bound,flChannel**channel,
+ FlGstNativeEpochFunc epochFunc,gpointer epochData,GCancellable*outer,GError**error){
+ return open_local_native_impl(session,producer,path,local,videoQueue,pool,queueMs,timeout,idle,
+  candidate,bound,channel,epochFunc,epochData,outer,error,nullptr);
+}
+gboolean fl_gst_session_open_local_native_relay(FlGstSession*session,FlGstSession*upstream,const gchar*path,
+ const flSessionCapabilities*local,guint videoQueue,guint pool,guint queueMs,guint timeout,guint idle,
+ const GstFrameLinkMemoryPolicy*candidate,GstFrameLinkMemoryPolicy*bound,flChannel**channel,
+ GCancellable*outer,GError**error){
+ if(bound)*bound={};if(channel)*channel=nullptr;
+ auto fail=[&](const char*message){
+  if(channel&&*channel){flClose(*channel);*channel=nullptr;}if(bound)*bound={};
+  // Invalid aliasing must not cancel the upstream session.
+  if(session&&session!=upstream)fl_gst_session_cancel(session);
+  if(!error||!*error)g_set_error_literal(error,G_IO_ERROR,G_IO_ERROR_INVALID_ARGUMENT,message);
+  return FALSE;
+ };
+ flSessionConfig before{},after{};Wire initial{},final{};gint64 mapped=-1;
+ if(!session||!upstream||session==upstream||!local||!bound||!channel||
+    fl_gst_session_get_config(upstream,&before)!=FL_GST_SESSION_READY||
+    before.version!=FL_SESSION_OPTIONAL_TRACKS_VERSION||!before.videoTrackId||!before.audioTrackId||
+    flSessionValidateSelection(&before,local,local)!=FL_SESSION_OK||
+    flSessionEncode(&before,initial.data(),initial.size())!=FL_SESSION_OK||
+    fl_gst_session_map_running_time(upstream,before.generation,0,TRUE,&mapped)!=FL_GST_SESSION_READY||mapped!=0)
+  return fail("relay requires distinct sessions and a live identity-mapped compatible A/V upstream");
+ // Restrict the offer to the exact upstream media, not a peer-selected fallback.
+ flSessionCapabilities exact{};exact.version=before.version;exact.videoCount=exact.audioCount=1;
+ exact.video[0]=before.video;exact.audio[0]=before.audio;
+ g_object_ref(upstream);
+ gboolean ok=open_local_native_impl(session,TRUE,path,&exact,videoQueue,pool,queueMs,timeout,idle,
+  candidate,bound,channel,nullptr,nullptr,outer,error,&before);
+ mapped=-1;
+ const bool unchanged=fl_gst_session_get_config(upstream,&after)==FL_GST_SESSION_READY&&
+  flSessionEncode(&after,final.data(),final.size())==FL_SESSION_OK&&initial==final&&
+  fl_gst_session_map_running_time(upstream,before.generation,0,TRUE,&mapped)==FL_GST_SESSION_READY&&mapped==0;
+ g_object_unref(upstream);
+ if(!ok||!unchanged)return fail("upstream changed or local relay setup failed");
+ return TRUE;
+}
+
 #endif
 gboolean fl_gst_session_local_ready(FlGstSession*session,gboolean producer,guint timeout,GError**error){
  return fl_gst_session_local_ready_cancellable(session,producer,timeout,nullptr,error);
