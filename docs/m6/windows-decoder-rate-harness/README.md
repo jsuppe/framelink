@@ -29,3 +29,25 @@ Local causal investigation must separate on-demand fixture generation/encoding f
 actual decode before any correction or repeat. No decoder endurance result,
 physical presentation or isolated-hop budget is claimed. Initial GLib timing
 and CNG integration-build failures remain archived.
+
+## Explicit pre-encoded input control (b247e5d)
+
+The source-only diagnostic measured1504K snow frames in5.14s for generation and
+5.56s including encoding (quiet wall time; startup included). Separate instrumented
+runs verified exact counts/PTS. This supports an upstream fixture contribution,
+not an isolated decoder or transport finding.
+
+`--prepare-fixture <file>` writes a versioned encoded-AU tape before measurement,
+without opening FrameLink sessions. `--fixture <file>` explicitly selects replay;
+the default on-demand generation/encoding path remains available. Tape records
+preserve encoded payload, caps, PTS/DTS/duration, flags and offsets. The reader
+checks the complete record structure and expected profile/count/PTS/footer/EOF
+before the epoch, then checks reads again. A file-fed appsrc bounds its queue to
+two AUs; there is also one feeder-held AU and decoder-internal storage. This is
+not a two-frame total memory bound. No decoded frames are cached.
+
+The runner must pin the entire tape SHA256 before and after replay. Actual D3D11
+decode/conversion, all-pixel SHA256, native ownership, PCM and17/34ms gates remain
+unchanged. Replay results must be labeled separately: they cannot waive the
+on-demand failures. Initial Windows build validation is underway; no replay
+performance or endurance success is claimed yet.
