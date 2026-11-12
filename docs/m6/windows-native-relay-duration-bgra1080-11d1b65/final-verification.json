@@ -1,0 +1,75 @@
+{
+  "verified_utc": "2026-11-12T08:01:44.490285+00:00",
+  "manifest_entries_verified": 32,
+  "raw_csv_count": 9,
+  "raw_csv_bytes": 117756087,
+  "raw_csvs": {
+    "duration/receiver.audio.csv": {
+      "sha256": "77dbefdb372ba66eab674c506bdcbbcdb03634cf3b5b814519141c3c2ea25d24",
+      "bytes": 19757868
+    },
+    "duration/receiver.resources.csv": {
+      "sha256": "fcbc3cd34c8f3cc42150998b400496da3f6b9742e6c872e0a0ccd7fecdb6a279",
+      "bytes": 74218
+    },
+    "duration/receiver.video.csv": {
+      "sha256": "94b98269b29bab86b81348b0d01a4f0366e82ab271d58f663f6605515272b395",
+      "bytes": 18646567
+    },
+    "duration/relay.audio.csv": {
+      "sha256": "6f50186de5e0ba587b71c32ccc705e214ede039777617502d5bf00a15ef0a12d",
+      "bytes": 18815634
+    },
+    "duration/relay.resources.csv": {
+      "sha256": "bab278a9413dff639df663787986289038454e752bca97b5bb13b8769af699a9",
+      "bytes": 75217
+    },
+    "duration/relay.video.csv": {
+      "sha256": "eb3d7647ce5acf3f7db15c0adec2edb70a5188f4cb4c3cba30eff68e4c654ec1",
+      "bytes": 16858121
+    },
+    "duration/source.audio.csv": {
+      "sha256": "d4da97a0b73dcbe8e6629866dcf217dfff83d3dac1cf5426002e0dc333c2bfd6",
+      "bytes": 18815634
+    },
+    "duration/source.resources.csv": {
+      "sha256": "caca5365096402f6d3e76b35571fd13d011330ba82efbf344f7e4573ff20ea89",
+      "bytes": 75602
+    },
+    "duration/source.video.csv": {
+      "sha256": "62f655a79b1b40336481b27f5c3baab0d54a2c1976ec184ab6b5590de27c028f",
+      "bytes": 24637226
+    }
+  },
+  "binary_hashes_unchanged": true,
+  "summaries": {
+    "source": {
+      "video": 108000,
+      "audio_blocks": 180000,
+      "pcm_frames": 86400000,
+      "terminal": true,
+      "held_last_proof": false
+    },
+    "relay": {
+      "video": 108000,
+      "audio_blocks": 180000,
+      "pcm_frames": 86400000,
+      "terminal": true,
+      "held_last_proof": true
+    },
+    "receiver": {
+      "video": 108000,
+      "audio_blocks": 180000,
+      "pcm_frames": 86400000,
+      "terminal": true,
+      "held_last_proof": true
+    }
+  },
+  "idle_receipt": {
+    "activeRuntime": [],
+    "utc": "2026-11-12T08:01:29.9120437Z"
+  },
+  "runtime_lane_released": true,
+  "pass_all": true,
+  "scope": "synthetic authenticated transport; explicit upload/verification copies; no physical playback or isolated-hop budget claim"
+}

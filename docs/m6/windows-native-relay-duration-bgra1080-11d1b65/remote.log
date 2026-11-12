@@ -1,0 +1,134 @@
+** WARNING: connection is not using a post-quantum key exchange algorithm.
+** This session may be vulnerable to "store now, decrypt later" attacks.
+** The server may need to be upgraded. See https://openssh.com/pq.html
+{
+  "revision": "11d1b65a84029c3fc84509e3b024b984bc240424",
+  "state": "finished",
+  "started_utc": "2026-11-12T07:31:21.091821+00:00",
+  "binary_before": {
+    "fl_gst_local_native_bench_win.exe": "aea536d880a0c3fe4fe8e3246a23cfec8b77d58b45b4fdd56e2f77eebc5aaed2",
+    "gstframelink.dll": "21f50fb75d9f8f9f96560ba0d48e1b9262454677d881e1ba1e786aae851db023",
+    "framelink.dll": "3a48efa50a42b6f4f291871538cefa970a82391db87b9bbcfb4b27c23876caf3",
+    "framelink_gst_session.dll": "f965f02a55758a76002459ce24261c870d46aa221868bc41de00cd9115c3a6f9"
+  },
+  "step": "duration-analysis",
+  "command": [
+    "<win-home>\\AppData\\Local\\Microsoft\\WindowsApps\\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\\python.exe",
+    "-E",
+    "<win-home>\\dev\\framelink-native-duration-native-bgra1080-1800-11d1b65-20261112t0732z\\check_local_native_bench.py",
+    "<win-home>\\dev\\framelink-native-duration-native-bgra1080-1800-11d1b65-20261112t0732z\\duration"
+  ],
+  "duration-idle-before_exit": 0,
+  "duration_exit": 0,
+  "duration-idle-after_exit": 0,
+  "duration_binary_after": {
+    "fl_gst_local_native_bench_win.exe": "aea536d880a0c3fe4fe8e3246a23cfec8b77d58b45b4fdd56e2f77eebc5aaed2",
+    "gstframelink.dll": "21f50fb75d9f8f9f96560ba0d48e1b9262454677d881e1ba1e786aae851db023",
+    "framelink.dll": "3a48efa50a42b6f4f291871538cefa970a82391db87b9bbcfb4b27c23876caf3",
+    "framelink_gst_session.dll": "f965f02a55758a76002459ce24261c870d46aa221868bc41de00cd9115c3a6f9"
+  },
+  "duration-analysis_exit": 0,
+  "duration_analysis": {
+    "scope": "synthetic authenticated transport; explicit upload/verification copies; no physical playback or isolated-hop budget claim",
+    "budget_ns": 17000000,
+    "roles": {
+      "source": {
+        "video": 108000,
+        "pcm_frames": 86400000,
+        "resource_slopes_per_min": {
+          "memory_kb": 0.0,
+          "handles": 0.0,
+          "threads": 0.0
+        },
+        "cpu_percent": 30.844716469803796
+      },
+      "relay": {
+        "video": 108000,
+        "pcm_frames": 86400000,
+        "resource_slopes_per_min": {
+          "memory_kb": 0.40021791420860975,
+          "handles": 0.0005724810889636967,
+          "threads": 0.0
+        },
+        "cpu_percent": 13.294135818648003
+      },
+      "receiver": {
+        "video": 108000,
+        "pcm_frames": 86400000,
+        "resource_slopes_per_min": {
+          "memory_kb": 0.0,
+          "handles": 0.0006501784804883159,
+          "threads": 0.0
+        },
+        "cpu_percent": 32.92180515207358
+      }
+    },
+    "timing_ms": {
+      "scheduled_to_final_arrival": {
+        "p50": 4.829567,
+        "p95": 5.933967,
+        "p99": 6.513534,
+        "max": 8.647134
+      },
+      "source_marker_to_relay": {
+        "p50": 2.7289,
+        "p95": 3.6497,
+        "p99": 4.3573,
+        "max": 6.9679
+      },
+      "source_marker_to_final": {
+        "p50": 4.5314,
+        "p95": 5.6346,
+        "p99": 6.2127,
+        "max": 8.3319
+      },
+      "source_acquire_call": {
+        "p50": 0.0006,
+        "p95": 0.0007,
+        "p99": 0.0007,
+        "max": 0.0435
+      },
+      "source_upload_call": {
+        "p50": 0.3494,
+        "p95": 0.3861,
+        "p99": 0.4262,
+        "max": 0.8846
+      },
+      "source_submit_call": {
+        "p50": 0.0635,
+        "p95": 0.0762,
+        "p99": 0.0884,
+        "max": 2.3809
+      },
+      "relay_acquire_to_record": {
+        "p50": 0.0455,
+        "p95": 0.0605,
+        "p99": 0.0714,
+        "max": 0.4053
+      },
+      "relay_forward_call": {
+        "p50": 0.0449,
+        "p95": 0.0599,
+        "p99": 0.0705,
+        "max": 0.3606
+      },
+      "final_acquire_to_completion": {
+        "p50": 2.0245,
+        "p95": 2.0702,
+        "p99": 4.0309,
+        "max": 5.5431
+      },
+      "audio_scheduled_to_final": {
+        "p50": 0.1583,
+        "p95": 0.1963,
+        "p99": 0.2233,
+        "max": 4.52
+      }
+    },
+    "pass_all": true,
+    "video_arrival_misses": 0,
+    "audio_arrival_misses": 0,
+    "trace_checked": false
+  },
+  "ended_utc": "2026-11-12T08:01:29.809569+00:00"
+}
