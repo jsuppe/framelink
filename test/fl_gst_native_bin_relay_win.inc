@@ -90,6 +90,30 @@ struct BrokerNativeBinRelay {
   ++count;pcmFrames+=48;last=GST_BUFFER_PTS(v);
   auto collected=native.collect();fprintf(stderr,"bin relay n=%u collect=%d pending=%u\n",n,int(collected),native.pending());CHECK(collected==FL_OK);
  }
+ // Explicit broker failure propagation, not autonomous bin-to-bin wiring.
+ void cancelDownstream(){
+  CHECK(count==8&&pcmFrames==384&&held&&native.pending()==1);
+  flSessionConfig snapshot{};
+  CHECK(fl_gst_session_wait(sender,config.generation,1000,&snapshot)==FL_GST_SESSION_READY);
+  const auto began=g_get_monotonic_time();
+  CHECK(gst_element_set_state(rx,GST_STATE_NULL)!=GST_STATE_CHANGE_FAILURE);
+  FlGstSessionResult result=FL_GST_SESSION_READY;
+  do{result=fl_gst_session_wait(sender,config.generation,50,&snapshot);
+   if(result!=FL_GST_SESSION_READY)break;g_usleep(1000);
+  }while(g_get_monotonic_time()-began<1000000);
+  CHECK(result==FL_GST_SESSION_CANCELLED);
+  // Failure is not permission to retire a native reader or synthesize END.
+  CHECK(native.pending()==1&&native.finish()==FL_BUSY);
+  guint64 frames=999;gint64 pts=999;
+  CHECK(fl_gst_session_wait_video_eos(sender,config.generation,0,&frames,&pts)==FL_GST_SESSION_CANCELLED);
+  CHECK(frames==999&&pts==999);
+  for(auto*p:{tx,rx}){auto*bus=gst_element_get_bus(p);
+   CHECK(!gst_bus_pop_filtered(bus,GST_MESSAGE_EOS));gst_object_unref(bus);}
+  fl_gst_session_cancel(up); // broker explicitly stops the upstream graph
+  CHECK(fl_gst_session_wait(up,config.generation,1,&snapshot)==FL_GST_SESSION_CANCELLED);
+  const auto elapsed=g_get_monotonic_time()-began;CHECK(elapsed<1500000);
+  printf("broker bin downstream cancellation: %.3fms, explicit upstream cancellation, no END/EOS, final reader still held\n",elapsed/1000.0);
+ }
  void terminal(){
   guint64 frames=0;gint64 pts=-1;
   CHECK(fl_gst_session_wait_video_eos(up,config.generation,0,&frames,&pts)==FL_GST_SESSION_READY);
@@ -116,6 +140,6 @@ struct BrokerNativeBinRelay {
   auto deadline=g_get_monotonic_time()+1000000;
   while(native.pending()){CHECK(g_get_monotonic_time()<deadline);CHECK(native.collect()==FL_OK);g_usleep(100);}
   CHECK(native.finish()==FL_OK);g_object_unref(sender);g_object_unref(receiver);
-  puts("broker native bin relay: 8 frames over two original allocations / 384 PCM frames; identity intermediate mapping, final +5ms and exact 37ms A/V, authenticated barriers/terminal; final reader retained beyond upstream and downstream bin teardown");
+  puts("broker native bin relay: 8 frames over two original allocations / 384 PCM frames; identity intermediate mapping, final +5ms and exact 37ms A/V, authenticated session; final reader retained beyond upstream and downstream bin teardown");
  }
 };

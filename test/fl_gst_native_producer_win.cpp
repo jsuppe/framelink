@@ -175,6 +175,7 @@ int main(int argc,char**argv){gst_init(&argc,&argv);CHECK(argc>=2);GError*e=null
  if(argc==7&&std::string(argv[2])=="--relay-decoder-producer")return relayprocess::reservedProducer(argv[3],guint16(atoi(argv[4])),true,atoi(argv[6])!=0);
  if(argc==7&&std::string(argv[2])=="--relay-death-reader")return relayprocess::deathReader(argv[3],(HANDLE)(uintptr_t)strtoull(argv[4],nullptr,10),(HANDLE)(uintptr_t)strtoull(argv[5],nullptr,10),(HANDLE)(uintptr_t)strtoull(argv[6],nullptr,10));
  CHECK(argc==2||argc==3);
+ if(argc==3&&std::string(argv[2])=="--bin-relay-cancel-diagnostic"){nativeProducerAv(6,false,false,false,true,false,false,false,false,true);return 0;}
  if(argc==3&&std::string(argv[2])=="--bin-relay-diagnostic"){nativeProducerAv(0,false,false,false,true,false,false,false,false,true);return 0;}
  if(argc==3&&std::string(argv[2])=="--lease-relay-diagnostic"){nativeProducerAv(0,false,false,false,true,false,false,false,true);return 0;}
  if(argc==3&&std::string(argv[2])=="--relay-decoder-diagnostic"){

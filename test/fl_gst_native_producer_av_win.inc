@@ -420,7 +420,22 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
   relayProducer.reset();flClose(relayConsumer);
   printf("relay contract: %u imported first-hop buffers rejected by independent second-hop pool; no publication, no reservation leak; first-hop pixels/PCM/timing intact\n",count);
  }
- if(mode==4||mode==5){
+ if(mode==6){
+  CHECK(binRelay);binAdapter->cancelDownstream();
+  // Observe cancellation at the actual original producer, while its last
+  // native allocation remains held by the final downstream reader.
+  flSessionConfig snapshot{};auto began=g_get_monotonic_time();
+  FlGstSessionResult result=FL_GST_SESSION_READY;
+  do{result=fl_gst_session_wait(s,cfg.generation,50,&snapshot);
+   if(result!=FL_GST_SESSION_READY)break;g_usleep(1000);
+  }while(g_get_monotonic_time()-began<1000000);
+  CHECK(result==FL_GST_SESSION_CANCELLED&&g_get_monotonic_time()-began<1500000);
+  CHECK(!finalReaderRetired.load());
+  for(auto*p:{tx,rx}){auto*bus=gst_element_get_bus(p);
+   CHECK(!gst_bus_pop_filtered(bus,GST_MESSAGE_EOS));gst_object_unref(bus);}
+  printf("broker bin original producer observes cancellation: %.3fms, no EOS\n",(g_get_monotonic_time()-began)/1000.0);
+ }
+ else if(mode==4||mode==5){
   CHECK(automatic&&nativeReceiver&&!decoder);
   // Exercise the actual bin teardown, not direct cancellation of a fixture's
   // coordinator. The final native reader and producer memories remain held.
@@ -445,7 +460,7 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
   CHECK(gst_app_src_end_of_stream(GST_APP_SRC(mode%2?ai:vi))==GST_FLOW_OK);avTerminal(tx,GST_MESSAGE_EOS);avTerminal(rx,GST_MESSAGE_EOS);
   guint64 frames=999;gint64 last=999;CHECK(fl_gst_session_wait_video_eos(r,cfg.generation,0,&frames,&last)==FL_GST_SESSION_READY&&frames==count&&last==(count?gint64(finalPts):-1LL));
  }
- if(binRelay)binAdapter->terminal();
+ if(binRelay&&mode!=6)binAdapter->terminal();
  if(decode){CHECK(!gst_app_sink_try_pull_sample(GST_APP_SINK(decoded),5*GST_SECOND));CHECK(gst_app_sink_is_eos(GST_APP_SINK(decoded)));avTerminal(decode,GST_MESSAGE_EOS);
   gst_element_set_state(decode,GST_STATE_NULL);gst_object_unref(converter);gst_object_unref(decoded);gst_object_unref(decode);
   printf("real decoder AV: %u upstream GPU color/scale transforms, source PTS origin=%llu explicitly normalized, exact pixels/PCM/37ms, no raw decoder zero-copy claim\n",count,static_cast<unsigned long long>(decoderOrigin));}
