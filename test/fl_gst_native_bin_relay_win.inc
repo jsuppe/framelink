@@ -5,6 +5,7 @@
 #include "../samples/session_relay_contract.h"
 #include "../samples/session_video_relay_events.h"
 #include "../samples/session_relay_supervisor.h"
+#include "../samples/native_d3d11_relay_pool.h"
 #include <mutex>
 // A bounded observation queue: callbacks never perform network writes.
 struct BinRelayEvents {
@@ -271,4 +272,25 @@ static void relaySupervisorControls(){
  }
  g_object_unref(up);g_object_unref(down);
  puts("supervisor controls: unrelated/cancelled graph rejects without propagation; stopped-before-start rejects; stop joins without cancellation; single-use lifecycle");
+}
+
+static void relayPoolControls(){
+ flSessionConfig cfg{};cfg.version=2;cfg.sessionId.bytes[0]=1;cfg.clockId.bytes[0]=2;cfg.generation=1;
+ cfg.videoTrackId=1;cfg.audioTrackId=2;cfg.audio={FL_PCM_S16,48000,2};cfg.audioQueueMs=80;
+ cfg.video={FL_FORMAT_RGBA8,64,32,30,1};cfg.videoQueueFrames=1;cfg.connectTimeoutMs=cfg.idleTimeoutMs=1000;
+ auto*pool=gst_buffer_pool_new();auto*settings=gst_buffer_pool_get_config(pool);
+ auto*caps=gst_caps_from_string("video/x-raw,format=RGBA,width=64,height=32,framerate=30/1");
+ gst_buffer_pool_config_set_params(settings,caps,8192,2,2);gst_caps_unref(caps);
+ CHECK(gst_buffer_pool_set_config(pool,settings));flChannel*r=nullptr,*w=nullptr;
+ CHECK(flsample::createNativeD3D11RelayPool(pool,"unused",cfg,2,false,&r,&w)==FL_INVALID);
+ CHECK(!r&&!w&&gst_buffer_pool_set_active(pool,TRUE));
+ CHECK(flsample::createNativeD3D11RelayPool(pool,"unused",cfg,2,false,&r,&r)==FL_INVALID);
+ for(unsigned count:{0u,1u,17u})CHECK(flsample::createNativeD3D11RelayPool(pool,"unused",cfg,count,false,&r,&w)==FL_INVALID);
+ CHECK(flsample::createNativeD3D11RelayPool(pool,"unused",cfg,2,false,&r,&w)==FL_FORMAT_UNSUPPORTED);
+ CHECK(!r&&!w);
+ GstBuffer*buffers[2]{};GstBufferPoolAcquireParams nowait{};nowait.flags=GST_BUFFER_POOL_ACQUIRE_FLAG_DONTWAIT;
+ for(auto&b:buffers)CHECK(gst_buffer_pool_acquire_buffer(pool,&b,&nowait)==GST_FLOW_OK);
+ for(auto*b:buffers)gst_buffer_unref(b);
+ CHECK(gst_buffer_pool_set_active(pool,FALSE));gst_object_unref(pool);
+ puts("relay pool controls: inactive/unbounded/aliased-output requests rejected; foreign CPU pool rejected with every temporary buffer returned");
 }

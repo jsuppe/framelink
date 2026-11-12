@@ -1,0 +1,24 @@
+** WARNING: connection is not using a post-quantum key exchange algorithm.
+** This session may be vulnerable to "store now, decrypt later" attacks.
+** The server may need to be upgraded. See https://openssh.com/pq.html
+Test project <win-home>/dev/framelink-m6-windows-7b8a274/build
+    Start 44: gst_relay_pool_controls_win
+1/8 Test #44: gst_relay_pool_controls_win ......................   Passed    0.08 sec
+    Start 46: gst_native_bin_relay_supervised_downstream_win
+2/8 Test #46: gst_native_bin_relay_supervised_downstream_win ...   Passed    0.67 sec
+    Start 47: gst_native_bin_relay_supervised_upstream_win
+3/8 Test #47: gst_native_bin_relay_supervised_upstream_win .....   Passed    0.72 sec
+    Start 48: gst_native_bin_relay_events_win
+4/8 Test #48: gst_native_bin_relay_events_win ..................   Passed    0.78 sec
+    Start 49: gst_native_bin_relay_cancel_win
+5/8 Test #49: gst_native_bin_relay_cancel_win ..................   Passed    0.78 sec
+    Start 50: gst_native_bin_relay_win
+6/8 Test #50: gst_native_bin_relay_win .........................   Passed    0.76 sec
+    Start 51: gst_native_lease_relay_win
+7/8 Test #51: gst_native_lease_relay_win .......................   Passed    0.50 sec
+    Start 52: gst_automatic_relay_negative_win
+8/8 Test #52: gst_automatic_relay_negative_win .................   Passed    1.10 sec
+
+100% tests passed, 0 tests failed out of 8
+
+Total Test time (real) =   5.43 sec

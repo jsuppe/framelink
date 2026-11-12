@@ -230,17 +230,20 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
  flFrame heldRelayFrame{};uint64_t heldRelayLease=0;std::atomic<bool> finalReaderRetired{false};
  if(leaseRelay||binRelay){
   CHECK(nativeReceiver&&!automatic&&!local);
-  GstBuffer* reservations[2]{};void* handles[2]{};
-  for(unsigned i=0;i<2;++i){
-   CHECK(gst_buffer_pool_acquire_buffer(pool,&reservations[i],nullptr)==GST_FLOW_OK);
-   auto*memory=gst_buffer_peek_memory(reservations[i],0);
-   auto*reservation=(FrameLinkD3DReservation*)gst_mini_object_get_qdata(GST_MINI_OBJECT(memory),FrameLinkD3DProducer::key());CHECK(reservation);
-   handles[1-i]=flImageSharedHandle(reservation->buffer.image);
+  if(mode==8){
+   GstBuffer*held=nullptr;CHECK(gst_buffer_pool_acquire_buffer(pool,&held,nullptr)==GST_FLOW_OK);
+   auto before=g_get_monotonic_time();
+   CHECK(flsample::createNativeD3D11RelayPool(pool,(name+"-busy").c_str(),cfg,2,true,&leaseReader,&leaseWriter)==FL_BUSY);
+   CHECK(!leaseReader&&!leaseWriter&&g_get_monotonic_time()-before<500000);
+   gst_buffer_unref(held);
+   auto wrong=cfg;wrong.video.width*=2;
+   CHECK(flsample::createNativeD3D11RelayPool(pool,(name+"-wrong").c_str(),wrong,2,true,&leaseReader,&leaseWriter)==FL_FORMAT_UNSUPPORTED);
+   CHECK(!leaseReader&&!leaseWriter);
+   CHECK(flsample::createNativeD3D11RelayPool(pool,(name+"-partial").c_str(),cfg,3,true,&leaseReader,&leaseWriter)==FL_FORMAT_UNSUPPORTED);
+   CHECK(!leaseReader&&!leaseWriter);
+   puts("relay pool setup: held-slot BUSY is bounded; geometry/capacity mismatch rejects; all temporary reservations returned");
   }
-  CHECK(flCreateChannelFromD3D11Handles((name+"-lease").c_str(),64,32,FL_FORMAT_RGBA8,2,
-    FL_MAP_CPU|FL_DEFER_RELEASE|FL_REQUIRE_FRAME_METADATA,nullptr,handles,&leaseReader)==FL_OK);
-  CHECK(flOpenProducer((name+"-lease").c_str(),&leaseWriter)==FL_OK);
-  for(auto*b:reservations)gst_buffer_unref(b);
+  CHECK(flsample::createNativeD3D11RelayPool(pool,(name+"-lease").c_str(),cfg,2,true,&leaseReader,&leaseWriter)==FL_OK);
   leaseAdapter.reset(new flsample::NativeGstD3D11Relay(leaseWriter,cfg.generation));CHECK(leaseAdapter->initialize()==FL_OK);
   if(binRelay)binAdapter.reset(new BrokerNativeBinRelay(r,cfg,policy,leaseReader,*leaseAdapter));
   if(mode==7||mode==6||mode==8||mode==9){CHECK(binRelay);binAdapter->observeEvents(vo,mode==7);}
