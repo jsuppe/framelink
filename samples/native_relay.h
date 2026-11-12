@@ -37,7 +37,13 @@ class NativeRelay {
     if(!initialized||failed)return FL_INVALID;
     flChannelInfo a{},b{};
     if(flQuery(up,&a)!=FL_OK||flQuery(down,&b)!=FL_OK||a.generation!=upInfo.generation||b.generation!=downInfo.generation){failed=true;return FL_DISCONNECTED;}
-    for(unsigned n=0;n<downInfo.poolSize;++n){
+    // Only missing reservations can make progress. Once the final real reader
+    // completes, its channel may close; probing an already fully reserved ring
+    // would report that disconnect after all upstream leases were safely retired.
+    // Generation checks above and every required acquisition remain mandatory.
+    unsigned missing=0;
+    for(unsigned n=0;n<downInfo.poolSize;++n)if(!slots[n].reserved)++missing;
+    for(unsigned n=0;n<missing;++n){
       flBuffer buffer{};auto r=flAcquireBuffer(down,&buffer,0);
       if(r==FL_TIMEOUT)return FL_OK;
       if(r!=FL_OK){failed=true;return r;}
