@@ -1,0 +1,30 @@
+{
+  "revision": "db43f54377cf3a6369c96a073ab6e2da00252646",
+  "started_utc": "2026-11-12T08:04:15.596740+00:00",
+  "state": "failed",
+  "step": "focused-tests",
+  "command": [
+    "ctest",
+    "--test-dir",
+    "build",
+    "-C",
+    "Release",
+    "--output-on-failure",
+    "-R",
+    "^(gst_relay_local_bin_pause_win|gst_relay_local_bin_paused_cancel_win|gst_relay_local_bin_win)$"
+  ],
+  "extract_exit": 0,
+  "configure_exit": 0,
+  "build_exit": 0,
+  "inventory_exit": 0,
+  "binary_sha256": {
+    "fl_gst_native_producer_win.exe": "dc33dc54de1326cca83e0bf2faac9745907b8016eee7a9ef6190f325ca4c0019",
+    "fl_gst_local_decoder_rate_win.exe": "1001029faf8e6bb783e99600e5be2ee93436fa6904dace6d0c721f691dd6b97d",
+    "gstframelink.dll": "6578d858b07b537ed7593abff4c7a0ad27f313b9ec777dbc7190636d28884861",
+    "framelink.dll": "fb8e5bbd0d379566839f050107af580b82ba97cdea37d96aba2b25442b7564ac",
+    "framelink_gst_session.dll": "78285e9a2d032c6af85e5acd3a2bc8a51663cd98b420256fd12fc7859e215d27"
+  },
+  "focused-tests_exit": 8,
+  "error": "focused-tests failed; evidence retained",
+  "ended_utc": "2026-11-12T08:04:46.615478+00:00"
+}

@@ -1,0 +1,17 @@
+Test project <win-home>/dev/framelink-native-ready-pause-diag-20261112t0804z/build
+    Start 51: gst_relay_local_bin_pause_win
+1/3 Test #51: gst_relay_local_bin_pause_win ...........***Failed    2.35 sec
+line 447: collected==FL_OK
+
+    Start 52: gst_relay_local_bin_paused_cancel_win
+2/3 Test #52: gst_relay_local_bin_paused_cancel_win ...   Passed    0.88 sec
+    Start 53: gst_relay_local_bin_win
+3/3 Test #53: gst_relay_local_bin_win .................   Passed    1.14 sec
+
+67% tests passed, 1 tests failed out of 3
+
+Total Test time (real) =   4.38 sec
+
+The following tests FAILED:
+	 51 - gst_relay_local_bin_pause_win (Failed)
+Errors while running CTest
