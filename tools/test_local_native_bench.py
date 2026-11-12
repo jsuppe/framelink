@@ -10,7 +10,7 @@ class Checks(unittest.TestCase):
    rows=[]
    for n in range(30):
     due=1000000000+n*10**9//30
-    rows.append(dict(identity=n,pts_ns=37000000+n*10**9//30,scheduled_ns=0 if role=='relay' else due,source_ns=0 if role=='relay' else due+100,arrival_ns=due+{'source':200,'relay':300,'receiver':500}[role],completed_ns=0 if role=='source' else due+{'relay':400,'receiver':600}[role],copy_bytes=0 if role=='relay' else 8192,sequence=n,slot=n%2,generation=1,dts_ns=37000000+n*10**9//30,duration_ns=(n+1)*10**9//30-n*10**9//30,lease=n+1 if role=='receiver' else 0,completion_value=n+1 if role=='receiver' else 0,mapped_pts_ns=37000000+n*10**9//30))
+    rows.append(dict(identity=n,pts_ns=37000000+n*10**9//30,scheduled_ns=0 if role=='relay' else due,source_ns=0 if role=='relay' else due+100,arrival_ns=due+{'source':200,'relay':300,'receiver':500}[role],completed_ns=0 if role=='source' else due+{'relay':400,'receiver':600}[role],copy_bytes=0 if role=='relay' else 8192,sequence=n,slot=n%2,generation=1,metadata_version=1,metadata_flags=3,dts_ns=37000000+n*10**9//30,duration_ns=(n+1)*10**9//30-n*10**9//30,lease=n+1 if role=='receiver' else 0,completion_value=n+1 if role=='receiver' else 0,mapped_pts_ns=37000000+n*10**9//30))
    for r in rows:
     due=1000000000+r['identity']*10**9//30
     for key,delta in [('acquire_begin_ns',10),('acquired_ns',30),('upload_begin_ns',110),('uploaded_ns',130),('submit_begin_ns',150),('submitted_ns',180)]:r[key]=due+delta if role=='source' else 0
@@ -117,6 +117,12 @@ class Checks(unittest.TestCase):
   self.assertAlmostEqual(timing['source_submit_call']['max'],30/1e6)
   self.assertAlmostEqual(timing['relay_forward_call']['max'],60/1e6)
   self.assertAlmostEqual(timing['relay_acquire_to_record']['max'],100/1e6)
+ def test_metadata_version(self):
+  self.mutate('receiver.video.csv',0,'metadata_version',2)
+  with self.assertRaisesRegex(ValueError,'metadata'):analyze(self.root)
+ def test_metadata_flags(self):
+  self.mutate('relay.video.csv',0,'metadata_flags',7)
+  with self.assertRaisesRegex(ValueError,'metadata'):analyze(self.root)
  def test_unfinished(self):
   p=self.root/'relay.summary.json';s=json.loads(p.read_text());s['terminal']=False;p.write_text(json.dumps(s))
   with self.assertRaisesRegex(ValueError,'terminal'):analyze(self.root)

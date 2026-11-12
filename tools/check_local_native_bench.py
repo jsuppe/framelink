@@ -40,7 +40,7 @@ def analyze(root):
         require([r['identity'] for r in a]==list(range(audio)),role+' missing/duplicate/reordered PCM identity')
         require(all(r['pts_ns']==37000000+i*10**9//fps for i,r in enumerate(v)),role+' video timeline')
         require(all(r['pts_ns']==i*10000000 and r['samples']==480 and r['bytes']==1920 for i,r in enumerate(a)),role+' PCM timeline/size')
-        require(all(r['generation']>0 and r['dts_ns']==r['pts_ns'] and r['duration_ns']==(i+1)*10**9//fps-i*10**9//fps for i,r in enumerate(v)),role+' metadata')
+        require(all(r['metadata_version']==1 and r['metadata_flags']==3 and r['generation']>0 and r['dts_ns']==r['pts_ns'] and r['duration_ns']==(i+1)*10**9//fps-i*10**9//fps for i,r in enumerate(v)),role+' metadata')
         if role=='receiver':
             require(all(r['lease']>0 and r['completion_value']==i+1 for i,r in enumerate(v)), 'missing actual lease/fence completion evidence')
             require(len({r['lease'] for r in v})==n,'duplicate receiver lease')

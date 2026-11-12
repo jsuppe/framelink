@@ -2,7 +2,7 @@
 
 Test-only executable `fl_gst_local_native_bench_win` composes source/relay/final-reader processes through existing FAR4→snapshot/FAR5 APIs, native ownership and authenticated PCM. It adds no public API or production behavior.
 
-Local analyzer: **28 cases pass**, including valid trace/resource controls and missing identities, bad mapping/completion, trace loss/copy, invalid resource counters and growth failures. Fresh local CMake configuration and its focused analyzer CTest **1/1 pass**. GStreamer was unavailable in that local configure; **this is not a Windows compile or runtime result**. Independent static review findings were corrected and verified.
+Local analyzer: **30 cases pass**, including valid trace/resource controls and missing identities, bad mapping/completion, trace loss/copy, invalid resource counters and growth failures. Fresh local CMake configuration and its focused analyzer CTest **1/1 pass**. GStreamer was unavailable in that local configure; **this is not a Windows compile or runtime result**. Independent static review findings were corrected and verified.
 
 ## Invocation and records
 

@@ -1,17 +1,17 @@
 {
-  "utc": "2026-11-12T07:02:12.706272+00:00",
+  "utc": "2026-11-12T07:10:16.617277+00:00",
   "status": "local checks passed; Windows compilation/runtime pending",
   "files_sha256": {
-    "test/fl_gst_local_native_bench_win.cpp": "0ab52531dfbf9a2fea07383521bac549baa6939164078c87b5c297777e58eda3",
-    "tools/check_local_native_bench.py": "74a5cd2787a1a54965ddfff9496a3fec915296cbeb8f80a5fe75802c8826bb8d",
-    "tools/test_local_native_bench.py": "358e072d613ef12fb97c059490d8485c8e01f9be986b7017bf35186518a7011b",
+    "test/fl_gst_local_native_bench_win.cpp": "30eb5ba153acebf08efefee84e925046c35b5851d4940c588aa4da0da66b642b",
+    "tools/check_local_native_bench.py": "9679b765eb5359c2a3cdb8e406e6c3dc2e633a1a815a8798793f5f956df668d9",
+    "tools/test_local_native_bench.py": "1583520dea8cd931d44ddd39cc4a2690d4f95fa408990edcd97a8a533909134e",
     "tools/run_local_native_bench_smoke.py": "6bfefec43d845319cfffad0f1b805b7bdd422e370c304b8ee8d0a06041e0f0e1",
     "CMakeLists.txt": "e097412e251b97435bdf6f7ad208f56e93ccb203ee2d8aa90d3740d1f80a66dc"
   },
   "checks": [
     {
       "command": "python3 tools/test_local_native_bench.py",
-      "cases": 28,
+      "cases": 30,
       "result": "pass (also covered by focused CTest)"
     },
     {
@@ -22,13 +22,13 @@
       "command": "ctest --test-dir /tmp/framelink-native-harness-config -R '^local_native_bench_analyzer$' --output-on-failure",
       "tests_passed": 1,
       "tests_selected": 1,
-      "seconds": 0.14
+      "seconds": 0.16
     },
     {
       "command": "git diff --check",
       "result": "pass"
     }
   ],
-  "review": "independent static review; corrected actual mapping observation, invalid resource counters and CMake Python discovery ordering; parent reviewed explicit source operation/relay forward phase measurements",
+  "review": "independent static review; corrected actual mapping observation, invalid resource counters and CMake Python discovery ordering; parent reviewed explicit source operation/relay forward phase measurements; parent reviewed metadata flags/version and missing thread-telemetry rejection",
   "production_source_unchanged_since": "461584b"
 }
