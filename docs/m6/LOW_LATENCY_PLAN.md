@@ -239,9 +239,14 @@ M6 remains open; M7 remains held.
 | D2 / D3 | Unresolved public overload/convenience-fallback decisions; existing explicit profiles/defaults preserved | Jon; no automatic default change or hidden native-to-CPU fallback |
 | Linux / Android campaigns | Broad work deferred under Windows-first direction. Prior Linux BGRA and other completed campaigns collected, not repeated. Android BGRA4K and NV121080 residual failures remain suspended; clean trace diagnostics did not waive them | Evelyn; resume deferred integration only after Windows priority permits; causal fixes required for suspended failed cells |
 
-**Windows runtime ownership:** no workload live after diagnostic collection13:51:12Z;
-`qualification_recovery` resumed as sole serial executor at 16:55Z.
-EXECUTION_GAP since 13:54Z is recorded, not described as active work.
+**Windows runtime ownership:** idle after verified shared-CPU collection19:51:34Z.
+qualification_recovery was sole serial executor; parent handles conversation.
+EXECUTION_GAP17:07–19:19:58Z was recorded and corrected by actual execution.
+Shared-CPU candidate cells are now complete. Current-renderer readiness review
+found conflicting/non-Git historical source identities; authoritative baseline
+selection is the next dependency, owned by parent/project coordination, then
+Evelyn implements/checks serially. No runtime is being described as active.
+[Exact remaining dependencies and source findings](WINDOWS_REMAINING_DEPENDENCIES.md).
 Windows device-lifetime causal evidence collected and integrated as64f7728. Six bounded
 serial arms collected17:03:49Z;800 cycles/270 settle observations. Hardware-only
 growth and delayed reclamation reproduced without FrameLink, textures or GStreamer;
@@ -264,8 +269,8 @@ against full-process/host suspension for that gap; selective scheduling/I/O or
 unlogged interference remains possible. No categorical orchestration exclusion.
 Further original-stall attribution needs original-scale phase/thread/I/O evidence;
 no additional uninstrumented endurance run or unsupported repair is ready.
-Root to select the next previously authorized Windows M6 task serially;
-this diagnostic evidence dependency does not declare the entire milestone blocked.
+Current-renderer source selection is the next identified ready-work dependency;
+other owner/resume conditions are listed above, not replaced by speculative reruns.
 
 Finalcandidate BGRA1080duration exec52689 **FAILED**, collected13:35:55Z, idle-after0.
 [Failure archive](windows-native-final-duration-bgra-1080-failure-a50841a/README.md).
@@ -354,9 +359,9 @@ in [the execution archive](LEDGER_HISTORY_20261112.md) and
 not supersede this current state. Notify Jon at verified full M6 closure and hold
 before M7 maintenance.
 
-Device-lifetime next boundary: [reviewable opt-in contract](lifecycle/DEVICE_LIFETIME_OPTION.md) prepared; not adopted or implemented. Evelyn owns implementation/measurements only after the product-contract decision; Jon owns whether an additional opt-in profile is acceptable while default-profile failures remain open. No equivalent teardown probes or unsupported cache/sleep fix are queued. Windows runtime idle after17:03:49Z. M6 remains open; this is not a declaration that every remaining task is blocked.
+Device-lifetime next boundary: [reviewable opt-in contract](lifecycle/DEVICE_LIFETIME_OPTION.md) prepared; not adopted or implemented. Evelyn owns implementation/measurements only after the product-contract decision; Jon owns whether an additional opt-in profile is acceptable while default-profile failures remain open. No equivalent teardown probes or unsupported cache/sleep fix are queued. Resource diagnostics released runtime17:03:49Z; later shared-CPU qualification collected19:51:34Z. M6 remains open; this is not a declaration that every remaining task is blocked.
 
 ### Serial recovery19:20Z
-EXECUTION_GAP since17:07Z recorded. qualification_recovery is sole executor, parent conversation only. Evidence reconciliation confirms controlled Windows GPU-delay and existing-policy faults already passed in exacta50841a178/178. Next ready task: missing frozen461584b **shared-CPU BGRA1080p60** cell (older76a65d2 evidence only), using existing pinned binaries, required5s preflight then1800s only on unchanged gate pass. This is not the failed native two-hop BGRA1080 path; no retry/waiver of that failure. Device-lifetime proposal awaits Jon and is not implemented.
+EXECUTION_GAP since17:07Z recorded. qualification_recovery is sole executor, parent conversation only. Evidence reconciliation confirms controlled Windows GPU-delay and existing-policy faults already passed in exacta50841a178/178. Executed the missing frozen461584b **shared-CPU BGRA1080p60** cell using existing pinned binaries:5s preflight and1800s passed unchanged gates; archived2f3c2bc/pinsad75507. This is not the failed native two-hop BGRA1080 path; no retry/waiver of that failure. Device-lifetime proposal awaits Jon and is not implemented.
 
 Shared-CPU BGRA1080p60 frozen461584b completed19:51:34Z:PASS,108000video/86400000PCM, zero17ms misses, maxvideo5.263817ms/audio3.17085ms, A/Vdelta0, memory -0.066858/6.609057KiB/min and handle/thread gates pass.37 original hashes/fullcoverage/uploads/four pins verified; local raw checker PASS; runtime idle count0. All four frozen461584b shared-CPU cells collected, not all native/cross-platform M6. No runtime currently active.
