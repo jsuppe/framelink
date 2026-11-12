@@ -1,0 +1,271 @@
+{
+  "backtraceGraph" : 
+  {
+    "commands" : 
+    [
+      "add_test"
+    ],
+    "files" : 
+    [
+      "<win-home>/dev/framelink-native-ready-drain-fix-462fa5f-20261112t0806z/CMakeLists.txt"
+    ],
+    "nodes" : 
+    [
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 491,
+        "parent" : 0
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 492,
+        "parent" : 2
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 502,
+        "parent" : 4
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 504,
+        "parent" : 6
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 505,
+        "parent" : 8
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 507,
+        "parent" : 10
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 554,
+        "parent" : 12
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 1098,
+        "parent" : 14
+      }
+    ]
+  },
+  "kind" : "ctestInfo",
+  "tests" : 
+  [
+    {
+      "backtrace" : 1,
+      "command" : 
+      [
+        "<win-home>/dev/framelink-native-ready-drain-fix-462fa5f-20261112t0806z/build/Release/fl_gst_native_producer_win.exe",
+        "<win-home>/dev/framelink-native-ready-drain-fix-462fa5f-20261112t0806z/build/Release/gstframelink.dll",
+        "--relay-local-cancel-downstream"
+      ],
+      "config" : "Release",
+      "name" : "gst_relay_local_cancel_downstream_win",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "<win-home>/dev/framelink-native-ready-drain-fix-462fa5f-20261112t0806z/build"
+        }
+      ]
+    },
+    {
+      "backtrace" : 3,
+      "command" : 
+      [
+        "<win-home>/dev/framelink-native-ready-drain-fix-462fa5f-20261112t0806z/build/Release/fl_gst_native_producer_win.exe",
+        "<win-home>/dev/framelink-native-ready-drain-fix-462fa5f-20261112t0806z/build/Release/gstframelink.dll",
+        "--relay-local-cancel-upstream"
+      ],
+      "config" : "Release",
+      "name" : "gst_relay_local_cancel_upstream_win",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "<win-home>/dev/framelink-native-ready-drain-fix-462fa5f-20261112t0806z/build"
+        }
+      ]
+    },
+    {
+      "backtrace" : 5,
+      "command" : 
+      [
+        "<win-home>/dev/framelink-native-ready-drain-fix-462fa5f-20261112t0806z/build/Release/fl_gst_native_producer_win.exe",
+        "<win-home>/dev/framelink-native-ready-drain-fix-462fa5f-20261112t0806z/build/Release/gstframelink.dll",
+        "--relay-local-recovery"
+      ],
+      "config" : "Release",
+      "name" : "gst_relay_local_recovery_win",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "<win-home>/dev/framelink-native-ready-drain-fix-462fa5f-20261112t0806z/build"
+        }
+      ]
+    },
+    {
+      "backtrace" : 7,
+      "command" : 
+      [
+        "<win-home>/dev/framelink-native-ready-drain-fix-462fa5f-20261112t0806z/build/Release/fl_gst_native_producer_win.exe",
+        "<win-home>/dev/framelink-native-ready-drain-fix-462fa5f-20261112t0806z/build/Release/gstframelink.dll",
+        "--relay-local-bin-pause"
+      ],
+      "config" : "Release",
+      "name" : "gst_relay_local_bin_pause_win",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "<win-home>/dev/framelink-native-ready-drain-fix-462fa5f-20261112t0806z/build"
+        }
+      ]
+    },
+    {
+      "backtrace" : 9,
+      "command" : 
+      [
+        "<win-home>/dev/framelink-native-ready-drain-fix-462fa5f-20261112t0806z/build/Release/fl_gst_native_producer_win.exe",
+        "<win-home>/dev/framelink-native-ready-drain-fix-462fa5f-20261112t0806z/build/Release/gstframelink.dll",
+        "--relay-local-bin-paused-cancel"
+      ],
+      "config" : "Release",
+      "name" : "gst_relay_local_bin_paused_cancel_win",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "<win-home>/dev/framelink-native-ready-drain-fix-462fa5f-20261112t0806z/build"
+        }
+      ]
+    },
+    {
+      "backtrace" : 11,
+      "command" : 
+      [
+        "<win-home>/dev/framelink-native-ready-drain-fix-462fa5f-20261112t0806z/build/Release/fl_gst_native_producer_win.exe",
+        "<win-home>/dev/framelink-native-ready-drain-fix-462fa5f-20261112t0806z/build/Release/gstframelink.dll",
+        "--relay-local-bin"
+      ],
+      "config" : "Release",
+      "name" : "gst_relay_local_bin_win",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "<win-home>/dev/framelink-native-ready-drain-fix-462fa5f-20261112t0806z/build"
+        }
+      ]
+    },
+    {
+      "backtrace" : 13,
+      "command" : 
+      [
+        "<win-home>/dev/framelink-native-ready-drain-fix-462fa5f-20261112t0806z/build/Release/fl_gst_native_producer_win.exe",
+        "<win-home>/dev/framelink-native-ready-drain-fix-462fa5f-20261112t0806z/build/Release/gstframelink.dll",
+        "--relay-downstream-death-diagnostic"
+      ],
+      "config" : "Release",
+      "name" : "gst_native_relay_downstream_death_win",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "<win-home>/dev/framelink-native-ready-drain-fix-462fa5f-20261112t0806z/build"
+        }
+      ]
+    },
+    {
+      "backtrace" : 15,
+      "command" : 
+      [
+        "<win-home>/dev/framelink-native-ready-drain-fix-462fa5f-20261112t0806z/build/Release/fl_native_relay_win.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_relay_win",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 20.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "<win-home>/dev/framelink-native-ready-drain-fix-462fa5f-20261112t0806z/build"
+        }
+      ]
+    }
+  ],
+  "version" : 
+  {
+    "major" : 1,
+    "minor" : 0
+  }
+}
