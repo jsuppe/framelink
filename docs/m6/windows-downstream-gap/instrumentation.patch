@@ -1,0 +1,57 @@
+--- samples/av_apps.cpp
++++ samples/av_apps.cpp
+@@ -1,3 +1,6 @@
++#define FL_TRACE_NS apptrace
++#define FL_TRACE_ENV "FRAMELINK_APP_TRACE"
++#include "framelink_trace.hpp"
+ // Independent A/V sample peers. GPU/image transport remains FrameLink;
+ // PCM uses GStreamer's GDP over an authenticated GIO stream, not a new PCM ABI.
+ #include "av_auth.h"
+@@ -510,6 +513,7 @@
+   if(!b)return GST_PAD_PROBE_OK;
+   const auto monotonicNs=gst_util_get_timestamp(); // opt-in probe time, before mapping/hash
+   auto pts=t.haveSegment && t.segment.format==GST_FORMAT_TIME ? gst_segment_to_running_time(&t.segment,GST_FORMAT_TIME,GST_BUFFER_PTS(b)) : GST_CLOCK_TIME_NONE;
++  const auto hashStart=apptrace::clockNs();
+   auto* hash=g_checksum_new(G_CHECKSUM_SHA256);
+   size_t bytes=0;
+   if(t.track=="video") {
+@@ -526,9 +530,20 @@
+   } else {
+     GstMapInfo map{};if(gst_buffer_map(b,&map,GST_MAP_READ)){g_checksum_update(hash,map.data,map.size);bytes=map.size;gst_buffer_unmap(b,&map);}
+   }
++  const auto hashEnd=apptrace::clockNs();
++  uint64_t locked=0, printed=0, flushed=0;
+   static std::mutex output;
+   {std::lock_guard<std::mutex> lock(output);
+-    printf("{\"event\":\"media-trace\",\"side\":\"%s\",\"track\":\"%s\",\"monotonic_ns\":%llu,\"pts_ns\":%llu,\"duration_ns\":%llu,\"bytes\":%llu,\"sha256\":\"%s\"}\n",t.side.c_str(),t.track.c_str(),(unsigned long long)monotonicNs,(unsigned long long)pts,(unsigned long long)GST_BUFFER_DURATION(b),(unsigned long long)bytes,g_checksum_get_string(hash));fflush(stdout);}
++    locked=apptrace::clockNs();
++    printf("{\"event\":\"media-trace\",\"side\":\"%s\",\"track\":\"%s\",\"monotonic_ns\":%llu,\"pts_ns\":%llu,\"duration_ns\":%llu,\"bytes\":%llu,\"sha256\":\"%s\"}\n",t.side.c_str(),t.track.c_str(),(unsigned long long)monotonicNs,(unsigned long long)pts,(unsigned long long)GST_BUFFER_DURATION(b),(unsigned long long)bytes,g_checksum_get_string(hash));printed=apptrace::clockNs();fflush(stdout);flushed=apptrace::clockNs();}
++  if(apptrace::enabled()) {
++    auto phase=[&](const char* op,uint64_t start,uint64_t end) {
++      apptrace::Event e{};e.op=op;e.start=start;e.duration=end-start;
++      e.object=t.track=="video"?1:2;e.pts=pts;apptrace::record(e);
++    };
++    phase("app.hash",hashStart,hashEnd);phase("app.output_lock",hashEnd,locked);
++    phase("app.printf",locked,printed);phase("app.fflush",printed,flushed);
++  }
+   g_checksum_free(hash);return GST_PAD_PROBE_OK;
+ }
+ void attachTrace(Pipeline& pipeline,const char* element,const char* padName,const char* side,const char* track) {
+@@ -1396,6 +1411,7 @@
+     size_t pendingBytes=0,peakPending=0,peakBytes=0;
+     uint64_t scheduled=0,overflow=0,handedOff=0;
+     auto videoEvent=[&](const char* stage,uint64_t pts) {
++      apptrace::Scope probe("app.schedule_printf");probe.event.pts=pts;
+       if(o.traceMedia) printf("{\"event\":\"video-schedule\",\"stage\":\"%s\",\"pts_ns\":%llu,\"monotonic_ns\":%llu}\n",stage,(unsigned long long)pts,(unsigned long long)gst_util_get_timestamp());
+     };
+     unsigned testPresentStallMs=0;
+@@ -1447,7 +1463,9 @@
+       checkPlaybackBus(bus);
+       if (!v) { g_usleep(5000); continue; }
+       presentDue();
++      const auto pullStart=apptrace::clockNs();
+       auto *sample=gst_app_sink_try_pull_sample(GST_APP_SINK(v),pending.empty()?10*GST_MSECOND:0);
++      if(apptrace::enabled()) {apptrace::Event e{};e.op="app.pull";e.start=pullStart;e.duration=apptrace::clockNs()-pullStart;e.result=sample?1:0;apptrace::record(e);}
+       if (!sample) { if(!pending.empty())g_usleep(1000); continue; }
+       std::unique_ptr<GstSample, decltype(&gst_sample_unref)> sampleOwner(sample,gst_sample_unref);
+       auto *b=gst_sample_get_buffer(sample);
