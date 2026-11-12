@@ -309,13 +309,16 @@ static int localPoolPauseReader(const char*path,HANDLE notice,HANDLE command,boo
  auto candidate=nativeAvPolicy(0,true);g_object_set(src,"session",path,nullptr);
  gboolean accepted=FALSE;g_signal_emit_by_name(src,"set-local-native-pool-candidate",&candidate,&accepted);CHECK(accepted);
  g_object_set(video,"emit-signals",TRUE,nullptr);g_signal_connect(video,"propose-allocation",G_CALLBACK(nativeAvReaderAllocation),&candidate);
+ // Persist EOS observations across GstPipeline bus flushing during NULL.
+ std::atomic<unsigned> eosEvents{0};GstPad*eosPads[2]={gst_element_get_static_pad(src,"video_src"),gst_element_get_static_pad(src,"audio_src")};gulong eosProbes[2]{};
+ for(unsigned i=0;i<2;++i){CHECK(eosPads[i]);eosProbes[i]=gst_pad_add_probe(eosPads[i],GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM,[](GstPad*,GstPadProbeInfo*info,gpointer data){if(GST_EVENT_TYPE(GST_PAD_PROBE_INFO_EVENT(info))==GST_EVENT_EOS)static_cast<std::atomic<unsigned>*>(data)->fetch_add(1);return GST_PAD_PROBE_OK;},&eosEvents,nullptr);CHECK(eosProbes[i]);}
  CHECK(gst_element_set_state(pipe,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
  GstClockTime first=GST_CLOCK_TIME_NONE;guint64 originalGeneration=0,pcmFrames=0;std::string originalSession;
  GstMemory*held=nullptr;gsize heldOffset=0;gint heldStride=0;unsigned received=0;
  auto identity=[&]{guint64 generation=0;gchar*session=nullptr;g_object_get(src,"generation",&generation,"session-id",&session,nullptr);
   CHECK(generation&&session&&*session);if(!originalGeneration){originalGeneration=generation;originalSession=session;}
   CHECK(generation==originalGeneration&&originalSession==session);g_free(session);};
- auto noEos=[&]{auto*bus=gst_element_get_bus(pipe);CHECK(!gst_bus_pop_filtered(bus,GST_MESSAGE_EOS));gst_object_unref(bus);};
+ auto noEos=[&]{CHECK(eosEvents.load()==0);auto*bus=gst_element_get_bus(pipe);CHECK(!gst_bus_pop_filtered(bus,GST_MESSAGE_EOS));gst_object_unref(bus);};
  for(unsigned n=0;n<(cancelPaused?4u:8u);++n){
   auto*v=gst_app_sink_try_pull_sample(GST_APP_SINK(video),5*GST_SECOND);auto*a=gst_app_sink_try_pull_sample(GST_APP_SINK(audio),5*GST_SECOND);CHECK(v&&a);
   auto*vb=gst_sample_get_buffer(v);auto*ab=gst_sample_get_buffer(a);auto*memory=gst_buffer_peek_memory(vb,0);
@@ -346,12 +349,13 @@ static int localPoolPauseReader(const char*path,HANDLE notice,HANDLE command,boo
  }
  if(cancelPaused){CHECK(received==4&&pcmFrames==192&&!held);noEos();}
  else{
-  CHECK(received==8&&pcmFrames==384&&held);avTerminal(pipe,GST_MESSAGE_EOS);
+  CHECK(received==8&&pcmFrames==384&&held);avTerminal(pipe,GST_MESSAGE_EOS);CHECK(eosEvents.load()==2);
   CHECK(gst_app_sink_is_eos(GST_APP_SINK(video))&&gst_app_sink_is_eos(GST_APP_SINK(audio)));identity();
   CHECK(SetEvent(notice));relayprocess::wait(command); // parent accepts authenticated terminal before teardown
   localPoolPauseState(pipe,GST_STATE_NULL);localPoolPauseMemory(held,heldOffset,heldStride,18);
   gst_memory_unref(held);held=nullptr;CHECK(SetEvent(notice));relayprocess::wait(command);
  }
+ for(unsigned i=0;i<2;++i){gst_pad_remove_probe(eosPads[i],eosProbes[i]);gst_object_unref(eosPads[i]);}
  gst_object_unref(src);gst_object_unref(video);gst_object_unref(audio);gst_object_unref(pipe);
  puts(cancelPaused?"FAR5 paused cancellation:4 exact native/192 PCM, held pixels valid through NULL and cancellation, no EOS":"FAR5 pause/resume:8 exact native/384 PCM, unchanged session/generation/37ms, new media and real EOS after resume");return 0;
 }
