@@ -1,10 +1,14 @@
 # Authenticated Windows native relay rate qualification
 
-Status: **test-harness implemented/reviewed;30 analyzer cases pass; Windows build/runtime pending**.
-See [local evidence](windows-native-relay-rate-harness/README.md).
-Owner: Evelyn; native `ledger_review` owns the new harness/analyzer, root owns
-review and evidence integration. Windows execution remains exclusive and must
-wait for the current shared-CPU campaign to release its lane.
+Status: **synthetic harness validated at 11d1b65: focused build, tiny smoke,
+and all four matched short target pairs passed; first 1800s run in progress**.
+See [smoke evidence](windows-native-relay-rate-smoke-11d1b65/README.md) and
+[target pairs](windows-native-relay-targets-11d1b65/README.md). The separate
+[paced real-decoder extension](windows-decoder-rate-harness/README.md) is
+implemented and locally reviewed, but its Windows build/runtime remain pending.
+Owner: Evelyn. Windows execution remains exclusive; consult the
+[current execution ledger](LOW_LATENCY_PLAN.md#authoritative-execution-state--2026-11-12)
+for the live owner before starting any runtime work.
 
 ## Why a new harness
 
@@ -102,4 +106,4 @@ only transport/relay **after conversion** can claim no payload copy at that boun
 
 ## Decoder functional gate completed; paced extension pending
 
-The proposed tiny authenticated decoder fixture passed at4d38a09: [source, build and runtime evidence](windows-local-decoder-4d38a09/README.md). This closes the tiny functional discovery gap only. A separate test-only rate executable is now being implemented: unchanged decoded pixels, independent source/final full-pixel digests joined offline, autonomous pacing, exact decoder PTS/duration/absentDTS, separate100Hz PCM, same allocation/real fence completion, explicit conversion/readback bytes and per-process resource series. The immutable synthetic11d1b65 duration run is unaffected. Initial decoder-rate smoke/preflight must pass before any duration qualification.
+The proposed tiny authenticated decoder fixture passed at4d38a09: [source, build and runtime evidence](windows-local-decoder-4d38a09/README.md). This closes the tiny functional discovery gap only. A separate test-only rate executable is implemented at49f9145 and awaits Windows validation: unchanged decoded pixels, independent source/final full-pixel digests joined offline, autonomous pacing, exact decoder PTS/duration/absentDTS, separate100Hz PCM, same allocation/real fence completion, explicit conversion/readback bytes and per-process resource series. The immutable synthetic11d1b65 duration run is unaffected. Initial decoder-rate smoke/preflight must pass before any duration qualification.
