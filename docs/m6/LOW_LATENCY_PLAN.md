@@ -227,17 +227,19 @@ since the candidate. M6 remains open; M7 remains held.
 | Old-client compatibility | **3/3 unchanged7b8a274-built clients** pass against baseline and candidate DLLs; exact binary hashes verified. Source review found no existing public layout/enum/signature break. [Evidence](windows-compat-461584b/README.md) | Collected; bounded proof, not all-version/ordinal ABI freeze |
 | Windows sharedCPU NV12 1080p60 | **PASS** exact461584b: one1800s run,108000video/86400000PCM/180000audio; zero17ms misses, inferred A/V delta0ns; memory7.233/7.569KB/min below64, handle/thread gates pass. [Evidence](cpu-path/windows-cpu-nv12-1080p60-461584b/README.md) | Collected and independently reanalyzed; four binary hashes unchanged. Runtime released06:54:44Z; do not repeat |
 | Windows other sharedCPU targets | **BGRA4K30 PASS** exact461584b:1800s,54000video/86400000PCM/180000audio, zero34ms misses; memory7.166/7.389KB/min, handle/thread gates pass. [Evidence](cpu-path/windows-cpu-bgra4k30-461584b/README.md). Older76a65d2 BGRA1080p60 pass retained; NV124K30 unqualified | Collected and independently reanalyzed;58 original hashes verified. Runtime released07:25:52Z; do not repeat |
-| Native two-hop qualification harness |30 analyzer cases/1 focused local CTest pass. First Windows build at4f46f42 failed MSVC C2397 before media; explicit format cast fixed1730a81. [Evidence](windows-native-relay-rate-harness/README.md) | Root owns next fresh focused build/2s smoke. Prior attempt exited and Windows idle07:26:25Z. No production API changes |
+| Native two-hop qualification harness | Corrected11d1b65 clean Windows build +2s smoke **PASS**,60video/96000PCM. BGRA1080p60 paired5s trace-off/trace-on **PASS**,300video/240000PCM each, zero17ms misses; both trace boundaries joined, no relay payload copies. Initial MSVC failure preserved. Local collection separator error recovered with55 verified hashes, no media repeat | Root; remaining target preflights then supported1800s cells. Not endurance/physical playback proof |
 | Authenticated real-decoder relay qualification | Existing broker-composed tiny decoder two-hop and tiny automatic one-hop checks passed in461584b; not authentic-discovery target-rate proof. [Next bounded gap](WINDOWS_NATIVE_RELAY_RATE_PLAN.md#following-gap-real-decoder-with-authenticated-discovery) | Root; after synthetic harness focused gate, adapt the supported explicit converter/reservation path to authenticated discovery. No new decoder API or raw-decoder zero-copy claim |
 | Historical Windows startup | **Suspended, not waived.** Original1529.4514ms is source-to-receive, not proven producer-open time. New buffered phases show current158–164ms opens dominated by device creation; legacy94/100 vs coordinated100/100, exactPCM, no reproduction. [Evidence](windows-startup-phase-461584b/README.md) | Evelyn; resume on original-scale phase/wait evidence plus compatible remedy, not equivalent clean repeats |
 | Windows native lifetime | **Suspended, not waived:**21.10/84.09KiB/cycle exceed16KB/cycle. Raw device churn/reuse/Trim controls identify a contribution, not complete attribution. [Contract](lifecycle/WINDOWS_DEVICE_LIFETIME.md) | Evelyn owns investigation; driver/backend remedy or explicitly approved device-lifetime contract required. Jon owns contract/acceptance changes |
 | D2 / D3 | Unresolved public overload/convenience-fallback decisions; existing explicit profiles/defaults preserved | Jon; no automatic default change or hidden native-to-CPU fallback |
 | Linux / Android campaigns | Broad work deferred under Windows-first direction. Prior Linux BGRA and other completed campaigns collected, not repeated. Android BGRA4K and NV121080 residual failures remain suspended; clean trace diagnostics did not waive them | Evelyn; resume deferred integration only after Windows priority permits; causal fixes required for suspended failed cells |
 
-**Windows runtime owner:** root. First native harness attempt collected from
-`<linux-home>/dev/evidence/m6-cpu-path/windows-native-relay-rate-prepared/runs/native-smoke-4f46f42-20261112t0726z`.
-Compile failure preserved; no media executed. Cast correction committed; fresh focused
-build/smoke is next. Check actual executor state before takeover; no competing workload.
+**Windows runtime owner:** root; idle verified07:28:37Z after successful paired
+BGRA1080p60 preflight. Raw evidence:
+`<linux-home>/dev/evidence/m6-cpu-path/windows-native-relay-target-prepared/runs/native-bgra1080-11d1b65-20261112t0729z`.
+The original controller failure records a Windows path-separator collection issue;
+`recovery-receipt.json` verifies all55 hashes and both independent analyses without
+rerunning media. Native decoder fixture and evidence archiving proceed locally.
 
 ### Qualification exclusions retained
 
