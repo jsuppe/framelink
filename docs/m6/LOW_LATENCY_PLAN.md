@@ -229,7 +229,7 @@ M6 remains open; M7 remains held.
 | Integrated Windows/API | Exacta50841a clean build/API + **178/178 tests in665.56s**, no skips;119 prior export names retained +9 additive =128. Four candidate plugin inspections passed. [Current evidence](windows-integrated-a50841a/README.md); previous461584b evidence retained | Collected, archived and independently checked; do not repeat diagnostics already in CTest |
 | Old-client compatibility | **3/3 unchanged7b8a274-built clients** pass against exacta50841a DLLs, with exact binary hashes verified; prior baseline control retained. Source review found no existing public layout/enum/signature break. [Prior control](windows-compat-461584b/README.md) | Collected; bounded proof, not all-version/ordinal ABI freeze |
 | Windows sharedCPU NV12 1080p60 | **PASS** exact461584b: one1800s run,108000video/86400000PCM/180000audio; zero17ms misses, inferred A/V delta0ns; memory7.233/7.569KB/min below64, handle/thread gates pass. [Evidence](cpu-path/windows-cpu-nv12-1080p60-461584b/README.md) | Collected and independently reanalyzed; four binary hashes unchanged. Runtime released06:54:44Z; do not repeat |
-| Windows other sharedCPU targets | **BGRA4K30 PASS** exact461584b:1800s,54000video/86400000PCM/180000audio, zero34ms misses; memory7.166/7.389KB/min, handle/thread gates pass. [Evidence](cpu-path/windows-cpu-bgra4k30-461584b/README.md). Older76a65d2 BGRA1080p60 pass retained; NV124K30 unqualified | Collected and independently reanalyzed;58 original hashes verified. Runtime released07:25:52Z; do not repeat |
+| Windows other sharedCPU targets | **BGRA4K30 PASS** exact461584b:1800s,54000video/86400000PCM/180000audio, zero34ms misses; memory7.166/7.389KB/min, handle/thread gates pass. [Evidence](cpu-path/windows-cpu-bgra4k30-461584b/README.md). Older76a65d2 BGRA1080p60 pass retained; NV124K30 PASS461584b:1800s54000video/86400000PCM, zero34ms misses; [evidence](cpu-path/windows-cpu-nv12-4k30-461584b/README.md) | Collected and independently reanalyzed;58 original hashes verified. Runtime released07:25:52Z; do not repeat |
 | Native two-hop qualification harness | All4 BGRA/NV12 1080p60/4K30 matched5s trace-off/trace-on profiles **PASS** at11d1b65, exact video/PCM and zero17/34ms misses; both trace boundaries joined without relay payload copies. [Verified targets](windows-native-relay-targets-11d1b65/README.md). Initial MSVC and collection separator failures preserved | BGRA1080p60 native1800s **PASS**:108000video/86400000PCM, zero17ms misses; memory slopes0/0.400218/0KB per minute and handle/thread gates pass. Root independent raw analysis passed; [duration evidence](windows-native-relay-duration-bgra1080-11d1b65/README.md) archived. Final-candidate NV12 1080p60 duration also PASS; final-candidate NV12 4K30 duration also PASS; final-candidate BGRA 4K30 duration also PASS |
 | Authenticated real-decoder relay qualification | New4d38a09 tiny real-decoder FAR4→FAR5 fixture clean Windows build/test/analysis **PASS**:16 distinct decoded frames,25600PCM,37ms offset and held-reader proof;7 checker cases/1 local CTest pass | Collected and independently checked; [evidence archived](windows-local-decoder-4d38a09/README.md). Explicit conversion/source-final readbacks, not target-rate or direct decoder-zero-copy proof |
 | Paced real-decoder relay | CNG77afa1a1080p60 matched short pair PASS; on-demand4K failed at77afa1a and queue-controlc539d99. Explicit AU replayb247e5d:4K trace-off PASS150distinct/240000PCM/max30.735534ms; trace-on exact media/accounting but two34ms misses (max36.6673ms), overall pair FAILED | Root; archived replay and phase diagnostic. Phase control did not reproduce original outlier; no decoder4K endurance, repeat or timing waiver |
@@ -240,14 +240,17 @@ M6 remains open; M7 remains held.
 | Linux / Android campaigns | Broad work deferred under Windows-first direction. Prior Linux BGRA and other completed campaigns collected, not repeated. Android BGRA4K and NV121080 residual failures remain suspended; clean trace diagnostics did not waive them | Evelyn; resume deferred integration only after Windows priority permits; causal fixes required for suspended failed cells |
 
 **Windows runtime owner:** native worker `qualification_recovery`, single-task/serial only.
-Finalcandidate BGRA4K30 duration exec58507 collected PASS12:50:41Z, Windows idle.
-[BGRA4K duration](windows-native-final-duration-bgra-4k-a50841a/README.md):54000video/
-86400000PCM per role; zero34ms misses; maxvideo13.700434ms/audio4.8904ms;
-memory42.957970/0.196621/0KB/min, handles/threads pass.
-[NV124K duration](windows-native-final-duration-nv12-4k-a50841a/README.md) also PASS:
-54000video/86400000PCM, zero34ms misses, maxvideo10.222667ms/audio4.7829ms.
-Both43hashes/fullcoverage/uploads/exact analyzer/five pins/finalidle verified.
-Next single task: prepared sharedCPU NV124K30 preflight and, only if pass, duration.
+SharedCPU NV124K30 preflight+duration exec82000 collected PASS13:21:53Z, frozen461584b.
+54000video/86400000PCM/180000audio, zero34ms misses; maximum video11.573167ms/audio2.6603ms;
+memory6.329599/3.283390KB/min, handles/threads pass.35original hashes/fullcoverage,
+upload bytes/four pins/local raw reanalysis verified; live idle13:22:15Z.
+[CPU NV124K archive](cpu-path/windows-cpu-nv12-4k30-461584b/README.md).
+Finalcandidate native BGRA4K and NV124K durations also PASS, each54000video/86400000PCM,
+zero34ms misses, resource gates pass and43hashes/pins/idle verified:
+[BGRA4K](windows-native-final-duration-bgra-4k-a50841a/README.md),
+[NV124K](windows-native-final-duration-nv12-4k-a50841a/README.md).
+Next scoped task: finalcandidate BGRA1080 shortpair then duration only ifpass.
+Existing BGRA1080 duration remains valid for11d1b65, not final checked-helper candidate.
 
 The prior NV12 1080p60 1800s run **PASSED**, completed09:07:02Z and recovered11:47Z
 without rerun. All43 collected hashes/full coverage, five unchanged pins, profile,
@@ -289,7 +292,7 @@ removes that concurrent workload from replay but does not waive on-demand failur
 The default path, actual decoder, full-pixel oracle, native leases, PCM and all
 17/34ms gates remain unchanged. Both modes retain explicit scope labels.
 
-Advance prepared sharedCPU NV124K30 gate serially; no competing Windows work. Other native4K and sharedCPU NV124K
+Advance finalcandidate BGRA1080 gate serially; no competing Windows work. Other native4K and sharedCPU NV124K
 qualification remain ready afterward. The duration adapter requires matching
 integrated/pair proof and unchanged gates;25 local validator tests and independent
 review passed. The review-found uncertain-SSH collection race was corrected and
