@@ -23,6 +23,17 @@ All target rows refer to 1920x1080 at60fps and3840x2160 at30fps, two transport s
 
 See [primary results](PRIMARY_RESULTS.md), [software costs](cost/STAGE_COSTS.md), and [controlled stalls](cost/stall-signatures/README.md). All failures remain retained, including failed unsupported-layout attempts. No maximum sustainable rate is inferred from a failed target or short successful control.
 
+## Negotiated shared-CPU path — separate qualification status
+
+The older Windows CPU rows above refer to the native transport/readback path; they do not qualify the newer negotiated shared-CPU allocator path. Its independent results are:
+
+| Candidate / format | 1080p60 | 4K30 |
+| --- | --- | --- |
+| BGRA shared CPU | 1800s pass at older76a65d2; not final-candidate qualification | Unqualified; exact461584b campaign active in [execution ledger](LOW_LATENCY_PLAN.md) |
+| NV12 shared CPU | **1800s pass at461584b**,108000video/86400000PCM, zero17ms misses, resource slopes within gates; [evidence](cpu-path/windows-cpu-nv12-1080p60-461584b/README.md) | Unqualified |
+
+These are transport arrival/accounting/resource results, not physical playback, native identity, or a waiver of earlier native-path failures. Source production code remains461584b; later evidence commits do not change its binaries.
+
 ## Cross-cutting limits and owners
 
 - Windows repeated lifecycle growth exceeds16KB/cycle despite steady-state64KB/min passes. Device-lifetime integration/measurement: Evelyn; product acceptance: Jon. See lifecycle/WINDOWS_DEVICE_LIFETIME.md.
