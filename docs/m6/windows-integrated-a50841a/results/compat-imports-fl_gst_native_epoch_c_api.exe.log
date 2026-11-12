@@ -1,0 +1,151 @@
+Microsoft (R) COFF/PE Dumper Version 14.44.35211.0
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+
+Dump of file <win-home>\dev\framelink-final-final-windows-a50841a-toolpath-20261112t0822z\compat-runtime\fl_gst_native_epoch_c_api.exe
+
+File Type: EXECUTABLE IMAGE
+
+  Section contains the following imports:
+
+    framelink_gst_session.dll
+             140003190 Import Address Table
+             140003B20 Import Name Table
+                     0 time date stamp
+                     0 Index of first forwarder reference
+
+                          22 fl_gst_session_open_local_native_epoch
+                          1D fl_gst_session_new
+
+    gstreamer-1.0-0.dll
+             1400031D8 Import Address Table
+             140003B68 Import Name Table
+                     0 time date stamp
+                     0 Index of first forwarder reference
+
+                         334 gst_init
+
+    gobject-2.0-0.dll
+             1400031C8 Import Address Table
+             140003B58 Import Name Table
+                     0 time date stamp
+                     0 Index of first forwarder reference
+
+                          AF g_object_unref
+
+    glib-2.0-0.dll
+             1400031B8 Import Address Table
+             140003B48 Import Name Table
+                     0 time date stamp
+                     0 Index of first forwarder reference
+
+                          EC g_clear_error
+
+    gio-2.0-0.dll
+             1400031A8 Import Address Table
+             140003B38 Import Name Table
+                     0 time date stamp
+                     0 Index of first forwarder reference
+
+                         403 g_io_error_quark
+
+    VCRUNTIME140.dll
+             140003080 Import Address Table
+             140003A10 Import Name Table
+                     0 time date stamp
+                     0 Index of first forwarder reference
+
+                           8 __C_specific_handler
+                          1B __current_exception
+                          3E memset
+                          1C __current_exception_context
+                          3C memcpy
+
+    api-ms-win-crt-runtime-l1-1-0.dll
+             1400030E0 Import Address Table
+             140003A70 Import Name Table
+                     0 time date stamp
+                     0 Index of first forwarder reference
+
+                          16 _cexit
+                          15 _c_exit
+                          3D _register_thread_local_exe_atexit_callback
+                          23 _exit
+                          55 exit
+                           5 __p___argv
+                           4 __p___argc
+                          34 _initialize_onexit_table
+                          3C _register_onexit_function
+                          1E _crt_atexit
+                          67 terminate
+                          18 _configure_narrow_argv
+                          40 _seh_filter_exe
+                          33 _initialize_narrow_environment
+                          37 _initterm_e
+                          36 _initterm
+                          28 _get_initial_narrow_environment
+                          42 _set_app_type
+
+    api-ms-win-crt-math-l1-1-0.dll
+             1400030D0 Import Address Table
+             140003A60 Import Name Table
+                     0 time date stamp
+                     0 Index of first forwarder reference
+
+                           9 __setusermatherr
+
+    api-ms-win-crt-stdio-l1-1-0.dll
+             140003178 Import Address Table
+             140003B08 Import Name Table
+                     0 time date stamp
+                     0 Index of first forwarder reference
+
+                           1 __p__commode
+                          54 _set_fmode
+
+    api-ms-win-crt-locale-l1-1-0.dll
+             1400030C0 Import Address Table
+             140003A50 Import Name Table
+                     0 time date stamp
+                     0 Index of first forwarder reference
+
+                           8 _configthreadlocale
+
+    api-ms-win-crt-heap-l1-1-0.dll
+             1400030B0 Import Address Table
+             140003A40 Import Name Table
+                     0 time date stamp
+                     0 Index of first forwarder reference
+
+                          16 _set_new_mode
+
+    KERNEL32.dll
+             140003000 Import Address Table
+             140003990 Import Name Table
+                     0 time date stamp
+                     0 Index of first forwarder reference
+
+                         510 RtlLookupFunctionEntry
+                         5FA UnhandledExceptionFilter
+                         2A4 GetModuleHandleW
+                         3AF IsDebuggerPresent
+                         399 InitializeSListHead
+                         319 GetSystemTimeAsFileTime
+                         245 GetCurrentThreadId
+                         241 GetCurrentProcessId
+                         480 QueryPerformanceCounter
+                         3B7 IsProcessorFeaturePresent
+                         517 RtlVirtualUnwind
+                         5B7 SetUnhandledExceptionFilter
+                         240 GetCurrentProcess
+                         5D7 TerminateProcess
+                         508 RtlCaptureContext
+
+  Summary
+
+        1000 .data
+        1000 .pdata
+        2000 .rdata
+        1000 .reloc
+        1000 .rsrc
+        2000 .text

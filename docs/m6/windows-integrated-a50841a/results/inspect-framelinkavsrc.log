@@ -1,0 +1,194 @@
+Factory Details:
+  Rank                     none (0)
+  Long-name                FrameLink A/V consumer
+  Klass                    Source/Video/Audio
+  Description              Composes framelinksrc and framelinkaudiosrc on one coordinated session; separate video_src/audio_src pads, no display or audio device
+  Author                   FrameLink
+
+Plugin Details:
+  Name                     framelink
+  Description              FrameLink native video and serialized PCM transport
+  Filename                 <win-home>\dev\framelink-final-final-windows-a50841a-toolpath-20261112t0822z\build\Release\gstframelink.dll
+  Version                  0.1.0
+  License                  MIT/X11
+  Source module            framelink
+  Binary package           framelink
+  Origin URL               https://github.com/jsuppe/framelink
+
+GObject
+ +----GInitiallyUnowned
+       +----GstObject
+             +----GstElement
+                   +----GstBin
+                         +----GstFrameLinkAvSrc
+
+Implemented Interfaces:
+  GstChildProxy
+
+Element Flags:
+  - SOURCE
+
+Pad Templates:
+  SRC template: 'audio_src'
+    Availability: Sometimes
+    Capabilities:
+      audio/x-raw
+                 format: { (string)S16LE, (string)F32LE } (GstValueList)
+                 layout: interleaved (gchararray)
+                   rate: [ 8000, 192000 ] (GstIntRange)
+               channels: [ 1, 2 ] (GstIntRange)
+  
+  SRC template: 'video_src'
+    Availability: Sometimes
+    Capabilities:
+      video/x-raw(ANY)
+                 format: { (string)BGRA, (string)RGBA, (string)NV12, (string)RGB10A2_LE } (GstValueList)
+
+Element has no clocking capabilities.
+Element has no URI handling capabilities.
+
+Pads:
+  SRC: 'video_src'
+    Pad Template: 'video_src'
+  SRC: 'audio_src'
+    Pad Template: 'audio_src'
+
+Element Properties:
+
+  async-handling      : The bin will handle Asynchronous state changes
+                        flags: readable, writable
+                        Boolean. Default: false
+  
+  audio-format        : Accepted PCM format (S16LE, F32LE)
+                        flags: readable, writable, changeable only in NULL or READY state
+                        String. Default: "S16LE"
+  
+  audio-queue-ms      : Hard audio queue budget, not target latency
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 1 - 2000 Default: 80 
+  
+  audio-track-id      : Negotiated audio identity, zero when absent
+                        flags: readable
+                        Unsigned Integer. Range: 0 - 4294967295 Default: 0 
+  
+  channels            : Accepted PCM channels
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 1 - 2 Default: 2 
+  
+  connect-timeout-ms  : Session setup and ready deadline
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 1 - 60000 Default: 15000 
+  
+  framerate           : Accepted video frame rate with session=
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Fraction. Range: 1/1 - 240/1 Default: 30/1 
+  
+  generation          : Negotiated session generation
+                        flags: readable
+                        Unsigned Integer64. Range: 0 - 18446744073709551615 Default: 0 
+  
+  height              : Accepted video height
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 16 - 8192 Default: 720 
+  
+  idle-timeout-ms     : Bounded transport idle deadline
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 1 - 60000 Default: 15000 
+  
+  latency-ms          : Explicit pipeline latency with session=; zero for transport, set required final-playback buffering explicitly
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 0 - 10000 Default: 0 
+  
+  message-forward     : Forwards all children messages
+                        flags: readable, writable
+                        Boolean. Default: false
+  
+  name                : The name of the object
+                        flags: readable, writable
+                        String. Default: "framelinkavsrc0"
+  
+  native-memory       : Output platform GPU memory (DMABuf, D3D11Memory, FrameLinkAHardwareBuffer) from the ring; with session= the ring defers read release
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Boolean. Default: false
+  
+  parent              : The parent of the object
+                        flags: readable, writable
+                        Object of type "GstObject"
+  
+  rate                : Accepted PCM rate
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 8000 - 192000 Default: 48000 
+  
+  session             : Private current-user local discovery directory (not a secret or URL); unset: use an installed framelink.session.v1 context
+                        flags: readable, writable, changeable only in NULL or READY state
+                        String. Default: null
+  
+  session-id          : Negotiated identity, not a secret
+                        flags: readable
+                        String. Default: null
+  
+  shared-cpu          : Explicit CPU video copy path; broker context or current-user session= discovery, no native fallback
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Boolean. Default: false
+  
+  tracks              : Required track set: audio, video or av; only enabled pads exist
+                        flags: readable, writable, changeable only in NULL or READY state
+                        String. Default: "av"
+  
+  video-format        : Accepted video format (BGRA, RGBA, NV12, RGB10A2_LE)
+                        flags: readable, writable, changeable only in NULL or READY state
+                        String. Default: "BGRA"
+  
+  video-pool          : Ring images this consumer allocates with session= (0: 4); cover ceil(latency*fps)+2
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 0 - 16 Default: 8 
+  
+  video-queue-frames  : Coordinated video queue budget
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 1 - 16 Default: 2 
+  
+  video-track-id      : Negotiated video identity, zero when absent
+                        flags: readable
+                        Unsigned Integer. Range: 0 - 4294967295 Default: 0 
+  
+  width               : Accepted video width
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 16 - 8192 Default: 1280 
+  
+
+Element Signals:
+
+  "pad-added" :  void user_function (GstElement * object,
+                                     GstPad * arg0,
+                                     gpointer user_data);
+
+  "pad-removed" :  void user_function (GstElement * object,
+                                       GstPad * arg0,
+                                       gpointer user_data);
+
+  "no-more-pads" :  void user_function (GstElement * object,
+                                        gpointer user_data);
+
+
+Element Actions:
+
+  "set-local-native-candidate" -> gboolean  :  g_signal_emit_by_name (element, "set-local-native-candidate",
+                                                                      gpointer arg0,
+                                                                      gboolean * p_return_value);
+
+  "set-local-native-pool-candidate" -> gboolean  :  g_signal_emit_by_name (element, "set-local-native-pool-candidate",
+                                                                           gpointer arg0,
+                                                                           gboolean * p_return_value);
+
+  "apply-memory-policy" -> gboolean  :  g_signal_emit_by_name (element, "apply-memory-policy",
+                                                               gpointer arg0,
+                                                               gboolean * p_return_value);
+
+  "adopt-channel" -> gboolean  :  g_signal_emit_by_name (element, "adopt-channel",
+                                                         gpointer arg0,
+                                                         gboolean * p_return_value);
+
+
+Children:
+  audio
+  video

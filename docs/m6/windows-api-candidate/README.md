@@ -1,11 +1,16 @@
 # Windows API integration baseline candidate — NOT FROZEN
 
-**Current verified integrated candidate:** `461584bbf5a6b8b70cec1578d69d35cb4b1ea2ff`.
-Clean exact-revision Windows build/API/full suite **169/169 passed (655.72s)**;
-[pinned evidence](../windows-integrated-461584b/README.md) includes DLL hashes,
-runtime properties, public-header manifest and exports. All119 prior names
-retained, nine additive functions,128 total. Source review identified no existing
-public layout/enum/signature break; name retention is not ordinal ABI proof.
+**Current verified integrated candidate:** `a50841aad44fbc9431234a4f326bad036d193bf5`.
+Clean exact-revision Windows build/API/full suite **178/178 passed (665.56s),
+zero skips**; [pinned evidence](../windows-integrated-a50841a/README.md) includes
+DLL/client hashes, four candidate element inspections, exact inventory/JUnit,
+per-DLL exports and independent local checks. All119 prior names retained,
+nine additive functions,128 total, with no unexpected names. Runtime DLL sources
+remain unchanged from the prior461584b candidate; newer checked relay helper and
+test additions are now integrated. Source review identified no existing public
+layout/enum/signature break; name retention is not ordinal ABI proof.
+The [prior461584b result](../windows-integrated-461584b/README.md) remains valid
+within its historical169-test scope.
 
 For profile selection, setup ordering, ownership, migration notes and remaining
 decisions, see the [Windows app contract](../WINDOWS_APP_CONTRACT.md). Actual
@@ -15,8 +20,10 @@ transactional setup are now included in this integrated candidate. Follow the
 [local relay recipe](../WINDOWS_LOCAL_NATIVE_RELAY.md); snapshot pinning is for
 the entire graph and never replaces frame-reader ownership.
 
-Three unchanged baseline-built C11/native clients passed against both old and
-new DLLs, with binary hashes verified; [compatibility evidence](../windows-compat-461584b/README.md).
+Three unchanged7b8a274-built C11/native clients passed against the new candidate
+DLLs, with binary hashes/imports verified; [current compatibility evidence](../windows-integrated-a50841a/local-compatibility.json).
+Their [earlier baseline/candidate comparison](../windows-compat-461584b/README.md)
+remains archived.
 Existing FAR4 selection and overload/fallback defaults remain unchanged. The
 explicit unavailable-adapter rejection and producer-open failed-output details
 are documented in the app contract and compatibility review.
