@@ -25,7 +25,7 @@ frames with zero17ms arrival misses (max10.1737/11.0694ms).
 The initial4K30 CNG preflight delivered all150 distinct frames and240000PCM
 frames, but140 video arrivals exceeded34ms. Decoder-pull p50 was22.0109ms,
 source readback/hash13.6742ms; no audio misses. Trace-on was not run.
-Local causal investigation must separate live fixture generation/encoding from
+Local causal investigation must separate on-demand fixture generation/encoding from
 actual decode before any correction or repeat. No decoder endurance result,
 physical presentation or isolated-hop budget is claimed. Initial GLib timing
 and CNG integration-build failures remain archived.
