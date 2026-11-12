@@ -1,0 +1,115 @@
+{
+  "scope": "decoder conversion plus source/final full-frame readback workload; no physical renderer or isolated-hop budget claim",
+  "trace_qualified": false,
+  "budget_ns": 34000000,
+  "resources": {
+    "source": {
+      "cpu_percent": 92.84259679943555,
+      "samples": 6,
+      "slopes_per_min": {}
+    },
+    "relay": {
+      "cpu_percent": 33.67684975765734,
+      "samples": 6,
+      "slopes_per_min": {}
+    },
+    "receiver": {
+      "cpu_percent": 66.26047509770895,
+      "samples": 6,
+      "slopes_per_min": {}
+    }
+  },
+  "video_frames": 150,
+  "pcm_frames": 240000,
+  "source_distinct_digests": 150,
+  "video_arrival_misses": [],
+  "audio_arrival_misses": [],
+  "source_conversion_bytes": 4976640000,
+  "source_readback_bytes": 4976640000,
+  "final_readback_bytes": 4976640000,
+  "timing_ms": {
+    "scheduled_to_final_arrival": {
+      "p50": 18.6,
+      "p95": 22.6008,
+      "p99": 23.700967,
+      "max": 25.0974
+    },
+    "audio_scheduled_to_final": {
+      "p50": 0.1728,
+      "p95": 0.217,
+      "p99": 0.2683,
+      "max": 1.2192
+    },
+    "source_acquire": {
+      "p50": 0.008,
+      "p95": 0.0118,
+      "p99": 0.2244,
+      "max": 0.8101
+    },
+    "decoder_pull_wait": {
+      "p50": 0.0054,
+      "p95": 0.0072,
+      "p99": 0.0102,
+      "max": 0.0168
+    },
+    "conversion_call": {
+      "p50": 0.0152,
+      "p95": 0.0243,
+      "p99": 0.0644,
+      "max": 0.0999
+    },
+    "conversion_until_gpu_observed_done": {
+      "p50": 1.6069,
+      "p95": 2.0803,
+      "p99": 2.1443,
+      "max": 2.1546
+    },
+    "source_oracle_readback_and_hash": {
+      "p50": 13.9234,
+      "p95": 18.0604,
+      "p99": 19.8999,
+      "max": 19.9039
+    },
+    "source_submit": {
+      "p50": 0.038,
+      "p95": 0.0532,
+      "p99": 0.0636,
+      "max": 0.0642
+    },
+    "relay_forward": {
+      "p50": 0.0388,
+      "p95": 0.0524,
+      "p99": 0.0642,
+      "max": 0.0658
+    },
+    "final_acquire_until_lease_done": {
+      "p50": 2.0399,
+      "p95": 6.0455,
+      "p99": 6.0736,
+      "max": 6.0786
+    },
+    "final_staging_map_and_hash": {
+      "p50": 12.9879,
+      "p95": 13.8871,
+      "p99": 15.4063,
+      "max": 15.4288
+    }
+  },
+  "trace_checked": true,
+  "trace_counts": {
+    "source": {
+      "sent": 150,
+      "received": 0
+    },
+    "relay": {
+      "sent": 150,
+      "received": 150
+    },
+    "receiver": {
+      "sent": 0,
+      "received": 150
+    }
+  },
+  "trace_scope": "FrameLink transport instrumentation only; uninstrumented GStreamer/D3D conversion and oracle copies are not inferred absent",
+  "pass": true
+}

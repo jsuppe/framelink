@@ -1,0 +1,221 @@
+{
+  "frames": 150,
+  "scope": "source oracle only; thread CPU quantized, wall-minus-CPU is not GPU attribution",
+  "phases": {
+    "map": {
+      "wall_ms_median": 0.76895,
+      "wall_ms_max": 2.4424,
+      "wall_ms_sum": 121.1677,
+      "thread_cpu_ms_median": 0.0,
+      "thread_cpu_ms_sum": 15.625
+    },
+    "sha": {
+      "wall_ms_median": 12.9635,
+      "wall_ms_max": 15.0879,
+      "wall_ms_sum": 1961.6168,
+      "thread_cpu_ms_median": 15.625,
+      "thread_cpu_ms_sum": 1843.75
+    },
+    "unmap": {
+      "wall_ms_median": 0.0064,
+      "wall_ms_max": 0.0091,
+      "wall_ms_sum": 0.9801,
+      "thread_cpu_ms_median": 0.0,
+      "thread_cpu_ms_sum": 0.0
+    }
+  },
+  "slowest_oracles": [
+    {
+      "identity": 0,
+      "total_wall_ms": 16.4214,
+      "map": {
+        "wall_ms": 2.4424,
+        "thread_cpu_ms": 0.0
+      },
+      "sha": {
+        "wall_ms": 13.9688,
+        "thread_cpu_ms": 15.625
+      },
+      "unmap": {
+        "wall_ms": 0.007,
+        "thread_cpu_ms": 0.0
+      }
+    },
+    {
+      "identity": 9,
+      "total_wall_ms": 15.9582,
+      "map": {
+        "wall_ms": 1.1448,
+        "thread_cpu_ms": 0.0
+      },
+      "sha": {
+        "wall_ms": 14.8009,
+        "thread_cpu_ms": 15.625
+      },
+      "unmap": {
+        "wall_ms": 0.0074,
+        "thread_cpu_ms": 0.0
+      }
+    },
+    {
+      "identity": 136,
+      "total_wall_ms": 15.9323,
+      "map": {
+        "wall_ms": 0.8687,
+        "thread_cpu_ms": 0.0
+      },
+      "sha": {
+        "wall_ms": 15.0524,
+        "thread_cpu_ms": 15.625
+      },
+      "unmap": {
+        "wall_ms": 0.0084,
+        "thread_cpu_ms": 0.0
+      }
+    },
+    {
+      "identity": 105,
+      "total_wall_ms": 15.9154,
+      "map": {
+        "wall_ms": 0.8162,
+        "thread_cpu_ms": 0.0
+      },
+      "sha": {
+        "wall_ms": 15.0879,
+        "thread_cpu_ms": 15.625
+      },
+      "unmap": {
+        "wall_ms": 0.0073,
+        "thread_cpu_ms": 0.0
+      }
+    },
+    {
+      "identity": 41,
+      "total_wall_ms": 15.7713,
+      "map": {
+        "wall_ms": 0.8743,
+        "thread_cpu_ms": 0.0
+      },
+      "sha": {
+        "wall_ms": 14.8863,
+        "thread_cpu_ms": 15.625
+      },
+      "unmap": {
+        "wall_ms": 0.0078,
+        "thread_cpu_ms": 0.0
+      }
+    },
+    {
+      "identity": 73,
+      "total_wall_ms": 15.6933,
+      "map": {
+        "wall_ms": 0.7948,
+        "thread_cpu_ms": 0.0
+      },
+      "sha": {
+        "wall_ms": 14.8873,
+        "thread_cpu_ms": 0.0
+      },
+      "unmap": {
+        "wall_ms": 0.0082,
+        "thread_cpu_ms": 0.0
+      }
+    },
+    {
+      "identity": 10,
+      "total_wall_ms": 15.4433,
+      "map": {
+        "wall_ms": 1.0831,
+        "thread_cpu_ms": 0.0
+      },
+      "sha": {
+        "wall_ms": 14.349,
+        "thread_cpu_ms": 15.625
+      },
+      "unmap": {
+        "wall_ms": 0.008,
+        "thread_cpu_ms": 0.0
+      }
+    },
+    {
+      "identity": 2,
+      "total_wall_ms": 15.2516,
+      "map": {
+        "wall_ms": 1.0939,
+        "thread_cpu_ms": 0.0
+      },
+      "sha": {
+        "wall_ms": 14.145,
+        "thread_cpu_ms": 15.625
+      },
+      "unmap": {
+        "wall_ms": 0.0088,
+        "thread_cpu_ms": 0.0
+      }
+    },
+    {
+      "identity": 104,
+      "total_wall_ms": 15.0859,
+      "map": {
+        "wall_ms": 0.7866,
+        "thread_cpu_ms": 0.0
+      },
+      "sha": {
+        "wall_ms": 14.2898,
+        "thread_cpu_ms": 15.625
+      },
+      "unmap": {
+        "wall_ms": 0.0066,
+        "thread_cpu_ms": 0.0
+      }
+    },
+    {
+      "identity": 1,
+      "total_wall_ms": 15.0359,
+      "map": {
+        "wall_ms": 0.9878,
+        "thread_cpu_ms": 0.0
+      },
+      "sha": {
+        "wall_ms": 14.0377,
+        "thread_cpu_ms": 15.625
+      },
+      "unmap": {
+        "wall_ms": 0.0078,
+        "thread_cpu_ms": 0.0
+      }
+    },
+    {
+      "identity": 42,
+      "total_wall_ms": 14.1991,
+      "map": {
+        "wall_ms": 0.8541,
+        "thread_cpu_ms": 0.0
+      },
+      "sha": {
+        "wall_ms": 13.3339,
+        "thread_cpu_ms": 15.625
+      },
+      "unmap": {
+        "wall_ms": 0.0068,
+        "thread_cpu_ms": 0.0
+      }
+    },
+    {
+      "identity": 21,
+      "total_wall_ms": 14.1153,
+      "map": {
+        "wall_ms": 0.8433,
+        "thread_cpu_ms": 0.0
+      },
+      "sha": {
+        "wall_ms": 13.2634,
+        "thread_cpu_ms": 0.0
+      },
+      "unmap": {
+        "wall_ms": 0.0058,
+        "thread_cpu_ms": 0.0
+      }
+    }
+  ]
+}
