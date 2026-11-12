@@ -1,0 +1,37 @@
+** WARNING: connection is not using a post-quantum key exchange algorithm.
+** This session may be vulnerable to "store now, decrypt later" attacks.
+** The server may need to be upgraded. See https://openssh.com/pq.html
+{
+  "revision": "11d1b65a84029c3fc84509e3b024b984bc240424",
+  "started_utc": "2026-11-12T07:27:33.410544+00:00",
+  "state": "finished",
+  "step": "smoke",
+  "command": [
+    "<win-home>\\dev\\framelink-native-rate-native-smoke-11d1b65-20261112t0731z\\build\\Release\\fl_gst_local_native_bench_win.exe",
+    "<win-home>\\dev\\framelink-native-rate-native-smoke-11d1b65-20261112t0731z\\build\\Release\\gstframelink.dll",
+    "--out",
+    "<win-home>\\dev\\framelink-native-rate-native-smoke-11d1b65-20261112t0731z\\smoke",
+    "--seconds",
+    "2",
+    "--width",
+    "64",
+    "--height",
+    "32",
+    "--fps",
+    "30",
+    "--format",
+    "BGRA"
+  ],
+  "extract_exit": 0,
+  "configure_exit": 0,
+  "build_exit": 0,
+  "inventory_exit": 0,
+  "binary_sha256": {
+    "fl_gst_local_native_bench_win.exe": "aea536d880a0c3fe4fe8e3246a23cfec8b77d58b45b4fdd56e2f77eebc5aaed2",
+    "gstframelink.dll": "21f50fb75d9f8f9f96560ba0d48e1b9262454677d881e1ba1e786aae851db023",
+    "framelink.dll": "3a48efa50a42b6f4f291871538cefa970a82391db87b9bbcfb4b27c23876caf3",
+    "framelink_gst_session.dll": "f965f02a55758a76002459ce24261c870d46aa221868bc41de00cd9115c3a6f9"
+  },
+  "smoke_exit": 0,
+  "ended_utc": "2026-11-12T07:28:03.093230+00:00"
+}
