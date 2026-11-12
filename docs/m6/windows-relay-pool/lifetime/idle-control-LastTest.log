@@ -1,0 +1,34 @@
+Start testing: Nov 12 00:21 Eastern Standard Time
+----------------------------------------------------------
+44/153 Testing: gst_relay_pool_lifetime_win
+44/153 Test: gst_relay_pool_lifetime_win
+Command: "<win-home>/dev/framelink-m6-windows-7b8a274/build/Release/fl_gst_native_producer_win.exe" "<win-home>/dev/framelink-m6-windows-7b8a274/build/Release/gstframelink.dll" "--relay-pool-lifetime"
+Directory: <win-home>/dev/framelink-m6-windows-7b8a274/build
+"gst_relay_pool_lifetime_win" start time: Nov 12 00:21 Eastern Standard Time
+Output:
+----------------------------------------------------------
+native AV mode 10 local=0
+line 83: contract.initialize()==FL_GST_SESSION_READY
+SETTLE immediate=1256
+SETTLE after3s=1845
+relay pool cleanup cycle=0 handles=1845 baseline=1845
+relay pool cleanup cycle=10 handles=1845 baseline=1845
+relay pool cleanup cycle=20 handles=1845 baseline=1845
+relay pool cleanup cycle=30 handles=1845 baseline=1845
+relay pool cleanup cycle=40 handles=1845 baseline=1845
+relay pool cleanup cycle=50 handles=1845 baseline=1845
+relay pool cleanup cycle=60 handles=1845 baseline=1845
+relay pool cleanup cycle=70 handles=1845 baseline=1845
+relay pool cleanup cycle=80 handles=1845 baseline=1845
+relay pool cleanup cycle=90 handles=1845 baseline=1845
+relay pool cleanup cycle=100 handles=1845 baseline=1845
+relay pool cleanup: 100 complete setup/adapter-reservation/close cycles, no net handle growth after one warmup; same upstream pool remains usable
+<end of output>
+Test time =   7.56 sec
+----------------------------------------------------------
+Test Failed.
+"gst_relay_pool_lifetime_win" end time: Nov 12 00:21 Eastern Standard Time
+"gst_relay_pool_lifetime_win" time elapsed: 00:00:07
+----------------------------------------------------------
+
+End testing: Nov 12 00:21 Eastern Standard Time

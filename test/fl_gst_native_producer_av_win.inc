@@ -126,6 +126,9 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
  flSessionConfig cfg{};cfg.version=2;cfg.sessionId.bytes[0]=1;cfg.clockId.bytes[0]=2;cfg.generation=1;
  cfg.videoTrackId=1;cfg.audioTrackId=2;cfg.audio={FL_PCM_S16,48000,2};cfg.audioQueueMs=80;
  cfg.video={FL_FORMAT_RGBA8,64,32,30,1};cfg.videoQueueFrames=1;cfg.connectTimeoutMs=cfg.idleTimeoutMs=1000;
+ // This fixture deliberately spends seconds exercising pre-media pool setup.
+ // Keep the usual one-second failure controls unchanged in every other mode.
+ if(mode==10)cfg.connectTimeoutMs=cfg.idleTimeoutMs=30000;
  flSessionCapabilities offer{};offer.version=2;offer.videoCount=1;offer.video[0]=cfg.video;offer.audioCount=1;offer.audio[0]=cfg.audio;
  flChannel*channel=nullptr;flChannel*producer=nullptr;
  auto policy=nativeAvPolicy(local?0:cfg.generation,nativeReceiver,decoder);
@@ -240,7 +243,15 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
     CHECK(adapter.initialize()==FL_OK&&adapter.pending()==0&&adapter.finish()==FL_OK);
     flClose(writer);flClose(reader);
     DWORD handles=0;CHECK(GetProcessHandleCount(GetCurrentProcess(),&handles));
-    if(!cycle)baseline=handles; // one explicit driver setup warmup
+    if(!cycle){
+     // The idle-only control showed asynchronous driver startup adds handles
+     // even without another channel creation. Settle once, before the measured
+     // 100 cycles; never rebase after observing their outcome.
+     printf("relay pool warmup immediate=%lu\n",(unsigned long)handles);
+     g_usleep(3000000);
+     CHECK(GetProcessHandleCount(GetCurrentProcess(),&baseline));
+     handles=baseline;
+    }
     if(cycle%10==0)printf("relay pool cleanup cycle=%u handles=%lu baseline=%lu\n",cycle,(unsigned long)handles,(unsigned long)baseline);
     if(cycle==100){
      const auto deadline=g_get_monotonic_time()+1000000;
@@ -248,7 +259,7 @@ static void nativeProducerAv(unsigned mode,bool local=false,bool customEpoch=fal
      CHECK(handles<=baseline);
     }
    }
-   puts("relay pool cleanup: 100 complete setup/adapter-reservation/close cycles, no net handle growth after one warmup; same upstream pool remains usable");
+   puts("relay pool cleanup: 100 complete setup/adapter-reservation/close cycles, no net handle growth after one warmup and fixed 3s settle; same upstream pool remains usable");
   }
   if(mode==8){
    GstBuffer*held=nullptr;CHECK(gst_buffer_pool_acquire_buffer(pool,&held,nullptr)==GST_FLOW_OK);
