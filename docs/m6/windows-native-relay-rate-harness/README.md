@@ -16,3 +16,7 @@ Supports BGRA/NV12,30/60fps, up to1800seconds. `--trace` is limited to5seconds a
 The [frozen plan](../WINDOWS_NATIVE_RELAY_RATE_PLAN.md) defines qualification order and scope. Next: one clean Windows focused build/short smoke after the sole current timing owner releases the lane. Analyze the collected smoke before a target preflight. No rate, physical playback, decoder or M6-completion claim is made here.
 
 Source acquisition, upload and submit calls and relay forward calls have explicit start/end stamps; software call duration is not GPU execution time. The broader acquire-to-record span is reported separately.
+
+## First Windows build, preserved failure
+
+Exact4f46f42 configured successfully but MSVC rejected the runtime-selected `flFormat` aggregate field as narrowing to uint32_t (C2397). No media ran. The harness now casts that existing positive format enum explicitly. See initial-build-failure/; the lane was verified idle after failure. Production code is unchanged.

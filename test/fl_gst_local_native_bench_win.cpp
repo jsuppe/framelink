@@ -45,7 +45,7 @@ struct Resources {
  ~Resources(){done=true;worker.join();}
 };
 struct Stamp {uint64_t magic=0x464c4e4154495645ULL,id,pts,scheduled,source;};
-static flSessionCapabilities caps(){flSessionCapabilities c{};c.version=2;c.videoCount=c.audioCount=1;c.video[0]={o.nv12?FL_FORMAT_NV12:FL_FORMAT_BGRA8,o.width,o.height,o.fps,1};c.audio[0]={FL_PCM_S16,48000,2};return c;}
+static flSessionCapabilities caps(){flSessionCapabilities c{};c.version=2;c.videoCount=c.audioCount=1;c.video[0]={static_cast<uint32_t>(o.nv12?FL_FORMAT_NV12:FL_FORMAT_BGRA8),o.width,o.height,o.fps,1};c.audio[0]={FL_PCM_S16,48000,2};return c;}
 static GstFrameLinkMemoryPolicy policy(){GstFrameLinkMemoryPolicy p{};p.version=1;for(int i=0;i<2;++i){flMemoryRequirementsInit(&p.requirements[i]);p.requirements[i].allowedResourceTypes=FL_MEMORY_D3D11;p.requirements[i].allowedOperations=0;p.requirements[i].requiredUsage=FL_MEMORY_GPU_SAMPLE;p.paths[i].version=1;p.paths[i].resourceType=FL_MEMORY_D3D11;p.paths[i].supportedUsage=FL_MEMORY_GPU_SAMPLE;}return p;}
 struct Audio {
  GstElement* pipe=nullptr,*port=nullptr;
