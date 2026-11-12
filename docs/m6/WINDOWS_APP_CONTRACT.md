@@ -11,6 +11,32 @@ from timing, resource and duration acceptance. Follow the
 its setup, pool snapshot, separate-process A/V and automatic FAR5 receiver
 contracts are implemented. Functional verification is not timing/resource acceptance.
 
+## Supported scope and lifecycle qualification
+
+The [approved Windows readiness checklist](M6_WINDOWS_READINESS.md) is the
+candidate support boundary; this API document describes capabilities, not a promise
+that every reachable combination is qualified. In particular, native BGRA1080 and
+decoder4K are excluded from initial advertised support. No unrestricted repeated
+native reconnect is qualified: persistent-role100-cycle slopes remain above the
+original16KiB/cycle limit. Fresh bins/session per generation are an ownership rule,
+not proof that process/driver resource usage returns to baseline. Ordered teardown,
+real reader completion and snapshots remain mandatory even for finite sessions.
+No hidden retained device, timed cleanup sleep or process termination replaces the
+published close/drain/lease obligations. An opt-in device-owner API is only a proposal.
+
+### Renderer integration boundary
+
+Approved renderer9f74b9d with repaira6a1906 accepts explicit `--av-latency-ms 0`
+through2000; its default remains100ms. This differs deliberately from the A/V source
+bin's default0ms. The tested NV121080p60 renderer profile has ring12/pending6 and
+explicit CPU conversion. Ring12 consists of six future positions, current1,
+prior-GPU2, retirement1, mailbox1 and writer1; the source comments identify this as
+an operating envelope, not guaranteed lossless catch-up under arbitrary stalls.
+Capacity does not imply a fill-before-play delay. Complete5s controls establish
+source/acquire/adopt/render/GPU/present-submission identity and PCM accounting at
+0ms and100ms; they do not establish two-slot renderer operation,30-minute renderer
+resource behavior, decoder zero-copy, physical scanout or acoustic alignment.
+
 ## Select a profile explicitly
 
 - **Native GPU:** producer `native-memory=true`; receiver

@@ -39,26 +39,27 @@ current, or choose a new renderer architecture from these different baselines.
 **Resolved by approved plans and GitHub PR13:** merged9f74b9d is the existing
 approved baseline. Clean isolated source and137-file historical comparison are
 [pinned here](renderer-provenance-9f74b9d/README.md). No new Jon architecture
-choice is needed. Evelyn owns the next routine isolated integration build and
-contract/clock review, then newly affected submission-identity checks. No physical-output claim
-or new performance budget is inferred. The earlier source-selection question is closed; implementation can proceed
-serially from the recovered baseline without asking Jon to reapprove it.
+choice is needed. Isolated integration is now collected: renderer repaira6a1906,
+4focused tests,9CLI controls and three complete5s source-to-submission captures pass.
+See [integration evidence](renderer-integration-a6a1906/README.md). No physical-output
+claim, new performance budget or renderer endurance qualification is inferred.
 
 ## Other dependencies, owners and resume conditions
 
 | Item | Owner | Resume condition |
 | --- | --- | --- |
-| Device-lifetime alternative | Jon: supported contract choice; Evelyn: implementation/measurement | Decide whether explicit additive opt-in owner is useful while unchanged default remains failed; review DEVICE_LIFETIME_OPTION.md. No cache/sleep workaround is justified |
-| D2 overload / D3 convenience fallback | Jon | Explicit product/default decision; current entrypoint defaults remain unchanged |
+| Supported bounded lifecycle | Evelyn: evidence/contract reconciliation; Jon: any changed supported contract | Existing100-cycle native growth fails. Optional owner remains deferred/unapproved; accept a concrete narrower lifecycle only with corresponding production measurements, or require a remedy to original lifecycle. No cache/sleep workaround or implicit waiver |
+| D2 overload / D3 convenience fallback | Jon only if introducing new policy | New convenience defaults deferred. Existing explicit profiles/defaults remain and routine supported-contract documentation is ready, not blocked |
 | Native BGRA1080 natural323ms stall | Evelyn causal investigation | Original-scale phase/thread/I/O evidence localizing the natural delay; synthetic pause proves catch-up mechanism only. No uninstrumented duration retry |
 | Decoder4K misses | Evelyn causal investigation | Evidence localizing original source-oracle/timing outlier, which isolated phase control did not reproduce; no clean-repeat waiver or decoder endurance |
 | Historical startup/159ms native timing | Evelyn causal investigation | Matched original-scale phase/wait evidence plus compatible remedy, not another equivalent clean control |
 | Default-profile lifecycle slopes | Evelyn/backend/driver; Jon only for contract changes | Real remedy plus unchanged matched production gates. New deferred-reclaim probes do not qualify default profile |
-| Primary-renderer/isolated-hop performance acceptance | Product budget review plus renderer integration | Authoritative renderer baseline and frozen applicable budgets; API submission is not physical scanout |
+| Renderer supported-profile acceptance | Evelyn; Jon only for changed support/budget | Current0/100ms NV12 submission proof uses ring12/pending6 and explicit CPU conversion. No two-slot/endurance/physical-output inference; reconcile named intended support with existing budgets |
 | Linux/Android integration and campaigns | Project scope/Jon | Windows-first deferral lifted or required focused shared-code check; no broad campaign is authorized as a workaround for Windows blockers |
 | Final M6 closure/CI/API freeze | Evelyn after predecessors | Resolved applicable gates/decisions and final exact changed-runtime qualification; M7 remains held |
 
 No additional supported Windows missing-cell duration or unrun existing-policy
 functional check was identified in this reconciliation. This does not assert
-that all project work is mathematically impossible; the source blocker has now been resolved and the next isolated renderer
-integration step is prepared, not yet executed. Do not launch speculative repeats merely to keep a process running.
+that all project work is mathematically impossible. Renderer integration is collected;
+remaining bounded-lifecycle and final supported-profile gates are explicit in
+[M6 Windows readiness](M6_WINDOWS_READINESS.md). Do not launch speculative repeats merely to keep a process running.
