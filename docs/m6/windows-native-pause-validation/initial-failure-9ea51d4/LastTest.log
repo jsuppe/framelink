@@ -1,0 +1,52 @@
+Start testing: Nov 12 03:02 Eastern Standard Time
+----------------------------------------------------------
+51/177 Testing: gst_relay_local_bin_pause_win
+51/177 Test: gst_relay_local_bin_pause_win
+Command: "<win-home>/dev/framelink-native-ready-ready-9ea51d4-20261112t0802z/build/Release/fl_gst_native_producer_win.exe" "<win-home>/dev/framelink-native-ready-ready-9ea51d4-20261112t0802z/build/Release/gstframelink.dll" "--relay-local-bin-pause"
+Directory: <win-home>/dev/framelink-native-ready-ready-9ea51d4-20261112t0802z/build
+"gst_relay_local_bin_pause_win" start time: Nov 12 03:02 Eastern Standard Time
+Output:
+----------------------------------------------------------
+line 444: g_get_monotonic_time()<deadline&&video.collect()==FL_OK
+<end of output>
+Test time =   2.43 sec
+----------------------------------------------------------
+Test Failed.
+"gst_relay_local_bin_pause_win" end time: Nov 12 03:02 Eastern Standard Time
+"gst_relay_local_bin_pause_win" time elapsed: 00:00:02
+----------------------------------------------------------
+
+52/177 Testing: gst_relay_local_bin_paused_cancel_win
+52/177 Test: gst_relay_local_bin_paused_cancel_win
+Command: "<win-home>/dev/framelink-native-ready-ready-9ea51d4-20261112t0802z/build/Release/fl_gst_native_producer_win.exe" "<win-home>/dev/framelink-native-ready-ready-9ea51d4-20261112t0802z/build/Release/gstframelink.dll" "--relay-local-bin-paused-cancel"
+Directory: <win-home>/dev/framelink-native-ready-ready-9ea51d4-20261112t0802z/build
+"gst_relay_local_bin_paused_cancel_win" start time: Nov 12 03:02 Eastern Standard Time
+Output:
+----------------------------------------------------------
+paused FAR5 NULL propagated source cancellation in 97.416ms (source observation 0.047ms); no EOS, four submissions only
+<end of output>
+Test time =   0.88 sec
+----------------------------------------------------------
+Test Passed.
+"gst_relay_local_bin_paused_cancel_win" end time: Nov 12 03:02 Eastern Standard Time
+"gst_relay_local_bin_paused_cancel_win" time elapsed: 00:00:00
+----------------------------------------------------------
+
+53/177 Testing: gst_relay_local_bin_win
+53/177 Test: gst_relay_local_bin_win
+Command: "<win-home>/dev/framelink-native-ready-ready-9ea51d4-20261112t0802z/build/Release/fl_gst_native_producer_win.exe" "<win-home>/dev/framelink-native-ready-ready-9ea51d4-20261112t0802z/build/Release/gstframelink.dll" "--relay-local-bin"
+Directory: <win-home>/dev/framelink-native-ready-ready-9ea51d4-20261112t0802z/build
+"gst_relay_local_bin_win" start time: Nov 12 03:02 Eastern Standard Time
+Output:
+----------------------------------------------------------
+three-process local authenticated A/V: 384 exact PCM frames/1536 bytes, 37ms offset, real END/EOS, final native lease held
+three-process local native relay: FAR4 source-time input + FAR5 snapshot transfer, no inherited textures, 8 exact final pixels/metadata, held final lease, real drain
+<end of output>
+Test time =   1.14 sec
+----------------------------------------------------------
+Test Passed.
+"gst_relay_local_bin_win" end time: Nov 12 03:02 Eastern Standard Time
+"gst_relay_local_bin_win" time elapsed: 00:00:01
+----------------------------------------------------------
+
+End testing: Nov 12 03:02 Eastern Standard Time
