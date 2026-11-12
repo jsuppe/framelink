@@ -230,7 +230,7 @@ M6 remains open; M7 remains held.
 | Old-client compatibility | **3/3 unchanged7b8a274-built clients** pass against exacta50841a DLLs, with exact binary hashes verified; prior baseline control retained. Source review found no existing public layout/enum/signature break. [Prior control](windows-compat-461584b/README.md) | Collected; bounded proof, not all-version/ordinal ABI freeze |
 | Windows sharedCPU NV12 1080p60 | **PASS** exact461584b: one1800s run,108000video/86400000PCM/180000audio; zero17ms misses, inferred A/V delta0ns; memory7.233/7.569KB/min below64, handle/thread gates pass. [Evidence](cpu-path/windows-cpu-nv12-1080p60-461584b/README.md) | Collected and independently reanalyzed; four binary hashes unchanged. Runtime released06:54:44Z; do not repeat |
 | Windows other sharedCPU targets | **BGRA4K30 PASS** exact461584b:1800s,54000video/86400000PCM/180000audio, zero34ms misses; memory7.166/7.389KB/min, handle/thread gates pass. [Evidence](cpu-path/windows-cpu-bgra4k30-461584b/README.md). Older76a65d2 BGRA1080p60 pass retained; NV124K30 unqualified | Collected and independently reanalyzed;58 original hashes verified. Runtime released07:25:52Z; do not repeat |
-| Native two-hop qualification harness | All4 BGRA/NV12 1080p60/4K30 matched5s trace-off/trace-on profiles **PASS** at11d1b65, exact video/PCM and zero17/34ms misses; both trace boundaries joined without relay payload copies. [Verified targets](windows-native-relay-targets-11d1b65/README.md). Initial MSVC and collection separator failures preserved | BGRA1080p60 native1800s **PASS**:108000video/86400000PCM, zero17ms misses; memory slopes0/0.400218/0KB per minute and handle/thread gates pass. Root independent raw analysis passed; [duration evidence](windows-native-relay-duration-bgra1080-11d1b65/README.md) archived. Final-candidate NV12 1080p60 duration also PASS; native 4K duration cells remain unqualified |
+| Native two-hop qualification harness | All4 BGRA/NV12 1080p60/4K30 matched5s trace-off/trace-on profiles **PASS** at11d1b65, exact video/PCM and zero17/34ms misses; both trace boundaries joined without relay payload copies. [Verified targets](windows-native-relay-targets-11d1b65/README.md). Initial MSVC and collection separator failures preserved | BGRA1080p60 native1800s **PASS**:108000video/86400000PCM, zero17ms misses; memory slopes0/0.400218/0KB per minute and handle/thread gates pass. Root independent raw analysis passed; [duration evidence](windows-native-relay-duration-bgra1080-11d1b65/README.md) archived. Final-candidate NV12 1080p60 duration also PASS; final-candidate NV12 4K30 duration also PASS; BGRA 4K duration remains unqualified |
 | Authenticated real-decoder relay qualification | New4d38a09 tiny real-decoder FAR4→FAR5 fixture clean Windows build/test/analysis **PASS**:16 distinct decoded frames,25600PCM,37ms offset and held-reader proof;7 checker cases/1 local CTest pass | Collected and independently checked; [evidence archived](windows-local-decoder-4d38a09/README.md). Explicit conversion/source-final readbacks, not target-rate or direct decoder-zero-copy proof |
 | Paced real-decoder relay | CNG77afa1a1080p60 matched short pair PASS; on-demand4K failed at77afa1a and queue-controlc539d99. Explicit AU replayb247e5d:4K trace-off PASS150distinct/240000PCM/max30.735534ms; trace-on exact media/accounting but two34ms misses (max36.6673ms), overall pair FAILED | Root; archived replay and phase diagnostic. Phase control did not reproduce original outlier; no decoder4K endurance, repeat or timing waiver |
 | Automatic FAR5 native receiver pause/resume | **PASS** after462fa5f checked-sample fix: collect only missing reservations, no post-drain extra acquire. Windows8/8 focused tests passed10.08s, including original pause case and genuine outstanding-reader death | Root; [initial failure](windows-native-pause-validation/initial-failure-9ea51d4/README.md), [diagnostics](windows-native-pause-validation/diagnostics/README.md), [fix evidence](windows-native-pause-validation/fix-462fa5f/README.md) archived. Real ownership/error checks retained |
@@ -239,13 +239,15 @@ M6 remains open; M7 remains held.
 | D2 / D3 | Unresolved public overload/convenience-fallback decisions; existing explicit profiles/defaults preserved | Jon; no automatic default change or hidden native-to-CPU fallback |
 | Linux / Android campaigns | Broad work deferred under Windows-first direction. Prior Linux BGRA and other completed campaigns collected, not repeated. Android BGRA4K and NV121080 residual failures remain suspended; clean trace diagnostics did not waive them | Evelyn; resume deferred integration only after Windows priority permits; causal fixes required for suspended failed cells |
 
-**Windows runtime owner:** native worker `qualification_recovery`, exec31547,
-one final-build NV12 4K30 1800-second trace-off duration at exact a50841a.
-Evidence: `windows-native-final-duration-prepared/runs/native-nv12-4k-duration-a50841a-20261112t1149z`.
-Started11:48:11Z; expected finish about12:18Z. No competing runtime.
-The [final 4K short pair](windows-native-final-nv12-4k-a50841a/README.md) passed:
-both150video/240000PCM, zero34ms misses, maximum arrival5.534367/9.271867ms;
-all64hashes verified and runtime idle. Reported to root before duration.
+**Windows runtime owner:** native worker `qualification_recovery`, single-task/serial only.
+NV12 4K30 duration exec31547 collected PASS at12:18:30Z; Windows idle.
+[Duration evidence](windows-native-final-duration-nv12-4k-a50841a/README.md):
+54000video/86400000PCM per role, zero34ms misses, maxvideo10.222667ms/audio4.7829ms;
+memory source42.868218/relay0/receiver0KB/min below64; handle/thread gates pass.
+All43hashes/fullcoverage/upload bytes/exact analyzer/five unchanged pins verified.
+Next ready task: final-build native BGRA4K short pair, then report before duration.
+The [NV12 4K short pair](windows-native-final-nv12-4k-a50841a/README.md) passed:
+both150video/240000PCM, zero34ms misses; all64hashes verified.
 
 The prior NV12 1080p60 1800s run **PASSED**, completed09:07:02Z and recovered11:47Z
 without rerun. All43 collected hashes/full coverage, five unchanged pins, profile,
@@ -287,7 +289,7 @@ removes that concurrent workload from replay but does not waive on-demand failur
 The default path, actual decoder, full-pixel oracle, native leases, PCM and all
 17/34ms gates remain unchanged. Both modes retain explicit scope labels.
 
-Collect the current final-build NV12 4K duration before any other Windows workload. Other native4K and sharedCPU NV124K
+Advance final-build BGRA4K short pair, then if pass report before duration; one task at a time. Other native4K and sharedCPU NV124K
 qualification remain ready afterward. The duration adapter requires matching
 integrated/pair proof and unchanged gates;25 local validator tests and independent
 review passed. The review-found uncertain-SSH collection race was corrected and
