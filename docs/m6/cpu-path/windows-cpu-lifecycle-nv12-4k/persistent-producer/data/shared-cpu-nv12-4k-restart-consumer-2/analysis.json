@@ -1,0 +1,26 @@
+{
+  "pass": true,
+  "checks": {
+    "exit": true,
+    "complete": true,
+    "cycles": true,
+    "frames": true,
+    "pcm": true
+  },
+  "slopes": {},
+  "rows": [
+    [
+      0,
+      15296.0,
+      1478.0,
+      16.0
+    ],
+    [
+      1,
+      15368.0,
+      1479.0,
+      16.0
+    ]
+  ],
+  "scope": "production restart counts and persistent-role resources; not per-frame timing, native lifecycle or physical output"
+}

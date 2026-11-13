@@ -12,4 +12,6 @@ No per-frame timing, pixels, native ownership or physical-output claim from this
 
 Original binaries/full raw evidence: <linux-home>/dev/evidence/m6-lifecycle/shared-cpu-nv12-4k-producer-461584b-harness-fix.
 Binaries excluded from repo; committed text is localenv-normalized, original hashes
-refer to external bytes. Opposite role remains pending. M6open/M7held.
+refer to external bytes. Both roles are now collected passes. M6open/M7held.
+
+Persistent producer/fresh consumer:2x5s control plus100x5s PASS23:59:50Z. Exact15000video/24000000PCM; original limits retained. Slopes and independent126-hash/fullcoverage/idle proof: persistent-producer/data/status.json and persistent-producer/independent-collection.json.
