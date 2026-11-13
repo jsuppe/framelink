@@ -13,8 +13,7 @@ API approval is inferred. Failed native BGRA1080 and decoder4K are NOT QUALIFIED
 and excluded from initial advertised support. One task and one executor, serially.
 
 
-After collection of the missing shared-CPU BGRA1080 cell, no runtime is active.
-All four frozen461584b shared-CPU cells are collected passes. Exacta50841a178/178,
+All four frozen461584b shared-CPU duration cells and all8target/role production lifecycle cells are collected passes; Windows runtime is idle after01:23:12ZNovember13. Exacta50841a178/178,
 128exports and3 unchanged clients are already collected; do not repeat them.
 Controlled Windows GPU-delay, existing-policy metadata/audio faults, held-reader,
 pause/death/cancellation functional checks already exist in that suite.
@@ -63,3 +62,15 @@ functional check was identified in this reconciliation. This does not assert
 that all project work is mathematically impossible. Renderer integration is collected;
 remaining bounded-lifecycle and final supported-profile gates are explicit in
 [M6 Windows readiness](M6_WINDOWS_READINESS.md). Do not launch speculative repeats merely to keep a process running.
+
+## Remaining native contract choice and closure dependencies
+
+[Concrete native lifecycle choices](lifecycle/NATIVE_LIFECYCLE_DECISION.md): accepted
+fresh-worker/single-generation support with matched qualification, explicitly
+authorized device-owner implementation for persistent applications, or a further
+deferral of advertised native readiness. None is selected by this document.
+Jon owns that support contract; executor owns validation/repair after it is settled.
+Final release artifact selection/integrated/API gates and verified merge depend
+on that boundary. Source reconciliation finds113production/header/runtime/sample/
+CMake blobs identical toa50841a; only the test-only lifecycle guard differs.
+No extra native repeat or unapproved lifetime implementation is the next action.
