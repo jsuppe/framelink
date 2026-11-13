@@ -1,0 +1,42 @@
+{
+  "state": "finished",
+  "started_utc": "2026-11-13T00:00:15.414214+00:00",
+  "revision": "461584bbf5a6b8b70cec1578d69d35cb4b1ea2ff",
+  "harness_source_sha256": "55573459f141299ee44ad23734bfa273b57f9635114862b16df0a52c75ddf7d8",
+  "profile": "shared CPU BGRA1080p60 restart producer, persistent consumer",
+  "limits": {
+    "memory_kib_per_cycle": 16,
+    "handles_per_cycle": 0.1,
+    "threads_per_cycle": 0.02
+  },
+  "warmup_cycles": 5,
+  "cases": [
+    {
+      "label": "shared-cpu-bgra-1080-restart-producer-2",
+      "exit": 0,
+      "pass": true,
+      "slopes": {},
+      "ended_utc": "2026-11-13T00:00:25.914605+00:00"
+    },
+    {
+      "label": "shared-cpu-bgra-1080-restart-producer-100",
+      "exit": 0,
+      "pass": true,
+      "slopes": {
+        "memory_kib_per_cycle": -2.2361142217245242,
+        "handles_per_cycle": -0.15156774916013438,
+        "threads_per_cycle": -0.0653555431131019
+      },
+      "ended_utc": "2026-11-13T00:09:00.957045+00:00"
+    }
+  ],
+  "case": "shared-cpu-bgra-1080-restart-producer-100",
+  "driver_pid": 42228,
+  "ended_utc": "2026-11-13T00:09:00.957338+00:00",
+  "final_binary_sha256": {
+    "framelink_gst_session.dll": "3329bef0da3a27d645c6348b4b509790c576550694046373649c8c03ba803a99",
+    "framelink.dll": "09f302958b85d65ce6dfc9c2b2f45ba7d41dfe2cd603dd6bc90c3681c07708a4",
+    "fl_gst_av_bench.exe": "acbac149eff82555f134c653ba5d100e7b35bc38209716967e1a8021326f175d",
+    "gstframelink.dll": "eaeb59775eb2da04c0a998d30a072d28a2994957f746d7943dd0475c3182425e"
+  }
+}
