@@ -13,5 +13,7 @@ EXECUTION_GAP: BGRA shared-CPU lifecycle controller completed2026-11-13T00:09:01
 
 Full originals/binaries remain at <linux-home>/dev/evidence/m6-lifecycle/shared-cpu-bgra-1080-producer-461584b-harness-fix.
 Repo excludes binaries; localenv filter normalizes textual paths, original hashes
-refer to external bytes. Opposite role pending; no native, per-frame timing, pixel
+refer to external bytes. Both roles now collected; no native, per-frame timing, pixel
 or physical-output qualification from this count/resource test. M6open/M7held.
+
+Persistent producer/fresh consumer100cycles PASS2026-11-13T01:04:59.395861+00:00: exact30000video/24000000PCM. Slopes {"memory_kib_per_cycle": -2.0697088465845463, "handles_per_cycle": -0.12122060470324748, "threads_per_cycle": -0.06005039193729003}. Originallimits,126hashes/fullcoverage/independentraw/idle0 verified.
