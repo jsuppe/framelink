@@ -24,6 +24,18 @@ real reader completion and snapshots remain mandatory even for finite sessions.
 No hidden retained device, timed cleanup sleep or process termination replaces the
 published close/drain/lease obligations. An opt-in device-owner API is only a proposal.
 
+### Measured shared-CPU lifecycle
+
+For the named Windows host/driver and BGRA/NV12 at1080p60/4K30, both endpoint
+roles pass100x5s sessions with the other endpoint recreated in a fresh process.
+Create fresh bins and session generation, release genuine mappings/leases and
+finish teardown before the next setup. Original first5warmups and private-commit,
+handle/thread slope gates apply; all800measured cycles have exact media counts.
+This is measured warm lifecycle at that cadence, not arbitrary/infinite reconnect,
+permission to discard held mappings or a waiver of cold one-handle observations.
+See [resource evidence](cpu-path/windows-cpu-lifecycle-summary/README.md).
+It does not establish the same contract for native D3D or renderer GPU resources.
+
 ### Renderer integration boundary
 
 Approved renderer9f74b9d with repaira6a1906 accepts explicit `--av-latency-ms 0`

@@ -17,7 +17,7 @@ Final publication must pin the selected exact integrated revisions, not floating
 
 | Explicit path | Candidate configuration | Existing evidence | Readiness boundary |
 |---|---|---|---|
-| Negotiated shared CPU | BGRA/NV12,1920x1080p60 and3840x2160p30 | Four461584b1800s cells pass | Final revision equivalence and accepted lifecycle still required |
+| Negotiated shared CPU | BGRA/NV12,1920x1080p60 and3840x2160p30 | Four461584b1800s cells and8/8production lifecycle cells pass | Exact artifact/revision selection and final closure remain; bounded warm100x5s lifecycle, not unrestricted cadence |
 | Native same-adapter two-hop | NV12,1920x1080p60 and3840x2160p30; BGRA3840x2160p30 | Threea50841a1800s cells pass | Strict ownership/synchronization; bounded lifecycle still required |
 | Native same-adapter two-hop | BGRA1920x1080p60 | Finala50841a run FAILED after~695s | **NOT QUALIFIED; excluded**. Earlier11d1b65 pass does not override failure |
 | Real decoded source relay | 1920x1080p60 | Matched short pair pass77afa1a | Functional/short-rate evidence only; no endurance support claim |
@@ -39,17 +39,17 @@ must be documented; no new uniform D2/D3 default is selected.
   PCM and trace-loss checks at0ms and100ms. Original undersized trace capture retained as failed.
 - [x] Existinga50841a integrated178/178,128exports retaining119,3unchangedclients archived.
 - [x] Named shared-CPU and three passing native duration cells archived; failed cells retained.
-- [x] Shared-CPU NV121080p60 persistent-consumer100cycle production control: original resource limits pass; [evidence](cpu-path/windows-cpu-lifecycle-nv12-1080/README.md). Other roles/targets are not inferred.
+- [x] Shared-CPU all8target/role100cycle production controls: original resource limits pass; [summary](cpu-path/windows-cpu-lifecycle-summary/README.md).800measured cycles, exact media; this does not qualify native reconnect.
 - [ ] Publish a **validated bounded lifecycle** for every advertised path. Existing
-  persistent producer/consumer100-cycle results exceed16KiB/cycle; delayed raw-driver
+  native persistent producer/consumer100-cycle results exceed16KiB/cycle; delayed raw-driver
   reclamation is not production equivalence. Do not advertise unrestricted reconnect.
   Executor must validate an authorized existing contract or bring a concrete contract
   choice to Jon. Optional device-owner proposal is not implementation authorization.
-- [ ] Reconcile final renderer supported scope (conversion, ring12/pending6, exact
+- [x] Reconcile final renderer supported scope (conversion, ring12/pending6, exact
   revision and submission-only limits) with the transport profile. Do not claim
   two-slot renderer qualification from unrelated native transport tests.
-- [ ] Finish supported-profile API/ownership/error/default documentation, explicit
-  selection/rejection, and supported-lifecycle integration. No new default choice implied.
+- [x] Document existing supported-profile API/ownership/error/defaults and explicit selection/rejection in WINDOWS_APP_CONTRACT.md. Shared-CPU bounded lifecycle now measured; native lifetime contract remains a separate unchecked gate. No new default choice implied.
+- [x] Record exact production source equivalence to a50841a plus the sole test-only lifecycle guard change; [scope](cpu-path/windows-cpu-lifecycle-summary/source-equivalence.json). This is not rebuild-byte equality or final release qualification.
 - [ ] Final exact-revision integrated validation and API/source/binary compatibility
   reconciliation after planned supported-path changes. Reuse exact unchanged evidence
   only with explicit hash/source equivalence; no unnecessary campaign repetition.

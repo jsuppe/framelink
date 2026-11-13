@@ -60,3 +60,7 @@ These are transport arrival/accounting/resource results, not physical playback, 
 - CPU/GPU/isolated-hop product budgets and public overload default remain unresolved. No retrospective threshold adjustment. M6.6 must measure trace overhead and per-boundary identities; M6.7/9 require exact final integrated revision validation.
 
 Final native a50841a two-hop cells: NV121080, NV124K and BGRA4K duration pass; BGRA1080 duration failed around695s and remains unqualified. Older table passes retain historical scope and do not waive that failure. See LOW_LATENCY_PLAN.md for exact archives and unresolved cause.
+
+## Shared-CPU lifecycle completion — November12/13
+
+All8format/target/persistent-role100x5s production lifecycle cells pass original warm resource limits. [Summary and exclusions](cpu-path/windows-cpu-lifecycle-summary/README.md). Native growth failures are not changed; no unlimited-rate reconnect claim.

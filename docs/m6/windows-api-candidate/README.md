@@ -29,8 +29,7 @@ explicit unavailable-adapter rejection and producer-open failed-output details
 are documented in the app contract and compatibility review.
 
 Historical startup/resource failures remain suspended, not waived by a passing
-integrated suite. Final-rate/lifetime and all-platform M6 gates, D2/D3 decisions
-and broader qualification remain open. **API not frozen; M6 not complete; M7 held.**
+integrated suite. The approved Windows-only support matrix supersedes broad-platform completion gates. Shared-CPU lifecycle now passes all8cells; native lifetime and final artifact/merge gates remain open. New D2/D3 convenience defaults remain deferred, not implicitly selected. **API not frozen; M6 not complete; M7 held.**
 
 **Historical candidate** exact revision: `609cb74031a5de2cee782619007a6e87ab7fbccd`.
 Clean isolated Windows source archive SHA256:

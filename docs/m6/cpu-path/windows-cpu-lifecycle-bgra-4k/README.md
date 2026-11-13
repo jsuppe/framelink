@@ -18,5 +18,7 @@ limits retained. Independent raw counts/slopes and126hashes/fullcoverage/idle0 v
 
 Full originals/binaries remain at <linux-home>/dev/evidence/m6-lifecycle/shared-cpu-bgra-4k-producer-461584b-harness-fix.
 Binaries excluded from repo; text is localenv-normalized. Original hashes refer to
-external bytes. Opposite role pending. No native, pixel, per-frame timing or physical
+external bytes. Both roles now collected passes. No native, pixel, per-frame timing or physical
 output claim from this count/resource test. M6open/M7held.
+
+Persistent producer/fresh consumer100cycles PASS2026-11-13T01:23:11.294461+00:00, exact15000video/24000000PCM. Slopes {"memory_kib_per_cycle": -0.2265397536394177, "handles_per_cycle": -0.11800111982082867, "threads_per_cycle": -0.05953247480403136}. Independent126hash/fullcoverage/raw/idle0 checks passed.

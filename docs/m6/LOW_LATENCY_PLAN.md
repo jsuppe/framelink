@@ -252,14 +252,8 @@ M6 remains open; M7 remains held.
 | D2 / D3 | Unresolved public overload/convenience-fallback decisions; existing explicit profiles/defaults preserved | Jon; no automatic default change or hidden native-to-CPU fallback |
 | Linux / Android campaigns | Broad work deferred under Windows-first direction. Prior Linux BGRA and other completed campaigns collected, not repeated. Android BGRA4K and NV121080 residual failures remain suspended; clean trace diagnostics did not waive them | Evelyn; resume deferred integration only after Windows priority permits; causal fixes required for suspended failed cells |
 
-**Windows runtime ownership:** qualification_recovery sole serial executor.
-Shared-CPU NV121080p60 restart-producer/persistent-consumer100x5s **PASS**:
-30000video/24000000PCM, original slopes -2.192665KiB/-0.151568handles/-0.065356threads
-per cycle.126remote hashes/fullcoverage and idle23:31:16Z verified. Test-only guard
-fix/evidencea5d52d1; [archive](cpu-path/windows-cpu-lifecycle-nv12-1080/README.md).
-Opposite persistent-producer role now RUNNING ownedexec98365,2cycle control then100x5s.
-Original461584b productionDLL pins and16/.1/.02 resource gates retained.
-No parallel task or native failure retry; collect before advancing another cell.
+**Windows runtime ownership:** Windows runtime IDLE after final shared-CPU cell collected01:23:12Z. All8cells/800measured cycles pass original resource gates;126remotehashes percell, rawcount/slopes/idle independently checked. Sole qualification_recovery now doing serial final source/API/support reconciliation, not running tests. Production source blobs identical toa50841a; only test/fl_gst_av_bench.cpp changed. Native lifecycle remains unqualified; final release artifact selection/integration and verified merge pending. No device-owner/default authorization, no M7.
+
 Renderer integration is collected: repaira6a1906,4focused tests,9CLI controls,
 three complete5s identity captures (0/100ms,300video/240000PCM). Source/binary pins,
 67remote result hashes and complete coverage verified; original trace-capacity
