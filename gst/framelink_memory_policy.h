@@ -37,3 +37,13 @@ typedef struct GstFrameLinkMemoryPolicy {
 // Errors surface on the bus. One setup attempt per bin; use new bins to reconnect,
 // including after cancellation/failure. No implicit fallback. Other platforms
 // return FALSE. Existing broker actions and unbound defaults remain unchanged.
+
+// Windows bins: set-local-d3d11-device-owner(pointer) -> gboolean, after a
+// configuration (and native candidate action, when used), while NULL before setup.
+// Also supports the existing explicit D3D11 mapped-copy local A/V profile; never
+// shared-cpu/audio-only or broker-adopted channels. Freezes configuration.
+// Retains an explicit flD3D11DeviceOwner until bin destruction; setup transfers a
+// separate reference to its session/channel. One selection, no mutation after
+// setup. A fresh bin/session may reuse the application owner only after old
+// channel/snapshot/GstMemory retirement. Rejection leaves existing state intact.
+// Not a pointer property, implicit cache, new default, or readiness guarantee.

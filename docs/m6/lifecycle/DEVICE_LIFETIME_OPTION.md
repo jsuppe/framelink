@@ -1,6 +1,22 @@
 # Review option: explicit Windows device lifetime
 
-Status: **proposal only; not approved, implemented, exported or qualified**.
+## Explicit retained-device owner approved — 2026-11-12 20:40:45 EST
+
+Jon selected option B for persistent applications. Implement and qualify the explicit
+selected-adapter retained-device owner described in DEVICE_LIFETIME_OPTION.md:
+create/retain/release, one attached channel initially, explicit factories/bounded
+producer open, fresh generation storage/fences/identity and transactional session/
+GStreamer propagation. Safe references, leases and graph retirement remain mandatory;
+removed devices reject. Legacy APIs/defaults remain; no hidden cache/fallback or
+waiver of failed default lifecycle. Require original-limit matched100-cycle both-role
+and held-lease tests, faults, compatibility and final changed-runtime qualification.
+This supersedes only prior device-owner deferral/unapproved status. Other scope
+exclusions, unchanged D2/D3/budgets, serial execution and M7 hold remain.
+Loom: REQ-1dcc0902 (owner), REQ-2d7aec46 (preserved/amended Windows scope);
+REQ-5c4df445 is superseded, not a waiver of its other constraints.
+
+
+Status: **option B approved; implementation in progress; NOT QUALIFIED**.
 Prepared2026-11-12 after the [causal controls](device-causal-controls-20261112/README.md).
 This makes the previously identified product decision reviewable. It does not
 change D2/D3, the public default, or any failed acceptance gate.

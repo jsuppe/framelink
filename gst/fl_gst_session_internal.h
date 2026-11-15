@@ -29,3 +29,8 @@ FL_GST_SESSION_API gboolean fl_gst_session_open_local_cpu_epoch(FlGstSession*,gb
 
 // Private to the session library, not an exported application API.
 G_GNUC_INTERNAL void fl_gst_session_complete_local(FlGstSession*);
+
+#ifdef _WIN32
+// Retained result; transport keeps it through setup rollback/publication.
+G_GNUC_INTERNAL flD3D11DeviceOwner* fl_gst_session_ref_d3d11_device_owner(FlGstSession*);
+#endif

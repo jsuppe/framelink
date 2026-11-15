@@ -46,6 +46,28 @@
 
 using Microsoft::WRL::ComPtr;
 
+struct flD3D11DeviceOwner {
+    std::atomic<uint32_t> references{1};
+    std::mutex mutex;
+    bool attached=false, poisoned=false;
+    uint8_t luid[8]{};
+    ComPtr<ID3D11Fence> retiringFence;
+    uint64_t retiringValue=0;
+    ComPtr<ID3D11Device> device;
+    ComPtr<ID3D11DeviceContext4> context;
+};
+
+// Shared by the channel and snapshots. Last reference releases attachment only
+// after channel resources and snapshot handles are destroyed.
+struct DeviceAttachment {
+    flD3D11DeviceOwner* owner=nullptr;
+    ~DeviceAttachment() {
+        if(!owner)return;
+        { std::lock_guard<std::mutex> lock(owner->mutex); owner->attached=false; }
+        flReleaseD3D11DeviceOwner(owner);
+    }
+};
+
 struct flImage {
     ComPtr<ID3D11Texture2D> tex;
     ComPtr<ID3D11Texture2D> staging;
@@ -62,6 +84,7 @@ struct LeaseCompletion {
 };
 
 struct flD3D11PoolSnapshot {
+    std::shared_ptr<DeviceAttachment> attachment;
     flChannelInfo info{};
     std::vector<HANDLE> handles;
     std::shared_ptr<std::atomic<uint32_t>> pins;
@@ -72,6 +95,7 @@ struct flD3D11PoolSnapshot {
 };
 
 struct flChannel {
+    std::shared_ptr<DeviceAttachment> attachment; // destroyed last
     bool isConsumer = false;
     bool externalPool = false;
     uint32_t flags = 0;
@@ -181,6 +205,28 @@ ComPtr<ID3D11Device> createDevice(const uint8_t luid[8], bool luidValid, bool* a
     ComPtr<ID3D10Multithread> mt;
     if (SUCCEEDED(dev.As(&mt))) mt->SetMultithreadProtected(TRUE);
     return dev;
+}
+
+flResult attachDevice(flChannel* ch, flD3D11DeviceOwner* owner,
+                      const uint8_t* luid, bool checkLuid) {
+    auto attachment=std::make_shared<DeviceAttachment>();
+    std::lock_guard<std::mutex> lock(owner->mutex);
+    if(owner->poisoned || FAILED(owner->device->GetDeviceRemovedReason())) {
+        owner->poisoned=true; return FL_DISCONNECTED;
+    }
+    if(checkLuid && (!luid || memcmp(luid,owner->luid,8)))return FL_ADAPTER_MISMATCH;
+    if(owner->attached)return FL_BUSY;
+    if(owner->retiringFence) {
+        const auto completed=owner->retiringFence->GetCompletedValue();
+        if(completed==UINT64_MAX){owner->poisoned=true;return FL_DISCONNECTED;}
+        if(completed<owner->retiringValue)return FL_BUSY;
+        owner->retiringFence.Reset();owner->retiringValue=0;
+    }
+    flRetainD3D11DeviceOwner(owner);
+    attachment->owner=owner; owner->attached=true;
+    ch->attachment=std::move(attachment);
+    ch->device=owner->device; ch->ctx=owner->context;
+    return FL_OK;
 }
 
 bool finishDeviceSetup(flChannel* ch) {
@@ -505,10 +551,12 @@ FL_API const char* flResultString(flResult r) {
 
 static flResult createChannel(const char* name, uint32_t width, uint32_t height,
     flFormat format, uint32_t poolSize, uint32_t flags,
-    const uint8_t adapterLUID[8], void* const* externalHandles, flChannel** out) {
+    const uint8_t adapterLUID[8], void* const* externalHandles, flChannel** out,
+    flD3D11DeviceOwner* owner=nullptr) {
     fltrace::Scope trace("flCreateChannelOnAdapter",fltrace::id(name));
     if(trace.active){trace.event.sequence=((uint64_t)width<<32)|height;trace.event.fence=(uint64_t)format;trace.event.slot=poolSize;trace.event.pts=flags;}
 
+    if(out)*out=nullptr;
     if (!name || !out || !fl::validGeometry(width,height,format)) return trace.result(FL_INVALID);
     *out = nullptr;
     if (format != FL_FORMAT_BGRA8 && format != FL_FORMAT_RGBA8 && format != FL_FORMAT_RGB10A2 && format != FL_FORMAT_NV12) return trace.result(FL_FORMAT_UNSUPPORTED);
@@ -521,7 +569,10 @@ static flResult createChannel(const char* name, uint32_t width, uint32_t height,
     const uint8_t zeroLuid[8]{};
     const bool explicitAdapter = adapterLUID && memcmp(adapterLUID, zeroLuid, 8) != 0;
     bool adapterMissing=false;
-    ch->device = createDevice(adapterLUID, explicitAdapter, &adapterMissing);
+    if(owner) {
+        auto result=attachDevice(ch,owner,adapterLUID,explicitAdapter);
+        if(result!=FL_OK){flClose(ch);return trace.result(result);}
+    }else ch->device = createDevice(adapterLUID, explicitAdapter, &adapterMissing);
     if (adapterMissing) { flClose(ch); return trace.result(FL_ADAPTER_MISMATCH); }
     if (!ch->device || !finishDeviceSetup(ch)) {
         flClose(ch);
@@ -558,6 +609,52 @@ static flResult createChannel(const char* name, uint32_t width, uint32_t height,
     return trace.result(FL_OK);
 }
 
+FL_API flResult flCreateD3D11DeviceOwner(const uint8_t luid[8], flD3D11DeviceOwner** out) {
+    if(!out)return FL_INVALID;
+    *out=nullptr;
+    auto owner=std::make_unique<flD3D11DeviceOwner>();
+    const uint8_t zero[8]{}; bool missing=false;
+    owner->device=createDevice(luid,luid && memcmp(luid,zero,8),&missing);
+    if(missing)return FL_ADAPTER_MISMATCH;
+    if(!owner->device)return FL_INTERNAL;
+    ComPtr<ID3D11Device5> dev5;
+    ComPtr<ID3D11DeviceContext> context;
+    owner->device->GetImmediateContext(&context);
+    ComPtr<IDXGIDevice> dxgi; ComPtr<IDXGIAdapter> adapter; DXGI_ADAPTER_DESC desc{};
+    if(FAILED(owner->device.As(&dev5)) || FAILED(context.As(&owner->context)) ||
+       FAILED(owner->device.As(&dxgi)) || FAILED(dxgi->GetAdapter(&adapter)) ||
+       FAILED(adapter->GetDesc(&desc)))return FL_FORMAT_UNSUPPORTED;
+    memcpy(owner->luid,&desc.AdapterLuid,8);
+    *out=owner.release();return FL_OK;
+}
+FL_API void flRetainD3D11DeviceOwner(flD3D11DeviceOwner* owner) {
+    if(owner)++owner->references;
+}
+FL_API void flReleaseD3D11DeviceOwner(flD3D11DeviceOwner* owner) {
+    if(owner && --owner->references==0)delete owner;
+}
+FL_API ID3D11Device* flD3D11DeviceOwnerDevice(flD3D11DeviceOwner* owner) {
+    return owner?owner->device.Get():nullptr;
+}
+FL_API flResult flD3D11DeviceOwnerAdapter(flD3D11DeviceOwner* owner,uint8_t out[8]) {
+    if(!owner || !out)return FL_INVALID;
+    memcpy(out,owner->luid,8);return FL_OK;
+}
+FL_API flResult flCreateChannelWithD3D11DeviceOwner(flD3D11DeviceOwner* owner,
+    const char* name,uint32_t width,uint32_t height,flFormat format,uint32_t poolSize,
+    uint32_t flags,flChannel** out) {
+    if(out)*out=nullptr;
+    if(!owner)return FL_INVALID;
+    return createChannel(name,width,height,format,poolSize,flags,nullptr,nullptr,out,owner);
+}
+FL_API flResult flCreateChannelFromD3D11HandlesWithDeviceOwner(flD3D11DeviceOwner* owner,
+    const char* name,uint32_t width,uint32_t height,flFormat format,uint32_t poolSize,
+    uint32_t flags,void*const* handles,flChannel** out) {
+    if(out)*out=nullptr;
+    if(!owner || !handles || (flags & ~(FL_MAP_CPU|FL_GPU_SYNC|FL_DEFER_RELEASE|FL_GPU_RENDER|FL_TRACK_ARRIVAL|FL_REQUIRE_FRAME_METADATA)))return FL_INVALID;
+    return createChannel(name,width,height,format,poolSize,flags,nullptr,handles,out,owner);
+}
+
 FL_API flResult flCreateChannelOnAdapter(const char* name, uint32_t width, uint32_t height,
     flFormat format, uint32_t poolSize, uint32_t flags, const uint8_t adapterLUID[8], flChannel** out) {
     return createChannel(name,width,height,format,poolSize,flags,adapterLUID,nullptr,out);
@@ -587,7 +684,7 @@ FL_API flResult flCreateChannel(const char* name, uint32_t width, uint32_t heigh
 
 static flResult importRing(flChannel*, const fl::RingDescMsg*);
 
-static flResult openProducer(const char* name, flChannel** out, SetupDeadline* setup) {
+static flResult openProducer(const char* name, flChannel** out, SetupDeadline* setup, flD3D11DeviceOwner* owner=nullptr) {
     fltrace::Scope trace("flOpenProducer",fltrace::id(name));
 
     if (!name || !out) return trace.result(FL_INVALID);
@@ -644,7 +741,11 @@ static flResult openProducer(const char* name, flChannel** out, SetupDeadline* s
     // Open on the consumer's adapter. Getting this wrong is the cross-adapter
     // failure the API promises to refuse rather than crash on.
     bool adapterMissing=false;
-    ch->device = createDevice(srv->adapterLUID, srv->luidValid != 0, &adapterMissing);
+    if(owner) {
+        if(!srv->luidValid){flClose(ch);return FL_ADAPTER_MISMATCH;}
+        auto result=attachDevice(ch,owner,srv->adapterLUID,true);
+        if(result!=FL_OK){flClose(ch);return trace.result(result);}
+    }else ch->device = createDevice(srv->adapterLUID, srv->luidValid != 0, &adapterMissing);
     if (adapterMissing) { flClose(ch); return trace.result(FL_ADAPTER_MISMATCH); }
     if (!ch->device || !finishDeviceSetup(ch)) {
         flClose(ch);
@@ -677,12 +778,12 @@ FL_API flResult flOpenProducer(const char* name, flChannel** out) {
     return openProducer(name,out,nullptr);
 }
 
-FL_API flResult flOpenProducerD3D11Bounded(const char* name, uint32_t timeoutMs,
-                                         void* cancelEvent, flChannel** out) {
+static flResult openProducerBounded(const char* name, uint32_t timeoutMs,
+                                         void* cancelEvent, flChannel** out, flD3D11DeviceOwner* owner) {
     if(out)*out=nullptr;
     if(!name || !out || !timeoutMs || timeoutMs>60000)return FL_INVALID;
     SetupDeadline setup(timeoutMs,(HANDLE)cancelEvent);
-    flResult result=openProducer(name,out,&setup);
+    flResult result=openProducer(name,out,&setup,owner);
     // Establish one completion boundary: the watcher cannot observe a later
     // cancellation after this final check but before success publication.
     setup.finish();
@@ -692,6 +793,17 @@ FL_API flResult flOpenProducerD3D11Bounded(const char* name, uint32_t timeoutMs,
         return stopped;
     }
     return result;
+}
+
+FL_API flResult flOpenProducerD3D11Bounded(const char* name, uint32_t timeoutMs,
+                                         void* cancelEvent, flChannel** out) {
+    return openProducerBounded(name,timeoutMs,cancelEvent,out,nullptr);
+}
+FL_API flResult flOpenProducerD3D11BoundedWithDeviceOwner(flD3D11DeviceOwner* owner,
+    const char* name, uint32_t timeoutMs, void* cancelEvent, flChannel** out) {
+    if(out)*out=nullptr;
+    if(!owner)return FL_INVALID;
+    return openProducerBounded(name,timeoutMs,cancelEvent,out,owner);
 }
 
 // Producer: replace our view of the ring from a RingDesc. Used at attach and
@@ -1113,6 +1225,26 @@ FL_API void flClose(flChannel* ch) {
     } else if (ch->link.connected()) {
         ch->link.send(fl::MsgType::Bye);
     }
+    if(ch->attachment) {
+        // No hidden GPU wait or invented lease completion. An unsafe retirement
+        // permanently rejects reuse; fresh generation allocation is not a waiver.
+        auto* owner=ch->attachment->owner;
+        const uint64_t required=ch->isConsumer?ch->heldReady:ch->readyValue;
+        const bool incomplete=ch->frameHeld || !ch->readers.empty() || !ch->pending.empty() ||
+            ch->submittingSlot!=UINT32_MAX ||
+            (ch->isConsumer && ch->consumedFence && ch->consumedFence->GetCompletedValue()<required) ||
+            FAILED(owner->device->GetDeviceRemovedReason());
+        { std::lock_guard<std::mutex> lock(owner->mutex); owner->poisoned|=incomplete;
+          // A remote reader may legitimately outlive producer close. Pin its
+          // actual consumed fence, not storage for reuse; the next attachment
+          // stays BUSY until real completion, never treating close as drain.
+          if(!ch->isConsumer && ch->consumedFence && ch->consumedFence->GetCompletedValue()<required) {
+              owner->retiringFence=ch->consumedFence;owner->retiringValue=required;
+          }
+        }
+        // Clear bindings from this retired graph; does not wait for GPU completion.
+        if(ch->ctx){ch->ctx->ClearState();ch->ctx->Flush();}
+    }
     for (flImage* img : ch->images) {
         if (img->shared) CloseHandle(img->shared);
         delete img;
@@ -1136,6 +1268,7 @@ FL_API flResult flSnapshotD3D11ConsumerPool(flChannel* ch, flD3D11PoolSnapshot**
         if(!DuplicateHandle(GetCurrentProcess(),ch->images[i]->shared,GetCurrentProcess(),
                             &snapshot->handles[i],0,FALSE,DUPLICATE_SAME_ACCESS))return FL_INTERNAL;
     }
+    snapshot->attachment=ch->attachment;
     snapshot->pins=ch->poolPins;
     ++*snapshot->pins;
     *out=snapshot.release();

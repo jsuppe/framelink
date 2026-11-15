@@ -1,5 +1,23 @@
 # M6 Windows readiness — approved scope and closure checklist
 
+## Explicit retained-device owner approved — 2026-11-12 20:40:45 EST
+
+Jon selected option B for persistent applications. Implement and qualify the explicit
+selected-adapter retained-device owner described in DEVICE_LIFETIME_OPTION.md:
+create/retain/release, one attached channel initially, explicit factories/bounded
+producer open, fresh generation storage/fences/identity and transactional session/
+GStreamer propagation. Safe references, leases and graph retirement remain mandatory;
+removed devices reject. Legacy APIs/defaults remain; no hidden cache/fallback or
+waiver of failed default lifecycle. Require original-limit matched100-cycle both-role
+and held-lease tests, faults, compatibility and final changed-runtime qualification.
+This supersedes only prior device-owner deferral/unapproved status. Other scope
+exclusions, unchanged D2/D3/budgets, serial execution and M7 hold remain.
+Loom: REQ-1dcc0902 (owner), REQ-2d7aec46 (preserved/amended Windows scope);
+REQ-5c4df445 is superseded, not a waiver of its other constraints.
+
+**First result 2026-11-13:** the matched 100-cycle restart-producer case passes (−0.65 KiB/cycle), and the restart-consumer case **fails** (24.93 against 16 KiB/cycle; fresh-device baseline 84.09). See [device-owner-20261113](lifecycle/device-owner-20261113/README.md). Option B is not qualified.
+
+
 Approved by Jon on 2026-11-12 at18:14EST; Loom requirement `REQ-5c4df445`.
 **M6 OPEN / API NOT FROZEN / M7 HELD.** This is a candidate matrix, not a release
 support declaration. Narrowing scope does not relax correctness or memory gates.
@@ -43,8 +61,8 @@ must be documented; no new uniform D2/D3 default is selected.
 - [ ] Publish a **validated bounded lifecycle** for every advertised path. Existing
   native persistent producer/consumer100-cycle results exceed16KiB/cycle; delayed raw-driver
   reclamation is not production equivalence. Do not advertise unrestricted reconnect.
-  Executor must validate an authorized existing contract or bring a concrete contract
-  choice to Jon. Optional device-owner proposal is not implementation authorization.
+  Option B is now approved; implement and qualify the retained-device profile under
+  original limits. Do not qualify the unchanged failed default from its results.
 - [x] Reconcile final renderer supported scope (conversion, ring12/pending6, exact
   revision and submission-only limits) with the transport profile. Do not claim
   two-slot renderer qualification from unrelated native transport tests.
@@ -64,7 +82,7 @@ must be documented; no new uniform D2/D3 default is selected.
 | Broad Linux/Android performance/integration | Executor; Jon prioritizes | Explicit post-M6 expansion authorization; retain existing failed CPU/Android cells |
 | Other GPUs/drivers/cross-adapter/formats/rates | Executor; Jon selects matrix | Named expanded matrix and original budgets before qualification |
 | Native BGRA1080 and decoder4K failures | Executor | Causal evidence and justified repair, then affected original gates; no speculative duration repeats or waiver |
-| Optional retained-device API | Jon contract decision; executor implementation | Required by accepted lifecycle and explicitly approved API/ownership contract; otherwise deferred |
+| Retained-device API | Executor | MOVED INTO M6 by explicit option B approval; implementation/qualification pending, not deferred |
 | Automatic fallback/convenience profiles | Jon policy; executor implementation | Explicit behavior/default approval; explicit selection/rejection remains in M6 |
 | Physical display/acoustic timing | Jon scope/budget; executor measurement | Approved physical-output methodology and budgets; submission timestamps are not scanout |
 | Packaging/release/developer handoff | Executor after Jon maintenance release | M6 closure plus explicit release of M7 hold |

@@ -21,7 +21,7 @@ struct Handle {
 // cancellation supervision before any source writes. No independent writers.
 inline flResult transferRelayPool(HANDLE input,HANDLE peer,HANDLE cancel,guint timeout,
  const flSessionConfig&config,bool producer,GBytes*key,const char*name,unsigned count,
- bool cpuAccess,const void*adapter,void*const*exports,flChannel**out){
+ bool cpuAccess,const void*adapter,void*const*exports,flChannel**out,flD3D11DeviceOwner* deviceOwner=nullptr){
  Handle owned;owned.value=input;if(out)*out=nullptr;
  if(!out||!name||!*name||strlen(name)>240||count<2||count>FL_MAX_POOL_SIZE||
     !timeout||timeout>60000||!cancel||!config.videoTrackId||
@@ -77,7 +77,7 @@ inline flResult transferRelayPool(HANDLE input,HANDLE peer,HANDLE cancel,guint t
      memcmp(message.payload.data(),packet.data(),packet.size()))return FL_INVALID;
   if(!remaining())return FL_TIMEOUT;
   if(WaitForSingleObject(cancel,0)!=WAIT_TIMEOUT)return FL_DISCONNECTED;
-  result=flOpenProducerD3D11Bounded(name,remaining(),cancel,&channel.value);if(result!=FL_OK)return result;
+  result=deviceOwner?flOpenProducerD3D11BoundedWithDeviceOwner(deviceOwner,name,remaining(),cancel,&channel.value):flOpenProducerD3D11Bounded(name,remaining(),cancel,&channel.value);if(result!=FL_OK)return result;
   result=validateRing();if(result!=FL_OK)return result;
   result=send(attachedType,packet.data(),packet.size());if(result!=FL_OK)return result;
  }else{
@@ -104,7 +104,13 @@ inline flResult transferRelayPool(HANDLE input,HANDLE peer,HANDLE cancel,guint t
     if(compare(handles[n].value,handles[previous].value))return FL_INVALID;
    imports[n]=handles[n].value;
   }
-  result=flCreateChannelFromD3D11Handles(name,config.video.width,config.video.height,
+  if(deviceOwner){
+   uint8_t luid[8]{};flD3D11DeviceOwnerAdapter(deviceOwner,luid);
+   if(memcmp(luid,packet.data()+16,8))return FL_ADAPTER_MISMATCH;
+   result=flCreateChannelFromD3D11HandlesWithDeviceOwner(deviceOwner,name,config.video.width,config.video.height,
+    static_cast<flFormat>(config.video.format),count,
+    FL_DEFER_RELEASE|FL_REQUIRE_FRAME_METADATA|(cpuAccess?FL_MAP_CPU:0),imports.data(),&channel.value);
+  }else result=flCreateChannelFromD3D11Handles(name,config.video.width,config.video.height,
    static_cast<flFormat>(config.video.format),count,
    FL_DEFER_RELEASE|FL_REQUIRE_FRAME_METADATA|(cpuAccess?FL_MAP_CPU:0),
    packet.data()+16,imports.data(),&channel.value);

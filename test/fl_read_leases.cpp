@@ -53,12 +53,26 @@ static void collect(flChannel* c) {
  for(int i=0;i<1000;++i){auto r=flCollectReadLeases(c);if(r==FL_OK)return;CHECK(r==FL_BUSY||r==FL_DISCONNECTED);std::this_thread::sleep_for(std::chrono::milliseconds(1));}
  CHECK(false);
 }
+#ifdef _WIN32
+static flD3D11DeviceOwner *consumerOwner=nullptr,*producerOwner=nullptr;
+#endif
+static flResult open(const char*name,flChannel**out){
+#ifdef _WIN32
+ if(producerOwner)return flOpenProducerD3D11BoundedWithDeviceOwner(producerOwner,name,1000,nullptr,out);
+#endif
+ return flOpenProducer(name,out);
+}
 static int cycle() {
  std::string name="leases-"+std::to_string(std::chrono::steady_clock::now().time_since_epoch().count());
  flChannel *c=nullptr,*p=nullptr;
- auto r=flCreateChannelEx(name.c_str(),64,32,FL_FORMAT_RGBA8,2,FL_MAP_CPU|FL_DEFER_RELEASE,&c);
+ flResult r;
+#ifdef _WIN32
+ if(consumerOwner)r=flCreateChannelWithD3D11DeviceOwner(consumerOwner,name.c_str(),64,32,FL_FORMAT_RGBA8,2,FL_MAP_CPU|FL_DEFER_RELEASE,&c);
+ else
+#endif
+ r=flCreateChannelEx(name.c_str(),64,32,FL_FORMAT_RGBA8,2,FL_MAP_CPU|FL_DEFER_RELEASE,&c);
  if(r!=FL_OK)return 77;
- for(int i=0;i<100&&!p;++i){r=flOpenProducer(name.c_str(),&p);CHECK(r==FL_OK||r==FL_NOT_FOUND);if(!p)std::this_thread::sleep_for(std::chrono::milliseconds(5));}
+ for(int i=0;i<100&&!p;++i){r=open(name.c_str(),&p);CHECK(r==FL_OK||r==FL_NOT_FOUND);if(!p)std::this_thread::sleep_for(std::chrono::milliseconds(5));}
  CHECK(p);
  uint32_t localFlags=0;CHECK(flQueryConsumerFlags(c,&localFlags)==FL_OK&&localFlags==(FL_MAP_CPU|FL_DEFER_RELEASE));
  localFlags=123;CHECK(flQueryConsumerFlags(p,&localFlags)==FL_INVALID&&localFlags==123);
@@ -104,10 +118,10 @@ static int cycle() {
  CHECK(flAcquireFrame(c,&f,1000)==FL_OK && flLeaseFrame(c,&f,&first)==FL_OK);
  CHECK(restart.handoff(c,first)==FL_OK);
  flClose(p);p=nullptr;std::this_thread::sleep_for(std::chrono::milliseconds(30));
- CHECK(flOpenProducer(name.c_str(),&p)==FL_BUSY && !p);
+ CHECK(open(name.c_str(),&p)==FL_BUSY && !p);
  CHECK(flCollectReadLeases(c)==FL_BUSY);
  restart.signal();collect(c);
- for(int i=0;i<100&&!p;++i){r=flOpenProducer(name.c_str(),&p);CHECK(r==FL_OK||r==FL_BUSY||r==FL_DISCONNECTED);if(!p)std::this_thread::sleep_for(std::chrono::milliseconds(5));}
+ for(int i=0;i<100&&!p;++i){r=open(name.c_str(),&p);CHECK(r==FL_OK||r==FL_BUSY||r==FL_DISCONNECTED);if(!p)std::this_thread::sleep_for(std::chrono::milliseconds(5));}
  CHECK(p && flCompleteReadLease(c,first)==FL_INVALID);
  CHECK(flAcquireBuffer(p,&b,1000)==FL_OK && flSubmit(p,&b,707)==FL_OK);
  CHECK(flAcquireFrame(c,&f,1000)==FL_OK && flLeaseFrame(c,&f,&second)==FL_OK);
@@ -138,6 +152,14 @@ static void resourceRow(unsigned cycleNumber) {
  std::printf("cycle.%u=%llu|%u|%u\n",cycleNumber,memory,handles,threads);std::fflush(stdout);
 }
 int main(int argc,char**argv) {
+#ifdef _WIN32
+ struct Owners {~Owners(){flReleaseD3D11DeviceOwner(producerOwner);flReleaseD3D11DeviceOwner(consumerOwner);}} owners;
+ if(argc>1&&!std::strcmp(argv[argc-1],"--device-owner")){
+  --argc;CHECK(flCreateD3D11DeviceOwner(nullptr,&consumerOwner)==FL_OK);
+  uint8_t luid[8]{};CHECK(flD3D11DeviceOwnerAdapter(consumerOwner,luid)==FL_OK);
+  CHECK(flCreateD3D11DeviceOwner(luid,&producerOwner)==FL_OK);
+ }
+#endif
  unsigned cycles=1;bool sample=false;
  if(argc!=1){CHECK(argc==3&&!std::strcmp(argv[1],"--cycles"));char*end=nullptr;
   auto n=std::strtoul(argv[2],&end,10);CHECK(end&&!*end&&n>=6&&n<=1000);cycles=unsigned(n);sample=true;}

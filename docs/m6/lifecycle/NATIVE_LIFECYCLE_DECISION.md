@@ -1,5 +1,21 @@
 # Native lifecycle: remaining product boundary, not a qualified profile
 
+## Explicit retained-device owner approved — 2026-11-12 20:40:45 EST
+
+Jon selected option B for persistent applications. Implement and qualify the explicit
+selected-adapter retained-device owner described in DEVICE_LIFETIME_OPTION.md:
+create/retain/release, one attached channel initially, explicit factories/bounded
+producer open, fresh generation storage/fences/identity and transactional session/
+GStreamer propagation. Safe references, leases and graph retirement remain mandatory;
+removed devices reject. Legacy APIs/defaults remain; no hidden cache/fallback or
+waiver of failed default lifecycle. Require original-limit matched100-cycle both-role
+and held-lease tests, faults, compatibility and final changed-runtime qualification.
+This supersedes only prior device-owner deferral/unapproved status. Other scope
+exclusions, unchanged D2/D3/budgets, serial execution and M7 hold remain.
+Loom: REQ-1dcc0902 (owner), REQ-2d7aec46 (preserved/amended Windows scope);
+REQ-5c4df445 is superseded, not a waiver of its other constraints.
+
+
 As of2026-11-13: shared-CPU lifecycle is8/8passed. Native persistent-role100-cycle
 private-commit slopes remain21.10/84.09KiB per cycle; held-lease profile82.528,
 against the unchanged16KiB limit. Raw device-only deferred reclamation does not
@@ -41,8 +57,7 @@ implementation/measurement after the contract is settled.
 The [reviewed explicit device-owner option](DEVICE_LIFETIME_OPTION.md) is the
 concrete additive proposal: selected adapter, one attached channel initially,
 fresh per-generation storage/fences/identity, retained owner/reference semantics,
-no removed-device resurrection and full session/GStreamer propagation. It requires
-explicit implementation authorization. It must pass original100-cycle limits and
+no removed-device resurrection and full session/GStreamer propagation. It received explicit implementation authorization at20:40:45EST. It must pass original100-cycle limits and
 ownership/fault tests; it cannot qualify the unchanged fresh-device default.
 
 ### C. Defer advertised native readiness while preserving its implementation

@@ -1,5 +1,21 @@
 # M6 low-latency and native-memory resolution plan
 
+## Explicit retained-device owner approved — 2026-11-12 20:40:45 EST
+
+Jon selected option B for persistent applications. Implement and qualify the explicit
+selected-adapter retained-device owner described in DEVICE_LIFETIME_OPTION.md:
+create/retain/release, one attached channel initially, explicit factories/bounded
+producer open, fresh generation storage/fences/identity and transactional session/
+GStreamer propagation. Safe references, leases and graph retirement remain mandatory;
+removed devices reject. Legacy APIs/defaults remain; no hidden cache/fallback or
+waiver of failed default lifecycle. Require original-limit matched100-cycle both-role
+and held-lease tests, faults, compatibility and final changed-runtime qualification.
+This supersedes only prior device-owner deferral/unapproved status. Other scope
+exclusions, unchanged D2/D3/budgets, serial execution and M7 hold remain.
+Loom: REQ-1dcc0902 (owner), REQ-2d7aec46 (preserved/amended Windows scope);
+REQ-5c4df445 is superseded, not a waiver of its other constraints.
+
+
 ## Approved M6 Windows readiness scope — 2026-11-12 18:14 EST
 
 Jon approved readiness for explicitly named Windows configurations, not universal
@@ -252,7 +268,7 @@ M6 remains open; M7 remains held.
 | D2 / D3 | Unresolved public overload/convenience-fallback decisions; existing explicit profiles/defaults preserved | Jon; no automatic default change or hidden native-to-CPU fallback |
 | Linux / Android campaigns | Broad work deferred under Windows-first direction. Prior Linux BGRA and other completed campaigns collected, not repeated. Android BGRA4K and NV121080 residual failures remain suspended; clean trace diagnostics did not waive them | Evelyn; resume deferred integration only after Windows priority permits; causal fixes required for suspended failed cells |
 
-**Windows runtime ownership:** Windows runtime IDLE, all8shared-CPU lifecycle cells collected/verified; finalidle01:23:12ZNovember13. Renderer integration and existing-profile documentation reconciled;113production blobs equal toa50841a, sole test-only guard change fully exercised. No supported-path code work remains ready without settling native lifecycle support: see docs/m6/lifecycle/NATIVE_LIFECYCLE_DECISION.md. Jon owns accepted worker-isolated contract vs authorized device-owner vs further native-support deferral; executor owns consequent validation/repair. Native100cycle failures retained. Final artifact/integrated/API/verifiedmerge gates await that contract, not marked complete. Qualification_recovery is not running runtime/code; no speculative repeats, no M7.
+**Windows runtime ownership:** EXECUTION_GAP: preflight completed2026-11-13T01:50:39Z; no next task until recovery11:47:23Z. Existing implementation builds and owner/preflight tests passed; Windows verified idle, no competing processes. Sole qualification_recovery now collecting original preflight without rerun, then starting original-limit100cycle retained-device qualification serially. M6open/M7held; no readiness claim.
 
 Renderer integration is collected: repaira6a1906,4focused tests,9CLI controls,
 three complete5s identity captures (0/100ms,300video/240000PCM). Source/binary pins,
@@ -370,7 +386,7 @@ in [the execution archive](LEDGER_HISTORY_20261112.md) and
 not supersede this current state. Notify Jon at verified full M6 closure and hold
 before M7 maintenance.
 
-Device-lifetime next boundary: [reviewable opt-in contract](lifecycle/DEVICE_LIFETIME_OPTION.md) prepared; not adopted or implemented. Evelyn owns implementation/measurements only after the product-contract decision; Jon owns whether an additional opt-in profile is acceptable while default-profile failures remain open. No equivalent teardown probes or unsupported cache/sleep fix are queued. Resource diagnostics released runtime17:03:49Z; later shared-CPU qualification collected19:51:34Z. M6 remains open; this is not a declaration that every remaining task is blocked.
+Device-lifetime next boundary: option B approved; implementation in progress under REQ-1dcc0902. Owner: qualification_recovery. Gates remain unpassed until measured.
 
 ### Serial recovery19:20Z
 EXECUTION_GAP since17:07Z recorded. qualification_recovery is sole executor, parent conversation only. Evidence reconciliation confirms controlled Windows GPU-delay and existing-policy faults already passed in exacta50841a178/178. Executed the missing frozen461584b **shared-CPU BGRA1080p60** cell using existing pinned binaries:5s preflight and1800s passed unchanged gates; archived2f3c2bc/pinsad75507. This is not the failed native two-hop BGRA1080 path; no retry/waiver of that failure. Device-lifetime proposal awaits Jon and is not implemented.

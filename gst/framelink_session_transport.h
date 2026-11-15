@@ -3,7 +3,18 @@
 #include <gio/gio.h>
 #include "framelink.h"
 #include "framelink_memory_policy.h"
+#ifdef _WIN32
+typedef struct flD3D11DeviceOwner flD3D11DeviceOwner;
+#endif
 G_BEGIN_DECLS
+#ifdef _WIN32
+// Explicit local native lifetime selection, before negotiation/configuration.
+// Retains owner once, immutable for this session; caller serializes setup/config.
+// FAR4/FAR5 use it transactionally; CPU/audio-only setup rejects, never ignores it.
+// A channel/snapshot can retain owner beyond session destruction. Local choice
+// changes no wire/defaults. Fresh sessions/bins are required for each generation.
+FL_GST_SESSION_API gboolean fl_gst_session_set_d3d11_device_owner(FlGstSession*,flD3D11DeviceOwner*);
+#endif
 // Explicit native-memory agreement on a dedicated connected STREAM. Both peers
 // supply the SAME exact candidate, in producer/consumer order (not element-local
 // order). Authenticates the full configured session, both requirements and paths,

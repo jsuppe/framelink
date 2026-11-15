@@ -1,5 +1,21 @@
 # Windows remaining execution dependencies — 2026-11-12
 
+## Explicit retained-device owner approved — 2026-11-12 20:40:45 EST
+
+Jon selected option B for persistent applications. Implement and qualify the explicit
+selected-adapter retained-device owner described in DEVICE_LIFETIME_OPTION.md:
+create/retain/release, one attached channel initially, explicit factories/bounded
+producer open, fresh generation storage/fences/identity and transactional session/
+GStreamer propagation. Safe references, leases and graph retirement remain mandatory;
+removed devices reject. Legacy APIs/defaults remain; no hidden cache/fallback or
+waiver of failed default lifecycle. Require original-limit matched100-cycle both-role
+and held-lease tests, faults, compatibility and final changed-runtime qualification.
+This supersedes only prior device-owner deferral/unapproved status. Other scope
+exclusions, unchanged D2/D3/budgets, serial execution and M7 hold remain.
+Loom: REQ-1dcc0902 (owner), REQ-2d7aec46 (preserved/amended Windows scope);
+REQ-5c4df445 is superseded, not a waiver of its other constraints.
+
+
 ## Approved M6 Windows readiness scope — 2026-11-12 18:14 EST
 
 Jon approved readiness for explicitly named Windows configurations, not universal
@@ -47,7 +63,7 @@ claim, new performance budget or renderer endurance qualification is inferred.
 
 | Item | Owner | Resume condition |
 | --- | --- | --- |
-| Supported bounded lifecycle | Evelyn: evidence/contract reconciliation; Jon: any changed supported contract | Existing100-cycle native growth fails. Optional owner remains deferred/unapproved; accept a concrete narrower lifecycle only with corresponding production measurements, or require a remedy to original lifecycle. No cache/sleep workaround or implicit waiver |
+| Supported bounded lifecycle | Evelyn: evidence/contract reconciliation; Jon: any changed supported contract | Existing100-cycle native growth fails. Option B is approved; executor owns additive implementation and original-limit qualification. No cache/sleep workaround or implicit waiver |
 | D2 overload / D3 convenience fallback | Jon only if introducing new policy | New convenience defaults deferred. Existing explicit profiles/defaults remain and routine supported-contract documentation is ready, not blocked |
 | Native BGRA1080 natural323ms stall | Evelyn causal investigation | Original-scale phase/thread/I/O evidence localizing the natural delay; synthetic pause proves catch-up mechanism only. No uninstrumented duration retry |
 | Decoder4K misses | Evelyn causal investigation | Evidence localizing original source-oracle/timing outlier, which isolated phase control did not reproduce; no clean-repeat waiver or decoder endurance |
@@ -68,9 +84,9 @@ remaining bounded-lifecycle and final supported-profile gates are explicit in
 [Concrete native lifecycle choices](lifecycle/NATIVE_LIFECYCLE_DECISION.md): accepted
 fresh-worker/single-generation support with matched qualification, explicitly
 authorized device-owner implementation for persistent applications, or a further
-deferral of advertised native readiness. None is selected by this document.
+deferral of advertised native readiness. Jon selected B at20:40:45EST; earlier alternatives below are historical, not pending approval.
 Jon owns that support contract; executor owns validation/repair after it is settled.
 Final release artifact selection/integrated/API gates and verified merge depend
 on that boundary. Source reconciliation finds113production/header/runtime/sample/
 CMake blobs identical toa50841a; only the test-only lifecycle guard differs.
-No extra native repeat or unapproved lifetime implementation is the next action.
+Next action is approved option B implementation, not a repeat of unchanged native failures.

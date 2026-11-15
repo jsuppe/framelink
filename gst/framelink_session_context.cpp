@@ -1,3 +1,12 @@
+#ifdef _WIN32
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include "framelink_d3d11.h"
+#endif
 #define FL_GST_SESSION_BUILD
 #include "framelink_session_context.h"
 #include <cstring>
@@ -21,6 +30,7 @@ struct _FlGstSession {
  flSharedCpuChannel* cpuChannel;
 #ifdef _WIN32
  HANDLE cpuCancelEvent;
+ flD3D11DeviceOwner* deviceOwner;
 #else
  int cpuShutdownFd;
 #endif
@@ -60,6 +70,9 @@ static void refreshEventFailure(FlGstSession*s){
 static void finalize(GObject* object) {
  auto* s=reinterpret_cast<FlGstSession*>(object);
  resetCpu(s);
+#ifdef _WIN32
+ flReleaseD3D11DeviceOwner(s->deviceOwner);
+#endif
  delete s->events;
  if(s->audioConnection)g_object_unref(s->audioConnection);
  g_cond_clear(&s->changed);g_mutex_clear(&s->mutex);
@@ -72,6 +85,18 @@ static void fl_gst_session_init(FlGstSession* s){g_mutex_init(&s->mutex);g_cond_
 #endif
 }
 namespace { struct Lock {GMutex* m; explicit Lock(GMutex* p):m(p){g_mutex_lock(m);}~Lock(){g_mutex_unlock(m);}}; }
+#ifdef _WIN32
+gboolean fl_gst_session_set_d3d11_device_owner(FlGstSession*s,flD3D11DeviceOwner*owner) {
+ if(!valid(s)||!owner)return FALSE;
+ Lock lock(&s->mutex);
+ if(s->configured||s->cancelled||s->deviceOwner||!(s->required&FL_GST_TRACK_VIDEO))return FALSE;
+ flRetainD3D11DeviceOwner(owner);s->deviceOwner=owner;return TRUE;
+}
+flD3D11DeviceOwner* fl_gst_session_ref_d3d11_device_owner(FlGstSession*s) {
+ if(!valid(s))return nullptr;
+ Lock lock(&s->mutex);flRetainD3D11DeviceOwner(s->deviceOwner);return s->deviceOwner;
+}
+#endif
 FlGstSession* fl_gst_session_new(guint required) {
  if(!required||(required&~3u))return nullptr;
  auto* s=static_cast<FlGstSession*>(g_object_new(fl_gst_session_get_type(),nullptr));s->required=required;return s;

@@ -13,6 +13,42 @@
 extern "C" {
 #endif
 
+// Explicit application-owned device lifetime; legacy factories remain unchanged.
+// NULL/zero LUID selects the default adapter ONCE at owner creation; a nonzero
+// LUID must exist. The resulting adapter/device never changes or falls back.
+// One attached channel per owner; other attachment attempts return FL_BUSY.
+// Channels and exported pool snapshots retain the owner and attachment. Caller
+// references may be released while attached. A snapshot surviving channel close
+// keeps the owner busy until released. Retain/release are thread safe; callers
+// must hold a reference during any operation, including concurrent attachment.
+// Only device/context survive: every channel gets fresh storage/fences/identity.
+// Before close, release all frames/leases and finish ALL GPU work and borrowed
+// native/COM use, including references duplicated by the application. Close is
+// NOT GPU completion. An observed incomplete close poisons the owner (future
+// attach returns FL_DISCONNECTED); arbitrary external GPU use cannot be inferred.
+// A producer closed with outstanding remote reads retains their consumed fence:
+// attachment remains BUSY until real completion. No timeout fabricates retirement;
+// a dead graph whose completion cannot arrive requires discarding that owner.
+// Device removal permanently rejects attachment. Never resurrect a removed owner.
+// Device getter is BORROWED. Caller must serialize its context work, remove old
+// resource bindings and finish work before channel close/next attachment.
+typedef struct flD3D11DeviceOwner flD3D11DeviceOwner;
+FL_API flResult flCreateD3D11DeviceOwner(const uint8_t adapterLUID[8], flD3D11DeviceOwner** out);
+FL_API void flRetainD3D11DeviceOwner(flD3D11DeviceOwner*);
+FL_API void flReleaseD3D11DeviceOwner(flD3D11DeviceOwner*);
+FL_API ID3D11Device* flD3D11DeviceOwnerDevice(flD3D11DeviceOwner*);
+FL_API flResult flD3D11DeviceOwnerAdapter(flD3D11DeviceOwner*, uint8_t outLUID[8]);
+FL_API flResult flCreateChannelWithD3D11DeviceOwner(flD3D11DeviceOwner*, const char* name,
+    uint32_t width, uint32_t height, flFormat format, uint32_t poolSize,
+    uint32_t flags, flChannel** out);
+FL_API flResult flCreateChannelFromD3D11HandlesWithDeviceOwner(flD3D11DeviceOwner*,
+    const char* name, uint32_t width, uint32_t height, flFormat format,
+    uint32_t poolSize, uint32_t flags, void* const* handles, flChannel** out);
+// Same deadline/cancellation and pull-handle requirements as the legacy bounded
+// entrypoint below. Peer adapter MUST match this owner's pinned adapter.
+FL_API flResult flOpenProducerD3D11BoundedWithDeviceOwner(flD3D11DeviceOwner*,
+    const char* name, uint32_t timeoutMs, void* cancelEvent, flChannel** out);
+
 // Adopt externally allocated shared textures as an immutable consumer-side ring.
 // Handles are BORROWED on input and independently duplicated on success; caller
 // may close its handles/references afterwards. No texture allocation or pixel

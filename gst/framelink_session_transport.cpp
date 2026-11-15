@@ -350,6 +350,11 @@ static gboolean open_local_av_impl(FlGstSession*session,gboolean producer,const 
  if(!session||!path||!*path||!local||!channel||(cpu&&!local->videoCount)||local->version!=FL_SESSION_OPTIONAL_TRACKS_VERSION||(!local->videoCount&&!local->audioCount)||
     (local->videoCount&&(!videoQueue||videoQueue>16||pool==1||pool>FL_MAX_POOL_SIZE))||(local->audioCount&&(!queueMs||queueMs>2000))||!timeout||timeout>60000||!idle||idle>60000)
   return fail("invalid local A/V session configuration");
+#ifdef _WIN32
+ std::unique_ptr<flD3D11DeviceOwner,decltype(&flReleaseD3D11DeviceOwner)> deviceOwner(
+  fl_gst_session_ref_d3d11_device_owner(session),flReleaseD3D11DeviceOwner);
+ if(deviceOwner && (cpu||!local->videoCount))return fail("retained device owner requires local D3D11 video profile");
+#endif
  Offer encoded{};if(!encode(*local,encoded))return fail("unsupported local A/V capabilities");
  Deadline deadline(timeout,outer);av::Endpoint endpoint{};av::RendezvousOwner owner;std::string reason;
  ObjectOwner listener,client;StreamOwner control,audio,events;
@@ -559,7 +564,7 @@ static gboolean open_local_av_impl(FlGstSession*session,gboolean producer,const 
    if(result!=FL_OK)return fail("relay pool pipe connection failed");
    auto input=pipe.value;pipe.value=nullptr;
    result=flnative::transferRelayPool(input,peer.value,cancel.value,timeout,selected,producer,secret,
-      name,pool,(flags&FL_MAP_CPU)!=0,relayPool->adapter,relayPool->handles,&ch);
+      name,pool,(flags&FL_MAP_CPU)!=0,relayPool->adapter,relayPool->handles,&ch,deviceOwner.get());
    if(result!=FL_OK||g_cancellable_is_cancelled(deadline.cancel)){
     if(ch)flClose(ch);return fail("authenticated relay pool transfer failed or cancelled");
    }
@@ -567,7 +572,13 @@ static gboolean open_local_av_impl(FlGstSession*session,gboolean producer,const 
 #endif
   if(!producer){
    const auto format=flFormat(selected.video.format);
-   if(flCreateChannelEx(name,selected.video.width,selected.video.height,format,pool?pool:4u,flags?flags:(FL_MAP_CPU|FL_REQUIRE_FRAME_METADATA),&ch)!=FL_OK||!ch)return fail("cannot create consumer video channel");
+   flResult created;
+#ifdef _WIN32
+   if(deviceOwner)created=flCreateChannelWithD3D11DeviceOwner(deviceOwner.get(),name,selected.video.width,selected.video.height,format,pool?pool:4u,flags,&ch);
+   else
+#endif
+   created=flCreateChannelEx(name,selected.video.width,selected.video.height,format,pool?pool:4u,flags?flags:(FL_MAP_CPU|FL_REQUIRE_FRAME_METADATA),&ch);
+   if(created!=FL_OK||!ch)return fail("cannot create consumer video channel");
    ready='V';if(!exact(control.p,true,&ready,1,deadline.cancel)){flClose(ch);return fail("video channel announcement failed");}
    // Do not return before the producer attached: a later attach changes the ring
    // generation under a started consumer element.
@@ -575,6 +586,17 @@ static gboolean open_local_av_impl(FlGstSession*session,gboolean producer,const 
   }else{
    if(!exact(control.p,false,&ready,1,deadline.cancel)||ready!='V')return fail("consumer video channel announcement missing");
    flResult r=FL_NOT_FOUND;
+   #ifdef _WIN32
+   if(deviceOwner){
+    flnative::Handle cancel;cancel.value=CreateEventW(nullptr,TRUE,FALSE,nullptr);
+    if(!cancel.value)return fail("cannot create owner setup cancellation event");
+    const auto id=g_cancellable_connect(deadline.cancel,G_CALLBACK(+[](GCancellable*,gpointer p){SetEvent(p);}),cancel.value,nullptr);
+    while(!g_cancellable_is_cancelled(deadline.cancel)&&
+      (r=flOpenProducerD3D11BoundedWithDeviceOwner(deviceOwner.get(),name,timeout,cancel.value,&ch))==FL_NOT_FOUND)g_usleep(5000);
+    if(id)g_cancellable_disconnect(deadline.cancel,id);
+    if(g_cancellable_is_cancelled(deadline.cancel)){if(ch)flClose(ch);return fail("retained owner setup cancelled");}
+   }else
+#endif
    while(!g_cancellable_is_cancelled(deadline.cancel)&&(r=flOpenProducer(name,&ch))==FL_NOT_FOUND)g_usleep(5000);
    if(r!=FL_OK||!ch)return fail("cannot attach producer video channel");
    ready='P';if(!exact(control.p,true,&ready,1,deadline.cancel)){flClose(ch);return fail("video attach confirmation failed");}

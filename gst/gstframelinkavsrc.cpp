@@ -1,3 +1,12 @@
+#ifdef _WIN32
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include "framelink_d3d11.h"
+#endif
 // framelinkavsrc: consumer convenience bin composing the validated
 // framelinksrc and framelinkaudiosrc with one coordinated session. Separate
 // video_src/audio_src pads feed application-chosen rendering; no display or
@@ -46,6 +55,10 @@ struct Shared {
 
 typedef struct _GstFrameLinkAvSrc {
  GstBin parent;
+ gboolean ownerSelected;
+#ifdef _WIN32
+ flD3D11DeviceOwner* deviceOwner;
+#endif
  gchar*sessionPath,*tracks,*videoFormat,*audioFormat;
  guint width,height,fpsN,fpsD,rate,channels,connectMs,idleMs,audioQueueMs,videoQueue,videoPool,latencyMs;gboolean nativeMemory;
  GstElement*video,*audio;GstPad*videoPad,*audioPad;
@@ -210,7 +223,7 @@ static GstStateChangeReturn changeState(GstElement*element,GstStateChange transi
  auto*s=reinterpret_cast<GstFrameLinkAvSrc*>(element);
  switch(transition){
  case GST_STATE_CHANGE_NULL_TO_READY:{
-  if(s->candidateSet&&s->nativeUsed){GST_ELEMENT_ERROR(s,RESOURCE,SETTINGS,("local native bins are single-session; create a new bin for reconnect"),(nullptr));return GST_STATE_CHANGE_FAILURE;}
+  if((s->candidateSet||s->ownerSelected)&&s->nativeUsed){GST_ELEMENT_ERROR(s,RESOURCE,SETTINGS,("local native bins are single-session; create a new bin for reconnect"),(nullptr));return GST_STATE_CHANGE_FAILURE;}
 
   if(s->sharedCpu&&(!wantVideo(s)||s->nativeMemory)){GST_ELEMENT_ERROR(s,RESOURCE,SETTINGS,("shared-cpu requires a video track and forbids native memory"),(nullptr));return GST_STATE_CHANGE_FAILURE;}
 #if !defined(__linux__) && !defined(_WIN32)
@@ -226,6 +239,11 @@ static GstStateChangeReturn changeState(GstElement*element,GstStateChange transi
    GstElement*top=element;while(auto*parent=GST_ELEMENT(gst_element_get_parent(top))){if(top!=element)gst_object_unref(top);top=parent;}
    if(top==element||!GST_IS_PIPELINE(top)){if(top!=element)gst_object_unref(top);GST_ELEMENT_ERROR(s,CORE,STATE_CHANGE,("framelinkavsrc with session= must be inside a GstPipeline"),(nullptr));return GST_STATE_CHANGE_FAILURE;}
    auto*session=fl_gst_session_new((wantVideo(s)?FL_GST_TRACK_VIDEO:0u)|(wantAudio(s)?FL_GST_TRACK_AUDIO:0u));
+#ifdef _WIN32
+   if(s->deviceOwner&&!fl_gst_session_set_d3d11_device_owner(session,s->deviceOwner)){
+    g_object_unref(session);GST_ELEMENT_ERROR(s,RESOURCE,SETTINGS,("retained device owner session binding rejected"),(nullptr));return GST_STATE_CHANGE_FAILURE;
+   }
+#endif
    GST_OBJECT_LOCK(s);s->session=session;GST_OBJECT_UNLOCK(s);s->local=TRUE;s->cancel=g_cancellable_new();
    // Exactly fl_gst_session_apply_pipeline_clock(consumer). A clock the
    // application fixed is respected here and refused at PLAYING if it is not
@@ -237,7 +255,7 @@ static GstStateChangeReturn changeState(GstElement*element,GstStateChange transi
    for(auto*child:{s->video,s->audio})if(child)gst_element_set_locked_state(child,TRUE);
    GstPad*pads[2]={s->videoPad,s->audioPad};
    for(int i=0;i<2;i++)s->probes[i]=pads[i]?gst_pad_add_probe(pads[i],GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM,eosProbe,s,nullptr):0;
-   if(s->candidateSet)s->nativeUsed=TRUE;
+   if(s->candidateSet||s->ownerSelected)s->nativeUsed=TRUE;
    startWorker(s);
   }
   break;}
@@ -281,7 +299,7 @@ static void handleMessage(GstBin*bin,GstMessage*message){
 }
 
 static gboolean adoptChannel(GstFrameLinkAvSrc*s,flChannel*channel){
- if(s->candidateSet||s->sharedCpu||s->local||!s->video||GST_STATE(s)!=GST_STATE_NULL)return FALSE;
+ if(s->ownerSelected||s->candidateSet||s->sharedCpu||s->local||!s->video||GST_STATE(s)!=GST_STATE_NULL)return FALSE;
  configureChildren(s);
  gboolean adopted=FALSE;g_signal_emit_by_name(s->video,"adopt-channel",channel,&adopted);if(adopted)s->nativeAdopted=TRUE;return adopted;
 }
@@ -289,7 +307,7 @@ static gboolean adoptChannel(GstFrameLinkAvSrc*s,flChannel*channel){
 // Endpoint zero is the receiver, exactly as for the thin source action.
 // The trusted caller authenticates the policy and validates the adopted resource.
 static gboolean applyMemoryPolicy(GstFrameLinkAvSrc*s,GstFrameLinkMemoryPolicy*policy){
- if(s->candidateSet||s->sharedCpu||s->local||!s->video||s->policyBound||
+ if(s->ownerSelected||s->candidateSet||s->sharedCpu||s->local||!s->video||s->policyBound||
     (s->sessionPath&&*s->sessionPath)||GST_STATE(s)!=GST_STATE_NULL)return FALSE;
  configureChildren(s);
  gboolean accepted=FALSE;g_signal_emit_by_name(s->video,"apply-memory-policy",policy,&accepted);
@@ -300,7 +318,7 @@ static gboolean applyMemoryPolicy(GstFrameLinkAvSrc*s,GstFrameLinkMemoryPolicy*p
 // it while NULL; the worker authenticates BOTH peers before allocating a channel.
 static gboolean setLocalNativeProfile(GstFrameLinkAvSrc*s,GstFrameLinkMemoryPolicy*policy,bool poolReceiver){
 #if defined(_WIN32)
- if(!policy||s->candidateSet||s->nativeAdopted||s->policyBound||s->local||s->sharedCpu||!wantVideo(s)||!s->video||
+ if(!policy||s->ownerSelected||s->candidateSet||s->nativeAdopted||s->policyBound||s->local||s->sharedCpu||!wantVideo(s)||!s->video||
     !s->sessionPath||!*s->sessionPath||GST_STATE(s)!=GST_STATE_NULL)return FALSE;
  // FAR5 preserves an existing A/V session and imports an exact-sized pool;
  // unlike FAR4, zero cannot request a newly allocated default-sized pool.
@@ -319,6 +337,15 @@ static gboolean setLocalNativeProfile(GstFrameLinkAvSrc*s,GstFrameLinkMemoryPoli
  (void)s;(void)policy;(void)poolReceiver;return FALSE;
 #endif
 }
+static gboolean setLocalDeviceOwner(GstFrameLinkAvSrc*s,gpointer value){
+#ifdef _WIN32
+ if(!value||s->deviceOwner||s->policyBound||s->nativeAdopted||s->sharedCpu||!wantVideo(s)||!s->video||!s->sessionPath||!*s->sessionPath||s->nativeUsed||s->local||GST_STATE(s)!=GST_STATE_NULL)return FALSE;
+ s->deviceOwner=static_cast<flD3D11DeviceOwner*>(value);flRetainD3D11DeviceOwner(s->deviceOwner);s->ownerSelected=TRUE;return TRUE;
+#else
+ return FALSE;
+#endif
+}
+
 static gboolean setLocalNativeCandidate(GstFrameLinkAvSrc*s,GstFrameLinkMemoryPolicy*policy){
  return setLocalNativeProfile(s,policy,false);
 }
@@ -328,7 +355,7 @@ static gboolean setLocalNativePoolCandidate(GstFrameLinkAvSrc*s,GstFrameLinkMemo
 
 static void setProperty(GObject*object,guint id,const GValue*value,GParamSpec*spec){
  auto*s=reinterpret_cast<GstFrameLinkAvSrc*>(object);
- if(s->candidateSet||s->policyBound){g_warning("framelinkavsrc: authenticated properties are immutable; create a new bin/session");return;}
+ if(s->ownerSelected||s->candidateSet||s->policyBound){g_warning("framelinkavsrc: authenticated properties are immutable; create a new bin/session");return;}
  if(GST_STATE(s)!=GST_STATE_NULL){g_warning("framelinkavsrc: %s can only change in NULL",spec->name);return;}
  switch(id){
  case PROP_SHARED_CPU:s->sharedCpu=g_value_get_boolean(value);break;
@@ -378,6 +405,9 @@ static void finalize(GObject*object){
  auto*s=reinterpret_cast<GstFrameLinkAvSrc*>(object);
  if(s->shared->channel)flClose(s->shared->channel);delete s->shared;
  g_clear_object(&s->cancel);g_clear_object(&s->session);
+#ifdef _WIN32
+ flReleaseD3D11DeviceOwner(s->deviceOwner);
+#endif
  g_free(s->sessionPath);g_free(s->tracks);g_free(s->videoFormat);g_free(s->audioFormat);
  G_OBJECT_CLASS(gst_framelink_av_src_parent_class)->finalize(object);
 }
@@ -418,6 +448,8 @@ static void gst_framelink_av_src_class_init(GstFrameLinkAvSrcClass*klass){
  g_object_class_install_property(o,PROP_GENERATION,g_param_spec_uint64("generation","Generation","Negotiated session generation",0,G_MAXUINT64,0,ro));
  g_object_class_install_property(o,PROP_AUDIO_ID,g_param_spec_uint("audio-track-id","Audio track","Negotiated audio identity, zero when absent",0,G_MAXUINT,0,ro));
  g_object_class_install_property(o,PROP_VIDEO_ID,g_param_spec_uint("video-track-id","Video track","Negotiated video identity, zero when absent",0,G_MAXUINT,0,ro));
+ g_signal_new_class_handler("set-local-d3d11-device-owner",G_TYPE_FROM_CLASS(klass),GSignalFlags(G_SIGNAL_RUN_LAST|G_SIGNAL_ACTION),G_CALLBACK(setLocalDeviceOwner),
+  nullptr,nullptr,g_cclosure_marshal_generic,G_TYPE_BOOLEAN,1,G_TYPE_POINTER);
  g_signal_new_class_handler("set-local-native-candidate",G_TYPE_FROM_CLASS(klass),GSignalFlags(G_SIGNAL_RUN_LAST|G_SIGNAL_ACTION),G_CALLBACK(setLocalNativeCandidate),
   nullptr,nullptr,nullptr,G_TYPE_BOOLEAN,1,G_TYPE_POINTER);
  g_signal_new_class_handler("set-local-native-pool-candidate",G_TYPE_FROM_CLASS(klass),GSignalFlags(G_SIGNAL_RUN_LAST|G_SIGNAL_ACTION),G_CALLBACK(setLocalNativePoolCandidate),
