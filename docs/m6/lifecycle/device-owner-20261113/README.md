@@ -19,5 +19,5 @@ Command: `fl_gst_av_bench --device-owner --native --cycles 100 --seconds 5`, BGR
 
 - Handle and thread slopes are flat or negative in both cases, and all 100 cycles delivered exact media counts.
 - In the failing case the long-lived producer's private commit rises from 86100 to 88016 KiB. Most cycles step +36 KiB, and cycles 89–99 are nearly flat.
-- The owner removes most of the producer-side growth, but the remainder is still above the limit. Attribution is a separate diagnostic.
+- The owner removes most of the producer-side growth, but the remainder is still above the limit. Attribution: [owner-attribution-20261115](../owner-attribution-20261115/README.md) shows bounded copy-volume warm-up in the driver/runtime, not a lifecycle leak. The gate still fails as defined.
 - Nothing has been waived. Option B still requires held-lease, fault, compatibility and final changed-runtime qualification.
