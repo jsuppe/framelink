@@ -52,6 +52,7 @@ It does not establish the same contract for native D3D or renderer GPU resources
   - A second attach returns `FL_BUSY`. So does attaching while a pool snapshot from the previous channel is unreleased, or while a closed producer still has outstanding remote reads.
   - An observed incomplete close (held frames, readers, pending submits, unsignalled fences) poisons the owner: later attaches return `FL_DISCONNECTED`.
   - Device removal permanently rejects attachment. Discard a poisoned or removed owner and create a new one.
+- **Fault behaviour tested** (`device_owner_faults_win`): closing a consumer that still holds a frame poisons its owner; a producer owner stays `FL_BUSY` while a remote read is outstanding and attaches again after the reader really releases; a reader that died never completes, so that owner stays `FL_BUSY` (no timeout); closing a producer mid-submit poisons its owner. Device removal is implemented but not tested, because it can't be forced on demand.
 - **Caller obligations:** `flD3D11DeviceOwnerDevice` is borrowed. Serialize your own immediate-context work, remove your bindings and finish GPU work before closing a channel. Close is not GPU completion. `flRetainD3D11DeviceOwner`/`flReleaseD3D11DeviceOwner` are thread safe; channels and snapshots hold their own references.
 - **Measured lifecycle:**
   - Host <win-host>, RTX 5090, driver 32.0.16.1714. 200 × 5 s cycles per case, gated on cycles 100–199 at the original limits (Jon, 2026-11-16).
