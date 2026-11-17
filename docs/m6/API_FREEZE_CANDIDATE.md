@@ -9,7 +9,7 @@ The freeze is Jon's decision. This page is what he would approve: the exact publ
 ## Public surface
 | Layer | Surface | Change since `a50841a` |
 |---|---|---|
-| C core (`framelink.dll`) | `framelink.h`, `framelink_d3d11.h`, `framelink_shared_cpu_win.h`, `framelink_shared_cpu_channel.h` | **+8 functions** (device owner: create, retain, release, device, adapter, channel create, channel from handles, bounded producer open); 80 → 88 exports |
+| C core (`framelink.dll`) | `framelink.h`, `framelink_d3d11.h`, `framelink_memory.h`, `framelink_session.h`, `framelink_slots.h`, `framelink_shared_cpu.h`, `framelink_shared_cpu_channel.h`, `framelink_shared_cpu_win.h` (`framelink_trace.hpp`: public status to confirm; the Linux/Android headers `framelink_dmabuf.h`, `framelink_ahb.h`, `framelink_sync_fd.h` are outside this Windows freeze) | **+8 functions** (device owner: create, retain, release, device, adapter, channel create, channel from handles, bounded producer open); 80 → 88 exports |
 | Session (`framelink_gst_session.dll`) | `framelink_session_transport.h`, `framelink_session_context.h`, `framelink_memory_policy.h` | **+1 function** `fl_gst_session_set_d3d11_device_owner`; 48 → 49 exports |
 | GStreamer plugin (`gstframelink.dll`) | `framelinksink`, `framelinksrc`, `framelinkavsink`, `framelinkavsrc` | **+1 action signal** `set-local-d3d11-device-owner` on both A/V elements; properties and defaults unchanged |
 
