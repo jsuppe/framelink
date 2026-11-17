@@ -1,0 +1,40 @@
+audio.arrival.all.ms=n=500 p50=0.99 p95=1.99 p99=2.05 max=2.52 min=0.09
+audio.arrival.ms=n=300 p50=0.98 p95=1.99 p99=2.03 max=2.52 min=0.09
+audio.contiguous=yes
+audio.deadline_misses=0/500
+audio.output_queue.admission_residence.ms=n=500 p50=0.01 p95=0.01 p99=0.01 max=0.01 min=0.00
+audio.output_queue.pending=0
+audio.output_queue.sampled_max_buffers=0
+audio.output_queue.unmatched=0
+audio.render.all.ms=n=500 p50=1.00 p95=2.01 p99=2.06 max=2.53 min=0.10
+audio.render.ms=n=300 p50=1.00 p95=2.00 p99=2.05 max=2.53 min=0.10
+audio.render_interval.ms=n=299 p50=10.00 p95=11.01 p99=11.51 max=11.58 min=7.93
+audio.render_jitter.p1_p99.ms=1.93
+av_offset.abs.ms=n=3 p50=2.65 p95=3.07 p99=3.07 max=3.07 min=1.70
+av_offset.ms=n=3 p50=2.65 p95=3.07 p99=3.07 max=3.07 min=1.70
+cpu.percent=4.47
+frames=300
+handles=1720..1720 min=1720 max=1720
+handles.slope.per_min=-0.00
+mem.kb=86404..70116 min=70116 max=86404
+mem.kind=private
+mem.slope.kb_per_min=-0.00
+memory=memory:D3D11Memory
+queue.accounting=complete
+result=EOS
+samples=240000
+scope=transport-consumer
+series.t_cpums_memkb_handles_threads=0.0:484:62112:1022:34;1.1:1391:85952:2714:46;2.1:1672:86404:1720:46;3.2:1719:70116:1720:46;4.2:1766:70116:1720:46;5.2:1812:69904:1689:41;
+threads=46..46 min=46 max=46
+threads.slope.per_min=0.00
+video.arrival.all.ms=n=300 p50=2.74 p95=4.72 p99=5.00 max=5.95 min=1.13
+video.arrival.ms=n=180 p50=3.31 p95=4.83 p99=5.45 max=5.95 min=1.15
+video.deadline_misses=0/300
+video.output_queue.admission_residence.ms=n=300 p50=0.01 p95=0.01 p99=0.01 max=0.02 min=0.00
+video.output_queue.pending=0
+video.output_queue.sampled_max_buffers=0
+video.output_queue.unmatched=0
+video.render.all.ms=n=300 p50=2.78 p95=4.76 p99=5.04 max=5.98 min=1.17
+video.render.ms=n=180 p50=3.34 p95=4.86 p99=5.49 max=5.98 min=1.19
+video.render_interval.ms=n=179 p50=16.01 p95=18.01 p99=18.02 max=18.50 min=14.00
+video.render_jitter.p1_p99.ms=4.29

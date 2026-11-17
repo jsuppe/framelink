@@ -15,7 +15,7 @@ exclusions, unchanged D2/D3/budgets, serial execution and M7 hold remain.
 Loom: REQ-1dcc0902 (owner), REQ-2d7aec46 (preserved/amended Windows scope);
 REQ-5c4df445 is superseded, not a waiver of its other constraints.
 
-**First result 2026-11-13:** the matched 100-cycle restart-producer case passes (−0.65 KiB/cycle), and the restart-consumer case **fails** (24.93 against 16 KiB/cycle; fresh-device baseline 84.09). See [device-owner-20261113](lifecycle/device-owner-20261113/README.md). Option B is not qualified.
+**First result 2026-11-13:** the matched 100-cycle restart-producer case passes (−0.65 KiB/cycle), and the restart-consumer case **fails** (24.93 against 16 KiB/cycle; fresh-device baseline 84.09). See [device-owner-20261113](lifecycle/device-owner-20261113/README.md). Option B is not qualified. Attribution (2026-11-15) found a bounded driver copy-pool warm-up, not a lifecycle leak. The [extended 200-cycle run](lifecycle/device-owner-20261113/extended-200/README.md) gives 22.13 for cycles 5–104 and **2.97** for cycles 100–199. Whether the gate should allow a warm-up is Jon's decision.
 
 
 Approved by Jon on 2026-11-12 at18:14EST; Loom requirement `REQ-5c4df445`.
