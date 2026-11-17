@@ -3,7 +3,7 @@
 The freeze is Jon's decision. This page is what he would approve: the exact public surface, what compatibility it promises, the evidence, and the decisions that are still open. All required evidence below has been collected at the proposed revision.
 
 ## Proposed revision
-- Revision: **`eb3505a2`** (qualified locally as `6ee0f86e7efd636ba8802663d9eb1bc4c3e19d5b`; same tree, ancestor message reworded), which is `a50841a` plus the option B device owner, the header typedef guard and documentation. [Final integrated evidence](windows-integrated-final/README.md).
+- Revision: **`060c54e41bcbfe7ca8dbdef89e6e74fb2930935c`**, which is `a50841a` plus the option B device owner, its fault test, the header typedef guard and documentation. [Final integrated evidence](windows-integrated-final/README.md).
 - `FL_VERSION` stays **6**, and the producer/consumer wire protocol is unchanged since `a50841a`. Both peers must still run the same `FL_VERSION`.
 
 ## Public surface
@@ -24,8 +24,8 @@ All changes are additive. No existing function signature, struct layout, enum va
 ## Evidence required (status)
 | Check | Status |
 |---|---|
-| Linux build and CI CPU subset at this source | 24/24 pass locally. The GStreamer tests need CI because this host has no GStreamer dev packages |
-| Windows full serial CTest, fresh Release build (previous 178 tests + `device_owner_win`) | **179/179 pass**, 0 skipped |
+| Hosted CI at this revision (PR #10) | **pass**, Linux and Windows, including the GStreamer CPU tests |
+| Windows full serial CTest, fresh Release build (previous 178 tests + two owner tests) | **180/180 pass**, 0 skipped (adds `device_owner_faults_win`) |
 | Exports: 128 baseline retained, exactly +9, nothing unexpected | **pass** (88 + 49 = 137) |
 | C11 translation unit including both owner headers | **pass** |
 | 3 unchanged `7b8a274`-built clients against the new DLLs | **3/3 pass** |

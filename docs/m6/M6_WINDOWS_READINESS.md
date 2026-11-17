@@ -75,7 +75,7 @@ must be documented; no new uniform D2/D3 default is selected.
   two-slot renderer qualification from unrelated native transport tests.
 - [x] Document existing supported-profile API/ownership/error/defaults and explicit selection/rejection in WINDOWS_APP_CONTRACT.md. Shared-CPU bounded lifecycle now measured; native lifetime contract remains a separate unchecked gate. No new default choice implied.
 - [x] Record exact production source equivalence to a50841a plus the sole test-only lifecycle guard change; [scope](cpu-path/windows-cpu-lifecycle-summary/source-equivalence.json). This is not rebuild-byte equality or final release qualification.
-- [x] Final exact-revision integrated validation and API/source/binary compatibility: `6ee0f86e` 179/179, 137 exports (128 + 9 owner), C11 headers, 3/3 old clients; [evidence](windows-integrated-final/README.md).
+- [x] Final exact-revision integrated validation and API/source/binary compatibility: `060c54e4` 180/180 (with owner fault test), 137 exports (128 + 9 owner), C11 headers, 3/3 old clients, hosted CI pass; [evidence](windows-integrated-final/README.md).
   Requirement: also
   reconciliation after planned supported-path changes. Reuse exact unchanged evidence
   only with explicit hash/source equivalence; no unnecessary campaign repetition.
