@@ -15,3 +15,5 @@ New DLL hashes: framelink.dll `f6b38ec8…7fbc44`, framelink_gst_session.dll `6a
 **Relation to the lifecycle evidence:** the option B lifecycle runs used binaries built from `d164742`. Between `d164742` and `6ee0f86e`, the only source change under `src/ gst/ include/ test/ tools/` and CMake is the header-only `flD3D11DeviceOwner` typedef guard (6 added lines). That isn't byte-identical rebuild evidence, but it is a reviewed, non-functional delta.
 
 Harness: adapted from `windows-integrated-a50841a`. Only the references, the public-header allowlist, the owner-signal check and the C11 step changed.
+
+**Commit ids:** this run was made at local commit `6ee0f86e7efd636ba8802663d9eb1bc4c3e19d5b`. Before publication the message of an ancestor commit was reworded, with no content change, so the published id of the same tree is `eb3505a2`. The lifecycle build commit `d164742` is published as `f4185511`. Ids inside the `runs/final-6ee0f86e` evidence files are the local ones.

@@ -3,7 +3,7 @@
 The freeze is Jon's decision. This page is what he would approve: the exact public surface, what compatibility it promises, the evidence, and the decisions that are still open. All required evidence below has been collected at the proposed revision.
 
 ## Proposed revision
-- Revision: **`6ee0f86e7efd636ba8802663d9eb1bc4c3e19d5b`**, which is `a50841a` plus the option B device owner, the header typedef guard and documentation. [Final integrated evidence](windows-integrated-final/README.md).
+- Revision: **`eb3505a2`** (qualified locally as `6ee0f86e7efd636ba8802663d9eb1bc4c3e19d5b`; same tree, ancestor message reworded), which is `a50841a` plus the option B device owner, the header typedef guard and documentation. [Final integrated evidence](windows-integrated-final/README.md).
 - `FL_VERSION` stays **6**, and the producer/consumer wire protocol is unchanged since `a50841a`. Both peers must still run the same `FL_VERSION`.
 
 ## Public surface
