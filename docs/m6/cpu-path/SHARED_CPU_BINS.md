@@ -1,5 +1,7 @@
 # Explicit shared-CPU A/V bin selection
 
+> **Superseded (2026-11-17).** This is an intermediate progress note. The negotiated shared-CPU path is now qualified on Windows; see [STATUS.md](../../STATUS.md) and [M6 Windows readiness](../M6_WINDOWS_READINESS.md).
+
 framelinkavsink and framelinkavsrc now expose shared-cpu=false by default,
 mutable only in NULL like other bin configuration. true selects the existing
 explicit CPU child path before children start, with installed coordinator contexts

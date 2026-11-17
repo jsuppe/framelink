@@ -16,17 +16,11 @@ Loom: REQ-1dcc0902 (owner), REQ-2d7aec46 (preserved/amended Windows scope);
 REQ-5c4df445 is superseded, not a waiver of its other constraints.
 
 
-## Approved M6 Windows readiness scope — 2026-11-12 18:14 EST
+## Status — 2026-11-17
 
-Jon approved readiness for explicitly named Windows configurations, not universal
-Windows support. This supersedes older broad M6 completion requirements below;
-historical results and failed gates remain evidence, not silently passed tasks.
-Authoritative reviewable scope/checklist: [M6 Windows readiness](M6_WINDOWS_READINESS.md).
-M6 remains OPEN; M7 maintenance hold remains. Correct media/timeline/ownership,
-fault handling, validated bounded lifecycle and final exact-revision integrated/API
-compatibility gates remain mandatory. No new budget, D2/D3 default or device-owner
-API approval is inferred. Failed native BGRA1080 and decoder4K are NOT QUALIFIED
-and excluded from initial advertised support. One task and one executor, serially.
+M6 is **ready for the approved Windows scope** and the Windows API is **frozen at `060c54e4`** (tag `m6-windows-api-freeze`), both recorded by Jon on 2026-11-17. Native BGRA and NV12 1080p60 are supported under a recorded host-scheduling assumption, without a clean 1800 s pass on the final revision. Decoded relay 4K30 stays excluded. M6 for Linux and Android is open and deferred, and M7 is held. Current status and revisions: [STATUS.md](../STATUS.md). The 2026-11-12 Windows scope approval and the closure checklist are in [M6 Windows readiness](M6_WINDOWS_READINESS.md).
+
+Sections below that carry an earlier date describe status at that date.
 
 
 Revision 1 — 2026-11-04. Owner: project executor. Single-task serial execution restored by Jon on November 12 at 06:49 EST;
@@ -144,6 +138,13 @@ Physical scanout/acoustic alignment are separate from API completion and PTS.
 
 ## Executable work breakdown
 
+**Per-platform state, 2026-11-17.** The boxes below track all three platforms and stay unchecked until every target is done. For Windows:
+- **Done:** 2e (1800 s cells on the final revision `060c54e4`), 3a/3b (shared CPU and the retained device owner), 7c (final-revision qualification and the [evidence review](EVIDENCE_REVIEW_20261117.md)), and 9a–9c and 9e for D3D11.
+- **Partly done:** 4b/4c (existing-policy faults and owner faults; device removal untested) and 9d (native two-hop relay qualified; decoded relay limited, 4K30 excluded).
+- **Open:** 2b budget acceptance for the primary profile, 4a (D2 deferred), 5c (the native 1080p60 late wake-up) and 6a.
+
+Linux and Android remain open on every unchecked item. One-line states per task are in [ROADMAP_TASKS.md](../ROADMAP_TASKS.md#m6--reliability-performance-and-observability).
+
 All unchecked tasks below are pending, not newly completed by prior large-queue
 runs. Every validation records revision, host/driver, settings, exact command,
 trace state, all failures, and raw evidence. Jon restored single-task serial execution on2026-11-12 at06:49EST; one task and one executor, no parallel work.
@@ -229,7 +230,11 @@ Receive-depth gate evidence: [review and platform tests](receive-depth/README.md
 - [ ] 7.4 Review exact-head tests, merge/tag/artifacts and known limits; retain
       physical-output exclusions unless independently measured.
 
-## Immediate next action and coordination
+## Current next action — 2026-11-17
+
+No executor task is running. The next step is Jon's decision: release the Windows baseline (M7), extend M6 to Linux and Android first, or both in that order. Deferred items that are ready when chosen: the native 1080p60 late-wake diagnosis ([plan](windows-final-duration-060c54e4/README.md#decision--jon-2026-11-17)), the owner device-removal test, and D2/D3 if a convenience entry point is proposed.
+
+## Execution history and coordination (to 2026-11-17)
 
 ### Execution-order override — Jon, 2026-11-12
 The then-running exact7b8a274 integrated campaign was preserved and collected; do not repeat it. Complete remaining Windows implementation and API-contract work using focused builds/checks, with one task and one executor at a time. Batch full integrated suites, broad fault/endurance/performance campaigns and final compatibility qualification after planned Windows code/API changes. Fix validation failures and qualify the final exact revision before readiness claims. Code complete is not validated/API frozen/M6 complete. Linux/Android broad campaigns remain deferred; M7 hold unchanged.
@@ -244,13 +249,13 @@ Make API stabilization an explicit deliverable alongside this Windows-first work
 
 Jon reinstated single-task serial execution on 2026-11-12 at 06:49 EST, superseding earlier parallel authorization. qualification_recovery is sole executor; parent handles conversation only. M6 is not complete.
 
-### Authoritative execution state — 2026-11-12
+### Execution state — 2026-11-12 (historical)
 
 API candidate: **`a50841aad44fbc9431234a4f326bad036d193bf5`, NOT FROZEN** (historical). **2026-11-17: API frozen at `060c54e41bcbfe7ca8dbdef89e6e74fb2930935c` and M6 ready for the Windows scope (Jon); M7 held. See [M6_WINDOWS_READINESS.md](M6_WINDOWS_READINESS.md).**
 Runtime DLL sources remain unchanged from `461584b`. Checked relay sample
 fix `462fa5f` avoids an unnecessary acquisition after real native drain and is
 now included in the verified exact-revision integrated build.
-M6 remains open; M7 remains held.
+At that date M6 remained open; the table below is that date's state.
 
 | Work | Concrete state and evidence | Owner / next action |
 | --- | --- | --- |

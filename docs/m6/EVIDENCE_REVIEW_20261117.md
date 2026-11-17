@@ -13,10 +13,10 @@ Candidate revision: `060c54e41bcbfe7ca8dbdef89e6e74fb2930935c`. Host for every r
 | Integrated suite, exports, C11, old clients | `windows-integrated-final/runs/final-060c54e4` | `060c54e4` | pass, 180/180 |
 | Hosted CI | PR #10 | `060c54e4` | pass |
 
-## Limited or excluded rows (unchanged)
+## Limited or excluded rows
 | Row | Status |
 |---|---|
-| Native BGRA 1080p60, 1800 s | **FAILED** at about 695 s on `a50841a`; excluded, not waived. Its option B lifecycle passes but doesn't change this |
+| Native BGRA 1080p60, 1800 s | **FAILED** at about 695 s on `a50841a`. Since Jon's 2026-11-17 decision it is **supported** under the host-scheduling assumption (see Decisions); the failure stays recorded |
 | Decoded relay 1080p60 | short functional pair only (`77afa1a`); no endurance claim |
 | Decoded relay 4K30 | **not qualified**; two 34 ms misses |
 | Renderer submission, NV12 1080p60 | three 5 s captures (`a6a1906`); submission proof only |

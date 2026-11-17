@@ -1,5 +1,7 @@
 # Authenticated local CPU setup
 
+> **Superseded (2026-11-17).** This is an intermediate progress note. The negotiated shared-CPU path is now qualified on Windows; see [STATUS.md](../../STATUS.md) and [M6 Windows readiness](../M6_WINDOWS_READINESS.md).
+
 Linux/Android explicit fl_gst_session_open_local_cpu composes protected FAR2
 Unix discovery, exact authenticated session negotiation, clock mapping, PCM and
 video event stream authentication, authenticated SEQPACKET transfer and CPU

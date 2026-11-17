@@ -1,16 +1,10 @@
 # M6 platform and format limits
 
-## Approved M6 Windows readiness scope — 2026-11-12 18:14 EST
+## Status — 2026-11-17
 
-Jon approved readiness for explicitly named Windows configurations, not universal
-Windows support. This supersedes older broad M6 completion requirements below;
-historical results and failed gates remain evidence, not silently passed tasks.
-Authoritative reviewable scope/checklist: [M6 Windows readiness](M6_WINDOWS_READINESS.md).
-M6 remains OPEN; M7 maintenance hold remains. Correct media/timeline/ownership,
-fault handling, validated bounded lifecycle and final exact-revision integrated/API
-compatibility gates remain mandatory. No new budget, D2/D3 default or device-owner
-API approval is inferred. Failed native BGRA1080 and decoder4K are NOT QUALIFIED
-and excluded from initial advertised support. One task and one executor, serially.
+M6 is **ready for the approved Windows scope** and the Windows API is **frozen at `060c54e4`** (tag `m6-windows-api-freeze`), both recorded by Jon on 2026-11-17. Native BGRA and NV12 1080p60 are supported under a recorded host-scheduling assumption, without a clean 1800 s pass on the final revision. Decoded relay 4K30 stays excluded. M6 for Linux and Android is open and deferred, and M7 is held. Current status and revisions: [STATUS.md](../STATUS.md). The 2026-11-12 Windows scope approval and the closure checklist are in [M6 Windows readiness](M6_WINDOWS_READINESS.md).
+
+Sections below that carry an earlier date describe status at that date.
 
 
 Status: measured configurations, not universal hardware limits or final M6 qualification.
@@ -59,7 +53,7 @@ These are transport arrival/accounting/resource results, not physical playback, 
 - Legacy Windows renderer evidence uses100ms scheduling and hidden/no-active-display fixture.300 unique presentation submissions and zero-loss traces are not physical presentation or current primary renderer qualification. M6.9d remains open.
 - CPU/GPU/isolated-hop product budgets and public overload default remain unresolved. No retrospective threshold adjustment. M6.6 must measure trace overhead and per-boundary identities; M6.7/9 require exact final integrated revision validation.
 
-Final native a50841a two-hop cells: NV121080, NV124K and BGRA4K duration pass; BGRA1080 duration failed around695s and remains unqualified. Older table passes retain historical scope and do not waive that failure. See LOW_LATENCY_PLAN.md for exact archives and unresolved cause.
+Final native a50841a two-hop cells: NV121080, NV124K and BGRA4K duration pass; BGRA1080 duration failed around695s (supported since 2026-11-17 by Jon's decision; see below). Older table passes retain historical scope and do not waive that failure. See LOW_LATENCY_PLAN.md for exact archives and unresolved cause.
 
 **2026-11-17:** on the final revision `060c54e4`, native NV12 1080p60 also failed its 1800 s run (about 1298.7 s) with the same late-wake signature, while shared CPU 4/4 and native 4K30 2/2 passed ([results](windows-final-duration-060c54e4/README.md)). Jon approved native 1080p60 (NV12 and BGRA) as supported under a host-scheduling assumption, with diagnosis deferred; both failures stay recorded.
 
