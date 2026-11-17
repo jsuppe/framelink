@@ -1,0 +1,143 @@
+Factory Details:
+  Rank                     none (0)
+  Long-name                framelink source
+  Klass                    Source/Video
+  Description              Creates a framelink channel and pushes submitted frames (a framelink consumer)
+  Author                   framelink
+
+Plugin Details:
+  Name                     framelink
+  Description              FrameLink native video and serialized PCM transport
+  Filename                 <win-home>\dev\framelink-final-final-6ee0f86e\build\Release\gstframelink.dll
+  Version                  0.1.0
+  License                  MIT/X11
+  Source module            framelink
+  Binary package           framelink
+  Origin URL               https://github.com/jsuppe/framelink
+
+GObject
+ +----GInitiallyUnowned
+       +----GstObject
+             +----GstElement
+                   +----GstBaseSrc
+                         +----GstPushSrc
+                               +----GstFrameLinkSrc
+
+Element Flags:
+  - SOURCE
+
+Pad Templates:
+  SRC template: 'src'
+    Availability: Always
+    Capabilities:
+      video/x-raw
+                 format: { (string)BGRA, (string)RGBA, (string)NV12, (string)RGB10A2_LE } (GstValueList)
+                  width: [ 1, 2147483647 ] (GstIntRange)
+                 height: [ 1, 2147483647 ] (GstIntRange)
+              framerate: [ 0/1, 2147483647/1 ] (GstFractionRange)
+      video/x-raw(memory:D3D11Memory)
+                 format: { (string)BGRA, (string)RGBA, (string)NV12, (string)RGB10A2_LE } (GstValueList)
+                  width: [ 1, 2147483647 ] (GstIntRange)
+                 height: [ 1, 2147483647 ] (GstIntRange)
+              framerate: [ 0/1, 2147483647/1 ] (GstFractionRange)
+
+Element has no clocking capabilities.
+Element has no URI handling capabilities.
+
+Pads:
+  SRC: 'src'
+    Pad Template: 'src'
+
+Element Properties:
+
+  automatic-eos       : Automatically EOS when the segment is done
+                        flags: readable, writable
+                        Boolean. Default: true
+  
+  blocksize           : Size in bytes to read per buffer (-1 = default)
+                        flags: readable, writable
+                        Unsigned Integer. Range: 0 - 4294967295 Default: 4096 
+  
+  channel             : framelink channel to create (this element is the consumer and owns the ring)
+                        flags: readable, writable
+                        String. Default: "framelink"
+  
+  do-timestamp        : Apply current stream time to buffers
+                        flags: readable, writable
+                        Boolean. Default: true
+  
+  expired-frames      : Frames discarded by receiver-local age policy
+                        flags: readable
+                        Unsigned Integer64. Range: 0 - 18446744073709551615 Default: 0 
+  
+  format              : Ring pixel format (BGRA, RGBA, NV12 or RGB10A2_LE; device-dependent)
+                        flags: readable, writable
+                        String. Default: "BGRA"
+  
+  fps                 : nominal frame rate advertised in the caps
+                        flags: readable, writable
+                        Integer. Range: 1 - 240 Default: 30 
+  
+  gpu-readback        : Linux BGRA/RGBA GPU staging into CPU output; requires adopted channel and negotiated COPY|READBACK; no fallback
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Boolean. Default: false
+  
+  height              : ring height to allocate
+                        flags: readable, writable
+                        Integer. Range: 16 - 8192 Default: 720 
+  
+  max-queue-age-ms    : Discard frames whose local receipt/readiness wait exceeds this age; 0 disables; never derived from media PTS
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 0 - 60000 Default: 0 
+  
+  name                : The name of the object
+                        flags: readable, writable
+                        String. Default: "framelinksrc0"
+  
+  native-memory       : Opt-in native DMA-BUF, D3D11 or exact RGB AHardwareBuffer output; unsupported paths fail without CPU fallback
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Boolean. Default: false
+  
+  num-buffers         : Number of buffers to output before sending EOS (-1 = unlimited)
+                        flags: readable, writable
+                        Integer. Range: -1 - 2147483647 Default: -1 
+  
+  parent              : The parent of the object
+                        flags: readable, writable
+                        Object of type "GstObject"
+  
+  pool-size           : Allocated images, not a queue-fill target or presentation delay; adopted channels retain their actual capacity
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 1 - 16 Default: 4 
+  
+  preserve-frame-metadata: Require exact running-time PTS/DTS/duration and media generation; both endpoints must opt in
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Boolean. Default: false
+  
+  preserve-timestamps : Opt-in agreed session running-time PTS; both pipelines must share clock and base time
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Boolean. Default: false
+  
+  shared-cpu          : Explicit broker-bound CPU source; COPY required; A/V requires event stream; no native fallback
+                        flags: readable, writable
+                        Boolean. Default: false
+  
+  typefind            : Run typefind before negotiating (deprecated, non-functional)
+                        flags: readable, writable, deprecated
+                        Boolean. Default: false
+  
+  width               : ring width to allocate
+                        flags: readable, writable
+                        Integer. Range: 16 - 8192 Default: 1280 
+  
+
+Element Actions:
+
+  "apply-memory-policy" -> gboolean  :  g_signal_emit_by_name (element, "apply-memory-policy",
+                                                               gpointer arg0,
+                                                               gboolean * p_return_value);
+
+  "adopt-channel" -> gboolean  :  g_signal_emit_by_name (element, "adopt-channel",
+                                                         gpointer arg0,
+                                                         gboolean * p_return_value);
+

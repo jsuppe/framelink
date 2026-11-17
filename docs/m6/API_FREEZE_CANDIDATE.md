@@ -1,9 +1,9 @@
 # M6 Windows API freeze candidate (M6.7 item 7.1) — DRAFT, NOT FROZEN
 
-The freeze is Jon's decision. This page is what he would approve: the exact public surface, what compatibility it promises, the evidence, and the decisions that are still open. The revision and evidence links are filled in after the final integrated run ([windows-integrated-final](windows-integrated-final/)).
+The freeze is Jon's decision. This page is what he would approve: the exact public surface, what compatibility it promises, the evidence, and the decisions that are still open. All required evidence below has been collected at the proposed revision.
 
 ## Proposed revision
-- Revision: _pending the final integrated run_. It is `a50841a` plus the option B device owner and documentation.
+- Revision: **`6ee0f86e7efd636ba8802663d9eb1bc4c3e19d5b`**, which is `a50841a` plus the option B device owner, the header typedef guard and documentation. [Final integrated evidence](windows-integrated-final/README.md).
 - `FL_VERSION` stays **6**, and the producer/consumer wire protocol is unchanged since `a50841a`. Both peers must still run the same `FL_VERSION`.
 
 ## Public surface
@@ -25,10 +25,10 @@ All changes are additive. No existing function signature, struct layout, enum va
 | Check | Status |
 |---|---|
 | Linux build and CI CPU subset at this source | 24/24 pass locally. The GStreamer tests need CI because this host has no GStreamer dev packages |
-| Windows full serial CTest, fresh Release build (previous 178 tests + `device_owner_win`) | pending final run |
-| Exports: 128 baseline retained, exactly +9, nothing unexpected | pending final run |
-| C11 translation unit including both owner headers | pending final run |
-| 3 unchanged `7b8a274`-built clients against the new DLLs | pending final run |
+| Windows full serial CTest, fresh Release build (previous 178 tests + `device_owner_win`) | **179/179 pass**, 0 skipped |
+| Exports: 128 baseline retained, exactly +9, nothing unexpected | **pass** (88 + 49 = 137) |
+| C11 translation unit including both owner headers | **pass** |
+| 3 unchanged `7b8a274`-built clients against the new DLLs | **3/3 pass** |
 | Option B lifecycle, advertised native configurations | **pass**: 6/6 advertised cases (3.16–13.97 KiB/cycle) plus BGRA1080p60 3/3 and held leases |
 
 ## Open decisions (Jon)
