@@ -34,8 +34,8 @@ Unknown modes reject. Both paths carry PTS/DTS/duration through FrameLink metada
 For bounded two-process execution with checked exit codes and accounting:
 
 ```powershell
-.\scripts\run_d3d_decode_example.ps1 -BuildDir .\build\Release -Mode gpu-color
-.\scripts\run_d3d_decode_example.ps1 -BuildDir .\build\Release -Mode cpu-readable -VerifyPixels
+.\scripts\run_d3d_decode_example.ps1 -BuildDir .\build -Mode gpu-color
+.\scripts\run_d3d_decode_example.ps1 -BuildDir .\build -Mode cpu-readable -VerifyPixels
 ```
 
 `-VerifyPixels` intentionally reads back each received frame to verify seven SMPTE

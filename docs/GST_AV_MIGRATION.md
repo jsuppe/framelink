@@ -94,8 +94,9 @@ exist in sessions: a session ends at EOS, which is drained and acknowledged.
   capabilities passed to the helper); upstream caps must match exactly.
 - **Copies.** Without `native-memory=true`, the consumer copies each frame
   out of the ring (slow from discrete-GPU memory on Linux; see M6.8). The
-  producer always copies its system-memory input into the ring; native
-  producer allocations are not yet qualified with sessions (M6.9).
+  producer copies system-memory input into the ring. Native producer allocations
+  in sessions (M6.9) are qualified on Windows (D3D11) for the advertised cells;
+  Linux and Android are not started.
 - **Latency queries.** The producer pipeline answers not-live (its FrameLink
   sinks do not synchronize); the consumer pipeline's latency is its own sinks'
   plus `latency-ms`.

@@ -87,8 +87,9 @@ Boundary copies per frame for system-memory input (exact, from the
 - Audio is serialized PCM over a local authenticated stream (GDP over GIO),
   never shared memory. Accounting is the producer's EOS statistics; copies
   inside GDP/GIO and the OS socket stack are unknown, not zero.
-- Native producer allocations (`framelinksink native-memory=true`) are an M5a
-  feature not yet qualified with coordinated sessions (roadmap M6.9).
+- Native producer allocations (`framelinksink native-memory=true`) in coordinated
+  sessions (roadmap M6.9) are qualified on Windows (D3D11) for the advertised
+  cells only; Linux (DMA-BUF) and Android (AHardwareBuffer) are not started.
 - On Linux with a discrete GPU the CPU consumer readback is slow (about 34MB/s
   measured on an RTX 3090); use `native-memory=true` for large frames
   (roadmap M6.8).

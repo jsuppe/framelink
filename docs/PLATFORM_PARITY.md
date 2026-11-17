@@ -3,6 +3,10 @@
 Scope: all functional gaps across FrameLink and vkrender, not tracing alone.
 This ledger is in-progress, not a blanket parity certification.
 
+**Status (2026-11-17):** this ledger records the 2026-10-29 parity work and is kept
+as history. Current milestone status, including what M6 covers on each platform,
+is in [STATUS.md](STATUS.md).
+
 ## Implemented in FrameLink
 
 - Portable `flImageMapPlanes` in the core header; Linux native mapping,

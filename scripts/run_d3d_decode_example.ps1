@@ -1,5 +1,5 @@
 param(
-  [string]$BuildDir = '.\build\Release',
+  [string]$BuildDir = '.\build',
   [ValidateSet('gpu-color','cpu-readable')][string]$Mode = 'gpu-color',
   [switch]$VerifyPixels,
   [string]$LogDir = '.\decode-example-logs'
@@ -7,6 +7,7 @@ param(
 # Run in the logged-in desktop, not SSH/session0. Only this run's children are stopped.
 $ErrorActionPreference = 'Stop'
 $BuildDir = (Resolve-Path $BuildDir).Path
+if (Test-Path (Join-Path $BuildDir 'Release\fl_d3d_decode_consumer.exe')) { $BuildDir = Join-Path $BuildDir 'Release' } # Visual Studio layout
 New-Item -ItemType Directory -Force $LogDir | Out-Null
 $LogDir = (Resolve-Path $LogDir).Path
 $channel = 'framelink.decode.' + [Guid]::NewGuid().ToString('N')

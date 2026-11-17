@@ -5,7 +5,7 @@ and the user's audio session are desired):
 
 ```powershell
 $env:PATH='C:/Program Files/gstreamer/1.0/msvc_x86_64/bin;'+$env:PATH
-python test/m5_visible_demo.py --build build/Release --renderer C:/src/vkrender/build/Release/vkrenderer.exe --output visible-demo --loops 30
+python test/m5_visible_demo.py --build build --renderer C:/src/vkrender/build/Release/vkrenderer.exe --output visible-demo --loops 30
 ```
 
 The helper opens `http://127.0.0.1:18765` in the default browser, decodes a real
