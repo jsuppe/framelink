@@ -1,5 +1,10 @@
 # M6 Windows readiness — approved scope and closure checklist
 
+## Option B lifecycle gate window — Jon, 2026-11-16
+For the explicit retained-device (option B) lifecycle cases only, each case runs **200 cycles and is gated on the slope over cycles 100–199**. The limits are unchanged (memory 16 KiB/cycle, handles 0.1, threads 0.02). This excludes the bounded driver copy-pool warm-up identified in [owner-attribution-20261115](lifecycle/owner-attribution-20261115/README.md). It does not change any other profile's gate, and it doesn't requalify the failed fresh-device default. The matched-100 option B results are kept as recorded.
+
+**Result 2026-11-17 (same binaries as matched-100):** all three option B BGRA1920x1080p60 native lifecycle cases pass, giving memory/handles/threads slopes over cycles 100–199. Restart-consumer: 2.97 / −0.011 / −0.005 ([extended-200](lifecycle/device-owner-20261113/extended-200/README.md)). Restart-producer: 3.13 / −0.009 / −0.005. Held leases (`fl_read_leases --cycles 200 --device-owner`): 1.33 / 0 / 0 ([gate-200](lifecycle/device-owner-20261113/gate-200/README.md)). BGRA1080p60 native is an excluded duration cell, so this proves the lifecycle mechanism but doesn't yet cover every advertised native configuration (NV12 1080p60, NV12 3840x2160p30, BGRA 3840x2160p30).
+
 ## Explicit retained-device owner approved — 2026-11-12 20:40:45 EST
 
 Jon selected option B for persistent applications. Implement and qualify the explicit
