@@ -29,7 +29,7 @@ All changes are additive. No existing function signature, struct layout, enum va
 | Exports: 128 baseline retained, exactly +9, nothing unexpected | pending final run |
 | C11 translation unit including both owner headers | pending final run |
 | 3 unchanged `7b8a274`-built clients against the new DLLs | pending final run |
-| Option B lifecycle, advertised native configurations | BGRA1080p60 3/3 pass; 6 runs for NV12 1080p60/NV12 4K30/BGRA 4K30 in progress |
+| Option B lifecycle, advertised native configurations | **pass**: 6/6 advertised cases (3.16–13.97 KiB/cycle) plus BGRA1080p60 3/3 and held leases |
 
 ## Open decisions (Jon)
 - **D2:** the default for new convenience callers (strict bounded failure versus explicitly specified realtime/latest behaviour).

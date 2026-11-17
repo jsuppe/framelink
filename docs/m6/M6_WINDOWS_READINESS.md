@@ -5,6 +5,8 @@ For the explicit retained-device (option B) lifecycle cases only, each case runs
 
 **Result 2026-11-17 (same binaries as matched-100):** all three option B BGRA1920x1080p60 native lifecycle cases pass, giving memory/handles/threads slopes over cycles 100–199. Restart-consumer: 2.97 / −0.011 / −0.005 ([extended-200](lifecycle/device-owner-20261113/extended-200/README.md)). Restart-producer: 3.13 / −0.009 / −0.005. Held leases (`fl_read_leases --cycles 200 --device-owner`): 1.33 / 0 / 0 ([gate-200](lifecycle/device-owner-20261113/gate-200/README.md)). BGRA1080p60 native is an excluded duration cell, so this proves the lifecycle mechanism but doesn't yet cover every advertised native configuration (NV12 1080p60, NV12 3840x2160p30, BGRA 3840x2160p30).
 
+**Advertised native configurations, 2026-11-17:** all six cases pass under the same criterion: NV12 1080p60, NV12 3840x2160p30 and BGRA 3840x2160p30, each restarting the producer and the consumer. Memory over cycles 100–199 ranges from 3.16 to 13.97 KiB/cycle, and handles/threads are falling. See [native-cells-200](lifecycle/device-owner-20261113/native-cells-200/README.md).
+
 ## Explicit retained-device owner approved — 2026-11-12 20:40:45 EST
 
 Jon selected option B for persistent applications. Implement and qualify the explicit
@@ -63,7 +65,7 @@ must be documented; no new uniform D2/D3 default is selected.
 - [x] Existinga50841a integrated178/178,128exports retaining119,3unchangedclients archived.
 - [x] Named shared-CPU and three passing native duration cells archived; failed cells retained.
 - [x] Shared-CPU all8target/role100cycle production controls: original resource limits pass; [summary](cpu-path/windows-cpu-lifecycle-summary/README.md).800measured cycles, exact media; this does not qualify native reconnect.
-- [ ] Publish a **validated bounded lifecycle** for every advertised path. Existing
+- [x] Publish a **validated bounded lifecycle** for every advertised path. Shared-CPU: 8/8 at the original window. Native: option B retained-device owner, 6/6 advertised cases plus BGRA1080 and held leases, under Jon's cycles 100–199 criterion (2026-11-16); legacy fresh-device native reconnect remains unqualified. Existing
   native persistent producer/consumer100-cycle results exceed16KiB/cycle; delayed raw-driver
   reclamation is not production equivalence. Do not advertise unrestricted reconnect.
   Option B is now approved; implement and qualify the retained-device profile under
