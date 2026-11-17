@@ -15,10 +15,10 @@ This is the authoritative current-status page. Other documents link here instead
 ## Current revisions
 | Repository | Revision | Notes |
 |---|---|---|
-| framelink `master` | `c2e4c2d` | `c6d7db7` (merge of PR #10, M6 Windows) plus the cross-platform tooling change (PR #11, CI/presets only) |
+| framelink `master` | current head | `c6d7db7` (merge of PR #10, M6 Windows) plus the tooling change (PR #11) and documentation (PR #12 and later); no code change since `c6d7db7` |
 | Frozen Windows API | `060c54e41bcbfe7ca8dbdef89e6e74fb2930935c` | Tag `m6-windows-api-freeze`. `FL_VERSION` 6. [API freeze](m6/API_FREEZE_CANDIDATE.md) |
-| vkrender `master` | `afbd052` | Pins framelink `c6d7db7` (code identical to the frozen revision) |
-| vkrender-airplay `main` | `31b4007` | Pins framelink `c6d7db7` |
+| vkrender `master` | `6530df8` | Pins framelink `c6d7db7` (code identical to the frozen revision); includes the renderer repair `86853d6` |
+| vkrender-airplay `main` | `9a0dbde` | Pins framelink `c6d7db7` |
 
 Both consumers stay on the same framelink revision because peers with a different `FL_VERSION` are refused at handshake.
 
@@ -58,6 +58,6 @@ Integrated: 180/180 tests, 137 exports (128 retained + 9 owner), C11 headers, 3/
 Builds use the same tooling on every platform: Ninja, Release, `CMakePresets.json` (`cmake --preset ci`, `cmake --build --preset ci`, `ctest --preset ci`), one CI job definition per platform, and pinned runners (`ubuntu-26.04`, `windows-2025`). Only dependency installation and the MSVC environment differ.
 
 ## Related projects
-- **vkrender renderer repair not merged:** the Windows readiness record cites renderer `a6a1906` (accept `--av-latency-ms 0`, cap at 2000, default 100 ms unchanged) on top of `9f74b9d`. That commit exists only on a local branch and is **not on vkrender `master`**, so `master` still rejects an explicit 0 ms renderer latency.
+- **vkrender renderer repair:** the Windows readiness record cites renderer `a6a1906` on top of `9f74b9d`. It accepts `--av-latency-ms 0`, caps the option at 2000 and leaves the 100 ms default unchanged. It is merged to vkrender `master` as `86853d6` (vkrender PR #19).
 - **vkrender:** PR #15 (fullscreen across displays) needs a rebase onto current `master` and a multi-monitor test; the test host has one monitor.
 - **vkrender-airplay:** the GPU self-test fails (54–56 of 60 frames decoded live; the pass mark is 58). It failed identically before the M6 pin. Frames are dropped at the GPU pipeline's latest-wins `appsink max-buffers=1` before reaching FrameLink. The choice between a deeper sink and a looser test is open. The CPU self-test passes.
