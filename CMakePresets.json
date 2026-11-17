@@ -1,0 +1,63 @@
+{
+  "version": 4,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 23,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "ci",
+      "displayName": "Release, all targets (CI, hardware gate and local validation)",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "FRAMELINK_BUILD_GST": "ON",
+        "FRAMELINK_BUILD_TESTS": "ON",
+        "FRAMELINK_BUILD_SAMPLES": "ON"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "ci",
+      "configurePreset": "ci",
+      "jobs": 4
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "ci",
+      "displayName": "GPU-free regressions run by hosted CI",
+      "configurePreset": "ci",
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error"
+      },
+      "filter": {
+        "include": {
+          "name": "^(local_decoder_rate_checker|local_decoder_checker|local_native_bench_analyzer|boundary_av_analyzer|memory_boundary|read_ledger|frame_metadata_contract|trace_details|trace_compiled_out|av_memory_agreement|av_memory_adversarial|memory_contract|memory_contract_c_api|audio_alignment|av_audio_segment|av_offer_bounds|av_auth|av_rendezvous|av_producer_help|av_consumer_help|session_contract|session_contract_c_api|session_contract_peers|nv12_layout|sample_invalid_cli|sample_wrong_role|trace_default_capacity|trace_override_capacity|trace_invalid_capacity|trace_disabled|trace_bounded_concurrent|trace_thread_limit|gst_session_transport|gst_session_context|gst_event_channel|gst_audio_sink|gst_audio_source|gst_local_audio)$"
+        }
+      }
+    },
+    {
+      "name": "hardware",
+      "displayName": "Native A/V tests for the opt-in GPU runner gate",
+      "configurePreset": "ci",
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error"
+      },
+      "filter": {
+        "include": {
+          "name": "^(gst_(av_session|av_faults|timestamp_contract|pool_policy|policy_generation|av_timeline)|receive_queue|read_leases|read_lease_(egl|d3d11)(_producer_death|_delayed_completion)?|m4_transport_(jitter_drift|negative_retimestamps)|m5a_transport_relay_sync_negative|m3_av_apps)$"
+        }
+      }
+    }
+  ]
+}
