@@ -30,6 +30,10 @@ cmake --build build --config Release --parallel 8
 python test/m5_external_pipeline.py --build build/Release --output evidence
 ```
 
+That reproduces the recorded M5 revision. On current `master`, build with
+`cmake --preset ci` and `cmake --build --preset ci` instead; binaries are then in
+`build/`, so pass `--build build` (and use `build` for `$bin` below).
+
 Required plugins: `avimux`, `avidemux`, `jpegenc`, `jpegdec`, `videoconvert`,
 `audioconvert`, `gdppay`, `gdpdepay`, `giostreamsink`, `appsrc`, `appsink`, test
 sources, and FrameLink. Missing plugins must fail; there is no hidden fallback.

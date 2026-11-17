@@ -2,7 +2,8 @@
 
 This increment connects trusted platform session discovery to the existing
 playback receiver without changing desktop private-directory rendezvous.
-It is **not yet the Android cross-app A/V demo**.
+It is not itself the Android cross-app A/V demo; that demo was added later in
+[android/crossapp](../android/crossapp/README.md).
 
 `PlaybackOptions::sessionProvider` is optional. When supplied, both `resolve`
 and `connect` callbacks are required. The adapter must outlive `runPlayback`.

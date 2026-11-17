@@ -17,10 +17,11 @@ This is the authoritative current-status page. Other documents link here instead
 |---|---|---|
 | framelink `master` | current head | `c6d7db7` (merge of PR #10, M6 Windows) plus the tooling change (PR #11) and documentation (PR #12 and later); no code change since `c6d7db7` |
 | Frozen Windows API | `060c54e41bcbfe7ca8dbdef89e6e74fb2930935c` | Tag `m6-windows-api-freeze`. `FL_VERSION` 6. [API freeze](m6/API_FREEZE_CANDIDATE.md) |
-| vkrender `master` | `f18c97f` | Pins framelink `c6d7db7` (code identical to the frozen revision); includes the renderer repair `86853d6`, the scene-output fix (PR #20) and fullscreen across displays (PR #15) |
+| vkrender `master` | current head | Code as of `f18c97f` (PR #15 merge; later commits are docs and test scripts). Pins framelink `c6d7db7` (code identical to the frozen revision); includes the renderer repair `86853d6`, the scene-output fix (PR #20) and fullscreen across displays (PR #15) |
 | vkrender-airplay `main` | `9a0dbde` | Pins framelink `c6d7db7` |
+| framecam `main` | `4a87bb3` | Virtual camera; not pinned, builds against the framelink checkout beside it (vkrender builds it with its own pin) |
 
-Both consumers stay on the same framelink revision because peers with a different `FL_VERSION` are refused at handshake.
+vkrender and vkrender-airplay stay on the same framelink revision because peers with a different `FL_VERSION` are refused at handshake.
 
 ## Windows: supported configurations
 Host: Windows 11 build 26300, NVIDIA RTX 5090, driver 32.0.16.1714, same adapter. No inference to other GPUs, drivers, OS builds or cross-adapter use.

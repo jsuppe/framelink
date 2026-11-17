@@ -12,8 +12,8 @@ a generic independently launched cross-process media-session manager.
 Build with `FRAMELINK_BUILD_GST=ON` and `FRAMELINK_BUILD_SAMPLES=ON` (defaults):
 
 ```sh
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build -j
+cmake --preset ci
+cmake --build --preset ci
 build/framelink_av_session build/libgstframelink.so
 build/framelink_av_session build/libgstframelink.so --faults
 # Optional real speaker/window output (requires available device/display):
@@ -21,7 +21,7 @@ build/framelink_av_session build/libgstframelink.so --play
 ctest --test-dir build -R 'gst_(av_|timestamp_contract)' --output-on-failure
 ```
 
-On Windows use the executable/plugin DLL paths in the selected build directory
+On Windows the same preset builds with Ninja into `build/`; use the `.exe`/`.dll` paths there
 and put the GStreamer runtime and FrameLink DLL on `PATH`. Required GStreamer
 plugins are app, coreelements, GDP and TCP; `--play` additionally needs
 videoconvert, audioconvert, audioresample and platform audio/video sinks.

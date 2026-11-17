@@ -13,13 +13,13 @@ zero-overhead throughput benchmarks.
 ## Build
 
 ```sh
-cmake -S . -B build -DFRAMELINK_BUILD_SAMPLES=ON
-cmake --build build --config Release
-ctest --test-dir build -C Release --output-on-failure
+cmake --preset ci
+cmake --build --preset ci
+ctest --preset ci
 ```
 
-Linux executables are in `build/`; Windows executables and `framelink.dll` are in
-`build/Release/`. `--help` prints options and exit codes. Samples do not require
+The preset (Ninja, Release, samples on) puts the executables and the library in
+`build/` on Linux and Windows alike. `--help` prints options and exit codes. Samples do not require
 GStreamer; set `FRAMELINK_BUILD_GST=OFF` if it is not wanted.
 
 ## Start in two terminals
