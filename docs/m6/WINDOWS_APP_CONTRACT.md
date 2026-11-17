@@ -250,7 +250,7 @@ Jon-owned:** whether any new convenience entrypoint may choose a compatibility
 copy profile. Current recommendation is explicit strict/native and separate
 opt-in CPU/readback profiles, without altering existing defaults. These decisions
 do not block correcting documentation or completing already-authorized code.
-M6 remains open; M7 packaging/release remains held.
+M6 is ready for the approved Windows scope and this API is frozen (2026-11-17); M7 packaging/release remains held.
 
 Source contracts: [memory policy](../../gst/framelink_memory_policy.h),
 [session transport](../../gst/framelink_session_transport.h),

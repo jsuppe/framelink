@@ -9,7 +9,15 @@ matrix below rather than assuming every pipeline is zero-copy.
 and **Android** (AHardwareBuffer) share the core C API. Platform headers expose
 interop handles; allocation/format/fence support still depends on the driver.
 
-## Design and progress — November 3, 2026
+## Status — November 17, 2026
+
+**M6 is ready for the approved Windows scope, and the Windows API is frozen at
+`060c54e4` (tag `m6-windows-api-freeze`, `FL_VERSION` 6).** M6 for Linux and
+Android is open and deferred; M7 (release) is held. See the
+[project status page](docs/STATUS.md) for supported configurations, exclusions,
+current revisions and open decisions.
+
+## Design and progress
 
 **Shipped on `master`: M1–M5, M5a and M5b are complete within documented scope.**
 M5b merged in [PR #8](https://github.com/jsuppe/framelink/pull/8) as `9f86c35`.
@@ -32,12 +40,16 @@ validation matrix on Linux, Windows and Android, and hosted Linux/Windows CI. Se
   Android. Start with the [developer guide](samples/GST_AV_EXAMPLE.md), the
   [element reference](docs/GST_AV_REFERENCE.md) and the
   [migration guide](docs/GST_AV_MIGRATION.md).
-- **M6 active; M7 pending:** low-latency reliability/performance qualification,
-  then release. See the [current resolution plan](docs/m6/LOW_LATENCY_PLAN.md).
-  Coordinated-session producers still copy into the video ring; their native
-  producer integration remains M6.9, not an established whole-path zero-copy claim.
-- **M6 timing migration:** `framelinkavsrc` defaults to `latency-ms=0` on this
-  development branch. Set `latency-ms=150` explicitly to retain the former
+- **M6 (merged in [PR #10](https://github.com/jsuppe/framelink/pull/10)):** Windows
+  low-latency qualification, the negotiated shared-CPU path, native D3D11 two-hop
+  relay and the retained D3D11 device owner. Ready for the
+  [approved Windows configurations](docs/m6/M6_WINDOWS_READINESS.md), with the
+  [API frozen](docs/m6/API_FREEZE_CANDIDATE.md); the
+  [Windows app contract](docs/m6/WINDOWS_APP_CONTRACT.md) is the integration guide.
+  Linux/Android M6 work, including native producers in coordinated sessions for
+  DMA-BUF and AHardwareBuffer (M6.9), is deferred. See the
+  [resolution plan](docs/m6/LOW_LATENCY_PLAN.md).
+- **M6 timing migration:** `framelinkavsrc` defaults to `latency-ms=0`. Set `latency-ms=150` explicitly to retain the former
   buffered playback setting; see the [migration guide](docs/GST_AV_MIGRATION.md).
 
 M5a shares compatible allocations at process boundaries with explicit CPU/GPU
@@ -53,14 +65,15 @@ presentation scheduling. Zero-copy does not mean zero synchronization or elapsed
 transfer time. Audio transport costs are assessed separately from video sharing.
 
 Start here:
+- [Project status](docs/STATUS.md)
 - [Current detailed task checklist](docs/ROADMAP_TASKS.md)
 - [Pipeline-boundary design and acceptance criteria](docs/M5A_PIPELINE_BOUNDARIES.md)
 - [Development memory contract](docs/MEMORY_CONTRACT.md)
 - [Adapter validation evidence](https://github.com/jsuppe/framelink/tree/4aab05f/docs/m5a/adapters-20261101)
 - [Remaining milestone roadmap](docs/REMAINING_ROADMAP.md)
 
-This is a dated source/evidence snapshot, not a live executor-status dashboard.
-Development-branch results are not merged release features.
+Evidence documents are dated snapshots; [docs/STATUS.md](docs/STATUS.md) is the
+current status. There is no tagged release yet (M7 is held).
 
 ```c
 // consumer — owns the buffers
@@ -126,10 +139,16 @@ for plane mapping, GStreamer examples, compatibility and tested limits.
 ## Building
 
 ```
-cmake -S . -B build
-cmake --build build --config Release
-ctest --test-dir build -C Release
+cmake --preset ci
+cmake --build --preset ci
+ctest --preset ci
 ```
+
+The `ci` preset (`CMakePresets.json`) is the same on every platform: Ninja,
+Release, GStreamer elements, tests and samples, output in `build/`. On Windows,
+run it from a Visual Studio developer prompt so Ninja finds MSVC. `ctest --preset
+ci` runs the GPU-free regressions that hosted CI runs; `ctest --test-dir build`
+runs everything, and `ctest --preset hardware` selects the native A/V tests.
 
 The test is two processes: one owns the ring and verifies pixels, the other
 attaches and draws. Each frame's colour is derived from its frame number and
@@ -172,7 +191,8 @@ Fan-out to multiple consumers of one channel is not implemented (use separate ch
 see the [A/V contract](docs/GSTREAMER_AV_CONTRACT.md) and
 [platform qualification](docs/m5b/platform-qualification/README.md).
 [Checkable roadmap](docs/ROADMAP_TASKS.md) distinguishes implemented, locally
-qualified and merged work. M6 reliability qualification and M7 release follow.
+qualified and merged work. M6 is ready for the Windows scope; Linux/Android M6
+and the M7 release are next, in an order Jon has not yet chosen.
 
 [Performance evidence](docs/m5a/multihop-performance-20261101/README.md) records
 supported one/two-boundary1080p60 paths with two original allocations: nominal

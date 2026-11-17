@@ -1,5 +1,7 @@
 # Primary zero-added-delay results — 2026-11-07
 
+> **Status (2026-11-17).** The Windows rows below predate the final revision; Windows is now qualified on `060c54e4` ([duration results](windows-final-duration-060c54e4/README.md)). The Linux and Android acceptance described here is still open and deferred. Current status: [STATUS.md](../STATUS.md).
+
 ## Status: measurements complete for 14 supported cells; acceptance remains open
 
 All selected untraced1800s captures have independent expected video/PCM counts,180000 contiguous audio blocks, exact common inferred A/V offset, zero arrivals over frozen17ms(60fps)/34ms(30fps), and each process below the fixed64KB/min memory-growth limit. These arrival diagnostics include source/copy/consumer work; they are NOT isolated per-hop overhead budgets or physical output timing. They do not erase historical failures.

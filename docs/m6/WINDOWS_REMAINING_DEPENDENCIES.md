@@ -1,4 +1,4 @@
-# Windows remaining execution dependencies — 2026-11-12
+# Windows remaining execution dependencies — updated 2026-11-17
 
 ## Explicit retained-device owner approved — 2026-11-12 20:40:45 EST
 
@@ -16,17 +16,11 @@ Loom: REQ-1dcc0902 (owner), REQ-2d7aec46 (preserved/amended Windows scope);
 REQ-5c4df445 is superseded, not a waiver of its other constraints.
 
 
-## Approved M6 Windows readiness scope — 2026-11-12 18:14 EST
+## Status — 2026-11-17
 
-Jon approved readiness for explicitly named Windows configurations, not universal
-Windows support. This supersedes older broad M6 completion requirements below;
-historical results and failed gates remain evidence, not silently passed tasks.
-Authoritative reviewable scope/checklist: [M6 Windows readiness](M6_WINDOWS_READINESS.md).
-M6 remains OPEN; M7 maintenance hold remains. Correct media/timeline/ownership,
-fault handling, validated bounded lifecycle and final exact-revision integrated/API
-compatibility gates remain mandatory. No new budget, D2/D3 default or device-owner
-API approval is inferred. Failed native BGRA1080 and decoder4K are NOT QUALIFIED
-and excluded from initial advertised support. One task and one executor, serially.
+M6 is **ready for the approved Windows scope** and the Windows API is **frozen at `060c54e4`** (tag `m6-windows-api-freeze`), both recorded by Jon on 2026-11-17. Native BGRA and NV12 1080p60 are supported under a recorded host-scheduling assumption, without a clean 1800 s pass on the final revision. Decoded relay 4K30 stays excluded. M6 for Linux and Android is open and deferred, and M7 is held. Current status and revisions: [STATUS.md](../STATUS.md). The 2026-11-12 Windows scope approval and the closure checklist are in [M6 Windows readiness](M6_WINDOWS_READINESS.md).
+
+Sections below that carry an earlier date describe status at that date.
 
 
 All four frozen461584b shared-CPU duration cells and all8target/role production lifecycle cells are collected passes; Windows runtime is idle after01:23:12ZNovember13. Exacta50841a178/178,
@@ -59,34 +53,23 @@ choice is needed. Isolated integration is now collected: renderer repaira6a1906,
 See [integration evidence](renderer-integration-a6a1906/README.md). No physical-output
 claim, new performance budget or renderer endurance qualification is inferred.
 
-## Other dependencies, owners and resume conditions
+## Dependencies, owners and state — 2026-11-17
 
-| Item | Owner | Resume condition |
+Evelyn's earlier ownership of investigations ended with her usage pause on 2026-11-13; remaining items are owned by whoever is assigned when Jon resumes them.
+
+| Item | State (2026-11-17) | Resume condition |
 | --- | --- | --- |
-| Supported bounded lifecycle | Evelyn: evidence/contract reconciliation; Jon: any changed supported contract | Existing100-cycle native growth fails. Option B is approved; executor owns additive implementation and original-limit qualification. No cache/sleep workaround or implicit waiver |
-| D2 overload / D3 convenience fallback | Jon only if introducing new policy | New convenience defaults deferred. Existing explicit profiles/defaults remain and routine supported-contract documentation is ready, not blocked |
-| Native BGRA1080 natural323ms stall | Evelyn causal investigation | Original-scale phase/thread/I/O evidence localizing the natural delay; synthetic pause proves catch-up mechanism only. No uninstrumented duration retry |
-| Decoder4K misses | Evelyn causal investigation | Evidence localizing original source-oracle/timing outlier, which isolated phase control did not reproduce; no clean-repeat waiver or decoder endurance |
-| Historical startup/159ms native timing | Evelyn causal investigation | Matched original-scale phase/wait evidence plus compatible remedy, not another equivalent clean control |
-| Default-profile lifecycle slopes | Evelyn/backend/driver; Jon only for contract changes | Real remedy plus unchanged matched production gates. New deferred-reclaim probes do not qualify default profile |
-| Renderer supported-profile acceptance | Evelyn; Jon only for changed support/budget | Current0/100ms NV12 submission proof uses ring12/pending6 and explicit CPU conversion. No two-slot/endurance/physical-output inference; reconcile named intended support with existing budgets |
-| Linux/Android integration and campaigns | Project scope/Jon | Windows-first deferral lifted or required focused shared-code check; no broad campaign is authorized as a workaround for Windows blockers |
-| Final M6 closure/CI/API freeze | Evelyn after predecessors | Resolved applicable gates/decisions and final exact changed-runtime qualification; M7 remains held |
+| Supported bounded lifecycle | **Done.** Shared CPU 8/8; native through the retained device owner (option B) under the cycles 100–199 rule | — |
+| D2 overload / D3 convenience fallback | **Deferred by Jon** until a convenience entry point is proposed | A proposed convenience entry point |
+| Native 1080p60 late wake-up (BGRA on `a50841a`, NV12 on `060c54e4`) | **Supported by Jon's decision** under a host-scheduling assumption; diagnosis deferred | Jon resumes it; [diagnostic plan](windows-final-duration-060c54e4/README.md#decision--jon-2026-11-17) |
+| Decoder 4K misses | Excluded; cause not established | Evidence localizing the original source/timing outlier; no clean-repeat waiver |
+| Historical startup/159 ms native timing | Cause not established | Matched original-scale phase/wait evidence plus a compatible remedy |
+| Default-profile (fresh-device) lifecycle slopes | Unqualified; not needed for support because the owner profile is the supported path | A real remedy plus unchanged matched production gates |
+| Renderer supported-profile acceptance | Submission proof only: NV12 0/100 ms, ring 12/pending 6, explicit CPU conversion | Named intended support, with existing budgets |
+| Owner device-removal path | Implemented, untested | A device-removal test on the owner |
+| Linux/Android integration and campaigns | Deferred | Jon chooses to extend M6 to Linux/Android |
+| Final M6 closure/CI/API freeze | **Done.** API frozen at `060c54e4`; M6 ready for the Windows scope; merged as PR #10 | — (M7 held) |
 
-No additional supported Windows missing-cell duration or unrun existing-policy
-functional check was identified in this reconciliation. This does not assert
-that all project work is mathematically impossible. Renderer integration is collected;
-remaining bounded-lifecycle and final supported-profile gates are explicit in
-[M6 Windows readiness](M6_WINDOWS_READINESS.md). Do not launch speculative repeats merely to keep a process running.
+## Native lifecycle contract choice (historical)
 
-## Remaining native contract choice and closure dependencies
-
-[Concrete native lifecycle choices](lifecycle/NATIVE_LIFECYCLE_DECISION.md): accepted
-fresh-worker/single-generation support with matched qualification, explicitly
-authorized device-owner implementation for persistent applications, or a further
-deferral of advertised native readiness. Jon selected B at20:40:45EST; earlier alternatives below are historical, not pending approval.
-Jon owns that support contract; executor owns validation/repair after it is settled.
-Final release artifact selection/integrated/API gates and verified merge depend
-on that boundary. Source reconciliation finds113production/header/runtime/sample/
-CMake blobs identical toa50841a; only the test-only lifecycle guard differs.
-Next action is approved option B implementation, not a repeat of unchanged native failures.
+Jon selected option B (the retained device owner) at 20:40:45 EST on 2026-11-12. It is implemented and qualified; see [native lifecycle choices](lifecycle/NATIVE_LIFECYCLE_DECISION.md) for the alternatives that were considered.

@@ -1,5 +1,7 @@
 # FrameLink media roadmap
 
+Historical plan from the audio/video start (2026-10-29). Items 4 and 5 below are as written then. Current status: [STATUS.md](STATUS.md); current roadmap: [REMAINING_ROADMAP.md](REMAINING_ROADMAP.md).
+
 ## Image/GPU transport baseline
 
 Merged baseline: PR #1, master `1a46650`. Linux/Windows/Android format, ownership,

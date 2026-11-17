@@ -1,23 +1,17 @@
 # FrameLink + renderer remaining roadmap
 
-## Approved M6 Windows readiness scope — 2026-11-12 18:14 EST
+## Status — 2026-11-17
 
-Jon approved readiness for explicitly named Windows configurations, not universal
-Windows support. This supersedes older broad M6 completion requirements below;
-historical results and failed gates remain evidence, not silently passed tasks.
-Authoritative reviewable scope/checklist: [M6 Windows readiness](m6/M6_WINDOWS_READINESS.md).
-M6 remains OPEN; M7 maintenance hold remains. Correct media/timeline/ownership,
-fault handling, validated bounded lifecycle and final exact-revision integrated/API
-compatibility gates remain mandatory. No new budget, D2/D3 default or device-owner
-API approval is inferred. Failed native BGRA1080 and decoder4K are NOT QUALIFIED
-and excluded from initial advertised support. One task and one executor, serially.
+M6 is **ready for the approved Windows scope** and the Windows API is **frozen at `060c54e4`** (tag `m6-windows-api-freeze`), both recorded by Jon on 2026-11-17. Native BGRA and NV12 1080p60 are supported under a recorded host-scheduling assumption, without a clean 1800 s pass on the final revision. Decoded relay 4K30 stays excluded. M6 for Linux and Android is open and deferred, and M7 is held. Current status and revisions: [STATUS.md](STATUS.md). The 2026-11-12 Windows scope approval and the closure checklist are in [M6 Windows readiness](m6/M6_WINDOWS_READINESS.md).
+
+Sections below that carry an earlier date describe status at that date.
 
 
 Updated 2026-11-04. Scope: local cross-platform video/audio sessions and renderer
 integration. Historical cloud calling, unrelated receiver features and HDR are
 not part of this release. M1–M5 are merged within their documented qualification
 scope. M5a is complete within documented paths (PR #7, `3e1d51f`).
-M5b is complete within documented scope (PR #8, `9f86c35`). M6 is in progress; M7 follows. Planned work is not implemented merely by being listed.
+M5b is complete within documented scope (PR #8, `9f86c35`). As of 2026-11-17, M6 is ready for the approved Windows scope (PR #10) and open for Linux/Android; M7 is held ([status](STATUS.md)). Planned work is not implemented merely by being listed.
 
 For individually checkable tasks and current merge gates, see
 [the executable roadmap checklist](ROADMAP_TASKS.md).
@@ -235,6 +229,8 @@ bounds, supported platform tests pass, final CI/review/merge is verified.
 Physical output qualification remains separate.
 
 ## M6 — Reliability, performance and observability
+**Status (2026-11-17):** ready for the [approved Windows scope](m6/M6_WINDOWS_READINESS.md); Linux and Android work is deferred. Per-task, per-platform state is in [ROADMAP_TASKS.md](ROADMAP_TASKS.md#m6--reliability-performance-and-observability).
+
 Deliverables: reproducible stress/benchmark suite, opt-in tracing, measured overhead
 and release acceptance report.
 Tasks:
@@ -247,6 +243,8 @@ Tasks:
 Gate: no unexplained corruption/hangs/unbounded growth; documented performance envelope and limitations.
 
 ## M7 — Release and handoff
+**Status (2026-11-17):** held. The Windows API freeze (`060c54e4`) covers the Windows part of the first task; nothing else has started.
+
 Deliverables: versioned release, build artifacts, API documentation, runnable examples
 and completed requirements/validation matrix.
 Tasks:
@@ -258,7 +256,7 @@ Gate: a clean machine can reproduce the documented A/V workflow; all release-sco
 or explicitly capability-gated, with unqualified hardware behavior never labeled passed.
 
 ## Execution dependencies
-M1 -> M2 -> M3 -> M4 -> M5 -> M5a -> M5b -> M6 -> M7.
+M1 -> M2 -> M3 -> M4 -> M5 -> M5a -> M5b -> M6 -> M7. M6's Windows scope is complete; whether M7 for Windows precedes Linux/Android M6 is Jon's open decision.
 Jon's 2026-10-31 override requires **one task at a time**: no concurrent
 implementation/review/validation workstreams. Finish and validate the current
 task, then immediately take the next ready task in the current milestone. Proposed soak lengths are release

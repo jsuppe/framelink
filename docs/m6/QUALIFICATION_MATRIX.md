@@ -1,5 +1,7 @@
 # M6 qualification matrix and numeric budgets
 
+> **Status (2026-11-17).** This M6.1 matrix and its budgets are unchanged. Windows readiness was decided against the [approved Windows scope](M6_WINDOWS_READINESS.md), not by closing this full matrix. Current status: [STATUS.md](../STATUS.md).
+
 M6.1 defines what M6 qualifies, how it is measured, and the numeric limits that
 M6.2–M6.7 must meet. The limits are derived mechanically from measured
 baselines (rule below); they are not targets chosen in advance. Anything outside

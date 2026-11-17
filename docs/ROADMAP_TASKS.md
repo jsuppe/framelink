@@ -1,16 +1,10 @@
 # FrameLink + vkrender — executable roadmap checklist
 
-## Approved M6 Windows readiness scope — 2026-11-12 18:14 EST
+## Status — 2026-11-17
 
-Jon approved readiness for explicitly named Windows configurations, not universal
-Windows support. This supersedes older broad M6 completion requirements below;
-historical results and failed gates remain evidence, not silently passed tasks.
-Authoritative reviewable scope/checklist: [M6 Windows readiness](m6/M6_WINDOWS_READINESS.md).
-M6 remains OPEN; M7 maintenance hold remains. Correct media/timeline/ownership,
-fault handling, validated bounded lifecycle and final exact-revision integrated/API
-compatibility gates remain mandatory. No new budget, D2/D3 default or device-owner
-API approval is inferred. Failed native BGRA1080 and decoder4K are NOT QUALIFIED
-and excluded from initial advertised support. One task and one executor, serially.
+M6 is **ready for the approved Windows scope** and the Windows API is **frozen at `060c54e4`** (tag `m6-windows-api-freeze`), both recorded by Jon on 2026-11-17. Native BGRA and NV12 1080p60 are supported under a recorded host-scheduling assumption, without a clean 1800 s pass on the final revision. Decoded relay 4K30 stays excluded. M6 for Linux and Android is open and deferred, and M7 is held. Current status and revisions: [STATUS.md](STATUS.md). The 2026-11-12 Windows scope approval and the closure checklist are in [M6 Windows readiness](m6/M6_WINDOWS_READINESS.md).
+
+Sections below that carry an earlier date describe status at that date.
 
 
 Updated 2026-11-04. This is the checkable execution view of
@@ -18,9 +12,9 @@ Updated 2026-11-04. This is the checkable execution view of
 remain authoritative. Checked means implemented, reviewed and validated within
 the stated scope—not universal hardware support or physical-output qualification.
 
-Remaining execution order: **M6 → M7**, one task at a time. No concurrent
-implementation/review/validation streams. Finish the current milestone before
-starting the next. Automated status reporting remains cancelled.
+Remaining work: M6 for Linux and Android, and M7. Their order is Jon's open
+decision (see [STATUS.md](STATUS.md)). One task at a time; no concurrent
+implementation/review/validation streams. Automated status reporting remains cancelled.
 
 ## Completed milestones
 
@@ -326,8 +320,10 @@ for mandatory M6.2–M6.9 subtasks, pending design decisions and final gates.
 M6.1 primary-profile budget acceptance is reopened; historical evidence remains.
 M6.7 prepares closure infrastructure; actual closure follows M6.8/M6.9.
 
-**State: in progress (M6.1 done).** Earlier targeted stress/trace tests are
-baseline evidence, not completion of these release-scale tasks.
+**State (2026-11-17): Windows scope ready; Linux and Android open and deferred.**
+The boxes below stay unchecked until every target is done; each carries its
+per-platform state. Windows readiness is the
+[approved Windows scope](m6/M6_WINDOWS_READINESS.md), not universal Windows support.
 
 - [x] **M6.1 Define qualification matrix and numeric budgets:** supported
   hardware/workload, FPS, latency/jitter, A/V offset, resources and tracing overhead.
@@ -346,33 +342,64 @@ baseline evidence, not completion of these release-scale tasks.
   Linux CPU 640x360/1280x720 unsupported (M6.8); Linux CPU path bimodal (cause
   open); Android NV12 slow (M6.5).
 - [ ] **M6.2 Sustained A/V:** 30-minute soaks on each supported target.
+  *Windows:* done on the final revision: shared CPU 4/4 and native 4K30 2/2 pass.
+  Native 1080p60 is supported by Jon's decision without a clean pass
+  ([results](m6/windows-final-duration-060c54e4/README.md)). *Linux/Android:* native
+  1800 s cells measured ([primary results](m6/PRIMARY_RESULTS.md)); primary-profile
+  budget acceptance (M6.2b/2e) open; CPU target cells unsupported (M6.8).
 - [ ] **M6.3 Lifecycle endurance:** at least 100 restart/reconnect cycles per target.
+  *Windows:* done: shared CPU 8/8; native through the retained device owner (option B),
+  6/6 advertised cases plus BGRA 1080p60 and held leases, under the cycles 100–199
+  rule. The legacy fresh-device reconnect fails and is unqualified.
+  *Linux/Android:* not started.
 - [ ] **M6.4 Fault qualification:** slow readers, underruns/drops, endpoint death,
   generation changes and cleanup; fix failures and rerun affected cases.
+  *All platforms:* existing-policy coverage, 8 regressions on each
+  ([fault coverage](m6/fault-coverage/README.md)). *Windows:* owner fault tests and
+  relay/bin cancellation and death evidence. D2 (overload default) is deferred, so
+  new overload policy is out of scope; the owner device-removal path is untested.
 - [ ] **M6.5 Performance/resource evidence:** distributions, queue depth,
   CPU/GPU/memory/handles, clock behavior and bounded growth.
+  Stage costs, Android NV12 cost isolation and platform limits are published
+  (M6.5a/b/d). Separating Windows queue timing from producer/GPU scheduling (5c)
+  remains open; the native 1080p60 late wake-up is its open instance.
 - [ ] **M6.6 Tracing qualification:** disabled vs enabled cost, record-loss
   detection and reproducible frame/audio accounting.
+  Overhead and loss detection are done on all platforms (6b; default 4096
+  events/thread). End-to-end identity joining through GPU completion and
+  presentation (6a) remains open.
 - [ ] **M6.7 Automate and close:** deterministic CI faults, reproducible benchmark
   commands and reviewed acceptance report with remaining unsupported modes.
+  CI negatives and gate scripts are done (7a/7b). *Windows:* the final-revision
+  acceptance is the [evidence review](m6/EVIDENCE_REVIEW_20261117.md).
+  *Linux/Android:* final-revision qualification follows M6.8/M6.9.
 - [ ] **M6.8 CPU-consumer ring memory (found in M5b.11):** Linux GBM linear
   rings live in discrete-GPU video memory, so the CPU consumer path reads
   ~34MB/s (640x360 RGBA: 27ms median, 78ms p90 on an RTX 3090) and cannot
   sustain 30fps there. Allocate CPU-consumed rings in cached system memory (or
   use streaming reads), qualify throughput per platform and publish budgets.
+  *Windows:* the negotiated shared-CPU path is qualified at the target sizes.
+  *Linux/Android:* diagnosed (8a); repair and qualification (8b/8c) not started.
 - [ ] **M6.9 Native producer in coordinated sessions (found in M5b.12):** the
   coordinated producer elements copy system-memory input into the ring; wire
   `framelinksink native-memory=true` (M5a policy binding, readiness fences)
   into sessions so native producer allocations travel without a copy, and
   qualify on each platform.
+  *Windows (D3D11):* native two-hop relay qualified for the advertised cells.
+  The decoded relay is limited (1080p60 short functional only; 4K30 excluded).
+  *Linux (DMA-BUF) / Android (AHardwareBuffer):* not started.
 
 ## M7 — Release and developer handoff
 
-**State: not started.** Deliverable: reproducible versioned release, not merely
-source branches or a demo that depends on the developer's machine.
+**State (2026-11-17): held.** M7.1 is done for Windows only (API frozen at
+`060c54e4`). Deliverable: reproducible versioned release, not merely source
+branches or a demo that depends on the developer's machine.
 
 - [ ] **M7.1 API/version review:** compatibility and migration notes, final
   requirements-to-tests matrix and explicit release capability scope.
+  *Windows:* API frozen at `060c54e4` with its compatibility promise
+  ([API freeze](m6/API_FREEZE_CANDIDATE.md)). A requirements-to-tests matrix and
+  the Linux/Android API check are not done.
 - [ ] **M7.2 Integration package:** producer/consumer and Windows GStreamer
   examples, invocation guides, deployment instructions and diagnostic troubleshooting.
 - [ ] **M7.3 Clean-install validation:** dependencies, platform artifacts and
