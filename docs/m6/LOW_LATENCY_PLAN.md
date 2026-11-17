@@ -246,7 +246,7 @@ Jon reinstated single-task serial execution on 2026-11-12 at 06:49 EST, supersed
 
 ### Authoritative execution state — 2026-11-12
 
-API candidate: **`a50841aad44fbc9431234a4f326bad036d193bf5`, NOT FROZEN**.
+API candidate: **`a50841aad44fbc9431234a4f326bad036d193bf5`, NOT FROZEN** (historical). **2026-11-17: API frozen at `060c54e41bcbfe7ca8dbdef89e6e74fb2930935c` and M6 ready for the Windows scope (Jon); M7 held. See [M6_WINDOWS_READINESS.md](M6_WINDOWS_READINESS.md).**
 Runtime DLL sources remain unchanged from `461584b`. Checked relay sample
 fix `462fa5f` avoids an unnecessary acquisition after real native drain and is
 now included in the verified exact-revision integrated build.

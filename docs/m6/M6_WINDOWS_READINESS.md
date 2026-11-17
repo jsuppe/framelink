@@ -1,5 +1,13 @@
 # M6 Windows readiness — approved scope and closure checklist
 
+## M6 READY for the Windows scope / API FROZEN at `060c54e4` / M7 HELD — Jon, 2026-11-17
+Jon's decisions on the final evidence review ([review](EVIDENCE_REVIEW_20261117.md)):
+1. **Native two-hop 1080p60 is supported.** Working assumption: the late test-source wake-ups behind both 1800 s failures are a host scheduling issue, not FrameLink. Root-cause testing is deferred ([plan](windows-final-duration-060c54e4/README.md#decision--jon-2026-11-17)). The question covered both formats, so NV12 1080p60 (failed at about 1298.7 s on `060c54e4`, passed on `a50841a`) and BGRA 1080p60 (failed at about 695 s on `a50841a`) are both supported. **Neither has a clean 1800 s pass on the final revision**; the failures stay recorded as failures, not passes.
+2. **Shared-CPU lifecycle:** the reviewed functional equivalence to the measured `a50841a`-equivalent source is accepted; the 8 cells are not rerun.
+3. **API frozen at `060c54e41bcbfe7ca8dbdef89e6e74fb2930935c`**, with D2/D3 deferred until a convenience entry point is proposed. See [API freeze](API_FREEZE_CANDIDATE.md).
+
+M7 stays on hold until Jon releases it.
+
 ## Option B lifecycle gate window — Jon, 2026-11-16
 For the explicit retained-device (option B) lifecycle cases only, each case runs **200 cycles and is gated on the slope over cycles 100–199**. The limits are unchanged (memory 16 KiB/cycle, handles 0.1, threads 0.02). This excludes the bounded driver copy-pool warm-up identified in [owner-attribution-20261115](lifecycle/owner-attribution-20261115/README.md). It does not change any other profile's gate, and it doesn't requalify the failed fresh-device default. The matched-100 option B results are kept as recorded.
 
@@ -26,7 +34,7 @@ REQ-5c4df445 is superseded, not a waiver of its other constraints.
 
 
 Approved by Jon on 2026-11-12 at18:14EST; Loom requirement `REQ-5c4df445`.
-**M6 OPEN / API NOT FROZEN / M7 HELD.** This is a candidate matrix, not a release
+**Historical (superseded 2026-11-17, see top): M6 OPEN / API NOT FROZEN / M7 HELD.** This was a candidate matrix, not a release
 support declaration. Narrowing scope does not relax correctness or memory gates.
 
 ## Exact environment and candidate support
@@ -44,8 +52,8 @@ Final publication must pin the selected exact integrated revisions, not floating
 |---|---|---|---|
 | Negotiated shared CPU | BGRA/NV12,1920x1080p60 and3840x2160p30 | Four461584b1800s cells and8/8production lifecycle cells pass | Exact artifact/revision selection and final closure remain; bounded warm100x5s lifecycle, not unrestricted cadence |
 | Native same-adapter two-hop | NV12,1920x1080p60 and3840x2160p30; BGRA3840x2160p30 | Threea50841a1800s cells pass | Strict ownership/synchronization; bounded lifecycle still required |
-| Native same-adapter two-hop | NV12 1920x1080p60 (final revision) | [Final `060c54e4` 1800 s run FAILED at about 1298.7 s](windows-final-duration-060c54e4/README.md); NV12 4K30 and BGRA 4K30 pass on the same revision | **Failed on the final revision; status pending Jon's decision.** The `a50841a` pass does not override the failure |
-| Native same-adapter two-hop | BGRA1920x1080p60 | Finala50841a run FAILED after~695s | **NOT QUALIFIED; excluded**. Earlier11d1b65 pass does not override failure |
+| Native same-adapter two-hop | NV12 1920x1080p60 (final revision) | [Final `060c54e4` 1800 s run FAILED at about 1298.7 s](windows-final-duration-060c54e4/README.md); NV12 4K30 and BGRA 4K30 pass on the same revision | **Supported (Jon, 2026-11-17)** under the host-scheduling assumption; the final-revision failure stays recorded |
+| Native same-adapter two-hop | BGRA1920x1080p60 | Finala50841a run FAILED after~695s | **Supported (Jon, 2026-11-17)** under the host-scheduling assumption; no clean 1800 s pass on the final revision, failure stays recorded |
 | Real decoded source relay | 1920x1080p60 | Matched short pair pass77afa1a | Functional/short-rate evidence only; no endurance support claim |
 | Real decoded source relay | 3840x2160p30 | Replay trace-on two34ms misses, max36.6673ms | **NOT QUALIFIED; excluded** |
 | Renderer final submission | NV121920x1080p60, explicit0ms or100ms, native input, ring12/pending6 | Three5s complete-trace captures,300identities/240000PCM each | Submission/control proof only, not endurance, small-pool qualification or physical output; explicit CPU NV12 conversion, not end-to-end zero-copy |
@@ -80,9 +88,9 @@ must be documented; no new uniform D2/D3 default is selected.
   Requirement: also
   reconciliation after planned supported-path changes. Reuse exact unchanged evidence
   only with explicit hash/source equivalence; no unnecessary campaign repetition.
-- [ ] Final evidence review: every support row has command/settings/revision/host,
-  raw outcomes and exclusions; no suspended failure is counted as pass.
-- [ ] Record M6 readiness only after all applicable gates; notify Jon and **HOLD before M7**.
+- [x] Final evidence review: every support row has command/settings/revision/host,
+  raw outcomes and exclusions; no suspended failure is counted as pass. [Review](EVIDENCE_REVIEW_20261117.md); native 1080p60 supported by Jon's decision with its failures recorded, shared-CPU lifecycle by accepted reviewed equivalence (2026-11-17).
+- [x] Record M6 readiness only after all applicable gates; notify Jon and **HOLD before M7**. Recorded 2026-11-17 at `060c54e4`; M7 held.
 
 ## Deferred expansion backlog — separate from M6 readiness
 
@@ -90,8 +98,8 @@ must be documented; no new uniform D2/D3 default is selected.
 |---|---|---|
 | Broad Linux/Android performance/integration | Executor; Jon prioritizes | Explicit post-M6 expansion authorization; retain existing failed CPU/Android cells |
 | Other GPUs/drivers/cross-adapter/formats/rates | Executor; Jon selects matrix | Named expanded matrix and original budgets before qualification |
-| Native BGRA1080 and decoder4K failures | Executor | Causal evidence and justified repair, then affected original gates; no speculative duration repeats or waiver |
-| Retained-device API | Executor | MOVED INTO M6 by explicit option B approval; implementation/qualification pending, not deferred |
+| Native 1080p60 late-wake diagnosis (NV12 and BGRA) and decoder 4K failure | Executor | Deferred by Jon 2026-11-17; [plan](windows-final-duration-060c54e4/README.md#decision--jon-2026-11-17). Decoder 4K stays excluded |
+| Retained-device API | Executor | Done in M6 (option B), frozen at `060c54e4` |
 | Automatic fallback/convenience profiles | Jon policy; executor implementation | Explicit behavior/default approval; explicit selection/rejection remains in M6 |
 | Physical display/acoustic timing | Jon scope/budget; executor measurement | Approved physical-output methodology and budgets; submission timestamps are not scanout |
 | Packaging/release/developer handoff | Executor after Jon maintenance release | M6 closure plus explicit release of M7 hold |

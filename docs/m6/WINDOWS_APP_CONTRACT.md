@@ -1,4 +1,7 @@
-# Windows application integration contract — not frozen
+# Windows application integration contract — frozen at `060c54e4` (Jon, 2026-11-17)
+
+The API surface this contract describes is frozen at `060c54e41bcbfe7ca8dbdef89e6e74fb2930935c`; see [API_FREEZE_CANDIDATE.md](API_FREEZE_CANDIDATE.md). The text below was written at `a50841a` and extended for the option B device owner.
+
 
 This is an app-facing reading of the implemented contracts integrated at
 `a50841a`, with runtime DLL source contracts unchanged from `461584b`, not a

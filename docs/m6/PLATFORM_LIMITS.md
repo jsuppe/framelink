@@ -61,6 +61,8 @@ These are transport arrival/accounting/resource results, not physical playback, 
 
 Final native a50841a two-hop cells: NV121080, NV124K and BGRA4K duration pass; BGRA1080 duration failed around695s and remains unqualified. Older table passes retain historical scope and do not waive that failure. See LOW_LATENCY_PLAN.md for exact archives and unresolved cause.
 
+**2026-11-17:** on the final revision `060c54e4`, native NV12 1080p60 also failed its 1800 s run (about 1298.7 s) with the same late-wake signature, while shared CPU 4/4 and native 4K30 2/2 passed ([results](windows-final-duration-060c54e4/README.md)). Jon approved native 1080p60 (NV12 and BGRA) as supported under a host-scheduling assumption, with diagnosis deferred; both failures stay recorded.
+
 ## Shared-CPU lifecycle completion — November12/13
 
 All8format/target/persistent-role100x5s production lifecycle cells pass original warm resource limits. [Summary and exclusions](cpu-path/windows-cpu-lifecycle-summary/README.md). Native growth failures are not changed; no unlimited-rate reconnect claim.

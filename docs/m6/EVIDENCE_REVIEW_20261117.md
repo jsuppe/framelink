@@ -1,4 +1,4 @@
-# M6 Windows final evidence review — 2026-11-17 (OPEN: one failed cell, one unmeasured row)
+# M6 Windows final evidence review — 2026-11-17 (CLOSED by Jon's decisions)
 
 Candidate revision: `060c54e41bcbfe7ca8dbdef89e6e74fb2930935c`. Host for every row: the Windows test host in [M6_WINDOWS_READINESS.md](M6_WINDOWS_READINESS.md) (Windows 11 build 26300, RTX 5090, driver 32.0.16.1714, same adapter). Each evidence folder below has a README, the commands or runner, and file hashes.
 
@@ -29,8 +29,9 @@ The seven 1800 s cells were rerun on `060c54e4`: [results](windows-final-duratio
 - **Failed:** native NV12 1080p60 stopped at about 1298.7 s. The test source's video thread woke 43.5 ms late, outside any FrameLink call, and the catch-up burst hit the queue-1 replacement. This is the same signature as the excluded BGRA 1080p60 failure on `a50841a`, which predates the owner code. The cause of the late wake-up is not established.
 - No retry and no waiver were applied.
 
-## Still open
-- **Native NV12 1080p60:** Jon, 2026-11-17: root-cause testing deferred; working assumption is a host scheduling stall, not FrameLink ([decision and deferred plan](windows-final-duration-060c54e4/README.md#decision--jon-2026-11-17)). The 1800 s result stays failed. Whether the cell is advertised under that assumption is still to be decided. The same assumption would apply to the excluded BGRA 1080p60 cell, which has the same signature.
-- **Shared-CPU lifecycle, 8 cells:** still measured only on `a50841a`-equivalent source. It is a reviewed functional equivalence (with no owner selected the new code is skipped), not a measurement on the final revision. Rerunning takes about 1.2 h; alternatively Jon accepts the reviewed equivalence explicitly.
+## Decisions — Jon, 2026-11-17
+- **Native 1080p60 (NV12 and BGRA): supported.** Root-cause testing is deferred; the working assumption is a host scheduling stall, not FrameLink ([decision and deferred plan](windows-final-duration-060c54e4/README.md#decision--jon-2026-11-17)). Both 1800 s failures stay recorded; neither format has a clean 1800 s pass on the final revision.
+- **Shared-CPU lifecycle, 8 cells:** the reviewed functional equivalence is accepted (with no owner selected the new code is skipped). Not remeasured on the final revision.
+- **API frozen at `060c54e4`**, D2/D3 deferred.
 
-Until these are decided the checklist item "Final evidence review" stays open and M6 readiness is not recorded.
+With these decisions the review is closed and M6 readiness for the Windows scope is recorded in [M6_WINDOWS_READINESS.md](M6_WINDOWS_READINESS.md). M7 stays held.

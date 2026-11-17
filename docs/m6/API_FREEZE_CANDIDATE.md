@@ -1,6 +1,6 @@
-# M6 Windows API freeze candidate (M6.7 item 7.1) — DRAFT, NOT FROZEN
+# M6 Windows API freeze (M6.7 item 7.1) — FROZEN at `060c54e4` (Jon, 2026-11-17)
 
-The freeze is Jon's decision. This page is what he would approve: the exact public surface, what compatibility it promises, the evidence, and the decisions that are still open. The evidence below was collected at the proposed revision; one duration cell failed (see the table).
+Jon approved this freeze on 2026-11-17, with D2/D3 deferred. This page records the exact public surface, what compatibility it promises, the evidence, and the deferred decisions. The evidence below was collected at the proposed revision; one duration cell failed (see the table).
 
 ## Proposed revision
 - Revision: **`060c54e41bcbfe7ca8dbdef89e6e74fb2930935c`**, which is `a50841a` plus the option B device owner, its fault test, the header typedef guard and documentation. [Final integrated evidence](windows-integrated-final/README.md).
@@ -31,9 +31,9 @@ All changes are additive. No existing function signature, struct layout, enum va
 | 3 unchanged `7b8a274`-built clients against the new DLLs | **3/3 pass** |
 | Option B lifecycle, advertised native configurations | **pass**: 6/6 advertised cases (3.16–13.97 KiB/cycle) plus BGRA1080p60 3/3 and held leases |
 | 1800 s duration on this revision, shared CPU (4 cells) and native 4K30 (2 cells) | **pass**, 6/6, zero deadline misses. [Results](windows-final-duration-060c54e4/README.md) |
-| 1800 s duration on this revision, native NV12 1080p60 | **FAILED** at about 1298.7 s: test-source wake-up 43.5 ms late, then queue-1 replacement. Same signature as the excluded BGRA 1080p60 cell. Does not involve the API surface, but the supported-configuration list depends on Jon's decision |
+| 1800 s duration on this revision, native NV12 1080p60 | **FAILED** at about 1298.7 s: test-source wake-up 43.5 ms late, then queue-1 replacement. Same signature as the excluded BGRA 1080p60 cell. Does not involve the API surface. Jon, 2026-11-17: supported under the host-scheduling assumption, failure stays recorded |
 
-## Open decisions (Jon)
+## Deferred decisions (Jon, 2026-11-17: deferred until a convenience entry point is proposed)
 - **D2:** the default for new convenience callers (strict bounded failure versus explicitly specified realtime/latest behaviour).
 - **D3:** whether a new convenience entrypoint may choose a compatibility copy profile.
 - **Recommendation:** the proposed surface adds **no** convenience entrypoint, so the freeze can record D2/D3 as deferred until such an entrypoint is proposed. Existing defaults are unchanged, profiles stay explicit and strict/native, and CPU/readback is opt-in.
