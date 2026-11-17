@@ -17,7 +17,7 @@ This is the authoritative current-status page. Other documents link here instead
 |---|---|---|
 | framelink `master` | current head | `c6d7db7` (merge of PR #10, M6 Windows) plus the tooling change (PR #11) and documentation (PR #12 and later); no code change since `c6d7db7` |
 | Frozen Windows API | `060c54e41bcbfe7ca8dbdef89e6e74fb2930935c` | Tag `m6-windows-api-freeze`. `FL_VERSION` 6. [API freeze](m6/API_FREEZE_CANDIDATE.md) |
-| vkrender `master` | `6530df8` | Pins framelink `c6d7db7` (code identical to the frozen revision); includes the renderer repair `86853d6` |
+| vkrender `master` | `f18c97f` | Pins framelink `c6d7db7` (code identical to the frozen revision); includes the renderer repair `86853d6`, the scene-output fix (PR #20) and fullscreen across displays (PR #15) |
 | vkrender-airplay `main` | `9a0dbde` | Pins framelink `c6d7db7` |
 
 Both consumers stay on the same framelink revision because peers with a different `FL_VERSION` are refused at handshake.
@@ -59,5 +59,6 @@ Builds use the same tooling on every platform: Ninja, Release, `CMakePresets.jso
 
 ## Related projects
 - **vkrender renderer repair:** the Windows readiness record cites renderer `a6a1906` on top of `9f74b9d`. It accepts `--av-latency-ms 0`, caps the option at 2000 and leaves the 100 ms default unchanged. It is merged to vkrender `master` as `86853d6` (vkrender PR #19).
-- **vkrender:** PR #15 (fullscreen across displays) needs a rebase onto current `master` and a multi-monitor test; the test host has one monitor.
+- **vkrender scene output:** from FrameLink `12326e17` (2026-11-01) until 2026-11-17, the renderer's Windows scene output delivered no frames, the virtual camera included. FrameLink requires the exact acquired buffer at submit, and the renderer rebuilt it without its image, so every `flEndSubmit` returned `FL_INVALID`. FrameLink behaved as its API documents; the renderer was fixed in vkrender PR #20. Its end-to-end check now runs in vkrender's `hardware` test preset.
+- **vkrender:** PR #15 (fullscreen across displays, on-screen controls) is merged. It was tested with multiple windows on the single-monitor test host. The per-monitor fullscreen path and the display on/off checkboxes are untested on real multiple displays.
 - **vkrender-airplay:** the GPU self-test fails (54–56 of 60 frames decoded live; the pass mark is 58). It failed identically before the M6 pin. Frames are dropped at the GPU pipeline's latest-wins `appsink max-buffers=1` before reaching FrameLink. The choice between a deeper sink and a looser test is open. The CPU self-test passes.
