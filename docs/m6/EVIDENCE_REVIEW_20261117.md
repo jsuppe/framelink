@@ -30,7 +30,7 @@ The seven 1800 s cells were rerun on `060c54e4`: [results](windows-final-duratio
 - No retry and no waiver were applied.
 
 ## Still open
-- **Native NV12 1080p60:** Jon decides between excluding it (as BGRA 1080p60 was), or keeping it open pending a diagnosis of the source-side stall and a new full run.
+- **Native NV12 1080p60:** Jon, 2026-11-17: root-cause testing deferred; working assumption is a host scheduling stall, not FrameLink ([decision and deferred plan](windows-final-duration-060c54e4/README.md#decision--jon-2026-11-17)). The 1800 s result stays failed. Whether the cell is advertised under that assumption is still to be decided. The same assumption would apply to the excluded BGRA 1080p60 cell, which has the same signature.
 - **Shared-CPU lifecycle, 8 cells:** still measured only on `a50841a`-equivalent source. It is a reviewed functional equivalence (with no owner selected the new code is skipped), not a measurement on the final revision. Rerunning takes about 1.2 h; alternatively Jon accepts the reviewed equivalence explicitly.
 
 Until these are decided the checklist item "Final evidence review" stays open and M6 readiness is not recorded.

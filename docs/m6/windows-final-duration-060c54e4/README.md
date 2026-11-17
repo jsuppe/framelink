@@ -31,6 +31,17 @@ This is the same signature as the [BGRA 1080p60 failure on `a50841a`](../windows
 
 **Host correlation (suggestive only):** the only Defender scan start in the batch window was logged at 06:32:14 UTC, with Defender status updates until 06:32:18; the stall happened at about 06:32:29. Hourly Defender health reports at 04:32, 05:32 and 07:32 coincided with passing cells. See `host-events-0400-0740utc.txt`.
 
+## Decision — Jon, 2026-11-17
+Root-cause testing is **deferred**. Working assumption: the late wake-up is a host scheduling issue, not FrameLink. It may be diagnosed later if it turns out to be a system problem. This is an assumption, not a measured attribution, and the cell's 1800 s result stays recorded as failed.
+
+Plan kept for later (nothing here has been run):
+1. A diagnostic copy of the test file only, recording per frame in memory the log-write start and end, each `Sleep` (requested and actual) and the thread's CPU time across a gap. This separates blocked I/O, oversleep and off-CPU time.
+2. A WPR kernel trace in a rolling in-memory buffer for the whole run, saved when the run stops: context switches and ready-thread events, file and disk I/O, DPC/ISR timing.
+3. A standalone pacing probe that reproduces only the video thread's loop (60 Hz pacing, log write, optional 3 MB upload) for hours, with each ingredient switched on or off.
+4. Fixture-side experiments, each labelled separately: log writes moved off the video thread, a high-resolution waitable timer, MMCSS registration, power throttling off. FrameLink code changes only if the trace points into it.
+
+Already checked (read-only): the Windows event logs show no Defender activity near the 2026-11-12 BGRA 1080p60 stall, and the log goes back to February. So the Defender scan logged before this stall is probably coincidence. The test account can record kernel traces.
+
 ## What this means
 - Shared-CPU duration is now measured on the final revision: 4/4 pass.
 - Native 4K30 duration (NV12 and BGRA) is measured on the final revision: 2/2 pass.
