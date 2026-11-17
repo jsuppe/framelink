@@ -1,6 +1,6 @@
 # M6 Windows API freeze candidate (M6.7 item 7.1) — DRAFT, NOT FROZEN
 
-The freeze is Jon's decision. This page is what he would approve: the exact public surface, what compatibility it promises, the evidence, and the decisions that are still open. All required evidence below has been collected at the proposed revision.
+The freeze is Jon's decision. This page is what he would approve: the exact public surface, what compatibility it promises, the evidence, and the decisions that are still open. The evidence below was collected at the proposed revision; one duration cell failed (see the table).
 
 ## Proposed revision
 - Revision: **`060c54e41bcbfe7ca8dbdef89e6e74fb2930935c`**, which is `a50841a` plus the option B device owner, its fault test, the header typedef guard and documentation. [Final integrated evidence](windows-integrated-final/README.md).
@@ -30,6 +30,8 @@ All changes are additive. No existing function signature, struct layout, enum va
 | C11 translation unit including both owner headers | **pass** |
 | 3 unchanged `7b8a274`-built clients against the new DLLs | **3/3 pass** |
 | Option B lifecycle, advertised native configurations | **pass**: 6/6 advertised cases (3.16–13.97 KiB/cycle) plus BGRA1080p60 3/3 and held leases |
+| 1800 s duration on this revision, shared CPU (4 cells) and native 4K30 (2 cells) | **pass**, 6/6, zero deadline misses. [Results](windows-final-duration-060c54e4/README.md) |
+| 1800 s duration on this revision, native NV12 1080p60 | **FAILED** at about 1298.7 s: test-source wake-up 43.5 ms late, then queue-1 replacement. Same signature as the excluded BGRA 1080p60 cell. Does not involve the API surface, but the supported-configuration list depends on Jon's decision |
 
 ## Open decisions (Jon)
 - **D2:** the default for new convenience callers (strict bounded failure versus explicitly specified realtime/latest behaviour).

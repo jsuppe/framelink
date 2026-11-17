@@ -1,0 +1,90 @@
+{
+  "scope": "synthetic authenticated transport; explicit upload/verification copies; no physical playback or isolated-hop budget claim",
+  "budget_ns": 17000000,
+  "roles": {
+    "source": {
+      "video": 300,
+      "pcm_frames": 240000,
+      "resource_slopes_per_min": {},
+      "cpu_percent": 51.56463408632409
+    },
+    "relay": {
+      "video": 300,
+      "pcm_frames": 240000,
+      "resource_slopes_per_min": {},
+      "cpu_percent": 32.9896289052067
+    },
+    "receiver": {
+      "video": 300,
+      "pcm_frames": 240000,
+      "resource_slopes_per_min": {},
+      "cpu_percent": 46.733501741381346
+    }
+  },
+  "timing_ms": {
+    "scheduled_to_final_arrival": {
+      "p50": 3.524234,
+      "p95": 4.956667,
+      "p99": 5.287834,
+      "max": 5.3381
+    },
+    "source_marker_to_relay": {
+      "p50": 1.6908,
+      "p95": 2.9263,
+      "p99": 3.2726,
+      "max": 3.3045
+    },
+    "source_marker_to_final": {
+      "p50": 3.5,
+      "p95": 4.9278,
+      "p99": 5.2638,
+      "max": 5.3084
+    },
+    "source_acquire_call": {
+      "p50": 0.0006,
+      "p95": 0.0007,
+      "p99": 0.0008,
+      "max": 0.0056
+    },
+    "source_upload_call": {
+      "p50": 0.119,
+      "p95": 0.1323,
+      "p99": 0.1423,
+      "max": 0.4045
+    },
+    "source_submit_call": {
+      "p50": 0.0572,
+      "p95": 0.0674,
+      "p99": 0.0812,
+      "max": 0.1233
+    },
+    "relay_acquire_to_record": {
+      "p50": 0.0361,
+      "p95": 0.0509,
+      "p99": 0.0576,
+      "max": 0.0662
+    },
+    "relay_forward_call": {
+      "p50": 0.0356,
+      "p95": 0.0502,
+      "p99": 0.0571,
+      "max": 0.0657
+    },
+    "final_acquire_to_completion": {
+      "p50": 2.0229,
+      "p95": 2.0357,
+      "p99": 2.045,
+      "max": 2.5279
+    },
+    "audio_scheduled_to_final": {
+      "p50": 0.1485,
+      "p95": 0.1946,
+      "p99": 0.2194,
+      "max": 0.646
+    }
+  },
+  "pass_all": true,
+  "video_arrival_misses": 0,
+  "audio_arrival_misses": 0,
+  "trace_checked": false
+}

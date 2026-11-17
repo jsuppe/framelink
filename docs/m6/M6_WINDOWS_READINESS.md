@@ -44,6 +44,7 @@ Final publication must pin the selected exact integrated revisions, not floating
 |---|---|---|---|
 | Negotiated shared CPU | BGRA/NV12,1920x1080p60 and3840x2160p30 | Four461584b1800s cells and8/8production lifecycle cells pass | Exact artifact/revision selection and final closure remain; bounded warm100x5s lifecycle, not unrestricted cadence |
 | Native same-adapter two-hop | NV12,1920x1080p60 and3840x2160p30; BGRA3840x2160p30 | Threea50841a1800s cells pass | Strict ownership/synchronization; bounded lifecycle still required |
+| Native same-adapter two-hop | NV12 1920x1080p60 (final revision) | [Final `060c54e4` 1800 s run FAILED at about 1298.7 s](windows-final-duration-060c54e4/README.md); NV12 4K30 and BGRA 4K30 pass on the same revision | **Failed on the final revision; status pending Jon's decision.** The `a50841a` pass does not override the failure |
 | Native same-adapter two-hop | BGRA1920x1080p60 | Finala50841a run FAILED after~695s | **NOT QUALIFIED; excluded**. Earlier11d1b65 pass does not override failure |
 | Real decoded source relay | 1920x1080p60 | Matched short pair pass77afa1a | Functional/short-rate evidence only; no endurance support claim |
 | Real decoded source relay | 3840x2160p30 | Replay trace-on two34ms misses, max36.6673ms | **NOT QUALIFIED; excluded** |

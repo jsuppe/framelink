@@ -1,0 +1,151 @@
+{
+  "revision": "060c54e41bcbfe7ca8dbdef89e6e74fb2930935c",
+  "state": "failed",
+  "started_utc": "2026-11-17T04:09:50.155774+00:00",
+  "binary_sha256": {
+    "fl_gst_av_bench.exe": "8f921869cf89e397022a2c36381790f4bb4130717d17bfd68e649e45e553cb4b",
+    "fl_gst_local_native_bench_win.exe": "4f5ff14b249277c0b129b4e88e9ec78b9e258086b4bbc7bde7f3528a04a1903a",
+    "gstframelink.dll": "4ac101887796478ef46ab2c09f8afe11bf754007130321058ce3fd3c32735f4e",
+    "framelink_gst_session.dll": "9f3ab33da330aff91376700e0ecc9f861cedd4f340a15105f2c29ca11298b41d",
+    "framelink.dll": "14b84733e8ab484f7d71595494a7124bfd3643622c49dfd91315dbce54de7403"
+  },
+  "cells": [
+    {
+      "label": "windows-shared-nv12-1920x1080-60-5",
+      "kind": "shared-cpu",
+      "seconds": 5,
+      "exit": 0,
+      "second_analysis_exit": 0,
+      "pass": true,
+      "ended_utc": "2026-11-17T04:09:57.501557+00:00"
+    },
+    {
+      "label": "windows-shared-bgra-1920x1080-60-5",
+      "kind": "shared-cpu",
+      "seconds": 5,
+      "exit": 0,
+      "second_analysis_exit": 0,
+      "pass": true,
+      "ended_utc": "2026-11-17T04:10:03.329994+00:00"
+    },
+    {
+      "label": "windows-shared-nv12-3840x2160-30-5",
+      "kind": "shared-cpu",
+      "seconds": 5,
+      "exit": 0,
+      "second_analysis_exit": 0,
+      "pass": true,
+      "ended_utc": "2026-11-17T04:10:09.149711+00:00"
+    },
+    {
+      "label": "windows-shared-bgra-3840x2160-30-5",
+      "kind": "shared-cpu",
+      "seconds": 5,
+      "exit": 0,
+      "second_analysis_exit": 0,
+      "pass": true,
+      "ended_utc": "2026-11-17T04:10:15.008602+00:00"
+    },
+    {
+      "label": "windows-native-nv12-1920x1080-60-5",
+      "kind": "native",
+      "seconds": 5,
+      "exit": 0,
+      "analysis_exit": 0,
+      "pass": true,
+      "ended_utc": "2026-11-17T04:10:21.748616+00:00"
+    },
+    {
+      "label": "windows-native-nv12-3840x2160-30-5",
+      "kind": "native",
+      "seconds": 5,
+      "exit": 0,
+      "analysis_exit": 0,
+      "pass": true,
+      "ended_utc": "2026-11-17T04:10:28.256644+00:00"
+    },
+    {
+      "label": "windows-native-bgra-3840x2160-30-5",
+      "kind": "native",
+      "seconds": 5,
+      "exit": 0,
+      "analysis_exit": 0,
+      "pass": true,
+      "ended_utc": "2026-11-17T04:10:34.957210+00:00"
+    },
+    {
+      "label": "windows-shared-nv12-1920x1080-60-1800",
+      "kind": "shared-cpu",
+      "seconds": 1800,
+      "exit": 0,
+      "second_analysis_exit": 0,
+      "pass": true,
+      "ended_utc": "2026-11-17T04:40:38.765267+00:00"
+    },
+    {
+      "label": "windows-shared-bgra-1920x1080-60-1800",
+      "kind": "shared-cpu",
+      "seconds": 1800,
+      "exit": 0,
+      "second_analysis_exit": 0,
+      "pass": true,
+      "ended_utc": "2026-11-17T05:10:42.540836+00:00"
+    },
+    {
+      "label": "windows-shared-nv12-3840x2160-30-1800",
+      "kind": "shared-cpu",
+      "seconds": 1800,
+      "exit": 0,
+      "second_analysis_exit": 0,
+      "pass": true,
+      "ended_utc": "2026-11-17T05:40:45.903062+00:00"
+    },
+    {
+      "label": "windows-shared-bgra-3840x2160-30-1800",
+      "kind": "shared-cpu",
+      "seconds": 1800,
+      "exit": 0,
+      "second_analysis_exit": 0,
+      "pass": true,
+      "ended_utc": "2026-11-17T06:10:49.235122+00:00"
+    },
+    {
+      "label": "windows-native-nv12-1920x1080-60-1800",
+      "kind": "native",
+      "seconds": 1800,
+      "exit": 1,
+      "analysis_exit": null,
+      "pass": false,
+      "ended_utc": "2026-11-17T06:32:29.377232+00:00"
+    },
+    {
+      "label": "windows-native-nv12-3840x2160-30-1800",
+      "kind": "native",
+      "seconds": 1800,
+      "exit": 0,
+      "analysis_exit": 0,
+      "pass": true,
+      "ended_utc": "2026-11-17T07:02:35.252544+00:00"
+    },
+    {
+      "label": "windows-native-bgra-3840x2160-30-1800",
+      "kind": "native",
+      "seconds": 1800,
+      "exit": 0,
+      "analysis_exit": 0,
+      "pass": true,
+      "ended_utc": "2026-11-17T07:32:40.817539+00:00"
+    }
+  ],
+  "case": "windows-native-bgra-3840x2160-30-1800",
+  "driver_pid": 8800,
+  "ended_utc": "2026-11-17T07:32:40.818140+00:00",
+  "final_binary_sha256": {
+    "fl_gst_av_bench.exe": "8f921869cf89e397022a2c36381790f4bb4130717d17bfd68e649e45e553cb4b",
+    "fl_gst_local_native_bench_win.exe": "4f5ff14b249277c0b129b4e88e9ec78b9e258086b4bbc7bde7f3528a04a1903a",
+    "gstframelink.dll": "4ac101887796478ef46ab2c09f8afe11bf754007130321058ce3fd3c32735f4e",
+    "framelink_gst_session.dll": "9f3ab33da330aff91376700e0ecc9f861cedd4f340a15105f2c29ca11298b41d",
+    "framelink.dll": "14b84733e8ab484f7d71595494a7124bfd3643622c49dfd91315dbce54de7403"
+  },
+  "idle_final": true
+}

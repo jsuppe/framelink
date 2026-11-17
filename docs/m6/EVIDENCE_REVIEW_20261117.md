@@ -1,13 +1,14 @@
-# M6 Windows final evidence review — 2026-11-17 (OPEN: one gap)
+# M6 Windows final evidence review — 2026-11-17 (OPEN: one failed cell, one unmeasured row)
 
 Candidate revision: `060c54e41bcbfe7ca8dbdef89e6e74fb2930935c`. Host for every row: the Windows test host in [M6_WINDOWS_READINESS.md](M6_WINDOWS_READINESS.md) (Windows 11 build 26300, RTX 5090, driver 32.0.16.1714, same adapter). Each evidence folder below has a README, the commands or runner, and file hashes.
 
 ## Advertised rows
 | Row | Evidence | Built from | Status |
 |---|---|---|---|
-| Shared CPU, 4 cells, 1800 s | `cpu-path/windows-cpu-{nv12-1080p60,bgra1080p60,nv12-4k30,bgra4k30}-461584b` | `461584b` | pass, **older build** |
+| Shared CPU, 4 cells, 1800 s | `windows-final-duration-060c54e4` (earlier: `cpu-path/windows-cpu-*-461584b`) | `060c54e4` | pass, 4/4 on the final revision |
 | Shared CPU lifecycle, 8 cells, 100 × 5 s | `cpu-path/windows-cpu-lifecycle-summary` | `a50841a`-equivalent source + test-only guard | pass, **older build** |
-| Native two-hop, 3 cells, 1800 s (NV12 1080p60, NV12 4K30, BGRA 4K30) | `windows-native-final-duration-{nv12-1080,nv12-4k,bgra-4k}-a50841a` | `a50841a` | pass, **older build** |
+| Native two-hop NV12 4K30 and BGRA 4K30, 1800 s | `windows-final-duration-060c54e4` (earlier: `windows-native-final-duration-{nv12-4k,bgra-4k}-a50841a`) | `060c54e4` | pass, 2/2 on the final revision |
+| Native two-hop NV12 1080p60, 1800 s | `windows-final-duration-060c54e4` (earlier pass: `windows-native-final-duration-nv12-1080-a50841a`) | `060c54e4` | **FAILED** at about 1298.7 s on the final revision; the `a50841a` pass does not override it. Status is Jon's decision |
 | Native lifecycle, option B owner, 6 cells + BGRA1080 + held leases, 200 × 5 s, gate on cycles 100–199 | `lifecycle/device-owner-20261113/{native-cells-200,gate-200,extended-200}` | `f4185511` (candidate minus a header-only guard and the fault test) | pass |
 | Integrated suite, exports, C11, old clients | `windows-integrated-final/runs/final-060c54e4` | `060c54e4` | pass, 180/180 |
 | Hosted CI | PR #10 | `060c54e4` | pass |
@@ -22,14 +23,14 @@ Candidate revision: `060c54e41bcbfe7ca8dbdef89e6e74fb2930935c`. Host for every r
 | Legacy fresh-device native reconnect | **fails** the 100-cycle limit; unqualified. Use the device owner |
 | Owner device-removal path | implemented, not tested |
 
-## Gap: duration and shared-CPU evidence predates the owner code
-- The 1800 s cells and the shared-CPU lifecycle were measured before option B landed. Between `a50841a` and the candidate, 10 production files changed (342 lines added) in `src/framelink_win.cpp`, the session transport/context, both A/V elements, the native relay pool and two headers.
-- **Reviewed, not measured:** with no owner selected, the new code is skipped or equivalent.
-  - `createChannel`/`openProducer` take the old `createDevice` branch.
-  - The `flClose` owner block is guarded by `ch->attachment`.
-  - The elements' owner fields stay null.
-  - The only unconditional changes are an early `*out=nullptr` in channel creation and an extra null `shared_ptr` member.
-- The checklist allows reusing older evidence "only with explicit hash/source equivalence". This is a reviewed functional equivalence, not hash or source equivalence. The 2026-11-12 execution-order rule also says endurance campaigns are batched on the final exact revision.
-- **To close:** rerun the 7 duration cells (about 3.5 h) on the final revision, and optionally the 8 shared-CPU lifecycle cells (about 1.2 h). Alternatively, Jon accepts the reviewed equivalence explicitly.
+## Duration rerun on the final revision (2026-11-17)
+The seven 1800 s cells were rerun on `060c54e4`: [results](windows-final-duration-060c54e4/README.md).
+- **Closed:** shared-CPU duration (4/4 pass) and native 4K30 duration (2/2 pass) are now measured on the final revision.
+- **Failed:** native NV12 1080p60 stopped at about 1298.7 s. The test source's video thread woke 43.5 ms late, outside any FrameLink call, and the catch-up burst hit the queue-1 replacement. This is the same signature as the excluded BGRA 1080p60 failure on `a50841a`, which predates the owner code. The cause of the late wake-up is not established.
+- No retry and no waiver were applied.
 
-Until then the checklist item "Final evidence review" stays open and M6 readiness is not recorded.
+## Still open
+- **Native NV12 1080p60:** Jon decides between excluding it (as BGRA 1080p60 was), or keeping it open pending a diagnosis of the source-side stall and a new full run.
+- **Shared-CPU lifecycle, 8 cells:** still measured only on `a50841a`-equivalent source. It is a reviewed functional equivalence (with no owner selected the new code is skipped), not a measurement on the final revision. Rerunning takes about 1.2 h; alternatively Jon accepts the reviewed equivalence explicitly.
+
+Until these are decided the checklist item "Final evidence review" stays open and M6 readiness is not recorded.
