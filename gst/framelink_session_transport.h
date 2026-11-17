@@ -4,7 +4,10 @@
 #include "framelink.h"
 #include "framelink_memory_policy.h"
 #ifdef _WIN32
+#ifndef FL_D3D11_DEVICE_OWNER_DECLARED
+#define FL_D3D11_DEVICE_OWNER_DECLARED
 typedef struct flD3D11DeviceOwner flD3D11DeviceOwner;
+#endif
 #endif
 G_BEGIN_DECLS
 #ifdef _WIN32

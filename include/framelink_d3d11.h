@@ -32,7 +32,10 @@ extern "C" {
 // Device removal permanently rejects attachment. Never resurrect a removed owner.
 // Device getter is BORROWED. Caller must serialize its context work, remove old
 // resource bindings and finish work before channel close/next attachment.
+#ifndef FL_D3D11_DEVICE_OWNER_DECLARED
+#define FL_D3D11_DEVICE_OWNER_DECLARED
 typedef struct flD3D11DeviceOwner flD3D11DeviceOwner;
+#endif
 FL_API flResult flCreateD3D11DeviceOwner(const uint8_t adapterLUID[8], flD3D11DeviceOwner** out);
 FL_API void flRetainD3D11DeviceOwner(flD3D11DeviceOwner*);
 FL_API void flReleaseD3D11DeviceOwner(flD3D11DeviceOwner*);

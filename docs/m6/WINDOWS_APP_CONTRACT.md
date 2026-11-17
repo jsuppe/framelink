@@ -16,13 +16,15 @@ contracts are implemented. Functional verification is not timing/resource accept
 The [approved Windows readiness checklist](M6_WINDOWS_READINESS.md) is the
 candidate support boundary; this API document describes capabilities, not a promise
 that every reachable combination is qualified. In particular, native BGRA1080 and
-decoder4K are excluded from initial advertised support. No unrestricted repeated
-native reconnect is qualified: persistent-role100-cycle slopes remain above the
-original16KiB/cycle limit. Fresh bins/session per generation are an ownership rule,
-not proof that process/driver resource usage returns to baseline. Ordered teardown,
-real reader completion and snapshots remain mandatory even for finite sessions.
-No hidden retained device, timed cleanup sleep or process termination replaces the
-published close/drain/lease obligations. An opt-in device-owner API is only a proposal.
+decoder4K are excluded from initial advertised support. With the legacy
+fresh-device factories, no repeated native reconnect is qualified: persistent-role
+100-cycle slopes remain above the original 16 KiB/cycle limit. Applications that
+reconnect native D3D11 channels repeatedly must use the explicit retained-device
+owner below. Fresh bins/session per generation are an ownership rule, not proof
+that process/driver resource usage returns to baseline. Ordered teardown, real
+reader completion and snapshots remain mandatory even for finite sessions. No
+hidden retained device, timed cleanup sleep or process termination replaces the
+published close/drain/lease obligations.
 
 ### Measured shared-CPU lifecycle
 
@@ -35,6 +37,27 @@ This is measured warm lifecycle at that cadence, not arbitrary/infinite reconnec
 permission to discard held mappings or a waiver of cold one-handle observations.
 See [resource evidence](cpu-path/windows-cpu-lifecycle-summary/README.md).
 It does not establish the same contract for native D3D or renderer GPU resources.
+
+### Retained-device native lifecycle (option B, Jon 2026-11-12)
+
+`framelink_d3d11.h` declares an explicit, application-owned device lifetime:
+
+- **Create once:** `flCreateD3D11DeviceOwner(luid, &owner)`. A NULL or zero LUID picks the default adapter once; a nonzero LUID must exist (`FL_ADAPTER_MISMATCH`). A device without the D3D11.4 interfaces returns `FL_FORMAT_UNSUPPORTED`. The adapter and device never change.
+- **Attach per generation:**
+  - Consumer side: `flCreateChannelWithD3D11DeviceOwner` or `flCreateChannelFromD3D11HandlesWithDeviceOwner`.
+  - Producer side: `flOpenProducerD3D11BoundedWithDeviceOwner`. The peer must be on the owner's adapter.
+  - Each channel gets fresh storage, fences and identity; only the device and context are reused.
+  - GStreamer: emit `set-local-d3d11-device-owner` (pointer → boolean) on `framelinkavsink`/`framelinkavsrc` in NULL state, after configuration and after `set-local-native-candidate` when you use it (a candidate set after the owner is rejected), before setup. One selection per bin; a rejected call leaves state unchanged. Also accepted for the existing explicit D3D11 mapped-copy profile; shared-CPU, audio-only and broker-adopted channels reject it. Session API: `fl_gst_session_set_d3d11_device_owner` before configuration.
+- **One attachment at a time:**
+  - A second attach returns `FL_BUSY`. So does attaching while a pool snapshot from the previous channel is unreleased, or while a closed producer still has outstanding remote reads.
+  - An observed incomplete close (held frames, readers, pending submits, unsignalled fences) poisons the owner: later attaches return `FL_DISCONNECTED`.
+  - Device removal permanently rejects attachment. Discard a poisoned or removed owner and create a new one.
+- **Caller obligations:** `flD3D11DeviceOwnerDevice` is borrowed. Serialize your own immediate-context work, remove your bindings and finish GPU work before closing a channel. Close is not GPU completion. `flRetainD3D11DeviceOwner`/`flReleaseD3D11DeviceOwner` are thread safe; channels and snapshots hold their own references.
+- **Measured lifecycle:**
+  - Host <win-host>, RTX 5090, driver 32.0.16.1714. 200 × 5 s cycles per case, gated on cycles 100–199 at the original limits (Jon, 2026-11-16).
+  - BGRA 1080p60: restart-consumer 2.97, restart-producer 3.13, held leases 1.33 KiB/cycle; handles/threads flat.
+  - Advertised native configurations: see [M6_WINDOWS_READINESS.md](M6_WINDOWS_READINESS.md).
+  - The first ~100 cycles include a bounded driver copy-pool warm-up (about 2 MiB total) on CPU-written channels; see [attribution](lifecycle/owner-attribution-20261115/README.md). This is not arbitrary or infinite reconnect.
 
 ### Renderer integration boundary
 
@@ -209,7 +232,8 @@ should use named imports/runtime name lookup, not assume ordinal stability.
 
 Final qualification must pin the integrated source, public headers and loaded
 DLL/dependency hashes; compare all public layouts/enums and export names/ordinals;
-compile C11/C++ clients; run old-built clients against new DLLs; and exercise
+compile C11/C++ clients (including a C translation unit that includes both
+`framelink_d3d11.h` and `framelink_session_transport.h`); run old-built clients against new DLLs; and exercise
 ownership, failed outputs, missing capabilities, immutable binding, protocol
 negatives, overload, restart and held-reader behavior. Preserve portable FCS1
 128-byte and session 160-byte encodings and typed platform factories; Windows
