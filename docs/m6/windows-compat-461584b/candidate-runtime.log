@@ -1,0 +1,48 @@
+** WARNING: connection is not using a post-quantum key exchange algorithm.
+** This session may be vulnerable to "store now, decrypt later" attacks.
+** The server may need to be upgraded. See https://openssh.com/pq.html
+
+
+Algorithm : SHA256
+Hash      : A8607D1CC1E7DD4111D5BFA24DBC0EBD36E15C6E1BF5769074CA33A1C59B6E96
+Path      : <win-home>\dev\framelink-compat-7b8a274-461584b\build\Release\fl_frame_metadata.exe
+
+Algorithm : SHA256
+Hash      : F8B465BEA89F81954EFDCA5127F5A1BAF3DED2A6B4EC21151D466114C13BB85E
+Path      : <win-home>\dev\framelink-compat-7b8a274-461584b\build\Release\fl_gst_native_epoch_c_api.exe
+
+Algorithm : SHA256
+Hash      : 99F0AB2A0F3B265A3BC15DD08BE9FB43E4B17C6ED97AA3E166018A438CDB542F
+Path      : <win-home>\dev\framelink-compat-7b8a274-461584b\build\Release\fl_read_lease_d3d11.exe
+
+Algorithm : SHA256
+Hash      : A8607D1CC1E7DD4111D5BFA24DBC0EBD36E15C6E1BF5769074CA33A1C59B6E96
+Path      : <win-home>\dev\framelink-compat-7b8a274-461584b\client-runtime\fl_frame_metadata.exe
+
+Algorithm : SHA256
+Hash      : F8B465BEA89F81954EFDCA5127F5A1BAF3DED2A6B4EC21151D466114C13BB85E
+Path      : <win-home>\dev\framelink-compat-7b8a274-461584b\client-runtime\fl_gst_native_epoch_c_api.exe
+
+Algorithm : SHA256
+Hash      : 99F0AB2A0F3B265A3BC15DD08BE9FB43E4B17C6ED97AA3E166018A438CDB542F
+Path      : <win-home>\dev\framelink-compat-7b8a274-461584b\client-runtime\fl_read_lease_d3d11.exe
+
+Algorithm : SHA256
+Hash      : 09F302958B85D65CE6DFC9C2B2F45BA7D41DFE2CD603DD6BC90C3681C07708A4
+Path      : <win-home>\dev\framelink-compat-7b8a274-461584b\client-runtime\framelink.dll
+
+Algorithm : SHA256
+Hash      : 3329BEF0DA3A27D645C6348B4B509790C576550694046373649C8C03BA803A99
+Path      : <win-home>\dev\framelink-compat-7b8a274-461584b\client-runtime\framelink_gst_session.dll
+
+
+
+fl_gst_native_epoch_c_api
+fl_frame_metadata
+[framelink error] framelink: refusing producer pid 50140 - speaks version 6, we speak 6
+[framelink error] framelink: refusing producer pid 50140 - speaks version 6, we speak 6
+[framelink error] framelink: refusing producer pid 50140 - speaks version 0, we speak 6
+[framelink error] framelink: refusing producer pid 50140 - speaks version 0, we speak 6
+frame metadata: exact values, optional absence/reuse, required publication, readiness FD and legacy/unknown-required peer refusal pass
+fl_read_lease_d3d11
+separate-process D3D11 shared-allocation GPU read, fence lease retirement and all-pixel verification passed

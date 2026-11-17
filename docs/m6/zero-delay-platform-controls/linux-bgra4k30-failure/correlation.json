@@ -1,0 +1,1391 @@
+{
+  "join": "inferred_constant_pts_mapping",
+  "frames": 54000,
+  "pts_offset_ns": 90225389983494,
+  "arrival_budget_ns": 34000000,
+  "arrival_misses": 165,
+  "late_frames": [
+    {
+      "index": 27,
+      "producer_pts_ns": 925850402,
+      "consumer_pts_ns": 90226315833896,
+      "push_lateness_ns": 101535,
+      "arrival_lateness_ns": 37551717,
+      "post_push_residual_ns": 37450182
+    },
+    {
+      "index": 256,
+      "producer_pts_ns": 8559183735,
+      "consumer_pts_ns": 90233949167229,
+      "push_lateness_ns": 136845,
+      "arrival_lateness_ns": 38446056,
+      "post_push_residual_ns": 38309211
+    },
+    {
+      "index": 903,
+      "producer_pts_ns": 30125850402,
+      "consumer_pts_ns": 90255515833896,
+      "push_lateness_ns": 132207,
+      "arrival_lateness_ns": 40415057,
+      "post_push_residual_ns": 40282850
+    },
+    {
+      "index": 2541,
+      "producer_pts_ns": 84725850402,
+      "consumer_pts_ns": 90310115833896,
+      "push_lateness_ns": 133160,
+      "arrival_lateness_ns": 40009479,
+      "post_push_residual_ns": 39876319
+    },
+    {
+      "index": 3846,
+      "producer_pts_ns": 128225850402,
+      "consumer_pts_ns": 90353615833896,
+      "push_lateness_ns": 136411,
+      "arrival_lateness_ns": 37144409,
+      "post_push_residual_ns": 37007998
+    },
+    {
+      "index": 3935,
+      "producer_pts_ns": 131192517068,
+      "consumer_pts_ns": 90356582500562,
+      "push_lateness_ns": 92768,
+      "arrival_lateness_ns": 39478441,
+      "post_push_residual_ns": 39385673
+    },
+    {
+      "index": 4250,
+      "producer_pts_ns": 141692517068,
+      "consumer_pts_ns": 90367082500562,
+      "push_lateness_ns": 135561,
+      "arrival_lateness_ns": 40199765,
+      "post_push_residual_ns": 40064204
+    },
+    {
+      "index": 6782,
+      "producer_pts_ns": 226092517068,
+      "consumer_pts_ns": 90451482500562,
+      "push_lateness_ns": 136452,
+      "arrival_lateness_ns": 39107495,
+      "post_push_residual_ns": 38971043
+    },
+    {
+      "index": 6935,
+      "producer_pts_ns": 231192517068,
+      "consumer_pts_ns": 90456582500562,
+      "push_lateness_ns": 141059,
+      "arrival_lateness_ns": 38970645,
+      "post_push_residual_ns": 38829586
+    },
+    {
+      "index": 7179,
+      "producer_pts_ns": 239325850402,
+      "consumer_pts_ns": 90464715833896,
+      "push_lateness_ns": 133221,
+      "arrival_lateness_ns": 37853875,
+      "post_push_residual_ns": 37720654
+    },
+    {
+      "index": 7721,
+      "producer_pts_ns": 257392517068,
+      "consumer_pts_ns": 90482782500562,
+      "push_lateness_ns": 133050,
+      "arrival_lateness_ns": 38549311,
+      "post_push_residual_ns": 38416261
+    },
+    {
+      "index": 8212,
+      "producer_pts_ns": 273759183735,
+      "consumer_pts_ns": 90499149167229,
+      "push_lateness_ns": 135206,
+      "arrival_lateness_ns": 38994110,
+      "post_push_residual_ns": 38858904
+    },
+    {
+      "index": 8363,
+      "producer_pts_ns": 278792517068,
+      "consumer_pts_ns": 90504182500562,
+      "push_lateness_ns": 137061,
+      "arrival_lateness_ns": 36537619,
+      "post_push_residual_ns": 36400558
+    },
+    {
+      "index": 8455,
+      "producer_pts_ns": 281859183735,
+      "consumer_pts_ns": 90507249167229,
+      "push_lateness_ns": 94857,
+      "arrival_lateness_ns": 38843724,
+      "post_push_residual_ns": 38748867
+    },
+    {
+      "index": 8514,
+      "producer_pts_ns": 283825850402,
+      "consumer_pts_ns": 90509215833896,
+      "push_lateness_ns": 140666,
+      "arrival_lateness_ns": 35042792,
+      "post_push_residual_ns": 34902126
+    },
+    {
+      "index": 8538,
+      "producer_pts_ns": 284625850402,
+      "consumer_pts_ns": 90510015833896,
+      "push_lateness_ns": 129170,
+      "arrival_lateness_ns": 36554204,
+      "post_push_residual_ns": 36425034
+    },
+    {
+      "index": 8573,
+      "producer_pts_ns": 285792517068,
+      "consumer_pts_ns": 90511182500562,
+      "push_lateness_ns": 146167,
+      "arrival_lateness_ns": 42670459,
+      "post_push_residual_ns": 42524292
+    },
+    {
+      "index": 8665,
+      "producer_pts_ns": 288859183735,
+      "consumer_pts_ns": 90514249167229,
+      "push_lateness_ns": 134883,
+      "arrival_lateness_ns": 38447086,
+      "post_push_residual_ns": 38312203
+    },
+    {
+      "index": 8765,
+      "producer_pts_ns": 292192517068,
+      "consumer_pts_ns": 90517582500562,
+      "push_lateness_ns": 132016,
+      "arrival_lateness_ns": 40054702,
+      "post_push_residual_ns": 39922686
+    },
+    {
+      "index": 8816,
+      "producer_pts_ns": 293892517068,
+      "consumer_pts_ns": 90519282500562,
+      "push_lateness_ns": 138264,
+      "arrival_lateness_ns": 39900398,
+      "post_push_residual_ns": 39762134
+    },
+    {
+      "index": 9022,
+      "producer_pts_ns": 300759183735,
+      "consumer_pts_ns": 90526149167229,
+      "push_lateness_ns": 137747,
+      "arrival_lateness_ns": 41331915,
+      "post_push_residual_ns": 41194168
+    },
+    {
+      "index": 9269,
+      "producer_pts_ns": 308992517068,
+      "consumer_pts_ns": 90534382500562,
+      "push_lateness_ns": 92877,
+      "arrival_lateness_ns": 36986258,
+      "post_push_residual_ns": 36893381
+    },
+    {
+      "index": 9386,
+      "producer_pts_ns": 312892517068,
+      "consumer_pts_ns": 90538282500562,
+      "push_lateness_ns": 138783,
+      "arrival_lateness_ns": 39365353,
+      "post_push_residual_ns": 39226570
+    },
+    {
+      "index": 9646,
+      "producer_pts_ns": 321559183735,
+      "consumer_pts_ns": 90546949167229,
+      "push_lateness_ns": 131727,
+      "arrival_lateness_ns": 38494325,
+      "post_push_residual_ns": 38362598
+    },
+    {
+      "index": 9914,
+      "producer_pts_ns": 330492517068,
+      "consumer_pts_ns": 90555882500562,
+      "push_lateness_ns": 141143,
+      "arrival_lateness_ns": 42546302,
+      "post_push_residual_ns": 42405159
+    },
+    {
+      "index": 10349,
+      "producer_pts_ns": 344992517068,
+      "consumer_pts_ns": 90570382500562,
+      "push_lateness_ns": 139425,
+      "arrival_lateness_ns": 36144237,
+      "post_push_residual_ns": 36004812
+    },
+    {
+      "index": 10438,
+      "producer_pts_ns": 347959183735,
+      "consumer_pts_ns": 90573349167229,
+      "push_lateness_ns": 93137,
+      "arrival_lateness_ns": 38446753,
+      "post_push_residual_ns": 38353616
+    },
+    {
+      "index": 10659,
+      "producer_pts_ns": 355325850402,
+      "consumer_pts_ns": 90580715833896,
+      "push_lateness_ns": 140050,
+      "arrival_lateness_ns": 40867871,
+      "post_push_residual_ns": 40727821
+    },
+    {
+      "index": 10737,
+      "producer_pts_ns": 357925850402,
+      "consumer_pts_ns": 90583315833896,
+      "push_lateness_ns": 144603,
+      "arrival_lateness_ns": 37319239,
+      "post_push_residual_ns": 37174636
+    },
+    {
+      "index": 10946,
+      "producer_pts_ns": 364892517068,
+      "consumer_pts_ns": 90590282500562,
+      "push_lateness_ns": 137806,
+      "arrival_lateness_ns": 37263527,
+      "post_push_residual_ns": 37125721
+    },
+    {
+      "index": 11099,
+      "producer_pts_ns": 369992517068,
+      "consumer_pts_ns": 90595382500562,
+      "push_lateness_ns": 137508,
+      "arrival_lateness_ns": 35277441,
+      "post_push_residual_ns": 35139933
+    },
+    {
+      "index": 11634,
+      "producer_pts_ns": 387825850402,
+      "consumer_pts_ns": 90613215833896,
+      "push_lateness_ns": 77913,
+      "arrival_lateness_ns": 38174729,
+      "post_push_residual_ns": 38096816
+    },
+    {
+      "index": 12185,
+      "producer_pts_ns": 406192517068,
+      "consumer_pts_ns": 90631582500562,
+      "push_lateness_ns": 140194,
+      "arrival_lateness_ns": 40721677,
+      "post_push_residual_ns": 40581483
+    },
+    {
+      "index": 12380,
+      "producer_pts_ns": 412692517068,
+      "consumer_pts_ns": 90638082500562,
+      "push_lateness_ns": 136202,
+      "arrival_lateness_ns": 40703405,
+      "post_push_residual_ns": 40567203
+    },
+    {
+      "index": 12743,
+      "producer_pts_ns": 424792517068,
+      "consumer_pts_ns": 90650182500562,
+      "push_lateness_ns": 138534,
+      "arrival_lateness_ns": 41038870,
+      "post_push_residual_ns": 40900336
+    },
+    {
+      "index": 12956,
+      "producer_pts_ns": 431892517068,
+      "consumer_pts_ns": 90657282500562,
+      "push_lateness_ns": 134749,
+      "arrival_lateness_ns": 42052260,
+      "post_push_residual_ns": 41917511
+    },
+    {
+      "index": 13147,
+      "producer_pts_ns": 438259183735,
+      "consumer_pts_ns": 90663649167229,
+      "push_lateness_ns": 137198,
+      "arrival_lateness_ns": 38660165,
+      "post_push_residual_ns": 38522967
+    },
+    {
+      "index": 13616,
+      "producer_pts_ns": 453892517068,
+      "consumer_pts_ns": 90679282500562,
+      "push_lateness_ns": 136284,
+      "arrival_lateness_ns": 37370435,
+      "post_push_residual_ns": 37234151
+    },
+    {
+      "index": 13781,
+      "producer_pts_ns": 459392517068,
+      "consumer_pts_ns": 90684782500562,
+      "push_lateness_ns": 135469,
+      "arrival_lateness_ns": 36189216,
+      "post_push_residual_ns": 36053747
+    },
+    {
+      "index": 13789,
+      "producer_pts_ns": 459659183735,
+      "consumer_pts_ns": 90685049167229,
+      "push_lateness_ns": 132680,
+      "arrival_lateness_ns": 39051127,
+      "post_push_residual_ns": 38918447
+    },
+    {
+      "index": 13979,
+      "producer_pts_ns": 465992517068,
+      "consumer_pts_ns": 90691382500562,
+      "push_lateness_ns": 131313,
+      "arrival_lateness_ns": 37986654,
+      "post_push_residual_ns": 37855341
+    },
+    {
+      "index": 14769,
+      "producer_pts_ns": 492325850402,
+      "consumer_pts_ns": 90717715833896,
+      "push_lateness_ns": 138167,
+      "arrival_lateness_ns": 38007090,
+      "post_push_residual_ns": 37868923
+    },
+    {
+      "index": 15044,
+      "producer_pts_ns": 501492517068,
+      "consumer_pts_ns": 90726882500562,
+      "push_lateness_ns": 137396,
+      "arrival_lateness_ns": 36631716,
+      "post_push_residual_ns": 36494320
+    },
+    {
+      "index": 15764,
+      "producer_pts_ns": 525492517068,
+      "consumer_pts_ns": 90750882500562,
+      "push_lateness_ns": 132196,
+      "arrival_lateness_ns": 36912122,
+      "post_push_residual_ns": 36779926
+    },
+    {
+      "index": 15915,
+      "producer_pts_ns": 530525850402,
+      "consumer_pts_ns": 90755915833896,
+      "push_lateness_ns": 137870,
+      "arrival_lateness_ns": 39246880,
+      "post_push_residual_ns": 39109010
+    },
+    {
+      "index": 16192,
+      "producer_pts_ns": 539759183735,
+      "consumer_pts_ns": 90765149167229,
+      "push_lateness_ns": 95799,
+      "arrival_lateness_ns": 35879058,
+      "post_push_residual_ns": 35783259
+    },
+    {
+      "index": 16446,
+      "producer_pts_ns": 548225850402,
+      "consumer_pts_ns": 90773615833896,
+      "push_lateness_ns": 136908,
+      "arrival_lateness_ns": 39020405,
+      "post_push_residual_ns": 38883497
+    },
+    {
+      "index": 17531,
+      "producer_pts_ns": 584392517068,
+      "consumer_pts_ns": 90809782500562,
+      "push_lateness_ns": 133202,
+      "arrival_lateness_ns": 37274762,
+      "post_push_residual_ns": 37141560
+    },
+    {
+      "index": 17702,
+      "producer_pts_ns": 590092517068,
+      "consumer_pts_ns": 90815482500562,
+      "push_lateness_ns": 133990,
+      "arrival_lateness_ns": 37038659,
+      "post_push_residual_ns": 36904669
+    },
+    {
+      "index": 17943,
+      "producer_pts_ns": 598125850402,
+      "consumer_pts_ns": 90823515833896,
+      "push_lateness_ns": 140723,
+      "arrival_lateness_ns": 39594801,
+      "post_push_residual_ns": 39454078
+    },
+    {
+      "index": 17951,
+      "producer_pts_ns": 598392517068,
+      "consumer_pts_ns": 90823782500562,
+      "push_lateness_ns": 135252,
+      "arrival_lateness_ns": 40303728,
+      "post_push_residual_ns": 40168476
+    },
+    {
+      "index": 18386,
+      "producer_pts_ns": 612892517068,
+      "consumer_pts_ns": 90838282500562,
+      "push_lateness_ns": 137824,
+      "arrival_lateness_ns": 37484726,
+      "post_push_residual_ns": 37346902
+    },
+    {
+      "index": 18408,
+      "producer_pts_ns": 613625850402,
+      "consumer_pts_ns": 90839015833896,
+      "push_lateness_ns": 140083,
+      "arrival_lateness_ns": 38498479,
+      "post_push_residual_ns": 38358396
+    },
+    {
+      "index": 18539,
+      "producer_pts_ns": 617992517068,
+      "consumer_pts_ns": 90843382500562,
+      "push_lateness_ns": 86574,
+      "arrival_lateness_ns": 37456619,
+      "post_push_residual_ns": 37370045
+    },
+    {
+      "index": 18634,
+      "producer_pts_ns": 621159183735,
+      "consumer_pts_ns": 90846549167229,
+      "push_lateness_ns": 139999,
+      "arrival_lateness_ns": 36110583,
+      "post_push_residual_ns": 35970584
+    },
+    {
+      "index": 18913,
+      "producer_pts_ns": 630459183735,
+      "consumer_pts_ns": 90855849167229,
+      "push_lateness_ns": 135608,
+      "arrival_lateness_ns": 36170226,
+      "post_push_residual_ns": 36034618
+    },
+    {
+      "index": 19087,
+      "producer_pts_ns": 636259183735,
+      "consumer_pts_ns": 90861649167229,
+      "push_lateness_ns": 92660,
+      "arrival_lateness_ns": 36908181,
+      "post_push_residual_ns": 36815521
+    },
+    {
+      "index": 19095,
+      "producer_pts_ns": 636525850402,
+      "consumer_pts_ns": 90861915833896,
+      "push_lateness_ns": 181514,
+      "arrival_lateness_ns": 38231466,
+      "post_push_residual_ns": 38049952
+    },
+    {
+      "index": 19180,
+      "producer_pts_ns": 639359183735,
+      "consumer_pts_ns": 90864749167229,
+      "push_lateness_ns": 137160,
+      "arrival_lateness_ns": 38912169,
+      "post_push_residual_ns": 38775009
+    },
+    {
+      "index": 19238,
+      "producer_pts_ns": 641292517068,
+      "consumer_pts_ns": 90866682500562,
+      "push_lateness_ns": 83791,
+      "arrival_lateness_ns": 37219419,
+      "post_push_residual_ns": 37135628
+    },
+    {
+      "index": 19389,
+      "producer_pts_ns": 646325850402,
+      "consumer_pts_ns": 90871715833896,
+      "push_lateness_ns": 130275,
+      "arrival_lateness_ns": 38941785,
+      "post_push_residual_ns": 38811510
+    },
+    {
+      "index": 19502,
+      "producer_pts_ns": 650092517068,
+      "consumer_pts_ns": 90875482500562,
+      "push_lateness_ns": 133912,
+      "arrival_lateness_ns": 38753709,
+      "post_push_residual_ns": 38619797
+    },
+    {
+      "index": 19837,
+      "producer_pts_ns": 661259183735,
+      "consumer_pts_ns": 90886649167229,
+      "push_lateness_ns": 132467,
+      "arrival_lateness_ns": 36495618,
+      "post_push_residual_ns": 36363151
+    },
+    {
+      "index": 19954,
+      "producer_pts_ns": 665159183735,
+      "consumer_pts_ns": 90890549167229,
+      "push_lateness_ns": 134664,
+      "arrival_lateness_ns": 34867209,
+      "post_push_residual_ns": 34732545
+    },
+    {
+      "index": 20164,
+      "producer_pts_ns": 672159183735,
+      "consumer_pts_ns": 90897549167229,
+      "push_lateness_ns": 95131,
+      "arrival_lateness_ns": 36228624,
+      "post_push_residual_ns": 36133493
+    },
+    {
+      "index": 20270,
+      "producer_pts_ns": 675692517068,
+      "consumer_pts_ns": 90901082500562,
+      "push_lateness_ns": 135697,
+      "arrival_lateness_ns": 38375242,
+      "post_push_residual_ns": 38239545
+    },
+    {
+      "index": 20313,
+      "producer_pts_ns": 677125850402,
+      "consumer_pts_ns": 90902515833896,
+      "push_lateness_ns": 89242,
+      "arrival_lateness_ns": 38326888,
+      "post_push_residual_ns": 38237646
+    },
+    {
+      "index": 20686,
+      "producer_pts_ns": 689559183735,
+      "consumer_pts_ns": 90914949167229,
+      "push_lateness_ns": 132524,
+      "arrival_lateness_ns": 37640190,
+      "post_push_residual_ns": 37507666
+    },
+    {
+      "index": 20929,
+      "producer_pts_ns": 697659183735,
+      "consumer_pts_ns": 90923049167229,
+      "push_lateness_ns": 132880,
+      "arrival_lateness_ns": 37650502,
+      "post_push_residual_ns": 37517622
+    },
+    {
+      "index": 21639,
+      "producer_pts_ns": 721325850402,
+      "consumer_pts_ns": 90946715833896,
+      "push_lateness_ns": 143177,
+      "arrival_lateness_ns": 39108788,
+      "post_push_residual_ns": 38965611
+    },
+    {
+      "index": 21694,
+      "producer_pts_ns": 723159183735,
+      "consumer_pts_ns": 90948549167229,
+      "push_lateness_ns": 96992,
+      "arrival_lateness_ns": 37502109,
+      "post_push_residual_ns": 37405117
+    },
+    {
+      "index": 21806,
+      "producer_pts_ns": 726892517068,
+      "consumer_pts_ns": 90952282500562,
+      "push_lateness_ns": 139215,
+      "arrival_lateness_ns": 38291932,
+      "post_push_residual_ns": 38152717
+    },
+    {
+      "index": 22200,
+      "producer_pts_ns": 740025850402,
+      "consumer_pts_ns": 90965415833896,
+      "push_lateness_ns": 144271,
+      "arrival_lateness_ns": 39050664,
+      "post_push_residual_ns": 38906393
+    },
+    {
+      "index": 22490,
+      "producer_pts_ns": 749692517068,
+      "consumer_pts_ns": 90975082500562,
+      "push_lateness_ns": 135230,
+      "arrival_lateness_ns": 37987478,
+      "post_push_residual_ns": 37852248
+    },
+    {
+      "index": 22706,
+      "producer_pts_ns": 756892517068,
+      "consumer_pts_ns": 90982282500562,
+      "push_lateness_ns": 136123,
+      "arrival_lateness_ns": 38609731,
+      "post_push_residual_ns": 38473608
+    },
+    {
+      "index": 22712,
+      "producer_pts_ns": 757092517068,
+      "consumer_pts_ns": 90982482500562,
+      "push_lateness_ns": 133648,
+      "arrival_lateness_ns": 38584897,
+      "post_push_residual_ns": 38451249
+    },
+    {
+      "index": 22716,
+      "producer_pts_ns": 757225850402,
+      "consumer_pts_ns": 90982615833896,
+      "push_lateness_ns": 142853,
+      "arrival_lateness_ns": 37075772,
+      "post_push_residual_ns": 36932919
+    },
+    {
+      "index": 22766,
+      "producer_pts_ns": 758892517068,
+      "consumer_pts_ns": 90984282500562,
+      "push_lateness_ns": 140235,
+      "arrival_lateness_ns": 38276771,
+      "post_push_residual_ns": 38136536
+    },
+    {
+      "index": 23260,
+      "producer_pts_ns": 775359183735,
+      "consumer_pts_ns": 91000749167229,
+      "push_lateness_ns": 94117,
+      "arrival_lateness_ns": 37980624,
+      "post_push_residual_ns": 37886507
+    },
+    {
+      "index": 24007,
+      "producer_pts_ns": 800259183735,
+      "consumer_pts_ns": 91025649167229,
+      "push_lateness_ns": 136930,
+      "arrival_lateness_ns": 40404514,
+      "post_push_residual_ns": 40267584
+    },
+    {
+      "index": 24516,
+      "producer_pts_ns": 817225850402,
+      "consumer_pts_ns": 91042615833896,
+      "push_lateness_ns": 132998,
+      "arrival_lateness_ns": 42846144,
+      "post_push_residual_ns": 42713146
+    },
+    {
+      "index": 24643,
+      "producer_pts_ns": 821459183735,
+      "consumer_pts_ns": 91046849167229,
+      "push_lateness_ns": 94772,
+      "arrival_lateness_ns": 36870702,
+      "post_push_residual_ns": 36775930
+    },
+    {
+      "index": 24948,
+      "producer_pts_ns": 831625850402,
+      "consumer_pts_ns": 91057015833896,
+      "push_lateness_ns": 141210,
+      "arrival_lateness_ns": 36887600,
+      "post_push_residual_ns": 36746390
+    },
+    {
+      "index": 24964,
+      "producer_pts_ns": 832159183735,
+      "consumer_pts_ns": 91057549167229,
+      "push_lateness_ns": 134497,
+      "arrival_lateness_ns": 38062297,
+      "post_push_residual_ns": 37927800
+    },
+    {
+      "index": 25812,
+      "producer_pts_ns": 860425850402,
+      "consumer_pts_ns": 91085815833896,
+      "push_lateness_ns": 141802,
+      "arrival_lateness_ns": 41648686,
+      "post_push_residual_ns": 41506884
+    },
+    {
+      "index": 26456,
+      "producer_pts_ns": 881892517068,
+      "consumer_pts_ns": 91107282500562,
+      "push_lateness_ns": 141932,
+      "arrival_lateness_ns": 38470495,
+      "post_push_residual_ns": 38328563
+    },
+    {
+      "index": 26487,
+      "producer_pts_ns": 882925850402,
+      "consumer_pts_ns": 91108315833896,
+      "push_lateness_ns": 131763,
+      "arrival_lateness_ns": 37922999,
+      "post_push_residual_ns": 37791236
+    },
+    {
+      "index": 26503,
+      "producer_pts_ns": 883459183735,
+      "consumer_pts_ns": 91108849167229,
+      "push_lateness_ns": 140992,
+      "arrival_lateness_ns": 37256337,
+      "post_push_residual_ns": 37115345
+    },
+    {
+      "index": 26711,
+      "producer_pts_ns": 890392517068,
+      "consumer_pts_ns": 91115782500562,
+      "push_lateness_ns": 94561,
+      "arrival_lateness_ns": 39705180,
+      "post_push_residual_ns": 39610619
+    },
+    {
+      "index": 26957,
+      "producer_pts_ns": 898592517068,
+      "consumer_pts_ns": 91123982500562,
+      "push_lateness_ns": 135686,
+      "arrival_lateness_ns": 36658080,
+      "post_push_residual_ns": 36522394
+    },
+    {
+      "index": 27332,
+      "producer_pts_ns": 911092517068,
+      "consumer_pts_ns": 91136482500562,
+      "push_lateness_ns": 138687,
+      "arrival_lateness_ns": 39345633,
+      "post_push_residual_ns": 39206946
+    },
+    {
+      "index": 28150,
+      "producer_pts_ns": 938359183735,
+      "consumer_pts_ns": 91163749167229,
+      "push_lateness_ns": 137374,
+      "arrival_lateness_ns": 38804420,
+      "post_push_residual_ns": 38667046
+    },
+    {
+      "index": 28259,
+      "producer_pts_ns": 941992517068,
+      "consumer_pts_ns": 91167382500562,
+      "push_lateness_ns": 89404,
+      "arrival_lateness_ns": 35613517,
+      "post_push_residual_ns": 35524113
+    },
+    {
+      "index": 28301,
+      "producer_pts_ns": 943392517068,
+      "consumer_pts_ns": 91168782500562,
+      "push_lateness_ns": 142480,
+      "arrival_lateness_ns": 39824654,
+      "post_push_residual_ns": 39682174
+    },
+    {
+      "index": 28346,
+      "producer_pts_ns": 944892517068,
+      "consumer_pts_ns": 91170282500562,
+      "push_lateness_ns": 138725,
+      "arrival_lateness_ns": 39643173,
+      "post_push_residual_ns": 39504448
+    },
+    {
+      "index": 28467,
+      "producer_pts_ns": 948925850402,
+      "consumer_pts_ns": 91174315833896,
+      "push_lateness_ns": 157157,
+      "arrival_lateness_ns": 37512344,
+      "post_push_residual_ns": 37355187
+    },
+    {
+      "index": 28706,
+      "producer_pts_ns": 956892517068,
+      "consumer_pts_ns": 91182282500562,
+      "push_lateness_ns": 154833,
+      "arrival_lateness_ns": 35823207,
+      "post_push_residual_ns": 35668374
+    },
+    {
+      "index": 28759,
+      "producer_pts_ns": 958659183735,
+      "consumer_pts_ns": 91184049167229,
+      "push_lateness_ns": 97166,
+      "arrival_lateness_ns": 37779911,
+      "post_push_residual_ns": 37682745
+    },
+    {
+      "index": 29686,
+      "producer_pts_ns": 989559183735,
+      "consumer_pts_ns": 91214949167229,
+      "push_lateness_ns": 95484,
+      "arrival_lateness_ns": 39002039,
+      "post_push_residual_ns": 38906555
+    },
+    {
+      "index": 29955,
+      "producer_pts_ns": 998525850402,
+      "consumer_pts_ns": 91223915833896,
+      "push_lateness_ns": 136931,
+      "arrival_lateness_ns": 36817735,
+      "post_push_residual_ns": 36680804
+    },
+    {
+      "index": 30888,
+      "producer_pts_ns": 1029625850402,
+      "consumer_pts_ns": 91255015833896,
+      "push_lateness_ns": 149146,
+      "arrival_lateness_ns": 37063376,
+      "post_push_residual_ns": 36914230
+    },
+    {
+      "index": 31264,
+      "producer_pts_ns": 1042159183735,
+      "consumer_pts_ns": 91267549167229,
+      "push_lateness_ns": 136520,
+      "arrival_lateness_ns": 39553524,
+      "post_push_residual_ns": 39417004
+    },
+    {
+      "index": 31910,
+      "producer_pts_ns": 1063692517068,
+      "consumer_pts_ns": 91289082500562,
+      "push_lateness_ns": 128210,
+      "arrival_lateness_ns": 34324657,
+      "post_push_residual_ns": 34196447
+    },
+    {
+      "index": 31913,
+      "producer_pts_ns": 1063792517068,
+      "consumer_pts_ns": 91289182500562,
+      "push_lateness_ns": 108756,
+      "arrival_lateness_ns": 34189403,
+      "post_push_residual_ns": 34080647
+    },
+    {
+      "index": 32254,
+      "producer_pts_ns": 1075159183735,
+      "consumer_pts_ns": 91300549167229,
+      "push_lateness_ns": 135168,
+      "arrival_lateness_ns": 38304413,
+      "post_push_residual_ns": 38169245
+    },
+    {
+      "index": 32551,
+      "producer_pts_ns": 1085059183735,
+      "consumer_pts_ns": 91310449167229,
+      "push_lateness_ns": 135059,
+      "arrival_lateness_ns": 38555403,
+      "post_push_residual_ns": 38420344
+    },
+    {
+      "index": 33526,
+      "producer_pts_ns": 1117559183735,
+      "consumer_pts_ns": 91342949167229,
+      "push_lateness_ns": 135244,
+      "arrival_lateness_ns": 39472372,
+      "post_push_residual_ns": 39337128
+    },
+    {
+      "index": 33760,
+      "producer_pts_ns": 1125359183735,
+      "consumer_pts_ns": 91350749167229,
+      "push_lateness_ns": 134529,
+      "arrival_lateness_ns": 38856828,
+      "post_push_residual_ns": 38722299
+    },
+    {
+      "index": 33972,
+      "producer_pts_ns": 1132425850402,
+      "consumer_pts_ns": 91357815833896,
+      "push_lateness_ns": 145599,
+      "arrival_lateness_ns": 42060112,
+      "post_push_residual_ns": 41914513
+    },
+    {
+      "index": 34106,
+      "producer_pts_ns": 1136892517068,
+      "consumer_pts_ns": 91362282500562,
+      "push_lateness_ns": 136288,
+      "arrival_lateness_ns": 37292882,
+      "post_push_residual_ns": 37156594
+    },
+    {
+      "index": 34332,
+      "producer_pts_ns": 1144425850402,
+      "consumer_pts_ns": 91369815833896,
+      "push_lateness_ns": 130472,
+      "arrival_lateness_ns": 37471776,
+      "post_push_residual_ns": 37341304
+    },
+    {
+      "index": 34528,
+      "producer_pts_ns": 1150959183735,
+      "consumer_pts_ns": 91376349167229,
+      "push_lateness_ns": 95062,
+      "arrival_lateness_ns": 39171133,
+      "post_push_residual_ns": 39076071
+    },
+    {
+      "index": 35078,
+      "producer_pts_ns": 1169292517068,
+      "consumer_pts_ns": 91394682500562,
+      "push_lateness_ns": 132252,
+      "arrival_lateness_ns": 37826198,
+      "post_push_residual_ns": 37693946
+    },
+    {
+      "index": 35400,
+      "producer_pts_ns": 1180025850402,
+      "consumer_pts_ns": 91405415833896,
+      "push_lateness_ns": 116259,
+      "arrival_lateness_ns": 34537371,
+      "post_push_residual_ns": 34421112
+    },
+    {
+      "index": 35423,
+      "producer_pts_ns": 1180792517068,
+      "consumer_pts_ns": 91406182500562,
+      "push_lateness_ns": 136231,
+      "arrival_lateness_ns": 38516556,
+      "post_push_residual_ns": 38380325
+    },
+    {
+      "index": 35563,
+      "producer_pts_ns": 1185459183735,
+      "consumer_pts_ns": 91410849167229,
+      "push_lateness_ns": 137360,
+      "arrival_lateness_ns": 39448749,
+      "post_push_residual_ns": 39311389
+    },
+    {
+      "index": 36306,
+      "producer_pts_ns": 1210225850402,
+      "consumer_pts_ns": 91435615833896,
+      "push_lateness_ns": 138464,
+      "arrival_lateness_ns": 39397745,
+      "post_push_residual_ns": 39259281
+    },
+    {
+      "index": 37048,
+      "producer_pts_ns": 1234959183735,
+      "consumer_pts_ns": 91460349167229,
+      "push_lateness_ns": 135620,
+      "arrival_lateness_ns": 40651552,
+      "post_push_residual_ns": 40515932
+    },
+    {
+      "index": 37140,
+      "producer_pts_ns": 1238025850402,
+      "consumer_pts_ns": 91463415833896,
+      "push_lateness_ns": 120858,
+      "arrival_lateness_ns": 34527173,
+      "post_push_residual_ns": 34406315
+    },
+    {
+      "index": 37221,
+      "producer_pts_ns": 1240725850402,
+      "consumer_pts_ns": 91466115833896,
+      "push_lateness_ns": 135010,
+      "arrival_lateness_ns": 41200872,
+      "post_push_residual_ns": 41065862
+    },
+    {
+      "index": 37298,
+      "producer_pts_ns": 1243292517068,
+      "consumer_pts_ns": 91468682500562,
+      "push_lateness_ns": 96883,
+      "arrival_lateness_ns": 37793181,
+      "post_push_residual_ns": 37696298
+    },
+    {
+      "index": 37464,
+      "producer_pts_ns": 1248825850402,
+      "consumer_pts_ns": 91474215833896,
+      "push_lateness_ns": 135218,
+      "arrival_lateness_ns": 37898656,
+      "post_push_residual_ns": 37763438
+    },
+    {
+      "index": 37816,
+      "producer_pts_ns": 1260559183735,
+      "consumer_pts_ns": 91485949167229,
+      "push_lateness_ns": 97634,
+      "arrival_lateness_ns": 37045838,
+      "post_push_residual_ns": 36948204
+    },
+    {
+      "index": 38204,
+      "producer_pts_ns": 1273492517068,
+      "consumer_pts_ns": 91498882500562,
+      "push_lateness_ns": 137947,
+      "arrival_lateness_ns": 38023403,
+      "post_push_residual_ns": 37885456
+    },
+    {
+      "index": 38284,
+      "producer_pts_ns": 1276159183735,
+      "consumer_pts_ns": 91501549167229,
+      "push_lateness_ns": 99818,
+      "arrival_lateness_ns": 37422972,
+      "post_push_residual_ns": 37323154
+    },
+    {
+      "index": 38362,
+      "producer_pts_ns": 1278759183735,
+      "consumer_pts_ns": 91504149167229,
+      "push_lateness_ns": 135067,
+      "arrival_lateness_ns": 36144825,
+      "post_push_residual_ns": 36009758
+    },
+    {
+      "index": 38691,
+      "producer_pts_ns": 1289725850402,
+      "consumer_pts_ns": 91515115833896,
+      "push_lateness_ns": 130786,
+      "arrival_lateness_ns": 39900523,
+      "post_push_residual_ns": 39769737
+    },
+    {
+      "index": 38721,
+      "producer_pts_ns": 1290725850402,
+      "consumer_pts_ns": 91516115833896,
+      "push_lateness_ns": 148026,
+      "arrival_lateness_ns": 39955678,
+      "post_push_residual_ns": 39807652
+    },
+    {
+      "index": 38857,
+      "producer_pts_ns": 1295259183735,
+      "consumer_pts_ns": 91520649167229,
+      "push_lateness_ns": 136851,
+      "arrival_lateness_ns": 38998752,
+      "post_push_residual_ns": 38861901
+    },
+    {
+      "index": 38988,
+      "producer_pts_ns": 1299625850402,
+      "consumer_pts_ns": 91525015833896,
+      "push_lateness_ns": 147086,
+      "arrival_lateness_ns": 35654523,
+      "post_push_residual_ns": 35507437
+    },
+    {
+      "index": 39356,
+      "producer_pts_ns": 1311892517068,
+      "consumer_pts_ns": 91537282500562,
+      "push_lateness_ns": 133961,
+      "arrival_lateness_ns": 37870768,
+      "post_push_residual_ns": 37736807
+    },
+    {
+      "index": 39467,
+      "producer_pts_ns": 1315592517068,
+      "consumer_pts_ns": 91540982500562,
+      "push_lateness_ns": 132446,
+      "arrival_lateness_ns": 39069388,
+      "post_push_residual_ns": 38936942
+    },
+    {
+      "index": 39912,
+      "producer_pts_ns": 1330425850402,
+      "consumer_pts_ns": 91555815833896,
+      "push_lateness_ns": 157117,
+      "arrival_lateness_ns": 40016965,
+      "post_push_residual_ns": 39859848
+    },
+    {
+      "index": 41094,
+      "producer_pts_ns": 1369825850402,
+      "consumer_pts_ns": 91595215833896,
+      "push_lateness_ns": 130608,
+      "arrival_lateness_ns": 35251570,
+      "post_push_residual_ns": 35120962
+    },
+    {
+      "index": 41209,
+      "producer_pts_ns": 1373659183735,
+      "consumer_pts_ns": 91599049167229,
+      "push_lateness_ns": 134001,
+      "arrival_lateness_ns": 37205412,
+      "post_push_residual_ns": 37071411
+    },
+    {
+      "index": 41815,
+      "producer_pts_ns": 1393859183735,
+      "consumer_pts_ns": 91619249167229,
+      "push_lateness_ns": 136195,
+      "arrival_lateness_ns": 41330707,
+      "post_push_residual_ns": 41194512
+    },
+    {
+      "index": 42296,
+      "producer_pts_ns": 1409892517068,
+      "consumer_pts_ns": 91635282500562,
+      "push_lateness_ns": 87978,
+      "arrival_lateness_ns": 39531090,
+      "post_push_residual_ns": 39443112
+    },
+    {
+      "index": 42489,
+      "producer_pts_ns": 1416325850402,
+      "consumer_pts_ns": 91641715833896,
+      "push_lateness_ns": 137040,
+      "arrival_lateness_ns": 37575992,
+      "post_push_residual_ns": 37438952
+    },
+    {
+      "index": 42797,
+      "producer_pts_ns": 1426592517068,
+      "consumer_pts_ns": 91651982500562,
+      "push_lateness_ns": 140166,
+      "arrival_lateness_ns": 38293354,
+      "post_push_residual_ns": 38153188
+    },
+    {
+      "index": 43861,
+      "producer_pts_ns": 1462059183735,
+      "consumer_pts_ns": 91687449167229,
+      "push_lateness_ns": 96643,
+      "arrival_lateness_ns": 38746142,
+      "post_push_residual_ns": 38649499
+    },
+    {
+      "index": 44009,
+      "producer_pts_ns": 1466992517068,
+      "consumer_pts_ns": 91692382500562,
+      "push_lateness_ns": 136717,
+      "arrival_lateness_ns": 39598273,
+      "post_push_residual_ns": 39461556
+    },
+    {
+      "index": 44613,
+      "producer_pts_ns": 1487125850402,
+      "consumer_pts_ns": 91712515833896,
+      "push_lateness_ns": 138302,
+      "arrival_lateness_ns": 37919972,
+      "post_push_residual_ns": 37781670
+    },
+    {
+      "index": 44931,
+      "producer_pts_ns": 1497725850402,
+      "consumer_pts_ns": 91723115833896,
+      "push_lateness_ns": 132043,
+      "arrival_lateness_ns": 35931443,
+      "post_push_residual_ns": 35799400
+    },
+    {
+      "index": 45404,
+      "producer_pts_ns": 1513492517068,
+      "consumer_pts_ns": 91738882500562,
+      "push_lateness_ns": 138369,
+      "arrival_lateness_ns": 35555196,
+      "post_push_residual_ns": 35416827
+    },
+    {
+      "index": 46631,
+      "producer_pts_ns": 1554392517068,
+      "consumer_pts_ns": 91779782500562,
+      "push_lateness_ns": 96444,
+      "arrival_lateness_ns": 41809085,
+      "post_push_residual_ns": 41712641
+    },
+    {
+      "index": 47274,
+      "producer_pts_ns": 1575825850402,
+      "consumer_pts_ns": 91801215833896,
+      "push_lateness_ns": 133853,
+      "arrival_lateness_ns": 36544862,
+      "post_push_residual_ns": 36411009
+    },
+    {
+      "index": 47812,
+      "producer_pts_ns": 1593759183735,
+      "consumer_pts_ns": 91819149167229,
+      "push_lateness_ns": 136109,
+      "arrival_lateness_ns": 39160734,
+      "post_push_residual_ns": 39024625
+    },
+    {
+      "index": 47978,
+      "producer_pts_ns": 1599292517068,
+      "consumer_pts_ns": 91824682500562,
+      "push_lateness_ns": 94923,
+      "arrival_lateness_ns": 42875194,
+      "post_push_residual_ns": 42780271
+    },
+    {
+      "index": 48389,
+      "producer_pts_ns": 1612992517068,
+      "consumer_pts_ns": 91838382500562,
+      "push_lateness_ns": 129427,
+      "arrival_lateness_ns": 39482084,
+      "post_push_residual_ns": 39352657
+    },
+    {
+      "index": 48688,
+      "producer_pts_ns": 1622959183735,
+      "consumer_pts_ns": 91848349167229,
+      "push_lateness_ns": 131258,
+      "arrival_lateness_ns": 37524833,
+      "post_push_residual_ns": 37393575
+    },
+    {
+      "index": 48741,
+      "producer_pts_ns": 1624725850402,
+      "consumer_pts_ns": 91850115833896,
+      "push_lateness_ns": 142228,
+      "arrival_lateness_ns": 38652753,
+      "post_push_residual_ns": 38510525
+    },
+    {
+      "index": 48907,
+      "producer_pts_ns": 1630259183735,
+      "consumer_pts_ns": 91855649167229,
+      "push_lateness_ns": 137384,
+      "arrival_lateness_ns": 39223990,
+      "post_push_residual_ns": 39086606
+    },
+    {
+      "index": 49017,
+      "producer_pts_ns": 1633925850402,
+      "consumer_pts_ns": 91859315833896,
+      "push_lateness_ns": 137576,
+      "arrival_lateness_ns": 37049694,
+      "post_push_residual_ns": 36912118
+    },
+    {
+      "index": 49259,
+      "producer_pts_ns": 1641992517068,
+      "consumer_pts_ns": 91867382500562,
+      "push_lateness_ns": 125440,
+      "arrival_lateness_ns": 43644049,
+      "post_push_residual_ns": 43518609
+    },
+    {
+      "index": 49686,
+      "producer_pts_ns": 1656225850402,
+      "consumer_pts_ns": 91881615833896,
+      "push_lateness_ns": 148705,
+      "arrival_lateness_ns": 36922814,
+      "post_push_residual_ns": 36774109
+    },
+    {
+      "index": 51099,
+      "producer_pts_ns": 1703325850402,
+      "consumer_pts_ns": 91928715833896,
+      "push_lateness_ns": 149589,
+      "arrival_lateness_ns": 40146952,
+      "post_push_residual_ns": 39997363
+    },
+    {
+      "index": 51259,
+      "producer_pts_ns": 1708659183735,
+      "consumer_pts_ns": 91934049167229,
+      "push_lateness_ns": 135899,
+      "arrival_lateness_ns": 38430940,
+      "post_push_residual_ns": 38295041
+    },
+    {
+      "index": 51808,
+      "producer_pts_ns": 1726959183735,
+      "consumer_pts_ns": 91952349167229,
+      "push_lateness_ns": 133397,
+      "arrival_lateness_ns": 38830787,
+      "post_push_residual_ns": 38697390
+    },
+    {
+      "index": 51820,
+      "producer_pts_ns": 1727359183735,
+      "consumer_pts_ns": 91952749167229,
+      "push_lateness_ns": 132866,
+      "arrival_lateness_ns": 38856528,
+      "post_push_residual_ns": 38723662
+    },
+    {
+      "index": 51900,
+      "producer_pts_ns": 1730025850402,
+      "consumer_pts_ns": 91955415833896,
+      "push_lateness_ns": 154529,
+      "arrival_lateness_ns": 38983744,
+      "post_push_residual_ns": 38829215
+    },
+    {
+      "index": 52014,
+      "producer_pts_ns": 1733825850402,
+      "consumer_pts_ns": 91959215833896,
+      "push_lateness_ns": 137320,
+      "arrival_lateness_ns": 38526566,
+      "post_push_residual_ns": 38389246
+    },
+    {
+      "index": 52165,
+      "producer_pts_ns": 1738859183735,
+      "consumer_pts_ns": 91964249167229,
+      "push_lateness_ns": 138500,
+      "arrival_lateness_ns": 38924483,
+      "post_push_residual_ns": 38785983
+    },
+    {
+      "index": 52615,
+      "producer_pts_ns": 1753859183735,
+      "consumer_pts_ns": 91979249167229,
+      "push_lateness_ns": 96278,
+      "arrival_lateness_ns": 35466318,
+      "post_push_residual_ns": 35370040
+    },
+    {
+      "index": 52873,
+      "producer_pts_ns": 1762459183735,
+      "consumer_pts_ns": 91987849167229,
+      "push_lateness_ns": 95913,
+      "arrival_lateness_ns": 35856401,
+      "post_push_residual_ns": 35760488
+    },
+    {
+      "index": 53863,
+      "producer_pts_ns": 1795459183735,
+      "consumer_pts_ns": 92020849167229,
+      "push_lateness_ns": 132026,
+      "arrival_lateness_ns": 39230183,
+      "post_push_residual_ns": 39098157
+    }
+  ],
+  "push_ms": {
+    "p50": 0.179467,
+    "p95": 0.200782,
+    "p99": 0.212925,
+    "max": 12.661196
+  },
+  "arrival_ms": {
+    "p50": 16.814166,
+    "p95": 17.794352,
+    "p99": 18.427521,
+    "max": 43.644049
+  },
+  "post_push_residual_ms": {
+    "p50": 16.681104,
+    "p95": 17.647111,
+    "p99": 18.2876,
+    "max": 43.518609
+  },
+  "scope": "All frames including startup/drain. Offset inferred from first records: cannot independently exclude a whole-stream constant shift; not identity proof. Residual includes producer copy, transport, consumer work and clock-mapping error; not a root-cause proof.",
+  "audio": {
+    "blocks": 180000,
+    "contiguous_10ms_pts": true,
+    "arrival_misses": 0,
+    "arrival_ms": {
+      "p50": 0.196539,
+      "p95": 0.353937,
+      "p99": 0.370432,
+      "max": 1.671237
+    },
+    "scope": "PTS continuity only; PCM bytes/counts require the benchmark summary."
+  },
+  "av_mapping": {
+    "audio": {
+      "join": "inferred_constant_pts_mapping",
+      "frames": 180000,
+      "pts_offset_ns": 90225389983494,
+      "arrival_budget_ns": 34000000,
+      "arrival_misses": 0,
+      "late_frames": [],
+      "push_ms": {
+        "p50": 0.088046,
+        "p95": 0.203713,
+        "p99": 0.214823,
+        "max": 1.57408
+      },
+      "arrival_ms": {
+        "p50": 0.196539,
+        "p95": 0.353937,
+        "p99": 0.370432,
+        "max": 1.671237
+      },
+      "post_push_residual_ms": {
+        "p50": 0.1071,
+        "p95": 0.156358,
+        "p99": 0.175228,
+        "max": 0.668873
+      },
+      "scope": "All frames including startup/drain. Offset inferred from first records: cannot independently exclude a whole-stream constant shift; not identity proof. Residual includes producer copy, transport, consumer work and clock-mapping error; not a root-cause proof."
+    },
+    "av_mapping_delta_ns": 0,
+    "scope": "Both tracks preserve the same inferred constant PTS mapping. No independent allocation identity or physical playback claim."
+  }
+}

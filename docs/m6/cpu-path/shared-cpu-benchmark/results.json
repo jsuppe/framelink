@@ -1,0 +1,183 @@
+[
+  {
+    "label": "build-linux",
+    "args": [
+      "cmake",
+      "--build",
+      "<linux-home>/dev/build/framelink-m6-linux",
+      "-j4",
+      "--target",
+      "fl_gst_av_bench",
+      "fl_gst_av_bin"
+    ],
+    "exit": 0
+  },
+  {
+    "label": "build-arm64",
+    "args": [
+      "cmake",
+      "--build",
+      "<linux-home>/dev/build/framelink-m6-arm64",
+      "-j4",
+      "--target",
+      "fl_gst_av_bench",
+      "fl_gst_av_bin"
+    ],
+    "exit": 0
+  },
+  {
+    "label": "build-x86_64",
+    "args": [
+      "cmake",
+      "--build",
+      "<linux-home>/dev/build/framelink-m6-x86_64",
+      "-j4",
+      "--target",
+      "fl_gst_av_bench",
+      "fl_gst_av_bin"
+    ],
+    "exit": 0
+  },
+  {
+    "label": "linux-regression",
+    "args": [
+      "ctest",
+      "--test-dir",
+      "<linux-home>/dev/build/framelink-m6-linux",
+      "-R",
+      "^(gst_av_bin|gst_av_bench_smoke|gst_shared_cpu_av)$",
+      "--output-on-failure"
+    ],
+    "exit": 0
+  },
+  {
+    "label": "linux-bgra",
+    "args": [
+      "<linux-home>/dev/build/framelink-m6-linux/fl_gst_av_bench",
+      "<linux-home>/dev/build/framelink-m6-linux/libgstframelink.so",
+      "--shared-cpu",
+      "--seconds",
+      "5",
+      "--size",
+      "64x64",
+      "--fps",
+      "30",
+      "--latency-ms",
+      "0",
+      "--transport-only",
+      "--no-output-preroll",
+      "--pool",
+      "4",
+      "--video-queue",
+      "2",
+      "--raw",
+      "--trace",
+      "--format",
+      "BGRA",
+      "--out",
+      "<linux-home>/dev/evidence/m6-cpu-path/shared-cpu-benchmark",
+      "--label",
+      "linux-bgra"
+    ],
+    "exit": 0
+  },
+  {
+    "label": "linux-nv12",
+    "args": [
+      "<linux-home>/dev/build/framelink-m6-linux/fl_gst_av_bench",
+      "<linux-home>/dev/build/framelink-m6-linux/libgstframelink.so",
+      "--shared-cpu",
+      "--seconds",
+      "5",
+      "--size",
+      "64x64",
+      "--fps",
+      "30",
+      "--latency-ms",
+      "0",
+      "--transport-only",
+      "--no-output-preroll",
+      "--pool",
+      "4",
+      "--video-queue",
+      "2",
+      "--raw",
+      "--trace",
+      "--format",
+      "NV12",
+      "--out",
+      "<linux-home>/dev/evidence/m6-cpu-path/shared-cpu-benchmark",
+      "--label",
+      "linux-nv12"
+    ],
+    "exit": 0
+  },
+  {
+    "label": "android-mkdir",
+    "args": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "shell",
+      "mkdir -p /data/local/tmp/framelink-cpu-bench"
+    ],
+    "exit": 0
+  },
+  {
+    "label": "android-push",
+    "args": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "push",
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_gst_av_bench",
+      "/data/local/tmp/framelink-cpu-bench/"
+    ],
+    "exit": 0
+  },
+  {
+    "label": "android-chmod",
+    "args": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "shell",
+      "chmod 755 /data/local/tmp/framelink-cpu-bench/fl_gst_av_bench"
+    ],
+    "exit": 0
+  },
+  {
+    "label": "android-bgra",
+    "args": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "shell",
+      "cd /data/local/tmp/framelink-cpu-bench && ./fl_gst_av_bench static --shared-cpu --seconds 5 --size 64x64 --fps 30 --latency-ms 0 --transport-only --no-output-preroll --pool 4 --video-queue 2 --raw --trace --format BGRA --out /data/local/tmp/framelink-cpu-bench --label android-bgra"
+    ],
+    "exit": 0
+  },
+  {
+    "label": "android-nv12",
+    "args": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "shell",
+      "cd /data/local/tmp/framelink-cpu-bench && ./fl_gst_av_bench static --shared-cpu --seconds 5 --size 64x64 --fps 30 --latency-ms 0 --transport-only --no-output-preroll --pool 4 --video-queue 2 --raw --trace --format NV12 --out /data/local/tmp/framelink-cpu-bench --label android-nv12"
+    ],
+    "exit": 0
+  },
+  {
+    "label": "android-pull",
+    "args": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "pull",
+      "/data/local/tmp/framelink-cpu-bench",
+      "<linux-home>/dev/evidence/m6-cpu-path/shared-cpu-benchmark/android"
+    ],
+    "exit": 0
+  }
+]

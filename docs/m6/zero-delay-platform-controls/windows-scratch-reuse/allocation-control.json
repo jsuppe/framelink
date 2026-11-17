@@ -1,0 +1,89 @@
+{
+  "scope": "GLib allocation plus contiguous payload copy only; not D3D11, scheduler or transport attribution",
+  "runs": [
+    {
+      "mode": "allocate_free",
+      "frames": 600,
+      "payload_bytes": 12441600,
+      "fault_delta": 1828808,
+      "before": {
+        "faults": 9708,
+        "private": 22306816,
+        "working_set": 39182336
+      },
+      "after": {
+        "faults": 1838516,
+        "private": 22306816,
+        "working_set": 39215104
+      },
+      "ms": {
+        "p50": 1.3961,
+        "p95": 1.6002,
+        "max": 2.2042
+      }
+    },
+    {
+      "mode": "reuse_warm",
+      "frames": 600,
+      "payload_bytes": 12441600,
+      "fault_delta": 1,
+      "before": {
+        "faults": 1841568,
+        "private": 39133184,
+        "working_set": 51683328
+      },
+      "after": {
+        "faults": 1841569,
+        "private": 38514688,
+        "working_set": 51064832
+      },
+      "ms": {
+        "p50": 0.4558,
+        "p95": 0.4605,
+        "max": 0.4736
+      }
+    },
+    {
+      "mode": "allocate_free",
+      "frames": 600,
+      "payload_bytes": 12441600,
+      "fault_delta": 1828804,
+      "before": {
+        "faults": 1841581,
+        "private": 21753856,
+        "working_set": 38662144
+      },
+      "after": {
+        "faults": 3670385,
+        "private": 21704704,
+        "working_set": 38617088
+      },
+      "ms": {
+        "p50": 1.3839,
+        "p95": 1.4048,
+        "max": 2.4099
+      }
+    },
+    {
+      "mode": "reuse_warm",
+      "frames": 600,
+      "payload_bytes": 12441600,
+      "fault_delta": 2,
+      "before": {
+        "faults": 3673442,
+        "private": 38547456,
+        "working_set": 51105792
+      },
+      "after": {
+        "faults": 3673444,
+        "private": 38555648,
+        "working_set": 51113984
+      },
+      "ms": {
+        "p50": 0.4558,
+        "p95": 0.4605,
+        "max": 0.4748
+      }
+    }
+  ]
+}

@@ -1,0 +1,410 @@
+{
+  "scope": "Serial M6 deterministic gates; exit0=all pass,1=failed/missing,77=unsupported skips.\n\nBuild first. Desktop uses CTest/JUnit. Android pushes selected executables to a\nfresh directory beneath --remote-dir; shared runtime libraries must already be\ninstalled there. Output retains logs, command provenance and separate skips.\nThis is not endurance, performance-budget, presentation or final qualification.\n",
+  "platform": "windows",
+  "expected": [
+    "gst_av_timeline",
+    "gst_policy_generation",
+    "gst_pool_policy",
+    "m4_transport_jitter_drift",
+    "m4_transport_negative_retimestamps",
+    "m5a_transport_relay_sync_negative",
+    "read_lease_d3d11",
+    "read_lease_d3d11_delayed_completion",
+    "read_lease_d3d11_producer_death",
+    "read_leases",
+    "read_ledger",
+    "receive_queue",
+    "trace_bounded_concurrent",
+    "trace_compiled_out",
+    "trace_default_capacity",
+    "trace_details",
+    "trace_disabled",
+    "trace_invalid_capacity",
+    "trace_override_capacity",
+    "trace_thread_limit"
+  ],
+  "missing": [],
+  "tests": [
+    {
+      "name": "gst_av_timeline",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "build",
+        "--no-tests=error",
+        "--output-on-failure",
+        "-R",
+        "^gst_av_timeline$",
+        "--output-junit",
+        "<win-home>\\dev\\framelink-m6-20261106\\m6-gates-1794046680\\gst_av_timeline.xml",
+        "-C",
+        "Release"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 5.703668800008018
+    },
+    {
+      "name": "gst_policy_generation",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "build",
+        "--no-tests=error",
+        "--output-on-failure",
+        "-R",
+        "^gst_policy_generation$",
+        "--output-junit",
+        "<win-home>\\dev\\framelink-m6-20261106\\m6-gates-1794046680\\gst_policy_generation.xml",
+        "-C",
+        "Release"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 2.6817697000224143
+    },
+    {
+      "name": "gst_pool_policy",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "build",
+        "--no-tests=error",
+        "--output-on-failure",
+        "-R",
+        "^gst_pool_policy$",
+        "--output-junit",
+        "<win-home>\\dev\\framelink-m6-20261106\\m6-gates-1794046680\\gst_pool_policy.xml",
+        "-C",
+        "Release"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 3.877046700043138
+    },
+    {
+      "name": "m4_transport_jitter_drift",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "build",
+        "--no-tests=error",
+        "--output-on-failure",
+        "-R",
+        "^m4_transport_jitter_drift$",
+        "--output-junit",
+        "<win-home>\\dev\\framelink-m6-20261106\\m6-gates-1794046680\\m4_transport_jitter_drift.xml",
+        "-C",
+        "Release"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 1.0592742000008002
+    },
+    {
+      "name": "m4_transport_negative_retimestamps",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "build",
+        "--no-tests=error",
+        "--output-on-failure",
+        "-R",
+        "^m4_transport_negative_retimestamps$",
+        "--output-junit",
+        "<win-home>\\dev\\framelink-m6-20261106\\m6-gates-1794046680\\m4_transport_negative_retimestamps.xml",
+        "-C",
+        "Release"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 0.4586153000127524
+    },
+    {
+      "name": "m5a_transport_relay_sync_negative",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "build",
+        "--no-tests=error",
+        "--output-on-failure",
+        "-R",
+        "^m5a_transport_relay_sync_negative$",
+        "--output-junit",
+        "<win-home>\\dev\\framelink-m6-20261106\\m6-gates-1794046680\\m5a_transport_relay_sync_negative.xml",
+        "-C",
+        "Release"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 0.7396961000049487
+    },
+    {
+      "name": "read_lease_d3d11",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "build",
+        "--no-tests=error",
+        "--output-on-failure",
+        "-R",
+        "^read_lease_d3d11$",
+        "--output-junit",
+        "<win-home>\\dev\\framelink-m6-20261106\\m6-gates-1794046680\\read_lease_d3d11.xml",
+        "-C",
+        "Release"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 0.395192300027702
+    },
+    {
+      "name": "read_lease_d3d11_delayed_completion",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "build",
+        "--no-tests=error",
+        "--output-on-failure",
+        "-R",
+        "^read_lease_d3d11_delayed_completion$",
+        "--output-junit",
+        "<win-home>\\dev\\framelink-m6-20261106\\m6-gates-1794046680\\read_lease_d3d11_delayed_completion.xml",
+        "-C",
+        "Release"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 0.4523571999743581
+    },
+    {
+      "name": "read_lease_d3d11_producer_death",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "build",
+        "--no-tests=error",
+        "--output-on-failure",
+        "-R",
+        "^read_lease_d3d11_producer_death$",
+        "--output-junit",
+        "<win-home>\\dev\\framelink-m6-20261106\\m6-gates-1794046680\\read_lease_d3d11_producer_death.xml",
+        "-C",
+        "Release"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 0.3935815999866463
+    },
+    {
+      "name": "read_leases",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "build",
+        "--no-tests=error",
+        "--output-on-failure",
+        "-R",
+        "^read_leases$",
+        "--output-junit",
+        "<win-home>\\dev\\framelink-m6-20261106\\m6-gates-1794046680\\read_leases.xml",
+        "-C",
+        "Release"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 0.33187439996981993
+    },
+    {
+      "name": "read_ledger",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "build",
+        "--no-tests=error",
+        "--output-on-failure",
+        "-R",
+        "^read_ledger$",
+        "--output-junit",
+        "<win-home>\\dev\\framelink-m6-20261106\\m6-gates-1794046680\\read_ledger.xml",
+        "-C",
+        "Release"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 0.03899149998323992
+    },
+    {
+      "name": "receive_queue",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "build",
+        "--no-tests=error",
+        "--output-on-failure",
+        "-R",
+        "^receive_queue$",
+        "--output-junit",
+        "<win-home>\\dev\\framelink-m6-20261106\\m6-gates-1794046680\\receive_queue.xml",
+        "-C",
+        "Release"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 1.6842633000342175
+    },
+    {
+      "name": "trace_bounded_concurrent",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "build",
+        "--no-tests=error",
+        "--output-on-failure",
+        "-R",
+        "^trace_bounded_concurrent$",
+        "--output-junit",
+        "<win-home>\\dev\\framelink-m6-20261106\\m6-gates-1794046680\\trace_bounded_concurrent.xml",
+        "-C",
+        "Release"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 0.05167499999515712
+    },
+    {
+      "name": "trace_compiled_out",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "build",
+        "--no-tests=error",
+        "--output-on-failure",
+        "-R",
+        "^trace_compiled_out$",
+        "--output-junit",
+        "<win-home>\\dev\\framelink-m6-20261106\\m6-gates-1794046680\\trace_compiled_out.xml",
+        "-C",
+        "Release"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 0.03708410001127049
+    },
+    {
+      "name": "trace_default_capacity",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "build",
+        "--no-tests=error",
+        "--output-on-failure",
+        "-R",
+        "^trace_default_capacity$",
+        "--output-junit",
+        "<win-home>\\dev\\framelink-m6-20261106\\m6-gates-1794046680\\trace_default_capacity.xml",
+        "-C",
+        "Release"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 0.050713000004179776
+    },
+    {
+      "name": "trace_details",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "build",
+        "--no-tests=error",
+        "--output-on-failure",
+        "-R",
+        "^trace_details$",
+        "--output-junit",
+        "<win-home>\\dev\\framelink-m6-20261106\\m6-gates-1794046680\\trace_details.xml",
+        "-C",
+        "Release"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 0.038822999980766326
+    },
+    {
+      "name": "trace_disabled",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "build",
+        "--no-tests=error",
+        "--output-on-failure",
+        "-R",
+        "^trace_disabled$",
+        "--output-junit",
+        "<win-home>\\dev\\framelink-m6-20261106\\m6-gates-1794046680\\trace_disabled.xml",
+        "-C",
+        "Release"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 0.03375870001036674
+    },
+    {
+      "name": "trace_invalid_capacity",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "build",
+        "--no-tests=error",
+        "--output-on-failure",
+        "-R",
+        "^trace_invalid_capacity$",
+        "--output-junit",
+        "<win-home>\\dev\\framelink-m6-20261106\\m6-gates-1794046680\\trace_invalid_capacity.xml",
+        "-C",
+        "Release"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 0.05261200002860278
+    },
+    {
+      "name": "trace_override_capacity",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "build",
+        "--no-tests=error",
+        "--output-on-failure",
+        "-R",
+        "^trace_override_capacity$",
+        "--output-junit",
+        "<win-home>\\dev\\framelink-m6-20261106\\m6-gates-1794046680\\trace_override_capacity.xml",
+        "-C",
+        "Release"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 0.059830900048837066
+    },
+    {
+      "name": "trace_thread_limit",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "build",
+        "--no-tests=error",
+        "--output-on-failure",
+        "-R",
+        "^trace_thread_limit$",
+        "--output-junit",
+        "<win-home>\\dev\\framelink-m6-20261106\\m6-gates-1794046680\\trace_thread_limit.xml",
+        "-C",
+        "Release"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 0.05215669999597594
+    }
+  ],
+  "result": "pass"
+}

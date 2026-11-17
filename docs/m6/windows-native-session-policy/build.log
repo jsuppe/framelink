@@ -1,0 +1,26 @@
+CMake is re-running because <win-home>/dev/framelink-m6-windows-d60f683/build/CMakeFiles/generate.stamp is out-of-date.
+  the file '<win-home>/dev/framelink-m6-windows-d60f683/CMakeLists.txt'
+  is newer than '<win-home>/dev/framelink-m6-windows-d60f683/build/CMakeFiles/generate.stamp.depend'
+  result='-1'
+-- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.26300.
+-- framelink: building GStreamer elements (gstframelink)
+-- Configuring done (0.8s)
+-- Generating done (1.1s)
+-- Build files have been written to: <win-home>/dev/framelink-m6-windows-d60f683/build
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <win-home>\dev\framelink-m6-windows-d60f683\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> <win-home>\dev\framelink-m6-windows-d60f683\build\Release\framelink_gst_session.dll
+  fl_gst_native_producer_win.cpp
+  The d3d11 library from gst-plugins-bad is unstable API and may change in future.
+  You can define GST_USE_UNSTABLE_API to avoid this warning.
+  fl_gst_native_producer_win.vcxproj -> <win-home>\dev\framelink-m6-windows-d60f683\build\Release\fl_gst_native_producer_win.exe
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <win-home>\dev\framelink-m6-windows-d60f683\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> <win-home>\dev\framelink-m6-windows-d60f683\build\Release\framelink_gst_session.dll
+  gstframelink.cpp
+  The d3d11 library from gst-plugins-bad is unstable API and may change in future.
+  You can define GST_USE_UNSTABLE_API to avoid this warning.
+     Creating library <win-home>/dev/framelink-m6-windows-d60f683/build/Release/gstframelink.lib and object <win-home>/dev/framelink-m6-windows-d60f683/build/Release/gstframelink.exp
+  gstframelink.vcxproj -> <win-home>\dev\framelink-m6-windows-d60f683\build\Release\gstframelink.dll

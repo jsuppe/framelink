@@ -1,0 +1,181 @@
+{
+  "scope": "ordered three off/on pairs,300frames,1080p60,onehop,GPU verification + testGDP; no universal overhead budget",
+  "captures": [
+    {
+      "case": "off-1",
+      "frames": 300,
+      "arrival_age_p95_ms": 2.5335,
+      "resources": {
+        "producer": {
+          "role": "producer",
+          "process_cpu_before_flush_ns": 1843750000,
+          "peak_resident_before_flush_bytes": 70569984,
+          "explicit_control_flush_ns": 8800,
+          "automatic_exit_flush_included": false
+        },
+        "consumer": {
+          "role": "consumer",
+          "process_cpu_before_flush_ns": 1656250000,
+          "peak_resident_before_flush_bytes": 83116032,
+          "explicit_control_flush_ns": 400,
+          "automatic_exit_flush_included": false
+        }
+      }
+    },
+    {
+      "case": "on-1",
+      "frames": 300,
+      "arrival_age_p95_ms": 2.5254,
+      "resources": {
+        "producer": {
+          "role": "producer",
+          "process_cpu_before_flush_ns": 1906250000,
+          "peak_resident_before_flush_bytes": 71143424,
+          "explicit_control_flush_ns": 4285500,
+          "automatic_exit_flush_included": false
+        },
+        "consumer": {
+          "role": "consumer",
+          "process_cpu_before_flush_ns": 1703125000,
+          "peak_resident_before_flush_bytes": 83714048,
+          "explicit_control_flush_ns": 2794300,
+          "automatic_exit_flush_included": false
+        }
+      }
+    },
+    {
+      "case": "off-2",
+      "frames": 300,
+      "arrival_age_p95_ms": 2.534,
+      "resources": {
+        "producer": {
+          "role": "producer",
+          "process_cpu_before_flush_ns": 1968750000,
+          "peak_resident_before_flush_bytes": 70836224,
+          "explicit_control_flush_ns": 8200,
+          "automatic_exit_flush_included": false
+        },
+        "consumer": {
+          "role": "consumer",
+          "process_cpu_before_flush_ns": 1593750000,
+          "peak_resident_before_flush_bytes": 83230720,
+          "explicit_control_flush_ns": 300,
+          "automatic_exit_flush_included": false
+        }
+      }
+    },
+    {
+      "case": "on-2",
+      "frames": 300,
+      "arrival_age_p95_ms": 2.539,
+      "resources": {
+        "producer": {
+          "role": "producer",
+          "process_cpu_before_flush_ns": 1968750000,
+          "peak_resident_before_flush_bytes": 71233536,
+          "explicit_control_flush_ns": 4314700,
+          "automatic_exit_flush_included": false
+        },
+        "consumer": {
+          "role": "consumer",
+          "process_cpu_before_flush_ns": 1687500000,
+          "peak_resident_before_flush_bytes": 83632128,
+          "explicit_control_flush_ns": 2760900,
+          "automatic_exit_flush_included": false
+        }
+      }
+    },
+    {
+      "case": "off-3",
+      "frames": 300,
+      "arrival_age_p95_ms": 3.0142,
+      "resources": {
+        "producer": {
+          "role": "producer",
+          "process_cpu_before_flush_ns": 1937500000,
+          "peak_resident_before_flush_bytes": 70561792,
+          "explicit_control_flush_ns": 8000,
+          "automatic_exit_flush_included": false
+        },
+        "consumer": {
+          "role": "consumer",
+          "process_cpu_before_flush_ns": 1750000000,
+          "peak_resident_before_flush_bytes": 83034112,
+          "explicit_control_flush_ns": 400,
+          "automatic_exit_flush_included": false
+        }
+      }
+    },
+    {
+      "case": "on-3",
+      "frames": 300,
+      "arrival_age_p95_ms": 2.5363,
+      "resources": {
+        "producer": {
+          "role": "producer",
+          "process_cpu_before_flush_ns": 1734375000,
+          "peak_resident_before_flush_bytes": 71016448,
+          "explicit_control_flush_ns": 4384400,
+          "automatic_exit_flush_included": false
+        },
+        "consumer": {
+          "role": "consumer",
+          "process_cpu_before_flush_ns": 1718750000,
+          "peak_resident_before_flush_bytes": 83513344,
+          "explicit_control_flush_ns": 2875700,
+          "automatic_exit_flush_included": false
+        }
+      }
+    }
+  ],
+  "paired_deltas": [
+    {
+      "pair": "1",
+      "arrival_age_p95_ms": -0.008100000000000218,
+      "roles": {
+        "producer": {
+          "process_cpu_before_flush_ns": 62500000,
+          "peak_resident_before_flush_bytes": 573440,
+          "explicit_control_flush_ns": 4276700
+        },
+        "consumer": {
+          "process_cpu_before_flush_ns": 46875000,
+          "peak_resident_before_flush_bytes": 598016,
+          "explicit_control_flush_ns": 2793900
+        }
+      }
+    },
+    {
+      "pair": "2",
+      "arrival_age_p95_ms": 0.0050000000000003375,
+      "roles": {
+        "producer": {
+          "process_cpu_before_flush_ns": 0,
+          "peak_resident_before_flush_bytes": 397312,
+          "explicit_control_flush_ns": 4306500
+        },
+        "consumer": {
+          "process_cpu_before_flush_ns": 93750000,
+          "peak_resident_before_flush_bytes": 401408,
+          "explicit_control_flush_ns": 2760600
+        }
+      }
+    },
+    {
+      "pair": "3",
+      "arrival_age_p95_ms": -0.4779,
+      "roles": {
+        "producer": {
+          "process_cpu_before_flush_ns": -203125000,
+          "peak_resident_before_flush_bytes": 454656,
+          "explicit_control_flush_ns": 4376400
+        },
+        "consumer": {
+          "process_cpu_before_flush_ns": -31250000,
+          "peak_resident_before_flush_bytes": 479232,
+          "explicit_control_flush_ns": 2875300
+        }
+      }
+    }
+  ]
+}

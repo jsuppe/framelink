@@ -1,0 +1,15 @@
+{
+  "gst.gpu_copy_issued": {
+    "events": 32,
+    "bytes": 663552000
+  },
+  "gst.gpu_readback_issued": {
+    "events": 32,
+    "bytes": 663552000
+  },
+  "call_ms": {
+    "median": 3.6013215,
+    "maximum": 77.604383,
+    "includes_cold_initialization": true
+  }
+}

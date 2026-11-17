@@ -1,0 +1,370 @@
+{
+  "scope": "Serial M6 deterministic gates; exit0=all pass,1=failed/missing,77=unsupported skips.\n\nBuild first. Desktop uses CTest/JUnit. Android pushes selected executables to a\nfresh directory beneath --remote-dir; shared runtime libraries must already be\ninstalled there. Output retains logs, command provenance and separate skips.\nThis is not endurance, performance-budget, presentation or final qualification.\n",
+  "platform": "linux",
+  "expected": [
+    "gst_av_timeline",
+    "gst_policy_generation",
+    "gst_pool_policy",
+    "m4_transport_jitter_drift",
+    "m4_transport_negative_retimestamps",
+    "m5a_transport_relay_sync_negative",
+    "read_lease_egl",
+    "read_lease_egl_delayed_completion",
+    "read_lease_egl_producer_death",
+    "read_leases",
+    "read_ledger",
+    "receive_queue",
+    "trace_bounded_concurrent",
+    "trace_compiled_out",
+    "trace_default_capacity",
+    "trace_details",
+    "trace_disabled",
+    "trace_invalid_capacity",
+    "trace_override_capacity",
+    "trace_thread_limit"
+  ],
+  "missing": [],
+  "tests": [
+    {
+      "name": "gst_av_timeline",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "<linux-home>/dev/build/framelink-m6-linux",
+        "--no-tests=error",
+        "--output-on-failure",
+        "-R",
+        "^gst_av_timeline$",
+        "--output-junit",
+        "<linux-home>/dev/evidence/m6-automation/runner-linux/gst_av_timeline.xml"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 2.093509547994472
+    },
+    {
+      "name": "gst_policy_generation",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "<linux-home>/dev/build/framelink-m6-linux",
+        "--no-tests=error",
+        "--output-on-failure",
+        "-R",
+        "^gst_policy_generation$",
+        "--output-junit",
+        "<linux-home>/dev/evidence/m6-automation/runner-linux/gst_policy_generation.xml"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 0.4446390540106222
+    },
+    {
+      "name": "gst_pool_policy",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "<linux-home>/dev/build/framelink-m6-linux",
+        "--no-tests=error",
+        "--output-on-failure",
+        "-R",
+        "^gst_pool_policy$",
+        "--output-junit",
+        "<linux-home>/dev/evidence/m6-automation/runner-linux/gst_pool_policy.xml"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 1.643150115996832
+    },
+    {
+      "name": "m4_transport_jitter_drift",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "<linux-home>/dev/build/framelink-m6-linux",
+        "--no-tests=error",
+        "--output-on-failure",
+        "-R",
+        "^m4_transport_jitter_drift$",
+        "--output-junit",
+        "<linux-home>/dev/evidence/m6-automation/runner-linux/m4_transport_jitter_drift.xml"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 0.7240496470185462
+    },
+    {
+      "name": "m4_transport_negative_retimestamps",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "<linux-home>/dev/build/framelink-m6-linux",
+        "--no-tests=error",
+        "--output-on-failure",
+        "-R",
+        "^m4_transport_negative_retimestamps$",
+        "--output-junit",
+        "<linux-home>/dev/evidence/m6-automation/runner-linux/m4_transport_negative_retimestamps.xml"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 0.21827134399791248
+    },
+    {
+      "name": "m5a_transport_relay_sync_negative",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "<linux-home>/dev/build/framelink-m6-linux",
+        "--no-tests=error",
+        "--output-on-failure",
+        "-R",
+        "^m5a_transport_relay_sync_negative$",
+        "--output-junit",
+        "<linux-home>/dev/evidence/m6-automation/runner-linux/m5a_transport_relay_sync_negative.xml"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 0.4750756009889301
+    },
+    {
+      "name": "read_lease_egl",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "<linux-home>/dev/build/framelink-m6-linux",
+        "--no-tests=error",
+        "--output-on-failure",
+        "-R",
+        "^read_lease_egl$",
+        "--output-junit",
+        "<linux-home>/dev/evidence/m6-automation/runner-linux/read_lease_egl.xml"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 0.12870756100164726
+    },
+    {
+      "name": "read_lease_egl_delayed_completion",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "<linux-home>/dev/build/framelink-m6-linux",
+        "--no-tests=error",
+        "--output-on-failure",
+        "-R",
+        "^read_lease_egl_delayed_completion$",
+        "--output-junit",
+        "<linux-home>/dev/evidence/m6-automation/runner-linux/read_lease_egl_delayed_completion.xml"
+      ],
+      "exit": 0,
+      "result": "skip",
+      "seconds": 0.09205264601041563
+    },
+    {
+      "name": "read_lease_egl_producer_death",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "<linux-home>/dev/build/framelink-m6-linux",
+        "--no-tests=error",
+        "--output-on-failure",
+        "-R",
+        "^read_lease_egl_producer_death$",
+        "--output-junit",
+        "<linux-home>/dev/evidence/m6-automation/runner-linux/read_lease_egl_producer_death.xml"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 0.10034475199063309
+    },
+    {
+      "name": "read_leases",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "<linux-home>/dev/build/framelink-m6-linux",
+        "--no-tests=error",
+        "--output-on-failure",
+        "-R",
+        "^read_leases$",
+        "--output-junit",
+        "<linux-home>/dev/evidence/m6-automation/runner-linux/read_leases.xml"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 0.09445279199280776
+    },
+    {
+      "name": "read_ledger",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "<linux-home>/dev/build/framelink-m6-linux",
+        "--no-tests=error",
+        "--output-on-failure",
+        "-R",
+        "^read_ledger$",
+        "--output-junit",
+        "<linux-home>/dev/evidence/m6-automation/runner-linux/read_ledger.xml"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 0.012831228988943622
+    },
+    {
+      "name": "receive_queue",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "<linux-home>/dev/build/framelink-m6-linux",
+        "--no-tests=error",
+        "--output-on-failure",
+        "-R",
+        "^receive_queue$",
+        "--output-junit",
+        "<linux-home>/dev/evidence/m6-automation/runner-linux/receive_queue.xml"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 1.5070982079778332
+    },
+    {
+      "name": "trace_bounded_concurrent",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "<linux-home>/dev/build/framelink-m6-linux",
+        "--no-tests=error",
+        "--output-on-failure",
+        "-R",
+        "^trace_bounded_concurrent$",
+        "--output-junit",
+        "<linux-home>/dev/evidence/m6-automation/runner-linux/trace_bounded_concurrent.xml"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 0.00984625201090239
+    },
+    {
+      "name": "trace_compiled_out",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "<linux-home>/dev/build/framelink-m6-linux",
+        "--no-tests=error",
+        "--output-on-failure",
+        "-R",
+        "^trace_compiled_out$",
+        "--output-junit",
+        "<linux-home>/dev/evidence/m6-automation/runner-linux/trace_compiled_out.xml"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 0.00813960301456973
+    },
+    {
+      "name": "trace_default_capacity",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "<linux-home>/dev/build/framelink-m6-linux",
+        "--no-tests=error",
+        "--output-on-failure",
+        "-R",
+        "^trace_default_capacity$",
+        "--output-junit",
+        "<linux-home>/dev/evidence/m6-automation/runner-linux/trace_default_capacity.xml"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 0.015077110001584515
+    },
+    {
+      "name": "trace_details",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "<linux-home>/dev/build/framelink-m6-linux",
+        "--no-tests=error",
+        "--output-on-failure",
+        "-R",
+        "^trace_details$",
+        "--output-junit",
+        "<linux-home>/dev/evidence/m6-automation/runner-linux/trace_details.xml"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 0.008143920975271612
+    },
+    {
+      "name": "trace_disabled",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "<linux-home>/dev/build/framelink-m6-linux",
+        "--no-tests=error",
+        "--output-on-failure",
+        "-R",
+        "^trace_disabled$",
+        "--output-junit",
+        "<linux-home>/dev/evidence/m6-automation/runner-linux/trace_disabled.xml"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 0.00816132198087871
+    },
+    {
+      "name": "trace_invalid_capacity",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "<linux-home>/dev/build/framelink-m6-linux",
+        "--no-tests=error",
+        "--output-on-failure",
+        "-R",
+        "^trace_invalid_capacity$",
+        "--output-junit",
+        "<linux-home>/dev/evidence/m6-automation/runner-linux/trace_invalid_capacity.xml"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 0.01518232497619465
+    },
+    {
+      "name": "trace_override_capacity",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "<linux-home>/dev/build/framelink-m6-linux",
+        "--no-tests=error",
+        "--output-on-failure",
+        "-R",
+        "^trace_override_capacity$",
+        "--output-junit",
+        "<linux-home>/dev/evidence/m6-automation/runner-linux/trace_override_capacity.xml"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 0.02442927600350231
+    },
+    {
+      "name": "trace_thread_limit",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "<linux-home>/dev/build/framelink-m6-linux",
+        "--no-tests=error",
+        "--output-on-failure",
+        "-R",
+        "^trace_thread_limit$",
+        "--output-junit",
+        "<linux-home>/dev/evidence/m6-automation/runner-linux/trace_thread_limit.xml"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 0.011235912999836728
+    }
+  ],
+  "result": "incomplete"
+}

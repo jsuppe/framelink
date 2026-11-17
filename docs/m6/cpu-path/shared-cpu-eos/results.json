@@ -1,0 +1,236 @@
+[
+  {
+    "step": "build-linux",
+    "command": [
+      "cmake",
+      "--build",
+      "<linux-home>/dev/build/framelink-m6-linux",
+      "-j4",
+      "--target",
+      "fl_shared_cpu_eos",
+      "fl_shared_cpu_channel",
+      "fl_shared_cpu_control",
+      "fl_shared_cpu_release",
+      "fl_shared_cpu_reconnect",
+      "fl_shared_cpu_channel_c"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "linux",
+    "command": [
+      "ctest",
+      "--test-dir",
+      "<linux-home>/dev/build/framelink-m6-linux",
+      "-R",
+      "shared_cpu|memory_contract|session_contract",
+      "--output-on-failure"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "build-arm64",
+    "command": [
+      "cmake",
+      "--build",
+      "<linux-home>/dev/build/framelink-m6-arm64",
+      "-j4",
+      "--target",
+      "fl_shared_cpu_eos",
+      "fl_shared_cpu_channel",
+      "fl_shared_cpu_control",
+      "fl_shared_cpu_release",
+      "fl_shared_cpu_reconnect",
+      "fl_shared_cpu_channel_c"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "build-x86_64",
+    "command": [
+      "cmake",
+      "--build",
+      "<linux-home>/dev/build/framelink-m6-x86_64",
+      "-j4",
+      "--target",
+      "fl_shared_cpu_eos",
+      "fl_shared_cpu_channel",
+      "fl_shared_cpu_control",
+      "fl_shared_cpu_release",
+      "fl_shared_cpu_reconnect",
+      "fl_shared_cpu_channel_c"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "device-process",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "shell",
+      "ps -A -o PID,ARGS"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "mkdir",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "shell",
+      "mkdir -p /data/local/tmp/framelink-cpu-eos"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "push-fl_shared_cpu_eos",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "push",
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_shared_cpu_eos",
+      "/data/local/tmp/framelink-cpu-eos/"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "push-fl_shared_cpu_channel",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "push",
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_shared_cpu_channel",
+      "/data/local/tmp/framelink-cpu-eos/"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "push-fl_shared_cpu_control",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "push",
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_shared_cpu_control",
+      "/data/local/tmp/framelink-cpu-eos/"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "push-fl_shared_cpu_release",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "push",
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_shared_cpu_release",
+      "/data/local/tmp/framelink-cpu-eos/"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "push-fl_shared_cpu_reconnect",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "push",
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_shared_cpu_reconnect",
+      "/data/local/tmp/framelink-cpu-eos/"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "push-fl_shared_cpu_channel_c",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "push",
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_shared_cpu_channel_c",
+      "/data/local/tmp/framelink-cpu-eos/"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "chmod",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "shell",
+      "chmod 755 /data/local/tmp/framelink-cpu-eos/fl_*"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "android-fl_shared_cpu_eos",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "shell",
+      "cd /data/local/tmp/framelink-cpu-eos && ./fl_shared_cpu_eos"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "android-fl_shared_cpu_channel",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "shell",
+      "cd /data/local/tmp/framelink-cpu-eos && ./fl_shared_cpu_channel"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "android-fl_shared_cpu_control",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "shell",
+      "cd /data/local/tmp/framelink-cpu-eos && ./fl_shared_cpu_control"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "android-fl_shared_cpu_release",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "shell",
+      "cd /data/local/tmp/framelink-cpu-eos && ./fl_shared_cpu_release"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "android-fl_shared_cpu_reconnect",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "shell",
+      "cd /data/local/tmp/framelink-cpu-eos && ./fl_shared_cpu_reconnect"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "android-fl_shared_cpu_channel_c",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "shell",
+      "cd /data/local/tmp/framelink-cpu-eos && ./fl_shared_cpu_channel_c"
+    ],
+    "exit": 0
+  }
+]

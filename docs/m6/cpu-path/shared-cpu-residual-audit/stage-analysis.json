@@ -1,0 +1,525 @@
+{
+  "coverage": {
+    "sink": 13500,
+    "consumer": 13500,
+    "alloc": 12,
+    "fill": 3967
+  },
+  "summary": {
+    "sink": {
+      "wait_us": {
+        "median": 35.0,
+        "max": 6420
+      },
+      "acquire_us": {
+        "median": 3.0,
+        "max": 56
+      },
+      "copy_us": {
+        "median": 6953.0,
+        "max": 15946
+      },
+      "submit_us": {
+        "median": 51.0,
+        "max": 4898
+      }
+    },
+    "consumer": {
+      "receive_us": {
+        "median": 20263.0,
+        "max": 146933
+      },
+      "output_us": {
+        "median": 23.0,
+        "max": 768
+      },
+      "copy_us": {
+        "median": 12831.0,
+        "max": 28513
+      },
+      "release_us": {
+        "median": 39.0,
+        "max": 336
+      },
+      "meta_us": {
+        "median": 6.0,
+        "max": 143
+      },
+      "copy_faults": {
+        "median": 0.0,
+        "max": 7
+      },
+      "copy_cpu_us": {
+        "median": 11420.5,
+        "max": 20290
+      }
+    },
+    "alloc": {
+      "us": {
+        "median": 7.0,
+        "max": 249
+      },
+      "faults": {
+        "median": 0.0,
+        "max": 1
+      }
+    },
+    "fill": {
+      "us": {
+        "median": 12469,
+        "max": 85427
+      },
+      "faults": {
+        "median": 0,
+        "max": 16238
+      }
+    }
+  },
+  "misses": [
+    {
+      "index": 3078,
+      "producer_pts_ns": 102895034461,
+      "consumer_pts_ns": 3893432654238396,
+      "push_lateness_ns": 426160,
+      "arrival_lateness_ns": 36443046,
+      "post_push_residual_ns": 36016886,
+      "neighbor_stages": {
+        "3077": {
+          "sink": {
+            "index": 3077,
+            "start": 3893432621268,
+            "wait_us": 64,
+            "acquire_us": 6,
+            "copy_us": 9506,
+            "submit_us": 56
+          },
+          "consumer": {
+            "seq": 3078,
+            "start": 3893432608264,
+            "receive_us": 23103,
+            "output_us": 49,
+            "copy_us": 17249,
+            "release_us": 64,
+            "meta_us": 7,
+            "copy_faults": 3,
+            "copy_cpu_us": 14116
+          },
+          "alloc": null,
+          "fill": null
+        },
+        "3078": {
+          "sink": {
+            "index": 3078,
+            "start": 3893432654709,
+            "wait_us": 76,
+            "acquire_us": 5,
+            "copy_us": 11964,
+            "submit_us": 93
+          },
+          "consumer": {
+            "seq": 3079,
+            "start": 3893432648856,
+            "receive_us": 18783,
+            "output_us": 79,
+            "copy_us": 22819,
+            "release_us": 58,
+            "meta_us": 7,
+            "copy_faults": 5,
+            "copy_cpu_us": 17982
+          },
+          "alloc": null,
+          "fill": null
+        },
+        "3079": {
+          "sink": {
+            "index": 3079,
+            "start": 3893432688107,
+            "wait_us": 2778,
+            "acquire_us": 8,
+            "copy_us": 11168,
+            "submit_us": 54
+          },
+          "consumer": {
+            "seq": 3080,
+            "start": 3893432690705,
+            "receive_us": 11907,
+            "output_us": 50,
+            "copy_us": 17395,
+            "release_us": 37,
+            "meta_us": 4,
+            "copy_faults": 0,
+            "copy_cpu_us": 17325
+          },
+          "alloc": null,
+          "fill": {
+            "index": 3079,
+            "start": 3893432666931,
+            "us": 12158,
+            "faults": 0
+          }
+        }
+      }
+    },
+    {
+      "index": 4871,
+      "producer_pts_ns": 162661701127,
+      "consumer_pts_ns": 3893492420905062,
+      "push_lateness_ns": 166498,
+      "arrival_lateness_ns": 34756075,
+      "post_push_residual_ns": 34589577,
+      "neighbor_stages": {
+        "4870": {
+          "sink": {
+            "index": 4870,
+            "start": 3893492387730,
+            "wait_us": 42,
+            "acquire_us": 4,
+            "copy_us": 8030,
+            "submit_us": 47
+          },
+          "consumer": {
+            "seq": 4871,
+            "start": 3893492379723,
+            "receive_us": 16212,
+            "output_us": 20,
+            "copy_us": 16835,
+            "release_us": 52,
+            "meta_us": 7,
+            "copy_faults": 0,
+            "copy_cpu_us": 11027
+          },
+          "alloc": null,
+          "fill": {
+            "index": 4870,
+            "start": 3893492362573,
+            "us": 13805,
+            "faults": 0
+          }
+        },
+        "4871": {
+          "sink": {
+            "index": 4871,
+            "start": 3893492421120,
+            "wait_us": 53,
+            "acquire_us": 9,
+            "copy_us": 15946,
+            "submit_us": 133
+          },
+          "consumer": {
+            "seq": 4872,
+            "start": 3893492412957,
+            "receive_us": 24394,
+            "output_us": 17,
+            "copy_us": 18136,
+            "release_us": 70,
+            "meta_us": 7,
+            "copy_faults": 0,
+            "copy_cpu_us": 12807
+          },
+          "alloc": null,
+          "fill": null
+        },
+        "4872": {
+          "sink": {
+            "index": 4872,
+            "start": 3893492454677,
+            "wait_us": 973,
+            "acquire_us": 6,
+            "copy_us": 8390,
+            "submit_us": 55
+          },
+          "consumer": {
+            "seq": 4873,
+            "start": 3893492455695,
+            "receive_us": 8516,
+            "output_us": 47,
+            "copy_us": 18123,
+            "release_us": 39,
+            "meta_us": 7,
+            "copy_faults": 0,
+            "copy_cpu_us": 15051
+          },
+          "alloc": null,
+          "fill": {
+            "index": 4872,
+            "start": 3893492437833,
+            "us": 13802,
+            "faults": 0
+          }
+        }
+      }
+    },
+    {
+      "index": 4883,
+      "producer_pts_ns": 163061701127,
+      "consumer_pts_ns": 3893492820905062,
+      "push_lateness_ns": 1122267,
+      "arrival_lateness_ns": 35156306,
+      "post_push_residual_ns": 34034039,
+      "neighbor_stages": {
+        "4882": {
+          "sink": {
+            "index": 4882,
+            "start": 3893492787831,
+            "wait_us": 38,
+            "acquire_us": 4,
+            "copy_us": 9137,
+            "submit_us": 67
+          },
+          "consumer": {
+            "seq": 4883,
+            "start": 3893492782691,
+            "receive_us": 17407,
+            "output_us": 11,
+            "copy_us": 14530,
+            "release_us": 47,
+            "meta_us": 7,
+            "copy_faults": 0,
+            "copy_cpu_us": 13856
+          },
+          "alloc": null,
+          "fill": {
+            "index": 4882,
+            "start": 3893492765878,
+            "us": 18771,
+            "faults": 0
+          }
+        },
+        "4883": {
+          "sink": {
+            "index": 4883,
+            "start": 3893492822080,
+            "wait_us": 53,
+            "acquire_us": 6,
+            "copy_us": 10388,
+            "submit_us": 81
+          },
+          "consumer": {
+            "seq": 4884,
+            "start": 3893492814797,
+            "receive_us": 17895,
+            "output_us": 18,
+            "copy_us": 21984,
+            "release_us": 45,
+            "meta_us": 7,
+            "copy_faults": 0,
+            "copy_cpu_us": 16414
+          },
+          "alloc": null,
+          "fill": {
+            "index": 4883,
+            "start": 3893492797235,
+            "us": 16663,
+            "faults": 0
+          }
+        },
+        "4884": {
+          "sink": {
+            "index": 4884,
+            "start": 3893492855163,
+            "wait_us": 26,
+            "acquire_us": 3,
+            "copy_us": 8520,
+            "submit_us": 50
+          },
+          "consumer": {
+            "seq": 4885,
+            "start": 3893492856095,
+            "receive_us": 7720,
+            "output_us": 13,
+            "copy_us": 15892,
+            "release_us": 41,
+            "meta_us": 7,
+            "copy_faults": 0,
+            "copy_cpu_us": 11951
+          },
+          "alloc": null,
+          "fill": {
+            "index": 4884,
+            "start": 3893492832734,
+            "us": 16602,
+            "faults": 0
+          }
+        }
+      }
+    },
+    {
+      "index": 9716,
+      "producer_pts_ns": 324161701127,
+      "consumer_pts_ns": 3893653920905062,
+      "push_lateness_ns": 121892,
+      "arrival_lateness_ns": 35545239,
+      "post_push_residual_ns": 35423347,
+      "neighbor_stages": {
+        "9715": {
+          "sink": {
+            "index": 9715,
+            "start": 3893653887801,
+            "wait_us": 35,
+            "acquire_us": 3,
+            "copy_us": 8680,
+            "submit_us": 63
+          },
+          "consumer": {
+            "seq": 9716,
+            "start": 3893653875128,
+            "receive_us": 22058,
+            "output_us": 65,
+            "copy_us": 16762,
+            "release_us": 42,
+            "meta_us": 6,
+            "copy_faults": 0,
+            "copy_cpu_us": 14753
+          },
+          "alloc": null,
+          "fill": null
+        },
+        "9716": {
+          "sink": {
+            "index": 9716,
+            "start": 3893653921058,
+            "wait_us": 58,
+            "acquire_us": 7,
+            "copy_us": 10265,
+            "submit_us": 51
+          },
+          "consumer": {
+            "seq": 9717,
+            "start": 3893653914155,
+            "receive_us": 17755,
+            "output_us": 34,
+            "copy_us": 23969,
+            "release_us": 188,
+            "meta_us": 16,
+            "copy_faults": 6,
+            "copy_cpu_us": 16475
+          },
+          "alloc": null,
+          "fill": {
+            "index": 9716,
+            "start": 3893653896666,
+            "us": 14093,
+            "faults": 0
+          }
+        },
+        "9717": {
+          "sink": {
+            "index": 9717,
+            "start": 3893653955302,
+            "wait_us": 897,
+            "acquire_us": 7,
+            "copy_us": 8842,
+            "submit_us": 60
+          },
+          "consumer": {
+            "seq": 9718,
+            "start": 3893653956544,
+            "receive_us": 9149,
+            "output_us": 40,
+            "copy_us": 28513,
+            "release_us": 65,
+            "meta_us": 7,
+            "copy_faults": 4,
+            "copy_cpu_us": 20290
+          },
+          "alloc": null,
+          "fill": {
+            "index": 9717,
+            "start": 3893653931502,
+            "us": 12048,
+            "faults": 0
+          }
+        }
+      }
+    },
+    {
+      "index": 9717,
+      "producer_pts_ns": 324195034461,
+      "consumer_pts_ns": 3893653954238396,
+      "push_lateness_ns": 1003020,
+      "arrival_lateness_ns": 40153828,
+      "post_push_residual_ns": 39150808,
+      "neighbor_stages": {
+        "9716": {
+          "sink": {
+            "index": 9716,
+            "start": 3893653921058,
+            "wait_us": 58,
+            "acquire_us": 7,
+            "copy_us": 10265,
+            "submit_us": 51
+          },
+          "consumer": {
+            "seq": 9717,
+            "start": 3893653914155,
+            "receive_us": 17755,
+            "output_us": 34,
+            "copy_us": 23969,
+            "release_us": 188,
+            "meta_us": 16,
+            "copy_faults": 6,
+            "copy_cpu_us": 16475
+          },
+          "alloc": null,
+          "fill": {
+            "index": 9716,
+            "start": 3893653896666,
+            "us": 14093,
+            "faults": 0
+          }
+        },
+        "9717": {
+          "sink": {
+            "index": 9717,
+            "start": 3893653955302,
+            "wait_us": 897,
+            "acquire_us": 7,
+            "copy_us": 8842,
+            "submit_us": 60
+          },
+          "consumer": {
+            "seq": 9718,
+            "start": 3893653956544,
+            "receive_us": 9149,
+            "output_us": 40,
+            "copy_us": 28513,
+            "release_us": 65,
+            "meta_us": 7,
+            "copy_faults": 4,
+            "copy_cpu_us": 20290
+          },
+          "alloc": null,
+          "fill": {
+            "index": 9717,
+            "start": 3893653931502,
+            "us": 12048,
+            "faults": 0
+          }
+        },
+        "9718": {
+          "sink": {
+            "index": 9718,
+            "start": 3893653988161,
+            "wait_us": 6420,
+            "acquire_us": 10,
+            "copy_us": 10522,
+            "submit_us": 56
+          },
+          "consumer": {
+            "seq": 9719,
+            "start": 3893653994415,
+            "receive_us": 10965,
+            "output_us": 22,
+            "copy_us": 15343,
+            "release_us": 34,
+            "meta_us": 4,
+            "copy_faults": 0,
+            "copy_cpu_us": 14333
+          },
+          "alloc": null,
+          "fill": null
+        }
+      }
+    }
+  ]
+}

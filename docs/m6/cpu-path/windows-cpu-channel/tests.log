@@ -1,0 +1,19 @@
+Test project <win-home>/dev/framelink-m6-windows-b997e7c/build
+    Start  8: shared_cpu_channel_win
+1/7 Test  #8: shared_cpu_channel_win ...........   Passed    3.06 sec
+    Start  9: shared_cpu_channel_c
+2/7 Test  #9: shared_cpu_channel_c .............   Passed    0.02 sec
+    Start 10: shared_cpu_control_win
+3/7 Test #10: shared_cpu_control_win ...........   Passed    1.63 sec
+    Start 11: shared_cpu_pipe_win
+4/7 Test #11: shared_cpu_pipe_win ..............   Passed    0.10 sec
+    Start 12: shared_cpu_imported_pool_win
+5/7 Test #12: shared_cpu_imported_pool_win .....   Passed    0.02 sec
+    Start 13: shared_cpu_allocation_win
+6/7 Test #13: shared_cpu_allocation_win ........   Passed    0.15 sec
+    Start 22: ipc_framing_win
+7/7 Test #22: ipc_framing_win ..................   Passed    0.01 sec
+
+100% tests passed, 0 tests failed out of 7
+
+Total Test time (real) =   5.08 sec

@@ -1,0 +1,19 @@
+#< CLIXML
+CMake is re-running because <win-home>/dev/framelink-m6-20261106/build/CMakeFiles/generate.stamp is out-of-date.
+  the file '<win-home>/dev/framelink-m6-20261106/CMakeLists.txt'
+  is newer than '<win-home>/dev/framelink-m6-20261106/build/CMakeFiles/generate.stamp.depend'
+  result='-1'
+-- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.26300.
+-- framelink: building GStreamer elements (gstframelink)
+-- Configuring done (1.1s)
+-- Generating done (0.9s)
+-- Build files have been written to: <win-home>/dev/framelink-m6-20261106/build
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  1>Checking Build System
+  Building Custom Rule <win-home>/dev/framelink-m6-20261106/CMakeLists.txt
+  framelink.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\framelink.dll
+  Building Custom Rule <win-home>/dev/framelink-m6-20261106/CMakeLists.txt
+  fl_read_lease_d3d11.cpp
+  fl_read_lease_d3d11.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_read_lease_d3d11.exe
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04"><Obj S="progress" RefId="0"><TN RefId="0"><T>System.Management.Automation.PSCustomObject</T><T>System.Object</T></TN><MS><I64 N="SourceId">1</I64><PR N="Record"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj></Objs>

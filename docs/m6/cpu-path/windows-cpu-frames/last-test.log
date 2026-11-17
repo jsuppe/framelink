@@ -1,0 +1,83 @@
+Start testing: Nov 08 19:22 Eastern Standard Time
+----------------------------------------------------------
+8/125 Testing: shared_cpu_control_win
+8/125 Test: shared_cpu_control_win
+Command: "<win-home>/dev/framelink-m6-windows-b997e7c/build/Release/fl_shared_cpu_control_win.exe"
+Directory: <win-home>/dev/framelink-m6-windows-b997e7c/build
+"shared_cpu_control_win" start time: Nov 08 19:22 Eastern Standard Time
+Output:
+----------------------------------------------------------
+Windows CPU control: 100 cross-process BGRA/NV12 streams of 32 exact frames/metadata/releases and held-slot EOS, 57 setup plus 23 frame/release/EOS negatives, exact handle cleanup passed
+<end of output>
+Test time =   1.63 sec
+----------------------------------------------------------
+Test Passed.
+"shared_cpu_control_win" end time: Nov 08 19:22 Eastern Standard Time
+"shared_cpu_control_win" time elapsed: 00:00:01
+----------------------------------------------------------
+
+9/125 Testing: shared_cpu_pipe_win
+9/125 Test: shared_cpu_pipe_win
+Command: "<win-home>/dev/framelink-m6-windows-b997e7c/build/Release/fl_shared_cpu_pipe_win.exe"
+Directory: <win-home>/dev/framelink-m6-windows-b997e7c/build
+"shared_cpu_pipe_win" start time: Nov 08 19:22 Eastern Standard Time
+Output:
+----------------------------------------------------------
+Windows CPU pipe: exact frames, 100 handle-clean exchanges, async-only adoption, timeout/cancel/read/write/death/malformed negatives passed
+<end of output>
+Test time =   0.11 sec
+----------------------------------------------------------
+Test Passed.
+"shared_cpu_pipe_win" end time: Nov 08 19:22 Eastern Standard Time
+"shared_cpu_pipe_win" time elapsed: 00:00:00
+----------------------------------------------------------
+
+10/125 Testing: shared_cpu_imported_pool_win
+10/125 Test: shared_cpu_imported_pool_win
+Command: "<win-home>/dev/framelink-m6-windows-b997e7c/build/Release/fl_shared_cpu_imported_pool_win.exe"
+Directory: <win-home>/dev/framelink-m6-windows-b997e7c/build
+"shared_cpu_imported_pool_win" start time: Nov 08 19:22 Eastern Standard Time
+Output:
+----------------------------------------------------------
+shared CPU imported pool: atomic failure, handle cleanup, kernel object aliases, stale epochs, retained retired mappings and producer rights passed
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"shared_cpu_imported_pool_win" end time: Nov 08 19:22 Eastern Standard Time
+"shared_cpu_imported_pool_win" time elapsed: 00:00:00
+----------------------------------------------------------
+
+11/125 Testing: shared_cpu_allocation_win
+11/125 Test: shared_cpu_allocation_win
+Command: "<win-home>/dev/framelink-m6-windows-b997e7c/build/Release/fl_shared_cpu_allocation_win.exe"
+Directory: <win-home>/dev/framelink-m6-windows-b997e7c/build
+"shared_cpu_allocation_win" start time: Nov 08 19:22 Eastern Standard Time
+Output:
+----------------------------------------------------------
+Windows CPU section: BGRA/NV12 pixels, exact size/type/epoch, OS readonly, cross-process pixels, retained lifetime, unmapped views and 100 handle-clean cycles passed
+<end of output>
+Test time =   0.15 sec
+----------------------------------------------------------
+Test Passed.
+"shared_cpu_allocation_win" end time: Nov 08 19:22 Eastern Standard Time
+"shared_cpu_allocation_win" time elapsed: 00:00:00
+----------------------------------------------------------
+
+20/125 Testing: ipc_framing_win
+20/125 Test: ipc_framing_win
+Command: "<win-home>/dev/framelink-m6-windows-b997e7c/build/Release/fl_ipc_framing_win.exe"
+Directory: <win-home>/dev/framelink-m6-windows-b997e7c/build
+"ipc_framing_win" start time: Nov 08 19:22 Eastern Standard Time
+Output:
+----------------------------------------------------------
+Windows IPC exact-message framing: 2 valid and 5 malformed cases passed
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"ipc_framing_win" end time: Nov 08 19:22 Eastern Standard Time
+"ipc_framing_win" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Nov 08 19:22 Eastern Standard Time

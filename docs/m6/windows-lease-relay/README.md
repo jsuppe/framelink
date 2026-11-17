@@ -1,0 +1,19 @@
+# Native GstMemory read-lease relay prerequisite
+
+Base `e11da24ca210b41c46906ed149031fc15378c9ee`; exact overlays and raw attempts in `<linux-home>/dev/evidence/m6-cpu-path/windows-lease-relay-e11da24`.
+
+`gst_framelink_memory_get_d3d11_shared_handle` is an additive Windows-only inline accessor. It returns a **borrowed** original NT allocation handle only on tagged FrameLink native reader memory. The channel remains owned by that memory's reader lease. Do not close the handle; duplicating it does not retain the lease or grant authorization. It is not a process security boundary. No exported DLL symbol, wire, policy/default or existing signature changes. Non-Windows paths are unchanged; API is not frozen.
+
+`NativeGstD3D11Relay` is a sample native-video adapter, not a new automatic bin mode. Trusted setup supplies a fresh immutable same-allocation downstream pool and expected media generation. Windows object identity, not handle-number equality, matches reversed pool slots. It retains the **original GstMemory**, submits only existing storage, and drops the memory only after the downstream reservation becomes reusable. Metadata rejection consumes nothing. Downstream failure must preserve pending references; cancellation alone must not retire leases. The owner must finish before destruction; dead-graph cleanup/reconnect is not provided by this prerequisite.
+
+The adapter forwards the buffer's current PTS/DTS/duration, not an inferred original source timeline. The test deliberately has a mapped first-hop timeline. Full session composition still needs an explicit identity/inverse mapping, authenticated second-hop PCM/events/terminal handling, and second-hop bin integration. Do not label this full two-hop A/V qualification or automatic discovery composition.
+
+## Checks
+
+The real first-hop native producer/receiver A/V bins deliver eight exact video/PCM frames with37ms offset. A broker-composed downstream native ring shares the same two allocations in reversed order. The adapter preserves mapped video metadata and pixels, rejects ordinary CPU memory, missing PTS, stale generation, and a valid reader from a different same-shaped allocation pool. Ordinary producer GstMemory has no reader accessor. Held downstream readers keep finish BUSY and prevent full upstream capacity reuse. Eight frames recycle through two slots.
+
+The final native read lease is held across normal first-hop terminal accounting and **complete destruction of the original bins, samples, and explicit retained producer/reader references**. Pixels remain exact; the original reader-memory weak notification is still absent. Only downstream completion and adapter collection trigger that notification, after which finish succeeds. This distinguishes actual lease retention from merely holding a native texture reference.
+
+Initial targeted1/1 passed after using the original borrowed handle. A strengthened fixture initially over-required both upstream slots to become free immediately after sample unref. Appsink still owns its current sample (observed sample refcount2); a1s poll and explicit preroll pull did not release that reference. The final test does not waive ownership: it uses the stronger full-bin-teardown/weak-notification control above, while eight-frame recycling proves progress. Original failures are retained. An earlier direct texture re-export identity attempt rejected frame0 with FORMAT_UNSUPPORTED; the supported path uses the existing channel handle rather than re-exported identity. Initial missing include/type compile errors are also preserved.
+
+Final build, focused **7/7 (30.35s)** and detailed diagnostic passed, all exit0. Exact overlay hashes and final-status.json are recorded beside this document. Loom briefing attempted, unavailable because chromadb is missing. No throughput/endurance or deferred Linux/Android campaign is claimed. M6 open; M7 maintenance hold.

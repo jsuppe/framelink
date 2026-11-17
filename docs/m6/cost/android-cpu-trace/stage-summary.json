@@ -1,0 +1,294 @@
+{
+  "nv21-stage-1920x1080-1794044530/consumer-core.30955.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "flCreateChannelEx": {
+        "n": 1,
+        "mean_ms": 25.572538,
+        "p95_ms": 25.572538,
+        "max_ms": 25.572538
+      },
+      "ipc.send": {
+        "n": 306,
+        "mean_ms": 0.03304547712418301,
+        "p95_ms": 0.03723,
+        "max_ms": 0.168384
+      },
+      "ipc.recv": {
+        "n": 302,
+        "mean_ms": 0.03245414238410596,
+        "p95_ms": 0.056,
+        "max_ms": 0.969846
+      },
+      "flAcquireFrame": {
+        "n": 300,
+        "mean_ms": 6.4659328233333335,
+        "p95_ms": 8.819385,
+        "max_ms": 37.063769
+      },
+      "flImageMapPlanes": {
+        "n": 300,
+        "mean_ms": 5.109846126666667,
+        "p95_ms": 5.703461,
+        "max_ms": 18.892231
+      },
+      "flImageUnmap": {
+        "n": 302,
+        "mean_ms": 1.1484839701986755,
+        "p95_ms": 1.377462,
+        "max_ms": 1.595
+      },
+      "flRelease": {
+        "n": 300,
+        "mean_ms": 0.03872946333333333,
+        "p95_ms": 0.053231,
+        "max_ms": 0.173231
+      },
+      "flClose": {
+        "n": 1,
+        "mean_ms": 3.191,
+        "p95_ms": 3.191,
+        "max_ms": 3.191
+      }
+    }
+  },
+  "nv21-stage-1920x1080-1794044530/consumer-gst.30955.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "gst.srcCreate": {
+        "n": 301,
+        "mean_ms": 16.59228311627907,
+        "p95_ms": 19.463076,
+        "max_ms": 60.739308
+      }
+    }
+  },
+  "nv21-stage-1920x1080-1794044530/producer-core.30959.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "ipc.recv": {
+        "n": 301,
+        "mean_ms": 0.04537233554817276,
+        "p95_ms": 0.093615,
+        "max_ms": 0.146231
+      },
+      "ipc.send": {
+        "n": 306,
+        "mean_ms": 0.10724183333333333,
+        "p95_ms": 0.203693,
+        "max_ms": 0.238692
+      },
+      "flOpenProducer": {
+        "n": 1,
+        "mean_ms": 25.837847,
+        "p95_ms": 25.837847,
+        "max_ms": 25.837847
+      },
+      "flRequestGeometry": {
+        "n": 1,
+        "mean_ms": 0.438462,
+        "p95_ms": 0.438462,
+        "max_ms": 0.438462
+      },
+      "flAcquireBuffer": {
+        "n": 300,
+        "mean_ms": 0.08596642666666666,
+        "p95_ms": 0.161538,
+        "max_ms": 2.417538
+      },
+      "flImageMapPlanes": {
+        "n": 300,
+        "mean_ms": 6.197085883333333,
+        "p95_ms": 6.774077,
+        "max_ms": 10.370231
+      },
+      "flImageUnmap": {
+        "n": 468,
+        "mean_ms": 0.6182965256410257,
+        "p95_ms": 1.059385,
+        "max_ms": 1.331692
+      },
+      "flBeginSubmit": {
+        "n": 300,
+        "mean_ms": 0.0009897366666666667,
+        "p95_ms": 0.00123,
+        "max_ms": 0.002077
+      },
+      "flEndSubmit": {
+        "n": 300,
+        "mean_ms": 0.11219487666666667,
+        "p95_ms": 0.211154,
+        "max_ms": 0.244384
+      },
+      "flSubmit": {
+        "n": 300,
+        "mean_ms": 0.11670746333333333,
+        "p95_ms": 0.214154,
+        "max_ms": 0.252923
+      },
+      "flClose": {
+        "n": 1,
+        "mean_ms": 2.036539,
+        "p95_ms": 2.036539,
+        "max_ms": 2.036539
+      }
+    }
+  },
+  "nv21-stage-1920x1080-1794044530/producer-gst.30959.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "gst.sinkRender": {
+        "n": 300,
+        "mean_ms": 8.049643083333333,
+        "p95_ms": 8.58777,
+        "max_ms": 12.007384
+      }
+    }
+  },
+  "nv21-stage-3840x2160-1794044536/consumer-core.31014.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "flCreateChannelEx": {
+        "n": 1,
+        "mean_ms": 34.692616,
+        "p95_ms": 34.692616,
+        "max_ms": 34.692616
+      },
+      "ipc.send": {
+        "n": 154,
+        "mean_ms": 0.029268194805194804,
+        "p95_ms": 0.031,
+        "max_ms": 0.115385
+      },
+      "ipc.recv": {
+        "n": 150,
+        "mean_ms": 0.0993636,
+        "p95_ms": 0.120384,
+        "max_ms": 0.182769
+      },
+      "flAcquireFrame": {
+        "n": 148,
+        "mean_ms": 0.6651060743243243,
+        "p95_ms": 0.001308,
+        "max_ms": 98.285538
+      },
+      "flImageMapPlanes": {
+        "n": 148,
+        "mean_ms": 21.104431472972973,
+        "p95_ms": 21.767,
+        "max_ms": 60.036308
+      },
+      "flImageUnmap": {
+        "n": 150,
+        "mean_ms": 3.3467395266666666,
+        "p95_ms": 3.845923,
+        "max_ms": 6.837923
+      },
+      "flRelease": {
+        "n": 148,
+        "mean_ms": 0.034063945945945945,
+        "p95_ms": 0.05477,
+        "max_ms": 0.118846
+      },
+      "flClose": {
+        "n": 1,
+        "mean_ms": 6.318692,
+        "p95_ms": 6.318692,
+        "max_ms": 6.318692
+      }
+    }
+  },
+  "nv21-stage-3840x2160-1794044536/consumer-gst.31014.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "gst.srcCreate": {
+        "n": 149,
+        "mean_ms": 39.63444965771812,
+        "p95_ms": 40.158769,
+        "max_ms": 177.664077
+      }
+    }
+  },
+  "nv21-stage-3840x2160-1794044536/producer-core.31018.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "ipc.recv": {
+        "n": 149,
+        "mean_ms": 0.02403405369127517,
+        "p95_ms": 0.025462,
+        "max_ms": 0.168615
+      },
+      "ipc.send": {
+        "n": 154,
+        "mean_ms": 0.07817546103896104,
+        "p95_ms": 0.131154,
+        "max_ms": 0.216923
+      },
+      "flOpenProducer": {
+        "n": 1,
+        "mean_ms": 34.525154,
+        "p95_ms": 34.525154,
+        "max_ms": 34.525154
+      },
+      "flRequestGeometry": {
+        "n": 1,
+        "mean_ms": 0.754461,
+        "p95_ms": 0.754461,
+        "max_ms": 0.754461
+      },
+      "flAcquireBuffer": {
+        "n": 150,
+        "mean_ms": 4.592109193333333,
+        "p95_ms": 6.619077,
+        "max_ms": 6.781923
+      },
+      "flImageMapPlanes": {
+        "n": 148,
+        "mean_ms": 21.138130986486487,
+        "p95_ms": 21.993231,
+        "max_ms": 31.019308
+      },
+      "flImageUnmap": {
+        "n": 217,
+        "mean_ms": 3.2568369400921657,
+        "p95_ms": 4.98123,
+        "max_ms": 6.605846
+      },
+      "flBeginSubmit": {
+        "n": 148,
+        "mean_ms": 0.0014324527027027027,
+        "p95_ms": 0.002692,
+        "max_ms": 0.004
+      },
+      "flEndSubmit": {
+        "n": 148,
+        "mean_ms": 0.08356904729729729,
+        "p95_ms": 0.137231,
+        "max_ms": 0.217231
+      },
+      "flSubmit": {
+        "n": 148,
+        "mean_ms": 0.09062628378378379,
+        "p95_ms": 0.151385,
+        "max_ms": 0.249538
+      },
+      "flClose": {
+        "n": 1,
+        "mean_ms": 5.104615,
+        "p95_ms": 5.104615,
+        "max_ms": 5.104615
+      }
+    }
+  },
+  "nv21-stage-3840x2160-1794044536/producer-gst.31018.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "gst.sinkRender": {
+        "n": 150,
+        "mean_ms": 33.85008412,
+        "p95_ms": 36.136385,
+        "max_ms": 39.324308
+      }
+    }
+  }
+}

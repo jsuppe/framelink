@@ -1,0 +1,49 @@
+{
+  "state": "finished",
+  "started": 1794147770.211918,
+  "revision": "d8023c448a00a87df1367a1724592a855cd546e8",
+  "command": [
+    "<linux-home>/dev/build/framelink-m6-linux/fl_gst_av_bench",
+    "<linux-home>/dev/build/framelink-m6-linux/libgstframelink.so",
+    "--shared-cpu",
+    "--seconds",
+    "1800",
+    "--size",
+    "1920x1080",
+    "--fps",
+    "60",
+    "--format",
+    "BGRA",
+    "--pool",
+    "2",
+    "--video-queue",
+    "1",
+    "--latency-ms",
+    "0",
+    "--arrival-budget-ms",
+    "17",
+    "--transport-only",
+    "--no-output-preroll",
+    "--output-queue-buffers",
+    "1",
+    "--raw",
+    "--out",
+    "<linux-home>/dev/evidence/m6-cpu-path/shared-cpu-benchmark/linux-shared-bgra-1920x1080-60-1800-readprep",
+    "--label",
+    "linux-shared-bgra-1920x1080-60-1800-readprep"
+  ],
+  "binary_sha256": {
+    "fl_gst_av_bench": "51ec1e6f354e35bb00e43cd206598679d5e41b5f2366e839f7bf4b1275561c52",
+    "libgstframelink.so": "b3186a8a8f1b8c231e2e3ed3f976622e002d637598ccb5e2a1b312a9d8cc7d88",
+    "libframelink_gst_session.so": "f38d44eef7c6d70a083fd20d07a9f9f6c3850479c380580e5e473b16f02e5a35",
+    "libframelink.so": "e23604829fab700be83a5bc8984ac598cbbb7dac9b180aa1133ca8965ec69118"
+  },
+  "exit": 0,
+  "complete": "yes",
+  "analysis_exit": 0,
+  "resource_slopes": {
+    "consumer.mem.slope.kb_per_min": "3.23",
+    "producer.mem.slope.kb_per_min": "3.23"
+  },
+  "ended": 1794149572.053727
+}

@@ -1,0 +1,40 @@
+Test project <win-home>/dev/framelink-m6-windows-6d7e6be/build
+    Start 42: gst_native_producer_win
+1/1 Test #42: gst_native_producer_win ..........***Failed    4.97 sec
+
+** (fl_gst_native_producer_win.exe:51824): WARNING **: 00:40:12.601: framelinkavsink: authenticated properties are immutable; create a new bin/session
+
+** (fl_gst_native_producer_win.exe:51824): WARNING **: 00:40:12.936: framelinkavsink: authenticated properties are immutable; create a new bin/session
+native AV mode 0 local=0
+native AV mode 1 local=0
+native AV mode 2 local=0
+native AV mode 3 local=0
+native AV: Socket I/O timed out <win-home>\dev\framelink-m6-windows-6d7e6be\gst\gstframelinkaudiosrc.cpp(66): readChunkImpl (): /GstPipeline:pipeline10/GstFrameLinkAvSrc:transport/GstFrameLinkAudioSrc:audio/FlAudioReader:flaudioreader3
+native AV mode 0 local=0
+line 151: vs&&as
+RGBA native producer: original texture, ready fence, exact pixels/metadata, local reference reuse and owner lifetime pass
+NV12 native producer: original texture, ready fence, exact pixels/metadata, local reference reuse and owner lifetime pass
+native sink pipeline: exact texture pixels/metadata, foreign allocation rejection, retained buffer after stop pass
+coordinated native missing policy rejected
+coordinated native stale policy rejected
+native sink pipeline: exact texture pixels/metadata, foreign allocation rejection, retained buffer after stop pass
+native sink pipeline: exact texture pixels/metadata, foreign allocation rejection, retained buffer after stop pass
+native bin rejects missing policy, audio-only, shared CPU and automatic discovery
+coordinated native missing policy rejected
+coordinated native stale policy rejected
+native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+
+
+0% tests passed, 1 tests failed out of 1
+
+Label Time Summary:
+gst_video_regression    =   4.97 sec*proc (1 test)
+
+Total Test time (real) =   5.00 sec
+
+The following tests FAILED:
+	 42 - gst_native_producer_win (Failed)                  gst_video_regression
+Errors while running CTest

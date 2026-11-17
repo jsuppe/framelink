@@ -1,0 +1,26 @@
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  1>Checking Build System
+  Building Custom Rule <win-home>/dev/framelink-native-rate-native-smoke-4f46f42-20261112t0726z/CMakeLists.txt
+  framelink_win.cpp
+  framelink_slots.cpp
+  fl_ipc_win32.cpp
+  fl_trace.cpp
+  framelink_session.cpp
+  framelink_memory.cpp
+  framelink_shared_cpu.cpp
+  framelink_shared_cpu_channel.cpp
+  Generating Code...
+     Creating library <win-home>/dev/framelink-native-rate-native-smoke-4f46f42-20261112t0726z/build/Release/framelink.lib and object <win-home>/dev/framelink-native-rate-native-smoke-4f46f42-20261112t0726z/build/Release/framelink.exp
+  framelink.vcxproj -> <win-home>\dev\framelink-native-rate-native-smoke-4f46f42-20261112t0726z\build\Release\framelink.dll
+  Building Custom Rule <win-home>/dev/framelink-native-rate-native-smoke-4f46f42-20261112t0726z/CMakeLists.txt
+  framelink_session_context.cpp
+  framelink_session_transport.cpp
+  av_auth.cpp
+  av_rendezvous.cpp
+  Generating Code...
+     Creating library <win-home>/dev/framelink-native-rate-native-smoke-4f46f42-20261112t0726z/build/Release/framelink_gst_session.lib and object <win-home>/dev/framelink-native-rate-native-smoke-4f46f42-20261112t0726z/build/Release/framelink_gst_session.exp
+  framelink_gst_session.vcxproj -> <win-home>\dev\framelink-native-rate-native-smoke-4f46f42-20261112t0726z\build\Release\framelink_gst_session.dll
+  Building Custom Rule <win-home>/dev/framelink-native-rate-native-smoke-4f46f42-20261112t0726z/CMakeLists.txt
+  fl_gst_local_native_bench_win.cpp
+<win-home>\dev\framelink-native-rate-native-smoke-4f46f42-20261112t0726z\test\fl_gst_local_native_bench_win.cpp(48,121): error C2397: conversion from 'flFormat' to 'uint32_t' requires a narrowing conversion [<win-home>\dev\framelink-native-rate-native-smoke-4f46f42-20261112t0726z\build\fl_gst_local_native_bench_win.vcxproj]

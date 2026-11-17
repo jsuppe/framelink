@@ -1,0 +1,21 @@
+Test project <win-home>/dev/framelink-native-ready-drain-fix-462fa5f-20261112t0806z/build
+    Start  44: gst_relay_local_cancel_downstream_win
+1/8 Test  #44: gst_relay_local_cancel_downstream_win ...   Passed    2.17 sec
+    Start  45: gst_relay_local_cancel_upstream_win
+2/8 Test  #45: gst_relay_local_cancel_upstream_win .....   Passed    0.69 sec
+    Start  50: gst_relay_local_recovery_win
+3/8 Test  #50: gst_relay_local_recovery_win ............   Passed    1.78 sec
+    Start  51: gst_relay_local_bin_pause_win
+4/8 Test  #51: gst_relay_local_bin_pause_win ...........   Passed    0.88 sec
+    Start  52: gst_relay_local_bin_paused_cancel_win
+5/8 Test  #52: gst_relay_local_bin_paused_cancel_win ...   Passed    0.88 sec
+    Start  53: gst_relay_local_bin_win
+6/8 Test  #53: gst_relay_local_bin_win .................   Passed    1.15 sec
+    Start  77: gst_native_relay_downstream_death_win
+7/8 Test  #77: gst_native_relay_downstream_death_win ...   Passed    1.99 sec
+    Start 145: native_relay_win
+8/8 Test #145: native_relay_win ........................   Passed    0.53 sec
+
+100% tests passed, 0 tests failed out of 8
+
+Total Test time (real) =  10.08 sec

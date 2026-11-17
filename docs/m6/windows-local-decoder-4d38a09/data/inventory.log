@@ -1,0 +1,59 @@
+{
+  "backtraceGraph" : 
+  {
+    "commands" : 
+    [
+      "add_test"
+    ],
+    "files" : 
+    [
+      "<win-home>/dev/framelink-local-decoder-decoder-4d38a09-20261112t0730z/CMakeLists.txt"
+    ],
+    "nodes" : 
+    [
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 1596,
+        "parent" : 0
+      }
+    ]
+  },
+  "kind" : "ctestInfo",
+  "tests" : 
+  [
+    {
+      "backtrace" : 1,
+      "command" : 
+      [
+        "<win-home>/AppData/Local/Microsoft/WindowsApps/python3.13.exe",
+        "<win-home>/dev/framelink-local-decoder-decoder-4d38a09-20261112t0730z/test/fl_gst_local_decoder_check.py",
+        "--exe",
+        "<win-home>/dev/framelink-local-decoder-decoder-4d38a09-20261112t0730z/build/Release/fl_gst_local_decoder_win.exe",
+        "--plugin",
+        "<win-home>/dev/framelink-local-decoder-decoder-4d38a09-20261112t0730z/build/Release/gstframelink.dll"
+      ],
+      "config" : "Release",
+      "name" : "gst_local_decoder_discovery_win",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 90.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "<win-home>/dev/framelink-local-decoder-decoder-4d38a09-20261112t0730z/build"
+        }
+      ]
+    }
+  ],
+  "version" : 
+  {
+    "major" : 1,
+    "minor" : 0
+  }
+}

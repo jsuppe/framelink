@@ -1,0 +1,27 @@
+{
+  "expected_source_frames": 300,
+  "transport_joins": 300,
+  "stages": {
+    "av.frame_adopt": {
+      "events": 300,
+      "unique_frames": 300
+    },
+    "av.frame_render_submit": {
+      "events": 11041,
+      "unique_frames": 300
+    },
+    "av.frame_present_submit": {
+      "events": 11041,
+      "unique_frames": 300
+    },
+    "av.frame_gpu_complete": {
+      "events": 11041,
+      "unique_frames": 300
+    }
+  },
+  "matching_render_serials": 11041,
+  "trace_loss": 0,
+  "physical_scanout_qualified": false,
+  "gpu_completion_semantics": "event labels joined; matching renderer source for fence-completion semantics not yet verified",
+  "scope": "legacy100ms hidden-display fixture, not current primary renderer"
+}

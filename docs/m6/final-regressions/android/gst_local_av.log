@@ -1,0 +1,10 @@
+track mismatch: producer incompatible session selection; consumer producer selection or authentication rejected
+mapping skew 77ns
+video lag 150.4..151.3ms
+audio lag 150.3..151.2ms
+order=producer-first video=30 samples=24000 firstAV=-4513307ns
+mapping skew -47347ns
+video lag 150.3..151.1ms
+audio lag 150.2..151.2ms
+order=consumer-first video=30 samples=24000 firstAV=-1129923ns
+local A/V setup: authenticated rendezvous, identity clock mapping, both startup orders, live synchronized pixels/PCM, track mismatch rejection passed

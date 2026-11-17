@@ -1,0 +1,191 @@
+Microsoft (R) COFF/PE Dumper Version 14.44.35211.0
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+
+Dump of file <win-home>\dev\framelink-m6-windows-609cb74\build\Release\framelink.dll
+
+File Type: DLL
+
+  Section contains the following exports for framelink.dll
+
+    00000000 characteristics
+    FFFFFFFF time date stamp
+        0.00 version
+           1 ordinal base
+          59 number of functions
+          59 number of names
+
+    ordinal hint RVA      name
+
+          1    0 00006650 flAcquireBuffer
+          2    1 00006D70 flAcquireFrame
+          3    2 000070D0 flBeginSubmit
+          4    3 00007300 flCancelBuffer
+          5    4 000073C0 flChannelD3D11Device
+          6    5 000073D0 flClose
+          7    6 000076F0 flCollectReadLeases
+          8    7 00007B20 flCompleteReadLease
+          9    8 00007D80 flCompleteReadLeaseD3D11Fence
+         10    9 00007FC0 flCreateChannel
+         11    A 00007FF0 flCreateChannelEx
+         12    B 000081B0 flCreateChannelFromD3D11Handles
+         13    C 000081F0 flCreateChannelOnAdapter
+         14    D 00008240 flEndSubmit
+         15    E 00008540 flFrameAgeNs
+         16    F 00008690 flGetFrameMetadata
+         17   10 000087D0 flImageD3D11
+         18   11 000087E0 flImageMap
+         19   12 000088D0 flImageMapPlanes
+         20   13 00008C50 flImageMemoryInfo
+         21   14 00009150 flImageSharedHandle
+         22   15 00009160 flImageUnmap
+         23   16 00009300 flLeaseFrame
+         24   17 0000E3D0 flMemoryEvaluate
+         25   18 0000E540 flMemoryEvaluateBoundary
+         26   19 0000E880 flMemoryPathValidate
+         27   1A 0000E8E0 flMemoryRequirementsCombine
+         28   1B 0000EA50 flMemoryRequirementsDecode
+         29   1C 0000ED30 flMemoryRequirementsEncode
+         30   1D 0000EEB0 flMemoryRequirementsInit
+         31   1E 0000EEF0 flMemoryRequirementsValidate
+         32   1F 00009700 flOpenProducer
+         33   20 0000BBB0 flOpenProducerSlot
+         34   21 00009CE0 flQuery
+         35   22 00009D20 flQueryConsumerFlags
+         36   23 00009DC0 flReadLeaseFrame
+         37   24 00009E80 flRelease
+         38   25 0000A130 flReleaseBufferReference
+         39   26 0000A230 flRequestGeometry
+         40   27 0000A5C0 flResultString
+         41   28 0000A680 flRetainBufferReference
+         42   29 0000A810 flRetainReadLease
+         43   2A 0000D400 flSessionDecode
+         44   2B 0000D8D0 flSessionEncode
+         45   2C 0000DB70 flSessionMapPts
+         46   2D 0000DCE0 flSessionNegotiate
+         47   2E 0000DFA0 flSessionSampleOffset
+         48   2F 0000E010 flSessionValidate
+         49   30 0000E1B0 flSessionValidateReplacement
+         50   31 0000E240 flSessionValidateSelection
+         51   32 0000AA60 flSetFrameMetadata
+         52   33 0000AB70 flSetReceiveQueue
+         53   34 0000AC80 flSharedConsumedFence
+         54   35 0000EF50 flSharedCpuDescriptorDecode
+         55   36 0000F560 flSharedCpuDescriptorEncode
+         56   37 0000F830 flSharedCpuDescriptorValidate
+         57   38 0000ACB0 flSharedReadyFence
+         58   39 0000ACE0 flSubmit
+         59   3A 0000D200 flTraceFlush
+
+  Summary
+
+        1000 .data
+        1000 .pdata
+        5000 .rdata
+        1000 .reloc
+        1000 .rsrc
+       11000 .text
+CURRENT_EXPORTS
+Microsoft (R) COFF/PE Dumper Version 14.44.35211.0
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+
+Dump of file <win-home>\dev\framelink-m6-windows-b997e7c\build\Release\framelink.dll
+
+File Type: DLL
+
+  Section contains the following exports for framelink.dll
+
+    00000000 characteristics
+    FFFFFFFF time date stamp
+        0.00 version
+           1 ordinal base
+          75 number of functions
+          75 number of names
+
+    ordinal hint RVA      name
+
+          1    0 00006650 flAcquireBuffer
+          2    1 00006D70 flAcquireFrame
+          3    2 000070D0 flBeginSubmit
+          4    3 00007300 flCancelBuffer
+          5    4 000073C0 flChannelD3D11Device
+          6    5 000073D0 flClose
+          7    6 000076F0 flCollectReadLeases
+          8    7 00007B20 flCompleteReadLease
+          9    8 00007D80 flCompleteReadLeaseD3D11Fence
+         10    9 00007FC0 flCreateChannel
+         11    A 00007FF0 flCreateChannelEx
+         12    B 000081B0 flCreateChannelFromD3D11Handles
+         13    C 000081F0 flCreateChannelOnAdapter
+         14    D 00008240 flEndSubmit
+         15    E 00008540 flFrameAgeNs
+         16    F 00008690 flGetFrameMetadata
+         17   10 000087D0 flImageD3D11
+         18   11 000087E0 flImageMap
+         19   12 000088D0 flImageMapPlanes
+         20   13 00008C50 flImageMemoryInfo
+         21   14 00009150 flImageSharedHandle
+         22   15 00009160 flImageUnmap
+         23   16 00009300 flLeaseFrame
+         24   17 0000E3D0 flMemoryEvaluate
+         25   18 0000E540 flMemoryEvaluateBoundary
+         26   19 0000E880 flMemoryPathValidate
+         27   1A 0000E8E0 flMemoryRequirementsCombine
+         28   1B 0000EA50 flMemoryRequirementsDecode
+         29   1C 0000ED30 flMemoryRequirementsEncode
+         30   1D 0000EEB0 flMemoryRequirementsInit
+         31   1E 0000EEF0 flMemoryRequirementsValidate
+         32   1F 00009700 flOpenProducer
+         33   20 0000BBB0 flOpenProducerSlot
+         34   21 00009CE0 flQuery
+         35   22 00009D20 flQueryConsumerFlags
+         36   23 00009DC0 flReadLeaseFrame
+         37   24 00009E80 flRelease
+         38   25 0000A130 flReleaseBufferReference
+         39   26 0000A230 flRequestGeometry
+         40   27 0000A5C0 flResultString
+         41   28 0000A680 flRetainBufferReference
+         42   29 0000A810 flRetainReadLease
+         43   2A 0000D400 flSessionDecode
+         44   2B 0000D8D0 flSessionEncode
+         45   2C 0000DB70 flSessionMapPts
+         46   2D 0000DCE0 flSessionNegotiate
+         47   2E 0000DFA0 flSessionSampleOffset
+         48   2F 0000E010 flSessionValidate
+         49   30 0000E1B0 flSessionValidateReplacement
+         50   31 0000E240 flSessionValidateSelection
+         51   32 0000AA60 flSetFrameMetadata
+         52   33 0000AB70 flSetReceiveQueue
+         53   34 0000AC80 flSharedConsumedFence
+         54   35 00014AC0 flSharedCpuAcquireWrite
+         55   36 00014E60 flSharedCpuCancelWrite
+         56   37 00014F30 flSharedCpuClose
+         57   38 0000EF50 flSharedCpuDescriptorDecode
+         58   39 0000F560 flSharedCpuDescriptorEncode
+         59   3A 0000F830 flSharedCpuDescriptorValidate
+         60   3B 00014FB0 flSharedCpuOpenConsumerPipe
+         61   3C 000150B0 flSharedCpuOpenProducerPipe
+         62   3D 000151A0 flSharedCpuQuery
+         63   3E 000152E0 flSharedCpuReadMetadata
+         64   3F 00015320 flSharedCpuReceive
+         65   40 00015360 flSharedCpuReceiveEvent
+         66   41 00015910 flSharedCpuReceiveRelease
+         67   42 00015AE0 flSharedCpuReleaseRead
+         68   43 00015CF0 flSharedCpuRetainRead
+         69   44 00015D20 flSharedCpuSendEos
+         70   45 00015F50 flSharedCpuSubmit
+         71   46 00015F60 flSharedCpuSubmitWithMetadata
+         72   47 000161C0 flSharedCpuWaitReadable
+         73   48 0000ACB0 flSharedReadyFence
+         74   49 0000ACE0 flSubmit
+         75   4A 0000D200 flTraceFlush
+
+  Summary
+
+        1000 .data
+        2000 .pdata
+        6000 .rdata
+        1000 .reloc
+        1000 .rsrc
+       18000 .text

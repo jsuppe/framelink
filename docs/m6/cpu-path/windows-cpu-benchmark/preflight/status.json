@@ -1,0 +1,49 @@
+{
+  "state": "finished",
+  "started": 1794191286.4865696,
+  "revision": "76a65d2",
+  "command": [
+    "<win-home>\\dev\\framelink-m6-windows-d60f683\\build\\Release\\fl_gst_av_bench.exe",
+    "<win-home>\\dev\\framelink-m6-windows-d60f683\\build\\Release\\gstframelink.dll",
+    "--shared-cpu",
+    "--seconds",
+    "5",
+    "--size",
+    "1920x1080",
+    "--fps",
+    "60",
+    "--format",
+    "BGRA",
+    "--pool",
+    "2",
+    "--video-queue",
+    "1",
+    "--latency-ms",
+    "0",
+    "--arrival-budget-ms",
+    "17",
+    "--transport-only",
+    "--no-output-preroll",
+    "--output-queue-buffers",
+    "1",
+    "--raw",
+    "--out",
+    "<win-home>/dev/framelink-m6-windows-d60f683/windows-shared-bgra-1920x1080-60-5",
+    "--label",
+    "windows-shared-bgra-1920x1080-60-5"
+  ],
+  "binary_sha256": {
+    "fl_gst_av_bench.exe": "b544e9694ea0e6d7dd0ffa9c63d9761732553b7531351648ed1cf159c7ce5d52",
+    "gstframelink.dll": "c04cf998e4e984751355b48f738b8e63d4a697db6ca2614909d016b8a7885351",
+    "framelink_gst_session.dll": "3bf3fe9a12bf7df45d763bf3dcaac9084d0eefd0c0819b4e55c524d0ae081571",
+    "framelink.dll": "a31ada168cd715a961734dc81826a6516d7831dcfd94ea518c1afd9fa7f8625e"
+  },
+  "exit": 0,
+  "complete": "yes",
+  "analysis_exit": 0,
+  "resource_slopes": {
+    "consumer.mem.slope.kb_per_min": "0.00",
+    "producer.mem.slope.kb_per_min": "-0.00"
+  },
+  "ended": 1794191292.0656657
+}

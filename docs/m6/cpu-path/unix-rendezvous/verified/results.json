@@ -1,0 +1,136 @@
+[
+  {
+    "step": "build-linux",
+    "command": [
+      "cmake",
+      "--build",
+      "<linux-home>/dev/build/framelink-m6-linux",
+      "-j4",
+      "--target",
+      "fl_av_rendezvous",
+      "fl_gst_session_transport",
+      "fl_gst_shared_cpu_av"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "linux",
+    "command": [
+      "ctest",
+      "--test-dir",
+      "<linux-home>/dev/build/framelink-m6-linux",
+      "-R",
+      "^(av_rendezvous|gst_session_transport|gst_shared_cpu_av|av_auth)$",
+      "--output-on-failure"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "build-arm64",
+    "command": [
+      "cmake",
+      "--build",
+      "<linux-home>/dev/build/framelink-m6-arm64",
+      "-j4",
+      "--target",
+      "fl_av_rendezvous",
+      "fl_gst_session_transport",
+      "fl_gst_shared_cpu_av"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "build-x86_64",
+    "command": [
+      "cmake",
+      "--build",
+      "<linux-home>/dev/build/framelink-m6-x86_64",
+      "-j4",
+      "--target",
+      "fl_av_rendezvous",
+      "fl_gst_session_transport",
+      "fl_gst_shared_cpu_av"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "device-process",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "shell",
+      "ps -A -o PID,ARGS"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "mkdir",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "shell",
+      "mkdir -p /data/local/tmp/framelink-unix-rendezvous"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "push-fl_av_rendezvous",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "push",
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_av_rendezvous",
+      "/data/local/tmp/framelink-unix-rendezvous/"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "push-fl_gst_session_transport",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "push",
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_gst_session_transport",
+      "/data/local/tmp/framelink-unix-rendezvous/"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "push-fl_gst_shared_cpu_av",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "push",
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_gst_shared_cpu_av",
+      "/data/local/tmp/framelink-unix-rendezvous/"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "chmod",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "shell",
+      "chmod 755 /data/local/tmp/framelink-unix-rendezvous/fl_*"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "android-fl_av_rendezvous",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "shell",
+      "cd /data/local/tmp/framelink-unix-rendezvous && ./fl_av_rendezvous static"
+    ],
+    "exit": 1
+  }
+]

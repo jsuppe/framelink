@@ -1,0 +1,176 @@
+Start testing: Nov 12 03:09 Eastern Standard Time
+----------------------------------------------------------
+42/178 Testing: win_sha256_rows
+42/178 Test: win_sha256_rows
+Command: "<win-home>/dev/framelink-native-ready-cng-limit-fix-20261112t0810z/build/Release/fl_win_sha256_rows.exe"
+Directory: <win-home>/dev/framelink-native-ready-cng-limit-fix-20261112t0810z/build
+"win_sha256_rows" start time: Nov 12 03:09 Eastern Standard Time
+Output:
+----------------------------------------------------------
+CNG full SHA256 known vectors, reusable reset, active rows and invalid layout checks passed
+<end of output>
+Test time =   0.03 sec
+----------------------------------------------------------
+Test Passed.
+"win_sha256_rows" end time: Nov 12 03:09 Eastern Standard Time
+"win_sha256_rows" time elapsed: 00:00:00
+----------------------------------------------------------
+
+45/178 Testing: gst_relay_local_cancel_downstream_win
+45/178 Test: gst_relay_local_cancel_downstream_win
+Command: "<win-home>/dev/framelink-native-ready-cng-limit-fix-20261112t0810z/build/Release/fl_gst_native_producer_win.exe" "<win-home>/dev/framelink-native-ready-cng-limit-fix-20261112t0810z/build/Release/gstframelink.dll" "--relay-local-cancel-downstream"
+Directory: <win-home>/dev/framelink-native-ready-cng-limit-fix-20261112t0810z/build
+"gst_relay_local_cancel_downstream_win" start time: Nov 12 03:09 Eastern Standard Time
+Output:
+----------------------------------------------------------
+native AV mode 13 local=0
+bin relay n=0 collect=0 pending=1
+bin relay n=1 collect=0 pending=1
+bin relay n=2 collect=0 pending=1
+bin relay n=3 collect=0 pending=1
+bin relay n=4 collect=0 pending=1
+bin relay n=5 collect=0 pending=1
+bin relay n=6 collect=0 pending=1
+bin relay n=7 collect=0 pending=1
+authenticated native pool: same-allocation imported ring attached
+broker bin downstream cancellation: 106.423ms, automatic idle supervisor propagation, no END/EOS, final reader still held
+broker bin original producer observes cancellation: 0.067ms, no EOS
+broker native bin relay: 8 frames over two original allocations / 384 PCM frames; identity intermediate mapping, negotiated final mapping and exact 37ms A/V, authenticated session; final reader retained beyond upstream and downstream bin teardown
+native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+<end of output>
+Test time =   2.20 sec
+----------------------------------------------------------
+Test Passed.
+"gst_relay_local_cancel_downstream_win" end time: Nov 12 03:09 Eastern Standard Time
+"gst_relay_local_cancel_downstream_win" time elapsed: 00:00:02
+----------------------------------------------------------
+
+46/178 Testing: gst_relay_local_cancel_upstream_win
+46/178 Test: gst_relay_local_cancel_upstream_win
+Command: "<win-home>/dev/framelink-native-ready-cng-limit-fix-20261112t0810z/build/Release/fl_gst_native_producer_win.exe" "<win-home>/dev/framelink-native-ready-cng-limit-fix-20261112t0810z/build/Release/gstframelink.dll" "--relay-local-cancel-upstream"
+Directory: <win-home>/dev/framelink-native-ready-cng-limit-fix-20261112t0810z/build
+"gst_relay_local_cancel_upstream_win" start time: Nov 12 03:09 Eastern Standard Time
+Output:
+----------------------------------------------------------
+native AV mode 14 local=0
+bin relay n=0 collect=0 pending=1
+bin relay n=1 collect=0 pending=1
+bin relay n=2 collect=0 pending=1
+bin relay n=3 collect=0 pending=1
+bin relay n=4 collect=0 pending=1
+bin relay n=5 collect=0 pending=1
+bin relay n=6 collect=0 pending=1
+bin relay n=7 collect=0 pending=1
+authenticated native pool: same-allocation imported ring attached
+broker bin upstream cancellation: 1.762ms, automatic idle supervisor propagation, no END/EOS, final reader still held
+broker bin original producer observes cancellation: 0.008ms, no EOS
+broker native bin relay: 8 frames over two original allocations / 384 PCM frames; identity intermediate mapping, negotiated final mapping and exact 37ms A/V, authenticated session; final reader retained beyond upstream and downstream bin teardown
+native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+<end of output>
+Test time =   0.69 sec
+----------------------------------------------------------
+Test Passed.
+"gst_relay_local_cancel_upstream_win" end time: Nov 12 03:09 Eastern Standard Time
+"gst_relay_local_cancel_upstream_win" time elapsed: 00:00:00
+----------------------------------------------------------
+
+51/178 Testing: gst_relay_local_recovery_win
+51/178 Test: gst_relay_local_recovery_win
+Command: "<win-home>/dev/framelink-native-ready-cng-limit-fix-20261112t0810z/build/Release/fl_gst_native_producer_win.exe" "<win-home>/dev/framelink-native-ready-cng-limit-fix-20261112t0810z/build/Release/gstframelink.dll" "--relay-local-recovery"
+Directory: <win-home>/dev/framelink-native-ready-cng-limit-fix-20261112t0810z/build
+"gst_relay_local_recovery_win" start time: Nov 12 03:09 Eastern Standard Time
+Output:
+----------------------------------------------------------
+three-process local authenticated A/V: 384 exact PCM frames/1536 bytes, 37ms offset, real END/EOS, final native lease held
+three-process local native relay: FAR4 source-time input + FAR5 snapshot transfer, no inherited textures, 8 exact final pixels/metadata, held final lease, real drain
+source-death replacement: bounded cancellation, no synthetic END/EOS, fresh A/V graph with disjoint allocations, old held pixels intact before final-reader completion
+<end of output>
+Test time =   1.78 sec
+----------------------------------------------------------
+Test Passed.
+"gst_relay_local_recovery_win" end time: Nov 12 03:09 Eastern Standard Time
+"gst_relay_local_recovery_win" time elapsed: 00:00:01
+----------------------------------------------------------
+
+52/178 Testing: gst_relay_local_bin_pause_win
+52/178 Test: gst_relay_local_bin_pause_win
+Command: "<win-home>/dev/framelink-native-ready-cng-limit-fix-20261112t0810z/build/Release/fl_gst_native_producer_win.exe" "<win-home>/dev/framelink-native-ready-cng-limit-fix-20261112t0810z/build/Release/gstframelink.dll" "--relay-local-bin-pause"
+Directory: <win-home>/dev/framelink-native-ready-cng-limit-fix-20261112t0810z/build
+"gst_relay_local_bin_pause_win" start time: Nov 12 03:09 Eastern Standard Time
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   0.92 sec
+----------------------------------------------------------
+Test Passed.
+"gst_relay_local_bin_pause_win" end time: Nov 12 03:09 Eastern Standard Time
+"gst_relay_local_bin_pause_win" time elapsed: 00:00:00
+----------------------------------------------------------
+
+53/178 Testing: gst_relay_local_bin_paused_cancel_win
+53/178 Test: gst_relay_local_bin_paused_cancel_win
+Command: "<win-home>/dev/framelink-native-ready-cng-limit-fix-20261112t0810z/build/Release/fl_gst_native_producer_win.exe" "<win-home>/dev/framelink-native-ready-cng-limit-fix-20261112t0810z/build/Release/gstframelink.dll" "--relay-local-bin-paused-cancel"
+Directory: <win-home>/dev/framelink-native-ready-cng-limit-fix-20261112t0810z/build
+"gst_relay_local_bin_paused_cancel_win" start time: Nov 12 03:09 Eastern Standard Time
+Output:
+----------------------------------------------------------
+paused FAR5 NULL propagated source cancellation in 100.420ms (source observation 0.042ms); no EOS, four submissions only
+<end of output>
+Test time =   0.88 sec
+----------------------------------------------------------
+Test Passed.
+"gst_relay_local_bin_paused_cancel_win" end time: Nov 12 03:09 Eastern Standard Time
+"gst_relay_local_bin_paused_cancel_win" time elapsed: 00:00:00
+----------------------------------------------------------
+
+54/178 Testing: gst_relay_local_bin_win
+54/178 Test: gst_relay_local_bin_win
+Command: "<win-home>/dev/framelink-native-ready-cng-limit-fix-20261112t0810z/build/Release/fl_gst_native_producer_win.exe" "<win-home>/dev/framelink-native-ready-cng-limit-fix-20261112t0810z/build/Release/gstframelink.dll" "--relay-local-bin"
+Directory: <win-home>/dev/framelink-native-ready-cng-limit-fix-20261112t0810z/build
+"gst_relay_local_bin_win" start time: Nov 12 03:09 Eastern Standard Time
+Output:
+----------------------------------------------------------
+three-process local authenticated A/V: 384 exact PCM frames/1536 bytes, 37ms offset, real END/EOS, final native lease held
+three-process local native relay: FAR4 source-time input + FAR5 snapshot transfer, no inherited textures, 8 exact final pixels/metadata, held final lease, real drain
+<end of output>
+Test time =   1.14 sec
+----------------------------------------------------------
+Test Passed.
+"gst_relay_local_bin_win" end time: Nov 12 03:09 Eastern Standard Time
+"gst_relay_local_bin_win" time elapsed: 00:00:01
+----------------------------------------------------------
+
+78/178 Testing: gst_native_relay_downstream_death_win
+78/178 Test: gst_native_relay_downstream_death_win
+Command: "<win-home>/dev/framelink-native-ready-cng-limit-fix-20261112t0810z/build/Release/fl_gst_native_producer_win.exe" "<win-home>/dev/framelink-native-ready-cng-limit-fix-20261112t0810z/build/Release/gstframelink.dll" "--relay-downstream-death-diagnostic"
+Directory: <win-home>/dev/framelink-native-ready-cng-limit-fix-20261112t0810z/build
+"gst_native_relay_downstream_death_win" start time: Nov 12 03:09 Eastern Standard Time
+Output:
+----------------------------------------------------------
+downstream process death (raw): reader exit73, exact pixels/PCM/37ms offset, bounded failure, lease retained, no synthetic drain; source exit74, relay exit0; old graph discarded
+downstream process death (GstMemory): reader exit73, exact pixels/PCM/37ms offset, bounded failure, lease retained, no synthetic drain; source exit74, relay exit0; old graph discarded
+<end of output>
+Test time =   1.99 sec
+----------------------------------------------------------
+Test Passed.
+"gst_native_relay_downstream_death_win" end time: Nov 12 03:09 Eastern Standard Time
+"gst_native_relay_downstream_death_win" time elapsed: 00:00:01
+----------------------------------------------------------
+
+146/178 Testing: native_relay_win
+146/178 Test: native_relay_win
+Command: "<win-home>/dev/framelink-native-ready-cng-limit-fix-20261112t0810z/build/Release/fl_native_relay_win.exe"
+Directory: <win-home>/dev/framelink-native-ready-cng-limit-fix-20261112t0810z/build
+"native_relay_win" start time: Nov 12 03:09 Eastern Standard Time
+Output:
+----------------------------------------------------------
+same canonical-NT NV12 relay: reversed slots, identity rejection, exact pixels/metadata, downstream leases prevent upstream reuse and bounded completion passed
+<end of output>
+Test time =   0.52 sec
+----------------------------------------------------------
+Test Passed.
+"native_relay_win" end time: Nov 12 03:09 Eastern Standard Time
+"native_relay_win" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Nov 12 03:09 Eastern Standard Time

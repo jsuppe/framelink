@@ -1,0 +1,18 @@
+{
+  "utc": "2026-11-12T07:36:08.080947+00:00",
+  "source_revision": "49f91459c9f699e401ec2eed973ee662b3253d16",
+  "checks": {
+    "local_analyzer_cases": 30,
+    "local_ctest_passed": 1,
+    "local_ctest_selected": 1,
+    "local_ctest_seconds": 0.2,
+    "windows_build_run": false
+  },
+  "local_files_sha256": {
+    "test/fl_gst_local_decoder_rate_win.cpp": "b168b68a5c07c30d7fb3441378902ee63d2c0152c94c17c11abfa5271defa81d",
+    "tools/check_local_decoder_rate.py": "c33452f80b294773b6642e2c225672756d26baf8e47d013ba160066cabdba0d1",
+    "tools/test_local_decoder_rate.py": "66e8b1cb29313f36ebda955a89f2da0a718c2dfeadf7ce873ede864985215b95",
+    "tools/run_local_decoder_rate_smoke.py": "def6eb63d10963d8b6140f28a37e67d74b40ebf6789b3ba8715dbbbb08e7e6ea"
+  },
+  "scope": "local checks only; Windows validation pending"
+}

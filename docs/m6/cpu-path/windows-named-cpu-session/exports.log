@@ -1,0 +1,67 @@
+Microsoft (R) COFF/PE Dumper Version 14.44.35211.0
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+
+Dump of file <win-home>\dev\framelink-m6-windows-30d7a53\build\Release\framelink_gst_session.dll
+
+File Type: DLL
+
+  Section contains the following exports for framelink_gst_session.dll
+
+    00000000 characteristics
+    FFFFFFFF time date stamp
+        0.00 version
+           1 ordinal base
+          39 number of functions
+          39 number of names
+
+    ordinal hint RVA      name
+
+          1    0 000086D0 ?fl_gst_session_finish_local_cancellable@@YAHPEAU_FlGstSession@@HIPEAU_GCancellable@@PEAPEAU_GError@@@Z
+          2    1 000088D0 ?fl_gst_session_local_ready_cancellable@@YAHPEAU_FlGstSession@@HIPEAU_GCancellable@@PEAPEAU_GError@@@Z
+          3    2 00008AC0 ?fl_gst_session_open_local_av_epoch@@YAHPEAU_FlGstSession@@HPEBDPEBUflSessionCapabilities@@IIIIIIPEAPEAUflChannel@@P6A_JPEAX_K@Z4PEAU_GCancellable@@PEAPEAU_GError@@@Z
+          4    3 00003AA0 ?fl_gst_session_peek_video_end@@YA?AW4FlGstSessionResult@@PEAU_FlGstSession@@_KPEAUFlGstVideoEvent@@@Z
+          5    4 00003BE0 ?fl_gst_session_publish_audio@@YAHPEAU_FlGstSession@@PEBUflSessionConfig@@PEAU_GSocketConnection@@H@Z
+          6    5 00003D50 ?fl_gst_session_publish_events@@YAHPEAU_FlGstSession@@PEBUflSessionConfig@@PEAU_GSocketConnection@@H@Z
+          7    6 000054D0 fl_gst_segment_running_time
+          8    7 0000A1A0 fl_gst_session_apply_pipeline_clock
+          9    8 0000A380 fl_gst_session_authenticate_audio_stream
+         10    9 0000A900 fl_gst_session_authenticate_cpu_bootstrap
+         11    A 0000AE70 fl_gst_session_authenticate_event_stream
+         12    B 00005550 fl_gst_session_bind_authenticated_cpu_pipe
+         13    C 000055D0 fl_gst_session_bind_shared_cpu_pipe
+         14    D 00005640 fl_gst_session_cancel
+         15    E 00005750 fl_gst_session_claim_audio_stream
+         16    F 00005840 fl_gst_session_claim_shared_cpu
+         17   10 00005920 fl_gst_session_configure
+         18   11 00005B70 fl_gst_session_create_context
+         19   12 0000B3F0 fl_gst_session_finish_local
+         20   13 00005C50 fl_gst_session_from_context
+         21   14 00005D10 fl_gst_session_get_config
+         22   15 00005E80 fl_gst_session_get_type
+         23   16 00005EC0 fl_gst_session_has_event_stream
+         24   17 0000B410 fl_gst_session_local_ready
+         25   18 00005F40 fl_gst_session_map_pts
+         26   19 00006050 fl_gst_session_map_running_time
+         27   1A 0000B430 fl_gst_session_negotiate_stream
+         28   1B 00006170 fl_gst_session_new
+         29   1C 0000C2D0 fl_gst_session_open_local_audio
+         30   1D 0000CBD0 fl_gst_session_open_local_av
+         31   1E 000061D0 fl_gst_session_open_named_cpu_pipe
+         32   1F 00006420 fl_gst_session_receive_video_event
+         33   20 00006600 fl_gst_session_register_track
+         34   21 000066C0 fl_gst_session_send_video_event
+         35   22 00006760 fl_gst_session_set_mapping
+         36   23 00006910 fl_gst_session_track_ready
+         37   24 00006A00 fl_gst_session_video_eos
+         38   25 00006B30 fl_gst_session_wait
+         39   26 00006CB0 fl_gst_session_wait_video_eos
+
+  Summary
+
+        1000 .data
+        1000 .pdata
+        9000 .rdata
+        1000 .reloc
+        1000 .rsrc
+       11000 .text

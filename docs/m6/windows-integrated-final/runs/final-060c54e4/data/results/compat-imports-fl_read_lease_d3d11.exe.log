@@ -1,0 +1,182 @@
+Microsoft (R) COFF/PE Dumper Version 14.44.35211.0
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+
+Dump of file <win-home>\dev\framelink-final-final-060c54e4\compat-runtime\fl_read_lease_d3d11.exe
+
+File Type: EXECUTABLE IMAGE
+
+  Section contains the following imports:
+
+    framelink.dll
+             140005268 Import Address Table
+             140006D80 Import Name Table
+                     0 time date stamp
+                     0 Index of first forwarder reference
+
+                           1 flAcquireFrame
+                           8 flCompleteReadLeaseD3D11Fence
+                           4 flChannelD3D11Device
+                          10 flImageD3D11
+                           6 flCollectReadLeases
+                          16 flLeaseFrame
+                           5 flClose
+                          15 flImageUnmap
+                          11 flImageMap
+                          49 flSubmit
+                           3 flCancelBuffer
+                           0 flAcquireBuffer
+                          1F flOpenProducer
+                           A flCreateChannelEx
+
+    d3d11.dll
+             140005258 Import Address Table
+             140006D70 Import Name Table
+                     0 time date stamp
+                     0 Index of first forwarder reference
+
+                           6 D3D11CreateDevice
+
+    KERNEL32.dll
+             140005000 Import Address Table
+             140006B18 Import Name Table
+                     0 time date stamp
+                     0 Index of first forwarder reference
+
+                         2A4 GetModuleHandleW
+                         3AF IsDebuggerPresent
+                         399 InitializeSListHead
+                         319 GetSystemTimeAsFileTime
+                         245 GetCurrentThreadId
+                         480 QueryPerformanceCounter
+                         3B7 IsProcessorFeaturePresent
+                         5B7 SetUnhandledExceptionFilter
+                         5FA UnhandledExceptionFilter
+                         517 RtlVirtualUnwind
+                         510 RtlLookupFunctionEntry
+                         508 RtlCaptureContext
+                         29F GetModuleFileNameA
+                          FC CreateProcessA
+                         266 GetExitCodeProcess
+                         5D7 TerminateProcess
+                          9C CloseHandle
+                         624 WaitForSingleObject
+                         5C7 Sleep
+                         240 GetCurrentProcess
+                         241 GetCurrentProcessId
+
+    MSVCP140.dll
+             1400050B0 Import Address Table
+             140006BC8 Import Name Table
+                     0 time date stamp
+                     0 Index of first forwarder reference
+
+                         28E ?_Xlength_error@std@@YAXPEBD@Z
+
+    VCRUNTIME140.dll
+             1400050C0 Import Address Table
+             140006BD8 Import Name Table
+                     0 time date stamp
+                     0 Index of first forwarder reference
+
+                          1B __current_exception
+                          1C __current_exception_context
+                           8 __C_specific_handler
+                          23 __std_terminate
+                          21 __std_exception_copy
+                          22 __std_exception_destroy
+                           1 _CxxThrowException
+                          3E memset
+                          3C memcpy
+                          3D memmove
+
+    VCRUNTIME140_1.dll
+             140005118 Import Address Table
+             140006C30 Import Name Table
+                     0 time date stamp
+                     0 Index of first forwarder reference
+
+                           0 __CxxFrameHandler4
+
+    api-ms-win-crt-runtime-l1-1-0.dll
+             140005170 Import Address Table
+             140006C88 Import Name Table
+                     0 time date stamp
+                     0 Index of first forwarder reference
+
+                          1E _crt_atexit
+                          3C _register_onexit_function
+                          40 _seh_filter_exe
+                          55 exit
+                          34 _initialize_onexit_table
+                          18 _configure_narrow_argv
+                          33 _initialize_narrow_environment
+                          28 _get_initial_narrow_environment
+                          36 _initterm
+                          37 _initterm_e
+                          23 _exit
+                           4 __p___argc
+                           5 __p___argv
+                          16 _cexit
+                          15 _c_exit
+                          3D _register_thread_local_exe_atexit_callback
+                          3A _invoke_watson
+                          67 terminate
+                          42 _set_app_type
+
+    api-ms-win-crt-stdio-l1-1-0.dll
+             140005210 Import Address Table
+             140006D28 Import Name Table
+                     0 time date stamp
+                     0 Index of first forwarder reference
+
+                          54 _set_fmode
+                           0 __acrt_iob_func
+                          93 puts
+                           3 __stdio_common_vfprintf
+                           1 __p__commode
+
+    api-ms-win-crt-string-l1-1-0.dll
+             140005240 Import Address Table
+             140006D58 Import Name Table
+                     0 time date stamp
+                     0 Index of first forwarder reference
+
+                          8B strlen
+                          86 strcmp
+
+    api-ms-win-crt-heap-l1-1-0.dll
+             140005128 Import Address Table
+             140006C40 Import Name Table
+                     0 time date stamp
+                     0 Index of first forwarder reference
+
+                           8 _callnewh
+                          19 malloc
+                          18 free
+                          16 _set_new_mode
+
+    api-ms-win-crt-math-l1-1-0.dll
+             140005160 Import Address Table
+             140006C78 Import Name Table
+                     0 time date stamp
+                     0 Index of first forwarder reference
+
+                           9 __setusermatherr
+
+    api-ms-win-crt-locale-l1-1-0.dll
+             140005150 Import Address Table
+             140006C68 Import Name Table
+                     0 time date stamp
+                     0 Index of first forwarder reference
+
+                           8 _configthreadlocale
+
+  Summary
+
+        1000 .data
+        1000 .pdata
+        3000 .rdata
+        1000 .reloc
+        1000 .rsrc
+        4000 .text

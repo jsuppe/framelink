@@ -1,0 +1,35 @@
+CASE negative outside a pipeline
+CASE tracks=av consumer-first=1 lead=0ms 
+   producer=EOS consumer=EOS video=30 (mapped 30, memory:SystemMemory) samples=24000 lag video 150.2..150.9ms audio 150.2..150.7ms
+CASE tracks=av consumer-first=0 lead=800ms 
+   producer=EOS consumer=EOS video=30 (mapped 30, memory:SystemMemory) samples=24000 lag video 150.2..151.0ms audio 150.2..150.6ms
+CASE tracks=video consumer-first=0 lead=300ms 
+   producer=EOS consumer=EOS video=30 (mapped 30, memory:SystemMemory) samples=0 lag video 150.2..150.9ms audio 9223372036854.8..-9223372036854.8ms
+CASE tracks=audio consumer-first=1 lead=0ms 
+   producer=EOS consumer=EOS video=0 (mapped 0, -) samples=24000 lag video 9223372036854.8..-9223372036854.8ms audio 150.2..150.8ms
+CASE tracks=av consumer-first=1 lead=0ms  (clock-providing element in both pipelines)
+   producer=EOS consumer=EOS video=30 (mapped 30, memory:SystemMemory) samples=24000 lag video 150.2..150.9ms audio 150.2..150.6ms
+CASE tracks=av consumer-first=1 lead=0ms native-memory=true
+   producer=EOS consumer=EOS video=30 (mapped 0, memory:FrameLinkAHardwareBuffer) samples=24000 lag video 150.2..150.9ms audio 150.2..150.7ms
+CASE thin (application-installed context)
+   producer=EOS consumer=EOS video=30 (mapped 30, memory:SystemMemory) samples=24000 lag video 150.2..150.9ms audio 150.2..150.8ms
+CASE standalone-element producer
+   producer=EOS consumer=EOS video=30 (mapped 30, memory:SystemMemory) samples=24000 lag video 150.2..150.8ms audio 150.2..150.8ms
+CASE reconnect through NULL
+  round 0 producer=EOS consumer=EOS video=30 (mapped 30, memory:SystemMemory) samples=24000 lag video 150.2..150.9ms audio 150.2..150.5ms
+  round 1 producer=EOS consumer=EOS video=30 (mapped 30, memory:SystemMemory) samples=24000 lag video 150.2..150.9ms audio 150.2..150.9ms
+  sessions 2737e2760f141110250d9200449185a6 / 606a41cfa68d6a266cb0a20d2a08fde8
+CASE producer death mid-stream
+  consumer 12ms after producer death: flaudioreader26: audio peer closed before GDP EOS
+CASE teardown during setup
+  NULL in 7.8ms
+CASE negative no-producer
+  consumer error after 1009ms: c: local session discovery deadline or cancellation; producer: -
+CASE negative track-mismatch
+  consumer error after 19ms: c: producer selection or authentication rejected; producer: s: incompatible session selection
+CASE negative caps-mismatch
+  consumer error after 14ms: c: producer selection or authentication rejected; producer: s: incompatible session selection
+CASE negative non-system-clock
+  consumer error after 2ms: c: framelinkavsrc with session= requires the pipeline system clock (mapped PTS are system-clock times); do not fix another pipeline clock; producer: -
+transport default installs zero latency; explicit150ms compatibility preserved
+framelinkavsrc: consumer/producer-first startup, consumer timeline (lag within latency bounds per track), exact counts/content, drain releases producer EOS, system clock over a clock-providing element, native memory negotiation, thin composition, standalone-element producer, reconnect via NULL, producer-death/track/caps/clock/missing-peer/outside-pipeline failures bounded

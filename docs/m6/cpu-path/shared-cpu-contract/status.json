@@ -1,0 +1,79 @@
+{
+  "state": "finished",
+  "source_sha256": {
+    "CMakeLists.txt": "e7ed82838f7c1606ff2dec64f128aa58b6555e9a1a44b3c69a92f9ce364046a9",
+    "include/framelink_shared_cpu.h": "c0ae50f26dedd12bda5bf9ecdea124d9206e593087abb1b55673f5cac03fa2c9",
+    "src/framelink_shared_cpu.cpp": "62c7be11e91cc631b9c7e0e0b4121d9855331794679c6fe1dec9e20121626146",
+    "test/fl_shared_cpu_contract.cpp": "fe642f6b07039e66f22d93d8e139c34fe9a5f9177eb9d3948f8c6b71f7132c5e",
+    "test/fl_shared_cpu_c_api.c": "d66504d77032e5e534821a66f563ea9146979527d32d2751b7ffc0f9740fea29"
+  },
+  "steps": [
+    {
+      "name": "windows-preflight",
+      "exit": 0
+    },
+    {
+      "name": "windows-new-framelink_shared_cpu",
+      "exit": 0
+    },
+    {
+      "name": "windows-new-framelink_shared_cpu",
+      "exit": 0
+    },
+    {
+      "name": "windows-new-fl_shared_cpu_contract",
+      "exit": 0
+    },
+    {
+      "name": "windows-new-fl_shared_cpu_c_api",
+      "exit": 0
+    },
+    {
+      "name": "windows-build",
+      "exit": 0
+    },
+    {
+      "name": "windows-tests",
+      "exit": 0
+    },
+    {
+      "name": "android-arm64-build",
+      "exit": 0
+    },
+    {
+      "name": "android-x86_64-build",
+      "exit": 0
+    },
+    {
+      "name": "android-fl_shared_cpu_contract",
+      "exit": 0
+    },
+    {
+      "name": "android-fl_shared_cpu_c_api",
+      "exit": 0
+    },
+    {
+      "name": "android-fl_memory_contract",
+      "exit": 0
+    },
+    {
+      "name": "android-fl_memory_c_api",
+      "exit": 0
+    },
+    {
+      "name": "android-fl_memory_boundary",
+      "exit": 0
+    },
+    {
+      "name": "android-fl_session_contract",
+      "exit": 0
+    },
+    {
+      "name": "android-fl_session_c_api",
+      "exit": 0
+    }
+  ],
+  "remote_cmake_baseline_sha256": "c788a419d5e3031c6c94ba26097a96d5bc8196d80a1961c07482806691c61c75",
+  "remote_cmake_tested_sha256": "dcf77ef7f11933421b2a7948a75ec22b5a71396abd3238e666d38dfbf8dc840e",
+  "ended": 1794104331.2232563
+}

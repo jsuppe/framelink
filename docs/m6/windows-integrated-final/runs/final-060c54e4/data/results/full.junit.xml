@@ -1,0 +1,1871 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="(empty)"
+	tests="180"
+	failures="0"
+	disabled="0"
+	skipped="0"
+	hostname=""
+	time="674"
+	timestamp="2026-11-16T22:55:11"
+	>
+	<testcase name="read_leases" classname="read_leases" time="0.342594" status="run">
+		<properties/>
+		<system-out>native read leases: retained readers block reuse; ordered retirement, resize and reconnect pass
+</system-out>
+	</testcase>
+	<testcase name="frame_metadata_contract" classname="frame_metadata_contract" time="0.0238811" status="run">
+		<properties/>
+		<system-out>metadata wire sizes, feature agreement, canonical validation and malformed messages pass
+</system-out>
+	</testcase>
+	<testcase name="read_ledger" classname="read_ledger" time="0.0649648" status="run">
+		<properties/>
+		<system-out>read ledger: bounded ownership, out-of-order completion and stale-token checks passed
+</system-out>
+	</testcase>
+	<testcase name="session_contract" classname="session_contract" time="0.0232256" status="run">
+		<properties/>
+		<system-out>session contract: negotiation, codec, generation and clock bounds passed
+</system-out>
+	</testcase>
+	<testcase name="session_optional_tracks" classname="session_optional_tracks" time="0.023427" status="run">
+		<properties/>
+		<system-out>optional tracks: audio/video/AV codec, absent-field, downgrade and replacement negatives passed
+</system-out>
+	</testcase>
+	<testcase name="session_contract_c_api" classname="session_contract_c_api" time="0.0227767" status="run">
+		<properties/>
+		<system-out></system-out>
+	</testcase>
+	<testcase name="memory_boundary" classname="memory_boundary" time="0.0222094" status="run">
+		<properties/>
+		<system-out>boundary agreement: endpoint usages, all-participant operation consent, conflicts and bounded negatives pass
+</system-out>
+	</testcase>
+	<testcase name="shared_cpu_channel_win" classname="shared_cpu_channel_win" time="3.18815" status="run">
+		<properties/>
+		<system-out>Windows public CPU API: 100 child sessions, 800 exact BGRA/NV12 frames, RO maps, metadata, retained read/write close lifetimes, reserved EOS and handle cleanup passed
+</system-out>
+	</testcase>
+	<testcase name="shared_cpu_channel_c" classname="shared_cpu_channel_c" time="0.0252276" status="run">
+		<properties/>
+		<system-out></system-out>
+	</testcase>
+	<testcase name="shared_cpu_control_win" classname="shared_cpu_control_win" time="1.64917" status="run">
+		<properties/>
+		<system-out>Windows CPU control: 100 cross-process BGRA/NV12 streams of 32 exact frames/metadata/releases and held-slot EOS, 57 setup plus 23 frame/release/EOS negatives, exact handle cleanup passed
+</system-out>
+	</testcase>
+	<testcase name="shared_cpu_pipe_win" classname="shared_cpu_pipe_win" time="0.110241" status="run">
+		<properties/>
+		<system-out>Windows CPU pipe: exact frames, 100 handle-clean exchanges, async-only adoption, timeout/cancel/read/write/death/malformed negatives passed
+</system-out>
+	</testcase>
+	<testcase name="shared_cpu_imported_pool_win" classname="shared_cpu_imported_pool_win" time="0.0394512" status="run">
+		<properties/>
+		<system-out>shared CPU imported pool: atomic failure, handle cleanup, kernel object aliases, stale epochs, retained retired mappings and producer rights passed
+</system-out>
+	</testcase>
+	<testcase name="shared_cpu_allocation_win" classname="shared_cpu_allocation_win" time="0.171061" status="run">
+		<properties/>
+		<system-out>Windows CPU section: BGRA/NV12 pixels, exact size/type/epoch, OS readonly, cross-process pixels, retained lifetime, unmapped views and 100 handle-clean cycles passed
+</system-out>
+	</testcase>
+	<testcase name="shared_cpu_pool" classname="shared_cpu_pool" time="0.0255875" status="run">
+		<properties/>
+		<system-out>shared CPU pool preflight: epoch/format/identity/bounds/queue, strict peer copy policy, CPU-only rights passed
+</system-out>
+	</testcase>
+	<testcase name="shared_cpu_contract" classname="shared_cpu_contract" time="0.0263213" status="run">
+		<properties/>
+		<system-out>shared-CPU contract: formats, fixed wire, overflow/overlap, aliasing, 1024 wire mutations and policy negatives passed
+</system-out>
+	</testcase>
+	<testcase name="shared_cpu_contract_c_api" classname="shared_cpu_contract_c_api" time="0.0243677" status="run">
+		<properties/>
+		<system-out></system-out>
+	</testcase>
+	<testcase name="memory_contract" classname="memory_contract" time="0.0266806" status="run">
+		<properties/>
+		<system-out>memory policy: strict/fallback, hard/preferred usage, versions, golden wire and malformed inputs passed
+</system-out>
+	</testcase>
+	<testcase name="memory_contract_c_api" classname="memory_contract_c_api" time="0.0229035" status="run">
+		<properties/>
+		<system-out></system-out>
+	</testcase>
+	<testcase name="device_owner_win" classname="device_owner_win" time="0.244229" status="run">
+		<properties/>
+		<system-out>owner: retained identity, fresh channels/pixels, concurrent busy, snapshot retirement, cancellation rollback and caller release passed
+</system-out>
+	</testcase>
+	<testcase name="device_owner_faults_win" classname="device_owner_faults_win" time="1.2155" status="run">
+		<properties/>
+		<system-out>owner faults: held-frame close poisons, dead reader stays BUSY, live reader release retires, mid-submit close poisons
+</system-out>
+	</testcase>
+	<testcase name="read_lease_d3d11" classname="read_lease_d3d11" time="0.384556" status="run">
+		<properties/>
+		<system-out>separate-process D3D11 shared-allocation GPU read, fence lease retirement and all-pixel verification passed
+</system-out>
+	</testcase>
+	<testcase name="read_lease_d3d11_producer_death" classname="read_lease_d3d11_producer_death" time="0.367915" status="run">
+		<properties/>
+		<system-out>separate-process D3D11 shared-allocation GPU read, fence lease retirement and all-pixel verification passed
+</system-out>
+	</testcase>
+	<testcase name="read_lease_d3d11_delayed_completion" classname="read_lease_d3d11_delayed_completion" time="0.469568" status="run">
+		<properties/>
+		<system-out>separate-process D3D11 shared-allocation GPU read, fence lease retirement and all-pixel verification passed
+</system-out>
+	</testcase>
+	<testcase name="ipc_framing_win" classname="ipc_framing_win" time="0.0260584" status="run">
+		<properties/>
+		<system-out>Windows IPC exact-message framing: 2 valid and 5 malformed cases passed
+</system-out>
+	</testcase>
+	<testcase name="import_failure_win" classname="import_failure_win" time="0.263113" status="run">
+		<properties/>
+		<system-out>24 failed ring imports close every received handle and preserve old ring
+</system-out>
+	</testcase>
+	<testcase name="external_pool_1" classname="external_pool_1" time="0.310714" status="run">
+		<properties/>
+		<system-out>external D3D format=1: alias/geometry rejection, immutable ring, original-allocation pixels and independent lifetime passed
+</system-out>
+	</testcase>
+	<testcase name="external_pool_2" classname="external_pool_2" time="0.275258" status="run">
+		<properties/>
+		<system-out>external D3D format=2: alias/geometry rejection, immutable ring, original-allocation pixels and independent lifetime passed
+</system-out>
+	</testcase>
+	<testcase name="external_pool_3" classname="external_pool_3" time="0.27175" status="run">
+		<properties/>
+		<system-out>external D3D format=3: alias/geometry rejection, immutable ring, original-allocation pixels and independent lifetime passed
+</system-out>
+	</testcase>
+	<testcase name="external_pool_4" classname="external_pool_4" time="0.271819" status="run">
+		<properties/>
+		<system-out>external D3D format=4: alias/geometry rejection, immutable ring, original-allocation pixels and independent lifetime passed
+</system-out>
+	</testcase>
+	<testcase name="buffer_references" classname="buffer_references" time="0.303292" status="run">
+		<properties/>
+		<system-out>producer references: bounded 256, remote completion cannot reuse local-held slots, concurrent finalizer, cancel and resize guards pass
+</system-out>
+	</testcase>
+	<testcase name="submit_ownership" classname="submit_ownership" time="0.598941" status="run">
+		<properties/>
+		<system-out>handles before=470 after=471
+handles after drain=470
+Producer reservations: wrong image/slot, duplicate/unmatched begin/end, forged values, geometry retention and post-release reuse passed
+</system-out>
+	</testcase>
+	<testcase name="memory_resource_1" classname="memory_resource_1" time="0.220272" status="run">
+		<properties/>
+		<system-out>resource format=1: ownership, actual metadata, strict mapping policy, pixels/PTS and unknown-field checks passed
+</system-out>
+	</testcase>
+	<testcase name="memory_resource_2" classname="memory_resource_2" time="0.210444" status="run">
+		<properties/>
+		<system-out>resource format=2: ownership, actual metadata, strict mapping policy, pixels/PTS and unknown-field checks passed
+</system-out>
+	</testcase>
+	<testcase name="memory_resource_3" classname="memory_resource_3" time="0.200953" status="run">
+		<properties/>
+		<system-out>resource format=3: ownership, actual metadata, strict mapping policy, pixels/PTS and unknown-field checks passed
+</system-out>
+	</testcase>
+	<testcase name="memory_resource_4" classname="memory_resource_4" time="0.204391" status="run">
+		<properties/>
+		<system-out>resource format=4: ownership, actual metadata, strict mapping policy, pixels/PTS and unknown-field checks passed
+</system-out>
+	</testcase>
+	<testcase name="frame_metadata" classname="frame_metadata" time="0.924776" status="run">
+		<properties/>
+		<system-out>[framelink error] framelink: refusing producer pid 27324 - speaks version 6, we speak 6
+[framelink error] framelink: refusing producer pid 27324 - speaks version 6, we speak 6
+[framelink error] framelink: refusing producer pid 27324 - speaks version 0, we speak 6
+[framelink error] framelink: refusing producer pid 27324 - speaks version 0, we speak 6
+frame metadata: exact values, optional absence/reuse, required publication, readiness FD and legacy/unknown-required peer refusal pass
+</system-out>
+	</testcase>
+	<testcase name="expanded_pool" classname="expanded_pool" time="0.421327" status="run">
+		<properties>
+			<property name="cmake_labels" value="gpu;integration"/>
+		</properties>
+		<system-out>[framelink error] framelink: refusing producer pid 37916 - speaks version 5, we speak 6
+[framelink error] framelink: refusing producer pid 37916 - speaks version 5, we speak 6
+[framelink error] framelink: channel 'pool16-163406365829200-old' speaks version 5, we speak 6
+16 distinct slots held; high slots recycled;17 rejected;v5 denied before ring transfer
+</system-out>
+	</testcase>
+	<testcase name="receive_queue" classname="receive_queue" time="1.73247" status="run">
+		<properties>
+			<property name="cmake_labels" value="gpu;integration"/>
+		</properties>
+		<system-out>receive queue: bounds, latest-wins default, oldest-first, overflow, shrink, producer headroom
+</system-out>
+	</testcase>
+	<testcase name="roundtrip" classname="roundtrip" time="2.47815" status="run">
+		<properties/>
+		<system-out>-- consume: channel 'flci' 256x128 pool 4, waiting for a producer
+consume: ring is now 320x240 (gen 3) - re-imported
+consume: 20 verified, 0 mismatched, 57 skipped (latest-frame-wins)
+consume: producer submitted 80 frames while we read 20
+consume: PASS
+
+</system-out>
+	</testcase>
+	<testcase name="roundtrip_reattach" classname="roundtrip_reattach" time="2.68325" status="run">
+		<properties/>
+		<system-out>-- consume: channel 'flre' 256x128 pool 4, waiting for a producer
+consume: ring is now 320x240 (gen 3) - re-imported
+consume: ring is now 320x240 (gen 4) - re-imported
+consume: 70 verified, 0 mismatched, 207 skipped (latest-frame-wins)
+consume: producer submitted 280 frames while we read 70
+consume: reattach seen, 20 verified after it
+consume: PASS
+
+</system-out>
+	</testcase>
+	<testcase name="nv12_layout" classname="nv12_layout" time="0.0239205" status="run">
+		<properties/>
+		<system-out>NV12 geometry, padded plane bounds and overflow checks passed
+</system-out>
+	</testcase>
+	<testcase name="nv21_conversion" classname="nv21_conversion" time="0.211942" status="run">
+		<properties/>
+		<system-out>NV21 bulk conversion: all-byte roundtrips, padding, guards and fallback passed
+</system-out>
+	</testcase>
+	<testcase name="gst_native_epoch_c_api" classname="gst_native_epoch_c_api" time="0.0820513" status="run">
+		<properties/>
+		<system-out></system-out>
+	</testcase>
+	<testcase name="win_sha256_rows" classname="win_sha256_rows" time="0.0219128" status="run">
+		<properties/>
+		<system-out>CNG full SHA256 known vectors, reusable reset, active rows and invalid layout checks passed
+</system-out>
+	</testcase>
+	<testcase name="gst_native_producer_win" classname="gst_native_producer_win" time="19.0111" status="run">
+		<properties>
+			<property name="cmake_labels" value="gst_video_regression"/>
+		</properties>
+		<system-out>
+** (fl_gst_native_producer_win.exe:31516): WARNING **: 22:55:33.350: framelinkavsink: authenticated properties are immutable; create a new bin/session
+
+** (fl_gst_native_producer_win.exe:31516): WARNING **: 22:55:33.690: framelinkavsink: authenticated properties are immutable; create a new bin/session
+native AV mode 0 local=0
+native AV mode 1 local=0
+native AV mode 2 local=0
+native AV mode 3 local=0
+native AV: Socket I/O timed out <win-home>\dev\framelink-final-final-060c54e4\source\gst\gstframelinkaudiosrc.cpp(66): readChunkImpl (): /GstPipeline:pipeline10/GstFrameLinkAvSrc:transport/GstFrameLinkAudioSrc:audio/FlAudioReader:flaudioreader3
+native AV mode 0 local=0
+native AV mode 1 local=0
+native AV mode 2 local=0
+native AV mode 3 local=0
+native AV: Socket I/O timed out <win-home>\dev\framelink-final-final-060c54e4\source\gst\gstframelinkaudiosrc.cpp(66): readChunkImpl (): /GstPipeline:pipeline18/GstFrameLinkAvSrc:transport/GstFrameLinkAudioSrc:audio/FlAudioReader:flaudioreader7
+native AV mode 0 local...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="gst_video_relay_event_controls_win" classname="gst_video_relay_event_controls_win" time="0.0693166" status="run">
+		<properties/>
+		<system-out>video event adapter: 100 recycled boundary entries; ten invalid controls, missing segment, flush/explicit/send cancellation sticky; no locked network callback
+</system-out>
+	</testcase>
+	<testcase name="gst_relay_local_cancel_downstream_win" classname="gst_relay_local_cancel_downstream_win" time="0.674149" status="run">
+		<properties/>
+		<system-out>native AV mode 13 local=0
+bin relay n=0 collect=0 pending=1
+bin relay n=1 collect=0 pending=1
+bin relay n=2 collect=0 pending=1
+bin relay n=3 collect=0 pending=1
+bin relay n=4 collect=0 pending=1
+bin relay n=5 collect=0 pending=1
+bin relay n=6 collect=0 pending=1
+bin relay n=7 collect=0 pending=1
+authenticated native pool: same-allocation imported ring attached
+broker bin downstream cancellation: 99.467ms, automatic idle supervisor propagation, no END/EOS, final reader still held
+broker bin original producer observes cancellation: 0.055ms, no EOS
+broker native bin relay: 8 frames over two original allocations / 384 PCM frames; identity intermediate mapping, negotiated final mapping and exact 37ms A/V, authenticated session; final reader retained beyond upstream and downstream bin teardown
+native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+</system-out>
+	</testcase>
+	<testcase name="gst_relay_local_cancel_upstream_win" classname="gst_relay_local_cancel_upstream_win" time="0.690039" status="run">
+		<properties/>
+		<system-out>native AV mode 14 local=0
+bin relay n=0 collect=0 pending=1
+bin relay n=1 collect=0 pending=1
+bin relay n=2 collect=0 pending=1
+bin relay n=3 collect=0 pending=1
+bin relay n=4 collect=0 pending=1
+bin relay n=5 collect=0 pending=1
+bin relay n=6 collect=0 pending=1
+bin relay n=7 collect=0 pending=1
+authenticated native pool: same-allocation imported ring attached
+broker bin upstream cancellation: 9.776ms, automatic idle supervisor propagation, no END/EOS, final reader still held
+broker bin original producer observes cancellation: 0.009ms, no EOS
+broker native bin relay: 8 frames over two original allocations / 384 PCM frames; identity intermediate mapping, negotiated final mapping and exact 37ms A/V, authenticated session; final reader retained beyond upstream and downstream bin teardown
+native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+</system-out>
+	</testcase>
+	<testcase name="gst_relay_local_pool_failures_win" classname="gst_relay_local_pool_failures_win" time="0.905745" status="run">
+		<properties/>
+		<system-out>pool negative mode=0 local=0 remote=0 localError=authenticated relay pool transfer failed or cancelled remoteError=authenticated relay pool transfer failed or cancelled
+pool negative mode=1 local=0 remote=0 localError=authenticated relay pool transfer failed or cancelled remoteError=authenticated relay pool transfer failed or cancelled
+pool negative mode=2 local=0 remote=0 localError=authenticated relay pool transfer failed or cancelled remoteError=authenticated relay pool transfer failed or cancelled
+pool negative mode=3 local=0 remote=0 localError=authenticated relay pool transfer failed or cancelled remoteError=authenticated relay pool transfer failed or cancelled
+pool negative mode=4 local=0 remote=0 localError=authenticated relay pool transfer failed or cancelled remoteError=authenticated relay pool transfer failed or cancelled
+pool negative mode=5 local=0 remote=0 localError=local control connection deadline or failure: Operation was cancelled remoteError=local session discovery deadline or cancellation...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="gst_relay_local_three_process_win" classname="gst_relay_local_three_process_win" time="0.977813" status="run">
+		<properties/>
+		<system-out>three-process local native relay: FAR4 source-time input + FAR5 snapshot transfer, no inherited textures, 8 exact final pixels/metadata, held final lease, real drain
+</system-out>
+	</testcase>
+	<testcase name="gst_relay_local_three_process_av_win" classname="gst_relay_local_three_process_av_win" time="1.00247" status="run">
+		<properties/>
+		<system-out>three-process local authenticated A/V: 384 exact PCM frames/1536 bytes, 37ms offset, real END/EOS, final native lease held
+three-process local native relay: FAR4 source-time input + FAR5 snapshot transfer, no inherited textures, 8 exact final pixels/metadata, held final lease, real drain
+</system-out>
+	</testcase>
+	<testcase name="gst_relay_local_replacement_win" classname="gst_relay_local_replacement_win" time="1.79458" status="run">
+		<properties/>
+		<system-out>three-process local authenticated A/V: 384 exact PCM frames/1536 bytes, 37ms offset, real END/EOS, final native lease held
+three-process local native relay: FAR4 source-time input + FAR5 snapshot transfer, no inherited textures, 8 exact final pixels/metadata, held final lease, real drain
+fresh-session replacement: distinct session/clock/native allocations; old reader held through complete replacement A/V graph; old pixels rechecked before real release
+three-process local authenticated A/V: 384 exact PCM frames/1536 bytes, 37ms offset, real END/EOS, final native lease held
+three-process local native relay: FAR4 source-time input + FAR5 snapshot transfer, no inherited textures, 8 exact final pixels/metadata, held final lease, real drain
+</system-out>
+	</testcase>
+	<testcase name="gst_relay_local_recovery_win" classname="gst_relay_local_recovery_win" time="1.77501" status="run">
+		<properties/>
+		<system-out>three-process local authenticated A/V: 384 exact PCM frames/1536 bytes, 37ms offset, real END/EOS, final native lease held
+three-process local native relay: FAR4 source-time input + FAR5 snapshot transfer, no inherited textures, 8 exact final pixels/metadata, held final lease, real drain
+source-death replacement: bounded cancellation, no synthetic END/EOS, fresh A/V graph with disjoint allocations, old held pixels intact before final-reader completion
+</system-out>
+	</testcase>
+	<testcase name="gst_relay_local_bin_pause_win" classname="gst_relay_local_bin_pause_win" time="0.91797" status="run">
+		<properties/>
+		<system-out></system-out>
+	</testcase>
+	<testcase name="gst_relay_local_bin_paused_cancel_win" classname="gst_relay_local_bin_paused_cancel_win" time="0.840656" status="run">
+		<properties/>
+		<system-out>paused FAR5 NULL propagated source cancellation in 101.508ms (source observation 0.060ms); no EOS, four submissions only
+</system-out>
+	</testcase>
+	<testcase name="gst_relay_local_bin_win" classname="gst_relay_local_bin_win" time="1.09971" status="run">
+		<properties/>
+		<system-out>three-process local authenticated A/V: 384 exact PCM frames/1536 bytes, 37ms offset, real END/EOS, final native lease held
+three-process local native relay: FAR4 source-time input + FAR5 snapshot transfer, no inherited textures, 8 exact final pixels/metadata, held final lease, real drain
+</system-out>
+	</testcase>
+	<testcase name="gst_relay_local_bin_negatives_win" classname="gst_relay_local_bin_negatives_win" time="1.11328" status="run">
+		<properties/>
+		<system-out>
+** (fl_gst_native_producer_win.exe:18560): WARNING **: 22:56:01.471: framelinkavsrc: authenticated properties are immutable; create a new bin/session
+native AV: local session discovery deadline or cancellation <win-home>\dev\framelink-final-final-060c54e4\source\gst\gstframelinkavsrc.cpp(164): startWorker::&lt;lambda_8127138ebb613649026a9c6cac7b51fa&gt;::operator () (): /GstPipeline:pipeline1/GstFrameLinkAvSrc:framelinkavsrc11:
+framelinkavsrc local session setup
+FAR5 bin controls: explicit immutable profile, invalid candidates, FAR4 mismatch/no fallback, bounded missing-peer cancellation
+</system-out>
+	</testcase>
+	<testcase name="gst_relay_setup_negatives_win" classname="gst_relay_setup_negatives_win" time="4.44141" status="run">
+		<properties/>
+		<system-out>transactional relay setup: downstream absent/cancelled, clear outputs, both sessions cancelled, source never readied
+</system-out>
+	</testcase>
+	<testcase name="gst_relay_local_source_control_win" classname="gst_relay_local_source_control_win" time="0.515936" status="run">
+		<properties/>
+		<system-out>separate local source control: authenticated FAR4, 8 exact frames/metadata, no inherited textures, real read leases before control acknowledgment
+</system-out>
+	</testcase>
+	<testcase name="gst_relay_local_process_win" classname="gst_relay_local_process_win" time="0.829461" status="run">
+		<properties/>
+		<system-out>FAR5 cross-process: no inherited textures; 8 exact frames/metadata; source lease retained until actual remote reader release; authenticated drain
+</system-out>
+	</testcase>
+	<testcase name="gst_relay_local_events_win" classname="gst_relay_local_events_win" time="0.780392" status="run">
+		<properties/>
+		<system-out>native AV mode 15 local=0
+bin relay n=0 collect=0 pending=1
+bin relay n=1 collect=0 pending=1
+bin relay n=2 collect=0 pending=1
+bin relay n=3 collect=0 pending=1
+bin relay n=4 collect=0 pending=1
+bin relay n=5 collect=0 pending=1
+bin relay n=6 collect=0 pending=1
+bin relay n=7 collect=0 pending=1
+authenticated native pool: same-allocation imported ring attached
+broker bin serialized GAP: exact 4,4,8 frame boundaries, negotiated mapping, durations 250/750/500us, DISCONT preserved, trailing GAP before EOS
+local native relay: retained authenticated discovery sessions, mapped A/V, genuine final-reader completion before drain acknowledgment
+broker native bin relay: 8 frames over two original allocations / 384 PCM frames; identity intermediate mapping, negotiated final mapping and exact 37ms A/V, authenticated session; final reader retained beyond upstream and downstream bin teardown
+native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics ...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="gst_relay_local_pool_win" classname="gst_relay_local_pool_win" time="0.81041" status="run">
+		<properties/>
+		<system-out>native AV mode 12 local=0
+bin relay n=0 collect=0 pending=1
+bin relay n=1 collect=0 pending=1
+bin relay n=2 collect=0 pending=1
+bin relay n=3 collect=0 pending=1
+bin relay n=4 collect=0 pending=1
+bin relay n=5 collect=0 pending=1
+bin relay n=6 collect=0 pending=1
+bin relay n=7 collect=0 pending=1
+authenticated native pool: same-allocation imported ring attached
+local native relay: retained authenticated discovery sessions, mapped A/V, genuine final-reader completion before drain acknowledgment
+broker native bin relay: 8 frames over two original allocations / 384 PCM frames; identity intermediate mapping, negotiated final mapping and exact 37ms A/V, authenticated session; final reader retained beyond upstream and downstream bin teardown
+native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+</system-out>
+	</testcase>
+	<testcase name="gst_relay_authenticated_pool_win" classname="gst_relay_authenticated_pool_win" time="0.797558" status="run">
+		<properties/>
+		<system-out>native AV mode 11 local=0
+bin relay n=0 collect=0 pending=1
+bin relay n=1 collect=0 pending=1
+bin relay n=2 collect=0 pending=1
+bin relay n=3 collect=0 pending=1
+bin relay n=4 collect=0 pending=1
+bin relay n=5 collect=0 pending=1
+bin relay n=6 collect=0 pending=1
+bin relay n=7 collect=0 pending=1
+authenticated native pool: same-allocation imported ring attached
+broker native bin relay: 8 frames over two original allocations / 384 PCM frames; identity intermediate mapping, negotiated final mapping and exact 37ms A/V, authenticated session; final reader retained beyond upstream and downstream bin teardown
+native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+</system-out>
+	</testcase>
+	<testcase name="gst_relay_local_session_win" classname="gst_relay_local_session_win" time="0.28063" status="run">
+		<properties/>
+		<system-out>local relay session: exact media/clock/epoch/generation/tracks, fresh hop identity; mapping/media/cancel/alias negatives; independent pools only
+</system-out>
+	</testcase>
+	<testcase name="gst_relay_pool_lifetime_win" classname="gst_relay_pool_lifetime_win" time="8.14012" status="run">
+		<properties/>
+		<system-out>native AV mode 10 local=0
+bin relay n=0 collect=0 pending=1
+bin relay n=1 collect=0 pending=1
+bin relay n=2 collect=0 pending=1
+bin relay n=3 collect=0 pending=1
+bin relay n=4 collect=0 pending=1
+bin relay n=5 collect=0 pending=1
+bin relay n=6 collect=0 pending=1
+bin relay n=7 collect=0 pending=1
+relay pool warmup immediate=1233
+relay pool cleanup cycle=0 handles=1827 baseline=1827
+relay pool cleanup cycle=10 handles=1827 baseline=1827
+relay pool cleanup cycle=20 handles=1827 baseline=1827
+relay pool cleanup cycle=30 handles=1827 baseline=1827
+relay pool cleanup cycle=40 handles=1827 baseline=1827
+relay pool cleanup cycle=50 handles=1827 baseline=1827
+relay pool cleanup cycle=60 handles=1827 baseline=1827
+relay pool cleanup cycle=70 handles=1827 baseline=1827
+relay pool cleanup cycle=80 handles=1827 baseline=1827
+relay pool cleanup cycle=90 handles=1827 baseline=1827
+relay pool cleanup cycle=100 handles=1827 baseline=1827
+relay pool cleanup: 100 complete setup/adapter-reservation/close cycles, no net handle g...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="gst_relay_pool_controls_win" classname="gst_relay_pool_controls_win" time="0.071185" status="run">
+		<properties/>
+		<system-out>relay pool controls: inactive/unbounded/aliased-output requests rejected; foreign CPU pool rejected with every temporary buffer returned
+</system-out>
+	</testcase>
+	<testcase name="gst_relay_supervisor_controls_win" classname="gst_relay_supervisor_controls_win" time="0.0667788" status="run">
+		<properties/>
+		<system-out>supervisor controls: unrelated/cancelled graph rejects without propagation; stopped-before-start rejects; stop joins without cancellation; single-use lifecycle
+</system-out>
+	</testcase>
+	<testcase name="gst_native_bin_relay_supervised_downstream_win" classname="gst_native_bin_relay_supervised_downstream_win" time="0.668508" status="run">
+		<properties/>
+		<system-out>native AV mode 8 local=0
+bin relay n=0 collect=0 pending=1
+bin relay n=1 collect=0 pending=1
+bin relay n=2 collect=0 pending=1
+bin relay n=3 collect=0 pending=1
+bin relay n=4 collect=0 pending=1
+bin relay n=5 collect=0 pending=1
+bin relay n=6 collect=0 pending=1
+bin relay n=7 collect=0 pending=1
+relay pool setup: held-slot BUSY is bounded; geometry/capacity mismatch rejects; all temporary reservations returned
+broker bin downstream cancellation: 103.450ms, automatic idle supervisor propagation, no END/EOS, final reader still held
+broker bin original producer observes cancellation: 0.055ms, no EOS
+broker native bin relay: 8 frames over two original allocations / 384 PCM frames; identity intermediate mapping, negotiated final mapping and exact 37ms A/V, authenticated session; final reader retained beyond upstream and downstream bin teardown
+native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+</system-out>
+	</testcase>
+	<testcase name="gst_native_bin_relay_supervised_upstream_win" classname="gst_native_bin_relay_supervised_upstream_win" time="0.673148" status="run">
+		<properties/>
+		<system-out>native AV mode 9 local=0
+bin relay n=0 collect=0 pending=1
+bin relay n=1 collect=0 pending=1
+bin relay n=2 collect=0 pending=1
+bin relay n=3 collect=0 pending=1
+bin relay n=4 collect=0 pending=1
+bin relay n=5 collect=0 pending=1
+bin relay n=6 collect=0 pending=1
+bin relay n=7 collect=0 pending=1
+broker bin upstream cancellation: 1.780ms, automatic idle supervisor propagation, no END/EOS, final reader still held
+broker bin original producer observes cancellation: 0.010ms, no EOS
+broker native bin relay: 8 frames over two original allocations / 384 PCM frames; identity intermediate mapping, negotiated final mapping and exact 37ms A/V, authenticated session; final reader retained beyond upstream and downstream bin teardown
+native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+</system-out>
+	</testcase>
+	<testcase name="gst_native_bin_relay_events_win" classname="gst_native_bin_relay_events_win" time="0.779852" status="run">
+		<properties/>
+		<system-out>native AV mode 7 local=0
+bin relay n=0 collect=0 pending=1
+bin relay n=1 collect=0 pending=1
+bin relay n=2 collect=0 pending=1
+bin relay n=3 collect=0 pending=1
+bin relay n=4 collect=0 pending=1
+bin relay n=5 collect=0 pending=1
+bin relay n=6 collect=0 pending=1
+bin relay n=7 collect=0 pending=1
+broker bin serialized GAP: exact 4,4,8 frame boundaries, negotiated mapping, durations 250/750/500us, DISCONT preserved, trailing GAP before EOS
+broker native bin relay: 8 frames over two original allocations / 384 PCM frames; identity intermediate mapping, negotiated final mapping and exact 37ms A/V, authenticated session; final reader retained beyond upstream and downstream bin teardown
+native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+</system-out>
+	</testcase>
+	<testcase name="gst_native_bin_relay_cancel_win" classname="gst_native_bin_relay_cancel_win" time="0.67229" status="run">
+		<properties/>
+		<system-out>native AV mode 6 local=0
+bin relay n=0 collect=0 pending=1
+bin relay n=1 collect=0 pending=1
+bin relay n=2 collect=0 pending=1
+bin relay n=3 collect=0 pending=1
+bin relay n=4 collect=0 pending=1
+bin relay n=5 collect=0 pending=1
+bin relay n=6 collect=0 pending=1
+bin relay n=7 collect=0 pending=1
+broker bin downstream cancellation: 107.505ms, explicit broker propagation, no END/EOS, final reader still held
+broker bin original producer observes cancellation: 0.033ms, no EOS
+broker native bin relay: 8 frames over two original allocations / 384 PCM frames; identity intermediate mapping, negotiated final mapping and exact 37ms A/V, authenticated session; final reader retained beyond upstream and downstream bin teardown
+native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+</system-out>
+	</testcase>
+	<testcase name="gst_native_bin_relay_win" classname="gst_native_bin_relay_win" time="0.780829" status="run">
+		<properties/>
+		<system-out>native AV mode 0 local=0
+bin relay n=0 collect=0 pending=1
+bin relay n=1 collect=0 pending=1
+bin relay n=2 collect=0 pending=1
+bin relay n=3 collect=0 pending=1
+bin relay n=4 collect=0 pending=1
+bin relay n=5 collect=0 pending=1
+bin relay n=6 collect=0 pending=1
+bin relay n=7 collect=0 pending=1
+broker native bin relay: 8 frames over two original allocations / 384 PCM frames; identity intermediate mapping, negotiated final mapping and exact 37ms A/V, authenticated session; final reader retained beyond upstream and downstream bin teardown
+native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+</system-out>
+	</testcase>
+	<testcase name="gst_native_lease_relay_win" classname="gst_native_lease_relay_win" time="0.52171" status="run">
+		<properties/>
+		<system-out>native AV mode 0 local=0
+lease input refs frame=0 sample=2 buffer=2 memory=2
+lease input refs frame=1 sample=2 buffer=1 memory=2
+lease input refs frame=2 sample=2 buffer=1 memory=2
+lease input refs frame=3 sample=2 buffer=1 memory=2
+lease input refs frame=4 sample=2 buffer=1 memory=2
+lease input refs frame=5 sample=2 buffer=1 memory=2
+lease input refs frame=6 sample=2 buffer=1 memory=2
+lease input refs frame=7 sample=2 buffer=1 memory=3
+native GstMemory lease adapter: 8 frames, reversed same-allocation slots, exact mapped timestamps/pixels, invalid/foreign inputs rejected; final upstream reader retained after complete bin teardown and retired only after downstream completion
+native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+</system-out>
+	</testcase>
+	<testcase name="gst_automatic_relay_negative_win" classname="gst_automatic_relay_negative_win" time="0.99931" status="run">
+		<properties/>
+		<system-out>native AV mode 0 local=1
+automatic second hop: own reservation pixels/PCM/37ms passed; first-hop reader rejected 0.045ms (native sink requires its own reserved allocation and valid metadata; no copy fallback)
+native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+</system-out>
+	</testcase>
+	<testcase name="gst_native_bin_cancel_win" classname="gst_native_bin_cancel_win" time="1.2315" status="run">
+		<properties/>
+		<system-out>native AV mode 4 local=1
+native AV: coordinated session not ready or cancelled <win-home>\dev\framelink-final-final-060c54e4\source\gst\gstframelink.cpp(537): sinkRenderImpl (): /GstPipeline:pipeline0/GstFrameLinkAvSink:transport/GstFrameLinkSink:video
+native AV mode 5 local=1
+native AV: audio peer closed before GDP EOS <win-home>\dev\framelink-final-final-060c54e4\source\gst\gstframelinkaudiosrc.cpp(66): readChunkImpl (): /GstPipeline:pipeline3/GstFrameLinkAvSrc:transport/GstFrameLinkAudioSrc:audio/FlAudioReader:flaudioreader1
+automatic native bin receiver cancellation: error in 106.557ms, no source EOS, native memories retained
+native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+automatic native bin producer cancellation: error in 0.304ms, no source EOS, native memories retained
+native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+</system-out>
+	</testcase>
+	<testcase name="gst_native_relay_av_win" classname="gst_native_relay_av_win" time="6.02331" status="run">
+		<properties/>
+		<system-out>relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+PCM queue controls: bounded retry, exact 4-block delivery, nonzero origin/discontinuity, bounded upstream/downstream cancellation, empty timeout, fail-closed initial/midstream GAP and 6 configuration negatives passed
+PCM GAP controls: opt-in leading/midstream order/seqnum/pixels, bounded zero-byte queue/retry, malformed timing, discontinuity and pending cancellation passed
+PCM terminal interruption mode=0 result=2 elapsed_us=54756
+PCM terminal interruption mode=1 result=2 elapsed_us=50602
+PCM terminal interruption mode=2 result=4 elapsed_us=55080
+PCM terminal controls: bounded both-session cancellation/replacement, polling, finite timeout and retry passed
+coordinated native relay: 16 same-allocation video frames / 768 PCM frames, two authenticated sessions, exact metadata, 37ms offset, ordered barriers, held-reader backpressure and terminal drain passed
+relay session contrac...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="gst_native_relay_process_win" classname="gst_native_relay_process_win" time="1.60209" status="run">
+		<properties/>
+		<system-out>three-process coordinated relay: 16 same-allocation video frames, 768 exact PCM frames; nonempty: both reversed slots / 37ms offset / held-reader exclusion; ordered GAP/barrier/END and authenticated terminal passed
+three-process coordinated relay: 0 same-allocation video frames, 0 exact PCM frames; nonempty: both reversed slots / 37ms offset / held-reader exclusion; ordered GAP/barrier/END and authenticated terminal passed
+</system-out>
+	</testcase>
+	<testcase name="gst_native_relay_reservation_win" classname="gst_native_relay_reservation_win" time="0.943817" status="run">
+		<properties/>
+		<system-out>three-process coordinated relay: 16 same-allocation video frames, 768 exact PCM frames; nonempty: both reversed slots / 37ms offset / held-reader exclusion; ordered GAP/barrier/END and authenticated terminal passed
+</system-out>
+	</testcase>
+	<testcase name="gst_native_relay_death_win" classname="gst_native_relay_death_win" time="1.54869" status="run">
+		<properties/>
+		<system-out>producer death (raw): explicit failure, no synthetic END/EOS, held pixels intact, no premature lease completion, bounded native drain
+producer death (GstMemory): explicit failure, no synthetic END/EOS, held pixels intact, no premature lease completion, bounded native drain
+</system-out>
+	</testcase>
+	<testcase name="gst_native_relay_downstream_death_win" classname="gst_native_relay_downstream_death_win" time="2.0067" status="run">
+		<properties/>
+		<system-out>downstream process death (raw): reader exit73, exact pixels/PCM/37ms offset, bounded failure, lease retained, no synthetic drain; source exit74, relay exit0; old graph discarded
+downstream process death (GstMemory): reader exit73, exact pixels/PCM/37ms offset, bounded failure, lease retained, no synthetic drain; source exit74, relay exit0; old graph discarded
+</system-out>
+	</testcase>
+	<testcase name="gst_native_relay_cancel_win" classname="gst_native_relay_cancel_win" time="1.54781" status="run">
+		<properties/>
+		<system-out>downstream cancellation (raw): explicit failure, no synthetic END/EOS, held pixels intact, no premature lease completion, bounded native drain
+downstream cancellation (GstMemory): explicit failure, no synthetic END/EOS, held pixels intact, no premature lease completion, bounded native drain
+</system-out>
+	</testcase>
+	<testcase name="gst_native_relay_decoder_win" classname="gst_native_relay_decoder_win" time="1.02774" status="run">
+		<properties/>
+		<system-out>three-process coordinated relay: 16 same-allocation video frames, 25600 exact PCM frames; nonempty: both reversed slots / 37ms offset / held-reader exclusion; ordered GAP/barrier/END and authenticated terminal passed
+</system-out>
+	</testcase>
+	<testcase name="gst_native_source_win" classname="gst_native_source_win" time="2.77734" status="run">
+		<properties>
+			<property name="cmake_labels" value="gst_video_regression"/>
+		</properties>
+		<system-out>RGBA native D3D11: same shared allocation, pixels/PTS, bounded reuse and retained memory after stop pass
+NV12 native D3D11: same shared allocation, pixels/PTS, bounded reuse and retained memory after stop pass
+RGBA native D3D11: same shared allocation, pixels/PTS, bounded reuse and retained memory after stop pass
+native layout generation: resized NV12 pixels, planes and memory extent pass
+CPU output cache: retained pixels and exact extent across grow/shrink/stop pass
+</system-out>
+	</testcase>
+	<testcase name="gst_native_source_win_copy_negative" classname="gst_native_source_win_copy_negative" time="0.267475" status="run">
+		<properties>
+			<property name="cmake_labels" value="gst_video_regression"/>
+		</properties>
+		<system-out>deliberate GPU copy rejected by allocation-alias oracle after successful setup
+</system-out>
+	</testcase>
+	<testcase name="gst_nv12_roundtrip" classname="gst_nv12_roundtrip" time="2.00926" status="run">
+		<properties>
+			<property name="cmake_labels" value="gst_video_regression"/>
+		</properties>
+		<system-out>GStreamer NV12 padded/offset byte roundtrip and mismatch rejection passed
+</system-out>
+	</testcase>
+	<testcase name="gst_rgb10a2_roundtrip" classname="gst_rgb10a2_roundtrip" time="1.98714" status="run">
+		<properties>
+			<property name="cmake_labels" value="gst_video_regression"/>
+		</properties>
+		<system-out>GStreamer RGB10A2_LE padded/offset byte roundtrip and mismatch rejection passed
+</system-out>
+	</testcase>
+	<testcase name="nv12_windows_roundtrip" classname="nv12_windows_roundtrip" time="0.455045" status="run">
+		<properties/>
+		<system-out>-- 24 cross-process shared NV12 textures: every Y/UV byte and fence-ordered readback passed
+
+</system-out>
+	</testcase>
+	<testcase name="nv12_windows_1080p" classname="nv12_windows_1080p" time="0.47982" status="run">
+		<properties/>
+		<system-out>-- 24 cross-process shared NV12 textures: every Y/UV byte and fence-ordered readback passed
+
+</system-out>
+	</testcase>
+	<testcase name="sample_bgra" classname="sample_bgra" time="0.507102" status="run">
+		<properties/>
+		<system-out>-- channel version=6 format=BGRA size=130x66 pool=1 generation=1 adapter=ff69010000000000
+consumer received=12 verified=12 pattern_gaps=0 sequence_gaps=0 timeouts=1 fps=28.57 pts_age_mean_ms=1.543 pts_age_max_ms=2.144
+
+channel version=6 format=BGRA size=130x66 pool=1 generation=2 adapter=ff69010000000000
+producer sent=13 timeouts=0 reconnects=0 elapsed_ms=451
+
+</system-out>
+	</testcase>
+	<testcase name="sample_nv12" classname="sample_nv12" time="0.470876" status="run">
+		<properties/>
+		<system-out>-- channel version=6 format=NV12 size=130x66 pool=8 generation=1 adapter=ff69010000000000
+consumer received=12 verified=12 pattern_gaps=0 sequence_gaps=0 timeouts=1 fps=28.90 pts_age_mean_ms=1.641 pts_age_max_ms=2.644
+
+channel version=6 format=NV12 size=130x66 pool=8 generation=2 adapter=ff69010000000000
+producer sent=13 timeouts=0 reconnects=0 elapsed_ms=433
+
+</system-out>
+	</testcase>
+	<testcase name="sample_slow" classname="sample_slow" time="0.713059" status="run">
+		<properties/>
+		<system-out>-- channel version=6 format=NV12 size=130x66 pool=2 generation=1 adapter=ff69010000000000
+consumer received=12 verified=12 pattern_gaps=0 sequence_gaps=0 timeouts=1 fps=20.94 pts_age_mean_ms=18.877 pts_age_max_ms=21.138
+
+channel version=6 format=NV12 size=130x66 pool=2 generation=2 adapter=ff69010000000000
+producer sent=14 timeouts=0 reconnects=0 elapsed_ms=676
+
+</system-out>
+	</testcase>
+	<testcase name="sample_metadata" classname="sample_metadata" time="0.493254" status="run">
+		<properties/>
+		<system-out>-- channel version=6 format=BGRA size=130x66 pool=4 generation=1 adapter=ff69010000000000
+consumer received=12 verified=0 pattern_gaps=0 sequence_gaps=0 timeouts=1 fps=27.48 pts_age_mean_ms=1.468 pts_age_max_ms=1.956
+
+channel version=6 format=BGRA size=130x66 pool=4 generation=2 adapter=ff69010000000000
+producer sent=13 timeouts=0 reconnects=0 elapsed_ms=455
+
+</system-out>
+	</testcase>
+	<testcase name="sample_reconnect" classname="sample_reconnect" time="0.703576" status="run">
+		<properties/>
+		<system-out>-- channel version=6 format=NV12 size=130x66 pool=4 generation=1 adapter=ff69010000000000
+consumer received=12 verified=12 pattern_gaps=0 sequence_gaps=0 timeouts=21 fps=18.52 pts_age_mean_ms=1.798 pts_age_max_ms=2.686
+
+channel version=6 format=NV12 size=130x66 pool=4 generation=2 adapter=ff69010000000000
+channel version=6 format=NV12 size=130x66 pool=4 generation=3 adapter=ff69010000000000
+producer sent=13 timeouts=0 reconnects=1 elapsed_ms=665
+
+</system-out>
+	</testcase>
+	<testcase name="sample_geometry" classname="sample_geometry" time="0.473028" status="run">
+		<properties/>
+		<system-out>-- channel version=6 format=NV12 size=130x66 pool=4 generation=1 adapter=ff69010000000000
+consumer received=12 verified=12 pattern_gaps=0 sequence_gaps=0 timeouts=1 fps=28.81 pts_age_mean_ms=1.807 pts_age_max_ms=2.277
+
+channel version=6 format=NV12 size=194x98 pool=4 generation=3 adapter=ff69010000000000
+producer sent=13 timeouts=0 reconnects=0 elapsed_ms=434
+
+</system-out>
+	</testcase>
+	<testcase name="sample_slots" classname="sample_slots" time="0.46929" status="run">
+		<properties/>
+		<system-out>-- channel version=6 format=BGRA size=130x66 pool=4 generation=1 adapter=ff69010000000000
+consumer received=12 verified=12 pattern_gaps=0 sequence_gaps=0 timeouts=1 fps=28.92 pts_age_mean_ms=1.632 pts_age_max_ms=2.150
+
+selected_slot=0
+channel version=6 format=BGRA size=130x66 pool=4 generation=2 adapter=ff69010000000000
+producer sent=13 timeouts=0 reconnects=0 elapsed_ms=432
+
+</system-out>
+	</testcase>
+	<testcase name="sample_gpu_sync" classname="sample_gpu_sync" time="0.471408" status="run">
+		<properties/>
+		<system-out>-- channel version=6 format=NV12 size=130x66 pool=4 generation=1 adapter=ff69010000000000
+consumer received=12 verified=12 pattern_gaps=0 sequence_gaps=0 timeouts=1 fps=28.85 pts_age_mean_ms=1.687 pts_age_max_ms=2.170
+
+channel version=6 format=NV12 size=130x66 pool=4 generation=2 adapter=ff69010000000000
+producer sent=13 timeouts=0 reconnects=0 elapsed_ms=433
+
+</system-out>
+	</testcase>
+	<testcase name="sample_invalid_cli" classname="sample_invalid_cli" time="0.0088638" status="run">
+		<properties/>
+		<system-out>options: NV12 dimensions must be even
+</system-out>
+	</testcase>
+	<testcase name="sample_wrong_role" classname="sample_wrong_role" time="0.0083364" status="run">
+		<properties/>
+		<system-out>options: unknown or wrong-role option: --pool
+</system-out>
+	</testcase>
+	<testcase name="sample_corruption" classname="sample_corruption" time="0.561191" status="run">
+		<properties/>
+		<system-out>-- channel version=6 format=NV12 size=130x66 pool=4 generation=1 adapter=ff69010000000000
+
+channel version=6 format=NV12 size=130x66 pool=4 generation=2 adapter=ff69010000000000
+consumer FAIL after 0 frames: pixel mismatch frame=0 plane=1 x=129 y=32
+producer sent=2 timeouts=0 reconnects=0 elapsed_ms=525
+
+</system-out>
+	</testcase>
+	<testcase name="disconnect_full_ring" classname="disconnect_full_ring" time="0.217791" status="run">
+		<properties/>
+		<system-out>full ring detects consumer disconnect without fence progress
+</system-out>
+	</testcase>
+	<testcase name="trace_disabled" classname="trace_disabled" time="0.0236369" status="run">
+		<properties/>
+		<system-out></system-out>
+	</testcase>
+	<testcase name="trace_default_capacity" classname="trace_default_capacity" time="0.0226999" status="run">
+		<properties/>
+		<system-out></system-out>
+	</testcase>
+	<testcase name="trace_override_capacity" classname="trace_override_capacity" time="0.0317166" status="run">
+		<properties/>
+		<system-out></system-out>
+	</testcase>
+	<testcase name="trace_invalid_capacity" classname="trace_invalid_capacity" time="0.0210553" status="run">
+		<properties/>
+		<system-out></system-out>
+	</testcase>
+	<testcase name="trace_bounded_concurrent" classname="trace_bounded_concurrent" time="0.0200851" status="run">
+		<properties/>
+		<system-out></system-out>
+	</testcase>
+	<testcase name="trace_thread_limit" classname="trace_thread_limit" time="0.0148357" status="run">
+		<properties/>
+		<system-out></system-out>
+	</testcase>
+	<testcase name="portable_map_nv12" classname="portable_map_nv12" time="0.236066" status="run">
+		<properties/>
+		<system-out>Portable CPU plane mapping: 8 patterned frames verified
+</system-out>
+	</testcase>
+	<testcase name="portable_map_rgba" classname="portable_map_rgba" time="0.21913" status="run">
+		<properties/>
+		<system-out>Portable CPU plane mapping: 8 patterned frames verified
+</system-out>
+	</testcase>
+	<testcase name="portable_map_bgra" classname="portable_map_bgra" time="0.216139" status="run">
+		<properties/>
+		<system-out>Portable CPU plane mapping: 8 patterned frames verified
+</system-out>
+	</testcase>
+	<testcase name="portable_map_rgb10a2" classname="portable_map_rgb10a2" time="0.214364" status="run">
+		<properties/>
+		<system-out>Portable CPU plane mapping: 8 patterned frames verified
+</system-out>
+	</testcase>
+	<testcase name="ready_fence_timeout" classname="ready_fence_timeout" time="0.243449" status="run">
+		<properties/>
+		<system-out>Unsignaled ready fence times out; later signal preserves pending frame
+</system-out>
+	</testcase>
+	<testcase name="reconnect_held" classname="reconnect_held" time="0.313998" status="run">
+		<properties/>
+		<system-out>Reconnect refuses held storage, then starts fresh generation
+</system-out>
+	</testcase>
+	<testcase name="gst_av_session" classname="gst_av_session" time="3.52361" status="run">
+		<properties/>
+		<system-out>session=163497405613 clock=GstSystemClock shared-base=163497408428500 video=150 audio=150 missing=0 drift_blocks=0 restarts=0
+app-observed pull skew ms p50=0.011 p99=1.019; video scheduled lateness ms p50=0.618 p99=1.988 (not speaker/scanout latency)
+</system-out>
+	</testcase>
+	<testcase name="gst_av_faults" classname="gst_av_faults" time="2.60713" status="run">
+		<properties/>
+		<system-out>session=163500912789 clock=GstSystemClock shared-base=163500915293300 video=150 audio=149 missing=1 drift_blocks=40 restarts=1
+app-observed pull skew ms p50=0.010 p99=4.015; video scheduled lateness ms p50=1.331 p99=1968.026 (not speaker/scanout latency)
+</system-out>
+	</testcase>
+	<testcase name="gst_timestamp_contract" classname="gst_timestamp_contract" time="1.78053" status="run">
+		<properties>
+			<property name="cmake_labels" value="gst_video_regression"/>
+		</properties>
+		<system-out>Timestamp contract: zero, repeated/backward, signed limit, overflow/missing rejection, segment mapping, variable metadata, generation relay, default mode passed
+</system-out>
+	</testcase>
+	<testcase name="session_contract_peers" classname="session_contract_peers" time="0.208835" status="run">
+		<properties/>
+		<system-out>agree: proposer=0, acceptor=0; contract gate passed
+unoffered: proposer=2, acceptor=2; contract gate passed
+stale: proposer=2, acceptor=2; contract gate passed
+changed-track: proposer=2, acceptor=2; contract gate passed
+unknown-clock: proposer=2, acceptor=2; contract gate passed
+malformed: proposer=2, acceptor=2; contract gate passed
+changed-ack: proposer=3, acceptor=0; contract gate passed
+</system-out>
+	</testcase>
+	<testcase name="av_rendezvous" classname="av_rendezvous" time="0.266948" status="run">
+		<properties/>
+		<system-out>private rendezvous: agreement, owner exclusion, crash recovery, malformed data and access checks passed
+</system-out>
+	</testcase>
+	<testcase name="av_auth" classname="av_auth" time="0.0377862" status="run">
+		<properties/>
+		<system-out>mutual A/V authentication: success, wrong key/role, fake server and reflection rejection passed
+</system-out>
+	</testcase>
+	<testcase name="av_producer_help" classname="av_producer_help" time="0.030918" status="run">
+		<properties/>
+		<system-out>Usage: framelink_av_{producer,consumer} PLUGIN --session PRIVATE_DIR
+  --frames N --format BGRA|NV12|auto --width W --height H --fps N
+  --rate N --channels 1|2 --timeout-ms N --sessions N
+  --media-run-ms 1..300000 (opt-in finite coordinated streaming; matching peers)
+  Consumer: --stream --audio-sink autoaudiosink|fakesink --latency-ms N (scheduled streaming); --play (verification window/sound); producer: --fault missing-audio|audio-pts-reset
+  --audio-offset-ns 0..2000000000 (producer fixture; verifier must use same offset)
+  --pacing-ppm -200000..200000 (producer pacing injection; PTS unchanged)
+  --input-pipeline FILE (producer; @VIDEO_SINK@ and @AUDIO_SINK@; requires streaming consumer)
+  --clock-policy audio|producer|audio-coordinated (stream receiver; default audio)
+  --trace-media (expensive payload hashes and running PTS for integration validation)
+  auto is consumer-only. See docs/M3_AV_APPS.md for bounds and recovery semantics.
+</system-out>
+	</testcase>
+	<testcase name="av_consumer_help" classname="av_consumer_help" time="0.0293434" status="run">
+		<properties/>
+		<system-out>Usage: framelink_av_{producer,consumer} PLUGIN --session PRIVATE_DIR
+  --frames N --format BGRA|NV12|auto --width W --height H --fps N
+  --rate N --channels 1|2 --timeout-ms N --sessions N
+  --media-run-ms 1..300000 (opt-in finite coordinated streaming; matching peers)
+  Consumer: --stream --audio-sink autoaudiosink|fakesink --latency-ms N (scheduled streaming); --play (verification window/sound); producer: --fault missing-audio|audio-pts-reset
+  --audio-offset-ns 0..2000000000 (producer fixture; verifier must use same offset)
+  --pacing-ppm -200000..200000 (producer pacing injection; PTS unchanged)
+  --input-pipeline FILE (producer; @VIDEO_SINK@ and @AUDIO_SINK@; requires streaming consumer)
+  --clock-policy audio|producer|audio-coordinated (stream receiver; default audio)
+  --trace-media (expensive payload hashes and running PTS for integration validation)
+  auto is consumer-only. See docs/M3_AV_APPS.md for bounds and recovery semantics.
+</system-out>
+	</testcase>
+	<testcase name="m3_av_apps" classname="m3_av_apps" time="30.1583" status="run">
+		<properties/>
+		<system-out>evidence: <win-home>\AppData\Local\Temp\framelink-m3-dxfdlqgc
+{"case": "bgra-producer-first", "passed": true, "results": {"producer": {"role": "producer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}, "consumer": {"role": "consumer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}}, "verified_session": {"event": "session-complete", "instance": "f58163f893248c92f8e7bff9dc8e0dd5", "generation": 1, "format": "BGRA", "video_frames": 50, "audio_blocks": 50, "audio_offset_ns": 0}}
+{"case": "bgra-consumer-first", "passed": true, "results": {"consumer": {"role": "consumer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}, "producer": {"role": "producer", "ok": true, "sessions": 1, "video_frames": 50, "audio_blocks": 50, "errors": 0, "disconnects": 0}}, "verified_session": {"event": "session-complete", "instance": "dee52abb91d5c43fe59e9eab98eb1b20", "generation": ...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="gst_pool_policy" classname="gst_pool_policy" time="4.98876" status="run">
+		<properties>
+			<property name="cmake_labels" value="gst_video_regression"/>
+		</properties>
+		<system-out>
+** (fl_gst_pool_policy.exe:37096): WARNING **: 22:57:33.698: framelinkavsink: buffer-wait-ms can only change in NULL
+
+** (fl_gst_pool_policy.exe:37096): WARNING **: 22:57:33.698: framelinkavsink: error-on-ring-full can only change in NULL
+pool2: single-frame no-fill, producer gap, exact PTS/pixels and no invented sequence loss pass
+pool3: single-frame no-fill, producer gap, exact PTS/pixels and no invented sequence loss pass
+sync=0: transport admission separated from sink clock hold pass
+sync=1: transport admission separated from sink clock hold pass
+2/3 image capacities: bounded drop, bounded error, delayed-reader recovery and exact loss accounting pass
+</system-out>
+	</testcase>
+	<testcase name="m5a_transport_relay" classname="m5a_transport_relay" time="1.46861" status="run">
+		<properties>
+			<property name="cmake_labels" value="gst_video_regression"/>
+		</properties>
+		<system-out>{"frame":0,"producer_offset_ns":37000000,"consumer_offset_ns":37000000,"video_send_ns":163541398951000,"audio_send_ns":163541398984000,"video_receive_ns":163541443454000,"audio_receive_ns":163541421749000}
+{"frame":1,"producer_offset_ns":37000000,"consumer_offset_ns":37000000,"video_send_ns":163541444941000,"audio_send_ns":163541444970000,"video_receive_ns":163541449112000,"audio_receive_ns":163541445159000}
+{"frame":2,"producer_offset_ns":37000000,"consumer_offset_ns":37000000,"video_send_ns":163541450941000,"audio_send_ns":163541450971000,"video_receive_ns":163541455097000,"audio_receive_ns":163541451141000}
+{"frame":3,"producer_offset_ns":37000000,"consumer_offset_ns":37000000,"video_send_ns":163541456940000,"audio_send_ns":163541456967000,"video_receive_ns":163541461115000,"audio_receive_ns":163541457152000}
+{"frame":4,"producer_offset_ns":37000000,"consumer_offset_ns":37000000,"video_send_ns":163541462939000,"audio_send_ns":163541462967000,"video_receive_ns":163541467102000,"audio_receive_ns":16354146312...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="m5a_transport_relay_audio_leads" classname="m5a_transport_relay_audio_leads" time="1.38622" status="run">
+		<properties>
+			<property name="cmake_labels" value="gst_video_regression"/>
+		</properties>
+		<system-out>{"frame":0,"producer_offset_ns":-37000000,"consumer_offset_ns":-37000000,"video_send_ns":163542851295000,"audio_send_ns":163542851333000,"video_receive_ns":163542893791000,"audio_receive_ns":163542874051000}
+{"frame":1,"producer_offset_ns":-37000000,"consumer_offset_ns":-37000000,"video_send_ns":163542895286000,"audio_send_ns":163542895317000,"video_receive_ns":163542897463000,"audio_receive_ns":163542895490000}
+{"frame":2,"producer_offset_ns":-37000000,"consumer_offset_ns":-37000000,"video_send_ns":163542899285000,"audio_send_ns":163542899312000,"video_receive_ns":163542900940000,"audio_receive_ns":163542899478000}
+{"frame":3,"producer_offset_ns":-37000000,"consumer_offset_ns":-37000000,"video_send_ns":163542902790000,"audio_send_ns":163542902816000,"video_receive_ns":163542904947000,"audio_receive_ns":163542902984000}
+{"frame":4,"producer_offset_ns":-37000000,"consumer_offset_ns":-37000000,"video_send_ns":163542906793000,"audio_send_ns":163542906804000,"video_receive_ns":163542908948000,"audio_receive_ns":1...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="m5a_transport_relay_sync_negative" classname="m5a_transport_relay_sync_negative" time="0.72255" status="run">
+		<properties>
+			<property name="cmake_labels" value="gst_video_regression"/>
+		</properties>
+		<system-out>NEGATIVE_CONTROL_CAUGHT: intermediate sync=true schedules future media instead of transporting immediately
+</system-out>
+	</testcase>
+	<testcase name="m4_transport_audio_lags" classname="m4_transport_audio_lags" time="0.834511" status="run">
+		<properties/>
+		<system-out>{"frame":0,"producer_offset_ns":37000000,"consumer_offset_ns":37000000,"video_send_ns":163544930927000,"audio_send_ns":163544930965000,"video_receive_ns":163544956925000,"audio_receive_ns":163544931628000}
+{"frame":1,"producer_offset_ns":37000000,"consumer_offset_ns":37000000,"video_send_ns":163544958422000,"audio_send_ns":163544958446000,"video_receive_ns":163544960609000,"audio_receive_ns":163544958574000}
+{"frame":2,"producer_offset_ns":37000000,"consumer_offset_ns":37000000,"video_send_ns":163544962419000,"audio_send_ns":163544962447000,"video_receive_ns":163544964586000,"audio_receive_ns":163544962554000}
+{"frame":3,"producer_offset_ns":37000000,"consumer_offset_ns":37000000,"video_send_ns":163544966421000,"audio_send_ns":163544966433000,"video_receive_ns":163544968580000,"audio_receive_ns":163544966527000}
+{"frame":4,"producer_offset_ns":37000000,"consumer_offset_ns":37000000,"video_send_ns":163544970418000,"audio_send_ns":163544970434000,"video_receive_ns":163544972579000,"audio_receive_ns":16354497053...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="m4_transport_audio_leads" classname="m4_transport_audio_leads" time="0.838477" status="run">
+		<properties/>
+		<system-out>{"frame":0,"producer_offset_ns":-37000000,"consumer_offset_ns":-37000000,"video_send_ns":163545770042000,"audio_send_ns":163545770078000,"video_receive_ns":163545792049000,"audio_receive_ns":163545770560000}
+{"frame":1,"producer_offset_ns":-37000000,"consumer_offset_ns":-37000000,"video_send_ns":163545793548000,"audio_send_ns":163545793572000,"video_receive_ns":163545795716000,"audio_receive_ns":163545793686000}
+{"frame":2,"producer_offset_ns":-37000000,"consumer_offset_ns":-37000000,"video_send_ns":163545797546000,"audio_send_ns":163545797572000,"video_receive_ns":163545799704000,"audio_receive_ns":163545797676000}
+{"frame":3,"producer_offset_ns":-37000000,"consumer_offset_ns":-37000000,"video_send_ns":163545801051000,"audio_send_ns":163545801079000,"video_receive_ns":163545803719000,"audio_receive_ns":163545801179000}
+{"frame":4,"producer_offset_ns":-37000000,"consumer_offset_ns":-37000000,"video_send_ns":163545805557000,"audio_send_ns":163545805569000,"video_receive_ns":163545807713000,"audio_receive_ns":1...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="m4_transport_jitter_drift" classname="m4_transport_jitter_drift" time="1.0415" status="run">
+		<properties/>
+		<system-out>{"frame":0,"producer_offset_ns":37000000,"consumer_offset_ns":37000000,"video_send_ns":163546615457000,"audio_send_ns":163546615490000,"video_receive_ns":163546636960000,"audio_receive_ns":163546616021000}
+{"frame":1,"producer_offset_ns":37100000,"consumer_offset_ns":37100000,"video_send_ns":163546638449000,"audio_send_ns":163546640446000,"video_receive_ns":163546640635000,"audio_receive_ns":163546640560000}
+{"frame":2,"producer_offset_ns":37200000,"consumer_offset_ns":37200000,"video_send_ns":163546642449000,"audio_send_ns":163546645448000,"video_receive_ns":163546644609000,"audio_receive_ns":163546645556000}
+{"frame":3,"producer_offset_ns":37300000,"consumer_offset_ns":37300000,"video_send_ns":163546647447000,"audio_send_ns":163546651460000,"video_receive_ns":163546648595000,"audio_receive_ns":163546651568000}
+{"frame":4,"producer_offset_ns":37400000,"consumer_offset_ns":37400000,"video_send_ns":163546653448000,"audio_send_ns":163546658446000,"video_receive_ns":163546654592000,"audio_receive_ns":16354665855...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="m4_transport_negative_retimestamps" classname="m4_transport_negative_retimestamps" time="0.437005" status="run">
+		<properties/>
+		<system-out>NEGATIVE_CONTROL_CAUGHT: consumer arrival retimestamping changes producer PTS
+</system-out>
+	</testcase>
+	<testcase name="audio_alignment" classname="audio_alignment" time="0.145736" status="run">
+		<properties/>
+		<system-out>guarded=0 samples=1600 jump=40000000 commits=2 1600 -321
+guarded=1 samples=1600 jump=40000000 commits=2 1600 1600
+guarded=0 samples=200 jump=40000000 commits=2 200 -1721
+guarded=1 samples=200 jump=40000000 commits=2 200 200
+guarded=0 samples=1 jump=40000000 commits=2 1 -1920
+guarded=1 samples=1 jump=40000000 commits=2 1 1
+guarded=0 samples=1600 jump=20000 commits=2 1600 1599
+guarded=1 samples=1600 jump=20000 commits=2 1600 1599
+real resampler phase-jump negative controls, variable block bounds and small-drift preservation passed
+</system-out>
+	</testcase>
+	<testcase name="av_offer_bounds" classname="av_offer_bounds" time="0.0837221" status="run">
+		<properties/>
+		<system-out></system-out>
+	</testcase>
+	<testcase name="m4_av_recovery" classname="m4_av_recovery" time="10.2736" status="run">
+		<properties/>
+		<system-out>bounded status=session-reconnecting: rendezvous deadline
+ok=0 sessions=0 clocks=0 ends=0 retries=1 ms=763 error=rendezvous deadline
+normal {"event":"playback-clock","policy":"audio","system_now_ns":163549375830700,"selected_now_ns":163549375830600,"device_now_ns":18446744073709551615,"mapped_producer_base_ns":163549373932400,"playback_base_ns":163549395782200,"latency_ns":100000000,"resample_slaves":0}
+status=system-clock-fallback
+{"event":"video-source-sequence-gap","previous_sequence":0,"sequence":4,"missing":3,"pts_ns":60000000}
+{"event":"video-schedule-summary","received":72,"scheduled":72,"handed_off":0,"late":0,"overflow":0,"peak_pending":7,"pending_limit":8,"peak_bytes":403200,"byte_limit":134217728}
+{"event":"playback-metrics","peak_queue_buffers":4,"peak_queue_ns":80000000,"queue_empty_events":3,"queue_full_events":64,"late_audio_blocks":0,"arrival_drift_ns":1309300}
+{"event":"playback-complete","audio_master":false,"video_received":72,"video_late":0,"audio_blocks":75,"audio_samples":72000,"latency_n...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="m5_finite_budget" classname="m5_finite_budget" time="18.7569" status="run">
+		<properties/>
+		<system-out>{"case": "longer-than-setup", "exit_codes": [0, 0], "elapsed_seconds": 4.927268200000981}
+{"case": "missing-peer", "exit_codes": [1], "elapsed_seconds": 2.079074600012973}
+{"case": "mismatch", "exit_codes": [1, 1], "elapsed_seconds": 0.09588020000956021}
+{"case": "legacy-peer", "exit_codes": [1, 1], "elapsed_seconds": 0.09316230000695214}
+{"case": "early-eos", "exit_codes": [1, 1], "elapsed_seconds": 0.8752343000087421}
+{"case": "source-stall", "exit_codes": [1, 1], "elapsed_seconds": 2.6373387999774422}
+{"case": "producer-idle", "exit_codes": [1, 1], "elapsed_seconds": 3.0473583999846596}
+{"case": "consumer-idle", "exit_codes": [1, 1], "elapsed_seconds": 3.695982700010063}
+{"case": "cancel", "exit_codes": [1, 0], "elapsed_seconds": 0.6645474999968428}
+finite budget: 9 real-peer cases and 8 malformed CLI budgets passed
+</system-out>
+	</testcase>
+	<testcase name="m4_authenticated_offsets" classname="m4_authenticated_offsets" time="6.46187" status="run">
+		<properties/>
+		<system-out>{"case": "offset-37000000", "passed": true, "source_audio_offset_ns": 37000000, "timing": [{"event": "playback-timing", "audio_first_running_pts_ns": 37000000, "video_first_running_pts_ns": 60000000, "audio_end_ns": 1637000000, "video_end_ns": 1600000000}], "completion": [{"event": "playback-complete", "audio_master": false, "video_received": 77, "video_late": 0, "audio_blocks": 80, "audio_samples": 76800, "latency_ns": 100000000}], "exit_codes": [0, 0]}
+{"case": "offset-123456789", "passed": true, "source_audio_offset_ns": 123456789, "timing": [{"event": "playback-timing", "audio_first_running_pts_ns": 123456789, "video_first_running_pts_ns": 60000000, "audio_end_ns": 1723456789, "video_end_ns": 1600000000}], "completion": [{"event": "playback-complete", "audio_master": false, "video_received": 77, "video_late": 0, "audio_blocks": 80, "audio_samples": 76800, "latency_ns": 100000000}], "exit_codes": [0, 0]}
+{"case": "negative-reset-37000000", "passed": true, "source_audio_offset_ns": 37000000, "timing": [], "...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="m4_source_drift" classname="m4_source_drift" time="39.2512" status="run">
+		<properties/>
+		<system-out>-1000 100 PASS {'event': 'playback-metrics', 'peak_queue_buffers': 4, 'peak_queue_ns': 80000000, 'queue_empty_events': 4, 'queue_full_events': 293, 'late_audio_blocks': 0, 'arrival_drift_ns': 37459500}
+1000 100 PASS {'event': 'playback-metrics', 'peak_queue_buffers': 4, 'peak_queue_ns': 80000000, 'queue_empty_events': 5, 'queue_full_events': 293, 'late_audio_blocks': 0, 'arrival_drift_ns': 38289600}
+100000 100 PASS {'event': 'playback-metrics', 'peak_queue_buffers': 4, 'peak_queue_ns': 80000000, 'queue_empty_events': 3, 'queue_full_events': 293, 'late_audio_blocks': 0, 'arrival_drift_ns': 39184600}
+-100000 100 PASS {'event': 'playback-metrics', 'peak_queue_buffers': 4, 'peak_queue_ns': 80000000, 'queue_empty_events': 61, 'queue_full_events': 20, 'late_audio_blocks': 3, 'arrival_drift_ns': 263904300}
+-100000 2000 PASS {'event': 'playback-metrics', 'peak_queue_buffers': 4, 'peak_queue_ns': 80000000, 'queue_empty_events': 4, 'queue_full_events': 295, 'late_audio_blocks': 0, 'arrival_drift_ns': 1937319800}
+coordi...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="av_audio_segment" classname="av_audio_segment" time="0.082495" status="run">
+		<properties/>
+		<system-out>audio segment normalization, preserved offset, deadline and rejection tests passed
+</system-out>
+	</testcase>
+	<testcase name="windows_endpoint_ready" classname="windows_endpoint_ready" time="1.94998" status="run">
+		<properties/>
+		<system-out>12 immediate create/open cycles passed with delayed accept-thread scheduling
+</system-out>
+	</testcase>
+	<testcase name="m5_external_pipeline" classname="m5_external_pipeline" time="6.34162" status="run">
+		<properties>
+			<property name="cmake_labels" value="gpu;integration"/>
+		</properties>
+		<system-out>[
+  {
+    "format": "BGRA",
+    "producer_video_frames": 100,
+    "sink_arrival_video_frames": 94,
+    "scheduled_video_frames": 94,
+    "matched_audio_blocks": 100,
+    "audio_samples": 96000,
+    "late_video": 1,
+    "payload_pts_duration_preserved": true,
+    "physical_playback_qualified": false
+  },
+  {
+    "format": "NV12",
+    "producer_video_frames": 100,
+    "sink_arrival_video_frames": 94,
+    "scheduled_video_frames": 94,
+    "matched_audio_blocks": 100,
+    "audio_samples": 96000,
+    "late_video": 1,
+    "payload_pts_duration_preserved": true,
+    "physical_playback_qualified": false
+  }
+]
+<win-home>\AppData\Local\Temp\fl-m5-zoodfp8t
+</system-out>
+	</testcase>
+	<testcase name="gst_sink_stats" classname="gst_sink_stats" time="0.089401" status="run">
+		<properties>
+			<property name="cmake_labels" value="gst_video_regression"/>
+		</properties>
+		<system-out>EOS reports transport loss instead of counting inputs as delivered
+</system-out>
+	</testcase>
+	<testcase name="gst_preconnect_slots" classname="gst_preconnect_slots" time="0.965939" status="run">
+		<properties>
+			<property name="cmake_labels" value="gpu;gst_video_regression;integration"/>
+		</properties>
+		<system-out>geometry-independent slot claim and fresh caps on restart passed
+</system-out>
+	</testcase>
+	<testcase name="m5_startup" classname="m5_startup" time="34.6428" status="run">
+		<properties>
+			<property name="cmake_labels" value="gpu;integration"/>
+		</properties>
+		<system-out>[
+  {
+    "policy": "producer",
+    "returncode": 0,
+    "cases": [
+      {
+        "format": "BGRA",
+        "intact": true,
+        "stats": {
+          "event": "video-transport-summary",
+          "received": 100,
+          "submitted": 100,
+          "dropped": 0,
+          "ring_full_drops": 0
+        },
+        "received": 100
+      },
+      {
+        "format": "NV12",
+        "intact": true,
+        "stats": {
+          "event": "video-transport-summary",
+          "received": 100,
+          "submitted": 100,
+          "dropped": 0,
+          "ring_full_drops": 0
+        },
+        "received": 100
+      }
+    ]
+  },
+  {
+    "policy": "audio-coordinated",
+    "returncode": 0,
+    "cases": [
+      {
+        "format": "BGRA",
+        "intact": true,
+        "stats": {
+          "event": "video-transport-summary",
+          "received": 100,
+          "submitted": 100,
+          "dropped": 0,
+          "ring_full_drops": 0
+        },
+        "received": 100
+      },
+      {
+        "format": "NV12",
+      ...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="m5_preconnect" classname="m5_preconnect" time="21.9587" status="run">
+		<properties>
+			<property name="cmake_labels" value="gpu;integration"/>
+		</properties>
+		<system-out>[
+  {
+    "mode": "ready",
+    "format": "BGRA",
+    "event": "video-schedule-summary",
+    "received": 100,
+    "scheduled": 100,
+    "handed_off": 0,
+    "late": 0,
+    "overflow": 0,
+    "peak_pending": 5,
+    "pending_limit": 8,
+    "peak_bytes": 288000,
+    "byte_limit": 134217728
+  },
+  {
+    "mode": "ready",
+    "format": "NV12",
+    "event": "video-schedule-summary",
+    "received": 100,
+    "scheduled": 100,
+    "handed_off": 0,
+    "late": 0,
+    "overflow": 0,
+    "peak_pending": 5,
+    "pending_limit": 8,
+    "peak_bytes": 108000,
+    "byte_limit": 134217728
+  },
+  {
+    "mode": "legacy",
+    "format": "BGRA",
+    "event": "video-schedule-summary",
+    "received": 81,
+    "scheduled": 76,
+    "handed_off": 0,
+    "late": 5,
+    "overflow": 0,
+    "peak_pending": 5,
+    "pending_limit": 8,
+    "peak_bytes": 288000,
+    "byte_limit": 134217728
+  },
+  {
+    "mode": "legacy",
+    "format": "NV12",
+    "event": "video-schedule-summary",
+    "received": 81,
+    "scheduled": 76,
+    "handed_off": 0,
+    ...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="m5_consumer_drain" classname="m5_consumer_drain" time="28.6157" status="run">
+		<properties>
+			<property name="cmake_labels" value="gpu;integration"/>
+		</properties>
+		<system-out>[
+  {
+    "case": "startup",
+    "format": "BGRA",
+    "event": "video-schedule-summary",
+    "received": 100,
+    "scheduled": 100,
+    "handed_off": 0,
+    "late": 0,
+    "overflow": 0,
+    "peak_pending": 5,
+    "pending_limit": 8,
+    "peak_bytes": 288000,
+    "byte_limit": 134217728
+  },
+  {
+    "case": "startup",
+    "format": "NV12",
+    "event": "video-schedule-summary",
+    "received": 100,
+    "scheduled": 100,
+    "handed_off": 0,
+    "late": 0,
+    "overflow": 0,
+    "peak_pending": 5,
+    "pending_limit": 8,
+    "peak_bytes": 108000,
+    "byte_limit": 134217728
+  },
+  {
+    "case": "steady",
+    "format": "BGRA",
+    "event": "video-schedule-summary",
+    "received": 100,
+    "scheduled": 100,
+    "handed_off": 0,
+    "late": 0,
+    "overflow": 0,
+    "peak_pending": 5,
+    "pending_limit": 8,
+    "peak_bytes": 288000,
+    "byte_limit": 134217728
+  },
+  {
+    "case": "steady",
+    "format": "NV12",
+    "event": "video-schedule-summary",
+    "received": 100,
+    "scheduled": 100,
+    "handed_off":...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="frame_accounting_negative_controls" classname="frame_accounting_negative_controls" time="0.105825" status="run">
+		<properties/>
+		<system-out>....................
+----------------------------------------------------------------------
+Ran 20 tests in 0.013s
+
+OK
+</system-out>
+	</testcase>
+	<testcase name="av_memory_agreement" classname="av_memory_agreement" time="0.0437437" status="run">
+		<properties/>
+		<system-out>authenticated memory agreement: exact binding, both-endpoint policy, explicit fallback, session/key mismatch, invalid offer and unchanged-output negatives pass
+</system-out>
+	</testcase>
+	<testcase name="d3d_memory_binding" classname="d3d_memory_binding" time="0.424766" status="run">
+		<properties/>
+		<system-out>RGBA canonical NT pool: exact imported-export proof, substitution/alias and partial-reservation cleanup pass
+NV12 canonical NT pool: exact imported-export proof, substitution/alias and partial-reservation cleanup pass
+</system-out>
+	</testcase>
+	<testcase name="gst_policy_generation" classname="gst_policy_generation" time="3.33118" status="run">
+		<properties>
+			<property name="cmake_labels" value="gst_video_regression"/>
+		</properties>
+		<system-out>
+** (fl_gst_policy_generation.exe:31448): WARNING **: 23:00:37.069: framelinkavsrc: authenticated properties are immutable; create a new bin/session
+
+** (fl_gst_policy_generation.exe:31448): WARNING **: 23:00:37.069: framelinkavsrc: authenticated properties are immutable; create a new bin/session
+
+** (fl_gst_policy_generation.exe:31448): WARNING **: 23:00:37.069: framelinkavsrc: authenticated properties are immutable; create a new bin/session
+
+** (fl_gst_policy_generation.exe:31448): WARNING **: 23:00:37.069: framelinkavsrc: authenticated properties are immutable; create a new bin/session
+
+** (fl_gst_policy_generation.exe:31448): WARNING **: 23:00:37.443: framelinkavsrc: authenticated properties are immutable; create a new bin/session
+
+** (fl_gst_policy_generation.exe:31448): WARNING **: 23:00:37.443: framelinkavsrc: authenticated properties are immutable; create a new bin/session
+
+** (fl_gst_policy_generation.exe:31448): WARNING **: 23:00:37.443: framelinkavsrc: authenticated properties are immutable; create...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="native_relay_win" classname="native_relay_win" time="0.52147" status="run">
+		<properties/>
+		<system-out>same canonical-NT NV12 relay: reversed slots, identity rejection, exact pixels/metadata, downstream leases prevent upstream reuse and bounded completion passed
+</system-out>
+	</testcase>
+	<testcase name="trace_details" classname="trace_details" time="0.0117197" status="run">
+		<properties/>
+		<system-out></system-out>
+	</testcase>
+	<testcase name="trace_compiled_out" classname="trace_compiled_out" time="0.0218592" status="run">
+		<properties/>
+		<system-out></system-out>
+	</testcase>
+	<testcase name="av_memory_adversarial" classname="av_memory_adversarial" time="0.0425571" status="run">
+		<properties/>
+		<system-out>PASS truncated-legacy (bounded, unchanged output on rejection)
+PASS role (bounded, unchanged output on rejection)
+PASS reserved (bounded, unchanged output on rejection)
+PASS zero-nonce (bounded, unchanged output on rejection)
+PASS requirements-magic (bounded, unchanged output on rejection)
+PASS requirements-version (bounded, unchanged output on rejection)
+PASS path-version (bounded, unchanged output on rejection)
+PASS multi-resource (bounded, unchanged output on rejection)
+PASS unknown-operation (bounded, unchanged output on rejection)
+PASS zero-binding (bounded, unchanged output on rejection)
+PASS bad-proof (bounded, unchanged output on rejection)
+PASS reflection (bounded, unchanged output on rejection)
+PASS bad-approval (bounded, unchanged output on rejection)
+PASS strict-copy-approval (bounded, unchanged output on rejection)
+PASS valid-control (bounded, unchanged output on rejection)
+</system-out>
+	</testcase>
+	<testcase name="native_relay_process_win" classname="native_relay_process_win" time="0.855437" status="run">
+		<properties/>
+		<system-out>three-process NV12 relay16/16: exact pixels/PTS/DTS/duration, reversed pool identity, no upstream reuse while downstream held, GPU-fence completion and bounded drain passed
+</system-out>
+	</testcase>
+	<testcase name="local_native_bench_analyzer" classname="local_native_bench_analyzer" time="0.554641" status="run">
+		<properties/>
+		<system-out>..............................
+----------------------------------------------------------------------
+Ran 30 tests in 0.457s
+
+OK
+</system-out>
+	</testcase>
+	<testcase name="boundary_av_analyzer" classname="boundary_av_analyzer" time="0.641713" status="run">
+		<properties/>
+		<system-out>........
+----------------------------------------------------------------------
+Ran 8 tests in 0.555s
+
+OK
+</system-out>
+	</testcase>
+	<testcase name="gst_session_transport" classname="gst_session_transport" time="0.799904" status="run">
+		<properties>
+			<property name="cmake_labels" value="m5b_av"/>
+		</properties>
+		<system-out>native memory agreement mode 0
+native memory agreement mode 1
+native memory agreement mode 2
+native memory agreement mode 3
+native memory agreement mode 4
+native memory agreement mode 5
+native memory agreement mode 6
+native memory agreement mode 7
+native memory agreement mode 8
+native memory agreement mode 9
+native memory agreement mode 10
+native memory agreement mode 11
+native memory agreement mode 12
+native memory agreement mode 13
+native memory agreement mode 14
+native memory agreement mode 15
+native memory agreement mode 16
+native memory agreement mode 17
+native memory agreement mode 18
+native memory agreement mode 19
+CPU bootstrap mode 0
+CPU bootstrap mode 1
+CPU bootstrap mode 2
+CPU bootstrap mode 3
+CPU bootstrap mode 4
+CPU bootstrap mode 5
+CPU bootstrap mode 6
+native memory exact agreement: success, 19 mismatch/invalid/domain negatives, deadline and cancellation passed
+authenticated session transport: all track modes, wrong key, mismatch, invalid config, timeout and cancel passed
+</system-out>
+	</testcase>
+	<testcase name="gst_shared_cpu_session_win" classname="gst_shared_cpu_session_win" time="2.35964" status="run">
+		<properties/>
+		<system-out>warm mode=0 baseline before=1463 after=1463
+warm mode=1 baseline before=1463 after=1463
+warm mode=2 baseline before=1463 after=1463
+warm mode=3 baseline before=1463 after=1463
+warm mode=4 baseline before=1463 after=1463
+Authenticated CPU coordinator: 8 mismatch/downgrade negatives, silent deadline, exact generation/role, one claim, metadata/EOS, held mappings through cancel/replacement, blocked setup interruption and 100-session handle cleanup passed
+</system-out>
+	</testcase>
+	<testcase name="gst_session_context" classname="gst_session_context" time="0.0988036" status="run">
+		<properties>
+			<property name="cmake_labels" value="m5b_av"/>
+		</properties>
+		<system-out>session context: ownership, readiness, track masks, generations and cancellation passed
+</system-out>
+	</testcase>
+	<testcase name="gst_audio_sink" classname="gst_audio_sink" time="1.26927" status="run">
+		<properties>
+			<property name="cmake_labels" value="m5b_av"/>
+		</properties>
+		<system-out>backpressure: 49 blocks accepted before bounded failure; teardown_us=173
+public audio sink: exact PCM/PTS/duration and missing-auth/invalid-PTS/oversized-block negatives passed
+</system-out>
+	</testcase>
+	<testcase name="gst_audio_source" classname="gst_audio_source" time="1.32343" status="run">
+		<properties>
+			<property name="cmake_labels" value="m5b_av"/>
+		</properties>
+		<system-out>public audio source: exact four PCM formats/layouts, incremental packet delivery before EOS, both startup orders, live latency, missing-peer and cancellation passed
+</system-out>
+	</testcase>
+	<testcase name="gst_shared_cpu_source" classname="gst_shared_cpu_source" time="0.149771" status="run">
+		<properties/>
+		<system-out>shared CPU source: padded BGRA/NV12, mapped timestamps/metadata, retained copies, EOS, policy/mapping/generation/death negatives and cancellation passed
+</system-out>
+	</testcase>
+	<testcase name="gst_shared_cpu_roundtrip" classname="gst_shared_cpu_roundtrip" time="0.1652" status="run">
+		<properties/>
+		<system-out>mode 0
+mode 1
+mode 2
+mode 3
+bus: Internal data stream error. ../libs/gst/base/gstbasesrc.c(3187): gst_base_src_loop (): /GstPipeline:pipeline6/GstAppSrc:input:
+streaming stopped, reason not-negotiated (-4)
+mode 4
+bus: Internal data stream error. ../libs/gst/base/gstbasesrc.c(3187): gst_base_src_loop (): /GstPipeline:pipeline8/GstAppSrc:input:
+streaming stopped, reason error (-5)
+mode 5
+mode 6
+mode 7
+bus: Internal data stream error. ../libs/gst/base/gstbasesrc.c(3187): gst_base_src_loop (): /GstPipeline:pipeline13/GstAppSrc:input:
+streaming stopped, reason error (-5)
+CPU video roundtrip: BGRA/NV12 exact pixels/timing, COPY/caps/duration rejection, empty EOS and held-final-frame drain/cancellation passed
+</system-out>
+	</testcase>
+	<testcase name="gst_shared_cpu_av" classname="gst_shared_cpu_av" time="3.06476" status="run">
+		<properties/>
+		<system-out>mode 0
+mode 1
+mode 2
+mode 3
+mode 4
+bus: invalid coordinated video terminal record <win-home>\dev\framelink-final-final-060c54e4\source\gst\gstframelinkaudiosrc.cpp(95): badInput (): /GstPipeline:pipeline11/GstFrameLinkAudioSrc:framelinkaudiosrc4:
+FrameLink consumer rejected received PCM
+mode 5
+bus: Socket I/O timed out <win-home>\dev\framelink-final-final-060c54e4\source\gst\gstframelinkaudiosrc.cpp(66): readChunkImpl (): /GstPipeline:pipeline13/GstFrameLinkAudioSrc:framelinkaudiosrc5/FlAudioReader:flaudioreader9
+mode 0
+mode 1
+mode 2
+mode 3
+mode 4
+bus: invalid coordinated video terminal record <win-home>\dev\framelink-final-final-060c54e4\source\gst\gstframelinkaudiosrc.cpp(95): badInput (): /GstPipeline:pipeline23/GstFrameLinkAvSrc:transport/GstFrameLinkAudioSrc:audio:
+FrameLink consumer rejected received PCM
+mode 5
+bus: Socket I/O timed out <win-home>\dev\framelink-final-final-060c54e4\source\gst\gstframelinkaudiosrc.cpp(66): readChunkImpl (): /GstPipeline:pipeline25/GstFrameLinkAvSrc:transp...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="gst_av_timeline" classname="gst_av_timeline" time="4.49003" status="run">
+		<properties>
+			<property name="cmake_labels" value="m5b_av"/>
+		</properties>
+		<system-out>CASE lead=0 negative=0 gap=0 empty=0 pause=0
+CASE lead=1 negative=0 gap=0 empty=0 pause=0
+CASE lead=0 negative=1 gap=0 empty=0 pause=0
+CASE lead=0 negative=2 gap=0 empty=0 pause=0
+CASE lead=0 negative=3 gap=0 empty=0 pause=0
+CASE lead=0 negative=4 gap=0 empty=0 pause=0
+consumer death surfaced at giostreamsink8 after 80us: Could not write to resource. (../gst/gio/gstgiobasesink.c(361): gst_gio_base_sink_render (): /GstPipeline:pipeline11/GstFrameLinkAudioSink:framelinkaudiosink8/GstGioStreamSink:giostreamsink8:
+Could not write to stream: Error sending data: An existing connection was forcibly closed by the remote host.)
+CASE lead=0 negative=5 gap=0 empty=0 pause=0
+audio transport loss surfaced at flaudioreader9 after 81us: audio peer closed before GDP EOS
+CASE reconnect
+reconnect: generation2 exact media after consumer death; generation1 operations stale
+CASE lead=0 negative=0 gap=1 empty=0 pause=0
+CASE lead=1 negative=0 gap=1 empty=0 pause=0
+CASE lead=0 negative=0 gap=1 empty=1 pause=0
+CASE lead=0 negative=0 ...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="gst_av_validation" classname="gst_av_validation" time="18.172" status="run">
+		<properties>
+			<property name="cmake_labels" value="m5b_av"/>
+		</properties>
+		<system-out>CASE testclock
+CASE content fault=none
+{"case":"testclock","deadlines":20,"latency_ns":10000000,"av_offset_ns":37000000,"early_renders":0,"result":"pass"}
+{"case":"content","fault":"none","video_frames":50,"audio_buffers":77,"audio_samples":49537,"av_offset_error_ns":0,"audio_drift_ns":0,"video_drift_ns":0,"arrival_us":{"video":{"p50":2179,"p95":2195,"max":2197},"audio":{"p50":88,"p95":129,"max":257}},"failures":0,"result":"pass"}
+CASE content fault=corrupt-pcm
+  validator: audio pcm: 1 samples differ
+{"case":"content","fault":"corrupt-pcm","video_frames":50,"audio_buffers":77,"audio_samples":49537,"av_offset_error_ns":0,"audio_drift_ns":0,"video_drift_ns":0,"arrival_us":{"video":{"p50":2172,"p95":2184,"max":2192},"audio":{"p50":86,"p95":154,"max":242}},"failures":1,"result":"fail"}
+CASE content fault=corrupt-pixel
+  validator: video pixels frame 9: 1 bytes differ
+{"case":"content","fault":"corrupt-pixel","video_frames":50,"audio_buffers":77,"audio_samples":49537,"av_offset_error_ns":0,"audio_drift_ns":0,"vid...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="gst_av_bin" classname="gst_av_bin" time="28.7039" status="run">
+		<properties>
+			<property name="cmake_labels" value="m5b_av"/>
+		</properties>
+		<system-out>CASE thin (application-installed context)
+consumer=ok video=30 samples=24000 lag=150.0..152.0ms
+CASE pause/resume tracks=video (bin)
+  producer=EOS consumer=ok video=29 samples=0 lag=150.1..151.6ms
+CASE pause/resume tracks=video (thin)
+  producer=EOS consumer=ok video=29 samples=0 lag=150.0..151.3ms
+CASE pause/resume tracks=av (bin)
+  producer=audio: PCM sample duration/continuity mismatch consumer=flaudioreader1: audio peer closed before GDP EOS video=12 samples=19200 lag=150.0..151.7ms
+CASE pause/resume tracks=av (thin)
+  producer=audio: PCM sample duration/continuity mismatch consumer=flaudioreader2: audio peer closed before GDP EOS video=12 samples=18720 lag=150.0..151.6ms
+CASE teardown while media is held
+  NULL in 0.5ms
+CASE consumer death mid-stream
+  producer error 0ms after consumer death: audio: required session tracks not ready or cancelled
+CASE tracks=av producer-first=0 lead=0ms
+producer=ok consumer=ok video=30 samples=24000 lag=150.1..152.0ms generation=1 ids=1/2 session=143cc9f4ee258556a8d65968...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="gst_av_src_bin" classname="gst_av_src_bin" time="15.9963" status="run">
+		<properties>
+			<property name="cmake_labels" value="m5b_av"/>
+		</properties>
+		<system-out>CASE negative outside a pipeline
+CASE tracks=av consumer-first=1 lead=0ms 
+   producer=EOS consumer=EOS video=30 (mapped 30, memory:SystemMemory) samples=24000 lag video 150.0..151.9ms audio 150.2..151.8ms
+CASE tracks=av consumer-first=0 lead=800ms 
+   producer=EOS consumer=EOS video=30 (mapped 30, memory:SystemMemory) samples=24000 lag video 150.1..151.8ms audio 150.2..152.0ms
+CASE tracks=video consumer-first=0 lead=300ms 
+   producer=EOS consumer=EOS video=30 (mapped 30, memory:SystemMemory) samples=0 lag video 150.0..151.5ms audio 9223372036854.8..-9223372036854.8ms
+CASE tracks=audio consumer-first=1 lead=0ms 
+   producer=EOS consumer=EOS video=0 (mapped 0, -) samples=24000 lag video 9223372036854.8..-9223372036854.8ms audio 150.2..151.7ms
+CASE tracks=av consumer-first=1 lead=0ms  (clock-providing element in both pipelines)
+   producer=EOS consumer=EOS video=30 (mapped 30, memory:SystemMemory) samples=24000 lag video 150.0..151.7ms audio 150.4..151.9ms
+CASE tracks=av consumer-first=1 lead=0ms native-memory...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="gst_av_parity" classname="gst_av_parity" time="108.358" status="run">
+		<properties>
+			<property name="cmake_labels" value="m5b_av"/>
+		</properties>
+		<system-out>CASE consumer-first av
+  consumer-first   producer=element consumer=element | producer=EOS consumer=EOS | frames 30/30 samples 24000/24000 lag v 150.1..151.7 a 150.0..152.1ms memory:SystemMemory
+  consumer-first   producer=element consumer=bin     | producer=EOS consumer=EOS | frames 30/30 samples 24000/24000 lag v 150.1..152.0 a 150.1..151.7ms memory:SystemMemory
+  consumer-first   producer=bin     consumer=element | producer=EOS consumer=EOS | frames 30/30 samples 24000/24000 lag v 150.1..151.9 a 150.3..151.9ms memory:SystemMemory
+  consumer-first   producer=bin     consumer=bin     | producer=EOS consumer=EOS | frames 30/30 samples 24000/24000 lag v 150.1..151.9 a 150.2..152.0ms memory:SystemMemory
+  =&gt; parity: producer=EOS consumer=EOS memory:SystemMemory
+CASE producer-first av
+  producer-first   producer=element consumer=element | producer=EOS consumer=EOS | frames 30/30 samples 24000/24000 lag v 150.1..152.0 a 150.1..152.5ms memory:SystemMemory
+  producer-first   producer=element consumer=bin     | prod...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="gst_av_qualification" classname="gst_av_qualification" time="64.418" status="run">
+		<properties>
+			<property name="cmake_labels" value="m5b_av"/>
+		</properties>
+		<system-out>CASE factories
+  framelinksink      Sink/Video                   pads: sink 
+  framelinksrc       Source/Video                 pads: src 
+  framelinkaudiosink Sink/Audio                   pads: sink 
+  framelinkaudiosrc  Source/Audio                 pads: src 
+  framelinkavsink    Sink/Video/Audio             pads: video_sink audio_sink 
+  framelinkavsrc     Source/Video/Audio           pads: video_src audio_src 
+  native consumer memory: memory:D3D11Memory
+CASE cleanup
+  element cpu    churn        handles: 2532 1538 1538 1538 1538 1538 1538 1538 -&gt; bounded
+  element native churn        handles: 1540 1540 1540 1540 1540 1540 1540 1540 -&gt; bounded
+  bin     cpu    churn        handles: 1539 1540 1540 1540 1540 1540 1540 1540 -&gt; bounded
+  bin     native churn        handles: 1544 1546 1546 1546 1546 1546 1543 1546 -&gt; bounded
+  bin     cpu    leak-control handles: 1559 1572 1550 1566 1582 1598 1614 1630 -&gt; growing
+CASE av-cpu
+  producer=element consumer=element PASS frames 30/30 samples 24000/24000 memory memory...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="gst_av_bench_smoke" classname="gst_av_bench_smoke" time="6.95476" status="run">
+		<properties/>
+		<system-out>pids producer=11784 consumer=31192
+arrival.budget_ms=150
+complete=yes
+config=RGBA 160x90@30 bin cpu 6s
+consumer.audio.arrival.all.ms=n=600 p50=0.90 p95=1.89 p99=2.04 max=2.07 min=0.07
+consumer.audio.arrival.ms=n=400 p50=0.88 p95=1.90 p99=2.04 max=2.07 min=0.07
+consumer.audio.contiguous=yes
+consumer.audio.deadline_misses=0/600
+consumer.audio.output_queue.admission_residence.ms=n=600 p50=139.95 p95=140.99 p99=141.47 max=141.56 min=0.01
+consumer.audio.output_queue.pending=0
+consumer.audio.output_queue.sampled_max_buffers=14
+consumer.audio.output_queue.unmatched=0
+consumer.audio.render.all.ms=n=600 p50=150.83 p95=151.82 p99=151.99 max=152.00 min=150.01
+consumer.audio.render.ms=n=400 p50=150.81 p95=151.82 p99=151.99 max=152.00 min=150.01
+consumer.audio.render_interval.ms=n=399 p50=10.00 p95=11.00 p99=11.01 max=11.02 min=8.50
+consumer.audio.render_jitter.p1_p99.ms=1.91
+consumer.av_offset.abs.ms=n=4 p50=0.09 p95=0.26 p99=0.26 max=0.26 min=0.09
+consumer.av_offset.ms=n=4 p50=0.09 p95=0.26 p99=0.26 max=0.26 min=-0.15
+c...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="gst_av_bench_shared_cpu_BGRA" classname="gst_av_bench_shared_cpu_BGRA" time="5.4322" status="run">
+		<properties/>
+		<system-out>pids producer=22392 consumer=41072
+arrival.budget_ms=150
+complete=yes
+config=BGRA 64x64@30 bin shared-cpu 5s
+consumer.audio.arrival.all.ms=n=500 p50=0.93 p95=1.94 p99=2.04 max=2.07 min=0.12
+consumer.audio.arrival.ms=n=300 p50=0.90 p95=1.91 p99=2.04 max=2.07 min=0.12
+consumer.audio.contiguous=yes
+consumer.audio.deadline_misses=0/500
+consumer.audio.output_queue.admission_residence.ms=n=500 p50=0.01 p95=0.01 p99=0.01 max=0.02 min=0.01
+consumer.audio.output_queue.pending=0
+consumer.audio.output_queue.sampled_max_buffers=0
+consumer.audio.output_queue.unmatched=0
+consumer.audio.render.all.ms=n=500 p50=0.94 p95=1.95 p99=2.05 max=2.09 min=0.13
+consumer.audio.render.ms=n=300 p50=0.91 p95=1.93 p99=2.05 max=2.08 min=0.13
+consumer.audio.render_interval.ms=n=299 p50=10.00 p95=11.01 p99=11.02 max=11.52 min=8.97
+consumer.audio.render_jitter.p1_p99.ms=1.92
+consumer.av_offset.abs.ms=n=3 p50=1.35 p95=1.36 p99=1.36 max=1.36 min=1.19
+consumer.av_offset.ms=n=3 p50=1.35 p95=1.36 p99=1.36 max=1.36 min=1.19
+consumer.cpu.percent=5.24...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="gst_av_bench_shared_cpu_NV12" classname="gst_av_bench_shared_cpu_NV12" time="5.43727" status="run">
+		<properties/>
+		<system-out>pids producer=5092 consumer=37268
+arrival.budget_ms=150
+complete=yes
+config=NV12 64x64@30 bin shared-cpu 5s
+consumer.audio.arrival.all.ms=n=500 p50=0.96 p95=1.92 p99=2.04 max=2.10 min=0.06
+consumer.audio.arrival.ms=n=300 p50=0.96 p95=1.93 p99=2.04 max=2.10 min=0.11
+consumer.audio.contiguous=yes
+consumer.audio.deadline_misses=0/500
+consumer.audio.output_queue.admission_residence.ms=n=500 p50=0.01 p95=0.01 p99=0.01 max=0.01 min=0.00
+consumer.audio.output_queue.pending=0
+consumer.audio.output_queue.sampled_max_buffers=0
+consumer.audio.output_queue.unmatched=0
+consumer.audio.render.all.ms=n=500 p50=0.97 p95=1.93 p99=2.06 max=2.11 min=0.08
+consumer.audio.render.ms=n=300 p50=0.97 p95=1.94 p99=2.06 max=2.11 min=0.12
+consumer.audio.render_interval.ms=n=299 p50=10.00 p95=11.01 p99=11.03 max=11.50 min=8.50
+consumer.audio.render_jitter.p1_p99.ms=1.93
+consumer.av_offset.abs.ms=n=3 p50=1.09 p95=1.47 p99=1.47 max=1.47 min=1.00
+consumer.av_offset.ms=n=3 p50=1.09 p95=1.47 p99=1.47 max=1.47 min=1.00
+consumer.cpu.percent=5.23
+...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="gst_local_av" classname="gst_local_av" time="3.07865" status="run">
+		<properties>
+			<property name="cmake_labels" value="m5b_av"/>
+		</properties>
+		<system-out>track mismatch: producer incompatible session selection; consumer producer selection or authentication rejected
+mapping skew -6400ns
+video lag 150.0..152.0ms
+audio lag 150.0..151.6ms
+order=producer-first video=30 samples=24000 firstAV=-690100ns
+mapping skew -800ns
+video lag 150.1..151.7ms
+audio lag 150.2..151.8ms
+order=consumer-first video=30 samples=24000 firstAV=-64200ns
+local A/V setup: authenticated rendezvous, identity clock mapping, both startup orders, live synchronized pixels/PCM, track mismatch rejection passed
+</system-out>
+	</testcase>
+	<testcase name="m5b_gst_av_example" classname="m5b_gst_av_example" time="62.7065" status="run">
+		<properties>
+			<property name="cmake_labels" value="m5b_av"/>
+		</properties>
+		<system-out>PASS av-rgba-consumer-first [element/element] producer=0 consumer=0 elapsed=3.92s {"event": "verify", "mode": "element", "tracks": "av", "format": "RGBA", "frames": 90, "expected_frames": 90, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.035, "lag_max_ms": 152.007, "latency_ms": 150, "result": "pass"}
+PASS av-rgba-consumer-first [bin/bin] producer=0 consumer=0 elapsed=3.91s {"event": "verify", "mode": "bin", "tracks": "av", "format": "RGBA", "frames": 90, "expected_frames": 90, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.009, "lag_max_ms": 152.001, "latency_ms": 150, "result": "pass"}
+PASS av-rgba-consumer-first [bin/element] producer=0 consumer=0 elapsed=3.90s {"event": "verify", "mode": "element", "tracks": "av", "format": "RGBA", "frames": 90, "expected_frames": 90, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.005, "lag_max_ms": 151.993, "latency_ms": 150, "result": "pass"}
+PASS av-rgba-consumer-first [element/bin] producer=0 consumer=0 elapsed=3....
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="gst_local_audio" classname="gst_local_audio" time="0.193556" status="run">
+		<properties>
+			<property name="cmake_labels" value="m5b_av"/>
+		</properties>
+		<system-out>local audio setup: both startup orders, authenticated stream lifetime, bounded missing-peer passed
+</system-out>
+	</testcase>
+	<testcase name="gst_event_channel" classname="gst_event_channel" time="2.43031" status="run">
+		<properties>
+			<property name="cmake_labels" value="m5b_av"/>
+		</properties>
+		<system-out>event channel: authenticated ordered bounded controls; quiet idle, stale generation, queue overflow, partial-record deadline, readiness wait and cancellation passed
+</system-out>
+	</testcase>
+	<testcase name="gst_local_native_bench_smoke_win" classname="gst_local_native_bench_smoke_win" time="3.32301" status="run">
+		<properties/>
+		<system-out>Evidence: <win-home>\AppData\Local\Temp\framelink-native-bench-95wn2ng8
+{
+  "scope": "synthetic authenticated transport; explicit upload/verification copies; no physical playback or isolated-hop budget claim",
+  "budget_ns": 34000000,
+  "roles": {
+    "source": {
+      "video": 60,
+      "pcm_frames": 96000,
+      "resource_slopes_per_min": {},
+      "cpu_percent": 88.2056457641173
+    },
+    "relay": {
+      "video": 60,
+      "pcm_frames": 96000,
+      "resource_slopes_per_min": {},
+      "cpu_percent": 77.85017764452382
+    },
+    "receiver": {
+      "video": 60,
+      "pcm_frames": 96000,
+      "resource_slopes_per_min": {},
+      "cpu_percent": 77.8131861028044
+    }
+  },
+  "timing_ms": {
+    "scheduled_to_final_arrival": {
+      "p50": 3.298134,
+      "p95": 4.066767,
+      "p99": 4.156467,
+      "max": 4.156467
+    },
+    "source_marker_to_relay": {
+      "p50": 1.1328,
+      "p95": 2.1128,
+      "p99": 2.1557,
+      "max": 2.1557
+    },
+    "source_marker_to_final": {
+      "p50": 3.2971,
+      "p...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="local_decoder_checker" classname="local_decoder_checker" time="0.138187" status="run">
+		<properties/>
+		<system-out>.......
+----------------------------------------------------------------------
+Ran 7 tests in 0.048s
+
+OK
+</system-out>
+	</testcase>
+	<testcase name="gst_local_decoder_discovery_win" classname="gst_local_decoder_discovery_win" time="1.25603" status="run">
+		<properties/>
+		<system-out>Evidence: <win-home>\AppData\Local\Temp\framelink-local-decoder-yxo1e4x8
+{
+  "pass": true,
+  "video_frames": 16,
+  "distinct_decoded_frames": 16,
+  "pcm_sample_frames": 25600,
+  "mapped_av_offset_ns": 37000000,
+  "source_conversion_output_bytes": 131072,
+  "source_oracle_readback_bytes": 131072,
+  "final_oracle_readback_bytes": 139264,
+  "scope": "tiny real decoder conversion plus authenticated same-allocation relay; no target-rate/physical-playback/zero-copy claim"
+}
+</system-out>
+	</testcase>
+	<testcase name="local_decoder_rate_checker" classname="local_decoder_rate_checker" time="0.76825" status="run">
+		<properties/>
+		<system-out>..............................
+----------------------------------------------------------------------
+Ran 30 tests in 0.668s
+
+OK
+</system-out>
+	</testcase>
+	<testcase name="gst_local_decoder_rate_smoke_win" classname="gst_local_decoder_rate_smoke_win" time="3.32831" status="run">
+		<properties/>
+		<system-out>Evidence: <win-home>\AppData\Local\Temp\framelink-decoder-rate-v_fv3hrh
+{
+  "scope": "decoder conversion plus source/final full-frame readback workload; no physical renderer or isolated-hop budget claim",
+  "trace_qualified": false,
+  "budget_ns": 34000000,
+  "resources": {
+    "source": {
+      "cpu_percent": 100.08450837127144,
+      "samples": 3,
+      "slopes_per_min": {}
+    },
+    "relay": {
+      "cpu_percent": 77.64639582871138,
+      "samples": 3,
+      "slopes_per_min": {}
+    },
+    "receiver": {
+      "cpu_percent": 69.51375555535995,
+      "samples": 3,
+      "slopes_per_min": {}
+    }
+  },
+  "video_frames": 60,
+  "pcm_frames": 96000,
+  "source_distinct_digests": 60,
+  "video_arrival_misses": [],
+  "audio_arrival_misses": [],
+  "source_conversion_bytes": 491520,
+  "source_readback_bytes": 491520,
+  "final_readback_bytes": 491520,
+  "timing_ms": {
+    "scheduled_to_final_arrival": {
+      "p50": 5.146834,
+      "p95": 5.985667,
+      "p99": 7.1012,
+      "max": 7.1012
+    },
+    "audio_schedul...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+</testsuite>

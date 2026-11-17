@@ -48,3 +48,21 @@ Bounds apply to their named stage. Receiver age does not include upstream queues
 kernel time before receipt, CPU copy after acquisition, or final presentation.
 Those remain observable application/integration budgets. Two buffers are not a
 universal full-rate guarantee; safe overlap depends on real reader/GPU lifetimes.
+
+## A/V producer bin controls
+
+`framelinkavsink` exposes the video child's `buffer-wait-ms` (0–1000, default 5)
+and `error-on-ring-full` (default false). Set both in NULL before native channel
+or memory-policy adoption. Values survive changes to `tracks` that rebuild the
+video child. For explicit fail-on-exhaustion copy-in operation:
+
+```text
+framelinkavsink buffer-wait-ms=5 error-on-ring-full=true
+```
+
+These are video allocation controls, not a playout buffer or a new product-wide
+overload profile. They preserve the thin sink's drop-and-count default. They do
+not permit lost PCM, overwrite GPU-owned images, relax native producer completion,
+or enable automatic copy fallback. Shared-CPU transport retains its strict
+channel behavior regardless of `error-on-ring-full=false`. Native allocation
+queries receive the configured wait budget; a foreign native buffer still fails.

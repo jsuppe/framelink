@@ -1,0 +1,3 @@
+VIDEO_PTS role=relay n=60 expected_pts=1037000000 actual_pts=1053666666 sequence=62 slot=1 at_ns=732939234970900
+DIAGNOSTIC_FAILURE role=relay thread=26572 at_ns=732939235060100 <win-home>\dev\framelink-native-stall-native-stall-a50841a-20261112t1353z\source\test\fl_gst_local_native_bench_win.cpp:112: f.ptsNs==int64_t(vpts(n))
+DIAGNOSTIC_FAILURE role=relay thread=35308 at_ns=732941273587100 <win-home>\dev\framelink-native-stall-native-stall-a50841a-20261112t1353z\source\test\fl_gst_local_native_bench_win.cpp:111: r==FL_GST_SESSION_READY||r==FL_GST_SESSION_TIMEOUT

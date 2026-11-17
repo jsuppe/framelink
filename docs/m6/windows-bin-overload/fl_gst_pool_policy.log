@@ -1,0 +1,57 @@
+
+(fl_gst_pool_policy:12938): GStreamer-CRITICAL **: 22:42:28.397: gst_ghost_pad_new_from_template: assertion 'GST_IS_PAD (target)' failed
+
+(fl_gst_pool_policy:12938): GStreamer-CRITICAL **: 22:42:28.398: gst_object_unref: assertion 'object != NULL' failed
+
+(fl_gst_pool_policy:12938): GStreamer-CRITICAL **: 22:42:28.398: gst_element_add_pad: assertion 'GST_IS_PAD (pad)' failed
+
+(fl_gst_pool_policy:12938): GStreamer-CRITICAL **: 22:42:28.398: gst_ghost_pad_new_from_template: assertion 'GST_IS_PAD (target)' failed
+
+(fl_gst_pool_policy:12938): GStreamer-CRITICAL **: 22:42:28.398: gst_object_unref: assertion 'object != NULL' failed
+
+(fl_gst_pool_policy:12938): GStreamer-CRITICAL **: 22:42:28.398: gst_element_add_pad: assertion 'GST_IS_PAD (pad)' failed
+
+** (fl_gst_pool_policy:12938): WARNING **: 22:42:28.398: framelinkavsink: buffer-wait-ms can only change in NULL
+
+** (fl_gst_pool_policy:12938): WARNING **: 22:42:28.398: framelinkavsink: error-on-ring-full can only change in NULL
+
+(fl_gst_pool_policy:12938): GStreamer-CRITICAL **: 22:42:28.701: gst_ghost_pad_new_from_template: assertion 'GST_IS_PAD (target)' failed
+
+(fl_gst_pool_policy:12938): GStreamer-CRITICAL **: 22:42:28.701: gst_object_unref: assertion 'object != NULL' failed
+
+(fl_gst_pool_policy:12938): GStreamer-CRITICAL **: 22:42:28.701: gst_element_add_pad: assertion 'GST_IS_PAD (pad)' failed
+
+(fl_gst_pool_policy:12938): GStreamer-CRITICAL **: 22:42:28.714: gst_ghost_pad_new_from_template: assertion 'GST_IS_PAD (target)' failed
+
+(fl_gst_pool_policy:12938): GStreamer-CRITICAL **: 22:42:28.714: gst_object_unref: assertion 'object != NULL' failed
+
+(fl_gst_pool_policy:12938): GStreamer-CRITICAL **: 22:42:28.714: gst_element_add_pad: assertion 'GST_IS_PAD (pad)' failed
+
+(fl_gst_pool_policy:12938): GStreamer-CRITICAL **: 22:42:28.783: gst_ghost_pad_new_from_template: assertion 'GST_IS_PAD (target)' failed
+
+(fl_gst_pool_policy:12938): GStreamer-CRITICAL **: 22:42:28.784: gst_object_unref: assertion 'object != NULL' failed
+
+(fl_gst_pool_policy:12938): GStreamer-CRITICAL **: 22:42:28.784: gst_element_add_pad: assertion 'GST_IS_PAD (pad)' failed
+
+(fl_gst_pool_policy:12938): GStreamer-CRITICAL **: 22:42:28.829: gst_ghost_pad_new_from_template: assertion 'GST_IS_PAD (target)' failed
+
+(fl_gst_pool_policy:12938): GStreamer-CRITICAL **: 22:42:28.829: gst_object_unref: assertion 'object != NULL' failed
+
+(fl_gst_pool_policy:12938): GStreamer-CRITICAL **: 22:42:28.830: gst_element_add_pad: assertion 'GST_IS_PAD (pad)' failed
+
+(fl_gst_pool_policy:12938): GStreamer-CRITICAL **: 22:42:28.851: gst_ghost_pad_new_from_template: assertion 'GST_IS_PAD (target)' failed
+
+(fl_gst_pool_policy:12938): GStreamer-CRITICAL **: 22:42:28.851: gst_object_unref: assertion 'object != NULL' failed
+
+(fl_gst_pool_policy:12938): GStreamer-CRITICAL **: 22:42:28.851: gst_element_add_pad: assertion 'GST_IS_PAD (pad)' failed
+
+(fl_gst_pool_policy:12938): GStreamer-CRITICAL **: 22:42:28.931: gst_ghost_pad_new_from_template: assertion 'GST_IS_PAD (target)' failed
+
+(fl_gst_pool_policy:12938): GStreamer-CRITICAL **: 22:42:28.932: gst_object_unref: assertion 'object != NULL' failed
+
+(fl_gst_pool_policy:12938): GStreamer-CRITICAL **: 22:42:28.932: gst_element_add_pad: assertion 'GST_IS_PAD (pad)' failed
+pool2: single-frame no-fill, producer gap, exact PTS/pixels and no invented sequence loss pass
+pool3: single-frame no-fill, producer gap, exact PTS/pixels and no invented sequence loss pass
+sync=0: transport admission separated from sink clock hold pass
+sync=1: transport admission separated from sink clock hold pass
+2/3 image capacities: bounded drop, bounded error, delayed-reader recovery and exact loss accounting pass

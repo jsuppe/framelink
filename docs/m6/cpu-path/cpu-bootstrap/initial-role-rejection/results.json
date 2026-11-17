@@ -1,0 +1,27 @@
+[
+  {
+    "step": "build-linux",
+    "command": [
+      "cmake",
+      "--build",
+      "<linux-home>/dev/build/framelink-m6-linux",
+      "-j4",
+      "--target",
+      "fl_gst_session_transport",
+      "fl_gst_shared_cpu_av"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "linux",
+    "command": [
+      "ctest",
+      "--test-dir",
+      "<linux-home>/dev/build/framelink-m6-linux",
+      "-R",
+      "^(gst_session_transport|gst_shared_cpu_av)$",
+      "--output-on-failure"
+    ],
+    "exit": 8
+  }
+]

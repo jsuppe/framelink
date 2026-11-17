@@ -1,0 +1,97 @@
+{
+  "pass": true,
+  "cells": [
+    {
+      "case": "shared-cpu-bgra-1080-restart-producer-100",
+      "cycles": 100,
+      "video_frames": 30000,
+      "pcm_frames": 24000000,
+      "slopes": {
+        "memory_kib_per_cycle": -2.2361142217245242,
+        "handles_per_cycle": -0.15156774916013438,
+        "threads_per_cycle": -0.0653555431131019
+      }
+    },
+    {
+      "case": "shared-cpu-bgra-1080-restart-consumer-100",
+      "cycles": 100,
+      "video_frames": 30000,
+      "pcm_frames": 24000000,
+      "slopes": {
+        "memory_kib_per_cycle": -2.0697088465845463,
+        "handles_per_cycle": -0.12122060470324748,
+        "threads_per_cycle": -0.06005039193729003
+      }
+    },
+    {
+      "case": "shared-cpu-bgra-4k-restart-producer-100",
+      "cycles": 100,
+      "video_frames": 15000,
+      "pcm_frames": 24000000,
+      "slopes": {
+        "memory_kib_per_cycle": -2.243784994400896,
+        "handles_per_cycle": -0.1495800671892497,
+        "threads_per_cycle": -0.06454367301231803
+      }
+    },
+    {
+      "case": "shared-cpu-bgra-4k-restart-consumer-100",
+      "cycles": 100,
+      "video_frames": 15000,
+      "pcm_frames": 24000000,
+      "slopes": {
+        "memory_kib_per_cycle": -0.2265397536394177,
+        "handles_per_cycle": -0.11800111982082867,
+        "threads_per_cycle": -0.05953247480403136
+      }
+    },
+    {
+      "case": "shared-cpu-nv12-1080-restart-producer-100",
+      "cycles": 100,
+      "video_frames": 30000,
+      "pcm_frames": 24000000,
+      "slopes": {
+        "memory_kib_per_cycle": -2.1926651735722285,
+        "handles_per_cycle": -0.15156774916013438,
+        "threads_per_cycle": -0.0653555431131019
+      }
+    },
+    {
+      "case": "shared-cpu-nv12-1080-restart-consumer-100",
+      "cycles": 100,
+      "video_frames": 30000,
+      "pcm_frames": 24000000,
+      "slopes": {
+        "memory_kib_per_cycle": -2.2821948488241883,
+        "handles_per_cycle": -0.13955767077267636,
+        "threads_per_cycle": -0.07123460246360583
+      }
+    },
+    {
+      "case": "shared-cpu-nv12-4k-restart-producer-100",
+      "cycles": 100,
+      "video_frames": 15000,
+      "pcm_frames": 24000000,
+      "slopes": {
+        "memory_kib_per_cycle": -2.3978163493840987,
+        "handles_per_cycle": -0.14972004479283316,
+        "threads_per_cycle": -0.06983482642777156
+      }
+    },
+    {
+      "case": "shared-cpu-nv12-4k-restart-consumer-100",
+      "cycles": 100,
+      "video_frames": 15000,
+      "pcm_frames": 24000000,
+      "slopes": {
+        "memory_kib_per_cycle": -2.092721164613662,
+        "handles_per_cycle": -0.12122060470324748,
+        "threads_per_cycle": -0.06005039193729003
+      }
+    }
+  ],
+  "cycles": 800,
+  "video_frames": 180000,
+  "pcm_frames": 192000000,
+  "fresh_consumer_continuity_verified": 400
+}

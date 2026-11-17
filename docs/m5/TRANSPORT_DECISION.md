@@ -1,6 +1,6 @@
 # M5 Linux transport evaluation (2026-10-30)
 
-Baseline: FrameLink `ed81cbb`, Release build, Linux host melchior, GStreamer
+Baseline: FrameLink `ed81cbb`, Release build, Linux host <linux-host>, GStreamer
 1.24.2; PulseAudio compatibility server PipeWire 1.0.5. This is a bounded
 characterization, not a latency SLA, independent-clock qualification, physical
 speaker measurement, or proof of all-platform readiness.

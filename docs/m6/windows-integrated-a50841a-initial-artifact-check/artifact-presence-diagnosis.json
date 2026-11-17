@@ -1,0 +1,1181 @@
+{
+    "artifacts":  [
+                      {
+                          "exists":  true,
+                          "target":  "fl_audio_alignment",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_audio_alignment.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_audio_alignment",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_audio_alignment.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_audio_segment",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_audio_segment.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_audio_segment",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_audio_segment.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_av_auth",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_av_auth.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_av_auth",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_av_auth.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_av_memory_adversarial",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_av_memory_adversarial.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_av_memory_adversarial",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_av_memory_adversarial.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_av_memory_agreement",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_av_memory_agreement.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_av_memory_agreement",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_av_memory_agreement.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_av_offer_bounds",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_av_offer_bounds.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_av_offer_bounds",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_av_offer_bounds.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_av_rendezvous",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_av_rendezvous.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_av_rendezvous",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_av_rendezvous.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_buffer_references",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_buffer_references.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_buffer_references",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_buffer_references.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_consume",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_consume.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_consume",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_consume.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_d3d_decode_consumer",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_d3d_decode_consumer.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_d3d_decode_consumer",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_d3d_decode_consumer.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_d3d_decode_producer",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_d3d_decode_producer.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_d3d_decode_producer",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_d3d_decode_producer.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_d3d_decoder_probe",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_d3d_decoder_probe.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_d3d_decoder_probe",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_d3d_decoder_probe.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_d3d_memory_binding",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_d3d_memory_binding.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_d3d_memory_binding",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_d3d_memory_binding.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_disconnect_win",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_disconnect_win.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_disconnect_win",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_disconnect_win.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_expanded_pool",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_expanded_pool.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_expanded_pool",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_expanded_pool.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_external_pool_win",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_external_pool_win.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_external_pool_win",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_external_pool_win.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_frame_metadata",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_frame_metadata.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_frame_metadata",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_frame_metadata.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_frame_metadata_contract",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_frame_metadata_contract.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_frame_metadata_contract",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_frame_metadata_contract.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_gst_audio_sink",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_audio_sink.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_gst_audio_sink",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_audio_sink.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_gst_audio_source",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_audio_source.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_gst_audio_source",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_audio_source.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_gst_av_bench",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_av_bench.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_gst_av_bench",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_av_bench.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_gst_av_bin",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_av_bin.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_gst_av_bin",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_av_bin.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_gst_av_parity",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_av_parity.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_gst_av_parity",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_av_parity.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_gst_av_qualification",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_av_qualification.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_gst_av_qualification",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_av_qualification.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_gst_av_src_bin",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_av_src_bin.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_gst_av_src_bin",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_av_src_bin.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_gst_av_timeline",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_av_timeline.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_gst_av_timeline",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_av_timeline.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_gst_av_validation",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_av_validation.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_gst_av_validation",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_av_validation.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_gst_event_channel",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_event_channel.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_gst_event_channel",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_event_channel.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_gst_local_audio",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_local_audio.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_gst_local_audio",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_local_audio.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_gst_local_av",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_local_av.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_gst_local_av",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_local_av.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_gst_local_decoder_rate_win",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_local_decoder_rate_win.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_gst_local_decoder_rate_win",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_local_decoder_rate_win.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_gst_local_decoder_win",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_local_decoder_win.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_gst_local_decoder_win",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_local_decoder_win.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_gst_local_native_bench_win",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_local_native_bench_win.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_gst_local_native_bench_win",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_local_native_bench_win.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_gst_native_epoch_c_api",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_native_epoch_c_api.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_gst_native_epoch_c_api",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_native_epoch_c_api.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_gst_native_producer_win",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_native_producer_win.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_gst_native_producer_win",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_native_producer_win.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_gst_native_source_win",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_native_source_win.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_gst_native_source_win",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_native_source_win.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_gst_nv12",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_nv12.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_gst_nv12",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_nv12.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_gst_policy_generation",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_policy_generation.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_gst_policy_generation",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_policy_generation.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_gst_pool_policy",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_pool_policy.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_gst_pool_policy",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_pool_policy.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_gst_preconnect_slots",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_preconnect_slots.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_gst_preconnect_slots",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_preconnect_slots.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_gst_session_context",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_session_context.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_gst_session_context",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_session_context.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_gst_session_transport",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_session_transport.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_gst_session_transport",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_session_transport.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_gst_shared_cpu_av",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_shared_cpu_av.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_gst_shared_cpu_av",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_shared_cpu_av.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_gst_shared_cpu_roundtrip",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_shared_cpu_roundtrip.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_gst_shared_cpu_roundtrip",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_shared_cpu_roundtrip.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_gst_shared_cpu_session_win",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_shared_cpu_session_win.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_gst_shared_cpu_session_win",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_shared_cpu_session_win.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_gst_shared_cpu_source",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_shared_cpu_source.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_gst_shared_cpu_source",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_shared_cpu_source.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_gst_sink_stats",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_sink_stats.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_gst_sink_stats",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_sink_stats.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_gst_timestamps",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_timestamps.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_gst_timestamps",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_gst_timestamps.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_import_failure_win",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_import_failure_win.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_import_failure_win",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_import_failure_win.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_ipc_framing_win",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_ipc_framing_win.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_ipc_framing_win",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_ipc_framing_win.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_m4_transport_timing",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_m4_transport_timing.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_m4_transport_timing",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_m4_transport_timing.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_memory_boundary",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_memory_boundary.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_memory_boundary",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_memory_boundary.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_memory_c_api",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_memory_c_api.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_memory_c_api",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_memory_c_api.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_memory_contract",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_memory_contract.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_memory_contract",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_memory_contract.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_memory_resource",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_memory_resource.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_memory_resource",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_memory_resource.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_native_boundary_benchmark_win",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_native_boundary_benchmark_win.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_native_boundary_benchmark_win",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_native_boundary_benchmark_win.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_native_relay_process_win",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_native_relay_process_win.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_native_relay_process_win",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_native_relay_process_win.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_native_relay_win",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_native_relay_win.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_native_relay_win",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_native_relay_win.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_nv12_layout",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_nv12_layout.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_nv12_layout",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_nv12_layout.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_nv12_win",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_nv12_win.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_nv12_win",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_nv12_win.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_nv21",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_nv21.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_nv21",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_nv21.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_playback_recovery",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_playback_recovery.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_playback_recovery",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_playback_recovery.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_portable_map",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_portable_map.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_portable_map",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_portable_map.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_produce",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_produce.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_produce",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_produce.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_read_lease_d3d11",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_read_lease_d3d11.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_read_lease_d3d11",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_read_lease_d3d11.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_read_leases",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_read_leases.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_read_leases",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_read_leases.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_read_ledger",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_read_ledger.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_read_ledger",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_read_ledger.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_ready_timeout_win",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_ready_timeout_win.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_ready_timeout_win",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_ready_timeout_win.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_receive_queue",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_receive_queue.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_receive_queue",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_receive_queue.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_reconnect_held",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_reconnect_held.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_reconnect_held",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_reconnect_held.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_session_c_api",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_session_c_api.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_session_c_api",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_session_c_api.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_session_contract",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_session_contract.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_session_contract",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_session_contract.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_session_optional_tracks",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_session_optional_tracks.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_session_optional_tracks",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_session_optional_tracks.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_session_peer",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_session_peer.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_session_peer",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_session_peer.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_shared_cpu_allocation_win",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_shared_cpu_allocation_win.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_shared_cpu_allocation_win",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_shared_cpu_allocation_win.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_shared_cpu_c_api",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_shared_cpu_c_api.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_shared_cpu_c_api",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_shared_cpu_c_api.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_shared_cpu_channel_c",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_shared_cpu_channel_c.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_shared_cpu_channel_c",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_shared_cpu_channel_c.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_shared_cpu_channel_win",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_shared_cpu_channel_win.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_shared_cpu_channel_win",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_shared_cpu_channel_win.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_shared_cpu_contract",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_shared_cpu_contract.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_shared_cpu_contract",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_shared_cpu_contract.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_shared_cpu_control_win",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_shared_cpu_control_win.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_shared_cpu_control_win",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_shared_cpu_control_win.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_shared_cpu_imported_pool_win",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_shared_cpu_imported_pool_win.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_shared_cpu_imported_pool_win",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_shared_cpu_imported_pool_win.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_shared_cpu_pipe_win",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_shared_cpu_pipe_win.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_shared_cpu_pipe_win",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_shared_cpu_pipe_win.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_shared_cpu_pool",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_shared_cpu_pool.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_shared_cpu_pool",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_shared_cpu_pool.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_startup_win",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_startup_win.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_startup_win",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_startup_win.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_submit_ownership",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_submit_ownership.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_submit_ownership",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_submit_ownership.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_trace_compiled_out",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_trace_compiled_out.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_trace_compiled_out",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_trace_compiled_out.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_trace_test",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_trace_test.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_trace_test",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_trace_test.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "fl_win_sha256_rows",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_win_sha256_rows.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "fl_win_sha256_rows",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/fl_win_sha256_rows.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "framelink",
+                          "type":  "SHARED_LIBRARY",
+                          "artifact":  "Release/framelink.dll"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "framelink",
+                          "type":  "SHARED_LIBRARY",
+                          "artifact":  "Release/framelink.lib"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "framelink",
+                          "type":  "SHARED_LIBRARY",
+                          "artifact":  "Release/framelink.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "framelink_av_consumer",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/framelink_av_consumer.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "framelink_av_consumer",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/framelink_av_consumer.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "framelink_av_producer",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/framelink_av_producer.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "framelink_av_producer",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/framelink_av_producer.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "framelink_av_session",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/framelink_av_session.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "framelink_av_session",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/framelink_av_session.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "framelink_consumer",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/framelink_consumer.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "framelink_consumer",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/framelink_consumer.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "framelink_gst_av",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/framelink_gst_av.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "framelink_gst_av",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/framelink_gst_av.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "framelink_gst_session",
+                          "type":  "SHARED_LIBRARY",
+                          "artifact":  "Release/framelink_gst_session.dll"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "framelink_gst_session",
+                          "type":  "SHARED_LIBRARY",
+                          "artifact":  "Release/framelink_gst_session.lib"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "framelink_gst_session",
+                          "type":  "SHARED_LIBRARY",
+                          "artifact":  "Release/framelink_gst_session.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "framelink_producer",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/framelink_producer.exe"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "framelink_producer",
+                          "type":  "EXECUTABLE",
+                          "artifact":  "Release/framelink_producer.pdb"
+                      },
+                      {
+                          "exists":  true,
+                          "target":  "gstframelink",
+                          "type":  "MODULE_LIBRARY",
+                          "artifact":  "Release/gstframelink.dll"
+                      },
+                      {
+                          "exists":  false,
+                          "target":  "gstframelink",
+                          "type":  "MODULE_LIBRARY",
+                          "artifact":  "Release/gstframelink.pdb"
+                      }
+                  ],
+    "utc":  "2026-11-12T08:20:12.2830250Z"
+}

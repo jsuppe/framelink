@@ -1,0 +1,65 @@
+pids producer=25698 consumer=25694
+arrival.budget_ms=17
+complete=yes
+config=RGBA 1920x1080@60 bin native 5s
+consumer.audio.arrival.ms=n=300 p50=1.72 p95=2.20 p99=2.34 max=2.64 min=1.17
+consumer.audio.deadline_misses=0/500
+consumer.audio.output_queue.admission_residence.ms=n=500 p50=0.26 p95=0.44 p99=0.55 max=28.31 min=0.07
+consumer.audio.output_queue.pending=0
+consumer.audio.output_queue.sampled_max_buffers=1
+consumer.audio.output_queue.unmatched=0
+consumer.audio.render.ms=n=300 p50=2.04 p95=2.62 p99=2.80 max=3.10 min=1.41
+consumer.audio.render_interval.ms=n=299 p50=10.03 p95=10.75 p99=10.99 max=11.44 min=8.66
+consumer.audio.render_jitter.p1_p99.ms=1.22
+consumer.av_offset.abs.ms=n=3 p50=4.77 p95=4.77 p99=4.77 max=4.77 min=4.50
+consumer.av_offset.ms=n=3 p50=4.77 p95=4.77 p99=4.77 max=4.77 min=4.50
+consumer.cpu.percent=14.58
+consumer.frames=300
+consumer.handles=24..24 min=24 max=24
+consumer.handles.slope.per_min=0.00
+consumer.mem.kb=44780..44780 min=44780 max=44780
+consumer.mem.kind=rss
+consumer.mem.slope.kb_per_min=0.00
+consumer.memory=memory:FrameLinkAHardwareBuffer
+consumer.pid=25694
+consumer.queue.accounting=complete
+consumer.result=EOS
+consumer.samples=240000
+consumer.series.t_cpums_memkb_handles_threads=0.0:192:41472:6:2;1.0:340:44780:24:10;2.0:482:44780:24:10;3.0:626:44780:24:10;4.0:775:44780:24:10;5.0:922:44780:24:10;5.4:976:44780:13:6;
+consumer.threads=10..10 min=10 max=10
+consumer.threads.slope.per_min=0.00
+consumer.video.arrival.ms=n=180 p50=6.14 p95=7.86 p99=8.68 max=8.69 min=4.53
+consumer.video.deadline_misses=0/300
+consumer.video.output_queue.admission_residence.ms=n=300 p50=0.32 p95=0.50 p99=0.56 max=0.72 min=0.07
+consumer.video.output_queue.pending=0
+consumer.video.output_queue.sampled_max_buffers=0
+consumer.video.output_queue.unmatched=0
+consumer.video.render.ms=n=180 p50=6.72 p95=8.30 p99=9.06 max=9.08 min=4.90
+consumer.video.render_interval.ms=n=179 p50=16.14 p95=18.86 p99=20.41 max=20.49 min=13.35
+consumer.video.render_jitter.p1_p99.ms=4.03
+exit=0/0
+label=android-prefault5
+output.queue_buffers=1
+output.sync=false
+playback.latency_ms=0
+producer.cpu.percent=55.62
+producer.handles=28..28 min=28 max=28
+producer.handles.slope.per_min=-0.00
+producer.mem.kb=69960..69960 min=69960 max=69960
+producer.mem.kind=rss
+producer.mem.slope.kb_per_min=0.00
+producer.pid=25698
+producer.pushed.frames=300
+producer.pushed.samples=240000
+producer.result=EOS
+producer.series.t_cpums_memkb_handles_threads=0.0:190:41812:6:2;1.0:706:69960:28:7;2.0:1266:69960:28:7;3.0:1822:69960:28:7;4.0:2385:69960:28:7;5.0:2943:69960:28:7;5.2:3030:45676:18:5;
+producer.stats.framelink-audio-sink-stats=framelink-audio-sink-stats, blocks=(guint64)500, pcm-bytes=(guint64)960000, sample-frames=(guint64)240000, generation=(guint64)1, shared-pcm=(boolean)false;
+producer.stats.framelink-sink-stats=framelink-sink-stats, received=(guint64)300, submitted=(guint64)300, dropped=(guint64)0, ring-full-drops=(guint64)0;
+producer.threads=7..7 min=7 max=7
+producer.threads.slope.per_min=-0.00
+producer.video.push_burst.max=0
+producer.video.push_interval.ms=n=180 p50=16.67 p95=16.81 p99=16.87 max=16.89 min=16.46
+producer.video.push_lateness.ms=n=180 p50=0.32 p95=0.44 p99=0.53 max=0.54 min=0.20
+seconds=5
+video.pool=2
+video.queue=1

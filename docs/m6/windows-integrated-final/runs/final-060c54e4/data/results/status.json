@@ -1,0 +1,31 @@
+{
+  "revision": "060c54e41bcbfe7ca8dbdef89e6e74fb2930935c",
+  "state": "finished",
+  "started_utc": "2026-11-17T03:54:24.993070+00:00",
+  "failures": [],
+  "step": "compat-run-fl_read_lease_d3d11.exe",
+  "command": [
+    "<win-home>\\dev\\framelink-final-final-060c54e4\\compat-runtime\\fl_read_lease_d3d11.exe"
+  ],
+  "gst-tools-preflight_exit": 0,
+  "extract_exit": 0,
+  "configure_exit": 0,
+  "build-all_exit": 0,
+  "inventory_exit": 0,
+  "expected_tests": 180,
+  "exports-framelink_exit": 0,
+  "exports-framelink_gst_session_exit": 0,
+  "inspect-framelinksink_exit": 0,
+  "inspect-framelinksrc_exit": 0,
+  "inspect-framelinkavsink_exit": 0,
+  "inspect-framelinkavsrc_exit": 0,
+  "c11-owner-headers_exit": 0,
+  "full-ctest_exit": 0,
+  "compat-imports-fl_frame_metadata.exe_exit": 0,
+  "compat-run-fl_frame_metadata.exe_exit": 0,
+  "compat-imports-fl_gst_native_epoch_c_api.exe_exit": 0,
+  "compat-run-fl_gst_native_epoch_c_api.exe_exit": 0,
+  "compat-imports-fl_read_lease_d3d11.exe_exit": 0,
+  "compat-run-fl_read_lease_d3d11.exe_exit": 0,
+  "ended_utc": "2026-11-17T04:06:27.506664+00:00"
+}

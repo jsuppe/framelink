@@ -1,0 +1,67 @@
+{
+  "seconds": 5,
+  "errors": [],
+  "scope": "transport timing and accounting, not payload hashes, physical playback or native identity",
+  "video": {
+    "producer_rows": 150,
+    "consumer_rows": 150,
+    "pts_offset_ns": 729376623080200,
+    "arrival": {
+      "p95_ms": 3.8925,
+      "max_ms": 4.413134,
+      "misses_34ms": 0
+    },
+    "render": {
+      "p95_ms": 3.9041,
+      "max_ms": 4.431834,
+      "misses_34ms": 0
+    },
+    "push": {
+      "p95_ms": 1.747534,
+      "max_ms": 1.9182,
+      "misses_34ms": 0
+    }
+  },
+  "audio": {
+    "producer_rows": 500,
+    "consumer_rows": 500,
+    "pts_offset_ns": 729376623080200,
+    "arrival": {
+      "p95_ms": 1.8862,
+      "max_ms": 2.401,
+      "misses_34ms": 0
+    },
+    "render": {
+      "p95_ms": 1.901,
+      "max_ms": 2.4145,
+      "misses_34ms": 0
+    },
+    "push": {
+      "p95_ms": 1.8101,
+      "max_ms": 2.3088,
+      "misses_34ms": 0
+    }
+  },
+  "av_mapping_delta_ns": 0,
+  "pcm_sample_frames": 240000,
+  "resource_limits_applicable": false,
+  "resources": {
+    "consumer": {
+      "samples": 6,
+      "cpu_percent": 6.666666666666666,
+      "reported_cpu_percent": 6.66,
+      "memory_kb_per_min": 0.0,
+      "handles_per_min": 0.0,
+      "threads_per_min": 0.0
+    },
+    "producer": {
+      "samples": 6,
+      "cpu_percent": 8.952380952380953,
+      "reported_cpu_percent": 8.9,
+      "memory_kb_per_min": 0.0,
+      "handles_per_min": 0.0,
+      "threads_per_min": 0.0
+    }
+  },
+  "pass": true
+}

@@ -1,0 +1,38 @@
+{
+  "note": "Reconstructed exactly from archived remote.py/config/controller path; slash spelling normalized for readability.",
+  "commands": {
+    "trace-off": [
+      "<win-home>/dev/framelink-native-rate-native-smoke-11d1b65-20261112t0731z/build/Release/fl_gst_local_native_bench_win.exe",
+      "<win-home>/dev/framelink-native-rate-native-smoke-11d1b65-20261112t0731z/build/Release/gstframelink.dll",
+      "--out",
+      "<win-home>/dev/framelink-native-target-native-nv124k-11d1b65-20261112t0731z/trace-off",
+      "--seconds",
+      "5",
+      "--width",
+      "3840",
+      "--height",
+      "2160",
+      "--fps",
+      "30",
+      "--format",
+      "NV12"
+    ],
+    "trace-on": [
+      "<win-home>/dev/framelink-native-rate-native-smoke-11d1b65-20261112t0731z/build/Release/fl_gst_local_native_bench_win.exe",
+      "<win-home>/dev/framelink-native-rate-native-smoke-11d1b65-20261112t0731z/build/Release/gstframelink.dll",
+      "--out",
+      "<win-home>/dev/framelink-native-target-native-nv124k-11d1b65-20261112t0731z/trace-on",
+      "--seconds",
+      "5",
+      "--width",
+      "3840",
+      "--height",
+      "2160",
+      "--fps",
+      "30",
+      "--format",
+      "NV12",
+      "--trace"
+    ]
+  }
+}

@@ -1,0 +1,550 @@
+[
+    {
+        "sha256":  "8cdc761a74a9867df6d7ef649b2a2b20e06a75eec8a97273da814f7f6c0f540a",
+        "path":  "renderer/android_control.h"
+    },
+    {
+        "sha256":  "5fe1b35ac2e9cfc4b186869c734bb45a1531f0cb2b3aae944cbabf34286780f0",
+        "path":  "renderer/android_displays.cpp"
+    },
+    {
+        "sha256":  "32f15f415c004db178e5efdd72a7b62e598586fe0fa98675fbbc645eff1e45cc",
+        "path":  "renderer/android_displays.h"
+    },
+    {
+        "sha256":  "2fff99831116dee772816a3d9782bced29e2ad24b7b8a0d4658d955a3bda6612",
+        "path":  "renderer/android_main.cpp"
+    },
+    {
+        "sha256":  "c94de9918eb9903df5f184f14559ee4c237d341d21a2b5c21be9668db2044bf2",
+        "path":  "renderer/android_preview.cpp"
+    },
+    {
+        "sha256":  "51cd685e13852669865dbdf6e71a19126bb5d45a99983eca1bfd2b0893cb93b1",
+        "path":  "renderer/android_preview.h"
+    },
+    {
+        "sha256":  "6fddf0e8805fbf7525f3ec09336c95ac54b1a90fc6fa8174e781a0902c84d4fa",
+        "path":  "renderer/av_input.h"
+    },
+    {
+        "sha256":  "86c73bb0301ba1bfdaa9963e51129998c5795669f4ae061ecf88dfa58aed738b",
+        "path":  "renderer/av_schedule.h"
+    },
+    {
+        "sha256":  "db34faf8c0d01458f1e18ba21eefbdf1be97ee95923e832852ee2d59d6174deb",
+        "path":  "renderer/background_pass.cpp"
+    },
+    {
+        "sha256":  "f5c61edb826b1c329b365886aa1c9c350c21cfcb978f17912547541c6feccc1e",
+        "path":  "renderer/background_pass.h"
+    },
+    {
+        "sha256":  "45845a761211d1ccf8b4b77831d4ad77d6aec16820f690a20cc1fbdf48376f78",
+        "path":  "renderer/control_api.cpp"
+    },
+    {
+        "sha256":  "8efe5280c61789c93324d71a0afc5e8f38c2fbeedebfda396fc29e6362eaacce",
+        "path":  "renderer/control_api.h"
+    },
+    {
+        "sha256":  "5dd1f7de6a6808ab4e65397ccb0229e739e60853a60d2b970f7c62bdb2b2e69c",
+        "path":  "renderer/dump_util.cpp"
+    },
+    {
+        "sha256":  "bdb67ee95c60b79efdfa9aa27490206b378903ef6cc9423c215c6d45f7ca0d5f",
+        "path":  "renderer/dump_util.h"
+    },
+    {
+        "sha256":  "3f242666812c5edfe384a0aa0d1d434dc423b35ffc01f997084ae718125f4906",
+        "path":  "renderer/external_video_image.cpp"
+    },
+    {
+        "sha256":  "0c355a977091377fe87e86ce2804de2328d26552062729774a4a2c2c3cdb95f9",
+        "path":  "renderer/external_video_image.h"
+    },
+    {
+        "sha256":  "e11738cb941fb2be5d674369cf80e00fb4c4a74dcbef13fe91c4d891391481a7",
+        "path":  "renderer/gpu_output.cpp"
+    },
+    {
+        "sha256":  "094245eec6b9d6dd1a1b2577c7194401d30686322cf09c0c3a989ddbfa1b194a",
+        "path":  "renderer/gpu_output.h"
+    },
+    {
+        "sha256":  "b919da055613e281efe3dea0dc52163a3851ad94a0a8cc1e00eca56204faa3d0",
+        "path":  "renderer/gpu_trace.h"
+    },
+    {
+        "sha256":  "bdc7dc58e9739f7051d1ac3cf488dea4d548ded406d461faf391b5a9e5acde3d",
+        "path":  "renderer/headless_pacer.h"
+    },
+    {
+        "sha256":  "3bd02daa5d15b0358c014f60fe41e7fe121ca7fbbc388ec4ac3c5c2233b5ed9a",
+        "path":  "renderer/main.cpp"
+    },
+    {
+        "sha256":  "a1f969ade440a8154f058c7793b26bfeb567d96bd8ab6404dea5893c0c49b005",
+        "path":  "renderer/moderation.h"
+    },
+    {
+        "sha256":  "dc93a610f4143d472c9b90c40f32918440e9ee1c78214455c369747589687ac5",
+        "path":  "renderer/nv12_cpu.h"
+    },
+    {
+        "sha256":  "5ec6ac5f163d0b9dddda9c8bbeb69b6ba6bd4b00959ed198071bed3870ba275d",
+        "path":  "renderer/nv12_output.cpp"
+    },
+    {
+        "sha256":  "89e64d39fcc639152020d556b7e77ec54c1808cb0143943dc60a0d660fbb9558",
+        "path":  "renderer/nv12_output.h"
+    },
+    {
+        "sha256":  "77c5b8d644001c040c9c06ff7fe66da17f3bbfc4bc122194ed3587780001e4a1",
+        "path":  "renderer/output_fullscreen_spv.h"
+    },
+    {
+        "sha256":  "bcfbbaaae8da898564c2c2da84083a144457d0de0e9a2ae4ad15f3479b4c4c47",
+        "path":  "renderer/output_nv12_spv.h"
+    },
+    {
+        "sha256":  "e2ef1cb7527505e359d5fa0ac675561853162fd624234c8b85c89ae8ebf298ca",
+        "path":  "renderer/output_yuv_spv.h"
+    },
+    {
+        "sha256":  "ef14796c177ee1e6110aa9361f33fcfcce6d8f552a4ebdb786a93322c34c11ae",
+        "path":  "renderer/perf_trace.h"
+    },
+    {
+        "sha256":  "f3cfaddddd2242230c970408ed5cb0fa66c2a89cfed5487d74720a25935b7c15",
+        "path":  "renderer/portable_input.cpp"
+    },
+    {
+        "sha256":  "bd91ca757fdfc5af8b0aefd57f6ede4c2b36b1a9eed1103515a103c77f9b029a",
+        "path":  "renderer/portable_input.h"
+    },
+    {
+        "sha256":  "2b41ad89400e3378f2d5ff4fc9ed248609a79dae1786b34bb01bfcc6972bb701",
+        "path":  "renderer/portable_output.cpp"
+    },
+    {
+        "sha256":  "ece164e4c5c4e152137bc96e3673cc9c0d9996b1a162996208b3c3a1f3a24ba9",
+        "path":  "renderer/portable_output.h"
+    },
+    {
+        "sha256":  "4b7b02495743034b0cea017b8e667e9827187e507ae5328392ae9e5edc928fcd",
+        "path":  "renderer/preview_mailbox.h"
+    },
+    {
+        "sha256":  "ee880d3d21b6907867f50d3a72b420cac6638b31e77c081268505f9c021d943f",
+        "path":  "renderer/scene_host.cpp"
+    },
+    {
+        "sha256":  "a4d0324746aca22934b19c94ef3714447e5fab9284c38c97ba061e732894fab6",
+        "path":  "renderer/scene_host.h"
+    },
+    {
+        "sha256":  "cce3fa74a49661820769fa71c4a80bb84444f7e32109d013f66df7a57a41674c",
+        "path":  "renderer/scene_layout.h"
+    },
+    {
+        "sha256":  "25b89025319ad41d5c078ad28ae0a559c3783a9f954c642940cd8107192b3a53",
+        "path":  "renderer/scene_math.h"
+    },
+    {
+        "sha256":  "5ba5d6e0dac547495a812ac36c0e8e19b0fa604f2013bd4780f2600ecd5275c4",
+        "path":  "renderer/scene_motion.h"
+    },
+    {
+        "sha256":  "f21d4589bc4066090af9aaf732c0c6c03df5058de038579f37059c004ff0d0fe",
+        "path":  "renderer/video_pass.cpp"
+    },
+    {
+        "sha256":  "137471517f38646115903655263437a53875cb8dec9953ecb4615a0de267b912",
+        "path":  "renderer/video_pass.h"
+    },
+    {
+        "sha256":  "14020e9b92fd513bb9fa2e703e6fe40422e247bc04239daf9889fb2b8a6441ce",
+        "path":  "renderer/vk_context.cpp"
+    },
+    {
+        "sha256":  "6802448a2c8d2d48cff53ab49e03c731d3e4a771fd241a28cce155576f90890e",
+        "path":  "renderer/vk_context.h"
+    },
+    {
+        "sha256":  "1b35fd041a220ad7047a994d773f06fec0cee070093e97f465802c3ef08fab6d",
+        "path":  "renderer/wayland_compositor.cpp"
+    },
+    {
+        "sha256":  "a0691dbbe119d39db6e0d01b5408e4984c5b8f8fc2bef6fc06cf982ec88d18a0",
+        "path":  "renderer/wayland_compositor.h"
+    },
+    {
+        "sha256":  "1492bb435186e8a9646c7f4157939bba521accc59820c2de86d389ef65711a9a",
+        "path":  "renderer/win_service.cpp"
+    },
+    {
+        "sha256":  "4931bdd5285caaa87c6712378a669c39e36c44f81cac703d60d579eb8f1590f3",
+        "path":  "renderer/win_service.h"
+    },
+    {
+        "sha256":  "0e9f5e9001eb941a9bfbc0ba401ac37a9461822796253375d369603f6d580d02",
+        "path":  "renderer/shaders/cube.vert"
+    },
+    {
+        "sha256":  "8fbfe3c0b897059165568087cebf9d5eb61aeaa0f79e405561b2375d3994f143",
+        "path":  "renderer/shaders/fullscreen.vert"
+    },
+    {
+        "sha256":  "fe9d2dc586933a5a000bc0b1e787f8aa1c712dd5fff72c70f0b7c0c2b0315679",
+        "path":  "renderer/shaders/nv12_cube.frag"
+    },
+    {
+        "sha256":  "2a1dad14c34f2ffb614e8bb6b2ca720ddd4d1e01aa4d2789d94dba6fa4424b37",
+        "path":  "renderer/shaders/nv12_planar.frag"
+    },
+    {
+        "sha256":  "c336e5a980a489b98c153134c6d26344269784316d5275aea348f94e42e9b4ca",
+        "path":  "renderer/shaders/output_fullscreen.vert"
+    },
+    {
+        "sha256":  "cd2f5b650b89c2b22123add255c516956d7f3f9ea559c5bdbd942e960d952088",
+        "path":  "renderer/shaders/output_nv12.comp"
+    },
+    {
+        "sha256":  "46a74b763f23273d59abc85a4191ad12f1209e2c42d0f3a3bdbb958ca96b5169",
+        "path":  "renderer/shaders/output_yuv.frag"
+    },
+    {
+        "sha256":  "6a48595ece850f91f4ad34f2302858924ee2de50f8515dc995eaa5c572119667",
+        "path":  "renderer/shaders/tile.frag"
+    },
+    {
+        "sha256":  "607c175683548d90b0e9a421eee40304c1f557681e6cd2cb91af046013637b9d",
+        "path":  "renderer/shaders/tile.vert"
+    },
+    {
+        "sha256":  "d1fbb840156da5b66958326936b4826f5b0bc3a7b5a0fc7893c57e67e42465b2",
+        "path":  "renderer/shaders/vaporwave.frag"
+    },
+    {
+        "sha256":  "ddba51f332bc194dbcdc83ab1d7ab279b350c6f0068cad62f348fe773aeecc6f",
+        "path":  "renderer/shaders/video_ycbcr.frag"
+    },
+    {
+        "sha256":  "5e755d76f17626f0edcbf5d60b99684a6c458f315c9c623a4d4460b5f4a0fec7",
+        "path":  "common/ipc.h"
+    },
+    {
+        "sha256":  "207f87025d17df4e93d19c4fcb0cdeb376f2c0730534556a71ae802777198f63",
+        "path":  "common/ipc_posix.cpp"
+    },
+    {
+        "sha256":  "4ae9247673723f904f3681ce365e01b2b6bad55044d7744fa90cc444ffdb40a1",
+        "path":  "common/ipc_win32.cpp"
+    },
+    {
+        "sha256":  "36fdc71d07f44bac11542697fed7a01235289487334bad36be6e0f12ffbd787c",
+        "path":  "common/log.h"
+    },
+    {
+        "sha256":  "73394053ae018ea10e892cd8d7d9ea2a9d26fb70263dc4bf18fd36e9ec1e1e19",
+        "path":  "common/protocol.h"
+    },
+    {
+        "sha256":  "21380257384d9edd9346e9084a37020ce2ea8ea0d63181a893aa4cf4f2c224d9",
+        "path":  "client/appliance_win.cpp"
+    },
+    {
+        "sha256":  "619d2727799b0cd44d4d843eceb089113ed1ae9c76c3e2f9a9b56e36df09a469",
+        "path":  "client/fl_sink_posix.h"
+    },
+    {
+        "sha256":  "cf33db1bb80521469fd787ec470d58b6fa140a18e647923e86def0af5ab79a6c",
+        "path":  "client/miracast_receiver.cpp"
+    },
+    {
+        "sha256":  "ce384f4e0a76ccf9e3e94c39a792e50c94ebcc88748ea310a2dd05404d7f3285",
+        "path":  "client/pin_overlay.cpp"
+    },
+    {
+        "sha256":  "66e5bd7a54c9c449baca6823ae84c192bfa8b128955a1ea4523e2d7e9ef34f0f",
+        "path":  "client/pin_overlay.h"
+    },
+    {
+        "sha256":  "7182155cb099da0d755c3a7eacaa4ceb2237a08974ddaeadaf48ec86bac7dc3d",
+        "path":  "client/recv_stats.h"
+    },
+    {
+        "sha256":  "574c348f4d1535ce65e16c3c8baffaa82d16082adb8f4873d2f1f0fdf6586738",
+        "path":  "client/rtsp_linux.cpp"
+    },
+    {
+        "sha256":  "4823f53acec80e9168adaa960fdd98b6601e171b89e12cb0d9e7abedd0d8e544",
+        "path":  "client/rtsp_room.cpp"
+    },
+    {
+        "sha256":  "333be4758df9ad45596ec7d52a715da358ca509332605221d5a0d849ab974b1d",
+        "path":  "client/rtsp_room.h"
+    },
+    {
+        "sha256":  "d961c1a147b887c93522ded895ce2691d446045a4a516ade056a50fa12b178a0",
+        "path":  "client/rtsp_win.cpp"
+    },
+    {
+        "sha256":  "cf5316e6eb83814a99c76a629f6298c32cb5995dc6f3fdb5b2f627fd12daadf2",
+        "path":  "client/vkr_web.cpp"
+    },
+    {
+        "sha256":  "3ec7763acb90f57a859f57fa99c0c92ea9b9f2248740a1117fcdbbb0100e20c6",
+        "path":  "client/webrtc_linux.cpp"
+    },
+    {
+        "sha256":  "fe8bde33631a15eaa5762e58c5e7e76b3b28aa3ab80b002af6b4997a963bf4d6",
+        "path":  "client/webrtc_win.cpp"
+    },
+    {
+        "sha256":  "2a5d62e421b8b5b97e0774857f22357ffbf064059fe922d48edb7bb356371d16",
+        "path":  "client/whip_mdns_win.c"
+    },
+    {
+        "sha256":  "816b957ad9334bec4c978cd90e2c01bad72702a39fdc0e88e08540f6349085d9",
+        "path":  "client/whip_mdns_win.h"
+    },
+    {
+        "sha256":  "f4d44d29c96d0311ac228ed0759f4504021cf919f2753207b2e4bb0ff67c13c3",
+        "path":  "client/whip_room.cpp"
+    },
+    {
+        "sha256":  "8db82a7f61b67f5f5df6a79d9a5174fd8802ddfa669d43c71d85bbd743079a4e",
+        "path":  "client/whip_room.h"
+    },
+    {
+        "sha256":  "93148f2b80ea219cb4dc84b966eb48fb99de8a401d39d0752ec56df63524d3f6",
+        "path":  "decoder/d3d11va_decoder.cpp"
+    },
+    {
+        "sha256":  "a20efcb4638230a56a3c01b436872dfbb087e18c87d679e49c623bbd720a66f3",
+        "path":  "decoder/d3d11va_decoder.h"
+    },
+    {
+        "sha256":  "89bc3625fc9d28dc0a47ebfaf64551b1fd3e3e4f717b1ce0e9f394b7ee4211a6",
+        "path":  "decoder/gst_d3d11_decoder.cpp"
+    },
+    {
+        "sha256":  "be8e7568ac693791b4ad30a0d61cfdd93db2675860c4079a365f9e9ca3392873",
+        "path":  "decoder/gst_d3d11_decoder.h"
+    },
+    {
+        "sha256":  "72794753b0cc7b7b5971fe911a27945c3d8e9bbcc7ea75b7a3c12612331c7594",
+        "path":  "decoder/gst_surface_decoder.cpp"
+    },
+    {
+        "sha256":  "560267b105a2040d24d35251806092c1fa0da383167dd50b7a467cb4bb40f7cc",
+        "path":  "decoder/gst_surface_decoder.h"
+    },
+    {
+        "sha256":  "a350478f3603fafb229ba274b70d927b3da5ab8b944928ff9cdc44638ca14b0b",
+        "path":  "decoder/gst_va_decoder.cpp"
+    },
+    {
+        "sha256":  "b380d1bba991d595247a1438e9de2a930ad3732101e5183d671971284662bae4",
+        "path":  "decoder/gst_va_decoder.h"
+    },
+    {
+        "sha256":  "1af71ed62729be866728477bac84c38c7b95c39a56dbd8e313a1d1de111385b3",
+        "path":  "decoder/main.cpp"
+    },
+    {
+        "sha256":  "17fcf498069aaf48a55d0851d6bd584403636c1d08185cb71eb57d472e48d404",
+        "path":  "decoder/mediacodec_decoder.cpp"
+    },
+    {
+        "sha256":  "df31878664db5b996da749b293bd35e06f260a2bf2cc06cafd5e2f94e84d6f3e",
+        "path":  "decoder/mediacodec_decoder.h"
+    },
+    {
+        "sha256":  "a6359a6652cc052612765f6c5f630797e24697ceeec2b3e77d0957be946c2631",
+        "path":  "decoder/surface_decoder.cpp"
+    },
+    {
+        "sha256":  "e0a7a8ccbdd51d303a5aea017156d37c048f8d1b2b75a6d65421802a951d3971",
+        "path":  "decoder/surface_decoder.h"
+    },
+    {
+        "sha256":  "00b97b89c40c9eadd3fee945a5472051324ddff9bf60fa8dd4d9b64d556cb8e2",
+        "path":  "decoder/vaapi_decoder.cpp"
+    },
+    {
+        "sha256":  "d992e8b58e1f9d38adfdf6e10f8a67132e75b26fe2cf81081015892792bb0dd9",
+        "path":  "decoder/vaapi_decoder.h"
+    },
+    {
+        "sha256":  "cffb471e2129f1d49bb92b06fe71d7498843b0a9f42a015eb7fd48ebcb0229e8",
+        "path":  "cmake/ffmpeg.cmake"
+    },
+    {
+        "sha256":  "9ed9328cceb6bffe566f8665c21a182b9e5de333a4604f7f145f91b9f0c5d50d",
+        "path":  "test/android_control.cpp"
+    },
+    {
+        "sha256":  "aab156108e9726bade6e9e0dd010f0c5be94f85202dc24134c4ecab3e763ef27",
+        "path":  "test/android_control_aidl.py"
+    },
+    {
+        "sha256":  "08de3e153e6ab11b176757f19aefcd378918c1d357b8619122611cb42ad2bfe6",
+        "path":  "test/android_display_pixels.py"
+    },
+    {
+        "sha256":  "9f3b5542a5d9b3d5b3c67f7a4ef57806cc1a43e931155df3e1db011b044e0b31",
+        "path":  "test/android_stream_owners.py"
+    },
+    {
+        "sha256":  "5ebe08998f6c20589bc9797bee89a8f0e3a4499884b7316ff0db2f9d2ac35acc",
+        "path":  "test/android_surface_generations.cpp"
+    },
+    {
+        "sha256":  "a7571903b62bc57bf3306d214bc242808981420f4e565fca134c0e17f48c8ea6",
+        "path":  "test/av_clock_contract_test.cpp"
+    },
+    {
+        "sha256":  "b8ccf0fd9e9e285608caa48d9c36b7028600a47f82bb23f748619f7c7c15e35a",
+        "path":  "test/av_renderer_generations.py"
+    },
+    {
+        "sha256":  "74b228484c90a42ce2d338203e3b21f989c158df7044951bfeba92c9323e6d71",
+        "path":  "test/av_renderer_pause.py"
+    },
+    {
+        "sha256":  "8cc97a3a02d1d4a875645698e9a7cb3cbae56dfdeac611c57dc9d5c569361088",
+        "path":  "test/av_renderer_select.py"
+    },
+    {
+        "sha256":  "9e8bb46cd4a51f149e12cb15525dd2e155068357517ee7f6727035b3325a5b6a",
+        "path":  "test/av_renderer_smoke.py"
+    },
+    {
+        "sha256":  "dcb2e40bd2aab25586f5b003c05d15ccc42f8b6c494969b9f30d257f2160a356",
+        "path":  "test/av_schedule_test.cpp"
+    },
+    {
+        "sha256":  "a2f1221736f13239976a4b5a57e7738d45af5ade6411872e86b479d872b0d957",
+        "path":  "test/av_stall_reconnect.py"
+    },
+    {
+        "sha256":  "c4e8fbad6961cb439af05e762796d848b92249b5547b3566f2e203c3b6ab1cb0",
+        "path":  "test/control_api.py"
+    },
+    {
+        "sha256":  "a020e74ebb38656a0b313a0d982ae0598fd188b2d3207aa758558f170f625f49",
+        "path":  "test/control_fixture.cpp"
+    },
+    {
+        "sha256":  "ebe07631ecc2c28d850b0eaa0d0f3d1adec92d1d94f775c3ea50f48244390a9c",
+        "path":  "test/control_preview_admission.py"
+    },
+    {
+        "sha256":  "b1ecafcba6c09ddf73eafed5423d82665c6dc43ed5f1b8da3ab8662ada4c0e01",
+        "path":  "test/control_short_write.cpp"
+    },
+    {
+        "sha256":  "ac77ad290f3a2ac8c7276f1af6c1bdd1acb7db728e4e2b870c1a2af1f303e1da",
+        "path":  "test/control_short_write.py"
+    },
+    {
+        "sha256":  "448187d423ac96237aa575c517779412619f55eedb8e995785c2c126e43d7800",
+        "path":  "test/gpu_output_caps.cpp"
+    },
+    {
+        "sha256":  "969d15bd7772c57eefdb98f1a07c70b7e78f257110eb4cd94118d4cb96b75ca2",
+        "path":  "test/gpu_output_integration.py"
+    },
+    {
+        "sha256":  "3cf595f4791176e0058d20f4b05ca34a0e25bf9588d9babc475c6b9ad3677f0e",
+        "path":  "test/gpu_output_pixels.cpp"
+    },
+    {
+        "sha256":  "4c4a5721ce78984d107b74bf46ffa3a499dac9db99a8f3018230c19aeb63e629",
+        "path":  "test/gpu_sync_fd.cpp"
+    },
+    {
+        "sha256":  "3e5c9787e2b0d99a4e8c809818c9412d555a142a7e563c6f2f2bee043a30639c",
+        "path":  "test/headless_pacer_test.cpp"
+    },
+    {
+        "sha256":  "143dff06fbadc801c4e9718e7b96dadad488240ecb2686eb79a17621e30be2e5",
+        "path":  "test/ipc_test.cpp"
+    },
+    {
+        "sha256":  "a528a9c22a3b57c77ba507145d8c74507b6b304c249aee9d5a5174e522403683",
+        "path":  "test/linux_control_integration.py"
+    },
+    {
+        "sha256":  "49992f83e4fea6650bff73e5c27d1e03c9e0c6ca8320f5576a8cdc8e43b946d1",
+        "path":  "test/linux_gpu_stress.py"
+    },
+    {
+        "sha256":  "5c1d54b9c21ca7326aacad52e04a4bf327e786fa4bcfaee62d9e325a589d9d04",
+        "path":  "test/mixed_formats.py"
+    },
+    {
+        "sha256":  "64ca339a843601ef6eb8d57093e7d7932672ed7eefa8fdb7b3b25d90ba592c01",
+        "path":  "test/nv12_cpu_test.cpp"
+    },
+    {
+        "sha256":  "1cf5dcbc67e3cb66e9e6fedd05db2ef7c2252b17f89b63169e9ede22d57caff8",
+        "path":  "test/nv12_output_win.cpp"
+    },
+    {
+        "sha256":  "03f4a2106a660791addae759489cf408e409672f05ef0d3f077deb6efcd7af6e",
+        "path":  "test/nv12_service.ps1"
+    },
+    {
+        "sha256":  "bceb25ad9cb552deb727bd534090bb9b0c22b580688cd48cd4ac25e5c5514174",
+        "path":  "test/parity_windows_input.ps1"
+    },
+    {
+        "sha256":  "e42c3ce0a57e4bffa243c0fbd8f521e124d3e3e5809da6464ed7bc82664db61f",
+        "path":  "test/parity_windows_output.ps1"
+    },
+    {
+        "sha256":  "05a0ab922183df5548b11fa1198b807b8e85ebe162e4d0c41b2cdc0c4c50050a",
+        "path":  "test/portable_output_check.cpp"
+    },
+    {
+        "sha256":  "f90215ce90721e3b4071b72252af0af6233b2ec308fba8b4baac64cac02b88c4",
+        "path":  "test/preview_mailbox.cpp"
+    },
+    {
+        "sha256":  "11c4329c89984e1e3ebb3c9d46353446ea680eafb1e49b4a58b965e34fe4bd17",
+        "path":  "test/preview_sync_validation.py"
+    },
+    {
+        "sha256":  "949668c21f697a80c15de1b59a9fbfeef990c4fe3b9b15b9c9fb0cef56290636",
+        "path":  "test/scene_layout.cpp"
+    },
+    {
+        "sha256":  "dd94dcb8d6be405733d5211ab4adc9d509633725b1309385e6a57f7bca351532",
+        "path":  "test/update_output_shaders.py"
+    },
+    {
+        "sha256":  "5057d1275a46faeefd6c754d177dcd2bf529d6390c86cc86ab97c7b8160505ac",
+        "path":  "test/wayland_dmabuf_client.c"
+    },
+    {
+        "sha256":  "e042369bf8613b4f365880edc6c7fe028f01ac0269de5bd2c4672b3ce510161c",
+        "path":  "test/windows_gpu_stress.ps1"
+    },
+    {
+        "sha256":  "979a6f89bb64eeeb9fef1cc8af5e6cdec10e0526d4a000a1b96f4345fb624dd5",
+        "path":  "test/windows_gpu_stress_pixels.ps1"
+    },
+    {
+        "sha256":  "be0a728a8f7c1a293b708f45abcc3f3ba6dff4516c91c275967918da924207a1",
+        "path":  "test/win_client_demo.cpp"
+    },
+    {
+        "sha256":  "3d3952a87ec8a2b22d30a1eeb50e74de03cfb2b498f66f6227b332e87cf64c8a",
+        "path":  "CMakeLists.txt"
+    }
+]

@@ -1,0 +1,350 @@
+** WARNING: connection is not using a post-quantum key exchange algorithm.
+** This session may be vulnerable to "store now, decrypt later" attacks.
+** The server may need to be upgraded. See https://openssh.com/pq.html
+UpdateCTestConfiguration  from :<win-home>/dev/framelink-m6-windows-f5b3ee3/build/DartConfiguration.tcl
+Test project <win-home>/dev/framelink-m6-windows-f5b3ee3/build
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 42
+      Start  42: gst_native_producer_win
+
+42: Test command: <win-home>\dev\framelink-m6-windows-f5b3ee3\build\Release\fl_gst_native_producer_win.exe "<win-home>/dev/framelink-m6-windows-f5b3ee3/build/Release/gstframelink.dll"
+42: Working Directory: <win-home>/dev/framelink-m6-windows-f5b3ee3/build
+42: Test timeout computed to be: 20
+42: 
+42: ** (fl_gst_native_producer_win.exe:23364): WARNING **: 21:13:55.060: framelinkavsink: authenticated properties are immutable; create a new bin/session
+42: 
+42: ** (fl_gst_native_producer_win.exe:23364): WARNING **: 21:13:55.390: framelinkavsink: authenticated properties are immutable; create a new bin/session
+42: native AV mode 0 local=0
+42: native AV mode 1 local=0
+42: native AV mode 2 local=0
+42: native AV mode 3 local=0
+42: native AV: Socket I/O timed out <win-home>\dev\framelink-m6-windows-f5b3ee3\gst\gstframelinkaudiosrc.cpp(66): readChunkImpl (): /GstPipeline:pipeline10/GstFrameLinkAvSrc:transport/GstFrameLinkAudioSrc:audio/FlAudioReader:flaudioreader3
+42: native AV mode 0 local=0
+42: native AV mode 1 local=0
+42: native AV mode 2 local=0
+42: native AV mode 3 local=0
+42: native AV: Socket I/O timed out <win-home>\dev\framelink-m6-windows-f5b3ee3\gst\gstframelinkaudiosrc.cpp(66): readChunkImpl (): /GstPipeline:pipeline18/GstFrameLinkAvSrc:transport/GstFrameLinkAudioSrc:audio/FlAudioReader:flaudioreader7
+42: native AV mode 0 local=1
+42: native AV mode 0 local=1
+42: native AV mode 0 local=1
+42: native AV mode 1 local=1
+42: native AV mode 1 local=1
+42: native AV mode 1 local=1
+42: native AV mode 2 local=1
+42: native AV mode 2 local=1
+42: native AV mode 2 local=1
+42: native AV mode 0 local=1
+42: native AV mode 1 local=1
+42: native AV mode 2 local=1
+42: native AV mode 0 local=1
+42: native AV mode 1 local=1
+42: native AV mode 2 local=1
+42: RGBA native producer: original texture, ready fence, exact pixels/metadata, local reference reuse and owner lifetime pass
+42: NV12 native producer: original texture, ready fence, exact pixels/metadata, local reference reuse and owner lifetime pass
+42: native producer layout: repeated fresh pixels, exact planes, grow/shrink and cancelled reservations pass
+42: native producer layout: repeated fresh pixels, exact planes, grow/shrink and cancelled reservations pass
+42: native sink pipeline: exact texture pixels/metadata, foreign allocation rejection, retained buffer after stop pass
+42: coordinated native missing policy rejected
+42: coordinated native stale policy rejected
+42: native sink pipeline: exact texture pixels/metadata, foreign allocation rejection, retained buffer after stop pass
+42: native sink pipeline: exact texture pixels/metadata, foreign allocation rejection, retained buffer after stop pass
+42: native bin rejects missing policy, audio-only, shared CPU and automatic discovery
+42: coordinated native missing policy rejected
+42: coordinated native stale policy rejected
+42: native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+42: native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+42: native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+42: native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+42: native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+42: native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+42: native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+42: native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+42: native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+42: native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+42: native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+42: native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+42: native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+42: native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+42: native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+42: native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+42: native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+42: native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+42: native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+42: native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+42: native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+42: native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+42: native prod
+42: ** (fl_gst_native_producer_win.exe:23364): WARNING **: 21:14:10.373: framelinkavsrc: authenticated properties are immutable; create a new bin/session
+42: 
+42: ** (fl_gst_native_producer_win.exe:23364): WARNING **: 21:14:10.374: framelinkavsrc: authenticated properties are immutable; create a new bin/session
+42: 
+42: ** (fl_gst_native_producer_win.exe:23364): WARNING **: 21:14:10.410: framelinkavsink: authenticated properties are immutable; create a new bin/session
+42: 
+42: ** (fl_gst_native_producer_win.exe:23364): WARNING **: 21:14:10.411: framelinkavsink: authenticated properties are immutable; create a new bin/session
+42: 
+42: ** (fl_gst_native_producer_win.exe:23364): WARNING **: 21:14:10.442: framelinkavsrc: authenticated properties are immutable; create a new bin/session
+42: 
+42: ** (fl_gst_native_producer_win.exe:23364): WARNING **: 21:14:10.443: framelinkavsrc: authenticated properties are immutable; create a new bin/session
+42: 
+42: ** (fl_gst_native_producer_win.exe:23364): WARNING **: 21:14:10.479: framelinkavsink: authenticated properties are immutable; create a new bin/session
+42: 
+42: ** (fl_gst_native_producer_win.exe:23364): WARNING **: 21:14:10.480: framelinkavsink: authenticated properties are immutable; create a new bin/session
+42: native AV mode 0 local=1
+42: native AV mode 1 local=1
+42: native AV mode 2 local=1
+42: ucer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+42: native local setup: invalid policies, candidate mismatch, legacy isolation, capacity and cancellation pass
+42: native local setup: invalid policies, candidate mismatch, legacy isolation, capacity and cancellation pass
+42: native bins: 26 configuration controls, immutable copies and both-role bounded cancellation pass
+42: native bins: 26 configuration controls, immutable copies and both-role bounded cancellation pass
+42: native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+42: native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+42: native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+ 1/12 Test  #42: gst_native_producer_win ............   Passed   18.70 sec
+test 43
+      Start  43: gst_native_relay_av_win
+
+43: Test command: <win-home>\dev\framelink-m6-windows-f5b3ee3\build\Release\fl_gst_native_producer_win.exe "<win-home>/dev/framelink-m6-windows-f5b3ee3/build/Release/gstframelink.dll" "--relay-av-diagnostic"
+43: Working Directory: <win-home>/dev/framelink-m6-windows-f5b3ee3/build
+43: Test timeout computed to be: 20
+43: relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+43: PCM queue controls: bounded retry, exact 4-block delivery, nonzero origin/discontinuity, bounded upstream/downstream cancellation, empty timeout, fail-closed initial/midstream GAP and 6 configuration negatives passed
+43: PCM GAP controls: opt-in leading/midstream order/seqnum/pixels, bounded zero-byte queue/retry, malformed timing, discontinuity and pending cancellation passed
+43: PCM terminal interruption mode=0 result=2 elapsed_us=55717
+43: PCM terminal interruption mode=1 result=2 elapsed_us=50125
+43: PCM terminal interruption mode=2 result=4 elapsed_us=52942
+43: PCM terminal controls: bounded both-session cancellation/replacement, polling, finite timeout and retry passed
+43: coordinated native relay: 16 same-allocation video frames / 768 PCM frames, two authenticated sessions, exact metadata, 37ms offset, ordered barriers, held-reader backpressure and terminal drain passed
+43: relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+43: coordinated native relay: 0 same-allocation video frames / 0 PCM frames, two authenticated sessions, exact metadata, 37ms offset, ordered barriers, held-reader backpressure and terminal drain passed
+43: relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+43: checked native relay fault 1: no unauthorized publication, retained ownership and safe drain passed
+43: relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+43: checked native relay fault 2: no unauthorized publication, retained ownership and safe drain passed
+43: relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+43: checked native relay fault 3: no unauthorized publication, retained ownership and safe drain passed
+43: relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+43: checked native relay fault 4: no unauthorized publication, retained ownership and safe drain passed
+43: relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+43: checked native relay fault 5: no unauthorized publication, retained ownership and safe drain passed
+43: relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+43: checked native relay fault 6: no unauthorized publication, retained ownership and safe drain passed
+43: relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+43: checked native relay fault 7: no unauthorized publication, retained ownership and safe drain passed
+43: relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+43: checked native relay fault 8: no unauthorized publication, retained ownership and safe drain passed
+43: relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+43: checked native relay fault 9: no unauthorized publication, retained ownership and safe drain passed
+43: relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+43: checked native relay fault 10: no unauthorized publication, retained ownership and safe drain passed
+43: relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+43: checked native relay fault 11: no unauthorized publication, retained ownership and safe drain passed
+43: relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+43: checked native relay fault 12: no unauthorized publication, retained ownership and safe drain passed
+43: relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+43: checked native relay fault 13: no unauthorized publication, retained ownership and safe drain passed
+43: relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+43: terminal GAP mapped_pts=2000000 duration=1000000 seqnum=5857 original_seqnum=1701
+43: terminal GAP relay seqnum input=5843 output=5843 preserved locally; GDP seqnum not a wire identity
+43: checked native relay fault 14: no unauthorized publication, retained ownership and safe drain passed
+43: relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+43: native event interruption fault=15 result=2 elapsed_us=54671
+43: native event wait control 15 passed
+43: relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+43: native event interruption fault=16 result=2 elapsed_us=50287
+43: native event wait control 16 passed
+43: relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+43: native event interruption fault=17 result=4 elapsed_us=55302
+43: native event wait control 17 passed
+43: relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+43: native event wait control 18 passed
+43: relay session contract: 14 mismatch negatives, queue independence, missing/nonidentity mapping, stale generation and cancellation passed
+43: terminal GAP mapped_pts=2000000 duration=1000000 seqnum=6480 original_seqnum=1701
+43: terminal GAP relay seqnum input=6450 output=6450 preserved locally; GDP seqnum not a wire identity
+43: checked native relay fault 14: no unauthorized publication, retained ownership and safe drain passed
+ 2/12 Test  #43: gst_native_relay_av_win ............   Passed    5.85 sec
+test 44
+      Start  44: gst_native_relay_process_win
+
+44: Test command: <win-home>\dev\framelink-m6-windows-f5b3ee3\build\Release\fl_gst_native_producer_win.exe "<win-home>/dev/framelink-m6-windows-f5b3ee3/build/Release/gstframelink.dll" "--relay-process-diagnostic"
+44: Working Directory: <win-home>/dev/framelink-m6-windows-f5b3ee3/build
+44: Test timeout computed to be: 30
+44: three-process coordinated relay: 16 same-allocation video frames, 768 exact PCM frames; nonempty: both reversed slots / 37ms offset / held-reader exclusion; ordered GAP/barrier/END and authenticated terminal passed
+44: three-process coordinated relay: 0 same-allocation video frames, 0 exact PCM frames; nonempty: both reversed slots / 37ms offset / held-reader exclusion; ordered GAP/barrier/END and authenticated terminal passed
+ 3/12 Test  #44: gst_native_relay_process_win .......   Passed    1.55 sec
+test 45
+      Start  45: gst_native_relay_reservation_win
+
+45: Test command: <win-home>\dev\framelink-m6-windows-f5b3ee3\build\Release\fl_gst_native_producer_win.exe "<win-home>/dev/framelink-m6-windows-f5b3ee3/build/Release/gstframelink.dll" "--relay-reservation-diagnostic"
+45: Working Directory: <win-home>/dev/framelink-m6-windows-f5b3ee3/build
+45: Test timeout computed to be: 30
+45: three-process coordinated relay: 16 same-allocation video frames, 768 exact PCM frames; nonempty: both reversed slots / 37ms offset / held-reader exclusion; ordered GAP/barrier/END and authenticated terminal passed
+ 4/12 Test  #45: gst_native_relay_reservation_win ...   Passed    0.91 sec
+test 46
+      Start  46: gst_native_relay_death_win
+
+46: Test command: <win-home>\dev\framelink-m6-windows-f5b3ee3\build\Release\fl_gst_native_producer_win.exe "<win-home>/dev/framelink-m6-windows-f5b3ee3/build/Release/gstframelink.dll" "--relay-death-diagnostic"
+46: Working Directory: <win-home>/dev/framelink-m6-windows-f5b3ee3/build
+46: Test timeout computed to be: 30
+46: producer death (raw): explicit failure, no synthetic END/EOS, held pixels intact, no premature lease completion, bounded native drain
+46: producer death (GstMemory): explicit failure, no synthetic END/EOS, held pixels intact, no premature lease completion, bounded native drain
+ 5/12 Test  #46: gst_native_relay_death_win .........   Passed    1.51 sec
+test 47
+      Start  47: gst_native_relay_cancel_win
+
+47: Test command: <win-home>\dev\framelink-m6-windows-f5b3ee3\build\Release\fl_gst_native_producer_win.exe "<win-home>/dev/framelink-m6-windows-f5b3ee3/build/Release/gstframelink.dll" "--relay-cancel-diagnostic"
+47: Working Directory: <win-home>/dev/framelink-m6-windows-f5b3ee3/build
+47: Test timeout computed to be: 30
+47: downstream cancellation (raw): explicit failure, no synthetic END/EOS, held pixels intact, no premature lease completion, bounded native drain
+47: downstream cancellation (GstMemory): explicit failure, no synthetic END/EOS, held pixels intact, no premature lease completion, bounded native drain
+ 6/12 Test  #47: gst_native_relay_cancel_win ........   Passed    1.49 sec
+test 48
+      Start  48: gst_native_relay_decoder_win
+
+48: Test command: <win-home>\dev\framelink-m6-windows-f5b3ee3\build\Release\fl_gst_native_producer_win.exe "<win-home>/dev/framelink-m6-windows-f5b3ee3/build/Release/gstframelink.dll" "--relay-decoder-diagnostic"
+48: Working Directory: <win-home>/dev/framelink-m6-windows-f5b3ee3/build
+48: Test timeout computed to be: 30
+48: three-process coordinated relay: 16 same-allocation video frames, 25600 exact PCM frames; nonempty: both reversed slots / 37ms offset / held-reader exclusion; ordered GAP/barrier/END and authenticated terminal passed
+ 7/12 Test  #48: gst_native_relay_decoder_win .......   Passed    1.01 sec
+test 120
+      Start 120: gst_session_transport
+
+120: Test command: <win-home>\dev\framelink-m6-windows-f5b3ee3\build\Release\fl_gst_session_transport.exe
+120: Working Directory: <win-home>/dev/framelink-m6-windows-f5b3ee3/build
+120: Test timeout computed to be: 15
+120: native memory agreement mode 0
+120: native memory agreement mode 1
+120: native memory agreement mode 2
+120: native memory agreement mode 3
+120: native memory agreement mode 4
+120: native memory agreement mode 5
+120: native memory agreement mode 6
+120: native memory agreement mode 7
+120: native memory agreement mode 8
+120: native memory agreement mode 9
+120: native memory agreement mode 10
+120: native memory agreement mode 11
+120: native memory agreement mode 12
+120: native memory agreement mode 13
+120: native memory agreement mode 14
+120: native memory agreement mode 15
+120: native memory agreement mode 16
+120: native memory agreement mode 17
+120: native memory agreement mode 18
+120: native memory agreement mode 19
+120: CPU bootstrap mode 0
+120: CPU bootstrap mode 1
+120: CPU bootstrap mode 2
+120: CPU bootstrap mode 3
+120: CPU bootstrap mode 4
+120: CPU bootstrap mode 5
+120: CPU bootstrap mode 6
+120: native memory exact agreement: success, 19 mismatch/invalid/domain negatives, deadline and cancellation passed
+120: authenticated session transport: all track modes, wrong key, mismatch, invalid config, timeout and cancel passed
+ 8/12 Test #120: gst_session_transport ..............   Passed    0.78 sec
+test 122
+      Start 122: gst_session_context
+
+122: Test command: <win-home>\dev\framelink-m6-windows-f5b3ee3\build\Release\fl_gst_session_context.exe
+122: Working Directory: <win-home>/dev/framelink-m6-windows-f5b3ee3/build
+122: Test timeout computed to be: 10
+122: session context: ownership, readiness, track masks, generations and cancellation passed
+ 9/12 Test #122: gst_session_context ................   Passed    0.07 sec
+test 130
+      Start 130: gst_av_bin
+
+130: Test command: <win-home>\dev\framelink-m6-windows-f5b3ee3\build\Release\fl_gst_av_bin.exe "<win-home>/dev/framelink-m6-windows-f5b3ee3/build/Release/gstframelink.dll"
+130: Working Directory: <win-home>/dev/framelink-m6-windows-f5b3ee3/build
+130: Test timeout computed to be: 120
+130: CASE thin (application-installed context)
+130: consumer=ok video=30 samples=24000 lag=150.0..152.0ms
+130: CASE pause/resume tracks=video (bin)
+130:   producer=EOS consumer=ok video=29 samples=0 lag=150.0..151.7ms
+130: CASE pause/resume tracks=video (thin)
+130:   producer=EOS consumer=ok video=29 samples=0 lag=150.0..151.5ms
+130: CASE pause/resume tracks=av (bin)
+130:   producer=audio: PCM sample duration/continuity mismatch consumer=flaudioreader1: audio peer closed before GDP EOS video=12 samples=18720 lag=150.0..152.4ms
+130: CASE pause/resume tracks=av (thin)
+130:   producer=audio: PCM sample duration/continuity mismatch consumer=flaudioreader2: audio peer closed before GDP EOS video=12 samples=18720 lag=150.2..151.8ms
+130: CASE teardown while media is held
+130:   NULL in 0.5ms
+130: CASE consumer death mid-stream
+130:   producer error 0ms after consumer death: giostreamsink16: Could not write to resource.
+130: CASE tracks=av producer-first=0 lead=0ms
+130: producer=ok consumer=ok video=30 samples=24000 lag=150.0..152.0ms generation=1 ids=1/2 session=34ecb833ed77d9a1a192f5333edc4201
+130: CASE tracks=av producer-first=0 lead=0ms
+130: producer=ok consumer=ok video=30 samples=24000 lag=150.0..152.0ms generation=1 ids=1/2 session=87877479647d3fada98ce9d780aaa529
+130: CASE tracks=av producer-first=0 lead=0ms
+130: producer=ok consumer=ok video=30 samples=24000 lag=150.0..151.8ms generation=1 ids=1/2 session=1a4fbad9cedee218d9e8efa6c2397bec
+130: CASE tracks=av producer-first=0 lead=0ms
+130: producer=ok consumer=ok video=30 samples=24000 lag=150.0..152.0ms generation=1 ids=1/2 session=3423c8df0a29c34e995fd872b71c90d0
+130: CASE tracks=av producer-first=1 lead=800ms
+130: producer=ok consumer=ok video=30 samples=24000 lag=150.1..151.8ms generation=1 ids=1/2 session=d628b23339fc703276b99aa8343d8027
+130: CASE tracks=av producer-first=0 lead=0ms
+130: producer=ok consumer=ok video=30 samples=24000 lag=150.0..152.0ms generation=1 ids=1/2 session=849cd54001659367d975a01d28880dde
+130: CASE tracks=video producer-first=1 lead=300ms
+130: producer=ok consumer=ok video=30 samples=0 lag=150.1..151.9ms generation=1 ids=1/0 session=c938671b55a5c72ce7fdabfe7847ffce
+130: CASE tracks=audio producer-first=0 lead=0ms
+130: producer=ok consumer=ok video=0 samples=24000 lag=150.4..151.9ms generation=1 ids=0/2 session=a4c96c5e4b1df102e5c89570fe52f94b
+130: CASE negative track-mismatch
+130:   producer error after 30ms: s: incompatible session selection; consumer: setup: producer selection or authentication rejected
+130: CASE negative no-consumer
+130:   producer error after 1001ms: s: local control connection deadline or failure: Operation was cancelled; consumer: 
+130: CASE negative non-system-clock
+130:   producer error after 0ms: s: framelinkavsink with session= requires the pipeline system clock; do not fix another pipeline clock; consumer: setup: local control connection deadline or failure: Could not connect to 127.0.0.1: No connection could be made because the target machine actively refused it.
+130: CASE negative caps-mismatch
+130:   producer: audio: required session tracks not ready or cancelled; consumer: flaudioreader11: audio peer closed before GDP EOS
+130: framelinkavsink: held startup in both orders, session-epoch timeline (lag within latency bounds on both tracks), thin/bin pause parity, exact counts, drain before EOS, teardown/consumer-death/track/clock/caps/missing-peer failures bounded
+10/12 Test #130: gst_av_bin .........................   Passed   25.64 sec
+test 137
+      Start 137: gst_local_av
+
+137: Test command: <win-home>\dev\framelink-m6-windows-f5b3ee3\build\Release\fl_gst_local_av.exe "<win-home>/dev/framelink-m6-windows-f5b3ee3/build/Release/gstframelink.dll"
+137: Working Directory: <win-home>/dev/framelink-m6-windows-f5b3ee3/build
+137: Test timeout computed to be: 40
+137: track mismatch: producer incompatible session selection; consumer producer selection or authentication rejected
+137: mapping skew -2750ns
+137: video lag 150.1..151.8ms
+137: audio lag 150.0..151.6ms
+137: order=producer-first video=30 samples=24000 firstAV=-741900ns
+137: mapping skew -8300ns
+137: video lag 150.1..151.8ms
+137: audio lag 150.2..151.8ms
+137: order=consumer-first video=30 samples=24000 firstAV=-79500ns
+137: local A/V setup: authenticated rendezvous, identity clock mapping, both startup orders, live synchronized pixels/PCM, track mismatch rejection passed
+11/12 Test #137: gst_local_av .......................   Passed    3.03 sec
+test 140
+      Start 140: gst_event_channel
+
+140: Test command: <win-home>\dev\framelink-m6-windows-f5b3ee3\build\Release\fl_gst_event_channel.exe
+140: Working Directory: <win-home>/dev/framelink-m6-windows-f5b3ee3/build
+140: Test timeout computed to be: 15
+140: event channel: authenticated ordered bounded controls; quiet idle, stale generation, queue overflow, partial-record deadline and cancellation passed
+12/12 Test #140: gst_event_channel ..................   Passed    2.33 sec
+
+The following tests passed:
+	gst_native_producer_win
+	gst_native_relay_av_win
+	gst_native_relay_process_win
+	gst_native_relay_reservation_win
+	gst_native_relay_death_win
+	gst_native_relay_cancel_win
+	gst_native_relay_decoder_win
+	gst_session_transport
+	gst_session_context
+	gst_av_bin
+	gst_local_av
+	gst_event_channel
+
+100% tests passed, 0 tests failed out of 12
+
+Label Time Summary:
+gst_video_regression    =  18.70 sec*proc (1 test)
+m5b_av                  =  31.85 sec*proc (5 tests)
+
+Total Test time (real) =  62.93 sec

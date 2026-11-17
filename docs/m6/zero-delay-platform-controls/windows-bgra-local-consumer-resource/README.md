@@ -1,0 +1,3 @@
+# BGRA local-consumer resource baseline
+
+No transport or GPU readback. Same benchmark queues/appsinks/count recorders, live BGRA4K30 source for1800s. EOS54000video/86400000PCM, contiguous audio and complete queues; zero timing misses. Privatecommit7.31KB/min, CPU8.09%, flat handles/threads. This matches NV12 local7.34KB/min and does not reproduce original BGRA CPU98.11KB/min. It narrows investigation to CPU transport/readback/output allocation, not native texture wrapping. Original BGRA CPU failure remains open. Next isolate per-frame33MB GstBuffer allocation against reuse; do not infer a leak solely from occupancy-dependent fitted slope.

@@ -1,0 +1,122 @@
+{
+  "cases": [
+    {
+      "file": "m5-startup-ka9x74t4/audio-coordinated/NV12-consumer.log",
+      "received": 100,
+      "missing_pts_ns": [],
+      "gaps": []
+    },
+    {
+      "file": "m5-startup-ka9x74t4/audio-coordinated/BGRA-consumer.log",
+      "received": 99,
+      "missing_pts_ns": [
+        1080000000
+      ],
+      "gaps": [
+        {
+          "event": "video-source-sequence-gap",
+          "previous_sequence": 54,
+          "sequence": 56,
+          "missing": 1,
+          "pts_ns": 1100000000
+        }
+      ]
+    },
+    {
+      "file": "m5-startup-ka9x74t4/producer/NV12-consumer.log",
+      "received": 100,
+      "missing_pts_ns": [],
+      "gaps": []
+    },
+    {
+      "file": "m5-startup-ka9x74t4/producer/BGRA-consumer.log",
+      "received": 100,
+      "missing_pts_ns": [],
+      "gaps": []
+    },
+    {
+      "file": "m5-preconnect-qhmu_fch/ready/NV12-consumer.log",
+      "received": 99,
+      "missing_pts_ns": [
+        1320000000
+      ],
+      "gaps": [
+        {
+          "event": "video-source-sequence-gap",
+          "previous_sequence": 66,
+          "sequence": 68,
+          "missing": 1,
+          "pts_ns": 1340000000
+        }
+      ]
+    },
+    {
+      "file": "m5-preconnect-qhmu_fch/ready/BGRA-consumer.log",
+      "received": 100,
+      "missing_pts_ns": [],
+      "gaps": []
+    }
+  ],
+  "preconnect_source_gap": {
+    "prior": {
+      "thread": "0",
+      "operation": "gst.srcCreate",
+      "start_ns": "693330511267300",
+      "duration_ns": "19927900",
+      "channel_id": "8540739648226808106",
+      "sequence": "66",
+      "fence": "66",
+      "slot": "0",
+      "pts_ns": "1300000000",
+      "result": "0",
+      "details": "0",
+      "payload_bytes": "0",
+      "generation": "0",
+      "occupancy": "0",
+      "token": "0",
+      "device_lo": "0",
+      "device_hi": "0",
+      "resource_type": "0",
+      "usage": "0",
+      "operations": "0",
+      "device_kind": "0",
+      "missing_usage": "0",
+      "unmet_preference": "0",
+      "rejected_resource": "0",
+      "forbidden_operations": "0",
+      "endpoint": "0",
+      "resource_known_fields": "0"
+    },
+    "next": {
+      "thread": "0",
+      "operation": "gst.srcCreate",
+      "start_ns": "693330577319900",
+      "duration_ns": "1496300",
+      "channel_id": "8540739648226808106",
+      "sequence": "68",
+      "fence": "68",
+      "slot": "1",
+      "pts_ns": "1340000000",
+      "result": "0",
+      "details": "0",
+      "payload_bytes": "0",
+      "generation": "0",
+      "occupancy": "0",
+      "token": "0",
+      "device_lo": "0",
+      "device_hi": "0",
+      "resource_type": "0",
+      "usage": "0",
+      "operations": "0",
+      "device_kind": "0",
+      "missing_usage": "0",
+      "unmet_preference": "0",
+      "rejected_resource": "0",
+      "forbidden_operations": "0",
+      "endpoint": "0",
+      "resource_known_fields": "0"
+    },
+    "outside_src_create_gap_ns": 46124700
+  },
+  "conclusion": "Missing middle frames, not startup/terminal loss. Original GST trace shows 46.1247ms outside source create; source next reads sequence68 after66. Native pending depth defaults1/latest; no native trace in original to establish overwrite timing or cause of downstream scheduling gap. No default/queue/budget change justified."
+}

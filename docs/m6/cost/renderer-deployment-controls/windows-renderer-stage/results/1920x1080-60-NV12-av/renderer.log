@@ -1,0 +1,11 @@
+[INF] renderer: device: NVIDIA GeForce RTX 5090
+[INF] swapchain: primary selected_present_mode=mailbox(1) requested=default-mailbox images=3 extent=1028x720
+[INF] swapchain: primary window fullscreen=0 visible=0 iconified=0 focused=1
+[INF] swapchain: primary selected_present_mode=fifo(2) requested=default-fifo images=3 extent=1028x720
+[INF] swapchain: primary window fullscreen=0 visible=0 iconified=0 focused=1
+[INF] scene: 1 window(s), canvas 1280x720 (aspect 1.78). Controls: L layout, SPACE pause, -/= speed, B backdrop, 1-9 toggle stream, 0 all, ESC quit
+[INF] service: 12 framelink input slots ready ('1920x1080-60-NV12-av.in.0' .. '1920x1080-60-NV12-av.in.11')
+[INF] control: moderation API on http://127.0.0.1:49424/api/
+
+(vkrenderer.exe:47448): GStreamer-WARNING **: 04:50:46.551: Failed to load plugin '<win-home>\dev\framelink-m6-20261106\build\Release\gstframelink.dll': The path cannot be traversed because it contains an untrusted mount point.
+AV_RENDER due_decisions=0 hold_checks=0 late_drops=0 invalid_pts=0 status=FrameLink plugin load

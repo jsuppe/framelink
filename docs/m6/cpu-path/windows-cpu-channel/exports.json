@@ -1,0 +1,24 @@
+{
+  "baseline": "609cb74031a5de2cee782619007a6e87ab7fbccd",
+  "old_count": 59,
+  "new_count": 75,
+  "removed": [],
+  "added": [
+    "flSharedCpuAcquireWrite",
+    "flSharedCpuCancelWrite",
+    "flSharedCpuClose",
+    "flSharedCpuOpenConsumerPipe",
+    "flSharedCpuOpenProducerPipe",
+    "flSharedCpuQuery",
+    "flSharedCpuReadMetadata",
+    "flSharedCpuReceive",
+    "flSharedCpuReceiveEvent",
+    "flSharedCpuReceiveRelease",
+    "flSharedCpuReleaseRead",
+    "flSharedCpuRetainRead",
+    "flSharedCpuSendEos",
+    "flSharedCpuSubmit",
+    "flSharedCpuSubmitWithMetadata",
+    "flSharedCpuWaitReadable"
+  ]
+}

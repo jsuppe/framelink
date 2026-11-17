@@ -1,0 +1,236 @@
+#< CLIXML
+CASE factories
+  framelinksink      Sink/Video                   pads: sink 
+  framelinksrc       Source/Video                 pads: src 
+  framelinkaudiosink Sink/Audio                   pads: sink 
+  framelinkaudiosrc  Source/Audio                 pads: src 
+  framelinkavsink    Sink/Video/Audio             pads: video_sink audio_sink 
+  framelinkavsrc     Source/Video/Audio           pads: video_src audio_src 
+  native consumer memory: memory:D3D11Memory
+CASE cleanup
+cycle=0 handles=2544 types 3:2 9:19 17:1 21:62 22:7 24:22 25:1 26:6 29:2 30:1 35:3 40:9 41:10 42:34 48:11 49:13 50:2193 56:149
+type=3 name=Directory count=2
+type=9 name=Thread count=19
+type=17 name=SchedulerSharedData count=1
+type=21 name=Event count=62
+type=22 name=Mutant count=7
+type=24 name=Semaphore count=22
+type=25 name=Timer count=1
+type=26 name=IRTimer count=6
+type=29 name=WindowStation count=2
+type=30 name=Desktop count=1
+type=35 name=TpWorkerFactory count=3
+type=40 name=IoCompletion count=9
+type=41 name=WaitCompletionPacket count=10
+type=42 name=File count=34
+type=48 name=ALPC Port count=11
+type=49 name=Section count=13
+type=50 name=Key count=2193
+type=56 name=EtwRegistration count=149
+cycle=1 handles=1549 types 3:2 9:19 17:1 21:62 22:7 24:22 25:1 26:6 29:2 30:1 35:3 40:9 41:10 42:33 48:11 49:13 50:1198 56:149
+cycle=2 handles=1549 types 3:2 9:19 17:1 21:62 22:7 24:22 25:1 26:6 29:2 30:1 35:3 40:9 41:10 42:33 48:11 49:13 50:1198 56:149
+cycle=3 handles=1549 types 3:2 9:19 17:1 21:62 22:7 24:22 25:1 26:6 29:2 30:1 35:3 40:9 41:10 42:33 48:11 49:13 50:1198 56:149
+cycle=4 handles=1549 types 3:2 9:19 17:1 21:62 22:7 24:22 25:1 26:6 29:2 30:1 35:3 40:9 41:10 42:33 48:11 49:13 50:1198 56:149
+cycle=5 handles=1549 types 3:2 9:19 17:1 21:62 22:7 24:22 25:1 26:6 29:2 30:1 35:3 40:9 41:10 42:33 48:11 49:13 50:1198 56:149
+cycle=6 handles=1549 types 3:2 9:19 17:1 21:62 22:7 24:22 25:1 26:6 29:2 30:1 35:3 40:9 41:10 42:33 48:11 49:13 50:1198 56:149
+cycle=7 handles=1549 types 3:2 9:19 17:1 21:62 22:7 24:22 25:1 26:6 29:2 30:1 35:3 40:9 41:10 42:33 48:11 49:13 50:1198 56:149
+type=3 name=Directory count=2
+type=9 name=Thread count=19
+type=17 name=SchedulerSharedData count=1
+type=21 name=Event count=62
+type=22 name=Mutant count=7
+type=24 name=Semaphore count=22
+type=25 name=Timer count=1
+type=26 name=IRTimer count=6
+type=29 name=WindowStation count=2
+type=30 name=Desktop count=1
+type=35 name=TpWorkerFactory count=3
+type=40 name=IoCompletion count=9
+  element cpu    churn        handles: 2544 1549 1549 1549 1549type=41 name=WaitCompletionPacket count=10
+type=42 name=File count=33
+type=48 name=ALPC Port count=11
+type=49 name=Section count=13
+type=50 name=Key count=1198
+type=56 name=EtwRegistration count=149
+ 1549 1549 1549 -> bounded
+cycle=0 handles=1551 types 3:2 9:19 17:1 21:63 22:7 24:22 25:1 26:6 29:2 30:1 35:3 40:10 41:10 42:33 48:11 49:13 50:1198 56:149
+type=3 name=Directory count=2
+type=9 name=Thread count=19
+type=17 name=SchedulerSharedData count=1
+type=21 name=Event count=63
+type=22 name=Mutant count=7
+type=24 name=Semaphore count=22
+type=25 name=Timer count=1
+type=26 name=IRTimer count=6
+type=29 name=WindowStation count=2
+type=30 name=Desktop count=1
+type=35 name=TpWorkerFactory count=3
+type=40 name=IoCompletion count=10
+type=41 name=WaitCompletionPacket count=10
+type=42 name=File count=33
+type=48 name=ALPC Port count=11
+type=49 name=Section count=13
+type=50 name=Key count=1198
+type=56 name=EtwRegistration count=149
+cycle=1 handles=1551 types 3:2 9:19 17:1 21:63 22:7 24:22 25:1 26:6 29:2 30:1 35:3 40:10 41:10 42:33 48:11 49:13 50:1198 56:149
+cycle=2 handles=1551 types 3:2 9:19 17:1 21:63 22:7 24:22 25:1 26:6 29:2 30:1 35:3 40:10 41:10 42:33 48:11 49:13 50:1198 56:149
+cycle=3 handles=1551 types 3:2 9:19 17:1 21:63 22:7 24:22 25:1 26:6 29:2 30:1 35:3 40:10 41:10 42:33 48:11 49:13 50:1198 56:149
+cycle=4 handles=1551 types 3:2 9:19 17:1 21:63 22:7 24:22 25:1 26:6 29:2 30:1 35:3 40:10 41:10 42:33 48:11 49:13 50:1198 56:149
+cycle=5 handles=1551 types 3:2 9:19 17:1 21:63 22:7 24:22 25:1 26:6 29:2 30:1 35:3 40:10 41:10 42:33 48:11 49:13 50:1198 56:149
+cycle=6 handles=1551 types 3:2 9:19 17:1 21:63 22:7 24:22 25:1 26:6 29:2 30:1 35:3 40:10 41:10 42:33 48:11 49:13 50:1198 56:149
+ cycle=7 handles=1551 types 3:2 9:19 17:1 21:63 22:7 24:22 25:1 26:6 29:2 30:1 35:3 40:10 41:10 42:33 48:11 49:13 50:1198 56:149
+type=3 name=Directory count=2
+type=9 name=Thread count=19
+type=17 name=SchedulerSharedData count=1
+type=21 name=Event count=63
+type=22 name=Mutant count=7
+type=24 name=Semaphore count=22
+type=25 name=Timer count=1
+type=26 name=IRTimer count=6
+type=29 name=WindowStation count=2
+type=30 name=Desktop count=1
+type=35 name=TpWorkerFactory count=3
+type=40 name=IoCompletion count=10
+type=41 name=WaitCompletionPacket count=10
+type=42 name=File count=33
+type=48 name=ALPC Port count=11
+type=49 name=Section count=13
+type=50 name=Key count=1198
+type=56 name=EtwRegistration count=149
+ element native churn        handles: 1551 1551 1551 1551 1551 1551 1551 1551 -> bounded
+cycle=0 handles=1557 types 3:2 9:20 17:1 21:66 22:7 24:22 25:1 26:6 29:2 30:1 35:3 40:12 41:10 42:33 48:11 49:13 50:1198 56:149
+type=3 name=Directory count=2
+type=9 name=Thread count=20
+type=17 name=SchedulerSharedData count=1
+type=21 name=Event count=66
+type=22 name=Mutant count=7
+type=24 name=Semaphore count=22
+type=25 name=Timer count=1
+type=26 name=IRTimer count=6
+type=29 name=WindowStation count=2
+type=30 name=Desktop count=1
+type=35 name=TpWorkerFactory count=3
+type=40 name=IoCompletion count=12
+type=41 name=WaitCompletionPacket count=10
+type=42 name=File count=33
+type=48 name=ALPC Port count=11
+type=49 name=Section count=13
+type=50 name=Key count=1198
+type=56 name=EtwRegistration count=149
+cycle=1 handles=1561 types 3:2 9:21 17:1 21:68 22:7 24:22 25:1 26:6 29:2 30:1 35:3 40:13 41:10 42:33 48:11 49:13 50:1198 56:149
+cycle=2 handles=1561 types 3:2 9:21 17:1 21:68 22:7 24:22 25:1 26:6 29:2 30:1 35:3 40:13 41:10 42:33 48:11 49:13 50:1198 56:149
+cycle=3 handles=1561 types 3:2 9:21 17:1 21:68 22:7 24:22 25:1 26:6 29:2 30:1 35:3 40:13 41:10 42:33 48:11 49:13 50:1198 56:149
+cycle=4 handles=1561 types 3:2 9:21 17:1 21:68 22:7 24:22 25:1 26:6 29:2 30:1 35:3 40:13 41:10 42:33 48:11 49:13 50:1198 56:149
+cycle=5 handles=1561 types 3:2 9:21 17:1 21:68 22:7 24:22 25:1 26:6 29:2 30:1 35:3 40:13 41:10 42:33 48:11 49:13 50:1198 56:149
+cycle=6 handles=1561 types 3:2 9:21 17:1 21:68 22:7 24:22 25:1 26:6 29:2 30:1 35:3 40:13 41:10 42:33 48:11 49:13 50:1198 56:149
+cycle=7 handles=1561 types 3:2 9:21 17:1 21:68 22:7 24:22 25:1 26:6 29:2 30:1 35:3 40:13 41:10 42:33 48:11 49:13 50:1198 56:149
+type=3 name=Directory count=2
+type=9 name=Thread count=21
+type=17 name=SchedulerSharedData count=1
+type=21 name=Event count=68
+type=22 name=Mutant count=7
+type=24 name=Semaphore count=22
+type=25 name=Timer count=1
+type=26 name=IRTimer count=6
+type=29 name=WindowStation count=2
+type=30 name=Desktop count=1
+type=35 name=TpWorkerFactory count=3
+type=40 name=IoCompletion count=13
+type=41 name=WaitCompletionPacket count=10
+type=42 name=File count=33
+type=48 name=ALPC Port count=11
+type=49 name=Section count=13
+type=50 name=Key count=1198
+type=56 name=EtwRegistration count=149
+  bin     cpu    churn        handles: 1557 1561 1561 1561 1561 1561 1561 1561 -> bounded
+cycle=0 handles=1563 types 3:2 9:21 17:1 21:69 22:7 24:22 25:1 26:6 29:2 30:1 35:3 40:14 41:10 42:33 48:11 49:13 50:1198 56:149
+type=3 name=Directory count=2
+type=9 name=Thread count=21
+type=17 name=SchedulerSharedData count=1
+type=21 name=Event count=69
+type=22 name=Mutant count=7
+type=24 name=Semaphore count=22
+type=25 name=Timer count=1
+type=26 name=IRTimer count=6
+type=29 name=WindowStation count=2
+type=30 name=Desktop count=1
+type=35 name=TpWorkerFactory count=3
+type=40 name=IoCompletion count=14
+type=41 name=WaitCompletionPacket count=10
+type=42 name=File count=33
+type=48 name=ALPC Port count=11
+type=49 name=Section count=13
+type=50 name=Key count=1198
+type=56 name=EtwRegistration count=149
+cycle=1 handles=1563 types 3:2 9:21 17:1 21:69 22:7 24:22 25:1 26:6 29:2 30:1 35:3 40:14 41:10 42:33 48:11 49:13 50:1198 56:149
+cycle=2 handles=1563 types 3:2 9:21 17:1 21:69 22:7 24:22 25:1 26:6 29:2 30:1 35:3 40:14 41:10 42:33 48:11 49:13 50:1198 56:149
+cycle=3 handles=1563 types 3:2 9:21 17:1 21:69 22:7 24:22 25:1 26:6 29:2 30:1 35:3 40:14 41:10 42:33 48:11 49:13 50:1198 56:149
+cycle=4 handles=1563 types 3:2 9:21 17:1 21:69 22:7 24:22 25:1 26:6 29:2 30:1 35:3 40:14 41:10 42:33 48:11 49:13 50:1198 56:149
+cycle=5 handles=1563 types 3:2 9:21 17:1 21:69 22:7 24:22 25:1 26:6 29:2 30:1 35:3 40:14 41:10 42:33 48:11 49:13 50:1198 56:149
+cycle=6 handles=1563 types 3:2 9:21 17:1 21:69 22:7 24:22 25:1 26:6 29:2 30:1 35:3 40:14 41:10 42:33 48:11 49:13 50:1198 56:149
+ cycle=7 handles=1563 types 3:2 9:21 17:1 21:69 22:7 24:22 25:1 26:6 29:2 30:1 35:3 40:14 41:10 42:33 48:11 49:13 50:1198 56:149
+type=3 name=Directory count=2
+type=9 name=Thread count=21
+type=17 name=SchedulerSharedData count=1
+type=21 name=Event count=69
+type=22 name=Mutant count=7
+type=24 name=Semaphore count=22
+type=25 name=Timer count=1
+type=26 name=IRTimer count=6
+type=29 name=WindowStation count=2
+type=30 name=Desktop count=1
+type=35 name=TpWorkerFactory count=3
+type=40 name=IoCompletion count=14
+type=41 name=WaitCompletionPacket count=10
+type=42 name=File count=33
+type=48 name=ALPC Port count=11
+type=49 name=Section count=13
+type=50 name=Key count=1198
+type=56 name=EtwRegistration count=149
+ bin     native churn        handles: 1563 1563 1563 1563 1563 1563 1563 1563 -> bounded
+cycle=0 handles=1579 types 3:2 9:22 17:1 21:69 22:7 24:22 25:1 26:6 29:2 30:1 35:3 40:14 41:10 42:49 48:10 49:13 50:1198 56:149
+type=3 name=Directory count=2
+type=9 name=Thread count=22
+type=17 name=SchedulerSharedData count=1
+type=21 name=Event count=69
+type=22 name=Mutant count=7
+type=24 name=Semaphore count=22
+type=25 name=Timer count=1
+type=26 name=IRTimer count=6
+type=29 name=WindowStation count=2
+type=30 name=Desktop count=1
+type=35 name=TpWorkerFactory count=3
+type=40 name=IoCompletion count=14
+type=41 name=WaitCompletionPacket count=10
+type=42 name=File count=49
+type=48 name=ALPC Port count=10
+type=49 name=Section count=13
+type=50 name=Key count=1198
+type=56 name=EtwRegistration count=149
+cycle=1 handles=1557 types 3:2 9:20 17:1 21:55 22:7 24:22 25:1 26:6 29:2 30:1 35:3 40:13 41:9 42:65 48:7 49:11 50:1194 56:138
+cycle=2 handles=1573 types 3:2 9:20 17:1 21:55 22:7 24:22 25:1 26:6 29:2 30:1 35:3 40:13 41:9 42:81 48:7 49:11 50:1194 56:138
+cycle=3 handles=1591 types 3:2 9:21 17:1 21:56 22:7 24:22 25:1 26:6 29:2 30:1 35:3 40:13 41:9 42:97 48:7 49:11 50:1194 56:138
+cycle=4 handles=1607 types 3:2 9:21 17:1 21:56 22:7 24:22 25:1 26:6 29:2 30:1 35:3 40:13 41:9 42:113 48:7 49:11 50:1194 56:138
+cycle=5 handles=1623 types 3:2 9:21 17:1 21:56 22:7 24:22 25:1 26:6 29:2 30:1 35:3 40:13 41:9 42:129 48:7 49:11 50:1194 56:138
+cycle=6 handles=1643 types 3:2 9:22 17:1 21:58 22:7 24:22 25:1 26:6 29:2 30:1 35:3 40:14 41:9 42:145 48:7 49:11 50:1194 56:138
+cycle=7 handles=1659 types 3:2 9:22 17:1 21:58 22:7 24:22 25:1 26:6 29:2 30:1 35:3 40:14 41:9 42:161 48:7 49:11 50:1194 56:138
+type=3 name=Directory count=2
+type=9 name=Thread count=22
+type=17 name=SchedulerSharedData count=1
+type=21 name=Event count=58
+type=22 name=Mutant count=7
+type=24 name=Semaphore count=22
+type=25 name=Timer count=1
+type=26 name=IRTimer count=6
+type=29 name=WindowStation count=2
+type=30 name=Desktop count=1
+type=35 name=TpWorkerFactory count=3
+type=40 name=IoCompletion count=14
+type=41 name=WaitCompletionPacket count=9
+type=42 name=File count=161
+type=48 name=ALPC Port count=7
+type=49 name=Section count=11
+type=50 name=Key count=1194
+type=56 name=EtwRegistration count=138
+  bin     cpu    leak-control handles: 1579 1557 1573 1591 1607 1623 1643 1659 -> growing
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04"><Obj S="progress" RefId="0"><TN RefId="0"><T>System.Management.Automation.PSCustomObject</T><T>System.Object</T></TN><MS><I64 N="SourceId">1</I64><PR N="Record"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj></Objs>

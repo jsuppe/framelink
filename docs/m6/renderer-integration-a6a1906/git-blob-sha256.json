@@ -1,0 +1,417 @@
+{
+  "source_commit": "c6a20a1a0cf5dad6e8a67a8549020ad691e3f59c",
+  "files": [
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/README.md",
+      "git_blob_sha256": "84e819b112c4105766f0199a36a98d306ab099c16e6c021f5a5196b094016ddd"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/archive-manifest.json",
+      "git_blob_sha256": "5163e53f97ce78c608e577bd79fe0583b05e6edd1b56eaea7c6bae4dcffc8c50"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/capture.ps1",
+      "git_blob_sha256": "81020b55a4d6d5d1992bf2ca0c4fe8de8e8e2397c0b955dcd95f7858c447ed5e"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/capture.py",
+      "git_blob_sha256": "f942a271ea64b72edb33cf53c224d9ea57601ac1aeed23ac04403fcb7f3813e7"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/check_identity.py",
+      "git_blob_sha256": "728e166de472cde9521b9c7d09d808e81070d6c1944adc81bbf0f21a4d63a1e5"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/collect.py",
+      "git_blob_sha256": "cdb89a1cf3d719c41843799b20d2f83da8889fff1726f093fab6b33ba695a034"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/config.json",
+      "git_blob_sha256": "06620a9bc87eaf309944f6676c10fba4ca5e45693041332a9b283db7b42f0608"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/controller.json",
+      "git_blob_sha256": "d319784de45855e628fe58a0c6eef3d5cc796955fee1426855443a52a9557275"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/binary-sha256.json",
+      "git_blob_sha256": "027f78882fcd4f22dc64cb2d4f1e27e02e4f46102f0154e7c931f83ee3768a8e"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/build.log",
+      "git_blob_sha256": "a23a202c42d8393a9c9877e859f057cd3f01aef2eec43c5f2d9eab5a6a5836d2"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/cli-controls.json",
+      "git_blob_sha256": "782d86335f75e8c874eb01549fa22bd794fd66f9577aa8583df16bf14194b624"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/configure.log",
+      "git_blob_sha256": "b00e0f615df0486088a4c1b701b02f86b5df57937752c92e28bd0e344259cdd5"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/dependency-revisions.json",
+      "git_blob_sha256": "c164229dd522486c6f7ea94b2f1981d98dd1d9370e5bbddcdde05fd77c5f7e9e"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/explicit0-controller.log",
+      "git_blob_sha256": "ee3106ec0f3299b218c92726ec199f7b8bba155c16f32e90483ba2192e0133b3"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/explicit0-status.json",
+      "git_blob_sha256": "b67f118d5b28bca41764e46a0e1b71e768c3d15d7970e53e0479554418f9e15c"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/explicit0/1920x1080-60-NV12-av/gst.8136.csv",
+      "git_blob_sha256": "255bde39f5182ee03e4e7d3aace2b3cef5d75b0ede6b0f4778624ea7f1fe5d50"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/explicit0/1920x1080-60-NV12-av/producer.log",
+      "git_blob_sha256": "5921ddfa4bb8a8722a5e283492071c8597d96258a090ff14606f3d0a9820da60"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/explicit0/1920x1080-60-NV12-av/renderer.11956.csv.gz",
+      "git_blob_sha256": "3faffaa931e6e9f612a8df52405d2fe0ec6ffb3b2fcf7acfcd0791b619403340"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/explicit0/1920x1080-60-NV12-av/renderer.log",
+      "git_blob_sha256": "a0c6948ffe54d35d1ab7cbc2eb7eba43bfd38035dbbf653ab7750b3cfd19d474"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/explicit0/1920x1080-60-NV12-av/session/.owner.lock",
+      "git_blob_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/explicit0/1920x1080-60-NV12-av/source.pipeline",
+      "git_blob_sha256": "5334fe81d6dbf0e3abe65ba8f35dca15f4ecdfd092f9d0d36db0522d4cf48827"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/explicit0/1920x1080-60-NV12-av/status.json",
+      "git_blob_sha256": "a11656267267eb8bfb5d934e49b721b78d569334609faecf8ff9e2469a5b37b2"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/explicit0/1920x1080-60-NV12-av/transport.11956.csv.gz",
+      "git_blob_sha256": "3a842bec31356211027d860c1982d1a9cbc3f87fea64f93f46c7c11a1fa5d08b"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/explicit0/1920x1080-60-NV12-av/transport.8136.csv",
+      "git_blob_sha256": "19ae71e886b920d4d9b8c31e3ccef896e8213e96ba854b327f625e98dc301b92"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/explicit0/summary.json",
+      "git_blob_sha256": "205bce19d5fe55ae399c2d731792445bac07ee812c23c16066190be2d0b39235"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/explicit100-fixed-controller.log",
+      "git_blob_sha256": "2b78510fad244ad3f3ad27087c3336459ee376c52fc70a2a2a62e1022300dce1"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/explicit100-fixed-status.json",
+      "git_blob_sha256": "a1884c234d3bb34720ad995c96ca464be95e68f9cf22cab1843507ec048c68f9"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/explicit100-fixed/1920x1080-60-NV12-av/gst.2972.csv",
+      "git_blob_sha256": "b3ddb87f6f3f135c91d2a2f78d7657970aa6a9459dc3d552280b837b2359d847"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/explicit100-fixed/1920x1080-60-NV12-av/producer.log",
+      "git_blob_sha256": "f64645992d48992eb3f2ece1b0f64077e5071009f13d0978198042d2e711cf42"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/explicit100-fixed/1920x1080-60-NV12-av/renderer.57616.csv.gz",
+      "git_blob_sha256": "addfbac8aff1bc2ff548e876761aca37317c80a4da6ebdba0ec4086c816185f7"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/explicit100-fixed/1920x1080-60-NV12-av/renderer.log",
+      "git_blob_sha256": "fae07bc20800c1225f2ad80eeb6feb1e95b7f399f589801daedd76b39eacf417"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/explicit100-fixed/1920x1080-60-NV12-av/session/.owner.lock",
+      "git_blob_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/explicit100-fixed/1920x1080-60-NV12-av/source.pipeline",
+      "git_blob_sha256": "5334fe81d6dbf0e3abe65ba8f35dca15f4ecdfd092f9d0d36db0522d4cf48827"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/explicit100-fixed/1920x1080-60-NV12-av/status.json",
+      "git_blob_sha256": "05039784a9d3c769a0a33a051b7a9db2851186e5c293bb1665c856fc114a256b"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/explicit100-fixed/1920x1080-60-NV12-av/transport.2972.csv",
+      "git_blob_sha256": "d758bc704af08543b3a4d70d6c70fa67f2faca656c8f5e4075489852e6f04f4f"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/explicit100-fixed/1920x1080-60-NV12-av/transport.57616.csv.gz",
+      "git_blob_sha256": "90d341ca956d2ee3d656a17b241ec45993cf45b64b3651624d35ad197cda1b03"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/explicit100-fixed/summary.json",
+      "git_blob_sha256": "e0d02461f8a84b404baae2fae219140acfb8e67493cf8633403c5df018cb6535"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/final-binary-sha256.json",
+      "git_blob_sha256": "163f70c6c0d03e492c08a5409b09eb4056958c5fa1ea9c82aa16d7d4be4c6880"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/final-idle.json",
+      "git_blob_sha256": "f99dfb17455fa643110fa43248e05985ae86c3c771452d5b0fa1b086b984d3f4"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/final-verification.json",
+      "git_blob_sha256": "3b70c19ef125fc03ddb77cf7e4ac813e40fe2965e29d0a47dd9c96037f0c4694"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/focused-status.json",
+      "git_blob_sha256": "4d0539122b9f3ddb1fac058451235c195c02ca6b976cc67c631e5fdf9c14e33f"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/focused.log",
+      "git_blob_sha256": "18a786e31a33864a3504a90838ac2ecec30da162fceb6c26290769da891b9088"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/focused.xml",
+      "git_blob_sha256": "a9a33468f1c3f8a95e7e5c5618d713be1dd123aa70fa14460367e9f80ba194c6"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/gpu.json",
+      "git_blob_sha256": "97dc26bd6d98799fd0a8285201461c517b8582344f40117cc412af5ffa8f9716"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/legacy100-complete-controller.log",
+      "git_blob_sha256": "b4a1095290679b3e6d9b051e42b5fec74255a269405b8f5c0ccf6aada91a388c"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/legacy100-complete-status.json",
+      "git_blob_sha256": "0d853a9b7d0a4f8fed68f92989f99bd770b7c9c6126bde27e38c303bc178bd07"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/legacy100-complete/1920x1080-60-NV12-av/gst.25100.csv",
+      "git_blob_sha256": "3287cfb2e980d9cecd054fd36e321984524a8e1d5edf3097e09732d91ce9cac1"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/legacy100-complete/1920x1080-60-NV12-av/producer.log",
+      "git_blob_sha256": "5b6061639f4a25faf2774ba348f7850358c769b44e0447f7aa4880ca2be83198"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/legacy100-complete/1920x1080-60-NV12-av/renderer.58008.csv.gz",
+      "git_blob_sha256": "a5bc891f3310e599461796e322998373dbb4d2d1e8ae38526d5013d80bdb74e0"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/legacy100-complete/1920x1080-60-NV12-av/renderer.log",
+      "git_blob_sha256": "80d39a7c2cc510d2581d7bac3c5e94fb07a5d10b599405a63e91d4f360dacca7"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/legacy100-complete/1920x1080-60-NV12-av/session/.owner.lock",
+      "git_blob_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/legacy100-complete/1920x1080-60-NV12-av/source.pipeline",
+      "git_blob_sha256": "5334fe81d6dbf0e3abe65ba8f35dca15f4ecdfd092f9d0d36db0522d4cf48827"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/legacy100-complete/1920x1080-60-NV12-av/status.json",
+      "git_blob_sha256": "d03be97d82dd4ad715b74bd37c1fa4b3d09c73c175d59bf04ed2e66d576ee457"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/legacy100-complete/1920x1080-60-NV12-av/transport.25100.csv",
+      "git_blob_sha256": "718be0405730dbe12a9ab181d7b360bd898a14975b3c0735750da3e78b47d2e4"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/legacy100-complete/1920x1080-60-NV12-av/transport.58008.csv.gz",
+      "git_blob_sha256": "cc65902594da3f7f964c6c2d22ffd303781ca63fe9b38d01fd5e3e1bad14298e"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/legacy100-complete/summary.json",
+      "git_blob_sha256": "c309425912b0a0d32df63fae613cf417bb1e67d7e5aba616cd85e9277550d5be"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/legacy100-controller.log",
+      "git_blob_sha256": "837e98ec6b3742b99a8067642f6206290c532286ab4dd0cf07eda85417a8fd15"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/legacy100-status.json",
+      "git_blob_sha256": "2e1e1fcee5d8d1de76b81604f92295f061f92a1f1d271552382f5b118ada295a"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/legacy100/1920x1080-60-NV12-av/gst.35704.csv",
+      "git_blob_sha256": "0d0a0e323d2634bef7e4fc140ce9f295f621b839cdbdccc6c2a94392e463c27a"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/legacy100/1920x1080-60-NV12-av/producer.log",
+      "git_blob_sha256": "b457fb1beabe39e838988e87eb2a2fa62c8eb751315f067293d53ff3abf2a747"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/legacy100/1920x1080-60-NV12-av/renderer.52820.csv.gz",
+      "git_blob_sha256": "fce410b9b6d8ed1f95c137744bf6f1274abaedbe34f3a60ac6751e14027bca6f"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/legacy100/1920x1080-60-NV12-av/renderer.log",
+      "git_blob_sha256": "6607087b5aadac7dd8919cf152cd7c1b6ca0b5ba8a7d3ea24b1211a9f45daac7"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/legacy100/1920x1080-60-NV12-av/session/.owner.lock",
+      "git_blob_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/legacy100/1920x1080-60-NV12-av/source.pipeline",
+      "git_blob_sha256": "5334fe81d6dbf0e3abe65ba8f35dca15f4ecdfd092f9d0d36db0522d4cf48827"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/legacy100/1920x1080-60-NV12-av/status.json",
+      "git_blob_sha256": "63bb331ad1a1e6cd098db9a8783fa18d5b0062335fd3ce881892247b0c2700dc"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/legacy100/1920x1080-60-NV12-av/transport.35704.csv",
+      "git_blob_sha256": "24727bf6c59aa31eac9a110994a84208f6638c165bd94488bace389c86320528"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/legacy100/1920x1080-60-NV12-av/transport.52820.csv.gz",
+      "git_blob_sha256": "c8d095b1bca841eaf876441fc362653dc87206b1461f3513cc74c825308a043a"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/legacy100/summary.json",
+      "git_blob_sha256": "256b66d875cd6a35b0cc1ea85db88859a183c77e79016908cd69c3ce56e22d72"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/os.json",
+      "git_blob_sha256": "925e96b91de9a97f9ef1250b19d323439654207c735f9b5f5343b2ed5d7f7e1e"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/status.json",
+      "git_blob_sha256": "186f06396bfc9d7dd1bdf956e01975b55487034b13202ef1f1efe76be1610d49"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/zero-build-pins.json",
+      "git_blob_sha256": "2cc1a662978b4e50c45d258e38350a93b816f876c12db9a45d0b28d11fb769bf"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/zero-cli-before.json",
+      "git_blob_sha256": "c15b90cbe919974978343eb13365b75fc4743c4e1117e6855a47a66acdd30e8e"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/zero-cli-before.log",
+      "git_blob_sha256": "768c330479862a8dac8e6725ef0ed5d9c1247422fcd53d371d1652d5b80b1324"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/zero-rebuild-status.json",
+      "git_blob_sha256": "ee402f91555f52a13ca5b39158fda255c3b67ba0aa1085c6d591435b1ff6afcb"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/data/zero-rebuild.log",
+      "git_blob_sha256": "f1753e17bf2a811311b48c706deea49401ace978c96b76534751198e12791e1e"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/execute.ps1",
+      "git_blob_sha256": "c9ef9d04794d6274edad26080f1455fb5fbb25d99237d69a98f0e1bea7afd647"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/explicit-zero-latency.patch",
+      "git_blob_sha256": "cbe4f870103043d98dfa5c2d3eea847a58fe3ee072815102a6fc55a6075b3079"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/explicit0-analysis.stderr",
+      "git_blob_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/explicit0-identity.json",
+      "git_blob_sha256": "14fcd72ff69f4d70a803d7a7d0f9f381530178047e3beaa0a8c9b5aceef22ae7"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/explicit0-ssh.log",
+      "git_blob_sha256": "fbf8578709aef2cd9eb3a0e629228a4f8043cf3136dfafa855713c8604439582"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/explicit100-fixed-analysis.stderr",
+      "git_blob_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/explicit100-fixed-identity.json",
+      "git_blob_sha256": "2ed9db9b1eb1bab6a7299c181431dd252e8021e69dcb0c74e6031ebc75d343bb"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/explicit100-fixed-ssh.log",
+      "git_blob_sha256": "fbf8578709aef2cd9eb3a0e629228a4f8043cf3136dfafa855713c8604439582"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/final-verify-controller.log",
+      "git_blob_sha256": "95d9eecf245bf3b0a23216ecf9df8e6adafe0b6ec75ad8557914e8ce0aa60c4b"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/final_verify.py",
+      "git_blob_sha256": "f66d84f8a2c9a84bf296471c9af6d309c616fa3c7cf1273052e17d2ee4c33606"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/focused-controller.log",
+      "git_blob_sha256": "fbf8578709aef2cd9eb3a0e629228a4f8043cf3136dfafa855713c8604439582"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/focused.ps1",
+      "git_blob_sha256": "52b15ae5e5b04ebc3fc2062dd8cd5bd67948f6c6478767b8f7ebec22a2a0cb90"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/legacy100-complete-analysis.stderr",
+      "git_blob_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/legacy100-complete-identity.json",
+      "git_blob_sha256": "59fed57bc6b7b28facd91b260dfd167df4537a608d5c174553f1afd588c9b722"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/legacy100-complete-ssh.log",
+      "git_blob_sha256": "fbf8578709aef2cd9eb3a0e629228a4f8043cf3136dfafa855713c8604439582"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/legacy100-ssh.log",
+      "git_blob_sha256": "fbf8578709aef2cd9eb3a0e629228a4f8043cf3136dfafa855713c8604439582"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/probe-before-trace-capacity.py",
+      "git_blob_sha256": "0756f5595aa0f26e2e5482931a5cf51ca3fdb00d32f919f268429194e1821ebf"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/probe.py",
+      "git_blob_sha256": "aec91570d512d4f4950db369e0023101c66d35618b8820ec0a806d503197ede1"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/provision.log",
+      "git_blob_sha256": "e3af8a5f2bf0055b98a7ea6636da886a63c078b6fde5de824010c7be049189a1"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/rebuild-zero.ps1",
+      "git_blob_sha256": "e7773e022ebc40c8305136b815bd5d405a93f6e9942290cbe35733dc30bf367a"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/remote-results-sha256.json",
+      "git_blob_sha256": "a7970ebdd361bf4c786a8fd401c05eecee2092204535ad02b7436fc2275e8876"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/remote.log",
+      "git_blob_sha256": "85244e5f988c5a4afbb2ca5a46857858e6be95a7ddf0652ee865d83f8ca26de2"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/remote.py",
+      "git_blob_sha256": "0168af671ceee35f48d8f1cf6996035d4a1dff7370a124758e65826e3a3c3414"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/run.py",
+      "git_blob_sha256": "b3257f76363f7b821c04dfb75ff4e488788eca0d967c25398f2a094c9ac369a6"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/trace-capacity-failure.json",
+      "git_blob_sha256": "e98c1e70bdc599d64c4e4e23d334572019e66a6daa7fcb1a06021ab6a552d4bb"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/zero-cli-controller.log",
+      "git_blob_sha256": "fbf8578709aef2cd9eb3a0e629228a4f8043cf3136dfafa855713c8604439582"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/zero-rebuild-controller.log",
+      "git_blob_sha256": "fbf8578709aef2cd9eb3a0e629228a4f8043cf3136dfafa855713c8604439582"
+    },
+    {
+      "path": "docs/m6/renderer-integration-a6a1906/zero-source-pins.json",
+      "git_blob_sha256": "c5f05ae74d59f66854692f6c87fcb35271eb889f74ae69ee1265be315d236729"
+    }
+  ]
+}

@@ -1,0 +1,191 @@
+{
+  "join": "inferred_constant_pts_mapping",
+  "frames": 54000,
+  "pts_offset_ns": 3870364491330605,
+  "arrival_budget_ns": 34000000,
+  "arrival_misses": 15,
+  "late_frames": [
+    {
+      "index": 0,
+      "producer_pts_ns": 290824385,
+      "consumer_pts_ns": 3870364782154990,
+      "push_lateness_ns": 96846,
+      "arrival_lateness_ns": 44555846,
+      "post_push_residual_ns": 44459000
+    },
+    {
+      "index": 1,
+      "producer_pts_ns": 324157718,
+      "consumer_pts_ns": 3870364815488323,
+      "push_lateness_ns": 4441436,
+      "arrival_lateness_ns": 44217590,
+      "post_push_residual_ns": 39776154
+    },
+    {
+      "index": 6878,
+      "producer_pts_ns": 229557491051,
+      "consumer_pts_ns": 3870594048821656,
+      "push_lateness_ns": 116655,
+      "arrival_lateness_ns": 38636809,
+      "post_push_residual_ns": 38520154
+    },
+    {
+      "index": 6879,
+      "producer_pts_ns": 229590824385,
+      "consumer_pts_ns": 3870594082154990,
+      "push_lateness_ns": 198091,
+      "arrival_lateness_ns": 40628706,
+      "post_push_residual_ns": 40430615
+    },
+    {
+      "index": 7860,
+      "producer_pts_ns": 262290824385,
+      "consumer_pts_ns": 3870626782154990,
+      "push_lateness_ns": 236323,
+      "arrival_lateness_ns": 38582323,
+      "post_push_residual_ns": 38346000
+    },
+    {
+      "index": 8502,
+      "producer_pts_ns": 283690824385,
+      "consumer_pts_ns": 3870648182154990,
+      "push_lateness_ns": 265786,
+      "arrival_lateness_ns": 37489632,
+      "post_push_residual_ns": 37223846
+    },
+    {
+      "index": 10896,
+      "producer_pts_ns": 363490824385,
+      "consumer_pts_ns": 3870727982154990,
+      "push_lateness_ns": 139714,
+      "arrival_lateness_ns": 35222021,
+      "post_push_residual_ns": 35082307
+    },
+    {
+      "index": 10897,
+      "producer_pts_ns": 363524157718,
+      "consumer_pts_ns": 3870728015488323,
+      "push_lateness_ns": 1919612,
+      "arrival_lateness_ns": 37480688,
+      "post_push_residual_ns": 35561076
+    },
+    {
+      "index": 10898,
+      "producer_pts_ns": 363557491051,
+      "consumer_pts_ns": 3870728048821656,
+      "push_lateness_ns": 288740,
+      "arrival_lateness_ns": 39311586,
+      "post_push_residual_ns": 39022846
+    },
+    {
+      "index": 10930,
+      "producer_pts_ns": 364624157718,
+      "consumer_pts_ns": 3870729115488323,
+      "push_lateness_ns": 155304,
+      "arrival_lateness_ns": 34336611,
+      "post_push_residual_ns": 34181307
+    },
+    {
+      "index": 10942,
+      "producer_pts_ns": 365024157718,
+      "consumer_pts_ns": 3870729515488323,
+      "push_lateness_ns": 231920,
+      "arrival_lateness_ns": 34124612,
+      "post_push_residual_ns": 33892692
+    },
+    {
+      "index": 10946,
+      "producer_pts_ns": 365157491051,
+      "consumer_pts_ns": 3870729648821656,
+      "push_lateness_ns": 177356,
+      "arrival_lateness_ns": 36212202,
+      "post_push_residual_ns": 36034846
+    },
+    {
+      "index": 10947,
+      "producer_pts_ns": 365190824385,
+      "consumer_pts_ns": 3870729682154990,
+      "push_lateness_ns": 193791,
+      "arrival_lateness_ns": 35497329,
+      "post_push_residual_ns": 35303538
+    },
+    {
+      "index": 10974,
+      "producer_pts_ns": 366090824385,
+      "consumer_pts_ns": 3870730582154990,
+      "push_lateness_ns": 182406,
+      "arrival_lateness_ns": 35306252,
+      "post_push_residual_ns": 35123846
+    },
+    {
+      "index": 11064,
+      "producer_pts_ns": 369090824385,
+      "consumer_pts_ns": 3870733582154990,
+      "push_lateness_ns": 186791,
+      "arrival_lateness_ns": 36166329,
+      "post_push_residual_ns": 35979538
+    }
+  ],
+  "push_ms": {
+    "p50": 0.203877,
+    "p95": 0.428519,
+    "p99": 0.514251,
+    "max": 4.441436
+  },
+  "arrival_ms": {
+    "p50": 23.529047,
+    "p95": 24.130489,
+    "p99": 25.082741,
+    "max": 44.555846
+  },
+  "post_push_residual_ms": {
+    "p50": 23.294615,
+    "p95": 23.879538,
+    "p99": 24.873692,
+    "max": 44.459
+  },
+  "scope": "All frames including startup/drain. Offset inferred from first records: cannot independently exclude a whole-stream constant shift; not identity proof. Residual includes producer copy, transport, consumer work and clock-mapping error; not a root-cause proof.",
+  "audio": {
+    "blocks": 180000,
+    "contiguous_10ms_pts": true,
+    "arrival_misses": 0,
+    "arrival_ms": {
+      "p50": 1.69966,
+      "p95": 2.640166,
+      "p99": 3.075342,
+      "max": 9.527021
+    },
+    "scope": "PTS continuity only; PCM bytes/counts require the benchmark summary."
+  },
+  "av_mapping": {
+    "audio": {
+      "join": "inferred_constant_pts_mapping",
+      "frames": 180000,
+      "pts_offset_ns": 3870364491330605,
+      "arrival_budget_ns": 34000000,
+      "arrival_misses": 0,
+      "late_frames": [],
+      "push_ms": {
+        "p50": 0.399479,
+        "p95": 0.641947,
+        "p99": 0.877319,
+        "max": 5.95456
+      },
+      "arrival_ms": {
+        "p50": 1.69966,
+        "p95": 2.640166,
+        "p99": 3.075342,
+        "max": 9.527021
+      },
+      "post_push_residual_ms": {
+        "p50": 1.320692,
+        "p95": 2.038538,
+        "p99": 2.339769,
+        "max": 7.818076
+      },
+      "scope": "All frames including startup/drain. Offset inferred from first records: cannot independently exclude a whole-stream constant shift; not identity proof. Residual includes producer copy, transport, consumer work and clock-mapping error; not a root-cause proof."
+    },
+    "av_mapping_delta_ns": 0,
+    "scope": "Both tracks preserve the same inferred constant PTS mapping. No independent allocation identity or physical playback claim."
+  }
+}

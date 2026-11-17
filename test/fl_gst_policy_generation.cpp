@@ -10,8 +10,8 @@ extern "C" {GST_PLUGIN_STATIC_DECLARE(framelink);GST_PLUGIN_STATIC_DECLARE(app);
 #endif
 #define CHECK(x) do{if(!(x)){fprintf(stderr,"line %d: %s\n",__LINE__,#x);std::exit(1);}}while(0)
 static void publish(flChannel*p,int64_t pts){flBuffer b{};CHECK(flAcquireBuffer(p,&b,1000)==FL_OK);CHECK(flSubmit(p,&b,pts)==FL_OK);}
-static void run(bool bound,bool beforeStart=false){auto name="policy-generation-"+std::to_string(g_get_monotonic_time());flChannel*c=nullptr,*p=nullptr;CHECK(flCreateChannelEx(name.c_str(),64,32,FL_FORMAT_RGBA8,2,FL_MAP_CPU,&c)==FL_OK);CHECK(flOpenProducer(name.c_str(),&p)==FL_OK);
- GError*e=nullptr;auto*pipeline=gst_parse_launch("framelinksrc name=source width=64 height=32 format=RGBA preserve-timestamps=true ! appsink name=out sync=false",&e);CHECK(pipeline&&!e);auto*source=gst_bin_get_by_name(GST_BIN(pipeline),"source");auto*out=gst_bin_get_by_name(GST_BIN(pipeline),"out");gboolean accepted=FALSE;g_signal_emit_by_name(source,"adopt-channel",c,&accepted);CHECK(accepted);
+static void run(bool bound,bool beforeStart=false,bool bin=false){auto name="policy-generation-"+std::to_string(g_get_monotonic_time());flChannel*c=nullptr,*p=nullptr;CHECK(flCreateChannelEx(name.c_str(),64,32,FL_FORMAT_RGBA8,2,FL_MAP_CPU,&c)==FL_OK);CHECK(flOpenProducer(name.c_str(),&p)==FL_OK);
+ GError*e=nullptr;auto*pipeline=gst_parse_launch(bin?"framelinkavsrc name=source tracks=video width=64 height=32 video-format=RGBA ! appsink name=out sync=false":"framelinksrc name=source width=64 height=32 format=RGBA preserve-timestamps=true ! appsink name=out sync=false",&e);CHECK(pipeline&&!e);auto*source=gst_bin_get_by_name(GST_BIN(pipeline),"source");auto*out=gst_bin_get_by_name(GST_BIN(pipeline),"out");gboolean accepted=FALSE;g_signal_emit_by_name(source,"adopt-channel",c,&accepted);CHECK(accepted);
  if(bound){GstFrameLinkMemoryPolicy policy{};policy.version=1;policy.sessionGeneration=1;for(unsigned i=0;i<2;++i){flMemoryRequirementsInit(&policy.requirements[i]);policy.requirements[i].allowedOperations=FL_MEMORY_OPERATIONS_ALL;policy.paths[i].version=1;policy.paths[i].operations=FL_MEMORY_OPERATIONS_ALL;
 #ifdef _WIN32
  policy.paths[i].resourceType=FL_MEMORY_D3D11;
@@ -20,7 +20,7 @@ static void run(bool bound,bool beforeStart=false){auto name="policy-generation-
 #else
  policy.paths[i].resourceType=FL_MEMORY_DMABUF;
 #endif
- }g_signal_emit_by_name(source,"apply-memory-policy",&policy,&accepted);CHECK(accepted);g_object_set(source,"width",128,nullptr);gint width=0;g_object_get(source,"width",&width,nullptr);CHECK(width==64);}
+ }g_signal_emit_by_name(source,"apply-memory-policy",&policy,&accepted);CHECK(accepted);g_object_set(source,"width",128,nullptr);gint width=0;g_object_get(source,"width",&width,nullptr);CHECK(width==64);if(bin){g_object_set(source,"tracks","audio","shared-cpu",TRUE,"native-memory",TRUE,nullptr);gchar*tracks=nullptr;gboolean cpu=TRUE,native=TRUE;g_object_get(source,"tracks",&tracks,"shared-cpu",&cpu,"native-memory",&native,nullptr);CHECK(std::string(tracks)=="video"&&!cpu&&!native);g_free(tracks);g_signal_emit_by_name(source,"apply-memory-policy",&policy,&accepted);CHECK(!accepted);}}
  if(beforeStart){
  CHECK(flRequestGeometry(p,128,64,FL_FORMAT_RGBA8)==FL_OK);
  CHECK(gst_element_set_state(pipeline,GST_STATE_PLAYING)==GST_STATE_CHANGE_FAILURE);
@@ -85,4 +85,4 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
 #else
  CHECK(argc==2);GError*e=nullptr;auto*plugin=gst_plugin_load_file(argv[1],&e);CHECK(plugin&&!e);gst_object_unref(plugin);
 #endif
- run(false);run(true);run(true,true);sinkGeneration(true);sinkGeneration(false);readerGate(false);readerGate(true);}
+ run(false);run(true);run(true,true);run(true,false,true);run(true,true,true);sinkGeneration(true);sinkGeneration(false);readerGate(false);readerGate(true);}

@@ -1,0 +1,25 @@
+** WARNING: connection is not using a post-quantum key exchange algorithm.
+** This session may be vulnerable to "store now, decrypt later" attacks.
+** The server may need to be upgraded. See https://openssh.com/pq.html
+Test project <win-home>/dev/framelink-m6-windows-14996d0/build
+    Start 43: gst_native_bin_relay_win
+1/1 Test #43: gst_native_bin_relay_win .........***Failed    0.81 sec
+native AV mode 0 local=0
+bin relay n=0 collect=0 pending=1
+bin relay n=1 collect=0 pending=1
+bin relay n=2 collect=0 pending=1
+bin relay n=3 collect=0 pending=1
+bin relay n=4 collect=0 pending=1
+bin relay n=5 collect=0 pending=1
+bin relay n=6 collect=0 pending=1
+bin relay n=7 collect=0 pending=1
+line 117: native.collect()==FL_OK
+
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) =   0.83 sec
+
+The following tests FAILED:
+	 43 - gst_native_bin_relay_win (Failed)
+Errors while running CTest

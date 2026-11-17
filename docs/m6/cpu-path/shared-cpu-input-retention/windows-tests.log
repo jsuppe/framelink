@@ -1,0 +1,14 @@
+#< CLIXML
+Test project <win-home>/dev/framelink-m6-20261106/build
+    Start 111: gst_av_bin
+1/2 Test #111: gst_av_bin .......................   Passed   25.86 sec
+    Start 115: gst_av_bench_smoke
+2/2 Test #115: gst_av_bench_smoke ...............   Passed    6.90 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Label Time Summary:
+m5b_av    =  25.86 sec*proc (1 test)
+
+Total Test time (real) =  32.82 sec
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04"><Obj S="progress" RefId="0"><TN RefId="0"><T>System.Management.Automation.PSCustomObject</T><T>System.Object</T></TN><MS><I64 N="SourceId">1</I64><PR N="Record"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj></Objs>

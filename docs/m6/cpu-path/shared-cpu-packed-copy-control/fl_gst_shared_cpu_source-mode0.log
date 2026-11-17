@@ -1,0 +1,32 @@
+shared CPU source: padded BGRA/NV12, mapped timestamps/metadata, retained copies, EOS, policy/mapping/generation/death negatives and cancellation passed
+AUDIT plane_mode enabled=0
+AUDIT consumer seq=1 start=3900269569391 receive_us=67 output_us=14 copy_us=107 release_us=76 meta_us=101 copy_faults=0 copy_cpu_us=0
+AUDIT consumer seq=2 start=3900269570756 receive_us=61 output_us=9 copy_us=7 release_us=34 meta_us=4 copy_faults=0 copy_cpu_us=0
+AUDIT output_fallback frame=2 size=1152
+AUDIT consumer seq=3 start=3900269570956 receive_us=108 output_us=43 copy_us=6 release_us=34 meta_us=4 copy_faults=0 copy_cpu_us=0
+AUDIT output_fallback frame=3 size=1152
+AUDIT consumer seq=4 start=3900269571195 receive_us=108 output_us=45 copy_us=5 release_us=97 meta_us=4 copy_faults=0 copy_cpu_us=0
+AUDIT output_fallback frame=4 size=1152
+AUDIT consumer seq=5 start=3900269571527 receive_us=34 output_us=23 copy_us=5 release_us=31 meta_us=3 copy_faults=0 copy_cpu_us=0
+AUDIT output_fallback frame=5 size=1152
+AUDIT consumer seq=6 start=3900269571705 receive_us=124 output_us=28 copy_us=6 release_us=88 meta_us=3 copy_faults=0 copy_cpu_us=0
+AUDIT output_fallback frame=6 size=1152
+AUDIT consumer seq=7 start=3900269572074 receive_us=30 output_us=51 copy_us=6 release_us=48 meta_us=3 copy_faults=0 copy_cpu_us=0
+AUDIT output_fallback frame=7 size=1152
+AUDIT consumer seq=8 start=3900269572270 receive_us=153 output_us=29 copy_us=4 release_us=22 meta_us=3 copy_faults=0 copy_cpu_us=0
+AUDIT plane_mode enabled=0
+AUDIT consumer seq=1 start=3900269575147 receive_us=220 output_us=9 copy_us=46 release_us=42 meta_us=5 copy_faults=0 copy_cpu_us=82
+AUDIT consumer seq=2 start=3900269575904 receive_us=27 output_us=5 copy_us=7 release_us=32 meta_us=3 copy_faults=0 copy_cpu_us=0
+AUDIT output_fallback frame=2 size=480
+AUDIT consumer seq=3 start=3900269576104 receive_us=84 output_us=54 copy_us=5 release_us=36 meta_us=4 copy_faults=0 copy_cpu_us=0
+AUDIT output_fallback frame=3 size=480
+AUDIT consumer seq=4 start=3900269576349 receive_us=155 output_us=80 copy_us=8 release_us=59 meta_us=6 copy_faults=0 copy_cpu_us=0
+AUDIT output_fallback frame=4 size=480
+AUDIT consumer seq=5 start=3900269576738 receive_us=144 output_us=61 copy_us=8 release_us=73 meta_us=4 copy_faults=0 copy_cpu_us=0
+AUDIT output_fallback frame=5 size=480
+AUDIT consumer seq=6 start=3900269577135 receive_us=30 output_us=28 copy_us=7 release_us=39 meta_us=4 copy_faults=0 copy_cpu_us=0
+AUDIT output_fallback frame=6 size=480
+AUDIT consumer seq=7 start=3900269577317 receive_us=79 output_us=55 copy_us=6 release_us=47 meta_us=4 copy_faults=0 copy_cpu_us=0
+AUDIT output_fallback frame=7 size=480
+AUDIT consumer seq=8 start=3900269577565 receive_us=24 output_us=55 copy_us=6 release_us=33 meta_us=3 copy_faults=0 copy_cpu_us=0
+AUDIT plane_mode enabled=0

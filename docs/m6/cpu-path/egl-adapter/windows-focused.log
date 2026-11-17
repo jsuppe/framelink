@@ -1,0 +1,29 @@
+#< CLIXML
+Test project <win-home>/dev/framelink-m6-20261106/build
+    Start  30: gst_native_producer_win
+1/9 Test  #30: gst_native_producer_win ...............   Passed    0.84 sec
+    Start  31: gst_native_source_win
+2/9 Test  #31: gst_native_source_win .................   Passed    2.88 sec
+    Start  32: gst_native_source_win_copy_negative
+3/9 Test  #32: gst_native_source_win_copy_negative ...   Passed    0.26 sec
+    Start  33: gst_nv12_roundtrip
+4/9 Test  #33: gst_nv12_roundtrip ....................   Passed    1.97 sec
+    Start  34: gst_rgb10a2_roundtrip
+5/9 Test  #34: gst_rgb10a2_roundtrip .................   Passed    1.97 sec
+    Start  63: gst_timestamp_contract
+6/9 Test  #63: gst_timestamp_contract ................   Passed    1.71 sec
+    Start  70: gst_pool_policy
+7/9 Test  #70: gst_pool_policy .......................   Passed    3.82 sec
+    Start  95: gst_policy_generation
+8/9 Test  #95: gst_policy_generation .................   Passed    2.56 sec
+    Start 109: gst_av_src_bin
+9/9 Test #109: gst_av_src_bin ........................   Passed   15.96 sec
+
+100% tests passed, 0 tests failed out of 9
+
+Label Time Summary:
+gst_video_regression    =  16.00 sec*proc (8 tests)
+m5b_av                  =  15.96 sec*proc (1 test)
+
+Total Test time (real) =  32.08 sec
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04"><Obj S="progress" RefId="0"><TN RefId="0"><T>System.Management.Automation.PSCustomObject</T><T>System.Object</T></TN><MS><I64 N="SourceId">1</I64><PR N="Record"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj></Objs>

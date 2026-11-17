@@ -1,0 +1,62 @@
+Internal ctest changing into directory: <linux-home>/dev/build/framelink-m6-linux
+Test project <linux-home>/dev/build/framelink-m6-linux
+      Start   9: session_contract
+ 1/26 Test   #9: session_contract .................   Passed    0.00 sec
+      Start  11: session_contract_c_api
+ 2/26 Test  #11: session_contract_c_api ...........   Passed    0.00 sec
+      Start  13: shared_cpu_reconnect
+ 3/26 Test  #13: shared_cpu_reconnect .............   Passed    0.03 sec
+      Start  14: shared_cpu_eos
+ 4/26 Test  #14: shared_cpu_eos ...................   Passed    0.00 sec
+      Start  15: shared_cpu_channel_c
+ 5/26 Test  #15: shared_cpu_channel_c .............   Passed    0.00 sec
+      Start  16: shared_cpu_channel
+ 6/26 Test  #16: shared_cpu_channel ...............   Passed    0.06 sec
+      Start  17: shared_cpu_release
+ 7/26 Test  #17: shared_cpu_release ...............   Passed    0.04 sec
+      Start  18: shared_cpu_control
+ 8/26 Test  #18: shared_cpu_control ...............   Passed    0.04 sec
+      Start  19: shared_cpu_imported_pool
+ 9/26 Test  #19: shared_cpu_imported_pool .........   Passed    0.01 sec
+      Start  20: shared_cpu_allocation
+10/26 Test  #20: shared_cpu_allocation ............   Passed    0.01 sec
+      Start  21: shared_cpu_pool
+11/26 Test  #21: shared_cpu_pool ..................   Passed    0.00 sec
+      Start  22: shared_cpu_contract
+12/26 Test  #22: shared_cpu_contract ..............   Passed    0.00 sec
+      Start  23: shared_cpu_contract_c_api
+13/26 Test  #23: shared_cpu_contract_c_api ........   Passed    0.00 sec
+      Start  24: memory_contract
+14/26 Test  #24: memory_contract ..................   Passed    0.00 sec
+      Start  25: memory_contract_c_api
+15/26 Test  #25: memory_contract_c_api ............   Passed    0.00 sec
+      Start  48: gst_nv12_roundtrip
+16/26 Test  #48: gst_nv12_roundtrip ...............   Passed    1.48 sec
+      Start  49: gst_rgb10a2_roundtrip
+17/26 Test  #49: gst_rgb10a2_roundtrip ............   Passed    1.46 sec
+      Start  78: session_contract_peers
+18/26 Test  #78: session_contract_peers ...........   Passed    0.03 sec
+      Start  85: gst_pool_policy
+19/26 Test  #85: gst_pool_policy ..................   Passed    1.61 sec
+      Start 119: gst_session_transport
+20/26 Test #119: gst_session_transport ............   Passed    0.15 sec
+      Start 120: gst_shared_cpu_session
+21/26 Test #120: gst_shared_cpu_session ...........   Passed    0.02 sec
+      Start 121: gst_session_context
+22/26 Test #121: gst_session_context ..............   Passed    0.01 sec
+      Start 124: gst_shared_cpu_source
+23/26 Test #124: gst_shared_cpu_source ............   Passed    0.07 sec
+      Start 125: gst_shared_cpu_roundtrip
+24/26 Test #125: gst_shared_cpu_roundtrip .........   Passed    0.08 sec
+      Start 126: gst_av_timeline
+25/26 Test #126: gst_av_timeline ..................   Passed    2.06 sec
+      Start 128: gst_av_bin
+26/26 Test #128: gst_av_bin .......................   Passed   24.84 sec
+
+100% tests passed, 0 tests failed out of 26
+
+Label Time Summary:
+gst_video_regression    =   4.55 sec*proc (3 tests)
+m5b_av                  =  27.06 sec*proc (4 tests)
+
+Total Test time (real) =  32.04 sec

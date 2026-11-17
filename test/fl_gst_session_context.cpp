@@ -70,6 +70,44 @@ int main(int argc,char**argv){
   CHECK(result==FL_GST_SESSION_CANCELLED);CHECK(g_get_monotonic_time()-start<1000000);
   g_object_unref(s);
  }
+ // A/V uses two independently arriving terminal observations (CPU EOS and
+ // audio accounting). Either may arrive first; identical repeats are allowed,
+ // contradictions must not overwrite the first observation.
+ for(unsigned empty=0;empty<2;empty++){
+  auto*s=fl_gst_session_new(3);auto c=config(3);auto p=offer(c);
+  CHECK(fl_gst_session_configure(s,&c,&p,&p)==FL_GST_SESSION_READY);
+  guint64 frames=999;gint64 pts=999;
+  CHECK(fl_gst_session_wait_video_eos(s,1,0,&frames,&pts)==FL_GST_SESSION_TIMEOUT&&frames==999&&pts==999);
+  CHECK(fl_gst_session_video_eos(s,1,0,0)==FL_GST_SESSION_INVALID);
+  CHECK(fl_gst_session_video_eos(s,1,1,-1)==FL_GST_SESSION_INVALID);
+  const guint64 count=empty?0:8;const gint64 last=empty?-1:37000000;
+  FlGstSessionResult result=FL_GST_SESSION_INVALID;std::atomic<bool> entered{false};
+  std::thread waiter([&]{entered=true;result=fl_gst_session_wait_video_eos(s,1,5000,&frames,&pts);});
+  while(!entered.load())std::this_thread::yield();
+  CHECK(fl_gst_session_video_eos(s,1,count,last)==FL_GST_SESSION_READY);
+  waiter.join();CHECK(result==FL_GST_SESSION_READY&&frames==count&&pts==last);
+  CHECK(fl_gst_session_video_eos(s,1,count,last)==FL_GST_SESSION_READY);
+  CHECK(fl_gst_session_video_eos(s,1,count+1,37000001)==FL_GST_SESSION_INVALID);
+  if(count)CHECK(fl_gst_session_video_eos(s,1,count,last+1)==FL_GST_SESSION_INVALID);
+  CHECK(fl_gst_session_wait_video_eos(s,1,0,&frames,&pts)==FL_GST_SESSION_READY&&frames==count&&pts==last);
+  // A new epoch discards terminal state, and wakes old-epoch waiters stale.
+  c.generation=2;CHECK(fl_gst_session_configure(s,&c,&p,&p)==FL_GST_SESSION_READY);
+  frames=999;pts=999;
+  CHECK(fl_gst_session_video_eos(s,1,count,last)==FL_GST_SESSION_STALE);
+  CHECK(fl_gst_session_wait_video_eos(s,2,1,&frames,&pts)==FL_GST_SESSION_TIMEOUT&&frames==999&&pts==999);
+  entered=false;
+  std::thread stale([&]{entered=true;result=fl_gst_session_wait_video_eos(s,2,5000,&frames,&pts);});
+  while(!entered.load())std::this_thread::yield();
+  c.generation=3;CHECK(fl_gst_session_configure(s,&c,&p,&p)==FL_GST_SESSION_READY);
+  stale.join();CHECK(result==FL_GST_SESSION_STALE&&frames==999&&pts==999);
+  entered=false;
+  std::thread cancelled([&]{entered=true;result=fl_gst_session_wait_video_eos(s,3,5000,&frames,&pts);});
+  while(!entered.load())std::this_thread::yield();
+  auto start=g_get_monotonic_time();fl_gst_session_cancel(s);cancelled.join();
+  CHECK(result==FL_GST_SESSION_CANCELLED&&g_get_monotonic_time()-start<1000000&&frames==999&&pts==999);
+  CHECK(fl_gst_session_video_eos(s,3,count,last)==FL_GST_SESSION_CANCELLED);
+  g_object_unref(s);
+ }
  // Standard bin context propagation supplies one owning object to both children.
  auto* sharedSession=fl_gst_session_new(3);auto* context=fl_gst_session_create_context(sharedSession);
  auto* pipeline=gst_pipeline_new(nullptr);auto* one=gst_bin_new(nullptr);auto* two=gst_bin_new(nullptr);

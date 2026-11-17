@@ -53,6 +53,9 @@
 #include "framelink.h"
 #include "fl_gst_metadata.hpp"
 #include "framelink_memory_policy.h"
+#ifdef FL_GST_EGL_READBACK
+#include "fl_gst_egl_readback.hpp"
+#endif
 #ifdef FL_GST_D3D11
 #include "fl_gst_d3d11_producer.hpp"
 #endif
@@ -116,7 +119,7 @@ static void copyPixels(guint8* dst, gsize dstStride, const guint8* src, gsize sr
 
 // Reading a GBM/dma-buf CPU mapping with plain loads is catastrophically slow
 // - the mapping is write-combined, and WC reads bypass the cache one access
-// at a time. Measured on melchior (RTX 3090, LINEAR bo): 10 MB/s, 363 ms per
+// at a time. Measured on <linux-host> (RTX 3090, LINEAR bo): 10 MB/s, 363 ms per
 // 720p frame. MOVNTDQA (SSE4.1 streaming load) is the architected way to read
 // WC memory at bandwidth; writes to the ordinary GstBuffer stay plain stores.
 // x86-only: Android's AHardwareBuffer_lock hands back a cached mapping, so
@@ -238,7 +241,10 @@ typedef struct _GstFrameLinkSink {
     gboolean preserveTimestamps;
     gboolean preserveFrameMetadata;
     guint64 streamGeneration;
-    gboolean nativeMemory;
+    gboolean nativeMemory,sharedCpu;
+    volatile gint cpuFlushing;
+    flSharedCpuChannel* cpuChannel;
+    guint cpuSlots,cpuOutstanding;
     gboolean memoryPolicyApplied;
     guint64 memoryPoolGeneration;
     GstFrameLinkMemoryPolicy memoryPolicy;
@@ -259,6 +265,9 @@ typedef struct _GstFrameLinkSink {
     gboolean errorOnRingFull;
     gboolean testOpenDelayed;
     guint64 submitted, dropped, received, ringFullDrops;
+#ifdef _WIN32
+    GByteArray* uploadScratch; // one CPU staging buffer, serialized by BaseSink
+#endif
 #ifndef _WIN32
     gboolean mapRefused; // consumer ring not FL_MAP_CPU - fatal, but say why
 #endif
@@ -272,7 +281,7 @@ G_DEFINE_TYPE(GstFrameLinkSink, gst_framelink_sink, GST_TYPE_BASE_SINK)
 #define GST_FRAMELINK_SINK(o) \
     (G_TYPE_CHECK_INSTANCE_CAST((o), gst_framelink_sink_get_type(), GstFrameLinkSink))
 
-enum { SINK_PROP_0, SINK_PROP_CHANNEL, SINK_PROP_SLOTS, SINK_PROP_PRESERVE_TIMESTAMPS, SINK_PROP_FRAME_METADATA, SINK_PROP_CONNECT_TIMEOUT, SINK_PROP_BUFFER_WAIT, SINK_PROP_ERROR_ON_RING_FULL, SINK_PROP_NATIVE_MEMORY };
+enum { SINK_PROP_0, SINK_PROP_CHANNEL, SINK_PROP_SLOTS, SINK_PROP_PRESERVE_TIMESTAMPS, SINK_PROP_FRAME_METADATA, SINK_PROP_CONNECT_TIMEOUT, SINK_PROP_BUFFER_WAIT, SINK_PROP_ERROR_ON_RING_FULL, SINK_PROP_NATIVE_MEMORY, SINK_PROP_SHARED_CPU };
 
 #ifdef FL_GST_D3D11
 #define FL_SINK_CAPS FRAMELINK_CAPS ";" GST_VIDEO_CAPS_MAKE_WITH_FEATURES("memory:D3D11Memory", "{ BGRA, RGBA, NV12, RGB10A2_LE }")
@@ -288,6 +297,10 @@ static GstStaticPadTemplate sinkTemplate =
                             GST_STATIC_CAPS(FL_SINK_CAPS));
 
 static void sinkDisconnect(GstFrameLinkSink* self) {
+    if(self->cpuChannel){flSharedCpuClose(self->cpuChannel);self->cpuChannel=nullptr;}
+#ifdef _WIN32
+    g_clear_pointer(&self->uploadScratch, g_byte_array_unref);
+#endif
 #ifdef FL_GST_NATIVE_SINK
     if(self->nativeProducer){(*self->nativeProducer)->active=false;delete self->nativeProducer;self->nativeProducer=nullptr;self->ch=nullptr;}
 #endif
@@ -385,10 +398,20 @@ static bool validSessionContext(GstElement*element){
  if(session){g_object_unref(session);return true;}
  GST_ELEMENT_ERROR(element,RESOURCE,SETTINGS,("malformed FrameLink session context"),("refusing unauthenticated fallback"));return false;
 }
+#include "fl_gst_shared_cpu_sink.inc"
 static gboolean sinkStart(GstBaseSink* base) {
     if(!validSessionContext(GST_ELEMENT(base)))return FALSE;
     auto* self=GST_FRAMELINK_SINK(base);
+    if(self->sharedCpu){
+        return sinkSharedCpuStart(self);
+    }
     if(self->session){
+        // A coordinated native producer must bind both endpoints' negotiated
+        // memory requirements before exposing its allocation pool. Adopting a
+        // channel alone establishes ownership, not permission for its usage.
+        if(self->nativeMemory&&!self->memoryPolicyApplied){
+            GST_ELEMENT_ERROR(self,RESOURCE,SETTINGS,("coordinated native video requires a bound memory policy"),(NULL));return FALSE;
+        }
         if(fl_gst_session_get_config(self->session,&self->sessionConfig)!=FL_GST_SESSION_READY||!self->sessionConfig.videoTrackId||!self->delegated||
            (self->memoryPolicyApplied&&self->memoryPolicy.sessionGeneration!=self->sessionConfig.generation)){
             GST_ELEMENT_ERROR(self,RESOURCE,SETTINGS,("coordinated video requires an adopted channel and matching session generation"),(NULL));return FALSE;
@@ -476,10 +499,18 @@ static gboolean sinkProposeAllocation(GstBaseSink* base,GstQuery* query){
 }
 static gboolean sinkSetCaps(GstBaseSink* base, GstCaps* caps) {
     GstFrameLinkSink* self = GST_FRAMELINK_SINK(base);
+#ifdef _WIN32
+    // Drop old geometry's storage rather than retaining a historical peak.
+    g_clear_pointer(&self->uploadScratch, g_byte_array_unref);
+#endif
     if (!gst_video_info_from_caps(&self->vinfo, caps)) return FALSE;
     if(self->session&&(guint(GST_VIDEO_INFO_WIDTH(&self->vinfo))!=self->sessionConfig.video.width||guint(GST_VIDEO_INFO_HEIGHT(&self->vinfo))!=self->sessionConfig.video.height||toFlFormat(GST_VIDEO_INFO_FORMAT(&self->vinfo))!=self->sessionConfig.video.format))return FALSE;
     if(GST_VIDEO_INFO_FORMAT(&self->vinfo)==GST_VIDEO_FORMAT_NV12 &&
        ((GST_VIDEO_INFO_WIDTH(&self->vinfo)&1)||(GST_VIDEO_INFO_HEIGHT(&self->vinfo)&1)))return FALSE;
+    if(self->sharedCpu){
+        if(!gst_caps_features_contains(gst_caps_get_features(caps,0),GST_CAPS_FEATURE_MEMORY_SYSTEM_MEMORY))return FALSE;
+        self->haveInfo=TRUE;return TRUE;
+    }
     if(self->memoryPolicyApplied && (!self->ch || GST_VIDEO_INFO_WIDTH(&self->vinfo)!=(int)self->cinfo.width ||
        GST_VIDEO_INFO_HEIGHT(&self->vinfo)!=(int)self->cinfo.height || toFlFormat(GST_VIDEO_INFO_FORMAT(&self->vinfo))!=self->cinfo.format))return FALSE;
     if(self->nativeMemory){
@@ -528,6 +559,10 @@ static GstFlowReturn sinkRenderImpl(GstBaseSink* base, GstBuffer* buffer) {
                           GST_CLOCK_TIME_IS_VALID(pts) ? (int64_t)pts : -1, 0});
     };
     account("gst.frame_receive");
+    if(self->sharedCpu){auto result=sinkSharedCpuRender(self,buffer);
+        if(result!=GST_FLOW_OK){++self->dropped;account("gst.frame_drop.shared_cpu_error");}
+        return trace.result(result);
+    }
     if(self->memoryPolicyApplied){
         flChannelInfo info{};
         if(!self->ch || flQuery(self->ch,&info)!=FL_OK || info.generation!=self->memoryPoolGeneration){
@@ -641,13 +676,15 @@ static GstFlowReturn sinkRenderImpl(GstBaseSink* base, GstBuffer* buffer) {
         if (incoming == FL_FORMAT_NV12) {
             // D3D11 upload uses one pitch for Y and UV. Repack GstVideoMeta's
             // independently strided planes without changing their values.
-            scratch = g_byte_array_sized_new(w * h * 3 / 2);
+            if (!self->uploadScratch)
+                self->uploadScratch = g_byte_array_sized_new(w * h * 3 / 2);
+            scratch = self->uploadScratch;
             g_byte_array_set_size(scratch, w * h * 3 / 2);
             for (guint p=0;p<2;p++) {
                 const gint pitch=GST_VIDEO_FRAME_PLANE_STRIDE(&vframe,p);
                 if(pitch<(gint)w) {
                     account("gst.frame_drop.invalid_pitch");
-                    ctx->Release();g_byte_array_unref(scratch);
+                    ctx->Release();
                     gst_video_frame_unmap(&vframe);sinkDisconnect(self);return trace.result(GST_FLOW_ERROR);
                 }
                 for(guint y=0;y<(p?h/2:h);y++)
@@ -657,7 +694,9 @@ static GstFlowReturn sinkRenderImpl(GstBaseSink* base, GstBuffer* buffer) {
             gsttrace::payload("gst.cpu_repack",gsttrace::id(self->channel),(uint64_t)w*h*3/2,FL_MEMORY_COPY);
             upload=scratch->data;uploadStride=w;
         } else if (swap) {
-            scratch = g_byte_array_sized_new(w * 4 * h);
+            if (!self->uploadScratch)
+                self->uploadScratch = g_byte_array_sized_new(w * 4 * h);
+            scratch = self->uploadScratch;
             g_byte_array_set_size(scratch, w * 4 * h);
             copyPixels(scratch->data, w * 4, src, srcStride, w, h, TRUE);
             gsttrace::payload("gst.cpu_convert",gsttrace::id(self->channel),(uint64_t)w*h*4,FL_MEMORY_COPY|FL_MEMORY_CONVERT);
@@ -669,7 +708,8 @@ static GstFlowReturn sinkRenderImpl(GstBaseSink* base, GstBuffer* buffer) {
                                (UINT)(uploadStride * h));
         gsttrace::payload("gst.gpu_upload_issued",gsttrace::id(self->channel),(uint64_t)w*h*(incoming==FL_FORMAT_NV12?3:8)/2,FL_MEMORY_UPLOAD);
         ctx->Release();
-        if (scratch) g_byte_array_unref(scratch);
+        // UpdateSubresource snapshots CPU source bytes before returning. Reuse
+        // staging only after that call; shared GPU texture ownership is unchanged.
         wrote = TRUE;
     }
 #else
@@ -680,6 +720,8 @@ static GstFlowReturn sinkRenderImpl(GstBaseSink* base, GstBuffer* buffer) {
         flMappedImage view{};
         r=flImageMapPlanes(fb.image,&view);
         if(r==FL_OK) {
+            {
+            gsttrace::Scope copyTrace("gst.cpu_copy_sink_duration",gsttrace::id(self->channel));
             wrote=view.planes==2;
             for(guint p=0;p<2 && wrote;p++) {
                 const gint pitch=GST_VIDEO_FRAME_PLANE_STRIDE(&vframe,p);
@@ -688,6 +730,7 @@ static GstFlowReturn sinkRenderImpl(GstBaseSink* base, GstBuffer* buffer) {
                     memcpy((guint8*)view.plane[p].pixels+y*view.plane[p].stride,
                            (guint8*)GST_VIDEO_FRAME_PLANE_DATA(&vframe,p)+(gsize)y*pitch,w);
                 gsttrace::payload("gst.cpu_copy_sink",gsttrace::id(self->channel),(uint64_t)w*view.plane[p].rows,FL_MEMORY_COPY);
+            }
             }
             flImageUnmap(fb.image);
         }
@@ -780,6 +823,7 @@ static gboolean sinkEventImpl(GstBaseSink* base, GstEvent* event) {
     }
     if (GST_EVENT_TYPE(event) == GST_EVENT_EOS) {
         auto* self = GST_FRAMELINK_SINK(base);
+        if(self->sharedCpu&&!sinkSharedCpuEos(self))return FALSE;
         if(self->session&&fl_gst_session_video_eos(self->session,self->sessionConfig.generation,self->sessionFrames,self->sessionLastPts)!=FL_GST_SESSION_READY){GST_ELEMENT_ERROR(self,STREAM,FAILED,("invalid coordinated video EOS"),(NULL));return FALSE;}
         if(self->session&&fl_gst_session_has_event_stream(self->session,self->sessionConfig.generation)){FlGstVideoEvent record{FL_GST_VIDEO_END,self->sessionFrames,self->sessionLastPts<0?0:guint64(self->sessionLastPts),0};if(fl_gst_session_send_video_event(self->session,self->sessionConfig.generation,&record)!=FL_GST_SESSION_READY)return FALSE;}
         auto* stats = gst_structure_new("framelink-sink-stats",
@@ -813,6 +857,9 @@ static void sinkSetProperty(GObject* obj, guint id, const GValue* value, GParamS
     if(self->session&&GST_STATE(self)!=GST_STATE_NULL){GST_WARNING_OBJECT(self,"session configuration immutable outside NULL");return;}
     if(self->memoryPolicyApplied){GST_WARNING_OBJECT(self,"authenticated session properties are immutable; create a new element/session");return;}
     switch (id) {
+        case SINK_PROP_SHARED_CPU:
+            if(GST_STATE(self)!=GST_STATE_NULL||self->ch)return;
+            self->sharedCpu=g_value_get_boolean(value);break;
         case SINK_PROP_BUFFER_WAIT:
             if(GST_STATE(self)>GST_STATE_READY){GST_WARNING_OBJECT(self,"buffer wait cannot change while running");break;}
             self->bufferWaitMs=g_value_get_uint(value);break;
@@ -844,6 +891,7 @@ static void sinkSetProperty(GObject* obj, guint id, const GValue* value, GParamS
 static void sinkGetProperty(GObject* obj, guint id, GValue* value, GParamSpec* spec) {
     GstFrameLinkSink* self = GST_FRAMELINK_SINK(obj);
     switch (id) {
+        case SINK_PROP_SHARED_CPU: g_value_set_boolean(value,self->sharedCpu);break;
         case SINK_PROP_BUFFER_WAIT: g_value_set_uint(value,self->bufferWaitMs);break;
         case SINK_PROP_ERROR_ON_RING_FULL: g_value_set_boolean(value,self->errorOnRingFull);break;
         case SINK_PROP_CONNECT_TIMEOUT: g_value_set_uint(value,self->connectTimeoutMs);break;
@@ -867,7 +915,7 @@ static void sinkFinalize(GObject* obj) {
 // Action signal accepts one OWNED producer channel only in NULL. TRUE transfers
 // ownership; FALSE leaves it with the caller. No allocation/lookup is performed.
 static gboolean sinkAdoptChannel(GstFrameLinkSink* self,flChannel* channel) {
-    if(GST_STATE(self)!=GST_STATE_NULL || self->ch || !channel || self->memoryPolicyApplied)return FALSE;
+    if(GST_STATE(self)!=GST_STATE_NULL || self->ch || !channel || self->memoryPolicyApplied || self->sharedCpu)return FALSE;
     flChannelInfo info{};if(flQuery(channel,&info)!=FL_OK)return FALSE;
     uint32_t consumerFlags=0;if(flQueryConsumerFlags(channel,&consumerFlags)==FL_OK)return FALSE;
     self->ch=channel;self->cinfo=info;self->delegated=TRUE;return TRUE;
@@ -895,6 +943,8 @@ static gboolean sinkSendEvent(GstElement* element,GstEvent* event){
     if(GST_EVENT_TYPE(event)==GST_EVENT_SEEK&&self->session){GST_WARNING_OBJECT(self,"seek refused: coordinated sessions are forward rate1 only");gst_event_unref(event);return FALSE;}
     return GST_ELEMENT_CLASS(gst_framelink_sink_parent_class)->send_event(element,event);
 }
+static gboolean sinkUnlock(GstBaseSink*base){auto*self=GST_FRAMELINK_SINK(base);g_atomic_int_set(&self->cpuFlushing,1);if(self->sharedCpu&&self->session)fl_gst_session_cancel(self->session);return TRUE;}
+static gboolean sinkUnlockStop(GstBaseSink*base){g_atomic_int_set(&GST_FRAMELINK_SINK(base)->cpuFlushing,0);return TRUE;}
 static void gst_framelink_sink_class_init(GstFrameLinkSinkClass* klass) {
     GObjectClass* gobject = G_OBJECT_CLASS(klass);
     GstElementClass* element = GST_ELEMENT_CLASS(klass);
@@ -917,6 +967,9 @@ static void gst_framelink_sink_class_init(GstFrameLinkSinkClass* klass) {
     g_signal_new_class_handler("acquire-native-buffer",G_TYPE_FROM_CLASS(klass),
         GSignalFlags(G_SIGNAL_RUN_LAST|G_SIGNAL_ACTION),G_CALLBACK(sinkAcquireNative),
         nullptr,nullptr,nullptr,G_TYPE_POINTER,1,G_TYPE_UINT);
+    g_object_class_install_property(gobject,SINK_PROP_SHARED_CPU,
+        g_param_spec_boolean("shared-cpu","Shared CPU sink","Explicit broker-bound CPU copy-in with bounded ownership wait; COPY required; A/V requires event stream",
+            FALSE,(GParamFlags)(G_PARAM_READWRITE|G_PARAM_STATIC_STRINGS)));
     g_object_class_install_property(gobject,SINK_PROP_NATIVE_MEMORY,
         g_param_spec_boolean("native-memory","Native producer allocations",
             "Strict native buffers acquired from this sink; no implicit copy fallback",FALSE,
@@ -967,6 +1020,7 @@ static void gst_framelink_sink_class_init(GstFrameLinkSinkClass* klass) {
     basesink->render = sinkRender;
     basesink->event = sinkEvent;
     basesink->stop = sinkStop;
+    basesink->unlock=sinkUnlock;basesink->unlock_stop=sinkUnlockStop;
 }
 
 static void gst_framelink_sink_init(GstFrameLinkSink* self) {
@@ -988,6 +1042,10 @@ struct NativeSourceOwner {
     flChannel* channel;
 #ifdef _WIN32
     GstD3D11Device* device;
+    // Layout only, never a retained GstMemory/texture or reader lease. A fresh
+    // ring generation invalidates even a recycled texture address.
+    struct Layout { guint64 generation=0; ID3D11Texture2D* texture=nullptr; gsize size=0; guint pitch=0; };
+    Layout layouts[FL_MAX_POOL_SIZE]{};
     explicit NativeSourceOwner(flChannel* c):channel(c),device(gst_d3d11_device_new_wrapped(flChannelD3D11Device(c))){}
     ~NativeSourceOwner(){if(device)gst_object_unref(device);flClose(channel);}
 #else
@@ -1008,7 +1066,7 @@ struct NativeSourceReader {
 typedef struct _GstFrameLinkSrc {
     GstPushSrc parent;
     GstBuffer* pendingDelivery;
-    FlGstSession* session; flSessionConfig sessionConfig; gboolean sessionRegistered;
+    FlGstSession* session; flSessionConfig sessionConfig; gboolean sessionRegistered; guint receiveQueue;
     guint64 sessionFrames;gint64 sessionLastPts;
     FlGstVideoEvent pendingGaps[32];guint pendingGapCount;gboolean videoEndSeen;guint64 sessionSequence;
 
@@ -1018,6 +1076,12 @@ typedef struct _GstFrameLinkSrc {
     gint width, height, fps;
     guint poolSize,maxQueueAgeMs;
     gboolean nativeMemory;
+    gboolean gpuReadback;
+    gboolean sharedCpu;
+    flSharedCpuChannel* cpuChannel;
+#ifdef FL_GST_EGL_READBACK
+    FrameLinkEglReadback* eglReadback;
+#endif
     gboolean memoryPolicyApplied;
     guint64 memoryPoolGeneration;
     GstFrameLinkMemoryPolicy memoryPolicy;
@@ -1039,6 +1103,8 @@ typedef struct _GstFrameLinkSrc {
 #ifdef _WIN32
     ID3D11Texture2D* staging; // cached; rebuilt when the generation moves
 #endif
+    GstBufferPool* cpuOutputPool; // at most two reusable CPU buffers; never wait
+    gsize cpuOutputSize;
 } GstFrameLinkSrc;
 
 typedef struct _GstFrameLinkSrcClass {
@@ -1049,7 +1115,7 @@ G_DEFINE_TYPE(GstFrameLinkSrc, gst_framelink_src, GST_TYPE_PUSH_SRC)
 #define GST_FRAMELINK_SRC(o) \
     (G_TYPE_CHECK_INSTANCE_CAST((o), gst_framelink_src_get_type(), GstFrameLinkSrc))
 
-enum { SRC_PROP_0, SRC_PROP_CHANNEL, SRC_PROP_WIDTH, SRC_PROP_HEIGHT, SRC_PROP_FPS, SRC_PROP_FORMAT, SRC_PROP_PRESERVE_TIMESTAMPS, SRC_PROP_FRAME_METADATA, SRC_PROP_POOL_SIZE, SRC_PROP_MAX_QUEUE_AGE, SRC_PROP_EXPIRED_FRAMES, SRC_PROP_NATIVE_MEMORY };
+enum { SRC_PROP_0, SRC_PROP_CHANNEL, SRC_PROP_WIDTH, SRC_PROP_HEIGHT, SRC_PROP_FPS, SRC_PROP_FORMAT, SRC_PROP_PRESERVE_TIMESTAMPS, SRC_PROP_FRAME_METADATA, SRC_PROP_POOL_SIZE, SRC_PROP_MAX_QUEUE_AGE, SRC_PROP_EXPIRED_FRAMES, SRC_PROP_NATIVE_MEMORY, SRC_PROP_GPU_READBACK, SRC_PROP_SHARED_CPU };
 
 #ifdef FL_GST_DMABUF
 #define FL_SOURCE_CAPS FRAMELINK_CAPS ";" GST_VIDEO_CAPS_MAKE_WITH_FEATURES("memory:DMABuf", "{ BGRA, RGBA, NV12, RGB10A2_LE }")
@@ -1064,14 +1130,51 @@ static GstStaticPadTemplate srcTemplate =
     GST_STATIC_PAD_TEMPLATE("src", GST_PAD_SRC, GST_PAD_ALWAYS,
                             GST_STATIC_CAPS(FL_SOURCE_CAPS));
 
-#ifdef _WIN32
-static void srcDropStaging(GstFrameLinkSrc* self) {
-    if (self->staging) {
-        self->staging->Release();
-        self->staging = NULL;
+static void srcDropCpuOutput(GstFrameLinkSrc* self) {
+    if (self->cpuOutputPool) {
+        // Outstanding downstream buffers remain valid; their pool frees them
+        // when returned. Stop and resize must never wait for downstream refs.
+        gst_buffer_pool_set_active(self->cpuOutputPool, FALSE);
+        gst_object_unref(self->cpuOutputPool);
+        self->cpuOutputPool = nullptr;
+        self->cpuOutputSize = 0;
     }
 }
+#ifdef _WIN32
+static void srcDropStaging(GstFrameLinkSrc* self) {
+    srcDropCpuOutput(self);
+    if (self->staging) {self->staging->Release();self->staging = NULL;}
+}
 #endif
+
+static GstBuffer* srcCpuOutputBuffer(GstFrameLinkSrc* self, gsize size) {
+    if (self->cpuOutputPool && self->cpuOutputSize != size) {
+#ifdef _WIN32
+        srcDropStaging(self);
+#else
+        srcDropCpuOutput(self);
+#endif
+    }
+    if (!self->cpuOutputPool && size <= G_MAXUINT) {
+        auto* pool = gst_buffer_pool_new();
+        auto* config = gst_buffer_pool_get_config(pool);
+        gst_buffer_pool_config_set_params(config, nullptr, (guint)size, 0, 2);
+        if (gst_buffer_pool_set_config(pool, config) && gst_buffer_pool_set_active(pool, TRUE)) {
+            self->cpuOutputPool = pool;
+            self->cpuOutputSize = size;
+        } else gst_object_unref(pool);
+    }
+    if (self->cpuOutputPool) {
+        GstBufferPoolAcquireParams params{};
+        params.flags = GST_BUFFER_POOL_ACQUIRE_FLAG_DONTWAIT;
+        GstBuffer* buffer = nullptr;
+        if (gst_buffer_pool_acquire_buffer(self->cpuOutputPool, &buffer, &params) == GST_FLOW_OK)
+            return buffer;
+    }
+    // Preserve the old nonblocking ownership contract when downstream holds
+    // both cached buffers. Fallback buffers are not retained in the cache.
+    return gst_buffer_new_allocate(nullptr, size, nullptr);
+}
 
 static GstCaps* srcMakeCaps(GstFrameLinkSrc* self) {
     // After start() the channel is the truth (its format differs per platform:
@@ -1108,9 +1211,25 @@ static GstCaps* srcGetCaps(GstBaseSrc* base, GstCaps* filter) {
     return caps;
 }
 
+static bool srcEmitGaps(GstFrameLinkSrc*);
+#include "fl_gst_shared_cpu_source.inc"
+
 static gboolean srcStart(GstBaseSrc* base) {
     if(!validSessionContext(GST_ELEMENT(base)))return FALSE;
     GstFrameLinkSrc* self = GST_FRAMELINK_SRC(base);
+    if(self->sharedCpu){
+        return srcSharedCpuStart(self);
+    }
+    if(self->gpuReadback){
+#ifdef FL_GST_EGL_READBACK
+        if(self->nativeMemory||!self->memoryPolicyApplied||!FrameLinkEglReadback::permits(self->memoryPolicy)||
+           (strcmp(self->format,"BGRA")&&strcmp(self->format,"RGBA"))){
+            GST_ELEMENT_ERROR(self,RESOURCE,SETTINGS,("gpu-readback requires negotiated COPY|READBACK, CPU output and exact BGRA/RGBA"),(NULL));return FALSE;
+        }
+#else
+        GST_ELEMENT_ERROR(self,RESOURCE,SETTINGS,("gpu-readback is unavailable in this build"),(NULL));return FALSE;
+#endif
+    }
     if(self->session){
         if(fl_gst_session_get_config(self->session,&self->sessionConfig)!=FL_GST_SESSION_READY||!self->sessionConfig.videoTrackId||!self->delegated||
            guint(self->width)!=self->sessionConfig.video.width||guint(self->height)!=self->sessionConfig.video.height||toFlFormat(gst_video_format_from_string(self->format))!=self->sessionConfig.video.format||
@@ -1150,6 +1269,20 @@ static gboolean srcStart(GstBaseSrc* base) {
     if(self->memoryPolicyApplied && self->cinfo.generation!=self->memoryPoolGeneration){
         GST_ELEMENT_ERROR(self,CORE,NEGOTIATION,("authenticated pool generation changed before start"),(NULL));return FALSE;
     }
+    // Every coordinated frame is accounted for, so the negotiated queue budget
+    // is the slack a briefly late reader has before a frame is replaced. The
+    // ring must also hold the frame being read and the one being drawn, so a
+    // small pool limits supported depth. Never silently shrink the agreed queue.
+    if(self->session){
+        const guint ringLimit=self->cinfo.poolSize>3?self->cinfo.poolSize-2:1;
+        if(self->sessionConfig.videoQueueFrames>ringLimit){
+            GST_ELEMENT_ERROR(self,RESOURCE,SETTINGS,("negotiated video queue exceeds ring capacity"),
+                ("requested %u unread frames, ring %u permits %u",self->sessionConfig.videoQueueFrames,self->cinfo.poolSize,ringLimit));return FALSE;
+        }
+        self->receiveQueue=self->sessionConfig.videoQueueFrames;
+        if(flSetReceiveQueue(self->ch,self->receiveQueue)!=FL_OK){GST_ELEMENT_ERROR(self,RESOURCE,SETTINGS,("cannot set the video receive queue"),(NULL));return FALSE;}
+        GST_INFO_OBJECT(self,"receive queue %u frames (video-queue-frames %u, ring %u)",self->receiveQueue,self->sessionConfig.videoQueueFrames,self->cinfo.poolSize);
+    }
 #ifdef FL_GST_NATIVE
     if(self->nativeMemory)self->nativeOwner=new std::shared_ptr<NativeSourceOwner>(std::make_shared<NativeSourceOwner>(self->ch));
 #endif
@@ -1167,7 +1300,12 @@ static gboolean srcStart(GstBaseSrc* base) {
 
 static gboolean srcStop(GstBaseSrc* base) {
     GstFrameLinkSrc* self = GST_FRAMELINK_SRC(base);
+    srcDropCpuOutput(self);
     gst_clear_buffer(&self->pendingDelivery);
+    if(self->cpuChannel){flSharedCpuClose(self->cpuChannel);self->cpuChannel=nullptr;}
+#ifdef FL_GST_EGL_READBACK
+    delete self->eglReadback;self->eglReadback=nullptr;
+#endif
     if(self->session)fl_gst_session_cancel(self->session);
 #ifdef _WIN32
     srcDropStaging(self);
@@ -1181,6 +1319,8 @@ static gboolean srcStop(GstBaseSrc* base) {
 
 static gboolean srcUnlock(GstBaseSrc* base) {
     g_atomic_int_set(&GST_FRAMELINK_SRC(base)->flushing, 1);
+    auto*self=GST_FRAMELINK_SRC(base);
+    if(self->sharedCpu&&self->session)fl_gst_session_cancel(self->session);
     return TRUE;
 }
 
@@ -1230,17 +1370,31 @@ static GstBuffer* srcNativeBuffer(GstFrameLinkSrc* self,const flFrame& frame) {
 static GstBuffer* srcNativeBuffer(GstFrameLinkSrc* self,const flFrame& frame) {
     if(!self->nativeOwner || !(*self->nativeOwner)->device)return nullptr;
     auto*tex=flImageD3D11(frame.image);if(!tex)return nullptr;
-    // size=0 asks GStreamer to probe an EMPTY staging allocation's pitch, not
-    // copy the shared image. Do not guess CPU stride from logical row width.
-    auto*mem=gst_d3d11_allocator_alloc_wrapped(nullptr,(*self->nativeOwner)->device,tex,0,nullptr,nullptr);
+    if(frame.slot>=FL_MAX_POOL_SIZE)return nullptr;
+    auto&layout=(*self->nativeOwner)->layouts[frame.slot];
+    if(layout.generation!=self->generation || layout.texture!=tex)layout={};
+    // Probe the actual CPU layout once per allocation, not once per frame.
+    // size=0 creates/maps/frees a temporary staging texture in GStreamer;
+    // repeated probes accumulate driver private commit even with release Flush.
+    // Subsequent wrappers use that measured size; GstVideoMeta carries pitch.
+    auto*mem=gst_d3d11_allocator_alloc_wrapped(nullptr,(*self->nativeOwner)->device,tex,layout.size,nullptr,nullptr);
     if(!mem)return nullptr;
-    guint pitch=0;if(!gst_d3d11_memory_get_resource_stride(GST_D3D11_MEMORY_CAST(mem),&pitch) || !pitch || pitch>G_MAXINT){gst_memory_unref(mem);return nullptr;}
+    if(!layout.size){
+        guint pitch=0;if(!gst_d3d11_memory_get_resource_stride(GST_D3D11_MEMORY_CAST(mem),&pitch) || !pitch || pitch>G_MAXINT || !mem->size){gst_memory_unref(mem);return nullptr;}
+        layout={self->generation,tex,mem->size,pitch};
+    }
+    const guint pitch=layout.pitch;
     uint64_t token=0;if(flLeaseFrame(self->ch,&frame,&token)!=FL_OK){gst_memory_unref(mem);return nullptr;}
     auto*reader=new NativeSourceReader{*self->nativeOwner,token};
     gst_mini_object_set_qdata(GST_MINI_OBJECT(mem),g_quark_from_static_string("framelink-reader"),reader,
         [](gpointer p){delete static_cast<NativeSourceReader*>(p);});
-    // A later explicit CPU map must download current shared pixels, not return
-    // the empty staging probe. Native GPU consumers use the original texture.
+    // Borrowed from the reader-owned channel; handle duplication alone must not
+    // be mistaken for retaining the FrameLink lease. No re-export/allocation.
+    gst_mini_object_set_qdata(GST_MINI_OBJECT(mem),
+        g_quark_from_static_string("framelink-d3d11-reader-shared-handle"),
+        flImageSharedHandle(frame.image),nullptr);
+    // A later explicit CPU map must download current shared pixels, regardless
+    // of how layout was obtained. Native GPU consumers use the original texture.
     GST_MINI_OBJECT_FLAG_SET(mem,GST_D3D11_MEMORY_TRANSFER_NEED_DOWNLOAD);
     auto*buf=gst_buffer_new();gst_buffer_append_memory(buf,mem);
     gsize offsets[GST_VIDEO_MAX_PLANES]{};gint strides[GST_VIDEO_MAX_PLANES]{};
@@ -1310,6 +1464,7 @@ static GstFlowReturn srcCreateImpl(GstPushSrc* push, GstBuffer** outbuf) {
         }while(result==FL_GST_SESSION_TIMEOUT);
         if(result!=FL_GST_SESSION_READY){GST_ELEMENT_ERROR(self,RESOURCE,READ,("coordinated session not ready or cancelled"),(NULL));return GST_FLOW_ERROR;}
     }
+    if(self->sharedCpu)return srcSharedCpuCreate(self,outbuf);
     const gint64 idleDeadline=g_get_monotonic_time()+gint64(self->sessionConfig.idleTimeoutMs)*1000;
     flFrame frame = {};
     for (;;) {
@@ -1367,12 +1522,12 @@ static GstFlowReturn srcCreateImpl(GstPushSrc* push, GstBuffer** outbuf) {
     }
 
     if(self->session&&metadata.streamGeneration!=self->sessionConfig.generation){srcReleaseFrame(self,&frame);GST_ELEMENT_ERROR(self,STREAM,FORMAT,("stale video media generation"),(NULL));return GST_FLOW_ERROR;}
-    // The ring keeps only the newest unread frame. Every submitted session
-    // frame is accounted for, so a replaced one can never be recovered: fail
-    // now with the cause instead of at the idle deadline.
+    // The ring keeps at most receiveQueue unread frames. Every submitted
+    // session frame is accounted for, so a replaced one can never be recovered:
+    // fail now with the cause instead of at the idle deadline.
     if(self->session&&frame.sequence!=self->sessionSequence+1){const guint64 previous=self->sessionSequence;srcReleaseFrame(self,&frame);
         GST_ELEMENT_ERROR(self,STREAM,FAILED,("coordinated video frame replaced before it was read: the producer delivered faster than real time"),
-            ("ring sequence %" G_GUINT64_FORMAT " after %" G_GUINT64_FORMAT "; coordinated video must be paced in real time (live or clock-synchronized sources)",frame.sequence,previous));
+            ("ring sequence %" G_GUINT64_FORMAT " after %" G_GUINT64_FORMAT " with a receive queue of %u; coordinated video must be paced in real time (live or clock-synchronized sources) and read within the queue budget",frame.sequence,previous,self->receiveQueue));
         return GST_FLOW_ERROR;}
     if(self->session)self->sessionSequence=frame.sequence;
     if(self->session&&(metadata.flags&FL_FRAME_DISCONT)&&!srcVideoEvents(self,FL_GST_VIDEO_BARRIER,frame.ptsNs)){srcReleaseFrame(self,&frame);GST_ELEMENT_ERROR(self,STREAM,FAILED,("video discontinuity event barrier failed"),(NULL));return GST_FLOW_ERROR;}
@@ -1424,10 +1579,30 @@ static GstFlowReturn srcCreateImpl(GstPushSrc* push, GstBuffer** outbuf) {
     } else
 #endif
     {
+{
+    gsttrace::Scope allocateTrace("gst.cpu_output_allocate",gsttrace::id(self->channel));
+#ifdef _WIN32
+    buf = srcCpuOutputBuffer(self, outputInfo.size);
+#else
     buf = gst_buffer_new_allocate(NULL, outputInfo.size, NULL);
+#endif
+    }
+    if (!buf) { srcReleaseFrame(self, &frame); return trace.result(GST_FLOW_ERROR); }
     GstMapInfo map;
     gboolean filled = FALSE;
     if (gst_buffer_map(buf, &map, GST_MAP_WRITE)) {
+#ifdef FL_GST_EGL_READBACK
+        if(self->gpuReadback){
+            if(!self->eglReadback)self->eglReadback=new FrameLinkEglReadback;
+            {
+                gsttrace::Scope readbackTrace("gst.egl_readback",gsttrace::id(self->channel));
+                filled=self->eglReadback->read(self->ch,frame,self->memoryPolicy,map.data,map.size);
+            }
+            if(self->eglReadback->gpuCopyBytes())gsttrace::payload("gst.gpu_copy_issued",gsttrace::id(self->channel),self->eglReadback->gpuCopyBytes(),FL_MEMORY_COPY);
+            if(self->eglReadback->readbackBytes())gsttrace::payload("gst.gpu_readback_issued",gsttrace::id(self->channel),self->eglReadback->readbackBytes(),FL_MEMORY_READBACK);
+        }else
+#endif
+        {
 #ifdef _WIN32
         ID3D11Device* dev = flChannelD3D11Device(self->ch);
         ID3D11Texture2D* tex = flImageD3D11(frame.image);
@@ -1468,6 +1643,8 @@ static GstFlowReturn srcCreateImpl(GstPushSrc* push, GstBuffer** outbuf) {
         if(self->cinfo.format==FL_FORMAT_NV12) {
             flMappedImage view{};
             if(flImageMapPlanes(frame.image,&view)==FL_OK) {
+                {
+                gsttrace::Scope copyTrace("gst.cpu_copy_source_duration",gsttrace::id(self->channel));
                 filled=view.planes==2;
                 memset(map.data,0,map.size);
                 for(guint p=0;p<2 && filled;p++) {
@@ -1476,6 +1653,7 @@ static GstFlowReturn srcCreateImpl(GstPushSrc* push, GstBuffer** outbuf) {
                         memcpy(map.data+outputInfo.offset[p]+(gsize)y*outputInfo.stride[p],
                                (guint8*)view.plane[p].pixels+y*view.plane[p].stride,w);
                     gsttrace::payload("gst.cpu_copy_source",gsttrace::id(self->channel),(uint64_t)w*view.plane[p].rows,FL_MEMORY_COPY);
+                }
                 }
                 flImageUnmap(frame.image);
             }
@@ -1493,6 +1671,7 @@ static GstFlowReturn srcCreateImpl(GstPushSrc* push, GstBuffer** outbuf) {
         }
         }
 #endif
+        } // selected readback path; never silently fall back
         gst_buffer_unmap(buf, &map);
     }
     srcReleaseFrame(self, &frame);
@@ -1563,6 +1742,12 @@ static void srcSetProperty(GObject* obj, guint id, const GValue* value, GParamSp
     if(self->session&&GST_STATE(self)!=GST_STATE_NULL){GST_WARNING_OBJECT(self,"session configuration immutable outside NULL");return;}
     if(self->memoryPolicyApplied){GST_WARNING_OBJECT(self,"authenticated session properties are immutable; create a new element/session");return;}
     switch (id) {
+        case SRC_PROP_SHARED_CPU:
+            if(GST_STATE(self)!=GST_STATE_NULL||self->ch)return;
+            self->sharedCpu=g_value_get_boolean(value);break;
+        case SRC_PROP_GPU_READBACK:
+            if(GST_STATE(self)>GST_STATE_READY||self->ch){GST_WARNING_OBJECT(self,"readback mode cannot change while allocated");break;}
+            self->gpuReadback=g_value_get_boolean(value);break;
         case SRC_PROP_NATIVE_MEMORY:
             if(GST_STATE(self)>GST_STATE_READY || self->ch){GST_WARNING_OBJECT(self,"memory mode cannot change while allocated");break;}
             if(self->memoryPolicyApplied){GST_WARNING_OBJECT(self,"native-memory is frozen by authenticated policy");return;}
@@ -1598,6 +1783,8 @@ static void srcSetProperty(GObject* obj, guint id, const GValue* value, GParamSp
 static void srcGetProperty(GObject* obj, guint id, GValue* value, GParamSpec* spec) {
     GstFrameLinkSrc* self = GST_FRAMELINK_SRC(obj);
     switch (id) {
+        case SRC_PROP_SHARED_CPU: g_value_set_boolean(value,self->sharedCpu);break;
+        case SRC_PROP_GPU_READBACK: g_value_set_boolean(value,self->gpuReadback);break;
         case SRC_PROP_NATIVE_MEMORY: g_value_set_boolean(value,self->nativeMemory);break;
         case SRC_PROP_EXPIRED_FRAMES: GST_OBJECT_LOCK(self);g_value_set_uint64(value,self->expiredFrames);GST_OBJECT_UNLOCK(self);break;
         case SRC_PROP_MAX_QUEUE_AGE: g_value_set_uint(value,self->maxQueueAgeMs);break;
@@ -1615,7 +1802,15 @@ static void srcGetProperty(GObject* obj, guint id, GValue* value, GParamSpec* sp
 
 static void srcFinalize(GObject* obj) {
     GstFrameLinkSrc* self = GST_FRAMELINK_SRC(obj);
+    srcDropCpuOutput(self);
+#ifdef _WIN32
+    srcDropStaging(self);
+#endif
     gst_clear_buffer(&self->pendingDelivery);
+    if(self->cpuChannel){flSharedCpuClose(self->cpuChannel);self->cpuChannel=nullptr;}
+#ifdef FL_GST_EGL_READBACK
+    delete self->eglReadback;self->eglReadback=nullptr;
+#endif
     if(self->session){fl_gst_session_cancel(self->session);g_object_unref(self->session);}
 #ifdef FL_GST_NATIVE
     if(self->nativeOwner){delete self->nativeOwner;self->nativeOwner=nullptr;self->ch=nullptr;}
@@ -1627,12 +1822,13 @@ static void srcFinalize(GObject* obj) {
 }
 
 static gboolean srcAdoptChannel(GstFrameLinkSrc* self,flChannel* channel) {
-    if(GST_STATE(self)!=GST_STATE_NULL || self->ch || !channel || self->memoryPolicyApplied)return FALSE;
+    if(GST_STATE(self)!=GST_STATE_NULL || self->ch || !channel || self->memoryPolicyApplied || self->sharedCpu)return FALSE;
     flChannelInfo info{};if(flQuery(channel,&info)!=FL_OK)return FALSE;
     if(info.width!=(guint)self->width || info.height!=(guint)self->height ||
        info.format!=toFlFormat(gst_video_format_from_string(self->format)))return FALSE;
     uint32_t flags=0;if(flQueryConsumerFlags(channel,&flags)!=FL_OK)return FALSE;
     if(self->nativeMemory && (!(flags&FL_DEFER_RELEASE)||(flags&FL_GPU_SYNC)))return FALSE;
+    if(self->gpuReadback&&(self->nativeMemory||(flags&FL_GPU_SYNC)))return FALSE;
     if(self->maxQueueAgeMs && !(flags&FL_TRACK_ARRIVAL))return FALSE;
     if(self->preserveFrameMetadata && !(flags&FL_REQUIRE_FRAME_METADATA))return FALSE;
     self->ch=channel;self->cinfo=info;self->delegated=TRUE;return TRUE;
@@ -1640,6 +1836,13 @@ static gboolean srcAdoptChannel(GstFrameLinkSrc* self,flChannel* channel) {
 
 static gboolean srcApplyMemoryPolicy(GstFrameLinkSrc* self,const GstFrameLinkMemoryPolicy* policy){
     if(GST_STATE(self)!=GST_STATE_NULL||!self->delegated||!self->ch||self->memoryPolicyApplied||!validMemoryPolicy(policy,self->nativeMemory,FALSE,self->channel))return FALSE;
+    if(self->gpuReadback){
+#ifdef FL_GST_EGL_READBACK
+        if(self->nativeMemory||!FrameLinkEglReadback::permits(*policy))return FALSE;
+#else
+        return FALSE;
+#endif
+    }
     flChannelInfo info{};if(flQuery(self->ch,&info)!=FL_OK)return FALSE;
     self->memoryPoolGeneration=info.generation;
     self->memoryPolicy=*policy;self->memoryPolicyApplied=TRUE;return TRUE;
@@ -1706,6 +1909,14 @@ static void gst_framelink_src_class_init(GstFrameLinkSrcClass* klass) {
         g_param_spec_int("fps", "FPS", "nominal frame rate advertised in the caps", 1, 240,
                          30, (GParamFlags)(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
 
+    g_object_class_install_property(gobject,SRC_PROP_SHARED_CPU,
+        g_param_spec_boolean("shared-cpu","Shared CPU source",
+            "Explicit broker-bound CPU source; COPY required; A/V requires event stream; no native fallback",
+            FALSE,(GParamFlags)(G_PARAM_READWRITE|G_PARAM_STATIC_STRINGS)));
+    g_object_class_install_property(gobject,SRC_PROP_GPU_READBACK,
+        g_param_spec_boolean("gpu-readback","Explicit GPU readback",
+            "Linux BGRA/RGBA GPU staging into CPU output; requires adopted channel and negotiated COPY|READBACK; no fallback",
+            FALSE,(GParamFlags)(G_PARAM_READWRITE|G_PARAM_STATIC_STRINGS|GST_PARAM_MUTABLE_READY)));
     g_object_class_install_property(gobject,SRC_PROP_NATIVE_MEMORY,
         g_param_spec_boolean("native-memory","Native memory output",
             "Opt-in native DMA-BUF, D3D11 or exact RGB AHardwareBuffer output; unsupported paths fail without CPU fallback",

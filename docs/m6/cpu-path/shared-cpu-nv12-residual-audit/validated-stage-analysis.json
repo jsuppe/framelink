@@ -1,0 +1,110 @@
+{
+  "nv12sample1800": {
+    "verified_frames": 108000,
+    "video_misses": 0,
+    "audio": {
+      "blocks": 180000,
+      "contiguous_10ms_pts": true,
+      "arrival_misses": 0,
+      "arrival_ms": {
+        "p50": 1.512108,
+        "p95": 2.461678,
+        "p99": 2.971514,
+        "max": 6.354042
+      },
+      "scope": "PTS continuity only; PCM bytes/counts require the benchmark summary."
+    },
+    "av_mapping": {
+      "audio": {
+        "join": "inferred_constant_pts_mapping",
+        "frames": 180000,
+        "pts_offset_ns": 3900863454876807,
+        "arrival_budget_ns": 17000000,
+        "arrival_misses": 0,
+        "late_frames": [],
+        "push_ms": {
+          "p50": 0.360541,
+          "p95": 0.880911,
+          "p99": 1.428708,
+          "max": 4.959028
+        },
+        "arrival_ms": {
+          "p50": 1.512108,
+          "p95": 2.461678,
+          "p99": 2.971514,
+          "max": 6.354042
+        },
+        "post_push_residual_ms": {
+          "p50": 1.146,
+          "p95": 1.796385,
+          "p99": 2.086077,
+          "max": 5.331
+        },
+        "scope": "All frames including startup/drain. Offset inferred from first records: cannot independently exclude a whole-stream constant shift; not identity proof. Residual includes producer copy, transport, consumer work and clock-mapping error; not a root-cause proof."
+      },
+      "av_mapping_delta_ns": 0,
+      "scope": "Both tracks preserve the same inferred constant PTS mapping. No independent allocation identity or physical playback claim."
+    },
+    "arrival_ms": {
+      "p50": 7.861669,
+      "p95": 8.499278,
+      "p99": 8.877698,
+      "max": 12.928569
+    },
+    "consumer_copy_wall_us": {
+      "p50": 3441,
+      "p95": 3837,
+      "p99": 4065,
+      "max": 5827
+    },
+    "consumer_copy_cpu_us": {
+      "p50": 1578,
+      "p95": 2887,
+      "p99": 3179,
+      "max": 3659
+    },
+    "consumer_copy_wall_minus_cpu_us": {
+      "p50": 1858,
+      "p95": 2819,
+      "p99": 3020,
+      "max": 3835
+    },
+    "sink_copy_us": {
+      "p50": 2406,
+      "p95": 2643,
+      "p99": 2670,
+      "max": 8111
+    },
+    "sink_wait_us": {
+      "p50": 74,
+      "p95": 187,
+      "p99": 201,
+      "max": 476
+    },
+    "copy_fault_sum": 4,
+    "fallbacks": 0,
+    "late_neighbors": [],
+    "sample_at_original_failure_index": {
+      "consumer": {
+        "seq": 78796,
+        "start": 3902176778747,
+        "receive_us": 12671,
+        "output_us": 58,
+        "copy_us": 3681,
+        "release_us": 112,
+        "meta_us": 16,
+        "copy_faults": 0,
+        "copy_cpu_us": 1424
+      },
+      "sink": {
+        "index": 78795,
+        "start": 3902176787976,
+        "wait_us": 167,
+        "acquire_us": 9,
+        "copy_us": 2406,
+        "submit_us": 274
+      }
+    },
+    "verdict": "Failure not reproduced; mechanism unresolved; not qualification; no blind repeat"
+  }
+}

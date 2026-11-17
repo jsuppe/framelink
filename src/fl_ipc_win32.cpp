@@ -86,6 +86,8 @@ Channel Channel::connect(const std::string& name, uint32_t timeoutMs, bool* busy
         if (pipe != INVALID_HANDLE_VALUE) {
             DWORD mode = PIPE_READMODE_MESSAGE;
             SetNamedPipeHandleState(pipe, &mode, nullptr, nullptr);
+            ULONG pid=0;
+            if(GetNamedPipeServerProcessId(pipe,&pid))ch.peerPid_=(uint32_t)pid;
             ch.handle_ = pipe;
             ch.connected_ = true;
             return ch;
@@ -149,7 +151,7 @@ std::optional<Message> Channel::recv() {
         return std::nullopt;
     }
     const auto* hdr = (const MsgHeader*)buf;
-    if (hdr->magic != kMagic || sizeof(MsgHeader) + hdr->payloadSize > read) {
+    if (hdr->magic != kMagic || hdr->payloadSize != read - sizeof(MsgHeader)) {
         connected_ = false;
         return std::nullopt;
     }

@@ -1,0 +1,16 @@
+[
+    {
+        "ProcessId":  56564,
+        "ParentProcessId":  3824,
+        "Name":  "ctest.exe",
+        "CommandLine":  "\"C:\\Program Files\\CMake\\bin\\ctest.exe\" --test-dir build -C Release --output-on-failure"
+    },
+    {
+        "ProcessId":  46600,
+        "ParentProcessId":  42692,
+        "Name":  "framelink_gst_av.exe",
+        "CommandLine":  "<win-home>/dev/framelink-m6-windows-8025ddd/build/Release/framelink_gst_av.exe consumer --tracks audio --verify --latency-ms 150 --pool 8 --session <win-home>\\AppData\\Local\\Temp\\fl-m5b-example-ws2h32x7/session --format RGBA --size 160x90 --fps 30 --seconds 3 --timeout-ms 8000"
+    }
+]
+#< CLIXML
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04"><Obj S="progress" RefId="0"><TN RefId="0"><T>System.Management.Automation.PSCustomObject</T><T>System.Object</T></TN><MS><I64 N="SourceId">1</I64><PR N="Record"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj><Obj S="progress" RefId="1"><TNRef RefId="0" /><MS><I64 N="SourceId">2</I64><PR N="Record"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj></Objs>

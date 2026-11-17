@@ -1,0 +1,22 @@
+{
+  "0-allocate.csv": {
+    "postwarm_private_delta_bytes": 0,
+    "postwarm_pagefaults": 40583396,
+    "postwarm_seconds": 18.889838
+  },
+  "1-pool.csv": {
+    "postwarm_private_delta_bytes": 0,
+    "postwarm_pagefaults": 0,
+    "postwarm_seconds": 6.147444
+  },
+  "3-pool.csv": {
+    "postwarm_private_delta_bytes": 0,
+    "postwarm_pagefaults": 0,
+    "postwarm_seconds": 6.120483
+  },
+  "2-allocate.csv": {
+    "postwarm_private_delta_bytes": 4096,
+    "postwarm_pagefaults": 40583387,
+    "postwarm_seconds": 18.880867
+  }
+}

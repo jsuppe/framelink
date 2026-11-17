@@ -1,0 +1,53 @@
+{
+    "os":  {
+               "Caption":  "Microsoft Windows 11 Home",
+               "Version":  "10.0.26300",
+               "BuildNumber":  "26300",
+               "OSArchitecture":  "64-bit"
+           },
+    "gpu":  [
+                {
+                    "Name":  "NVIDIA GeForce RTX 5090",
+                    "DriverVersion":  "32.0.16.1714",
+                    "PNPDeviceID":  "PCI\\VEN_10DE\u0026DEV_2B85\u0026SUBSYS_41981458\u0026REV_A1\\0C1BFEE8662DB04800"
+                }
+            ],
+    "activeRuntime":  [
+
+                      ],
+    "computer":  {
+                     "Manufacturer":  "NZXT, Inc.",
+                     "Model":  "NZXT",
+                     "TotalPhysicalMemory":  68305281024,
+                     "NumberOfProcessors":  1,
+                     "NumberOfLogicalProcessors":  16
+                 },
+    "binaryHashes":  [
+                         {
+                             "Path":  "<win-home>\\dev\\framelink-m6-windows-461584b\\build\\Release\\fl_gst_av_bench.exe",
+                             "Hash":  "A59CE56D5508BBF58D40BFA775FA6ADFF5DFFBD3897F48DF1EEFC31A02040DCC"
+                         },
+                         {
+                             "Path":  "<win-home>\\dev\\framelink-m6-windows-461584b\\build\\Release\\gstframelink.dll",
+                             "Hash":  "EAEB59775EB2DA04C0A998D30A072D28A2994957F746D7943DD0475C3182425E"
+                         },
+                         {
+                             "Path":  "<win-home>\\dev\\framelink-m6-windows-461584b\\build\\Release\\framelink_gst_session.dll",
+                             "Hash":  "3329BEF0DA3A27D645C6348B4B509790C576550694046373649C8C03BA803A99"
+                         },
+                         {
+                             "Path":  "<win-home>\\dev\\framelink-m6-windows-461584b\\build\\Release\\framelink.dll",
+                             "Hash":  "09F302958B85D65CE6DFC9C2B2F45BA7D41DFE2CD603DD6BC90C3681C07708A4"
+                         }
+                     ],
+    "utc":  "2026-11-12T07:25:52.9344762Z",
+    "cpu":  [
+                {
+                    "Name":  "AMD Ryzen 7 9800X3D 8-Core Processor           ",
+                    "Manufacturer":  "AuthenticAMD",
+                    "NumberOfCores":  8,
+                    "NumberOfLogicalProcessors":  16,
+                    "MaxClockSpeed":  4700
+                }
+            ]
+}

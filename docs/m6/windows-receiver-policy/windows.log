@@ -1,0 +1,40 @@
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <win-home>\dev\framelink-m6-windows-c1a517f\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> <win-home>\dev\framelink-m6-windows-c1a517f\build\Release\framelink_gst_session.dll
+  gstframelinkavsrc.cpp
+     Creating library <win-home>/dev/framelink-m6-windows-c1a517f/build/Release/gstframelink.lib and object <win-home>/dev/framelink-m6-windows-c1a517f/build/Release/gstframelink.exp
+  gstframelink.vcxproj -> <win-home>\dev\framelink-m6-windows-c1a517f\build\Release\gstframelink.dll
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <win-home>\dev\framelink-m6-windows-c1a517f\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> <win-home>\dev\framelink-m6-windows-c1a517f\build\Release\framelink_gst_session.dll
+  gstframelink.vcxproj -> <win-home>\dev\framelink-m6-windows-c1a517f\build\Release\gstframelink.dll
+  framelink_av_playback.vcxproj -> <win-home>\dev\framelink-m6-windows-c1a517f\build\Release\framelink_av_playback.lib
+  fl_gst_policy_generation.cpp
+  fl_gst_policy_generation.vcxproj -> <win-home>\dev\framelink-m6-windows-c1a517f\build\Release\fl_gst_policy_generation.exe
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <win-home>\dev\framelink-m6-windows-c1a517f\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> <win-home>\dev\framelink-m6-windows-c1a517f\build\Release\framelink_gst_session.dll
+  fl_gst_native_producer_win.cpp
+  The d3d11 library from gst-plugins-bad is unstable API and may change in future.
+  You can define GST_USE_UNSTABLE_API to avoid this warning.
+  fl_gst_native_producer_win.vcxproj -> <win-home>\dev\framelink-m6-windows-c1a517f\build\Release\fl_gst_native_producer_win.exe
+Test project <win-home>/dev/framelink-m6-windows-c1a517f/build
+    Start  41: gst_native_producer_win
+1/4 Test  #41: gst_native_producer_win ..........   Passed    4.81 sec
+    Start  81: gst_pool_policy
+2/4 Test  #81: gst_pool_policy ..................   Passed    4.86 sec
+    Start 106: gst_policy_generation
+3/4 Test #106: gst_policy_generation ............   Passed    3.29 sec
+    Start 123: gst_av_bin
+4/4 Test #123: gst_av_bin .......................   Passed   25.51 sec
+
+100% tests passed, 0 tests failed out of 4
+
+Label Time Summary:
+gst_video_regression    =  12.96 sec*proc (3 tests)
+m5b_av                  =  25.51 sec*proc (1 test)
+
+Total Test time (real) =  38.51 sec

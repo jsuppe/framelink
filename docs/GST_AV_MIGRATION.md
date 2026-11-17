@@ -6,7 +6,28 @@ guide covers moving to the new elements. Element details are in the
 [element reference](GST_AV_REFERENCE.md), a walkthrough in the
 [developer guide](../samples/GST_AV_EXAMPLE.md).
 
-## Nothing changes unless you opt in
+## M6 development change: zero added latency is the transport default
+
+`framelinkavsrc session=...` now defaults to `latency-ms=0`, replacing the
+previous implicit150ms pipeline latency. This is an intentional default change,
+not a claim of zero elapsed transfer time. Applications needing the old scheduled
+playback behavior must set **`latency-ms=150` explicitly** (or their measured
+output-device budget). The public final-playback sample already sets its own
+latency and keeps that explicit playback profile.
+
+Transport/intermediate consumers should not add a playback reservoir at each
+boundary. Keep audio/video PTS on the shared timeline; final sinks own scheduling.
+Do not disable final audio/video sink synchronization indiscriminately. A zero
+FrameLink latency setting does not disable downstream preroll, queues, hardware
+latency or mandatory GPU fences. The benchmark's `--no-output-preroll` applies
+only to its measurement appsinks, not production playback devices.
+
+Pool capacity and unread depth remain independent bounds; their defaults and
+fail-fast policy are unchanged. Capacity does not impose a fill-before-delivery
+wait. In application-managed (no `session=`) mode, the application still owns
+pipeline clock/base-time/latency setup.
+
+## Legacy video-only behavior is unchanged
 
 `framelinksink` and `framelinksrc` without a session context behave as
 before: latest-frame delivery, `channel=` naming, legacy timestamps unless
@@ -22,7 +43,7 @@ only when a session context is attached.
 |---|---|
 | `... ! framelinksink channel=NAME` | `... ! s.video_sink` with `framelinkavsink name=s session=DIR tracks=av video-format=… width=… height=… framerate=…`, and the audio chain into `s.audio_sink` |
 | `framelinksrc channel=NAME width=… height=… format=… ! ...` | `framelinkavsrc name=c session=DIR tracks=av video-format=… width=… height=…` with `c.video_src ! queue ! ...` and `c.audio_src ! queue ! ...` |
-| `framelinksrc pool-size=N` | `framelinkavsrc video-pool=N` (default 8; size it as `ceil(latency × fps) + 2`) |
+| `framelinksrc pool-size=N` | `framelinkavsrc video-pool=N` (default 8; independent ownership capacity, not added delay; cover unread depth and downstream-held buffers) |
 | `framelinksrc native-memory=true` | `framelinkavsrc native-memory=true` |
 | Channel name agreed out of band | A private current-user directory (`session=`); the ring name is derived from the session secret |
 

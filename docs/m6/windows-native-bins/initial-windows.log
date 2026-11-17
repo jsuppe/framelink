@@ -1,0 +1,71 @@
+-- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.26300.
+-- framelink: building GStreamer elements (gstframelink)
+-- Configuring done (0.8s)
+-- Generating done (1.0s)
+-- Build files have been written to: <win-home>/dev/framelink-m6-windows-c8ff226/build
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  1>Checking Build System
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-c8ff226/CMakeLists.txt
+  framelink.vcxproj -> <win-home>\dev\framelink-m6-windows-c8ff226\build\Release\framelink.dll
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-c8ff226/CMakeLists.txt
+  framelink_gst_session.vcxproj -> <win-home>\dev\framelink-m6-windows-c8ff226\build\Release\framelink_gst_session.dll
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-c8ff226/CMakeLists.txt
+  fl_gst_native_epoch_c_api.vcxproj -> <win-home>\dev\framelink-m6-windows-c8ff226\build\Release\fl_gst_native_epoch_c_api.exe
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <win-home>\dev\framelink-m6-windows-c8ff226\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> <win-home>\dev\framelink-m6-windows-c8ff226\build\Release\framelink_gst_session.dll
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-c8ff226/CMakeLists.txt
+  gstframelinkavsink.cpp
+  gstframelinkavsrc.cpp
+  Generating Code...
+     Creating library <win-home>/dev/framelink-m6-windows-c8ff226/build/Release/gstframelink.lib and object <win-home>/dev/framelink-m6-windows-c8ff226/build/Release/gstframelink.exp
+  gstframelink.vcxproj -> <win-home>\dev\framelink-m6-windows-c8ff226\build\Release\gstframelink.dll
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-c8ff226/CMakeLists.txt
+  fl_av_rendezvous.vcxproj -> <win-home>\dev\framelink-m6-windows-c8ff226\build\Release\fl_av_rendezvous.exe
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <win-home>\dev\framelink-m6-windows-c8ff226\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> <win-home>\dev\framelink-m6-windows-c8ff226\build\Release\framelink_gst_session.dll
+  gstframelink.vcxproj -> <win-home>\dev\framelink-m6-windows-c8ff226\build\Release\gstframelink.dll
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-c8ff226/CMakeLists.txt
+  fl_gst_local_av.vcxproj -> <win-home>\dev\framelink-m6-windows-c8ff226\build\Release\fl_gst_local_av.exe
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <win-home>\dev\framelink-m6-windows-c8ff226\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> <win-home>\dev\framelink-m6-windows-c8ff226\build\Release\framelink_gst_session.dll
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-c8ff226/CMakeLists.txt
+  fl_gst_session_transport.vcxproj -> <win-home>\dev\framelink-m6-windows-c8ff226\build\Release\fl_gst_session_transport.exe
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <win-home>\dev\framelink-m6-windows-c8ff226\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> <win-home>\dev\framelink-m6-windows-c8ff226\build\Release\framelink_gst_session.dll
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-c8ff226/CMakeLists.txt
+  fl_gst_native_producer_win.cpp
+  The d3d11 library from gst-plugins-bad is unstable API and may change in future.
+  You can define GST_USE_UNSTABLE_API to avoid this warning.
+  fl_gst_native_producer_win.vcxproj -> <win-home>\dev\framelink-m6-windows-c8ff226\build\Release\fl_gst_native_producer_win.exe
+Test project <win-home>/dev/framelink-m6-windows-c8ff226/build
+    Start  41: gst_native_epoch_c_api
+1/6 Test  #41: gst_native_epoch_c_api ...........   Passed    0.06 sec
+    Start  42: gst_native_producer_win
+2/6 Test  #42: gst_native_producer_win ..........   Passed   10.08 sec
+    Start  77: av_rendezvous
+3/6 Test  #77: av_rendezvous ....................   Passed    0.24 sec
+    Start 114: gst_session_transport
+4/6 Test #114: gst_session_transport ............   Passed    0.78 sec
+    Start 121: gst_shared_cpu_av
+5/6 Test #121: gst_shared_cpu_av ................   Passed    3.05 sec
+    Start 131: gst_local_av
+6/6 Test #131: gst_local_av .....................   Passed    3.05 sec
+
+100% tests passed, 0 tests failed out of 6
+
+Label Time Summary:
+gst_video_regression    =  10.08 sec*proc (1 test)
+m5b_av                  =   3.83 sec*proc (2 tests)
+
+Total Test time (real) =  17.30 sec

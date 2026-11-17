@@ -1,0 +1,27 @@
+** WARNING: connection is not using a post-quantum key exchange algorithm.
+** This session may be vulnerable to "store now, decrypt later" attacks.
+** The server may need to be upgraded. See https://openssh.com/pq.html
+UpdateCTestConfiguration  from :<win-home>/dev/framelink-m6-windows-c5bea11/build/DartConfiguration.tcl
+Test project <win-home>/dev/framelink-m6-windows-c5bea11/build
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 47
+    Start 47: gst_native_relay_downstream_death_win
+
+47: Test command: <win-home>\dev\framelink-m6-windows-c5bea11\build\Release\fl_gst_native_producer_win.exe "<win-home>/dev/framelink-m6-windows-c5bea11/build/Release/gstframelink.dll" "--relay-downstream-death-diagnostic"
+47: Working Directory: <win-home>/dev/framelink-m6-windows-c5bea11/build
+47: Test timeout computed to be: 30
+47: downstream process death (raw): reader exit73, exact pixels/PCM/37ms offset, bounded failure, lease retained, no synthetic drain; source exit74, relay exit0; old graph discarded
+47: downstream process death (GstMemory): reader exit73, exact pixels/PCM/37ms offset, bounded failure, lease retained, no synthetic drain; source exit74, relay exit0; old graph discarded
+1/1 Test #47: gst_native_relay_downstream_death_win ...   Passed    1.99 sec
+
+The following tests passed:
+	gst_native_relay_downstream_death_win
+
+100% tests passed, 0 tests failed out of 1
+
+Total Test time (real) =   2.02 sec

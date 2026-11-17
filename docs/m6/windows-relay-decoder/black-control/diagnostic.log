@@ -1,0 +1,37 @@
+three-process coordinated relay: 16 same-allocation video frames, 25600 exact PCM frames; nonempty: both reversed slots / 37ms offset / held-reader exclusion; ordered GAP/barrier/END and authenticated terminal passed
+DECODED,0,pts=3600000000000000,duration=33333333,origin=3600000000000000
+DECODED,1,pts=3600000033333333,duration=33333333,origin=3600000000000000
+DECODED,2,pts=3600000066666666,duration=33333333,origin=3600000000000000
+DECODED,3,pts=3600000100000000,duration=33333333,origin=3600000000000000
+DECODED,4,pts=3600000133333333,duration=33333333,origin=3600000000000000
+DECODED,5,pts=3600000166666666,duration=33333333,origin=3600000000000000
+DECODED,6,pts=3600000200000000,duration=33333333,origin=3600000000000000
+DECODED,7,pts=3600000233333333,duration=33333333,origin=3600000000000000
+DECODED,8,pts=3600000266666666,duration=33333333,origin=3600000000000000
+DECODED,9,pts=3600000300000000,duration=33333333,origin=3600000000000000
+DECODED,10,pts=3600000333333333,duration=33333333,origin=3600000000000000
+DECODED,11,pts=3600000366666666,duration=33333333,origin=3600000000000000
+DECODED,12,pts=3600000400000000,duration=33333333,origin=3600000000000000
+DECODED,13,pts=3600000433333333,duration=33333333,origin=3600000000000000
+DECODED,14,pts=3600000466666666,duration=33333333,origin=3600000000000000
+DECODED,15,pts=3600000500000000,duration=33333333,origin=3600000000000000
+16 source GstMemory reservations: remote drain plus final local reference required; duplicate submit rejected; both original allocations reused
+relay start
+relay downstream authenticated
+relay upstream authenticated
+frame 0 forwarded=0 session=0
+frame 1 forwarded=0 session=0
+frame 2 forwarded=0 session=0
+frame 3 forwarded=0 session=0
+frame 4 forwarded=0 session=0
+frame 5 forwarded=0 session=0
+frame 6 forwarded=0 session=0
+frame 7 forwarded=0 session=0
+frame 8 forwarded=0 session=0
+frame 9 forwarded=0 session=0
+frame 10 forwarded=0 session=0
+frame 11 forwarded=0 session=0
+frame 12 forwarded=0 session=0
+frame 13 forwarded=0 session=0
+frame 14 forwarded=0 session=0
+frame 15 forwarded=0 session=0

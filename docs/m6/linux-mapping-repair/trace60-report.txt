@@ -1,0 +1,42 @@
+<evidence>/linux-bgra4k30-trace60-consumer-core.724558.csv # schema=2,clock=steady_ns,pid=724558,origin_ns=92057259160207,wall_ns=1793978771875305409
+<evidence>/linux-bgra4k30-trace60-consumer-core.724558.csv # dropped_events=0,rejected_threads=0,capacity_per_thread=1048576
+<evidence>/linux-bgra4k30-trace60-producer-core.724566.csv # schema=2,clock=steady_ns,pid=724566,origin_ns=92057259357333,wall_ns=1793978771875502032
+<evidence>/linux-bgra4k30-trace60-producer-core.724566.csv # dropped_events=0,rejected_threads=0,capacity_per_thread=1048576
+<evidence>/linux-bgra4k30-trace60-consumer-gst.724558.csv # schema=2,clock=steady_ns,pid=724558,origin_ns=92057299243088,wall_ns=1793978771915387539
+<evidence>/linux-bgra4k30-trace60-consumer-gst.724558.csv # dropped_events=0,rejected_threads=0,capacity_per_thread=1048576
+<evidence>/linux-bgra4k30-trace60-producer-gst.724566.csv # schema=2,clock=steady_ns,pid=724566,origin_ns=92057281666071,wall_ns=1793978771897810394
+<evidence>/linux-bgra4k30-trace60-producer-gst.724566.csv # dropped_events=0,rejected_threads=0,capacity_per_thread=1048576
+<evidence>/linux-bgra4k30-trace60-consumer-core.724558.csv flAcquireFrame: n=1800 us p50=33698.723 p95=34091.704 p99=35407.043 max=54833.325 results={'0': 1800}
+  channel=17812267603404945820 delivery interval ms p50=33.735 max=54.880 (API delivery, NOT presentation)
+<evidence>/linux-bgra4k30-trace60-consumer-core.724558.csv flClose: n=1 us p50=119.728 p95=119.728 p99=119.728 max=119.728 results={'-9999': 1}
+<evidence>/linux-bgra4k30-trace60-consumer-core.724558.csv flCreateChannelEx: n=1 us p50=487.076 p95=487.076 p99=487.076 max=487.076 results={'0': 1}
+<evidence>/linux-bgra4k30-trace60-consumer-core.724558.csv flImageUnmap: n=2 us p50=0.025 p95=0.036 p99=0.036 max=0.036 results={'-9999': 2}
+<evidence>/linux-bgra4k30-trace60-consumer-core.724558.csv ipc.frame_received: n=1800 us p50=0.000 p95=0.000 p99=0.000 max=0.000 results={'0': 1800}
+<evidence>/linux-bgra4k30-trace60-consumer-core.724558.csv ipc.recv: n=1802 us p50=3.515 p95=4.423 p99=5.900 max=24.723 results={'-9999': 1802}
+<evidence>/linux-bgra4k30-trace60-consumer-core.724558.csv ipc.send: n=1804 us p50=4.869 p95=8.700 p99=20.416 max=45.984 results={'-9999': 1804}
+<evidence>/linux-bgra4k30-trace60-consumer-core.724558.csv reader.acquire: n=1800 us p50=0.344 p95=0.703 p99=1.097 max=4.501 results={'0': 1800}
+  retained frame records max=2 (not queued latency or reader-token count)
+<evidence>/linux-bgra4k30-trace60-consumer-core.724558.csv reader.complete: n=1800 us p50=0.042 p95=0.080 p99=0.152 max=0.746 results={'0': 1800}
+  retained frame records max=2 (not queued latency or reader-token count)
+<evidence>/linux-bgra4k30-trace60-consumer-core.724558.csv reader.retire: n=1800 us p50=0.049 p95=0.055 p99=0.063 max=13.809 results={'0': 1800}
+  retained frame records max=1 (not queued latency or reader-token count)
+<evidence>/linux-bgra4k30-trace60-consumer-gst.724558.csv gst.srcCreate: n=1801 us p50=33727.192 p95=34118.991 p99=35441.454 max=54864.532 results={'0': 1800, '-9999': 1}
+<evidence>/linux-bgra4k30-trace60-producer-core.724566.csv flAcquireBuffer: n=1800 us p50=7.924 p95=14.885 p99=28.454 max=48.803 results={'0': 1800}
+<evidence>/linux-bgra4k30-trace60-producer-core.724566.csv flBeginSubmit: n=1800 us p50=0.088 p95=0.198 p99=0.582 max=16.593 results={'0': 1800}
+<evidence>/linux-bgra4k30-trace60-producer-core.724566.csv flClose: n=1 us p50=492.893 p95=492.893 p99=492.893 max=492.893 results={'-9999': 1}
+<evidence>/linux-bgra4k30-trace60-producer-core.724566.csv flEndSubmit: n=1800 us p50=4.370 p95=18.462 p99=20.425 max=23.502 results={'0': 1800}
+<evidence>/linux-bgra4k30-trace60-producer-core.724566.csv flImageMap: n=1800 us p50=15.966 p95=23.362 p99=43.249 max=444.869 results={'0': 1800}
+<evidence>/linux-bgra4k30-trace60-producer-core.724566.csv flImageMapPlanes: n=1800 us p50=15.644 p95=18.633 p99=41.501 max=443.813 results={'0': 1800}
+<evidence>/linux-bgra4k30-trace60-producer-core.724566.csv flImageUnmap: n=1802 us p50=184.490 p95=200.908 p99=222.787 max=330.352 results={'-9999': 1802}
+<evidence>/linux-bgra4k30-trace60-producer-core.724566.csv flOpenProducer: n=1 us p50=159.441 p95=159.441 p99=159.441 max=159.441 results={'0': 1}
+<evidence>/linux-bgra4k30-trace60-producer-core.724566.csv flRequestGeometry: n=1 us p50=118.052 p95=118.052 p99=118.052 max=118.052 results={'0': 1}
+<evidence>/linux-bgra4k30-trace60-producer-core.724566.csv flSubmit: n=1800 us p50=5.021 p95=19.338 p99=22.060 max=41.926 results={'0': 1800}
+<evidence>/linux-bgra4k30-trace60-producer-core.724566.csv ipc.recv: n=1801 us p50=4.739 p95=5.814 p99=19.177 max=71.356 results={'-9999': 1801}
+<evidence>/linux-bgra4k30-trace60-producer-core.724566.csv ipc.send: n=1806 us p50=3.927 p95=17.886 p99=19.119 max=43.263 results={'-9999': 1806}
+<evidence>/linux-bgra4k30-trace60-producer-gst.724566.csv gst.cpu_copy_sink: n=1800 us p50=0.000 p95=0.000 p99=0.000 max=0.000 results={'0': 1800}
+  observed logical payload bytes=59719680000; GPU issued commands are not completion; excludes driver-internal work
+<evidence>/linux-bgra4k30-trace60-producer-gst.724566.csv gst.frame_acquired: n=1800 us p50=0.000 p95=0.000 p99=0.000 max=0.000 results={'0': 1800}
+<evidence>/linux-bgra4k30-trace60-producer-gst.724566.csv gst.frame_receive: n=1800 us p50=0.000 p95=0.000 p99=0.000 max=0.000 results={'0': 1800}
+<evidence>/linux-bgra4k30-trace60-producer-gst.724566.csv gst.sinkRender: n=1800 us p50=15442.060 p95=16003.278 p99=16571.528 max=38145.807 results={'0': 1800}
+Exact channel/fence/PTS joins: n=1800 submit-entry to acquire-return ms median=1.120 max=2.170; ambiguous=0
+Only meaningful on one host/boot with a shared monotonic clock. Not display latency; GPU_SYNC delivery may precede GPU completion.

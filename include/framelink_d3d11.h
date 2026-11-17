@@ -1,5 +1,6 @@
 // framelink D3D11 interop (Windows). The ONLY platform-specific header a
-// Windows integrator needs; the call sequence in framelink.h is unchanged.
+// native GPU integrator needs; the call sequence in framelink.h is unchanged.
+// Explicit CPU-only factories are separate: framelink_shared_cpu_win.h.
 //
 // The Linux and Android equivalents (framelink_dmabuf.h, framelink_ahb.h) and
 // the portable framelink_vulkan.h are not in the spike.
@@ -11,6 +12,45 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+// Explicit application-owned device lifetime; legacy factories remain unchanged.
+// NULL/zero LUID selects the default adapter ONCE at owner creation; a nonzero
+// LUID must exist. The resulting adapter/device never changes or falls back.
+// One attached channel per owner; other attachment attempts return FL_BUSY.
+// Channels and exported pool snapshots retain the owner and attachment. Caller
+// references may be released while attached. A snapshot surviving channel close
+// keeps the owner busy until released. Retain/release are thread safe; callers
+// must hold a reference during any operation, including concurrent attachment.
+// Only device/context survive: every channel gets fresh storage/fences/identity.
+// Before close, release all frames/leases and finish ALL GPU work and borrowed
+// native/COM use, including references duplicated by the application. Close is
+// NOT GPU completion. An observed incomplete close poisons the owner (future
+// attach returns FL_DISCONNECTED); arbitrary external GPU use cannot be inferred.
+// A producer closed with outstanding remote reads retains their consumed fence:
+// attachment remains BUSY until real completion. No timeout fabricates retirement;
+// a dead graph whose completion cannot arrive requires discarding that owner.
+// Device removal permanently rejects attachment. Never resurrect a removed owner.
+// Device getter is BORROWED. Caller must serialize its context work, remove old
+// resource bindings and finish work before channel close/next attachment.
+#ifndef FL_D3D11_DEVICE_OWNER_DECLARED
+#define FL_D3D11_DEVICE_OWNER_DECLARED
+typedef struct flD3D11DeviceOwner flD3D11DeviceOwner;
+#endif
+FL_API flResult flCreateD3D11DeviceOwner(const uint8_t adapterLUID[8], flD3D11DeviceOwner** out);
+FL_API void flRetainD3D11DeviceOwner(flD3D11DeviceOwner*);
+FL_API void flReleaseD3D11DeviceOwner(flD3D11DeviceOwner*);
+FL_API ID3D11Device* flD3D11DeviceOwnerDevice(flD3D11DeviceOwner*);
+FL_API flResult flD3D11DeviceOwnerAdapter(flD3D11DeviceOwner*, uint8_t outLUID[8]);
+FL_API flResult flCreateChannelWithD3D11DeviceOwner(flD3D11DeviceOwner*, const char* name,
+    uint32_t width, uint32_t height, flFormat format, uint32_t poolSize,
+    uint32_t flags, flChannel** out);
+FL_API flResult flCreateChannelFromD3D11HandlesWithDeviceOwner(flD3D11DeviceOwner*,
+    const char* name, uint32_t width, uint32_t height, flFormat format,
+    uint32_t poolSize, uint32_t flags, void* const* handles, flChannel** out);
+// Same deadline/cancellation and pull-handle requirements as the legacy bounded
+// entrypoint below. Peer adapter MUST match this owner's pinned adapter.
+FL_API flResult flOpenProducerD3D11BoundedWithDeviceOwner(flD3D11DeviceOwner*,
+    const char* name, uint32_t timeoutMs, void* cancelEvent, flChannel** out);
 
 // Adopt externally allocated shared textures as an immutable consumer-side ring.
 // Handles are BORROWED on input and independently duplicated on success; caller
@@ -28,6 +68,38 @@ FL_API flResult flCreateChannelFromD3D11Handles(const char* name,
     uint32_t width, uint32_t height, flFormat format, uint32_t poolSize,
     uint32_t flags, const uint8_t adapterLUID[8], void* const* handles,
     flChannel** out);
+
+// Opt-in bounded producer setup. timeoutMs must be 1..60000; cancelEvent is
+// an optional BORROWED manual-reset Windows event, alive throughout this call.
+// Deadline covers connect/Hello/ring import. Pending synchronous pipe I/O is
+// cancelled; D3D driver calls cannot be interrupted and may exceed the deadline,
+// but no channel is returned after observed expiry/cancellation. FL_TIMEOUT for
+// expiry; FL_DISCONNECTED for cancellation; *out is NULL on every failure.
+// Requires a peer supporting ownership-safe pull-handle transfer; older peers
+// return FL_VERSION_MISMATCH. Legacy flOpenProducer behavior is unchanged.
+FL_API flResult flOpenProducerD3D11Bounded(const char* name, uint32_t timeoutMs,
+    void* cancelEvent, flChannel** out);
+
+// Owned, immutable consumer pool export. No image acquisition, frame lease,
+// copying, or writer permission is implied. Each slot handle is an independent
+// NT reference to the exact original allocation. While a snapshot exists,
+// geometry replacement is refused (the current geometry is returned) and a
+// newly attaching producer receives FL_BUSY: the source pool/epoch is pinned.
+// Existing media and read leases continue normally. Retain the snapshot for
+// the relay graph lifetime to prohibit mid-graph pool changes; relay code must
+// also preserve real upstream read leases until downstream readers finish.
+// Calls on the source must be serialized against flClose as for other APIs.
+// Snapshots can outlive source close: their handles stay valid, but source close
+// does not imply GPU completion or make old-generation frames reusable.
+// Handle getters return BORROWED handles, valid until snapshot release. Callers
+// may duplicate them, but such duplicates no longer pin source reconfiguration.
+// Authorized cross-process transfer is the caller's responsibility.
+// On failure *out=NULL; producer channels are rejected with FL_INVALID.
+typedef struct flD3D11PoolSnapshot flD3D11PoolSnapshot;
+FL_API flResult flSnapshotD3D11ConsumerPool(flChannel*, flD3D11PoolSnapshot** out);
+FL_API flResult flQueryD3D11PoolSnapshot(const flD3D11PoolSnapshot*, flChannelInfo* out);
+FL_API void* flD3D11PoolSnapshotHandle(const flD3D11PoolSnapshot*, uint32_t slot);
+FL_API void flReleaseD3D11PoolSnapshot(flD3D11PoolSnapshot*);
 
 // The texture backing an acquired image. Borrowed - do NOT Release() it; it
 // dies with the channel.

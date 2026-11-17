@@ -179,3 +179,38 @@ this private record is recognized by its exact wire type/name/schema and consume
 inside the source. This is not general custom-event preservation. Raw older GDP
 senders without this terminal record do not qualify as clean public-source EOS.
 No dummy PCM block or extra PCM buffering is introduced for termination.
+
+### Explicit cached shared-CPU video
+
+On Linux/Android, both A/V bins support `shared-cpu=true session=/private/path`
+for current-user authenticated local setup, or `shared-cpu=true` with a
+broker-provisioned context. Both endpoints must select this mode. Video is
+required; `native-memory=true` is incompatible. This is **CPU copy-in/copy-out**,
+not native GPU sharing or a zero-copy claim. The default native path is unchanged.
+The local mode preserves common A/V clocks, readiness, EOS and cancellable
+startup; it does not add intentional playback buffering. Android cross-UID
+clients require an authorized broker rather than this current-user discovery.
+See [validation and limits](../docs/m6/cpu-path/LOCAL_CPU_BINS.md).
+
+## Explicit Windows FAR5 receiver bin
+
+`framelinkavsrc` provides the action `set-local-native-pool-candidate(policy*)`
+(returning boolean) for an authenticated FAR5 same-allocation relay receiver.
+It copies the producer-ordered version1, generation0 native candidate while NULL.
+Configure `session=`, A/V tracks, an explicit `video-pool` of at least2, queue,
+format and native/readback profile before invoking it. Success freezes the
+configuration; it is not successful peer setup or readiness. Observe bus errors.
+
+The existing `set-local-native-candidate` remains FAR4. FAR4 and FAR5 never
+silently negotiate down or copy-fallback. The new receiver pairs with
+`fl_gst_session_open_local_native_relay_pool`, performs setup on its worker,
+and uses the existing automatic readiness/EOS control handling. It does not
+construct the intermediate relay, source snapshot, or writer. On non-Windows
+systems the action rejects. Use new bin/session objects after failure/reconnect.
+
+Retain final native GstMemory until actual GPU work is complete, including across
+EOS/bin teardown if necessary. Transport EOS/control drain does not complete a
+native read lease. An application relaying PCM to this bin can use the explicit
+`SessionPcmRelay::endPublication` helper to publish authenticated terminal before
+native readers drain, then separately collect/finish the native relay. Existing
+`SessionPcmRelay::finish` retains its strict pre-drain requirement.

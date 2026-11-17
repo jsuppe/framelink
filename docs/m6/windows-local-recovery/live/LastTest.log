@@ -1,0 +1,72 @@
+Start testing: Nov 12 01:04 Eastern Standard Time
+----------------------------------------------------------
+47/165 Testing: gst_relay_local_three_process_win
+47/165 Test: gst_relay_local_three_process_win
+Command: "<win-home>/dev/framelink-relay-486bf04/build/Release/fl_gst_native_producer_win.exe" "<win-home>/dev/framelink-relay-486bf04/build/Release/gstframelink.dll" "--relay-local-three-process"
+Directory: <win-home>/dev/framelink-relay-486bf04/build
+"gst_relay_local_three_process_win" start time: Nov 12 01:04 Eastern Standard Time
+Output:
+----------------------------------------------------------
+three-process local native relay: FAR4 source-time input + FAR5 snapshot transfer, no inherited textures, 8 exact final pixels/metadata, held final lease, real drain
+<end of output>
+Test time =   1.10 sec
+----------------------------------------------------------
+Test Passed.
+"gst_relay_local_three_process_win" end time: Nov 12 01:04 Eastern Standard Time
+"gst_relay_local_three_process_win" time elapsed: 00:00:01
+----------------------------------------------------------
+
+48/165 Testing: gst_relay_local_three_process_av_win
+48/165 Test: gst_relay_local_three_process_av_win
+Command: "<win-home>/dev/framelink-relay-486bf04/build/Release/fl_gst_native_producer_win.exe" "<win-home>/dev/framelink-relay-486bf04/build/Release/gstframelink.dll" "--relay-three-local-av"
+Directory: <win-home>/dev/framelink-relay-486bf04/build
+"gst_relay_local_three_process_av_win" start time: Nov 12 01:04 Eastern Standard Time
+Output:
+----------------------------------------------------------
+three-process local authenticated A/V: 384 exact PCM frames/1536 bytes, 37ms offset, real END/EOS, final native lease held
+three-process local native relay: FAR4 source-time input + FAR5 snapshot transfer, no inherited textures, 8 exact final pixels/metadata, held final lease, real drain
+<end of output>
+Test time =   1.04 sec
+----------------------------------------------------------
+Test Passed.
+"gst_relay_local_three_process_av_win" end time: Nov 12 01:04 Eastern Standard Time
+"gst_relay_local_three_process_av_win" time elapsed: 00:00:01
+----------------------------------------------------------
+
+49/165 Testing: gst_relay_local_replacement_win
+49/165 Test: gst_relay_local_replacement_win
+Command: "<win-home>/dev/framelink-relay-486bf04/build/Release/fl_gst_native_producer_win.exe" "<win-home>/dev/framelink-relay-486bf04/build/Release/gstframelink.dll" "--relay-local-replacement"
+Directory: <win-home>/dev/framelink-relay-486bf04/build
+"gst_relay_local_replacement_win" start time: Nov 12 01:04 Eastern Standard Time
+Output:
+----------------------------------------------------------
+three-process local authenticated A/V: 384 exact PCM frames/1536 bytes, 37ms offset, real END/EOS, final native lease held
+three-process local native relay: FAR4 source-time input + FAR5 snapshot transfer, no inherited textures, 8 exact final pixels/metadata, held final lease, real drain
+fresh-session replacement: distinct session/clock/native allocations; old reader held through complete replacement A/V graph; old pixels rechecked before real release
+three-process local authenticated A/V: 384 exact PCM frames/1536 bytes, 37ms offset, real END/EOS, final native lease held
+three-process local native relay: FAR4 source-time input + FAR5 snapshot transfer, no inherited textures, 8 exact final pixels/metadata, held final lease, real drain
+<end of output>
+Test time =   1.90 sec
+----------------------------------------------------------
+Test Passed.
+"gst_relay_local_replacement_win" end time: Nov 12 01:04 Eastern Standard Time
+"gst_relay_local_replacement_win" time elapsed: 00:00:01
+----------------------------------------------------------
+
+51/165 Testing: gst_relay_local_process_win
+51/165 Test: gst_relay_local_process_win
+Command: "<win-home>/dev/framelink-relay-486bf04/build/Release/fl_gst_native_producer_win.exe" "<win-home>/dev/framelink-relay-486bf04/build/Release/gstframelink.dll" "--relay-local-process"
+Directory: <win-home>/dev/framelink-relay-486bf04/build
+"gst_relay_local_process_win" start time: Nov 12 01:04 Eastern Standard Time
+Output:
+----------------------------------------------------------
+FAR5 cross-process: no inherited textures; 8 exact frames/metadata; source lease retained until actual remote reader release; authenticated drain
+<end of output>
+Test time =   0.81 sec
+----------------------------------------------------------
+Test Passed.
+"gst_relay_local_process_win" end time: Nov 12 01:04 Eastern Standard Time
+"gst_relay_local_process_win" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Nov 12 01:04 Eastern Standard Time

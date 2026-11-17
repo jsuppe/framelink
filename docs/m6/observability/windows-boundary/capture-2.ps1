@@ -1,0 +1,19 @@
+$ErrorActionPreference='Stop'
+$env:PATH='C:\Program Files\gstreamer\1.0\msvc_x86_64\bin;'+$env:PATH
+Set-Location '<win-home>/dev/framelink-m6-20261106'
+New-Item -ItemType Directory -Force '<win-home>/dev/framelink-m6-20261106/m6-boundary-1794045967/2' | Out-Null
+$env:FL_BENCH_FRAMES='300'
+$env:FL_BENCH_WARMUP='60'
+$env:FL_BENCH_FPS='60'
+$env:FL_BENCH_HOPS='2'
+$env:FL_BENCH_WIDTH='1920'
+$env:FL_BENCH_HEIGHT='1080'
+$env:FL_BENCH_AUDIO='1'
+$env:FL_BENCH_FORMAT='BGRA'
+$env:FL_BENCH_OUT='<win-home>/dev/framelink-m6-20261106/m6-boundary-1794045967/2/capture'
+$env:FRAMELINK_TRACE='<win-home>/dev/framelink-m6-20261106/m6-boundary-1794045967/2/trace'
+$env:FRAMELINK_TRACE_EVENTS='65536'
+$env:FL_BENCH_TRACE='<win-home>/dev/framelink-m6-20261106/m6-boundary-1794045967/2/completion'
+$env:FL_BENCH_TRACE_EVENTS='65536'
+./build/Release/fl_native_boundary_benchmark_win.exe
+exit $LASTEXITCODE

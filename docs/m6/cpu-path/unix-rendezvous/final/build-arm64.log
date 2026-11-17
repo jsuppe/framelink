@@ -1,0 +1,16 @@
+[0/1] Re-running CMake...
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: <linux-home>/dev/build/framelink-m6-arm64
+[1/12] Building CXX object CMakeFiles/framelink_gst_session.dir/runtime/av_auth.cpp.o
+[2/12] Building CXX object CMakeFiles/fl_av_rendezvous.dir/runtime/av_rendezvous.cpp.o
+[3/12] Building CXX object CMakeFiles/fl_av_rendezvous.dir/test/test_av_rendezvous.cpp.o
+[4/12] Linking CXX executable fl_av_rendezvous
+[5/12] Building CXX object CMakeFiles/framelink_gst_session.dir/gst/framelink_session_transport.cpp.o
+[6/12] Building CXX object CMakeFiles/framelink_gst_session.dir/runtime/av_rendezvous.cpp.o
+[7/12] Linking CXX static library libframelink_gst_session.a
+[8/12] Linking CXX executable fl_gst_shared_cpu_av
+[9/12] Building CXX object CMakeFiles/fl_gst_session_transport.dir/runtime/av_auth.cpp.o
+[10/12] Building CXX object CMakeFiles/fl_gst_session_transport.dir/test/fl_gst_session_transport.cpp.o
+[11/12] Building CXX object CMakeFiles/fl_gst_session_transport.dir/runtime/av_rendezvous.cpp.o
+[12/12] Linking CXX executable fl_gst_session_transport

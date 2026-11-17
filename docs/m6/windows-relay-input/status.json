@@ -1,0 +1,16 @@
+{
+    "startedUtc":  "2026-11-12T06:02:24.2469494Z",
+    "scope":  "focused local native relay",
+    "finishedUtc":  "2026-11-12T06:03:10.9794466Z",
+    "testExit":  0,
+    "tests":  [
+                  "gst_native_epoch_c_api",
+                  "gst_relay_local_three_process_win",
+                  "gst_relay_local_source_control_win",
+                  "gst_relay_local_process_win",
+                  "gst_relay_local_events_win",
+                  "gst_relay_local_pool_win"
+              ],
+    "revision":  "486bf04510730a11688f5b1a25a5294767fdfd4e",
+    "status":  "passed"
+}

@@ -1,0 +1,32 @@
+{
+  "revision": "77afa1a4e9abcbdfdcae007d3d6dfb4dac97763f",
+  "state": "failed",
+  "started_utc": "2026-11-12T08:11:01.750957+00:00",
+  "binary_before": {
+    "fl_gst_native_producer_win.exe": "951d9619cdee4eb1da3cfbd985301fd292b5ec142738704215f90fe0347723e1",
+    "fl_gst_local_decoder_rate_win.exe": "855925ba5444de726b6245c0f11a305567b1caba4bcef8fe750b8356724ad9ab",
+    "gstframelink.dll": "20bce32ccec688641c677503492663b2e3db706e51081ff748a2b1f11ba90627",
+    "framelink.dll": "107949791f8013d721bb51b76f2fa71606d3256826d196d706d4e58a598e4a75",
+    "framelink_gst_session.dll": "e2195af0fcbff43282bdb7a89a952abf046cf9e8ec0f72c9d086da2eb68adb91"
+  },
+  "step": "trace-off-analysis",
+  "command": [
+    "<win-home>\\AppData\\Local\\Microsoft\\WindowsApps\\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\\python.exe",
+    "-E",
+    "<win-home>\\dev\\framelink-decoder-target-decoder-4k30-cng-77afa1a-20261112t0812z\\check_local_decoder_rate.py",
+    "<win-home>\\dev\\framelink-decoder-target-decoder-4k30-cng-77afa1a-20261112t0812z\\trace-off"
+  ],
+  "trace-off-idle-before_exit": 0,
+  "trace-off_exit": 0,
+  "trace-off-idle-after_exit": 0,
+  "trace-off_binary_after": {
+    "fl_gst_native_producer_win.exe": "951d9619cdee4eb1da3cfbd985301fd292b5ec142738704215f90fe0347723e1",
+    "fl_gst_local_decoder_rate_win.exe": "855925ba5444de726b6245c0f11a305567b1caba4bcef8fe750b8356724ad9ab",
+    "gstframelink.dll": "20bce32ccec688641c677503492663b2e3db706e51081ff748a2b1f11ba90627",
+    "framelink.dll": "107949791f8013d721bb51b76f2fa71606d3256826d196d706d4e58a598e4a75",
+    "framelink_gst_session.dll": "e2195af0fcbff43282bdb7a89a952abf046cf9e8ec0f72c9d086da2eb68adb91"
+  },
+  "trace-off-analysis_exit": 1,
+  "error": "trace-off-analysis failed; no next arm",
+  "ended_utc": "2026-11-12T08:11:10.977193+00:00"
+}

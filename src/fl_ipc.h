@@ -69,7 +69,9 @@ class Channel {
     // busy: no more writes occur to otherwise discover the closed reader.
     bool peerAlive();
 #endif
-    uint32_t peerPid() const { return peerPid_; } // listen() side only
+    // Windows: actual named-pipe peer PID on both ends, never Hello.pid.
+    // POSIX: listen/accept side only.
+    uint32_t peerPid() const { return peerPid_; }
 
 #ifndef _WIN32
     // Own fd on every path. Only connected AF_UNIX/SEQPACKET sockets with a

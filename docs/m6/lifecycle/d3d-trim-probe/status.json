@@ -1,0 +1,52 @@
+{
+  "state": "finished",
+  "started": 1794038657.1029847,
+  "purpose": "Trim driver caches before device destruction each cycle, no transport",
+  "cases": [
+    {
+      "label": "trim-2",
+      "cycles": 2,
+      "max_device_release_refs": 0,
+      "first": {
+        "cycle": 0,
+        "monotonic_us": 280144352660,
+        "private_bytes": 28622848,
+        "page_faults": 19589,
+        "handles": 244,
+        "device_release_refs": 0
+      },
+      "last": {
+        "cycle": 1,
+        "monotonic_us": 280149495270,
+        "private_bytes": 28344320,
+        "page_faults": 32557,
+        "handles": 244,
+        "device_release_refs": 0
+      }
+    },
+    {
+      "label": "trim-100",
+      "cycles": 100,
+      "max_device_release_refs": 0,
+      "first": {
+        "cycle": 0,
+        "monotonic_us": 280155419640,
+        "private_bytes": 27357184,
+        "page_faults": 19384,
+        "handles": 238,
+        "device_release_refs": 0
+      },
+      "last": {
+        "cycle": 99,
+        "monotonic_us": 280664877144,
+        "private_bytes": 32088064,
+        "page_faults": 1264983,
+        "handles": 235,
+        "device_release_refs": 0
+      },
+      "postwarm_kb_per_cycle": 35.76052631578948
+    }
+  ],
+  "build_exit": 0,
+  "ended": 1794039187.8018873
+}

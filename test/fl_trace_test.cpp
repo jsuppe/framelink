@@ -49,6 +49,23 @@ int main(int argc,char** argv) {
         }
         return rows==2?0:10;
     }
+    if(argc>2 && !std::strcmp(argv[1],"capacity")) {
+        const size_t expected=std::stoul(argv[2]);
+        for(size_t n=0;n<=expected;++n) {fltrace::Scope scope("capacity");}
+        if(!fltrace::flush())return 11;
+#ifdef _WIN32
+        const int pid=_getpid();
+#else
+        const int pid=getpid();
+#endif
+        std::ifstream input(std::string(std::getenv("FRAMELINK_TRACE"))+"."+std::to_string(pid)+".csv");
+        std::string line;size_t rows=0;bool footer=false;
+        while(std::getline(input,line)) {
+            if(line.find(",capacity,")!=std::string::npos)++rows;
+            if(line.find("# dropped_events=1,rejected_threads=0,capacity_per_thread="+std::to_string(expected))==0)footer=true;
+        }
+        return rows==expected&&footer?0:12;
+    }
     const bool threadLimit=argc>1 && !std::strcmp(argv[1],"threads");
     if(threadLimit) {
         for(unsigned n=0;n<65;n++){std::thread t([]{fltrace::Scope s("threaded");});t.join();}

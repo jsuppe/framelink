@@ -1,0 +1,37 @@
+{
+  "pass": true,
+  "expected_frames": 300,
+  "matched_transport": 300,
+  "stages": {
+    "av.frame_adopt": {
+      "unique_frames": 300,
+      "events": 300
+    },
+    "av.frame_render_submit": {
+      "unique_frames": 300,
+      "events": 10800
+    },
+    "av.frame_gpu_complete": {
+      "unique_frames": 300,
+      "events": 10800
+    },
+    "av.frame_present_submit": {
+      "unique_frames": 300,
+      "events": 10800
+    }
+  },
+  "matching_render_serials": 10800,
+  "trace_footers": {
+    "gst.25100.csv": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "renderer.58008.csv": "# dropped_events=0,rejected_threads=0,capacity_per_thread=524288",
+    "transport.25100.csv": "# dropped_events=0,rejected_threads=0,capacity_per_thread=262144",
+    "transport.58008.csv": "# dropped_events=0,rejected_threads=0,capacity_per_thread=262144"
+  },
+  "pcm_sample_frames": 240000,
+  "audio_blocks": 300,
+  "explicit_latency_ms": 100,
+  "ring_slots": 12,
+  "pending_slots": 6,
+  "physical_scanout_qualified": false,
+  "scope": "finite integrated scheduled playback and identity/GPU/presentation API submission; no isolated-hop timing or physical-output qualification"
+}

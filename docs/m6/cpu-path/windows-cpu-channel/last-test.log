@@ -1,0 +1,114 @@
+Start testing: Nov 08 19:23 Eastern Standard Time
+----------------------------------------------------------
+8/127 Testing: shared_cpu_channel_win
+8/127 Test: shared_cpu_channel_win
+Command: "<win-home>/dev/framelink-m6-windows-b997e7c/build/Release/fl_shared_cpu_channel_win.exe"
+Directory: <win-home>/dev/framelink-m6-windows-b997e7c/build
+"shared_cpu_channel_win" start time: Nov 08 19:23 Eastern Standard Time
+Output:
+----------------------------------------------------------
+Windows public CPU API: 100 child sessions, 800 exact BGRA/NV12 frames, RO maps, metadata, retained read/write close lifetimes, reserved EOS and handle cleanup passed
+<end of output>
+Test time =   3.06 sec
+----------------------------------------------------------
+Test Passed.
+"shared_cpu_channel_win" end time: Nov 08 19:23 Eastern Standard Time
+"shared_cpu_channel_win" time elapsed: 00:00:03
+----------------------------------------------------------
+
+9/127 Testing: shared_cpu_channel_c
+9/127 Test: shared_cpu_channel_c
+Command: "<win-home>/dev/framelink-m6-windows-b997e7c/build/Release/fl_shared_cpu_channel_c.exe"
+Directory: <win-home>/dev/framelink-m6-windows-b997e7c/build
+"shared_cpu_channel_c" start time: Nov 08 19:23 Eastern Standard Time
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"shared_cpu_channel_c" end time: Nov 08 19:23 Eastern Standard Time
+"shared_cpu_channel_c" time elapsed: 00:00:00
+----------------------------------------------------------
+
+10/127 Testing: shared_cpu_control_win
+10/127 Test: shared_cpu_control_win
+Command: "<win-home>/dev/framelink-m6-windows-b997e7c/build/Release/fl_shared_cpu_control_win.exe"
+Directory: <win-home>/dev/framelink-m6-windows-b997e7c/build
+"shared_cpu_control_win" start time: Nov 08 19:23 Eastern Standard Time
+Output:
+----------------------------------------------------------
+Windows CPU control: 100 cross-process BGRA/NV12 streams of 32 exact frames/metadata/releases and held-slot EOS, 57 setup plus 23 frame/release/EOS negatives, exact handle cleanup passed
+<end of output>
+Test time =   1.63 sec
+----------------------------------------------------------
+Test Passed.
+"shared_cpu_control_win" end time: Nov 08 19:23 Eastern Standard Time
+"shared_cpu_control_win" time elapsed: 00:00:01
+----------------------------------------------------------
+
+11/127 Testing: shared_cpu_pipe_win
+11/127 Test: shared_cpu_pipe_win
+Command: "<win-home>/dev/framelink-m6-windows-b997e7c/build/Release/fl_shared_cpu_pipe_win.exe"
+Directory: <win-home>/dev/framelink-m6-windows-b997e7c/build
+"shared_cpu_pipe_win" start time: Nov 08 19:23 Eastern Standard Time
+Output:
+----------------------------------------------------------
+Windows CPU pipe: exact frames, 100 handle-clean exchanges, async-only adoption, timeout/cancel/read/write/death/malformed negatives passed
+<end of output>
+Test time =   0.10 sec
+----------------------------------------------------------
+Test Passed.
+"shared_cpu_pipe_win" end time: Nov 08 19:23 Eastern Standard Time
+"shared_cpu_pipe_win" time elapsed: 00:00:00
+----------------------------------------------------------
+
+12/127 Testing: shared_cpu_imported_pool_win
+12/127 Test: shared_cpu_imported_pool_win
+Command: "<win-home>/dev/framelink-m6-windows-b997e7c/build/Release/fl_shared_cpu_imported_pool_win.exe"
+Directory: <win-home>/dev/framelink-m6-windows-b997e7c/build
+"shared_cpu_imported_pool_win" start time: Nov 08 19:23 Eastern Standard Time
+Output:
+----------------------------------------------------------
+shared CPU imported pool: atomic failure, handle cleanup, kernel object aliases, stale epochs, retained retired mappings and producer rights passed
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"shared_cpu_imported_pool_win" end time: Nov 08 19:23 Eastern Standard Time
+"shared_cpu_imported_pool_win" time elapsed: 00:00:00
+----------------------------------------------------------
+
+13/127 Testing: shared_cpu_allocation_win
+13/127 Test: shared_cpu_allocation_win
+Command: "<win-home>/dev/framelink-m6-windows-b997e7c/build/Release/fl_shared_cpu_allocation_win.exe"
+Directory: <win-home>/dev/framelink-m6-windows-b997e7c/build
+"shared_cpu_allocation_win" start time: Nov 08 19:23 Eastern Standard Time
+Output:
+----------------------------------------------------------
+Windows CPU section: BGRA/NV12 pixels, exact size/type/epoch, OS readonly, cross-process pixels, retained lifetime, unmapped views and 100 handle-clean cycles passed
+<end of output>
+Test time =   0.15 sec
+----------------------------------------------------------
+Test Passed.
+"shared_cpu_allocation_win" end time: Nov 08 19:23 Eastern Standard Time
+"shared_cpu_allocation_win" time elapsed: 00:00:00
+----------------------------------------------------------
+
+22/127 Testing: ipc_framing_win
+22/127 Test: ipc_framing_win
+Command: "<win-home>/dev/framelink-m6-windows-b997e7c/build/Release/fl_ipc_framing_win.exe"
+Directory: <win-home>/dev/framelink-m6-windows-b997e7c/build
+"ipc_framing_win" start time: Nov 08 19:23 Eastern Standard Time
+Output:
+----------------------------------------------------------
+Windows IPC exact-message framing: 2 valid and 5 malformed cases passed
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"ipc_framing_win" end time: Nov 08 19:23 Eastern Standard Time
+"ipc_framing_win" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Nov 08 19:23 Eastern Standard Time

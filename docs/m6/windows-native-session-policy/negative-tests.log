@@ -1,0 +1,28 @@
+Test project <win-home>/dev/framelink-m6-windows-d60f683/build
+    Start  41: gst_native_producer_win
+1/5 Test  #41: gst_native_producer_win ..........***Failed    0.89 sec
+line 68: gst_element_set_state(sink,GST_STATE_PAUSED)==GST_STATE_CHANGE_FAILURE
+RGBA native producer: original texture, ready fence, exact pixels/metadata, local reference reuse and owner lifetime pass
+NV12 native producer: original texture, ready fence, exact pixels/metadata, local reference reuse and owner lifetime pass
+native sink pipeline: exact texture pixels/metadata, foreign allocation rejection, retained buffer after stop pass
+
+    Start  42: gst_native_source_win
+2/5 Test  #42: gst_native_source_win ............   Passed    2.87 sec
+    Start 113: gst_session_transport
+3/5 Test #113: gst_session_transport ............   Passed    0.33 sec
+    Start 115: gst_session_context
+4/5 Test #115: gst_session_context ..............   Passed    0.08 sec
+    Start 120: gst_shared_cpu_av
+5/5 Test #120: gst_shared_cpu_av ................   Passed    3.05 sec
+
+80% tests passed, 1 tests failed out of 5
+
+Label Time Summary:
+gst_video_regression    =   3.76 sec*proc (2 tests)
+m5b_av                  =   0.41 sec*proc (2 tests)
+
+Total Test time (real) =   7.89 sec
+
+The following tests FAILED:
+	 41 - gst_native_producer_win (Failed)                  gst_video_regression
+Errors while running CTest

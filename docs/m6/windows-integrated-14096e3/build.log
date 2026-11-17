@@ -1,0 +1,358 @@
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  1>Checking Build System
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  framelink_win.cpp
+  framelink_slots.cpp
+  fl_ipc_win32.cpp
+  fl_trace.cpp
+  framelink_session.cpp
+  framelink_memory.cpp
+  framelink_shared_cpu.cpp
+  framelink_shared_cpu_channel.cpp
+  Generating Code...
+     Creating library <win-home>/dev/framelink-m6-windows-14096e3/build/Release/framelink.lib and object <win-home>/dev/framelink-m6-windows-14096e3/build/Release/framelink.exp
+  framelink.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\framelink.dll
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  framelink_session_context.cpp
+  framelink_session_transport.cpp
+  av_auth.cpp
+  av_rendezvous.cpp
+  Generating Code...
+     Creating library <win-home>/dev/framelink-m6-windows-14096e3/build/Release/framelink_gst_session.lib and object <win-home>/dev/framelink-m6-windows-14096e3/build/Release/framelink_gst_session.exp
+  framelink_gst_session.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\framelink_gst_session.dll
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  gstframelink.cpp
+  The d3d11 library from gst-plugins-bad is unstable API and may change in future.
+  You can define GST_USE_UNSTABLE_API to avoid this warning.
+  gstframelinkaudio.cpp
+  gstframelinkaudiosrc.cpp
+  fl_gst_audio_startup.cpp
+  gstframelinkavsink.cpp
+  gstframelinkavsrc.cpp
+  Generating Code...
+     Creating library <win-home>/dev/framelink-m6-windows-14096e3/build/Release/gstframelink.lib and object <win-home>/dev/framelink-m6-windows-14096e3/build/Release/gstframelink.exp
+  gstframelink.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\gstframelink.dll
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  av_apps.cpp
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  test_av_rendezvous.cpp
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  fl_buffer_references.cpp
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  fl_consume.cpp
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  test_av_auth.cpp
+  d3d_decode_consumer.cpp
+  fl_consume.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_consume.exe
+  av_auth.cpp
+  fl_buffer_references.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_buffer_references.exe
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  d3d_decoder_probe.cpp
+  d3d_decode_producer.cpp
+  av_rendezvous.cpp
+  av_rendezvous.cpp
+  av_rendezvous.cpp
+  fl_d3d_decode_consumer.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_d3d_decode_consumer.exe
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  av_auth.cpp
+  Generating Code...
+  fl_disconnect_win.cpp
+  Generating Code...
+  fl_d3d_decoder_probe.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_d3d_decoder_probe.exe
+  av_memory_agreement.cpp
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  fl_expanded_pool.cpp
+  fl_d3d_decode_producer.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_d3d_decode_producer.exe
+  fl_external_pool_win.cpp
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  fl_frame_metadata.cpp
+  fl_av_auth.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_av_auth.exe
+  Generating Code...
+  fl_disconnect_win.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_disconnect_win.exe
+  fl_ipc_win32.cpp
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  fl_av_rendezvous.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_av_rendezvous.exe
+  fl_ipc_win32.cpp
+  fl_frame_metadata_contract.cpp
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  Generating Code...
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  fl_frame_metadata_contract.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_frame_metadata_contract.exe
+  Generating Code...
+  fl_external_pool_win.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_external_pool_win.exe
+  fl_gst_av_bin.cpp
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  fl_gst_av_parity.cpp
+  fl_gst_av_qualification.cpp
+  fl_gst_audio_sink.cpp
+  fl_gst_av_bench.cpp
+  framelink_av_playback.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\framelink_av_playback.lib
+  fl_expanded_pool.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_expanded_pool.exe
+  fl_gst_audio_source.cpp
+  fl_gst_audio_sink.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_gst_audio_sink.exe
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  fl_frame_metadata.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_frame_metadata.exe
+  fl_gst_av_src_bin.cpp
+  fl_gst_av_bin.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_gst_av_bin.exe
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  fl_gst_audio_source.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_gst_audio_source.exe
+  fl_gst_av_parity.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_gst_av_parity.exe
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  fl_audio_segment.cpp
+  test_av_memory_adversarial.cpp
+  fl_gst_av_timeline.cpp
+  fl_av_offer_bounds.cpp
+  av_memory_agreement.cpp
+  fl_audio_segment.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_audio_segment.exe
+  test_av_memory_agreement.cpp
+  fl_audio_alignment.cpp
+  av_auth.cpp
+  fl_gst_av_timeline.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_gst_av_timeline.exe
+  av_memory_agreement.cpp
+  fl_gst_av_src_bin.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_gst_av_src_bin.exe
+  fl_d3d_memory_binding.cpp
+  av_rendezvous.cpp
+  fl_audio_alignment.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_audio_alignment.exe
+  fl_gst_av_bench.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_gst_av_bench.exe
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  av_auth.cpp
+  fl_gst_av_qualification.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_gst_av_qualification.exe
+  fl_gst_av_validation.cpp
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  fl_gst_event_channel.cpp
+  av_rendezvous.cpp
+  Generating Code...
+  fl_gst_event_channel.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_gst_event_channel.exe
+  fl_av_memory_adversarial.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_av_memory_adversarial.exe
+  fl_av_offer_bounds.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_av_offer_bounds.exe
+  Generating Code...
+  fl_d3d_memory_binding.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_d3d_memory_binding.exe
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  fl_gst_local_av.cpp
+  fl_gst_native_producer_win.cpp
+  fl_av_memory_agreement.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_av_memory_agreement.exe
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  The d3d11 library from gst-plugins-bad is unstable API and may change in future.
+  You can define GST_USE_UNSTABLE_API to avoid this warning.
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  fl_gst_native_source_win.cpp
+  fl_gst_nv12.cpp
+  fl_gst_native_epoch_c_api.c
+  fl_gst_local_av.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_gst_local_av.exe
+  fl_gst_av_validation.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_gst_av_validation.exe
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  The d3d11 library from gst-plugins-bad is unstable API and may change in future.
+  You can define GST_USE_UNSTABLE_API to avoid this warning.
+  fl_gst_policy_generation.cpp
+  fl_gst_native_epoch_c_api.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_gst_native_epoch_c_api.exe
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  fl_gst_pool_policy.cpp
+  fl_gst_local_audio.cpp
+  fl_gst_nv12.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_gst_nv12.exe
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  fl_gst_preconnect_slots.cpp
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  fl_gst_native_source_win.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_gst_native_source_win.exe
+  fl_gst_session_context.cpp
+  fl_gst_policy_generation.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_gst_policy_generation.exe
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  fl_gst_session_transport.cpp
+  fl_gst_shared_cpu_av.cpp
+  fl_gst_pool_policy.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_gst_pool_policy.exe
+  fl_gst_local_audio.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_gst_local_audio.exe
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  fl_gst_shared_cpu_roundtrip.cpp
+  fl_gst_preconnect_slots.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_gst_preconnect_slots.exe
+  fl_gst_shared_cpu_session_win.cpp
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  fl_gst_native_producer_win.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_gst_native_producer_win.exe
+  fl_gst_shared_cpu_source.cpp
+  fl_gst_session_context.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_gst_session_context.exe
+  av_auth.cpp
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  fl_gst_sink_stats.cpp
+  av_rendezvous.cpp
+  fl_gst_sink_stats.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_gst_sink_stats.exe
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  fl_gst_timestamps.cpp
+  fl_gst_shared_cpu_roundtrip.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_gst_shared_cpu_roundtrip.exe
+  fl_gst_shared_cpu_av.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_gst_shared_cpu_av.exe
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  Generating Code...
+  fl_gst_shared_cpu_source.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_gst_shared_cpu_source.exe
+  fl_import_failure_win.cpp
+  fl_ipc_framing_win.cpp
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  m4_transport_timing.cpp
+  fl_gst_timestamps.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_gst_timestamps.exe
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  fl_gst_shared_cpu_session_win.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_gst_shared_cpu_session_win.exe
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  fl_memory_boundary.cpp
+  fl_memory_c_api.c
+  fl_gst_session_transport.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_gst_session_transport.exe
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  fl_memory_c_api.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_memory_c_api.exe
+  fl_memory_contract.cpp
+  fl_memory_boundary.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_memory_boundary.exe
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  fl_ipc_win32.cpp
+  fl_memory_resource.cpp
+  fl_native_boundary_benchmark_win.cpp
+  fl_memory_contract.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_memory_contract.exe
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  fl_ipc_win32.cpp
+  fl_m4_transport_timing.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_m4_transport_timing.exe
+  fl_native_relay_process_win.cpp
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  fl_native_relay_win.cpp
+  fl_trace.cpp
+  fl_memory_resource.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_memory_resource.exe
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  fl_nv12_layout.cpp
+  fl_trace.cpp
+  Generating Code...
+  fl_nv12_layout.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_nv12_layout.exe
+  framelink_memory.cpp
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  Generating Code...
+  fl_nv12_win.cpp
+     Creating library <win-home>/dev/framelink-m6-windows-14096e3/build/Release/fl_ipc_framing_win.lib and object <win-home>/dev/framelink-m6-windows-14096e3/build/Release/fl_ipc_framing_win.exp
+  fl_ipc_framing_win.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_ipc_framing_win.exe
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  fl_playback_recovery.cpp
+  fl_nv21.cpp
+  fl_native_relay_process_win.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_native_relay_process_win.exe
+  fl_native_relay_win.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_native_relay_win.exe
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+     Creating library <win-home>/dev/framelink-m6-windows-14096e3/build/Release/fl_import_failure_win.lib and object <win-home>/dev/framelink-m6-windows-14096e3/build/Release/fl_import_failure_win.exp
+  fl_portable_map.cpp
+  fl_import_failure_win.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_import_failure_win.exe
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  fl_nv12_win.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_nv12_win.exe
+  fl_produce.cpp
+  fl_nv21.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_nv21.exe
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  fl_native_boundary_benchmark_win.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_native_boundary_benchmark_win.exe
+  fl_read_lease_d3d11.cpp
+  fl_read_leases.cpp
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  fl_read_ledger.cpp
+  fl_playback_recovery.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_playback_recovery.exe
+  fl_portable_map.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_portable_map.exe
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  fl_produce.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_produce.exe
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  fl_ready_timeout_win.cpp
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  fl_receive_queue.cpp
+  fl_reconnect_held.cpp
+  fl_read_ledger.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_read_ledger.exe
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  fl_session_c_api.c
+  fl_session_contract.cpp
+  fl_receive_queue.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_receive_queue.exe
+  fl_reconnect_held.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_reconnect_held.exe
+  fl_read_lease_d3d11.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_read_lease_d3d11.exe
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  fl_read_leases.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_read_leases.exe
+  fl_session_optional_tracks.cpp
+  fl_session_c_api.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_session_c_api.exe
+  fl_session_peer.cpp
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  fl_session_contract.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_session_contract.exe
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  fl_shared_cpu_allocation_win.cpp
+  fl_shared_cpu_c_api.c
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  fl_shared_cpu_channel_c.c
+  fl_ready_timeout_win.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_ready_timeout_win.exe
+  fl_shared_cpu_channel_win.cpp
+  fl_shared_cpu_contract.cpp
+  fl_session_peer.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_session_peer.exe
+  fl_session_optional_tracks.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_session_optional_tracks.exe
+  fl_shared_cpu_c_api.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_shared_cpu_c_api.exe
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  fl_shared_cpu_channel_c.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_shared_cpu_channel_c.exe
+  fl_shared_cpu_control_win.cpp
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  fl_shared_cpu_imported_pool_win.cpp
+  fl_shared_cpu_pipe_win.cpp
+  fl_shared_cpu_contract.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_shared_cpu_contract.exe
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  fl_shared_cpu_pool.cpp
+  fl_shared_cpu_pool.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_shared_cpu_pool.exe
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  fl_shared_cpu_allocation_win.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_shared_cpu_allocation_win.exe
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  fl_startup_win.cpp
+  fl_submit_ownership.cpp
+  fl_shared_cpu_channel_win.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_shared_cpu_channel_win.exe
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  fl_trace_test.cpp
+  fl_trace_test.cpp
+  fl_startup_win.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_startup_win.exe
+  fl_shared_cpu_pipe_win.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_shared_cpu_pipe_win.exe
+  fl_shared_cpu_imported_pool_win.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_shared_cpu_imported_pool_win.exe
+  fl_shared_cpu_control_win.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_shared_cpu_control_win.exe
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  av_apps.cpp
+  av_session.cpp
+  av_apps.cpp
+  fl_submit_ownership.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_submit_ownership.exe
+  fl_trace_compiled_out.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_trace_compiled_out.exe
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt
+  consumer.cpp
+  gst_av_example.cpp
+  producer.cpp
+  fl_trace_test.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\fl_trace_test.exe
+  av_rendezvous.cpp
+  av_rendezvous.cpp
+  framelink_av_session.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\framelink_av_session.exe
+  sample_common.cpp
+  sample_common.cpp
+  av_auth.cpp
+  av_auth.cpp
+  framelink_gst_av.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\framelink_gst_av.exe
+  av_memory_agreement.cpp
+  av_memory_agreement.cpp
+  Generating Code...
+  Generating Code...
+  Generating Code...
+  Generating Code...
+  framelink_consumer.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\framelink_consumer.exe
+  framelink_producer.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\framelink_producer.exe
+  framelink_av_consumer.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\framelink_av_consumer.exe
+  framelink_av_producer.vcxproj -> <win-home>\dev\framelink-m6-windows-14096e3\build\Release\framelink_av_producer.exe
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-14096e3/CMakeLists.txt

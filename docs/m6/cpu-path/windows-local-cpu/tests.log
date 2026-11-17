@@ -1,0 +1,16 @@
+Test project <win-home>/dev/framelink-m6-windows-3f45f7b/build
+    Start  76: av_rendezvous
+1/4 Test  #76: av_rendezvous ....................   Passed    0.21 sec
+    Start 113: gst_session_transport
+2/4 Test #113: gst_session_transport ............   Passed    0.36 sec
+    Start 114: gst_shared_cpu_session_win
+3/4 Test #114: gst_shared_cpu_session_win .......   Passed    2.37 sec
+    Start 120: gst_shared_cpu_av
+4/4 Test #120: gst_shared_cpu_av ................   Passed    2.84 sec
+
+100% tests passed, 0 tests failed out of 4
+
+Label Time Summary:
+m5b_av    =   0.36 sec*proc (1 test)
+
+Total Test time (real) =   5.82 sec

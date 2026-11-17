@@ -1,0 +1,74 @@
+** WARNING: connection is not using a post-quantum key exchange algorithm.
+** This session may be vulnerable to "store now, decrypt later" attacks.
+** The server may need to be upgraded. See https://openssh.com/pq.html
+UpdateCTestConfiguration  from :<win-home>/dev/framelink-m6-windows-0df689a/build/DartConfiguration.tcl
+Test project <win-home>/dev/framelink-m6-windows-0df689a/build
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 135
+    Start 135: gst_av_parity
+
+135: Test command: <win-home>\dev\framelink-m6-windows-0df689a\build\Release\fl_gst_av_parity.exe "<win-home>/dev/framelink-m6-windows-0df689a/build/Release/gstframelink.dll"
+135: Working Directory: <win-home>/dev/framelink-m6-windows-0df689a/build
+135: Test timeout computed to be: 300
+135: CASE consumer-pause
+135:   consumer-pause   producer=element consumer=element | producer=error: required session tracks not ready or cancelled consumer=error: coordinated video frame replaced before it was read: the producer delivered faster than real time | frames 13/22 samples 25920/43680 lag v 150.1..421.0 a 150.1..448.5ms memory:SystemMemory
+135:   consumer-pause   producer=element consumer=bin     | producer=error: required session tracks not ready or cancelled consumer=error: coordinated video frame replaced before it was read: the producer delivered faster than real time | frames 13/22 samples 24480/43680 lag v 150.4..420.2 a 150.2..446.9ms memory:SystemMemory
+135:   consumer-pause   producer=bin     consumer=element | producer=error: required session tracks not ready or cancelled consumer=error: coordinated video frame replaced before it was read: the producer delivered faster than real time | frames 13/22 samples 25440/46080 lag v 150.2..420.9 a 150.1..447.7ms memory:SystemMemory
+135:   consumer-pause   producer=bin     consumer=bin     | producer=error: required session tracks not ready or cancelled consumer=error: coordinated video frame replaced before it was read: the producer delivered faster than real time | frames 13/22 samples 25920/43680 lag v 150.1..422.9 a 150.5..449.6ms memory:SystemMemory
+135:   => parity: producer=error: session cancelled consumer=error: coordinated video frame replaced before it was read: the producer delivered faster than real time
+135: bin parity: identical outcomes for element/bin producers x element/bin consumers
+    Test #135: gst_av_parity ....................   Passed    4.53 sec
+    Start 135: gst_av_parity
+
+135: Test command: <win-home>\dev\framelink-m6-windows-0df689a\build\Release\fl_gst_av_parity.exe "<win-home>/dev/framelink-m6-windows-0df689a/build/Release/gstframelink.dll"
+135: Working Directory: <win-home>/dev/framelink-m6-windows-0df689a/build
+135: Test timeout computed to be: 300
+135: CASE consumer-pause
+135:   consumer-pause   producer=element consumer=element | producer=error: coordinated session not ready or cancelled consumer=error: coordinated video frame replaced before it was read: the producer delivered faster than real time | frames 13/22 samples 25920/43680 lag v 150.2..425.4 a 150.1..442.8ms memory:SystemMemory
+135:   consumer-pause   producer=element consumer=bin     | producer=error: required session tracks not ready or cancelled consumer=error: coordinated video frame replaced before it was read: the producer delivered faster than real time | frames 13/22 samples 24480/46080 lag v 150.2..423.6 a 150.2..450.3ms memory:SystemMemory
+135:   consumer-pause   producer=bin     consumer=element | producer=error: required session tracks not ready or cancelled consumer=error: coordinated video frame replaced before it was read: the producer delivered faster than real time | frames 13/22 samples 25440/43680 lag v 150.3..420.6 a 150.2..447.3ms memory:SystemMemory
+135:   consumer-pause   producer=bin     consumer=bin     | producer=error: required session tracks not ready or cancelled consumer=error: coordinated video frame replaced before it was read: the producer delivered faster than real time | frames 13/22 samples 24000/43680 lag v 150.2..422.7 a 150.1..449.4ms memory:SystemMemory
+135:   => parity: producer=error: session cancelled consumer=error: coordinated video frame replaced before it was read: the producer delivered faster than real time
+135: bin parity: identical outcomes for element/bin producers x element/bin consumers
+    Test #135: gst_av_parity ....................   Passed    4.52 sec
+    Start 135: gst_av_parity
+
+135: Test command: <win-home>\dev\framelink-m6-windows-0df689a\build\Release\fl_gst_av_parity.exe "<win-home>/dev/framelink-m6-windows-0df689a/build/Release/gstframelink.dll"
+135: Working Directory: <win-home>/dev/framelink-m6-windows-0df689a/build
+135: Test timeout computed to be: 300
+135: CASE consumer-pause
+135:   consumer-pause   producer=element consumer=element | producer=error: required session tracks not ready or cancelled consumer=error: coordinated video frame replaced before it was read: the producer delivered faster than real time | frames 13/22 samples 25920/43680 lag v 150.3..420.0 a 150.0..447.4ms memory:SystemMemory
+135:   consumer-pause   producer=element consumer=bin     | producer=error: coordinated session not ready or cancelled consumer=error: coordinated video frame replaced before it was read: the producer delivered faster than real time | frames 13/22 samples 23520/43680 lag v 150.2..424.0 a 150.1..450.7ms memory:SystemMemory
+135:   consumer-pause   producer=bin     consumer=element | producer=error: required session tracks not ready or cancelled consumer=error: coordinated video frame replaced before it was read: the producer delivered faster than real time | frames 13/22 samples 24480/43680 lag v 150.3..420.2 a 150.3..446.9ms memory:SystemMemory
+135:   consumer-pause   producer=bin     consumer=bin     | producer=error: required session tracks not ready or cancelled consumer=error: coordinated video frame replaced before it was read: the producer delivered faster than real time | frames 13/22 samples 24960/46080 lag v 150.2..423.7 a 150.3..450.4ms memory:SystemMemory
+135:   => parity: producer=error: session cancelled consumer=error: coordinated video frame replaced before it was read: the producer delivered faster than real time
+135: bin parity: identical outcomes for element/bin producers x element/bin consumers
+    Test #135: gst_av_parity ....................   Passed    4.53 sec
+    Start 135: gst_av_parity
+
+135: Test command: <win-home>\dev\framelink-m6-windows-0df689a\build\Release\fl_gst_av_parity.exe "<win-home>/dev/framelink-m6-windows-0df689a/build/Release/gstframelink.dll"
+135: Working Directory: <win-home>/dev/framelink-m6-windows-0df689a/build
+135: Test timeout computed to be: 300
+135: CASE consumer-pause
+135:   consumer-pause   producer=element consumer=element | producer=error: required session tracks not ready or cancelled consumer=error: coordinated video frame replaced before it was read: the producer delivered faster than real time | frames 13/22 samples 24480/43680 lag v 150.1..418.8 a 150.0..446.2ms memory:SystemMemory
+135:   consumer-pause   producer=element consumer=bin     | producer=error: required session tracks not ready or cancelled consumer=error: coordinated video frame replaced before it was read: the producer delivered faster than real time | frames 13/22 samples 24000/43680 lag v 150.1..421.6 a 150.2..448.3ms memory:SystemMemory
+135:   consumer-pause   producer=bin     consumer=element | producer=error: required session tracks not ready or cancelled consumer=error: coordinated video frame replaced before it was read: the producer delivered faster than real time | frames 13/22 samples 25440/43680 lag v 150.1..423.0 a 150.5..449.7ms memory:SystemMemory
+135:   consumer-pause   producer=bin     consumer=bin     | producer=error: required session tracks not ready or cancelled consumer=error: coordinated video frame replaced before it was read: the producer delivered faster than real time | frames 13/22 samples 25440/46080 lag v 150.3..421.8 a 150.4..448.6ms memory:SystemMemory
+135:   => parity: producer=error: session cancelled consumer=error: coordinated video frame replaced before it was read: the producer delivered faster than real time
+135: bin parity: identical outcomes for element/bin producers x element/bin consumers
+1/1 Test #135: gst_av_parity ....................   Passed    4.51 sec
+
+The following tests passed:
+	gst_av_parity
+
+100% tests passed, 0 tests failed out of 1
+
+Label Time Summary:
+m5b_av    =   4.51 sec*proc (1 test)
+
+Total Test time (real) =  18.11 sec

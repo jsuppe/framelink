@@ -1,0 +1,28 @@
+Test project <win-home>/dev/framelink-m6-windows-67c1523/build
+    Start  11: shared_cpu_pipe_win
+1/6 Test  #11: shared_cpu_pipe_win ..............   Passed    0.10 sec
+    Start 113: gst_session_transport
+2/6 Test #113: gst_session_transport ............   Passed    0.35 sec
+    Start 114: gst_shared_cpu_session_win
+3/6 Test #114: gst_shared_cpu_session_win .......***Failed    1.56 sec
+warm baseline before=1472 after=1472
+mode=1 baseline=1472 actual=1473
+line 70: actualHandles==baseline error=109
+
+    Start 118: gst_shared_cpu_source
+4/6 Test #118: gst_shared_cpu_source ............   Passed    0.15 sec
+    Start 119: gst_shared_cpu_roundtrip
+5/6 Test #119: gst_shared_cpu_roundtrip .........   Passed    0.15 sec
+    Start 120: gst_shared_cpu_av
+6/6 Test #120: gst_shared_cpu_av ................   Passed    2.47 sec
+
+83% tests passed, 1 tests failed out of 6
+
+Label Time Summary:
+m5b_av    =   0.35 sec*proc (1 test)
+
+Total Test time (real) =   4.85 sec
+
+The following tests FAILED:
+	114 - gst_shared_cpu_session_win (Failed)
+Errors while running CTest

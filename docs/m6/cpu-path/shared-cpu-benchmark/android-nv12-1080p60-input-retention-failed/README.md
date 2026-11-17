@@ -1,0 +1,3 @@
+# Android NV12 1080p60 input-retention sustained: FAILED timing
+
+Source 93283ac (docs HEAD 7642b6f); binary dee5c211. Benchmark exit0, pull0, analysis1. Exact 108000 video frames / 86400000 PCM sample frames; 180000 contiguous audio blocks. One video arrival miss at index78795 (~1313.33s): 17.863579ms against17ms, push1.983386ms, residual15.880193ms. Audio zero misses, common inferred A/V mapping delta0ns. RSS slopes -746.24/-746.27KB/min, handles18..19/17 and threads8..9/6..7 bounded. No acceptance waiver; no identical clean-repeat. Residual does not establish root cause. Evelyn owns matched copy/offCPU diagnosis alongside BGRA4K. Raw evidence stays at <linux-home>/dev/evidence/m6-cpu-path/shared-cpu-benchmark/android-shared-nv12-1920x1080-60-1800-input-retention.

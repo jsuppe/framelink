@@ -1,0 +1,15 @@
+Internal ctest changing into directory: <linux-home>/dev/build/framelink-m6-linux
+Test project <linux-home>/dev/build/framelink-m6-linux
+    Start 126: gst_shared_cpu_av
+1/3 Test #126: gst_shared_cpu_av ................   Passed    0.79 sec
+    Start 130: gst_av_bin
+2/3 Test #130: gst_av_bin .......................   Passed   24.87 sec
+    Start 134: gst_av_bench_smoke
+3/3 Test #134: gst_av_bench_smoke ...............   Passed    6.46 sec
+
+100% tests passed, 0 tests failed out of 3
+
+Label Time Summary:
+m5b_av    =  24.87 sec*proc (1 test)
+
+Total Test time (real) =  32.13 sec

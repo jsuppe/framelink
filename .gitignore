@@ -5,3 +5,7 @@ out/
 *.user
 CMakeUserPresets.json
 build-android-*/
+
+# machine-local settings (tools/setup_local_env.py)
+local.env
+__pycache__/

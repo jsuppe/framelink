@@ -1,0 +1,86 @@
+{
+  "cells": [
+    {
+      "profile": "shared CPU BGRA1080p60 restart consumer, persistent producer",
+      "case": "shared-cpu-bgra-1080-restart-consumer-100",
+      "ended_utc": "2026-11-13T01:04:59.395861+00:00",
+      "slopes": {
+        "memory_kib_per_cycle": -2.0697088465845463,
+        "handles_per_cycle": -0.12122060470324748,
+        "threads_per_cycle": -0.06005039193729003
+      }
+    },
+    {
+      "profile": "shared CPU BGRA1080p60 restart producer, persistent consumer",
+      "case": "shared-cpu-bgra-1080-restart-producer-100",
+      "ended_utc": "2026-11-13T00:09:00.957045+00:00",
+      "slopes": {
+        "memory_kib_per_cycle": -2.2361142217245242,
+        "handles_per_cycle": -0.15156774916013438,
+        "threads_per_cycle": -0.0653555431131019
+      }
+    },
+    {
+      "profile": "shared CPU BGRA4K30 restart consumer, persistent producer",
+      "case": "shared-cpu-bgra-4k-restart-consumer-100",
+      "ended_utc": "2026-11-13T01:23:11.294461+00:00",
+      "slopes": {
+        "memory_kib_per_cycle": -0.2265397536394177,
+        "handles_per_cycle": -0.11800111982082867,
+        "threads_per_cycle": -0.05953247480403136
+      }
+    },
+    {
+      "profile": "shared CPU BGRA4K30 restart producer, persistent consumer",
+      "case": "shared-cpu-bgra-4k-restart-producer-100",
+      "ended_utc": "2026-11-13T01:14:04.562528+00:00",
+      "slopes": {
+        "memory_kib_per_cycle": -2.243784994400896,
+        "handles_per_cycle": -0.1495800671892497,
+        "threads_per_cycle": -0.06454367301231803
+      }
+    },
+    {
+      "profile": "shared CPU NV121080p60 restart consumer, persistent producer",
+      "case": "shared-cpu-nv12-1080-restart-consumer-100",
+      "ended_utc": "2026-11-12T23:40:48.666359+00:00",
+      "slopes": {
+        "memory_kib_per_cycle": -2.2821948488241883,
+        "handles_per_cycle": -0.13955767077267636,
+        "threads_per_cycle": -0.07123460246360583
+      }
+    },
+    {
+      "profile": "shared CPU NV121080p60 restart producer, persistent consumer",
+      "case": "shared-cpu-nv12-1080-restart-producer-100",
+      "ended_utc": "2026-11-12T23:31:16.224891+00:00",
+      "slopes": {
+        "memory_kib_per_cycle": -2.1926651735722285,
+        "handles_per_cycle": -0.15156774916013438,
+        "threads_per_cycle": -0.0653555431131019
+      }
+    },
+    {
+      "profile": "shared CPU NV124K30 restart consumer, persistent producer",
+      "case": "shared-cpu-nv12-4k-restart-consumer-100",
+      "ended_utc": "2026-11-12T23:59:50.529635+00:00",
+      "slopes": {
+        "memory_kib_per_cycle": -2.092721164613662,
+        "handles_per_cycle": -0.12122060470324748,
+        "threads_per_cycle": -0.06005039193729003
+      }
+    },
+    {
+      "profile": "shared CPU NV124K30 restart producer, persistent consumer",
+      "case": "shared-cpu-nv12-4k-restart-producer-100",
+      "ended_utc": "2026-11-12T23:50:38.690194+00:00",
+      "slopes": {
+        "memory_kib_per_cycle": -2.3978163493840987,
+        "handles_per_cycle": -0.14972004479283316,
+        "threads_per_cycle": -0.06983482642777156
+      }
+    }
+  ],
+  "pass": true,
+  "fresh_consumer_contiguity_and_queue_accounting_verified": 400
+}

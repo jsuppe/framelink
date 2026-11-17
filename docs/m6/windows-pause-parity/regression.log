@@ -1,0 +1,19 @@
+** WARNING: connection is not using a post-quantum key exchange algorithm.
+** This session may be vulnerable to "store now, decrypt later" attacks.
+** The server may need to be upgraded. See https://openssh.com/pq.html
+Test project <win-home>/dev/framelink-m6-windows-0df689a/build
+    Start  44: gst_native_bin_cancel_win
+1/4 Test  #44: gst_native_bin_cancel_win ........   Passed    1.22 sec
+    Start 133: gst_av_bin
+2/4 Test #133: gst_av_bin .......................   Passed   25.60 sec
+    Start 135: gst_av_parity
+3/4 Test #135: gst_av_parity ....................   Passed  108.62 sec
+    Start 143: gst_event_channel
+4/4 Test #143: gst_event_channel ................   Passed    2.40 sec
+
+100% tests passed, 0 tests failed out of 4
+
+Label Time Summary:
+m5b_av    = 136.62 sec*proc (3 tests)
+
+Total Test time (real) = 137.85 sec

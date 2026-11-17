@@ -1,0 +1,11 @@
+{
+  "pass": true,
+  "video_frames": 16,
+  "distinct_decoded_frames": 16,
+  "pcm_sample_frames": 25600,
+  "mapped_av_offset_ns": 37000000,
+  "source_conversion_output_bytes": 131072,
+  "source_oracle_readback_bytes": 131072,
+  "final_oracle_readback_bytes": 139264,
+  "scope": "tiny real decoder conversion plus authenticated same-allocation relay; no target-rate/physical-playback/zero-copy claim"
+}

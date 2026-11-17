@@ -1,0 +1,19 @@
+Start testing: Nov 12 00:50 Eastern Standard Time
+----------------------------------------------------------
+44/157 Testing: gst_relay_local_process_win
+44/157 Test: gst_relay_local_process_win
+Command: "<win-home>/dev/framelink-m6-windows-7b8a274/build/Release/fl_gst_native_producer_win.exe" "<win-home>/dev/framelink-m6-windows-7b8a274/build/Release/gstframelink.dll" "--relay-local-process"
+Directory: <win-home>/dev/framelink-m6-windows-7b8a274/build
+"gst_relay_local_process_win" start time: Nov 12 00:50 Eastern Standard Time
+Output:
+----------------------------------------------------------
+FAR5 cross-process: no inherited textures; 8 exact frames/metadata; source lease retained until actual remote reader release; authenticated drain
+<end of output>
+Test time =   0.85 sec
+----------------------------------------------------------
+Test Passed.
+"gst_relay_local_process_win" end time: Nov 12 00:50 Eastern Standard Time
+"gst_relay_local_process_win" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Nov 12 00:50 Eastern Standard Time

@@ -1,0 +1,19 @@
+{
+  "state": "failed",
+  "started": 1794044279.5294626,
+  "source_sha256": {
+    "src/fl_nv21.h": "c2977f2101bc23c48530b2f15be1fc697f7c60e4e318aaf34fab0d5fb02b0af7",
+    "src/framelink_android.cpp": "36e0a993aeaa5baeb01135a30662df6ece9784b928823f49fbe069f0f6e9715f",
+    "test/fl_nv21.cpp": "a78d3ed91c8c734c0b4982745037734535f0ec83ecdbf40ec805876c30cfd6cf",
+    "CMakeLists.txt": "6554da5edd2cda573a04a15b651abec26512ee09d3884991de5d474f858e19f0"
+  },
+  "steps": [
+    {
+      "name": "arm64-configure",
+      "exit": 0
+    }
+  ],
+  "cases": [],
+  "error": "['read_lease_egl', 'read_lease_egl_producer_death', 'read_leases', 'nv21_conversion', 'portable_map_nv12', 'portable_map_rgba', 'portable_map_bgra', 'portable_map_rgb10a2']",
+  "ended": 1794044279.6503825
+}

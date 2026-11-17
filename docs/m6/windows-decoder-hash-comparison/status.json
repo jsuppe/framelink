@@ -1,0 +1,20 @@
+{
+  "state": "finished",
+  "started_utc": "2026-11-12T08:07:30.884278+00:00",
+  "step": "analysis",
+  "command": [
+    "<win-home>\\AppData\\Local\\Microsoft\\WindowsApps\\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\\python.exe",
+    "-E",
+    "<win-home>\\dev\\framelink-hash-compare-hash-compare-20261112a\\check_results.py",
+    "<win-home>\\dev\\framelink-hash-compare-hash-compare-20261112a\\result"
+  ],
+  "configure_exit": 0,
+  "build_exit": 0,
+  "binary_before": "75adacf22008239574ee45d5ce9ae3fc343ea0fd1f707cc8de6ac910a3379f38",
+  "benchmark-idle-before_exit": 0,
+  "benchmark_exit": 0,
+  "benchmark-idle-after_exit": 0,
+  "binary_after": "75adacf22008239574ee45d5ce9ae3fc343ea0fd1f707cc8de6ac910a3379f38",
+  "analysis_exit": 0,
+  "ended_utc": "2026-11-12T08:07:38.232794+00:00"
+}

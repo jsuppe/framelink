@@ -1,0 +1,228 @@
+{
+  "state": "finished",
+  "started": 1794044323.91511,
+  "source_sha256": {
+    "src/fl_nv21.h": "c2977f2101bc23c48530b2f15be1fc697f7c60e4e318aaf34fab0d5fb02b0af7",
+    "src/framelink_android.cpp": "36e0a993aeaa5baeb01135a30662df6ece9784b928823f49fbe069f0f6e9715f",
+    "test/fl_nv21.cpp": "a78d3ed91c8c734c0b4982745037734535f0ec83ecdbf40ec805876c30cfd6cf",
+    "CMakeLists.txt": "6554da5edd2cda573a04a15b651abec26512ee09d3884991de5d474f858e19f0"
+  },
+  "steps": [
+    {
+      "name": "arm64-configure",
+      "exit": 0
+    },
+    {
+      "name": "arm64-build",
+      "exit": 0
+    },
+    {
+      "name": "x86_64-build",
+      "exit": 0
+    },
+    {
+      "name": "android-read_lease_egl",
+      "exit": 0
+    },
+    {
+      "name": "android-read_lease_egl_producer_death",
+      "exit": 0
+    },
+    {
+      "name": "android-read_leases",
+      "exit": 0
+    },
+    {
+      "name": "android-nv21_conversion",
+      "exit": 0
+    },
+    {
+      "name": "android-portable_map_nv12",
+      "exit": 0
+    },
+    {
+      "name": "android-portable_map_rgba",
+      "exit": 0
+    },
+    {
+      "name": "android-portable_map_bgra",
+      "exit": 0
+    },
+    {
+      "name": "android-portable_map_rgb10a2",
+      "exit": 0
+    },
+    {
+      "name": "android-gst_pool_policy",
+      "exit": 0
+    },
+    {
+      "name": "probe-build",
+      "exit": 0
+    },
+    {
+      "name": "NV12-130x66-map-25",
+      "exit": 0
+    },
+    {
+      "name": "NV12-1920x1080-map-300",
+      "exit": 0
+    },
+    {
+      "name": "NV12-3840x2160-map-300",
+      "exit": 0
+    },
+    {
+      "name": "NV12-1920x1080-copy-300",
+      "exit": 0
+    },
+    {
+      "name": "NV12-3840x2160-copy-300",
+      "exit": 0
+    }
+  ],
+  "cases": [
+    {
+      "label": "NV12-130x66-map-25",
+      "fields": {
+        "scope": "single-acquired-buffer-map-control-no-av",
+        "format": "NV12",
+        "mode": "map",
+        "width": "130",
+        "height": "66",
+        "native.format": "35",
+        "native.usage": "306",
+        "native.planes": "3",
+        "native.plane0": "192,1",
+        "native.plane1": "192,2",
+        "native.plane2": "192,2",
+        "native.uv_delta": "-1",
+        "map.n": "25",
+        "map.mean_ms": "0.107978",
+        "map.p95_ms": "0.110693",
+        "copy.n": "25",
+        "copy.mean_ms": "0.000062",
+        "copy.p95_ms": "0.000077",
+        "unmap.n": "25",
+        "unmap.mean_ms": "0.009040",
+        "unmap.p95_ms": "0.009846",
+        "cpu.mean_ms": "0.117698",
+        "content": "verified"
+      }
+    },
+    {
+      "label": "NV12-1920x1080-map-300",
+      "fields": {
+        "scope": "single-acquired-buffer-map-control-no-av",
+        "format": "NV12",
+        "mode": "map",
+        "width": "1920",
+        "height": "1080",
+        "native.format": "35",
+        "native.usage": "306",
+        "native.planes": "3",
+        "native.plane0": "1920,1",
+        "native.plane1": "1920,2",
+        "native.plane2": "1920,2",
+        "native.uv_delta": "-1",
+        "map.n": "300",
+        "map.mean_ms": "4.434839",
+        "map.p95_ms": "4.534384",
+        "copy.n": "300",
+        "copy.mean_ms": "0.000203",
+        "copy.p95_ms": "0.000308",
+        "unmap.n": "300",
+        "unmap.mean_ms": "0.895281",
+        "unmap.p95_ms": "0.958538",
+        "cpu.mean_ms": "5.242518",
+        "content": "verified"
+      }
+    },
+    {
+      "label": "NV12-3840x2160-map-300",
+      "fields": {
+        "scope": "single-acquired-buffer-map-control-no-av",
+        "format": "NV12",
+        "mode": "map",
+        "width": "3840",
+        "height": "2160",
+        "native.format": "35",
+        "native.usage": "306",
+        "native.planes": "3",
+        "native.plane0": "3840,1",
+        "native.plane1": "3840,2",
+        "native.plane2": "3840,2",
+        "native.uv_delta": "-1",
+        "map.n": "300",
+        "map.mean_ms": "17.291605",
+        "map.p95_ms": "17.803077",
+        "copy.n": "300",
+        "copy.mean_ms": "0.000222",
+        "copy.p95_ms": "0.000308",
+        "unmap.n": "300",
+        "unmap.mean_ms": "3.335397",
+        "unmap.p95_ms": "3.396384",
+        "cpu.mean_ms": "20.434028",
+        "content": "verified"
+      }
+    },
+    {
+      "label": "NV12-1920x1080-copy-300",
+      "fields": {
+        "scope": "single-acquired-buffer-map-control-no-av",
+        "format": "NV12",
+        "mode": "copy",
+        "width": "1920",
+        "height": "1080",
+        "native.format": "35",
+        "native.usage": "306",
+        "native.planes": "3",
+        "native.plane0": "1920,1",
+        "native.plane1": "1920,2",
+        "native.plane2": "1920,2",
+        "native.uv_delta": "-1",
+        "map.n": "300",
+        "map.mean_ms": "4.406478",
+        "map.p95_ms": "4.492692",
+        "copy.n": "300",
+        "copy.mean_ms": "0.567090",
+        "copy.p95_ms": "0.656923",
+        "unmap.n": "300",
+        "unmap.mean_ms": "0.811862",
+        "unmap.p95_ms": "0.920615",
+        "cpu.mean_ms": "5.701434",
+        "content": "verified"
+      }
+    },
+    {
+      "label": "NV12-3840x2160-copy-300",
+      "fields": {
+        "scope": "single-acquired-buffer-map-control-no-av",
+        "format": "NV12",
+        "mode": "copy",
+        "width": "3840",
+        "height": "2160",
+        "native.format": "35",
+        "native.usage": "306",
+        "native.planes": "3",
+        "native.plane0": "3840,1",
+        "native.plane1": "3840,2",
+        "native.plane2": "3840,2",
+        "native.uv_delta": "-1",
+        "map.n": "300",
+        "map.mean_ms": "17.305150",
+        "map.p95_ms": "17.809769",
+        "copy.n": "300",
+        "copy.mean_ms": "2.361394",
+        "copy.p95_ms": "2.497230",
+        "unmap.n": "300",
+        "unmap.mean_ms": "3.270739",
+        "unmap.p95_ms": "3.361230",
+        "cpu.mean_ms": "22.705366",
+        "content": "verified"
+      }
+    }
+  ],
+  "probe_sha256": "84f606844d0559b9f2d39de02de93e7b7bd1f459068b9653ec6849933d113846",
+  "ended": 1794044353.6828585
+}

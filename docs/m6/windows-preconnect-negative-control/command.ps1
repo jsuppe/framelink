@@ -1,0 +1,1 @@
+$ProgressPreference='SilentlyContinue'; $env:PATH='C:\Program Files\gstreamer\1.0\msvc_x86_64\bin;'+$env:PATH; Set-Location '<win-home>/dev/framelink-m6-windows-a2d25b4'; ctest --test-dir build -C Release --output-on-failure -R '^(m5_preconnect|m5_external_pipeline)$'; exit $LASTEXITCODE

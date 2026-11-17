@@ -1,0 +1,10 @@
+{
+  "unit": "framelink-m6-windows-d8f97c2-20261109T002436",
+  "command": [
+    "/usr/bin/python3",
+    "<linux-home>/dev/evidence/m6-cpu-path/windows-integrated-d8f97c2/run.py"
+  ],
+  "revision": "d8f97c244696c42bb4ad4124674d8b462df4a9ed",
+  "wake": "794c5600-be66-471f-a7c9-c679bc9bb0d7",
+  "purpose": "Exact-revision clean Windows build, runtime API/export inspection and full serial regression after public CPU DLL extension"
+}

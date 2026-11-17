@@ -1,0 +1,27 @@
+{
+  "state": "finished",
+  "started": 1794137322.494308,
+  "revision": "4f37f258a1d6fe485e704fc70378ede2419d880f",
+  "binary_sha256": "8266261c62c9e10a32623db4f950aaf791bbd811b99d6621bba34b4cb48e00aa",
+  "remote": "/data/local/tmp/framelink-cpu-prefault/android-shared-bgra-1920x1080-60-5-prefault",
+  "command": "cd /data/local/tmp/framelink-cpu-prefault && ./fl_gst_av_bench static --shared-cpu --seconds 5 --size 1920x1080 --fps 60 --format BGRA --pool 2 --video-queue 1 --latency-ms 0 --arrival-budget-ms 17 --transport-only --no-output-preroll --output-queue-buffers 1 --raw --out /data/local/tmp/framelink-cpu-prefault/android-shared-bgra-1920x1080-60-5-prefault --label android-shared-bgra-1920x1080-60-5-prefault",
+  "exit": 0,
+  "pull_exit": 0,
+  "complete": "yes",
+  "counts": {
+    "consumer.frames": "300",
+    "consumer.samples": "240000",
+    "producer.pushed.frames": "300",
+    "producer.pushed.samples": "240000"
+  },
+  "analysis_exit": 0,
+  "resource_slopes": {
+    "consumer.handles.slope.per_min": "-0.00",
+    "consumer.mem.slope.kb_per_min": "0.00",
+    "consumer.threads.slope.per_min": "0.00",
+    "producer.handles.slope.per_min": "0.00",
+    "producer.mem.slope.kb_per_min": "0.00",
+    "producer.threads.slope.per_min": "0.00"
+  },
+  "ended": 1794137328.748334
+}

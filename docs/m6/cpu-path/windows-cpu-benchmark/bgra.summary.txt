@@ -1,0 +1,82 @@
+arrival.budget_ms=150
+complete=yes
+config=BGRA 64x64@30 bin shared-cpu traced 5s
+consumer.audio.arrival.all.ms=n=500 p50=0.79 p95=1.80 p99=2.03 max=2.06 min=0.06
+consumer.audio.arrival.ms=n=300 p50=0.75 p95=1.86 p99=2.04 max=2.06 min=0.07
+consumer.audio.contiguous=yes
+consumer.audio.deadline_misses=0/500
+consumer.audio.output_queue.admission_residence.ms=n=500 p50=0.01 p95=0.01 p99=0.01 max=0.01 min=0.01
+consumer.audio.output_queue.pending=0
+consumer.audio.output_queue.sampled_max_buffers=0
+consumer.audio.output_queue.unmatched=0
+consumer.audio.render.all.ms=n=500 p50=0.80 p95=1.81 p99=2.05 max=2.08 min=0.08
+consumer.audio.render.ms=n=300 p50=0.77 p95=1.88 p99=2.06 max=2.08 min=0.09
+consumer.audio.render_interval.ms=n=299 p50=10.00 p95=11.01 p99=11.01 max=11.06 min=8.50
+consumer.audio.render_jitter.p1_p99.ms=1.96
+consumer.av_offset.abs.ms=n=3 p50=1.20 p95=1.33 p99=1.33 max=1.33 min=1.01
+consumer.av_offset.ms=n=3 p50=1.20 p95=1.33 p99=1.33 max=1.33 min=1.01
+consumer.cpu.percent=8.79
+consumer.frames=150
+consumer.handles=1500..1500 min=1500 max=1500
+consumer.handles.slope.per_min=-0.00
+consumer.mem.kb=187792..187792 min=187792 max=187792
+consumer.mem.kind=private
+consumer.mem.slope.kb_per_min=0.00
+consumer.memory=memory:SystemMemory
+consumer.pid=56588
+consumer.queue.accounting=complete
+consumer.result=EOS
+consumer.samples=240000
+consumer.scope=transport-consumer
+consumer.series.t_cpums_memkb_handles_threads=0.0:109:6548:275:12;1.1:1203:186772:2495:21;2.1:1719:187792:1500:21;3.2:1828:187792:1500:21;4.3:1906:187792:1500:21;5.2:2016:187704:1485:18;
+consumer.threads=21..21 min=21 max=21
+consumer.threads.slope.per_min=0.00
+consumer.video.arrival.all.ms=n=150 p50=2.00 p95=2.97 p99=3.73 max=3.95 min=0.76
+consumer.video.arrival.ms=n=90 p50=1.92 p95=2.88 p99=3.95 max=3.95 min=0.76
+consumer.video.deadline_misses=0/150
+consumer.video.output_queue.admission_residence.ms=n=150 p50=0.01 p95=0.01 p99=0.01 max=0.02 min=0.00
+consumer.video.output_queue.pending=0
+consumer.video.output_queue.sampled_max_buffers=0
+consumer.video.output_queue.unmatched=0
+consumer.video.render.all.ms=n=150 p50=2.01 p95=2.99 p99=3.75 max=3.96 min=0.78
+consumer.video.render.ms=n=90 p50=1.94 p95=2.90 p99=3.96 max=3.96 min=0.78
+consumer.video.render_interval.ms=n=89 p50=33.08 p95=34.99 p99=35.01 max=35.01 min=31.00
+consumer.video.render_jitter.p1_p99.ms=3.19
+exit=0/0
+expected.frames=150
+expected.samples=240000
+label=bgra
+output.async=false
+output.queue_buffers=0
+output.sync=false
+playback.latency_ms=0
+producer.audio.push_burst.max=0
+producer.audio.push_interval.ms=n=300 p50=10.00 p95=11.00 p99=11.01 max=11.04 min=8.50
+producer.audio.push_lateness.ms=n=300 p50=0.70 p95=1.81 p99=1.99 max=1.99 min=0.02
+producer.cpu.percent=5.21
+producer.handles=1491..1491 min=1491 max=1491
+producer.handles.slope.per_min=0.00
+producer.injection.elapsed_us=0
+producer.injection.executed=0
+producer.injection.frame=0
+producer.injection.requested_ms=0
+producer.injection.stage=none
+producer.injection.start_monotonic_us=0
+producer.mem.kb=187516..187516 min=187516 max=187516
+producer.mem.kind=private
+producer.mem.slope.kb_per_min=0.00
+producer.pid=29492
+producer.pushed.frames=150
+producer.pushed.samples=240000
+producer.result=EOS
+producer.series.t_cpums_memkb_handles_threads=0.0:94:6636:262:12;1.1:1125:186816:2486:18;2.1:1500:187516:1491:18;3.2:1547:187516:1491:18;4.2:1609:187516:1491:18;5.0:1672:187460:1480:16;
+producer.stats.framelink-audio-sink-stats=framelink-audio-sink-stats, blocks=(guint64)500, pcm-bytes=(guint64)960000, sample-frames=(guint64)240000, generation=(guint64)1, shared-pcm=(boolean)false;
+producer.stats.framelink-sink-stats=framelink-sink-stats, received=(guint64)150, submitted=(guint64)150, dropped=(guint64)0, ring-full-drops=(guint64)0;
+producer.threads=18..18 min=18 max=18
+producer.threads.slope.per_min=0.00
+producer.video.push_burst.max=0
+producer.video.push_interval.ms=n=90 p50=33.03 p95=34.51 p99=34.58 max=34.58 min=32.00
+producer.video.push_lateness.ms=n=90 p50=0.75 p95=1.44 p99=1.93 max=1.93 min=0.02
+seconds=5
+video.pool=2
+video.queue=1

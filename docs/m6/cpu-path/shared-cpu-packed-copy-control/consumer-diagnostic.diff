@@ -1,0 +1,20 @@
+--- original-instrumented-source.inc
++++ packed-copy-instrumented-source.inc
+@@ -79,6 +79,7 @@
+  struct Buffer{GstBuffer*p;~Buffer(){if(p)gst_buffer_unref(p);}} owned{buf};
+  GstMapInfo map{};if(!gst_buffer_map(buf,&map,GST_MAP_WRITE))return GST_FLOW_ERROR;
+  const auto audit2=g_get_monotonic_time();rusage auditRu0{},auditRu1{};getrusage(RUSAGE_THREAD,&auditRu0);
++ if(seq==1)fprintf(stderr,"AUDIT plane_mode enabled=%d\n",g_getenv("FL_AUDIT_PLANE_COPY")!=nullptr);
+  bool valid=view.planes==GST_VIDEO_INFO_N_PLANES(&info);guint64 bytes=0;
+  // Skip initialization only when every output byte will be overwritten.
+  // Padded/offset layouts retain full zeroing, including reused cache buffers.
+@@ -96,7 +97,8 @@
+   valid=p<GST_VIDEO_MAX_PLANES&&view.plane[p].rows==rows&&view.plane[p].rowBytes==rowBytes&&view.plane[p].stride>=rowBytes&&
+    info.stride[p]>=gint(rowBytes)&&info.offset[p]+gsize(rows-1)*info.stride[p]+rowBytes<=map.size;
+   if(!valid)break;
+-  for(guint y=0;y<rows;y++)memcpy(map.data+info.offset[p]+gsize(y)*info.stride[p],static_cast<const guint8*>(view.plane[p].pixels)+gsize(y)*view.plane[p].stride,rowBytes);
++  if(g_getenv("FL_AUDIT_PLANE_COPY")&&view.plane[p].stride==rowBytes&&info.stride[p]==gint(rowBytes))memcpy(map.data+info.offset[p],view.plane[p].pixels,gsize(rows)*rowBytes);
++  else for(guint y=0;y<rows;y++)memcpy(map.data+info.offset[p]+gsize(y)*info.stride[p],static_cast<const guint8*>(view.plane[p].pixels)+gsize(y)*view.plane[p].stride,rowBytes);
+   bytes+=guint64(rows)*rowBytes;
+  }
+  const auto audit3=g_get_monotonic_time();getrusage(RUSAGE_THREAD,&auditRu1);

@@ -1,0 +1,101 @@
+{
+  "scope": "decoder conversion plus source/final full-frame readback workload; no physical renderer or isolated-hop budget claim",
+  "trace_qualified": false,
+  "budget_ns": 34000000,
+  "resources": {
+    "source": {
+      "cpu_percent": 96.68172148819741,
+      "samples": 3,
+      "slopes_per_min": {}
+    },
+    "relay": {
+      "cpu_percent": 85.74396305044341,
+      "samples": 3,
+      "slopes_per_min": {}
+    },
+    "receiver": {
+      "cpu_percent": 73.01137632869381,
+      "samples": 3,
+      "slopes_per_min": {}
+    }
+  },
+  "video_frames": 60,
+  "pcm_frames": 96000,
+  "source_distinct_digests": 60,
+  "video_arrival_misses": [],
+  "audio_arrival_misses": [],
+  "source_conversion_bytes": 491520,
+  "source_readback_bytes": 491520,
+  "final_readback_bytes": 491520,
+  "timing_ms": {
+    "scheduled_to_final_arrival": {
+      "p50": 5.197534,
+      "p95": 6.063567,
+      "p99": 7.7894,
+      "max": 7.7894
+    },
+    "audio_scheduled_to_final": {
+      "p50": 0.164,
+      "p95": 0.2157,
+      "p99": 0.2845,
+      "max": 1.5059
+    },
+    "source_acquire": {
+      "p50": 0.0073,
+      "p95": 0.0129,
+      "p99": 0.1988,
+      "max": 0.1988
+    },
+    "decoder_pull_wait": {
+      "p50": 0.0052,
+      "p95": 0.0094,
+      "p99": 0.0109,
+      "max": 0.0109
+    },
+    "conversion_call": {
+      "p50": 0.0149,
+      "p95": 0.0388,
+      "p99": 0.0551,
+      "max": 0.0551
+    },
+    "conversion_until_gpu_observed_done": {
+      "p50": 1.6547,
+      "p95": 2.0686,
+      "p99": 3.0975,
+      "max": 3.0975
+    },
+    "source_oracle_readback_and_hash": {
+      "p50": 0.1975,
+      "p95": 0.3798,
+      "p99": 0.5504,
+      "max": 0.5504
+    },
+    "source_submit": {
+      "p50": 0.0304,
+      "p95": 0.0486,
+      "p99": 0.0729,
+      "max": 0.0729
+    },
+    "relay_forward": {
+      "p50": 0.0364,
+      "p95": 0.051,
+      "p99": 0.0637,
+      "max": 0.0637
+    },
+    "final_acquire_until_lease_done": {
+      "p50": 2.0303,
+      "p95": 2.0463,
+      "p99": 2.0668,
+      "max": 2.0668
+    },
+    "final_staging_map_and_hash": {
+      "p50": 0.0112,
+      "p95": 0.0146,
+      "p99": 0.0301,
+      "max": 0.0301
+    }
+  },
+  "trace_checked": false,
+  "trace_scope": "FrameLink transport instrumentation only; uninstrumented GStreamer/D3D conversion and oracle copies are not inferred absent",
+  "pass": true
+}

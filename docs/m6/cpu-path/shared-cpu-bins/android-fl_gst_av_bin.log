@@ -1,0 +1,39 @@
+CASE thin (application-installed context)
+consumer=ok video=30 samples=24000 lag=150.2..150.8ms
+CASE pause/resume tracks=video (thin)
+  producer=EOS consumer=ok video=29 samples=0 lag=150.2..150.9ms
+CASE pause/resume tracks=video (bin)
+  producer=EOS consumer=ok video=29 samples=0 lag=150.3..151.0ms
+CASE pause/resume tracks=av (thin)
+  producer=audio: PCM sample duration/continuity mismatch consumer=flaudioreader1: audio peer closed before GDP EOS video=12 samples=18720 lag=150.2..150.9ms
+CASE pause/resume tracks=av (bin)
+  producer=audio: PCM sample duration/continuity mismatch consumer=flaudioreader2: audio peer closed before GDP EOS video=12 samples=18720 lag=150.2..150.7ms
+CASE teardown while media is held
+  NULL in 3.2ms
+CASE consumer death mid-stream
+  producer error 0ms after consumer death: giostreamsink16: Could not write to resource.
+CASE tracks=av producer-first=0 lead=0ms
+producer=ok consumer=ok video=30 samples=24000 lag=150.2..150.8ms generation=1 ids=1/2 session=915eab5d7bfa93c996286d8f66992fbe
+CASE tracks=av producer-first=0 lead=0ms
+producer=ok consumer=ok video=30 samples=24000 lag=150.2..150.9ms generation=1 ids=1/2 session=13c00b40fe96c91c8ffbb1a32391480f
+CASE tracks=av producer-first=0 lead=0ms
+producer=ok consumer=ok video=30 samples=24000 lag=150.2..150.8ms generation=1 ids=1/2 session=dde2c615d57e2a176551686b407b4995
+CASE tracks=av producer-first=0 lead=0ms
+producer=ok consumer=ok video=30 samples=24000 lag=150.2..150.9ms generation=1 ids=1/2 session=c22b602d0302e3b46e811884b8aeb29b
+CASE tracks=av producer-first=1 lead=800ms
+producer=ok consumer=ok video=30 samples=24000 lag=150.2..150.8ms generation=1 ids=1/2 session=918d99ae2cdec92b20699b7242966d38
+CASE tracks=av producer-first=0 lead=0ms
+producer=ok consumer=ok video=30 samples=24000 lag=150.2..150.5ms generation=1 ids=1/2 session=7e41f4fae1bd1a51610fcd2d73a95443
+CASE tracks=video producer-first=1 lead=300ms
+producer=ok consumer=ok video=30 samples=0 lag=150.2..150.9ms generation=1 ids=1/0 session=10536744ceaa1c8798561e4ef46267ad
+CASE tracks=audio producer-first=0 lead=0ms
+producer=ok consumer=ok video=0 samples=24000 lag=150.2..150.5ms generation=1 ids=0/2 session=92a2347da87db3ff20eee6feaa1d5bad
+CASE negative track-mismatch
+  producer error after 17ms: s: incompatible session selection; consumer: setup: producer selection or authentication rejected
+CASE negative no-consumer
+  producer error after 1004ms: s: local control connection deadline or failure: Operation was cancelled; consumer: 
+CASE negative non-system-clock
+  producer error after 2ms: s: framelinkavsink with session= requires the pipeline system clock; do not fix another pipeline clock; consumer: setup: local session discovery deadline or cancellation
+CASE negative caps-mismatch
+  producer: videotestsrc17: Internal data stream error.; consumer: flaudioreader11: audio peer closed before GDP EOS
+framelinkavsink: held startup in both orders, session-epoch timeline (lag within latency bounds on both tracks), thin/bin pause parity, exact counts, drain before EOS, teardown/consumer-death/track/clock/caps/missing-peer failures bounded

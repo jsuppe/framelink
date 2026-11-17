@@ -9,6 +9,7 @@
 #include <vector>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include "../samples/deadline.h"
 #ifdef __ANDROID__
 extern "C" {
@@ -18,10 +19,16 @@ GST_PLUGIN_STATIC_DECLARE(framelink);GST_PLUGIN_STATIC_DECLARE(app);GST_PLUGIN_S
 #define CHECK(x) do {if(!(x)){fprintf(stderr,"line %d: %s\n",__LINE__,#x);std::exit(1);}}while(0)
 static GstElement* parse(const std::string& s){GError* e=nullptr;auto*p=gst_parse_launch(s.c_str(),&e);if(e)fprintf(stderr,"%s\n",e->message);CHECK(p&&!e);return p;}
 static void push(GstElement* in,int64_t pts) {auto*b=gst_buffer_new_allocate(nullptr,16*16*4,nullptr);gst_buffer_memset(b,0,127,16*16*4);GST_BUFFER_PTS(b)=pts;CHECK(gst_app_src_push_buffer(GST_APP_SRC(in),b)==GST_FLOW_OK);}
-static void policy(unsigned pool,bool fail,bool recover) {
+static void policy(unsigned pool,bool fail,bool recover,bool bin=false) {
  const auto name="pool-policy-"+std::to_string(g_get_monotonic_time());flChannel*c=nullptr;
  CHECK(flCreateChannelEx(name.c_str(),16,16,FL_FORMAT_BGRA8,pool,FL_MAP_CPU|FL_DEFER_RELEASE,&c)==FL_OK);
- auto*p=parse("appsrc name=in is-live=true format=time caps=video/x-raw,format=BGRA,width=16,height=16,framerate=30/1 ! framelinksink channel="+name+" preserve-timestamps=true sync=false buffer-wait-ms="+std::to_string(recover?500:fail?50:0)+" error-on-ring-full="+(fail?"true":"false"));
+ auto*p=parse("appsrc name=in is-live=true format=time caps=video/x-raw,format=BGRA,width=16,height=16,framerate=30/1 ! "+(bin?std::string("framelinkavsink name=transport tracks=video"):"framelinksink channel="+name+" preserve-timestamps=true sync=false")+" buffer-wait-ms="+std::to_string(recover?500:fail?50:0)+" error-on-ring-full="+(fail?"true":"false"));
+ if(bin){
+  auto*b=gst_bin_get_by_name(GST_BIN(p),"transport");auto*v=gst_bin_get_by_name(GST_BIN(b),"video");
+  g_object_set(v,"preserve-timestamps",TRUE,"sync",FALSE,nullptr);gst_object_unref(v);
+  flChannel*producer=nullptr;CHECK(flOpenProducer(name.c_str(),&producer)==FL_OK);gboolean adopted=FALSE;
+  g_signal_emit_by_name(b,"adopt-channel",producer,&adopted);CHECK(adopted);gst_object_unref(b);
+ }
  auto*in=gst_bin_get_by_name(GST_BIN(p),"in");auto*bus=gst_element_get_bus(p);
  CHECK(gst_element_set_state(p,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
  std::vector<uint64_t> leases;flFrame f{};
@@ -40,6 +47,18 @@ static void policy(unsigned pool,bool fail,bool recover) {
  CHECK(g_get_monotonic_time()-before<2000000);
  for(auto t:leases)CHECK(flCompleteReadLease(c,t)==FL_OK);CHECK(flCollectReadLeases(c)==FL_OK);
  gst_element_set_state(p,GST_STATE_NULL);gst_object_unref(in);gst_object_unref(bus);gst_object_unref(p);flClose(c);
+}
+static void binPolicyDefaults(){
+ auto*b=gst_element_factory_make("framelinkavsink",nullptr);CHECK(b);
+ guint wait=99;gboolean fail=TRUE;g_object_get(b,"buffer-wait-ms",&wait,"error-on-ring-full",&fail,nullptr);CHECK(wait==5&&!fail);
+ g_object_set(b,"buffer-wait-ms",123u,"error-on-ring-full",TRUE,"tracks","audio",nullptr);
+ g_object_set(b,"tracks","video",nullptr); // Rebuilt child must retain selection.
+ auto*v=gst_bin_get_by_name(GST_BIN(b),"video");CHECK(v);
+ g_object_get(v,"buffer-wait-ms",&wait,"error-on-ring-full",&fail,nullptr);CHECK(wait==123&&fail);
+ CHECK(gst_element_set_state(b,GST_STATE_READY)!=GST_STATE_CHANGE_FAILURE);
+ g_object_set(b,"buffer-wait-ms",0u,"error-on-ring-full",FALSE,nullptr);
+ g_object_get(b,"buffer-wait-ms",&wait,"error-on-ring-full",&fail,nullptr);CHECK(wait==123&&fail);
+ gst_element_set_state(b,GST_STATE_NULL);gst_object_unref(v);gst_object_unref(b);
 }
 static void source(unsigned pool) {
  const auto name="source-pool-"+std::to_string(g_get_monotonic_time());
@@ -102,13 +121,68 @@ static void sequenceGap() {
  flClose(producer);gst_element_set_state(p,GST_STATE_NULL);
  gst_object_unref(bus);gst_object_unref(pad);gst_object_unref(src);gst_object_unref(out);gst_object_unref(p);
 }
+// Control sizes are deliberately small: these establish queue semantics, not
+// throughput qualification. The 1080p60/4K30 sustained evidence is separate.
+static void noFillAndProducerGap(unsigned pool) {
+ const auto name="no-fill-"+std::to_string(g_get_monotonic_time());
+ auto*p=parse("framelinksrc channel="+name+" width=16 height=16 pool-size="+std::to_string(pool)+" preserve-timestamps=true ! appsink name=out sync=false async=false enable-last-sample=false max-buffers=1");
+ auto*out=gst_bin_get_by_name(GST_BIN(p),"out");auto*bus=gst_element_get_bus(p);
+ CHECK(gst_element_set_state(p,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
+ flChannel*producer=nullptr;CHECK(flOpenProducer(name.c_str(),&producer)==FL_OK);
+ const int64_t pts[]={0,16666667,2000000000,2016666667};
+ for(unsigned i=0;i<4;++i){
+  flBuffer b{};CHECK(flAcquireBuffer(producer,&b,1000)==FL_OK);
+  flMappedImage image{};CHECK(flImageMapPlanes(b.image,&image)==FL_OK&&image.planes==1);
+  for(unsigned y=0;y<16;++y)memset((guint8*)image.plane[0].pixels+y*image.plane[0].stride,31+i,64);
+  flImageUnmap(b.image);CHECK(flSubmit(producer,&b,pts[i])==FL_OK);
+  // No second submit exists yet: any wait-to-fill policy must time out here.
+  auto*sample=gst_app_sink_try_pull_sample(GST_APP_SINK(out),2*GST_SECOND);CHECK(sample);
+  auto*buffer=gst_sample_get_buffer(sample);CHECK(GST_BUFFER_PTS(buffer)==guint64(pts[i]));
+  GstMapInfo map{};CHECK(gst_buffer_map(buffer,&map,GST_MAP_READ)&&map.size==1024);
+  for(unsigned j=0;j<1024;++j)CHECK(map.data[j]==31+i);gst_buffer_unmap(buffer,&map);gst_sample_unref(sample);
+  if(i==1){ // no submission means no duplicate, invented frame or transport loss
+   CHECK(!gst_app_sink_try_pull_sample(GST_APP_SINK(out),50*GST_MSECOND));
+  }
+ }
+ // The large media-time gap is upstream, not a missing transport sequence.
+ CHECK(!gst_bus_pop_filtered(bus,(GstMessageType)(GST_MESSAGE_ELEMENT|GST_MESSAGE_ERROR)));
+ flClose(producer);gst_element_set_state(p,GST_STATE_NULL);gst_object_unref(bus);gst_object_unref(out);gst_object_unref(p);
+ printf("pool%u: single-frame no-fill, producer gap, exact PTS/pixels and no invented sequence loss pass\n",pool);
+}
+static void clockScheduling(bool sync) {
+ const auto name="clock-control-"+std::to_string(g_get_monotonic_time());
+ auto*p=parse("framelinksrc name=source channel="+name+" width=16 height=16 pool-size=2 preserve-timestamps=true ! appsink name=out async=false enable-last-sample=false sync="+(sync?"true":"false"));
+ auto*out=gst_bin_get_by_name(GST_BIN(p),"out");auto*pad=gst_element_get_static_pad(out,"sink");std::atomic<bool> arrived{false};
+ auto probe=gst_pad_add_probe(pad,GST_PAD_PROBE_TYPE_BUFFER,[](GstPad*,GstPadProbeInfo*,gpointer data){((std::atomic<bool>*)data)->store(true);return GST_PAD_PROBE_OK;},&arrived,nullptr);
+ CHECK(gst_element_set_state(p,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
+ flChannel*producer=nullptr;CHECK(flOpenProducer(name.c_str(),&producer)==FL_OK);
+ auto*clock=gst_element_get_clock(p);CHECK(clock);const auto target=gst_clock_get_time(clock)-gst_element_get_base_time(p)+GST_SECOND;
+ flBuffer b{};CHECK(flAcquireBuffer(producer,&b,1000)==FL_OK&&flSubmit(producer,&b,target)==FL_OK);
+ const auto deadline=g_get_monotonic_time()+500000;while(!arrived&&g_get_monotonic_time()<deadline)g_usleep(1000);CHECK(arrived);
+ // Admission happened; only the selected sink clock should hold this frame.
+ CHECK(gst_clock_get_time(clock)-gst_element_get_base_time(p)<target-100*GST_MSECOND);
+ if(sync)CHECK(!gst_app_sink_try_pull_sample(GST_APP_SINK(out),50*GST_MSECOND));
+ auto*sample=gst_app_sink_try_pull_sample(GST_APP_SINK(out),sync?2*GST_SECOND:100*GST_MSECOND);CHECK(sample);
+ CHECK(GST_BUFFER_PTS(gst_sample_get_buffer(sample))==target);
+ const auto observed=gst_clock_get_time(clock)-gst_element_get_base_time(p);
+ if(sync)CHECK(observed>=target);else CHECK(observed<target);
+ gst_sample_unref(sample);gst_object_unref(clock);gst_pad_remove_probe(pad,probe);
+ flClose(producer);gst_element_set_state(p,GST_STATE_NULL);gst_object_unref(pad);gst_object_unref(out);gst_object_unref(p);
+ printf("sync=%d: transport admission separated from sink clock hold pass\n",sync);
+}
 int main(int argc,char**argv){gst_init(&argc,&argv);SampleDeadline deadline;CHECK(argc==2);
 #ifdef __ANDROID__
  GST_PLUGIN_STATIC_REGISTER(framelink);GST_PLUGIN_STATIC_REGISTER(app);GST_PLUGIN_STATIC_REGISTER(coreelements);
 #else
  GError*error=nullptr;auto*plugin=gst_plugin_load_file(argv[1],&error);CHECK(plugin&&!error);gst_object_unref(plugin);
 #endif
+ binPolicyDefaults();
  for(unsigned pool:{2u,3u}){source(pool);policy(pool,false,false);policy(pool,true,false);policy(pool,true,true);}
+ // The same held-native-lease oracle exercises the bin's public policy, not
+ // merely getter/setter forwarding: all slots unavailable, then fail/drop/free.
+ for(unsigned pool:{2u,3u}){policy(pool,false,false,true);policy(pool,true,false,true);policy(pool,true,true,true);}
  agePolicy();sequenceGap();
+ for(unsigned pool:{2u,3u})noFillAndProducerGap(pool);
+ clockScheduling(false);clockScheduling(true);
  puts("2/3 image capacities: bounded drop, bounded error, delayed-reader recovery and exact loss accounting pass");
 }

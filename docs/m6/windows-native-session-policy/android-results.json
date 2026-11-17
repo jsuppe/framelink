@@ -1,0 +1,88 @@
+[
+  {
+    "name": "arm64-build",
+    "command": [
+      "cmake",
+      "--build",
+      "<linux-home>/dev/build/framelink-m6-arm64",
+      "--target",
+      "fl_gst_native_producer_android",
+      "fl_gst_shared_cpu_av",
+      "-j",
+      "4"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "x86_64-build",
+    "command": [
+      "cmake",
+      "--build",
+      "<linux-home>/dev/build/framelink-m6-x86_64",
+      "--target",
+      "fl_gst_native_producer_android",
+      "fl_gst_shared_cpu_av",
+      "-j",
+      "4"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "mkdir",
+    "command": [
+      "adb",
+      "shell",
+      "mkdir",
+      "-p",
+      "/data/local/tmp/framelink-windows-native-policy-regression"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "push-fl_gst_native_producer_android",
+    "command": [
+      "adb",
+      "push",
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_gst_native_producer_android",
+      "/data/local/tmp/framelink-windows-native-policy-regression/"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "push-fl_gst_shared_cpu_av",
+    "command": [
+      "adb",
+      "push",
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_gst_shared_cpu_av",
+      "/data/local/tmp/framelink-windows-native-policy-regression/"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "chmod",
+    "command": [
+      "adb",
+      "shell",
+      "chmod 755 /data/local/tmp/framelink-windows-native-policy-regression/fl_*"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "fl_gst_native_producer_android",
+    "command": [
+      "adb",
+      "shell",
+      "cd /data/local/tmp/framelink-windows-native-policy-regression && ./fl_gst_native_producer_android static"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "fl_gst_shared_cpu_av",
+    "command": [
+      "adb",
+      "shell",
+      "cd /data/local/tmp/framelink-windows-native-policy-regression && ./fl_gst_shared_cpu_av static"
+    ],
+    "exit": 0
+  }
+]

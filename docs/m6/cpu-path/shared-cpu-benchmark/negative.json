@@ -1,0 +1,34 @@
+[
+  {
+    "args": [
+      "--native"
+    ],
+    "exit": 1
+  },
+  {
+    "args": [
+      "--mode",
+      "element"
+    ],
+    "exit": 1
+  },
+  {
+    "args": [
+      "--source-only"
+    ],
+    "exit": 1
+  },
+  {
+    "args": [
+      "--local-consumer"
+    ],
+    "exit": 1
+  },
+  {
+    "args": [
+      "--cycles",
+      "100"
+    ],
+    "exit": 1
+  }
+]

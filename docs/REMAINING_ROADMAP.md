@@ -1,13 +1,30 @@
 # FrameLink + renderer remaining roadmap
 
-Updated 2026-11-01. Scope: local cross-platform video/audio sessions and renderer
+## Approved M6 Windows readiness scope — 2026-11-12 18:14 EST
+
+Jon approved readiness for explicitly named Windows configurations, not universal
+Windows support. This supersedes older broad M6 completion requirements below;
+historical results and failed gates remain evidence, not silently passed tasks.
+Authoritative reviewable scope/checklist: [M6 Windows readiness](m6/M6_WINDOWS_READINESS.md).
+M6 remains OPEN; M7 maintenance hold remains. Correct media/timeline/ownership,
+fault handling, validated bounded lifecycle and final exact-revision integrated/API
+compatibility gates remain mandatory. No new budget, D2/D3 default or device-owner
+API approval is inferred. Failed native BGRA1080 and decoder4K are NOT QUALIFIED
+and excluded from initial advertised support. One task and one executor, serially.
+
+
+Updated 2026-11-04. Scope: local cross-platform video/audio sessions and renderer
 integration. Historical cloud calling, unrelated receiver features and HDR are
 not part of this release. M1–M5 are merged within their documented qualification
 scope. M5a is complete within documented paths (PR #7, `3e1d51f`).
-M5b is complete within documented scope (PR #8, `9f86c35`). M6 is next; M7 follows. Planned work is not implemented merely by being listed.
+M5b is complete within documented scope (PR #8, `9f86c35`). M6 is in progress; M7 follows. Planned work is not implemented merely by being listed.
 
 For individually checkable tasks and current merge gates, see
 [the executable roadmap checklist](ROADMAP_TASKS.md).
+
+November 4: [Low-latency/native-memory resolution plan](m6/LOW_LATENCY_PLAN.md)
+adds mandatory subtasks and a versioned decision register to M6. The primary
+profile has no intentional per-hop delay; buffered results remain controls.
 
 ## M1 — Land the validated audio foundation
 

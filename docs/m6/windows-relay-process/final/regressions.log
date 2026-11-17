@@ -1,0 +1,23 @@
+Test project <win-home>/dev/framelink-m6-windows-1fdbaa6/build
+    Start  42: gst_native_producer_win
+1/7 Test  #42: gst_native_producer_win ..........   Passed   18.89 sec
+    Start  43: gst_native_relay_av_win
+2/7 Test  #43: gst_native_relay_av_win ..........   Passed    5.78 sec
+    Start  44: gst_native_relay_process_win
+3/7 Test  #44: gst_native_relay_process_win .....   Passed    1.54 sec
+    Start 110: native_relay_win
+4/7 Test #110: native_relay_win .................   Passed    0.50 sec
+    Start 114: native_relay_process_win
+5/7 Test #114: native_relay_process_win .........   Passed    0.82 sec
+    Start 116: gst_session_transport
+6/7 Test #116: gst_session_transport ............   Passed    0.78 sec
+    Start 120: gst_audio_source
+7/7 Test #120: gst_audio_source .................   Passed    1.29 sec
+
+100% tests passed, 0 tests failed out of 7
+
+Label Time Summary:
+gst_video_regression    =  18.89 sec*proc (1 test)
+m5b_av                  =   2.06 sec*proc (2 tests)
+
+Total Test time (real) =  29.61 sec

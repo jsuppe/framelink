@@ -1,0 +1,5 @@
+{
+  "utc": "2026-11-12T02:45:41.042006+00:00",
+  "exit": 0,
+  "command": "Set-Location '<win-home>/dev/framelink-m6-windows-8b057a1'\nctest --test-dir build -C Release -R '^gst_(av_bin|local_av|event_channel|session_context|session_transport|native_(bin_cancel|producer|relay_.*)_win)$' --output-on-failure -V\nexit $LASTEXITCODE"
+}

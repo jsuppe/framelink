@@ -1,0 +1,21 @@
+three-process coordinated relay: 16 same-allocation video frames, 768 exact PCM frames; nonempty: both reversed slots / 37ms offset / held-reader exclusion; ordered GAP/barrier/END and authenticated terminal passed
+16 source GstMemory reservations: remote drain plus final local reference required; duplicate submit rejected; both original allocations reused
+relay start
+relay downstream authenticated
+relay upstream authenticated
+frame 0 forwarded=0 session=0
+frame 1 forwarded=0 session=0
+frame 2 forwarded=0 session=0
+frame 3 forwarded=0 session=0
+frame 4 forwarded=0 session=0
+frame 5 forwarded=0 session=0
+frame 6 forwarded=0 session=0
+frame 7 forwarded=0 session=0
+frame 8 forwarded=0 session=0
+frame 9 forwarded=0 session=0
+frame 10 forwarded=0 session=0
+frame 11 forwarded=0 session=0
+frame 12 forwarded=0 session=0
+frame 13 forwarded=0 session=0
+frame 14 forwarded=0 session=0
+frame 15 forwarded=0 session=0

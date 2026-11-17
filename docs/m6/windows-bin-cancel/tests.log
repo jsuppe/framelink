@@ -1,0 +1,31 @@
+** WARNING: connection is not using a post-quantum key exchange algorithm.
+** This session may be vulnerable to "store now, decrypt later" attacks.
+** The server may need to be upgraded. See https://openssh.com/pq.html
+UpdateCTestConfiguration  from :<win-home>/dev/framelink-m6-windows-8b057a1/build/DartConfiguration.tcl
+Test project <win-home>/dev/framelink-m6-windows-8b057a1/build
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 43
+    Start 43: gst_native_bin_cancel_win
+
+43: Test command: <win-home>\dev\framelink-m6-windows-8b057a1\build\Release\fl_gst_native_producer_win.exe "<win-home>/dev/framelink-m6-windows-8b057a1/build/Release/gstframelink.dll" "--bin-cancel-diagnostic"
+43: Working Directory: <win-home>/dev/framelink-m6-windows-8b057a1/build
+43: Test timeout computed to be: 20
+43: native AV mode 4 local=1
+43: line 14: m&&GST_MESSAGE_TYPE(m)==expected
+1/1 Test #43: gst_native_bin_cancel_win ........***Failed    3.42 sec
+native AV mode 4 local=1
+line 14: m&&GST_MESSAGE_TYPE(m)==expected
+
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) =   3.45 sec
+
+The following tests FAILED:
+	 43 - gst_native_bin_cancel_win (Failed)
+Errors while running CTest

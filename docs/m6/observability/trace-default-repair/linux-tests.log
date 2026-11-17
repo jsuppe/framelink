@@ -1,0 +1,22 @@
+Internal ctest changing into directory: <linux-home>/dev/build/framelink-m6-linux
+Test project <linux-home>/dev/build/framelink-m6-linux
+    Start  49: trace_disabled
+1/8 Test  #49: trace_disabled ...................   Passed    0.00 sec
+    Start  50: trace_default_capacity
+2/8 Test  #50: trace_default_capacity ...........   Passed    0.01 sec
+    Start  51: trace_override_capacity
+3/8 Test  #51: trace_override_capacity ..........   Passed    0.01 sec
+    Start  52: trace_invalid_capacity
+4/8 Test  #52: trace_invalid_capacity ...........   Passed    0.01 sec
+    Start  53: trace_bounded_concurrent
+5/8 Test  #53: trace_bounded_concurrent .........   Passed    0.00 sec
+    Start  54: trace_thread_limit
+6/8 Test  #54: trace_thread_limit ...............   Passed    0.00 sec
+    Start  99: trace_details
+7/8 Test  #99: trace_details ....................   Passed    0.00 sec
+    Start 100: trace_compiled_out
+8/8 Test #100: trace_compiled_out ...............   Passed    0.00 sec
+
+100% tests passed, 0 tests failed out of 8
+
+Total Test time (real) =   0.04 sec

@@ -1,0 +1,26 @@
+[
+  {
+    "clock": "producer",
+    "lazy": null,
+    "delay": null,
+    "exit": 2
+  },
+  {
+    "clock": "audio",
+    "lazy": "1",
+    "delay": "350",
+    "exit": 2
+  },
+  {
+    "clock": "producer",
+    "lazy": "0",
+    "delay": "350",
+    "exit": 2
+  },
+  {
+    "clock": "producer",
+    "lazy": "1",
+    "delay": "0",
+    "exit": 2
+  }
+]

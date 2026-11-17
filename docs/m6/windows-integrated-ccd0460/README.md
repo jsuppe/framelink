@@ -1,0 +1,3 @@
+# Exact Windows integration: ccd0460
+
+Revision `ccd046038220a489d5b94ec3bdc823083df88d7a`. Clean source archive and Release build, API inspection, **139/139 serial tests (616.90s)**, decoder, relay and producer-death diagnostics all exit0 (run 2026-11-09T09:57:33Z–10:08:43Z). Exported names identical to [1460444](../windows-integrated-1460444/README.md): **119/119** retained, none added; name retention is not behavioral or ordinal ABI proof. Commands, DLL hashes and properties: run.py/api-runtime.log. Home-directory prefixes redacted to `<linux-home>`/`<win-home>`. No M6 gate or D2/D3 policy waived.

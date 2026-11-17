@@ -1,0 +1,19 @@
+{
+  "linux-build": 0,
+  "linux-tests": 0,
+  "exports": 0,
+  "export_names": {
+    "retained": 32,
+    "removed": [],
+    "added": [
+      "fl_gst_session_open_named_cpu_pipe"
+    ]
+  },
+  "all_session_exports": {
+    "retained": 38,
+    "added": [
+      "fl_gst_session_open_named_cpu_pipe"
+    ],
+    "removed": []
+  }
+}

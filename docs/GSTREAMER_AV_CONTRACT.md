@@ -60,10 +60,16 @@ Shared configuration is immutable outside NULL. Public elements/bins expose:
 - `audio-queue-ms` (default80, range1..2000): hard bounded buffering budget,
   not preroll/latency target. Oversized blocks fail rather than bypass the cap.
 - `video-queue-frames` (default2, range1..16), independent of required native
-  allocation count and existing video overflow policy. Delivery keeps the
-  ring's newest-unread-frame policy; coordinated video must be paced in real
-  time, and a frame replaced before the consumer read it fails the session at
-  once with that cause (decision Jon, 2026-11-02: fail fast and document).
+  allocation count and existing video overflow policy. The consumer ring keeps
+  up to this many unread frames, oldest first (`flSetReceiveQueue`), so a reader
+  that is briefly late by up to that many frame periods loses nothing. The ring
+  also holds the frame being read and the one being drawn, so a pool smaller
+  than the budget plus two limits the depth to pool - 2 (at least 1). Coordinated video must still be paced in
+  real time, and a frame replaced before the consumer read it fails the session
+  at once with that cause (decision Jon, 2026-11-02: fail fast and document).
+  Before 2026-11-04 the budget was negotiated but the ring kept only the newest
+  unread frame, which left about 5 ms of slack at 1080p60 and failed Windows
+  BGRA soaks (M6.2); honouring the budget was decided by Jon on 2026-11-04.
 - Read-only negotiated `session-id`, `generation`, `audio-track-id`,
   `video-track-id`; absent track ID is zero. Nonzero IDs must differ.
 

@@ -1,0 +1,295 @@
+pids producer=20411 consumer=20409
+AUDIT hooks alloc=1 fill=1 create=0
+AUDIT alloc index=0 start=3893095306750 us=75 faults=1
+AUDIT fill index=0 start=3893095306860 us=72003 faults=16239
+AUDIT sink index=0 start=3893095379166 wait_us=3 acquire_us=5 copy_us=6977 submit_us=72
+AUDIT alloc index=1 start=3893095386278 us=90 faults=1
+AUDIT fill index=1 start=3893095386377 us=32811 faults=8100
+AUDIT sink index=1 start=3893095419344 wait_us=40 acquire_us=3 copy_us=7198 submit_us=53
+AUDIT alloc index=2 start=3893095426694 us=10 faults=0
+AUDIT fill index=2 start=3893095426713 us=10328 faults=0
+AUDIT sink index=2 start=3893095446046 wait_us=53 acquire_us=3 copy_us=6747 submit_us=886
+AUDIT alloc index=3 start=3893095453928 us=34 faults=0
+AUDIT fill index=3 start=3893095453993 us=12506 faults=0
+AUDIT sink index=3 start=3893095479188 wait_us=32 acquire_us=3 copy_us=6857 submit_us=51
+AUDIT alloc index=4 start=3893095486184 us=9 faults=0
+AUDIT fill index=4 start=3893095486201 us=11591 faults=0
+AUDIT sink index=4 start=3893095512531 wait_us=33 acquire_us=3 copy_us=6858 submit_us=1015
+AUDIT alloc index=5 start=3893095520557 us=18 faults=0
+AUDIT fill index=5 start=3893095520587 us=12279 faults=0
+AUDIT sink index=5 start=3893095545859 wait_us=32 acquire_us=3 copy_us=6951 submit_us=2317
+AUDIT alloc index=6 start=3893095555394 us=40 faults=0
+AUDIT fill index=6 start=3893095555475 us=10772 faults=0
+AUDIT sink index=6 start=3893095579189 wait_us=32 acquire_us=3 copy_us=6954 submit_us=54
+AUDIT alloc index=7 start=3893095586286 us=9 faults=0
+AUDIT fill index=7 start=3893095586302 us=11175 faults=0
+AUDIT sink index=7 start=3893095612525 wait_us=33 acquire_us=3 copy_us=6978 submit_us=1013
+AUDIT alloc index=8 start=3893095620804 us=37 faults=0
+AUDIT fill index=8 start=3893095620884 us=12792 faults=0
+AUDIT sink index=8 start=3893095645867 wait_us=34 acquire_us=4 copy_us=6731 submit_us=1509
+AUDIT alloc index=9 start=3893095654366 us=25 faults=0
+AUDIT fill index=9 start=3893095654416 us=11715 faults=0
+AUDIT sink index=9 start=3893095679187 wait_us=32 acquire_us=3 copy_us=6766 submit_us=49
+AUDIT alloc index=10 start=3893095686082 us=10 faults=0
+AUDIT fill index=10 start=3893095686101 us=12268 faults=0
+AUDIT sink index=10 start=3893095712521 wait_us=33 acquire_us=3 copy_us=6827 submit_us=34
+AUDIT alloc index=11 start=3893095719457 us=9 faults=0
+AUDIT fill index=11 start=3893095719473 us=12141 faults=0
+AUDIT sink index=11 start=3893095746120 wait_us=55 acquire_us=3 copy_us=7136 submit_us=2748
+AUDIT fill index=16 start=3893095886317 us=12425 faults=0
+AUDIT fill index=17 start=3893095920642 us=13156 faults=0
+AUDIT fill index=18 start=3893095953142 us=12529 faults=0
+AUDIT fill index=20 start=3893096020561 us=12243 faults=0
+AUDIT fill index=22 start=3893096086200 us=12139 faults=0
+AUDIT fill index=23 start=3893096120382 us=12751 faults=0
+AUDIT fill index=25 start=3893096186278 us=13457 faults=0
+AUDIT fill index=26 start=3893096220747 us=13346 faults=0
+AUDIT fill index=27 start=3893096253092 us=12171 faults=0
+AUDIT fill index=28 start=3893096286032 us=13457 faults=0
+AUDIT fill index=29 start=3893096320637 us=12295 faults=0
+AUDIT fill index=31 start=3893096386151 us=14568 faults=0
+AUDIT fill index=32 start=3893096420476 us=12736 faults=0
+AUDIT fill index=34 start=3893096486569 us=12285 faults=0
+AUDIT fill index=36 start=3893096553711 us=12056 faults=0
+AUDIT fill index=38 start=3893096619413 us=12028 faults=0
+AUDIT fill index=40 start=3893096686809 us=12112 faults=0
+AUDIT fill index=43 start=3893096786200 us=12091 faults=0
+AUDIT fill index=44 start=3893096820610 us=12521 faults=0
+AUDIT fill index=46 start=3893096886348 us=13245 faults=0
+AUDIT fill index=47 start=3893096920705 us=12757 faults=0
+AUDIT fill index=50 start=3893097020625 us=12864 faults=0
+AUDIT fill index=53 start=3893097120555 us=12132 faults=0
+AUDIT fill index=55 start=3893097186325 us=12142 faults=0
+AUDIT fill index=56 start=3893097220730 us=12439 faults=0
+AUDIT fill index=58 start=3893097286401 us=12426 faults=0
+AUDIT fill index=59 start=3893097320452 us=12535 faults=0
+AUDIT fill index=61 start=3893097386158 us=12981 faults=0
+AUDIT fill index=62 start=3893097420680 us=12493 faults=0
+AUDIT fill index=63 start=3893097454312 us=12774 faults=0
+AUDIT fill index=65 start=3893097520725 us=12504 faults=0
+AUDIT fill index=70 start=3893097686193 us=12461 faults=0
+AUDIT fill index=71 start=3893097720649 us=12428 faults=0
+AUDIT fill index=73 start=3893097786287 us=12339 faults=0
+AUDIT fill index=74 start=3893097820493 us=12251 faults=0
+AUDIT fill index=76 start=3893097886317 us=13573 faults=0
+AUDIT fill index=77 start=3893097920684 us=12765 faults=0
+AUDIT fill index=79 start=3893097986105 us=14303 faults=0
+AUDIT fill index=80 start=3893098020670 us=12342 faults=0
+AUDIT fill index=81 start=3893098053862 us=12879 faults=0
+AUDIT fill index=82 start=3893098086212 us=13085 faults=0
+AUDIT fill index=83 start=3893098120500 us=12722 faults=0
+AUDIT fill index=86 start=3893098220542 us=12343 faults=0
+AUDIT fill index=88 start=3893098286209 us=12999 faults=0
+AUDIT fill index=89 start=3893098320385 us=12512 faults=0
+AUDIT fill index=91 start=3893098386184 us=13437 faults=0
+AUDIT fill index=92 start=3893098420721 us=13380 faults=0
+AUDIT fill index=93 start=3893098453049 us=12093 faults=0
+AUDIT fill index=94 start=3893098486258 us=13528 faults=0
+AUDIT fill index=95 start=3893098520629 us=12659 faults=0
+AUDIT fill index=96 start=3893098554110 us=12346 faults=0
+AUDIT fill index=97 start=3893098586093 us=13303 faults=0
+AUDIT fill index=98 start=3893098620691 us=12202 faults=0
+AUDIT fill index=100 start=3893098686167 us=12093 faults=0
+AUDIT fill index=101 start=3893098720385 us=12957 faults=0
+AUDIT fill index=103 start=3893098786244 us=13390 faults=0
+AUDIT fill index=106 start=3893098886027 us=12954 faults=0
+AUDIT fill index=107 start=3893098920354 us=12840 faults=0
+AUDIT fill index=109 start=3893098986190 us=13482 faults=0
+AUDIT fill index=110 start=3893099020713 us=13109 faults=0
+AUDIT fill index=111 start=3893099053023 us=12291 faults=0
+AUDIT fill index=112 start=3893099086213 us=13109 faults=0
+AUDIT fill index=113 start=3893099120668 us=12545 faults=0
+AUDIT fill index=115 start=3893099186333 us=13478 faults=0
+AUDIT fill index=116 start=3893099220389 us=12868 faults=0
+AUDIT fill index=118 start=3893099286123 us=13403 faults=0
+AUDIT fill index=119 start=3893099320609 us=13258 faults=0
+AUDIT fill index=120 start=3893099352948 us=12451 faults=0
+AUDIT fill index=121 start=3893099386222 us=13382 faults=0
+AUDIT fill index=122 start=3893099420618 us=12513 faults=0
+AUDIT fill index=123 start=3893099454187 us=12280 faults=0
+AUDIT fill index=124 start=3893099486302 us=13237 faults=0
+AUDIT fill index=126 start=3893099554506 us=12468 faults=0
+AUDIT fill index=127 start=3893099586132 us=12943 faults=0
+AUDIT fill index=128 start=3893099620403 us=12970 faults=0
+AUDIT fill index=129 start=3893099653873 us=12751 faults=0
+AUDIT fill index=130 start=3893099686185 us=12984 faults=0
+AUDIT fill index=131 start=3893099720792 us=12311 faults=0
+AUDIT fill index=132 start=3893099754415 us=12170 faults=0
+AUDIT fill index=133 start=3893099786293 us=13295 faults=0
+AUDIT fill index=134 start=3893099820603 us=13039 faults=0
+AUDIT fill index=135 start=3893099853985 us=12699 faults=0
+AUDIT fill index=136 start=3893099886049 us=13116 faults=0
+AUDIT fill index=137 start=3893099920347 us=12782 faults=0
+AUDIT fill index=139 start=3893099986176 us=13242 faults=0
+AUDIT fill index=140 start=3893100020451 us=12966 faults=0
+AUDIT fill index=145 start=3893100186402 us=13337 faults=0
+AUDIT fill index=146 start=3893100220337 us=12611 faults=0
+AUDIT fill index=149 start=3893100320542 us=12940 faults=0
+AUDIT fill index=151 start=3893100386246 us=13018 faults=0
+AUDIT fill index=152 start=3893100420751 us=12796 faults=0
+AUDIT fill index=154 start=3893100486359 us=12482 faults=0
+AUDIT fill index=155 start=3893100520582 us=12013 faults=0
+AUDIT fill index=157 start=3893100586133 us=13200 faults=0
+AUDIT fill index=158 start=3893100620716 us=12283 faults=0
+AUDIT fill index=159 start=3893100653711 us=12707 faults=0
+AUDIT fill index=160 start=3893100686215 us=13748 faults=0
+AUDIT fill index=161 start=3893100720600 us=12743 faults=0
+AUDIT fill index=163 start=3893100786294 us=13362 faults=0
+AUDIT fill index=164 start=3893100820611 us=13051 faults=0
+AUDIT fill index=166 start=3893100886100 us=13477 faults=0
+AUDIT fill index=167 start=3893100920403 us=12182 faults=0
+AUDIT fill index=169 start=3893100986204 us=13162 faults=0
+AUDIT fill index=170 start=3893101020517 us=13579 faults=0
+AUDIT fill index=175 start=3893101186090 us=12402 faults=0
+AUDIT fill index=176 start=3893101220728 us=12211 faults=0
+AUDIT fill index=178 start=3893101286165 us=14336 faults=0
+AUDIT fill index=179 start=3893101319598 us=12023 faults=0
+AUDIT fill index=182 start=3893101420675 us=12498 faults=0
+AUDIT fill index=184 start=3893101486070 us=14093 faults=0
+AUDIT fill index=187 start=3893101586185 us=13283 faults=0
+AUDIT fill index=188 start=3893101620622 us=12373 faults=0
+AUDIT fill index=190 start=3893101686254 us=13434 faults=0
+AUDIT fill index=191 start=3893101720582 us=13394 faults=0
+AUDIT fill index=194 start=3893101819796 us=12470 faults=0
+AUDIT fill index=196 start=3893101886156 us=12596 faults=0
+AUDIT fill index=197 start=3893101920337 us=12816 faults=0
+AUDIT fill index=199 start=3893101986231 us=14448 faults=0
+AUDIT fill index=202 start=3893102086302 us=14383 faults=0
+AUDIT fill index=203 start=3893102120038 us=12188 faults=0
+AUDIT fill index=205 start=3893102186097 us=13846 faults=0
+AUDIT fill index=206 start=3893102220487 us=12502 faults=0
+AUDIT fill index=208 start=3893102286180 us=13048 faults=0
+AUDIT fill index=209 start=3893102320672 us=12492 faults=0
+AUDIT fill index=211 start=3893102386336 us=12164 faults=0
+AUDIT fill index=215 start=3893102519483 us=12053 faults=0
+AUDIT fill index=218 start=3893102620549 us=12634 faults=0
+AUDIT fill index=223 start=3893102786382 us=12094 faults=0
+AUDIT fill index=224 start=3893102820625 us=13370 faults=0
+AUDIT fill index=225 start=3893102852897 us=12097 faults=0
+AUDIT fill index=226 start=3893102886149 us=13441 faults=0
+AUDIT fill index=227 start=3893102920513 us=12772 faults=0
+AUDIT fill index=229 start=3893102986253 us=14162 faults=0
+AUDIT fill index=230 start=3893103020767 us=12721 faults=0
+AUDIT fill index=232 start=3893103086414 us=13116 faults=0
+AUDIT fill index=233 start=3893103120358 us=12954 faults=0
+AUDIT fill index=236 start=3893103219542 us=12429 faults=0
+AUDIT fill index=238 start=3893103286283 us=13422 faults=0
+AUDIT fill index=239 start=3893103320759 us=12380 faults=0
+AUDIT fill index=242 start=3893103420576 us=12348 faults=0
+AUDIT fill index=244 start=3893103486109 us=13360 faults=0
+AUDIT fill index=245 start=3893103520545 us=12787 faults=0
+AUDIT fill index=247 start=3893103586217 us=12804 faults=0
+AUDIT fill index=248 start=3893103620630 us=12954 faults=0
+AUDIT fill index=251 start=3893103720771 us=12670 faults=0
+AUDIT fill index=253 start=3893103786074 us=14514 faults=0
+AUDIT fill index=254 start=3893103819504 us=12598 faults=0
+AUDIT fill index=256 start=3893103886221 us=12782 faults=0
+AUDIT fill index=257 start=3893103920435 us=13152 faults=0
+AUDIT fill index=259 start=3893103986288 us=13498 faults=0
+AUDIT fill index=260 start=3893104020562 us=12691 faults=0
+AUDIT fill index=262 start=3893104086056 us=12799 faults=0
+AUDIT fill index=263 start=3893104120361 us=12973 faults=0
+AUDIT fill index=266 start=3893104220667 us=12320 faults=0
+AUDIT fill index=269 start=3893104320838 us=12376 faults=0
+AUDIT fill index=270 start=3893104354404 us=12954 faults=0
+AUDIT fill index=272 start=3893104420395 us=12586 faults=0
+AUDIT fill index=275 start=3893104520453 us=12849 faults=0
+AUDIT fill index=277 start=3893104586314 us=12934 faults=0
+AUDIT fill index=278 start=3893104620672 us=12533 faults=0
+AUDIT fill index=280 start=3893104686323 us=12559 faults=0
+AUDIT fill index=281 start=3893104720669 us=12201 faults=0
+AUDIT fill index=284 start=3893104820838 us=12109 faults=0
+AUDIT fill index=285 start=3893104854052 us=12236 faults=0
+AUDIT fill index=286 start=3893104886210 us=14400 faults=0
+AUDIT fill index=287 start=3893104919711 us=12100 faults=0
+AUDIT fill index=289 start=3893104986299 us=14541 faults=0
+AUDIT fill index=290 start=3893105020621 us=12601 faults=0
+AUDIT fill index=292 start=3893105086059 us=12826 faults=0
+AUDIT fill index=293 start=3893105120796 us=12893 faults=0
+AUDIT fill index=294 start=3893105153998 us=12251 faults=0
+AUDIT fill index=295 start=3893105186200 us=13927 faults=0
+AUDIT fill index=296 start=3893105220637 us=12540 faults=0
+AUDIT fill index=298 start=3893105286260 us=13438 faults=0
+AUDIT fill index=299 start=3893105320852 us=12277 faults=0
+arrival.budget_ms=34
+complete=yes
+config=BGRA 3840x2160@30 bin shared-cpu 10s
+consumer.audio.arrival.all.ms=n=1000 p50=1.62 p95=2.64 p99=3.02 max=3.76 min=0.65
+consumer.audio.arrival.ms=n=800 p50=1.61 p95=2.65 p99=3.04 max=3.76 min=0.65
+consumer.audio.contiguous=yes
+consumer.audio.deadline_misses=0/1000
+consumer.audio.output_queue.admission_residence.ms=n=1000 p50=0.34 p95=0.74 p99=0.94 max=1.13 min=0.08
+consumer.audio.output_queue.pending=0
+consumer.audio.output_queue.sampled_max_buffers=0
+consumer.audio.output_queue.unmatched=0
+consumer.audio.render.all.ms=n=1000 p50=2.01 p95=3.29 p99=3.72 max=4.58 min=0.78
+consumer.audio.render.ms=n=800 p50=2.00 p95=3.29 p99=3.72 max=4.58 min=0.78
+consumer.audio.render_interval.ms=n=799 p50=10.15 p95=11.45 p99=12.07 max=12.73 min=7.07
+consumer.audio.render_jitter.p1_p99.ms=2.64
+consumer.av_offset.abs.ms=n=8 p50=18.74 p95=19.01 p99=19.01 max=19.01 min=18.20
+consumer.av_offset.ms=n=8 p50=18.74 p95=19.01 p99=19.01 max=19.01 min=18.20
+consumer.cpu.percent=46.18
+consumer.frames=300
+consumer.handles=19..19 min=18 max=19
+consumer.handles.slope.per_min=5.96
+consumer.mem.kb=171712..171712 min=171712 max=171712
+consumer.mem.kind=rss
+consumer.mem.slope.kb_per_min=0.00
+consumer.memory=memory:SystemMemory
+consumer.pid=20409
+consumer.queue.accounting=complete
+consumer.result=EOS
+consumer.samples=480000
+consumer.scope=transport-consumer
+consumer.series.t_cpums_memkb_handles_threads=0.0:194:41792:6:2;1.0:621:171712:19:9;2.0:1112:171712:19:9;3.0:1585:171712:18:9;4.0:2045:171712:19:9;5.0:2511:171712:19:9;6.0:2968:171712:19:9;7.1:3425:171712:18:9;8.1:3896:171712:19:9;9.1:4365:171712:19:9;10.1:4833:171712:19:9;10.6:5052:42164:10:6;
+consumer.threads=9..9 min=9 max=9
+consumer.threads.slope.per_min=-0.00
+consumer.video.arrival.all.ms=n=300 p50=20.56 p95=21.77 p99=23.24 max=30.86 min=13.89
+consumer.video.arrival.ms=n=240 p50=20.51 p95=21.14 p99=21.78 max=21.86 min=13.89
+consumer.video.deadline_misses=0/300
+consumer.video.output_queue.admission_residence.ms=n=300 p50=0.29 p95=0.43 p99=0.50 max=0.59 min=0.06
+consumer.video.output_queue.pending=0
+consumer.video.output_queue.sampled_max_buffers=0
+consumer.video.output_queue.unmatched=0
+consumer.video.render.all.ms=n=300 p50=20.87 p95=22.01 p99=23.44 max=31.18 min=14.08
+consumer.video.render.ms=n=240 p50=20.82 p95=21.53 p99=22.04 max=22.19 min=14.08
+consumer.video.render_interval.ms=n=239 p50=33.24 p95=36.26 p99=36.83 max=38.16 min=27.33
+consumer.video.render_jitter.p1_p99.ms=4.59
+exit=0/0
+expected.frames=300
+expected.samples=480000
+label=audit
+output.async=false
+output.queue_buffers=1
+output.sync=false
+playback.latency_ms=0
+producer.audio.push_burst.max=0
+producer.audio.push_interval.ms=n=800 p50=10.00 p95=10.42 p99=10.74 max=10.88 min=9.08
+producer.audio.push_lateness.ms=n=800 p50=0.41 p95=0.75 p99=1.04 max=1.25 min=0.16
+producer.cpu.percent=67.38
+producer.handles=17..17 min=17 max=17
+producer.handles.slope.per_min=0.00
+producer.injection.elapsed_us=0
+producer.injection.executed=0
+producer.injection.frame=0
+producer.injection.requested_ms=0
+producer.injection.stage=none
+producer.injection.start_monotonic_us=0
+producer.mem.kb=204440..204440 min=204440 max=204440
+producer.mem.kind=rss
+producer.mem.slope.kb_per_min=0.00
+producer.pid=20411
+producer.pushed.frames=300
+producer.pushed.samples=480000
+producer.result=EOS
+producer.series.t_cpums_memkb_handles_threads=0.0:198:41496:6:2;1.0:838:204440:17:7;2.0:1533:204440:17:7;3.0:2211:204440:17:7;4.0:2895:204440:17:7;5.0:3582:204440:17:7;6.0:4255:204440:17:7;7.1:4930:204440:17:7;8.1:5611:204440:17:7;9.1:6283:204440:17:7;10.1:6960:204440:17:7;10.4:7146:42584:10:5;
+producer.stats.framelink-audio-sink-stats=framelink-audio-sink-stats, blocks=(guint64)1000, pcm-bytes=(guint64)1920000, sample-frames=(guint64)480000, generation=(guint64)1, shared-pcm=(boolean)false;
+producer.stats.framelink-sink-stats=framelink-sink-stats, received=(guint64)300, submitted=(guint64)300, dropped=(guint64)0, ring-full-drops=(guint64)0;
+producer.threads=7..7 min=7 max=7
+producer.threads.slope.per_min=0.00
+producer.video.push_burst.max=0
+producer.video.push_interval.ms=n=240 p50=33.33 p95=33.44 p99=33.49 max=33.57 min=33.09
+producer.video.push_lateness.ms=n=240 p50=0.20 p95=0.31 p99=0.44 max=0.44 min=0.09
+seconds=10
+video.pool=2
+video.queue=1

@@ -1,0 +1,8 @@
+line 208: flAcquireFrame(down,&frame,5000)==FL_OK&&frame.ptsNs==37000000+frameTime(n,decoder)
+line 32: GST_BUFFER_PTS(input)-origin==frameTime(n,true)&&GST_BUFFER_DURATION(input)==frameDuration(n,true)
+relay start
+relay downstream authenticated
+relay upstream authenticated
+frame 0 forwarded=0 session=0
+frame 1 forwarded=0 session=0
+line 176: flAcquireFrame(up,&frame,5000)==FL_OK

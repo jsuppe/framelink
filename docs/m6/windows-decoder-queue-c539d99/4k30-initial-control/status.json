@@ -1,0 +1,32 @@
+{
+  "revision": "c539d99e538a37a667582fd1d8120d936573792b",
+  "state": "failed",
+  "started_utc": "2026-11-12T08:13:15.645783+00:00",
+  "binary_before": {
+    "fl_gst_native_producer_win.exe": "f296a172832ec2a12771ec1814a81384f16012174be01c4d8d21cce0041deffb",
+    "fl_gst_local_decoder_rate_win.exe": "2947102f6be9e25d199cfc8e32e7e2a1222cb9bcd455e0ec7aea3393ce873500",
+    "gstframelink.dll": "f472ea45cacbd3982a5b3d994183832b1c8678e966f0117ea21a47dc9967a6da",
+    "framelink.dll": "c106ae5cc594e266f42388976fc1f769189e020e2a0516f362d402bb0abd72a9",
+    "framelink_gst_session.dll": "a74e1346b8a5819c311d1b4a59ac8f529d8f14b36245857975168a3ad19a1fc6"
+  },
+  "step": "trace-off-analysis",
+  "command": [
+    "<win-home>\\AppData\\Local\\Microsoft\\WindowsApps\\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\\python.exe",
+    "-E",
+    "<win-home>\\dev\\framelink-decoder-target-decoder-4k30-auqueue-c539d99-20261112t0814z\\check_local_decoder_rate.py",
+    "<win-home>\\dev\\framelink-decoder-target-decoder-4k30-auqueue-c539d99-20261112t0814z\\trace-off"
+  ],
+  "trace-off-idle-before_exit": 0,
+  "trace-off_exit": 0,
+  "trace-off-idle-after_exit": 0,
+  "trace-off_binary_after": {
+    "fl_gst_native_producer_win.exe": "f296a172832ec2a12771ec1814a81384f16012174be01c4d8d21cce0041deffb",
+    "fl_gst_local_decoder_rate_win.exe": "2947102f6be9e25d199cfc8e32e7e2a1222cb9bcd455e0ec7aea3393ce873500",
+    "gstframelink.dll": "f472ea45cacbd3982a5b3d994183832b1c8678e966f0117ea21a47dc9967a6da",
+    "framelink.dll": "c106ae5cc594e266f42388976fc1f769189e020e2a0516f362d402bb0abd72a9",
+    "framelink_gst_session.dll": "a74e1346b8a5819c311d1b4a59ac8f529d8f14b36245857975168a3ad19a1fc6"
+  },
+  "trace-off-analysis_exit": 1,
+  "error": "trace-off-analysis failed; no next arm",
+  "ended_utc": "2026-11-12T08:13:24.698986+00:00"
+}

@@ -1,0 +1,38 @@
+-- Building for: Visual Studio 17 2022
+-- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.26300.
+-- The C compiler identification is MSVC 19.44.35216.0
+-- The CXX compiler identification is MSVC 19.44.35216.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+CMake Deprecation Warning at <win-home>/dev/m6-renderer9f74b9d-framelinka50841a-20261112/build/_deps/volk-src/CMakeLists.txt:1 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+
+
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Failed
+-- Looking for pthread_create in pthreads
+-- Looking for pthread_create in pthreads - not found
+-- Looking for pthread_create in pthread
+-- Looking for pthread_create in pthread - not found
+-- Found Threads: TRUE
+-- Including Win32 support
+-- No build type selected, default to Debug
+-- Found Python3: <win-home>/AppData/Local/Microsoft/WindowsApps/python3.13.exe (found version "3.13.14") found components: Interpreter
+-- framelink: building GStreamer elements (gstframelink)
+-- framecam not found at '<win-home>/dev/m6-renderer9f74b9d-framelinka50841a-20261112/renderer/../framecam' - skipping the virtual camera. Clone it beside vkrender to build it.
+-- Configuring done (243.3s)
+-- Generating done (0.4s)
+-- Build files have been written to: <win-home>/dev/m6-renderer9f74b9d-framelinka50841a-20261112/build

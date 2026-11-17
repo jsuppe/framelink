@@ -1,0 +1,181 @@
+{
+  "scope": "ordered three off/on pairs,300frames,1080p60,onehop,GPU verification + testGDP; no universal overhead budget",
+  "captures": [
+    {
+      "case": "off-1",
+      "frames": 300,
+      "arrival_age_p95_ms": 2.096098,
+      "resources": {
+        "producer": {
+          "role": "producer",
+          "process_cpu_before_flush_ns": 720747000,
+          "peak_resident_before_flush_bytes": 106622976,
+          "explicit_control_flush_ns": 69,
+          "automatic_exit_flush_included": false
+        },
+        "consumer": {
+          "role": "consumer",
+          "process_cpu_before_flush_ns": 406185000,
+          "peak_resident_before_flush_bytes": 107802624,
+          "explicit_control_flush_ns": 79,
+          "automatic_exit_flush_included": false
+        }
+      }
+    },
+    {
+      "case": "on-1",
+      "frames": 300,
+      "arrival_age_p95_ms": 2.114139,
+      "resources": {
+        "producer": {
+          "role": "producer",
+          "process_cpu_before_flush_ns": 736842000,
+          "peak_resident_before_flush_bytes": 106397696,
+          "explicit_control_flush_ns": 11962706,
+          "automatic_exit_flush_included": false
+        },
+        "consumer": {
+          "role": "consumer",
+          "process_cpu_before_flush_ns": 410152000,
+          "peak_resident_before_flush_bytes": 107851776,
+          "explicit_control_flush_ns": 7235588,
+          "automatic_exit_flush_included": false
+        }
+      }
+    },
+    {
+      "case": "off-2",
+      "frames": 300,
+      "arrival_age_p95_ms": 2.100627,
+      "resources": {
+        "producer": {
+          "role": "producer",
+          "process_cpu_before_flush_ns": 694581000,
+          "peak_resident_before_flush_bytes": 106430464,
+          "explicit_control_flush_ns": 437,
+          "automatic_exit_flush_included": false
+        },
+        "consumer": {
+          "role": "consumer",
+          "process_cpu_before_flush_ns": 372611000,
+          "peak_resident_before_flush_bytes": 107663360,
+          "explicit_control_flush_ns": 468,
+          "automatic_exit_flush_included": false
+        }
+      }
+    },
+    {
+      "case": "on-2",
+      "frames": 300,
+      "arrival_age_p95_ms": 2.086895,
+      "resources": {
+        "producer": {
+          "role": "producer",
+          "process_cpu_before_flush_ns": 622664000,
+          "peak_resident_before_flush_bytes": 106569728,
+          "explicit_control_flush_ns": 1953530,
+          "automatic_exit_flush_included": false
+        },
+        "consumer": {
+          "role": "consumer",
+          "process_cpu_before_flush_ns": 326530000,
+          "peak_resident_before_flush_bytes": 107892736,
+          "explicit_control_flush_ns": 1851367,
+          "automatic_exit_flush_included": false
+        }
+      }
+    },
+    {
+      "case": "off-3",
+      "frames": 300,
+      "arrival_age_p95_ms": 2.08214,
+      "resources": {
+        "producer": {
+          "role": "producer",
+          "process_cpu_before_flush_ns": 627569000,
+          "peak_resident_before_flush_bytes": 106385408,
+          "explicit_control_flush_ns": 461,
+          "automatic_exit_flush_included": false
+        },
+        "consumer": {
+          "role": "consumer",
+          "process_cpu_before_flush_ns": 309821000,
+          "peak_resident_before_flush_bytes": 107565056,
+          "explicit_control_flush_ns": 549,
+          "automatic_exit_flush_included": false
+        }
+      }
+    },
+    {
+      "case": "on-3",
+      "frames": 300,
+      "arrival_age_p95_ms": 2.134268,
+      "resources": {
+        "producer": {
+          "role": "producer",
+          "process_cpu_before_flush_ns": 711817000,
+          "peak_resident_before_flush_bytes": 106393600,
+          "explicit_control_flush_ns": 11959133,
+          "automatic_exit_flush_included": false
+        },
+        "consumer": {
+          "role": "consumer",
+          "process_cpu_before_flush_ns": 357071000,
+          "peak_resident_before_flush_bytes": 107978752,
+          "explicit_control_flush_ns": 3333467,
+          "automatic_exit_flush_included": false
+        }
+      }
+    }
+  ],
+  "paired_deltas": [
+    {
+      "pair": "1",
+      "arrival_age_p95_ms": 0.018041000000000196,
+      "roles": {
+        "producer": {
+          "process_cpu_before_flush_ns": 16095000,
+          "peak_resident_before_flush_bytes": -225280,
+          "explicit_control_flush_ns": 11962637
+        },
+        "consumer": {
+          "process_cpu_before_flush_ns": 3967000,
+          "peak_resident_before_flush_bytes": 49152,
+          "explicit_control_flush_ns": 7235509
+        }
+      }
+    },
+    {
+      "pair": "2",
+      "arrival_age_p95_ms": -0.013731999999999633,
+      "roles": {
+        "producer": {
+          "process_cpu_before_flush_ns": -71917000,
+          "peak_resident_before_flush_bytes": 139264,
+          "explicit_control_flush_ns": 1953093
+        },
+        "consumer": {
+          "process_cpu_before_flush_ns": -46081000,
+          "peak_resident_before_flush_bytes": 229376,
+          "explicit_control_flush_ns": 1850899
+        }
+      }
+    },
+    {
+      "pair": "3",
+      "arrival_age_p95_ms": 0.052128000000000174,
+      "roles": {
+        "producer": {
+          "process_cpu_before_flush_ns": 84248000,
+          "peak_resident_before_flush_bytes": 8192,
+          "explicit_control_flush_ns": 11958672
+        },
+        "consumer": {
+          "process_cpu_before_flush_ns": 47250000,
+          "peak_resident_before_flush_bytes": 413696,
+          "explicit_control_flush_ns": 3332918
+        }
+      }
+    }
+  ]
+}

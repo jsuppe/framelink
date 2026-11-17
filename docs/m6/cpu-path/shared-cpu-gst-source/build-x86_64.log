@@ -1,0 +1,37 @@
+[0/1] Re-running CMake...
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: <linux-home>/dev/build/framelink-m6-x86_64
+[1/33] Building CXX object CMakeFiles/fl_shared_cpu_reconnect.dir/test/fl_shared_cpu_reconnect.cpp.o
+[2/33] Building CXX object CMakeFiles/fl_shared_cpu_channel.dir/test/fl_shared_cpu_channel.cpp.o
+[3/33] Building CXX object CMakeFiles/fl_shared_cpu_eos.dir/test/fl_shared_cpu_eos.cpp.o
+[4/33] Building CXX object CMakeFiles/framelink.dir/src/framelink_shared_cpu_channel.cpp.o
+[5/33] Linking CXX static library libframelink.a
+[6/33] Linking CXX executable fl_shared_cpu_reconnect
+[7/33] Linking CXX executable fl_shared_cpu_eos
+[8/33] Linking CXX executable fl_shared_cpu_channel
+[9/33] Linking CXX executable fl_shared_cpu_release
+[10/33] Linking CXX executable fl_shared_cpu_control
+[11/33] Building CXX object CMakeFiles/gstframelink.dir/gst/gstframelinkaudio.cpp.o
+[12/33] Building CXX object CMakeFiles/gstframelink.dir/gst/gstframelinkaudiosrc.cpp.o
+[13/33] Building CXX object CMakeFiles/gstframelink.dir/gst/gstframelink.cpp.o
+[14/33] Building CXX object CMakeFiles/gstframelink.dir/gst/fl_gst_audio_startup.cpp.o
+[15/33] Building CXX object CMakeFiles/gstframelink.dir/gst/gstframelinkavsink.cpp.o
+[16/33] Building CXX object CMakeFiles/gstframelink.dir/gst/gstframelinkavsrc.cpp.o
+[17/33] Building CXX object CMakeFiles/framelink_gst_session.dir/gst/framelink_session_context.cpp.o
+[18/33] Building CXX object CMakeFiles/framelink_gst_session.dir/gst/framelink_session_transport.cpp.o
+[19/33] Linking CXX static library libframelink_gst_session.a
+[20/33] Linking CXX static library libgstframelink.a
+[21/33] Linking CXX executable fl_gst_nv12
+[22/33] Linking CXX executable fl_gst_pool_policy
+[23/33] Building CXX object CMakeFiles/fl_gst_session_transport.dir/test/fl_gst_session_transport.cpp.o
+[24/33] Linking CXX executable fl_gst_session_context
+[25/33] Linking CXX executable fl_gst_session_transport
+[26/33] Building CXX object CMakeFiles/fl_gst_shared_cpu_session.dir/test/fl_gst_shared_cpu_session.cpp.o
+[27/33] Linking CXX executable fl_gst_shared_cpu_session
+[28/33] Building CXX object CMakeFiles/fl_gst_shared_cpu_source.dir/test/fl_gst_shared_cpu_source.cpp.o
+[29/33] Linking CXX executable fl_gst_shared_cpu_source
+[30/33] Building CXX object CMakeFiles/fl_gst_av_timeline.dir/test/fl_gst_av_timeline.cpp.o
+[31/33] Linking CXX executable fl_gst_av_timeline
+[32/33] Building CXX object CMakeFiles/fl_gst_av_bin.dir/test/fl_gst_av_bin.cpp.o
+[33/33] Linking CXX executable fl_gst_av_bin

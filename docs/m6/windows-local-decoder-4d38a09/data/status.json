@@ -1,0 +1,25 @@
+{
+  "revision": "4d38a099c1790caa4be091bb5bbf3b9f8a13cf14",
+  "started_utc": "2026-11-12T07:30:37.113318+00:00",
+  "state": "finished",
+  "step": "analysis",
+  "command": [
+    "<win-home>\\AppData\\Local\\Microsoft\\WindowsApps\\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\\python.exe",
+    "test/fl_gst_local_decoder_check.py",
+    "--check-only",
+    "<win-home>\\dev\\framelink-local-decoder-decoder-4d38a09-20261112t0730z\\smoke"
+  ],
+  "extract_exit": 0,
+  "configure_exit": 0,
+  "build_exit": 0,
+  "inventory_exit": 0,
+  "binary_sha256": {
+    "fl_gst_local_decoder_win.exe": "b119617d1a4814f5dbabb79d91271f5783867eb6b667ef4a0e7560ce1a10f282",
+    "gstframelink.dll": "ec0e7452da0edac38ac16c6e073385013498c0b98f157d64e91e03d4e5432ebb",
+    "framelink.dll": "63c027c15da545501df57ae0a6a8c944c00e259c42174096728334ba4eade708",
+    "framelink_gst_session.dll": "b329232546c2284009ff74b07dc351c4f5b514b1f93275908b1e5f15f4b39c03"
+  },
+  "smoke_exit": 0,
+  "analysis_exit": 0,
+  "ended_utc": "2026-11-12T07:31:00.946365+00:00"
+}

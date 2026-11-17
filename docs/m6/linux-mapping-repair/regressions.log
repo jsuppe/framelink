@@ -1,0 +1,32 @@
+Internal ctest changing into directory: <build>
+Test project <build>
+      Start  3: read_leases
+ 1/11 Test  #3: read_leases ......................   Passed    0.08 sec
+      Start 16: buffer_references
+ 2/11 Test #16: buffer_references ................   Passed    0.10 sec
+      Start 17: submit_ownership
+ 3/11 Test #17: submit_ownership .................   Passed    0.16 sec
+      Start 24: frame_metadata
+ 4/11 Test #24: frame_metadata ...................   Passed    0.26 sec
+      Start 25: expanded_pool
+ 5/11 Test #25: expanded_pool ....................   Passed    0.12 sec
+      Start 26: receive_queue
+ 6/11 Test #26: receive_queue ....................   Passed    1.49 sec
+      Start 50: portable_map_nv12
+ 7/11 Test #50: portable_map_nv12 ................   Passed    0.15 sec
+      Start 51: portable_map_rgba
+ 8/11 Test #51: portable_map_rgba ................   Passed    0.33 sec
+      Start 52: portable_map_bgra
+ 9/11 Test #52: portable_map_bgra ................   Passed    0.33 sec
+      Start 53: portable_map_rgb10a2
+10/11 Test #53: portable_map_rgb10a2 .............   Passed    0.33 sec
+      Start 55: reconnect_held
+11/11 Test #55: reconnect_held ...................   Passed    0.07 sec
+
+100% tests passed, 0 tests failed out of 11
+
+Label Time Summary:
+gpu            =   1.60 sec*proc (2 tests)
+integration    =   1.60 sec*proc (2 tests)
+
+Total Test time (real) =   3.43 sec

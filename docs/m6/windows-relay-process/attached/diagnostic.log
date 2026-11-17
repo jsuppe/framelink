@@ -1,0 +1,34 @@
+three-process coordinated relay: 16 original allocations, 768 exact PCM frames, 37ms offset, held-reader exclusion, ordered GAP/barrier/END and authenticated terminal passed
+three-process coordinated relay: 0 original allocations, 0 exact PCM frames, 37ms offset, held-reader exclusion, ordered GAP/barrier/END and authenticated terminal passed
+producer start
+producer authenticated
+relay start
+relay downstream authenticated
+relay upstream authenticated
+line 92: video.forward(frame)==FL_OK
+producer start
+producer authenticated
+relay start
+relay downstream authenticated
+relay upstream authenticated
+frame 0 forwarded=0 session=0
+frame 1 forwarded=0 session=0
+frame 2 forwarded=0 session=0
+frame 3 forwarded=0 session=0
+frame 4 forwarded=0 session=0
+frame 5 forwarded=0 session=0
+frame 6 forwarded=0 session=0
+frame 7 forwarded=0 session=0
+frame 8 forwarded=0 session=0
+frame 9 forwarded=0 session=0
+frame 10 forwarded=0 session=0
+frame 11 forwarded=0 session=0
+frame 12 forwarded=0 session=0
+frame 13 forwarded=0 session=0
+frame 14 forwarded=0 session=0
+frame 15 forwarded=0 session=0
+producer start
+producer authenticated
+relay start
+relay downstream authenticated
+relay upstream authenticated

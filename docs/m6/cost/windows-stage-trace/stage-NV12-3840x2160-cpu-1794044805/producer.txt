@@ -1,0 +1,20 @@
+audio.push_burst.max=0
+audio.push_interval.ms=n=300 p50=10.00 p95=11.00 p99=11.01 max=11.50 min=8.98
+audio.push_lateness.ms=n=300 p50=0.83 p95=1.84 p99=1.89 max=1.90 min=0.23
+cpu.percent=13.36
+handles=1692..1692 min=1692 max=1692
+handles.slope.per_min=0.00
+mem.kb=180288..180288 min=180288 max=180288
+mem.kind=private
+mem.slope.kb_per_min=0.00
+pushed.frames=150
+pushed.samples=240000
+result=EOS
+series.t_cpums_memkb_handles_threads=0.0:156:6648:295:12;1.1:1422:179432:2687:40;2.1:1812:180288:1692:40;3.2:1953:180288:1692:40;4.2:2094:180288:1692:40;5.3:2234:180288:1692:40;5.5:2266:104488:1543:17;
+stats.framelink-audio-sink-stats=framelink-audio-sink-stats, blocks=(guint64)500, pcm-bytes=(guint64)960000, sample-frames=(guint64)240000, generation=(guint64)1, shared-pcm=(boolean)false;
+stats.framelink-sink-stats=framelink-sink-stats, received=(guint64)150, submitted=(guint64)150, dropped=(guint64)0, ring-full-drops=(guint64)0;
+threads=40..40 min=40 max=40
+threads.slope.per_min=0.00
+video.push_burst.max=0
+video.push_interval.ms=n=90 p50=33.08 p95=34.98 p99=35.01 max=35.01 min=31.50
+video.push_lateness.ms=n=90 p50=0.64 p95=1.84 p99=1.99 max=1.99 min=0.01

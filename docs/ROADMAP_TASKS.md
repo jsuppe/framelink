@@ -1,13 +1,26 @@
 # FrameLink + vkrender — executable roadmap checklist
 
-Updated 2026-11-01. This is the checkable execution view of
+## Approved M6 Windows readiness scope — 2026-11-12 18:14 EST
+
+Jon approved readiness for explicitly named Windows configurations, not universal
+Windows support. This supersedes older broad M6 completion requirements below;
+historical results and failed gates remain evidence, not silently passed tasks.
+Authoritative reviewable scope/checklist: [M6 Windows readiness](m6/M6_WINDOWS_READINESS.md).
+M6 remains OPEN; M7 maintenance hold remains. Correct media/timeline/ownership,
+fault handling, validated bounded lifecycle and final exact-revision integrated/API
+compatibility gates remain mandatory. No new budget, D2/D3 default or device-owner
+API approval is inferred. Failed native BGRA1080 and decoder4K are NOT QUALIFIED
+and excluded from initial advertised support. One task and one executor, serially.
+
+
+Updated 2026-11-04. This is the checkable execution view of
 [the milestone roadmap](REMAINING_ROADMAP.md); the detailed acceptance contracts
 remain authoritative. Checked means implemented, reviewed and validated within
 the stated scope—not universal hardware support or physical-output qualification.
 
-Remaining execution order: **M5b → M6 → M7**, one task at a time. No concurrent
+Remaining execution order: **M6 → M7**, one task at a time. No concurrent
 implementation/review/validation streams. Finish the current milestone before
-starting the next. Hourly reporting is not an implementation executor.
+starting the next. Automated status reporting remains cancelled.
 
 ## Completed milestones
 
@@ -306,11 +319,32 @@ new shared-PCM transport are not silently included.
 
 ## M6 — Reliability, performance and observability
 
-**State: not started as a milestone.** Earlier targeted stress/trace tests are
+**November 4 requirement update:** the primary profile has no intentional
+per-hop delay; 150 ms buffered runs do not qualify it. See the
+[low-latency resolution plan and decision register](m6/LOW_LATENCY_PLAN.md)
+for mandatory M6.2–M6.9 subtasks, pending design decisions and final gates.
+M6.1 primary-profile budget acceptance is reopened; historical evidence remains.
+M6.7 prepares closure infrastructure; actual closure follows M6.8/M6.9.
+
+**State: in progress (M6.1 done).** Earlier targeted stress/trace tests are
 baseline evidence, not completion of these release-scale tasks.
 
-- [ ] **M6.1 Define qualification matrix and numeric budgets:** supported
+- [x] **M6.1 Define qualification matrix and numeric budgets:** supported
   hardware/workload, FPS, latency/jitter, A/V offset, resources and tracing overhead.
+  [Matrix](m6/QUALIFICATION_MATRIX.md): three targets; requirement cells at the
+  project targets 1080p60 and 4K30 (BGRA/NV12, Android RGBA; native and CPU
+  consumer; source-only references) plus functional cells (RGBA/NV12,
+  160x90–1280x720 at 30 fps, bins/elements, traced). Native consumer carries
+  1080p60 and 4K30 on all three platforms; CPU consumer at target sizes only on
+  Windows (Linux: M6.8; Android: saturates); Android native output RGBA-only.
+  Producer per-frame copy is the remaining cost (M6.9).
+  `fl_gst_av_bench` + `tools/m6_bench_matrix.py`/`m6_bench_report.py` measure
+  arrival/render lateness, A/V offset, deadline misses, CPU, memory,
+  handles/threads and GPU (per-process engines on Windows, device counters on
+  Linux, uid GPU time on Android). Baseline 3x60 s per cell on all platforms;
+  [budgets.json](m6/budgets.json) derived by a fixed rule, every baseline passes.
+  Linux CPU 640x360/1280x720 unsupported (M6.8); Linux CPU path bimodal (cause
+  open); Android NV12 slow (M6.5).
 - [ ] **M6.2 Sustained A/V:** 30-minute soaks on each supported target.
 - [ ] **M6.3 Lifecycle endurance:** at least 100 restart/reconnect cycles per target.
 - [ ] **M6.4 Fault qualification:** slow readers, underruns/drops, endpoint death,

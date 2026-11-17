@@ -1,0 +1,12 @@
+{
+  "pass": true,
+  "clients": [
+    "fl_frame_metadata.exe",
+    "fl_gst_native_epoch_c_api.exe",
+    "fl_read_lease_d3d11.exe"
+  ],
+  "candidate_dll_sha256": {
+    "framelink.dll": "f6b38ec8b63ff9dc47b9c6a547e4282146d2856409573e0167464d7bce7fbc44",
+    "framelink_gst_session.dll": "6aba39e1dff0dc156988524932ae708610704aab4347666ca92b891a6379f909"
+  }
+}

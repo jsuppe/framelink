@@ -1,0 +1,41 @@
+{
+  "state": "finished",
+  "started": 1794044777.497539,
+  "revision": "Windows existing matched M6 binaries + gst stage scopes816bbe2",
+  "scope": "5s bounded65536 per-thread traces, diagnostic only; no physical presentation",
+  "cases": [
+    {
+      "label": "stage-NV12-1920x1080-cpu-1794044778",
+      "collection": "complete"
+    },
+    {
+      "label": "stage-NV12-1920x1080-native-1794044785",
+      "collection": "complete"
+    },
+    {
+      "label": "stage-BGRA-1920x1080-cpu-1794044791",
+      "collection": "complete"
+    },
+    {
+      "label": "stage-BGRA-1920x1080-native-1794044798",
+      "collection": "complete"
+    },
+    {
+      "label": "stage-NV12-3840x2160-cpu-1794044805",
+      "collection": "complete"
+    },
+    {
+      "label": "stage-NV12-3840x2160-native-1794044812",
+      "collection": "complete"
+    },
+    {
+      "label": "stage-BGRA-3840x2160-cpu-1794044818",
+      "collection": "complete"
+    },
+    {
+      "label": "stage-BGRA-3840x2160-native-1794044825",
+      "collection": "complete"
+    }
+  ],
+  "ended": 1794044832.4995275
+}

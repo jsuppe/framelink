@@ -1,0 +1,40 @@
+ninja: warning: build log version is too old; starting over
+[0/1] Re-running CMake...
+-- The CXX compiler identification is Clang 19.0.1
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: <linux-home>/Android/Sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- The C compiler identification is Clang 19.0.1
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: <linux-home>/Android/Sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/bin/clang - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Found PkgConfig: /usr/bin/pkg-config (found version "2.5.1")
+-- Configuring done (0.4s)
+-- Generating done (0.1s)
+-- Build files have been written to: <linux-home>/dev/build/framelink-m6-arm64
+[1/23] Building CXX object CMakeFiles/framelink.dir/src/framelink_slots.cpp.o
+[2/23] Building CXX object CMakeFiles/framelink.dir/src/fl_trace.cpp.o
+[3/23] Building CXX object CMakeFiles/framelink.dir/src/framelink_memory.cpp.o
+[4/23] Building CXX object CMakeFiles/framelink.dir/src/framelink_session.cpp.o
+[5/23] Building CXX object CMakeFiles/framelink.dir/src/framelink_shared_cpu.cpp.o
+[6/23] Building CXX object CMakeFiles/framelink.dir/src/fl_ipc_posix.cpp.o
+[7/23] Building CXX object CMakeFiles/framelink.dir/src/framelink_android.cpp.o
+[8/23] Building CXX object CMakeFiles/framelink.dir/src/framelink_shared_cpu_channel.cpp.o
+[9/23] Linking CXX static library libframelink.a
+[10/23] Building CXX object CMakeFiles/framelink_gst_session.dir/gst/framelink_session_context.cpp.o
+[11/23] Building CXX object CMakeFiles/framelink_gst_session.dir/gst/framelink_session_transport.cpp.o
+[12/23] Building CXX object CMakeFiles/framelink_gst_session.dir/runtime/av_auth.cpp.o
+[13/23] Building CXX object CMakeFiles/framelink_gst_session.dir/runtime/av_rendezvous.cpp.o
+[14/23] Linking CXX static library libframelink_gst_session.a
+[15/23] Building CXX object CMakeFiles/fl_gst_session_transport.dir/runtime/av_auth.cpp.o
+[16/23] Building CXX object CMakeFiles/fl_gst_session_transport.dir/runtime/av_rendezvous.cpp.o
+[17/23] Building CXX object CMakeFiles/fl_gst_session_transport.dir/test/fl_gst_session_transport.cpp.o
+[18/23] Linking CXX executable fl_gst_session_transport
+[19/23] Building CXX object CMakeFiles/fl_gst_session_context.dir/test/fl_gst_session_context.cpp.o
+[20/23] Linking CXX executable fl_gst_session_context
+[21/23] Building CXX object CMakeFiles/fl_gst_event_channel.dir/test/fl_gst_event_channel.cpp.o
+[22/23] Linking CXX executable fl_gst_event_channel

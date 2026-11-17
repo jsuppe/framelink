@@ -1,0 +1,53 @@
+-- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.26300.
+-- framelink: building GStreamer elements (gstframelink)
+-- Configuring done (0.8s)
+-- Generating done (1.1s)
+-- Build files have been written to: <win-home>/dev/framelink-m6-windows-67c1523/build
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  fl_ipc_win32.cpp
+  framelink_shared_cpu_channel.cpp
+  framelink_win.cpp
+  Generating Code...
+     Creating library <win-home>/dev/framelink-m6-windows-67c1523/build/Release/framelink.lib and object <win-home>/dev/framelink-m6-windows-67c1523/build/Release/framelink.exp
+  framelink.vcxproj -> <win-home>\dev\framelink-m6-windows-67c1523\build\Release\framelink.dll
+  framelink_session_context.cpp
+  framelink_session_transport.cpp
+  Generating Code...
+     Creating library <win-home>/dev/framelink-m6-windows-67c1523/build/Release/framelink_gst_session.lib and object <win-home>/dev/framelink-m6-windows-67c1523/build/Release/framelink_gst_session.exp
+  framelink_gst_session.vcxproj -> <win-home>\dev\framelink-m6-windows-67c1523\build\Release\framelink_gst_session.dll
+  fl_gst_audio_startup.cpp
+  gstframelink.cpp
+  The d3d11 library from gst-plugins-bad is unstable API and may change in future.
+  You can define GST_USE_UNSTABLE_API to avoid this warning.
+  gstframelinkaudio.cpp
+  gstframelinkaudiosrc.cpp
+  gstframelinkavsink.cpp
+  gstframelinkavsrc.cpp
+  Generating Code...
+     Creating library <win-home>/dev/framelink-m6-windows-67c1523/build/Release/gstframelink.lib and object <win-home>/dev/framelink-m6-windows-67c1523/build/Release/gstframelink.exp
+  gstframelink.vcxproj -> <win-home>\dev\framelink-m6-windows-67c1523\build\Release\gstframelink.dll
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <win-home>\dev\framelink-m6-windows-67c1523\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> <win-home>\dev\framelink-m6-windows-67c1523\build\Release\framelink_gst_session.dll
+  fl_gst_shared_cpu_session_win.cpp
+  fl_gst_shared_cpu_session_win.vcxproj -> <win-home>\dev\framelink-m6-windows-67c1523\build\Release\fl_gst_shared_cpu_session_win.exe
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <win-home>\dev\framelink-m6-windows-67c1523\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> <win-home>\dev\framelink-m6-windows-67c1523\build\Release\framelink_gst_session.dll
+  gstframelink.vcxproj -> <win-home>\dev\framelink-m6-windows-67c1523\build\Release\gstframelink.dll
+  fl_gst_shared_cpu_av.cpp
+  fl_gst_shared_cpu_av.vcxproj -> <win-home>\dev\framelink-m6-windows-67c1523\build\Release\fl_gst_shared_cpu_av.exe
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <win-home>\dev\framelink-m6-windows-67c1523\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> <win-home>\dev\framelink-m6-windows-67c1523\build\Release\framelink_gst_session.dll
+  fl_gst_session_transport.cpp
+  fl_gst_session_transport.vcxproj -> <win-home>\dev\framelink-m6-windows-67c1523\build\Release\fl_gst_session_transport.exe
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <win-home>\dev\framelink-m6-windows-67c1523\build\Release\framelink.dll
+  fl_shared_cpu_pipe_win.cpp
+  fl_shared_cpu_pipe_win.vcxproj -> <win-home>\dev\framelink-m6-windows-67c1523\build\Release\fl_shared_cpu_pipe_win.exe

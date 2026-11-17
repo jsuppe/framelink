@@ -1,0 +1,29 @@
+#< CLIXML
+Test project <win-home>/dev/framelink-m6-20261106/build
+    Start   2: frame_metadata_contract
+1/8 Test   #2: frame_metadata_contract ..........   Passed    0.01 sec
+    Start  23: frame_metadata
+2/8 Test  #23: frame_metadata ...................   Passed    0.89 sec
+    Start  25: receive_queue
+3/8 Test  #25: receive_queue ....................   Passed    1.66 sec
+    Start  66: gst_pool_policy
+4/8 Test  #66: gst_pool_policy ..................   Passed    3.80 sec
+    Start  95: av_memory_adversarial
+5/8 Test  #95: av_memory_adversarial ............   Passed    0.07 sec
+    Start 100: gst_audio_sink
+6/8 Test #100: gst_audio_sink ...................   Passed    1.25 sec
+    Start 101: gst_audio_source
+7/8 Test #101: gst_audio_source .................   Passed    1.29 sec
+    Start 111: gst_local_audio
+8/8 Test #111: gst_local_audio ..................   Passed    0.17 sec
+
+100% tests passed, 0 tests failed out of 8
+
+Label Time Summary:
+gpu                     =   1.66 sec*proc (1 test)
+gst_video_regression    =   3.80 sec*proc (1 test)
+integration             =   1.66 sec*proc (1 test)
+m5b_av                  =   2.71 sec*proc (3 tests)
+
+Total Test time (real) =   9.23 sec
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04"><Obj S="progress" RefId="0"><TN RefId="0"><T>System.Management.Automation.PSCustomObject</T><T>System.Object</T></TN><MS><I64 N="SourceId">1</I64><PR N="Record"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj></Objs>

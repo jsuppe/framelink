@@ -1,0 +1,12 @@
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  1>Checking Build System
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-04babab/CMakeLists.txt
+  framelink.vcxproj -> <win-home>\dev\framelink-m6-windows-04babab\build\Release\framelink.dll
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-04babab/CMakeLists.txt
+  framelink_gst_session.vcxproj -> <win-home>\dev\framelink-m6-windows-04babab\build\Release\framelink_gst_session.dll
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-04babab/CMakeLists.txt
+  fl_gst_native_producer_win.cpp
+  The d3d11 library from gst-plugins-bad is unstable API and may change in future.
+  You can define GST_USE_UNSTABLE_API to avoid this warning.
+  fl_gst_native_producer_win.vcxproj -> <win-home>\dev\framelink-m6-windows-04babab\build\Release\fl_gst_native_producer_win.exe

@@ -1,0 +1,11 @@
+{"event":"session-ready","instance":"0280881369119f500b5c556ad0382121","generation":1,"format":"BGRA","video_frames":0,"audio_blocks":0,"audio_offset_ns":0}
+{"event":"startup-released","epoch_ns":440700782620500}
+{"event":"media-progress","instance":"0280881369119f500b5c556ad0382121","generation":1,"format":"BGRA","video_frames":1,"audio_blocks":1,"audio_offset_ns":0}
+{"event":"media-progress","instance":"0280881369119f500b5c556ad0382121","generation":1,"format":"BGRA","video_frames":25,"audio_blocks":25,"audio_offset_ns":0}
+{"event":"media-progress","instance":"0280881369119f500b5c556ad0382121","generation":1,"format":"BGRA","video_frames":50,"audio_blocks":50,"audio_offset_ns":0}
+{"event":"media-progress","instance":"0280881369119f500b5c556ad0382121","generation":1,"format":"BGRA","video_frames":75,"audio_blocks":75,"audio_offset_ns":0}
+{"event":"media-progress","instance":"0280881369119f500b5c556ad0382121","generation":1,"format":"BGRA","video_frames":100,"audio_blocks":100,"audio_offset_ns":0}
+{"event":"producer-pacing","pacing_ppm":0,"max_push_ns":52600,"max_wake_lag_ns":1784100,"catchup_holds":0}
+{"event":"video-transport-summary","received":100,"submitted":100,"dropped":0,"ring_full_drops":0}
+{"event":"session-complete","instance":"0280881369119f500b5c556ad0382121","generation":1,"format":"BGRA","video_frames":100,"audio_blocks":100,"audio_offset_ns":0}
+{"role":"producer","ok":true,"sessions":1,"video_frames":100,"audio_blocks":100,"errors":0,"disconnects":0}

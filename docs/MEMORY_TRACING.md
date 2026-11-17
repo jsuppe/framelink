@@ -4,7 +4,7 @@ Enable `FRAMELINK_TRACE=/absolute/prefix` for core operations and
 `FRAMELINK_GST_TRACE=/absolute/prefix` for GStreamer boundary operations. Each
 process writes `prefix.PID.csv` on orderly exit or an explicit control-thread
 flush. A crash may leave no complete file. Do not flush on a frame thread.
-`*_TRACE_EVENTS` sets per-thread capacity (16–1,048,576, default 65,536).
+`*_TRACE_EVENTS` sets per-thread capacity (16–1,048,576, default 4,096).
 
 ## What the records mean
 
@@ -71,3 +71,5 @@ native submissions with no boundary payload events, or checks the exact 12-frame
 positive controls, missing/lossy footers and incorrect payload totals. Use
 `--windows` for the explicit repack/upload/readback/copy path. CPU pixel-oracle
 reads in core fixture traces must not be confused with native GStreamer boundaries.
+
+On the measured64-bit ABI, each event is168 bytes: default4096 slots reserve672KiB per attached thread (42MiB at64threads per recorder), excluding allocator/container overhead. Tracing disabled allocates no event buffers. The explicit maximum1048576 slots can reserve168MiB/thread (10.5GiB at64threads); this is an intentional opt-in, not a safe blanket capture recommendation. Size each recorder for the capture, and reject any nonzero dropped/rejected footer. Multiple recorder namespaces/processes have separate bounds.

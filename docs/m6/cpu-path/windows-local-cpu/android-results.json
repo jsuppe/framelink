@@ -1,0 +1,109 @@
+[
+  {
+    "name": "arm64-build",
+    "command": [
+      "cmake",
+      "--build",
+      "<linux-home>/dev/build/framelink-m6-arm64",
+      "--target",
+      "fl_gst_shared_cpu_av",
+      "fl_av_rendezvous",
+      "fl_gst_session_transport",
+      "-j",
+      "4"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "x86_64-build",
+    "command": [
+      "cmake",
+      "--build",
+      "<linux-home>/dev/build/framelink-m6-x86_64",
+      "--target",
+      "fl_gst_shared_cpu_av",
+      "fl_av_rendezvous",
+      "fl_gst_session_transport",
+      "-j",
+      "4"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "mkdir",
+    "command": [
+      "adb",
+      "shell",
+      "mkdir",
+      "-p",
+      "/data/local/tmp/framelink-windows-local-cpu-regression"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "push-fl_gst_shared_cpu_av",
+    "command": [
+      "adb",
+      "push",
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_gst_shared_cpu_av",
+      "/data/local/tmp/framelink-windows-local-cpu-regression/"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "push-fl_av_rendezvous",
+    "command": [
+      "adb",
+      "push",
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_av_rendezvous",
+      "/data/local/tmp/framelink-windows-local-cpu-regression/"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "push-fl_gst_session_transport",
+    "command": [
+      "adb",
+      "push",
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_gst_session_transport",
+      "/data/local/tmp/framelink-windows-local-cpu-regression/"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "chmod",
+    "command": [
+      "adb",
+      "shell",
+      "chmod 755 /data/local/tmp/framelink-windows-local-cpu-regression/fl_*"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "fl_gst_shared_cpu_av",
+    "command": [
+      "adb",
+      "shell",
+      "cd /data/local/tmp/framelink-windows-local-cpu-regression && ./fl_gst_shared_cpu_av static"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "fl_av_rendezvous",
+    "command": [
+      "adb",
+      "shell",
+      "cd /data/local/tmp/framelink-windows-local-cpu-regression && ./fl_av_rendezvous static"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "fl_gst_session_transport",
+    "command": [
+      "adb",
+      "shell",
+      "cd /data/local/tmp/framelink-windows-local-cpu-regression && ./fl_gst_session_transport static"
+    ],
+    "exit": 0
+  }
+]

@@ -1,0 +1,24 @@
+{
+  "utc": "2026-11-12T04:35:48.395094+00:00",
+  "remote_processes": [
+    {
+      "ProcessId": 46744,
+      "ParentProcessId": 47980,
+      "Name": "ctest.exe",
+      "CommandLine": "\"C:\\Program Files\\CMake\\bin\\ctest.exe\" --test-dir build -C Release --output-on-failure"
+    },
+    {
+      "ProcessId": 50188,
+      "ParentProcessId": 20084,
+      "Name": "framelink_av_producer.exe",
+      "CommandLine": "<win-home>/dev/framelink-m6-windows-c5ca13b/build/Release/framelink_av_producer.exe <win-home>/dev/framelink-m6-windows-c5ca13b/build/Release/gstframelink.dll --session <win-home>\\AppData\\Local\\Temp\\framelink-m3-s0rlf6hs\\consumer-restart\\session --frames 50 --timeout-ms 20000 --format BGRA --width 160 --height 90 --fps 50 --rate 48000 --channels 2 --sessions 2"
+    },
+    {
+      "ProcessId": 36076,
+      "ParentProcessId": 20084,
+      "Name": "framelink_av_consumer.exe",
+      "CommandLine": "<win-home>/dev/framelink-m6-windows-c5ca13b/build/Release/framelink_av_consumer.exe <win-home>/dev/framelink-m6-windows-c5ca13b/build/Release/gstframelink.dll --session <win-home>\\AppData\\Local\\Temp\\framelink-m3-s0rlf6hs\\consumer-restart\\session --frames 50 --timeout-ms 20000 --format auto --width 160 --height 90 --fps 50 --rate 48000 --channels 2 --sessions 2"
+    }
+  ],
+  "ssh_exit": 0
+}

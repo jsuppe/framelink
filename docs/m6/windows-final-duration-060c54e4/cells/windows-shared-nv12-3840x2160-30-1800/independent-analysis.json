@@ -1,0 +1,124 @@
+{
+  "checks": {
+    "complete": true,
+    "expected.frames": true,
+    "expected.samples": true,
+    "consumer.frames": true,
+    "producer.pushed.frames": true,
+    "consumer.samples": true,
+    "producer.pushed.samples": true,
+    "consumer.audio.contiguous": true,
+    "consumer.queue.accounting": true,
+    "producer.result": true,
+    "consumer.result": true,
+    "video.pool": true,
+    "video.queue": true,
+    "playback.latency_ms": true,
+    "output.queue_buffers": true,
+    "output.async": true,
+    "output.sync": true,
+    "arrival.budget_ms": true,
+    "audio.pending": true,
+    "audio.unmatched": true,
+    "video.pending": true,
+    "video.unmatched": true,
+    "video_deadline": true,
+    "audio_deadline": true,
+    "consumer.mem_kb_per_min": true,
+    "consumer.handles_per_min": true,
+    "consumer.threads_per_min": true,
+    "producer.mem_kb_per_min": true,
+    "producer.handles_per_min": true,
+    "producer.threads_per_min": true
+  },
+  "scope": "shared CPU transport, inferred constant PTS mapping; not physical playback or native allocation identity",
+  "video": {
+    "join": "inferred_constant_pts_mapping",
+    "frames": 54000,
+    "pts_offset_ns": 167925642724850,
+    "arrival_budget_ns": 34000000,
+    "arrival_misses": 0,
+    "late_frames": [],
+    "push_ms": {
+      "p50": 0.822434,
+      "p95": 1.805867,
+      "p99": 1.9655,
+      "max": 2.498867
+    },
+    "arrival_ms": {
+      "p50": 2.55915,
+      "p95": 3.79225,
+      "p99": 4.260517,
+      "max": 5.15845
+    },
+    "post_push_residual_ms": {
+      "p50": 1.45245,
+      "p95": 2.46315,
+      "p99": 2.61965,
+      "max": 4.15035
+    },
+    "scope": "All frames including startup/drain. Offset inferred from first records: cannot independently exclude a whole-stream constant shift; not identity proof. Residual includes producer copy, transport, consumer work and clock-mapping error; not a root-cause proof."
+  },
+  "audio": {
+    "blocks": 180000,
+    "contiguous_10ms_pts": true,
+    "arrival_misses": 0,
+    "arrival_ms": {
+      "p50": 0.91835,
+      "p95": 1.91745,
+      "p99": 2.04945,
+      "max": 2.59435
+    },
+    "scope": "PTS continuity only; PCM bytes/counts require the benchmark summary."
+  },
+  "av_mapping": {
+    "audio": {
+      "join": "inferred_constant_pts_mapping",
+      "frames": 180000,
+      "pts_offset_ns": 167925642724850,
+      "arrival_budget_ns": 34000000,
+      "arrival_misses": 0,
+      "late_frames": [],
+      "push_ms": {
+        "p50": 0.8443,
+        "p95": 1.8434,
+        "p99": 1.9744,
+        "max": 2.5141
+      },
+      "arrival_ms": {
+        "p50": 0.91835,
+        "p95": 1.91745,
+        "p99": 2.04945,
+        "max": 2.59435
+      },
+      "post_push_residual_ms": {
+        "p50": 0.07295,
+        "p95": 0.08655,
+        "p99": 0.09975,
+        "max": 0.92395
+      },
+      "scope": "All frames including startup/drain. Offset inferred from first records: cannot independently exclude a whole-stream constant shift; not identity proof. Residual includes producer copy, transport, consumer work and clock-mapping error; not a root-cause proof."
+    },
+    "av_mapping_delta_ns": 0,
+    "scope": "Both tracks preserve the same inferred constant PTS mapping. No independent allocation identity or physical playback claim."
+  },
+  "resources": {
+    "consumer": {
+      "mem_kb_per_min": 7.959047170004898,
+      "handles_per_min": 0.00502853643523078,
+      "threads_per_min": 0.02094640847190921,
+      "cpu_percent": 6.67,
+      "sample_count": 1710,
+      "rounded_series": true
+    },
+    "producer": {
+      "mem_kb_per_min": 4.351166030138014,
+      "handles_per_min": 0.0,
+      "threads_per_min": 0.02921228818421697,
+      "cpu_percent": 7.75,
+      "sample_count": 1716,
+      "rounded_series": true
+    }
+  },
+  "pass": true
+}

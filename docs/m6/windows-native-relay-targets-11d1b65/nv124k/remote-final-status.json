@@ -1,0 +1,231 @@
+{
+  "revision": "11d1b65a84029c3fc84509e3b024b984bc240424",
+  "state": "finished",
+  "started_utc": "2026-11-12T07:30:04.830116+00:00",
+  "binary_before": {
+    "fl_gst_local_native_bench_win.exe": "aea536d880a0c3fe4fe8e3246a23cfec8b77d58b45b4fdd56e2f77eebc5aaed2",
+    "gstframelink.dll": "21f50fb75d9f8f9f96560ba0d48e1b9262454677d881e1ba1e786aae851db023",
+    "framelink.dll": "3a48efa50a42b6f4f291871538cefa970a82391db87b9bbcfb4b27c23876caf3",
+    "framelink_gst_session.dll": "f965f02a55758a76002459ce24261c870d46aa221868bc41de00cd9115c3a6f9"
+  },
+  "step": "trace-on-analysis",
+  "command": [
+    "<win-home>\\AppData\\Local\\Microsoft\\WindowsApps\\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\\python.exe",
+    "-E",
+    "<win-home>\\dev\\framelink-native-target-native-nv124k-11d1b65-20261112t0731z\\check_local_native_bench.py",
+    "<win-home>\\dev\\framelink-native-target-native-nv124k-11d1b65-20261112t0731z\\trace-on"
+  ],
+  "trace-off-idle-before_exit": 0,
+  "trace-off_exit": 0,
+  "trace-off-idle-after_exit": 0,
+  "trace-off_binary_after": {
+    "fl_gst_local_native_bench_win.exe": "aea536d880a0c3fe4fe8e3246a23cfec8b77d58b45b4fdd56e2f77eebc5aaed2",
+    "gstframelink.dll": "21f50fb75d9f8f9f96560ba0d48e1b9262454677d881e1ba1e786aae851db023",
+    "framelink.dll": "3a48efa50a42b6f4f291871538cefa970a82391db87b9bbcfb4b27c23876caf3",
+    "framelink_gst_session.dll": "f965f02a55758a76002459ce24261c870d46aa221868bc41de00cd9115c3a6f9"
+  },
+  "trace-off-analysis_exit": 0,
+  "trace-off_analysis": {
+    "scope": "synthetic authenticated transport; explicit upload/verification copies; no physical playback or isolated-hop budget claim",
+    "budget_ns": 34000000,
+    "roles": {
+      "source": {
+        "video": 150,
+        "pcm_frames": 240000,
+        "resource_slopes_per_min": {},
+        "cpu_percent": 45.9699498950949
+      },
+      "relay": {
+        "video": 150,
+        "pcm_frames": 240000,
+        "resource_slopes_per_min": {},
+        "cpu_percent": 14.137466123096804
+      },
+      "receiver": {
+        "video": 150,
+        "pcm_frames": 240000,
+        "resource_slopes_per_min": {},
+        "cpu_percent": 54.609319746111225
+      }
+    },
+    "timing_ms": {
+      "scheduled_to_final_arrival": {
+        "p50": 4.057167,
+        "p95": 5.3642,
+        "p99": 5.460567,
+        "max": 6.2235
+      },
+      "source_marker_to_relay": {
+        "p50": 1.9335,
+        "p95": 2.9266,
+        "p99": 3.0062,
+        "max": 3.9782
+      },
+      "source_marker_to_final": {
+        "p50": 3.5929,
+        "p95": 4.9002,
+        "p99": 4.9996,
+        "max": 5.9769
+      },
+      "source_acquire_call": {
+        "p50": 0.0006,
+        "p95": 0.0007,
+        "p99": 0.0011,
+        "max": 0.0051
+      },
+      "source_upload_call": {
+        "p50": 0.5266,
+        "p95": 0.6194,
+        "p99": 1.1841,
+        "max": 1.3228
+      },
+      "source_submit_call": {
+        "p50": 0.0684,
+        "p95": 0.0862,
+        "p99": 0.1078,
+        "max": 0.1316
+      },
+      "relay_acquire_to_record": {
+        "p50": 0.0446,
+        "p95": 0.06,
+        "p99": 0.0801,
+        "max": 0.0845
+      },
+      "relay_forward_call": {
+        "p50": 0.0441,
+        "p95": 0.0588,
+        "p99": 0.0794,
+        "max": 0.0839
+      },
+      "final_acquire_to_completion": {
+        "p50": 2.024,
+        "p95": 2.0375,
+        "p99": 2.0481,
+        "max": 2.5286
+      },
+      "audio_scheduled_to_final": {
+        "p50": 0.153,
+        "p95": 0.2021,
+        "p99": 0.238,
+        "max": 0.739
+      }
+    },
+    "pass_all": true,
+    "video_arrival_misses": 0,
+    "audio_arrival_misses": 0,
+    "trace_checked": false
+  },
+  "trace-on-idle-before_exit": 0,
+  "trace-on_exit": 0,
+  "trace-on-idle-after_exit": 0,
+  "trace-on_binary_after": {
+    "fl_gst_local_native_bench_win.exe": "aea536d880a0c3fe4fe8e3246a23cfec8b77d58b45b4fdd56e2f77eebc5aaed2",
+    "gstframelink.dll": "21f50fb75d9f8f9f96560ba0d48e1b9262454677d881e1ba1e786aae851db023",
+    "framelink.dll": "3a48efa50a42b6f4f291871538cefa970a82391db87b9bbcfb4b27c23876caf3",
+    "framelink_gst_session.dll": "f965f02a55758a76002459ce24261c870d46aa221868bc41de00cd9115c3a6f9"
+  },
+  "trace-on-analysis_exit": 0,
+  "trace-on_analysis": {
+    "scope": "synthetic authenticated transport; explicit upload/verification copies; no physical playback or isolated-hop budget claim",
+    "budget_ns": 34000000,
+    "roles": {
+      "source": {
+        "video": 150,
+        "pcm_frames": 240000,
+        "resource_slopes_per_min": {},
+        "cpu_percent": 51.035497957281216,
+        "trace_counts": {
+          "sent": 150,
+          "received": 0
+        }
+      },
+      "relay": {
+        "video": 150,
+        "pcm_frames": 240000,
+        "resource_slopes_per_min": {},
+        "cpu_percent": 35.83004610973411,
+        "trace_counts": {
+          "sent": 150,
+          "received": 150
+        }
+      },
+      "receiver": {
+        "video": 150,
+        "pcm_frames": 240000,
+        "resource_slopes_per_min": {},
+        "cpu_percent": 49.7151648519143,
+        "trace_counts": {
+          "sent": 0,
+          "received": 150
+        }
+      }
+    },
+    "timing_ms": {
+      "scheduled_to_final_arrival": {
+        "p50": 5.359267,
+        "p95": 7.091434,
+        "p99": 7.540634,
+        "max": 7.6759
+      },
+      "source_marker_to_relay": {
+        "p50": 3.0362,
+        "p95": 4.6726,
+        "p99": 6.0823,
+        "max": 6.2162
+      },
+      "source_marker_to_final": {
+        "p50": 4.9611,
+        "p95": 6.6255,
+        "p99": 7.0816,
+        "max": 7.2135
+      },
+      "source_acquire_call": {
+        "p50": 0.001,
+        "p95": 0.0011,
+        "p99": 0.005,
+        "max": 0.0064
+      },
+      "source_upload_call": {
+        "p50": 0.5267,
+        "p95": 0.6075,
+        "p99": 1.2225,
+        "max": 1.2942
+      },
+      "source_submit_call": {
+        "p50": 0.0702,
+        "p95": 0.085,
+        "p99": 0.1513,
+        "max": 0.1532
+      },
+      "relay_acquire_to_record": {
+        "p50": 0.0461,
+        "p95": 0.0591,
+        "p99": 0.0642,
+        "max": 0.0658
+      },
+      "relay_forward_call": {
+        "p50": 0.0456,
+        "p95": 0.0584,
+        "p99": 0.0636,
+        "max": 0.0652
+      },
+      "final_acquire_to_completion": {
+        "p50": 4.0186,
+        "p95": 4.0452,
+        "p99": 6.035,
+        "max": 6.0361
+      },
+      "audio_scheduled_to_final": {
+        "p50": 0.1509,
+        "p95": 0.2004,
+        "p99": 0.2283,
+        "max": 0.8854
+      }
+    },
+    "pass_all": true,
+    "video_arrival_misses": 0,
+    "audio_arrival_misses": 0,
+    "trace_checked": true
+  },
+  "ended_utc": "2026-11-12T07:30:20.386010+00:00"
+}

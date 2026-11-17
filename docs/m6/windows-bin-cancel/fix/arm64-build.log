@@ -1,0 +1,10 @@
+[0/1] Re-running CMake...
+-- Configuring done (0.0s)
+-- Generating done (0.1s)
+-- Build files have been written to: <linux-home>/dev/build/framelink-m6-arm64
+[1/7] Building CXX object CMakeFiles/fl_gst_event_channel.dir/test/fl_gst_event_channel.cpp.o
+[2/7] Building CXX object CMakeFiles/framelink_gst_session.dir/gst/framelink_session_context.cpp.o
+[3/7] Linking CXX static library libframelink_gst_session.a
+[4/7] Linking CXX executable fl_gst_session_transport
+[5/7] Linking CXX executable fl_gst_session_context
+[6/7] Linking CXX executable fl_gst_event_channel

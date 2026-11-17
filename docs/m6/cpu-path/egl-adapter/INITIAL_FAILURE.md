@@ -1,0 +1,1 @@
+The first gst_egl_readback fixture failed with `authenticated pool generation changed; fresh session agreement required`. It applied policy before connecting the producer. Connecting first and then adopting/authenticating the resulting generation repaired the fixture; the production generation guard was preserved. No media pixels were accepted from the rejected generation.

@@ -1,0 +1,15 @@
+mode 0
+mode 1
+mode 2
+mode 3
+bus: Internal data stream error. ../libs/gst/base/gstbasesrc.c(3177): gst_base_src_loop (): /GstPipeline:pipeline6/GstAppSrc:input:
+streaming stopped, reason not-negotiated (-4)
+mode 4
+bus: Internal data stream error. ../libs/gst/base/gstbasesrc.c(3177): gst_base_src_loop (): /GstPipeline:pipeline8/GstAppSrc:input:
+streaming stopped, reason error (-5)
+mode 5
+mode 6
+mode 7
+bus: Internal data stream error. ../libs/gst/base/gstbasesrc.c(3177): gst_base_src_loop (): /GstPipeline:pipeline13/GstAppSrc:input:
+streaming stopped, reason error (-5)
+CPU video roundtrip: BGRA/NV12 exact pixels/timing, COPY/caps/duration rejection, empty EOS and held-final-frame drain/cancellation passed

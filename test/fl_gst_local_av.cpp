@@ -33,6 +33,18 @@ static void mismatch(){
  flSessionConfig out{};CHECK(fl_gst_session_get_config(p,&out)!=FL_GST_SESSION_READY&&fl_gst_session_get_config(c,&out)!=FL_GST_SESSION_READY);
  g_clear_error(&pe);g_clear_error(&ce);g_object_unref(p);g_object_unref(c);
 }
+static void queueCapacity(){
+ for(guint depth:{1u,2u}){
+  auto path=sessionPath();auto*p=fl_gst_session_new(3);auto*c=fl_gst_session_new(3);auto local=caps(true,true);
+  gboolean pr=FALSE,cr=FALSE;flChannel*pch=nullptr,*cch=nullptr;GError*pe=nullptr,*ce=nullptr;
+  std::thread a([&]{pr=fl_gst_session_open_local_av(p,TRUE,path.c_str(),&local,depth,0,80,2000,2000,0,&pch,nullptr,&pe);});
+  std::thread b([&]{cr=fl_gst_session_open_local_av(c,FALSE,path.c_str(),&local,depth,2,80,2000,2000,0,&cch,nullptr,&ce);});a.join();b.join();
+  if(depth==1){CHECK(pr&&cr&&pch&&cch);flSessionConfig cfg{};CHECK(fl_gst_session_get_config(c,&cfg)==FL_GST_SESSION_READY&&cfg.videoQueueFrames==1);}
+  else{CHECK(!pr&&!cr&&!pch&&!cch&&ce&&std::string(ce->message).find("queue exceeds ring capacity")!=std::string::npos);}
+  if(pch)flClose(pch);if(cch)flClose(cch);fl_gst_session_cancel(p);fl_gst_session_cancel(c);
+  g_clear_error(&pe);g_clear_error(&ce);g_object_unref(p);g_object_unref(c);
+ }
+}
 int main(int argc,char**argv){gst_init(&argc,&argv);
 #ifdef __ANDROID__
  GST_PLUGIN_STATIC_REGISTER(framelink);GST_PLUGIN_STATIC_REGISTER(app);GST_PLUGIN_STATIC_REGISTER(coreelements);GST_PLUGIN_STATIC_REGISTER(gdp);GST_PLUGIN_STATIC_REGISTER(gio);
@@ -40,7 +52,7 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
 #else
  CHECK(argc>1);GError*error=nullptr;auto*plugin=gst_plugin_load_file(argv[1],&error);if(error)fprintf(stderr,"%s\n",error->message);CHECK(plugin&&!error);gst_object_unref(plugin);
 #endif
- mismatch();
+ mismatch();queueCapacity();
  for(int consumerFirst=0;consumerFirst<2;consumerFirst++){
   auto path=sessionPath();auto*sender=fl_gst_session_new(3);auto*receiver=fl_gst_session_new(3);auto local=caps(true,true);
   gboolean pr=FALSE,cr=FALSE;flChannel*producer=nullptr,*consumer=nullptr;GError*pe=nullptr,*ce=nullptr;

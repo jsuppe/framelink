@@ -1,0 +1,562 @@
+{
+  "stage-NV12-1920x1080-cpu-1794044923/consumer-core.1103491.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "flCreateChannelEx": {
+        "n": 1,
+        "mean_ms": 0.41876,
+        "p95_ms": 0.41876
+      },
+      "ipc.send": {
+        "n": 27,
+        "mean_ms": 0.004488814814814815,
+        "p95_ms": 0.004583
+      },
+      "ipc.recv": {
+        "n": 25,
+        "mean_ms": 0.00376072,
+        "p95_ms": 0.00426
+      },
+      "flAcquireFrame": {
+        "n": 23,
+        "mean_ms": 0.27109947826086955,
+        "p95_ms": 0.000275
+      },
+      "flImageMapPlanes": {
+        "n": 23,
+        "mean_ms": 0.0025254347826086957,
+        "p95_ms": 0.002452
+      },
+      "flImageUnmap": {
+        "n": 25,
+        "mean_ms": 0.00092996,
+        "p95_ms": 0.00125
+      },
+      "flRelease": {
+        "n": 23,
+        "mean_ms": 0.0049728260869565215,
+        "p95_ms": 0.005621
+      },
+      "flClose": {
+        "n": 1,
+        "mean_ms": 0.269604,
+        "p95_ms": 0.269604
+      }
+    }
+  },
+  "stage-NV12-1920x1080-cpu-1794044923/consumer-gst.1103491.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "gst.cpu_output_allocate": {
+        "n": 23,
+        "mean_ms": 0.0036986521739130434,
+        "p95_ms": 0.012852
+      },
+      "gst.cpu_copy_source_duration": {
+        "n": 23,
+        "mean_ms": 231.28013186956522,
+        "p95_ms": 242.087953
+      },
+      "gst.srcCreate": {
+        "n": 24,
+        "mean_ms": 221.92047620833333,
+        "p95_ms": 242.100044
+      }
+    }
+  },
+  "stage-NV12-1920x1080-cpu-1794044923/producer-gst.1103499.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "gst.cpu_copy_sink_duration": {
+        "n": 23,
+        "mean_ms": 1.1078068260869565,
+        "p95_ms": 1.241416
+      },
+      "gst.sinkRender": {
+        "n": 300,
+        "mean_ms": 5.947540413333333,
+        "p95_ms": 6.26944
+      }
+    }
+  },
+  "stage-NV12-1920x1080-cpu-1794044923/producer-core.1103499.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "ipc.recv": {
+        "n": 24,
+        "mean_ms": 0.006878875,
+        "p95_ms": 0.012994
+      },
+      "ipc.send": {
+        "n": 29,
+        "mean_ms": 0.004422344827586207,
+        "p95_ms": 0.006142
+      },
+      "flOpenProducer": {
+        "n": 1,
+        "mean_ms": 0.079405,
+        "p95_ms": 0.079405
+      },
+      "flRequestGeometry": {
+        "n": 1,
+        "mean_ms": 0.066472,
+        "p95_ms": 0.066472
+      },
+      "flAcquireBuffer": {
+        "n": 300,
+        "mean_ms": 5.857608066666667,
+        "p95_ms": 6.265556
+      },
+      "flImageMapPlanes": {
+        "n": 23,
+        "mean_ms": 0.02075191304347826,
+        "p95_ms": 0.00248
+      },
+      "flImageUnmap": {
+        "n": 25,
+        "mean_ms": 0.00115868,
+        "p95_ms": 0.001674
+      },
+      "flBeginSubmit": {
+        "n": 23,
+        "mean_ms": 9.317391304347826e-05,
+        "p95_ms": 0.000104
+      },
+      "flEndSubmit": {
+        "n": 23,
+        "mean_ms": 0.003861217391304348,
+        "p95_ms": 0.004214
+      },
+      "flSubmit": {
+        "n": 23,
+        "mean_ms": 0.004663260869565217,
+        "p95_ms": 0.005915
+      },
+      "flClose": {
+        "n": 1,
+        "mean_ms": 0.20841,
+        "p95_ms": 0.20841
+      }
+    }
+  },
+  "stage-BGRA-1920x1080-cpu-1794044928/producer-gst.1103543.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "gst.sinkRender": {
+        "n": 300,
+        "mean_ms": 6.216265903333333,
+        "p95_ms": 6.28073
+      }
+    }
+  },
+  "stage-BGRA-1920x1080-cpu-1794044928/consumer-core.1103535.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "flCreateChannelEx": {
+        "n": 1,
+        "mean_ms": 0.333962,
+        "p95_ms": 0.333962
+      },
+      "ipc.send": {
+        "n": 12,
+        "mean_ms": 0.005924916666666667,
+        "p95_ms": 0.004801
+      },
+      "ipc.recv": {
+        "n": 10,
+        "mean_ms": 0.0043654,
+        "p95_ms": 0.00402
+      },
+      "flAcquireFrame": {
+        "n": 8,
+        "mean_ms": 1.28475775,
+        "p95_ms": 0.000968
+      },
+      "flImageMapPlanes": {
+        "n": 8,
+        "mean_ms": 0.00356025,
+        "p95_ms": 0.007169
+      },
+      "flImageMap": {
+        "n": 8,
+        "mean_ms": 0.0038653750000000003,
+        "p95_ms": 0.007912
+      },
+      "flImageUnmap": {
+        "n": 10,
+        "mean_ms": 0.0009979,
+        "p95_ms": 0.001491
+      },
+      "flRelease": {
+        "n": 8,
+        "mean_ms": 0.00656625,
+        "p95_ms": 0.005998
+      },
+      "flClose": {
+        "n": 1,
+        "mean_ms": 0.334894,
+        "p95_ms": 0.334894
+      }
+    }
+  },
+  "stage-BGRA-1920x1080-cpu-1794044928/producer-core.1103543.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "ipc.recv": {
+        "n": 9,
+        "mean_ms": 0.007267444444444444,
+        "p95_ms": 0.011995
+      },
+      "ipc.send": {
+        "n": 14,
+        "mean_ms": 0.005998142857142857,
+        "p95_ms": 0.021612
+      },
+      "flOpenProducer": {
+        "n": 1,
+        "mean_ms": 0.075141,
+        "p95_ms": 0.075141
+      },
+      "flRequestGeometry": {
+        "n": 1,
+        "mean_ms": 0.034583,
+        "p95_ms": 0.034583
+      },
+      "flAcquireBuffer": {
+        "n": 300,
+        "mean_ms": 6.128642523333333,
+        "p95_ms": 6.278367
+      },
+      "flImageMapPlanes": {
+        "n": 8,
+        "mean_ms": 0.06541525,
+        "p95_ms": 0.175734
+      },
+      "flImageMap": {
+        "n": 8,
+        "mean_ms": 0.06566137500000001,
+        "p95_ms": 0.175929
+      },
+      "flImageUnmap": {
+        "n": 10,
+        "mean_ms": 0.0007014,
+        "p95_ms": 0.000992
+      },
+      "flBeginSubmit": {
+        "n": 8,
+        "mean_ms": 0.000108,
+        "p95_ms": 0.000136
+      },
+      "flEndSubmit": {
+        "n": 8,
+        "mean_ms": 0.004023625,
+        "p95_ms": 0.004529
+      },
+      "flSubmit": {
+        "n": 8,
+        "mean_ms": 0.005079,
+        "p95_ms": 0.006156
+      },
+      "flClose": {
+        "n": 1,
+        "mean_ms": 0.509322,
+        "p95_ms": 0.509322
+      }
+    }
+  },
+  "stage-BGRA-1920x1080-cpu-1794044928/consumer-gst.1103535.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "gst.cpu_output_allocate": {
+        "n": 8,
+        "mean_ms": 0.016287,
+        "p95_ms": 0.035301
+      },
+      "gst.srcCreate": {
+        "n": 9,
+        "mean_ms": 643.8660953333333,
+        "p95_ms": 744.70816
+      }
+    }
+  },
+  "stage-NV12-3840x2160-cpu-1794044934/consumer-gst.1103594.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "gst.cpu_output_allocate": {
+        "n": 5,
+        "mean_ms": 0.0119346,
+        "p95_ms": 0.014072
+      },
+      "gst.cpu_copy_source_duration": {
+        "n": 5,
+        "mean_ms": 1148.297091,
+        "p95_ms": 1374.205233
+      },
+      "gst.srcCreate": {
+        "n": 6,
+        "mean_ms": 960.0684858333333,
+        "p95_ms": 1375.919572
+      }
+    }
+  },
+  "stage-NV12-3840x2160-cpu-1794044934/consumer-core.1103594.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "flCreateChannelEx": {
+        "n": 1,
+        "mean_ms": 0.328446,
+        "p95_ms": 0.328446
+      },
+      "ipc.send": {
+        "n": 9,
+        "mean_ms": 0.006732222222222222,
+        "p95_ms": 0.005663
+      },
+      "ipc.recv": {
+        "n": 7,
+        "mean_ms": 0.0053638571428571424,
+        "p95_ms": 0.004236
+      },
+      "flAcquireFrame": {
+        "n": 5,
+        "mean_ms": 3.7355504,
+        "p95_ms": 0.000271
+      },
+      "flImageMapPlanes": {
+        "n": 5,
+        "mean_ms": 0.0066686,
+        "p95_ms": 0.011995
+      },
+      "flImageUnmap": {
+        "n": 7,
+        "mean_ms": 0.0009608571428571429,
+        "p95_ms": 0.001463
+      },
+      "flRelease": {
+        "n": 5,
+        "mean_ms": 0.0086644,
+        "p95_ms": 0.006578
+      },
+      "flClose": {
+        "n": 1,
+        "mean_ms": 0.369861,
+        "p95_ms": 0.369861
+      }
+    }
+  },
+  "stage-NV12-3840x2160-cpu-1794044934/producer-gst.1103602.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "gst.cpu_copy_sink_duration": {
+        "n": 5,
+        "mean_ms": 4.7469164,
+        "p95_ms": 5.230112
+      },
+      "gst.sinkRender": {
+        "n": 150,
+        "mean_ms": 6.19926282,
+        "p95_ms": 6.268002
+      }
+    }
+  },
+  "stage-NV12-3840x2160-cpu-1794044934/producer-core.1103602.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "ipc.recv": {
+        "n": 6,
+        "mean_ms": 0.0095245,
+        "p95_ms": 0.01283
+      },
+      "ipc.send": {
+        "n": 11,
+        "mean_ms": 0.007164818181818182,
+        "p95_ms": 0.021482
+      },
+      "flOpenProducer": {
+        "n": 1,
+        "mean_ms": 0.075993,
+        "p95_ms": 0.075993
+      },
+      "flRequestGeometry": {
+        "n": 1,
+        "mean_ms": 0.038331,
+        "p95_ms": 0.038331
+      },
+      "flAcquireBuffer": {
+        "n": 150,
+        "mean_ms": 6.033668573333333,
+        "p95_ms": 6.263381
+      },
+      "flImageMapPlanes": {
+        "n": 5,
+        "mean_ms": 0.1076946,
+        "p95_ms": 0.185235
+      },
+      "flImageUnmap": {
+        "n": 7,
+        "mean_ms": 0.0006562857142857143,
+        "p95_ms": 0.001105
+      },
+      "flBeginSubmit": {
+        "n": 5,
+        "mean_ms": 0.0001502,
+        "p95_ms": 0.000212
+      },
+      "flEndSubmit": {
+        "n": 5,
+        "mean_ms": 0.004741,
+        "p95_ms": 0.004944
+      },
+      "flSubmit": {
+        "n": 5,
+        "mean_ms": 0.0057506,
+        "p95_ms": 0.006053
+      },
+      "flClose": {
+        "n": 1,
+        "mean_ms": 0.355125,
+        "p95_ms": 0.355125
+      }
+    }
+  },
+  "stage-BGRA-3840x2160-cpu-1794044941/consumer-core.1103663.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "flCreateChannelEx": {
+        "n": 1,
+        "mean_ms": 0.313643,
+        "p95_ms": 0.313643
+      },
+      "ipc.send": {
+        "n": 15,
+        "mean_ms": 0.0063154,
+        "p95_ms": 0.00808
+      },
+      "ipc.recv": {
+        "n": 13,
+        "mean_ms": 0.004423846153846154,
+        "p95_ms": 0.004755
+      },
+      "flAcquireFrame": {
+        "n": 11,
+        "mean_ms": 3.2116003636363635,
+        "p95_ms": 0.000565
+      },
+      "flImageMapPlanes": {
+        "n": 11,
+        "mean_ms": 0.003651181818181818,
+        "p95_ms": 0.009123
+      },
+      "flImageMap": {
+        "n": 11,
+        "mean_ms": 0.003931181818181818,
+        "p95_ms": 0.009989
+      },
+      "flImageUnmap": {
+        "n": 13,
+        "mean_ms": 0.0012984615384615385,
+        "p95_ms": 0.001739
+      },
+      "flRelease": {
+        "n": 11,
+        "mean_ms": 0.00741090909090909,
+        "p95_ms": 0.008115
+      },
+      "flClose": {
+        "n": 1,
+        "mean_ms": 0.533615,
+        "p95_ms": 0.533615
+      }
+    }
+  },
+  "stage-BGRA-3840x2160-cpu-1794044941/producer-core.1103671.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "ipc.recv": {
+        "n": 12,
+        "mean_ms": 0.0065611666666666665,
+        "p95_ms": 0.01242
+      },
+      "ipc.send": {
+        "n": 17,
+        "mean_ms": 0.005502764705882353,
+        "p95_ms": 0.017868
+      },
+      "flOpenProducer": {
+        "n": 1,
+        "mean_ms": 0.075784,
+        "p95_ms": 0.075784
+      },
+      "flRequestGeometry": {
+        "n": 1,
+        "mean_ms": 0.034787,
+        "p95_ms": 0.034787
+      },
+      "flAcquireBuffer": {
+        "n": 150,
+        "mean_ms": 5.847743726666667,
+        "p95_ms": 6.263784
+      },
+      "flImageMapPlanes": {
+        "n": 11,
+        "mean_ms": 0.049973363636363635,
+        "p95_ms": 0.264229
+      },
+      "flImageMap": {
+        "n": 11,
+        "mean_ms": 0.05019709090909091,
+        "p95_ms": 0.265245
+      },
+      "flImageUnmap": {
+        "n": 13,
+        "mean_ms": 0.0005538461538461539,
+        "p95_ms": 0.000735
+      },
+      "flBeginSubmit": {
+        "n": 11,
+        "mean_ms": 0.00018281818181818183,
+        "p95_ms": 0.000235
+      },
+      "flEndSubmit": {
+        "n": 11,
+        "mean_ms": 0.004163272727272727,
+        "p95_ms": 0.004772
+      },
+      "flSubmit": {
+        "n": 11,
+        "mean_ms": 0.005017,
+        "p95_ms": 0.007058
+      },
+      "flClose": {
+        "n": 1,
+        "mean_ms": 0.634639,
+        "p95_ms": 0.634639
+      }
+    }
+  },
+  "stage-BGRA-3840x2160-cpu-1794044941/producer-gst.1103671.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "gst.sinkRender": {
+        "n": 150,
+        "mean_ms": 6.3225397,
+        "p95_ms": 6.270788
+      }
+    }
+  },
+  "stage-BGRA-3840x2160-cpu-1794044941/consumer-gst.1103663.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "gst.cpu_output_allocate": {
+        "n": 11,
+        "mean_ms": 0.011266090909090908,
+        "p95_ms": 0.019658
+      },
+      "gst.srcCreate": {
+        "n": 12,
+        "mean_ms": 473.75193566666667,
+        "p95_ms": 587.45716
+      }
+    }
+  }
+}

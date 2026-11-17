@@ -1,0 +1,22 @@
+[
+    {
+        "ProcessId":  21944,
+        "ParentProcessId":  48840,
+        "Name":  "ctest.exe",
+        "CommandLine":  "\"C:\\Program Files\\CMake\\bin\\ctest.exe\" --test-dir build -C Release --output-on-failure"
+    },
+    {
+        "ProcessId":  50492,
+        "ParentProcessId":  10844,
+        "Name":  "framelink_av_producer.exe",
+        "CommandLine":  "<win-home>\\dev\\framelink-m6-windows-4f816e6\\build\\Release\\framelink_av_producer.exe <win-home>\\dev\\framelink-m6-windows-4f816e6\\build\\Release\\gstframelink.dll --session <win-home>\\AppData\\Local\\Temp\\m5-startup-926quklu\\audio-coordinated\\session-NV12 --format NV12 --frames 100 --timeout-ms 15000 --trace-media --input-pipeline <win-home>\\AppData\\Local\\Temp\\m5-startup-926quklu\\audio-coordinated\\NV12.pipeline"
+    },
+    {
+        "ProcessId":  36392,
+        "ParentProcessId":  10844,
+        "Name":  "framelink_av_consumer.exe",
+        "CommandLine":  "<win-home>\\dev\\framelink-m6-windows-4f816e6\\build\\Release\\framelink_av_consumer.exe <win-home>\\dev\\framelink-m6-windows-4f816e6\\build\\Release\\gstframelink.dll --session <win-home>\\AppData\\Local\\Temp\\m5-startup-926quklu\\audio-coordinated\\session-NV12 --format NV12 --frames 100 --timeout-ms 15000 --trace-media --stream --audio-sink fakesink --clock-policy audio-coordinated"
+    }
+]
+#< CLIXML
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04"><Obj S="progress" RefId="0"><TN RefId="0"><T>System.Management.Automation.PSCustomObject</T><T>System.Object</T></TN><MS><I64 N="SourceId">1</I64><PR N="Record"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj><Obj S="progress" RefId="1"><TNRef RefId="0" /><MS><I64 N="SourceId">2</I64><PR N="Record"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj></Objs>

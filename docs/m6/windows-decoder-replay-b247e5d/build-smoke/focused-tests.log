@@ -1,0 +1,23 @@
+Test project <win-home>/dev/framelink-native-ready-decoder-tape-b247e5d-20261112t0817z/build
+    Start  42: win_sha256_rows
+1/9 Test  #42: win_sha256_rows .........................   Passed    0.02 sec
+    Start  45: gst_relay_local_cancel_downstream_win
+2/9 Test  #45: gst_relay_local_cancel_downstream_win ...   Passed    2.17 sec
+    Start  46: gst_relay_local_cancel_upstream_win
+3/9 Test  #46: gst_relay_local_cancel_upstream_win .....   Passed    0.67 sec
+    Start  51: gst_relay_local_recovery_win
+4/9 Test  #51: gst_relay_local_recovery_win ............   Passed    1.82 sec
+    Start  52: gst_relay_local_bin_pause_win
+5/9 Test  #52: gst_relay_local_bin_pause_win ...........   Passed    0.87 sec
+    Start  53: gst_relay_local_bin_paused_cancel_win
+6/9 Test  #53: gst_relay_local_bin_paused_cancel_win ...   Passed    0.89 sec
+    Start  54: gst_relay_local_bin_win
+7/9 Test  #54: gst_relay_local_bin_win .................   Passed    1.14 sec
+    Start  78: gst_native_relay_downstream_death_win
+8/9 Test  #78: gst_native_relay_downstream_death_win ...   Passed    1.98 sec
+    Start 146: native_relay_win
+9/9 Test #146: native_relay_win ........................   Passed    0.51 sec
+
+100% tests passed, 0 tests failed out of 9
+
+Total Test time (real) =  10.09 sec

@@ -1,0 +1,50 @@
+abort_message at out/lib/device-libcxx-aarch64-ndk-cxx/out/llvm-project/libcxxabi/src/abort_message.cpp:78
+demangling_terminate_handler() at out/lib/device-libcxx-aarch64-ndk-cxx/out/llvm-project/libcxxabi/src/cxa_default_handlers.cpp:72 (discriminator 3)
+std::__terminate(void (*)()) at out/lib/device-libcxx-aarch64-ndk-cxx/out/llvm-project/libcxxabi/src/cxa_handlers.cpp:59
+__cxxabiv1::failed_throw(__cxxabiv1::__cxa_exception*) at out/lib/device-libcxx-aarch64-ndk-cxx/out/llvm-project/libcxxabi/src/cxa_exception.cpp:152
+__cxa_throw at out/lib/device-libcxx-aarch64-ndk-cxx/out/llvm-project/libcxxabi/src/cxa_exception.cpp:294
+__throw_bad_alloc_shim() at out/lib/device-libcxx-aarch64-ndk-cxx/out/llvm-project/libcxxabi/src/stdlib_new_delete.cpp:33 (discriminator 2)
+ (inlined by) operator new(unsigned long) at out/lib/device-libcxx-aarch64-ndk-cxx/out/llvm-project/libcxxabi/src/stdlib_new_delete.cpp:69
+void* std::__ndk1::__libcpp_operator_new[abi:ne190000]<unsigned long>(unsigned long) at <linux-home>/Android/Sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/c++/v1/new:271
+ (inlined by) std::__ndk1::__libcpp_allocate[abi:ne190000](unsigned long, unsigned long) at <linux-home>/Android/Sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/c++/v1/new:295
+ (inlined by) std::__ndk1::allocator<_GstMessage*>::allocate[abi:ne190000](unsigned long) at <linux-home>/Android/Sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/c++/v1/__memory/allocator.h:125
+ (inlined by) std::__ndk1::__allocation_result<std::__ndk1::allocator_traits<std::__ndk1::allocator<_GstMessage*>>::pointer> std::__ndk1::__allocate_at_least[abi:ne190000]<std::__ndk1::allocator<_GstMessage*>>(std::__ndk1::allocator<_GstMessage*>&, unsigned long) at <linux-home>/Android/Sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/c++/v1/__memory/allocate_at_least.h:41
+ (inlined by) std::__ndk1::__split_buffer<_GstMessage*, std::__ndk1::allocator<_GstMessage*>&>::__split_buffer(unsigned long, unsigned long, std::__ndk1::allocator<_GstMessage*>&) at <linux-home>/Android/Sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/c++/v1/__split_buffer:343
+ (inlined by) _GstMessage** std::__ndk1::vector<_GstMessage*, std::__ndk1::allocator<_GstMessage*>>::__push_back_slow_path<_GstMessage* const&>(_GstMessage* const&) at <linux-home>/Android/Sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/c++/v1/vector:1469
+ (inlined by) std::__ndk1::vector<_GstMessage*, std::__ndk1::allocator<_GstMessage*>>::push_back[abi:ne190000](_GstMessage* const&) at <linux-home>/Android/Sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/c++/v1/vector:1485
+ (inlined by) handleMessage(_GstBin*, _GstMessage*) at <linux-home>/dev/framelink-m6/gst/gstframelinkavsink.cpp:256
+bin_bus_handler at /home/nirbheek/projects/repos/cerbero.git/1.24/build/sources/android_universal/arm64/gstreamer-1.0-1.24.13/b/../gst/gstbin.c:3263
+gst_bus_post at /home/nirbheek/projects/repos/cerbero.git/1.24/build/sources/android_universal/arm64/gstreamer-1.0-1.24.13/b/../gst/gstbus.c:358
+gst_element_post_message_default at /home/nirbheek/projects/repos/cerbero.git/1.24/build/sources/android_universal/arm64/gstreamer-1.0-1.24.13/b/../gst/gstelement.c:2127
+gst_element_post_message at /home/nirbheek/projects/repos/cerbero.git/1.24/build/sources/android_universal/arm64/gstreamer-1.0-1.24.13/b/../gst/gstelement.c:2170
+gst_base_sink_default_event at /home/nirbheek/projects/repos/cerbero.git/1.24/build/sources/android_universal/arm64/gstreamer-1.0-1.24.13/b/../libs/gst/base/gstbasesink.c:0
+sinkEventImpl(_GstBaseSink*, _GstEvent*) at <linux-home>/dev/framelink-m6/gst/gstframelink.cpp:808
+ (inlined by) sinkEvent(_GstBaseSink*, _GstEvent*) at <linux-home>/dev/framelink-m6/gst/gstframelink.cpp:812
+gst_base_sink_event at /home/nirbheek/projects/repos/cerbero.git/1.24/build/sources/android_universal/arm64/gstreamer-1.0-1.24.13/b/../libs/gst/base/gstbasesink.c:0
+gst_pad_send_event_unchecked at /home/nirbheek/projects/repos/cerbero.git/1.24/build/sources/android_universal/arm64/gstreamer-1.0-1.24.13/b/../gst/gstpad.c:5982
+gst_pad_push_event_unchecked at /home/nirbheek/projects/repos/cerbero.git/1.24/build/sources/android_universal/arm64/gstreamer-1.0-1.24.13/b/../gst/gstpad.c:5608
+push_sticky at /home/nirbheek/projects/repos/cerbero.git/1.24/build/sources/android_universal/arm64/gstreamer-1.0-1.24.13/b/../gst/gstpad.c:4083
+events_foreach at /home/nirbheek/projects/repos/cerbero.git/1.24/build/sources/android_universal/arm64/gstreamer-1.0-1.24.13/b/../gst/gstpad.c:613
+check_sticky at /home/nirbheek/projects/repos/cerbero.git/1.24/build/sources/android_universal/arm64/gstreamer-1.0-1.24.13/b/../gst/gstpad.c:4142
+gst_pad_push_event at /home/nirbheek/projects/repos/cerbero.git/1.24/build/sources/android_universal/arm64/gstreamer-1.0-1.24.13/b/../gst/gstpad.c:5748
+event_forward_func at /home/nirbheek/projects/repos/cerbero.git/1.24/build/sources/android_universal/arm64/gstreamer-1.0-1.24.13/b/../gst/gstpad.c:3156
+gst_pad_forward at /home/nirbheek/projects/repos/cerbero.git/1.24/build/sources/android_universal/arm64/gstreamer-1.0-1.24.13/b/../gst/gstpad.c:3110
+gst_pad_event_default at /home/nirbheek/projects/repos/cerbero.git/1.24/build/sources/android_universal/arm64/gstreamer-1.0-1.24.13/b/../gst/gstpad.c:3207
+gst_pad_send_event_unchecked at /home/nirbheek/projects/repos/cerbero.git/1.24/build/sources/android_universal/arm64/gstreamer-1.0-1.24.13/b/../gst/gstpad.c:5982
+gst_pad_push_event_unchecked at /home/nirbheek/projects/repos/cerbero.git/1.24/build/sources/android_universal/arm64/gstreamer-1.0-1.24.13/b/../gst/gstpad.c:5608
+push_sticky at /home/nirbheek/projects/repos/cerbero.git/1.24/build/sources/android_universal/arm64/gstreamer-1.0-1.24.13/b/../gst/gstpad.c:4083
+events_foreach at /home/nirbheek/projects/repos/cerbero.git/1.24/build/sources/android_universal/arm64/gstreamer-1.0-1.24.13/b/../gst/gstpad.c:613
+check_sticky at /home/nirbheek/projects/repos/cerbero.git/1.24/build/sources/android_universal/arm64/gstreamer-1.0-1.24.13/b/../gst/gstpad.c:4142
+gst_pad_push_event at /home/nirbheek/projects/repos/cerbero.git/1.24/build/sources/android_universal/arm64/gstreamer-1.0-1.24.13/b/../gst/gstpad.c:5748
+gst_base_transform_sink_eventfunc at /home/nirbheek/projects/repos/cerbero.git/1.24/build/sources/android_universal/arm64/gstreamer-1.0-1.24.13/b/../libs/gst/base/gstbasetransform.c:1972
+gst_capsfilter_sink_event at /home/nirbheek/projects/repos/cerbero.git/1.24/build/sources/android_universal/arm64/gstreamer-1.0-1.24.13/b/../plugins/elements/gstcapsfilter.c:527
+gst_pad_send_event_unchecked at /home/nirbheek/projects/repos/cerbero.git/1.24/build/sources/android_universal/arm64/gstreamer-1.0-1.24.13/b/../gst/gstpad.c:5982
+gst_pad_push_event_unchecked at /home/nirbheek/projects/repos/cerbero.git/1.24/build/sources/android_universal/arm64/gstreamer-1.0-1.24.13/b/../gst/gstpad.c:5608
+push_sticky at /home/nirbheek/projects/repos/cerbero.git/1.24/build/sources/android_universal/arm64/gstreamer-1.0-1.24.13/b/../gst/gstpad.c:4083
+events_foreach at /home/nirbheek/projects/repos/cerbero.git/1.24/build/sources/android_universal/arm64/gstreamer-1.0-1.24.13/b/../gst/gstpad.c:613
+check_sticky at /home/nirbheek/projects/repos/cerbero.git/1.24/build/sources/android_universal/arm64/gstreamer-1.0-1.24.13/b/../gst/gstpad.c:4142
+gst_pad_push_event at /home/nirbheek/projects/repos/cerbero.git/1.24/build/sources/android_universal/arm64/gstreamer-1.0-1.24.13/b/../gst/gstpad.c:5748
+gst_base_src_loop at /home/nirbheek/projects/repos/cerbero.git/1.24/build/sources/android_universal/arm64/gstreamer-1.0-1.24.13/b/../libs/gst/base/gstbasesrc.c:0
+gst_task_func at /home/nirbheek/projects/repos/cerbero.git/1.24/build/sources/android_universal/arm64/gstreamer-1.0-1.24.13/b/../gst/gsttask.c:399
+g_thread_pool_thread_proxy at /home/nirbheek/projects/repos/cerbero.git/1.24/build/sources/android_universal/arm64/glib-2.74.4/b/../glib/gthreadpool.c:352
+g_thread_proxy at /home/nirbheek/projects/repos/cerbero.git/1.24/build/sources/android_universal/arm64/glib-2.74.4/b/../glib/gthread.c:831

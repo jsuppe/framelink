@@ -1,0 +1,13 @@
+[0/1] Re-running CMake...
+-- framelink: building GStreamer elements (gstframelink)
+-- Configuring done (0.1s)
+-- Generating done (0.1s)
+-- Build files have been written to: <linux-home>/dev/build/framelink-m6-linux
+[1/8] Building CXX object CMakeFiles/fl_gst_shared_cpu_events.dir/test/fl_gst_shared_cpu_events.cpp.o
+[2/8] Building CXX object CMakeFiles/fl_gst_shared_cpu_source.dir/test/fl_gst_shared_cpu_source.cpp.o
+[3/8] Building CXX object CMakeFiles/fl_gst_shared_cpu_roundtrip.dir/test/fl_gst_shared_cpu_roundtrip.cpp.o
+[4/8] Building CXX object CMakeFiles/gstframelink.dir/gst/gstframelink.cpp.o
+[5/8] Linking CXX shared module libgstframelink.so
+[6/8] Linking CXX executable fl_gst_shared_cpu_source
+[7/8] Linking CXX executable fl_gst_shared_cpu_events
+[8/8] Linking CXX executable fl_gst_shared_cpu_roundtrip

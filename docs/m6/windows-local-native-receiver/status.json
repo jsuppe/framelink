@@ -1,0 +1,17 @@
+{
+  "base": "6d7e6be7a6a1f6acb3dcdaea0a4c98a55456d985",
+  "state": "finished",
+  "start": "2026-11-09T05:41:27.309750+00:00",
+  "preflight_exit": 0,
+  "hashes": {
+    "test/fl_gst_native_producer_win.cpp": "ac3d882f735867b22a42c2e3200313d864bcbd1bdea24bcfa008b9f05931a676",
+    "test/fl_gst_native_producer_av_win.inc": "9554e96acaaac9ee7a7d946144b72de64b315b3bf0582a0a41cb066e9104504b",
+    "gst/gstframelinkavsrc.cpp": "965c2bad5b0fad873adbfc71364ee37fc5c6ad934b0c215e87b52a8b38cc83be",
+    "gst/gstframelinkavsink.cpp": "a97c699b96446e0e3bd44a1e0f932e5994e5ceb7661099a67a74fcd170afe6fe",
+    "gst/framelink_session_transport.cpp": "ff834c0b4dde6427a25ce0146dbe7c6670865147fd113be6637b3430220a24f7"
+  },
+  "build_exit": 0,
+  "regression_exit": 0,
+  "end": "2026-11-09T05:41:59.393416+00:00",
+  "bin_regression_exit": 0
+}

@@ -32,7 +32,13 @@ validation matrix on Linux, Windows and Android, and hosted Linux/Windows CI. Se
   Android. Start with the [developer guide](samples/GST_AV_EXAMPLE.md), the
   [element reference](docs/GST_AV_REFERENCE.md) and the
   [migration guide](docs/GST_AV_MIGRATION.md).
-- **M6/M7 not started:** extended reliability/performance qualification, then release.
+- **M6 active; M7 pending:** low-latency reliability/performance qualification,
+  then release. See the [current resolution plan](docs/m6/LOW_LATENCY_PLAN.md).
+  Coordinated-session producers still copy into the video ring; their native
+  producer integration remains M6.9, not an established whole-path zero-copy claim.
+- **M6 timing migration:** `framelinkavsrc` defaults to `latency-ms=0` on this
+  development branch. Set `latency-ms=150` explicitly to retain the former
+  buffered playback setting; see the [migration guide](docs/GST_AV_MIGRATION.md).
 
 M5a shares compatible allocations at process boundaries with explicit CPU/GPU
 usage negotiation. Storage remains owned until downstream work completes.
@@ -131,6 +137,10 @@ checked against the timestamp that travelled with it, so slot aliasing or a
 missing fence wait fails — not merely "no pixels arrived".
 
 Set `FRAMELINK_DEBUG=1` for connection diagnostics. Errors always print.
+
+Before committing evidence or scripts, run `python3 tools/setup_local_env.py` once
+per clone so machine-local paths, users and hosts are committed as placeholders;
+see [docs/LOCAL_ENV.md](docs/LOCAL_ENV.md).
 
 ## Status
 

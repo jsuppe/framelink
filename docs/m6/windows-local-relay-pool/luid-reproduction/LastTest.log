@@ -1,0 +1,23 @@
+Start testing: Nov 12 00:51 Eastern Standard Time
+----------------------------------------------------------
+44/158 Testing: gst_relay_local_pool_failures_win
+44/158 Test: gst_relay_local_pool_failures_win
+Command: "<win-home>/dev/framelink-m6-windows-7b8a274/build/Release/fl_gst_native_producer_win.exe" "<win-home>/dev/framelink-m6-windows-7b8a274/build/Release/gstframelink.dll" "--relay-local-pool-failures"
+Directory: <win-home>/dev/framelink-m6-windows-7b8a274/build
+"gst_relay_local_pool_failures_win" start time: Nov 12 00:51 Eastern Standard Time
+Output:
+----------------------------------------------------------
+pool negative mode=0 local=0 remote=0 localError=authenticated relay pool transfer failed or cancelled remoteError=authenticated relay pool transfer failed or cancelled
+pool negative mode=1 local=0 remote=0 localError=authenticated relay pool transfer failed or cancelled remoteError=authenticated relay pool transfer failed or cancelled
+pool negative mode=2 local=0 remote=0 localError=authenticated relay pool transfer failed or cancelled remoteError=authenticated relay pool transfer failed or cancelled
+pool negative mode=3 local=1 remote=1 localError=none remoteError=none
+line 117: !local&&!remote&&localError&&remoteError&&!p&&!c&&!bound.version&&!received.version
+<end of output>
+Test time =   0.42 sec
+----------------------------------------------------------
+Test Failed.
+"gst_relay_local_pool_failures_win" end time: Nov 12 00:51 Eastern Standard Time
+"gst_relay_local_pool_failures_win" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Nov 12 00:51 Eastern Standard Time

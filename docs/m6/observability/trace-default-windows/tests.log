@@ -1,0 +1,40 @@
+#< CLIXML
+CMake is re-running because <win-home>/dev/framelink-m6-20261106/build/CMakeFiles/generate.stamp is out-of-date.
+  the file '<win-home>/dev/framelink-m6-20261106/CMakeLists.txt'
+  is newer than '<win-home>/dev/framelink-m6-20261106/build/CMakeFiles/generate.stamp.depend'
+  result='-1'
+-- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.26300.
+-- framelink: building GStreamer elements (gstframelink)
+-- Configuring done (0.8s)
+-- Generating done (1.5s)
+-- Build files have been written to: <win-home>/dev/framelink-m6-20261106/build
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  fl_trace_test.cpp
+  fl_trace_test.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_trace_test.exe
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  fl_trace_test.cpp
+  fl_trace_compiled_out.vcxproj -> <win-home>\dev\framelink-m6-20261106\build\Release\fl_trace_compiled_out.exe
+Test project <win-home>/dev/framelink-m6-20261106/build
+    Start 49: trace_disabled
+1/8 Test #49: trace_disabled ...................   Passed    0.02 sec
+    Start 50: trace_default_capacity
+2/8 Test #50: trace_default_capacity ...........   Passed    0.02 sec
+    Start 51: trace_override_capacity
+3/8 Test #51: trace_override_capacity ..........   Passed    0.03 sec
+    Start 52: trace_invalid_capacity
+4/8 Test #52: trace_invalid_capacity ...........   Passed    0.02 sec
+    Start 53: trace_bounded_concurrent
+5/8 Test #53: trace_bounded_concurrent .........   Passed    0.02 sec
+    Start 54: trace_thread_limit
+6/8 Test #54: trace_thread_limit ...............   Passed    0.02 sec
+    Start 97: trace_details
+7/8 Test #97: trace_details ....................   Passed    0.01 sec
+    Start 98: trace_compiled_out
+8/8 Test #98: trace_compiled_out ...............   Passed    0.02 sec
+
+100% tests passed, 0 tests failed out of 8
+
+Total Test time (real) =   0.21 sec
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04"><Obj S="progress" RefId="0"><TN RefId="0"><T>System.Management.Automation.PSCustomObject</T><T>System.Object</T></TN><MS><I64 N="SourceId">1</I64><PR N="Record"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj></Objs>

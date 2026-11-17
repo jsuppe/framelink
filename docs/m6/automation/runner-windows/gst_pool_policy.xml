@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="(empty)"
+	tests="1"
+	failures="0"
+	disabled="0"
+	skipped="0"
+	hostname=""
+	time="3"
+	timestamp="2026-11-07T05:18:11"
+	>
+	<testcase name="gst_pool_policy" classname="gst_pool_policy" time="3.84668" status="run">
+		<properties>
+			<property name="cmake_labels" value="gst_video_regression"/>
+		</properties>
+		<system-out>pool2: single-frame no-fill, producer gap, exact PTS/pixels and no invented sequence loss pass
+pool3: single-frame no-fill, producer gap, exact PTS/pixels and no invented sequence loss pass
+sync=0: transport admission separated from sink clock hold pass
+sync=1: transport admission separated from sink clock hold pass
+2/3 image capacities: bounded drop, bounded error, delayed-reader recovery and exact loss accounting pass
+</system-out>
+	</testcase>
+</testsuite>

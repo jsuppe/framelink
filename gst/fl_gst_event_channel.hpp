@@ -39,13 +39,26 @@ public:
   if(!producer_)reader_=std::thread([this]{readLoop();});
  }
  ~FlGstEventChannel(){cancel();if(reader_.joinable())reader_.join();g_object_unref(cancel_);g_object_unref(stream_);}
- void cancel(){g_cancellable_cancel(cancel_);changed_.notify_all();}
- bool failed()const{return failed_.load();}
+ void cancel(){
+  g_cancellable_cancel(cancel_);
+  // Interrupt the peer as well as local waiters. Cancellation does not transfer
+  // ownership of any native allocation or manufacture a successful terminal.
+  g_socket_shutdown(g_socket_connection_get_socket(stream_),TRUE,TRUE,nullptr);
+  changed_.notify_all();
+ }
+ bool failed(){
+  // Event records are strictly producer -> consumer. The producer has no
+  // reader thread, but must observe peer shutdown even while publishing no
+  // events. Readability here is EOF or forbidden reverse traffic, both fatal.
+  if(producer_&&!failed_&&!g_cancellable_is_cancelled(cancel_)&&
+     g_socket_condition_check(g_socket_connection_get_socket(stream_),GIOCondition(G_IO_IN|G_IO_HUP|G_IO_ERR)))fail();
+  return failed_.load();
+ }
  bool producer()const{return producer_;}
  FlGstSessionResult send(const FlGstVideoEvent&e){
   if(!producer_||!valid(e))return FL_GST_SESSION_INVALID;
   std::lock_guard<std::mutex> lock(writeMutex_);
-  if(failed_||g_cancellable_is_cancelled(cancel_))return FL_GST_SESSION_CANCELLED;
+  if(failed()||g_cancellable_is_cancelled(cancel_))return FL_GST_SESSION_CANCELLED;
   if(sent_==G_MAXUINT64)return FL_GST_SESSION_INVALID;
   std::array<guint8,64> wire{};memcpy(wire.data(),"FLEVT001",8);GST_WRITE_UINT64_BE(wire.data()+8,generation_);GST_WRITE_UINT32_BE(wire.data()+16,e.kind);GST_WRITE_UINT64_BE(wire.data()+24,e.afterFrames);GST_WRITE_UINT64_BE(wire.data()+32,e.ptsNs);GST_WRITE_UINT64_BE(wire.data()+40,e.durationNs);GST_WRITE_UINT64_BE(wire.data()+48,++sent_);
   GError*error=nullptr;bool ok=g_output_stream_write_all(g_io_stream_get_output_stream(G_IO_STREAM(stream_)),wire.data(),wire.size(),nullptr,cancel_,&error);g_clear_error(&error);if(!ok){fail();return FL_GST_SESSION_CANCELLED;}return FL_GST_SESSION_READY;

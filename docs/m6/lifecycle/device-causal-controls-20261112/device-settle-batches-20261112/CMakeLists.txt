@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.20)
+project(device_allocation_isolation LANGUAGES CXX)
+add_executable(device_allocation_isolation probe.cpp)
+target_link_libraries(device_allocation_isolation PRIVATE d3d11 psapi)
+target_compile_features(device_allocation_isolation PRIVATE cxx_std_17)

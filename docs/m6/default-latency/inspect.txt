@@ -1,0 +1,4 @@
+  latency-ms          : Explicit pipeline latency with session=; zero for transport, set required final-playback buffering explicitly
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 0 - 10000 Default: 0 
+  

@@ -65,7 +65,8 @@ class Recorder {
     std::vector<std::unique_ptr<Buffer>> buffers_;
     std::atomic<uint64_t> rejected_{0};
     std::string path_;
-    size_t capacity_=65536;
+    // Opt-in tracing starts small; long captures must explicitly size buffers.
+    size_t capacity_=4096;
     uint64_t origin_=clockNs();
     uint64_t wall_=(uint64_t)std::chrono::duration_cast<std::chrono::nanoseconds>(
         std::chrono::system_clock::now().time_since_epoch()).count();

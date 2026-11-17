@@ -1,0 +1,25 @@
+{
+  "per_dll": {
+    "framelink.dll": {
+      "removed_candidate": [],
+      "removed_baseline": [],
+      "unexpected": [],
+      "pass": true
+    },
+    "framelink_gst_session.dll": {
+      "removed_candidate": [],
+      "removed_baseline": [],
+      "unexpected": [],
+      "pass": true
+    }
+  },
+  "baseline_count": 128,
+  "expected_count": 137,
+  "actual_count": 137,
+  "removed_baseline": [],
+  "removed_candidate": [],
+  "unexpected": [],
+  "explicit_far5_action": true,
+  "candidate_plugin_loaded": true,
+  "pass": true
+}

@@ -1,0 +1,12 @@
+{
+  "revision": "4d38a099c1790caa4be091bb5bbf3b9f8a13cf14",
+  "all_five_uploaded_artifact_hashes_match": true,
+  "verified_sha256": {
+    "remote.py": "f80cd9eee90283031224fa21e1c767a9aaf1bf366f88a35cadb8202e25eba518",
+    "execute.ps1": "164f8b3576dfdc59de7dfe03de83bbbed7db114db91f531c9d6807d54d39f6cb",
+    "collect.py": "873efbd2010163409edcf299d37786a1361b8b3f525ee3a2c0b841448a0d3cd3",
+    "source.tar": "094671410eb28104781304403cf5ce5e1f0e27275abcef9708b782019022cce6",
+    "config.json": "80284b174786873c92c8bdb84b398fa930b2578fc10347fd4d2f78f802ee173b"
+  },
+  "note": "source.tar verified in external evidence store, deliberately not copied; runtime DLL/exe hashes retained from data/status.json, not independently rehashed here"
+}

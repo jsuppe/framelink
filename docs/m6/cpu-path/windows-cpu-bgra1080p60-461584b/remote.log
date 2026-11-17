@@ -1,0 +1,42 @@
+** WARNING: connection is not using a post-quantum key exchange algorithm.
+** This session may be vulnerable to "store now, decrypt later" attacks.
+** The server may need to be upgraded. See https://openssh.com/pq.html
+START windows-shared-bgra-1920x1080-60-5 2026-11-12T19:21:24.868864+00:00
+PASS windows-shared-bgra-1920x1080-60-5 2026-11-12T19:21:30.646582+00:00
+START windows-shared-bgra-1920x1080-60-1800 2026-11-12T19:21:30.648169+00:00
+PASS windows-shared-bgra-1920x1080-60-1800 2026-11-12T19:51:34.161766+00:00
+{
+  "revision": "461584bbf5a6b8b70cec1578d69d35cb4b1ea2ff",
+  "state": "finished",
+  "started_utc": "2026-11-12T19:21:24.816394+00:00",
+  "binary_sha256": {
+    "fl_gst_av_bench.exe": "a59ce56d5508bbf58d40bfa775fa6adff5dffbd3897f48df1eefc31a02040dcc",
+    "gstframelink.dll": "eaeb59775eb2da04c0a998d30a072d28a2994957f746d7943dd0475c3182425e",
+    "framelink_gst_session.dll": "3329bef0da3a27d645c6348b4b509790c576550694046373649c8c03ba803a99",
+    "framelink.dll": "09f302958b85d65ce6dfc9c2b2f45ba7d41dfe2cd603dd6bc90c3681c07708a4"
+  },
+  "trace": false,
+  "case": "windows-shared-bgra-1920x1080-60-1800",
+  "driver_pid": 6484,
+  "windows-shared-bgra-1920x1080-60-5": {
+    "exit": 0,
+    "ended_utc": "2026-11-12T19:21:30.514561+00:00",
+    "binary_sha256": {
+      "fl_gst_av_bench.exe": "a59ce56d5508bbf58d40bfa775fa6adff5dffbd3897f48df1eefc31a02040dcc",
+      "gstframelink.dll": "eaeb59775eb2da04c0a998d30a072d28a2994957f746d7943dd0475c3182425e",
+      "framelink_gst_session.dll": "3329bef0da3a27d645c6348b4b509790c576550694046373649c8c03ba803a99",
+      "framelink.dll": "09f302958b85d65ce6dfc9c2b2f45ba7d41dfe2cd603dd6bc90c3681c07708a4"
+    }
+  },
+  "windows-shared-bgra-1920x1080-60-1800": {
+    "exit": 0,
+    "ended_utc": "2026-11-12T19:51:31.912208+00:00",
+    "binary_sha256": {
+      "fl_gst_av_bench.exe": "a59ce56d5508bbf58d40bfa775fa6adff5dffbd3897f48df1eefc31a02040dcc",
+      "gstframelink.dll": "eaeb59775eb2da04c0a998d30a072d28a2994957f746d7943dd0475c3182425e",
+      "framelink_gst_session.dll": "3329bef0da3a27d645c6348b4b509790c576550694046373649c8c03ba803a99",
+      "framelink.dll": "09f302958b85d65ce6dfc9c2b2f45ba7d41dfe2cd603dd6bc90c3681c07708a4"
+    }
+  },
+  "ended_utc": "2026-11-12T19:51:34.161811+00:00"
+}

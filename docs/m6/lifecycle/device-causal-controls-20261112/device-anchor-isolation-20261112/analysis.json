@@ -1,0 +1,38 @@
+{
+  "baseline": {
+    "count": 1,
+    "first_KiB": 1032.0,
+    "last_KiB": 1032.0,
+    "last_handles": 90
+  },
+  "anchor_created": {
+    "count": 1,
+    "first_KiB": 56164.0,
+    "last_KiB": 56164.0,
+    "last_handles": 361
+  },
+  "cycle": {
+    "count": 100,
+    "first_KiB": 72452.0,
+    "last_KiB": 88772.0,
+    "last_handles": 365
+  },
+  "settle": {
+    "count": 30,
+    "first_KiB": 88772.0,
+    "last_KiB": 61584.0,
+    "last_handles": 367
+  },
+  "anchor_released": {
+    "count": 1,
+    "first_KiB": 24372.0,
+    "last_KiB": 24372.0,
+    "last_handles": 239
+  },
+  "settle_no_anchor": {
+    "count": 30,
+    "first_KiB": 24372.0,
+    "last_KiB": 10040.0,
+    "last_handles": 240
+  }
+}

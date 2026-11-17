@@ -1,0 +1,25 @@
+Start testing: Nov 12 00:51 Eastern Standard Time
+----------------------------------------------------------
+44/158 Testing: gst_relay_local_pool_failures_win
+44/158 Test: gst_relay_local_pool_failures_win
+Command: "<win-home>/dev/framelink-m6-windows-7b8a274/build/Release/fl_gst_native_producer_win.exe" "<win-home>/dev/framelink-m6-windows-7b8a274/build/Release/gstframelink.dll" "--relay-local-pool-failures"
+Directory: <win-home>/dev/framelink-m6-windows-7b8a274/build
+"gst_relay_local_pool_failures_win" start time: Nov 12 00:51 Eastern Standard Time
+Output:
+----------------------------------------------------------
+pool negative mode=0 local=0 remote=0 localError=local audio connection deadline or failure: Operation was cancelled remoteError=clock uncertainty exceeds 50ms or mapping rejected
+pool negative mode=1 local=0 remote=0 localError=local audio connection deadline or failure: Operation was cancelled remoteError=clock uncertainty exceeds 50ms or mapping rejected
+pool negative mode=2 local=0 remote=0 localError=local audio connection deadline or failure: Operation was cancelled remoteError=clock uncertainty exceeds 50ms or mapping rejected
+pool negative mode=3 local=0 remote=0 localError=local audio connection deadline or failure: Operation was cancelled remoteError=clock uncertainty exceeds 50ms or mapping rejected
+pool negative mode=4 local=0 remote=0 localError=local audio connection deadline or failure: Operation was cancelled remoteError=clock uncertainty exceeds 50ms or mapping rejected
+pool negative mode=5 local=0 remote=0 localError=local control connection deadline or failure: Operation was cancelled remoteError=local session discovery deadline or cancellation
+FAR5 pool failures: duplicate/invalid/non-texture handles, wrong LUID/capacity, legacy receiver reject; outputs clear, source/event handles and source pool survive
+<end of output>
+Test time =   3.31 sec
+----------------------------------------------------------
+Test Passed.
+"gst_relay_local_pool_failures_win" end time: Nov 12 00:51 Eastern Standard Time
+"gst_relay_local_pool_failures_win" time elapsed: 00:00:03
+----------------------------------------------------------
+
+End testing: Nov 12 00:51 Eastern Standard Time

@@ -1,0 +1,29 @@
+** WARNING: connection is not using a post-quantum key exchange algorithm.
+** This session may be vulnerable to "store now, decrypt later" attacks.
+** The server may need to be upgraded. See https://openssh.com/pq.html
+UpdateCTestConfiguration  from :<win-home>/dev/framelink-m6-relay-cancel-20261112/build/DartConfiguration.tcl
+Test project <win-home>/dev/framelink-m6-relay-cancel-20261112/build
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 140
+    Start 140: gst_event_channel
+
+140: Test command: <win-home>\dev\framelink-m6-relay-cancel-20261112\build\Release\fl_gst_event_channel.exe
+140: Working Directory: <win-home>/dev/framelink-m6-relay-cancel-20261112/build
+140: Test timeout computed to be: 15
+140: event channel: authenticated ordered bounded controls; quiet idle, stale generation, queue overflow, partial-record deadline and cancellation passed
+1/1 Test #140: gst_event_channel ................   Passed    2.34 sec
+
+The following tests passed:
+	gst_event_channel
+
+100% tests passed, 0 tests failed out of 1
+
+Label Time Summary:
+m5b_av    =   2.34 sec*proc (1 test)
+
+Total Test time (real) =   2.36 sec

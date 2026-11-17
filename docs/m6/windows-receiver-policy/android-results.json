@@ -1,0 +1,137 @@
+[
+  {
+    "name": "linux-build",
+    "command": [
+      "cmake",
+      "--build",
+      "<linux-home>/dev/build/framelink-m6-linux",
+      "--target",
+      "gstframelink",
+      "fl_gst_policy_generation",
+      "fl_gst_av_bin",
+      "fl_gst_shared_cpu_av",
+      "-j",
+      "4"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "linux-tests",
+    "command": [
+      "ctest",
+      "--test-dir",
+      "<linux-home>/dev/build/framelink-m6-linux",
+      "--output-on-failure",
+      "-R",
+      "^(gst_policy_generation|gst_av_bin|gst_shared_cpu_av)$"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "arm64-build",
+    "command": [
+      "cmake",
+      "--build",
+      "<linux-home>/dev/build/framelink-m6-arm64",
+      "--target",
+      "fl_gst_policy_generation",
+      "fl_gst_av_bin",
+      "fl_gst_shared_cpu_av",
+      "-j",
+      "4"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "x86_64-build",
+    "command": [
+      "cmake",
+      "--build",
+      "<linux-home>/dev/build/framelink-m6-x86_64",
+      "--target",
+      "fl_gst_policy_generation",
+      "fl_gst_av_bin",
+      "fl_gst_shared_cpu_av",
+      "-j",
+      "4"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "mkdir",
+    "command": [
+      "adb",
+      "shell",
+      "mkdir",
+      "-p",
+      "/data/local/tmp/framelink-receiver-policy-regression"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "push-fl_gst_policy_generation",
+    "command": [
+      "adb",
+      "push",
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_gst_policy_generation",
+      "/data/local/tmp/framelink-receiver-policy-regression/"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "push-fl_gst_av_bin",
+    "command": [
+      "adb",
+      "push",
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_gst_av_bin",
+      "/data/local/tmp/framelink-receiver-policy-regression/"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "push-fl_gst_shared_cpu_av",
+    "command": [
+      "adb",
+      "push",
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_gst_shared_cpu_av",
+      "/data/local/tmp/framelink-receiver-policy-regression/"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "chmod",
+    "command": [
+      "adb",
+      "shell",
+      "chmod 755 /data/local/tmp/framelink-receiver-policy-regression/fl_*"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "fl_gst_policy_generation",
+    "command": [
+      "adb",
+      "shell",
+      "cd /data/local/tmp/framelink-receiver-policy-regression && ./fl_gst_policy_generation static"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "fl_gst_av_bin",
+    "command": [
+      "adb",
+      "shell",
+      "cd /data/local/tmp/framelink-receiver-policy-regression && ./fl_gst_av_bin static"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "fl_gst_shared_cpu_av",
+    "command": [
+      "adb",
+      "shell",
+      "cd /data/local/tmp/framelink-receiver-policy-regression && ./fl_gst_shared_cpu_av static"
+    ],
+    "exit": 0
+  }
+]

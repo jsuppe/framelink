@@ -4,7 +4,15 @@
 #include <cstdint>
 #include <string>
 namespace av {
-struct Endpoint { uint16_t port = 0; std::array<unsigned char, 32> token{}; };
+struct Endpoint { uint16_t port = 0; std::array<unsigned char, 32> token{};
+    // Explicit FAR2 Unix record: port must be zero; name is independent of token.
+    std::array<unsigned char, 16> unixName{};
+    // FAR3: Windows CPU session control over loopback, not legacy GPU TCP.
+    bool cpuControl = false;
+    // FAR4: explicit native-memory agreement before channel setup.
+    bool nativeControl = false;
+    // FAR5: native same-allocation relay pool import; never a FAR4 fallback.
+    bool nativeRelayControl = false; };
 // Local current-user trust boundary. Keep owner alive while listening. An OS
 // lifetime lock allows recovery after process death without trusting PID files.
 class RendezvousOwner {
@@ -19,6 +27,31 @@ private:
     struct Impl;
     Impl* impl_ = nullptr;
 };
+#ifdef __linux__
+// Linux/Android abstract Unix STREAM listener. Discovery remains protected by
+// the same current-user record/lock as TCP. The public socket name is NOT the
+// authentication credential. Accepted streams still require authentication.
+// fd() is borrowed, CLOEXEC and nonblocking. No media or session setup here.
+class UnixRendezvousOwner {
+public:
+    ~UnixRendezvousOwner();
+    UnixRendezvousOwner() = default;
+    UnixRendezvousOwner(const UnixRendezvousOwner&) = delete;
+    UnixRendezvousOwner& operator=(const UnixRendezvousOwner&) = delete;
+    bool publish(const std::string&, std::string& error);
+    void close();
+    int fd() const { return fd_; }
+private:
+    int fd_ = -1;
+    RendezvousOwner record_;
+};
+// Exact abstract address bytes, including leading NUL; empty for TCP/invalid.
+std::string unixAddress(const Endpoint&);
+bool readUnixEndpoint(const std::string&, Endpoint&, std::string& error);
+#endif
 bool readEndpoint(const std::string& directory, Endpoint&, std::string& error);
+bool readCpuControlEndpoint(const std::string& directory, Endpoint&, std::string& error);
+bool readNativeControlEndpoint(const std::string& directory, Endpoint&, std::string& error);
+bool readNativeRelayEndpoint(const std::string& directory, Endpoint&, std::string& error);
 bool secureRandom(void*, size_t, std::string& error);
 }

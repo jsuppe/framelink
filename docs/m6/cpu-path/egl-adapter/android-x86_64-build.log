@@ -1,0 +1,12 @@
+[0/1] Re-running CMake...
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: <linux-home>/dev/build/framelink-m6-x86_64
+[1/8] Building CXX object CMakeFiles/gstframelink.dir/gst/gstframelinkavsink.cpp.o
+[2/8] Building CXX object CMakeFiles/gstframelink.dir/gst/gstframelink.cpp.o
+[3/8] Linking CXX static library libgstframelink.a
+[4/8] Linking CXX executable fl_gst_nv12
+[5/8] Linking CXX executable fl_gst_av_src_bin
+[6/8] Linking CXX executable fl_gst_policy_generation
+[7/8] Linking CXX executable fl_gst_pool_policy
+[8/8] Linking CXX executable fl_gst_av_qualification

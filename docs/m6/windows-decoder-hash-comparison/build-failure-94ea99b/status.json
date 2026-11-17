@@ -1,0 +1,28 @@
+{
+  "revision": "94ea99b731469470ffc742f9dfdd377f0743604a",
+  "started_utc": "2026-11-12T08:08:31.973775+00:00",
+  "state": "failed",
+  "step": "build",
+  "command": [
+    "cmake",
+    "--build",
+    "build",
+    "--config",
+    "Release",
+    "--target",
+    "fl_gst_native_producer_win",
+    "fl_gst_local_decoder_rate_win",
+    "fl_native_relay_win",
+    "fl_win_sha256_rows",
+    "gstframelink",
+    "-j",
+    "4",
+    "--",
+    "/nr:false"
+  ],
+  "extract_exit": 0,
+  "configure_exit": 0,
+  "build_exit": 1,
+  "error": "build failed; evidence retained",
+  "ended_utc": "2026-11-12T08:08:53.515872+00:00"
+}

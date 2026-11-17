@@ -1,0 +1,69 @@
+{
+  "state": "finished",
+  "source_sha256": {
+    "src/framelink_shared_cpu_channel.cpp": "e2d0928fc7cad7415ab2edba433fefa4e72bca228bc72f2985e221d7b53583dc",
+    "gst/fl_gst_shared_cpu_source.inc": "5fc4002d8852322e34c9e9a413917d16b46f32068c09273c5ffeef132d1b0a88"
+  },
+  "steps": [
+    {
+      "name": "mkdir",
+      "exit": 0
+    },
+    {
+      "name": "fl_gst_shared_cpu_source-push",
+      "exit": 0
+    },
+    {
+      "name": "fl_shared_cpu_channel-push",
+      "exit": 0
+    },
+    {
+      "name": "fl_shared_cpu_reconnect-push",
+      "exit": 0
+    },
+    {
+      "name": "fl_gst_shared_cpu_roundtrip-push",
+      "exit": 0
+    },
+    {
+      "name": "fl_gst_shared_cpu_av-push",
+      "exit": 0
+    },
+    {
+      "name": "fl_gst_shared_cpu_events-push",
+      "exit": 0
+    },
+    {
+      "name": "fl_gst_av_bench-push",
+      "exit": 0
+    },
+    {
+      "name": "fl_gst_shared_cpu_source",
+      "exit": 0
+    },
+    {
+      "name": "fl_shared_cpu_channel",
+      "exit": 0
+    },
+    {
+      "name": "fl_shared_cpu_reconnect",
+      "exit": 0
+    },
+    {
+      "name": "fl_gst_shared_cpu_roundtrip",
+      "exit": 0
+    },
+    {
+      "name": "fl_gst_shared_cpu_av",
+      "exit": 0
+    },
+    {
+      "name": "fl_gst_shared_cpu_events",
+      "exit": 0
+    },
+    {
+      "name": "x86-build",
+      "exit": 0
+    }
+  ]
+}

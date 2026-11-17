@@ -1,0 +1,3 @@
+# EGL delayed-completion capability
+
+LinuxNVIDIA andAndroidMali controllable reusable-sync server-wait injection bothreturn77(unavailable), notpassed. Androidnormalimported-GPUread/nativefencecompletion andproducerdeath tests pass. Linuxrawnegativecontrol showsnativefence readiness despiteunsignalledreusablegate; Androiddoesnotprovideusablegatecapability. Softwareeventfd readiness andordinaryGPUcompletion tests remain separate evidence. EquivalentcontrollednativeGPUqueue-stall coverage onthesehosts remains suspended pendinga supported injection source/API; nofalseallplatformfaultqualification.

@@ -1,0 +1,22 @@
+[0/1] Re-running CMake...
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: <linux-home>/dev/build/framelink-m6-x86_64
+[1/18] Building CXX object CMakeFiles/fl_shared_cpu_reconnect.dir/test/fl_shared_cpu_reconnect.cpp.o
+[2/18] Building CXX object CMakeFiles/fl_shared_cpu_eos.dir/test/fl_shared_cpu_eos.cpp.o
+[3/18] Building C object CMakeFiles/fl_shared_cpu_channel_c.dir/test/fl_shared_cpu_channel_c.c.o
+[4/18] Building CXX object CMakeFiles/fl_shared_cpu_channel.dir/test/fl_shared_cpu_channel.cpp.o
+[5/18] Building CXX object CMakeFiles/framelink.dir/src/fl_ipc_posix.cpp.o
+[6/18] Building CXX object CMakeFiles/framelink.dir/src/framelink_shared_cpu_channel.cpp.o
+[7/18] Building CXX object CMakeFiles/fl_shared_cpu_release.dir/test/fl_shared_cpu_release.cpp.o
+[8/18] Building CXX object CMakeFiles/fl_shared_cpu_release.dir/src/fl_ipc_posix.cpp.o
+[9/18] Building CXX object CMakeFiles/framelink.dir/src/framelink_android.cpp.o
+[10/18] Linking CXX static library libframelink.a
+[11/18] Linking CXX executable fl_shared_cpu_eos
+[12/18] Linking CXX executable fl_shared_cpu_reconnect
+[13/18] Linking CXX executable fl_shared_cpu_channel
+[14/18] Linking CXX executable fl_shared_cpu_channel_c
+[15/18] Linking CXX executable fl_shared_cpu_release
+[16/18] Building CXX object CMakeFiles/fl_shared_cpu_control.dir/test/fl_shared_cpu_control.cpp.o
+[17/18] Building CXX object CMakeFiles/fl_shared_cpu_control.dir/src/fl_ipc_posix.cpp.o
+[18/18] Linking CXX executable fl_shared_cpu_control

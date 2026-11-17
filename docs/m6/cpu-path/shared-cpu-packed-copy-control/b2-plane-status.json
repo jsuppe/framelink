@@ -1,0 +1,57 @@
+{
+  "state": "finished",
+  "started": 1794169524.4203722,
+  "seconds": 120,
+  "scope": "consumer row versus packed-plane copy diagnostic; not qualification",
+  "copy_mode": "plane",
+  "build": {
+    "base": "93283ac53d9a4d5caecf33a76704fe02085b909a",
+    "binary_sha256": "3a07c721f647cc8996cea0f0b4a41bed9489f0b42939ec5a533f3a3fc86ae538",
+    "binaries": {
+      "fl_gst_av_bench": "3a07c721f647cc8996cea0f0b4a41bed9489f0b42939ec5a533f3a3fc86ae538",
+      "fl_gst_shared_cpu_source": "0548a9f458c9bdbb024672416d7ed8348760d5d07364bb82ebc9dcaca8cf9a19",
+      "fl_gst_shared_cpu_roundtrip": "20ee174b91b1b3a10bd77c1fc9c9395b060a4d393b9e21d39be2fd56ff538b3d",
+      "fl_gst_shared_cpu_av": "bebb9c5b91801da58e90a0bc6b46887d67ca579e4a31e413eb255c19b49f8585"
+    },
+    "sources": {
+      "<linux-home>/dev/framelink-m6/test/fl_gst_av_bench.cpp": "e401aae97589702ca4fd3a47e72d1436e60ba71d06c85ea6fa7c3e51bd2c8833",
+      "<linux-home>/dev/framelink-m6/gst/fl_gst_shared_cpu_sink.inc": "665af1b249a8f620133f7323cbf663b0fcc65fa9b162a5f377fc12bc673e733c",
+      "<linux-home>/dev/framelink-m6/gst/fl_gst_shared_cpu_source.inc": "07eb6a3e047955e6117a63be22ccbf44548e9c1d7fb20a721900606866e1a748",
+      "<linux-home>/dev/framelink-m6/gst/gstframelink.cpp": "7ece9b7711ffd9822d938ae52d744e0d4de9eb003c5f03ccd6f435eaaa79f34a"
+    }
+  },
+  "command": "cd /data/local/tmp/framelink-packed-copy && env FL_AUDIT_PLANE_COPY=1 taskset ff ./fl_gst_av_bench static --shared-cpu --seconds 120 --size 3840x2160 --fps 30 --format BGRA --pool 2 --video-queue 1 --latency-ms 0 --arrival-budget-ms 34 --transport-only --no-output-preroll --output-queue-buffers 1 --raw --out /data/local/tmp/framelink-packed-copy/b2-plane --label audit",
+  "observed_thread_affinities": [
+    "0-7",
+    "0-7",
+    "0-7",
+    "0-7",
+    "0-7",
+    "0-7",
+    "0-7",
+    "0-7",
+    "0-7",
+    "0-7",
+    "0-7",
+    "0-7",
+    "0-7",
+    "0-7",
+    "0-7",
+    "0-7",
+    "0-7"
+  ],
+  "affinity_verified": true,
+  "exit": 0,
+  "pull_exit": 0,
+  "counts": {
+    "consumer.frames": "3600",
+    "consumer.samples": "5760000",
+    "producer.pushed.frames": "3600",
+    "producer.pushed.samples": "5760000"
+  },
+  "consumer_stage_rows": 3600,
+  "sink_stage_rows": 3600,
+  "fallbacks": 0,
+  "analysis_exit": 0,
+  "ended": 1794169646.0531712
+}

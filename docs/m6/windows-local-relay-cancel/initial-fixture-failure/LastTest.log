@@ -1,0 +1,87 @@
+Start testing: Nov 12 00:52 Eastern Standard Time
+----------------------------------------------------------
+44/160 Testing: gst_relay_local_cancel_downstream_win
+44/160 Test: gst_relay_local_cancel_downstream_win
+Command: "<win-home>/dev/framelink-m6-windows-7b8a274/build/Release/fl_gst_native_producer_win.exe" "<win-home>/dev/framelink-m6-windows-7b8a274/build/Release/gstframelink.dll" "--relay-local-cancel-downstream"
+Directory: <win-home>/dev/framelink-m6-windows-7b8a274/build
+"gst_relay_local_cancel_downstream_win" start time: Nov 12 00:52 Eastern Standard Time
+Output:
+----------------------------------------------------------
+native AV mode 13 local=0
+bin relay n=0 collect=0 pending=1
+bin relay n=1 collect=0 pending=1
+bin relay n=2 collect=0 pending=1
+bin relay n=3 collect=0 pending=1
+bin relay n=4 collect=0 pending=1
+bin relay n=5 collect=0 pending=1
+bin relay n=6 collect=0 pending=1
+bin relay n=7 collect=0 pending=1
+line 220: fl_gst_session_wait_video_eos(up,config.generation,0,&frames,&pts)==FL_GST_SESSION_READY
+authenticated native pool: wrong key/generation/access and cancellation rejected; same-allocation imported ring attached
+broker bin downstream cancellation: 102.415ms, automatic idle supervisor propagation, no END/EOS, final reader still held
+broker bin original producer observes cancellation: 0.055ms, no EOS
+<end of output>
+Test time =   0.52 sec
+----------------------------------------------------------
+Test Failed.
+"gst_relay_local_cancel_downstream_win" end time: Nov 12 00:52 Eastern Standard Time
+"gst_relay_local_cancel_downstream_win" time elapsed: 00:00:00
+----------------------------------------------------------
+
+45/160 Testing: gst_relay_local_cancel_upstream_win
+45/160 Test: gst_relay_local_cancel_upstream_win
+Command: "<win-home>/dev/framelink-m6-windows-7b8a274/build/Release/fl_gst_native_producer_win.exe" "<win-home>/dev/framelink-m6-windows-7b8a274/build/Release/gstframelink.dll" "--relay-local-cancel-upstream"
+Directory: <win-home>/dev/framelink-m6-windows-7b8a274/build
+"gst_relay_local_cancel_upstream_win" start time: Nov 12 00:52 Eastern Standard Time
+Output:
+----------------------------------------------------------
+native AV mode 14 local=0
+bin relay n=0 collect=0 pending=1
+bin relay n=1 collect=0 pending=1
+bin relay n=2 collect=0 pending=1
+bin relay n=3 collect=0 pending=1
+bin relay n=4 collect=0 pending=1
+bin relay n=5 collect=0 pending=1
+bin relay n=6 collect=0 pending=1
+bin relay n=7 collect=0 pending=1
+line 220: fl_gst_session_wait_video_eos(up,config.generation,0,&frames,&pts)==FL_GST_SESSION_READY
+authenticated native pool: wrong key/generation/access and cancellation rejected; same-allocation imported ring attached
+broker bin upstream cancellation: 7.824ms, automatic idle supervisor propagation, no END/EOS, final reader still held
+broker bin original producer observes cancellation: 0.008ms, no EOS
+<end of output>
+Test time =   0.36 sec
+----------------------------------------------------------
+Test Failed.
+"gst_relay_local_cancel_upstream_win" end time: Nov 12 00:52 Eastern Standard Time
+"gst_relay_local_cancel_upstream_win" time elapsed: 00:00:00
+----------------------------------------------------------
+
+48/160 Testing: gst_relay_local_pool_win
+48/160 Test: gst_relay_local_pool_win
+Command: "<win-home>/dev/framelink-m6-windows-7b8a274/build/Release/fl_gst_native_producer_win.exe" "<win-home>/dev/framelink-m6-windows-7b8a274/build/Release/gstframelink.dll" "--relay-local-pool"
+Directory: <win-home>/dev/framelink-m6-windows-7b8a274/build
+"gst_relay_local_pool_win" start time: Nov 12 00:52 Eastern Standard Time
+Output:
+----------------------------------------------------------
+native AV mode 12 local=0
+bin relay n=0 collect=0 pending=1
+bin relay n=1 collect=0 pending=1
+bin relay n=2 collect=0 pending=1
+bin relay n=3 collect=0 pending=1
+bin relay n=4 collect=0 pending=1
+bin relay n=5 collect=0 pending=1
+bin relay n=6 collect=0 pending=1
+bin relay n=7 collect=0 pending=1
+authenticated native pool: wrong key/generation/access and cancellation rejected; same-allocation imported ring attached
+local native relay: retained authenticated discovery sessions, mapped A/V, genuine final-reader completion before drain acknowledgment
+broker native bin relay: 8 frames over two original allocations / 384 PCM frames; identity intermediate mapping, negotiated final mapping and exact 37ms A/V, authenticated session; final reader retained beyond upstream and downstream bin teardown
+native producer AV: retained texture after full teardown, original allocation, exact pixels/PCM, 37ms mapping and terminal semantics pass
+<end of output>
+Test time =   0.79 sec
+----------------------------------------------------------
+Test Passed.
+"gst_relay_local_pool_win" end time: Nov 12 00:52 Eastern Standard Time
+"gst_relay_local_pool_win" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Nov 12 00:52 Eastern Standard Time

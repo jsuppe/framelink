@@ -3,7 +3,14 @@
 Hashes trace-mode media; this is a correctness test, not a throughput benchmark.
 """
 import argparse,json,os,pathlib,subprocess,tempfile
-p=argparse.ArgumentParser();p.add_argument('--build',required=True);p.add_argument('--output');p.add_argument('--audio-sink',default='fakesink');p.add_argument('--clock-policy',choices=['audio','producer','audio-coordinated'],default='audio');a=p.parse_args()
+from m5_capture import CapturedProcess
+p=argparse.ArgumentParser();p.add_argument('--build',required=True);p.add_argument('--output');p.add_argument('--audio-sink',default='fakesink');p.add_argument('--clock-policy',choices=['audio','producer','audio-coordinated'],default='audio')
+p.add_argument('--preconnect-negative-control',action='store_true',help='Require loss/late video from deliberately delayed lazy producer open')
+a=p.parse_args()
+if a.preconnect_negative_control:
+    if (a.clock_policy!='producer' or os.environ.get('FRAMELINK_TEST_LAZY_PRODUCER_OPEN')!='1'
+            or os.environ.get('FRAMELINK_TEST_PRODUCER_OPEN_DELAY_MS')!='350'):
+        p.error('--preconnect-negative-control requires producer clock and the 350ms lazy-open injection')
 b=pathlib.Path(a.build).resolve();root=pathlib.Path(a.output or tempfile.mkdtemp(prefix='fl-m5-')).resolve();root.mkdir(parents=True,exist_ok=True)
 exe='.exe' if os.name=='nt' else '';plugin=b/('gstframelink.dll' if os.name=='nt' else 'libgstframelink.so')
 media=root/'decoded-source.avi'
@@ -19,8 +26,8 @@ for fmt in ('BGRA','NV12'):
     args=[str(plugin),'--session',str(root/('session-'+fmt)),'--format',fmt,'--frames','100','--timeout-ms','15000','--trace-media']
     plog=root/(fmt+'-producer.log');clog=root/(fmt+'-consumer.log')
     with plog.open('w') as pf,clog.open('w') as cf:
-        producer=subprocess.Popen([str(b/('framelink_av_producer'+exe)),*args,'--input-pipeline',str(pipeline)],stdout=pf,stderr=subprocess.STDOUT)
-        consumer=subprocess.Popen([str(b/('framelink_av_consumer'+exe)),*args,'--stream','--audio-sink',a.audio_sink,'--clock-policy',a.clock_policy],stdout=cf,stderr=subprocess.STDOUT)
+        producer=CapturedProcess([str(b/('framelink_av_producer'+exe)),*args,'--input-pipeline',str(pipeline)],stdout=pf,stderr=subprocess.STDOUT)
+        consumer=CapturedProcess([str(b/('framelink_av_consumer'+exe)),*args,'--stream','--audio-sink',a.audio_sink,'--clock-policy',a.clock_policy],stdout=cf,stderr=subprocess.STDOUT)
         try:
             codes=(producer.wait(timeout=25),consumer.wait(timeout=25))
         finally:
@@ -36,6 +43,12 @@ for fmt in ('BGRA','NV12'):
     assert len({value[0] for value in rv.values()})>1,'no changing video content'
     complete=next(r for r in records(clog) if r.get('event')=='playback-complete')
     assert complete['audio_samples']==96000
-    assert complete['video_late']<10,complete
+    if a.preconnect_negative_control:
+        # This deliberately broken path must demonstrate the regression, not
+        # pass the normal playback late-frame budget. Integrity checks above
+        # and the parent's trace-based injection/readiness checks still apply.
+        assert complete['video_received']<100 or complete['video_late']>0,complete
+    else:
+        assert complete['video_late']<10,complete
     results.append({'format':fmt,'producer_video_frames':len(sv),'sink_arrival_video_frames':len(rv),'scheduled_video_frames':complete['video_received'],'matched_audio_blocks':len(ra),'audio_samples':complete['audio_samples'],'late_video':complete['video_late'],'payload_pts_duration_preserved':True,'physical_playback_qualified':False})
 (root/'summary.json').write_text(json.dumps(results,indent=2)+'\n');print(json.dumps(results,indent=2));print(root)

@@ -1,0 +1,18 @@
+{
+  "baseline": "7b8a274",
+  "candidate": "461584bbf5a6b8b70cec1578d69d35cb4b1ea2ff",
+  "baseline_count": 119,
+  "candidate_count": 128,
+  "removed": [],
+  "added": [
+    "flD3D11PoolSnapshotHandle",
+    "flOpenProducerD3D11Bounded",
+    "flQueryD3D11PoolSnapshot",
+    "flReleaseD3D11PoolSnapshot",
+    "flSnapshotD3D11ConsumerPool",
+    "fl_gst_session_open_local_native_pool_receiver",
+    "fl_gst_session_open_local_native_relay",
+    "fl_gst_session_open_local_native_relay_input",
+    "fl_gst_session_open_local_native_relay_pool"
+  ]
+}

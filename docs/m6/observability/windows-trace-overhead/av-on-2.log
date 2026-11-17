@@ -1,0 +1,24 @@
+{
+  "frames": 300,
+  "hops": 1,
+  "pcm_sample_frames": 240000,
+  "pcm_channels": 2,
+  "pcm_logical_bytes": 960000,
+  "producer_and_consumer_av_offset_ns": 37000000,
+  "media_offset_change_ns": 0,
+  "audio_minus_video_arrival_ms": {
+    "min": -4.9727,
+    "p50": -1.9369,
+    "p95": 0.0642,
+    "p99": 0.0714,
+    "max": 0.082
+  },
+  "audio_minus_video_transport_delay_ms": {
+    "min": -2.9982,
+    "p50": -1.4712,
+    "p95": -0.4731,
+    "p99": -0.4628,
+    "max": -0.4584
+  },
+  "physical_output_qualified": false
+}

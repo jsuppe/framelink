@@ -150,6 +150,13 @@ static void cleanup(){
  auto rounds=[&](Mode m,bool native,bool leak){std::vector<guint> hs,ts;std::vector<GSocket*> leaked;
   for(int i=0;i<8;i++){auto path=sessionPath();{Producer p(m,path,"av",10);Consumer c(m,path,"av",native);c.start();p.start();c.finish();p.finish();CHECK(p.result=="EOS"&&c.result=="EOS");}
    if(leak)for(int k=0;k<16;k++)leaked.push_back(g_socket_new(G_SOCKET_FAMILY_IPV4,G_SOCKET_TYPE_STREAM,G_SOCKET_PROTOCOL_TCP,nullptr));
+#ifdef _WIN32
+   // All pipelines above are destroyed. Join the global idle task cache before
+   // sampling: lazy GStreamer workers retain Thread/Event/IoCompletion handles
+   // across rounds, independently of FrameLink ownership. Do not raise the
+   // leak tolerance; the deliberately retained sockets below must still fail.
+   gst_task_cleanup_all();
+#endif
    hs.push_back(handles());ts.push_back(threads());}
   for(auto*s:leaked)g_object_unref(s);
   const guint warm=*std::max_element(hs.begin(),hs.begin()+3),warmT=*std::max_element(ts.begin(),ts.begin()+3);const bool ok=hs.back()<=warm+4&&ts.back()<=warmT+2;

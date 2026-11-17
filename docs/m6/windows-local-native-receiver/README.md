@@ -1,0 +1,11 @@
+# Explicit Windows local native receiver profile
+
+Production changes are Windows-only. Base `6d7e6be7a6a1f6acb3dcdaea0a4c98a55456d985`, exact implementation/test overlays hashed in status.json. Public header edits are contract comments only.
+
+The local helper and both A/V bins accept either the existing explicit CPU_READ/COPY|READBACK receiver or the explicit GPU_SAMPLE/operations=0 receiver. The latter creates a deferred-release channel. Receiver `native-memory` must agree with the candidate. Both peers authenticate the exact producer-ordered candidate before allocating resources. No automatic fallback, wire change, new symbol, changed struct or changed default. Older builds reject the new explicit profile safely; never silently downgrade it.
+
+The native consumer still must negotiate `retain-memory-until-gpu-complete-v1` and retain memory through actual GPU completion. Tiny synthetic A/V tests cover all three helper variants (default epoch, custom epoch, automatic bins), both EOS orders and empty streams, native D3D11 type/caps, explicit test-only pitched pixel readback, exact PCM,37ms mapping, original producer identity and final references surviving complete teardown. Broker path also covers audio failure. Each profile runs11 local setup negatives and20 bin configuration controls, plus both-role cancellation. Tests preserve readback coverage rather than replacing it.
+
+Five focused Windows tests passed in25.30s, including the expanded native producer suite18.29s. Both legacy A/V bin regressions also passed (41.37s); **7/7 focused Windows tests passed**. Loom briefing unavailable (missing chromadb); direct inspection performed. No deferred Linux/Android campaigns: all executable changes are within existing Windows-only compilation guards.
+
+This does not qualify arbitrary decoders, two-hop PCM, target-rate throughput, physical presentation or lifetime memory budgets. Native wrapper layout probing can allocate staging resources; the policy is not an assertion of zero driver work. Original548fe19 startup1529ms and lifecycle21.10/84.09KiB-per-cycle failures remain unresolved, with no clean-repeat waiver. API remains a candidate; clean exact-head integration next. M6 open; M7 hold.

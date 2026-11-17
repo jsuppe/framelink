@@ -1,0 +1,856 @@
+
+
+Algorithm : SHA256
+Hash      : 922179F99224281E6358D9A257E0EBF0EFA1FDFB8DFFF9144239484ED04BCCD7
+Path      : <win-home>\dev\framelink-m6-windows-3f45f7b\build\Release\framelink.dll
+
+Algorithm : SHA256
+Hash      : AB42A272A9DDDF4FB5716642C320F685E5D31FF77CD0ABACB286734585DEE9D6
+Path      : <win-home>\dev\framelink-m6-windows-3f45f7b\build\Release\framelink_gst_session.dll
+
+Algorithm : SHA256
+Hash      : 4A00CD949FB522B841C62F4127A76C6F8115A6BCD427B233828BB62ECBBFD822
+Path      : <win-home>\dev\framelink-m6-windows-3f45f7b\build\Release\gstframelink.dll
+
+
+
+Factory Details:
+  Rank                     none (0)
+  Long-name                framelink sink
+  Klass                    Sink/Video
+  Description              Submits video frames into a framelink channel (a framelink producer)
+  Author                   framelink
+
+Plugin Details:
+  Name                     framelink
+  Description              FrameLink native video and serialized PCM transport
+  Filename                 <win-home>\dev\framelink-m6-windows-3f45f7b\build\Release\gstframelink.dll
+  Version                  0.1.0
+  License                  MIT/X11
+  Source module            framelink
+  Binary package           framelink
+  Origin URL               https://github.com/jsuppe/framelink
+
+GObject
+ +----GInitiallyUnowned
+       +----GstObject
+             +----GstElement
+                   +----GstBaseSink
+                         +----GstFrameLinkSink
+
+Element Flags:
+  - SINK
+
+Pad Templates:
+  SINK template: 'sink'
+    Availability: Always
+    Capabilities:
+      video/x-raw
+                 format: { (string)BGRA, (string)RGBA, (string)NV12, (string)RGB10A2_LE } (GstValueList)
+                  width: [ 1, 2147483647 ] (GstIntRange)
+                 height: [ 1, 2147483647 ] (GstIntRange)
+              framerate: [ 0/1, 2147483647/1 ] (GstFractionRange)
+      video/x-raw(memory:D3D11Memory)
+                 format: { (string)BGRA, (string)RGBA, (string)NV12, (string)RGB10A2_LE } (GstValueList)
+                  width: [ 1, 2147483647 ] (GstIntRange)
+                 height: [ 1, 2147483647 ] (GstIntRange)
+              framerate: [ 0/1, 2147483647/1 ] (GstFractionRange)
+
+Element has no clocking capabilities.
+Element has no URI handling capabilities.
+
+Pads:
+  SINK: 'sink'
+    Pad Template: 'sink'
+
+Element Properties:
+
+  async               : Go asynchronously to PAUSED
+                        flags: readable, writable
+                        Boolean. Default: true
+  
+  blocksize           : Size in bytes to pull per buffer (0 = default)
+                        flags: readable, writable
+                        Unsigned Integer. Range: 0 - 4294967295 Default: 4096 
+  
+  buffer-wait-ms      : Maximum wait for a reusable image; zero is nonblocking, not an added presentation delay
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 0 - 1000 Default: 5 
+  
+  channel             : framelink channel name (or slot-set prefix when slots > 0)
+                        flags: readable, writable
+                        String. Default: "framelink"
+  
+  connect-timeout-ms  : Open the producer before streaming; 0 keeps lazy connection
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 0 - 60000 Default: 0 
+  
+  enable-last-sample  : Enable the last-sample property
+                        flags: readable, writable
+                        Boolean. Default: true
+  
+  error-on-ring-full  : Raise an error instead of dropping when the bounded buffer wait expires
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Boolean. Default: false
+  
+  last-sample         : The last sample received in the sink
+                        flags: readable
+                        Boxed pointer of type "GstSample"
+  
+  max-bitrate         : The maximum bits per second to render (0 = disabled)
+                        flags: readable, writable
+                        Unsigned Integer64. Range: 0 - 18446744073709551615 Default: 0 
+  
+  max-lateness        : Maximum number of nanoseconds that a buffer can be late before it is dropped (-1 unlimited)
+                        flags: readable, writable
+                        Integer64. Range: -1 - 9223372036854775807 Default: -1 
+  
+  name                : The name of the object
+                        flags: readable, writable
+                        String. Default: "framelinksink0"
+  
+  native-memory       : Strict native buffers acquired from this sink; no implicit copy fallback
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Boolean. Default: false
+  
+  parent              : The parent of the object
+                        flags: readable, writable
+                        Object of type "GstObject"
+  
+  preserve-frame-metadata: Require exact running-time PTS/DTS/duration and media generation; both endpoints must opt in
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Boolean. Default: false
+  
+  preserve-timestamps : Opt-in agreed session running-time PTS; both pipelines must share clock and base time
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Boolean. Default: false
+  
+  processing-deadline : Maximum processing time for a buffer in nanoseconds
+                        flags: readable, writable
+                        Unsigned Integer64. Range: 0 - 18446744073709551615 Default: 20000000 
+  
+  qos                 : Generate Quality-of-Service events upstream
+                        flags: readable, writable
+                        Boolean. Default: false
+  
+  render-delay        : Additional render delay of the sink in nanoseconds
+                        flags: readable, writable
+                        Unsigned Integer64. Range: 0 - 18446744073709551615 Default: 0 
+  
+  shared-cpu          : Explicit broker-bound CPU copy-in with bounded ownership wait; COPY required; A/V requires event stream
+                        flags: readable, writable
+                        Boolean. Default: false
+  
+  slots               : walk consumer slot channels <channel>.0..N-1 and take the first free one (0 = open <channel> directly)
+                        flags: readable, writable
+                        Integer. Range: 0 - 64 Default: 0 
+  
+  stats               : Sink Statistics
+                        flags: readable
+                        Boxed pointer of type "GstStructure"
+                                                        average-rate: 0 (gdouble)
+                                                             dropped: 0 (guint64)
+                                                            rendered: 0 (guint64)
+
+  
+  sync                : Sync on the clock
+                        flags: readable, writable
+                        Boolean. Default: false
+  
+  throttle-time       : The time to keep between rendered buffers (0 = disabled)
+                        flags: readable, writable
+                        Unsigned Integer64. Range: 0 - 18446744073709551615 Default: 0 
+  
+  ts-offset           : Timestamp offset in nanoseconds
+                        flags: readable, writable
+                        Integer64. Range: -9223372036854775808 - 9223372036854775807 Default: 0 
+  
+
+Element Actions:
+
+  "apply-memory-policy" -> gboolean  :  g_signal_emit_by_name (element, "apply-memory-policy",
+                                                               gpointer arg0,
+                                                               gboolean * p_return_value);
+
+  "adopt-channel" -> gboolean  :  g_signal_emit_by_name (element, "adopt-channel",
+                                                         gpointer arg0,
+                                                         gboolean * p_return_value);
+
+  "set-native-ready-fd" -> gboolean  :  g_signal_emit_by_name (element, "set-native-ready-fd",
+                                                               gpointer arg0,
+                                                               gint arg1,
+                                                               gboolean * p_return_value);
+
+  "acquire-native-buffer" -> gpointer  :  g_signal_emit_by_name (element, "acquire-native-buffer",
+                                                                 guint arg0,
+                                                                 gpointer * p_return_value);
+
+Factory Details:
+  Rank                     none (0)
+  Long-name                framelink source
+  Klass                    Source/Video
+  Description              Creates a framelink channel and pushes submitted frames (a framelink consumer)
+  Author                   framelink
+
+Plugin Details:
+  Name                     framelink
+  Description              FrameLink native video and serialized PCM transport
+  Filename                 <win-home>\dev\framelink-m6-windows-3f45f7b\build\Release\gstframelink.dll
+  Version                  0.1.0
+  License                  MIT/X11
+  Source module            framelink
+  Binary package           framelink
+  Origin URL               https://github.com/jsuppe/framelink
+
+GObject
+ +----GInitiallyUnowned
+       +----GstObject
+             +----GstElement
+                   +----GstBaseSrc
+                         +----GstPushSrc
+                               +----GstFrameLinkSrc
+
+Element Flags:
+  - SOURCE
+
+Pad Templates:
+  SRC template: 'src'
+    Availability: Always
+    Capabilities:
+      video/x-raw
+                 format: { (string)BGRA, (string)RGBA, (string)NV12, (string)RGB10A2_LE } (GstValueList)
+                  width: [ 1, 2147483647 ] (GstIntRange)
+                 height: [ 1, 2147483647 ] (GstIntRange)
+              framerate: [ 0/1, 2147483647/1 ] (GstFractionRange)
+      video/x-raw(memory:D3D11Memory)
+                 format: { (string)BGRA, (string)RGBA, (string)NV12, (string)RGB10A2_LE } (GstValueList)
+                  width: [ 1, 2147483647 ] (GstIntRange)
+                 height: [ 1, 2147483647 ] (GstIntRange)
+              framerate: [ 0/1, 2147483647/1 ] (GstFractionRange)
+
+Element has no clocking capabilities.
+Element has no URI handling capabilities.
+
+Pads:
+  SRC: 'src'
+    Pad Template: 'src'
+
+Element Properties:
+
+  automatic-eos       : Automatically EOS when the segment is done
+                        flags: readable, writable
+                        Boolean. Default: true
+  
+  blocksize           : Size in bytes to read per buffer (-1 = default)
+                        flags: readable, writable
+                        Unsigned Integer. Range: 0 - 4294967295 Default: 4096 
+  
+  channel             : framelink channel to create (this element is the consumer and owns the ring)
+                        flags: readable, writable
+                        String. Default: "framelink"
+  
+  do-timestamp        : Apply current stream time to buffers
+                        flags: readable, writable
+                        Boolean. Default: true
+  
+  expired-frames      : Frames discarded by receiver-local age policy
+                        flags: readable
+                        Unsigned Integer64. Range: 0 - 18446744073709551615 Default: 0 
+  
+  format              : Ring pixel format (BGRA, RGBA, NV12 or RGB10A2_LE; device-dependent)
+                        flags: readable, writable
+                        String. Default: "BGRA"
+  
+  fps                 : nominal frame rate advertised in the caps
+                        flags: readable, writable
+                        Integer. Range: 1 - 240 Default: 30 
+  
+  gpu-readback        : Linux BGRA/RGBA GPU staging into CPU output; requires adopted channel and negotiated COPY|READBACK; no fallback
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Boolean. Default: false
+  
+  height              : ring height to allocate
+                        flags: readable, writable
+                        Integer. Range: 16 - 8192 Default: 720 
+  
+  max-queue-age-ms    : Discard frames whose local receipt/readiness wait exceeds this age; 0 disables; never derived from media PTS
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 0 - 60000 Default: 0 
+  
+  name                : The name of the object
+                        flags: readable, writable
+                        String. Default: "framelinksrc0"
+  
+  native-memory       : Opt-in native DMA-BUF, D3D11 or exact RGB AHardwareBuffer output; unsupported paths fail without CPU fallback
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Boolean. Default: false
+  
+  num-buffers         : Number of buffers to output before sending EOS (-1 = unlimited)
+                        flags: readable, writable
+                        Integer. Range: -1 - 2147483647 Default: -1 
+  
+  parent              : The parent of the object
+                        flags: readable, writable
+                        Object of type "GstObject"
+  
+  pool-size           : Allocated images, not a queue-fill target or presentation delay; adopted channels retain their actual capacity
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 1 - 16 Default: 4 
+  
+  preserve-frame-metadata: Require exact running-time PTS/DTS/duration and media generation; both endpoints must opt in
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Boolean. Default: false
+  
+  preserve-timestamps : Opt-in agreed session running-time PTS; both pipelines must share clock and base time
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Boolean. Default: false
+  
+  shared-cpu          : Explicit broker-bound CPU source; COPY required; A/V requires event stream; no native fallback
+                        flags: readable, writable
+                        Boolean. Default: false
+  
+  typefind            : Run typefind before negotiating (deprecated, non-functional)
+                        flags: readable, writable, deprecated
+                        Boolean. Default: false
+  
+  width               : ring width to allocate
+                        flags: readable, writable
+                        Integer. Range: 16 - 8192 Default: 1280 
+  
+
+Element Actions:
+
+  "apply-memory-policy" -> gboolean  :  g_signal_emit_by_name (element, "apply-memory-policy",
+                                                               gpointer arg0,
+                                                               gboolean * p_return_value);
+
+  "adopt-channel" -> gboolean  :  g_signal_emit_by_name (element, "adopt-channel",
+                                                         gpointer arg0,
+                                                         gboolean * p_return_value);
+
+Factory Details:
+  Rank                     none (0)
+  Long-name                FrameLink A/V producer
+  Klass                    Sink/Video/Audio
+  Description              Composes framelinksink and framelinkaudiosink on one coordinated session; separate video_sink/audio_sink pads, not a multiplexed format
+  Author                   FrameLink
+
+Plugin Details:
+  Name                     framelink
+  Description              FrameLink native video and serialized PCM transport
+  Filename                 <win-home>\dev\framelink-m6-windows-3f45f7b\build\Release\gstframelink.dll
+  Version                  0.1.0
+  License                  MIT/X11
+  Source module            framelink
+  Binary package           framelink
+  Origin URL               https://github.com/jsuppe/framelink
+
+GObject
+ +----GInitiallyUnowned
+       +----GstObject
+             +----GstElement
+                   +----GstBin
+                         +----GstFrameLinkAvSink
+
+Implemented Interfaces:
+  GstChildProxy
+
+Element Flags:
+  - SINK
+
+Pad Templates:
+  SINK template: 'audio_sink'
+    Availability: Sometimes
+    Capabilities:
+      audio/x-raw
+                 format: { (string)S16LE, (string)F32LE } (GstValueList)
+                 layout: interleaved (gchararray)
+                   rate: [ 8000, 192000 ] (GstIntRange)
+               channels: [ 1, 2 ] (GstIntRange)
+  
+  SINK template: 'video_sink'
+    Availability: Sometimes
+    Capabilities:
+      video/x-raw
+                 format: { (string)BGRA, (string)RGBA, (string)NV12, (string)RGB10A2_LE } (GstValueList)
+
+Element has no clocking capabilities.
+Element has no URI handling capabilities.
+
+Pads:
+  SINK: 'video_sink'
+    Pad Template: 'video_sink'
+  SINK: 'audio_sink'
+    Pad Template: 'audio_sink'
+
+Element Properties:
+
+  async-handling      : The bin will handle Asynchronous state changes
+                        flags: readable, writable
+                        Boolean. Default: false
+  
+  audio-format        : Offered PCM format with session= (S16LE, F32LE)
+                        flags: readable, writable, changeable only in NULL or READY state
+                        String. Default: "S16LE"
+  
+  audio-queue-ms      : Hard audio queue budget, not target latency
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 1 - 2000 Default: 80 
+  
+  audio-track-id      : Negotiated audio identity, zero when absent
+                        flags: readable
+                        Unsigned Integer. Range: 0 - 4294967295 Default: 0 
+  
+  channels            : Offered PCM channels with session=
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 1 - 2 Default: 2 
+  
+  connect-timeout-ms  : Session setup and media hold deadline
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 1 - 60000 Default: 15000 
+  
+  framerate           : Offered video frame rate with session=
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Fraction. Range: 1/1 - 240/1 Default: 30/1 
+  
+  generation          : Negotiated session generation
+                        flags: readable
+                        Unsigned Integer64. Range: 0 - 18446744073709551615 Default: 0 
+  
+  height              : Offered video height with session=
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 16 - 8192 Default: 720 
+  
+  idle-timeout-ms     : Bounded transport idle deadline
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 1 - 60000 Default: 15000 
+  
+  message-forward     : Forwards all children messages
+                        flags: readable, writable
+                        Boolean. Default: false
+  
+  name                : The name of the object
+                        flags: readable, writable
+                        String. Default: "framelinkavsink0"
+  
+  parent              : The parent of the object
+                        flags: readable, writable
+                        Object of type "GstObject"
+  
+  rate                : Offered PCM rate with session=
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 8000 - 192000 Default: 48000 
+  
+  session             : Private current-user local discovery directory (not a secret or URL); unset: use an installed framelink.session.v1 context
+                        flags: readable, writable, changeable only in NULL or READY state
+                        String. Default: null
+  
+  session-id          : Negotiated identity, not a secret
+                        flags: readable
+                        String. Default: null
+  
+  shared-cpu          : Explicit CPU video copy path; broker context or Linux/Android session= discovery, no native fallback
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Boolean. Default: false
+  
+  tracks              : Required track set: audio, video or av; only enabled pads exist
+                        flags: readable, writable, changeable only in NULL or READY state
+                        String. Default: "av"
+  
+  video-format        : Offered video format with session= (BGRA, RGBA, NV12, RGB10A2_LE)
+                        flags: readable, writable, changeable only in NULL or READY state
+                        String. Default: "BGRA"
+  
+  video-pool          : Consumer ring images requested (0: consumer default)
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 0 - 16 Default: 0 
+  
+  video-queue-frames  : Coordinated video queue budget
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 1 - 16 Default: 2 
+  
+  video-track-id      : Negotiated video identity, zero when absent
+                        flags: readable
+                        Unsigned Integer. Range: 0 - 4294967295 Default: 0 
+  
+  width               : Offered video width with session=
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 16 - 8192 Default: 1280 
+  
+
+Element Signals:
+
+  "pad-added" :  void user_function (GstElement * object,
+                                     GstPad * arg0,
+                                     gpointer user_data);
+
+  "pad-removed" :  void user_function (GstElement * object,
+                                       GstPad * arg0,
+                                       gpointer user_data);
+
+  "no-more-pads" :  void user_function (GstElement * object,
+                                        gpointer user_data);
+
+
+Element Actions:
+
+  "adopt-channel" -> gboolean  :  g_signal_emit_by_name (element, "adopt-channel",
+                                                         gpointer arg0,
+                                                         gboolean * p_return_value);
+
+
+Children:
+  audio
+  video
+Factory Details:
+  Rank                     none (0)
+  Long-name                FrameLink A/V consumer
+  Klass                    Source/Video/Audio
+  Description              Composes framelinksrc and framelinkaudiosrc on one coordinated session; separate video_src/audio_src pads, no display or audio device
+  Author                   FrameLink
+
+Plugin Details:
+  Name                     framelink
+  Description              FrameLink native video and serialized PCM transport
+  Filename                 <win-home>\dev\framelink-m6-windows-3f45f7b\build\Release\gstframelink.dll
+  Version                  0.1.0
+  License                  MIT/X11
+  Source module            framelink
+  Binary package           framelink
+  Origin URL               https://github.com/jsuppe/framelink
+
+GObject
+ +----GInitiallyUnowned
+       +----GstObject
+             +----GstElement
+                   +----GstBin
+                         +----GstFrameLinkAvSrc
+
+Implemented Interfaces:
+  GstChildProxy
+
+Element Flags:
+  - SOURCE
+
+Pad Templates:
+  SRC template: 'audio_src'
+    Availability: Sometimes
+    Capabilities:
+      audio/x-raw
+                 format: { (string)S16LE, (string)F32LE } (GstValueList)
+                 layout: interleaved (gchararray)
+                   rate: [ 8000, 192000 ] (GstIntRange)
+               channels: [ 1, 2 ] (GstIntRange)
+  
+  SRC template: 'video_src'
+    Availability: Sometimes
+    Capabilities:
+      video/x-raw(ANY)
+                 format: { (string)BGRA, (string)RGBA, (string)NV12, (string)RGB10A2_LE } (GstValueList)
+
+Element has no clocking capabilities.
+Element has no URI handling capabilities.
+
+Pads:
+  SRC: 'video_src'
+    Pad Template: 'video_src'
+  SRC: 'audio_src'
+    Pad Template: 'audio_src'
+
+Element Properties:
+
+  async-handling      : The bin will handle Asynchronous state changes
+                        flags: readable, writable
+                        Boolean. Default: false
+  
+  audio-format        : Accepted PCM format (S16LE, F32LE)
+                        flags: readable, writable, changeable only in NULL or READY state
+                        String. Default: "S16LE"
+  
+  audio-queue-ms      : Hard audio queue budget, not target latency
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 1 - 2000 Default: 80 
+  
+  audio-track-id      : Negotiated audio identity, zero when absent
+                        flags: readable
+                        Unsigned Integer. Range: 0 - 4294967295 Default: 0 
+  
+  channels            : Accepted PCM channels
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 1 - 2 Default: 2 
+  
+  connect-timeout-ms  : Session setup and ready deadline
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 1 - 60000 Default: 15000 
+  
+  framerate           : Accepted video frame rate with session=
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Fraction. Range: 1/1 - 240/1 Default: 30/1 
+  
+  generation          : Negotiated session generation
+                        flags: readable
+                        Unsigned Integer64. Range: 0 - 18446744073709551615 Default: 0 
+  
+  height              : Accepted video height
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 16 - 8192 Default: 720 
+  
+  idle-timeout-ms     : Bounded transport idle deadline
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 1 - 60000 Default: 15000 
+  
+  latency-ms          : Explicit pipeline latency with session=; zero for transport, set required final-playback buffering explicitly
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 0 - 10000 Default: 0 
+  
+  message-forward     : Forwards all children messages
+                        flags: readable, writable
+                        Boolean. Default: false
+  
+  name                : The name of the object
+                        flags: readable, writable
+                        String. Default: "framelinkavsrc0"
+  
+  native-memory       : Output platform GPU memory (DMABuf, D3D11Memory, FrameLinkAHardwareBuffer) from the ring; with session= the ring defers read release
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Boolean. Default: false
+  
+  parent              : The parent of the object
+                        flags: readable, writable
+                        Object of type "GstObject"
+  
+  rate                : Accepted PCM rate
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 8000 - 192000 Default: 48000 
+  
+  session             : Private current-user local discovery directory (not a secret or URL); unset: use an installed framelink.session.v1 context
+                        flags: readable, writable, changeable only in NULL or READY state
+                        String. Default: null
+  
+  session-id          : Negotiated identity, not a secret
+                        flags: readable
+                        String. Default: null
+  
+  shared-cpu          : Explicit CPU video copy path; broker context or Linux/Android session= discovery, no native fallback
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Boolean. Default: false
+  
+  tracks              : Required track set: audio, video or av; only enabled pads exist
+                        flags: readable, writable, changeable only in NULL or READY state
+                        String. Default: "av"
+  
+  video-format        : Accepted video format (BGRA, RGBA, NV12, RGB10A2_LE)
+                        flags: readable, writable, changeable only in NULL or READY state
+                        String. Default: "BGRA"
+  
+  video-pool          : Ring images this consumer allocates with session= (0: 4); cover ceil(latency*fps)+2
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 0 - 16 Default: 8 
+  
+  video-queue-frames  : Coordinated video queue budget
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 1 - 16 Default: 2 
+  
+  video-track-id      : Negotiated video identity, zero when absent
+                        flags: readable
+                        Unsigned Integer. Range: 0 - 4294967295 Default: 0 
+  
+  width               : Accepted video width
+                        flags: readable, writable, changeable only in NULL or READY state
+                        Unsigned Integer. Range: 16 - 8192 Default: 1280 
+  
+
+Element Signals:
+
+  "pad-added" :  void user_function (GstElement * object,
+                                     GstPad * arg0,
+                                     gpointer user_data);
+
+  "pad-removed" :  void user_function (GstElement * object,
+                                       GstPad * arg0,
+                                       gpointer user_data);
+
+  "no-more-pads" :  void user_function (GstElement * object,
+                                        gpointer user_data);
+
+
+Element Actions:
+
+  "adopt-channel" -> gboolean  :  g_signal_emit_by_name (element, "adopt-channel",
+                                                         gpointer arg0,
+                                                         gboolean * p_return_value);
+
+
+Children:
+  audio
+  video
+Microsoft (R) COFF/PE Dumper Version 14.44.35211.0
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+
+Dump of file build\Release\framelink.dll
+
+File Type: DLL
+
+  Section contains the following exports for framelink.dll
+
+    00000000 characteristics
+    FFFFFFFF time date stamp
+        0.00 version
+           1 ordinal base
+          75 number of functions
+          75 number of names
+
+    ordinal hint RVA      name
+
+          1    0 00006650 flAcquireBuffer
+          2    1 00006D70 flAcquireFrame
+          3    2 000070D0 flBeginSubmit
+          4    3 00007300 flCancelBuffer
+          5    4 000073C0 flChannelD3D11Device
+          6    5 000073D0 flClose
+          7    6 000076F0 flCollectReadLeases
+          8    7 00007B20 flCompleteReadLease
+          9    8 00007D80 flCompleteReadLeaseD3D11Fence
+         10    9 00007FC0 flCreateChannel
+         11    A 00007FF0 flCreateChannelEx
+         12    B 000081B0 flCreateChannelFromD3D11Handles
+         13    C 000081F0 flCreateChannelOnAdapter
+         14    D 00008240 flEndSubmit
+         15    E 00008540 flFrameAgeNs
+         16    F 00008690 flGetFrameMetadata
+         17   10 000087D0 flImageD3D11
+         18   11 000087E0 flImageMap
+         19   12 000088D0 flImageMapPlanes
+         20   13 00008C50 flImageMemoryInfo
+         21   14 00009150 flImageSharedHandle
+         22   15 00009160 flImageUnmap
+         23   16 00009300 flLeaseFrame
+         24   17 0000E3D0 flMemoryEvaluate
+         25   18 0000E540 flMemoryEvaluateBoundary
+         26   19 0000E880 flMemoryPathValidate
+         27   1A 0000E8E0 flMemoryRequirementsCombine
+         28   1B 0000EA50 flMemoryRequirementsDecode
+         29   1C 0000ED30 flMemoryRequirementsEncode
+         30   1D 0000EEB0 flMemoryRequirementsInit
+         31   1E 0000EEF0 flMemoryRequirementsValidate
+         32   1F 00009700 flOpenProducer
+         33   20 0000BBB0 flOpenProducerSlot
+         34   21 00009CE0 flQuery
+         35   22 00009D20 flQueryConsumerFlags
+         36   23 00009DC0 flReadLeaseFrame
+         37   24 00009E80 flRelease
+         38   25 0000A130 flReleaseBufferReference
+         39   26 0000A230 flRequestGeometry
+         40   27 0000A5C0 flResultString
+         41   28 0000A680 flRetainBufferReference
+         42   29 0000A810 flRetainReadLease
+         43   2A 0000D400 flSessionDecode
+         44   2B 0000D8D0 flSessionEncode
+         45   2C 0000DB70 flSessionMapPts
+         46   2D 0000DCE0 flSessionNegotiate
+         47   2E 0000DFA0 flSessionSampleOffset
+         48   2F 0000E010 flSessionValidate
+         49   30 0000E1B0 flSessionValidateReplacement
+         50   31 0000E240 flSessionValidateSelection
+         51   32 0000AA60 flSetFrameMetadata
+         52   33 0000AB70 flSetReceiveQueue
+         53   34 0000AC80 flSharedConsumedFence
+         54   35 00014AC0 flSharedCpuAcquireWrite
+         55   36 00014E60 flSharedCpuCancelWrite
+         56   37 00014F30 flSharedCpuClose
+         57   38 0000EF50 flSharedCpuDescriptorDecode
+         58   39 0000F560 flSharedCpuDescriptorEncode
+         59   3A 0000F830 flSharedCpuDescriptorValidate
+         60   3B 00014FB0 flSharedCpuOpenConsumerPipe
+         61   3C 000150B0 flSharedCpuOpenProducerPipe
+         62   3D 000151A0 flSharedCpuQuery
+         63   3E 000152E0 flSharedCpuReadMetadata
+         64   3F 00015320 flSharedCpuReceive
+         65   40 00015360 flSharedCpuReceiveEvent
+         66   41 00015910 flSharedCpuReceiveRelease
+         67   42 00015AE0 flSharedCpuReleaseRead
+         68   43 00015CF0 flSharedCpuRetainRead
+         69   44 00015D20 flSharedCpuSendEos
+         70   45 00015F50 flSharedCpuSubmit
+         71   46 00015F60 flSharedCpuSubmitWithMetadata
+         72   47 000161C0 flSharedCpuWaitReadable
+         73   48 0000ACB0 flSharedReadyFence
+         74   49 0000ACE0 flSubmit
+         75   4A 0000D200 flTraceFlush
+
+  Summary
+
+        1000 .data
+        2000 .pdata
+        6000 .rdata
+        1000 .reloc
+        1000 .rsrc
+       18000 .text
+Microsoft (R) COFF/PE Dumper Version 14.44.35211.0
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+
+Dump of file build\Release\framelink_gst_session.dll
+
+File Type: DLL
+
+  Section contains the following exports for framelink_gst_session.dll
+
+    00000000 characteristics
+    FFFFFFFF time date stamp
+        0.00 version
+           1 ordinal base
+          39 number of functions
+          39 number of names
+
+    ordinal hint RVA      name
+
+          1    0 000086D0 ?fl_gst_session_finish_local_cancellable@@YAHPEAU_FlGstSession@@HIPEAU_GCancellable@@PEAPEAU_GError@@@Z
+          2    1 000088D0 ?fl_gst_session_local_ready_cancellable@@YAHPEAU_FlGstSession@@HIPEAU_GCancellable@@PEAPEAU_GError@@@Z
+          3    2 00008AC0 ?fl_gst_session_open_local_av_epoch@@YAHPEAU_FlGstSession@@HPEBDPEBUflSessionCapabilities@@IIIIIIPEAPEAUflChannel@@P6A_JPEAX_K@Z4PEAU_GCancellable@@PEAPEAU_GError@@@Z
+          4    3 00003AA0 ?fl_gst_session_peek_video_end@@YA?AW4FlGstSessionResult@@PEAU_FlGstSession@@_KPEAUFlGstVideoEvent@@@Z
+          5    4 00003BE0 ?fl_gst_session_publish_audio@@YAHPEAU_FlGstSession@@PEBUflSessionConfig@@PEAU_GSocketConnection@@H@Z
+          6    5 00003D50 ?fl_gst_session_publish_events@@YAHPEAU_FlGstSession@@PEBUflSessionConfig@@PEAU_GSocketConnection@@H@Z
+          7    6 000054D0 fl_gst_segment_running_time
+          8    7 0000A1A0 fl_gst_session_apply_pipeline_clock
+          9    8 0000A380 fl_gst_session_authenticate_audio_stream
+         10    9 0000A900 fl_gst_session_authenticate_cpu_bootstrap
+         11    A 0000AE70 fl_gst_session_authenticate_event_stream
+         12    B 00005550 fl_gst_session_bind_authenticated_cpu_pipe
+         13    C 000055D0 fl_gst_session_bind_shared_cpu_pipe
+         14    D 00005640 fl_gst_session_cancel
+         15    E 00005750 fl_gst_session_claim_audio_stream
+         16    F 00005840 fl_gst_session_claim_shared_cpu
+         17   10 00005920 fl_gst_session_configure
+         18   11 00005B70 fl_gst_session_create_context
+         19   12 0000B3F0 fl_gst_session_finish_local
+         20   13 00005C50 fl_gst_session_from_context
+         21   14 00005D10 fl_gst_session_get_config
+         22   15 00005E80 fl_gst_session_get_type
+         23   16 00005EC0 fl_gst_session_has_event_stream
+         24   17 0000B410 fl_gst_session_local_ready
+         25   18 00005F40 fl_gst_session_map_pts
+         26   19 00006050 fl_gst_session_map_running_time
+         27   1A 0000B430 fl_gst_session_negotiate_stream
+         28   1B 00006170 fl_gst_session_new
+         29   1C 0000C2D0 fl_gst_session_open_local_audio
+         30   1D 0000CBD0 fl_gst_session_open_local_av
+         31   1E 000061D0 fl_gst_session_open_named_cpu_pipe
+         32   1F 00006420 fl_gst_session_receive_video_event
+         33   20 00006600 fl_gst_session_register_track
+         34   21 000066C0 fl_gst_session_send_video_event
+         35   22 00006760 fl_gst_session_set_mapping
+         36   23 00006910 fl_gst_session_track_ready
+         37   24 00006A00 fl_gst_session_video_eos
+         38   25 00006B30 fl_gst_session_wait
+         39   26 00006CB0 fl_gst_session_wait_video_eos
+
+  Summary
+
+        1000 .data
+        1000 .pdata
+        9000 .rdata
+        1000 .reloc
+        1000 .rsrc
+       11000 .text

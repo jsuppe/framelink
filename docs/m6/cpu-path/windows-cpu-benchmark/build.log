@@ -1,0 +1,21 @@
+CMake is re-running because <win-home>/dev/framelink-m6-windows-d60f683/build/CMakeFiles/generate.stamp is out-of-date.
+  the file '<win-home>/dev/framelink-m6-windows-d60f683/CMakeLists.txt'
+  is newer than '<win-home>/dev/framelink-m6-windows-d60f683/build/CMakeFiles/generate.stamp.depend'
+  result='-1'
+-- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.26300.
+-- framelink: building GStreamer elements (gstframelink)
+-- Configuring done (1.0s)
+-- Generating done (1.0s)
+-- Build files have been written to: <win-home>/dev/framelink-m6-windows-d60f683/build
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  1>Checking Build System
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-d60f683/CMakeLists.txt
+  framelink.vcxproj -> <win-home>\dev\framelink-m6-windows-d60f683\build\Release\framelink.dll
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-d60f683/CMakeLists.txt
+  framelink_gst_session.vcxproj -> <win-home>\dev\framelink-m6-windows-d60f683\build\Release\framelink_gst_session.dll
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-d60f683/CMakeLists.txt
+  gstframelink.vcxproj -> <win-home>\dev\framelink-m6-windows-d60f683\build\Release\gstframelink.dll
+  Building Custom Rule <win-home>/dev/framelink-m6-windows-d60f683/CMakeLists.txt
+  fl_gst_av_bench.cpp
+  fl_gst_av_bench.vcxproj -> <win-home>\dev\framelink-m6-windows-d60f683\build\Release\fl_gst_av_bench.exe

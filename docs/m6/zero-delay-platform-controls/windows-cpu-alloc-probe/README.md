@@ -1,0 +1,7 @@
+# CPU buffer allocation probe — PARTIAL
+
+Question: does per-frame33MB CPU GstBuffer allocation cause retained growth or avoidable allocation/pagefault pressure compared with a bounded two-buffer pool?
+
+A/B/A/B6000frames, equal memset writes and one retained prior buffer, noGPU/transport. Every iteration verifies prior/current pixels; pool exhaustion with two outstanding buffers must return EOS for DONTWAIT. All passed. After1000warmup frames, fresh allocation added40.58million pagefaults/5000frames versus0 for pool reuse; elapsed18.88–18.89s versus6.12–6.15s. Privatecommit delta0/4096bytes for fresh allocation and0 for reuse. This demonstrates avoidable churn, NOT the original98.11KB/min retained-growth root cause. Measurements sample the same ownership phase and cannot reproduce asynchronous occupancy bias.
+
+Next production change: Windows-only CPU output pool retaining at most two buffers. DONTWAIT acquisition falls back to the previous allocate path if downstream retains both; no new blocking or restriction on downstream refs. Pool discarded on resize/stop/finalize; held buffers remain valid. This is a bounded cache, not a bound on total downstream-owned memory. Native path unchanged. Required validation: retained buffers beyond cache capacity, across stop/start, fresh formats/pixels, generation changes, full Windows regressions and sustained BGRA CPU gate. Loom context unavailable (chromadb missing); repository requirements used. Original growth gate remains failing until validated at repaired revision.

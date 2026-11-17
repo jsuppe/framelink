@@ -1,0 +1,44 @@
+{
+  "verified_utc": "2026-11-12T07:26:23.831282+00:00",
+  "source_root": "<linux-home>/dev/evidence/m6-cpu-path/windows-cpu-4k-461584b-prepared/runs/bgra-4k30-20261112t0655z",
+  "manifest": "evidence-sha256.json",
+  "manifest_entries_verified": 58,
+  "mismatches": [],
+  "raw_csv_count": 8,
+  "raw_csv_bytes": 12617396,
+  "raw_csvs": {
+    "data/windows-shared-bgra-3840x2160-30-5/windows-shared-bgra-3840x2160-30-5-producer.txt.audio-push.csv": {
+      "sha256": "22e5a5927eac11e979631d17146797bb10c03e8dce3e0a9c0de8df1e4d41d38e",
+      "bytes": 9592
+    },
+    "data/windows-shared-bgra-3840x2160-30-5/windows-shared-bgra-3840x2160-30-5-consumer.txt.audio.csv": {
+      "sha256": "27c12a18769e74e78748f511cd0589e5a9439afdffffdee958b7fe27d622d5e0",
+      "bytes": 16041
+    },
+    "data/windows-shared-bgra-3840x2160-30-5/windows-shared-bgra-3840x2160-30-5-producer.txt.push.csv": {
+      "sha256": "4bcc421b7646ba73468088874e9d9f71890fd5e51e5030d2c39157755e9140a1",
+      "bytes": 2867
+    },
+    "data/windows-shared-bgra-3840x2160-30-5/windows-shared-bgra-3840x2160-30-5-consumer.txt.video.csv": {
+      "sha256": "f852c9a2ec3bddc1ad49780f5fcd4193875d713039ab101cad865841122e2f28",
+      "bytes": 4997
+    },
+    "data/windows-shared-bgra-3840x2160-30-1800/windows-shared-bgra-3840x2160-30-1800-consumer.txt.audio.csv": {
+      "sha256": "61dfc1c2e03a173f87824ea98d25562be17e861064c280cd3135f329cbd1c00a",
+      "bytes": 5728026
+    },
+    "data/windows-shared-bgra-3840x2160-30-1800/windows-shared-bgra-3840x2160-30-1800-consumer.txt.video.csv": {
+      "sha256": "e8cbb748e90ed678ec0ee80c8f4d8031ff1cda69dbe8977c46fbe3c739dd60c0",
+      "bytes": 1782049
+    },
+    "data/windows-shared-bgra-3840x2160-30-1800/windows-shared-bgra-3840x2160-30-1800-producer.txt.push.csv": {
+      "sha256": "9c63a83977e9f21a7cfa88929ac3419694c689a742020a2daf1198cd2374d612",
+      "bytes": 1168783
+    },
+    "data/windows-shared-bgra-3840x2160-30-1800/windows-shared-bgra-3840x2160-30-1800-producer.txt.audio-push.csv": {
+      "sha256": "6cf3e7a8c089a2ef1d7b09c3c5b4728755d80a80a5109b18b0d434cf769944e5",
+      "bytes": 3905041
+    }
+  },
+  "note": "Hashes verified against retained local original evidence without Windows execution. Manifest paths describe the original evidence layout, not this compact archive. No raw media or discovery credentials copied."
+}

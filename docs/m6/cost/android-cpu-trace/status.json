@@ -1,0 +1,23 @@
+{
+  "state": "finished",
+  "started": 1794044530.3924694,
+  "revision": "70d8407",
+  "scope": "bounded 65536-event per-recorder diagnostic stage timing, not throughput qualification",
+  "cases": [
+    {
+      "label": "nv21-stage-1920x1080-1794044530",
+      "producer_consumer_exit": [
+        0,
+        0
+      ]
+    },
+    {
+      "label": "nv21-stage-3840x2160-1794044536",
+      "producer_consumer_exit": [
+        0,
+        0
+      ]
+    }
+  ],
+  "ended": 1794044542.9940498
+}

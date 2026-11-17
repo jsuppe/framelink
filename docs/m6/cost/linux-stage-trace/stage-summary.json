@@ -1,0 +1,542 @@
+{
+  "stage-NV12-1920x1080-native-1794044874/consumer-gst.1102610.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "gst.srcCreate": {
+        "n": 301,
+        "mean_ms": 16.89543811960133,
+        "p95_ms": 17.156317
+      }
+    }
+  },
+  "stage-NV12-1920x1080-native-1794044874/consumer-core.1102610.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "flCreateChannelEx": {
+        "n": 1,
+        "mean_ms": 0.40201,
+        "p95_ms": 0.40201
+      },
+      "ipc.send": {
+        "n": 304,
+        "mean_ms": 0.013157671052631579,
+        "p95_ms": 0.019167
+      },
+      "ipc.recv": {
+        "n": 302,
+        "mean_ms": 0.012147115894039735,
+        "p95_ms": 0.017175
+      },
+      "flAcquireFrame": {
+        "n": 301,
+        "mean_ms": 16.843741162790696,
+        "p95_ms": 17.08895
+      },
+      "reader.acquire": {
+        "n": 300,
+        "mean_ms": 0.0006952933333333333,
+        "p95_ms": 0.001019
+      },
+      "reader.complete": {
+        "n": 300,
+        "mean_ms": 0.00019452333333333334,
+        "p95_ms": 0.000328
+      },
+      "reader.retire": {
+        "n": 300,
+        "mean_ms": 0.0002678133333333333,
+        "p95_ms": 0.000375
+      },
+      "flImageUnmap": {
+        "n": 2,
+        "mean_ms": 0.0001995,
+        "p95_ms": 0.000157
+      },
+      "flClose": {
+        "n": 1,
+        "mean_ms": 0.603331,
+        "p95_ms": 0.603331
+      }
+    }
+  },
+  "stage-NV12-1920x1080-native-1794044874/producer-gst.1102618.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "gst.cpu_copy_sink_duration": {
+        "n": 300,
+        "mean_ms": 1.22872595,
+        "p95_ms": 1.272001
+      },
+      "gst.sinkRender": {
+        "n": 300,
+        "mean_ms": 1.2959893366666666,
+        "p95_ms": 1.350691
+      }
+    }
+  },
+  "stage-NV12-1920x1080-native-1794044874/producer-core.1102618.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "ipc.recv": {
+        "n": 301,
+        "mean_ms": 0.012000827242524917,
+        "p95_ms": 0.016116
+      },
+      "ipc.send": {
+        "n": 306,
+        "mean_ms": 0.012347441176470589,
+        "p95_ms": 0.017022
+      },
+      "flOpenProducer": {
+        "n": 1,
+        "mean_ms": 0.235564,
+        "p95_ms": 0.235564
+      },
+      "flRequestGeometry": {
+        "n": 1,
+        "mean_ms": 0.033592,
+        "p95_ms": 0.033592
+      },
+      "flAcquireBuffer": {
+        "n": 300,
+        "mean_ms": 0.020395623333333335,
+        "p95_ms": 0.027324
+      },
+      "flImageMapPlanes": {
+        "n": 300,
+        "mean_ms": 0.009095873333333334,
+        "p95_ms": 0.009564
+      },
+      "flImageUnmap": {
+        "n": 302,
+        "mean_ms": 0.003216370860927152,
+        "p95_ms": 0.004857
+      },
+      "flBeginSubmit": {
+        "n": 300,
+        "mean_ms": 0.00029243333333333336,
+        "p95_ms": 0.000411
+      },
+      "flEndSubmit": {
+        "n": 300,
+        "mean_ms": 0.013729873333333333,
+        "p95_ms": 0.019076
+      },
+      "flSubmit": {
+        "n": 300,
+        "mean_ms": 0.016182286666666667,
+        "p95_ms": 0.03558
+      },
+      "flClose": {
+        "n": 1,
+        "mean_ms": 1.162607,
+        "p95_ms": 1.162607
+      }
+    }
+  },
+  "stage-BGRA-1920x1080-native-1794044880/producer-core.1102750.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "ipc.recv": {
+        "n": 301,
+        "mean_ms": 0.010733126245847177,
+        "p95_ms": 0.015899
+      },
+      "ipc.send": {
+        "n": 306,
+        "mean_ms": 0.011919712418300654,
+        "p95_ms": 0.018199
+      },
+      "flOpenProducer": {
+        "n": 1,
+        "mean_ms": 0.075173,
+        "p95_ms": 0.075173
+      },
+      "flRequestGeometry": {
+        "n": 1,
+        "mean_ms": 0.063191,
+        "p95_ms": 0.063191
+      },
+      "flAcquireBuffer": {
+        "n": 300,
+        "mean_ms": 0.018418626666666667,
+        "p95_ms": 0.026628
+      },
+      "flImageMapPlanes": {
+        "n": 300,
+        "mean_ms": 0.00728942,
+        "p95_ms": 0.007485
+      },
+      "flImageMap": {
+        "n": 300,
+        "mean_ms": 0.008246283333333333,
+        "p95_ms": 0.008148
+      },
+      "flImageUnmap": {
+        "n": 302,
+        "mean_ms": 0.002503523178807947,
+        "p95_ms": 0.003807
+      },
+      "flBeginSubmit": {
+        "n": 300,
+        "mean_ms": 0.00030210333333333334,
+        "p95_ms": 0.000413
+      },
+      "flEndSubmit": {
+        "n": 300,
+        "mean_ms": 0.0134414,
+        "p95_ms": 0.01987
+      },
+      "flSubmit": {
+        "n": 300,
+        "mean_ms": 0.015785236666666667,
+        "p95_ms": 0.036968
+      },
+      "flClose": {
+        "n": 1,
+        "mean_ms": 0.48327,
+        "p95_ms": 0.48327
+      }
+    }
+  },
+  "stage-BGRA-1920x1080-native-1794044880/producer-gst.1102750.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "gst.sinkRender": {
+        "n": 300,
+        "mean_ms": 3.0193472233333334,
+        "p95_ms": 3.085189
+      }
+    }
+  },
+  "stage-BGRA-1920x1080-native-1794044880/consumer-core.1102739.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "flCreateChannelEx": {
+        "n": 1,
+        "mean_ms": 0.317183,
+        "p95_ms": 0.317183
+      },
+      "ipc.send": {
+        "n": 304,
+        "mean_ms": 0.012091440789473685,
+        "p95_ms": 0.020088
+      },
+      "ipc.recv": {
+        "n": 302,
+        "mean_ms": 0.01063798344370861,
+        "p95_ms": 0.017011
+      },
+      "flAcquireFrame": {
+        "n": 300,
+        "mean_ms": 16.567669996666666,
+        "p95_ms": 17.036731
+      },
+      "reader.acquire": {
+        "n": 300,
+        "mean_ms": 0.0005933633333333333,
+        "p95_ms": 0.000952
+      },
+      "reader.complete": {
+        "n": 300,
+        "mean_ms": 0.00015289666666666666,
+        "p95_ms": 0.000275
+      },
+      "reader.retire": {
+        "n": 300,
+        "mean_ms": 0.00023143666666666668,
+        "p95_ms": 0.00038
+      },
+      "flImageUnmap": {
+        "n": 2,
+        "mean_ms": 0.0002075,
+        "p95_ms": 0.000161
+      },
+      "flClose": {
+        "n": 1,
+        "mean_ms": 0.544286,
+        "p95_ms": 0.544286
+      }
+    }
+  },
+  "stage-BGRA-1920x1080-native-1794044880/consumer-gst.1102739.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "gst.srcCreate": {
+        "n": 301,
+        "mean_ms": 16.56002645182724,
+        "p95_ms": 17.104585
+      }
+    }
+  },
+  "stage-NV12-3840x2160-native-1794044886/producer-gst.1102988.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "gst.cpu_copy_sink_duration": {
+        "n": 150,
+        "mean_ms": 4.385659,
+        "p95_ms": 4.44755
+      },
+      "gst.sinkRender": {
+        "n": 150,
+        "mean_ms": 4.455902166666666,
+        "p95_ms": 4.524206
+      }
+    }
+  },
+  "stage-NV12-3840x2160-native-1794044886/consumer-core.1102980.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "flCreateChannelEx": {
+        "n": 1,
+        "mean_ms": 0.326432,
+        "p95_ms": 0.326432
+      },
+      "ipc.send": {
+        "n": 154,
+        "mean_ms": 0.012777642857142857,
+        "p95_ms": 0.018385
+      },
+      "ipc.recv": {
+        "n": 152,
+        "mean_ms": 0.011491065789473684,
+        "p95_ms": 0.01653
+      },
+      "flAcquireFrame": {
+        "n": 151,
+        "mean_ms": 33.6376150397351,
+        "p95_ms": 34.028655
+      },
+      "reader.acquire": {
+        "n": 150,
+        "mean_ms": 0.0005428266666666667,
+        "p95_ms": 0.000768
+      },
+      "reader.complete": {
+        "n": 150,
+        "mean_ms": 0.00018941333333333333,
+        "p95_ms": 0.000295
+      },
+      "reader.retire": {
+        "n": 150,
+        "mean_ms": 0.00024703333333333334,
+        "p95_ms": 0.000352
+      },
+      "flImageUnmap": {
+        "n": 2,
+        "mean_ms": 0.0001595,
+        "p95_ms": 0.000125
+      },
+      "flClose": {
+        "n": 1,
+        "mean_ms": 0.578814,
+        "p95_ms": 0.578814
+      }
+    }
+  },
+  "stage-NV12-3840x2160-native-1794044886/consumer-gst.1102980.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "gst.srcCreate": {
+        "n": 151,
+        "mean_ms": 33.688729754966886,
+        "p95_ms": 34.092778
+      }
+    }
+  },
+  "stage-NV12-3840x2160-native-1794044886/producer-core.1102988.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "ipc.recv": {
+        "n": 151,
+        "mean_ms": 0.011682086092715233,
+        "p95_ms": 0.015846
+      },
+      "ipc.send": {
+        "n": 156,
+        "mean_ms": 0.011934326923076922,
+        "p95_ms": 0.017566
+      },
+      "flOpenProducer": {
+        "n": 1,
+        "mean_ms": 0.074568,
+        "p95_ms": 0.074568
+      },
+      "flRequestGeometry": {
+        "n": 1,
+        "mean_ms": 0.03949,
+        "p95_ms": 0.03949
+      },
+      "flAcquireBuffer": {
+        "n": 150,
+        "mean_ms": 0.02058134,
+        "p95_ms": 0.028493
+      },
+      "flImageMapPlanes": {
+        "n": 150,
+        "mean_ms": 0.011756393333333334,
+        "p95_ms": 0.0099
+      },
+      "flImageUnmap": {
+        "n": 152,
+        "mean_ms": 0.0033310394736842104,
+        "p95_ms": 0.004777
+      },
+      "flBeginSubmit": {
+        "n": 150,
+        "mean_ms": 0.00020594666666666668,
+        "p95_ms": 0.000275
+      },
+      "flEndSubmit": {
+        "n": 150,
+        "mean_ms": 0.013489126666666667,
+        "p95_ms": 0.018801
+      },
+      "flSubmit": {
+        "n": 150,
+        "mean_ms": 0.01565958,
+        "p95_ms": 0.0299
+      },
+      "flClose": {
+        "n": 1,
+        "mean_ms": 0.414249,
+        "p95_ms": 0.414249
+      }
+    }
+  },
+  "stage-BGRA-3840x2160-native-1794044892/producer-gst.1103144.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "gst.sinkRender": {
+        "n": 150,
+        "mean_ms": 10.165706233333333,
+        "p95_ms": 11.567231
+      }
+    }
+  },
+  "stage-BGRA-3840x2160-native-1794044892/producer-core.1103144.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "ipc.recv": {
+        "n": 151,
+        "mean_ms": 0.007675039735099338,
+        "p95_ms": 0.016755
+      },
+      "ipc.send": {
+        "n": 156,
+        "mean_ms": 0.006769435897435897,
+        "p95_ms": 0.014816
+      },
+      "flOpenProducer": {
+        "n": 1,
+        "mean_ms": 0.073766,
+        "p95_ms": 0.073766
+      },
+      "flRequestGeometry": {
+        "n": 1,
+        "mean_ms": 0.049694,
+        "p95_ms": 0.049694
+      },
+      "flAcquireBuffer": {
+        "n": 150,
+        "mean_ms": 0.01246354,
+        "p95_ms": 0.027113
+      },
+      "flImageMapPlanes": {
+        "n": 150,
+        "mean_ms": 0.008200673333333333,
+        "p95_ms": 0.009186
+      },
+      "flImageMap": {
+        "n": 150,
+        "mean_ms": 0.008857933333333333,
+        "p95_ms": 0.009944
+      },
+      "flImageUnmap": {
+        "n": 152,
+        "mean_ms": 0.0013211973684210526,
+        "p95_ms": 0.003105
+      },
+      "flBeginSubmit": {
+        "n": 150,
+        "mean_ms": 0.00029072,
+        "p95_ms": 0.000565
+      },
+      "flEndSubmit": {
+        "n": 150,
+        "mean_ms": 0.007497133333333334,
+        "p95_ms": 0.015822
+      },
+      "flSubmit": {
+        "n": 150,
+        "mean_ms": 0.00899562,
+        "p95_ms": 0.01803
+      },
+      "flClose": {
+        "n": 1,
+        "mean_ms": 0.562344,
+        "p95_ms": 0.562344
+      }
+    }
+  },
+  "stage-BGRA-3840x2160-native-1794044892/consumer-gst.1103135.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "gst.srcCreate": {
+        "n": 151,
+        "mean_ms": 33.0537741192053,
+        "p95_ms": 35.082892
+      }
+    }
+  },
+  "stage-BGRA-3840x2160-native-1794044892/consumer-core.1103135.csv": {
+    "footer": "# dropped_events=0,rejected_threads=0,capacity_per_thread=65536",
+    "operations": {
+      "flCreateChannelEx": {
+        "n": 1,
+        "mean_ms": 0.433272,
+        "p95_ms": 0.433272
+      },
+      "ipc.send": {
+        "n": 154,
+        "mean_ms": 0.0069302792207792206,
+        "p95_ms": 0.013496
+      },
+      "ipc.recv": {
+        "n": 152,
+        "mean_ms": 0.005606078947368421,
+        "p95_ms": 0.013343
+      },
+      "flAcquireFrame": {
+        "n": 150,
+        "mean_ms": 33.238529146666664,
+        "p95_ms": 35.043125
+      },
+      "reader.acquire": {
+        "n": 150,
+        "mean_ms": 0.00041410666666666666,
+        "p95_ms": 0.000763
+      },
+      "reader.complete": {
+        "n": 150,
+        "mean_ms": 6.535333333333333e-05,
+        "p95_ms": 0.000162
+      },
+      "reader.retire": {
+        "n": 150,
+        "mean_ms": 8.624666666666667e-05,
+        "p95_ms": 0.000206
+      },
+      "flImageUnmap": {
+        "n": 2,
+        "mean_ms": 4.4999999999999996e-05,
+        "p95_ms": 3.9e-05
+      },
+      "flClose": {
+        "n": 1,
+        "mean_ms": 0.119983,
+        "p95_ms": 0.119983
+      }
+    }
+  }
+}

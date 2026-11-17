@@ -1,0 +1,81 @@
+#< CLIXML
+Test project <win-home>/dev/framelink-m6-windows-3f45f7b/build
+    Start 123: gst_av_bin
+1/1 Test #123: gst_av_bin .......................   Passed   25.76 sec
+
+100% tests passed, 0 tests failed out of 1
+
+Label Time Summary:
+m5b_av    =  25.76 sec*proc (1 test)
+
+Total Test time (real) =  25.77 sec
+Microsoft (R) COFF/PE Dumper Version 14.44.35211.0
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+
+Dump of file build\Release\framelink_gst_session.dll
+
+File Type: DLL
+
+  Section contains the following exports for framelink_gst_session.dll
+
+    00000000 characteristics
+    FFFFFFFF time date stamp
+        0.00 version
+           1 ordinal base
+          41 number of functions
+          41 number of names
+
+    ordinal hint RVA      name
+
+          1    0 00008740 ?fl_gst_session_finish_local_cancellable@@YAHPEAU_FlGstSession@@HIPEAU_GCancellable@@PEAPEAU_GError@@@Z
+          2    1 00008940 ?fl_gst_session_local_ready_cancellable@@YAHPEAU_FlGstSession@@HIPEAU_GCancellable@@PEAPEAU_GError@@@Z
+          3    2 00008B30 ?fl_gst_session_open_local_av_epoch@@YAHPEAU_FlGstSession@@HPEBDPEBUflSessionCapabilities@@IIIIIIPEAPEAUflChannel@@P6A_JPEAX_K@Z4PEAU_GCancellable@@PEAPEAU_GError@@@Z
+          4    3 00008BD0 ?fl_gst_session_open_local_cpu_epoch@@YAHPEAU_FlGstSession@@HPEBDPEBUflSessionCapabilities@@IIIIIP6A_JPEAX_K@Z3PEAU_GCancellable@@PEAPEAU_GError@@@Z
+          5    4 00003AA0 ?fl_gst_session_peek_video_end@@YA?AW4FlGstSessionResult@@PEAU_FlGstSession@@_KPEAUFlGstVideoEvent@@@Z
+          6    5 00003BE0 ?fl_gst_session_publish_audio@@YAHPEAU_FlGstSession@@PEBUflSessionConfig@@PEAU_GSocketConnection@@H@Z
+          7    6 00003D50 ?fl_gst_session_publish_events@@YAHPEAU_FlGstSession@@PEBUflSessionConfig@@PEAU_GSocketConnection@@H@Z
+          8    7 000054D0 fl_gst_segment_running_time
+          9    8 0000A820 fl_gst_session_apply_pipeline_clock
+         10    9 0000AA00 fl_gst_session_authenticate_audio_stream
+         11    A 0000AF90 fl_gst_session_authenticate_cpu_bootstrap
+         12    B 0000B510 fl_gst_session_authenticate_event_stream
+         13    C 00005550 fl_gst_session_bind_authenticated_cpu_pipe
+         14    D 000055D0 fl_gst_session_bind_shared_cpu_pipe
+         15    E 00005640 fl_gst_session_cancel
+         16    F 00005750 fl_gst_session_claim_audio_stream
+         17   10 00005840 fl_gst_session_claim_shared_cpu
+         18   11 00005920 fl_gst_session_configure
+         19   12 00005B70 fl_gst_session_create_context
+         20   13 0000BAA0 fl_gst_session_finish_local
+         21   14 00005C50 fl_gst_session_from_context
+         22   15 00005D10 fl_gst_session_get_config
+         23   16 00005E80 fl_gst_session_get_type
+         24   17 00005EC0 fl_gst_session_has_event_stream
+         25   18 0000BAC0 fl_gst_session_local_ready
+         26   19 00005F40 fl_gst_session_map_pts
+         27   1A 00006050 fl_gst_session_map_running_time
+         28   1B 0000BAE0 fl_gst_session_negotiate_stream
+         29   1C 00006170 fl_gst_session_new
+         30   1D 0000C990 fl_gst_session_open_local_audio
+         31   1E 0000D290 fl_gst_session_open_local_av
+         32   1F 0000D320 fl_gst_session_open_local_cpu
+         33   20 000061D0 fl_gst_session_open_named_cpu_pipe
+         34   21 00006420 fl_gst_session_receive_video_event
+         35   22 00006600 fl_gst_session_register_track
+         36   23 000066C0 fl_gst_session_send_video_event
+         37   24 00006760 fl_gst_session_set_mapping
+         38   25 00006910 fl_gst_session_track_ready
+         39   26 00006A00 fl_gst_session_video_eos
+         40   27 00006B30 fl_gst_session_wait
+         41   28 00006CB0 fl_gst_session_wait_video_eos
+
+  Summary
+
+        1000 .data
+        1000 .pdata
+        9000 .rdata
+        1000 .reloc
+        1000 .rsrc
+       11000 .text
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04"><Obj S="progress" RefId="0"><TN RefId="0"><T>System.Management.Automation.PSCustomObject</T><T>System.Object</T></TN><MS><I64 N="SourceId">1</I64><PR N="Record"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj><Obj S="progress" RefId="1"><TNRef RefId="0" /><MS><I64 N="SourceId">1</I64><PR N="Record"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj></Objs>

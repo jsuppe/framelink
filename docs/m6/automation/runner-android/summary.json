@@ -1,0 +1,310 @@
+{
+  "scope": "Serial M6 deterministic gates; exit0=all pass,1=failed/missing,77=unsupported skips.\n\nBuild first. Desktop uses CTest/JUnit. Android pushes selected executables to a\nfresh directory beneath --remote-dir; shared runtime libraries must already be\ninstalled there. Output retains logs, command provenance and separate skips.\nThis is not endurance, performance-budget, presentation or final qualification.\n",
+  "platform": "android",
+  "expected": [
+    "gst_av_timeline",
+    "gst_policy_generation",
+    "gst_pool_policy",
+    "m4_transport_jitter_drift",
+    "m4_transport_negative_retimestamps",
+    "m5a_transport_relay_sync_negative",
+    "read_lease_egl",
+    "read_lease_egl_delayed_completion",
+    "read_lease_egl_producer_death",
+    "read_leases",
+    "read_ledger",
+    "receive_queue",
+    "trace_bounded_concurrent",
+    "trace_compiled_out",
+    "trace_default_capacity",
+    "trace_details",
+    "trace_disabled",
+    "trace_invalid_capacity",
+    "trace_override_capacity",
+    "trace_thread_limit"
+  ],
+  "missing": [],
+  "tests": [
+    {
+      "name": "gst_av_timeline",
+      "binary_sha256": "902772fd5a17ed068e361d7ca3c6e5d32057e0b1d811bab7cc9d0fee57128263",
+      "command": [
+        "<linux-home>/Android/Sdk/platform-tools/adb",
+        "-s",
+        "A06B4AABFB07983",
+        "shell",
+        "mkdir -p /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/gst_av_timeline && cd /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/gst_av_timeline && env LD_LIBRARY_PATH=/data/local/tmp/framelink-m6-20261106 TMPDIR=/data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/gst_av_timeline FRAMELINK_TRACE= /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/fl_gst_av_timeline static"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 3.430375341005856
+    },
+    {
+      "name": "gst_policy_generation",
+      "binary_sha256": "eb3befadb2131b479fdc0051f38b5b3223acd23d98a63e35ea11bc0cbde76359",
+      "command": [
+        "<linux-home>/Android/Sdk/platform-tools/adb",
+        "-s",
+        "A06B4AABFB07983",
+        "shell",
+        "mkdir -p /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/gst_policy_generation && cd /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/gst_policy_generation && env LD_LIBRARY_PATH=/data/local/tmp/framelink-m6-20261106 TMPDIR=/data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/gst_policy_generation FRAMELINK_TRACE= /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/fl_gst_policy_generation static"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 1.4060160520020872
+    },
+    {
+      "name": "gst_pool_policy",
+      "binary_sha256": "01612c0f7fb20bc25c289c751eaa0d76fb0a39631092601fd1b50d54ef60774d",
+      "command": [
+        "<linux-home>/Android/Sdk/platform-tools/adb",
+        "-s",
+        "A06B4AABFB07983",
+        "shell",
+        "mkdir -p /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/gst_pool_policy && cd /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/gst_pool_policy && env LD_LIBRARY_PATH=/data/local/tmp/framelink-m6-20261106 TMPDIR=/data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/gst_pool_policy FRAMELINK_TRACE= /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/fl_gst_pool_policy static"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 2.5465341300005093
+    },
+    {
+      "name": "m4_transport_jitter_drift",
+      "binary_sha256": "56de1efeb80b4f37338058e3aabee0aea2d220682de9f0c22a6b0a83dd55fb9c",
+      "command": [
+        "<linux-home>/Android/Sdk/platform-tools/adb",
+        "-s",
+        "A06B4AABFB07983",
+        "shell",
+        "mkdir -p /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/m4_transport_jitter_drift && cd /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/m4_transport_jitter_drift && env LD_LIBRARY_PATH=/data/local/tmp/framelink-m6-20261106 TMPDIR=/data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/m4_transport_jitter_drift FRAMELINK_TRACE= /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/fl_m4_transport_timing static --faults"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 3.190902857983019
+    },
+    {
+      "name": "m4_transport_negative_retimestamps",
+      "binary_sha256": "56de1efeb80b4f37338058e3aabee0aea2d220682de9f0c22a6b0a83dd55fb9c",
+      "command": [
+        "<linux-home>/Android/Sdk/platform-tools/adb",
+        "-s",
+        "A06B4AABFB07983",
+        "shell",
+        "mkdir -p /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/m4_transport_negative_retimestamps && cd /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/m4_transport_negative_retimestamps && env LD_LIBRARY_PATH=/data/local/tmp/framelink-m6-20261106 TMPDIR=/data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/m4_transport_negative_retimestamps FRAMELINK_TRACE= /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/fl_m4_transport_timing static --negative"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 0.688555881002685
+    },
+    {
+      "name": "m5a_transport_relay_sync_negative",
+      "binary_sha256": "56de1efeb80b4f37338058e3aabee0aea2d220682de9f0c22a6b0a83dd55fb9c",
+      "command": [
+        "<linux-home>/Android/Sdk/platform-tools/adb",
+        "-s",
+        "A06B4AABFB07983",
+        "shell",
+        "mkdir -p /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/m5a_transport_relay_sync_negative && cd /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/m5a_transport_relay_sync_negative && env LD_LIBRARY_PATH=/data/local/tmp/framelink-m6-20261106 TMPDIR=/data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/m5a_transport_relay_sync_negative FRAMELINK_TRACE= /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/fl_m4_transport_timing static --relay-sync-negative"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 0.9259819019935094
+    },
+    {
+      "name": "read_lease_egl",
+      "binary_sha256": "97783156c1d98b8669e25685eb3be5d6d50bbac6acd63ed54a4daa18ec86f18e",
+      "command": [
+        "<linux-home>/Android/Sdk/platform-tools/adb",
+        "-s",
+        "A06B4AABFB07983",
+        "shell",
+        "mkdir -p /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/read_lease_egl && cd /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/read_lease_egl && env LD_LIBRARY_PATH=/data/local/tmp/framelink-m6-20261106 TMPDIR=/data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/read_lease_egl FRAMELINK_TRACE= /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/fl_read_lease_egl"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 0.9434518079797272
+    },
+    {
+      "name": "read_lease_egl_delayed_completion",
+      "binary_sha256": "97783156c1d98b8669e25685eb3be5d6d50bbac6acd63ed54a4daa18ec86f18e",
+      "command": [
+        "<linux-home>/Android/Sdk/platform-tools/adb",
+        "-s",
+        "A06B4AABFB07983",
+        "shell",
+        "mkdir -p /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/read_lease_egl_delayed_completion && cd /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/read_lease_egl_delayed_completion && env LD_LIBRARY_PATH=/data/local/tmp/framelink-m6-20261106 TMPDIR=/data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/read_lease_egl_delayed_completion FRAMELINK_TRACE= /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/fl_read_lease_egl --delayed-completion"
+      ],
+      "exit": 77,
+      "result": "skip",
+      "seconds": 0.49118192499736324
+    },
+    {
+      "name": "read_lease_egl_producer_death",
+      "binary_sha256": "97783156c1d98b8669e25685eb3be5d6d50bbac6acd63ed54a4daa18ec86f18e",
+      "command": [
+        "<linux-home>/Android/Sdk/platform-tools/adb",
+        "-s",
+        "A06B4AABFB07983",
+        "shell",
+        "mkdir -p /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/read_lease_egl_producer_death && cd /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/read_lease_egl_producer_death && env LD_LIBRARY_PATH=/data/local/tmp/framelink-m6-20261106 TMPDIR=/data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/read_lease_egl_producer_death FRAMELINK_TRACE= /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/fl_read_lease_egl --producer-death"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 0.8134538950107526
+    },
+    {
+      "name": "read_leases",
+      "binary_sha256": "005b52bb236de19da99175ebd236c300a9ab46b06d5eb2fb3eda13ff0ff070dd",
+      "command": [
+        "<linux-home>/Android/Sdk/platform-tools/adb",
+        "-s",
+        "A06B4AABFB07983",
+        "shell",
+        "mkdir -p /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/read_leases && cd /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/read_leases && env LD_LIBRARY_PATH=/data/local/tmp/framelink-m6-20261106 TMPDIR=/data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/read_leases FRAMELINK_TRACE= /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/fl_read_leases"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 0.5161845219845418
+    },
+    {
+      "name": "read_ledger",
+      "binary_sha256": "61c1f37f5d3b7efe86531e5edb147841337afa3408055d2db6579e0f1edb18a9",
+      "command": [
+        "<linux-home>/Android/Sdk/platform-tools/adb",
+        "-s",
+        "A06B4AABFB07983",
+        "shell",
+        "mkdir -p /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/read_ledger && cd /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/read_ledger && env LD_LIBRARY_PATH=/data/local/tmp/framelink-m6-20261106 TMPDIR=/data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/read_ledger FRAMELINK_TRACE= /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/fl_read_ledger"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 0.1216942569881212
+    },
+    {
+      "name": "receive_queue",
+      "binary_sha256": "5433541b19266c89569a52381490570d782bd4d2a45215afe2911ee0f0aa3c90",
+      "command": [
+        "<linux-home>/Android/Sdk/platform-tools/adb",
+        "-s",
+        "A06B4AABFB07983",
+        "shell",
+        "mkdir -p /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/receive_queue && cd /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/receive_queue && env LD_LIBRARY_PATH=/data/local/tmp/framelink-m6-20261106 TMPDIR=/data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/receive_queue FRAMELINK_TRACE= /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/fl_receive_queue"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 1.9417941530118696
+    },
+    {
+      "name": "trace_bounded_concurrent",
+      "binary_sha256": "a8705acebf4adf8e90782140bb976e2b4e24a4de5fb06e590b577fa59e1f1cff",
+      "command": [
+        "<linux-home>/Android/Sdk/platform-tools/adb",
+        "-s",
+        "A06B4AABFB07983",
+        "shell",
+        "mkdir -p /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/trace_bounded_concurrent && cd /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/trace_bounded_concurrent && env LD_LIBRARY_PATH=/data/local/tmp/framelink-m6-20261106 TMPDIR=/data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/trace_bounded_concurrent FRAMELINK_TRACE=/data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/trace_bounded_concurrent/trace-test FRAMELINK_TRACE_EVENTS=16 /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/fl_trace_test"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 0.21895481800311245
+    },
+    {
+      "name": "trace_compiled_out",
+      "binary_sha256": "c764bb4fb67dc1f9b2b68842018978522e7f6238e3cbeab6ec7dd00a0bffeb00",
+      "command": [
+        "<linux-home>/Android/Sdk/platform-tools/adb",
+        "-s",
+        "A06B4AABFB07983",
+        "shell",
+        "mkdir -p /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/trace_compiled_out && cd /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/trace_compiled_out && env LD_LIBRARY_PATH=/data/local/tmp/framelink-m6-20261106 TMPDIR=/data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/trace_compiled_out FRAMELINK_TRACE=/data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/trace_compiled_out/must-not-exist /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/fl_trace_compiled_out"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 0.2325361839903053
+    },
+    {
+      "name": "trace_default_capacity",
+      "binary_sha256": "a8705acebf4adf8e90782140bb976e2b4e24a4de5fb06e590b577fa59e1f1cff",
+      "command": [
+        "<linux-home>/Android/Sdk/platform-tools/adb",
+        "-s",
+        "A06B4AABFB07983",
+        "shell",
+        "mkdir -p /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/trace_default_capacity && cd /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/trace_default_capacity && env LD_LIBRARY_PATH=/data/local/tmp/framelink-m6-20261106 TMPDIR=/data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/trace_default_capacity FRAMELINK_TRACE=/data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/trace_default_capacity/trace-default FRAMELINK_TRACE_EVENTS= /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/fl_trace_test capacity 4096"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 0.18831933301407844
+    },
+    {
+      "name": "trace_details",
+      "binary_sha256": "a8705acebf4adf8e90782140bb976e2b4e24a4de5fb06e590b577fa59e1f1cff",
+      "command": [
+        "<linux-home>/Android/Sdk/platform-tools/adb",
+        "-s",
+        "A06B4AABFB07983",
+        "shell",
+        "mkdir -p /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/trace_details && cd /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/trace_details && env LD_LIBRARY_PATH=/data/local/tmp/framelink-m6-20261106 TMPDIR=/data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/trace_details FRAMELINK_TRACE=/data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/trace_details/trace-details FRAMELINK_TRACE_EVENTS=16 /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/fl_trace_test details"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 0.14563091701711528
+    },
+    {
+      "name": "trace_disabled",
+      "binary_sha256": "a8705acebf4adf8e90782140bb976e2b4e24a4de5fb06e590b577fa59e1f1cff",
+      "command": [
+        "<linux-home>/Android/Sdk/platform-tools/adb",
+        "-s",
+        "A06B4AABFB07983",
+        "shell",
+        "mkdir -p /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/trace_disabled && cd /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/trace_disabled && env LD_LIBRARY_PATH=/data/local/tmp/framelink-m6-20261106 TMPDIR=/data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/trace_disabled FRAMELINK_TRACE= /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/fl_trace_test"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 0.1421663099899888
+    },
+    {
+      "name": "trace_invalid_capacity",
+      "binary_sha256": "a8705acebf4adf8e90782140bb976e2b4e24a4de5fb06e590b577fa59e1f1cff",
+      "command": [
+        "<linux-home>/Android/Sdk/platform-tools/adb",
+        "-s",
+        "A06B4AABFB07983",
+        "shell",
+        "mkdir -p /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/trace_invalid_capacity && cd /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/trace_invalid_capacity && env LD_LIBRARY_PATH=/data/local/tmp/framelink-m6-20261106 TMPDIR=/data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/trace_invalid_capacity FRAMELINK_TRACE=/data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/trace_invalid_capacity/trace-invalid FRAMELINK_TRACE_EVENTS=invalid /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/fl_trace_test capacity 4096"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 0.17083296098280698
+    },
+    {
+      "name": "trace_override_capacity",
+      "binary_sha256": "a8705acebf4adf8e90782140bb976e2b4e24a4de5fb06e590b577fa59e1f1cff",
+      "command": [
+        "<linux-home>/Android/Sdk/platform-tools/adb",
+        "-s",
+        "A06B4AABFB07983",
+        "shell",
+        "mkdir -p /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/trace_override_capacity && cd /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/trace_override_capacity && env LD_LIBRARY_PATH=/data/local/tmp/framelink-m6-20261106 TMPDIR=/data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/trace_override_capacity FRAMELINK_TRACE=/data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/trace_override_capacity/trace-override FRAMELINK_TRACE_EVENTS=8192 /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/fl_trace_test capacity 8192"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 0.21755105999181978
+    },
+    {
+      "name": "trace_thread_limit",
+      "binary_sha256": "a8705acebf4adf8e90782140bb976e2b4e24a4de5fb06e590b577fa59e1f1cff",
+      "command": [
+        "<linux-home>/Android/Sdk/platform-tools/adb",
+        "-s",
+        "A06B4AABFB07983",
+        "shell",
+        "mkdir -p /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/trace_thread_limit && cd /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/trace_thread_limit && env LD_LIBRARY_PATH=/data/local/tmp/framelink-m6-20261106 TMPDIR=/data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/trace_thread_limit FRAMELINK_TRACE=/data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/trace_thread_limit/trace-threads FRAMELINK_TRACE_EVENTS=16 /data/local/tmp/framelink-m6-20261106/m6-gates-ef7a5b33dcf3/fl_trace_test threads"
+      ],
+      "exit": 0,
+      "result": "pass",
+      "seconds": 0.19617661199299619
+    }
+  ],
+  "result": "incomplete"
+}

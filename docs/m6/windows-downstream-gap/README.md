@@ -1,0 +1,25 @@
+# Windows downstream gap diagnosis — in progress
+
+Base revision `d8a1f2f177d10e6e1c8df108322d58d38b22fb7a`. Original full-suite **140/142 failure remains unresolved**, not waived by successful controls. API candidate remains8b057a1/not frozen; D2/D3 unresolved, M6open/M7hold.
+
+## Collected unchanged-binary control
+
+At2026-11-12T03:03Z local process inventory and remote Windows inventory were empty. Further correlation of original logs places the delay after the consumer video pad probe timestamp, before sample pull: **46.1217ms at PTS1300000000** in preconnect NV12, **53.9776ms at PTS1060000000** in startup/audio-coordinated BGRA. Original probe records time *before* hash, output-mutex acquisition, printf and fflush. Thus logs cannot distinguish disk/stdio blocking, hashing, scheduling, or downstream appsink delay. Do not claim any of these as root cause.
+
+Bounded matched control changed only child stdout destination: original file versus pipe drained into RAM by a separate harness thread, saved after child exit. Same binaries, all media hashes, producer350ms preconnect delay, native/GST flight recorders, original frame/PCM checks, and independent expected100-PTS set retained. Producer and audio-coordinated clocks, BGRA/NV12: all **8cells100/100**, matching100PCM blocks/96000samples. Probe-to-pull maxima1.8604–2.3529ms. Exit0/pull0, ended03:04:20Z. No original gap reproduced; this does **not** demonstrate a logging fix or qualify a rerun. Binary SHA256 manifest retained with raw evidence.
+
+## Collected phase diagnostic
+
+Diagnostic-only copy of av_apps.cpp adds append-only per-thread in-memory phase records around media hashing, output mutex acquisition, printf, fflush, schedule logging and appsink pull. Existing trace recorder writes at shutdown; no per-event diagnostic I/O. Patch is archived here, **not applied to production source**. Separate Windows tree `<win-home>/dev/framelink-m6-gap-phase-d8a1f2f` from exact base source archive preserves original integrated binaries.
+
+Completed03:07:02Z; build/diagnostic/four evidence pulls exit0. All recorder footers report zero dropped/rejected events. **Three of32 format cells lose frames**, all file-backed audio-coordinated cells: iteration2 BGRA98/100 (PTS1.10/1.12s), NV1297/100 (0.58/0.60/1.96s), iteration3 NV1299/100 (1.12s). RAM cells retain100/100. Exact surviving pixels/PCM checks pass; diagnostic script exit0 is NOT a completeness pass.
+
+In iteration2 BGRA consumer, video fflush atPTS1.08s takes65.0822ms and schedule printf stalls57.3903ms over the same interval; probe-to-pull65.2316ms. Producer audio fflush takes67.3656ms while video waits67.1263ms on the output mutex. NV12 producer fflush takes69.7029ms, with audio output-lock49.9037ms. Later paired producer/consumer flush stalls41.3515/40.7061ms coincide with missing1.96s. Iteration3 producer audio flush/video mutex stall similarly precedes missing1.12s. Hash maximum0.2081ms. This identifies synchronous trace stdout/file I/O plus lock contention as a reproduced stall mechanism, not a general transport or OS storage root cause. Original uninstrumented failure is consistent, not individually proven by phase data it did not capture.
+
+## Scoped test-harness repair under validation
+
+Finite `m5_external_pipeline.py` now drains child stdout concurrently into bounded4MiB-per-child RAM; it saves logs after process exit. Overflow drains/discards excess then fails explicitly, never silently validates incomplete evidence. Timeout/kill paths preserve partial output. All original hashes, PCM,100-PTS startup/preconnect checks and deliberately broken policy controls remain. No sample/native/API/default change. This isolates correctness tests from their own synchronous file-write perturbation; it does **not** repair arbitrary slow stdout use in the sample or qualify trace-off performance.
+
+Local helper controls passed exact200000-byte output, idempotent wait,5MB overflow rejection, and timeout/kill partial capture. Loom briefing unavailable (missing chromadb). Sole sequential Windows validation unit `framelink-m6-capture-d8a1f2f-20261112T0313.service` actually started03:08:38Z, not the timestamp in its name. It runs affected startup and preconnect tests, including their negative controls, against unchanged production d8a1f2f binaries. Raw `capture-status.json`, `capture-tests.log`, `capture-results` in the same evidence directory. Collect before any new executor; no blind full-suite rerun. Original failure retained, API candidate8b057a1/not frozen; M6open/M7hold.
+
+Collected03:09:38Z: both startup and preconnect pass (tests/pull exit0). Positive startup producer/audio-coordinated cells each100/100; ready BGRA/NV12 each100/100. Required legacy negatives still lose frames (preconnect81/82); cancellation/restart/long-preroll/producer-stall checks pass. This validates scoped harness isolation only; original negative evidence retained. Next exact-revision integrated qualification is justified by measured mechanism + scoped repair, not a blind retry.

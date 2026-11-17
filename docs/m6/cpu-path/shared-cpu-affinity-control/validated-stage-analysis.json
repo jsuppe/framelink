@@ -1,0 +1,334 @@
+{
+  "a1-all": {
+    "verified_frames": 3600,
+    "video_misses": 1,
+    "audio_misses": 0,
+    "av_delta_ns": 0,
+    "arrival_ms": {
+      "p50": 20.797208,
+      "p95": 21.642463,
+      "p99": 23.703364,
+      "max": 34.622848
+    },
+    "consumer_copy_wall_us": {
+      "p50": 12881,
+      "p95": 13374,
+      "p99": 14873,
+      "max": 21910
+    },
+    "consumer_copy_cpu_us": {
+      "p50": 10683,
+      "p95": 12263,
+      "p99": 13248,
+      "max": 17204
+    },
+    "consumer_copy_wall_minus_cpu_us": {
+      "p50": 2271,
+      "p95": 3888,
+      "p99": 4342,
+      "max": 7429
+    },
+    "sink_copy_us": {
+      "p50": 6963,
+      "p95": 7139,
+      "p99": 7742,
+      "max": 11019
+    },
+    "sink_wait_us": {
+      "p50": 34,
+      "p95": 55,
+      "p99": 57,
+      "max": 386
+    },
+    "copy_fault_sum": 13,
+    "fallbacks": 0,
+    "late_neighbors": [
+      {
+        "timing": {
+          "index": 741,
+          "producer_pts_ns": 25014095154,
+          "consumer_pts_ns": 3899706929724506,
+          "push_lateness_ns": 235386,
+          "arrival_lateness_ns": 34622848,
+          "post_push_residual_ns": 34387462
+        },
+        "stages": {
+          "740": {
+            "consumer": {
+              "seq": 741,
+              "start": 3899706884892,
+              "receive_us": 18871,
+              "output_us": 28,
+              "copy_us": 14101,
+              "release_us": 33,
+              "meta_us": 8,
+              "copy_faults": 0,
+              "copy_cpu_us": 12297
+            },
+            "sink": {
+              "index": 740,
+              "start": 3899706896717,
+              "wait_us": 34,
+              "acquire_us": 3,
+              "copy_us": 6784,
+              "submit_us": 40
+            }
+          },
+          "741": {
+            "consumer": {
+              "seq": 742,
+              "start": 3899706918038,
+              "receive_us": 23687,
+              "output_us": 59,
+              "copy_us": 21910,
+              "release_us": 129,
+              "meta_us": 11,
+              "copy_faults": 7,
+              "copy_cpu_us": 14481
+            },
+            "sink": {
+              "index": 741,
+              "start": 3899706930029,
+              "wait_us": 66,
+              "acquire_us": 7,
+              "copy_us": 11019,
+              "submit_us": 65
+            }
+          },
+          "742": {
+            "consumer": {
+              "seq": 743,
+              "start": 3899706964481,
+              "receive_us": 8201,
+              "output_us": 46,
+              "copy_us": 14362,
+              "release_us": 43,
+              "meta_us": 6,
+              "copy_faults": 0,
+              "copy_cpu_us": 10788
+            },
+            "sink": {
+              "index": 742,
+              "start": 3899706963603,
+              "wait_us": 386,
+              "acquire_us": 4,
+              "copy_us": 8305,
+              "submit_us": 67
+            }
+          }
+        }
+      }
+    ]
+  },
+  "b1-big": {
+    "verified_frames": 3600,
+    "video_misses": 0,
+    "audio_misses": 0,
+    "av_delta_ns": 0,
+    "arrival_ms": {
+      "p50": 20.565285,
+      "p95": 21.119338,
+      "p99": 21.879153,
+      "max": 28.831851
+    },
+    "consumer_copy_wall_us": {
+      "p50": 10393,
+      "p95": 13292,
+      "p99": 13606,
+      "max": 17033
+    },
+    "consumer_copy_cpu_us": {
+      "p50": 7840,
+      "p95": 10983,
+      "p99": 11847,
+      "max": 13187
+    },
+    "consumer_copy_wall_minus_cpu_us": {
+      "p50": 2886,
+      "p95": 7246,
+      "p99": 7596,
+      "max": 10794
+    },
+    "sink_copy_us": {
+      "p50": 6958,
+      "p95": 7154,
+      "p99": 7446,
+      "max": 12375
+    },
+    "sink_wait_us": {
+      "p50": 33,
+      "p95": 43,
+      "p99": 56,
+      "max": 147
+    },
+    "copy_fault_sum": 7,
+    "fallbacks": 0,
+    "late_neighbors": []
+  },
+  "b2-big": {
+    "verified_frames": 3600,
+    "video_misses": 1,
+    "audio_misses": 0,
+    "av_delta_ns": 0,
+    "arrival_ms": {
+      "p50": 20.447709,
+      "p95": 21.244427,
+      "p99": 22.447224,
+      "max": 34.009374
+    },
+    "consumer_copy_wall_us": {
+      "p50": 10673,
+      "p95": 13529,
+      "p99": 13995,
+      "max": 22345
+    },
+    "consumer_copy_cpu_us": {
+      "p50": 8145,
+      "p95": 11436,
+      "p99": 11988,
+      "max": 14405
+    },
+    "consumer_copy_wall_minus_cpu_us": {
+      "p50": 3088,
+      "p95": 5693,
+      "p99": 7427,
+      "max": 13947
+    },
+    "sink_copy_us": {
+      "p50": 6951,
+      "p95": 7168,
+      "p99": 7588,
+      "max": 12895
+    },
+    "sink_wait_us": {
+      "p50": 34,
+      "p95": 44,
+      "p99": 57,
+      "max": 99
+    },
+    "copy_fault_sum": 15,
+    "fallbacks": 0,
+    "late_neighbors": [
+      {
+        "timing": {
+          "index": 683,
+          "producer_pts_ns": 23054853666,
+          "consumer_pts_ns": 3899948263223148,
+          "push_lateness_ns": 185951,
+          "arrival_lateness_ns": 34009374,
+          "post_push_residual_ns": 33823423
+        },
+        "stages": {
+          "682": {
+            "consumer": {
+              "seq": 683,
+              "start": 3899948217278,
+              "receive_us": 20542,
+              "output_us": 31,
+              "copy_us": 13088,
+              "release_us": 34,
+              "meta_us": 4,
+              "copy_faults": 0,
+              "copy_cpu_us": 10293
+            },
+            "sink": {
+              "index": 682,
+              "start": 3899948230106,
+              "wait_us": 32,
+              "acquire_us": 3,
+              "copy_us": 7029,
+              "submit_us": 48
+            }
+          },
+          "683": {
+            "consumer": {
+              "seq": 684,
+              "start": 3899948251070,
+              "receive_us": 25598,
+              "output_us": 23,
+              "copy_us": 20419,
+              "release_us": 44,
+              "meta_us": 5,
+              "copy_faults": 4,
+              "copy_cpu_us": 8732
+            },
+            "sink": {
+              "index": 683,
+              "start": 3899948263472,
+              "wait_us": 99,
+              "acquire_us": 5,
+              "copy_us": 12379,
+              "submit_us": 116
+            }
+          },
+          "684": {
+            "consumer": {
+              "seq": 685,
+              "start": 3899948297262,
+              "receive_us": 14857,
+              "output_us": 14,
+              "copy_us": 9963,
+              "release_us": 36,
+              "meta_us": 6,
+              "copy_faults": 0,
+              "copy_cpu_us": 7043
+            },
+            "sink": {
+              "index": 684,
+              "start": 3899948297337,
+              "wait_us": 23,
+              "acquire_us": 3,
+              "copy_us": 10403,
+              "submit_us": 55
+            }
+          }
+        }
+      }
+    ]
+  },
+  "a2-all": {
+    "verified_frames": 3600,
+    "video_misses": 0,
+    "audio_misses": 0,
+    "av_delta_ns": 0,
+    "arrival_ms": {
+      "p50": 20.970926,
+      "p95": 21.608775,
+      "p99": 22.665466,
+      "max": 29.487923
+    },
+    "consumer_copy_wall_us": {
+      "p50": 13013,
+      "p95": 13548,
+      "p99": 14187,
+      "max": 20590
+    },
+    "consumer_copy_cpu_us": {
+      "p50": 10064,
+      "p95": 12664,
+      "p99": 13071,
+      "max": 17729
+    },
+    "consumer_copy_wall_minus_cpu_us": {
+      "p50": 2571,
+      "p95": 3781,
+      "p99": 4172,
+      "max": 6995
+    },
+    "sink_copy_us": {
+      "p50": 6963,
+      "p95": 7147,
+      "p99": 7400,
+      "max": 10219
+    },
+    "sink_wait_us": {
+      "p50": 34,
+      "p95": 56,
+      "p99": 58,
+      "max": 80
+    },
+    "copy_fault_sum": 0,
+    "fallbacks": 0,
+    "late_neighbors": []
+  }
+}

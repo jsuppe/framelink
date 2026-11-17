@@ -1,0 +1,10 @@
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <win-home>\dev\framelink-m6-windows-548fe19\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> <win-home>\dev\framelink-m6-windows-548fe19\build\Release\framelink_gst_session.dll
+  gstframelinkavsink.cpp
+<win-home>\dev\framelink-m6-windows-548fe19\gst\gstframelinkavsink.cpp(58,43): error C2121: '#': invalid character: possibly the result of a macro expansion [<win-home>\dev\framelink-m6-windows-548fe19\build\gstframelink.vcxproj]
+<win-home>\dev\framelink-m6-windows-548fe19\gst\gstframelinkavsink.cpp(58,43): error C2146: syntax error: missing ')' before identifier 'ifdef' [<win-home>\dev\framelink-m6-windows-548fe19\build\gstframelink.vcxproj]
+<win-home>\dev\framelink-m6-windows-548fe19\gst\gstframelinkavsink.cpp(58,43): error C2143: syntax error: missing ';' before '{' [<win-home>\dev\framelink-m6-windows-548fe19\build\gstframelink.vcxproj]
+<win-home>\dev\framelink-m6-windows-548fe19\gst\gstframelinkavsink.cpp(58,43): error C2447: '{': missing function header (old-style formal list?) [<win-home>\dev\framelink-m6-windows-548fe19\build\gstframelink.vcxproj]
+<win-home>\dev\framelink-m6-windows-548fe19\gst\gstframelinkavsink.cpp(58,43): error C2059: syntax error: '}' [<win-home>\dev\framelink-m6-windows-548fe19\build\gstframelink.vcxproj]

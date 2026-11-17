@@ -1,0 +1,28 @@
+** WARNING: connection is not using a post-quantum key exchange algorithm.
+** This session may be vulnerable to "store now, decrypt later" attacks.
+** The server may need to be upgraded. See https://openssh.com/pq.html
+-- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.26300.
+-- framelink: building GStreamer elements (gstframelink)
+-- Configuring done (0.8s)
+-- Generating done (1.1s)
+-- Build files have been written to: <win-home>/dev/framelink-m6-windows-7b8a274/build
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  framelink.vcxproj -> <win-home>\dev\framelink-m6-windows-7b8a274\build\Release\framelink.dll
+  framelink_gst_session.vcxproj -> <win-home>\dev\framelink-m6-windows-7b8a274\build\Release\framelink_gst_session.dll
+  fl_gst_native_producer_win.cpp
+  The d3d11 library from gst-plugins-bad is unstable API and may change in future.
+  You can define GST_USE_UNSTABLE_API to avoid this warning.
+<win-home>\dev\framelink-m6-windows-7b8a274\samples\native_d3d11_relay_pool.h(62,10): error C2664: 'flResult flCreateChannelFromD3D11Handles(const char *,uint32_t,uint32_t,flFormat,uint32_t,uint32_t,const uint8_t [],void *const *,flChannel **)': cannot convert argument 4 from 'const uint32_t' to 'flFormat' [<win-home>\dev\framelink-m6-windows-7b8a274\build\fl_gst_native_producer_win.vcxproj]
+  (compiling source file '../test/fl_gst_native_producer_win.cpp')
+      <win-home>\dev\framelink-m6-windows-7b8a274\samples\native_d3d11_relay_pool.h(62,98):
+      Conversion to enumeration type requires an explicit cast (static_cast, C-style cast or parenthesized function-style cast)
+      <win-home>\dev\framelink-m6-windows-7b8a274\include\framelink_d3d11.h(28,17):
+      see declaration of 'flCreateChannelFromD3D11Handles'
+      <win-home>\dev\framelink-m6-windows-7b8a274\samples\native_d3d11_relay_pool.h(62,10):
+      while trying to match the argument list '(const char *, const uint32_t, const uint32_t, const uint32_t, unsigned int, int, uint8_t [8], _Ty *, flChannel **)'
+          with
+          [
+              _Ty=void *
+          ]
+  

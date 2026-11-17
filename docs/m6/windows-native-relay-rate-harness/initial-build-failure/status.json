@@ -1,0 +1,25 @@
+{
+  "revision": "4f46f424adacbaeb13d39b916ee6bfb33a952e9c",
+  "started_utc": "2026-11-12T07:26:08.800068+00:00",
+  "state": "failed",
+  "step": "build",
+  "command": [
+    "cmake",
+    "--build",
+    "build",
+    "--config",
+    "Release",
+    "--target",
+    "fl_gst_local_native_bench_win",
+    "gstframelink",
+    "-j",
+    "4",
+    "--",
+    "/nr:false"
+  ],
+  "extract_exit": 0,
+  "configure_exit": 0,
+  "build_exit": 1,
+  "error": "build failed; evidence retained",
+  "ended_utc": "2026-11-12T07:26:25.255791+00:00"
+}

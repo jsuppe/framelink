@@ -1,0 +1,21 @@
+{
+  "state": "finished",
+  "started": 1794016535.6470664,
+  "label": "local-consumer-windows-nv12-4k30-1800",
+  "revision": "b5236a4 + gst/test3e0cd85 + benchmark/harness e109432",
+  "purpose": "local consumer resource isolation, not transport qualification",
+  "process_exit": 0,
+  "scope": "local-consumer-control-no-transport",
+  "result": "EOS",
+  "frames": "54000",
+  "samples": "86400000",
+  "audio.contiguous": "yes",
+  "queue.accounting": "complete",
+  "mem.slope.kb_per_min": "7.34",
+  "handles.slope.per_min": "0.00",
+  "threads.slope.per_min": "-0.00",
+  "cpu.percent": "5.66",
+  "video.deadline_misses": "0/54000",
+  "audio.deadline_misses": "0/180000",
+  "ended": 1794018337.5245206
+}

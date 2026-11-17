@@ -1,0 +1,28 @@
+{
+  "state": "finished",
+  "started": 1794122637.280166,
+  "steps": [
+    {
+      "name": "linux-build",
+      "exit": 0
+    },
+    {
+      "name": "linux-tests",
+      "exit": 0
+    },
+    {
+      "name": "x86-build",
+      "exit": 0
+    },
+    {
+      "name": "windows",
+      "exit": 0
+    }
+  ],
+  "source_sha256": {
+    "gst/gstframelink.cpp": "655f14507256213243aeac07158b33fb2cde5fbf038e07b6e175584a39a3abb2",
+    "gst/fl_gst_shared_cpu_source.inc": "4428b35ded3d822c07cd187bf30b57be1c377f9460410b50c1575636812c4b5b",
+    "test/fl_gst_shared_cpu_source.cpp": "0de104e2b25dec76bfb88fe9ac1c045ddd41bc53d97ff453a90498b3995a17d1"
+  },
+  "ended": 1794122704.0202684
+}

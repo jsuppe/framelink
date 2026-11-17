@@ -1,0 +1,7 @@
+# Windows local shared-CPU A/V session composition
+
+The existing explicit `fl_gst_session_open_local_cpu` API is now available on Windows, with identical parameters and no changes to existing Linux/Android signatures. Windows uses protected FAR3 loopback discovery, authenticated offer/clock/PCM/event streams and a session-unique named message pipe. The actual pipe authenticates full config, directional role, fresh nonces and kernel process identity before exchanging pool handles. Allocation extents are page-aligned; logical planes stay packed. Connect deadline cancellation covers discovery through pool setup; the channel retains the independent idle timeout. No hidden native fallback; default APIs unchanged.
+
+Windows 4/4 focused tests pass, including 16 A/V cases (four new local setup variants), exact BGRA/NV12 and PCM data, 37ms relative A/V mapping, empty and both EOS orders, missing peers, pre-cancellation and incompatible offers. Linux 3/3 and Android 3/3 affected regressions pass, with both Android ABI builds. Windows tests create a nonexistent private child beneath a temporary directory so production creates its current-user-only ACL; broad inherited ACLs are not weakened.
+
+This exposes the worker-thread setup API, not yet Windows `session=` bin composition or independent-process rate qualification. API not frozen; D2/D3 decisions, native producer, timing and private-memory gates remain open. M6 open; M7 hold.

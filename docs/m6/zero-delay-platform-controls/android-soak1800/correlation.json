@@ -1,0 +1,39 @@
+{
+  "join": "inferred_constant_pts_mapping",
+  "frames": 108000,
+  "pts_offset_ns": 3696095862278833,
+  "arrival_budget_ns": 17000000,
+  "arrival_misses": 0,
+  "late_frames": [],
+  "push_ms": {
+    "p50": 0.30656,
+    "p95": 0.438891,
+    "p99": 0.48437,
+    "max": 5.878506
+  },
+  "arrival_ms": {
+    "p50": 6.289728,
+    "p95": 7.82704,
+    "p99": 8.728789,
+    "max": 13.56066
+  },
+  "post_push_residual_ms": {
+    "p50": 5.966539,
+    "p95": 7.49077,
+    "p99": 8.40177,
+    "max": 12.492616
+  },
+  "scope": "All frames including startup/drain. Offset inferred from first records: cannot independently exclude a whole-stream constant shift; not identity proof. Residual includes producer copy, transport, consumer work and clock-mapping error; not a root-cause proof.",
+  "audio": {
+    "blocks": 180000,
+    "contiguous_10ms_pts": true,
+    "arrival_misses": 0,
+    "arrival_ms": {
+      "p50": 1.695553,
+      "p95": 2.372693,
+      "p99": 2.586206,
+      "max": 5.950856
+    },
+    "scope": "PTS continuity only; PCM bytes/counts require the benchmark summary."
+  }
+}

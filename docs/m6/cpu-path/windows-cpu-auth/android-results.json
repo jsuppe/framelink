@@ -1,0 +1,136 @@
+[
+  {
+    "name": "linux-build",
+    "command": [
+      "cmake",
+      "--build",
+      "<linux-home>/dev/build/framelink-m6-linux",
+      "--target",
+      "fl_gst_session_context",
+      "fl_gst_session_transport",
+      "fl_gst_shared_cpu_av",
+      "-j",
+      "4"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "linux-tests",
+    "command": [
+      "ctest",
+      "--test-dir",
+      "<linux-home>/dev/build/framelink-m6-linux",
+      "-R",
+      "^(gst_session_context|gst_session_transport|gst_shared_cpu_av)$",
+      "--output-on-failure"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "arm64-build",
+    "command": [
+      "cmake",
+      "--build",
+      "<linux-home>/dev/build/framelink-m6-arm64",
+      "--target",
+      "fl_gst_session_context",
+      "fl_gst_session_transport",
+      "fl_gst_shared_cpu_av",
+      "-j",
+      "4"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "x86_64-build",
+    "command": [
+      "cmake",
+      "--build",
+      "<linux-home>/dev/build/framelink-m6-x86_64",
+      "--target",
+      "fl_gst_session_context",
+      "fl_gst_session_transport",
+      "fl_gst_shared_cpu_av",
+      "-j",
+      "4"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "mkdir",
+    "command": [
+      "adb",
+      "shell",
+      "mkdir",
+      "-p",
+      "/data/local/tmp/framelink-windows-cpu-auth-regression"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "push-fl_gst_session_context",
+    "command": [
+      "adb",
+      "push",
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_gst_session_context",
+      "/data/local/tmp/framelink-windows-cpu-auth-regression/"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "push-fl_gst_session_transport",
+    "command": [
+      "adb",
+      "push",
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_gst_session_transport",
+      "/data/local/tmp/framelink-windows-cpu-auth-regression/"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "push-fl_gst_shared_cpu_av",
+    "command": [
+      "adb",
+      "push",
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_gst_shared_cpu_av",
+      "/data/local/tmp/framelink-windows-cpu-auth-regression/"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "chmod",
+    "command": [
+      "adb",
+      "shell",
+      "chmod 755 /data/local/tmp/framelink-windows-cpu-auth-regression/fl_*"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "fl_gst_session_context",
+    "command": [
+      "adb",
+      "shell",
+      "cd /data/local/tmp/framelink-windows-cpu-auth-regression && ./fl_gst_session_context static"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "fl_gst_session_transport",
+    "command": [
+      "adb",
+      "shell",
+      "cd /data/local/tmp/framelink-windows-cpu-auth-regression && ./fl_gst_session_transport static"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "fl_gst_shared_cpu_av",
+    "command": [
+      "adb",
+      "shell",
+      "cd /data/local/tmp/framelink-windows-cpu-auth-regression && ./fl_gst_shared_cpu_av static"
+    ],
+    "exit": 0
+  }
+]

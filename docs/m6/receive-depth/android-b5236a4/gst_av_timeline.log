@@ -1,0 +1,19 @@
+CASE lead=0 negative=0 gap=0 empty=0 pause=0
+CASE lead=1 negative=0 gap=0 empty=0 pause=0
+CASE lead=0 negative=1 gap=0 empty=0 pause=0
+CASE lead=0 negative=2 gap=0 empty=0 pause=0
+CASE lead=0 negative=3 gap=0 empty=0 pause=0
+CASE lead=0 negative=4 gap=0 empty=0 pause=0
+consumer death surfaced at giostreamsink8 after 977us: Could not write to resource. (../gst/gio/gstgiobasesink.c(361): gst_gio_base_sink_render (): /GstPipeline:pipeline11/GstFrameLinkAudioSink:framelinkaudiosink8/GstGioStreamSink:giostreamsink8:
+Could not write to stream: Error sending data: Broken pipe)
+CASE lead=0 negative=5 gap=0 empty=0 pause=0
+audio transport loss surfaced at flaudioreader9 after 842us: audio peer closed before GDP EOS
+CASE reconnect
+reconnect: generation2 exact media after consumer death; generation1 operations stale
+CASE lead=0 negative=0 gap=1 empty=0 pause=0
+CASE lead=1 negative=0 gap=1 empty=0 pause=0
+CASE lead=0 negative=0 gap=1 empty=1 pause=0
+CASE lead=0 negative=0 gap=1 empty=0 pause=1
+CASE lead=0 negative=0 gap=1 empty=0 pause=2
+CASE lead=0 negative=0 gap=1 empty=0 pause=3
+coordinated public A/V: distinct TIME segments, one receiver mapping, exact +/-37ms offset, pixels/PCM/DTS/duration/generation passed

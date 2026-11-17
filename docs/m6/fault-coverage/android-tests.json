@@ -1,0 +1,168 @@
+[
+  {
+    "backtrace": 1,
+    "command": [
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_frame_metadata_contract"
+    ],
+    "name": "frame_metadata_contract",
+    "properties": [
+      {
+        "name": "WORKING_DIRECTORY",
+        "value": "<linux-home>/dev/build/framelink-m6-arm64"
+      }
+    ]
+  },
+  {
+    "backtrace": 3,
+    "command": [
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_frame_metadata"
+    ],
+    "name": "frame_metadata",
+    "properties": [
+      {
+        "name": "TIMEOUT",
+        "value": 20.0
+      },
+      {
+        "name": "WORKING_DIRECTORY",
+        "value": "<linux-home>/dev/build/framelink-m6-arm64"
+      }
+    ]
+  },
+  {
+    "backtrace": 5,
+    "command": [
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_receive_queue"
+    ],
+    "name": "receive_queue",
+    "properties": [
+      {
+        "name": "LABELS",
+        "value": [
+          "gpu",
+          "integration"
+        ]
+      },
+      {
+        "name": "TIMEOUT",
+        "value": 30.0
+      },
+      {
+        "name": "WORKING_DIRECTORY",
+        "value": "<linux-home>/dev/build/framelink-m6-arm64"
+      }
+    ]
+  },
+  {
+    "backtrace": 7,
+    "command": [
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_gst_pool_policy",
+      "<linux-home>/dev/build/framelink-m6-arm64/libgstframelink.a"
+    ],
+    "name": "gst_pool_policy",
+    "properties": [
+      {
+        "name": "LABELS",
+        "value": [
+          "gst_video_regression"
+        ]
+      },
+      {
+        "name": "TIMEOUT",
+        "value": 30.0
+      },
+      {
+        "name": "WORKING_DIRECTORY",
+        "value": "<linux-home>/dev/build/framelink-m6-arm64"
+      }
+    ]
+  },
+  {
+    "backtrace": 9,
+    "command": [
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_av_memory_adversarial"
+    ],
+    "name": "av_memory_adversarial",
+    "properties": [
+      {
+        "name": "TIMEOUT",
+        "value": 30.0
+      },
+      {
+        "name": "WORKING_DIRECTORY",
+        "value": "<linux-home>/dev/build/framelink-m6-arm64"
+      }
+    ]
+  },
+  {
+    "backtrace": 11,
+    "command": [
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_gst_audio_sink",
+      "<linux-home>/dev/build/framelink-m6-arm64/libgstframelink.a"
+    ],
+    "name": "gst_audio_sink",
+    "properties": [
+      {
+        "name": "LABELS",
+        "value": [
+          "m5b_av"
+        ]
+      },
+      {
+        "name": "TIMEOUT",
+        "value": 20.0
+      },
+      {
+        "name": "WORKING_DIRECTORY",
+        "value": "<linux-home>/dev/build/framelink-m6-arm64"
+      }
+    ]
+  },
+  {
+    "backtrace": 13,
+    "command": [
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_gst_audio_source",
+      "<linux-home>/dev/build/framelink-m6-arm64/libgstframelink.a"
+    ],
+    "name": "gst_audio_source",
+    "properties": [
+      {
+        "name": "LABELS",
+        "value": [
+          "m5b_av"
+        ]
+      },
+      {
+        "name": "TIMEOUT",
+        "value": 20.0
+      },
+      {
+        "name": "WORKING_DIRECTORY",
+        "value": "<linux-home>/dev/build/framelink-m6-arm64"
+      }
+    ]
+  },
+  {
+    "backtrace": 15,
+    "command": [
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_gst_local_audio"
+    ],
+    "name": "gst_local_audio",
+    "properties": [
+      {
+        "name": "LABELS",
+        "value": [
+          "m5b_av"
+        ]
+      },
+      {
+        "name": "TIMEOUT",
+        "value": 10.0
+      },
+      {
+        "name": "WORKING_DIRECTORY",
+        "value": "<linux-home>/dev/build/framelink-m6-arm64"
+      }
+    ]
+  }
+]

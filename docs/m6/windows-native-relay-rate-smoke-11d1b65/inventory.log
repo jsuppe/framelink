@@ -1,0 +1,57 @@
+{
+  "backtraceGraph" : 
+  {
+    "commands" : 
+    [
+      "add_test"
+    ],
+    "files" : 
+    [
+      "<win-home>/dev/framelink-native-rate-native-smoke-11d1b65-20261112t0731z/CMakeLists.txt"
+    ],
+    "nodes" : 
+    [
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 1585,
+        "parent" : 0
+      }
+    ]
+  },
+  "kind" : "ctestInfo",
+  "tests" : 
+  [
+    {
+      "backtrace" : 1,
+      "command" : 
+      [
+        "<win-home>/AppData/Local/Microsoft/WindowsApps/python3.13.exe",
+        "<win-home>/dev/framelink-native-rate-native-smoke-11d1b65-20261112t0731z/tools/run_local_native_bench_smoke.py",
+        "<win-home>/dev/framelink-native-rate-native-smoke-11d1b65-20261112t0731z/build/Release/fl_gst_local_native_bench_win.exe",
+        "<win-home>/dev/framelink-native-rate-native-smoke-11d1b65-20261112t0731z/build/Release/gstframelink.dll"
+      ],
+      "config" : "Release",
+      "name" : "gst_local_native_bench_smoke_win",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 90.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "<win-home>/dev/framelink-native-rate-native-smoke-11d1b65-20261112t0731z/build"
+        }
+      ]
+    }
+  ],
+  "version" : 
+  {
+    "major" : 1,
+    "minor" : 0
+  }
+}

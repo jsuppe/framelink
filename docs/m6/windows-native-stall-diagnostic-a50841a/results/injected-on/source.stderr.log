@@ -1,0 +1,2 @@
+SOURCE_ACQUIRE n=62 expected_pts=1070333333 result=1 begin_ns=732939234481600 end_ns=732941234033400
+DIAGNOSTIC_FAILURE role=source thread=49564 at_ns=732941234123300 <win-home>\dev\framelink-native-stall-native-stall-a50841a-20261112t1353z\source\test\fl_gst_local_native_bench_win.cpp:90: acquireResult==FL_OK

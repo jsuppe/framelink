@@ -1,0 +1,444 @@
+[
+  {
+    "step": "build-linux",
+    "command": [
+      "cmake",
+      "--build",
+      "<linux-home>/dev/build/framelink-m6-linux",
+      "-j4",
+      "--target",
+      "fl_gst_shared_cpu_roundtrip",
+      "fl_gst_shared_cpu_source",
+      "fl_gst_shared_cpu_session",
+      "fl_gst_session_context",
+      "fl_gst_session_transport",
+      "fl_shared_cpu_channel",
+      "fl_shared_cpu_control",
+      "fl_shared_cpu_release",
+      "fl_shared_cpu_reconnect",
+      "fl_shared_cpu_eos",
+      "fl_gst_pool_policy",
+      "fl_gst_nv12",
+      "fl_gst_av_timeline",
+      "fl_gst_av_bin"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "linux",
+    "command": [
+      "ctest",
+      "--test-dir",
+      "<linux-home>/dev/build/framelink-m6-linux",
+      "-R",
+      "shared_cpu|memory_contract|session_contract|gst_session_context|gst_session_transport|gst_pool_policy|gst_nv12_roundtrip|gst_rgb10a2_roundtrip|gst_av_timeline|gst_av_bin",
+      "--output-on-failure"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "build-arm64",
+    "command": [
+      "cmake",
+      "--build",
+      "<linux-home>/dev/build/framelink-m6-arm64",
+      "-j4",
+      "--target",
+      "fl_gst_shared_cpu_roundtrip",
+      "fl_gst_shared_cpu_source",
+      "fl_gst_shared_cpu_session",
+      "fl_gst_session_context",
+      "fl_gst_session_transport",
+      "fl_shared_cpu_channel",
+      "fl_shared_cpu_control",
+      "fl_shared_cpu_release",
+      "fl_shared_cpu_reconnect",
+      "fl_shared_cpu_eos",
+      "fl_gst_pool_policy",
+      "fl_gst_nv12",
+      "fl_gst_av_timeline",
+      "fl_gst_av_bin"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "build-x86_64",
+    "command": [
+      "cmake",
+      "--build",
+      "<linux-home>/dev/build/framelink-m6-x86_64",
+      "-j4",
+      "--target",
+      "fl_gst_shared_cpu_roundtrip",
+      "fl_gst_shared_cpu_source",
+      "fl_gst_shared_cpu_session",
+      "fl_gst_session_context",
+      "fl_gst_session_transport",
+      "fl_shared_cpu_channel",
+      "fl_shared_cpu_control",
+      "fl_shared_cpu_release",
+      "fl_shared_cpu_reconnect",
+      "fl_shared_cpu_eos",
+      "fl_gst_pool_policy",
+      "fl_gst_nv12",
+      "fl_gst_av_timeline",
+      "fl_gst_av_bin"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "device-process",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "shell",
+      "ps -A -o PID,ARGS"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "mkdir",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "shell",
+      "mkdir -p /data/local/tmp/framelink-cpu-gst-sink"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "push-fl_gst_shared_cpu_roundtrip",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "push",
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_gst_shared_cpu_roundtrip",
+      "/data/local/tmp/framelink-cpu-gst-sink/"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "push-fl_gst_shared_cpu_source",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "push",
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_gst_shared_cpu_source",
+      "/data/local/tmp/framelink-cpu-gst-sink/"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "push-fl_gst_shared_cpu_session",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "push",
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_gst_shared_cpu_session",
+      "/data/local/tmp/framelink-cpu-gst-sink/"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "push-fl_gst_session_context",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "push",
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_gst_session_context",
+      "/data/local/tmp/framelink-cpu-gst-sink/"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "push-fl_gst_session_transport",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "push",
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_gst_session_transport",
+      "/data/local/tmp/framelink-cpu-gst-sink/"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "push-fl_shared_cpu_channel",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "push",
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_shared_cpu_channel",
+      "/data/local/tmp/framelink-cpu-gst-sink/"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "push-fl_shared_cpu_control",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "push",
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_shared_cpu_control",
+      "/data/local/tmp/framelink-cpu-gst-sink/"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "push-fl_shared_cpu_release",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "push",
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_shared_cpu_release",
+      "/data/local/tmp/framelink-cpu-gst-sink/"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "push-fl_shared_cpu_reconnect",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "push",
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_shared_cpu_reconnect",
+      "/data/local/tmp/framelink-cpu-gst-sink/"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "push-fl_shared_cpu_eos",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "push",
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_shared_cpu_eos",
+      "/data/local/tmp/framelink-cpu-gst-sink/"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "push-fl_gst_pool_policy",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "push",
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_gst_pool_policy",
+      "/data/local/tmp/framelink-cpu-gst-sink/"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "push-fl_gst_nv12",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "push",
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_gst_nv12",
+      "/data/local/tmp/framelink-cpu-gst-sink/"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "push-fl_gst_av_timeline",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "push",
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_gst_av_timeline",
+      "/data/local/tmp/framelink-cpu-gst-sink/"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "push-fl_gst_av_bin",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "push",
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_gst_av_bin",
+      "/data/local/tmp/framelink-cpu-gst-sink/"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "chmod",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "shell",
+      "chmod 755 /data/local/tmp/framelink-cpu-gst-sink/fl_*"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "android-fl_gst_shared_cpu_roundtrip",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "shell",
+      "cd /data/local/tmp/framelink-cpu-gst-sink && ./fl_gst_shared_cpu_roundtrip static"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "android-fl_gst_shared_cpu_source",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "shell",
+      "cd /data/local/tmp/framelink-cpu-gst-sink && ./fl_gst_shared_cpu_source static"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "android-fl_gst_shared_cpu_session",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "shell",
+      "cd /data/local/tmp/framelink-cpu-gst-sink && ./fl_gst_shared_cpu_session static"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "android-fl_gst_session_context",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "shell",
+      "cd /data/local/tmp/framelink-cpu-gst-sink && ./fl_gst_session_context static"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "android-fl_gst_session_transport",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "shell",
+      "cd /data/local/tmp/framelink-cpu-gst-sink && ./fl_gst_session_transport static"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "android-fl_shared_cpu_channel",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "shell",
+      "cd /data/local/tmp/framelink-cpu-gst-sink && ./fl_shared_cpu_channel static"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "android-fl_shared_cpu_control",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "shell",
+      "cd /data/local/tmp/framelink-cpu-gst-sink && ./fl_shared_cpu_control static"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "android-fl_shared_cpu_release",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "shell",
+      "cd /data/local/tmp/framelink-cpu-gst-sink && ./fl_shared_cpu_release static"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "android-fl_shared_cpu_reconnect",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "shell",
+      "cd /data/local/tmp/framelink-cpu-gst-sink && ./fl_shared_cpu_reconnect static"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "android-fl_shared_cpu_eos",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "shell",
+      "cd /data/local/tmp/framelink-cpu-gst-sink && ./fl_shared_cpu_eos static"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "android-fl_gst_pool_policy",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "shell",
+      "cd /data/local/tmp/framelink-cpu-gst-sink && ./fl_gst_pool_policy static"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "android-fl_gst_nv12",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "shell",
+      "cd /data/local/tmp/framelink-cpu-gst-sink && ./fl_gst_nv12 static"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "android-fl_gst_av_timeline",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "shell",
+      "cd /data/local/tmp/framelink-cpu-gst-sink && ./fl_gst_av_timeline static"
+    ],
+    "exit": 0
+  },
+  {
+    "step": "android-fl_gst_av_bin",
+    "command": [
+      "<linux-home>/Android/Sdk/platform-tools/adb",
+      "-s",
+      "A06B4AABFB07983",
+      "shell",
+      "cd /data/local/tmp/framelink-cpu-gst-sink && ./fl_gst_av_bin static"
+    ],
+    "exit": 0
+  }
+]

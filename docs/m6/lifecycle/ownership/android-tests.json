@@ -1,0 +1,131 @@
+[
+  {
+    "backtrace": 1,
+    "command": [
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_read_lease_egl"
+    ],
+    "name": "read_lease_egl",
+    "properties": [
+      {
+        "name": "SKIP_RETURN_CODE",
+        "value": 77
+      },
+      {
+        "name": "TIMEOUT",
+        "value": 20.0
+      },
+      {
+        "name": "WORKING_DIRECTORY",
+        "value": "<linux-home>/dev/build/framelink-m6-arm64"
+      }
+    ]
+  },
+  {
+    "backtrace": 3,
+    "command": [
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_read_lease_egl",
+      "--producer-death"
+    ],
+    "name": "read_lease_egl_producer_death",
+    "properties": [
+      {
+        "name": "SKIP_RETURN_CODE",
+        "value": 77
+      },
+      {
+        "name": "TIMEOUT",
+        "value": 20.0
+      },
+      {
+        "name": "WORKING_DIRECTORY",
+        "value": "<linux-home>/dev/build/framelink-m6-arm64"
+      }
+    ]
+  },
+  {
+    "backtrace": 5,
+    "command": [
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_read_leases"
+    ],
+    "name": "read_leases",
+    "properties": [
+      {
+        "name": "SKIP_RETURN_CODE",
+        "value": 77
+      },
+      {
+        "name": "TIMEOUT",
+        "value": 20.0
+      },
+      {
+        "name": "WORKING_DIRECTORY",
+        "value": "<linux-home>/dev/build/framelink-m6-arm64"
+      }
+    ]
+  },
+  {
+    "backtrace": 7,
+    "command": [
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_reconnect_held"
+    ],
+    "name": "reconnect_held",
+    "properties": [
+      {
+        "name": "TIMEOUT",
+        "value": 20.0
+      },
+      {
+        "name": "WORKING_DIRECTORY",
+        "value": "<linux-home>/dev/build/framelink-m6-arm64"
+      }
+    ]
+  },
+  {
+    "backtrace": 9,
+    "command": [
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_gst_policy_generation",
+      "<linux-home>/dev/build/framelink-m6-arm64/libgstframelink.a"
+    ],
+    "name": "gst_policy_generation",
+    "properties": [
+      {
+        "name": "LABELS",
+        "value": [
+          "gst_video_regression"
+        ]
+      },
+      {
+        "name": "TIMEOUT",
+        "value": 20.0
+      },
+      {
+        "name": "WORKING_DIRECTORY",
+        "value": "<linux-home>/dev/build/framelink-m6-arm64"
+      }
+    ]
+  },
+  {
+    "backtrace": 11,
+    "command": [
+      "<linux-home>/dev/build/framelink-m6-arm64/fl_gst_av_qualification",
+      "<linux-home>/dev/build/framelink-m6-arm64/libgstframelink.a"
+    ],
+    "name": "gst_av_qualification",
+    "properties": [
+      {
+        "name": "LABELS",
+        "value": [
+          "m5b_av"
+        ]
+      },
+      {
+        "name": "TIMEOUT",
+        "value": 300.0
+      },
+      {
+        "name": "WORKING_DIRECTORY",
+        "value": "<linux-home>/dev/build/framelink-m6-arm64"
+      }
+    ]
+  }
+]

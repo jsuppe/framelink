@@ -1,0 +1,18 @@
+Internal ctest changing into directory: <linux-home>/dev/build/framelink-m6-linux
+Test project <linux-home>/dev/build/framelink-m6-linux
+    Start  46: gst_native_producer_linux
+1/4 Test  #46: gst_native_producer_linux ........   Passed    0.09 sec
+    Start  47: gst_native_source
+2/4 Test  #47: gst_native_source ................   Passed    0.46 sec
+    Start 121: gst_session_context
+3/4 Test #121: gst_session_context ..............   Passed    0.02 sec
+    Start 126: gst_shared_cpu_av
+4/4 Test #126: gst_shared_cpu_av ................   Passed    0.82 sec
+
+100% tests passed, 0 tests failed out of 4
+
+Label Time Summary:
+gst_video_regression    =   0.56 sec*proc (2 tests)
+m5b_av                  =   0.02 sec*proc (1 test)
+
+Total Test time (real) =   1.40 sec

@@ -1,0 +1,78 @@
+[
+  {
+    "policy": "producer",
+    "stdout": "file",
+    "error": null,
+    "cells": [
+      {
+        "format": "BGRA",
+        "count": 100,
+        "missing": [],
+        "probe_to_pull_max_ms": 2.3529
+      },
+      {
+        "format": "NV12",
+        "count": 100,
+        "missing": [],
+        "probe_to_pull_max_ms": 1.8684
+      }
+    ]
+  },
+  {
+    "policy": "producer",
+    "stdout": "ram",
+    "error": null,
+    "cells": [
+      {
+        "format": "BGRA",
+        "count": 100,
+        "missing": [],
+        "probe_to_pull_max_ms": 1.8697
+      },
+      {
+        "format": "NV12",
+        "count": 100,
+        "missing": [],
+        "probe_to_pull_max_ms": 1.864
+      }
+    ]
+  },
+  {
+    "policy": "audio-coordinated",
+    "stdout": "file",
+    "error": null,
+    "cells": [
+      {
+        "format": "BGRA",
+        "count": 100,
+        "missing": [],
+        "probe_to_pull_max_ms": 2.3463
+      },
+      {
+        "format": "NV12",
+        "count": 100,
+        "missing": [],
+        "probe_to_pull_max_ms": 1.8604
+      }
+    ]
+  },
+  {
+    "policy": "audio-coordinated",
+    "stdout": "ram",
+    "error": null,
+    "cells": [
+      {
+        "format": "BGRA",
+        "count": 100,
+        "missing": [],
+        "probe_to_pull_max_ms": 1.8658
+      },
+      {
+        "format": "NV12",
+        "count": 100,
+        "missing": [],
+        "probe_to_pull_max_ms": 2.1603
+      }
+    ]
+  }
+]

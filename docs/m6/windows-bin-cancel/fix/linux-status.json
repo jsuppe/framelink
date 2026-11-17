@@ -1,0 +1,31 @@
+{
+  "started": "2026-11-12T02:45:42.083642+00:00",
+  "build": {
+    "command": [
+      "cmake",
+      "--build",
+      "<linux-home>/dev/build/framelink-m6-event-linux-20261112",
+      "--target",
+      "fl_gst_event_channel",
+      "fl_gst_session_context",
+      "fl_gst_session_transport",
+      "fl_gst_av_bin",
+      "gstframelink",
+      "-j",
+      "4"
+    ],
+    "exit": 0
+  },
+  "tests": {
+    "command": [
+      "ctest",
+      "--test-dir",
+      "<linux-home>/dev/build/framelink-m6-event-linux-20261112",
+      "-R",
+      "^gst_(event_channel|session_context|session_transport|av_bin)$",
+      "--output-on-failure"
+    ],
+    "exit": 0
+  },
+  "ended": "2026-11-12T02:46:11.899710+00:00"
+}

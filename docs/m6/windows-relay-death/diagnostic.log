@@ -1,0 +1,14 @@
+producer death (raw): explicit failure, no synthetic END/EOS, held pixels intact, no premature lease completion, bounded native drain
+producer death (GstMemory): explicit failure, no synthetic END/EOS, held pixels intact, no premature lease completion, bounded native drain
+producer start
+producer authenticated
+relay start
+relay downstream authenticated
+relay upstream authenticated
+frame 0 forwarded=0 session=0
+producer death: event result=2 elapsed_us=11548 pending=1
+relay start
+relay downstream authenticated
+relay upstream authenticated
+frame 0 forwarded=0 session=0
+producer death: event result=2 elapsed_us=9723 pending=1

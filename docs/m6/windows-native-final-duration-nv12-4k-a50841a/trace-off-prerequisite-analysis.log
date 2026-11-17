@@ -1,0 +1,90 @@
+{
+  "scope": "synthetic authenticated transport; explicit upload/verification copies; no physical playback or isolated-hop budget claim",
+  "budget_ns": 34000000,
+  "roles": {
+    "source": {
+      "video": 150,
+      "pcm_frames": 240000,
+      "resource_slopes_per_min": {},
+      "cpu_percent": 53.337694458979016
+    },
+    "relay": {
+      "video": 150,
+      "pcm_frames": 240000,
+      "resource_slopes_per_min": {},
+      "cpu_percent": 8.80657040228827
+    },
+    "receiver": {
+      "video": 150,
+      "pcm_frames": 240000,
+      "resource_slopes_per_min": {},
+      "cpu_percent": 54.29152580064083
+    }
+  },
+  "timing_ms": {
+    "scheduled_to_final_arrival": {
+      "p50": 3.970767,
+      "p95": 5.2841,
+      "p99": 5.513734,
+      "max": 5.534367
+    },
+    "source_marker_to_relay": {
+      "p50": 2.0687,
+      "p95": 2.9731,
+      "p99": 3.1031,
+      "max": 3.8262
+    },
+    "source_marker_to_final": {
+      "p50": 3.5483,
+      "p95": 4.8248,
+      "p99": 5.0789,
+      "max": 5.1033
+    },
+    "source_acquire_call": {
+      "p50": 0.0006,
+      "p95": 0.0007,
+      "p99": 0.0015,
+      "max": 0.0044
+    },
+    "source_upload_call": {
+      "p50": 0.5334,
+      "p95": 0.6936,
+      "p99": 1.163,
+      "max": 1.3316
+    },
+    "source_submit_call": {
+      "p50": 0.0685,
+      "p95": 0.0917,
+      "p99": 0.0994,
+      "max": 0.1269
+    },
+    "relay_acquire_to_record": {
+      "p50": 0.0371,
+      "p95": 0.0483,
+      "p99": 0.0588,
+      "max": 0.0728
+    },
+    "relay_forward_call": {
+      "p50": 0.0366,
+      "p95": 0.0478,
+      "p99": 0.0582,
+      "max": 0.0706
+    },
+    "final_acquire_to_completion": {
+      "p50": 2.0247,
+      "p95": 2.0377,
+      "p99": 2.5265,
+      "max": 2.531
+    },
+    "audio_scheduled_to_final": {
+      "p50": 0.1537,
+      "p95": 0.203,
+      "p99": 0.2535,
+      "max": 2.2534
+    }
+  },
+  "pass_all": true,
+  "video_arrival_misses": 0,
+  "audio_arrival_misses": 0,
+  "trace_checked": false
+}

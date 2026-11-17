@@ -19,6 +19,11 @@ struct FrameLinkD3DProducer : std::enable_shared_from_this<FrameLinkD3DProducer>
     flChannel* channel;
     flChannelInfo info{};
     GstD3D11Device* device=nullptr;
+    // Cache only measured layout, never a GstMemory or reservation. size=0
+    // wrapping probes temporary staging storage; repeating it on every frame
+    // creates needless driver work. Ring generations invalidate recycled pointers.
+    struct Layout { uint64_t generation=0; ID3D11Texture2D* texture=nullptr; gsize size=0; guint pitch=0; };
+    Layout layouts[FL_MAX_POOL_SIZE]{};
     std::mutex mutex;
     std::atomic<bool> active{true};
     explicit FrameLinkD3DProducer(flChannel* ch):channel(ch){
@@ -42,11 +47,22 @@ struct FrameLinkD3DProducer : std::enable_shared_from_this<FrameLinkD3DProducer>
         }
         uint64_t ref=0;
         if(flRetainBufferReference(channel,&b,&ref)!=FL_OK){flCancelBuffer(channel,&b);return nullptr;}
-        auto* mem=gst_d3d11_allocator_alloc_wrapped(nullptr,device,flImageD3D11(b.image),0,nullptr,nullptr);
-        guint pitch=0;
-        if(!mem || !gst_d3d11_memory_get_resource_stride(GST_D3D11_MEMORY_CAST(mem),&pitch) || !pitch || pitch>G_MAXINT){
-            if(mem)gst_memory_unref(mem);flCancelBuffer(channel,&b);flReleaseBufferReference(channel,ref);return nullptr;
+        if(flQuery(channel,&info)!=FL_OK || b.slot>=FL_MAX_POOL_SIZE){
+            flCancelBuffer(channel,&b);flReleaseBufferReference(channel,ref);return nullptr;
         }
+        auto* texture=flImageD3D11(b.image);
+        auto& layout=layouts[b.slot];
+        if(layout.generation!=info.generation || layout.texture!=texture)layout={};
+        auto* mem=gst_d3d11_allocator_alloc_wrapped(nullptr,device,texture,layout.size,nullptr,nullptr);
+        if(!mem){flCancelBuffer(channel,&b);flReleaseBufferReference(channel,ref);return nullptr;}
+        if(!layout.size){
+            guint pitch=0;
+            if(!gst_d3d11_memory_get_resource_stride(GST_D3D11_MEMORY_CAST(mem),&pitch) || !pitch || pitch>G_MAXINT || !mem->size){
+                gst_memory_unref(mem);flCancelBuffer(channel,&b);flReleaseBufferReference(channel,ref);return nullptr;
+            }
+            layout={info.generation,texture,mem->size,pitch};
+        }
+        const guint pitch=layout.pitch;
         auto* reservation=new FrameLinkD3DReservation{shared_from_this(),b,ref,false,mem->offset,mem->size};
         gst_mini_object_set_qdata(GST_MINI_OBJECT(mem),key(),reservation,[](gpointer p){delete (FrameLinkD3DReservation*)p;});
         // Native GPU access uses the original allocation. Explicit CPU maps are
