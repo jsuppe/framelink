@@ -1554,6 +1554,8 @@ static GstFlowReturn srcCreateImpl(GstPushSrc* push, GstBuffer** outbuf) {
         self->haveTimestamp = FALSE;
 #ifdef _WIN32
         srcDropStaging(self); // stale size/format; rebuilt below
+#else
+        srcDropCpuOutput(self);
 #endif
         GstCaps* caps = srcMakeCaps(self);
         const gboolean ok = gst_base_src_set_caps(GST_BASE_SRC(self), caps);
@@ -1582,11 +1584,9 @@ static GstFlowReturn srcCreateImpl(GstPushSrc* push, GstBuffer** outbuf) {
     {
 {
     gsttrace::Scope allocateTrace("gst.cpu_output_allocate",gsttrace::id(self->channel));
-#ifdef _WIN32
+    // Bounded reuse on every platform: a fresh output buffer costs a page
+    // fault per page on first write (docs/m6/cpu-path/cpu-output-reuse-20261118).
     buf = srcCpuOutputBuffer(self, outputInfo.size);
-#else
-    buf = gst_buffer_new_allocate(NULL, outputInfo.size, NULL);
-#endif
     }
     if (!buf) { srcReleaseFrame(self, &frame); return trace.result(GST_FLOW_ERROR); }
     GstMapInfo map;
@@ -1665,7 +1665,10 @@ static GstFlowReturn srcCreateImpl(GstPushSrc* push, GstBuffer** outbuf) {
         guint64 stride = 0;
         if (flImageMap(frame.image, &pixels, &stride) == FL_OK) {
             // WC-aware copy: see wcCopy - a plain memcpy here ran at 10 MB/s.
+            {
+            gsttrace::Scope copyTrace("gst.cpu_copy_source_duration",gsttrace::id(self->channel));
             wcCopy(map.data, (gsize)w * 4, (const guint8*)pixels, (gsize)stride, w, h);
+            }
             gsttrace::payload("gst.cpu_copy_source",gsttrace::id(self->channel),(uint64_t)w*h*4,FL_MEMORY_COPY);
             flImageUnmap(frame.image);
             filled = TRUE;

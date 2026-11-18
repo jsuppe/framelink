@@ -1,0 +1,8 @@
+before (0f4715a1): bench RGBA 1920x1080 CPU readback receiver: frames=120 first=17.081 p50=21.618 p90=24.650 p99=26.226 max=26.515 ms
+before (0f4715a1): bench RGBA 3840x2160 CPU readback receiver: frames=120 first=55.244 p50=49.705 p90=52.448 p99=58.999 max=59.084 ms
+after: bench RGBA 1920x1080 CPU readback receiver: frames=120 first=17.477 p50=5.157 p90=6.629 p99=8.887 max=15.586 ms
+after: bench RGBA 3840x2160 CPU readback receiver: frames=120 first=63.605 p50=11.280 p90=12.009 p99=17.476 max=39.465 ms
+after: bench RGBA 1920x1080 CPU readback receiver: frames=120 first=27.635 p50=4.893 p90=6.335 p99=7.460 max=16.421 ms
+after: bench RGBA 3840x2160 CPU readback receiver: frames=120 first=59.808 p50=11.127 p90=12.986 p99=17.456 max=39.331 ms
+before (0f4715a1): bench RGBA 1920x1080 CPU readback receiver: frames=120 first=20.829 p50=20.989 p90=23.614 p99=26.294 max=27.543 ms
+before (0f4715a1): bench RGBA 3840x2160 CPU readback receiver: frames=120 first=54.653 p50=48.768 p90=59.390 p99=69.450 max=71.412 ms

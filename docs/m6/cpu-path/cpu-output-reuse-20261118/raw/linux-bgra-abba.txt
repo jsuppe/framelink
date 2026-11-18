@@ -1,0 +1,10 @@
+before (0f4715a1): bench BGRA 1920x1080 GPU-staged readback receiver: frames=120 first=120.692 p50=3.091 p90=3.222 p99=4.887 max=5.818 ms
+before (0f4715a1): bench BGRA 3840x2160 GPU-staged readback receiver: frames=120 first=81.298 p50=11.661 p90=12.044 p99=12.650 max=15.229 ms
+after: bench BGRA 1920x1080 GPU-staged readback receiver: frames=120 first=72.413 p50=3.091 p90=5.094 p99=5.448 max=6.349 ms
+after: bench BGRA 3840x2160 GPU-staged readback receiver: frames=120 first=79.327 p50=5.477 p90=5.654 p99=6.086 max=14.168 ms
+after: bench BGRA 1920x1080 GPU-staged readback receiver: frames=120 first=67.126 p50=3.050 p90=3.170 p99=3.720 max=5.560 ms
+after: bench BGRA 3840x2160 GPU-staged readback receiver: frames=120 first=78.659 p50=5.494 p90=5.763 p99=6.214 max=14.476 ms
+before (0f4715a1): bench BGRA 1920x1080 GPU-staged readback receiver: frames=120 first=75.122 p50=3.088 p90=3.217 p99=4.730 max=6.001 ms
+before (0f4715a1): bench BGRA 3840x2160 GPU-staged readback receiver: frames=120 first=77.826 p50=11.449 p90=11.878 p99=12.474 max=15.327 ms
+before (0f4715a1): bench BGRA 1920x1080 CPU readback receiver: frames=30 first=122.226 p50=674.066 p90=697.739 p99=698.393 max=698.393 ms
+after: bench BGRA 1920x1080 CPU readback receiver: frames=30 first=703.354 p50=705.130 p90=726.139 p99=752.030 max=752.030 ms
