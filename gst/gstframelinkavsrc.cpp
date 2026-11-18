@@ -60,7 +60,7 @@ typedef struct _GstFrameLinkAvSrc {
  flD3D11DeviceOwner* deviceOwner;
 #endif
  gchar*sessionPath,*tracks,*videoFormat,*audioFormat;
- guint width,height,fpsN,fpsD,rate,channels,connectMs,idleMs,audioQueueMs,videoQueue,videoPool,latencyMs;gboolean nativeMemory;
+ guint width,height,fpsN,fpsD,rate,channels,connectMs,idleMs,audioQueueMs,videoQueue,videoPool,latencyMs;gboolean nativeMemory,gpuReadback;
  GstElement*video,*audio;GstPad*videoPad,*audioPad;
  FlGstSession*session;gboolean local,sharedCpu,policyBound,nativeAdopted;
  GstFrameLinkMemoryPolicy nativeCandidate;gboolean candidateSet,nativeUsed,nativePoolReceiver;
@@ -77,7 +77,7 @@ static GstStaticPadTemplate audioTemplate=GST_STATIC_PAD_TEMPLATE("audio_src",GS
  GST_STATIC_CAPS("audio/x-raw,format={S16LE,F32LE},layout=interleaved,rate=[8000,192000],channels=[1,2]"));
 
 enum {PROP_0,PROP_SESSION,PROP_TRACKS,PROP_VIDEO_FORMAT,PROP_WIDTH,PROP_HEIGHT,PROP_FRAMERATE,PROP_AUDIO_FORMAT,PROP_RATE,PROP_CHANNELS,
- PROP_CONNECT,PROP_IDLE,PROP_AUDIO_QUEUE,PROP_VIDEO_QUEUE,PROP_VIDEO_POOL,PROP_LATENCY,PROP_NATIVE,PROP_SHARED_CPU,PROP_ID,PROP_GENERATION,PROP_AUDIO_ID,PROP_VIDEO_ID};
+ PROP_CONNECT,PROP_IDLE,PROP_AUDIO_QUEUE,PROP_VIDEO_QUEUE,PROP_VIDEO_POOL,PROP_LATENCY,PROP_NATIVE,PROP_SHARED_CPU,PROP_GPU_READBACK,PROP_ID,PROP_GENERATION,PROP_AUDIO_ID,PROP_VIDEO_ID};
 
 static bool wantVideo(GstFrameLinkAvSrc*s){return s->tracks&&(!strcmp(s->tracks,"av")||!strcmp(s->tracks,"video"));}
 static bool wantAudio(GstFrameLinkAvSrc*s){return s->tracks&&(!strcmp(s->tracks,"av")||!strcmp(s->tracks,"audio"));}
@@ -218,6 +218,9 @@ static void rebuild(GstFrameLinkAvSrc*s){
 // Inner elements carry the negotiated geometry and PCM shape in both modes.
 static void configureChildren(GstFrameLinkAvSrc*s){
  if(s->video&&!s->policyBound)g_object_set(s->video,"width",gint(s->width),"height",gint(s->height),"format",s->videoFormat,"native-memory",s->nativeMemory,nullptr);
+#ifdef FL_GST_EGL_READBACK
+ if(s->video&&!s->policyBound)g_object_set(s->video,"gpu-readback",s->gpuReadback,nullptr);
+#endif
  if(s->audio)g_object_set(s->audio,"format",s->audioFormat,"rate",s->rate,"channels",s->channels,"audio-queue-ms",s->audioQueueMs,
   "connect-timeout-ms",s->connectMs,"idle-timeout-ms",s->idleMs,nullptr);
 }
@@ -229,6 +232,8 @@ static GstStateChangeReturn changeState(GstElement*element,GstStateChange transi
   if((s->candidateSet||s->ownerSelected)&&s->nativeUsed){GST_ELEMENT_ERROR(s,RESOURCE,SETTINGS,("local native bins are single-session; create a new bin for reconnect"),(nullptr));return GST_STATE_CHANGE_FAILURE;}
 
   if(s->sharedCpu&&(!wantVideo(s)||s->nativeMemory)){GST_ELEMENT_ERROR(s,RESOURCE,SETTINGS,("shared-cpu requires a video track and forbids native memory"),(nullptr));return GST_STATE_CHANGE_FAILURE;}
+  // GPU staging serves only the negotiated readback receiver (COPY|READBACK).
+  if(s->gpuReadback&&(!s->candidateSet||s->nativeMemory||s->sharedCpu)){GST_ELEMENT_ERROR(s,RESOURCE,SETTINGS,("gpu-readback requires the local native readback candidate"),(nullptr));return GST_STATE_CHANGE_FAILURE;}
 #if !defined(__linux__) && !defined(_WIN32)
   if(s->sharedCpu&&s->sessionPath&&*s->sessionPath){GST_ELEMENT_ERROR(s,RESOURCE,SETTINGS,("local shared-cpu discovery unavailable on this platform"),(nullptr));return GST_STATE_CHANGE_FAILURE;}
 #endif
@@ -336,7 +341,7 @@ static gboolean setLocalNativeProfile(GstFrameLinkAvSrc*s,GstFrameLinkMemoryPoli
  if(policy->version!=1||policy->reserved||policy->sessionGeneration||
     flMemoryEvaluateBoundary(policy->requirements,policy->paths,2,decisions)!=FL_MEMORY_OK||
     policy->paths[0].resourceType!=FL_GST_LOCAL_NATIVE_RESOURCE||policy->paths[1].resourceType!=FL_GST_LOCAL_NATIVE_RESOURCE||
-    policy->paths[0].operations||(!nativeReceiver&&!readbackReceiver)||
+    policy->paths[0].operations||(!nativeReceiver&&!readbackReceiver)||(s->gpuReadback&&!readbackReceiver)||
     (policy->paths[0].supportedUsage!=FL_MEMORY_GPU_SAMPLE&&
      policy->paths[0].supportedUsage!=(FL_MEMORY_GPU_SAMPLE|FL_MEMORY_GPU_RENDER))||bool(s->nativeMemory)!=nativeReceiver)return FALSE;
  s->nativeCandidate=*policy;s->nativePoolReceiver=poolReceiver;s->candidateSet=TRUE;return TRUE;
@@ -378,6 +383,7 @@ static void setProperty(GObject*object,guint id,const GValue*value,GParamSpec*sp
  case PROP_AUDIO_QUEUE:s->audioQueueMs=g_value_get_uint(value);break;case PROP_VIDEO_QUEUE:s->videoQueue=g_value_get_uint(value);break;
  case PROP_VIDEO_POOL:s->videoPool=g_value_get_uint(value);break;case PROP_LATENCY:s->latencyMs=g_value_get_uint(value);break;
  case PROP_NATIVE:s->nativeMemory=g_value_get_boolean(value);break;
+ case PROP_GPU_READBACK:s->gpuReadback=g_value_get_boolean(value);break;
  default:G_OBJECT_WARN_INVALID_PROPERTY_ID(object,id,spec);
  }
 }
@@ -397,6 +403,7 @@ static void getProperty(GObject*object,guint id,GValue*value,GParamSpec*spec){
  case PROP_AUDIO_QUEUE:g_value_set_uint(value,s->audioQueueMs);break;case PROP_VIDEO_QUEUE:g_value_set_uint(value,s->videoQueue);break;
  case PROP_VIDEO_POOL:g_value_set_uint(value,s->videoPool);break;case PROP_LATENCY:g_value_set_uint(value,s->latencyMs);break;
  case PROP_NATIVE:g_value_set_boolean(value,s->nativeMemory);break;
+ case PROP_GPU_READBACK:g_value_set_boolean(value,s->gpuReadback);break;
  case PROP_GENERATION:g_value_set_uint64(value,c.generation);break;
  case PROP_AUDIO_ID:g_value_set_uint(value,c.audioTrackId);break;case PROP_VIDEO_ID:g_value_set_uint(value,c.videoTrackId);break;
  case PROP_ID:{gchar text[33]{};if(c.generation)for(unsigned i=0;i<16;i++)g_snprintf(text+2*i,3,"%02x",c.sessionId.bytes[i]);g_value_set_string(value,c.generation?text:nullptr);break;}
@@ -421,7 +428,7 @@ static void finalize(GObject*object){
 static void gst_framelink_av_src_init(GstFrameLinkAvSrc*s){
  s->tracks=g_strdup("av");s->videoFormat=g_strdup("BGRA");s->audioFormat=g_strdup("S16LE");
  s->width=1280;s->height=720;s->fpsN=30;s->fpsD=1;s->rate=48000;s->channels=2;
- s->connectMs=15000;s->idleMs=15000;s->audioQueueMs=80;s->videoQueue=2;s->videoPool=8;s->latencyMs=0;s->nativeMemory=FALSE;
+ s->connectMs=15000;s->idleMs=15000;s->audioQueueMs=80;s->videoQueue=2;s->videoPool=8;s->latencyMs=0;s->nativeMemory=FALSE;s->gpuReadback=FALSE;
  s->shared=new Shared;
  rebuild(s);
 }
@@ -451,6 +458,11 @@ static void gst_framelink_av_src_class_init(GstFrameLinkAvSrcClass*klass){
  g_object_class_install_property(o,PROP_LATENCY,g_param_spec_uint("latency-ms","Latency","Explicit pipeline latency with session=; zero for transport, set required final-playback buffering explicitly",0,10000,0,rw));
  g_object_class_install_property(o,PROP_NATIVE,g_param_spec_boolean("native-memory","Native memory","Output platform GPU memory (DMABuf, D3D11Memory, FrameLinkAHardwareBuffer) from the ring; with session= the ring defers read release",FALSE,rw));
  g_object_class_install_property(o,PROP_SHARED_CPU,g_param_spec_boolean("shared-cpu","Shared CPU","Explicit CPU video copy path; broker context or current-user session= discovery, no native fallback",FALSE,rw));
+ // Only builds with the Linux EGL staging adapter have this property.
+#ifdef FL_GST_EGL_READBACK
+ g_object_class_install_property(o,PROP_GPU_READBACK,g_param_spec_boolean("gpu-readback","Explicit GPU readback",
+  "Local native readback receiver only: stage BGRA/RGBA DMA-BUF frames through a GPU copy into CPU output; requires negotiated COPY|READBACK; no fallback",FALSE,rw));
+#endif
  g_object_class_install_property(o,PROP_ID,g_param_spec_string("session-id","Session identity","Negotiated identity, not a secret",nullptr,ro));
  g_object_class_install_property(o,PROP_GENERATION,g_param_spec_uint64("generation","Generation","Negotiated session generation",0,G_MAXUINT64,0,ro));
  g_object_class_install_property(o,PROP_AUDIO_ID,g_param_spec_uint("audio-track-id","Audio track","Negotiated audio identity, zero when absent",0,G_MAXUINT,0,ro));

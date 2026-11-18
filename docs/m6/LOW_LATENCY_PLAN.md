@@ -208,6 +208,7 @@ Receive-depth gate evidence: [review and platform tests](receive-depth/README.md
 - [x] 8a Reproduce Linux slow/bimodal readback with allocation/cache diagnostics. Evidence: [CPU-path investigation](cpu-path/README.md); no production repair/target-rate claim.
 - [ ] 8b Compare cached shared-memory, streaming and explicit staging choices;
       implement negotiated CPU-efficient path without mislabeling copies.
+      Progress 2026-11-18 ([evidence](cpu-path/cpu-consumer-20261118/README.md)): GPU producer to CPU consumer in A/V sessions. Linux `framelinkavsrc gpu-readback` (BGRA 1080p 689 to 3.1 ms, 4K 11.2 ms; direct path delivers no 4K frame); Android cached `FL_MAP_CPU` rings (1080p 34 to 20.6 ms, 4K 104 to 43 ms). Open: the Android readback receiver's remaining copy-out cost (still above budget).
 - [ ] 8c Validate pixels, planes, visibility, lifetime and A/V timing; measure
       target-rate CPU consumption on all three platforms where supported.
 

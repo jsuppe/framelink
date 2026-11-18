@@ -379,7 +379,9 @@ per-platform state. Windows readiness is the
   sustain 30fps there. Allocate CPU-consumed rings in cached system memory (or
   use streaming reads), qualify throughput per platform and publish budgets.
   *Windows:* the negotiated shared-CPU path is qualified at the target sizes.
-  *Linux/Android:* diagnosed (8a); repair and qualification (8b/8c) not started.
+  *Linux/Android:* diagnosed (8a). 8b in progress: GPU-producer repairs on
+  2026-11-18 ([evidence](m6/cpu-path/cpu-consumer-20261118/README.md)); the
+  Android readback receiver is still above budget. Qualification (8c) not started.
 - [ ] **M6.9 Native producer in coordinated sessions (found in M5b.12):** the
   coordinated producer elements copy system-memory input into the ring; wire
   `framelinksink native-memory=true` (M5a policy binding, readiness fences)
