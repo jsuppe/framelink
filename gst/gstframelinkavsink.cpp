@@ -72,6 +72,9 @@ G_DEFINE_TYPE(GstFrameLinkAvSink,gst_framelink_av_sink,GST_TYPE_BIN)
 
 #ifdef FL_GST_D3D11
 #define FL_AV_SINK_NATIVE_CAPS ";video/x-raw(memory:D3D11Memory),format={BGRA,RGBA,NV12,RGB10A2_LE}"
+#elif defined(FL_GST_DMABUF)
+// Same native formats as framelinksink on desktop Linux.
+#define FL_AV_SINK_NATIVE_CAPS ";video/x-raw(memory:DMABuf),format={BGRA,RGBA,NV12,RGB10A2_LE}"
 #else
 #define FL_AV_SINK_NATIVE_CAPS ""
 #endif
@@ -169,7 +172,7 @@ static void startWorker(GstFrameLinkAvSink*s){
  s->worker=new std::thread([s,caps,path]{
   GError*error=nullptr;flChannel*channel=nullptr;
   bool ok=false;
-#if defined(_WIN32)
+#ifdef FL_GST_LOCAL_NATIVE_SESSION
   if(s->candidateSet)ok=fl_gst_session_open_local_native_epoch(s->session,TRUE,path.c_str(),&caps,s->videoQueue,s->videoPool,s->audioQueueMs,s->connectMs,s->idleMs,
    &s->nativeCandidate,&s->shared->bound,&channel,chooseEpoch,s,s->cancel,&error);
   else
@@ -366,8 +369,21 @@ static gboolean setLocalDeviceOwner(GstFrameLinkAvSink*s,gpointer value){
 #endif
 }
 
+#if defined(__ANDROID__) || defined(FL_GST_DMABUF)
+// Explicit native producer actions of the inner framelinksink. DMA-BUF and
+// AHardwareBuffer writers must hand their ready fence to the sink before
+// publication; without these the bin's native video track cannot be fed.
+static gboolean setNativeReadyFd(GstFrameLinkAvSink*s,GstBuffer*buffer,gint fd){
+ if(!s->video||!s->nativeMemory)return FALSE;
+ gboolean accepted=FALSE;g_signal_emit_by_name(s->video,"set-native-ready-fd",buffer,fd,&accepted);return accepted;
+}
+static gpointer acquireNativeBuffer(GstFrameLinkAvSink*s,guint timeoutMs){
+ if(!s->video||!s->nativeMemory)return nullptr;
+ gpointer buffer=nullptr;g_signal_emit_by_name(s->video,"acquire-native-buffer",timeoutMs,&buffer);return buffer;
+}
+#endif
 static gboolean setLocalNativeCandidate(GstFrameLinkAvSink*s,GstFrameLinkMemoryPolicy*policy){
-#if defined(_WIN32)
+#ifdef FL_GST_LOCAL_NATIVE_SESSION
  if(!policy||s->ownerSelected||s->candidateSet||s->policyBound||s->local||s->sharedCpu||!wantVideo(s)||!s->video||
     !s->sessionPath||!*s->sessionPath||GST_STATE(s)!=GST_STATE_NULL||!s->nativeMemory||s->channelAdopted)return FALSE;
  const bool nativeReceiver=policy->paths[1].supportedUsage==FL_MEMORY_GPU_SAMPLE&&policy->paths[1].operations==0;
@@ -375,7 +391,7 @@ static gboolean setLocalNativeCandidate(GstFrameLinkAvSink*s,GstFrameLinkMemoryP
  flMemoryDecision decisions[2]{};
  if(policy->version!=1||policy->reserved||policy->sessionGeneration||
     flMemoryEvaluateBoundary(policy->requirements,policy->paths,2,decisions)!=FL_MEMORY_OK||
-    policy->paths[0].resourceType!=FL_MEMORY_D3D11||policy->paths[1].resourceType!=FL_MEMORY_D3D11||
+    policy->paths[0].resourceType!=FL_GST_LOCAL_NATIVE_RESOURCE||policy->paths[1].resourceType!=FL_GST_LOCAL_NATIVE_RESOURCE||
     policy->paths[0].operations||(!nativeReceiver&&!readbackReceiver)||
     (policy->paths[0].supportedUsage!=FL_MEMORY_GPU_SAMPLE&&
      policy->paths[0].supportedUsage!=(FL_MEMORY_GPU_SAMPLE|FL_MEMORY_GPU_RENDER)))return FALSE;
@@ -492,6 +508,12 @@ static void gst_framelink_av_sink_class_init(GstFrameLinkAvSinkClass*klass){
   nullptr,nullptr,g_cclosure_marshal_generic,G_TYPE_BOOLEAN,1,G_TYPE_POINTER);
  g_signal_new_class_handler("set-local-native-candidate",G_TYPE_FROM_CLASS(klass),GSignalFlags(G_SIGNAL_RUN_LAST|G_SIGNAL_ACTION),G_CALLBACK(setLocalNativeCandidate),
   nullptr,nullptr,nullptr,G_TYPE_BOOLEAN,1,G_TYPE_POINTER);
+#if defined(__ANDROID__) || defined(FL_GST_DMABUF)
+ g_signal_new_class_handler("set-native-ready-fd",G_TYPE_FROM_CLASS(klass),GSignalFlags(G_SIGNAL_RUN_LAST|G_SIGNAL_ACTION),G_CALLBACK(setNativeReadyFd),
+  nullptr,nullptr,nullptr,G_TYPE_BOOLEAN,2,G_TYPE_POINTER,G_TYPE_INT);
+ g_signal_new_class_handler("acquire-native-buffer",G_TYPE_FROM_CLASS(klass),GSignalFlags(G_SIGNAL_RUN_LAST|G_SIGNAL_ACTION),G_CALLBACK(acquireNativeBuffer),
+  nullptr,nullptr,nullptr,G_TYPE_POINTER,1,G_TYPE_UINT);
+#endif
  g_signal_new_class_handler("apply-memory-policy",G_TYPE_FROM_CLASS(klass),GSignalFlags(G_SIGNAL_RUN_LAST|G_SIGNAL_ACTION),G_CALLBACK(applyMemoryPolicy),
   nullptr,nullptr,nullptr,G_TYPE_BOOLEAN,1,G_TYPE_POINTER);
  g_signal_new_class_handler("adopt-channel",G_TYPE_FROM_CLASS(klass),GSignalFlags(G_SIGNAL_RUN_LAST|G_SIGNAL_ACTION),G_CALLBACK(adoptChannel),

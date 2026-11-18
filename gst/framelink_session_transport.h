@@ -9,6 +9,16 @@
 typedef struct flD3D11DeviceOwner flD3D11DeviceOwner;
 #endif
 #endif
+// Explicit local native A/V sessions: D3D11 on Windows, DMA-BUF on desktop Linux.
+// Android (AHardwareBuffer) is not yet enabled for this profile.
+#if defined(_WIN32) || (defined(__linux__) && !defined(__ANDROID__))
+#define FL_GST_LOCAL_NATIVE_SESSION 1
+#ifdef _WIN32
+#define FL_GST_LOCAL_NATIVE_RESOURCE FL_MEMORY_D3D11
+#else
+#define FL_GST_LOCAL_NATIVE_RESOURCE FL_MEMORY_DMABUF
+#endif
+#endif
 G_BEGIN_DECLS
 #ifdef _WIN32
 // Explicit local native lifetime selection, before negotiation/configuration.
@@ -221,12 +231,13 @@ FL_GST_SESSION_API gboolean fl_gst_session_open_local_cpu(FlGstSession*,gboolean
 G_END_DECLS
 #endif
 
-#ifdef _WIN32
+#ifdef FL_GST_LOCAL_NATIVE_SESSION
 G_BEGIN_DECLS
 // Explicit current-user native profile, worker-thread only. FAR4 discovery is
 // separate from legacy/CPU profiles. Negotiates session, authenticates the exact
 // producer-ordered candidate BEFORE allocation, then clock/PCM/events and channel.
-// v1 supports a D3D11 GPU_SAMPLE or GPU_SAMPLE|GPU_RENDER producer
+// v1 supports a GPU_SAMPLE or GPU_SAMPLE|GPU_RENDER producer of the platform's
+// native resource (D3D11 on Windows, DMA-BUF on Linux)
 // (operations=0; GPU_RENDER alone rejects), with an explicit receiver:
 // CPU_READ (operations=COPY|READBACK), or GPU_SAMPLE (operations=0, deferred release).
 // BOTH requirements must authorize the path. Other paths reject; no fallback.
@@ -262,6 +273,10 @@ FL_GST_SESSION_API gboolean fl_gst_session_open_local_native_epoch(FlGstSession*
  guint audio_queue_ms,guint connect_timeout_ms,guint idle_timeout_ms,
  const GstFrameLinkMemoryPolicy* candidate,GstFrameLinkMemoryPolicy* bound,flChannel** channel,
  FlGstNativeEpochFunc,gpointer,GCancellable*,GError**);
+G_END_DECLS
+#endif
+#ifdef _WIN32
+G_BEGIN_DECLS
 // Explicit intermediate receiver for source-time relay forwarding, paired with
 // the ordinary FAR4 native producer. Authenticates the same clock exchange but
 // installs a source-relative running-time mapping BEFORE tracks are exposed.

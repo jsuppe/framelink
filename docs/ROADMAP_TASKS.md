@@ -387,7 +387,12 @@ per-platform state. Windows readiness is the
   qualify on each platform.
   *Windows (D3D11):* native two-hop relay qualified for the advertised cells.
   The decoded relay is limited (1080p60 short functional only; 4K30 excluded).
-  *Linux (DMA-BUF) / Android (AHardwareBuffer):* not started.
+  *Linux (DMA-BUF):* 9a–9c done with focused checks (2026-11-18): the explicit local
+  native session profile and both A/V bins accept DMA-BUF candidates, and the producer
+  bin forwards the sink's native buffer and ready-fence actions
+  ([evidence](m6/linux-native-av-session/README.md)). 9d (real decoder/renderer
+  producers, relay) and 9e (final-revision gates) not started.
+  *Android (AHardwareBuffer):* not started.
 
 ## M7 — Release and developer handoff
 
