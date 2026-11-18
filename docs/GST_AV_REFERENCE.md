@@ -140,7 +140,7 @@ Signals: `pad-added`, `pad-removed`, `no-more-pads`
 
 Actions: `set-local-native-candidate`, `set-local-d3d11-device-owner`, `apply-memory-policy`, `adopt-channel`; on Linux (DMA-BUF) and Android (AHardwareBuffer) builds also `set-native-ready-fd` and `acquire-native-buffer`, forwarded to the inner `framelinksink`
 
-`set-local-native-candidate` selects the explicit local native session profile: D3D11 on Windows, DMA-BUF on desktop Linux (since 2026-11-18). It is not yet enabled on Android. `set-local-d3d11-device-owner` is effective on Windows only.
+`set-local-native-candidate` selects the explicit local native session profile: D3D11 on Windows, DMA-BUF on desktop Linux and AHardwareBuffer on Android (exact RGBA and RGB10A2_LE; both since 2026-11-18). `set-local-d3d11-device-owner` is effective on Windows only.
 
 #### `framelinkavsrc`
 

@@ -392,7 +392,9 @@ per-platform state. Windows readiness is the
   bin forwards the sink's native buffer and ready-fence actions
   ([evidence](m6/linux-native-av-session/README.md)). 9d (real decoder/renderer
   producers, relay) and 9e (final-revision gates) not started.
-  *Android (AHardwareBuffer):* not started.
+  *Android (AHardwareBuffer):* 9a–9c done with focused checks (2026-11-18): the same
+  profile with exact RGBA/RGB10A2_LE AHardwareBuffers
+  ([evidence](m6/android-native-av-session/README.md)). 9d and 9e not started.
 
 ## M7 — Release and developer handoff
 

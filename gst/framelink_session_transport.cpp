@@ -638,8 +638,8 @@ static gboolean open_local_native_impl(FlGstSession*session,gboolean producer,co
  const flSessionCapabilities*local,guint videoQueue,guint pool,guint queueMs,guint timeout,guint idle,
  const GstFrameLinkMemoryPolicy*candidate,GstFrameLinkMemoryPolicy*bound,flChannel**channel,
  FlGstNativeEpochFunc epochFunc,gpointer epochData,GCancellable*outer,GError**error,const flSessionConfig*relay,const NativeRelayPool*relayPool=nullptr,bool preserveSourceTimeline=false){
- // Explicit receiver profiles on the platform's native resource (D3D11 or
- // DMA-BUF): CPU readback or deferred native GPU use.
+ // Explicit receiver profiles on the platform's native resource (D3D11,
+ // DMA-BUF or AHardwareBuffer): CPU readback or deferred native GPU use.
  // Neither profile permits automatic fallback or undeclared operations.
  GstFrameLinkMemoryPolicy policy{};if(candidate)policy=*candidate;
  if(bound)*bound={};if(channel)*channel=nullptr;
@@ -656,6 +656,8 @@ static gboolean open_local_native_impl(FlGstSession*session,gboolean producer,co
   if(session)fl_gst_session_cancel(session);
   g_set_error_literal(error,G_IO_ERROR,G_IO_ERROR_INVALID_ARGUMENT,FL_GST_LOCAL_NATIVE_RESOURCE==FL_MEMORY_D3D11?
    "unsupported local native candidate (D3D11 sample or sample+render producer with explicit native or CPU readback receiver required)":
+   FL_GST_LOCAL_NATIVE_RESOURCE==FL_MEMORY_AHB?
+   "unsupported local native candidate (AHardwareBuffer sample or sample+render producer with explicit native or CPU readback receiver required)":
    "unsupported local native candidate (DMA-BUF sample or sample+render producer with explicit native or CPU readback receiver required)");return FALSE;
  }
  if(!open_local_av_impl(session,producer,path,local,videoQueue,pool,queueMs,timeout,idle,

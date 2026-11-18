@@ -216,7 +216,8 @@ Receive-depth gate evidence: [review and platform tests](receive-depth/README.md
 - [ ] 9b Integrate upstream allocation/import and readiness/completion fences for
       DMA-BUF, D3D11 and supported AHardwareBuffer layouts.
 - [ ] 9c Reject incompatible adapter/layout/usage and test explicit fallback.
-      *Linux:* 9a–9c done with focused checks on 2026-11-18 ([evidence](linux-native-av-session/README.md)); Android not started.
+      *Linux:* 9a–9c done with focused checks on 2026-11-18 ([evidence](linux-native-av-session/README.md)).
+      *Android:* 9a–9c done with focused checks on 2026-11-18 ([evidence](android-native-av-session/README.md)).
 - [ ] 9d Qualify real compatible decoder/renderer producers, native consumer,
       and two-hop relay with PCM; prove allocation identity and zero payload
       copies, not just absence of CPU mapping.

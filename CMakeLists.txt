@@ -1351,13 +1351,26 @@ if(FRAMELINK_BUILD_TESTS AND TARGET framelink_gst_session)
     add_test(NAME gst_shared_cpu_av COMMAND fl_gst_shared_cpu_av $<TARGET_FILE:gstframelink>)
     set_tests_properties(gst_shared_cpu_av PROPERTIES TIMEOUT 20)
 endif()
-# M6.9 on Linux: native DMA-BUF producer allocations in coordinated A/V sessions.
-if(FRAMELINK_BUILD_TESTS AND TARGET framelink_gst_session AND UNIX AND NOT ANDROID)
-    add_executable(fl_gst_native_av_linux test/fl_gst_native_av_linux.cpp)
-    target_link_libraries(fl_gst_native_av_linux PRIVATE framelink_gst_session PkgConfig::FL_GST_APP PkgConfig::FL_GST_ALLOCATORS)
-    add_dependencies(fl_gst_native_av_linux gstframelink)
-    add_test(NAME gst_native_av_linux COMMAND fl_gst_native_av_linux $<TARGET_FILE:gstframelink>)
-    set_tests_properties(gst_native_av_linux PROPERTIES TIMEOUT 60 LABELS "gpu")
+# M6.9: native producer allocations in coordinated A/V sessions (DMA-BUF on
+# Linux, AHardwareBuffer on Android); one source, one test per platform.
+if(FRAMELINK_BUILD_TESTS AND TARGET framelink_gst_session AND UNIX)
+    if(ANDROID)
+        add_executable(fl_gst_native_av_android test/fl_gst_native_av_session.cpp)
+        target_link_libraries(fl_gst_native_av_android PRIVATE framelink_gst_session gstframelink
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstapp.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstcoreelements.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstgdp.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstgio.a"
+            ${FL_ANDROID_SESSION_GIO_STATIC_LDFLAGS} ${FL_ANDROID_GST_STATIC_LDFLAGS})
+        add_test(NAME gst_native_av_android COMMAND fl_gst_native_av_android)
+        set_tests_properties(gst_native_av_android PROPERTIES TIMEOUT 60 LABELS "gpu" SKIP_RETURN_CODE 77)
+    else()
+        add_executable(fl_gst_native_av_linux test/fl_gst_native_av_session.cpp)
+        target_link_libraries(fl_gst_native_av_linux PRIVATE framelink_gst_session PkgConfig::FL_GST_APP PkgConfig::FL_GST_ALLOCATORS)
+        add_dependencies(fl_gst_native_av_linux gstframelink)
+        add_test(NAME gst_native_av_linux COMMAND fl_gst_native_av_linux $<TARGET_FILE:gstframelink>)
+        set_tests_properties(gst_native_av_linux PROPERTIES TIMEOUT 60 LABELS "gpu")
+    endif()
 endif()
 if(FRAMELINK_BUILD_TESTS AND TARGET framelink_gst_session AND NOT WIN32)
     add_executable(fl_gst_shared_cpu_events test/fl_gst_shared_cpu_events.cpp)
