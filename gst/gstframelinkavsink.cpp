@@ -72,6 +72,9 @@ G_DEFINE_TYPE(GstFrameLinkAvSink,gst_framelink_av_sink,GST_TYPE_BIN)
 
 #ifdef FL_GST_D3D11
 #define FL_AV_SINK_NATIVE_CAPS ";video/x-raw(memory:D3D11Memory),format={BGRA,RGBA,NV12,RGB10A2_LE}"
+#elif defined(__ANDROID__)
+// Same native formats as framelinksink on Android (exact RGB AHardwareBuffers).
+#define FL_AV_SINK_NATIVE_CAPS ";video/x-raw(memory:FrameLinkAHardwareBuffer),format={RGBA,RGB10A2_LE}"
 #elif defined(FL_GST_DMABUF)
 // Same native formats as framelinksink on desktop Linux.
 #define FL_AV_SINK_NATIVE_CAPS ";video/x-raw(memory:DMABuf),format={BGRA,RGBA,NV12,RGB10A2_LE}"

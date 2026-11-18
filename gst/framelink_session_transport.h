@@ -9,12 +9,14 @@
 typedef struct flD3D11DeviceOwner flD3D11DeviceOwner;
 #endif
 #endif
-// Explicit local native A/V sessions: D3D11 on Windows, DMA-BUF on desktop Linux.
-// Android (AHardwareBuffer) is not yet enabled for this profile.
-#if defined(_WIN32) || (defined(__linux__) && !defined(__ANDROID__))
+// Explicit local native A/V sessions: D3D11 on Windows, DMA-BUF on desktop
+// Linux, AHardwareBuffer on Android.
+#if defined(_WIN32) || defined(__linux__)
 #define FL_GST_LOCAL_NATIVE_SESSION 1
-#ifdef _WIN32
+#if defined(_WIN32)
 #define FL_GST_LOCAL_NATIVE_RESOURCE FL_MEMORY_D3D11
+#elif defined(__ANDROID__)
+#define FL_GST_LOCAL_NATIVE_RESOURCE FL_MEMORY_AHB
 #else
 #define FL_GST_LOCAL_NATIVE_RESOURCE FL_MEMORY_DMABUF
 #endif
@@ -237,7 +239,7 @@ G_BEGIN_DECLS
 // separate from legacy/CPU profiles. Negotiates session, authenticates the exact
 // producer-ordered candidate BEFORE allocation, then clock/PCM/events and channel.
 // v1 supports a GPU_SAMPLE or GPU_SAMPLE|GPU_RENDER producer of the platform's
-// native resource (D3D11 on Windows, DMA-BUF on Linux)
+// native resource (D3D11 on Windows, DMA-BUF on Linux, AHardwareBuffer on Android)
 // (operations=0; GPU_RENDER alone rejects), with an explicit receiver:
 // CPU_READ (operations=COPY|READBACK), or GPU_SAMPLE (operations=0, deferred release).
 // BOTH requirements must authorize the path. Other paths reject; no fallback.

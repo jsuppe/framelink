@@ -14,7 +14,7 @@ This is the authoritative current-status page. Other documents link here instead
 
 **Order of work.** Implementation first, with focused checks; broad campaigns afterwards on the final revision (the 2026-11-12 execution-order rule):
 1. M6.9 on Linux (DMA-BUF): native producer allocations in coordinated sessions. 9a–9c done with focused checks on 2026-11-18 ([evidence](m6/linux-native-av-session/README.md)); 9d/9e follow with the final-revision qualification.
-2. M6.9 on Android (AHardwareBuffer).
+2. M6.9 on Android (AHardwareBuffer). 9a–9c done with focused checks on 2026-11-18 ([evidence](m6/android-native-av-session/README.md)).
 3. M6.8b/8c: CPU-consumer ring memory on Linux and Android.
 4. Check the Linux/Android integration against the frozen Windows API `060c54e4`; any breaking change goes to Jon first.
 5. Final-revision qualification: budget acceptance (M6.2b/2e), lifecycle (M6.3), faults (M6.4), 9d/9e and the acceptance review (M6.7c).
@@ -22,7 +22,7 @@ This is the authoritative current-status page. Other documents link here instead
 ## Current revisions
 | Repository | Revision | Notes |
 |---|---|---|
-| framelink `master` | current head | `c6d7db7` (merge of PR #10, M6 Windows) plus the tooling change (PR #11), documentation (PR #12 and later) and M6.9 on Linux (PR #17): Linux-only session code, Windows behavior unchanged (180/180 on the qualification host) |
+| framelink `master` | current head | `c6d7db7` (merge of PR #10, M6 Windows) plus the tooling change (PR #11), documentation (PR #12 and later) and M6.9 on Linux and Android (PRs #17, #18): session code for those platforms only, Windows behavior unchanged (180/180 on the qualification host after each) |
 | Frozen Windows API | `060c54e41bcbfe7ca8dbdef89e6e74fb2930935c` | Tag `m6-windows-api-freeze`. `FL_VERSION` 6. [API freeze](m6/API_FREEZE_CANDIDATE.md) |
 | vkrender `master` | current head | Code as of `f18c97f` (PR #15 merge; later commits are docs and test scripts). Pins framelink `c6d7db7` (code identical to the frozen revision); includes the renderer repair `86853d6`, the scene-output fix (PR #20) and fullscreen across displays (PR #15) |
 | vkrender-airplay `main` | `ac4e29f` | Pins framelink `c6d7db7` |
@@ -59,7 +59,7 @@ Integrated: 180/180 tests, 137 exports (128 retained + 9 owner), C11 headers, 3/
 
 ## Linux and Android
 - **Measured:** primary zero-added-delay 1800 s cells pass their transport gates: Linux native BGRA/NV12 at 1080p60 and 4K30, Android native RGBA at 1080p60 and 4K30 ([PRIMARY_RESULTS.md](m6/PRIMARY_RESULTS.md)). Integrated regressions passed earlier (Linux 114/114, Android 72/72).
-- **Not done:** primary-profile budget acceptance (M6.2b/2e), lifecycle (M6.3), fault qualification (M6.4), CPU-consumer memory path (M6.8b/c; Linux and Android CPU target cells unsupported), native producer in coordinated sessions (M6.9: Linux 9a–9c done, Linux 9d/9e and Android not started), and final-revision qualification.
+- **Not done:** primary-profile budget acceptance (M6.2b/2e), lifecycle (M6.3), fault qualification (M6.4), CPU-consumer memory path (M6.8b/c; Linux and Android CPU target cells unsupported), native producer in coordinated sessions (M6.9: 9a–9c done on Linux and Android; 9d/9e not started on either), and final-revision qualification.
 - The Windows API freeze does not establish that Linux/Android integration will need no breaking change; that check is part of the deferred work.
 
 ## Tooling (all repositories)

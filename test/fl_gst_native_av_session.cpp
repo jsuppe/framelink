@@ -1,21 +1,36 @@
-// M6.9 on Linux: native DMA-BUF producer allocations in coordinated A/V
-// sessions, selected through set-local-native-candidate on both bins.
-// The producer writes into the sink's own pool (the ring's DMA-BUF
-// allocations); a native receiver must see those same allocations, and a
-// CPU-readback receiver the same pixels. PCM, PTS/DTS/duration and the A/V
-// offset travel with them. Negatives mirror the Windows native A/V controls.
-#include "framelink_dmabuf.h"
+// M6.9 on Linux and Android: native producer allocations (DMA-BUF,
+// AHardwareBuffer) in coordinated A/V sessions, selected through
+// set-local-native-candidate on both bins. The producer writes into the
+// sink's own pool (the ring's allocations); a native receiver must see those
+// same allocations, and a CPU-readback receiver the same pixels. PCM,
+// PTS/DTS/duration and the A/V offset travel with them. Negatives mirror the
+// Windows native A/V controls.
 #include "../gst/framelink_session_transport.h"
-#include <gst/allocators/gstdmabuf.h>
 #include <gst/app/gstappsink.h>
 #include <gst/app/gstappsrc.h>
 #include <gst/video/video.h>
-#include <linux/dma-buf.h>
 #include <sys/eventfd.h>
+#include <unistd.h>
+#ifdef __ANDROID__
+#include "framelink_ahb.h"
+#include "../gst/framelink_native.h"
+#include <android/hardware_buffer.h>
+#include <dlfcn.h>
+extern "C" {GST_PLUGIN_STATIC_DECLARE(framelink);GST_PLUGIN_STATIC_DECLARE(app);GST_PLUGIN_STATIC_DECLARE(coreelements);GST_PLUGIN_STATIC_DECLARE(gdp);GST_PLUGIN_STATIC_DECLARE(gio);}
+#define NATIVE_FEATURE "memory:FrameLinkAHardwareBuffer"
+#define NATIVE_RESOURCE FL_MEMORY_AHB
+#define NATIVE_NAME "AHardwareBuffer"
+#else
+#include "framelink_dmabuf.h"
+#include <gst/allocators/gstdmabuf.h>
+#include <linux/dma-buf.h>
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
-#include <unistd.h>
+#define NATIVE_FEATURE "memory:DMABuf"
+#define NATIVE_RESOURCE FL_MEMORY_DMABUF
+#define NATIVE_NAME "DMA-BUF"
+#endif
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -26,7 +41,7 @@
 #include <vector>
 #define CHECK(x) do{if(!(x)){fprintf(stderr,"line %d: %s\n",__LINE__,#x);std::exit(1);}}while(0)
 
-static GstFrameLinkMemoryPolicy nativeAvPolicy(bool nativeReceiver,bool renderProducer=false,uint32_t resource=FL_MEMORY_DMABUF){
+static GstFrameLinkMemoryPolicy nativeAvPolicy(bool nativeReceiver,bool renderProducer=false,uint32_t resource=NATIVE_RESOURCE){
  GstFrameLinkMemoryPolicy policy{};policy.version=1;
  for(unsigned i=0;i<2;++i){flMemoryRequirementsInit(&policy.requirements[i]);
   policy.requirements[i].allowedResourceTypes=resource;
@@ -77,6 +92,34 @@ static FlGstSession*childSession(GstElement*bin){
  CHECK(state==GST_STATE_PLAYING);auto*context=gst_element_get_context(child,"framelink.session.v1");CHECK(context);
  auto*session=fl_gst_session_from_context(context);CHECK(session);gst_context_unref(context);gst_object_unref(child);return session;
 }
+// Platform layer: write source content, identify an allocation, check that a
+// received memory is native, and read it back for the pixel oracle.
+#ifdef __ANDROID__
+static AHardwareBuffer*hardwareBuffer(GstMemory*mem){auto*ahb=gst_framelink_memory_get_hardware_buffer(mem);CHECK(ahb);return ahb;}
+static void fill(GstBuffer*b,bool nv12,guint8 value){
+ CHECK(!nv12); // Android native output is exact RGB only
+ auto*ahb=hardwareBuffer(gst_buffer_peek_memory(b,0));AHardwareBuffer_Desc desc{};AHardwareBuffer_describe(ahb,&desc);void*data=nullptr;
+ CHECK(AHardwareBuffer_lock(ahb,AHARDWAREBUFFER_USAGE_CPU_WRITE_OFTEN,-1,nullptr,&data)==0);
+ for(unsigned y=0;y<32;++y)memset((char*)data+y*desc.stride*4,value,256);
+ CHECK(AHardwareBuffer_unlock(ahb,nullptr)==0); // source content; the sink never maps or copies
+}
+static uint64_t allocationId(GstMemory*mem){
+ using GetId=int(*)(const AHardwareBuffer*,uint64_t*);static auto getId=(GetId)dlsym(RTLD_DEFAULT,"AHardwareBuffer_getId");
+ CHECK(getId);uint64_t id=0;CHECK(getId(hardwareBuffer(mem),&id)==0);return id;
+}
+static bool isNative(GstMemory*mem){return gst_framelink_memory_get_hardware_buffer(mem)!=nullptr;}
+static void checkPixels(GstMemory*mem,GstSample*,bool nativeReceiver,bool nv12,guint8 value){
+ CHECK(!nv12);
+ if(nativeReceiver){
+  auto*ahb=hardwareBuffer(mem);AHardwareBuffer_Desc desc{};AHardwareBuffer_describe(ahb,&desc);void*data=nullptr;
+  CHECK(AHardwareBuffer_lock(ahb,AHARDWAREBUFFER_USAGE_CPU_READ_OFTEN,-1,nullptr,&data)==0);
+  for(unsigned y=0;y<32;++y)for(unsigned x=0;x<256;++x)CHECK(((guint8*)data)[y*desc.stride*4+x]==value);
+  CHECK(AHardwareBuffer_unlock(ahb,nullptr)==0);return;
+ }
+ GstMapInfo map{};CHECK(gst_memory_map(mem,&map,GST_MAP_READ));
+ for(unsigned i=0;i<32*256;++i)CHECK(map.data[i]==value);gst_memory_unmap(mem,&map);
+}
+#else
 static void fill(GstBuffer*b,bool nv12,guint8 value){
  auto*mem=gst_buffer_peek_memory(b,0);CHECK(gst_is_dmabuf_memory(mem));const int fd=gst_dmabuf_memory_get_fd(mem);
  auto*layout=gst_buffer_get_video_meta(b);CHECK(layout);
@@ -86,12 +129,27 @@ static void fill(GstBuffer*b,bool nv12,guint8 value){
   memset((char*)data+layout->offset[plane]+y*layout->stride[plane],value,nv12?64:256);
  CHECK(munmap(data,mem->size)==0);sync.flags=DMA_BUF_SYNC_END|DMA_BUF_SYNC_WRITE;CHECK(ioctl(fd,DMA_BUF_IOCTL_SYNC,&sync)==0);
 }
-static ino_t inodeOf(GstMemory*mem){struct stat st{};CHECK(fstat(gst_dmabuf_memory_get_fd(mem),&st)==0);return st.st_ino;}
+static uint64_t allocationId(GstMemory*mem){struct stat st{};CHECK(fstat(gst_dmabuf_memory_get_fd(mem),&st)==0);return uint64_t(st.st_ino);}
+static bool isNative(GstMemory*mem){return gst_is_dmabuf_memory(mem);}
+static void checkPixels(GstMemory*mem,GstSample*sample,bool nativeReceiver,bool nv12,guint8 value){
+ // Native memory carries its real layout; packed CPU output follows its caps.
+ auto*vb=gst_sample_get_buffer(sample);
+ GstVideoInfo info;CHECK(gst_video_info_from_caps(&info,gst_sample_get_caps(sample)));
+ gsize offset[2]={GST_VIDEO_INFO_PLANE_OFFSET(&info,0),GST_VIDEO_INFO_PLANE_OFFSET(&info,1)};
+ gint stride[2]={GST_VIDEO_INFO_PLANE_STRIDE(&info,0),GST_VIDEO_INFO_PLANE_STRIDE(&info,1)};
+ if(auto*meta=gst_buffer_get_video_meta(vb)){for(unsigned i=0;i<2;++i){offset[i]=meta->offset[i];stride[i]=meta->stride[i];}}
+ else CHECK(!nativeReceiver);
+ GstMapInfo map{};CHECK(gst_memory_map(mem,&map,GST_MAP_READ));
+ for(unsigned plane=0;plane<(nv12?2u:1u);++plane)for(unsigned y=0;y<(plane?16u:32u);++y)for(unsigned x=0;x<(nv12?64u:256u);++x)
+  CHECK(map.data[offset[plane]+y*stride[plane]+x]==value);
+ gst_memory_unmap(mem,&map);
+}
+#endif
 
 // Real bins on both ends, explicit candidates, the sink's own DMA-BUF pool.
-static void nativeAvBins(bool nativeReceiver,bool nv12,bool renderProducer){
- const char*format=nv12?"NV12":"RGBA";
- const std::string videoCaps=std::string("video/x-raw(memory:DMABuf),format=")+format+",width=64,height=32,framerate=30/1";
+static void nativeAvBins(bool nativeReceiver,const char*format,bool renderProducer){
+ const bool nv12=!strcmp(format,"NV12");
+ const std::string videoCaps=std::string("video/x-raw(" NATIVE_FEATURE "),format=")+format+",width=64,height=32,framerate=30/1";
  GError*e=nullptr;
  auto*tx=gst_parse_launch(("framelinkavsink name=transport native-memory=true appsrc name=vi is-live=true format=time caps="+videoCaps+
   " ! transport.video_sink appsrc name=ai is-live=true format=time caps=audio/x-raw,format=S16LE,layout=interleaved,rate=48000,channels=2,channel-mask=(bitmask)0x3 ! transport.audio_sink").c_str(),&e);
@@ -132,10 +190,10 @@ static void nativeAvBins(bool nativeReceiver,bool nv12,bool renderProducer){
 
  // Contiguous 1 ms PCM blocks; each frame lasts 1 ms and leads its audio by 37 ms.
  const unsigned count=8;const GstClockTime videoDuration=1000000;
- std::set<ino_t> producerAllocations;std::vector<int> readyFds;GstClockTime finalPts=0;
+ std::set<uint64_t> producerAllocations;std::vector<int> readyFds;GstClockTime finalPts=0;
  for(unsigned n=0;n<count;++n){
   GstBuffer*b=nullptr;CHECK(gst_buffer_pool_acquire_buffer(pool,&b,nullptr)==GST_FLOW_OK);
-  producerAllocations.insert(inodeOf(gst_buffer_peek_memory(b,0)));
+  producerAllocations.insert(allocationId(gst_buffer_peek_memory(b,0)));
   const guint8 value=guint8(n+1);fill(b,nv12,value);
   const int ready=eventfd(0,EFD_CLOEXEC|EFD_NONBLOCK);CHECK(ready>=0);readyFds.push_back(ready);
   uint64_t one=1;CHECK(write(ready,&one,sizeof one)==sizeof one); // CPU writes are complete
@@ -155,19 +213,10 @@ static void nativeAvBins(bool nativeReceiver,bool nv12,bool renderProducer){
   CHECK(GST_BUFFER_PTS(ab)==guint64(mappedBase)+audioPts&&GST_BUFFER_PTS(vb)-GST_BUFFER_PTS(ab)==37000000);
   CHECK(gst_buffer_n_memory(vb)==1);auto*memory=gst_buffer_peek_memory(vb,0);
   if(nativeReceiver){
-   // Allocation identity: the receiver holds the producer's own DMA-BUF.
-   CHECK(gst_is_dmabuf_memory(memory));CHECK(producerAllocations.count(inodeOf(memory))==1);
+   // Allocation identity: the receiver holds the producer's own allocation.
+   CHECK(isNative(memory));CHECK(producerAllocations.count(allocationId(memory))==1);
   }
-  // Native memory carries its real layout; packed CPU output follows its caps.
-  GstVideoInfo info;CHECK(gst_video_info_from_caps(&info,gst_sample_get_caps(vs)));
-  gsize offset[2]={GST_VIDEO_INFO_PLANE_OFFSET(&info,0),GST_VIDEO_INFO_PLANE_OFFSET(&info,1)};
-  gint stride[2]={GST_VIDEO_INFO_PLANE_STRIDE(&info,0),GST_VIDEO_INFO_PLANE_STRIDE(&info,1)};
-  if(auto*meta=gst_buffer_get_video_meta(vb)){for(unsigned i=0;i<2;++i){offset[i]=meta->offset[i];stride[i]=meta->stride[i];}}
-  else CHECK(!nativeReceiver);
-  GstMapInfo map{};CHECK(gst_memory_map(memory,&map,GST_MAP_READ));
-  for(unsigned plane=0;plane<(nv12?2u:1u);++plane)for(unsigned y=0;y<(plane?16u:32u);++y)for(unsigned x=0;x<(nv12?64u:256u);++x)
-   CHECK(map.data[offset[plane]+y*stride[plane]+x]==value);
-  gst_memory_unmap(memory,&map);
+  checkPixels(memory,vs,nativeReceiver,nv12,value);
   std::vector<guint8>pcm(pcmBytes);CHECK(gst_buffer_get_size(ab)==pcmBytes&&gst_buffer_extract(ab,0,pcm.data(),pcmBytes)==pcmBytes);
   for(auto v:pcm)CHECK(v==n+31);
   gst_sample_unref(vs);gst_sample_unref(as);
@@ -184,7 +233,7 @@ static void nativeAvBins(bool nativeReceiver,bool nv12,bool renderProducer){
  for(int fd:readyFds)close(fd);
  g_object_unref(s);g_object_unref(r);
  for(auto*o:{vi,ai,vo,ao,sink,src})gst_object_unref(o);gst_object_unref(tx);gst_object_unref(rx);
- printf("%s native DMA-BUF A/V bins, %s receiver%s: %u frames, original allocations, pixels, PCM and A/V offset pass\n",
+ printf("%s native " NATIVE_NAME " A/V bins, %s receiver%s: %u frames, original allocations, pixels, PCM and A/V offset pass\n",
   format,nativeReceiver?"native":"CPU readback",renderProducer?", sample+render producer":"",count);
 }
 
@@ -201,7 +250,7 @@ static void nativeLocalSetup(bool nativeReceiver){
   const gboolean sender=fl_gst_session_open_local_native(s,TRUE,path.c_str(),&caps,1,2,80,2000,1000,&candidate,&a,&pch,nullptr,&se);
   receiver.join();if(se||ce)fprintf(stderr,"local native: %s / %s\n",se?se->message:"ok",ce?ce->message:"ok");
   CHECK(sender&&peer&&!se&&!ce&&pch&&rch);
-  CHECK(a.sessionGeneration&&a.sessionGeneration==b.sessionGeneration&&a.paths[0].resourceType==FL_MEMORY_DMABUF);
+  CHECK(a.sessionGeneration&&a.sessionGeneration==b.sessionGeneration&&a.paths[0].resourceType==NATIVE_RESOURCE);
   flChannelInfo info{};CHECK(flQuery(rch,&info)==FL_OK&&info.width==64&&info.height==32&&info.poolSize==2);
   flClose(pch);flClose(rch);g_object_unref(s);g_object_unref(r);
  }
@@ -219,7 +268,7 @@ static void nativeLocalSetup(bool nativeReceiver){
    a.version=99;GError*error=nullptr;
    CHECK(!fl_gst_session_open_local_native(s,TRUE,path.c_str(),&caps,1,2,80,200,1000,&candidate,&a,&pch,nullptr,&error));
    CHECK(!pch&&!a.version&&!a.sessionGeneration);
-   if(mode==5)CHECK(error&&strstr(error->message,"DMA-BUF"));g_clear_error(&error);
+   if(mode==5)CHECK(error&&strstr(error->message,NATIVE_NAME));g_clear_error(&error);
   }else if(mode<9){
    if(mode==6)other.requirements[0].preferredUsage=FL_MEMORY_GPU_SAMPLE; // valid but distinct candidate
    std::thread receiver([&]{
@@ -300,11 +349,19 @@ static void nativeBinNegatives(bool nativeReceiver){
 }
 
 int main(int argc,char**argv){
- gst_init(&argc,&argv);CHECK(argc==2);GError*e=nullptr;auto*plugin=gst_plugin_load_file(argv[1],&e);CHECK(plugin&&!e);gst_object_unref(plugin);
+ gst_init(&argc,&argv);
+#ifdef __ANDROID__
+ GST_PLUGIN_STATIC_REGISTER(framelink);GST_PLUGIN_STATIC_REGISTER(app);GST_PLUGIN_STATIC_REGISTER(coreelements);GST_PLUGIN_STATIC_REGISTER(gdp);GST_PLUGIN_STATIC_REGISTER(gio);
+ if(!dlsym(RTLD_DEFAULT,"AHardwareBuffer_getId")){puts("SKIP: AHardwareBuffer_getId unavailable");return 77;}
+ const char*second="RGB10A2_LE"; // Android native output is exact RGB: no NV12
+#else
+ CHECK(argc==2);GError*e=nullptr;auto*plugin=gst_plugin_load_file(argv[1],&e);CHECK(plugin&&!e);gst_object_unref(plugin);
+ const char*second="NV12";
+#endif
  for(bool nativeReceiver:{false,true}){nativeBinNegatives(nativeReceiver);nativeLocalSetup(nativeReceiver);}
- nativeAvBins(true,false,false);
- nativeAvBins(true,true,false);
- nativeAvBins(true,false,true);
- nativeAvBins(false,false,false);
+ nativeAvBins(true,"RGBA",false);
+ nativeAvBins(true,second,false);
+ nativeAvBins(true,"RGBA",true);
+ nativeAvBins(false,"RGBA",false);
  puts("PASS");
 }
