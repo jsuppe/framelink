@@ -1,4 +1,4 @@
-# FrameLink project status — 2026-11-17
+# FrameLink project status — 2026-11-18
 
 This is the authoritative current-status page. Other documents link here instead of repeating status. Dated evidence folders (`docs/m*/…/README.md`) are records of their own date and are not updated.
 
@@ -7,10 +7,17 @@ This is the authoritative current-status page. Other documents link here instead
 |---|---|
 | M1–M5, M5a, M5b | **Complete** within documented scope (merged; see [ROADMAP_TASKS.md](ROADMAP_TASKS.md)) |
 | M6 — Windows scope | **Ready**, recorded 2026-11-17 by Jon. [M6_WINDOWS_READINESS.md](m6/M6_WINDOWS_READINESS.md) |
-| M6 — Linux and Android | **Open, deferred.** Primary-profile measurements exist; acceptance and the remaining M6 work have not started (below) |
-| M7 — Release and handoff | **Held.** 7.1 (API freeze) is done for Windows only; 7.2–7.4 not started |
+| M6 — Linux and Android | **Open, next** (Jon's decision, 2026-11-18). Primary-profile measurements exist; acceptance and the remaining M6 work have not started (below) |
+| M7 — Release and handoff | **Held** until M6 Linux and Android. 7.1 (API freeze) is done for Windows only; 7.2–7.4 not started |
 
-**Next decision (Jon):** release the Windows baseline (M7), extend M6 to Linux and Android first, or both in that order.
+**Decision (Jon, 2026-11-18):** extend M6 to Linux and Android next; M7 stays held until then.
+
+**Order of work.** Implementation first, with focused checks; broad campaigns afterwards on the final revision (the 2026-11-12 execution-order rule):
+1. M6.9 on Linux (DMA-BUF): native producer allocations in coordinated sessions (9a–9c), starting with what of the D3D11 session wiring already applies on Linux.
+2. M6.9 on Android (AHardwareBuffer).
+3. M6.8b/8c: CPU-consumer ring memory on Linux and Android.
+4. Check the Linux/Android integration against the frozen Windows API `060c54e4`; any breaking change goes to Jon first.
+5. Final-revision qualification: budget acceptance (M6.2b/2e), lifecycle (M6.3), faults (M6.4), 9d/9e and the acceptance review (M6.7c).
 
 ## Current revisions
 | Repository | Revision | Notes |
@@ -18,7 +25,7 @@ This is the authoritative current-status page. Other documents link here instead
 | framelink `master` | current head | `c6d7db7` (merge of PR #10, M6 Windows) plus the tooling change (PR #11) and documentation (PR #12 and later); no code change since `c6d7db7` |
 | Frozen Windows API | `060c54e41bcbfe7ca8dbdef89e6e74fb2930935c` | Tag `m6-windows-api-freeze`. `FL_VERSION` 6. [API freeze](m6/API_FREEZE_CANDIDATE.md) |
 | vkrender `master` | current head | Code as of `f18c97f` (PR #15 merge; later commits are docs and test scripts). Pins framelink `c6d7db7` (code identical to the frozen revision); includes the renderer repair `86853d6`, the scene-output fix (PR #20) and fullscreen across displays (PR #15) |
-| vkrender-airplay `main` | `9a0dbde` | Pins framelink `c6d7db7` |
+| vkrender-airplay `main` | `ac4e29f` | Pins framelink `c6d7db7` |
 | framecam `master` | `4a87bb3` | Virtual camera; not pinned, builds against the framelink checkout beside it (vkrender builds it with its own pin) |
 
 vkrender and vkrender-airplay stay on the same framelink revision because peers with a different `FL_VERSION` are refused at handshake.
@@ -62,4 +69,4 @@ Builds use the same tooling on every platform: Ninja, Release, `CMakePresets.jso
 - **vkrender renderer repair:** the Windows readiness record cites renderer `a6a1906` on top of `9f74b9d`. It accepts `--av-latency-ms 0`, caps the option at 2000 and leaves the 100 ms default unchanged. It is merged to vkrender `master` as `86853d6` (vkrender PR #19).
 - **vkrender scene output:** from FrameLink `12326e17` (2026-11-01) until 2026-11-17, the renderer's Windows scene output delivered no frames, the virtual camera included. FrameLink requires the exact acquired buffer at submit, and the renderer rebuilt it without its image, so every `flEndSubmit` returned `FL_INVALID`. FrameLink behaved as its API documents; the renderer was fixed in vkrender PR #20. Its end-to-end check now runs in vkrender's `hardware` test preset.
 - **vkrender:** PR #15 (fullscreen across displays, on-screen controls) is merged. It was tested with multiple windows on the single-monitor test host. The per-monitor fullscreen path and the display on/off checkboxes are untested on real multiple displays.
-- **vkrender-airplay:** the GPU self-test fails (54–56 of 60 frames decoded live; the pass mark is 58). It failed identically before the M6 pin. Frames are dropped at the GPU pipeline's latest-wins `appsink max-buffers=1` before reaching FrameLink. The choice between a deeper sink and a looser test is open. The CPU self-test passes.
+- **vkrender-airplay:** the GPU self-test passes since PR #6 (2026-11-18): 8 of 8 runs delivered 58 of 60 frames. The cause of the earlier 54–56 was the GPU pipeline's `appsink max-buffers=1`; the decoder emits frames in bursts and the older of two was dropped before reaching FrameLink. The sink now holds 4, as the CPU path does.

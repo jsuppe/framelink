@@ -2,7 +2,7 @@
 
 ## Status — 2026-11-17
 
-M6 is **ready for the approved Windows scope** and the Windows API is **frozen at `060c54e4`** (tag `m6-windows-api-freeze`), both recorded by Jon on 2026-11-17. Native BGRA and NV12 1080p60 are supported under a recorded host-scheduling assumption, without a clean 1800 s pass on the final revision. Decoded relay 4K30 stays excluded. M6 for Linux and Android is open and deferred, and M7 is held. Current status and revisions: [STATUS.md](STATUS.md). The 2026-11-12 Windows scope approval and the closure checklist are in [M6 Windows readiness](m6/M6_WINDOWS_READINESS.md).
+M6 is **ready for the approved Windows scope** and the Windows API is **frozen at `060c54e4`** (tag `m6-windows-api-freeze`), both recorded by Jon on 2026-11-17. Native BGRA and NV12 1080p60 are supported under a recorded host-scheduling assumption, without a clean 1800 s pass on the final revision. Decoded relay 4K30 stays excluded. M6 for Linux and Android is open and next (Jon's decision, 2026-11-18), and M7 is held until then. Current status, revisions and the order of work: [STATUS.md](STATUS.md). The 2026-11-12 Windows scope approval and the closure checklist are in [M6 Windows readiness](m6/M6_WINDOWS_READINESS.md).
 
 Sections below that carry an earlier date describe status at that date.
 
@@ -12,8 +12,8 @@ Updated 2026-11-04. This is the checkable execution view of
 remain authoritative. Checked means implemented, reviewed and validated within
 the stated scope—not universal hardware support or physical-output qualification.
 
-Remaining work: M6 for Linux and Android, and M7. Their order is Jon's open
-decision (see [STATUS.md](STATUS.md)). One task at a time; no concurrent
+Remaining work: M6 for Linux and Android, then M7 (Jon's decision, 2026-11-18;
+see [STATUS.md](STATUS.md)). One task at a time; no concurrent
 implementation/review/validation streams. Automated status reporting remains cancelled.
 
 ## Completed milestones
@@ -391,7 +391,7 @@ per-platform state. Windows readiness is the
 
 ## M7 — Release and developer handoff
 
-**State (2026-11-17): held.** M7.1 is done for Windows only (API frozen at
+**State (2026-11-18): held until M6 Linux and Android.** M7.1 is done for Windows only (API frozen at
 `060c54e4`). Deliverable: reproducible versioned release, not merely source
 branches or a demo that depends on the developer's machine.
 
