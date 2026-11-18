@@ -20,12 +20,14 @@ typedef struct GstFrameLinkMemoryPolicy {
 // FL_MEMORY_REQUIREMENTS_WIRE_SIZE bytes. Required on policy-bound native sinks.
 // This request is evaluated alongside BOTH authenticated endpoint requirements.
 
-// Windows A/V bins additionally expose set-local-native-candidate(pointer).
+// A/V bins on Windows (D3D11) and desktop Linux (DMA-BUF) additionally expose
+// set-local-native-candidate(pointer); elsewhere it returns false.
 // This is an UNAUTHENTICATED producer-ordered template, not apply-memory-policy.
 // Configure all properties first in NULL, including a nonempty session= path;
 // producer native-memory=true. Receiver native-memory=false selects CPU_READ
 // with operations=COPY|READBACK; true selects GPU_SAMPLE with operations=0.
-// Neither shared-cpu nor audio-only. Version 1, generation 0, D3D11 producer
+// Neither shared-cpu nor audio-only. Version 1, generation 0, platform-native
+// (D3D11 or DMA-BUF) producer
 // GPU_SAMPLE or GPU_SAMPLE|GPU_RENDER, operations=0 (GPU_RENDER alone rejects). Receiver property and candidate must match. Native
 // receivers require downstream retain-memory-until-gpu-complete-v1 allocation
 // agreement and memory retention until actual GPU completion; no implicit copy.

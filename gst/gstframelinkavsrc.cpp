@@ -136,11 +136,14 @@ static void startWorker(GstFrameLinkAvSrc*s){
  s->worker=new std::thread([s,caps,path,flags]{
   auto*sh=s->shared;GError*error=nullptr;flChannel*channel=nullptr;
   bool ok=false;
-#if defined(_WIN32)
+#ifdef FL_GST_LOCAL_NATIVE_SESSION
   if(s->candidateSet){
+#ifdef _WIN32
    if(s->nativePoolReceiver)ok=fl_gst_session_open_local_native_pool_receiver(s->session,path.c_str(),&caps,s->videoQueue,s->videoPool,s->audioQueueMs,s->connectMs,s->idleMs,
     &s->nativeCandidate,&s->shared->bound,&channel,s->cancel,&error);
-   else ok=fl_gst_session_open_local_native_epoch(s->session,FALSE,path.c_str(),&caps,s->videoQueue,s->videoPool,s->audioQueueMs,s->connectMs,s->idleMs,
+   else
+#endif
+   ok=fl_gst_session_open_local_native_epoch(s->session,FALSE,path.c_str(),&caps,s->videoQueue,s->videoPool,s->audioQueueMs,s->connectMs,s->idleMs,
     &s->nativeCandidate,&s->shared->bound,&channel,nullptr,nullptr,s->cancel,&error);
   }
   else
@@ -317,7 +320,11 @@ static gboolean applyMemoryPolicy(GstFrameLinkAvSrc*s,GstFrameLinkMemoryPolicy*p
 // Provisional producer-ordered template, never an authenticated policy. Copy
 // it while NULL; the worker authenticates BOTH peers before allocating a channel.
 static gboolean setLocalNativeProfile(GstFrameLinkAvSrc*s,GstFrameLinkMemoryPolicy*policy,bool poolReceiver){
-#if defined(_WIN32)
+#ifdef FL_GST_LOCAL_NATIVE_SESSION
+#ifndef _WIN32
+ // The FAR5 exact-pool receiver imports D3D11 shared handles; Windows only.
+ if(poolReceiver)return FALSE;
+#endif
  if(!policy||s->ownerSelected||s->candidateSet||s->nativeAdopted||s->policyBound||s->local||s->sharedCpu||!wantVideo(s)||!s->video||
     !s->sessionPath||!*s->sessionPath||GST_STATE(s)!=GST_STATE_NULL)return FALSE;
  // FAR5 preserves an existing A/V session and imports an exact-sized pool;
@@ -328,7 +335,7 @@ static gboolean setLocalNativeProfile(GstFrameLinkAvSrc*s,GstFrameLinkMemoryPoli
  flMemoryDecision decisions[2]{};
  if(policy->version!=1||policy->reserved||policy->sessionGeneration||
     flMemoryEvaluateBoundary(policy->requirements,policy->paths,2,decisions)!=FL_MEMORY_OK||
-    policy->paths[0].resourceType!=FL_MEMORY_D3D11||policy->paths[1].resourceType!=FL_MEMORY_D3D11||
+    policy->paths[0].resourceType!=FL_GST_LOCAL_NATIVE_RESOURCE||policy->paths[1].resourceType!=FL_GST_LOCAL_NATIVE_RESOURCE||
     policy->paths[0].operations||(!nativeReceiver&&!readbackReceiver)||
     (policy->paths[0].supportedUsage!=FL_MEMORY_GPU_SAMPLE&&
      policy->paths[0].supportedUsage!=(FL_MEMORY_GPU_SAMPLE|FL_MEMORY_GPU_RENDER))||bool(s->nativeMemory)!=nativeReceiver)return FALSE;

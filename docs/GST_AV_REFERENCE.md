@@ -116,15 +116,19 @@ Setup properties change only in NULL.
 | `audio-format` | string, default "S16LE" | read/write | Offered PCM format with session= (S16LE, F32LE) |
 | `audio-queue-ms` | uint 1 - 2000, default 80 | read/write | Hard audio queue budget, not target latency |
 | `audio-track-id` | uint, default 0 | read-only | Negotiated audio identity, zero when absent |
+| `buffer-wait-ms` | uint 0 - 1000, default 5 | read/write | Maximum video allocation wait; zero is nonblocking, not a presentation delay; set before channel/policy binding |
 | `channels` | uint 1 - 2, default 2 | read/write | Offered PCM channels with session= |
 | `connect-timeout-ms` | uint 1 - 60000, default 15000 | read/write | Session setup and media hold deadline |
+| `error-on-ring-full` | bool, default false | read/write | Fail video copy-in on exhausted ring instead of drop-and-count; does not relax PCM or native ownership rules |
 | `framerate` | Fraction. 1/1 - 240/1, default 30/1 | read/write | Offered video frame rate with session= |
 | `generation` | uint64, default 0 | read-only | Negotiated session generation |
 | `height` | uint 16 - 8192, default 720 | read/write | Offered video height with session= |
 | `idle-timeout-ms` | uint 1 - 60000, default 15000 | read/write | Bounded transport idle deadline |
+| `native-memory` | bool, default false | read/write | Strict native producer; broker-bound policy or session= with explicit set-local-native-candidate; no implicit fallback |
 | `rate` | uint 8000 - 192000, default 48000 | read/write | Offered PCM rate with session= |
 | `session` | string, default null | read/write | Private current-user local discovery directory (not a secret or URL); unset: use an installed framelink.session.v1 context |
 | `session-id` | string, default null | read-only | Negotiated identity, not a secret |
+| `shared-cpu` | bool, default false | read/write | Explicit CPU video copy path; broker context or current-user session= discovery, no native fallback |
 | `tracks` | string, default "av" | read/write | Required track set: audio, video or av; only enabled pads exist |
 | `video-format` | string, default "BGRA" | read/write | Offered video format with session= (BGRA, RGBA, NV12, RGB10A2_LE) |
 | `video-pool` | uint 0 - 16, default 0 | read/write | Consumer ring images requested (0: consumer default) |
@@ -134,7 +138,9 @@ Setup properties change only in NULL.
 
 Signals: `pad-added`, `pad-removed`, `no-more-pads`
 
-Actions: `adopt-channel`
+Actions: `set-local-native-candidate`, `set-local-d3d11-device-owner`, `apply-memory-policy`, `adopt-channel`; on Linux (DMA-BUF) and Android (AHardwareBuffer) builds also `set-native-ready-fd` and `acquire-native-buffer`, forwarded to the inner `framelinksink`
+
+`set-local-native-candidate` selects the explicit local native session profile: D3D11 on Windows, DMA-BUF on desktop Linux (since 2026-11-18). It is not yet enabled on Android. `set-local-d3d11-device-owner` is effective on Windows only.
 
 #### `framelinkavsrc`
 
@@ -154,6 +160,7 @@ Actions: `adopt-channel`
 | `rate` | uint 8000 - 192000, default 48000 | read/write | Accepted PCM rate |
 | `session` | string, default null | read/write | Private current-user local discovery directory (not a secret or URL); unset: use an installed framelink.session.v1 context |
 | `session-id` | string, default null | read-only | Negotiated identity, not a secret |
+| `shared-cpu` | bool, default false | read/write | Explicit CPU video copy path; broker context or current-user session= discovery, no native fallback |
 | `tracks` | string, default "av" | read/write | Required track set: audio, video or av; only enabled pads exist |
 | `video-format` | string, default "BGRA" | read/write | Accepted video format (BGRA, RGBA, NV12, RGB10A2_LE) |
 | `video-pool` | uint 0 - 16, default 8 | read/write | Independent ownership capacity with session= (0: 4), not a playback delay; cover unread depth and downstream-held buffers |
@@ -163,7 +170,9 @@ Actions: `adopt-channel`
 
 Signals: `pad-added`, `pad-removed`, `no-more-pads`
 
-Actions: `adopt-channel`
+Actions: `set-local-native-candidate`, `set-local-native-pool-candidate`, `set-local-d3d11-device-owner`, `apply-memory-policy`, `adopt-channel`
+
+`set-local-native-pool-candidate` (the exact-pool relay receiver) and `set-local-d3d11-device-owner` are Windows only and return false elsewhere.
 
 #### `framelinksink`
 
