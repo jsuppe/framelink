@@ -1,0 +1,14 @@
+alloc RARELY lock W|RARELY (current)       p50= 12.78 max= 13.57 ms pixels=ok
+alloc RARELY lock OFTEN                    p50= 12.65 max= 13.42 ms pixels=ok
+alloc OFTEN  lock W|RARELY                 p50=  2.08 max=  2.38 ms pixels=ok
+alloc OFTEN  lock OFTEN                    p50=  2.09 max=  2.40 ms pixels=ok
+alloc OFTEN  lock W|OFTEN                  p50=  2.10 max=  2.40 ms pixels=ok
+alloc RARELY lock W|RARELY, fresh output   p50= 19.27 max= 20.38 ms pixels=ok
+alloc OFTEN  lock OFTEN, fresh output      p50=  7.26 max=  7.66 ms pixels=ok
+alloc RARELY lock W|RARELY (current)       p50= 12.66 max= 13.70 ms pixels=ok
+alloc RARELY lock OFTEN                    p50= 12.61 max= 13.65 ms pixels=ok
+alloc OFTEN  lock W|RARELY                 p50=  2.09 max=  2.36 ms pixels=ok
+alloc OFTEN  lock OFTEN                    p50=  2.09 max=  2.38 ms pixels=ok
+alloc OFTEN  lock W|OFTEN                  p50=  2.03 max=  2.30 ms pixels=ok
+alloc RARELY lock W|RARELY, fresh output   p50= 19.21 max= 20.24 ms pixels=ok
+alloc OFTEN  lock OFTEN, fresh output      p50=  7.33 max=  7.64 ms pixels=ok

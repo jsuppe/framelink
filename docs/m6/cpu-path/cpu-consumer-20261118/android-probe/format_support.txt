@@ -1,0 +1,12 @@
+RGBA8           READ_RARELY supported=1 allocate=0
+RGBA8           READ_OFTEN  supported=1 allocate=0
+RGBA8    render READ_RARELY supported=1 allocate=0
+RGBA8    render READ_OFTEN  supported=1 allocate=0
+RGB10A2         READ_RARELY supported=1 allocate=0
+RGB10A2         READ_OFTEN  supported=1 allocate=0
+RGB10A2  render READ_RARELY supported=1 allocate=0
+RGB10A2  render READ_OFTEN  supported=1 allocate=0
+YUV420          READ_RARELY supported=1 allocate=0
+YUV420          READ_OFTEN  supported=1 allocate=0
+YUV420   render READ_RARELY supported=1 allocate=0
+YUV420   render READ_OFTEN  supported=1 allocate=0

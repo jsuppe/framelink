@@ -1,0 +1,8 @@
+bench RGBA 1920x1080 CPU readback receiver: frames=120 first=17.282 p50=20.910 p90=23.518 p99=25.273 max=26.965 ms
+bench RGBA 1920x1080 CPU readback receiver: frames=120 first=32.464 p50=20.378 p90=23.154 p99=27.137 max=27.366 ms
+bench RGBA 3840x2160 CPU readback receiver: frames=120 first=40.000 p50=43.773 p90=54.795 p99=59.954 max=59.979 ms
+bench RGBA 3840x2160 CPU readback receiver: frames=120 first=55.512 p50=42.987 p90=55.234 p99=58.709 max=58.954 ms
+bench RGBA 1920x1080 native receiver: frames=120 first=8.238 p50=1.701 p90=2.274 p99=4.183 max=4.260 ms
+bench RGBA 1920x1080 native receiver: frames=120 first=7.080 p50=1.694 p90=2.259 p99=4.159 max=5.796 ms
+bench RGBA 3840x2160 native receiver: frames=120 first=9.789 p50=1.616 p90=3.518 p99=7.474 max=7.583 ms
+bench RGBA 3840x2160 native receiver: frames=120 first=2.659 p50=1.495 p90=3.514 p99=5.131 max=6.395 ms

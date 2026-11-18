@@ -1,0 +1,8 @@
+1920x1080 READ_RARELY stride=1920 usage=0x332: lock p50=0.023 copy p50=12.582 max=13.536 ms (659 MB/s) pixels=ok
+1920x1080 READ_OFTEN  stride=1920 usage=0x333: lock p50=0.022 copy p50=2.049 max=2.367 ms (4048 MB/s) pixels=ok
+1920x1080 READ_RARELY stride=1920 usage=0x332: lock p50=0.021 copy p50=12.695 max=13.505 ms (653 MB/s) pixels=ok
+1920x1080 READ_OFTEN  stride=1920 usage=0x333: lock p50=0.022 copy p50=2.060 max=2.260 ms (4026 MB/s) pixels=ok
+3840x2160 READ_RARELY stride=3840 usage=0x332: lock p50=0.028 copy p50=51.595 max=53.811 ms (643 MB/s) pixels=ok
+3840x2160 READ_OFTEN  stride=3840 usage=0x333: lock p50=0.034 copy p50=7.936 max=8.786 ms (4181 MB/s) pixels=ok
+3840x2160 READ_RARELY stride=3840 usage=0x332: lock p50=0.031 copy p50=51.113 max=54.049 ms (649 MB/s) pixels=ok
+3840x2160 READ_OFTEN  stride=3840 usage=0x333: lock p50=0.033 copy p50=8.003 max=9.234 ms (4146 MB/s) pixels=ok

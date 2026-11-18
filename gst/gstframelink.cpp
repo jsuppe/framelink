@@ -122,8 +122,9 @@ static void copyPixels(guint8* dst, gsize dstStride, const guint8* src, gsize sr
 // at a time. Measured on <linux-host> (RTX 3090, LINEAR bo): 10 MB/s, 363 ms per
 // 720p frame. MOVNTDQA (SSE4.1 streaming load) is the architected way to read
 // WC memory at bandwidth; writes to the ordinary GstBuffer stay plain stores.
-// x86-only: Android's AHardwareBuffer_lock hands back a cached mapping, so
-// ARM never sees this problem.
+// x86-only. On Android the ring's allocation usage decides whether the CPU
+// mapping is cached (see cpuRingUsage in framelink_android.cpp); streaming
+// loads are not the remedy there.
 #if defined(__GNUC__) && defined(__x86_64__)
 #include <smmintrin.h>
 __attribute__((target("sse4.1"))) static void wcRowCopySse41(guint8* dst, const guint8* src,

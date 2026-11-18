@@ -89,10 +89,14 @@ Boundary copies per frame for system-memory input (exact, from the
   inside GDP/GIO and the OS socket stack are unknown, not zero.
 - Native producer allocations (`framelinksink native-memory=true`) in coordinated
   sessions (roadmap M6.9) are qualified on Windows (D3D11) for the advertised
-  cells only; Linux (DMA-BUF) and Android (AHardwareBuffer) are not started.
-- On Linux with a discrete GPU the CPU consumer readback is slow (about 34MB/s
-  measured on an RTX 3090); use `native-memory=true` for large frames
-  (roadmap M6.8).
+  cells only. On Linux (DMA-BUF) and Android (AHardwareBuffer) they work with
+  focused checks (9a–9c); qualification (9d/9e) is not done.
+- On Linux with a discrete GPU, CPU output read directly from the ring is slow:
+  the ring lives in video memory (BGRA 1920x1080 measured about 689 ms per
+  frame on an RTX 3090). For a GPU producer use `native-memory=true`, or a
+  CPU-readback receiver with `gpu-readback=true` (about 3 ms per frame on the
+  same workload; one GPU copy plus a readback, not zero-copy). For a CPU
+  producer use `shared-cpu=true` (roadmap M6.8).
 - Timing figures are software timing on the consumer's pipeline clock. Display
   scanout and speaker output are not measured, and no physical lip-sync claim
   is made.
@@ -153,6 +157,7 @@ Actions: `set-local-native-candidate`, `set-local-d3d11-device-owner`, `apply-me
 | `connect-timeout-ms` | uint 1 - 60000, default 15000 | read/write | Session setup and ready deadline |
 | `framerate` | Fraction. 1/1 - 240/1, default 30/1 | read/write | Accepted video frame rate with session= |
 | `generation` | uint64, default 0 | read-only | Negotiated session generation |
+| `gpu-readback` | bool, default false | read/write | Linux EGL builds only. Local native readback receiver only: stage BGRA/RGBA DMA-BUF frames through a GPU copy into CPU output; requires negotiated COPY\|READBACK; no fallback. Set before the candidate |
 | `height` | uint 16 - 8192, default 720 | read/write | Accepted video height |
 | `idle-timeout-ms` | uint 1 - 60000, default 15000 | read/write | Bounded transport idle deadline |
 | `latency-ms` | uint 0 - 10000, default 0 | read/write | Explicit pipeline latency with session=; zero for transport, set required final-playback buffering explicitly |
@@ -185,6 +190,7 @@ Actions: `set-local-native-candidate`, `set-local-native-pool-candidate`, `set-l
 | `native-memory` | bool, default false | read/write | Strict native buffers acquired from this sink; no implicit copy fallback |
 | `preserve-frame-metadata` | bool, default false | read/write | Require exact running-time PTS/DTS/duration and media generation; both endpoints must opt in |
 | `preserve-timestamps` | bool, default false | read/write | Opt-in agreed session running-time PTS; both pipelines must share clock and base time |
+| `shared-cpu` | bool, default false | read/write | Explicit broker-bound CPU copy-in with bounded ownership wait; COPY required; A/V requires event stream |
 | `slots` | int 0 - 64, default 0 | read/write | walk consumer slot channels <channel>.0..N-1 and take the first free one (0 = open <channel> directly) |
 
 Actions: `apply-memory-policy`, `adopt-channel`, `set-native-ready-fd`, `acquire-native-buffer`
@@ -197,12 +203,14 @@ Actions: `apply-memory-policy`, `adopt-channel`, `set-native-ready-fd`, `acquire
 | `expired-frames` | uint64, default 0 | read-only | Frames discarded by receiver-local age policy |
 | `format` | string, default "BGRA" | read/write | Ring pixel format (BGRA, RGBA, NV12 or RGB10A2_LE; device-dependent) |
 | `fps` | int 1 - 240, default 30 | read/write | nominal frame rate advertised in the caps |
+| `gpu-readback` | bool, default false | read/write | Linux EGL builds only (other builds reject it at start). BGRA/RGBA GPU staging into CPU output; requires an adopted channel and negotiated COPY\|READBACK; no fallback |
 | `height` | int 16 - 8192, default 720 | read/write | ring height to allocate |
 | `max-queue-age-ms` | uint 0 - 60000, default 0 | read/write | Discard frames whose local receipt/readiness wait exceeds this age; 0 disables; never derived from media PTS |
 | `native-memory` | bool, default false | read/write | Opt-in native DMA-BUF, D3D11 or exact RGB AHardwareBuffer output; unsupported paths fail without CPU fallback |
 | `pool-size` | uint 1 - 16, default 4 | read/write | Allocated images, not a queue-fill target or presentation delay; adopted channels retain their actual capacity |
 | `preserve-frame-metadata` | bool, default false | read/write | Require exact running-time PTS/DTS/duration and media generation; both endpoints must opt in |
 | `preserve-timestamps` | bool, default false | read/write | Opt-in agreed session running-time PTS; both pipelines must share clock and base time |
+| `shared-cpu` | bool, default false | read/write | Explicit broker-bound CPU source; COPY required; A/V requires event stream; no native fallback |
 | `width` | int 16 - 8192, default 1280 | read/write | ring width to allocate |
 
 Actions: `apply-memory-policy`, `adopt-channel`

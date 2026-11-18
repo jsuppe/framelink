@@ -135,6 +135,19 @@ uint32_t ahbFormatFor(flFormat f) {
            f == FL_FORMAT_NV12 ? AHARDWAREBUFFER_FORMAT_Y8Cb8Cr8_420 : 0;
 }
 
+// FL_MAP_CPU rings exist for CPU readers (and CPU writers). Allocation usage,
+// not lock usage, selects the CPU mapping: on a Mali/MT6768 gralloc,
+// CPU_READ_RARELY gives an uncached mapping (about 650 MB/s reads at 1080p
+// RGBA) and CPU_READ_OFTEN a cached one (about 4 GB/s; docs/m6/cpu-path/
+// cpu-consumer-20261118). Prefer the cached read hint; a device that does not
+// support it for this description keeps the previous hint. Pixel contents and
+// the lock/unlock coherency contract are unchanged.
+uint64_t cpuRingUsage(AHardwareBuffer_Desc desc) {
+    desc.usage |= AHARDWAREBUFFER_USAGE_CPU_WRITE_OFTEN | AHARDWAREBUFFER_USAGE_CPU_READ_OFTEN;
+    if (AHardwareBuffer_isSupported(&desc)) return AHARDWAREBUFFER_USAGE_CPU_WRITE_OFTEN | AHARDWAREBUFFER_USAGE_CPU_READ_OFTEN;
+    return AHARDWAREBUFFER_USAGE_CPU_WRITE_OFTEN | AHARDWAREBUFFER_USAGE_CPU_READ_RARELY;
+}
+
 void freeImage(flImage* img) {
     flImageUnmap(img);
     if (img->ahb) AHardwareBuffer_release(img->ahb);
@@ -176,7 +189,7 @@ bool reallocRing(flChannel* ch, uint32_t w, uint32_t h, uint32_t poolSize) {
     desc.usage = AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE;
     if(ch->flags & FL_GPU_RENDER)desc.usage |= AHARDWAREBUFFER_USAGE_GPU_COLOR_OUTPUT;
     if (ch->flags & FL_MAP_CPU)
-        desc.usage |= AHARDWAREBUFFER_USAGE_CPU_WRITE_OFTEN | AHARDWAREBUFFER_USAGE_CPU_READ_RARELY;
+        desc.usage |= cpuRingUsage(desc);
     for (uint32_t i = 0; i < poolSize; ++i) {
         auto* img = new flImage();
         if (AHardwareBuffer_allocate(&desc, &img->ahb) != 0 || !img->ahb) {
@@ -456,7 +469,7 @@ static flResult createChannel(const char* name, uint32_t width, uint32_t height,
         AHardwareBuffer_Desc desc{};desc.width=width;desc.height=height;desc.layers=1;
         desc.format=ahbFormatFor(format);
         desc.usage=AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE|AHARDWAREBUFFER_USAGE_GPU_COLOR_OUTPUT;
-        if(flags & FL_MAP_CPU)desc.usage|=AHARDWAREBUFFER_USAGE_CPU_WRITE_OFTEN|AHARDWAREBUFFER_USAGE_CPU_READ_RARELY;
+        if(flags & FL_MAP_CPU)desc.usage|=cpuRingUsage(desc);
         if(!AHardwareBuffer_isSupported(&desc))return trace.result(FL_FORMAT_UNSUPPORTED);
     }
     auto* ch = new flChannel();

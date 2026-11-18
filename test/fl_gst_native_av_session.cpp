@@ -31,6 +31,7 @@ extern "C" {GST_PLUGIN_STATIC_DECLARE(framelink);GST_PLUGIN_STATIC_DECLARE(app);
 #define NATIVE_RESOURCE FL_MEMORY_DMABUF
 #define NATIVE_NAME "DMA-BUF"
 #endif
+#include <algorithm>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -40,6 +41,11 @@ extern "C" {GST_PLUGIN_STATIC_DECLARE(framelink);GST_PLUGIN_STATIC_DECLARE(app);
 #include <utility>
 #include <vector>
 #define CHECK(x) do{if(!(x)){fprintf(stderr,"line %d: %s\n",__LINE__,#x);std::exit(1);}}while(0)
+
+// Per-byte positional content: a stale, shifted or channel-swapped byte fails.
+static guint8 pattern(guint8 frame,unsigned plane,unsigned x,unsigned y){return guint8(frame*29+plane*101+x*7+y*13);}
+// Geometry written and checked; a bench run writes and checks only its first rows.
+struct Extent{unsigned width,height,rows;};
 
 static GstFrameLinkMemoryPolicy nativeAvPolicy(bool nativeReceiver,bool renderProducer=false,uint32_t resource=NATIVE_RESOURCE){
  GstFrameLinkMemoryPolicy policy{};policy.version=1;
@@ -96,11 +102,14 @@ static FlGstSession*childSession(GstElement*bin){
 // received memory is native, and read it back for the pixel oracle.
 #ifdef __ANDROID__
 static AHardwareBuffer*hardwareBuffer(GstMemory*mem){auto*ahb=gst_framelink_memory_get_hardware_buffer(mem);CHECK(ahb);return ahb;}
-static void fill(GstBuffer*b,bool nv12,guint8 value){
+static void fill(GstBuffer*b,bool nv12,guint8 value,Extent e){
  CHECK(!nv12); // Android native output is exact RGB only
  auto*ahb=hardwareBuffer(gst_buffer_peek_memory(b,0));AHardwareBuffer_Desc desc{};AHardwareBuffer_describe(ahb,&desc);void*data=nullptr;
+ // CPU-mappable rings carry the cached read hint wherever the device supports it.
+ auto cached=desc;cached.usage=(cached.usage&~uint64_t(AHARDWAREBUFFER_USAGE_CPU_READ_MASK))|AHARDWAREBUFFER_USAGE_CPU_READ_OFTEN;
+ if(AHardwareBuffer_isSupported(&cached))CHECK((desc.usage&AHARDWAREBUFFER_USAGE_CPU_READ_MASK)==AHARDWAREBUFFER_USAGE_CPU_READ_OFTEN);
  CHECK(AHardwareBuffer_lock(ahb,AHARDWAREBUFFER_USAGE_CPU_WRITE_OFTEN,-1,nullptr,&data)==0);
- for(unsigned y=0;y<32;++y)memset((char*)data+y*desc.stride*4,value,256);
+ for(unsigned y=0;y<e.rows;++y)for(unsigned x=0;x<e.width*4;++x)((guint8*)data)[y*desc.stride*4+x]=pattern(value,0,x,y);
  CHECK(AHardwareBuffer_unlock(ahb,nullptr)==0); // source content; the sink never maps or copies
 }
 static uint64_t allocationId(GstMemory*mem){
@@ -108,30 +117,30 @@ static uint64_t allocationId(GstMemory*mem){
  CHECK(getId);uint64_t id=0;CHECK(getId(hardwareBuffer(mem),&id)==0);return id;
 }
 static bool isNative(GstMemory*mem){return gst_framelink_memory_get_hardware_buffer(mem)!=nullptr;}
-static void checkPixels(GstMemory*mem,GstSample*,bool nativeReceiver,bool nv12,guint8 value){
+static void checkPixels(GstMemory*mem,GstSample*,bool nativeReceiver,bool nv12,guint8 value,Extent e){
  CHECK(!nv12);
  if(nativeReceiver){
   auto*ahb=hardwareBuffer(mem);AHardwareBuffer_Desc desc{};AHardwareBuffer_describe(ahb,&desc);void*data=nullptr;
   CHECK(AHardwareBuffer_lock(ahb,AHARDWAREBUFFER_USAGE_CPU_READ_OFTEN,-1,nullptr,&data)==0);
-  for(unsigned y=0;y<32;++y)for(unsigned x=0;x<256;++x)CHECK(((guint8*)data)[y*desc.stride*4+x]==value);
+  for(unsigned y=0;y<e.rows;++y)for(unsigned x=0;x<e.width*4;++x)CHECK(((guint8*)data)[y*desc.stride*4+x]==pattern(value,0,x,y));
   CHECK(AHardwareBuffer_unlock(ahb,nullptr)==0);return;
  }
  GstMapInfo map{};CHECK(gst_memory_map(mem,&map,GST_MAP_READ));
- for(unsigned i=0;i<32*256;++i)CHECK(map.data[i]==value);gst_memory_unmap(mem,&map);
+ for(unsigned y=0;y<e.rows;++y)for(unsigned x=0;x<e.width*4;++x)CHECK(map.data[y*e.width*4+x]==pattern(value,0,x,y));gst_memory_unmap(mem,&map);
 }
 #else
-static void fill(GstBuffer*b,bool nv12,guint8 value){
+static void fill(GstBuffer*b,bool nv12,guint8 value,Extent e){
  auto*mem=gst_buffer_peek_memory(b,0);CHECK(gst_is_dmabuf_memory(mem));const int fd=gst_dmabuf_memory_get_fd(mem);
  auto*layout=gst_buffer_get_video_meta(b);CHECK(layout);
  dma_buf_sync sync{};sync.flags=DMA_BUF_SYNC_START|DMA_BUF_SYNC_WRITE;CHECK(ioctl(fd,DMA_BUF_IOCTL_SYNC,&sync)==0);
  void*data=mmap(nullptr,mem->size,PROT_READ|PROT_WRITE,MAP_SHARED,fd,0);CHECK(data!=MAP_FAILED);
- for(unsigned plane=0;plane<(nv12?2u:1u);++plane)for(unsigned y=0;y<(plane?16u:32u);++y)
-  memset((char*)data+layout->offset[plane]+y*layout->stride[plane],value,nv12?64:256);
+ for(unsigned plane=0;plane<(nv12?2u:1u);++plane)for(unsigned y=0;y<(plane?e.rows/2:e.rows);++y)
+  for(unsigned x=0;x<(nv12?e.width:e.width*4);++x)((guint8*)data)[layout->offset[plane]+y*layout->stride[plane]+x]=pattern(value,plane,x,y);
  CHECK(munmap(data,mem->size)==0);sync.flags=DMA_BUF_SYNC_END|DMA_BUF_SYNC_WRITE;CHECK(ioctl(fd,DMA_BUF_IOCTL_SYNC,&sync)==0);
 }
 static uint64_t allocationId(GstMemory*mem){struct stat st{};CHECK(fstat(gst_dmabuf_memory_get_fd(mem),&st)==0);return uint64_t(st.st_ino);}
 static bool isNative(GstMemory*mem){return gst_is_dmabuf_memory(mem);}
-static void checkPixels(GstMemory*mem,GstSample*sample,bool nativeReceiver,bool nv12,guint8 value){
+static void checkPixels(GstMemory*mem,GstSample*sample,bool nativeReceiver,bool nv12,guint8 value,Extent e){
  // Native memory carries its real layout; packed CPU output follows its caps.
  auto*vb=gst_sample_get_buffer(sample);
  GstVideoInfo info;CHECK(gst_video_info_from_caps(&info,gst_sample_get_caps(sample)));
@@ -140,25 +149,40 @@ static void checkPixels(GstMemory*mem,GstSample*sample,bool nativeReceiver,bool 
  if(auto*meta=gst_buffer_get_video_meta(vb)){for(unsigned i=0;i<2;++i){offset[i]=meta->offset[i];stride[i]=meta->stride[i];}}
  else CHECK(!nativeReceiver);
  GstMapInfo map{};CHECK(gst_memory_map(mem,&map,GST_MAP_READ));
- for(unsigned plane=0;plane<(nv12?2u:1u);++plane)for(unsigned y=0;y<(plane?16u:32u);++y)for(unsigned x=0;x<(nv12?64u:256u);++x)
-  CHECK(map.data[offset[plane]+y*stride[plane]+x]==value);
+ for(unsigned plane=0;plane<(nv12?2u:1u);++plane)for(unsigned y=0;y<(plane?e.rows/2:e.rows);++y)for(unsigned x=0;x<(nv12?e.width:e.width*4);++x)
+  CHECK(map.data[offset[plane]+y*stride[plane]+x]==pattern(value,plane,x,y));
  gst_memory_unmap(mem,&map);
 }
 #endif
 
-// Real bins on both ends, explicit candidates, the sink's own DMA-BUF pool.
-static void nativeAvBins(bool nativeReceiver,const char*format,bool renderProducer){
+struct BinRun{
+ bool nativeReceiver=false;const char*format="RGBA";bool renderProducer=false;
+ bool gpuReadback=false;  // readback receiver through the EGL staging adapter
+ unsigned width=64,height=32,count=8;
+ bool bench=false;        // time push to pull; write and check only the first rows
+};
+static bool hasGpuReadback(){
+ auto*bin=gst_element_factory_make("framelinkavsrc",nullptr);CHECK(bin);
+ const bool has=g_object_class_find_property(G_OBJECT_GET_CLASS(bin),"gpu-readback")!=nullptr;gst_object_unref(bin);return has;
+}
+
+// Real bins on both ends, explicit candidates, the sink's own native pool.
+static void nativeAvBins(const BinRun&run){
+ const bool nativeReceiver=run.nativeReceiver,renderProducer=run.renderProducer;const char*format=run.format;
  const bool nv12=!strcmp(format,"NV12");
- const std::string videoCaps=std::string("video/x-raw(" NATIVE_FEATURE "),format=")+format+",width=64,height=32,framerate=30/1";
+ const Extent extent{run.width,run.height,run.bench?4u:run.height};
+ const std::string sizeCaps=",width="+std::to_string(run.width)+",height="+std::to_string(run.height);
+ const std::string videoCaps=std::string("video/x-raw(" NATIVE_FEATURE "),format=")+format+sizeCaps+",framerate=30/1";
  GError*e=nullptr;
  auto*tx=gst_parse_launch(("framelinkavsink name=transport native-memory=true appsrc name=vi is-live=true format=time caps="+videoCaps+
   " ! transport.video_sink appsrc name=ai is-live=true format=time caps=audio/x-raw,format=S16LE,layout=interleaved,rate=48000,channels=2,channel-mask=(bitmask)0x3 ! transport.audio_sink").c_str(),&e);
  if(e)fprintf(stderr,"producer pipeline: %s\n",e->message);CHECK(tx&&!e);
- auto*rx=gst_parse_launch((std::string("framelinkavsrc name=transport video-format=")+format+" width=64 height=32 framerate=30/1 transport.video_src ! appsink name=vo sync=false async=false transport.audio_src ! appsink name=ao sync=false async=false").c_str(),&e);CHECK(rx&&!e);
+ auto*rx=gst_parse_launch((std::string("framelinkavsrc name=transport video-format=")+format+" width="+std::to_string(run.width)+" height="+std::to_string(run.height)+" framerate=30/1 transport.video_src ! appsink name=vo sync=false async=false transport.audio_src ! appsink name=ao sync=false async=false").c_str(),&e);CHECK(rx&&!e);
  auto*sink=gst_bin_get_by_name(GST_BIN(tx),"transport");auto*src=gst_bin_get_by_name(GST_BIN(rx),"transport");
  if(nativeReceiver)g_object_set(src,"native-memory",TRUE,nullptr);
- const auto path=tempSessionPath("framelink-native-av-linux");
- for(auto*bin:{sink,src})g_object_set(bin,"session",path.c_str(),"video-format",format,"width",64u,"height",32u,
+ if(run.gpuReadback)g_object_set(src,"gpu-readback",TRUE,nullptr); // before the candidate freezes properties
+ const auto path=tempSessionPath("framelink-native-av");
+ for(auto*bin:{sink,src})g_object_set(bin,"session",path.c_str(),"video-format",format,"width",run.width,"height",run.height,
    "video-pool",2u,"video-queue-frames",1u,"connect-timeout-ms",2000u,"idle-timeout-ms",1000u,nullptr);
  auto policy=nativeAvPolicy(nativeReceiver,renderProducer);
  for(auto*bin:{sink,src}){auto candidate=policy;gboolean accepted=FALSE;
@@ -189,12 +213,12 @@ static void nativeAvBins(bool nativeReceiver,const char*format,bool renderProduc
  CHECK(pool&&max==2);gst_query_unref(q);gst_caps_unref(caps);CHECK(gst_buffer_pool_set_active(pool,TRUE));
 
  // Contiguous 1 ms PCM blocks; each frame lasts 1 ms and leads its audio by 37 ms.
- const unsigned count=8;const GstClockTime videoDuration=1000000;
- std::set<uint64_t> producerAllocations;std::vector<int> readyFds;GstClockTime finalPts=0;
+ const unsigned count=run.count;const GstClockTime videoDuration=1000000;
+ std::set<uint64_t> producerAllocations;std::vector<int> readyFds;GstClockTime finalPts=0;std::vector<double> receiveMs;
  for(unsigned n=0;n<count;++n){
   GstBuffer*b=nullptr;CHECK(gst_buffer_pool_acquire_buffer(pool,&b,nullptr)==GST_FLOW_OK);
   producerAllocations.insert(allocationId(gst_buffer_peek_memory(b,0)));
-  const guint8 value=guint8(n+1);fill(b,nv12,value);
+  const guint8 value=guint8(n+1);fill(b,nv12,value,extent);
   const int ready=eventfd(0,EFD_CLOEXEC|EFD_NONBLOCK);CHECK(ready>=0);readyFds.push_back(ready);
   uint64_t one=1;CHECK(write(ready,&one,sizeof one)==sizeof one); // CPU writes are complete
   gboolean accepted=FALSE;g_signal_emit_by_name(sink,"set-native-ready-fd",b,ready,&accepted);CHECK(accepted);
@@ -203,8 +227,9 @@ static void nativeAvBins(bool nativeReceiver,const char*format,bool renderProduc
   const gsize pcmBytes=192;
   auto*a=gst_buffer_new_allocate(nullptr,pcmBytes,nullptr);gst_buffer_memset(a,0,n+31,pcmBytes);
   GST_BUFFER_PTS(a)=audioPts;GST_BUFFER_DURATION(a)=1000000;
+  const gint64 pushed=g_get_monotonic_time();
   CHECK(gst_app_src_push_buffer(GST_APP_SRC(vi),b)==GST_FLOW_OK);CHECK(gst_app_src_push_buffer(GST_APP_SRC(ai),a)==GST_FLOW_OK);
-  auto*vs=gst_app_sink_try_pull_sample(GST_APP_SINK(vo),2*GST_SECOND);auto*as=gst_app_sink_try_pull_sample(GST_APP_SINK(ao),2*GST_SECOND);
+  auto*vs=gst_app_sink_try_pull_sample(GST_APP_SINK(vo),2*GST_SECOND);receiveMs.push_back((g_get_monotonic_time()-pushed)/1000.0);auto*as=gst_app_sink_try_pull_sample(GST_APP_SINK(ao),2*GST_SECOND);
   if(!vs||!as){fprintf(stderr,"%s receiver=%s frame=%u video=%p audio=%p\n",format,nativeReceiver?"native":"readback",n,(void*)vs,(void*)as);dumpErrors(tx,rx);}
   CHECK(vs&&as);
   auto*vb=gst_sample_get_buffer(vs);auto*ab=gst_sample_get_buffer(as);
@@ -216,7 +241,7 @@ static void nativeAvBins(bool nativeReceiver,const char*format,bool renderProduc
    // Allocation identity: the receiver holds the producer's own allocation.
    CHECK(isNative(memory));CHECK(producerAllocations.count(allocationId(memory))==1);
   }
-  checkPixels(memory,vs,nativeReceiver,nv12,value);
+  checkPixels(memory,vs,nativeReceiver,nv12,value,extent);
   std::vector<guint8>pcm(pcmBytes);CHECK(gst_buffer_get_size(ab)==pcmBytes&&gst_buffer_extract(ab,0,pcm.data(),pcmBytes)==pcmBytes);
   for(auto v:pcm)CHECK(v==n+31);
   gst_sample_unref(vs);gst_sample_unref(as);
@@ -233,8 +258,17 @@ static void nativeAvBins(bool nativeReceiver,const char*format,bool renderProduc
  for(int fd:readyFds)close(fd);
  g_object_unref(s);g_object_unref(r);
  for(auto*o:{vi,ai,vo,ao,sink,src})gst_object_unref(o);gst_object_unref(tx);gst_object_unref(rx);
+ const char*receiver=nativeReceiver?"native":run.gpuReadback?"GPU-staged readback":"CPU readback";
+ if(run.bench){
+  // Push to pull of one frame at a time: a stage cost, not paced throughput.
+  std::vector<double> sorted(receiveMs.begin()+1,receiveMs.end());std::sort(sorted.begin(),sorted.end());
+  auto at=[&](double q){return sorted[std::min(sorted.size()-1,size_t(q*sorted.size()))];};
+  printf("bench %s %ux%u %s receiver: frames=%u first=%.3f p50=%.3f p90=%.3f p99=%.3f max=%.3f ms\n",format,run.width,run.height,receiver,count,
+   receiveMs[0],at(0.5),at(0.9),at(0.99),sorted.back());
+  return;
+ }
  printf("%s native " NATIVE_NAME " A/V bins, %s receiver%s: %u frames, original allocations, pixels, PCM and A/V offset pass\n",
-  format,nativeReceiver?"native":"CPU readback",renderProducer?", sample+render producer":"",count);
+  format,receiver,renderProducer?", sample+render producer":"",count);
 }
 
 // Direct API: one positive setup, then invalid policies, candidate mismatch,
@@ -348,20 +382,59 @@ static void nativeBinNegatives(bool nativeReceiver){
   nativeReceiver?"native":"CPU readback");
 }
 
+// gpu-readback selects GPU staging only for the negotiated readback receiver.
+static void gpuReadbackNegatives(){
+ auto make=[](bool native){auto*bin=gst_element_factory_make("framelinkavsrc",nullptr);CHECK(bin);
+  g_object_set(bin,"session","unused-gpu-readback","native-memory",native,"gpu-readback",TRUE,nullptr);return bin;};
+ {auto*bin=make(true);auto candidate=nativeAvPolicy(true);gboolean accepted=TRUE; // a native receiver has no readback
+  g_signal_emit_by_name(bin,"set-local-native-candidate",&candidate,&accepted);CHECK(!accepted);gst_object_unref(bin);}
+ {auto*bin=make(false);g_object_set(bin,"shared-cpu",TRUE,nullptr);auto candidate=nativeAvPolicy(false);gboolean accepted=TRUE;
+  g_signal_emit_by_name(bin,"set-local-native-candidate",&candidate,&accepted);CHECK(!accepted);gst_object_unref(bin);}
+ {auto*bin=make(false);auto candidate=nativeAvPolicy(false);gboolean accepted=FALSE; // frozen with the candidate
+  g_signal_emit_by_name(bin,"set-local-native-candidate",&candidate,&accepted);CHECK(accepted);
+  g_object_set(bin,"gpu-readback",FALSE,nullptr);gboolean value=FALSE;g_object_get(bin,"gpu-readback",&value,nullptr);CHECK(value);gst_object_unref(bin);}
+ for(bool shared:{false,true}){ // no candidate: refused before any session work
+  auto*pipeline=gst_pipeline_new(nullptr);auto*bin=make(false);gst_bin_add(GST_BIN(pipeline),bin);
+  const auto path=tempSessionPath("framelink-gpu-readback");g_object_set(bin,"session",path.c_str(),"shared-cpu",shared,nullptr);
+  CHECK(gst_element_set_state(pipeline,GST_STATE_READY)==GST_STATE_CHANGE_FAILURE);
+  gst_element_set_state(pipeline,GST_STATE_NULL);gst_object_unref(pipeline);
+ }
+ puts("gpu-readback bins: native receiver, shared CPU, frozen property and missing candidate controls pass");
+}
+
 int main(int argc,char**argv){
  gst_init(&argc,&argv);
 #ifdef __ANDROID__
  GST_PLUGIN_STATIC_REGISTER(framelink);GST_PLUGIN_STATIC_REGISTER(app);GST_PLUGIN_STATIC_REGISTER(coreelements);GST_PLUGIN_STATIC_REGISTER(gdp);GST_PLUGIN_STATIC_REGISTER(gio);
  if(!dlsym(RTLD_DEFAULT,"AHardwareBuffer_getId")){puts("SKIP: AHardwareBuffer_getId unavailable");return 77;}
  const char*second="RGB10A2_LE"; // Android native output is exact RGB: no NV12
+ const int first=1;
 #else
- CHECK(argc==2);GError*e=nullptr;auto*plugin=gst_plugin_load_file(argv[1],&e);CHECK(plugin&&!e);gst_object_unref(plugin);
+ CHECK(argc>=2);GError*e=nullptr;auto*plugin=gst_plugin_load_file(argv[1],&e);CHECK(plugin&&!e);gst_object_unref(plugin);
  const char*second="NV12";
+ const int first=2; // after the plugin path
 #endif
+ // [plugin] --bench WIDTH HEIGHT FORMAT FRAMES cpu|gpu|native: receive-stage timing only.
+ if(argc==first+6&&!strcmp(argv[first],"--bench")){
+  const char*mode=argv[first+5];
+  BinRun run;run.width=unsigned(atoi(argv[first+1]));run.height=unsigned(atoi(argv[first+2]));run.format=argv[first+3];run.count=unsigned(atoi(argv[first+4]));
+  run.gpuReadback=!strcmp(mode,"gpu");run.nativeReceiver=!strcmp(mode,"native");run.bench=true;
+  CHECK(run.count>=2&&(run.gpuReadback||run.nativeReceiver||!strcmp(mode,"cpu")));
+  CHECK(!run.gpuReadback||hasGpuReadback());nativeAvBins(run);return 0;
+ }
+ CHECK(argc==first);
  for(bool nativeReceiver:{false,true}){nativeBinNegatives(nativeReceiver);nativeLocalSetup(nativeReceiver);}
- nativeAvBins(true,"RGBA",false);
- nativeAvBins(true,second,false);
- nativeAvBins(true,"RGBA",true);
- nativeAvBins(false,"RGBA",false);
+ auto bins=[](bool nativeReceiver,const char*format,bool renderProducer=false,bool gpuReadback=false){
+  BinRun run;run.nativeReceiver=nativeReceiver;run.format=format;run.renderProducer=renderProducer;run.gpuReadback=gpuReadback;nativeAvBins(run);};
+ bins(true,"RGBA");
+ bins(true,second);
+ bins(true,"RGBA",true);
+ bins(false,"RGBA");
+ if(hasGpuReadback()){ // Linux EGL builds: explicit GPU staging for the readback receiver
+  gpuReadbackNegatives();
+  bins(false,"BGRA");
+  bins(false,"RGBA",false,true);
+  bins(false,"BGRA",false,true);
+ }
  puts("PASS");
 }

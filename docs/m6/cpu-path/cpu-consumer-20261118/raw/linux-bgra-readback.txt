@@ -1,0 +1,12 @@
+bench BGRA 1920x1080 CPU readback receiver: frames=120 first=719.688 p50=688.914 p90=699.914 p99=765.188 max=772.056 ms
+bench BGRA 1920x1080 GPU-staged readback receiver: frames=120 first=102.008 p50=3.191 p90=3.748 p99=5.396 max=5.790 ms
+bench BGRA 1920x1080 GPU-staged readback receiver: frames=120 first=72.714 p50=3.094 p90=3.201 p99=5.003 max=5.729 ms
+bench BGRA 1920x1080 CPU readback receiver: frames=120 first=123.328 p50=686.810 p90=696.840 p99=714.646 max=719.628 ms
+pipeline error: Socket I/O timed out gst/gstframelinkaudiosrc.cpp(66): readChunkImpl (): /GstPipeline:pipeline1/GstFrameLinkAvSrc:transport/GstFrameLinkAudioSrc:audio/FlAudioReader:flaudioreader0
+pipeline error: Internal data stream error. ../libs/gst/base/gstbasesrc.c(3187): gst_base_src_loop (): /GstPipeline:pipeline1/GstFrameLinkAvSrc:transport/GstFrameLinkAudioSrc:audio/FlAudioReader:flaudioreader0:
+line 231: vs&&as
+bench BGRA 3840x2160 GPU-staged readback receiver: frames=120 first=114.361 p50=11.445 p90=11.887 p99=12.863 max=15.589 ms
+bench BGRA 3840x2160 GPU-staged readback receiver: frames=120 first=81.155 p50=11.184 p90=11.910 p99=12.680 max=16.498 ms
+pipeline error: Socket I/O timed out gst/gstframelinkaudiosrc.cpp(66): readChunkImpl (): /GstPipeline:pipeline1/GstFrameLinkAvSrc:transport/GstFrameLinkAudioSrc:audio/FlAudioReader:flaudioreader0
+pipeline error: Internal data stream error. ../libs/gst/base/gstbasesrc.c(3187): gst_base_src_loop (): /GstPipeline:pipeline1/GstFrameLinkAvSrc:transport/GstFrameLinkAudioSrc:audio/FlAudioReader:flaudioreader0:
+line 231: vs&&as
