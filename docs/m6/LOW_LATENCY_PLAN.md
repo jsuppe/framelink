@@ -18,7 +18,7 @@ REQ-5c4df445 is superseded, not a waiver of its other constraints.
 
 ## Status — 2026-11-17
 
-M6 is **ready for the approved Windows scope** and the Windows API is **frozen at `060c54e4`** (tag `m6-windows-api-freeze`), both recorded by Jon on 2026-11-17. Native BGRA and NV12 1080p60 are supported under a recorded host-scheduling assumption, without a clean 1800 s pass on the final revision. Decoded relay 4K30 stays excluded. M6 for Linux and Android is open and deferred, and M7 is held. Current status and revisions: [STATUS.md](../STATUS.md). The 2026-11-12 Windows scope approval and the closure checklist are in [M6 Windows readiness](M6_WINDOWS_READINESS.md).
+M6 is **ready for the approved Windows scope** and the Windows API is **frozen at `060c54e4`** (tag `m6-windows-api-freeze`), both recorded by Jon on 2026-11-17. Native BGRA and NV12 1080p60 are supported under a recorded host-scheduling assumption, without a clean 1800 s pass on the final revision. Decoded relay 4K30 stays excluded. M6 for Linux and Android is open and next (Jon's decision, 2026-11-18), and M7 is held until then. Current status, revisions and the order of work: [STATUS.md](../STATUS.md). The 2026-11-12 Windows scope approval and the closure checklist are in [M6 Windows readiness](M6_WINDOWS_READINESS.md).
 
 Sections below that carry an earlier date describe status at that date.
 
@@ -230,9 +230,9 @@ Receive-depth gate evidence: [review and platform tests](receive-depth/README.md
 - [ ] 7.4 Review exact-head tests, merge/tag/artifacts and known limits; retain
       physical-output exclusions unless independently measured.
 
-## Current next action — 2026-11-17
+## Current next action — 2026-11-18
 
-No executor task is running. The next step is Jon's decision: release the Windows baseline (M7), extend M6 to Linux and Android first, or both in that order. Deferred items that are ready when chosen: the native 1080p60 late-wake diagnosis ([plan](windows-final-duration-060c54e4/README.md#decision--jon-2026-11-17)), the owner device-removal test, and D2/D3 if a convenience entry point is proposed.
+Jon decided on 2026-11-18 to extend M6 to Linux and Android before M7. The first task is M6.9 on Linux (DMA-BUF). The A/V sink and the session transport already have Linux branches for the local native session path, and Android is rejected explicitly; how much of that works on Linux has not been checked. So the task starts by establishing what of the D3D11 session wiring already applies, then completes 9a (native negotiation through the session coordinator, sink and A/V bin), 9b (DMA-BUF allocation/import with readiness and completion fences) and 9c (rejecting incompatible layouts, with a tested explicit fallback), checked with focused Linux tests. The order of the remaining work is in [STATUS.md](../STATUS.md). Windows items still deferred: the native 1080p60 late-wake diagnosis ([plan](windows-final-duration-060c54e4/README.md#decision--jon-2026-11-17)), the owner device-removal test, and D2/D3 if a convenience entry point is proposed.
 
 ## Execution history and coordination (to 2026-11-17)
 
