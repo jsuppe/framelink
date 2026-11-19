@@ -1,0 +1,96 @@
+config=RGBA 1920x1080@60 60s bufferqueue cpu-copy maxImages=2 budget_ms=17
+frames=3600/3600 identity_errors=0
+arrival.all.ms=n=3600 p50=7.62 p95=10.05 p99=11.46 p999=14.75 max=50.63 min=5.16
+arrival.steady.ms=n=3480 p50=7.63 p95=10.06 p99=11.32 p999=13.41 max=17.09 min=5.16
+post_to_done.ms=n=3600 p50=3.14 p95=4.73 p99=6.53 p999=7.86 max=9.01 min=-1.24
+producer.lock_wait.ms=n=3600 p50=0.23 p95=0.36 p99=0.67 p999=2.92 max=45.17 min=0.04
+producer.write.ms=n=3600 p50=3.36 p95=5.07 p99=6.81 p999=7.76 max=10.94 min=1.91
+deadline_misses=4/3600
+producer.thread_cpu.percent=23.85
+consumer.thread_cpu.percent=17.93
+exit=0
+
+config=RGBA 3840x2160@30 60s bufferqueue cpu-copy maxImages=2 budget_ms=34
+frames=1800/1800 identity_errors=0
+arrival.all.ms=n=1800 p50=19.91 p95=22.17 p99=23.92 p999=30.66 max=62.96 min=16.11
+arrival.steady.ms=n=1740 p50=19.90 p95=22.17 p99=23.82 p999=25.89 max=30.66 min=16.20
+post_to_done.ms=n=1800 p50=9.26 p95=10.62 p99=11.91 p999=14.97 max=19.34 min=7.48
+producer.lock_wait.ms=n=1800 p50=0.20 p95=0.35 p99=0.50 p999=2.76 max=39.70 min=0.05
+producer.write.ms=n=1800 p50=9.76 p95=11.75 p99=12.96 p999=14.21 max=16.51 min=7.57
+deadline_misses=2/1800
+producer.thread_cpu.percent=30.45
+consumer.thread_cpu.percent=26.93
+exit=0
+
+config=RGBA 1920x1080@60 60s bufferqueue gpu-no-copy maxImages=2 budget_ms=17
+frames=3600/3600 identity_errors=not-checked
+arrival.all.ms=n=3600 p50=4.79 p95=7.12 p99=8.76 p999=11.12 max=39.92 min=2.56
+arrival.steady.ms=n=3480 p50=4.80 p95=7.12 p99=8.71 p999=10.43 max=11.30 min=2.87
+post_to_done.ms=n=3600 p50=0.28 p95=0.76 p99=1.58 p999=3.83 max=4.60 min=-4.03
+producer.lock_wait.ms=n=3600 p50=0.24 p95=0.37 p99=0.69 p999=2.56 max=36.43 min=0.05
+producer.write.ms=n=3600 p50=3.53 p95=5.24 p99=7.07 p999=7.89 max=9.57 min=1.88
+deadline_misses=2/3600
+producer.thread_cpu.percent=24.91
+consumer.thread_cpu.percent=1.12
+exit=0
+
+config=RGBA 3840x2160@30 60s bufferqueue gpu-no-copy maxImages=2 budget_ms=34
+frames=1800/1800 identity_errors=not-checked
+arrival.all.ms=n=1800 p50=11.18 p95=13.20 p99=14.56 p999=16.04 max=52.17 min=8.14
+arrival.steady.ms=n=1740 p50=11.17 p95=13.22 p99=14.50 p999=15.84 max=16.04 min=8.47
+post_to_done.ms=n=1800 p50=0.25 p95=0.64 p99=1.34 p999=2.51 max=4.07 min=-2.41
+producer.lock_wait.ms=n=1800 p50=0.22 p95=0.35 p99=0.48 p999=2.04 max=40.91 min=0.05
+producer.write.ms=n=1800 p50=10.03 p95=11.97 p99=13.06 p999=14.50 max=15.03 min=7.22
+deadline_misses=1/1800
+producer.thread_cpu.percent=31.43
+consumer.thread_cpu.percent=0.45
+exit=0
+
+config=RGBA 1920x1080@60 60s bufferqueue cpu-copy maxImages=2 budget_ms=17
+frames=3600/3600 identity_errors=0
+arrival.all.ms=n=3600 p50=7.70 p95=10.21 p99=11.70 p999=15.63 max=53.68 min=5.02
+arrival.steady.ms=n=3480 p50=7.68 p95=10.15 p99=11.46 p999=14.49 max=15.63 min=5.02
+post_to_done.ms=n=3600 p50=3.19 p95=4.76 p99=6.47 p999=8.11 max=9.93 min=-0.08
+producer.lock_wait.ms=n=3600 p50=0.24 p95=0.35 p99=0.60 p999=3.47 max=47.46 min=0.04
+producer.write.ms=n=3600 p50=3.39 p95=5.15 p99=6.86 p999=7.86 max=9.41 min=1.99
+deadline_misses=4/3600
+producer.thread_cpu.percent=23.94
+consumer.thread_cpu.percent=18.10
+exit=0
+
+config=RGBA 3840x2160@30 60s bufferqueue cpu-copy maxImages=2 budget_ms=34
+frames=1800/1800 identity_errors=0
+arrival.all.ms=n=1800 p50=19.89 p95=22.37 p99=24.51 p999=29.87 max=65.27 min=15.80
+arrival.steady.ms=n=1740 p50=19.91 p95=22.37 p99=24.32 p999=25.38 max=29.87 min=15.80
+post_to_done.ms=n=1800 p50=9.34 p95=11.07 p99=12.13 p999=14.70 max=16.90 min=7.39
+producer.lock_wait.ms=n=1800 p50=0.20 p95=0.32 p99=0.49 p999=2.15 max=41.71 min=0.04
+producer.write.ms=n=1800 p50=9.71 p95=11.76 p99=13.02 p999=15.28 max=16.08 min=7.09
+deadline_misses=2/1800
+producer.thread_cpu.percent=30.49
+consumer.thread_cpu.percent=26.98
+exit=0
+
+config=RGBA 1920x1080@60 60s bufferqueue gpu-no-copy maxImages=2 budget_ms=17
+frames=3600/3600 identity_errors=not-checked
+arrival.all.ms=n=3600 p50=4.80 p95=7.18 p99=8.74 p999=11.95 max=44.94 min=2.30
+arrival.steady.ms=n=3480 p50=4.80 p95=7.18 p99=8.73 p999=9.78 max=12.16 min=2.93
+post_to_done.ms=n=3600 p50=0.29 p95=0.78 p99=1.38 p999=4.13 max=4.81 min=-2.75
+producer.lock_wait.ms=n=3600 p50=0.25 p95=0.40 p99=0.73 p999=4.08 max=41.47 min=0.06
+producer.write.ms=n=3600 p50=3.53 p95=5.20 p99=6.90 p999=7.86 max=10.69 min=1.72
+deadline_misses=2/3600
+producer.thread_cpu.percent=24.94
+consumer.thread_cpu.percent=1.12
+exit=0
+
+config=RGBA 3840x2160@30 60s bufferqueue gpu-no-copy maxImages=2 budget_ms=34
+frames=1800/1800 identity_errors=not-checked
+arrival.all.ms=n=1800 p50=11.13 p95=13.47 p99=15.04 p999=16.68 max=47.00 min=8.17
+arrival.steady.ms=n=1740 p50=11.16 p95=13.47 p99=14.87 p999=16.31 max=16.68 min=8.31
+post_to_done.ms=n=1800 p50=0.24 p95=0.67 p99=1.28 p999=2.99 max=3.39 min=-1.27
+producer.lock_wait.ms=n=1800 p50=0.23 p95=0.39 p99=0.70 p999=3.39 max=38.12 min=0.06
+producer.write.ms=n=1800 p50=9.91 p95=12.16 p99=13.63 p999=15.15 max=15.68 min=7.22
+deadline_misses=1/1800
+producer.thread_cpu.percent=31.22
+consumer.thread_cpu.percent=0.44
+exit=0
+
