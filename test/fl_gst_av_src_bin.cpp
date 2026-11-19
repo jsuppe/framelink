@@ -220,6 +220,24 @@ static void latencyDefaults(){
  puts("transport default installs zero latency; explicit150ms compatibility preserved");
 }
 
+// gpu-readback is registered on every build, so one pipeline string works on
+// every platform; builds without the EGL staging adapter refuse TRUE at start.
+static void gpuReadbackSurface(){
+ fprintf(stderr,"CASE gpu-readback surface\n");
+ auto*s=gst_element_factory_make("framelinkavsrc",nullptr);CHECK(s);
+ auto*spec=g_object_class_find_property(G_OBJECT_GET_CLASS(s),"gpu-readback");CHECK(G_IS_PARAM_SPEC_BOOLEAN(spec)&&!G_PARAM_SPEC_BOOLEAN(spec)->default_value);
+ gst_object_unref(s);gst_object_unref(parse("framelinkavsrc tracks=video gpu-readback=false"));
+#ifndef FL_TEST_EGL_READBACK
+ auto*p=gst_pipeline_new(nullptr);s=gst_element_factory_make("framelinkavsrc",nullptr);CHECK(p&&s);
+ g_object_set(s,"session",sessionPath().c_str(),"gpu-readback",TRUE,nullptr);CHECK(gst_bin_add(GST_BIN(p),s));
+ CHECK(gst_element_set_state(p,GST_STATE_READY)==GST_STATE_CHANGE_FAILURE);
+ auto*m=finish(p,0);CHECK(m&&GST_MESSAGE_TYPE(m)==GST_MESSAGE_ERROR);const std::string text=errorText(m);gst_message_unref(m);
+ fprintf(stderr,"  refused: %s\n",text.c_str());CHECK(text.find("gpu-readback is unavailable in this build")!=std::string::npos);
+ gst_element_set_state(p,GST_STATE_NULL);gst_object_unref(p);
+#endif
+ puts("gpu-readback: registered with default false; builds without EGL staging refuse it at start");
+}
+
 int main(int argc,char**argv){gst_init(&argc,&argv);
 #ifdef __ANDROID__
  GST_PLUGIN_STATIC_REGISTER(framelink);GST_PLUGIN_STATIC_REGISTER(app);GST_PLUGIN_STATIC_REGISTER(coreelements);GST_PLUGIN_STATIC_REGISTER(gdp);GST_PLUGIN_STATIC_REGISTER(gio);
@@ -227,7 +245,7 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
 #else
  CHECK(argc>1);GError*error=nullptr;auto*plugin=gst_plugin_load_file(argv[1],&error);if(error)fprintf(stderr,"%s\n",error->message);CHECK(plugin&&!error);gst_object_unref(plugin);
 #endif
- latencyDefaults();
+ latencyDefaults();gpuReadbackSurface();
  // Only enabled pads exist; no display or audio device is inside the bin.
  for(auto t:{"av","video","audio"}){auto*s=gst_element_factory_make("framelinkavsrc",nullptr);CHECK(s);g_object_set(s,"tracks",t,nullptr);
   auto*v=gst_element_get_static_pad(s,"video_src"),*a=gst_element_get_static_pad(s,"audio_src");CHECK((v!=nullptr)==(strcmp(t,"audio")!=0)&&(a!=nullptr)==(strcmp(t,"video")!=0));

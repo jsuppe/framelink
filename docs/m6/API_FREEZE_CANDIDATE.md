@@ -41,6 +41,8 @@ All changes are additive. No existing function signature, struct layout, enum va
   - `framelink_gst_session.dll` exports go from 49 to 47 (7 mangled names removed, 5 C names added). No promised name, signature, struct, enum, property or default changed. `FL_VERSION` and the wire protocol are unchanged.
   - **Pairing:** `gstframelink.dll` and `framelink_gst_session.dll` must come from the same build. A 060c54e4-era plugin does not load against the new session library (it imports the removed names). They ship together.
   - The export lists are checked in CI against `tools/exports/`.
+- **2026-11-19 (Jon): `framelinkavsrc` registers `gpu-readback` on every platform.** It was registered only in Linux EGL builds. On Windows it is a new property, default false; setting it to true makes the element refuse to start ("gpu-readback is unavailable in this build"), as `framelinksrc` already does. Additive: no existing property, signal, default or behaviour changed.
+  - **Convention for platform-dependent element features:** register the property or action on every platform and refuse it at run time where the platform lacks it, so one pipeline description works everywhere. `framelinksrc gpu-readback` and `set-local-d3d11-device-owner` already follow it. Whether `framelinkavsink`'s `acquire-native-buffer` and `set-native-ready-fd` (Linux and Android only) follow it is decided with the native relay parity work (M6.9d).
 
 ## Deferred decisions (Jon, 2026-11-17: deferred until a convenience entry point is proposed)
 - **D2:** the default for new convenience callers (strict bounded failure versus explicitly specified realtime/latest behaviour).
