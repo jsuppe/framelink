@@ -809,10 +809,6 @@ FL_API flResult flReleaseSyncFd(flChannel* ch, const flFrame* frame, int consume
     return trace.result(ch->peer.sendWithFds(fl::MsgType::FrameReleased, &fr, sizeof(fr), consumedFd>=0?&consumedFd:nullptr, consumedFd>=0?1:0) ? FL_OK : FL_DISCONNECTED);
 }
 
-FL_API flResult flReconfigure(flChannel*, uint32_t, uint32_t, flFormat) {
-    return FL_INTERNAL; // not implemented on this backend yet
-}
-
 FL_API flResult flRelease(flChannel* ch, const flFrame* frame) {
     if(ch && (ch->flags & (FL_GPU_SYNC|FL_DEFER_RELEASE))) {
         if(!ch->isConsumer || !frame)return FL_INVALID;
