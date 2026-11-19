@@ -1,19 +1,36 @@
 #pragma once
-#ifdef _WIN32
 #include "../gst/framelink_session_transport.h"
+#ifdef FL_GST_LOCAL_NATIVE_RELAY
+#ifdef _WIN32
 #include "framelink_d3d11.h"
+#else
+#include "framelink_dmabuf.h"
+#endif
 #include <array>
 #include <cstring>
 
 namespace flsample {
+// The platform's consumer-pool snapshot: D3D11 shared handles on Windows,
+// DMA-BUF fds on desktop Linux. Same pinning contract on both.
+#ifdef _WIN32
+using LocalPoolSnapshot=flD3D11PoolSnapshot;
+inline flResult snapshotLocalPool(flChannel*c,LocalPoolSnapshot**s){return flSnapshotD3D11ConsumerPool(c,s);}
+inline flResult queryLocalPoolSnapshot(const LocalPoolSnapshot*s,flChannelInfo*i){return flQueryD3D11PoolSnapshot(s,i);}
+inline void releaseLocalPoolSnapshot(LocalPoolSnapshot*s){flReleaseD3D11PoolSnapshot(s);}
+#else
+using LocalPoolSnapshot=flDmabufPoolSnapshot;
+inline flResult snapshotLocalPool(flChannel*c,LocalPoolSnapshot**s){return flSnapshotDmabufConsumerPool(c,s);}
+inline flResult queryLocalPoolSnapshot(const LocalPoolSnapshot*s,flChannelInfo*i){return flQueryDmabufPoolSnapshot(s,i);}
+inline void releaseLocalPoolSnapshot(LocalPoolSnapshot*s){flReleaseDmabufPoolSnapshot(s);}
+#endif
 // Explicit ownership transfer, deliberately NOT a running-graph RAII owner.
 // The caller must stop writers and retire actual downstream readers before
 // closing channels. Keep snapshot for the ENTIRE graph lifetime: duplicate
-// texture handles alone do not pin the original source pool/epoch.
+// texture handles or fds alone do not pin the original source pool/epoch.
 struct LocalNativeRelaySetup {
   flChannel* input=nullptr;
   flChannel* output=nullptr;
-  flD3D11PoolSnapshot* snapshot=nullptr;
+  LocalPoolSnapshot* snapshot=nullptr;
   // Both policies are producer-ordered. Swap endpoints for receiver binding.
   GstFrameLinkMemoryPolicy inputPolicy{},outputPolicy{};
 };
@@ -43,7 +60,7 @@ inline gboolean setupLocalNativeRelay(FlGstSession* up,FlGstSession* down,
     ~Pending(){
       if(value.output)flClose(value.output);
       if(value.input)flClose(value.input);
-      if(value.snapshot)flReleaseD3D11PoolSnapshot(value.snapshot);
+      if(value.snapshot)releaseLocalPoolSnapshot(value.snapshot);
     }
   } pending;
   auto fail=[&](GIOErrorEnum code,const char* message)->gboolean{
@@ -82,15 +99,16 @@ inline gboolean setupLocalNativeRelay(FlGstSession* up,FlGstSession* down,
       audioQueueMs,remaining(),idleTimeoutMs,candidate,&value.inputPolicy,&value.input,cancel,error))
     return fail(G_IO_ERROR_FAILED,"local native relay input setup failed");
   if(!check())return FALSE;
-  if(flSnapshotD3D11ConsumerPool(value.input,&value.snapshot)!=FL_OK)
+  if(snapshotLocalPool(value.input,&value.snapshot)!=FL_OK)
     return fail(G_IO_ERROR_FAILED,"local native relay consumer snapshot failed");
   flChannelInfo info{};
-  if(flQueryD3D11PoolSnapshot(value.snapshot,&info)!=FL_OK||info.poolSize!=videoPool)
+  if(queryLocalPoolSnapshot(value.snapshot,&info)!=FL_OK||info.poolSize!=videoPool)
     return fail(G_IO_ERROR_INVALID_DATA,"local native relay snapshot capacity mismatch");
+  // Deliberately do not preserve slot order: forwarding must match the actual
+  // allocation identity, never confuse input and output ring slot indices.
+#ifdef _WIN32
   std::array<void*,FL_MAX_POOL_SIZE> handles{};
   for(guint n=0;n<videoPool;++n){
-    // Deliberately do not preserve slot order: forwarding must match the actual
-    // allocation identity, never confuse input and output ring slot indices.
     handles[videoPool-1-n]=flD3D11PoolSnapshotHandle(value.snapshot,n);
     if(!handles[videoPool-1-n])return fail(G_IO_ERROR_INVALID_DATA,"local native relay snapshot contains no handle");
   }
@@ -99,6 +117,17 @@ inline gboolean setupLocalNativeRelay(FlGstSession* up,FlGstSession* down,
       audioQueueMs,remaining(),idleTimeoutMs,candidate,info.adapterLUID,handles.data(),
       &value.outputPolicy,&value.output,cancel,error))
     return fail(G_IO_ERROR_FAILED,"local native relay output setup failed");
+#else
+  std::array<flDmabuf,FL_MAX_POOL_SIZE> images{};
+  for(guint n=0;n<videoPool;++n)
+    if(flDmabufPoolSnapshotImage(value.snapshot,n,&images[videoPool-1-n])!=FL_OK)
+      return fail(G_IO_ERROR_INVALID_DATA,"local native relay snapshot contains no image");
+  if(!check())return FALSE;
+  if(!fl_gst_session_open_local_native_relay_pool_dmabuf(down,up,outputPath,caps,videoQueue,videoPool,
+      audioQueueMs,remaining(),idleTimeoutMs,candidate,images.data(),
+      &value.outputPolicy,&value.output,cancel,error))
+    return fail(G_IO_ERROR_FAILED,"local native relay output setup failed");
+#endif
   if(!check())return FALSE;
   *out=value;
   value={};

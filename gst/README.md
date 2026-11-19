@@ -192,7 +192,7 @@ startup; it does not add intentional playback buffering. Android cross-UID
 clients require an authorized broker rather than this current-user discovery.
 See [validation and limits](../docs/m6/cpu-path/LOCAL_CPU_BINS.md).
 
-## Explicit Windows FAR5 receiver bin
+## Explicit FAR5 receiver bin (Windows and desktop Linux)
 
 `framelinkavsrc` provides the action `set-local-native-pool-candidate(policy*)`
 (returning boolean) for an authenticated FAR5 same-allocation relay receiver.
@@ -203,10 +203,12 @@ configuration; it is not successful peer setup or readiness. Observe bus errors.
 
 The existing `set-local-native-candidate` remains FAR4. FAR4 and FAR5 never
 silently negotiate down or copy-fallback. The new receiver pairs with
-`fl_gst_session_open_local_native_relay_pool`, performs setup on its worker,
-and uses the existing automatic readiness/EOS control handling. It does not
-construct the intermediate relay, source snapshot, or writer. On non-Windows
-systems the action rejects. Use new bin/session objects after failure/reconnect.
+`fl_gst_session_open_local_native_relay_pool` (Windows) or
+`fl_gst_session_open_local_native_relay_pool_dmabuf` (desktop Linux), performs
+setup on its worker, and uses the existing automatic readiness/EOS control
+handling. It does not construct the intermediate relay, source snapshot, or
+writer. On Android the action rejects. Use new bin/session objects after
+failure/reconnect.
 
 Retain final native GstMemory until actual GPU work is complete, including across
 EOS/bin teardown if necessary. Transport EOS/control drain does not complete a

@@ -183,7 +183,7 @@ Signals: `pad-added`, `pad-removed`, `no-more-pads`
 
 Actions: `set-local-native-candidate`, `set-local-native-pool-candidate`, `set-local-d3d11-device-owner`, `apply-memory-policy`, `adopt-channel`
 
-`set-local-native-pool-candidate` (the exact-pool relay receiver) and `set-local-d3d11-device-owner` are Windows only and return false elsewhere.
+`set-local-native-pool-candidate` (the exact-pool relay receiver) works on Windows and desktop Linux and returns false on Android. `set-local-d3d11-device-owner` is Windows only and returns false elsewhere.
 
 #### `framelinksink`
 

@@ -82,7 +82,7 @@ flSnapshotDmabufConsumerPool
 flSubmit
 flSubmitSyncFd
 flTraceFlush
-## libframelink_gst_session.so (43)
+## libframelink_gst_session.so (45)
 fl_gst_segment_running_time
 fl_gst_session_apply_pipeline_clock
 fl_gst_session_authenticate_audio_stream
@@ -115,8 +115,10 @@ fl_gst_session_open_local_cpu
 fl_gst_session_open_local_cpu_epoch
 fl_gst_session_open_local_native
 fl_gst_session_open_local_native_epoch
+fl_gst_session_open_local_native_pool_receiver
 fl_gst_session_open_local_native_relay
 fl_gst_session_open_local_native_relay_input
+fl_gst_session_open_local_native_relay_pool_dmabuf
 fl_gst_session_peek_video_end
 fl_gst_session_receive_video_event
 fl_gst_session_register_track

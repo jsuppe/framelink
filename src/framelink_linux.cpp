@@ -57,6 +57,7 @@
 #include "fl_log.h"
 #include "fl_protocol.h"
 #include "fl_metadata.hpp"
+#include "fl_render_node.h"
 
 struct flImage {
     gbm_bo* bo = nullptr; // consumer only
@@ -143,22 +144,7 @@ uint32_t fourccFor(flFormat f) {
     return f == FL_FORMAT_BGRA8 ? DRM_FORMAT_ARGB8888 : f == FL_FORMAT_NV12 ? DRM_FORMAT_NV12 : f == FL_FORMAT_RGBA8 ? DRM_FORMAT_ABGR8888 : f == FL_FORMAT_RGB10A2 ? DRM_FORMAT_ABGR2101010 : 0;
 }
 
-gbm_device* openRenderNode(int* fdOut) {
-    // Render nodes only: no DRM master, no seat, works headless and inside
-    // containers - which is what a library wants.
-    for (int i = 128; i < 136; ++i) {
-        char path[64];
-        snprintf(path, sizeof(path), "/dev/dri/renderD%d", i);
-        const int fd = open(path, O_RDWR | O_CLOEXEC);
-        if (fd < 0) continue;
-        if (gbm_device* g = gbm_create_device(fd)) {
-            *fdOut = fd;
-            return g;
-        }
-        ::close(fd);
-    }
-    return nullptr;
-}
+using fl::openRenderNode; // shared with the session library (fl_render_node.h)
 
 void freeImage(flImage* img) {
     flImageUnmap(img);
@@ -314,6 +300,8 @@ void acceptLoop(flChannel* ch) {
         hello.version = FL_VERSION;
         hello._pad=fl::localFeatures(ch->flags);
         hello.pid = (uint32_t)getpid();
+        hello.luidValid = 1; // render node identity, so producers report the ring's device
+        memcpy(hello.adapterLUID, ch->info.adapterLUID, sizeof hello.adapterLUID);
         if (!link.send(fl::MsgType::Hello, hello)) continue;
         auto peer = link.recv();
         if(peer && !peer->fds.empty()){for(int fd:peer->fds)close(fd);continue;}
@@ -501,6 +489,8 @@ static flResult createChannel(const char* name, uint32_t width, uint32_t height,
         FL_LOG_ERR("framelink: no usable /dev/dri render node");
         return trace.result(FL_INTERNAL);
     }
+    // The GPU the frames live on: this render node (see fl_render_node.h).
+    fl::renderNodeId(ch->drmFd, ch->info.adapterLUID);
 
     ch->externalPool=externalImages!=nullptr;
     flResult allocation=externalImages?adoptRing(ch,externalImages,poolSize):
@@ -556,6 +546,7 @@ FL_API flResult flOpenProducer(const char* name, flChannel** out) {
         delete ch;
         return trace.result(FL_DISCONNECTED);
     }
+    if (srv->luidValid) memcpy(ch->info.adapterLUID, srv->adapterLUID, sizeof ch->info.adapterLUID);
     if (srv->version != FL_VERSION) {
         FL_LOG_ERR("framelink: channel '%s' speaks version %u, we speak %u", name,
                    srv->version, (unsigned)FL_VERSION);
@@ -674,7 +665,10 @@ FL_API flResult flAcquireBuffer(flChannel* ch, flBuffer* out, uint32_t timeoutMs
     if (!ch->link.connected()) return trace.result(FL_DISCONNECTED);
     for (uint32_t waited = 0;; waited += 2) {
         drainProducerMessages(ch);
-        if(!ch->link.connected())return trace.result(FL_DISCONNECTED);
+        // Same order as Windows: a release the consumer sent before it went
+        // away still frees its slot (the relay's proof of final completion);
+        // the disconnect is reported only when no slot is free.
+        const bool gone=!ch->link.connected();
         ch->sync.advance(ch->consumedValue);
         for (size_t i = 0; i < ch->images.size(); ++i) {
             // Free once the consumer has promised never to read this slot's
@@ -692,6 +686,7 @@ FL_API flResult flAcquireBuffer(flChannel* ch, flBuffer* out, uint32_t timeoutMs
                 return trace.result(FL_OK);
             }
         }
+        if (gone) return trace.result(FL_DISCONNECTED);
         if (waited >= timeoutMs) return trace.result(FL_TIMEOUT);
         usleep(2000);
     }

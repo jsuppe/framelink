@@ -50,3 +50,25 @@ The shared test binary `fl_gst_native_relay` (`test/fl_gst_native_relay.cpp`, pl
 The adapter holds the platform parts: the native candidate on `FL_GST_LOCAL_NATIVE_RESOURCE`, writing a producer frame (D3D11 upload or mapped DMA-BUF), one-way control gates (inherited Windows events or pipes) and child processes (job object, or fork/exec with `PR_SET_PDEATHSIG`). The Windows three-process FAR5 graph still uses its own source helper until phase 3 moves it.
 
 Negative control: installing the ordinary playback mapping in `relay_input` instead of the source-relative one fails the source-control mapping check.
+
+## Phase 3 result (2026-11-19)
+
+FAR5 on desktop Linux.
+
+- **Session:** `fl_gst_session_open_local_native_relay_pool_dmabuf` (sender, taking `flDmabuf` images) and `fl_gst_session_open_local_native_pool_receiver` (receiver, same signature as Windows). The Linux session library exports 45 functions.
+- **Transfer** (`gst/fl_gst_native_relay_pool_linux.h`): an abstract `AF_UNIX` `SOCK_SEQPACKET` socket whose name is derived from the session secret. Each side checks `SO_PEERCRED` (same effective user) and binds both process IDs into a mutual HMAC under the domain "FrameLink authenticated Linux native relay pool v1". The offer carries the slot layouts with every plane fd as `SCM_RIGHTS`. The receiver checks capacity, layout, distinct allocations (by inode) and that its render node is the sender's, imports with `flCreateChannelFromDmabufs`, and acknowledges; the sender attaches as producer, checks the ring and confirms.
+- **Device identity:** on Linux, `flChannelInfo.adapterLUID` now names the ring's DRM render node (major and minor, the same bytes `flImageMemoryInfo` reports), and producers receive it in the handshake as on Windows. The render-node choice is shared by the core and the session library (`src/fl_render_node.h`).
+- **Element:** `set-local-native-pool-candidate` works on desktop Linux.
+- **Sample:** `samples/local_native_relay_setup.h` (FAR4 input, consumer-pool snapshot, FAR5 output as one transaction) builds on both platforms.
+- **Core fix:** on Linux, `flAcquireBuffer` applied a release that arrived just before the consumer closed but then reported `FL_DISCONNECTED` without handing out the freed slot. It now uses the Windows order: a free slot is returned first, and the disconnect is reported only when none is free. The relay depends on that final release as proof of completion. Android has the same pattern and is left for its phase.
+
+**Tests moved into the shared binary**, under the same names on Windows and Linux (`gst_relay_<name>_{win,linux}`): `local_process`, `local_pool_failures`, `local_three_process`, `local_three_process_av`, `local_replacement`, `local_recovery`, `local_bin`, `local_bin_negatives` and `setup_negatives`. The Windows-only `fl_gst_native_local_source_process_win.inc` is gone. The test list is one CMake list registered per platform.
+
+On Linux the pool-failure `Mismatch` case is a malformed plane layout; the Windows case is a wrong adapter LUID. A render-node mismatch needs a second GPU and was checked with a negative control instead.
+
+**Fixture fix in `local_bin`:** the parent forwarded frame n+1 while the receiver bin might not yet have taken frame n, and a coordinated ring correctly refuses an unread replacement ("coordinated video frame replaced before it was read"). The bin reader now signals after pulling each video sample, and the parent waits for it. This applies on Windows too.
+
+**Checks:**
+- All 11 shared relay tests pass on Linux, and 10 repeated runs of the set under `-j4` passed.
+- `local_bin` failed 13 of 30 serial runs without the read gate, and 15 of 40 parallel runs without the acquire-order fix; with both, 100 of 100 passed.
+- Negative controls: a wrong role byte in the sender MAC check, and a different render node at the receiver, each fail FAR5 setup.

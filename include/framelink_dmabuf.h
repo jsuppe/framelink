@@ -52,6 +52,9 @@ FL_API flResult flImageDmabuf(flImage*, flDmabuf* out);
 // Callers may dup() them, but such duplicates no longer pin the source pool.
 // Authorized cross-process transfer is the caller's responsibility.
 // On failure *out=NULL; producer channels are rejected with FL_INVALID.
+// On Linux, flChannelInfo.adapterLUID (and so the snapshot's info) names the
+// ring's DRM render node: major then minor, little-endian 32-bit each, the
+// same bytes flImageMemoryInfo reports for FL_MEMORY_DEVICE_DRM_NODE.
 typedef struct flDmabufPoolSnapshot flDmabufPoolSnapshot;
 FL_API flResult flSnapshotDmabufConsumerPool(flChannel*, flDmabufPoolSnapshot** out);
 FL_API flResult flQueryDmabufPoolSnapshot(const flDmabufPoolSnapshot*, flChannelInfo* out);
