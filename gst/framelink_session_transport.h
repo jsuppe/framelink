@@ -21,6 +21,11 @@ typedef struct flD3D11DeviceOwner flD3D11DeviceOwner;
 #define FL_GST_LOCAL_NATIVE_RESOURCE FL_MEMORY_DMABUF
 #endif
 #endif
+// FAR4 relay setup (relay_input, relay): Windows and desktop Linux. Android
+// follows with its own relay parity work.
+#if defined(_WIN32) || (defined(__linux__) && !defined(__ANDROID__))
+#define FL_GST_LOCAL_NATIVE_RELAY 1
+#endif
 G_BEGIN_DECLS
 #ifdef _WIN32
 // Explicit local native lifetime selection, before negotiation/configuration.
@@ -305,7 +310,7 @@ FL_GST_SESSION_API gboolean fl_gst_session_open_local_native_epoch(FlGstSession*
  FlGstNativeEpochFunc,gpointer,GCancellable*,GError**);
 G_END_DECLS
 #endif
-#ifdef _WIN32
+#ifdef FL_GST_LOCAL_NATIVE_RELAY
 G_BEGIN_DECLS
 // Explicit intermediate receiver for source-time relay forwarding, paired with
 // the ordinary FAR4 native producer. Authenticates the same clock exchange but
@@ -333,6 +338,10 @@ FL_GST_SESSION_API gboolean fl_gst_session_open_local_native_relay(FlGstSession*
  guint audio_queue_ms,guint connect_timeout_ms,guint idle_timeout_ms,
  const GstFrameLinkMemoryPolicy* candidate,GstFrameLinkMemoryPolicy* bound,flChannel** channel,
  GCancellable*,GError**);
+G_END_DECLS
+#endif
+#ifdef _WIN32
+G_BEGIN_DECLS
 // Explicit FAR5 same-allocation relay setup, paired ONLY with pool_receiver.
 // Same timeline/serialization contract as native_relay. Borrow adapter LUID[8]
 // and exactly video_pool D3D11 shared NT handles from a fully pinned upstream

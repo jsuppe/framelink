@@ -38,3 +38,15 @@ Android follows with the same phases on AHardwareBuffer.
 Negative controls: removing the pin from producer attach fails the `FL_BUSY` check; removing it from the geometry path fails the unchanged-geometry check.
 
 The Linux core library exports 83 functions (79 before, plus the four snapshot functions).
+
+## Phase 2 result (2026-11-19)
+
+`fl_gst_session_open_local_native_relay_input` and `fl_gst_session_open_local_native_relay` are built on desktop Linux (`FL_GST_LOCAL_NATIVE_RELAY`: Windows and desktop Linux). The FAR5 pair stays Windows-only until phase 3. The Linux session library exports 43 functions (41 before).
+
+The shared test binary `fl_gst_native_relay` (`test/fl_gst_native_relay.cpp`, platform adapter `test/fl_gst_native_relay_platform.h`) starts with two modes moved from the Windows-only `fl_gst_native_producer_win`:
+- `--relay-local-session` (`gst_relay_local_session_{win,linux}`): FAR4 relay setup pins the upstream's media, clock, epoch, generation and track IDs with a fresh hop identity; mapping, media, cancellation and alias negatives.
+- `--relay-local-source-control` (`gst_relay_local_source_control_{win,linux}`): `relay_input` against a separate source process; source-relative mapping, 8 exact frames and metadata, real read leases.
+
+The adapter holds the platform parts: the native candidate on `FL_GST_LOCAL_NATIVE_RESOURCE`, writing a producer frame (D3D11 upload or mapped DMA-BUF), one-way control gates (inherited Windows events or pipes) and child processes (job object, or fork/exec with `PR_SET_PDEATHSIG`). The Windows three-process FAR5 graph still uses its own source helper until phase 3 moves it.
+
+Negative control: installing the ordinary playback mapping in `relay_input` instead of the source-relative one fails the source-control mapping check.

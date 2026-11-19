@@ -195,7 +195,6 @@ int main(int argc,char**argv){gst_init(&argc,&argv);CHECK(argc>=2);GError*e=null
  if(argc==3&&std::string(argv[2])=="--relay-local-replacement"){localsource::threeProcess(argv[1],true,true);return 0;}
  if(argc==3&&std::string(argv[2])=="--relay-three-local-av"){localsource::threeProcess(argv[1],true);return 0;}
  if(argc==3&&std::string(argv[2])=="--relay-local-three-process"){localsource::threeProcess(argv[1]);return 0;}
- if(argc==3&&std::string(argv[2])=="--relay-local-source-control"){localsource::control(argv[1]);return 0;}
  if(argc==3&&std::string(argv[2])=="--video-relay-event-controls"){videoRelayEventControls();return 0;}
  if(argc==3&&std::string(argv[2])=="--relay-local-pool-failures"){localPoolFailureControls();return 0;}
  if(argc==3&&std::string(argv[2])=="--relay-local-process"){localPoolProcess(argv[1]);return 0;}
@@ -204,7 +203,6 @@ int main(int argc,char**argv){gst_init(&argc,&argv);CHECK(argc>=2);GError*e=null
  if(argc==3&&std::string(argv[2])=="--relay-local-events"){nativeProducerAv(15,false,false,false,true,false,false,false,false,true);return 0;}
  if(argc==3&&std::string(argv[2])=="--relay-local-pool"){nativeProducerAv(12,false,false,false,true,false,false,false,false,true);return 0;}
  if(argc==3&&std::string(argv[2])=="--relay-authenticated-pool"){nativeProducerAv(11,false,false,false,true,false,false,false,false,true);return 0;}
- if(argc==3&&std::string(argv[2])=="--relay-local-session"){nativeLocalRelaySession();return 0;}
  if(argc==3&&std::string(argv[2])=="--relay-pool-lifetime"){nativeProducerAv(10,false,false,false,true,false,false,false,false,true);return 0;}
  if(argc==3&&std::string(argv[2])=="--relay-pool-controls"){relayPoolControls();return 0;}
  if(argc==3&&std::string(argv[2])=="--relay-supervisor-controls"){relaySupervisorControls();return 0;}

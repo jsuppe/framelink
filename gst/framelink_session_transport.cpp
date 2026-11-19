@@ -680,7 +680,7 @@ gboolean fl_gst_session_open_local_native_epoch(FlGstSession*session,gboolean pr
   candidate,bound,channel,epochFunc,epochData,outer,error,nullptr);
 }
 #endif
-#ifdef _WIN32
+#ifdef FL_GST_LOCAL_NATIVE_RELAY
 gboolean fl_gst_session_open_local_native_relay_input(FlGstSession*session,const gchar*path,
  const flSessionCapabilities*local,guint queue,guint pool,guint audio,guint timeout,guint idle,
  const GstFrameLinkMemoryPolicy*candidate,GstFrameLinkMemoryPolicy*bound,flChannel**channel,
@@ -753,6 +753,8 @@ gboolean fl_gst_session_open_local_native_relay(FlGstSession*s,FlGstSession*up,c
  GCancellable*cancel,GError**error){
  return open_local_native_relay_impl(s,up,path,local,queue,pool,audio,timeout,idle,candidate,bound,channel,cancel,error,nullptr);
 }
+#endif
+#ifdef _WIN32
 gboolean fl_gst_session_open_local_native_relay_pool(FlGstSession*s,FlGstSession*up,const gchar*path,
  const flSessionCapabilities*local,guint queue,guint pool,guint audio,guint timeout,guint idle,
  const GstFrameLinkMemoryPolicy*candidate,const guint8*adapter,void*const*handles,
