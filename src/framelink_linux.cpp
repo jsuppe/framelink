@@ -47,6 +47,7 @@
 #include <gbm.h>
 
 #include <atomic>
+#include <memory>
 #include <mutex>
 #include <string>
 #include <thread>
@@ -78,6 +79,9 @@ struct LeaseCompletion {
 struct flChannel {
     bool isConsumer = false;
     bool externalPool = false;
+    // Live flDmabufPoolSnapshot count. Shared so a snapshot may outlive the
+    // channel. While nonzero the ring is pinned: no producer attach, no realloc.
+    std::shared_ptr<std::atomic<uint32_t>> poolPins = std::make_shared<std::atomic<uint32_t>>(0);
     std::string name;
     flChannelInfo info{};
     uint32_t flags = 0;
@@ -323,7 +327,7 @@ void acceptLoop(flChannel* ch) {
         {
             std::lock_guard<std::mutex> hold(ch->pendingMutex);
             ch->sync.advance(ch->retiredValue);
-            if(!ch->readers.empty() || ch->frameHeld || ch->retiredValue<ch->heldReady || !ch->pending.all([](const fl::PendingFrame& f){return fl::fenceReady(f.fence);})) {
+            if(ch->poolPins->load() || !ch->readers.empty() || ch->frameHeld || ch->retiredValue<ch->heldReady || !ch->pending.all([](const fl::PendingFrame& f){return fl::fenceReady(f.fence);})) {
                 link.send(fl::MsgType::Busy);
                 continue;
             }
@@ -368,7 +372,8 @@ void acceptLoop(flChannel* ch) {
                     (g->width != ch->info.width || g->height != ch->info.height)) {
                     std::lock_guard<std::mutex> hold(ch->pendingMutex);
                     ch->sync.advance(ch->retiredValue);
-                    if(!ch->readers.empty() || ch->frameHeld || ch->retiredValue < ch->heldReady){if(!handOverRing(ch,ch->peer))break;continue;}
+                    // A snapshot pins the pool: answer with the current ring, like a busy one.
+                    if(ch->poolPins->load() || !ch->readers.empty() || ch->frameHeld || ch->retiredValue < ch->heldReady){if(!handOverRing(ch,ch->peer))break;continue;}
                     ch->pending.clear(); // stale: the old ring is going away
                     const uint32_t pool = (uint32_t)ch->images.size();
 
@@ -976,6 +981,57 @@ FL_API flResult flImageDmabuf(flImage* img, flDmabuf* out) {
     *out = img->desc;
     return FL_OK;
 }
+
+struct flDmabufPoolSnapshot {
+    flChannelInfo info{};
+    std::vector<flDmabuf> images; // owned duplicates, -1 where unused
+    std::shared_ptr<std::atomic<uint32_t>> pins;
+    ~flDmabufPoolSnapshot() {
+        for(auto& d:images)for(int fd:d.fd)if(fd>=0)close(fd);
+        if(pins)--*pins;
+    }
+};
+
+FL_API flResult flSnapshotDmabufConsumerPool(flChannel* ch, flDmabufPoolSnapshot** out) {
+    fltrace::Scope trace("flSnapshotDmabufConsumerPool", fltrace::id(ch ? ch->name.c_str() : nullptr));
+    if(out)*out=nullptr;
+    if(!ch || !ch->isConsumer || !out)return trace.result(FL_INVALID);
+    // The listener thread changes the ring (attach, reallocation) under this lock.
+    std::lock_guard<std::mutex> hold(ch->pendingMutex);
+    if(ch->stop.load() || !ch->info.generation || ch->images.size()!=ch->info.poolSize)return trace.result(FL_DISCONNECTED);
+    auto snapshot=std::make_unique<flDmabufPoolSnapshot>();
+    snapshot->info=ch->info;
+    snapshot->images.resize(ch->images.size());
+    for(auto& d:snapshot->images)for(int& fd:d.fd)fd=-1;
+    for(size_t i=0;i<ch->images.size();++i) {
+        const flDmabuf& source=ch->images[i]->desc;
+        flDmabuf& copy=snapshot->images[i];
+        copy.planes=source.planes;copy.fourcc=source.fourcc;copy.modifier=source.modifier;
+        if(!source.planes || source.planes>4)return trace.result(FL_INTERNAL);
+        for(uint32_t p=0;p<source.planes;++p) {
+            copy.offset[p]=source.offset[p];copy.stride[p]=source.stride[p];
+            if(source.fd[p]<0 || (copy.fd[p]=fcntl(source.fd[p],F_DUPFD_CLOEXEC,0))<0)return trace.result(FL_INTERNAL);
+        }
+    }
+    snapshot->pins=ch->poolPins;
+    ++*snapshot->pins;
+    *out=snapshot.release();
+    return trace.result(FL_OK);
+}
+
+FL_API flResult flQueryDmabufPoolSnapshot(const flDmabufPoolSnapshot* snapshot, flChannelInfo* out) {
+    if(!snapshot || !out)return FL_INVALID;
+    *out=snapshot->info;
+    return FL_OK;
+}
+
+FL_API flResult flDmabufPoolSnapshotImage(const flDmabufPoolSnapshot* snapshot, uint32_t slot, flDmabuf* out) {
+    if(!snapshot || !out || slot>=snapshot->images.size())return FL_INVALID;
+    *out=snapshot->images[slot];
+    return FL_OK;
+}
+
+FL_API void flReleaseDmabufPoolSnapshot(flDmabufPoolSnapshot* snapshot) { delete snapshot; }
 
 FL_API flResult flImageMapPlanes(flImage* img,flMappedImage* out) {
     fltrace::Scope trace("flImageMapPlanes", (uint64_t)(uintptr_t)img);
