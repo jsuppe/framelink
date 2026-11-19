@@ -79,6 +79,8 @@ jobs:
         run: python tools/check_av_test_registration.py build
       - name: Inspect public GStreamer elements
         run: python tools/check_gst_elements.py build
+      - name: Exported symbols match the baseline
+        run: python tools/check_exports.py build
       - name: Run CPU-only regressions
         run: ctest --preset ci
       - name: Report hardware qualification boundary

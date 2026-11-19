@@ -130,7 +130,10 @@ if(FRAMELINK_BUILD_TESTS)
         target_link_libraries(fl_shared_cpu_reconnect PRIVATE framelink)
         add_test(NAME shared_cpu_reconnect COMMAND fl_shared_cpu_reconnect)
         set_tests_properties(shared_cpu_reconnect PROPERTIES TIMEOUT 60)
-        add_executable(fl_shared_cpu_eos test/fl_shared_cpu_eos.cpp)
+        # Sends hostile control messages through the internal IPC class, which
+        # the library does not export: compile its own copy.
+        add_executable(fl_shared_cpu_eos test/fl_shared_cpu_eos.cpp src/fl_ipc_posix.cpp)
+        target_include_directories(fl_shared_cpu_eos PRIVATE src)
         target_link_libraries(fl_shared_cpu_eos PRIVATE framelink)
         add_test(NAME shared_cpu_eos COMMAND fl_shared_cpu_eos)
         set_tests_properties(shared_cpu_eos PROPERTIES TIMEOUT 30)
@@ -1644,4 +1647,17 @@ if(FRAMELINK_BUILD_TESTS AND Python3_Interpreter_FOUND)
     add_test(NAME gst_local_decoder_rate_smoke_win COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/run_local_decoder_rate_smoke.py $<TARGET_FILE:fl_gst_local_decoder_rate_win> $<TARGET_FILE:gstframelink>)
     set_tests_properties(gst_local_decoder_rate_smoke_win PROPERTIES TIMEOUT 90)
   endif()
+endif()
+
+# Off Windows, export only what the headers mark for export (FL_API,
+# FL_GST_SESSION_API, the GStreamer plugin entry points), as the Windows DLLs
+# do. Internal C++ classes, inline functions and template instantiations stay
+# inside each library. tools/check_exports.py guards the resulting lists.
+if(NOT WIN32)
+    foreach(fl_visibility_target framelink framelink_gst_session gstframelink)
+        if(TARGET ${fl_visibility_target})
+            set_target_properties(${fl_visibility_target} PROPERTIES
+                C_VISIBILITY_PRESET hidden CXX_VISIBILITY_PRESET hidden VISIBILITY_INLINES_HIDDEN ON)
+        endif()
+    endforeach()
 endif()

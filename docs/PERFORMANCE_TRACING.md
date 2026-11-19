@@ -60,6 +60,12 @@ C++ `flush()` similarly. Snapshotting does not clear buffers. Export takes a
 registration mutex and performs file I/O; event writers never acquire that lock
 after their first event, but OS I/O contention can still affect the application.
 Measure first, export afterward. Forced termination/crash loses unsaved records.
+Every module has its own recorder on every platform: the libraries export only
+their API, so a program that includes `framelink_trace.hpp` does not share the
+library's recorder. Define `FL_TRACE_NS` and `FL_TRACE_ENV` before including it
+and give that recorder its own prefix; the native boundary benchmarks use
+`benchtrace` and `FL_BENCH_TRACE`, and `tools/check_boundary_trace.py` reads
+that file through `--completion-files`.
 Close/join component threads before unloading their library or exiting normally.
 
 Unset the environment variables to disable. `FRAMELINK_DISABLE_TRACE=ON` in
