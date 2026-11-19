@@ -1,4 +1,4 @@
-## libframelink.so (79)
+## libframelink.so (83)
 flAcquireBuffer
 flAcquireFrame
 flBeginSubmit
@@ -11,6 +11,7 @@ flCreateChannel
 flCreateChannelEx
 flCreateChannelFromDmabufs
 flCreateChannelOnAdapter
+flDmabufPoolSnapshotImage
 flEndSubmit
 flFrameAgeNs
 flFrameReadySyncFd
@@ -33,9 +34,11 @@ flOpenProducer
 flOpenProducerSlot
 flQuery
 flQueryConsumerFlags
+flQueryDmabufPoolSnapshot
 flReadLeaseFrame
 flRelease
 flReleaseBufferReference
+flReleaseDmabufPoolSnapshot
 flReleaseSyncFd
 flRequestGeometry
 flResultString
@@ -75,6 +78,7 @@ flSharedCpuSubmitWithMetadata
 flSharedCpuWaitReadable
 flSharedReadyFence
 flSignalConsumedSyncFd
+flSnapshotDmabufConsumerPool
 flSubmit
 flSubmitSyncFd
 flTraceFlush
