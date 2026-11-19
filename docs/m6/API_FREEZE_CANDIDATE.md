@@ -33,6 +33,15 @@ All changes are additive. No existing function signature, struct layout, enum va
 | 1800 s duration on this revision, shared CPU (4 cells) and native 4K30 (2 cells) | **pass**, 6/6, zero deadline misses. [Results](windows-final-duration-060c54e4/README.md) |
 | 1800 s duration on this revision, native NV12 1080p60 | **FAILED** at about 1298.7 s: test-source wake-up 43.5 ms late, then queue-1 replacement. Same signature as the excluded BGRA 1080p60 cell. Does not involve the API surface. Jon, 2026-11-17: supported under the host-scheduling assumption, failure stays recorded |
 
+## Changes after the freeze
+- **2026-11-19 (Jon): session library interface to the plugin.** Seven functions from the internal, uninstalled `fl_gst_session_internal.h` were exported with C++ (MSVC) names; they were outside the promise ("unlisted or internal headers"). Now:
+  - `fl_gst_session_publish_audio` and `fl_gst_session_publish_events` are no longer exported. They are called only inside the session library.
+  - `fl_gst_session_peek_video_end` stays internal but has a C name.
+  - `fl_gst_session_open_local_av_epoch`, `fl_gst_session_open_local_cpu_epoch`, `fl_gst_session_local_ready_cancellable` and `fl_gst_session_finish_local_cancellable` are **new public API** in `framelink_session_transport.h`, with the public `FlGstEpochFunc` typedef. `FlGstNativeEpochFunc` is kept as the same type.
+  - `framelink_gst_session.dll` exports go from 49 to 47 (7 mangled names removed, 5 C names added). No promised name, signature, struct, enum, property or default changed. `FL_VERSION` and the wire protocol are unchanged.
+  - **Pairing:** `gstframelink.dll` and `framelink_gst_session.dll` must come from the same build. A 060c54e4-era plugin does not load against the new session library (it imports the removed names). They ship together.
+  - The export lists are checked in CI against `tools/exports/`.
+
 ## Deferred decisions (Jon, 2026-11-17: deferred until a convenience entry point is proposed)
 - **D2:** the default for new convenience callers (strict bounded failure versus explicitly specified realtime/latest behaviour).
 - **D3:** whether a new convenience entrypoint may choose a compatibility copy profile.

@@ -87,14 +87,7 @@ flSharedReadyFence
 flSnapshotD3D11ConsumerPool
 flSubmit
 flTraceFlush
-## framelink_gst_session.dll (49)
-?fl_gst_session_finish_local_cancellable@@YAHPEAU_FlGstSession@@HIPEAU_GCancellable@@PEAPEAU_GError@@@Z
-?fl_gst_session_local_ready_cancellable@@YAHPEAU_FlGstSession@@HIPEAU_GCancellable@@PEAPEAU_GError@@@Z
-?fl_gst_session_open_local_av_epoch@@YAHPEAU_FlGstSession@@HPEBDPEBUflSessionCapabilities@@IIIIIIPEAPEAUflChannel@@P6A_JPEAX_K@Z4PEAU_GCancellable@@PEAPEAU_GError@@@Z
-?fl_gst_session_open_local_cpu_epoch@@YAHPEAU_FlGstSession@@HPEBDPEBUflSessionCapabilities@@IIIIIP6A_JPEAX_K@Z3PEAU_GCancellable@@PEAPEAU_GError@@@Z
-?fl_gst_session_peek_video_end@@YA?AW4FlGstSessionResult@@PEAU_FlGstSession@@_KPEAUFlGstVideoEvent@@@Z
-?fl_gst_session_publish_audio@@YAHPEAU_FlGstSession@@PEBUflSessionConfig@@PEAU_GSocketConnection@@H@Z
-?fl_gst_session_publish_events@@YAHPEAU_FlGstSession@@PEBUflSessionConfig@@PEAU_GSocketConnection@@H@Z
+## framelink_gst_session.dll (47)
 fl_gst_segment_running_time
 fl_gst_session_apply_pipeline_clock
 fl_gst_session_authenticate_audio_stream
@@ -109,18 +102,22 @@ fl_gst_session_claim_shared_cpu
 fl_gst_session_configure
 fl_gst_session_create_context
 fl_gst_session_finish_local
+fl_gst_session_finish_local_cancellable
 fl_gst_session_from_context
 fl_gst_session_get_config
 fl_gst_session_get_type
 fl_gst_session_has_event_stream
 fl_gst_session_local_ready
+fl_gst_session_local_ready_cancellable
 fl_gst_session_map_pts
 fl_gst_session_map_running_time
 fl_gst_session_negotiate_stream
 fl_gst_session_new
 fl_gst_session_open_local_audio
 fl_gst_session_open_local_av
+fl_gst_session_open_local_av_epoch
 fl_gst_session_open_local_cpu
+fl_gst_session_open_local_cpu_epoch
 fl_gst_session_open_local_native
 fl_gst_session_open_local_native_epoch
 fl_gst_session_open_local_native_pool_receiver
@@ -128,6 +125,7 @@ fl_gst_session_open_local_native_relay
 fl_gst_session_open_local_native_relay_input
 fl_gst_session_open_local_native_relay_pool
 fl_gst_session_open_named_cpu_pipe
+fl_gst_session_peek_video_end
 fl_gst_session_receive_video_event
 fl_gst_session_register_track
 fl_gst_session_send_video_event

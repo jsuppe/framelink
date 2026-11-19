@@ -32,6 +32,12 @@ session fixes one format per track at negotiation; caps must match it.
   adopts the video lease (`adopt-channel`), applies the pipeline clock and
   reports ready/drain (`fl_gst_session_local_ready`, `fl_gst_session_finish_local`).
   Use this to put the tracks in different bins or to control the order of setup.
+  `fl_gst_session_open_local_av_epoch` (and `fl_gst_session_open_local_cpu_epoch`
+  for shared CPU) lets the producer choose the session epoch through an
+  `FlGstEpochFunc`; consumers never call it. `fl_gst_session_local_ready_cancellable`
+  and `fl_gst_session_finish_local_cancellable` take a `GCancellable`, report
+  `G_IO_ERROR_CANCELLED` when it fires and `G_IO_ERROR_TIMED_OUT` when the
+  deadline expires. These are the calls the bins use.
 - **Bins in thin mode** (no `session=`): as the previous, with the bin's own
   `adopt-channel` action.
 - **Audio only**: `framelinkaudiosink session=DIR` and `framelinkaudiosrc

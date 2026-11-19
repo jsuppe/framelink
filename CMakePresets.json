@@ -39,7 +39,7 @@
       },
       "filter": {
         "include": {
-          "name": "^(local_decoder_rate_checker|local_decoder_checker|local_native_bench_analyzer|boundary_av_analyzer|memory_boundary|read_ledger|frame_metadata_contract|trace_details|trace_compiled_out|av_memory_agreement|av_memory_adversarial|memory_contract|memory_contract_c_api|audio_alignment|av_audio_segment|av_offer_bounds|av_auth|av_rendezvous|av_producer_help|av_consumer_help|session_contract|session_contract_c_api|session_contract_peers|nv12_layout|sample_invalid_cli|sample_wrong_role|trace_default_capacity|trace_override_capacity|trace_invalid_capacity|trace_disabled|trace_bounded_concurrent|trace_thread_limit|gst_session_transport|gst_session_context|gst_event_channel|gst_audio_sink|gst_audio_source|gst_local_audio)$"
+          "name": "^(local_decoder_rate_checker|local_decoder_checker|local_native_bench_analyzer|boundary_av_analyzer|memory_boundary|read_ledger|frame_metadata_contract|trace_details|trace_compiled_out|av_memory_agreement|av_memory_adversarial|memory_contract|memory_contract_c_api|audio_alignment|av_audio_segment|av_offer_bounds|av_auth|av_rendezvous|av_producer_help|av_consumer_help|session_contract|session_contract_c_api|session_contract_peers|nv12_layout|sample_invalid_cli|sample_wrong_role|trace_default_capacity|trace_override_capacity|trace_invalid_capacity|trace_disabled|trace_bounded_concurrent|trace_thread_limit|gst_session_transport|gst_session_epoch_c_api|gst_session_context|gst_event_channel|gst_audio_sink|gst_audio_source|gst_local_audio)$"
         }
       }
     },

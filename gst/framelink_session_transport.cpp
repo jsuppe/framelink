@@ -611,7 +611,8 @@ static gboolean open_local_av_impl(FlGstSession*session,gboolean producer,const 
 gboolean fl_gst_session_open_local_av_epoch(FlGstSession*session,gboolean producer,const gchar*path,
  const flSessionCapabilities*local,guint videoQueue,guint pool,guint queueMs,guint timeout,guint idle,guint flags,
  flChannel**channel,FlGstEpochFunc epochFunc,gpointer epochData,GCancellable*outer,GError**error){
- return open_local_av_impl(session,producer,path,local,videoQueue,pool,queueMs,timeout,idle,flags,channel,epochFunc,epochData,outer,error,false);
+ // Consumers never call the producer's epoch callback (FlGstEpochFunc).
+ return open_local_av_impl(session,producer,path,local,videoQueue,pool,queueMs,timeout,idle,flags,channel,producer?epochFunc:nullptr,epochData,outer,error,false);
 }
 #if defined(__linux__) || defined(_WIN32)
 gboolean fl_gst_session_open_local_cpu(FlGstSession*session,gboolean producer,const gchar*path,
@@ -623,7 +624,7 @@ gboolean fl_gst_session_open_local_cpu_epoch(FlGstSession*session,gboolean produ
  const flSessionCapabilities*local,guint videoQueue,guint pool,guint queueMs,guint timeout,guint idle,
  FlGstEpochFunc epochFunc,gpointer epochData,GCancellable*outer,GError**error){
  flChannel*unused=nullptr;
- return open_local_av_impl(session,producer,path,local,videoQueue,pool,queueMs,timeout,idle,0,&unused,epochFunc,epochData,outer,error,true);
+ return open_local_av_impl(session,producer,path,local,videoQueue,pool,queueMs,timeout,idle,0,&unused,producer?epochFunc:nullptr,epochData,outer,error,true);
 }
 #endif
 #ifdef FL_GST_LOCAL_NATIVE_SESSION
@@ -787,7 +788,9 @@ gboolean fl_gst_session_local_ready_cancellable(FlGstSession*session,gboolean pr
  if(!control){g_set_error_literal(error,G_IO_ERROR,G_IO_ERROR_NOT_FOUND,"no local control connection");return FALSE;}
  Deadline deadline(timeout,outer);guint8 marker='R';
  const bool ok=producer?(exact(control,false,&marker,1,deadline.cancel)&&marker=='R'):exact(control,true,&marker,1,deadline.cancel);
- if(!ok){fl_gst_session_cancel(session);g_set_error_literal(error,G_IO_ERROR,G_IO_ERROR_TIMED_OUT,producer?"consumer did not report ready before the deadline":"ready report failed");}
+ if(!ok){fl_gst_session_cancel(session);
+  if(outer&&g_cancellable_is_cancelled(outer))g_set_error_literal(error,G_IO_ERROR,G_IO_ERROR_CANCELLED,"ready handshake cancelled");
+  else g_set_error_literal(error,G_IO_ERROR,G_IO_ERROR_TIMED_OUT,producer?"consumer did not report ready before the deadline":"ready report failed");}
  return ok;
 }
 gboolean fl_gst_session_finish_local(FlGstSession*session,gboolean producer,guint timeout,GError**error){
@@ -802,7 +805,8 @@ gboolean fl_gst_session_finish_local_cancellable(FlGstSession*session,gboolean p
  else ok=exact(control,true,&marker,1,deadline.cancel);
  g_io_stream_close(G_IO_STREAM(control),nullptr,nullptr);g_object_unref(control);
  if(ok)fl_gst_session_complete_local(session);
- if(!ok)g_set_error_literal(error,G_IO_ERROR,G_IO_ERROR_TIMED_OUT,producer?"consumer did not report drain before the deadline":"drain report failed");
+ if(!ok&&outer&&g_cancellable_is_cancelled(outer))g_set_error_literal(error,G_IO_ERROR,G_IO_ERROR_CANCELLED,"drain handshake cancelled");
+ else if(!ok)g_set_error_literal(error,G_IO_ERROR,G_IO_ERROR_TIMED_OUT,producer?"consumer did not report drain before the deadline":"drain report failed");
  return ok;
 }
 gboolean fl_gst_session_apply_pipeline_clock(FlGstSession*session,GstPipeline*pipeline,gboolean producer,GstClockTime latency,GError**error){

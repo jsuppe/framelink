@@ -45,6 +45,64 @@ static void queueCapacity(){
   g_clear_error(&pe);g_clear_error(&ce);g_object_unref(p);g_object_unref(c);
  }
 }
+// Public epoch-selecting and cancellable entry points (FlGstEpochFunc,
+// open_local_*_epoch, local_ready/finish_local_cancellable).
+struct EpochProbe{int calls=0;gint64 value=-1;bool reject=false;};
+static gint64 chooseEpoch(gpointer data,GstClockTime now){
+ auto*probe=static_cast<EpochProbe*>(data);++probe->calls;if(probe->reject)return -1;
+ probe->value=gint64(now)+300*GST_MSECOND;return probe->value;
+}
+struct Pair{FlGstSession*p=nullptr,*c=nullptr;flChannel*pch=nullptr,*cch=nullptr;gboolean pr=FALSE,cr=FALSE;GError*pe=nullptr,*ce=nullptr;
+ ~Pair(){if(pch)flClose(pch);if(cch)flClose(cch);for(auto*s:{p,c})if(s){fl_gst_session_cancel(s);g_object_unref(s);}g_clear_error(&pe);g_clear_error(&ce);}};
+static void openAv(Pair&x,EpochProbe*producer,EpochProbe*consumer){
+ auto path=sessionPath();auto local=caps(true,true);x.p=fl_gst_session_new(3);x.c=fl_gst_session_new(3);
+ std::thread a([&]{x.pr=fl_gst_session_open_local_av_epoch(x.p,TRUE,path.c_str(),&local,2,0,80,3000,3000,0,&x.pch,producer?chooseEpoch:nullptr,producer,nullptr,&x.pe);});
+ std::thread b([&]{x.cr=fl_gst_session_open_local_av_epoch(x.c,FALSE,path.c_str(),&local,2,0,80,3000,3000,0,&x.cch,consumer?chooseEpoch:nullptr,consumer,nullptr,&x.ce);});
+ a.join();b.join();
+}
+static void publicEpochAndCancel(){
+ {// The producer selects the epoch; the consumer's callback is never called.
+  EpochProbe producer,consumer;consumer.reject=true;Pair x;openAv(x,&producer,&consumer);
+  CHECK(x.pr&&x.cr&&x.pch&&x.cch&&producer.calls==1&&consumer.calls==0);
+  flSessionConfig pc{},cc{};CHECK(fl_gst_session_get_config(x.p,&pc)==FL_GST_SESSION_READY&&fl_gst_session_get_config(x.c,&cc)==FL_GST_SESSION_READY);
+  CHECK(pc.epochNs==producer.value&&cc.epochNs==producer.value);
+  // Cancelling a waiting ready handshake returns promptly with CANCELLED.
+  GCancellable*cancel=g_cancellable_new();std::thread t([&]{g_usleep(100000);g_cancellable_cancel(cancel);});
+  const gint64 begin=g_get_monotonic_time();GError*e=nullptr;
+  CHECK(!fl_gst_session_local_ready_cancellable(x.p,TRUE,5000,cancel,&e));t.join();
+  CHECK(g_error_matches(e,G_IO_ERROR,G_IO_ERROR_CANCELLED)&&g_get_monotonic_time()-begin<2000000);
+  g_clear_error(&e);g_object_unref(cancel);
+ }
+ {// An expired deadline is TIMED_OUT, not CANCELLED.
+  Pair x;openAv(x,nullptr,nullptr);CHECK(x.pr&&x.cr);GCancellable*cancel=g_cancellable_new();GError*e=nullptr;
+  CHECK(!fl_gst_session_local_ready_cancellable(x.p,TRUE,200,cancel,&e)&&g_error_matches(e,G_IO_ERROR,G_IO_ERROR_TIMED_OUT));
+  g_clear_error(&e);g_object_unref(cancel);
+ }
+ {// A cancelled finish consumes the control connection; it cannot be retried.
+  Pair x;openAv(x,nullptr,nullptr);CHECK(x.pr&&x.cr);GCancellable*cancel=g_cancellable_new();g_cancellable_cancel(cancel);GError*e=nullptr;
+  CHECK(!fl_gst_session_finish_local_cancellable(x.p,TRUE,5000,cancel,&e)&&g_error_matches(e,G_IO_ERROR,G_IO_ERROR_CANCELLED));g_clear_error(&e);
+  CHECK(!fl_gst_session_finish_local(x.p,TRUE,1000,&e)&&g_error_matches(e,G_IO_ERROR,G_IO_ERROR_NOT_FOUND));
+  g_clear_error(&e);g_object_unref(cancel);
+  CHECK(!fl_gst_session_local_ready_cancellable(x.p,TRUE,0,nullptr,&e)&&g_error_matches(e,G_IO_ERROR,G_IO_ERROR_INVALID_ARGUMENT));g_clear_error(&e);
+ }
+ {// A negative producer epoch rejects setup on both sides.
+  EpochProbe producer;producer.reject=true;Pair x;openAv(x,&producer,nullptr);
+  CHECK(!x.pr&&!x.cr&&!x.pch&&!x.cch&&producer.calls==1&&x.pe&&std::string(x.pe->message).find("invalid session epoch")!=std::string::npos);
+ }
+#if defined(__linux__) || defined(_WIN32)
+ {// Shared-CPU setup with a producer-selected epoch.
+  EpochProbe producer,consumer;consumer.reject=true;auto path=sessionPath();
+  flSessionCapabilities v{};v.version=FL_SESSION_OPTIONAL_TRACKS_VERSION;v.videoCount=1;v.video[0]={FL_FORMAT_BGRA8,18,16,60,1};
+  auto*p=fl_gst_session_new(1);auto*c=fl_gst_session_new(1);gboolean pr=FALSE,cr=FALSE;GError*pe=nullptr,*ce=nullptr;
+  std::thread a([&]{pr=fl_gst_session_open_local_cpu_epoch(p,TRUE,path.c_str(),&v,1,2,0,3000,3000,chooseEpoch,&producer,nullptr,&pe);});
+  std::thread b([&]{cr=fl_gst_session_open_local_cpu_epoch(c,FALSE,path.c_str(),&v,1,2,0,3000,3000,chooseEpoch,&consumer,nullptr,&ce);});a.join();b.join();
+  if(pe)fprintf(stderr,"cpu producer: %s\n",pe->message);if(ce)fprintf(stderr,"cpu consumer: %s\n",ce->message);
+  CHECK(pr&&cr&&producer.calls==1&&consumer.calls==0);
+  flSessionConfig pc{};CHECK(fl_gst_session_get_config(p,&pc)==FL_GST_SESSION_READY&&pc.epochNs==producer.value);
+  for(auto*s:{p,c}){fl_gst_session_cancel(s);g_object_unref(s);}g_clear_error(&pe);g_clear_error(&ce);
+ }
+#endif
+}
 int main(int argc,char**argv){gst_init(&argc,&argv);
 #ifdef __ANDROID__
  GST_PLUGIN_STATIC_REGISTER(framelink);GST_PLUGIN_STATIC_REGISTER(app);GST_PLUGIN_STATIC_REGISTER(coreelements);GST_PLUGIN_STATIC_REGISTER(gdp);GST_PLUGIN_STATIC_REGISTER(gio);
@@ -52,7 +110,7 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
 #else
  CHECK(argc>1);GError*error=nullptr;auto*plugin=gst_plugin_load_file(argv[1],&error);if(error)fprintf(stderr,"%s\n",error->message);CHECK(plugin&&!error);gst_object_unref(plugin);
 #endif
- mismatch();queueCapacity();
+ mismatch();queueCapacity();publicEpochAndCancel();
  for(int consumerFirst=0;consumerFirst<2;consumerFirst++){
   auto path=sessionPath();auto*sender=fl_gst_session_new(3);auto*receiver=fl_gst_session_new(3);auto local=caps(true,true);
   gboolean pr=FALSE,cr=FALSE;flChannel*producer=nullptr,*consumer=nullptr;GError*pe=nullptr,*ce=nullptr;
@@ -103,6 +161,6 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
   gst_object_unref(clock);gst_element_set_state(tx,GST_STATE_NULL);gst_element_set_state(rx,GST_STATE_NULL);
   for(auto*e:{vs,vr,vout,aout,tx,rx})gst_object_unref(e);g_object_unref(sender);g_object_unref(receiver);
  }
- puts("local A/V setup: authenticated rendezvous, identity clock mapping, both startup orders, live synchronized pixels/PCM, track mismatch rejection passed");
+ puts("local A/V setup: authenticated rendezvous, identity clock mapping, both startup orders, live synchronized pixels/PCM, track mismatch rejection, public epoch selection and cancellable ready/finish passed");
  return 0;
 }
