@@ -148,6 +148,29 @@ FL_GST_SESSION_API gboolean fl_gst_session_local_ready(FlGstSession*,gboolean pr
 // or timeout_ms elapses (FALSE). Idempotent per session.
 FL_GST_SESSION_API gboolean fl_gst_session_finish_local(FlGstSession*,gboolean producer,
  guint timeout_ms,GError**);
+// Producer epoch selection for the local setup calls. Called once on the setup
+// worker with the current monotonic system-clock time, after the control
+// connection and before session negotiation. Return a nonnegative monotonic
+// system-clock timestamp; negative rejects setup. The callback must not block
+// and its data must outlive the call. Consumers never call it: their epoch
+// always comes from the authenticated producer. A null callback proposes
+// now+200ms. apply_pipeline_clock later refuses an epoch more than 1 s ahead.
+typedef gint64 (*FlGstEpochFunc)(gpointer data,GstClockTime now);
+// open_local_av with a producer-selected epoch (see FlGstEpochFunc).
+FL_GST_SESSION_API gboolean fl_gst_session_open_local_av_epoch(FlGstSession*,gboolean producer,
+ const gchar* session_path,const flSessionCapabilities* local,guint video_queue_frames,
+ guint video_pool,guint audio_queue_ms,guint connect_timeout_ms,guint idle_timeout_ms,guint channel_flags,
+ flChannel** channel,FlGstEpochFunc,gpointer,GCancellable*,GError**);
+// local_ready and finish_local that a GCancellable can interrupt, for example
+// from a state change. Same contract and timeout_ms bounds (1..60000).
+// Cancellation returns FALSE with G_IO_ERROR_CANCELLED; an expired deadline
+// returns G_IO_ERROR_TIMED_OUT. A failed ready cancels the session. A failed
+// finish has already consumed the control connection, so the session is not
+// completed and finish_local cannot be retried.
+FL_GST_SESSION_API gboolean fl_gst_session_local_ready_cancellable(FlGstSession*,gboolean producer,
+ guint timeout_ms,GCancellable*,GError**);
+FL_GST_SESSION_API gboolean fl_gst_session_finish_local_cancellable(FlGstSession*,gboolean producer,
+ guint timeout_ms,GCancellable*,GError**);
 // Install the negotiated timeline on a pipeline in NULL/READY: monotonic system
 // clock, no start-time reset, producer base time = session epoch, consumer base
 // time 0 (mapped PTS are receiver system-clock times) and the given pipeline
@@ -230,6 +253,11 @@ G_BEGIN_DECLS
 FL_GST_SESSION_API gboolean fl_gst_session_open_local_cpu(FlGstSession*,gboolean,
  const gchar*,const flSessionCapabilities*,guint video_queue_frames,guint video_pool,
  guint audio_queue_ms,guint connect_timeout_ms,guint idle_timeout_ms,GCancellable*,GError**);
+// open_local_cpu with a producer-selected epoch (see FlGstEpochFunc).
+FL_GST_SESSION_API gboolean fl_gst_session_open_local_cpu_epoch(FlGstSession*,gboolean,
+ const gchar*,const flSessionCapabilities*,guint video_queue_frames,guint video_pool,
+ guint audio_queue_ms,guint connect_timeout_ms,guint idle_timeout_ms,
+ FlGstEpochFunc,gpointer,GCancellable*,GError**);
 G_END_DECLS
 #endif
 
@@ -269,7 +297,7 @@ FL_GST_SESSION_API gboolean fl_gst_session_open_local_native(FlGstSession*,gbool
 // the callback: its epoch always comes from the authenticated producer. Null
 // callback preserves open_local_native's now+200ms epoch. The explicit local
 // native bin profile passes its already-selected pipeline epoch here.
-typedef gint64 (*FlGstNativeEpochFunc)(gpointer data,GstClockTime now);
+typedef FlGstEpochFunc FlGstNativeEpochFunc; // same type, frozen name
 FL_GST_SESSION_API gboolean fl_gst_session_open_local_native_epoch(FlGstSession*,gboolean producer,
  const gchar* session_path,const flSessionCapabilities*,guint video_queue_frames,guint video_pool,
  guint audio_queue_ms,guint connect_timeout_ms,guint idle_timeout_ms,
