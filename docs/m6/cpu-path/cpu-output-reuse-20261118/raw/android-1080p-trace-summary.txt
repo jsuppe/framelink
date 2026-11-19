@@ -1,0 +1,12 @@
+after (reuse), 1080p RGBA readback receiver, 40 frames, p50 / max ms
+  gst.cpu_copy_source_duration     n= 40    3.59 /   15.16
+  gst.cpu_output_allocate          n= 40    0.01 /    0.48
+  gst.srcCreate                    n= 41    6.07 /  112.19
+  flAcquireFrame                   n= 41    2.18 /  112.15
+  flImageMap                       n= 40    0.11 /    0.63
+before (0f4715a1 code, cached ring), 1080p RGBA readback receiver, 40 frames, p50 / max ms
+  gst.cpu_output_allocate          n= 40    0.21 /    0.36
+  gst.srcCreate                    n= 41   21.80 /  109.88
+  flAcquireFrame                   n= 41    8.64 /  109.35
+  flImageMap                       n= 40    0.13 /    0.28
+  (the RGBA copy had no duration scope before this change; it is the remainder of gst.srcCreate)

@@ -1,0 +1,39 @@
+  3/142 Test #138: m5b_gst_av_example ...................***Failed   56.10 sec
+PASS av-rgba-consumer-first [element/element] producer=0 consumer=0 elapsed=3.67s {"event": "verify", "mode": "element", "tracks": "av", "format": "RGBA", "frames": 90, "expected_frames": 90, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.055, "lag_max_ms": 150.286, "latency_ms": 150, "result": "pass"}
+PASS av-rgba-consumer-first [bin/bin] producer=0 consumer=0 elapsed=3.48s {"event": "verify", "mode": "bin", "tracks": "av", "format": "RGBA", "frames": 90, "expected_frames": 90, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.04, "lag_max_ms": 150.269, "latency_ms": 150, "result": "pass"}
+FAIL av-rgba-consumer-first [bin/element] producer=1 consumer=1 elapsed=1.41s {"event": "verify", "mode": "element", "tracks": "av", "format": "RGBA", "frames": 27, "expected_frames": 90, "samples": 43200, "expected_samples": 144000, "lag_min_ms": 150.01, "lag_max_ms": 152.755, "latency_ms": 150, "result": "fail", "reason": "video frame count"}
+--- producer stderr
+producer (bin): waiting for consumer on <tmp>/session
+audio: required session tracks not ready or cancelled
+gst/gstframelinkaudio.cpp(28): reject (): /GstPipeline:pipeline0/GstFrameLinkAvSink:s/GstFrameLinkAudioSink:audio:
+FrameLink audio rejected before serialization
+producer: failed
+
+--- consumer stderr
+consumer: connecting to <tmp>/session
+video: coordinated video frame replaced before it was read: the producer delivered faster than real time
+gst/gstframelink.cpp(1530): srcCreateImpl (): /GstPipeline:pipeline0/GstFrameLinkSrc:video:
+ring sequence 31 after 29 with a receive queue of 2; coordinated video must be paced in real time (live or clock-synchronized sources) and read within the queue budget
+consumer: failed
+
+PASS av-rgba-consumer-first [element/bin] producer=0 consumer=0 elapsed=3.71s {"event": "verify", "mode": "bin", "tracks": "av", "format": "RGBA", "frames": 90, "expected_frames": 90, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.027, "lag_max_ms": 154.506, "latency_ms": 150, "result": "pass"}
+PASS av-rgba-consumer-first timing parity element 150.1..150.3ms bin 150.0..150.3ms
+PASS av-rgba-producer-first [element/element] producer=0 consumer=0 elapsed=3.70s {"event": "verify", "mode": "element", "tracks": "av", "format": "RGBA", "frames": 90, "expected_frames": 90, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.015, "lag_max_ms": 161.623, "latency_ms": 150, "result": "pass"}
+PASS av-rgba-producer-first [bin/bin] producer=0 consumer=0 elapsed=3.47s {"event": "verify", "mode": "bin", "tracks": "av", "format": "RGBA", "frames": 90, "expected_frames": 90, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.022, "lag_max_ms": 150.302, "latency_ms": 150, "result": "pass"}
+PASS av-rgba-producer-first [bin/element] producer=0 consumer=0 elapsed=3.49s {"event": "verify", "mode": "element", "tracks": "av", "format": "RGBA", "frames": 90, "expected_frames": 90, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.018, "lag_max_ms": 150.34, "latency_ms": 150, "result": "pass"}
+PASS av-rgba-producer-first [element/bin] producer=0 consumer=0 elapsed=3.67s {"event": "verify", "mode": "bin", "tracks": "av", "format": "RGBA", "frames": 90, "expected_frames": 90, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.055, "lag_max_ms": 150.242, "latency_ms": 150, "result": "pass"}
+PASS av-rgba-producer-first timing parity element 150.0..161.6ms bin 150.0..150.3ms
+PASS av-nv12 [element/element] producer=0 consumer=0 elapsed=3.69s {"event": "verify", "mode": "element", "tracks": "av", "format": "NV12", "frames": 90, "expected_frames": 90, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.056, "lag_max_ms": 150.249, "latency_ms": 150, "result": "pass"}
+PASS av-nv12 [bin/bin] producer=0 consumer=0 elapsed=3.51s {"event": "verify", "mode": "bin", "tracks": "av", "format": "NV12", "frames": 90, "expected_frames": 90, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.046, "lag_max_ms": 150.257, "latency_ms": 150, "result": "pass"}
+PASS av-nv12 [bin/element] producer=0 consumer=0 elapsed=3.49s {"event": "verify", "mode": "element", "tracks": "av", "format": "NV12", "frames": 90, "expected_frames": 90, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.053, "lag_max_ms": 150.276, "latency_ms": 150, "result": "pass"}
+PASS av-nv12 [element/bin] producer=0 consumer=0 elapsed=3.70s {"event": "verify", "mode": "bin", "tracks": "av", "format": "NV12", "frames": 90, "expected_frames": 90, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.023, "lag_max_ms": 150.19, "latency_ms": 150, "result": "pass"}
+PASS av-nv12 timing parity element 150.1..150.2ms bin 150.0..150.3ms
+PASS video-bgra [element/element] producer=0 consumer=0 elapsed=3.69s {"event": "verify", "mode": "element", "tracks": "video", "format": "BGRA", "frames": 90, "expected_frames": 90, "samples": 0, "expected_samples": 0, "lag_min_ms": 150.057, "lag_max_ms": 150.235, "latency_ms": 150, "result": "pass"}
+PASS video-bgra [bin/bin] producer=0 consumer=0 elapsed=3.55s {"event": "verify", "mode": "bin", "tracks": "video", "format": "BGRA", "frames": 90, "expected_frames": 90, "samples": 0, "expected_samples": 0, "lag_min_ms": 150.057, "lag_max_ms": 150.178, "latency_ms": 150, "result": "pass"}
+PASS video-bgra timing parity element 150.1..150.2ms bin 150.1..150.2ms
+PASS audio-only [element/element] producer=0 consumer=0 elapsed=3.67s {"event": "verify", "mode": "element", "tracks": "audio", "format": "RGBA", "frames": 0, "expected_frames": 0, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.044, "lag_max_ms": 150.172, "latency_ms": 150, "result": "pass"}
+PASS audio-only [bin/bin] producer=0 consumer=0 elapsed=3.51s {"event": "verify", "mode": "bin", "tracks": "audio", "format": "RGBA", "frames": 0, "expected_frames": 0, "samples": 144000, "expected_samples": 144000, "lag_min_ms": 150.056, "lag_max_ms": 150.171, "latency_ms": 150, "result": "pass"}
+PASS audio-only timing parity element 150.0..150.2ms bin 150.1..150.2ms
+PASS negative-track-mismatch [element/element] producer=1 consumer=1 elapsed=0.32s 
+PASS negative-track-mismatch [bin/bin] producer=1 consumer=1 elapsed=0.32s {"event": "verify", "mode": "bin", "tracks": "audio", "format": "RGBA", "frames": 0, "expected_frames": 0, "samples": 0, "expected_samples": 144000, "lag_min_ms": 0.0, "lag_max_ms": 0.0, "latency_ms": 150, "result": "fail", "reason": "audio sample count"}
+m5b gst A/V example: 22/23 cases passed
