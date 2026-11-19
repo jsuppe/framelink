@@ -1,4 +1,4 @@
-# FrameLink project status — 2026-11-18
+# FrameLink project status — 2026-11-19
 
 This is the authoritative current-status page. Other documents link here instead of repeating status. Dated evidence folders (`docs/m*/…/README.md`) are records of their own date and are not updated.
 
@@ -16,13 +16,13 @@ This is the authoritative current-status page. Other documents link here instead
 1. M6.9 on Linux (DMA-BUF): native producer allocations in coordinated sessions. 9a–9c done with focused checks on 2026-11-18 ([evidence](m6/linux-native-av-session/README.md)); 9d/9e follow with the final-revision qualification.
 2. M6.9 on Android (AHardwareBuffer). 9a–9c done with focused checks on 2026-11-18 ([evidence](m6/android-native-av-session/README.md)).
 3. M6.8b/8c: CPU-consumer ring memory on Linux and Android. 8b in progress: on 2026-11-18, GPU staging was added to the Linux A/V source and Android CPU-mappable rings were made cached ([evidence](m6/cpu-path/cpu-consumer-20261118/README.md)), and ring readback on Linux and Android reuses its CPU output buffers ([evidence](m6/cpu-path/cpu-output-reuse-20261118/README.md)). Push-to-pull stage costs are now within the 1080p60 and 4K30 frame budgets on both platforms. 8c started on Android ([evidence](m6/cpu-path/android-cpu-receiver-20261118/README.md)): the CPU receiver's 1800 s 1080p60 cell completes (21 arrival misses over 17 ms, no drops); the 4K30 cell failed (4 ring-full drops, 283 misses over 34 ms), then completed after the receiver prepared its output buffers at start (54000/54000, no drops, 83 misses over 34 ms; one run) ([evidence](m6/cpu-path/android-output-prepare-20261118/README.md)). A same-device BufferQueue baseline is recorded ([evidence](m6/cpu-path/android-bufferqueue-20261118/README.md)). Linux 8c has not started.
-4. Check the Linux/Android integration against the frozen Windows API `060c54e4`; any breaking change goes to Jon first.
+4. Check the Linux/Android integration against the frozen Windows API `060c54e4`; any breaking change goes to Jon first. Done on 2026-11-19 at `4a944ab9`: no breaking change; the Windows exports and element surface are identical, and the frozen revision's 180 tests pass against the new DLLs. Five observations for a later Linux/Android API decision are recorded; Jon decided the first on 2026-11-19: full native relay parity (FAR4 and a FAR5 same-allocation equivalent) on Linux, then Android, as part of 9d ([evidence](m6/api-check-linux-android-20261119/README.md)).
 5. Final-revision qualification: budget acceptance (M6.2b/2e), lifecycle (M6.3), faults (M6.4), 9d/9e and the acceptance review (M6.7c).
 
 ## Current revisions
 | Repository | Revision | Notes |
 |---|---|---|
-| framelink `master` | current head | `c6d7db7` (merge of PR #10, M6 Windows) plus the tooling change (PR #11), documentation (PR #12 and later) and M6.9 on Linux and Android (PRs #17, #18): session code for those platforms only, Windows behavior unchanged (180/180 on the qualification host after each) |
+| framelink `master` | current head | `c6d7db7` (merge of PR #10, M6 Windows) plus the tooling change (PR #11), documentation (PR #12 and later) and M6.9 on Linux and Android (PRs #17, #18) and M6.8b/8c (PRs #19–#22): code for those platforms only, Windows API and behavior unchanged (180/180 on the qualification host; [API check](m6/api-check-linux-android-20261119/README.md)) |
 | Frozen Windows API | `060c54e41bcbfe7ca8dbdef89e6e74fb2930935c` | Tag `m6-windows-api-freeze`. `FL_VERSION` 6. [API freeze](m6/API_FREEZE_CANDIDATE.md) |
 | vkrender `master` | current head | Code as of `f18c97f` (PR #15 merge; later commits are docs and test scripts). Pins framelink `c6d7db7` (code identical to the frozen revision); includes the renderer repair `86853d6`, the scene-output fix (PR #20) and fullscreen across displays (PR #15) |
 | vkrender-airplay `main` | `ac4e29f` | Pins framelink `c6d7db7` |
