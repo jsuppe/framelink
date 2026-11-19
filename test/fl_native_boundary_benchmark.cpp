@@ -1,3 +1,7 @@
+// The benchmark's own events use their own recorder, as on Windows: each
+// module in a process has its own recorder (docs/PERFORMANCE_TRACING.md).
+#define FL_TRACE_NS benchtrace
+#define FL_TRACE_ENV "FL_BENCH_TRACE"
 #include "fl_native_process_support.hpp"
 #include <algorithm>
 #include <fstream>
@@ -52,10 +56,10 @@ int main(int argc,char**argv){configure();BoundaryResources resources(argc>1?arg
    flImageUnmap(f.image);CHECK(flCompleteReadLease(c,lease)==FL_OK);CHECK(flCollectReadLeases(c)==FL_OK);retired=nowNs();
   }
   CHECK(h.identity==n&&h.pts==uint64_t(f.ptsNs)&&h.magic==0x46524c42454e4348ULL&&arrival>=h.sourceReady);
-  if(gpu&&fltrace::enabled()){
-   const auto id=fltrace::id((name+".down").c_str());
-   fltrace::record({"benchmark.gpu_complete",retired,0,id,f.sequence,f._readyValue,f.slot,f.ptsNs,0});
-   fltrace::payload("benchmark.private_verification_readback",id,sizeof(Header)+4,FL_MEMORY_READBACK);
+  if(gpu&&benchtrace::enabled()){
+   const auto id=benchtrace::id((name+".down").c_str());
+   benchtrace::record({"benchmark.gpu_complete",retired,0,id,f.sequence,f._readyValue,f.slot,f.ptsNs,0});
+   benchtrace::payload("benchmark.private_verification_readback",id,sizeof(Header)+4,FL_MEMORY_READBACK);
   }
   observations.push_back({n,h.pts,h.sourceReady,arrival,retired});
  }
