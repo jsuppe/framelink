@@ -117,7 +117,7 @@ Boundary copies per frame for system-memory input (exact, from the
 
 ## Properties
 
-Setup properties change only in NULL.
+Setup properties change only in NULL. A property that depends on the platform is registered on every build; a build without the feature refuses it at start.
 
 #### `framelinkavsink`
 
@@ -163,7 +163,7 @@ Actions: `set-local-native-candidate`, `set-local-d3d11-device-owner`, `apply-me
 | `connect-timeout-ms` | uint 1 - 60000, default 15000 | read/write | Session setup and ready deadline |
 | `framerate` | Fraction. 1/1 - 240/1, default 30/1 | read/write | Accepted video frame rate with session= |
 | `generation` | uint64, default 0 | read-only | Negotiated session generation |
-| `gpu-readback` | bool, default false | read/write | Linux EGL builds only. Local native readback receiver only: stage BGRA/RGBA DMA-BUF frames through a GPU copy into CPU output; requires negotiated COPY\|READBACK; no fallback. Set before the candidate |
+| `gpu-readback` | bool, default false | read/write | Linux EGL builds only (other builds reject it at start). Local native readback receiver only: stage BGRA/RGBA DMA-BUF frames through a GPU copy into CPU output; requires negotiated COPY\|READBACK; no fallback. Set before the candidate |
 | `height` | uint 16 - 8192, default 720 | read/write | Accepted video height |
 | `idle-timeout-ms` | uint 1 - 60000, default 15000 | read/write | Bounded transport idle deadline |
 | `latency-ms` | uint 0 - 10000, default 0 | read/write | Explicit pipeline latency with session=; zero for transport, set required final-playback buffering explicitly |

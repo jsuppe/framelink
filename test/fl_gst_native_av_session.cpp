@@ -161,9 +161,13 @@ struct BinRun{
  unsigned width=64,height=32,count=8;
  bool bench=false;        // time push to pull; write and check only the first rows
 };
+// The property exists on every build; CMake says whether this one can stage.
 static bool hasGpuReadback(){
- auto*bin=gst_element_factory_make("framelinkavsrc",nullptr);CHECK(bin);
- const bool has=g_object_class_find_property(G_OBJECT_GET_CLASS(bin),"gpu-readback")!=nullptr;gst_object_unref(bin);return has;
+#ifdef FL_TEST_EGL_READBACK
+ return true;
+#else
+ return false;
+#endif
 }
 
 // Real bins on both ends, explicit candidates, the sink's own native pool.

@@ -218,9 +218,7 @@ static void rebuild(GstFrameLinkAvSrc*s){
 // Inner elements carry the negotiated geometry and PCM shape in both modes.
 static void configureChildren(GstFrameLinkAvSrc*s){
  if(s->video&&!s->policyBound)g_object_set(s->video,"width",gint(s->width),"height",gint(s->height),"format",s->videoFormat,"native-memory",s->nativeMemory,nullptr);
-#ifdef FL_GST_EGL_READBACK
  if(s->video&&!s->policyBound)g_object_set(s->video,"gpu-readback",s->gpuReadback,nullptr);
-#endif
  if(s->audio)g_object_set(s->audio,"format",s->audioFormat,"rate",s->rate,"channels",s->channels,"audio-queue-ms",s->audioQueueMs,
   "connect-timeout-ms",s->connectMs,"idle-timeout-ms",s->idleMs,nullptr);
 }
@@ -232,6 +230,10 @@ static GstStateChangeReturn changeState(GstElement*element,GstStateChange transi
   if((s->candidateSet||s->ownerSelected)&&s->nativeUsed){GST_ELEMENT_ERROR(s,RESOURCE,SETTINGS,("local native bins are single-session; create a new bin for reconnect"),(nullptr));return GST_STATE_CHANGE_FAILURE;}
 
   if(s->sharedCpu&&(!wantVideo(s)||s->nativeMemory)){GST_ELEMENT_ERROR(s,RESOURCE,SETTINGS,("shared-cpu requires a video track and forbids native memory"),(nullptr));return GST_STATE_CHANGE_FAILURE;}
+#ifndef FL_GST_EGL_READBACK
+  // Registered on every build like framelinksrc's; only EGL builds can stage.
+  if(s->gpuReadback){GST_ELEMENT_ERROR(s,RESOURCE,SETTINGS,("gpu-readback is unavailable in this build"),(nullptr));return GST_STATE_CHANGE_FAILURE;}
+#endif
   // GPU staging serves only the negotiated readback receiver (COPY|READBACK).
   if(s->gpuReadback&&(!s->candidateSet||s->nativeMemory||s->sharedCpu)){GST_ELEMENT_ERROR(s,RESOURCE,SETTINGS,("gpu-readback requires the local native readback candidate"),(nullptr));return GST_STATE_CHANGE_FAILURE;}
 #if !defined(__linux__) && !defined(_WIN32)
@@ -458,11 +460,9 @@ static void gst_framelink_av_src_class_init(GstFrameLinkAvSrcClass*klass){
  g_object_class_install_property(o,PROP_LATENCY,g_param_spec_uint("latency-ms","Latency","Explicit pipeline latency with session=; zero for transport, set required final-playback buffering explicitly",0,10000,0,rw));
  g_object_class_install_property(o,PROP_NATIVE,g_param_spec_boolean("native-memory","Native memory","Output platform GPU memory (DMABuf, D3D11Memory, FrameLinkAHardwareBuffer) from the ring; with session= the ring defers read release",FALSE,rw));
  g_object_class_install_property(o,PROP_SHARED_CPU,g_param_spec_boolean("shared-cpu","Shared CPU","Explicit CPU video copy path; broker context or current-user session= discovery, no native fallback",FALSE,rw));
- // Only builds with the Linux EGL staging adapter have this property.
-#ifdef FL_GST_EGL_READBACK
+ // Registered on every build; builds without the Linux EGL staging adapter refuse TRUE at start.
  g_object_class_install_property(o,PROP_GPU_READBACK,g_param_spec_boolean("gpu-readback","Explicit GPU readback",
-  "Local native readback receiver only: stage BGRA/RGBA DMA-BUF frames through a GPU copy into CPU output; requires negotiated COPY|READBACK; no fallback",FALSE,rw));
-#endif
+  "Linux EGL builds (others refuse it at start). Local native readback receiver only: stage BGRA/RGBA DMA-BUF frames through a GPU copy into CPU output; requires negotiated COPY|READBACK; no fallback",FALSE,rw));
  g_object_class_install_property(o,PROP_ID,g_param_spec_string("session-id","Session identity","Negotiated identity, not a secret",nullptr,ro));
  g_object_class_install_property(o,PROP_GENERATION,g_param_spec_uint64("generation","Generation","Negotiated session generation",0,G_MAXUINT64,0,ro));
  g_object_class_install_property(o,PROP_AUDIO_ID,g_param_spec_uint("audio-track-id","Audio track","Negotiated audio identity, zero when absent",0,G_MAXUINT,0,ro));
