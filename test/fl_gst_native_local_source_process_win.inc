@@ -79,32 +79,8 @@ struct Peer {
   CloseHandle(child.hThread);CloseHandle(child.hProcess);child={};
  }
 };
-// A focused upstream-only control for the new source child. This does not claim
-// a three-process relay: the consumer snapshot integration is a separate step.
-static void control(const char*plugin){
- gchar*dir=g_dir_make_tmp("framelink-local-source-XXXXXX",nullptr);CHECK(dir);
- const std::string path=std::string(dir)+"/session";g_free(dir);
- Peer source(plugin,path);
- auto caps=localPoolProcessCaps();auto candidate=nativeAvPolicy(0,true);GstFrameLinkMemoryPolicy bound{};
- auto*session=fl_gst_session_new(3);flChannel*channel=nullptr;GError*error=nullptr;
- CHECK(fl_gst_session_open_local_native_relay_input(session,path.c_str(),&caps,1,2,80,5000,5000,
-   &candidate,&bound,&channel,nullptr,&error));
- flSessionConfig cfg{};CHECK(fl_gst_session_get_config(session,&cfg)==FL_GST_SESSION_READY);
- CHECK(cfg.generation&&bound.sessionGeneration==cfg.generation);
- for(gint64 input:{gint64(0),gint64(37000000)}){gint64 mapped=-1;
-  CHECK(fl_gst_session_map_running_time(session,cfg.generation,input,TRUE,&mapped)==FL_GST_SESSION_READY&&mapped==input);}
- CHECK(fl_gst_session_local_ready(session,FALSE,1000,nullptr));
- for(unsigned n=0;n<Frames;++n){
-  source.next();flFrame frame{};CHECK(flAcquireFrame(channel,&frame,1000)==FL_OK);
-  verify(channel,frame,n,cfg.generation);
-  uint64_t lease=0;CHECK(flLeaseFrame(channel,&frame,&lease)==FL_OK);
-  CHECK(flCompleteReadLease(channel,lease)==FL_OK);CHECK(flCollectReadLeases(channel)==FL_OK);
-  source.release();
- }
- CHECK(fl_gst_session_finish_local(session,FALSE,1000,nullptr));source.join();
- flClose(channel);g_object_unref(session);
- puts("separate local source control: authenticated FAR4, 8 exact frames/metadata, no inherited textures, real read leases before control acknowledgment");
-}
+// The upstream-only control moved to the shared fl_gst_native_relay.cpp; the
+// three-process FAR5 graph below follows in the FAR5 relay phase.
 // Three independent processes: source child, this relay, final reader child.
 // Uses the committed backend snapshot contract, never inherited texture handles.
 struct HeldGraph { flSessionConfig config{};void*handles[2]{}; };

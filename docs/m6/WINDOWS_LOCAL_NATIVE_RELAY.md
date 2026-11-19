@@ -31,7 +31,8 @@ A version-1 candidate has generation zero and producer-first endpoints on both p
 - Queue 1 permits pool 2; queue greater than 1 requires pool at least queue+2. This is capacity, not a mandatory fill delay. Legacy defaults are unchanged. No new universal latest/lossless policy is implied; product D2/D3 decisions remain open.
 - `error-on-ring-full` is not a universal delivery policy. Explicit CPU/readback choices are not automatic fallback. Never silently copy after native authentication or import failure.
 - Backend `d4c32cc` adds an explicit consumer-pool snapshot. Snapshot handles remain borrowed until release; keep the snapshot through the entire graph to pin source reconfiguration. The new three-process fixture uses the committed snapshot API, not inherited textures. Windows exact `486bf04` build and focused video runtime passed; `881c6f8` subsequently adds real separate-process PCM coverage below. This is not general throughput or resource qualification.
-- Native local setup is Windows-only. No Linux/Android automatic-native parity, full ABI compatibility, timing/endurance acceptance or M6 completion is claimed.
+- Linux parity is in progress ([plan](linux-native-relay/README.md)): since 2026-11-19 desktop Linux has `open_local_native_relay_input` and `open_local_native_relay` (FAR4); FAR5 follows. Android follows Linux.
+- At the time of this record, native local setup was Windows-only. No Linux/Android automatic-native parity, full ABI compatibility, timing/endurance acceptance or M6 completion is claimed.
 
 ## Focused evidence
 
