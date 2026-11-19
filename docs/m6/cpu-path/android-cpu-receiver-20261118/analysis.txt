@@ -1,0 +1,22 @@
+android-1080p60-cpu1800: budget 17 ms, 108000 frames, 21 over budget
+  first 6 frames arrival (s, ms): [(0.0, 23.9), (0.017, 16.0), (0.033, 8.1), (0.05, 7.8), (0.067, 8.9), (0.083, 8.3)]
+  PTS gaps (missing frames) at s: []
+  over budget per 5 min: [5, 7, 4, 1, 0, 4]
+  clusters (<1 s apart): 20, largest 2
+    552.6-552.6 s n=2 max=20.3 ms
+    0.0-0.0 s n=1 max=23.9 ms
+    48.0-48.0 s n=1 max=17.1 ms
+    102.3-102.3 s n=1 max=19.7 ms
+    171.2-171.2 s n=1 max=17.2 ms
+  steady (after 2 s): p50 10.01 p99 14.12 p99.9 15.84 max 20.26 ms
+android-4k30-cpu1800: budget 34 ms, 53996 frames, 283 over budget
+  first 6 frames arrival (s, ms): [(0.0, 68.2), (0.033, 79.0), (0.067, 88.6), (0.133, 31.8), (0.167, 27.2), (0.2, 25.8)]
+  PTS gaps (missing frames) at s: [0.13, 91.9, 96.0, 96.5]
+  over budget per 5 min: [203, 18, 20, 17, 14, 11]
+  clusters (<1 s apart): 60, largest 97
+    93.9-98.2 s n=97 max=87.0 ms
+    82.8-83.6 s n=21 max=50.9 ms
+    91.2-91.9 s n=15 max=84.7 ms
+    80.6-81.3 s n=13 max=41.8 ms
+    121.0-121.3 s n=8 max=48.6 ms
+  steady (after 2 s): p50 26.62 p99 32.17 p99.9 44.37 max 86.99 ms
