@@ -1177,6 +1177,31 @@ static GstBuffer* srcCpuOutputBuffer(GstFrameLinkSrc* self, gsize size) {
     return gst_buffer_new_allocate(nullptr, size, nullptr);
 }
 
+#ifndef _WIN32
+// Touch both cached output buffers before the first frame, so that first-write
+// page faults are paid during start, not by frame 0 and 1 (Android 4K30: 68-89
+// ms startup arrivals and a ring-full drop; docs/m6/cpu-path/
+// android-cpu-receiver-20261118). Bounded: two buffers of one frame each.
+static void srcPrepareCpuOutput(GstFrameLinkSrc* self) {
+    GstVideoInfo info;
+    gst_video_info_init(&info);
+    if (!self->cinfo.width || !self->cinfo.height ||
+        !gst_video_info_set_format(&info, toGstFormat(self->cinfo.format), self->cinfo.width, self->cinfo.height))
+        return;
+    gsttrace::Scope trace("gst.cpu_output_prepare", gsttrace::id(self->channel));
+    GstBuffer* held[2] = {};
+    for (auto& b : held) {
+        b = srcCpuOutputBuffer(self, info.size);
+        GstMapInfo map;
+        if (b && gst_buffer_map(b, &map, GST_MAP_WRITE)) {
+            memset(map.data, 0, map.size);
+            gst_buffer_unmap(b, &map);
+        }
+    }
+    for (auto* b : held) if (b) gst_buffer_unref(b); // back to the cache
+}
+#endif
+
 static GstCaps* srcMakeCaps(GstFrameLinkSrc* self) {
     // After start() the channel is the truth (its format differs per platform:
     // BGRA on desktop, RGBA where AHardwareBuffer has no BGRA).
@@ -1295,6 +1320,9 @@ static gboolean srcStart(GstBaseSrc* base) {
                     self->channel, self->cinfo.width, self->cinfo.height,
                     gst_video_format_to_string(toGstFormat(self->cinfo.format)),
                     self->cinfo.poolSize);
+#ifndef _WIN32
+    if(!self->nativeMemory)srcPrepareCpuOutput(self);
+#endif
     if(self->session&&fl_gst_session_track_ready(self->session,FL_GST_TRACK_VIDEO,self->sessionConfig.generation)!=FL_GST_SESSION_READY)return FALSE;
     return TRUE;
 }
