@@ -26,7 +26,7 @@ Each phase is one pull request.
 1. **Core consumer-pool snapshot** (this record's first change). `flSnapshotDmabufConsumerPool`, `flQueryDmabufPoolSnapshot`, `flDmabufPoolSnapshotImage` and `flReleaseDmabufPoolSnapshot` in `framelink_dmabuf.h`, with the Windows snapshot's rules: owned duplicates of the exact original allocations; while any snapshot lives, a newly attaching producer gets `FL_BUSY` and geometry requests are answered with the current ring; snapshots outlive the source channel. Test: `dmabuf_pool_snapshot`.
 2. **FAR4 relay entry points** on Linux: `open_local_native_relay_input` and `open_local_native_relay`, with setup, cancellation and source-control tests.
 3. **FAR5 on Linux:** DMA-BUF fds passed with `SCM_RIGHTS` over a Unix socket, the peer pinned with `SO_PEERCRED`, the transfer authenticated under its own domain; the receiver imports with `flCreateChannelFromDmabufs` and checks geometry, pool size, distinct allocations and the render node device before acknowledging. Adds `open_local_native_relay_pool_dmabuf`, enables `open_local_native_pool_receiver` and `set-local-native-pool-candidate`, and the pool-export and relay-adapter samples.
-4. **Shared relay tests:** bins, supervisor, events, cancellation, death and recovery, and the three-process A/V graph with PCM.
+4. **Shared relay tests:** bins, supervisor, events, cancellation, death and recovery, and the three-process A/V graph with PCM. Two pull requests: 4a moves the controls and the in-process GStreamer bin relays (with the Linux pool-export and GStreamer relay samples); 4b moves the broker-composed process tests. The hardware-decoder relay moves to phase 5.
 5. **9d Linux qualification:** two hops with PCM, allocation identity by inode and zero payload copies in the trace, with an evidence record.
 
 Android follows with the same phases on AHardwareBuffer.
@@ -72,3 +72,38 @@ On Linux the pool-failure `Mismatch` case is a malformed plane layout; the Windo
 - All 11 shared relay tests pass on Linux, and 10 repeated runs of the set under `-j4` passed.
 - `local_bin` failed 13 of 30 serial runs without the read gate, and 15 of 40 parallel runs without the acquire-order fix; with both, 100 of 100 passed.
 - Negative controls: a wrong role byte in the sender MAC check, and a different render node at the receiver, each fail FAR5 setup.
+
+## Phase 4a (2026-11-19)
+
+### Controls
+
+**Moved into the shared binary:** `video_event_controls`, `supervisor_controls`, `local_bin_pause` and `local_bin_paused_cancel` (`gst_relay_<name>_{win,linux}`). The Windows test `gst_video_relay_event_controls_win` is now `gst_relay_video_event_controls_win`; the historical a50841a record keeps the old name. `fl_gst_native_local_pool_process_win.inc` and `fl_gst_video_relay_events.inc` are gone. `relay_pool_controls` moves with the bin relays, since it needs the Linux pool-export sample. A test list entry may carry its own timeout (`name|flag|seconds`).
+
+**Element fix (all platforms):** after a live PLAYING to PAUSED to PLAYING cycle, the video source could stop delivering for good. GStreamer 1.28's base source calls `unlock()` on pause, restarts the streaming task on PLAYING, and defers `unlock_stop()` to the next `create()`. A `create()` that saw the unlock but returned `FLUSHING` only after the resume therefore paused the already-running task permanently. The video source now handles an unlock the way the audio reader already did: a live source that is not really flushing (source pad not flushing) waits for PLAYING with `gst_base_src_wait_playing()` and continues, with a fresh deadline. A real flush or stop still returns `FLUSHING`. Unlocks are counted, so a pause that arrives during the wait is never lost. The shared-CPU path keeps its behavior.
+
+**Fixture fix in the pause tests:** the same per-frame read gate as `local_bin` (the bin reader signals after pulling each video sample).
+
+**Checks:**
+- Linux: full suite 159 of 159 (1 known skip). The relay set (15 tests) passed 40 repeated rounds under `-j8`; before the element fix, the same run failed `local_bin_pause` within 25 rounds twice. The reader's GStreamer log showed `create returned -2 (flushing)` after `live running 1` and the video task paused with reason `flushing`.
+- Without the read gate the pause tests failed 4 and 6 of 10 runs; with it, 30 of 30 each.
+- Windows: build and exports unchanged (88, 47, 2); the 22 `gst_relay_*_win` tests pass, and 25 repeated rounds of the two pause tests under `-j4`; full suite 181 of 181; the unchanged 060c54e4 suite against the new DLLs 180 of 180.
+- Android: 95 of 97 (the known skip and the known `gst_av_bench_smoke` host-path failure).
+
+### In-process GStreamer bin relays
+
+**Moved into the shared binary** (`test/fl_gst_native_bin_relay.inc`, included by `fl_gst_native_relay.cpp`): `bin`, `lease`, `bin_cancel`, `bin_events`, `bin_supervised_downstream`, `bin_supervised_upstream`, `pool_lifetime`, `authenticated_pool`, `local_pool`, `local_cancel_downstream`, `local_cancel_upstream`, `local_events` and `pool_controls`. Each runs a real native producer bin (`framelinkavsink native-memory=true`, writing into its own pool), a first native reader, the read-lease adapter into a same-allocation ring, and a final reader bin. The relay modes and `BrokerNativeBinRelay` left the Windows-only `fl_gst_native_producer_win`; `fl_gst_native_bin_relay_win.inc` is gone. Windows renames: `gst_native_bin_relay_win` is `gst_relay_bin_win`, `gst_native_lease_relay_win` is `gst_relay_lease_win`, and `gst_native_bin_relay_{cancel,events,supervised_downstream,supervised_upstream}_win` are `gst_relay_bin_{...}_win`; the other seven keep their names.
+
+**New Linux samples**, each the counterpart of the D3D11 one with the same rules:
+- `samples/native_dmabuf_relay_pool.h`: the export guard over the native DMA-BUF producer pool (pins every unpublished reservation, refuses busy, partial, foreign or stale pools) and `createNativeDmabufRelayPool` (an in-process same-allocation ring through `flCreateChannelFromDmabufs`).
+- `samples/native_gst_dmabuf_relay.h`: the GStreamer read-lease adapter. It accepts only intact FrameLink reader memory and forwards by inode.
+- `samples/native_dmabuf_relay_transfer.h`: the broker-keyed transfer (explicit abstract socket and secret) over the phase 3 Linux transfer.
+
+**Public header addition:** `gst_framelink_memory_get_dmabuf_fd` in the installed `framelink/framelink_native.h` (desktop Linux only, static inline): the borrowed fd of an intact FrameLink reader memory, or -1. It is the Linux counterpart of `gst_framelink_memory_get_d3d11_shared_handle` and `gst_framelink_memory_get_hardware_buffer`. The header is outside the Windows freeze surface; this needs Jon's approval with the merge.
+
+Platform parts of the fixture are in the adapter: the caps feature and producer completion contract, writing a pool buffer (a D3D11 upload, or a mapped DMA-BUF write with a signalled ready fd), reader-memory identity, and open handles (`GetProcessHandleCount`) or fds (`/proc/self/fd`) for `pool_lifetime`.
+
+**Checks:**
+- Linux: all 13 pass; the 28 shared relay tests passed 20 repeated rounds under `-j8`. Negative controls: matching the first reserved slot instead of the inode fails `lease` (unrelated ring accepted) and `bin` (allocation identity); accepting a partially available pool fails the `BUSY` check; leaking one fd per pool setup fails `pool_lifetime`.
+- Windows: build and exports unchanged (88, 47, 2); all 28 `gst_relay_*_win` tests pass, and 5 repeated rounds under `-j4`; full suite 181 of 181; the unchanged 060c54e4 suite against the new DLLs 180 of 180.
+- The first Windows run failed `authenticated_pool`: the shared endpoint name lacked the `framelink-cpu-` prefix that the Windows pipe endpoint requires, so the positive transfer was refused (and the four negatives were failing for that reason too). The name now keeps the original prefix on both platforms.
+- Android: 95 of 97 (unchanged).
