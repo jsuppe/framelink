@@ -107,3 +107,25 @@ Platform parts of the fixture are in the adapter: the caps feature and producer 
 - Windows: build and exports unchanged (88, 47, 2); all 28 `gst_relay_*_win` tests pass, and 5 repeated rounds under `-j4`; full suite 181 of 181; the unchanged 060c54e4 suite against the new DLLs 180 of 180.
 - The first Windows run failed `authenticated_pool`: the shared endpoint name lacked the `framelink-cpu-` prefix that the Windows pipe endpoint requires, so the positive transfer was refused (and the four negatives were failing for that reason too). The name now keeps the original prefix on both platforms.
 - Android: 95 of 97 (unchanged).
+
+## Phase 4b (2026-11-20)
+
+### Broker-composed process relays
+
+**Moved into the shared binary** (`fl_gst_native_relay`): `av`, `process`, `reservation`, `death`, `downstream_death`, `cancel`, `automatic_negative` and `decoder` (`gst_relay_<name>_{win,linux}`). Sources: `test/fl_gst_native_relay_av.inc`, `test/fl_gst_native_relay_process.inc` and `test/fl_gst_native_relay_automatic.inc`. `fl_gst_native_relay_av_win.inc` and `fl_gst_native_relay_process_win.inc` are gone; the modes, the automatic-relay branch of `nativeProducerAv`, and the old registrations left the Windows-only `fl_gst_native_producer_win`. Windows renames: `gst_native_relay_<name>_win` is `gst_relay_<name>_win`, and `gst_automatic_relay_negative_win` is `gst_relay_automatic_negative_win`. Historical records keep the old names.
+
+**The decoder relay** (`gst_relay_decoder_linux`) skips with 77 until phase 5 (NVDEC decode into the reservation's DMA-BUF). On Windows it runs as before.
+
+**Platform parts** are in `test/fl_gst_native_relay_platform.h`:
+- `Child` now also inherits the native handles a broker hands out (allocations and a mailbox), and reports `running()`.
+- `Mailbox`: one value (a listening port) from a child to its parent; a pipe either way.
+- `SharedImages`: the two broker allocations given to every ring of a graph. On Windows, D3D11 shared NT handles; on Linux, linear `ABGR8888` GBM buffers on the render node FrameLink uses, adopted with `flCreateChannelFromDmabufs`. `indexOf` names the original allocation by `CompareObjectHandles` or by inode.
+- `ReservationOwner`, `reservationOf` and `uploadReservation`: the native producer's GstMemory reservations used directly by a source process; on Linux a mapped DMA-BUF write followed by a signalled ready fd.
+
+The named Windows events became the existing anonymous `Gate`s, one set per graph passed on the command line. Death uses `Child::terminate` (exit 73 on Windows, `SIGKILL` on Linux). The automatic-relay negative now runs two real hops in one process: the second hop must accept its own reservation, then reject the first hop's reader memory with valid rewritten timestamps, leave that buffer's timestamps and pixels untouched, and refuse to restart.
+
+**Checks:**
+- Linux: all seven pass and the decoder skips; full suite 185 of 185 (the known EGL skip and the decoder skip); the 36 shared relay tests passed 20 repeated rounds under `-j8`.
+- Negative controls (temporary edits, reverted): identity that always names the first allocation fails `process` (`seen==3`); a same-allocation check that always agrees fails `process` (the reversed down ring is no longer matched); a Linux reservation that drops its buffer pin at submit fails `reservation` in the source (`!owner->acquire(0)` after the remote drain).
+- Windows: build and exports unchanged (88, 47, 2); all 36 `gst_relay_*_win` tests pass, including `decoder`, and 10 repeated rounds under `-j4`; full suite 186 of 186; the unchanged 060c54e4 suite against the new DLLs 180 of 180.
+- Android: builds; it has no GStreamer relay binary, so nothing moved there.

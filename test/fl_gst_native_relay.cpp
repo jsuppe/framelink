@@ -945,6 +945,9 @@ static void pauseControl(const char*plugin,bool cancelPaused){
 }
 }
 #include "fl_gst_native_bin_relay.inc"
+#include "fl_gst_native_relay_av.inc"
+#include "fl_gst_native_relay_process.inc"
+#include "fl_gst_native_relay_automatic.inc"
 
 int main(int argc,char**argv){
  gst_init(&argc,&argv);CHECK(argc>=3);
@@ -969,6 +972,7 @@ int main(int argc,char**argv){
   relaytest::Gate advance(argv[4]),published(argv[5]),retired(argv[6]);
   return localsource::producer(argv[3],advance,published,retired,mode=="--relay-local-source-av");
  }
+ {int code=0;if(relayprocess::child(argc,argv,&code))return code;}
  CHECK(argc==3);
  if(mode=="--relay-local-session"){nativeLocalRelaySession();return 0;}
  if(mode=="--relay-local-source-control"){localsource::control(argv[1]);return 0;}
@@ -998,5 +1002,13 @@ int main(int argc,char**argv){
  if(mode=="--relay-local-cancel-upstream"){binrelay::run(14);return 0;}
  if(mode=="--relay-local-events"){binrelay::run(15);return 0;}
  if(mode=="--relay-pool-controls"){binrelay::relayPoolControls();return 0;}
+ if(mode=="--relay-av-diagnostic"){relayav::nativeRelayAv(false);relayav::nativeRelayAv(true);for(unsigned fault=1;fault<=18;++fault)relayav::nativeRelayAv(false,fault);relayav::nativeRelayAv(true,14);return 0;}
+ if(mode=="--relay-process-diagnostic"){relayprocess::run(argv[1],false);relayprocess::run(argv[1],true);return 0;}
+ if(mode=="--relay-reservation-diagnostic"){relayprocess::run(argv[1],false,true);return 0;}
+ if(mode=="--relay-death-diagnostic"){relayprocess::run(argv[1],false,false,false,1);relayprocess::run(argv[1],false,true,false,1);return 0;}
+ if(mode=="--relay-downstream-death-diagnostic"){relayprocess::downstreamDeath(argv[1],false);relayprocess::downstreamDeath(argv[1],true);return 0;}
+ if(mode=="--relay-cancel-diagnostic"){relayprocess::run(argv[1],false,false,false,2);relayprocess::run(argv[1],false,true,false,2);return 0;}
+ if(mode=="--relay-decoder-diagnostic"){if(!relayprocess::decoderAvailable())return 77;relayprocess::run(argv[1],false,true,true);return 0;}
+ if(mode=="--automatic-relay-negative"){autorelay::negative();return 0;}
  fprintf(stderr,"unknown mode %s\n",mode.c_str());return 2;
 }

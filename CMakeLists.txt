@@ -503,7 +503,15 @@ set(FL_NATIVE_RELAY_TESTS
     local_cancel_downstream|relay-local-cancel-downstream
     local_cancel_upstream|relay-local-cancel-upstream
     local_events|relay-local-events
-    pool_controls|relay-pool-controls)
+    pool_controls|relay-pool-controls
+    av|relay-av-diagnostic|60
+    process|relay-process-diagnostic|60
+    reservation|relay-reservation-diagnostic|60
+    death|relay-death-diagnostic|60
+    downstream_death|relay-downstream-death-diagnostic|60
+    cancel|relay-cancel-diagnostic|60
+    automatic_negative|automatic-relay-negative
+    decoder|relay-decoder-diagnostic|60)
 # Each entry is name|flag, or name|flag|timeout (seconds, default 30).
 function(fl_add_native_relay_tests suffix)
     foreach(_pair ${FL_NATIVE_RELAY_TESTS})
@@ -518,6 +526,9 @@ function(fl_add_native_relay_tests suffix)
         add_test(NAME gst_relay_${_name}_${suffix} COMMAND fl_gst_native_relay $<TARGET_FILE:gstframelink> --${_flag})
         set_tests_properties(gst_relay_${_name}_${suffix} PROPERTIES TIMEOUT ${_timeout} LABELS "gpu")
     endforeach()
+    # The hardware-decoder relay skips where its decoder is not available
+    # (Linux until phase 5).
+    set_tests_properties(gst_relay_decoder_${suffix} PROPERTIES SKIP_RETURN_CODE 77)
 endfunction()
 if(FRAMELINK_BUILD_TESTS AND FL_GST_FOUND AND WIN32)
     add_executable(fl_gst_native_epoch_c_api test/fl_gst_native_epoch_c_api.c)
@@ -546,6 +557,9 @@ if(FRAMELINK_BUILD_TESTS AND FL_GST_FOUND AND WIN32)
     target_link_libraries(fl_gst_local_decoder_rate_win PRIVATE $<TARGET_PROPERTY:fl_gst_native_source_win,LINK_LIBRARIES> framelink_gst_session gio-2.0.lib d3d11 psapi bcrypt)
     add_executable(fl_win_sha256_rows test/fl_win_sha256_rows.cpp)
     target_link_libraries(fl_win_sha256_rows PRIVATE bcrypt)
+    add_test(NAME gst_native_bin_cancel_win COMMAND fl_gst_native_producer_win $<TARGET_FILE:gstframelink> --bin-cancel-diagnostic)
+    set_tests_properties(gst_native_bin_cancel_win PROPERTIES TIMEOUT 20)
+
     add_test(NAME win_sha256_rows COMMAND fl_win_sha256_rows)
     set_tests_properties(win_sha256_rows PROPERTIES TIMEOUT 10)
     # Shared native relay tests (fl_gst_native_relay.cpp); the Linux build
@@ -562,24 +576,6 @@ if(FRAMELINK_BUILD_TESTS AND FL_GST_FOUND AND WIN32)
     target_link_libraries(fl_gst_native_producer_win PRIVATE $<TARGET_PROPERTY:fl_gst_native_source_win,LINK_LIBRARIES> framelink_gst_session gio-2.0.lib d3d11)
     add_test(NAME gst_native_producer_win COMMAND fl_gst_native_producer_win $<TARGET_FILE:gstframelink>)
     set_tests_properties(gst_native_producer_win PROPERTIES TIMEOUT 20)
-    add_test(NAME gst_automatic_relay_negative_win COMMAND fl_gst_native_producer_win $<TARGET_FILE:gstframelink> --automatic-relay-negative)
-    set_tests_properties(gst_automatic_relay_negative_win PROPERTIES TIMEOUT 25)
-    add_test(NAME gst_native_bin_cancel_win COMMAND fl_gst_native_producer_win $<TARGET_FILE:gstframelink> --bin-cancel-diagnostic)
-    set_tests_properties(gst_native_bin_cancel_win PROPERTIES TIMEOUT 20)
-    add_test(NAME gst_native_relay_av_win COMMAND fl_gst_native_producer_win $<TARGET_FILE:gstframelink> --relay-av-diagnostic)
-    set_tests_properties(gst_native_relay_av_win PROPERTIES TIMEOUT 20)
-    add_test(NAME gst_native_relay_process_win COMMAND fl_gst_native_producer_win $<TARGET_FILE:gstframelink> --relay-process-diagnostic)
-    set_tests_properties(gst_native_relay_process_win PROPERTIES TIMEOUT 30)
-    add_test(NAME gst_native_relay_reservation_win COMMAND fl_gst_native_producer_win $<TARGET_FILE:gstframelink> --relay-reservation-diagnostic)
-    set_tests_properties(gst_native_relay_reservation_win PROPERTIES TIMEOUT 30)
-    add_test(NAME gst_native_relay_death_win COMMAND fl_gst_native_producer_win $<TARGET_FILE:gstframelink> --relay-death-diagnostic)
-    set_tests_properties(gst_native_relay_death_win PROPERTIES TIMEOUT 30)
-    add_test(NAME gst_native_relay_downstream_death_win COMMAND fl_gst_native_producer_win $<TARGET_FILE:gstframelink> --relay-downstream-death-diagnostic)
-    set_tests_properties(gst_native_relay_downstream_death_win PROPERTIES TIMEOUT 30)
-    add_test(NAME gst_native_relay_cancel_win COMMAND fl_gst_native_producer_win $<TARGET_FILE:gstframelink> --relay-cancel-diagnostic)
-    set_tests_properties(gst_native_relay_cancel_win PROPERTIES TIMEOUT 30)
-    add_test(NAME gst_native_relay_decoder_win COMMAND fl_gst_native_producer_win $<TARGET_FILE:gstframelink> --relay-decoder-diagnostic)
-    set_tests_properties(gst_native_relay_decoder_win PROPERTIES TIMEOUT 30 SKIP_RETURN_CODE 77)
     add_test(NAME gst_native_source_win COMMAND fl_gst_native_source_win $<TARGET_FILE:gstframelink>)
     set_tests_properties(gst_native_source_win PROPERTIES TIMEOUT 20)
     add_test(NAME gst_native_source_win_copy_negative COMMAND fl_gst_native_source_win $<TARGET_FILE:gstframelink> --copy-negative)
@@ -1423,7 +1419,7 @@ if(FRAMELINK_BUILD_TESTS AND TARGET framelink_gst_session AND UNIX)
         set_tests_properties(gst_native_av_linux PROPERTIES TIMEOUT 60 LABELS "gpu")
         # Shared native relay tests; Windows registers the same modes as _win.
         add_executable(fl_gst_native_relay test/fl_gst_native_relay.cpp)
-        target_link_libraries(fl_gst_native_relay PRIVATE framelink_gst_session PkgConfig::FL_GST_APP PkgConfig::FL_GST_ALLOCATORS PkgConfig::GBM)
+        target_link_libraries(fl_gst_native_relay PRIVATE framelink_gst_session PkgConfig::FL_GST_APP PkgConfig::FL_GST_ALLOCATORS PkgConfig::GBM PkgConfig::DRM)
         add_dependencies(fl_gst_native_relay gstframelink)
         fl_add_native_relay_tests(linux)
     endif()

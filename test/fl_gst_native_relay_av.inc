@@ -1,15 +1,9 @@
 // Explicit broker-composed two-hop diagnostic. No automatic-discovery promise:
-// the broker supplies the SAME immutable allocation pool to both video rings.
-#include "../samples/session_native_relay.h"
-#include "../samples/session_pcm_relay.h"
-#include "../samples/session_relay_contract.h"
-#include <dxgi1_3.h>
-#include <wrl/client.h>
-static bool relaySame(flImage*a,flImage*b){
- using Compare=BOOL(WINAPI*)(HANDLE,HANDLE);
- auto compare=reinterpret_cast<Compare>(GetProcAddress(GetModuleHandleW(L"KernelBase.dll"),"CompareObjectHandles"));
- return compare&&compare(flImageSharedHandle(a),flImageSharedHandle(b));
-}
+// the broker supplies the SAME immutable allocation pool to both video rings
+// (relaytest::SharedImages: D3D11 shared handles, or linear DMA-BUFs).
+namespace relayav {
+using binrelay::avStreamPair;
+static bool relaySame(flImage*a,flImage*b){return relaytest::sameAllocation(a,b);}
 static void relaySessionNegatives(flSessionConfig cfg,const flSessionCapabilities&offer){
  auto second=cfg;second.sessionId.bytes[0]=2;
  CHECK(flsample::SessionRelayContract::compatible(cfg,second));
@@ -250,7 +244,6 @@ static void relayPcmTerminalControls(flSessionConfig cfg,const flSessionCapabili
  printf("PCM terminal controls: bounded both-session cancellation/replacement, polling, finite timeout and retry passed\n");
 }
 static void nativeRelayAv(bool empty,unsigned fault=0){
- using Microsoft::WRL::ComPtr;
  FlGstSession* sessions[4]{};
  GstElement* pipes[4]{},*ports[4]{};
  flSessionConfig cfg{};cfg.version=2;cfg.clockId.bytes[0]=2;cfg.generation=1;cfg.epochNs=5000000;
@@ -292,19 +285,11 @@ static void nativeRelayAv(bool empty,unsigned fault=0){
  }
  flsample::SessionRelayContract contract(sessions[1],sessions[2]);
  CHECK(contract.initialize()==FL_GST_SESSION_READY);
- ComPtr<ID3D11Device> device;ComPtr<ID3D11DeviceContext> context;
- CHECK(SUCCEEDED(D3D11CreateDevice(nullptr,D3D_DRIVER_TYPE_HARDWARE,nullptr,0,nullptr,0,D3D11_SDK_VERSION,&device,nullptr,&context)));
- D3D11_TEXTURE2D_DESC desc{};desc.Width=64;desc.Height=32;desc.ArraySize=desc.MipLevels=desc.SampleDesc.Count=1;
- desc.Format=DXGI_FORMAT_R8G8B8A8_UNORM;desc.Usage=D3D11_USAGE_DEFAULT;desc.BindFlags=D3D11_BIND_SHADER_RESOURCE|D3D11_BIND_RENDER_TARGET;
- desc.MiscFlags=D3D11_RESOURCE_MISC_SHARED|D3D11_RESOURCE_MISC_SHARED_NTHANDLE;
- ComPtr<ID3D11Texture2D> textures[2];void*handles[2]{};
- for(unsigned i=0;i<2;++i){CHECK(SUCCEEDED(device->CreateTexture2D(&desc,nullptr,&textures[i])));ComPtr<IDXGIResource1> resource;
-  CHECK(SUCCEEDED(textures[i].As(&resource)));CHECK(SUCCEEDED(resource->CreateSharedHandle(nullptr,DXGI_SHARED_RESOURCE_READ|DXGI_SHARED_RESOURCE_WRITE,nullptr,&handles[i])));}
+ relaytest::SharedImages images;
  auto name="native-relay-av-"+std::to_string(g_get_monotonic_time());
- flChannel *up=nullptr,*writer=nullptr,*down=nullptr,*forward=nullptr;void*reversed[2]={handles[1],handles[0]};
+ flChannel *writer=nullptr,*forward=nullptr;
  const auto flags=FL_MAP_CPU|FL_DEFER_RELEASE|FL_REQUIRE_FRAME_METADATA;
- CHECK(flCreateChannelFromD3D11Handles((name+".up").c_str(),64,32,FL_FORMAT_RGBA8,2,flags,nullptr,handles,&up)==FL_OK);
- CHECK(flCreateChannelFromD3D11Handles((name+".down").c_str(),64,32,FL_FORMAT_RGBA8,2,flags,nullptr,reversed,&down)==FL_OK);
+ flChannel*up=images.adopt(name+".up",false,flags),*down=images.adopt(name+".down",true,flags);
  CHECK(flOpenProducer((name+".up").c_str(),&writer)==FL_OK);CHECK(flOpenProducer((name+".down").c_str(),&forward)==FL_OK);
  flsample::SessionNativeRelay relay(sessions[1],sessions[2],up,forward,relaySame);CHECK(relay.initialize()==FL_OK);
  CHECK(relay.forwardEvent(0)==FL_GST_SESSION_TIMEOUT);
@@ -337,7 +322,7 @@ static void nativeRelayAv(bool empty,unsigned fault=0){
   }
   CHECK(relay.count()==0&&relay.pending()==0&&relay.finish()==FL_OK);
   for(unsigned i=0;i<4;++i){gst_object_unref(ports[i]);gst_object_unref(pipes[i]);g_object_unref(sessions[i]);}
-  flClose(forward);flClose(writer);flClose(down);flClose(up);for(auto handle:handles)CloseHandle(handle);
+  flClose(forward);flClose(writer);flClose(down);flClose(up);
   printf("native event wait control %u passed\n",fault);return;
  }
  for(auto*session:sessions)CHECK(fl_gst_session_track_ready(session,FL_GST_TRACK_VIDEO,1)==FL_GST_SESSION_READY);
@@ -500,7 +485,8 @@ static void nativeRelayAv(bool empty,unsigned fault=0){
  }
  if(!empty&&!fault)relayPcmTerminalControls(cfg,offer,relay);
  for(unsigned i=0;i<4;++i){CHECK(gst_element_set_state(pipes[i],GST_STATE_NULL)!=GST_STATE_CHANGE_FAILURE);gst_object_unref(ports[i]);gst_object_unref(pipes[i]);g_object_unref(sessions[i]);}
- flClose(forward);flClose(writer);flClose(down);flClose(up);for(auto handle:handles)CloseHandle(handle);
+ flClose(forward);flClose(writer);flClose(down);flClose(up);
  if(fault){printf("checked native relay fault %u: no unauthorized publication, retained ownership and safe drain passed\n",fault);return;}
  printf("coordinated native relay: %u same-allocation video frames / %u PCM frames, two authenticated sessions, exact metadata, 37ms offset, ordered barriers, held-reader backpressure and terminal drain passed\n",frames,frames*48);
+}
 }
