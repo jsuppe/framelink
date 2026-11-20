@@ -516,7 +516,7 @@ FL_API flResult flCreateChannelFromHardwareBuffers(const char* name, uint32_t wi
     uint32_t height, flFormat format, uint32_t poolSize, uint32_t flags,
     AHardwareBuffer* const* images, flChannel** out) {
     if(out)*out=nullptr;
-    if(!images || (flags & ~(FL_MAP_CPU|FL_GPU_SYNC|FL_DEFER_RELEASE|FL_GPU_RENDER|FL_TRACK_ARRIVAL|FL_REQUIRE_FRAME_METADATA)))return FL_INVALID;
+    if(!images || (flags & ~(FL_MAP_CPU|FL_GPU_SYNC|FL_DEFER_RELEASE|FL_GPU_RENDER|FL_TRACK_ARRIVAL|FL_REQUIRE_FRAME_METADATA|FL_VULKAN_IMPORT)))return FL_INVALID;
     return createChannel(name,width,height,format,poolSize,flags,out,fl::Channel{},false,images);
 }
 FL_API flResult flCreateChannelFromSocketFdWithHardwareBuffers(int fd, uint32_t width,
@@ -524,7 +524,7 @@ FL_API flResult flCreateChannelFromSocketFdWithHardwareBuffers(int fd, uint32_t 
     AHardwareBuffer* const* images, flChannel** out) {
     auto link=fl::Channel::adoptConnectedFd(fd,timeout); // consume even on validation failure
     if(out)*out=nullptr;
-    if(!link.connected() || !images || (flags & ~(FL_MAP_CPU|FL_GPU_SYNC|FL_DEFER_RELEASE|FL_GPU_RENDER|FL_TRACK_ARRIVAL|FL_REQUIRE_FRAME_METADATA)))return FL_INVALID;
+    if(!link.connected() || !images || (flags & ~(FL_MAP_CPU|FL_GPU_SYNC|FL_DEFER_RELEASE|FL_GPU_RENDER|FL_TRACK_ARRIVAL|FL_REQUIRE_FRAME_METADATA|FL_VULKAN_IMPORT)))return FL_INVALID;
     return createChannel("broker-external-video",width,height,format,poolSize,flags,out,std::move(link),true,images);
 }
 

@@ -234,9 +234,16 @@ bool reallocRing(flChannel* ch, uint32_t w, uint32_t h, uint32_t poolSize) {
     // Asking for RENDERING|LINEAR together is the natural thing to want and it
     // FAILS on NVIDIA's GBM backend - measured, each flag alone succeeds. Try
     // the pair, fall back to LINEAR alone.
+    //
+    // FL_VULKAN_IMPORT: NVIDIA's GBM picks a compressed block-linear layout
+    // for RENDERING that its Vulkan driver does not list (EGL imports it).
+    // Adding SCANOUT selects the uncompressed layout Vulkan does list. Fall
+    // back to plain RENDERING where a driver refuses SCANOUT for a format.
     const uint32_t preferred = (ch->flags & FL_MAP_CPU)
                                    ? (GBM_BO_USE_RENDERING | GBM_BO_USE_LINEAR)
-                                   : GBM_BO_USE_RENDERING;
+                                   : (ch->flags & FL_VULKAN_IMPORT)
+                                         ? (GBM_BO_USE_RENDERING | GBM_BO_USE_SCANOUT)
+                                         : GBM_BO_USE_RENDERING;
     const uint32_t fallback =
         (ch->flags & FL_MAP_CPU) ? GBM_BO_USE_LINEAR : GBM_BO_USE_RENDERING;
     const uint32_t fourcc = fourccFor(ch->info.format);
@@ -249,8 +256,11 @@ bool reallocRing(flChannel* ch, uint32_t w, uint32_t h, uint32_t poolSize) {
             img->bo = gbm_bo_create(ch->gbm, w, h, fourcc, fallback);
             img->allocationUsage = fallback;
             if (img->bo && i == 0)
-                FL_LOG("framelink: RENDERING|LINEAR refused, using LINEAR only "
-                       "(CPU-mappable but may not be GPU-renderable)");
+                FL_LOG("%s", (ch->flags & FL_MAP_CPU)
+                           ? "framelink: RENDERING|LINEAR refused, using LINEAR only "
+                             "(CPU-mappable but may not be GPU-renderable)"
+                           : "framelink: RENDERING|SCANOUT refused, using RENDERING "
+                             "(Vulkan import may be unsupported)");
         }
         if (!img->bo) {
             delete img;
@@ -510,7 +520,7 @@ FL_API flResult flCreateChannelFromDmabufs(const char* name, uint32_t width,
     uint32_t height, flFormat format, uint32_t poolSize, uint32_t flags,
     const flDmabuf* images, flChannel** out) {
     if(out)*out=nullptr;
-    if(!images || (flags & ~(FL_MAP_CPU|FL_GPU_SYNC|FL_DEFER_RELEASE|FL_GPU_RENDER|FL_TRACK_ARRIVAL|FL_REQUIRE_FRAME_METADATA)))return FL_INVALID;
+    if(!images || (flags & ~(FL_MAP_CPU|FL_GPU_SYNC|FL_DEFER_RELEASE|FL_GPU_RENDER|FL_TRACK_ARRIVAL|FL_REQUIRE_FRAME_METADATA|FL_VULKAN_IMPORT)))return FL_INVALID;
     return createChannel(name,width,height,format,poolSize,flags,images,out);
 }
 

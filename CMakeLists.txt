@@ -63,6 +63,9 @@ if(WIN32)
 endif()
 
 set_property(TARGET framelink APPEND PROPERTY PUBLIC_HEADER include/framelink_session.h include/framelink_memory.h include/framelink_shared_cpu.h)
+# Header-only Vulkan interop: inline wrappers over the platform headers. The
+# library itself never links or includes Vulkan.
+set_property(TARGET framelink APPEND PROPERTY PUBLIC_HEADER include/framelink_vulkan.h)
 
 if(FRAMELINK_BUILD_TESTS)
     # Two processes, because that is the only way to test what this library
@@ -730,6 +733,36 @@ if(FRAMELINK_BUILD_TESTS AND WIN32)
     target_link_libraries(fl_ready_timeout_win PRIVATE framelink d3d11)
     add_test(NAME ready_fence_timeout COMMAND fl_ready_timeout_win)
     set_tests_properties(ready_fence_timeout PROPERTIES TIMEOUT 10)
+endif()
+
+# framelink_vulkan.h tests. Headers are a pinned Khronos release on every
+# platform (no SDK install); the loader is opened at run time, so a machine
+# without Vulkan builds everything and the hardware tests skip (77).
+option(FRAMELINK_BUILD_VULKAN_TESTS "Build the Vulkan interop tests (downloads pinned Vulkan-Headers)" ON)
+if(FRAMELINK_BUILD_TESTS AND FRAMELINK_BUILD_VULKAN_TESTS)
+    include(FetchContent)
+    FetchContent_Declare(framelink_vulkan_headers
+        URL https://github.com/KhronosGroup/Vulkan-Headers/archive/refs/tags/vulkan-sdk-1.3.296.0.tar.gz
+        URL_HASH SHA256=1e872a0be3890784bbe68dcd89b7e017fed77ba95820841848718c98bda6dc33
+        DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+        SOURCE_SUBDIR no-cmake-project) # headers only; do not add Khronos' project
+    FetchContent_MakeAvailable(framelink_vulkan_headers)
+    add_library(fl_vulkan_headers INTERFACE)
+    target_include_directories(fl_vulkan_headers SYSTEM INTERFACE ${framelink_vulkan_headers_SOURCE_DIR}/include)
+
+    enable_language(C)
+    add_executable(fl_vulkan_header test/fl_vulkan_header.c)
+    set_target_properties(fl_vulkan_header PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED ON)
+    target_link_libraries(fl_vulkan_header PRIVATE framelink fl_vulkan_headers)
+    add_test(NAME vulkan_header_contract COMMAND fl_vulkan_header)
+    set_tests_properties(vulkan_header_contract PROPERTIES TIMEOUT 10)
+
+    add_executable(fl_vulkan test/fl_vulkan.cpp)
+    target_link_libraries(fl_vulkan PRIVATE framelink fl_vulkan_headers ${CMAKE_DL_LIBS})
+    foreach(_mode formats ordering adapter generation)
+        add_test(NAME vulkan_${_mode} COMMAND fl_vulkan --${_mode})
+        set_tests_properties(vulkan_${_mode} PROPERTIES TIMEOUT 60 SKIP_RETURN_CODE 77 LABELS "gpu")
+    endforeach()
 endif()
 
 if(FRAMELINK_BUILD_TESTS AND UNIX)

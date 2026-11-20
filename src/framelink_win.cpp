@@ -651,7 +651,7 @@ FL_API flResult flCreateChannelFromD3D11HandlesWithDeviceOwner(flD3D11DeviceOwne
     const char* name,uint32_t width,uint32_t height,flFormat format,uint32_t poolSize,
     uint32_t flags,void*const* handles,flChannel** out) {
     if(out)*out=nullptr;
-    if(!owner || !handles || (flags & ~(FL_MAP_CPU|FL_GPU_SYNC|FL_DEFER_RELEASE|FL_GPU_RENDER|FL_TRACK_ARRIVAL|FL_REQUIRE_FRAME_METADATA)))return FL_INVALID;
+    if(!owner || !handles || (flags & ~(FL_MAP_CPU|FL_GPU_SYNC|FL_DEFER_RELEASE|FL_GPU_RENDER|FL_TRACK_ARRIVAL|FL_REQUIRE_FRAME_METADATA|FL_VULKAN_IMPORT)))return FL_INVALID;
     return createChannel(name,width,height,format,poolSize,flags,nullptr,handles,out,owner);
 }
 
@@ -664,7 +664,7 @@ FL_API flResult flCreateChannelFromD3D11Handles(const char* name, uint32_t width
     uint32_t height, flFormat format, uint32_t poolSize, uint32_t flags,
     const uint8_t adapterLUID[8], void* const* handles, flChannel** out) {
     if(out)*out=nullptr;
-    if(!handles || (flags & ~(FL_MAP_CPU|FL_GPU_SYNC|FL_DEFER_RELEASE|FL_GPU_RENDER|FL_TRACK_ARRIVAL|FL_REQUIRE_FRAME_METADATA)))return FL_INVALID;
+    if(!handles || (flags & ~(FL_MAP_CPU|FL_GPU_SYNC|FL_DEFER_RELEASE|FL_GPU_RENDER|FL_TRACK_ARRIVAL|FL_REQUIRE_FRAME_METADATA|FL_VULKAN_IMPORT)))return FL_INVALID;
     return createChannel(name,width,height,format,poolSize,flags,adapterLUID,handles,out);
 }
 

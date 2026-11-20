@@ -156,6 +156,14 @@ FL_API flResult flCreateChannel(const char* name, uint32_t width, uint32_t heigh
 #define FL_TRACK_ARRIVAL 0x10
 // Require negotiated metadata support and metadata on every published frame.
 #define FL_REQUIRE_FRAME_METADATA 0x20
+// Allocate so Vulkan on the ring's GPU can import it (framelink_vulkan.h).
+// Linux: requests a layout the vendor's Vulkan driver accepts - on NVIDIA the
+// default GPU allocation is a compressed layout only EGL can import - and falls
+// back to the default allocation if the driver refuses. Windows and Android
+// storage is always importable, so there it changes nothing. Adopted external
+// storage (flCreateChannelFrom*) keeps its owner's layout. Not a guarantee:
+// flVkImportImage still checks the exact buffer and usage.
+#define FL_VULKAN_IMPORT 0x40
 
 FL_API flResult flCreateChannelEx(const char* name, uint32_t width, uint32_t height,
                                   flFormat format, uint32_t poolSize, uint32_t flags,

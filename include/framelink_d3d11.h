@@ -2,8 +2,8 @@
 // native GPU integrator needs; the call sequence in framelink.h is unchanged.
 // Explicit CPU-only factories are separate: framelink_shared_cpu_win.h.
 //
-// The Linux and Android equivalents (framelink_dmabuf.h, framelink_ahb.h) and
-// the portable framelink_vulkan.h are not in the spike.
+// The Linux and Android equivalents are framelink_dmabuf.h and framelink_ahb.h;
+// framelink_vulkan.h wraps all three for Vulkan (header-only).
 #pragma once
 #include <d3d11.h>
 
