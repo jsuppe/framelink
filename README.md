@@ -130,6 +130,12 @@ against your writes. Use `flSharedReadyFence` + `flBeginSubmit`/`flEndSubmit`
 and signal the fence inside your own submit. A Vulkan compositor does exactly
 this.
 
+For Vulkan specifically, `framelink_vulkan.h` does all of this on Windows,
+Linux and Android: zero-copy image import, readiness and completion
+semaphores, adapter checks and ownership barriers. It is header-only (nothing
+new is exported and the library never links Vulkan). Create Vulkan-facing
+rings with `FL_VULKAN_IMPORT`. See [docs/VULKAN.md](docs/VULKAN.md).
+
 ## NV12
 
 Linux, Windows and supported Android allocations expose `FL_FORMAT_NV12`: full-resolution Y plus half-resolution
