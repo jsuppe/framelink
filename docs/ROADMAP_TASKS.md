@@ -395,8 +395,13 @@ per-platform state. Windows readiness is the
   *Linux (DMA-BUF):* 9a–9c done with focused checks (2026-11-18): the explicit local
   native session profile and both A/V bins accept DMA-BUF candidates, and the producer
   bin forwards the sink's native buffer and ready-fence actions
-  ([evidence](m6/linux-native-av-session/README.md)). 9d (real decoder/renderer
-  producers, relay) and 9e (final-revision gates) not started.
+  ([evidence](m6/linux-native-av-session/README.md)). 9d relay parity done
+  (2026-11-20): FAR4/FAR5 entry points, consumer-pool snapshot, the shared relay
+  tests, and a hardware-decoder relay (NVDEC into the reservation's DMA-BUF), with
+  functional two-hop PCM qualification, 40 of 40 runs
+  ([plan](m6/linux-native-relay/README.md),
+  [evidence](m6/linux-native-relay-qualification-61375e7/README.md)). Rate,
+  duration and resource cells (as qualified on Windows) not done; 9e not started.
   *Android (AHardwareBuffer):* 9a–9c done with focused checks (2026-11-18): the same
   profile with exact RGBA/RGB10A2_LE AHardwareBuffers
   ([evidence](m6/android-native-av-session/README.md)). 9d and 9e not started.

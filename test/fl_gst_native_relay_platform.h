@@ -45,6 +45,12 @@
 #include <sys/mman.h>
 #include <drm_fourcc.h>
 #include <gbm.h>
+#include <dlfcn.h>
+#include <type_traits>
+#ifdef FL_RELAY_GL_DECODER
+#include <gst/gl/gl.h>
+#include <gst/gl/egl/gsteglimage.h>
+#endif
 #endif
 #ifndef CHECK
 #define CHECK(x) do{if(!(x)){fprintf(stderr,"line %d: %s\n",__LINE__,#x);std::exit(1);}}while(0)

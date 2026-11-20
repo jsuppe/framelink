@@ -129,3 +129,26 @@ The named Windows events became the existing anonymous `Gate`s, one set per grap
 - Negative controls (temporary edits, reverted): identity that always names the first allocation fails `process` (`seen==3`); a same-allocation check that always agrees fails `process` (the reversed down ring is no longer matched); a Linux reservation that drops its buffer pin at submit fails `reservation` in the source (`!owner->acquire(0)` after the remote drain).
 - Windows: build and exports unchanged (88, 47, 2); all 36 `gst_relay_*_win` tests pass, including `decoder`, and 10 repeated rounds under `-j4`; full suite 186 of 186; the unchanged 060c54e4 suite against the new DLLs 180 of 180.
 - Android: builds; it has no GStreamer relay binary, so nothing moved there.
+
+## Phase 5 (2026-11-20)
+
+**Decoder relay on Linux.** `gst_relay_decoder_linux` now runs instead of skipping:
+1. NVDEC (`nvh264dec`) decodes into GL memory.
+2. GStreamer GL converts and scales on the GPU.
+3. CUDA copies the result into the source reservation's own DMA-BUF through an EGLImage.
+
+NVIDIA imports a linear DMA-BUF for GL sampling only, never as a render target, so a direct GL render is impossible. libcuda is opened at run time and only the driver-API types used are declared, so the build needs GStreamer GL but no CUDA toolkit. The test skips (77) without NVDEC, the GL elements or libcuda.
+
+On Linux the decoder graph's ring and policy declare sampling, not `GPU_RENDER`, because the write is a copy and NVIDIA refuses render usage for linear buffers. Windows keeps `GPU_RENDER` for its D3D11 converter. Decoded durations may be the exact gap to the next timestamp: GStreamer rounds 1/30 s to 33333333 or 33333334 ns.
+
+**Qualification.** The tools:
+- `tools/run_relay_qualification.py` runs the two-hop PCM graphs with tracing in every process, on a clean exact revision, into a new evidence directory.
+- `tools/check_relay_trace.py` checks each run: lossless traces; a relay that forwards what it acquires, with no payload operation and no CPU map; complete final reads.
+- `tools/test_relay_trace.py` covers the checker in hosted CI (`relay_trace_checker`).
+
+Result at `61375e75`: 40 of 40 runs (four graphs, ten runs each). See the [evidence](../linux-native-relay-qualification-61375e7/README.md). This is functional qualification on small frames; Linux has no rate, duration or resource cells yet.
+
+**Checks:**
+- Linux: full suite 186 of 186 (the known EGL skip); the 36 shared relay tests passed 10 repeated rounds under `-j8`.
+- Negative controls: a relay that maps frames fails the trace check; a decoder that skips its copy fails the source's pixel check.
+- Windows: build and exports unchanged (88, 47, 2); the 36 `gst_relay_*_win` tests pass, including `decoder`, and 10 repeated rounds under `-j4`; full suite 187 of 187 (with `relay_trace_checker`); the unchanged 060c54e4 suite against the new DLLs 180 of 180.

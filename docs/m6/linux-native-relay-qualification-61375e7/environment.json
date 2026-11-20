@@ -1,0 +1,23 @@
+{
+ "revision": "61375e7593c3d3b4b43b31158d4c3a707e557c81",
+ "dirty": false,
+ "platform": "Linux-7.0.0-43-generic-x86_64-with-glibc2.43",
+ "machine": "x86_64",
+ "python": "3.14.4",
+ "gstreamer": "gst-inspect-1.0 version 1.28.2\nGStreamer 1.28.2\nhttps://launchpad.net/ubuntu/+source/gstreamer1.0",
+ "gpu": "NVIDIA GeForce RTX 3090, 580.178.04",
+ "sources_sha256": {
+  "test/fl_gst_native_relay.cpp": "525617f9a5ff24d595063e12f8e7f96b9bfa59003f201c37d94e4544ed76ea1c",
+  "test/fl_gst_native_relay_platform.h": "a7e304592744c5e6853f2565478092b54f9226ea1d3f0a870be0f359802e5ba3",
+  "test/fl_gst_native_relay_process.inc": "6f934e409325bc870c3a8b340233de826eacbd5d1bfb812635f0dc16259c828c",
+  "test/fl_gst_native_relay_av.inc": "c9e1e34af2df020d828955c9148cf87c4ad012ce9ed10099800af2f5dcc65af5",
+  "test/fl_gst_native_bin_relay.inc": "a1a3a8684bce60bf1ac943e9f6b27c3b709951ce45f1d6dc769a93bb94f751d4",
+  "samples/session_native_relay.h": "41aa6a359bda2da844c34f1e0afe2abf6a0a27974363b0bb421964462047c66d",
+  "samples/session_pcm_relay.h": "311200fdcc025567c217e00f819ee2f2c0eb34dd0ccc5750b9368d63c92310a5",
+  "gst/fl_gst_dmabuf_producer.hpp": "595dd47d6cbf0fe197cc09c8064b691b9cb4cab9c95503fcaa8d619d0df00e8c",
+  "tools/check_relay_trace.py": "02950bdf61dd8f5fa6822ed32307c3a3f1734c8ce04f51eeb314a927e09c1fbc",
+  "tools/run_relay_qualification.py": "06e71689e4f1e594a53ffa1deb7c61670fbaf2ba32161776bc8b6a9967e52e96"
+ },
+ "binary_sha256": "c6f8485c7c638a99560ee12072c418709eaaeb51db6ca81952b193962335035f",
+ "plugin_sha256": "feed49c072ebcc3adf7f0214aed8c445fb67c60598ed9c43b17adae32ac1bf14"
+}
