@@ -48,11 +48,11 @@ static bool srcSharedCpuEvents(GstFrameLinkSrc*self,guint kind,guint64 pts){
  return false;
 }
 static GstFlowReturn srcSharedCpuCreate(GstFrameLinkSrc*self,GstBuffer**out){
- if(g_atomic_int_get(&self->flushing))return GST_FLOW_FLUSHING;
+ if(srcUnlockPending(self))return GST_FLOW_FLUSHING;
  const auto deadline=g_get_monotonic_time()+gint64(self->sessionConfig.idleTimeoutMs)*1000;
  for(;;){
   flSessionConfig cfg{};
-  if(g_atomic_int_get(&self->flushing))return GST_FLOW_FLUSHING;
+  if(srcUnlockPending(self))return GST_FLOW_FLUSHING;
   if(fl_gst_session_get_config(self->session,&cfg)!=FL_GST_SESSION_READY||cfg.generation!=self->sessionConfig.generation||g_get_monotonic_time()>=deadline)return GST_FLOW_ERROR;
   const auto remaining=deadline-g_get_monotonic_time();if(remaining<=0)return GST_FLOW_ERROR;
   auto ready=flSharedCpuWaitReadable(self->cpuChannel,guint(std::min<gint64>(50,(remaining+999)/1000)));
@@ -60,7 +60,7 @@ static GstFlowReturn srcSharedCpuCreate(GstFrameLinkSrc*self,GstBuffer**out){
  }
  flSharedCpuLease*lease=nullptr;flMappedImage view{};uint64_t seq=0;int64_t pts=0;int eos=0;
  auto result=flSharedCpuReceiveEvent(self->cpuChannel,&lease,&view,&seq,&pts,&eos);
- if(result!=FL_OK)return g_atomic_int_get(&self->flushing)?GST_FLOW_FLUSHING:GST_FLOW_ERROR;
+ if(result!=FL_OK)return srcUnlockPending(self)?GST_FLOW_FLUSHING:GST_FLOW_ERROR;
  if(eos){
   if(!srcSharedCpuEvents(self,FL_GST_VIDEO_END,self->sessionLastPts<0?0:guint64(self->sessionLastPts))||!srcEmitGaps(self))return GST_FLOW_ERROR;
   if(fl_gst_session_video_eos(self->session,self->sessionConfig.generation,self->sessionFrames,self->sessionLastPts)!=FL_GST_SESSION_READY)return GST_FLOW_ERROR;

@@ -1100,7 +1100,7 @@ typedef struct _GstFrameLinkSrc {
     gboolean delegated;
     flChannelInfo cinfo;
     guint64 generation; // re-read geometry + renegotiate caps when it moves
-    volatile gint flushing;
+    gint unlocks,unlocksHandled; // unlock() count, and the count unlock_stop() or a resume has cleared
 #ifdef _WIN32
     ID3D11Texture2D* staging; // cached; rebuilt when the generation moves
 #endif
@@ -1238,6 +1238,8 @@ static GstCaps* srcGetCaps(GstBaseSrc* base, GstCaps* filter) {
 }
 
 static bool srcEmitGaps(GstFrameLinkSrc*);
+// An unlock() not yet cleared by unlock_stop() (or a completed live resume).
+static bool srcUnlockPending(GstFrameLinkSrc*self){return g_atomic_int_get(&self->unlocks)!=g_atomic_int_get(&self->unlocksHandled);}
 #include "fl_gst_shared_cpu_source.inc"
 
 static gboolean srcStart(GstBaseSrc* base) {
@@ -1347,15 +1349,33 @@ static gboolean srcStop(GstBaseSrc* base) {
 }
 
 static gboolean srcUnlock(GstBaseSrc* base) {
-    g_atomic_int_set(&GST_FRAMELINK_SRC(base)->flushing, 1);
+    g_atomic_int_inc(&GST_FRAMELINK_SRC(base)->unlocks);
     auto*self=GST_FRAMELINK_SRC(base);
     if(self->sharedCpu&&self->session)fl_gst_session_cancel(self->session);
     return TRUE;
 }
 
 static gboolean srcUnlockStop(GstBaseSrc* base) {
-    g_atomic_int_set(&GST_FRAMELINK_SRC(base)->flushing, 0);
+    auto*self=GST_FRAMELINK_SRC(base);
+    g_atomic_int_set(&self->unlocksHandled,g_atomic_int_get(&self->unlocks));
     return TRUE;
+}
+
+// A live PLAYING->PAUSED unlock is not a flush. GstBaseSrc restarts the task on
+// PLAYING but defers unlock_stop() to the next create(), so a FLUSHING returned
+// after the pause already resumed would pause the streaming task for good. As
+// the audio reader does, wait for PLAYING and continue with the same create();
+// only a real flush or stop (source pad flushing first) returns FLUSHING. An
+// unlock that arrives after the wait stays pending for the next check.
+enum class SrcUnlock { None, Flushing, Resumed };
+static SrcUnlock srcCheckUnlock(GstFrameLinkSrc* self) {
+    const gint unlocks=g_atomic_int_get(&self->unlocks),handled=g_atomic_int_get(&self->unlocksHandled);
+    if(unlocks==handled)return SrcUnlock::None;
+    auto*base=GST_BASE_SRC(self);
+    if(!gst_base_src_is_live(base)||GST_PAD_IS_FLUSHING(GST_BASE_SRC_PAD(base))||gst_base_src_wait_playing(base)!=GST_FLOW_OK)
+        return SrcUnlock::Flushing;
+    g_atomic_int_compare_and_exchange(&self->unlocksHandled,handled,unlocks);
+    return SrcUnlock::Resumed;
 }
 
 static flResult srcReleaseFrame(GstFrameLinkSrc* self,const flFrame* frame) {
@@ -1484,21 +1504,25 @@ static GstFlowReturn srcCreateImpl(GstPushSrc* push, GstBuffer** outbuf) {
 
 
     if(self->session){
-        const auto deadline=g_get_monotonic_time()+gint64(self->sessionConfig.connectTimeoutMs)*1000;
-        flSessionConfig ready{};FlGstSessionResult result;
+        auto deadline=g_get_monotonic_time()+gint64(self->sessionConfig.connectTimeoutMs)*1000;
+        flSessionConfig ready{};FlGstSessionResult result=FL_GST_SESSION_TIMEOUT;
         do {
-            if(g_atomic_int_get(&self->flushing))return GST_FLOW_FLUSHING;
+            auto unlock=srcCheckUnlock(self);
+            if(unlock==SrcUnlock::Flushing)return GST_FLOW_FLUSHING;
+            if(unlock==SrcUnlock::Resumed){deadline=g_get_monotonic_time()+gint64(self->sessionConfig.connectTimeoutMs)*1000;continue;}
             auto remaining=deadline-g_get_monotonic_time();if(remaining<=0){result=FL_GST_SESSION_TIMEOUT;break;}
             result=fl_gst_session_wait(self->session,self->sessionConfig.generation,guint(std::min<gint64>(50,(remaining+999)/1000)),&ready);
         }while(result==FL_GST_SESSION_TIMEOUT);
         if(result!=FL_GST_SESSION_READY){GST_ELEMENT_ERROR(self,RESOURCE,READ,("coordinated session not ready or cancelled"),(NULL));return GST_FLOW_ERROR;}
     }
     if(self->sharedCpu)return srcSharedCpuCreate(self,outbuf);
-    const gint64 idleDeadline=g_get_monotonic_time()+gint64(self->sessionConfig.idleTimeoutMs)*1000;
+    gint64 idleDeadline=g_get_monotonic_time()+gint64(self->sessionConfig.idleTimeoutMs)*1000;
     flFrame frame = {};
     for (;;) {
         if(self->session){flSessionConfig current{};if(fl_gst_session_get_config(self->session,&current)!=FL_GST_SESSION_READY||current.generation!=self->sessionConfig.generation||g_get_monotonic_time()>=idleDeadline){GST_ELEMENT_ERROR(self,RESOURCE,READ,("coordinated video idle deadline, cancellation or stale generation"),(NULL));return GST_FLOW_ERROR;}}
-        if (g_atomic_int_get(&self->flushing)) return trace.result(GST_FLOW_FLUSHING);
+        auto unlock=srcCheckUnlock(self);
+        if(unlock==SrcUnlock::Flushing)return trace.result(GST_FLOW_FLUSHING);
+        if(unlock==SrcUnlock::Resumed){idleDeadline=g_get_monotonic_time()+gint64(self->sessionConfig.idleTimeoutMs)*1000;continue;}
         if(self->nativeMemory){
             auto collected=flCollectReadLeases(self->ch);
             if(collected!=FL_OK&&collected!=FL_BUSY){

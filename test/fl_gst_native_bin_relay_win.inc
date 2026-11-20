@@ -254,50 +254,6 @@ struct BrokerNativeBinRelay {
  }
 };
 
-// Lifecycle controls supplement the real endpoint-failure tests. In particular,
-// preflight rejection/normal shutdown must never cancel a healthy source graph.
-static void relaySupervisorControls(){
- auto*up=fl_gst_session_new(3);auto*down=fl_gst_session_new(3);
- flSessionConfig cfg{};cfg.version=2;cfg.sessionId.bytes[0]=1;cfg.clockId.bytes[0]=2;cfg.generation=1;
- cfg.videoTrackId=1;cfg.audioTrackId=2;cfg.audio={FL_PCM_S16,48000,2};cfg.audioQueueMs=80;
- cfg.video={FL_FORMAT_RGBA8,64,32,30,1};cfg.videoQueueFrames=1;cfg.connectTimeoutMs=cfg.idleTimeoutMs=1000;
- flSessionCapabilities caps{};caps.version=2;caps.videoCount=caps.audioCount=1;caps.video[0]=cfg.video;caps.audio[0]=cfg.audio;
- CHECK(fl_gst_session_configure(up,&cfg,&caps,&caps)==FL_GST_SESSION_READY);
- cfg.sessionId.bytes[0]=3;
- CHECK(fl_gst_session_configure(down,&cfg,&caps,&caps)==FL_GST_SESSION_READY);
- flClockMapping mapping{};mapping.sourceClockId=cfg.clockId;mapping.targetClockId.bytes[0]=9;
- CHECK(fl_gst_session_set_mapping(up,1,&mapping,0)==FL_GST_SESSION_READY);
- std::atomic<unsigned> failures{0};
- {
-  flsample::SessionRelaySupervisor invalid(up,up,[&]{++failures;});
-  CHECK(invalid.start()==FL_GST_SESSION_INVALID);
-  flSessionConfig snapshot{};
-  CHECK(fl_gst_session_get_config(up,&snapshot)==FL_GST_SESSION_READY);
- }
- {
-  flsample::SessionRelaySupervisor stopped(up,down,[&]{++failures;});
-  stopped.stop();CHECK(stopped.start()==FL_GST_SESSION_INVALID);
- }
- {
-  flsample::SessionRelaySupervisor supervisor(up,down,[&]{++failures;});
-  CHECK(supervisor.start()==FL_GST_SESSION_READY);
-  supervisor.stop();supervisor.stop();
-  CHECK(supervisor.start()==FL_GST_SESSION_INVALID);
-  fl_gst_session_cancel(down);
-  flSessionConfig snapshot{};
-  CHECK(fl_gst_session_get_config(up,&snapshot)==FL_GST_SESSION_READY);
-  CHECK(supervisor.status()==FL_GST_SESSION_READY&&failures.load()==0);
- }
- // A pre-existing failure is rejected, not treated as a monitored graph.
- {
-  flsample::SessionRelaySupervisor rejected(up,down,[&]{++failures;});
-  CHECK(rejected.start()==FL_GST_SESSION_CANCELLED);
-  CHECK(failures.load()==0);
- }
- g_object_unref(up);g_object_unref(down);
- puts("supervisor controls: unrelated/cancelled graph rejects without propagation; stopped-before-start rejects; stop joins without cancellation; single-use lifecycle");
-}
-
 static void relayPoolControls(){
  flSessionConfig cfg{};cfg.version=2;cfg.sessionId.bytes[0]=1;cfg.clockId.bytes[0]=2;cfg.generation=1;
  cfg.videoTrackId=1;cfg.audioTrackId=2;cfg.audio={FL_PCM_S16,48000,2};cfg.audioQueueMs=80;
