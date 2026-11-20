@@ -8,8 +8,34 @@
 //   --relay-local-source-control  FAR4 relay_input against a separate source
 //                                  process: source-relative mapping, exact frames
 //                                  and metadata, real read leases.
+//   --relay-local-process         FAR5 across a process boundary: authenticated
+//                                  transfer of the source's original allocations,
+//                                  8 frames forwarded by allocation identity, the
+//                                  source lease held until the remote reader's.
+//   --relay-local-pool-failures   FAR5 malformed exports, capacity and legacy
+//                                  receiver rejection, upstream cancellation.
+//   --relay-local-three-process   source process -> this relay (FAR4 input,
+//                                  snapshot, FAR5 output) -> final reader process.
+//   --relay-three-local-av        the same graph with authenticated PCM.
+//   --relay-local-replacement     a fresh complete A/V graph while the old final
+//                                  reader still holds its native lease.
+//   --relay-local-recovery        source death: bounded failure, no synthetic
+//                                  END/EOS, old held pixels intact.
+//   --relay-local-bin             the final reader is a framelinkavsrc bin
+//                                  selected by set-local-native-pool-candidate.
+//   --relay-local-bin-negatives   FAR5 bin profile controls and FAR4 mismatch.
+//   --relay-setup-negatives       transactional setup: absent/cancelled output.
 #include "fl_gst_native_relay_platform.h"
 #include "../samples/session_relay_contract.h"
+#include "../samples/native_relay.h"
+#include "../samples/session_native_relay.h"
+#include "../samples/session_pcm_relay.h"
+#include "../samples/session_relay_supervisor.h"
+#include "../gst/framelink_meta.h"
+#include <gst/app/gstappsink.h>
+#include <gst/app/gstappsrc.h>
+#include <gst/video/video.h>
+#include <atomic>
 #include <cstring>
 #include <memory>
 #include <string>
@@ -71,6 +97,41 @@ static void nativeLocalRelaySession(){
  puts("local relay session: exact media/clock/epoch/generation/tracks, fresh hop identity; mapping/media/cancel/alias negatives; independent pools only");
 }
 
+static void avTerminal(GstElement*p,GstMessageType expected){
+ auto*bus=gst_element_get_bus(p);auto*m=gst_bus_timed_pop_filtered(bus,3*GST_SECOND,GstMessageType(GST_MESSAGE_EOS|GST_MESSAGE_ERROR));
+ if(m&&GST_MESSAGE_TYPE(m)==GST_MESSAGE_ERROR){GError*e=nullptr;gchar*d=nullptr;gst_message_parse_error(m,&e,&d);fprintf(stderr,"native AV: %s %s\n",e->message,d?d:"");g_clear_error(&e);g_free(d);}
+ CHECK(m&&GST_MESSAGE_TYPE(m)==expected);gst_message_unref(m);gst_object_unref(bus);
+}
+// The appsink consumer completes its synchronous pixel oracle before releasing
+// memory. Real GPU consumers must retain it through their actual completion.
+static gboolean nativeAvReaderAllocation(GstElement*,GstQuery*query,gpointer data){
+ auto*policy=static_cast<GstFrameLinkMemoryPolicy*>(data);
+ guint8 wire[FL_MEMORY_REQUIREMENTS_WIRE_SIZE];
+ CHECK(flMemoryRequirementsEncode(&policy->requirements[1],wire,sizeof wire)==FL_MEMORY_OK);
+ auto*bytes=g_bytes_new(wire,sizeof wire);
+ gst_structure_set(gst_query_writable_structure(query),
+  "framelink-reader-completion-contract",G_TYPE_STRING,"retain-memory-until-gpu-complete-v1",
+  "framelink-memory-requirements",G_TYPE_BYTES,bytes,nullptr);
+ g_bytes_unref(bytes);return TRUE;
+}
+// Borrow the already authenticated audio connection from the local session.
+struct LocalProcessAudio {
+ GstElement*pipe=nullptr,*port=nullptr;
+ LocalProcessAudio(FlGstSession*session,bool producer){
+  CHECK(fl_gst_session_register_track(session,FL_GST_TRACK_VIDEO)==FL_GST_SESSION_READY);
+  flSessionConfig cfg{};CHECK(fl_gst_session_get_config(session,&cfg)==FL_GST_SESSION_READY);
+  GError*error=nullptr;
+  pipe=gst_parse_launch(producer?
+   "appsrc name=port is-live=true format=time max-bytes=15360 caps=audio/x-raw,format=S16LE,layout=interleaved,rate=48000,channels=2,channel-mask=(bitmask)0x3 ! framelinkaudiosink tracks=av":
+   "framelinkaudiosrc tracks=av ! appsink name=port max-buffers=2 sync=false async=false enable-last-sample=false",&error);
+  CHECK(pipe&&!error);port=gst_bin_get_by_name(GST_BIN(pipe),"port");CHECK(port);
+  auto*context=fl_gst_session_create_context(session);gst_element_set_context(pipe,context);gst_context_unref(context);
+  CHECK(fl_gst_session_track_ready(session,FL_GST_TRACK_VIDEO,cfg.generation)==FL_GST_SESSION_READY);
+ }
+ void start(){CHECK(gst_element_set_state(pipe,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);}
+ ~LocalProcessAudio(){CHECK(gst_element_set_state(pipe,GST_STATE_NULL)!=GST_STATE_CHANGE_FAILURE);gst_object_unref(port);gst_object_unref(pipe);}
+};
+
 // Independent upstream source process for the relay fixtures. Only control
 // gates are inherited, never native resources or credentials.
 namespace localsource {
@@ -88,13 +149,17 @@ static void verify(flChannel*channel,const flFrame&frame,unsigned n,guint64 gene
  flImageUnmap(frame.image);
 }
 // Child: an ordinary FAR4 native producer, paced by the parent.
-static int producer(const char*path,relaytest::Gate&advance,relaytest::Gate&published,relaytest::Gate&retired){
+static int producer(const char*path,relaytest::Gate&advance,relaytest::Gate&published,relaytest::Gate&retired,bool audio=false){
  auto caps=relaytest::localCaps();auto candidate=nativeAvPolicy(0,true);GstFrameLinkMemoryPolicy bound{};
  auto*session=fl_gst_session_new(3);flChannel*channel=nullptr;GError*error=nullptr;
  CHECK(fl_gst_session_open_local_native(session,TRUE,path,&caps,1,2,80,5000,5000,
    &candidate,&bound,&channel,nullptr,&error));
  flSessionConfig cfg{};CHECK(fl_gst_session_get_config(session,&cfg)==FL_GST_SESSION_READY);
  CHECK(bound.sessionGeneration==cfg.generation);
+ std::unique_ptr<LocalProcessAudio> pcm;
+ if(audio){pcm.reset(new LocalProcessAudio(session,true));pcm->start();}
+ // The relay parent signals readiness only after snapshot import and the
+ // same-allocation read-lease adapter are bound.
  CHECK(fl_gst_session_local_ready(session,TRUE,5000,nullptr));
  for(unsigned n=0;n<Frames;++n){
   advance.wait();
@@ -102,23 +167,37 @@ static int producer(const char*path,relaytest::Gate&advance,relaytest::Gate&publ
   relaytest::fill(channel,buffer,static_cast<unsigned char>(n+11));
   flFrameMetadata meta{FL_FRAME_METADATA_VERSION,FL_FRAME_HAS_DTS|FL_FRAME_HAS_DURATION,pts(n),1000000,cfg.generation,{}};
   CHECK(flSetFrameMetadata(channel,&buffer,&meta)==FL_OK);CHECK(flSubmit(channel,&buffer,pts(n))==FL_OK);
+  if(audio){
+   auto*block=gst_buffer_new_allocate(nullptr,192,nullptr);guint8 bytes[192];
+   for(unsigned i=0;i<sizeof bytes;++i)bytes[i]=guint8((n*29+i*7+31)&255);
+   CHECK(gst_buffer_fill(block,0,bytes,sizeof bytes)==sizeof bytes);
+   GST_BUFFER_PTS(block)=n*1000000;GST_BUFFER_DURATION(block)=1000000;
+   CHECK(gst_app_src_push_buffer(GST_APP_SRC(pcm->port),block)==GST_FLOW_OK);
+  }
   published.signal();
   // A control gate bounds the fixture's outstanding frames; it is not proof
   // of native completion. The parent signals only after the real lease retires.
   retired.wait();
  }
- CHECK(fl_gst_session_finish_local(session,TRUE,5000,nullptr));
+ if(audio){
+  FlGstVideoEvent end{FL_GST_VIDEO_END,Frames,guint64(pts(Frames-1)),0};
+  CHECK(fl_gst_session_send_video_event(session,cfg.generation,&end)==FL_GST_SESSION_READY);
+  CHECK(fl_gst_session_video_eos(session,cfg.generation,Frames,pts(Frames-1))==FL_GST_SESSION_READY);
+  CHECK(gst_app_src_end_of_stream(GST_APP_SRC(pcm->port))==GST_FLOW_OK);
+ }
+ CHECK(fl_gst_session_finish_local(session,TRUE,5000,nullptr));pcm.reset();
  flClose(channel);g_object_unref(session);return 0;
 }
 struct Peer {
  relaytest::Gate advance,published,retired;std::unique_ptr<relaytest::Child> child;
- Peer(const char*plugin,const std::string&path){
-  child.reset(new relaytest::Child({plugin,"--relay-local-source",path,advance.arg(),published.arg(),retired.arg()},
+ Peer(const char*plugin,const std::string&path,bool audio=false){
+  child.reset(new relaytest::Child({plugin,audio?"--relay-local-source-av":"--relay-local-source",path,advance.arg(),published.arg(),retired.arg()},
    {&advance,&published,&retired}));
  }
  void next(){advance.signal();published.wait();}
  void release(){retired.signal();}
  void join(){child->join();}
+ void fail(){child->terminate();}
 };
 // A focused upstream-only control for the separate source process.
 static void control(const char*plugin){
@@ -147,16 +226,447 @@ static void control(const char*plugin){
 }
 }
 
+// FAR5 transfer across a real process boundary. Only control gates are
+// inherited; native allocations reach the reader only through the
+// authenticated, kernel-pinned transfer.
+namespace localpool {
+static flSessionConfig upstreamConfig(guint timeout){
+ auto caps=relaytest::localCaps();
+ flSessionConfig cfg{};cfg.version=2;cfg.sessionId.bytes[0]=31;cfg.clockId.bytes[0]=73;cfg.generation=19;
+ cfg.videoTrackId=7;cfg.audioTrackId=8;cfg.video=caps.video[0];cfg.audio=caps.audio[0];
+ cfg.videoQueueFrames=1;cfg.audioQueueMs=80;cfg.connectTimeoutMs=cfg.idleTimeoutMs=timeout;
+ auto*clock=gst_system_clock_obtain();cfg.epochNs=gst_clock_get_time(clock)-GST_SECOND;gst_object_unref(clock);
+ return cfg;
+}
+static FlGstSession* identityMappedUpstream(const flSessionConfig&cfg){
+ auto caps=relaytest::localCaps();auto*up=fl_gst_session_new(3);
+ CHECK(fl_gst_session_configure(up,&cfg,&caps,&caps)==FL_GST_SESSION_READY);
+ flClockMapping mapping{};mapping.sourceClockId=cfg.clockId;mapping.targetClockId.bytes[0]=81;mapping.sourceAnchorNs=cfg.epochNs;
+ CHECK(fl_gst_session_set_mapping(up,cfg.generation,&mapping,0)==FL_GST_SESSION_READY);
+ return up;
+}
+// Child: the final FAR5 receiver. fixedFixture checks the process test's
+// configured upstream; audio adds PCM, END/EOS and drain; failedSource expects
+// the source to die before END.
+static int reader(const char*path,relaytest::Gate&held,relaytest::Gate&release,relaytest::Gate&exit,bool fixedFixture=true,bool audio=false,bool failedSource=false){
+ auto caps=relaytest::localCaps();auto candidate=nativeAvPolicy(0,true);GstFrameLinkMemoryPolicy bound{};
+ auto*session=fl_gst_session_new(3);flChannel*channel=nullptr;GError*error=nullptr;
+ CHECK(fl_gst_session_open_local_native_pool_receiver(session,path,&caps,1,2,80,5000,5000,
+   &candidate,&bound,&channel,nullptr,&error));
+ flSessionConfig cfg{};CHECK(fl_gst_session_get_config(session,&cfg)==FL_GST_SESSION_READY);
+ CHECK(flSessionValidate(&cfg)==FL_SESSION_OK&&bound.sessionGeneration==cfg.generation);
+ if(fixedFixture)CHECK(cfg.generation==19&&cfg.clockId.bytes[0]==73&&cfg.videoTrackId==7&&cfg.audioTrackId==8);
+ std::unique_ptr<LocalProcessAudio> pcm;
+ if(audio){pcm.reset(new LocalProcessAudio(session,false));pcm->start();}
+ guint64 audioFrames=0,audioBytes=0;
+ CHECK(fl_gst_session_local_ready(session,FALSE,1000,nullptr));
+ for(unsigned n=0;n<8;++n){
+  flFrame frame{};CHECK(flAcquireFrame(channel,&frame,5000)==FL_OK);
+  CHECK(frame.ptsNs==37000000+n*1000000);
+  flFrameMetadata meta{};CHECK(flGetFrameMetadata(channel,&frame,&meta)==FL_OK);
+  CHECK(meta.streamGeneration==cfg.generation&&meta.durationNs==1000000&&meta.dtsNs==frame.ptsNs);
+  flMappedImage map{};CHECK(flImageMapPlanes(frame.image,&map)==FL_OK);
+  for(unsigned y=0;y<32;++y)for(unsigned x=0;x<256;++x)
+   CHECK(static_cast<unsigned char*>(map.plane[0].pixels)[y*map.plane[0].stride+x]==n+11);
+  flImageUnmap(frame.image);
+  if(audio){
+   auto*sample=gst_app_sink_try_pull_sample(GST_APP_SINK(pcm->port),5*GST_SECOND);CHECK(sample);
+   auto*buffer=gst_sample_get_buffer(sample);guint8 bytes[192]{};gint64 mapped=-1;
+   CHECK(gst_buffer_get_size(buffer)==sizeof bytes&&gst_buffer_extract(buffer,0,bytes,sizeof bytes)==sizeof bytes);
+   // Independent expected source sequence, not data reported by the relay.
+   for(unsigned i=0;i<sizeof bytes;++i)CHECK(bytes[i]==guint8((n*29+i*7+31)&255));
+   CHECK(GST_BUFFER_DURATION(buffer)==1000000);
+   CHECK(fl_gst_session_map_running_time(session,cfg.generation,frame.ptsNs,TRUE,&mapped)==FL_GST_SESSION_READY);
+   CHECK(mapped>=37000000&&guint64(mapped-37000000)==GST_BUFFER_PTS(buffer));
+   CHECK(fl_gst_session_map_running_time(session,cfg.generation,n*1000000,TRUE,&mapped)==FL_GST_SESSION_READY);
+   CHECK(GST_BUFFER_PTS(buffer)==guint64(mapped));
+   audioFrames+=48;audioBytes+=sizeof bytes;gst_sample_unref(sample);
+  }
+  uint64_t lease=0;CHECK(flLeaseFrame(channel,&frame,&lease)==FL_OK);
+  if(n==7){
+   held.signal();release.wait();
+   // Re-read through the still-live lease after an optional replacement graph.
+   flFrame retained{};uint64_t generation=0;
+   CHECK(flReadLeaseFrame(channel,lease,&retained,&generation)==FL_OK);
+   CHECK(retained.ptsNs==44000000);
+   flMappedImage stable{};CHECK(flImageMapPlanes(retained.image,&stable)==FL_OK);
+   for(unsigned y=0;y<32;++y)for(unsigned x=0;x<256;++x)
+    CHECK(static_cast<unsigned char*>(stable.plane[0].pixels)[y*stable.plane[0].stride+x]==18);
+   flImageUnmap(retained.image);
+  }
+  CHECK(flCompleteReadLease(channel,lease)==FL_OK);CHECK(flCollectReadLeases(channel)==FL_OK);
+ }
+ if(audio&&!failedSource){
+  FlGstVideoEvent end{};CHECK(fl_gst_session_receive_video_event(session,cfg.generation,5000,&end)==FL_GST_SESSION_READY);
+  CHECK(end.kind==FL_GST_VIDEO_END&&end.afterFrames==8&&end.ptsNs==44000000);
+  CHECK(!gst_app_sink_try_pull_sample(GST_APP_SINK(pcm->port),5*GST_SECOND));
+  CHECK(gst_app_sink_is_eos(GST_APP_SINK(pcm->port)));avTerminal(pcm->pipe,GST_MESSAGE_EOS);
+  guint64 count=0;gint64 last=-1;
+  CHECK(fl_gst_session_wait_video_eos(session,cfg.generation,1000,&count,&last)==FL_GST_SESSION_READY);
+  CHECK(count==8&&last==44000000&&audioFrames==384&&audioBytes==1536);
+  flFrame extra{};CHECK(flAcquireFrame(channel,&extra,0)==FL_TIMEOUT);
+ }
+ exit.wait();
+ if(!failedSource)CHECK(fl_gst_session_finish_local(session,FALSE,1000,nullptr));
+ else{fl_gst_session_cancel(session);CHECK(!gst_app_sink_is_eos(GST_APP_SINK(pcm->port)));}
+ pcm.reset();flClose(channel);g_object_unref(session);return 0;
+}
+// Child: the final receiver as an automatic FAR5 framelinkavsrc bin.
+// read is signalled after each video sample is pulled: the parent forwards the
+// next frame only then, so a coordinated frame is never replaced unread.
+static int binReader(const char*path,relaytest::Gate&held,relaytest::Gate&release,relaytest::Gate&exit,relaytest::Gate&read){
+ GError*error=nullptr;
+ auto*pipe=gst_parse_launch("framelinkavsrc name=transport native-memory=true video-format=RGBA width=64 height=32 framerate=30/1 video-pool=2 video-queue-frames=1 transport.video_src ! appsink name=video max-buffers=1 sync=false async=false enable-last-sample=false transport.audio_src ! appsink name=audio max-buffers=1 sync=false async=false enable-last-sample=false",&error);CHECK(pipe&&!error);
+ auto*src=gst_bin_get_by_name(GST_BIN(pipe),"transport");auto*video=gst_bin_get_by_name(GST_BIN(pipe),"video");auto*audio=gst_bin_get_by_name(GST_BIN(pipe),"audio");
+ auto candidate=nativeAvPolicy(0,true);g_object_set(src,"session",path,nullptr);
+ gboolean accepted=FALSE;g_signal_emit_by_name(src,"set-local-native-pool-candidate",&candidate,&accepted);CHECK(accepted);
+ g_object_set(video,"emit-signals",TRUE,nullptr);g_signal_connect(video,"propose-allocation",G_CALLBACK(nativeAvReaderAllocation),&candidate);
+ CHECK(gst_element_set_state(pipe,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
+ GstClockTime first=GST_CLOCK_TIME_NONE;guint64 frames=0;GstMemory*retained=nullptr;gsize finalOffset=0;gint finalStride=0;
+ for(unsigned n=0;n<8;++n){
+  auto*v=gst_app_sink_try_pull_sample(GST_APP_SINK(video),5*GST_SECOND);CHECK(v);read.signal();
+  auto*a=gst_app_sink_try_pull_sample(GST_APP_SINK(audio),5*GST_SECOND);CHECK(a);
+  auto*vb=gst_sample_get_buffer(v);auto*ab=gst_sample_get_buffer(a);auto*memory=gst_buffer_peek_memory(vb,0);CHECK(relaytest::isNativeMemory(memory));
+  auto*meta=gst_buffer_get_video_meta(vb);auto*identity=gst_buffer_get_framelink_frame_meta(vb);guint64 generation=0;g_object_get(src,"generation",&generation,nullptr);
+  CHECK(identity&&identity->frame.streamGeneration==generation&&generation);
+  CHECK(GST_BUFFER_PTS(vb)-GST_BUFFER_PTS(ab)==37000000&&GST_BUFFER_DTS(vb)==GST_BUFFER_PTS(vb));
+  if(!n)first=GST_BUFFER_PTS(ab);
+  CHECK(GST_BUFFER_PTS(ab)==first+n*1000000&&GST_BUFFER_DURATION(ab)==1000000&&GST_BUFFER_DURATION(vb)==1000000);
+  GstMapInfo map{};CHECK(meta&&gst_memory_map(memory,&map,GST_MAP_READ));
+  for(unsigned y=0;y<32;++y)for(unsigned x=0;x<256;++x)CHECK(map.data[meta->offset[0]+y*meta->stride[0]+x]==n+11);
+  gst_memory_unmap(memory,&map);guint8 bytes[192];CHECK(gst_buffer_get_size(ab)==sizeof bytes&&gst_buffer_extract(ab,0,bytes,sizeof bytes)==sizeof bytes);
+  for(unsigned i=0;i<sizeof bytes;++i)CHECK(bytes[i]==guint8((n*29+i*7+31)&255));frames+=48;
+  if(n==7){retained=gst_memory_ref(memory);finalOffset=meta->offset[0];finalStride=meta->stride[0];}
+  gst_sample_unref(v);gst_sample_unref(a);
+  if(retained)held.signal();
+ }
+ CHECK(frames==384);avTerminal(pipe,GST_MESSAGE_EOS);CHECK(gst_app_sink_is_eos(GST_APP_SINK(video))&&gst_app_sink_is_eos(GST_APP_SINK(audio)));
+ // Keep the control session live until the sender accepts the real drain.
+ release.wait();
+ CHECK(gst_element_set_state(pipe,GST_STATE_NULL)!=GST_STATE_CHANGE_FAILURE);
+ CHECK(retained);GstMapInfo stable{};CHECK(gst_memory_map(retained,&stable,GST_MAP_READ));
+ for(unsigned y=0;y<32;++y)for(unsigned col=0;col<256;++col)CHECK(stable.data[finalOffset+y*finalStride+col]==18);
+ gst_memory_unmap(retained,&stable);exit.signal();release.wait();gst_memory_unref(retained);exit.wait();
+ gst_object_unref(src);gst_object_unref(video);gst_object_unref(audio);gst_object_unref(pipe);
+ puts("automatic FAR5 receiver bin: 8 native/384 PCM, exact bytes/37ms, held GstMemory and authenticated EOS");return 0;
+}
+static void binNegatives(){
+ for(unsigned mode=0;mode<10;++mode){
+  auto*bin=gst_element_factory_make("framelinkavsrc",nullptr);CHECK(bin);
+  g_object_set(bin,"session","unused-far5-negative","native-memory",TRUE,"video-pool",2u,"video-queue-frames",1u,nullptr);
+  auto candidate=nativeAvPolicy(0,true);
+  if(mode==1)g_object_set(bin,"session",nullptr,nullptr);
+  if(mode==2)g_object_set(bin,"tracks","video",nullptr);
+  if(mode==3)g_object_set(bin,"video-pool",0u,nullptr);
+  if(mode==4)g_object_set(bin,"video-pool",1u,nullptr);
+  if(mode==5)g_object_set(bin,"shared-cpu",TRUE,nullptr);
+  if(mode==6)candidate.sessionGeneration=1;
+  if(mode==7)g_object_set(bin,"native-memory",FALSE,nullptr);
+  gboolean accepted=FALSE;
+  if(mode==9){g_signal_emit_by_name(bin,"set-local-native-candidate",&candidate,&accepted);CHECK(accepted);}
+  accepted=TRUE;g_signal_emit_by_name(bin,"set-local-native-pool-candidate",mode==8?nullptr:&candidate,&accepted);
+  CHECK(accepted==(mode==0));
+  if(mode==0){
+   g_signal_emit_by_name(bin,"set-local-native-pool-candidate",&candidate,&accepted);CHECK(!accepted);
+   g_signal_emit_by_name(bin,"set-local-native-candidate",&candidate,&accepted);CHECK(!accepted);
+   g_signal_emit_by_name(bin,"adopt-channel",nullptr,&accepted);CHECK(!accepted);
+   g_signal_emit_by_name(bin,"apply-memory-policy",&candidate,&accepted);CHECK(!accepted);
+   g_object_set(bin,"width",96u,nullptr);guint width=0;g_object_get(bin,"width",&width,nullptr);CHECK(width==1280);
+  }
+  gst_object_unref(bin);
+ }
+ for(bool mismatch:{false,true}){
+  auto*pipe=gst_pipeline_new(nullptr);auto*bin=gst_element_factory_make("framelinkavsrc",nullptr);CHECK(pipe&&bin);gst_bin_add(GST_BIN(pipe),bin);
+  gchar*directory=g_dir_make_tmp("framelink-far5-bin-negative-XXXXXX",nullptr);CHECK(directory);std::string path=std::string(directory)+"/session";g_free(directory);
+  g_object_set(bin,"session",path.c_str(),"native-memory",TRUE,"video-format","RGBA","width",64u,"height",32u,
+    "video-pool",2u,"video-queue-frames",1u,"connect-timeout-ms",mismatch?1000u:60000u,nullptr);
+  gst_util_set_object_arg(G_OBJECT(bin),"framerate","30/1");
+  auto candidate=nativeAvPolicy(0,true);gboolean accepted=FALSE;g_signal_emit_by_name(bin,"set-local-native-pool-candidate",&candidate,&accepted);CHECK(accepted);
+  CHECK(gst_element_set_state(pipe,GST_STATE_READY)!=GST_STATE_CHANGE_FAILURE);
+  if(mismatch){
+   auto*session=fl_gst_session_new(3);auto caps=relaytest::localCaps();GstFrameLinkMemoryPolicy bound{};flChannel*channel=nullptr;GError*error=nullptr;
+   // Existing FAR4 producer must not silently downgrade this explicit FAR5 bin.
+   gboolean ok=fl_gst_session_open_local_native(session,TRUE,path.c_str(),&caps,1,2,80,1000,1000,&candidate,&bound,&channel,nullptr,&error);
+   CHECK(!ok&&!channel&&!bound.version&&error);g_clear_error(&error);g_object_unref(session);avTerminal(pipe,GST_MESSAGE_ERROR);
+  }else g_usleep(30000);
+  const auto began=g_get_monotonic_time();CHECK(gst_element_set_state(pipe,GST_STATE_NULL)!=GST_STATE_CHANGE_FAILURE);
+  CHECK(g_get_monotonic_time()-began<1000000);gst_object_unref(pipe);
+ }
+ puts("FAR5 bin controls: explicit immutable profile, invalid candidates, FAR4 mismatch/no fallback, bounded missing-peer cancellation");
+}
+// Parent: source ring and writer, FAR5 sender, same-allocation forwarding.
+static void process(const char*plugin){
+ auto caps=relaytest::localCaps();auto candidate=nativeAvPolicy(0,true);GstFrameLinkMemoryPolicy bound{};
+ const auto cfg=upstreamConfig(5000);auto*up=identityMappedUpstream(cfg);auto*down=fl_gst_session_new(3);
+ auto name="native-local-process-"+std::to_string(g_get_monotonic_time());
+ flChannel*source=nullptr,*writer=nullptr,*downstream=nullptr;
+ CHECK(flCreateChannelEx(name.c_str(),64,32,FL_FORMAT_RGBA8,2,FL_MAP_CPU|FL_DEFER_RELEASE|FL_REQUIRE_FRAME_METADATA,&source)==FL_OK);
+ CHECK(flOpenProducer(name.c_str(),&writer)==FL_OK);
+ // Pin every unpublished slot; export them reversed, so slot index is not identity.
+ flBuffer reservations[2]{};relaytest::PoolExport exports{};
+ for(unsigned n=0;n<2;++n){CHECK(flAcquireBuffer(writer,&reservations[n],1000)==FL_OK);relaytest::exportImage(writer,reservations[n].image,exports,1-n);}
+ gchar*dir=g_dir_make_tmp("framelink-native-process-XXXXXX",nullptr);CHECK(dir);std::string path=std::string(dir)+"/session";g_free(dir);
+ relaytest::Gate held,release,exit;
+ relaytest::Child child({plugin,"--relay-local-reader",path,held.arg(),release.arg(),exit.arg()},{&held,&release,&exit});
+ GError*error=nullptr;
+ CHECK(relaytest::openRelayPool(down,up,path.c_str(),&caps,1,2,80,5000,5000,&candidate,exports,&bound,&downstream,nullptr,&error));
+ for(auto&b:reservations)CHECK(flCancelBuffer(writer,&b)==FL_OK);
+ CHECK(fl_gst_session_local_ready(down,TRUE,1000,nullptr));
+ flsample::NativeRelay relay(source,downstream,[](flImage*a,flImage*b){return relaytest::sameAllocation(a,b);});
+ CHECK(relay.initialize()==FL_OK);
+ for(unsigned n=0;n<8;++n){
+  flBuffer buffer{};CHECK(flAcquireBuffer(writer,&buffer,1000)==FL_OK);
+  relaytest::fill(writer,buffer,static_cast<unsigned char>(n+11));
+  const gint64 pts=37000000+n*1000000;
+  flFrameMetadata meta{1,FL_FRAME_HAS_DTS|FL_FRAME_HAS_DURATION,pts,1000000,19,{}};
+  CHECK(flSetFrameMetadata(writer,&buffer,&meta)==FL_OK);CHECK(flSubmit(writer,&buffer,pts)==FL_OK);
+  flFrame frame{};CHECK(flAcquireFrame(source,&frame,1000)==FL_OK);CHECK(relay.forward(frame)==FL_OK);
+  if(n==7){held.wait();CHECK(relay.pending()==1&&relay.finish()==FL_BUSY);release.signal();}
+  const auto deadline=g_get_monotonic_time()+2000000;
+  while(relay.pending()){CHECK(g_get_monotonic_time()<deadline);CHECK(relay.collect()==FL_OK);g_usleep(100);}
+ }
+ CHECK(relay.count()==8&&relay.finish()==FL_OK);exit.signal();
+ CHECK(fl_gst_session_finish_local(down,TRUE,1000,nullptr));child.join();
+ flClose(downstream);flClose(writer);flClose(source);g_object_unref(down);g_object_unref(up);
+ puts("FAR5 cross-process: no inherited native resources; 8 exact frames/metadata; source lease retained until actual remote reader release; authenticated drain");
+}
+static void failures(){
+ auto caps=relaytest::localCaps();auto candidate=nativeAvPolicy(0,true);
+ const auto cfg=upstreamConfig(1000);auto*up=identityMappedUpstream(cfg);
+ auto name="native-pool-negative-"+std::to_string(g_get_monotonic_time());flChannel*reader=nullptr,*writer=nullptr;
+ CHECK(flCreateChannelEx(name.c_str(),64,32,FL_FORMAT_RGBA8,2,FL_MAP_CPU|FL_REQUIRE_FRAME_METADATA,&reader)==FL_OK);
+ CHECK(flOpenProducer(name.c_str(),&writer)==FL_OK);
+ flBuffer slots[2]{};for(auto&b:slots)CHECK(flAcquireBuffer(writer,&b,1000)==FL_OK);
+ relaytest::PoolExport original{};for(unsigned n=0;n<2;++n)relaytest::exportImage(writer,slots[n].image,original,n);
+ relaytest::Gate foreign; // a valid kernel object that is not an image
+ const relaytest::BadExport bad[]={relaytest::BadExport::Duplicate,relaytest::BadExport::Invalid,
+  relaytest::BadExport::Foreign,relaytest::BadExport::Mismatch};
+ for(unsigned mode=0;mode<6;++mode){
+  auto exports=original;if(mode<4)relaytest::corrupt(exports,bad[mode],foreign);
+  auto*s=fl_gst_session_new(3);auto*r=fl_gst_session_new(3);
+  GstFrameLinkMemoryPolicy bound{},received{};flChannel*p=nullptr,*c=nullptr;
+  GError*localError=nullptr,*remoteError=nullptr;
+  gchar*dir=g_dir_make_tmp("framelink-pool-negative-XXXXXX",nullptr);CHECK(dir);std::string path=std::string(dir)+"/session";g_free(dir);
+  gboolean remote=TRUE;auto before=g_get_monotonic_time();
+  std::thread peer([&]{
+   remote=mode==5?fl_gst_session_open_local_native(r,FALSE,path.c_str(),&caps,1,2,80,500,1000,&candidate,&received,&c,nullptr,&remoteError):
+    fl_gst_session_open_local_native_pool_receiver(r,path.c_str(),&caps,1,mode==4?3:2,80,500,1000,&candidate,&received,&c,nullptr,&remoteError);
+  });
+  auto local=relaytest::openRelayPool(s,up,path.c_str(),&caps,1,2,80,500,1000,&candidate,exports,&bound,&p,nullptr,&localError);
+  peer.join();fprintf(stderr,"pool negative mode=%u local=%d remote=%d localError=%s remoteError=%s\n",mode,int(local),int(remote),localError?localError->message:"none",remoteError?remoteError->message:"none");
+  CHECK(!local&&!remote&&localError&&remoteError&&!p&&!c&&!bound.version&&!received.version);
+  if(mode<5){CHECK(strstr(localError->message,"authenticated relay pool transfer")&&strstr(remoteError->message,"authenticated relay pool transfer"));}
+  CHECK(g_get_monotonic_time()-before<2000000);
+  flSessionConfig still{};CHECK(fl_gst_session_get_config(up,&still)==FL_GST_SESSION_READY);
+  CHECK(relaytest::exportsAlive(original,2));
+  g_clear_error(&localError);g_clear_error(&remoteError);g_object_unref(s);g_object_unref(r);
+ }
+ // Missing downstream must not mask a subsequently cancelled upstream for
+ // the full two-second discovery budget. The native source slots stay pinned.
+ {
+  auto*down=fl_gst_session_new(3);GstFrameLinkMemoryPolicy bound{};flChannel*output=nullptr;GError*error=nullptr;
+  gchar*dir=g_dir_make_tmp("framelink-pool-source-cancel-XXXXXX",nullptr);CHECK(dir);
+  std::string path=std::string(dir)+"/session";g_free(dir);
+  const auto began=g_get_monotonic_time();
+  std::thread cancel([&]{g_usleep(30000);fl_gst_session_cancel(up);});
+  auto ok=relaytest::openRelayPool(down,up,path.c_str(),&caps,1,2,80,2000,1000,&candidate,original,&bound,&output,nullptr,&error);
+  cancel.join();const auto elapsed=g_get_monotonic_time()-began;
+  CHECK(!ok&&error&&!output&&!bound.version&&elapsed<500000);
+  fprintf(stderr,"upstream cancellation during missing-downstream setup: %.3fms\n",elapsed/1000.0);
+  g_clear_error(&error);g_object_unref(down);
+ }
+ for(auto&b:slots)CHECK(flCancelBuffer(writer,&b)==FL_OK);
+ for(auto&b:slots)CHECK(flAcquireBuffer(writer,&b,1000)==FL_OK);
+ for(auto&b:slots)CHECK(flCancelBuffer(writer,&b)==FL_OK);
+ flClose(writer);flClose(reader);g_object_unref(up);
+ puts("FAR5 pool failures: duplicate/invalid/foreign exports, adapter or layout mismatch, wrong capacity, legacy receiver reject; outputs clear, exports and source pool survive");
+}
+}
+
+// Three independent processes: source child, this relay, final reader child.
+// Uses the committed consumer-pool snapshot, never inherited native resources.
+namespace graph {
+using localsource::Frames;using localsource::pts;using localsource::Peer;
+struct HeldGraph { flSessionConfig config{};relaytest::AllocationId allocations[2]{}; };
+static void threeProcess(const char*plugin,bool audio=false,bool replaceWhileHeld=false,const HeldGraph*old=nullptr,bool failedSource=false,bool binFinal=false){
+ gchar*dir=g_dir_make_tmp("framelink-three-local-XXXXXX",nullptr);CHECK(dir);
+ const std::string root=dir;g_free(dir);const auto inputPath=root+"/input",outputPath=root+"/output";
+ Peer source(plugin,inputPath,audio);
+ auto caps=relaytest::localCaps();auto candidate=nativeAvPolicy(0,true);
+ auto*up=fl_gst_session_new(3);auto*down=fl_gst_session_new(3);
+ flChannel*input=nullptr,*output=nullptr;GError*error=nullptr;
+ relaytest::Gate held,release,exit,read;
+ const char*readerMode=binFinal?"--relay-local-reader-bin":(failedSource?"--relay-local-reader-failed":(audio?"--relay-local-reader-av":"--relay-local-reader-generic"));
+ std::vector<std::string> readerArgs{plugin,readerMode,outputPath,held.arg(),release.arg(),exit.arg()};
+ std::vector<const relaytest::Gate*> readerGates{&held,&release,&exit};
+ if(binFinal){readerArgs.push_back(read.arg());readerGates.push_back(&read);}
+ relaytest::Child final(readerArgs,readerGates);
+ flsample::LocalNativeRelaySetup prepared{};
+ CHECK(flsample::setupLocalNativeRelay(up,down,inputPath.c_str(),outputPath.c_str(),&caps,&candidate,
+   1,2,80,5000,5000,nullptr,&prepared,&error));
+ input=prepared.input;output=prepared.output;
+ auto*snapshot=prepared.snapshot;
+ flSessionConfig original{};CHECK(fl_gst_session_get_config(up,&original)==FL_GST_SESSION_READY);
+ flChannelInfo info{};CHECK(flsample::queryLocalPoolSnapshot(snapshot,&info)==FL_OK&&info.poolSize==2);
+ relaytest::AllocationId allocations[2]{};for(unsigned n=0;n<2;++n)allocations[n]=relaytest::snapshotAllocation(snapshot,n);
+ // Both channels are ready, but the source is still forbidden to publish.
+ CHECK(source.published.idle());
+ flSessionConfig forwarded{};CHECK(fl_gst_session_get_config(down,&forwarded)==FL_GST_SESSION_READY);
+ CHECK(flsample::SessionRelayContract::compatible(original,forwarded));
+ if(old){
+  CHECK(memcmp(original.sessionId.bytes,old->config.sessionId.bytes,16)!=0);
+  CHECK(memcmp(original.clockId.bytes,old->config.clockId.bytes,16)!=0);
+  CHECK(!flsample::SessionRelayContract::compatible(old->config,forwarded));
+  for(auto&current:allocations)for(auto&prior:old->allocations)CHECK(!relaytest::sameAllocation(current,prior));
+ }
+ flsample::SessionNativeRelay relay(up,down,input,output,[](flImage*a,flImage*b){return relaytest::sameAllocation(a,b);});
+ CHECK(relay.initialize()==FL_OK);
+ std::unique_ptr<LocalProcessAudio> pcmInput,pcmOutput;
+ std::unique_ptr<flsample::SessionPcmRelay> pcm;
+ if(audio){
+  pcmInput.reset(new LocalProcessAudio(up,false));pcmOutput.reset(new LocalProcessAudio(down,true));
+  pcm.reset(new flsample::SessionPcmRelay(up,down,GST_APP_SINK(pcmInput->port),GST_APP_SRC(pcmOutput->port)));
+  CHECK(pcm->initialize()==FL_GST_SESSION_READY);pcmOutput->start();pcmInput->start();
+ }
+ flsample::SessionRelaySupervisor supervisor(up,down);CHECK(supervisor.start()==FL_GST_SESSION_READY);
+ CHECK(fl_gst_session_local_ready(down,TRUE,1000,nullptr));
+ CHECK(fl_gst_session_local_ready(up,FALSE,1000,nullptr));
+ if(binFinal){FlGstVideoEvent barrier{FL_GST_VIDEO_BARRIER,0,guint64(pts(0)),0};CHECK(fl_gst_session_send_video_event(down,original.generation,&barrier)==FL_GST_SESSION_READY);}
+ for(unsigned n=0;n<Frames;++n){
+  source.next();flFrame frame{};CHECK(flAcquireFrame(input,&frame,1000)==FL_OK);
+  CHECK(frame.ptsNs==pts(n));CHECK(relay.forward(frame)==FL_OK);
+  if(binFinal)read.wait(); // the bin has taken frame n before frame n+1 can be published
+  if(audio){
+   const auto until=g_get_monotonic_time()+5000000;FlGstSessionResult result;
+   do{result=pcm->forward(100);CHECK(result==FL_GST_SESSION_READY||result==FL_GST_SESSION_TIMEOUT);CHECK(g_get_monotonic_time()<until);}while(result==FL_GST_SESSION_TIMEOUT);
+  }
+  if(n+1==Frames){
+   held.wait();CHECK(relay.collect()==FL_OK&&relay.pending()==1);
+   // Collection cannot retire the source lease while the final reader holds it.
+   // Do not call SessionNativeRelay::finish here: that closes publication
+   // before the source's authenticated END can be forwarded.
+   CHECK(relay.collect()==FL_OK&&relay.pending()==1);
+   if(failedSource){
+    source.fail();const auto deadline=g_get_monotonic_time()+1000000;
+    while(supervisor.status()==FL_GST_SESSION_READY){CHECK(g_get_monotonic_time()<deadline);g_usleep(1000);}
+    CHECK(supervisor.status()!=FL_GST_SESSION_READY&&relay.pending()==1&&!relay.videoEnded());
+    FlGstVideoEvent event{};CHECK(fl_gst_session_receive_video_event(up,original.generation,0,&event)!=FL_GST_SESSION_READY);
+   }
+   if(replaceWhileHeld){
+    HeldGraph heldGraph{original,{allocations[0],allocations[1]}};
+    threeProcess(plugin,true,false,&heldGraph);
+    CHECK(relay.pending()==1);
+    if(!failedSource)CHECK(relay.collect()==FL_OK);
+    if(!failedSource){flSessionConfig unchanged{};CHECK(fl_gst_session_get_config(up,&unchanged)==FL_GST_SESSION_READY);CHECK(memcmp(&unchanged,&original,sizeof original)==0);}
+   }
+   if(!binFinal)release.signal();
+   if(failedSource){
+    // Source is already stopped. Retire the entire failed graph only after
+    // the old final reader has completed its real lease and exited.
+    exit.signal();final.join();
+    CHECK(relay.pending()==1&&!relay.videoEnded());supervisor.stop();
+    pcm.reset();pcmOutput.reset();pcmInput.reset();
+    flsample::releaseLocalPoolSnapshot(snapshot);flClose(output);flClose(input);
+    g_object_unref(down);g_object_unref(up);
+    puts("source-death replacement: bounded cancellation, no synthetic END/EOS, fresh A/V graph with disjoint allocations, old held pixels intact before final-reader completion");
+    return;
+   }
+  }
+  const auto deadline=g_get_monotonic_time()+2000000;
+  while(relay.pending()>(binFinal?1u:0u)){CHECK(g_get_monotonic_time()<deadline);CHECK(relay.collect()==FL_OK);g_usleep(100);}
+  // Raw readers acknowledge actual retirement. Streaming appsink permits one
+  // in-flight sample; this gate permits the next write attempt, whose native
+  // acquisition still enforces actual slot ownership. It never completes a lease.
+  source.release();
+ }
+ CHECK(relay.count()==Frames);
+ if(audio){
+  CHECK(relay.forwardEvent(5000)==FL_GST_SESSION_READY&&relay.videoEnded());
+  avTerminal(pcmInput->pipe,GST_MESSAGE_EOS);
+  if(binFinal){
+   CHECK(relay.pending()==1&&pcm->finish(relay,0)==FL_GST_SESSION_TIMEOUT);
+   CHECK(pcm->endPublication(relay,5000)==FL_GST_SESSION_READY);
+   supervisor.stop();CHECK(supervisor.status()==FL_GST_SESSION_READY);
+   CHECK(fl_gst_session_finish_local(down,TRUE,1000,nullptr));release.signal();
+   exit.wait();CHECK(relay.pending()==1&&relay.finish()==FL_BUSY);
+   release.signal();
+   const auto deadline=g_get_monotonic_time()+2000000;
+   while(relay.pending()){CHECK(g_get_monotonic_time()<deadline);CHECK(relay.collect()==FL_OK);g_usleep(100);}
+  }else CHECK(pcm->finish(relay,5000)==FL_GST_SESSION_READY);
+  CHECK(pcm->blockCount()==8&&pcm->frameCount()==384&&pcm->byteCount()==1536);
+ }
+ CHECK(relay.finish()==FL_OK);
+ supervisor.stop();CHECK(supervisor.status()==FL_GST_SESSION_READY);
+ exit.signal();if(!binFinal)CHECK(fl_gst_session_finish_local(down,TRUE,1000,nullptr));
+ CHECK(fl_gst_session_finish_local(up,FALSE,1000,nullptr));
+ final.join();source.join();
+ // The snapshot pins the source epoch for the ENTIRE graph, not only import.
+ pcm.reset();pcmOutput.reset();pcmInput.reset();
+ flsample::releaseLocalPoolSnapshot(snapshot);flClose(output);flClose(input);
+ g_object_unref(down);g_object_unref(up);
+ if(replaceWhileHeld)puts("fresh-session replacement: distinct session/clock/native allocations; old reader held through complete replacement A/V graph; old pixels rechecked before real release");
+ if(audio)puts("three-process local authenticated A/V: 384 exact PCM frames/1536 bytes, 37ms offset, real END/EOS, final native lease held");
+ puts("three-process local native relay: FAR4 source-time input + FAR5 snapshot transfer, no inherited native resources, 8 exact final pixels/metadata, held final lease, real drain");
+}
+
+static void setupNegatives(){
+ for(bool cancelSetup:{false,true}){
+  gchar*directory=g_dir_make_tmp("framelink-relay-setup-XXXXXX",nullptr);CHECK(directory);std::string root=directory;g_free(directory);
+  const auto inputPath=root+"/input",outputPath=root+"/absent-output";
+  auto*producerSession=fl_gst_session_new(3);auto*up=fl_gst_session_new(3);auto*down=fl_gst_session_new(3);
+  auto caps=relaytest::localCaps();auto candidate=nativeAvPolicy(0,true);auto*cancel=g_cancellable_new();
+  std::atomic<bool> opened{false};bool producerReady=true;
+  std::thread source([&]{
+   GstFrameLinkMemoryPolicy bound{};flChannel*channel=nullptr;GError*error=nullptr;
+   CHECK(fl_gst_session_open_local_native(producerSession,TRUE,inputPath.c_str(),&caps,1,2,80,2000,2000,&candidate,&bound,&channel,nullptr,&error));
+   opened.store(true);producerReady=fl_gst_session_local_ready(producerSession,TRUE,2000,nullptr);
+   CHECK(!producerReady);fl_gst_session_cancel(producerSession);flClose(channel);
+  });
+  std::thread stop;
+  if(cancelSetup)stop=std::thread([&]{const auto deadline=g_get_monotonic_time()+2000000;while(!opened.load()){CHECK(g_get_monotonic_time()<deadline);g_usleep(1000);}g_usleep(30000);g_cancellable_cancel(cancel);});
+  flsample::LocalNativeRelaySetup result{};GError*error=nullptr;const auto began=g_get_monotonic_time();
+  CHECK(!flsample::setupLocalNativeRelay(up,down,inputPath.c_str(),outputPath.c_str(),&caps,&candidate,
+    1,2,80,cancelSetup?60000u:500u,2000,cancel,&result,&error));
+  CHECK(error&&!result.input&&!result.output&&!result.snapshot&&!result.inputPolicy.version&&!result.outputPolicy.version);
+  CHECK(g_get_monotonic_time()-began<1500000);source.join();if(stop.joinable())stop.join();
+  CHECK(opened.load()&&!producerReady);flSessionConfig config{};
+  CHECK(fl_gst_session_get_config(up,&config)==FL_GST_SESSION_CANCELLED&&fl_gst_session_get_config(down,&config)==FL_GST_SESSION_CANCELLED);
+  g_clear_error(&error);g_object_unref(cancel);g_object_unref(up);g_object_unref(down);g_object_unref(producerSession);
+ }
+ puts("transactional relay setup: downstream absent/cancelled, clear outputs, both sessions cancelled, source never readied");
+}
+}
+
 int main(int argc,char**argv){
  gst_init(&argc,&argv);CHECK(argc>=3);
  GError*e=nullptr;auto*plugin=gst_plugin_load_file(argv[1],&e);CHECK(plugin&&!e);gst_object_unref(plugin);
  const std::string mode=argv[2];
- if(argc==7&&mode=="--relay-local-source"){
+ if(argc==7&&mode.rfind("--relay-local-reader",0)==0){
+  relaytest::Gate held(argv[4]),release(argv[5]),exit(argv[6]);
+  if(mode=="--relay-local-reader")return localpool::reader(argv[3],held,release,exit);
+  if(mode=="--relay-local-reader-generic")return localpool::reader(argv[3],held,release,exit,false);
+  if(mode=="--relay-local-reader-av")return localpool::reader(argv[3],held,release,exit,false,true);
+  if(mode=="--relay-local-reader-failed")return localpool::reader(argv[3],held,release,exit,false,true,true);
+ }
+ if(argc==8&&mode=="--relay-local-reader-bin"){
+  relaytest::Gate held(argv[4]),release(argv[5]),exit(argv[6]),read(argv[7]);
+  return localpool::binReader(argv[3],held,release,exit,read);
+ }
+ if(argc==7&&(mode=="--relay-local-source"||mode=="--relay-local-source-av")){
   relaytest::Gate advance(argv[4]),published(argv[5]),retired(argv[6]);
-  return localsource::producer(argv[3],advance,published,retired);
+  return localsource::producer(argv[3],advance,published,retired,mode=="--relay-local-source-av");
  }
  CHECK(argc==3);
  if(mode=="--relay-local-session"){nativeLocalRelaySession();return 0;}
  if(mode=="--relay-local-source-control"){localsource::control(argv[1]);return 0;}
+ if(mode=="--relay-local-process"){localpool::process(argv[1]);return 0;}
+ if(mode=="--relay-local-pool-failures"){localpool::failures();return 0;}
+ if(mode=="--relay-local-three-process"){graph::threeProcess(argv[1]);return 0;}
+ if(mode=="--relay-three-local-av"){graph::threeProcess(argv[1],true);return 0;}
+ if(mode=="--relay-local-replacement"){graph::threeProcess(argv[1],true,true);return 0;}
+ if(mode=="--relay-local-recovery"){graph::threeProcess(argv[1],true,true,nullptr,true);return 0;}
+ if(mode=="--relay-local-bin"){graph::threeProcess(argv[1],true,false,nullptr,false,true);return 0;}
+ if(mode=="--relay-local-bin-negatives"){localpool::binNegatives();return 0;}
+ if(mode=="--relay-setup-negatives"){graph::setupNegatives();return 0;}
  fprintf(stderr,"unknown mode %s\n",mode.c_str());return 2;
 }

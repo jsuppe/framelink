@@ -21,10 +21,14 @@ typedef struct flD3D11DeviceOwner flD3D11DeviceOwner;
 #define FL_GST_LOCAL_NATIVE_RESOURCE FL_MEMORY_DMABUF
 #endif
 #endif
-// FAR4 relay setup (relay_input, relay): Windows and desktop Linux. Android
-// follows with its own relay parity work.
+// Relay setup (FAR4 relay_input/relay and the FAR5 pool_receiver): Windows and
+// desktop Linux. The FAR5 sender is typed per platform. Android follows with
+// its own relay parity work.
 #if defined(_WIN32) || (defined(__linux__) && !defined(__ANDROID__))
 #define FL_GST_LOCAL_NATIVE_RELAY 1
+#endif
+#if defined(__linux__) && !defined(__ANDROID__)
+#include "framelink_dmabuf.h"
 #endif
 G_BEGIN_DECLS
 #ifdef _WIN32
@@ -338,6 +342,33 @@ FL_GST_SESSION_API gboolean fl_gst_session_open_local_native_relay(FlGstSession*
  guint audio_queue_ms,guint connect_timeout_ms,guint idle_timeout_ms,
  const GstFrameLinkMemoryPolicy* candidate,GstFrameLinkMemoryPolicy* bound,flChannel** channel,
  GCancellable*,GError**);
+// Receiver half of FAR5 setup; FAR4/native and FAR3/CPU endpoints reject.
+// The returned policy is producer-ordered: swap endpoints before receiver binding.
+// Own the returned channel on success; outputs clear on failure. Configure and
+// bind tracks before local_ready, then finish_local only after real aggregate
+// drain. This does not create bins, forward media, or install a supervisor.
+FL_GST_SESSION_API gboolean fl_gst_session_open_local_native_pool_receiver(FlGstSession*,
+ const gchar* session_path,const flSessionCapabilities*,guint video_queue_frames,guint video_pool,
+ guint audio_queue_ms,guint connect_timeout_ms,guint idle_timeout_ms,
+ const GstFrameLinkMemoryPolicy* candidate,GstFrameLinkMemoryPolicy* bound,flChannel** channel,
+ GCancellable*,GError**);
+#ifndef _WIN32
+// Desktop Linux FAR5 sender, paired ONLY with pool_receiver; the counterpart
+// of open_local_native_relay_pool with the same timeline, serialization and
+// lifetime contract. Borrows exactly video_pool images (each slot's plane fds
+// and layout) from a fully pinned upstream pool, e.g. flDmabufPoolSnapshotImage
+// of a snapshot retained for the ENTIRE relay graph lifetime. The fds travel
+// over a separately authenticated Unix socket whose peer is pinned with
+// SO_PEERCRED (same user, PID bound into the authentication). The receiver
+// imports the same allocations and checks geometry, capacity, distinct
+// allocations and that its render node is the sender's before acknowledging.
+// No native/CPU fallback; all partial imports close on failure.
+FL_GST_SESSION_API gboolean fl_gst_session_open_local_native_relay_pool_dmabuf(FlGstSession*,FlGstSession* upstream,
+ const gchar* session_path,const flSessionCapabilities*,guint video_queue_frames,guint video_pool,
+ guint audio_queue_ms,guint connect_timeout_ms,guint idle_timeout_ms,
+ const GstFrameLinkMemoryPolicy* candidate,const flDmabuf* images,
+ GstFrameLinkMemoryPolicy* bound,flChannel** channel,GCancellable*,GError**);
+#endif
 G_END_DECLS
 #endif
 #ifdef _WIN32
@@ -361,15 +392,5 @@ FL_GST_SESSION_API gboolean fl_gst_session_open_local_native_relay_pool(FlGstSes
  guint audio_queue_ms,guint connect_timeout_ms,guint idle_timeout_ms,
  const GstFrameLinkMemoryPolicy* candidate,const guint8* adapter_luid,void*const* shared_handles,
  GstFrameLinkMemoryPolicy* bound,flChannel** channel,GCancellable*,GError**);
-// Receiver half of FAR5 setup; FAR4/native and FAR3/CPU endpoints reject.
-// The returned policy is producer-ordered: swap endpoints before receiver binding.
-// Own the returned channel on success; outputs clear on failure. Configure and
-// bind tracks before local_ready, then finish_local only after real aggregate
-// drain. This does not create bins, forward media, or install a supervisor.
-FL_GST_SESSION_API gboolean fl_gst_session_open_local_native_pool_receiver(FlGstSession*,
- const gchar* session_path,const flSessionCapabilities*,guint video_queue_frames,guint video_pool,
- guint audio_queue_ms,guint connect_timeout_ms,guint idle_timeout_ms,
- const GstFrameLinkMemoryPolicy* candidate,GstFrameLinkMemoryPolicy* bound,flChannel** channel,
- GCancellable*,GError**);
 G_END_DECLS
 #endif

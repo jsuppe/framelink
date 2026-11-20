@@ -5,10 +5,12 @@
 // beyond the source channel.
 #include "framelink.h"
 #include "framelink_dmabuf.h"
+#include "framelink_memory.h"
 #include <linux/dma-buf.h>
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
+#include <sys/sysmacros.h>
 #include <unistd.h>
 #include <chrono>
 #include <cstdio>
@@ -36,6 +38,19 @@ static ino_t frame(flChannel*p,flChannel*c,unsigned char value,int64_t pts){
  flDmabuf d{};CHECK(flImageDmabuf(f.image,&d)==FL_OK);const ino_t id=inode(d.fd[0]);
  CHECK(flRelease(c,&f)==FL_OK);return id;
 }
+// The render node identity flChannelInfo.adapterLUID carries on Linux: DRM
+// major/minor (LE32 each), the same bytes flImageMemoryInfo reports.
+static void checkDevice(flChannel*c,flChannel*p){
+ flChannelInfo ci{},pi{};CHECK(flQuery(c,&ci)==FL_OK&&flQuery(p,&pi)==FL_OK);
+ CHECK(!memcmp(ci.adapterLUID,pi.adapterLUID,8));
+ uint32_t majorId=0;for(unsigned b=0;b<4;b++)majorId|=uint32_t(ci.adapterLUID[b])<<(8*b);CHECK(majorId==226); // DRM
+ flBuffer b{};CHECK(flAcquireBuffer(p,&b,2000)==FL_OK);
+ flMemoryResourceInfo info{};info.version=FL_MEMORY_INFO_VERSION;CHECK(flImageMemoryInfo(p,b.image,&info,sizeof info)==FL_OK);
+ flMemoryResourceInfo consumer{};consumer.version=FL_MEMORY_INFO_VERSION;CHECK(flSubmit(p,&b,1)==FL_OK);
+ flFrame f{};CHECK(flAcquireFrame(c,&f,2000)==FL_OK);CHECK(flImageMemoryInfo(c,f.image,&consumer,sizeof consumer)==FL_OK);
+ CHECK((consumer.knownFields&FL_MEMORY_INFO_DEVICE)&&consumer.deviceIdKind==FL_MEMORY_DEVICE_DRM_NODE&&!memcmp(consumer.deviceId,ci.adapterLUID,8));
+ CHECK(flRelease(c,&f)==FL_OK);
+}
 // Read the first row of an allocation through the snapshot's own fd.
 static unsigned char firstByte(const flDmabuf&d){
  const size_t length=d.offset[0]+d.stride[0]*H;
@@ -56,12 +71,14 @@ int main(){
  flChannel*p=nullptr;CHECK(openProducer(name,&p)==FL_OK);
  s=reinterpret_cast<flDmabufPoolSnapshot*>(1);
  CHECK(flSnapshotDmabufConsumerPool(p,&s)==FL_INVALID&&!s); // producer channels are rejected
+ checkDevice(c,p);
  const ino_t read=frame(p,c,41,100);
 
  // Exact original allocations: distinct, and the frame just read is one of them.
  flDmabufPoolSnapshot*first=nullptr;CHECK(flSnapshotDmabufConsumerPool(c,&first)==FL_OK&&first);
  flChannelInfo info{},live{};CHECK(flQueryDmabufPoolSnapshot(first,&info)==FL_OK&&flQuery(c,&live)==FL_OK);
  CHECK(info.poolSize==POOL&&info.width==W&&info.height==H&&info.format==FL_FORMAT_BGRA8&&info.generation==live.generation);
+ CHECK(!memcmp(info.adapterLUID,live.adapterLUID,8));
  std::set<ino_t> slots;flDmabuf images[POOL]{};int readSlot=-1;
  for(uint32_t n=0;n<POOL;n++){
   CHECK(flDmabufPoolSnapshotImage(first,n,&images[n])==FL_OK&&images[n].planes==1);
@@ -106,6 +123,6 @@ int main(){
  CHECK(flQueryDmabufPoolSnapshot(last,&info)==FL_OK&&info.width==128&&info.poolSize==POOL);
  for(uint32_t n=0;n<POOL;n++){flDmabuf d{};CHECK(flDmabufPoolSnapshotImage(last,n,&d)==FL_OK);inode(d.fd[0]);}
  flReleaseDmabufPoolSnapshot(last);flReleaseDmabufPoolSnapshot(nullptr);
- puts("DMA-BUF pool snapshot: exact allocations, same-allocation import, pinned geometry and attach, release and source-close lifetime passed");
+ puts("DMA-BUF pool snapshot: render node identity, exact allocations, same-allocation import, pinned geometry and attach, release and source-close lifetime passed");
  return 0;
 }

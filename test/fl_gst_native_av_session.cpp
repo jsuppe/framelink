@@ -362,12 +362,20 @@ static void nativeBinNegatives(bool nativeReceiver){
    }
    gst_object_unref(bin);
   }
-  // The FAR5 exact-pool receiver imports D3D11 handles and stays Windows-only.
+  // The FAR5 exact-pool receiver: Windows and desktop Linux, for native and
+  // readback receivers (fl_gst_native_relay covers it). Android follows with
+  // its relay work.
   if(!producer){
    auto*bin=gst_element_factory_make("framelinkavsrc",nullptr);CHECK(bin);
-   g_object_set(bin,"session","unused-native-negative","native-memory",nativeReceiver,"video-pool",2u,nullptr);
-   auto candidate=nativeAvPolicy(nativeReceiver);gboolean accepted=TRUE;
-   g_signal_emit_by_name(bin,"set-local-native-pool-candidate",&candidate,&accepted);CHECK(!accepted);gst_object_unref(bin);
+   g_object_set(bin,"session","unused-native-negative","native-memory",nativeReceiver,"video-pool",2u,"video-queue-frames",1u,nullptr);
+   auto candidate=nativeAvPolicy(nativeReceiver);gboolean accepted=FALSE;
+   g_signal_emit_by_name(bin,"set-local-native-pool-candidate",&candidate,&accepted);
+#ifdef __ANDROID__
+   CHECK(!accepted);
+#else
+   CHECK(accepted);
+#endif
+   gst_object_unref(bin);
   }
   // Setup cancellation must interrupt an absent peer's 60-second deadline.
   auto*pipeline=gst_pipeline_new(nullptr);
