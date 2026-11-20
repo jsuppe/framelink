@@ -10,11 +10,24 @@ namespace relayprocess {
 static constexpr unsigned Frames=16;
 static uint64_t frameTime(unsigned n,bool decoder){return decoder?gst_util_uint64_scale(n,GST_SECOND,30):n*1000000ULL;}
 static uint64_t frameDuration(unsigned /*n*/,bool decoder){return frameTime(1,decoder);}
+// A decoder may report either the nominal duration or the exact gap to the
+// next contiguous timestamp (GStreamer rounds 1/30 s to ...33 or ...34 ns).
+static bool decodedDuration(uint64_t d,unsigned n){return d==frameDuration(n,true)||d==frameTime(n+1,true)-frameTime(n,true);}
 static uint64_t pixelHash(const unsigned char*data,size_t stride){
  uint64_t hash=14695981039346656037ULL;
  for(unsigned y=0;y<32;++y)for(unsigned x=0;x<256;++x){hash^=data[y*stride+x];hash*=1099511628211ULL;}return hash;
 }
 static bool same(flImage*a,flImage*b){return relaytest::sameAllocation(a,b);}
+// Does the decoder fixture RENDER into the reservation? Windows: the D3D11
+// converter does (GPU_RENDER ring and policy). Linux: CUDA copies into the
+// reservation's EGLImage; NVIDIA refuses render usage for linear DMA-BUFs, so
+// the ring and policy honestly declare sampling only.
+#ifdef _WIN32
+static constexpr bool DecoderRenders=true;
+#else
+static constexpr bool DecoderRenders=false;
+#endif
+static uint32_t renderFlag(bool decoder){return decoder&&DecoderRenders?FL_GPU_RENDER:0;}
 
 // Every control signal of one graph, created by the supervisor and inherited
 // by each child (one command-line argument).
@@ -34,11 +47,10 @@ struct Signals {
 
 #ifdef _WIN32
 // Explicit upstream decode/color/scale into a reservation, never a relay copy.
-// Windows only until the phase 5 NVDEC import (the Linux test skips).
 struct Decoder {
  GstElement*pipeline=nullptr,*sink=nullptr;GstD3D11Converter*converter=nullptr;
  GstClockTime origin=GST_CLOCK_TIME_NONE;std::vector<uint64_t> hashes;
- uint64_t fill(GstBuffer*buffer,unsigned n){
+ uint64_t fill(relaytest::ReservationOwner&,GstBuffer*buffer,unsigned n){
   auto*mem=gst_buffer_peek_memory(buffer,0);auto*device=GST_D3D11_MEMORY_CAST(mem)->device;
   if(!pipeline){
    GError*error=nullptr;
@@ -54,7 +66,7 @@ struct Decoder {
   CHECK(GST_CLOCK_TIME_IS_VALID(GST_BUFFER_PTS(input))&&!GST_CLOCK_TIME_IS_VALID(GST_BUFFER_DTS(input)));
   if(!n)origin=GST_BUFFER_PTS(input);
   fprintf(stderr,"DECODED,%u,pts=%llu,duration=%llu,origin=%llu\n",n,(unsigned long long)GST_BUFFER_PTS(input),(unsigned long long)GST_BUFFER_DURATION(input),(unsigned long long)origin);
-  CHECK(GST_BUFFER_PTS(input)-origin==frameTime(n,true)&&GST_BUFFER_DURATION(input)==frameDuration(n,true));
+  CHECK(GST_BUFFER_PTS(input)-origin==frameTime(n,true)&&decodedDuration(GST_BUFFER_DURATION(input),n));
   if(!converter){GstVideoInfo in{},out{};CHECK(gst_video_info_from_caps(&in,gst_sample_get_caps(sample)));
    CHECK(GST_VIDEO_INFO_FORMAT(&in)==GST_VIDEO_FORMAT_NV12&&GST_VIDEO_INFO_WIDTH(&in)==320&&GST_VIDEO_INFO_HEIGHT(&in)==240);
    gst_video_info_set_format(&out,GST_VIDEO_FORMAT_RGBA,64,32);out.colorimetry.range=GST_VIDEO_COLOR_RANGE_0_255;
@@ -74,18 +86,132 @@ struct Decoder {
  ~Decoder(){if(pipeline){CHECK(!gst_app_sink_try_pull_sample(GST_APP_SINK(sink),5*GST_SECOND));CHECK(gst_app_sink_is_eos(GST_APP_SINK(sink)));avTerminal(pipeline,GST_MESSAGE_EOS);
   CHECK(gst_element_set_state(pipeline,GST_STATE_NULL)!=GST_STATE_CHANGE_FAILURE);gst_object_unref(sink);gst_object_unref(pipeline);gst_object_unref(converter);}}
 };
+#elif defined(FL_RELAY_GL_DECODER)
+// Linux: NVDEC decodes into GL memory, GStreamer GL converts and scales on the
+// GPU, and CUDA copies the result into the reservation's own DMA-BUF through an
+// EGLImage (NVIDIA imports a linear DMA-BUF for GL sampling only, never as a
+// render target). No CPU copy. libcuda is opened at run time and only the
+// driver-API subset below is declared, so the build needs no CUDA toolkit.
+namespace cuda {
+using Result=int;using Device=int;using Context=struct CUctx_st*;using Array=struct CUarray_st*;
+using Resource=struct CUgraphicsResource_st*;using Stream=struct CUstream_st*;
+enum {Success=0,MemoryTypeDevice=2,MemoryTypeArray=3,RegisterReadOnly=1,RegisterWriteDiscard=2,FrameTypeArray=0,FrameTypePitch=1,GlDevicesAll=1};
+struct Memcpy2D { // CUDA_MEMCPY2D (v2)
+ size_t srcXInBytes,srcY;int srcMemoryType;const void*srcHost;unsigned long long srcDevice;Array srcArray;size_t srcPitch;
+ size_t dstXInBytes,dstY;int dstMemoryType;void*dstHost;unsigned long long dstDevice;Array dstArray;size_t dstPitch;
+ size_t WidthInBytes,Height;
+};
+struct EglFrame { // CUeglFrame
+ union{Array pArray[3];void*pPitch[3];}frame;
+ unsigned width,height,depth,pitch,planeCount,numChannels;int frameType,eglColorFormat,cuFormat;
+};
+struct Api {
+ void*library=nullptr;
+ Result(*Init)(unsigned)=nullptr;Result(*GLGetDevices)(unsigned*,Device*,unsigned,int)=nullptr;
+ Result(*PrimaryCtxRetain)(Context*,Device)=nullptr;Result(*PrimaryCtxRelease)(Device)=nullptr;
+ Result(*CtxPush)(Context)=nullptr;Result(*CtxPop)(Context*)=nullptr;Result(*CtxSynchronize)()=nullptr;
+ Result(*GLRegisterImage)(Resource*,unsigned,unsigned,unsigned)=nullptr;Result(*EGLRegisterImage)(Resource*,void*,unsigned)=nullptr;
+ Result(*Map)(unsigned,Resource*,Stream)=nullptr;Result(*Unmap)(unsigned,Resource*,Stream)=nullptr;
+ Result(*MappedArray)(Array*,Resource,unsigned,unsigned)=nullptr;Result(*MappedEglFrame)(EglFrame*,Resource,unsigned,unsigned)=nullptr;
+ Result(*Unregister)(Resource)=nullptr;Result(*Copy2D)(const Memcpy2D*)=nullptr;Result(*ErrorName)(Result,const char**)=nullptr;
+ bool load(){
+  library=dlopen("libcuda.so.1",RTLD_NOW|RTLD_LOCAL);if(!library)return false;
+  auto sym=[&](auto&fn,const char*name){fn=reinterpret_cast<std::remove_reference_t<decltype(fn)>>(dlsym(library,name));return fn!=nullptr;};
+  return sym(Init,"cuInit")&&sym(GLGetDevices,"cuGLGetDevices_v2")&&sym(PrimaryCtxRetain,"cuDevicePrimaryCtxRetain")&&
+   sym(PrimaryCtxRelease,"cuDevicePrimaryCtxRelease_v2")&&sym(CtxPush,"cuCtxPushCurrent_v2")&&sym(CtxPop,"cuCtxPopCurrent_v2")&&
+   sym(CtxSynchronize,"cuCtxSynchronize")&&sym(GLRegisterImage,"cuGraphicsGLRegisterImage")&&sym(EGLRegisterImage,"cuGraphicsEGLRegisterImage")&&
+   sym(Map,"cuGraphicsMapResources")&&sym(Unmap,"cuGraphicsUnmapResources")&&sym(MappedArray,"cuGraphicsSubResourceGetMappedArray")&&
+   sym(MappedEglFrame,"cuGraphicsResourceGetMappedEglFrame")&&sym(Unregister,"cuGraphicsUnregisterResource")&&
+   sym(Copy2D,"cuMemcpy2D_v2")&&sym(ErrorName,"cuGetErrorName")&&Init(0)==Success;
+ }
+ void check(Result r,const char*what){if(r==Success)return;const char*name="?";ErrorName(r,&name);fprintf(stderr,"%s -> %s\n",what,name);CHECK(r==Success);}
+};
+}
+#define FL_CU(call) cu.check(cu.call,#call)
+struct Decoder {
+ GstElement*pipeline=nullptr,*sink=nullptr;GstClockTime origin=GST_CLOCK_TIME_NONE;std::vector<uint64_t> hashes;
+ cuda::Api cu;cuda::Device device=-1;cuda::Context context=nullptr;
+ struct Job{Decoder*self;GstGLMemory*source;int fd;gsize offset;gint stride;};
+ // Runs in the decoder's GL context: register both images with CUDA, copy, wait.
+ static void copy(GstGLContext*gl,gpointer data){
+  auto*job=static_cast<Job*>(data);auto&cu=job->self->cu;
+  if(!job->self->context){
+   unsigned count=0;cuda::Device devices[1]{};FL_CU(GLGetDevices(&count,devices,1,cuda::GlDevicesAll));CHECK(count==1);
+   job->self->device=devices[0];FL_CU(PrimaryCtxRetain(&job->self->context,devices[0]));
+  }
+  FL_CU(CtxPush(job->self->context));
+  GstVideoInfo info;gst_video_info_set_format(&info,GST_VIDEO_FORMAT_RGBA,64,32);info.stride[0]=job->stride;info.offset[0]=job->offset;
+  GstEGLImage*image=gst_egl_image_from_dmabuf(gl,job->fd,&info,0,job->offset);CHECK(image);
+  cuda::Resource src=nullptr,dst=nullptr;
+  FL_CU(GLRegisterImage(&src,gst_gl_memory_get_texture_id(job->source),0x0DE1/*GL_TEXTURE_2D*/,cuda::RegisterReadOnly));
+  FL_CU(EGLRegisterImage(&dst,gst_egl_image_get_image(image),cuda::RegisterWriteDiscard));
+  FL_CU(Map(1,&src,nullptr));cuda::Array in=nullptr;FL_CU(MappedArray(&in,src,0,0));
+  cuda::EglFrame frame{};FL_CU(MappedEglFrame(&frame,dst,0,0));CHECK(frame.width==64&&frame.height==32&&frame.planeCount==1);
+  cuda::Memcpy2D c{};c.srcMemoryType=cuda::MemoryTypeArray;c.srcArray=in;c.WidthInBytes=256;c.Height=32;
+  if(frame.frameType==cuda::FrameTypeArray){c.dstMemoryType=cuda::MemoryTypeArray;c.dstArray=frame.frame.pArray[0];}
+  else{c.dstMemoryType=cuda::MemoryTypeDevice;c.dstDevice=reinterpret_cast<uintptr_t>(frame.frame.pPitch[0]);c.dstPitch=frame.pitch;}
+  FL_CU(Copy2D(&c));FL_CU(CtxSynchronize()); // GPU writes complete before the ready fd
+  FL_CU(Unmap(1,&src,nullptr));FL_CU(Unregister(src));FL_CU(Unregister(dst));gst_egl_image_unref(image);
+  cuda::Context popped=nullptr;FL_CU(CtxPop(&popped));
+ }
+ uint64_t fill(relaytest::ReservationOwner&owner,GstBuffer*buffer,unsigned n){
+  if(!pipeline){
+   CHECK(cu.load());GError*error=nullptr;
+   pipeline=gst_parse_launch("videotestsrc num-buffers=16 pattern=snow ! video/x-raw,format=NV12,width=320,height=240,framerate=30/1 ! x264enc tune=zerolatency speed-preset=ultrafast key-int-max=30 ! h264parse ! nvh264dec ! video/x-raw(memory:GLMemory),format=NV12 ! glcolorconvert ! glcolorscale ! video/x-raw(memory:GLMemory),format=RGBA,width=64,height=32 ! appsink name=decoded sync=false enable-last-sample=false max-buffers=1",&error);
+   CHECK(pipeline&&!error);sink=gst_bin_get_by_name(GST_BIN(pipeline),"decoded");CHECK(sink);
+   CHECK(gst_element_set_state(pipeline,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
+  }
+  auto*sample=gst_app_sink_try_pull_sample(GST_APP_SINK(sink),5*GST_SECOND);CHECK(sample);
+  auto*input=gst_sample_get_buffer(sample);CHECK(gst_buffer_n_memory(input)==1);
+  auto*memory=gst_buffer_peek_memory(input,0);CHECK(gst_is_gl_memory(memory));
+  CHECK(!gst_mini_object_get_qdata(GST_MINI_OBJECT(memory),relaytest::ReservationOwner::key()));
+  CHECK(GST_CLOCK_TIME_IS_VALID(GST_BUFFER_PTS(input)));
+  if(!n)origin=GST_BUFFER_PTS(input);
+  fprintf(stderr,"DECODED,%u,pts=%llu,duration=%llu,origin=%llu\n",n,(unsigned long long)GST_BUFFER_PTS(input),(unsigned long long)GST_BUFFER_DURATION(input),(unsigned long long)origin);
+  CHECK(GST_BUFFER_PTS(input)-origin==frameTime(n,true)&&decodedDuration(GST_BUFFER_DURATION(input),n));
+  auto*target=gst_buffer_peek_memory(buffer,0);auto*layout=gst_buffer_get_video_meta(buffer);CHECK(gst_is_dmabuf_memory(target)&&layout);
+  relaytest::reservationOf(buffer);
+  Job job{this,reinterpret_cast<GstGLMemory*>(memory),gst_dmabuf_memory_get_fd(target),layout->offset[0],layout->stride[0]};
+  gst_gl_context_thread_add(reinterpret_cast<GstGLBaseMemory*>(memory)->context,copy,&job);
+  gst_sample_unref(sample);
+  const int ready=eventfd(0,EFD_CLOEXEC|EFD_NONBLOCK);CHECK(ready>=0);uint64_t one=1;CHECK(write(ready,&one,sizeof one)==sizeof one);
+  CHECK(owner.setReady(buffer,ready));close(ready);
+  // Source-side verification readback of the decoded reservation (not relay work).
+  const int fd=gst_dmabuf_memory_get_fd(target);dma_buf_sync sync{};sync.flags=DMA_BUF_SYNC_START|DMA_BUF_SYNC_READ;CHECK(ioctl(fd,DMA_BUF_IOCTL_SYNC,&sync)==0);
+  void*mapped=mmap(nullptr,target->size,PROT_READ,MAP_SHARED,fd,0);CHECK(mapped!=MAP_FAILED);
+  auto*data=static_cast<unsigned char*>(mapped)+layout->offset[0];
+  for(unsigned y=0;y<32;++y)for(unsigned x=3;x<256;x+=4)CHECK(data[y*layout->stride[0]+x]==255);
+  const auto hash=pixelHash(data,layout->stride[0]);CHECK(munmap(mapped,target->size)==0);
+  sync.flags=DMA_BUF_SYNC_END|DMA_BUF_SYNC_READ;CHECK(ioctl(fd,DMA_BUF_IOCTL_SYNC,&sync)==0);
+  for(auto previous:hashes)CHECK(previous!=hash);hashes.push_back(hash);
+  fprintf(stderr,"DECODED_PIXELS,%u,%llu\n",n,(unsigned long long)hash);return hash;
+ }
+ ~Decoder(){
+  if(pipeline){CHECK(!gst_app_sink_try_pull_sample(GST_APP_SINK(sink),5*GST_SECOND));CHECK(gst_app_sink_is_eos(GST_APP_SINK(sink)));avTerminal(pipeline,GST_MESSAGE_EOS);
+   CHECK(gst_element_set_state(pipeline,GST_STATE_NULL)!=GST_STATE_CHANGE_FAILURE);gst_object_unref(sink);gst_object_unref(pipeline);}
+  if(context)cu.PrimaryCtxRelease(device);
+ }
+};
+#undef FL_CU
 #else
-struct Decoder {uint64_t fill(GstBuffer*,unsigned){CHECK(!"decoder relay is Windows-only until phase 5");return 0;}};
+struct Decoder {uint64_t fill(relaytest::ReservationOwner&,GstBuffer*,unsigned){CHECK(!"no GPU decoder relay in this build");return 0;}};
 #endif
 static bool decoderAvailable(){
 #ifdef _WIN32
- for(auto name:{"videotestsrc","x264enc","h264parse","d3d11h264dec"}){
+ const char* required[]={"videotestsrc","x264enc","h264parse","d3d11h264dec"};
+#elif defined(FL_RELAY_GL_DECODER)
+ const char* required[]={"videotestsrc","x264enc","h264parse","nvh264dec","glcolorconvert","glcolorscale"};
+ void*cuda=dlopen("libcuda.so.1",RTLD_NOW|RTLD_LOCAL);
+ if(!cuda){fprintf(stderr,"SKIP: libcuda.so.1 unavailable (the decoder relay uses NVDEC and CUDA-EGL interop)\n");return false;}
+ dlclose(cuda);
+#else
+ fprintf(stderr,"SKIP: built without GStreamer GL; the decoder relay needs it\n");return false;
+ const char* required[]={""};
+#endif
+ for(auto name:required){
   auto*factory=gst_element_factory_find(name);if(!factory){fprintf(stderr,"SKIP: required decoder fixture element %s unavailable\n",name);return false;}gst_object_unref(factory);
  }
  return true;
-#else
- fprintf(stderr,"SKIP: the hardware-decoder relay (NVDEC to DMA-BUF) is phase 5\n");return false;
-#endif
 }
 
 static GSocketListener* listener(guint16*port){
@@ -108,7 +234,7 @@ struct Endpoint {
    GSocketConnection*c=nullptr;
    if(listen)c=g_socket_listener_accept(listen,nullptr,nullptr,nullptr);
    else{auto*client=g_socket_client_new();g_socket_client_set_timeout(client,5);c=g_socket_client_connect_to_host(client,"127.0.0.1",number,nullptr,nullptr);g_object_unref(client);}
-   CHECK(c);auto policy=nativeAvPolicy(1,true,decoder);
+   CHECK(c);auto policy=nativeAvPolicy(1,true,decoder&&DecoderRenders);
    if(kind==2)CHECK(fl_gst_session_authenticate_native_memory(session,c,producer,key,&policy,5000,nullptr,nullptr));
    else{auto fn=kind?fl_gst_session_authenticate_event_stream:fl_gst_session_authenticate_audio_stream;CHECK(fn(session,c,producer,key,5000,nullptr,nullptr));}
    g_object_unref(c);
@@ -154,6 +280,10 @@ static int producer(const std::string&name,guint16 port,Signals&sig,bool empty,b
 // completion nor dropping only the GstBuffer permits reuse of retained memory.
 static int reservedProducer(const std::string&name,guint16 port,Signals&sig,bool decoder=false,bool cancelled=false){
  logTo(name+".producer.log");
+#ifndef _WIN32
+ // NVIDIA's desktop GL context is the CUDA-compatible one; headless EGL.
+ if(decoder){g_setenv("GST_GL_API","opengl3",TRUE);g_setenv("GST_GL_PLATFORM","egl",TRUE);g_setenv("GST_GL_WINDOW","surfaceless",TRUE);}
+#endif
  Endpoint e(0,true,port,nullptr,decoder);Decoder decoded;flChannel*writer=nullptr;CHECK(flOpenProducer((name+".up").c_str(),&writer)==FL_OK);
  auto owner=std::make_shared<relaytest::ReservationOwner>(writer);CHECK(owner->valid());
  sig[Attached].signal();e.start();
@@ -161,7 +291,7 @@ static int reservedProducer(const std::string&name,guint16 port,Signals&sig,bool
  for(unsigned n=0;n<Frames;++n){
   auto*&buffer=slots[n%2];auto*memory=gst_buffer_peek_memory(buffer,0);
   auto image=relaytest::reservationOf(buffer)->buffer.image;
-  uint64_t hash=0;if(decoder)hash=decoded.fill(buffer,n);else relaytest::uploadReservation(*owner,buffer,static_cast<unsigned char>(n+1)); // explicit source upload only
+  uint64_t hash=0;if(decoder)hash=decoded.fill(*owner,buffer,n);else relaytest::uploadReservation(*owner,buffer,static_cast<unsigned char>(n+1)); // explicit source upload only
   const uint64_t pts=37000000+frameTime(n,decoder);flFrameMetadata metadata{1,decoder?FL_FRAME_HAS_DURATION:FL_FRAME_HAS_DTS|FL_FRAME_HAS_DURATION,decoder?0:int64_t(pts-100),frameDuration(n,decoder),1,{}};
   CHECK(owner->submit(buffer,pts,&metadata)==FL_OK);CHECK(owner->submit(buffer,pts,&metadata)==FL_INVALID);
   const unsigned pcmBytes=decoder?6400:192;auto*pcm=gst_buffer_new_allocate(nullptr,pcmBytes,nullptr);gst_buffer_memset(pcm,0,n+31,pcmBytes);
@@ -188,7 +318,7 @@ static int reservedProducer(const std::string&name,guint16 port,Signals&sig,bool
 }
 static int relay(const std::string&name,guint16 port,relaytest::SharedImages&images,relaytest::Mailbox&notify,Signals&sig,bool empty,bool decoder=false,unsigned fault=0){
  logTo(name+".relay.log");fprintf(stderr,"relay start\n");
- flChannel*up=images.adopt(name+".up",false,FL_MAP_CPU|FL_DEFER_RELEASE|FL_REQUIRE_FRAME_METADATA|(decoder?FL_GPU_RENDER:0)),*down=nullptr;
+ flChannel*up=images.adopt(name+".up",false,FL_MAP_CPU|FL_DEFER_RELEASE|FL_REQUIRE_FRAME_METADATA|renderFlag(decoder)),*down=nullptr;
  CHECK(flOpenProducer((name+".down").c_str(),&down)==FL_OK);
  Endpoint output(1,true,port,nullptr,decoder);fprintf(stderr,"relay downstream authenticated\n");guint16 upstreamPort=0;auto*l=listener(&upstreamPort);
  notify.put(upstreamPort);notify.closeWriter();
@@ -251,7 +381,7 @@ static std::vector<relaytest::NativeHandle> inherit(const relaytest::SharedImage
 static void run(const std::string&plugin,bool empty,bool reserved=false,bool decoder=false,unsigned fault=0){
  relaytest::SharedImages images;Signals sig;
  auto name=graphName("process",std::to_string(empty)+"-"+std::to_string(reserved)+"-"+std::to_string(decoder)+"-"+std::to_string(fault));
- flChannel*down=images.adopt(name+".down",true,FL_MAP_CPU|FL_DEFER_RELEASE|FL_REQUIRE_FRAME_METADATA|(decoder?FL_GPU_RENDER:0));
+ flChannel*down=images.adopt(name+".down",true,FL_MAP_CPU|FL_DEFER_RELEASE|FL_REQUIRE_FRAME_METADATA|renderFlag(decoder));
  relaytest::Mailbox notify;guint16 port=0;auto*l=listener(&port);
  relaytest::Child middle({plugin,"--relay-process-child",name,std::to_string(port),images.arg(),notify.arg(),sig.arg(),
   std::to_string(empty),std::to_string(decoder),std::to_string(fault)},sig.all(),inherit(images,notify));

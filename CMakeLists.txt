@@ -1239,6 +1239,8 @@ if(FRAMELINK_BUILD_TESTS AND Python3_Interpreter_FOUND AND NOT ANDROID)
   add_test(NAME local_native_bench_analyzer COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/test_local_native_bench.py)
   add_test(NAME boundary_av_analyzer COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/test_boundary_av_analyzer.py)
   set_tests_properties(boundary_av_analyzer PROPERTIES TIMEOUT 15)
+  add_test(NAME relay_trace_checker COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/test_relay_trace.py)
+  set_tests_properties(relay_trace_checker PROPERTIES TIMEOUT 15)
 endif()
 
 # Reusable typed session context: public elements must not depend on sample apps.
@@ -1420,6 +1422,13 @@ if(FRAMELINK_BUILD_TESTS AND TARGET framelink_gst_session AND UNIX)
         # Shared native relay tests; Windows registers the same modes as _win.
         add_executable(fl_gst_native_relay test/fl_gst_native_relay.cpp)
         target_link_libraries(fl_gst_native_relay PRIVATE framelink_gst_session PkgConfig::FL_GST_APP PkgConfig::FL_GST_ALLOCATORS PkgConfig::GBM PkgConfig::DRM)
+        # The decoder relay (NVDEC -> GStreamer GL -> CUDA-EGL copy into the
+        # reservation) needs GStreamer GL; libcuda is opened at run time.
+        pkg_check_modules(FL_RELAY_GL QUIET IMPORTED_TARGET gstreamer-gl-1.0 gstreamer-gl-egl-1.0)
+        if(FL_RELAY_GL_FOUND)
+            target_link_libraries(fl_gst_native_relay PRIVATE PkgConfig::FL_RELAY_GL ${CMAKE_DL_LIBS})
+            target_compile_definitions(fl_gst_native_relay PRIVATE FL_RELAY_GL_DECODER)
+        endif()
         add_dependencies(fl_gst_native_relay gstframelink)
         fl_add_native_relay_tests(linux)
     endif()
