@@ -74,8 +74,13 @@ struct VulkanReadback {
  // GPU copy of the held frame into host memory (tightly packed rows: BGRA, or
  // NV12 luma then chroma); returns the copy's completion fd for FrameLink.
  int copy(flChannel*channel,const flFrame&frame,bool nv12,uint32_t width,uint32_t height){
-  auto it=images.find(frame.slot);
-  if(it!=images.end()&&!flVkImageCurrent(channel,&it->second)){DeviceWaitIdle(device);for(auto&i:images)flVkDestroyImage(&ctx,&i.second);images.clear();it=images.end();}
+  // Import the held frame afresh every time. A long-lived import of these
+  // linear DMA-BUFs was observed to go stale on NVIDIA after about 30 s in the
+  // three-process graph (zeros, while a CPU read and a fresh import of the
+  // same held storage were correct). The previous import is retired once the
+  // previous copy has completed (data() waits for it).
+  if(!images.empty()){for(auto&i:images)flVkDestroyImage(&ctx,&i.second);images.clear();}
+  auto it=images.end();
   if(it==images.end()){flVkImportDesc desc{};desc.usage=VK_IMAGE_USAGE_TRANSFER_SRC_BIT;desc.flags=FL_VK_IMPORT_NO_VIEW;flVkImage img{};
    CHECK(flVkImportImage(&ctx,channel,frame.image,&desc,&img)==FL_OK);it=images.emplace(frame.slot,img).first;}
   const flVkImage&img=it->second;
@@ -97,6 +102,8 @@ struct VulkanReadback {
   VkSemaphoreGetFdInfoKHR get{VK_STRUCTURE_TYPE_SEMAPHORE_GET_FD_INFO_KHR};get.semaphore=sync.exportable;get.handleType=VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_SYNC_FD_BIT;
   int fd=-1;CHECK(ctx.GetSemaphoreFdKHR(device,&get,&fd)==VK_SUCCESS);return fd; // -1: already complete
  }
+ // Drop every cached import (diagnostics: re-import the same buffers).
+ void forget(){DeviceWaitIdle(device);for(auto&i:images)flVkDestroyImage(&ctx,&i.second);images.clear();}
  // The copied bytes, once the GPU copy has completed.
  const uint8_t* data(){
   CHECK(WaitForFences(device,1,&fence,VK_TRUE,5000000000ULL)==VK_SUCCESS);

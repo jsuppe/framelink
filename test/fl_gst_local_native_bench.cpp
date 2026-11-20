@@ -169,16 +169,31 @@ static void receiver(){auto c=caps();auto p=policy();GstFrameLinkMemoryPolicy bo
  {Audio audio(s,false);audio.start();auto out=videoFile();auto af=audioFile();CHECK(fl_gst_session_local_ready(s,FALSE,10000,nullptr));
  std::thread pcm([&]{for(unsigned n=0;n<o.seconds*100;++n){auto*sample=gst_app_sink_try_pull_sample(GST_APP_SINK(audio.port),10*GST_SECOND);CHECK(sample);verifyAudio(gst_sample_get_buffer(sample),s,n,af);gst_sample_unref(sample);}CHECK(!gst_app_sink_try_pull_sample(GST_APP_SINK(audio.port),10*GST_SECOND));CHECK(gst_app_sink_is_eos(GST_APP_SINK(audio.port)));});
  auto held=ev("held"),release=ev("release");const unsigned rowBytes=o.width*(o.nv12?1:4),rows=o.nv12?o.height*3/2:o.height;
- VulkanReadback readback;readback.start(channel,VkDeviceSize(rowBytes)*rows);
- for(unsigned n=0;n<frames();++n){flFrame f{};CHECK(flAcquireFrame(channel,&f,5000)==FL_OK);auto arrived=now();CHECK(f.ptsNs==int64_t(vpts(n)));flFrameMetadata m{};CHECK(flGetFrameMetadata(channel,&f,&m)==FL_OK&&m.version==FL_FRAME_METADATA_VERSION&&m.flags==(FL_FRAME_HAS_DTS|FL_FRAME_HAS_DURATION)&&m.streamGeneration==cfg.generation&&m.dtsNs==f.ptsNs&&m.durationNs==tick(n+1,o.fps)-tick(n,o.fps));uint64_t lease=0;CHECK(flLeaseFrame(channel,&f,&lease)==FL_OK);
+ VulkanReadback readback;readback.start(channel,VkDeviceSize(rowBytes)*rows);uint64_t lastArrival=now();const bool diagnose=getenv("FL_BENCH_DIAG")!=nullptr;
+ for(unsigned n=0;n<frames();++n){flFrame f{};CHECK(flAcquireFrame(channel,&f,5000)==FL_OK);auto arrived=now();
+  if(f.ptsNs!=int64_t(vpts(n)))fprintf(stderr,"frame replaced: expected frame %u (pts %llu), received pts %lld sequence %llu slot %u, %.3f ms after the previous acquisition\n",n,(unsigned long long)vpts(n),(long long)f.ptsNs,(unsigned long long)f.sequence,f.slot,(arrived-lastArrival)/1e6);
+  lastArrival=arrived;CHECK(f.ptsNs==int64_t(vpts(n)));flFrameMetadata m{};CHECK(flGetFrameMetadata(channel,&f,&m)==FL_OK&&m.version==FL_FRAME_METADATA_VERSION&&m.flags==(FL_FRAME_HAS_DTS|FL_FRAME_HAS_DURATION)&&m.streamGeneration==cfg.generation&&m.dtsNs==f.ptsNs&&m.durationNs==tick(n+1,o.fps)-tick(n,o.fps));uint64_t lease=0;CHECK(flLeaseFrame(channel,&f,&lease)==FL_OK);
   // Explicit GPU verification copy into host memory (the Windows staging
   // copy's counterpart); its real completion fence goes to FrameLink.
   const int done=readback.copy(channel,f,o.nv12,o.width,o.height);
+  // Diagnostic mode: settle the copy while the lease is still held, and on a
+  // mismatch read the same held frame through the (slow) CPU mapping.
+  if(diagnose){const uint8_t*early=readback.data();Stamp e{};memcpy(&e,early,sizeof e);
+   if(!(e.magic==Stamp{}.magic&&e.id==n)){flMappedImage mm{};CHECK(flImageMapPlanes(f.image,&mm)==FL_OK);Stamp cpu{};memcpy(&cpu,mm.plane[0].pixels,sizeof cpu);
+    const unsigned fill=static_cast<unsigned char*>(mm.plane[0].pixels)[sizeof cpu];flImageUnmap(f.image);
+    fprintf(stderr,"held frame %u: GPU copy magic=%llx id=%llu; CPU read of the same held storage magic=%llx id=%llu fill=%u\n",n,(unsigned long long)e.magic,(unsigned long long)e.id,(unsigned long long)cpu.magic,(unsigned long long)cpu.id,fill);
+    const int again=readback.copy(channel,f,o.nv12,o.width,o.height);if(again>=0)close(again);const uint8_t*second=readback.data();Stamp r{};memcpy(&r,second,sizeof r);
+    fprintf(stderr,"held frame %u: second GPU copy magic=%llx id=%llu\n",n,(unsigned long long)r.magic,(unsigned long long)r.id);
+    readback.forget();const int fresh=readback.copy(channel,f,o.nv12,o.width,o.height);if(fresh>=0)close(fresh);const uint8_t*third=readback.data();Stamp t{};memcpy(&t,third,sizeof t);
+    fprintf(stderr,"held frame %u: copy after a fresh import magic=%llx id=%llu fill=%u\n",n,(unsigned long long)t.magic,(unsigned long long)t.id,third[sizeof t]);}}
   // The final control tests native ownership, never manufactures completion.
   if(n+1==frames()){signalEvent(held);wait(release);flFrame retained{};uint64_t generation=0;CHECK(flReadLeaseFrame(channel,lease,&retained,&generation)==FL_OK&&retained.ptsNs==f.ptsNs);}
   CHECK(flCompleteReadLeaseSyncFd(channel,lease,done)==FL_OK);if(done>=0)close(done);
   auto deadline=now()+5000000000ULL;flResult r=FL_BUSY;while(r==FL_BUSY){CHECK(now()<deadline);r=flCollectReadLeases(channel);if(r==FL_BUSY)Sleep(1);}CHECK(r==FL_OK);const auto completed=now();
-  const uint8_t*copied=readback.data();Stamp st{};memcpy(&st,copied,sizeof st);CHECK(st.magic==Stamp{}.magic&&st.id==n&&st.pts==vpts(n));
+  const uint8_t*copied=readback.data();Stamp st{};memcpy(&st,copied,sizeof st);
+  if(!(st.magic==Stamp{}.magic&&st.id==n&&st.pts==vpts(n)))fprintf(stderr,"content mismatch: expected frame %u, copy holds magic=%llx id=%llu pts=%llu fill=%u last=%u; slot=%u sequence=%llu lease=%llu\n",n,
+   (unsigned long long)st.magic,(unsigned long long)st.id,(unsigned long long)st.pts,copied[sizeof st],copied[size_t(rowBytes)*rows-1],f.slot,(unsigned long long)f.sequence,(unsigned long long)lease);
+  CHECK(st.magic==Stamp{}.magic&&st.id==n&&st.pts==vpts(n));
   for(size_t i=sizeof st;i<size_t(rowBytes)*rows;++i)CHECK(copied[i]==uint8_t(n));
   gint64 mappedPts=0;CHECK(fl_gst_session_map_running_time(s,cfg.generation,st.pts,TRUE,&mappedPts)==FL_GST_SESSION_READY);row(out,st,arrived,completed,uint64_t(rowBytes)*rows,&f,&m,lease,n+1,uint64_t(mappedPts));}
  pcm.join();audio.eos();FlGstVideoEvent end{};CHECK(fl_gst_session_receive_video_event(s,cfg.generation,10000,&end)==FL_GST_SESSION_READY&&end.kind==FL_GST_VIDEO_END&&end.afterFrames==frames()&&end.ptsNs==vpts(frames()-1));guint64 count=0;gint64 last=0;CHECK(fl_gst_session_wait_video_eos(s,cfg.generation,10000,&count,&last)==FL_GST_SESSION_READY&&count==frames()&&last==int64_t(vpts(frames()-1)));CHECK(fl_gst_session_finish_local(s,FALSE,10000,nullptr));closeEvent(held);closeEvent(release);summary(count,true);}
