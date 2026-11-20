@@ -20,6 +20,8 @@
 #include "../samples/native_d3d11_relay_pool.h"
 #include "../samples/native_d3d11_relay_transfer.h"
 #include "../samples/native_gst_d3d11_relay.h"
+#include <dxgi1_3.h>
+#include <wrl/client.h>
 #else
 #include <gst/allocators/gstdmabuf.h>
 #include <cerrno>
@@ -41,6 +43,8 @@
 #include <sys/eventfd.h>
 #include <sys/ioctl.h>
 #include <sys/mman.h>
+#include <drm_fourcc.h>
+#include <gbm.h>
 #endif
 #ifndef CHECK
 #define CHECK(x) do{if(!(x)){fprintf(stderr,"line %d: %s\n",__LINE__,#x);std::exit(1);}}while(0)
@@ -230,20 +234,27 @@ inline void corrupt(PoolExport&pool,BadExport kind,const Gate&foreign){
 #endif
 }
 
+#ifdef _WIN32
+using NativeHandle=HANDLE;
+#else
+using NativeHandle=int;
+#endif
+
 // A child process running this same test executable with the given arguments.
-// It inherits only the listed gates (never textures, fds of rings, or keys) and
-// dies with the parent. join() requires a clean exit within 10 s.
+// It inherits only the listed gates and `extra` native handles (a broker's
+// allocations, a mailbox) and dies with the parent. join() requires a clean
+// exit within 10 s.
 struct Child {
 #ifdef _WIN32
  PROCESS_INFORMATION process{};
- Child(const std::vector<std::string>&args,const std::vector<const Gate*>&gates){
+ Child(const std::vector<std::string>&args,const std::vector<const Gate*>&gates,const std::vector<NativeHandle>&extra={}){
   static HANDLE job=nullptr;
   if(!job){job=CreateJobObjectA(nullptr,nullptr);CHECK(job);JOBOBJECT_EXTENDED_LIMIT_INFORMATION limits{};
    limits.BasicLimitInformation.LimitFlags=JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
    CHECK(SetInformationJobObject(job,JobObjectExtendedLimitInformation,&limits,sizeof limits));}
   char exe[MAX_PATH]{};CHECK(GetModuleFileNameA(nullptr,exe,MAX_PATH));
   std::string command="\""+std::string(exe)+"\"";for(auto&a:args)command+=" \""+a+"\"";
-  std::vector<HANDLE> handles;for(auto*g:gates)for(auto h:g->inherited())handles.push_back(h);
+  std::vector<HANDLE> handles(extra);for(auto*g:gates)for(auto h:g->inherited())handles.push_back(h);
   STARTUPINFOEXA startup{};startup.StartupInfo.cb=sizeof startup;SIZE_T bytes=0;
   InitializeProcThreadAttributeList(nullptr,1,0,&bytes);std::vector<unsigned char> storage(bytes);
   startup.lpAttributeList=reinterpret_cast<LPPROC_THREAD_ATTRIBUTE_LIST>(storage.data());
@@ -267,11 +278,12 @@ struct Child {
   DWORD code=0;CHECK(GetExitCodeProcess(process.hProcess,&code)&&code==73);
   CloseHandle(process.hThread);CloseHandle(process.hProcess);process={};
  }
+ bool running(){return WaitForSingleObject(process.hProcess,0)==WAIT_TIMEOUT;}
  ~Child(){if(process.hProcess){TerminateProcess(process.hProcess,1);CloseHandle(process.hThread);CloseHandle(process.hProcess);}}
 #else
  pid_t pid=-1;
- Child(const std::vector<std::string>&args,const std::vector<const Gate*>&gates){
-  std::vector<int> fds;for(auto*g:gates)for(int f:g->inherited())fds.push_back(f);
+ Child(const std::vector<std::string>&args,const std::vector<const Gate*>&gates,const std::vector<NativeHandle>&extra={}){
+  std::vector<int> fds(extra);for(auto*g:gates)for(int f:g->inherited())fds.push_back(f);
   const pid_t parent=getpid();
   pid=fork();CHECK(pid>=0);
   if(!pid){
@@ -291,6 +303,7 @@ struct Child {
  void terminate(){
   CHECK(kill(pid,SIGKILL)==0);int status=0;CHECK(waitpid(pid,&status,0)==pid&&WIFSIGNALED(status)&&WTERMSIG(status)==SIGKILL);pid=-1;
  }
+ bool running(){int status=0;return waitpid(pid,&status,WNOHANG)==0;}
  ~Child(){if(pid>0){kill(pid,SIGKILL);waitpid(pid,nullptr,0);}}
 #endif
  Child(const Child&)=delete;Child&operator=(const Child&)=delete;
@@ -442,4 +455,163 @@ inline flResult createAuthenticatedRelayPool(bool producer,GstBufferPool*pool,co
 #endif
 }
 
+
+// ---- Broker-composed process relays ----
+
+// One value (a listening port) written by a child, read by its parent. The
+// child inherits only the write end.
+struct Mailbox {
+#ifdef _WIN32
+ HANDLE read=nullptr,write=nullptr;
+ Mailbox(){CHECK(CreatePipe(&read,&write,nullptr,0));}
+ explicit Mailbox(const char*arg){write=reinterpret_cast<HANDLE>(uintptr_t(strtoull(arg,nullptr,10)));CHECK(write);}
+ ~Mailbox(){if(read)CloseHandle(read);if(write)CloseHandle(write);}
+ void put(guint16 value){DWORD n=0;CHECK(WriteFile(write,&value,sizeof value,&n,nullptr)&&n==sizeof value);}
+ guint16 take(){guint16 value=0;DWORD n=0;CHECK(ReadFile(read,&value,sizeof value,&n,nullptr)&&n==sizeof value);return value;}
+ void closeWriter(){if(write)CloseHandle(write);write=nullptr;}
+ std::string arg()const{return std::to_string(uintptr_t(write));}
+ NativeHandle inherited()const{return write;}
+#else
+ int read=-1,write=-1;
+ Mailbox(){int fd[2];CHECK(pipe2(fd,O_CLOEXEC)==0);read=fd[0];write=fd[1];}
+ explicit Mailbox(const char*arg){write=atoi(arg);CHECK(write>=0);}
+ ~Mailbox(){if(read>=0)close(read);if(write>=0)close(write);}
+ void put(guint16 value){ssize_t n;do n=::write(write,&value,sizeof value);while(n<0&&errno==EINTR);CHECK(n==sizeof value);}
+ guint16 take(){
+  pollfd p{read,POLLIN,0};int ready;do ready=poll(&p,1,10000);while(ready<0&&errno==EINTR);CHECK(ready==1);
+  guint16 value=0;ssize_t n;do n=::read(read,&value,sizeof value);while(n<0&&errno==EINTR);CHECK(n==sizeof value);return value;
+ }
+ void closeWriter(){if(write>=0)close(write);write=-1;}
+ std::string arg()const{return std::to_string(write);}
+ NativeHandle inherited()const{return write;}
+#endif
+ Mailbox(const Mailbox&)=delete;Mailbox&operator=(const Mailbox&)=delete;
+};
+
+// Two 64x32 RGBA allocations a broker makes once and hands, as native handles,
+// to every ring of a graph: D3D11 shared NT handles, or linear GBM DMA-BUFs on
+// the render node FrameLink uses. A child reconstructs them from arg().
+struct SharedImages {
+#ifdef _WIN32
+ Microsoft::WRL::ComPtr<ID3D11Device> device;Microsoft::WRL::ComPtr<ID3D11Texture2D> textures[2];HANDLE handles[2]{};
+ SharedImages(){
+  Microsoft::WRL::ComPtr<ID3D11DeviceContext> context;
+  CHECK(SUCCEEDED(D3D11CreateDevice(nullptr,D3D_DRIVER_TYPE_HARDWARE,nullptr,0,nullptr,0,D3D11_SDK_VERSION,&device,nullptr,&context)));
+  D3D11_TEXTURE2D_DESC d{};d.Width=64;d.Height=32;d.ArraySize=d.MipLevels=d.SampleDesc.Count=1;d.Format=DXGI_FORMAT_R8G8B8A8_UNORM;
+  d.Usage=D3D11_USAGE_DEFAULT;d.BindFlags=D3D11_BIND_SHADER_RESOURCE|D3D11_BIND_RENDER_TARGET;
+  d.MiscFlags=D3D11_RESOURCE_MISC_SHARED|D3D11_RESOURCE_MISC_SHARED_NTHANDLE;
+  for(unsigned i=0;i<2;++i){CHECK(SUCCEEDED(device->CreateTexture2D(&d,nullptr,&textures[i])));Microsoft::WRL::ComPtr<IDXGIResource1> resource;
+   CHECK(SUCCEEDED(textures[i].As(&resource)));
+   CHECK(SUCCEEDED(resource->CreateSharedHandle(nullptr,DXGI_SHARED_RESOURCE_READ|DXGI_SHARED_RESOURCE_WRITE,nullptr,&handles[i])));}
+ }
+ explicit SharedImages(const char*arg){
+  unsigned long long a=0,b=0;CHECK(sscanf(arg,"%llu,%llu",&a,&b)==2);
+  handles[0]=reinterpret_cast<HANDLE>(uintptr_t(a));handles[1]=reinterpret_cast<HANDLE>(uintptr_t(b));CHECK(handles[0]&&handles[1]);
+ }
+ ~SharedImages(){for(auto h:handles)if(h)CloseHandle(h);}
+ std::string arg()const{return std::to_string(uintptr_t(handles[0]))+","+std::to_string(uintptr_t(handles[1]));}
+ std::vector<NativeHandle> inherited()const{return {handles[0],handles[1]};}
+ flChannel* adopt(const std::string&name,bool reversed,uint32_t flags)const{
+  void*h[2]={handles[reversed?1:0],handles[reversed?0:1]};flChannel*ch=nullptr;
+  CHECK(flCreateChannelFromD3D11Handles(name.c_str(),64,32,FL_FORMAT_RGBA8,2,flags,nullptr,h,&ch)==FL_OK);return ch;
+ }
+ // Which original allocation an image of an adopting ring is (-1: neither).
+ int indexOf(flImage*image)const{
+  using Compare=BOOL(WINAPI*)(HANDLE,HANDLE);
+  static auto compare=reinterpret_cast<Compare>(GetProcAddress(GetModuleHandleW(L"KernelBase.dll"),"CompareObjectHandles"));CHECK(compare);
+  for(int i=0;i<2;++i)if(compare(flImageSharedHandle(image),handles[i]))return i;
+  return -1;
+ }
+#else
+ gbm_device*gbm=nullptr;int node=-1;gbm_bo*bo[2]{};flDmabuf images[2]{};
+ SharedImages(){
+  // The first render node with a working GBM device, as FrameLink chooses.
+  for(int i=128;i<136&&!gbm;++i){
+   const std::string path="/dev/dri/renderD"+std::to_string(i);node=open(path.c_str(),O_RDWR|O_CLOEXEC);
+   if(node<0)continue;gbm=gbm_create_device(node);if(!gbm){close(node);node=-1;}
+  }
+  CHECK(gbm);
+  for(unsigned i=0;i<2;++i){
+   // RENDERING|LINEAR is refused by some GBM backends; LINEAR alone suffices.
+   bo[i]=gbm_bo_create(gbm,64,32,GBM_FORMAT_ABGR8888,GBM_BO_USE_RENDERING|GBM_BO_USE_LINEAR);
+   if(!bo[i])bo[i]=gbm_bo_create(gbm,64,32,GBM_FORMAT_ABGR8888,GBM_BO_USE_LINEAR);
+   CHECK(bo[i]&&gbm_bo_get_modifier(bo[i])==DRM_FORMAT_MOD_LINEAR&&gbm_bo_get_plane_count(bo[i])==1);
+   auto&d=images[i];for(auto&f:d.fd)f=-1;d.fd[0]=gbm_bo_get_fd(bo[i]);CHECK(d.fd[0]>=0);
+   CHECK(fcntl(d.fd[0],F_SETFD,FD_CLOEXEC)==0);
+   d.offset[0]=gbm_bo_get_offset(bo[i],0);d.stride[0]=gbm_bo_get_stride_for_plane(bo[i],0);
+   d.planes=1;d.fourcc=DRM_FORMAT_ABGR8888;d.modifier=DRM_FORMAT_MOD_LINEAR;
+  }
+ }
+ explicit SharedImages(const char*arg){
+  for(unsigned i=0;i<2;++i){
+   auto&d=images[i];for(auto&f:d.fd)f=-1;unsigned long long offset=0,stride=0;int consumed=0;
+   CHECK(sscanf(arg,"%d:%llu:%llu%n",&d.fd[0],&offset,&stride,&consumed)==3&&d.fd[0]>=0);
+   CHECK(fcntl(d.fd[0],F_SETFD,FD_CLOEXEC)==0);
+   d.offset[0]=offset;d.stride[0]=stride;d.planes=1;d.fourcc=DRM_FORMAT_ABGR8888;d.modifier=DRM_FORMAT_MOD_LINEAR;
+   arg+=consumed;if(i==0){CHECK(*arg==',');++arg;}
+  }
+ }
+ ~SharedImages(){
+  for(auto&d:images)if(d.fd[0]>=0)close(d.fd[0]);
+  for(auto*b:bo)if(b)gbm_bo_destroy(b);if(gbm)gbm_device_destroy(gbm);if(node>=0)close(node);
+ }
+ std::string arg()const{
+  std::string out;for(unsigned i=0;i<2;++i){if(i)out+=",";
+   out+=std::to_string(images[i].fd[0])+":"+std::to_string(images[i].offset[0])+":"+std::to_string(images[i].stride[0]);}
+  return out;
+ }
+ std::vector<NativeHandle> inherited()const{return {images[0].fd[0],images[1].fd[0]};}
+ flChannel* adopt(const std::string&name,bool reversed,uint32_t flags)const{
+  flDmabuf d[2]={images[reversed?1:0],images[reversed?0:1]};flChannel*ch=nullptr;
+  CHECK(flCreateChannelFromDmabufs(name.c_str(),64,32,FL_FORMAT_RGBA8,2,flags,d,&ch)==FL_OK);return ch;
+ }
+ int indexOf(flImage*image)const{
+  flDmabuf d{};CHECK(flImageDmabuf(image,&d)==FL_OK&&d.fd[0]>=0);struct stat a{};CHECK(fstat(d.fd[0],&a)==0);
+  for(int i=0;i<2;++i){struct stat b{};CHECK(fstat(images[i].fd[0],&b)==0);if(a.st_dev==b.st_dev&&a.st_ino==b.st_ino)return i;}
+  return -1;
+ }
+#endif
+ SharedImages(const SharedImages&)=delete;SharedImages&operator=(const SharedImages&)=delete;
+};
+
+// The native producer's GstMemory reservations (the ones framelinkavsink's
+// pool hands out), used directly by a source process.
+#ifdef _WIN32
+using ReservationOwner=FrameLinkD3DProducer;
+using Reservation=FrameLinkD3DReservation;
+#else
+using ReservationOwner=FrameLinkDmabufProducer;
+using Reservation=FrameLinkDmabufReservation;
+#endif
+inline Reservation* reservationOf(GstBuffer*b){
+ auto*memory=gst_buffer_peek_memory(b,0);
+ auto*r=static_cast<Reservation*>(gst_mini_object_get_qdata(GST_MINI_OBJECT(memory),ReservationOwner::key()));CHECK(r);
+#ifdef _WIN32
+ CHECK(gst_d3d11_memory_get_resource_handle(GST_D3D11_MEMORY_CAST(memory))==(ID3D11Resource*)flImageD3D11(r->buffer.image));
+#else
+ flDmabuf d{};CHECK(flImageDmabuf(r->buffer.image,&d)==FL_OK);struct stat a{},b2{};
+ CHECK(fstat(gst_dmabuf_memory_get_fd(memory),&a)==0&&fstat(d.fd[0],&b2)==0&&a.st_ino==b2.st_ino&&a.st_dev==b2.st_dev);
+#endif
+ return r;
+}
+// Explicit source upload into a reservation, completed for submission.
+inline void uploadReservation(ReservationOwner&owner,GstBuffer*b,unsigned char value){
+ auto*image=reservationOf(b)->buffer.image;
+#ifdef _WIN32
+ std::vector<unsigned char> pixels(64*32*4,value);ID3D11DeviceContext*context=nullptr;
+ flChannelD3D11Device(owner.channel)->GetImmediateContext(&context);gst_d3d11_device_lock(owner.device);
+ context->UpdateSubresource(flImageD3D11(image),0,nullptr,pixels.data(),256,0);
+ gst_d3d11_device_unlock(owner.device);context->Release();
+#else
+ (void)image;auto*mem=gst_buffer_peek_memory(b,0);const int fd=gst_dmabuf_memory_get_fd(mem);
+ auto*layout=gst_buffer_get_video_meta(b);CHECK(layout);
+ dma_buf_sync sync{};sync.flags=DMA_BUF_SYNC_START|DMA_BUF_SYNC_WRITE;CHECK(ioctl(fd,DMA_BUF_IOCTL_SYNC,&sync)==0);
+ void*data=mmap(nullptr,mem->size,PROT_READ|PROT_WRITE,MAP_SHARED,fd,0);CHECK(data!=MAP_FAILED);
+ for(unsigned y=0;y<32;++y)memset(static_cast<char*>(data)+layout->offset[0]+y*layout->stride[0],value,256);
+ CHECK(munmap(data,mem->size)==0);sync.flags=DMA_BUF_SYNC_END|DMA_BUF_SYNC_WRITE;CHECK(ioctl(fd,DMA_BUF_IOCTL_SYNC,&sync)==0);
+ const int ready=eventfd(0,EFD_CLOEXEC|EFD_NONBLOCK);CHECK(ready>=0);
+ uint64_t one=1;CHECK(write(ready,&one,sizeof one)==sizeof one); // CPU writes are complete
+ CHECK(owner.setReady(b,ready));close(ready); // the owner keeps its own duplicate
+#endif
+}
 }
