@@ -32,6 +32,20 @@
 //                                  session/generation, held lease kept, real EOS.
 //   --relay-local-bin-paused-cancel  source cancellation while the bin is
 //                                  PAUSED then NULL: no EOS, held pixels intact.
+//   In-process GStreamer bin relays (fl_gst_native_bin_relay.inc): a real
+//   native producer bin, a first native reader, the read-lease adapter into a
+//   same-allocation ring, and a final reader bin.
+//   --bin-relay                   two hops: exact pixels/PCM/37 ms, terminal.
+//   --lease-relay                 the adapter alone; final reader retained past
+//                                  full bin teardown, retired only after it.
+//   --bin-relay-cancel / -events / -supervised-downstream / -supervised-upstream
+//                                  cancellation, serialized GAP/DISCONT, and the
+//                                  relay supervisor at each end.
+//   --relay-pool-lifetime         100 setup cycles, no handle or fd growth.
+//   --relay-authenticated-pool    broker-keyed pool transfer and its negatives.
+//   --relay-local-pool / -local-cancel-downstream / -local-cancel-upstream /
+//   --relay-local-events          the same over local FAR4/FAR5 discovery.
+//   --relay-pool-controls         pool export guard rejections.
 #include "fl_gst_native_relay_platform.h"
 #include "../samples/session_relay_contract.h"
 #include "../samples/native_relay.h"
@@ -930,6 +944,8 @@ static void pauseControl(const char*plugin,bool cancelPaused){
  flsample::releaseLocalPoolSnapshot(setup.snapshot);flClose(setup.output);flClose(setup.input);g_object_unref(source);g_object_unref(up);g_object_unref(down);
 }
 }
+#include "fl_gst_native_bin_relay.inc"
+
 int main(int argc,char**argv){
  gst_init(&argc,&argv);CHECK(argc>=3);
  GError*e=nullptr;auto*plugin=gst_plugin_load_file(argv[1],&e);CHECK(plugin&&!e);gst_object_unref(plugin);
@@ -969,5 +985,18 @@ int main(int argc,char**argv){
  if(mode=="--relay-supervisor-controls"){controls::relaySupervisorControls();return 0;}
  if(mode=="--relay-local-bin-pause"){controls::pauseControl(argv[1],false);return 0;}
  if(mode=="--relay-local-bin-paused-cancel"){controls::pauseControl(argv[1],true);return 0;}
+ if(mode=="--bin-relay"){binrelay::run(0);return 0;}
+ if(mode=="--lease-relay"){binrelay::run(0,true);return 0;}
+ if(mode=="--bin-relay-cancel"){binrelay::run(6);return 0;}
+ if(mode=="--bin-relay-events"){binrelay::run(7);return 0;}
+ if(mode=="--bin-relay-supervised-downstream"){binrelay::run(8);return 0;}
+ if(mode=="--bin-relay-supervised-upstream"){binrelay::run(9);return 0;}
+ if(mode=="--relay-pool-lifetime"){binrelay::run(10);return 0;}
+ if(mode=="--relay-authenticated-pool"){binrelay::run(11);return 0;}
+ if(mode=="--relay-local-pool"){binrelay::run(12);return 0;}
+ if(mode=="--relay-local-cancel-downstream"){binrelay::run(13);return 0;}
+ if(mode=="--relay-local-cancel-upstream"){binrelay::run(14);return 0;}
+ if(mode=="--relay-local-events"){binrelay::run(15);return 0;}
+ if(mode=="--relay-pool-controls"){binrelay::relayPoolControls();return 0;}
  fprintf(stderr,"unknown mode %s\n",mode.c_str());return 2;
 }

@@ -6,6 +6,7 @@
 // cases themselves are the same on every platform.
 #include "../gst/framelink_session_transport.h"
 #include "../samples/local_native_relay_setup.h"
+#include "../gst/framelink_native.h"
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -16,6 +17,9 @@
 #include <d3d11.h>
 #include <gst/d3d11/gstd3d11.h>
 #include "framelink_d3d11.h"
+#include "../samples/native_d3d11_relay_pool.h"
+#include "../samples/native_d3d11_relay_transfer.h"
+#include "../samples/native_gst_d3d11_relay.h"
 #else
 #include <gst/allocators/gstdmabuf.h>
 #include <cerrno>
@@ -29,6 +33,14 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include "framelink_dmabuf.h"
+#include "../samples/native_dmabuf_relay_pool.h"
+#include "../samples/native_dmabuf_relay_transfer.h"
+#include "../samples/native_gst_dmabuf_relay.h"
+#include <dirent.h>
+#include <linux/dma-buf.h>
+#include <sys/eventfd.h>
+#include <sys/ioctl.h>
+#include <sys/mman.h>
 #endif
 #ifndef CHECK
 #define CHECK(x) do{if(!(x)){fprintf(stderr,"line %d: %s\n",__LINE__,#x);std::exit(1);}}while(0)
@@ -283,5 +295,151 @@ struct Child {
 #endif
  Child(const Child&)=delete;Child&operator=(const Child&)=delete;
 };
+
+
+// ---- In-process GStreamer bin relays ----
+
+// The native producer pool's caps feature, and the completion contract the
+// producer offers in its allocation query.
+inline const char*nativeFeature(){
+#ifdef _WIN32
+ return "memory:D3D11Memory";
+#else
+ return "memory:DMABuf";
+#endif
+}
+inline const char*producerCompletion(){
+#ifdef _WIN32
+ return "same-device-before-abandon-v1";
+#else
+ return "external-sync-fd-before-submit-v1";
+#endif
+}
+// Write one byte value into every pixel of a 64x32 RGBA buffer from the native
+// sink's own pool, and complete it for submission: a D3D11 upload, or a mapped
+// DMA-BUF write followed by a signalled ready fd given to the sink.
+inline void fillPoolBuffer(GstElement*sink,GstBuffer*b,unsigned char value){
+ auto*mem=gst_buffer_peek_memory(b,0);
+#ifdef _WIN32
+ (void)sink;CHECK(gst_is_d3d11_memory(mem));
+ auto*reservation=(FrameLinkD3DReservation*)gst_mini_object_get_qdata(GST_MINI_OBJECT(mem),FrameLinkD3DProducer::key());CHECK(reservation);
+ auto*texture=(ID3D11Texture2D*)gst_d3d11_memory_get_resource_handle(GST_D3D11_MEMORY_CAST(mem));CHECK(texture==flImageD3D11(reservation->buffer.image));
+ ID3D11Device*d=nullptr;texture->GetDevice(&d);ID3D11DeviceContext*c=nullptr;d->GetImmediateContext(&c);
+ std::vector<unsigned char>pixels(64*32*4,value);c->UpdateSubresource(texture,0,nullptr,pixels.data(),256,0);
+ c->Release();d->Release();
+#else
+ CHECK(gst_is_dmabuf_memory(mem));const int fd=gst_dmabuf_memory_get_fd(mem);
+ auto*layout=gst_buffer_get_video_meta(b);CHECK(layout);
+ dma_buf_sync sync{};sync.flags=DMA_BUF_SYNC_START|DMA_BUF_SYNC_WRITE;CHECK(ioctl(fd,DMA_BUF_IOCTL_SYNC,&sync)==0);
+ void*data=mmap(nullptr,mem->size,PROT_READ|PROT_WRITE,MAP_SHARED,fd,0);CHECK(data!=MAP_FAILED);
+ for(unsigned y=0;y<32;++y)memset(static_cast<char*>(data)+layout->offset[0]+y*layout->stride[0],value,256);
+ CHECK(munmap(data,mem->size)==0);sync.flags=DMA_BUF_SYNC_END|DMA_BUF_SYNC_WRITE;CHECK(ioctl(fd,DMA_BUF_IOCTL_SYNC,&sync)==0);
+ const int ready=eventfd(0,EFD_CLOEXEC|EFD_NONBLOCK);CHECK(ready>=0);
+ uint64_t one=1;CHECK(write(ready,&one,sizeof one)==sizeof one); // CPU writes are complete
+ gboolean accepted=FALSE;g_signal_emit_by_name(sink,"set-native-ready-fd",b,ready,&accepted);CHECK(accepted);
+ close(ready); // the sink keeps its own duplicate
+#endif
+}
+// An intact FrameLink native reader memory (not producer or ordinary memory).
+inline bool isReaderMemory(GstMemory*m){
+#ifdef _WIN32
+ return gst_framelink_memory_get_d3d11_shared_handle(m)!=nullptr;
+#else
+ return gst_framelink_memory_get_dmabuf_fd(m)>=0;
+#endif
+}
+// Two FrameLink reader memories name the same allocation (kernel identity).
+inline bool sameMemory(GstMemory*a,GstMemory*b){
+#ifdef _WIN32
+ using Compare=BOOL(WINAPI*)(HANDLE,HANDLE);
+ static auto compare=reinterpret_cast<Compare>(GetProcAddress(GetModuleHandleW(L"KernelBase.dll"),"CompareObjectHandles"));
+ CHECK(compare);auto x=gst_framelink_memory_get_d3d11_shared_handle(a),y=gst_framelink_memory_get_d3d11_shared_handle(b);
+ CHECK(x&&y);return compare(x,y)!=FALSE;
+#else
+ const int x=gst_framelink_memory_get_dmabuf_fd(a),y=gst_framelink_memory_get_dmabuf_fd(b);CHECK(x>=0&&y>=0);
+ struct stat sx{},sy{};CHECK(fstat(x,&sx)==0&&fstat(y,&sy)==0);return sx.st_dev==sy.st_dev&&sx.st_ino==sy.st_ino;
+#endif
+}
+// Identity of a native producer-pool memory, stable while it is retained.
+inline uint64_t poolAllocation(GstMemory*m){
+#ifdef _WIN32
+ CHECK(gst_is_d3d11_memory(m));return uint64_t(uintptr_t(gst_d3d11_memory_get_resource_handle(GST_D3D11_MEMORY_CAST(m))));
+#else
+ CHECK(gst_is_dmabuf_memory(m));struct stat st{};CHECK(fstat(gst_dmabuf_memory_get_fd(m),&st)==0);return uint64_t(st.st_ino);
+#endif
+}
+// A retained native memory still names a live resource after every pipeline,
+// pool and session is gone: its D3D11 device is not removed, or its fd is open.
+inline void checkRetained(GstMemory*m){
+#ifdef _WIN32
+ CHECK(gst_is_d3d11_memory(m));auto*resource=gst_d3d11_memory_get_resource_handle(GST_D3D11_MEMORY_CAST(m));CHECK(resource);
+ ID3D11Device*device=nullptr;resource->GetDevice(&device);CHECK(device&&SUCCEEDED(device->GetDeviceRemovedReason()));device->Release();
+#else
+ CHECK(gst_is_dmabuf_memory(m));struct stat st{};CHECK(fstat(gst_dmabuf_memory_get_fd(m),&st)==0);
+#endif
+}
+// Open kernel handles (Windows) or file descriptors (Linux) of this process.
+inline unsigned long openHandles(){
+#ifdef _WIN32
+ DWORD handles=0;CHECK(GetProcessHandleCount(GetCurrentProcess(),&handles));return handles;
+#else
+ unsigned long count=0;DIR*d=opendir("/proc/self/fd");CHECK(d);
+ while(auto*e=readdir(d))if(e->d_name[0]!='.')++count;
+ closedir(d);return count-1; // the directory stream's own fd
+#endif
+}
+// The platform's relay samples: pool export guard, in-process same-allocation
+// ring, and the GStreamer read-lease adapter.
+#ifdef _WIN32
+using RelayPoolExport=flsample::NativeD3D11RelayPoolExport;
+using GstRelay=flsample::NativeGstD3D11Relay;
+inline flResult createRelayPool(GstBufferPool*pool,const char*name,const flSessionConfig&config,unsigned capacity,bool cpu,flChannel**reader,flChannel**writer){
+ return flsample::createNativeD3D11RelayPool(pool,name,config,capacity,cpu,reader,writer);}
+#else
+using RelayPoolExport=flsample::NativeDmabufRelayPoolExport;
+using GstRelay=flsample::NativeGstDmabufRelay;
+inline flResult createRelayPool(GstBufferPool*pool,const char*name,const flSessionConfig&config,unsigned capacity,bool cpu,flChannel**reader,flChannel**writer){
+ return flsample::createNativeDmabufRelayPool(pool,name,config,capacity,cpu,reader,writer);}
+#endif
+// The typed FAR5 sender over a pinned producer pool.
+inline gboolean openRelayPool(FlGstSession*down,FlGstSession*up,const char*path,const flSessionCapabilities*caps,
+ guint queue,guint pool,guint audio,guint timeout,guint idle,const GstFrameLinkMemoryPolicy*candidate,
+ const RelayPoolExport&exported,GstFrameLinkMemoryPolicy*bound,flChannel**channel,GCancellable*cancel,GError**error){
+#ifdef _WIN32
+ return fl_gst_session_open_local_native_relay_pool(down,up,path,caps,queue,pool,audio,timeout,idle,candidate,
+  exported.first.adapterLUID,exported.handles.data(),bound,channel,cancel,error);
+#else
+ return fl_gst_session_open_local_native_relay_pool_dmabuf(down,up,path,caps,queue,pool,audio,timeout,idle,candidate,
+  exported.images.data(),bound,channel,cancel,error);
+#endif
+}
+// Cancellation for the broker-keyed transfer: a manual-reset event, or a GCancellable.
+struct Cancel {
+#ifdef _WIN32
+ HANDLE event=CreateEventW(nullptr,TRUE,FALSE,nullptr);
+ Cancel(){CHECK(event);}
+ ~Cancel(){CloseHandle(event);}
+ void set(){CHECK(SetEvent(event));}
+ void reset(){CHECK(ResetEvent(event));}
+#else
+ GCancellable*cancellable=g_cancellable_new();
+ ~Cancel(){g_object_unref(cancellable);}
+ void set(){g_cancellable_cancel(cancellable);}
+ void reset(){g_cancellable_reset(cancellable);}
+ Cancel()=default;
+#endif
+ Cancel(const Cancel&)=delete;Cancel&operator=(const Cancel&)=delete;
+};
+// Broker-keyed same-allocation transfer (explicit endpoint and secret, not
+// session discovery): a current-user named pipe, or an abstract Unix socket.
+inline flResult createAuthenticatedRelayPool(bool producer,GstBufferPool*pool,const std::string&endpoint,const char*ring,
+ const flSessionConfig&config,unsigned capacity,bool cpu,GBytes*key,Cancel&cancel,guint timeout,flChannel**out){
+#ifdef _WIN32
+ const std::wstring pipe=L"\\\\.\\pipe\\"+std::wstring(endpoint.begin(),endpoint.end());
+ return flsample::createAuthenticatedNativeD3D11RelayPool(producer,pool,pipe,ring,config,capacity,cpu,key,cancel.event,timeout,out);
+#else
+ return flsample::createAuthenticatedNativeDmabufRelayPool(producer,pool,std::string(1,'\0')+endpoint,ring,config,capacity,cpu,key,cancel.cancellable,timeout,out);
+#endif
+}
 
 }

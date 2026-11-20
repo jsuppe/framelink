@@ -27,3 +27,18 @@ static inline void* gst_framelink_memory_get_d3d11_shared_handle(GstMemory* memo
         g_quark_from_static_string("framelink-d3d11-reader-shared-handle"));
 }
 #endif
+
+#if defined(__linux__) && !defined(__ANDROID__)
+#include <gst/allocators/gstdmabuf.h>
+// Borrowed DMA-BUF fd for an intact FrameLink native reader memory, or -1 for
+// other memory (including ordinary DMA-BUF allocations). Do not close, write
+// through, or transfer it without broker authorization. Retain this exact
+// GstMemory until downstream GPU completion: duplicating the fd does NOT hold
+// the reader lease. Intended for same-allocation identity checks (compare the
+// fd's inode) and composition; in-process qdata is not an authentication boundary.
+static inline int gst_framelink_memory_get_dmabuf_fd(GstMemory* memory) {
+    if(!memory || !gst_is_dmabuf_memory(memory) ||
+       !gst_mini_object_get_qdata(GST_MINI_OBJECT(memory),g_quark_from_static_string("framelink-reader")))return -1;
+    return gst_dmabuf_memory_get_fd(memory);
+}
+#endif

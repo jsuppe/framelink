@@ -175,19 +175,6 @@ int main(int argc,char**argv){gst_init(&argc,&argv);CHECK(argc>=2);GError*e=null
  if(argc==7&&std::string(argv[2])=="--relay-decoder-producer")return relayprocess::reservedProducer(argv[3],guint16(atoi(argv[4])),true,atoi(argv[6])!=0);
  if(argc==7&&std::string(argv[2])=="--relay-death-reader")return relayprocess::deathReader(argv[3],(HANDLE)(uintptr_t)strtoull(argv[4],nullptr,10),(HANDLE)(uintptr_t)strtoull(argv[5],nullptr,10),(HANDLE)(uintptr_t)strtoull(argv[6],nullptr,10));
  CHECK(argc==2||argc==3);
- if(argc==3&&std::string(argv[2])=="--relay-local-cancel-downstream"){nativeProducerAv(13,false,false,false,true,false,false,false,false,true);return 0;}
- if(argc==3&&std::string(argv[2])=="--relay-local-cancel-upstream"){nativeProducerAv(14,false,false,false,true,false,false,false,false,true);return 0;}
- if(argc==3&&std::string(argv[2])=="--relay-local-events"){nativeProducerAv(15,false,false,false,true,false,false,false,false,true);return 0;}
- if(argc==3&&std::string(argv[2])=="--relay-local-pool"){nativeProducerAv(12,false,false,false,true,false,false,false,false,true);return 0;}
- if(argc==3&&std::string(argv[2])=="--relay-authenticated-pool"){nativeProducerAv(11,false,false,false,true,false,false,false,false,true);return 0;}
- if(argc==3&&std::string(argv[2])=="--relay-pool-lifetime"){nativeProducerAv(10,false,false,false,true,false,false,false,false,true);return 0;}
- if(argc==3&&std::string(argv[2])=="--relay-pool-controls"){relayPoolControls();return 0;}
- if(argc==3&&std::string(argv[2])=="--bin-relay-supervised-downstream"){nativeProducerAv(8,false,false,false,true,false,false,false,false,true);return 0;}
- if(argc==3&&std::string(argv[2])=="--bin-relay-supervised-upstream"){nativeProducerAv(9,false,false,false,true,false,false,false,false,true);return 0;}
- if(argc==3&&std::string(argv[2])=="--bin-relay-events-diagnostic"){nativeProducerAv(7,false,false,false,true,false,false,false,false,true);return 0;}
- if(argc==3&&std::string(argv[2])=="--bin-relay-cancel-diagnostic"){nativeProducerAv(6,false,false,false,true,false,false,false,false,true);return 0;}
- if(argc==3&&std::string(argv[2])=="--bin-relay-diagnostic"){nativeProducerAv(0,false,false,false,true,false,false,false,false,true);return 0;}
- if(argc==3&&std::string(argv[2])=="--lease-relay-diagnostic"){nativeProducerAv(0,false,false,false,true,false,false,false,true);return 0;}
  if(argc==3&&std::string(argv[2])=="--relay-decoder-diagnostic"){
   for(auto name:{"videotestsrc","x264enc","h264parse","d3d11h264dec"}){
    auto*factory=gst_element_factory_find(name);if(!factory){fprintf(stderr,"SKIP: required decoder fixture element %s unavailable\n",name);return 77;}gst_object_unref(factory);
