@@ -35,3 +35,21 @@ Each phase is one pull request.
 ## Phase 1 (2026-11-20)
 
 The snapshot holds one `AHardwareBuffer_acquire` reference per slot and shares the channel's pin counter. Pin checks are added at producer attach (`Busy`) and on geometry requests (the current ring is handed back), at the same points as Linux.
+
+## Phase 2 (2026-11-20)
+
+**FAR4 on Android.** `FL_GST_LOCAL_NATIVE_RELAY` now covers every platform with a local native session, so `fl_gst_session_open_local_native_relay_input` and `fl_gst_session_open_local_native_relay` are built on Android. The FAR5 half has its own macro, `FL_GST_LOCAL_NATIVE_RELAY_POOL` (Windows and desktop Linux until phase 3). It covers:
+- `open_local_native_pool_receiver` and the typed senders;
+- the pool-transfer implementation;
+- the `framelinkavsrc` pool-receiver profile;
+- the `samples/local_native_relay_setup.h` FAR4-plus-snapshot-plus-FAR5 transaction.
+
+Windows and Linux compile exactly what they did before.
+
+**Shared relay tests on Android.** `fl_gst_native_relay` builds for Android with GStreamer and the plugin linked statically. `argv[1]` is a placeholder, so child command lines keep their shape. It registers four tests:
+- `gst_relay_local_session_android`
+- `gst_relay_local_source_control_android`
+- `gst_relay_video_event_controls_android`
+- `gst_relay_supervisor_controls_android`
+
+The FAR5 modes and their helpers in `test/fl_gst_native_relay_platform.h` compile only with `FL_GST_LOCAL_NATIVE_RELAY_POOL`. The platform adapter gains the Android identity check: the AHardwareBuffer allocation ID, never a slot or pointer. `Gate` and `Child` use the POSIX path (pipes; `fork`/`exec` of `/proc/self/exe` with `PR_SET_PDEATHSIG`).

@@ -1,6 +1,6 @@
 #pragma once
 #include "../gst/framelink_session_transport.h"
-#ifdef FL_GST_LOCAL_NATIVE_RELAY
+#ifdef FL_GST_LOCAL_NATIVE_RELAY_POOL
 #ifdef _WIN32
 #include "framelink_d3d11.h"
 #else

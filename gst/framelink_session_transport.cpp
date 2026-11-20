@@ -17,7 +17,7 @@
 #ifdef __linux__
 #include <gio/gunixsocketaddress.h>
 #endif
-#ifdef FL_GST_LOCAL_NATIVE_RELAY
+#ifdef FL_GST_LOCAL_NATIVE_RELAY_POOL
 #include "fl_gst_native_relay_pool_linux.h"
 #endif
 #endif
@@ -348,7 +348,7 @@ gboolean fl_gst_session_open_local_av(FlGstSession*session,gboolean producer,con
 struct NativeRelayPool {
 #ifdef _WIN32
  const void* adapter=nullptr; void*const* handles=nullptr;
-#elif defined(FL_GST_LOCAL_NATIVE_RELAY)
+#elif defined(FL_GST_LOCAL_NATIVE_RELAY_POOL)
  const flDmabuf* images=nullptr;
 #endif
 };
@@ -579,7 +579,7 @@ static gboolean open_local_av_impl(FlGstSession*session,gboolean producer,const 
     if(ch)flClose(ch);return fail("authenticated relay pool transfer failed or cancelled");
    }
   }else
-#elif defined(FL_GST_LOCAL_NATIVE_RELAY)
+#elif defined(FL_GST_LOCAL_NATIVE_RELAY_POOL)
   if(relayPool){
    // FAR5 on Linux: a separately authenticated, kernel-peer-pinned Unix
    // SEQPACKET transfer of the exact original DMA-BUF allocations.
@@ -779,6 +779,8 @@ gboolean fl_gst_session_open_local_native_relay(FlGstSession*s,FlGstSession*up,c
  GCancellable*cancel,GError**error){
  return open_local_native_relay_impl(s,up,path,local,queue,pool,audio,timeout,idle,candidate,bound,channel,cancel,error,nullptr);
 }
+#endif
+#ifdef FL_GST_LOCAL_NATIVE_RELAY_POOL
 gboolean fl_gst_session_open_local_native_pool_receiver(FlGstSession*s,const gchar*path,
  const flSessionCapabilities*local,guint queue,guint pool,guint audio,guint timeout,guint idle,
  const GstFrameLinkMemoryPolicy*candidate,GstFrameLinkMemoryPolicy*bound,flChannel**channel,

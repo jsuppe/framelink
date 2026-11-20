@@ -21,11 +21,14 @@ typedef struct flD3D11DeviceOwner flD3D11DeviceOwner;
 #define FL_GST_LOCAL_NATIVE_RESOURCE FL_MEMORY_DMABUF
 #endif
 #endif
-// Relay setup (FAR4 relay_input/relay and the FAR5 pool_receiver): Windows and
-// desktop Linux. The FAR5 sender is typed per platform. Android follows with
-// its own relay parity work.
-#if defined(_WIN32) || (defined(__linux__) && !defined(__ANDROID__))
+// FAR4 relay setup (relay_input/relay): every platform with a local native
+// session. FAR5 (pool_receiver and the per-platform typed sender): Windows and
+// desktop Linux; Android follows in its relay parity work.
+#ifdef FL_GST_LOCAL_NATIVE_SESSION
 #define FL_GST_LOCAL_NATIVE_RELAY 1
+#endif
+#if defined(_WIN32) || (defined(__linux__) && !defined(__ANDROID__))
+#define FL_GST_LOCAL_NATIVE_RELAY_POOL 1
 #endif
 #if defined(__linux__) && !defined(__ANDROID__)
 #include "framelink_dmabuf.h"
@@ -342,6 +345,10 @@ FL_GST_SESSION_API gboolean fl_gst_session_open_local_native_relay(FlGstSession*
  guint audio_queue_ms,guint connect_timeout_ms,guint idle_timeout_ms,
  const GstFrameLinkMemoryPolicy* candidate,GstFrameLinkMemoryPolicy* bound,flChannel** channel,
  GCancellable*,GError**);
+G_END_DECLS
+#endif
+#ifdef FL_GST_LOCAL_NATIVE_RELAY_POOL
+G_BEGIN_DECLS
 // Receiver half of FAR5 setup; FAR4/native and FAR3/CPU endpoints reject.
 // The returned policy is producer-ordered: swap endpoints before receiver binding.
 // Own the returned channel on success; outputs clear on failure. Configure and
