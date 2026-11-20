@@ -58,6 +58,7 @@
 #include <unistd.h>
 
 #include <atomic>
+#include <memory>
 #include <mutex>
 #include <string>
 #include <thread>
@@ -117,6 +118,10 @@ struct flChannel {
     bool frameHeld = false;
     uint64_t heldReady = 0;
     uint64_t retiredValue = 0; // completed consumer GPU reads; protects geometry changes
+    // Live consumer-pool snapshots of this channel. While nonzero the ring is
+    // pinned: no producer attach, no reallocation. Shared so a snapshot that
+    // outlives the channel can still release its pin safely.
+    std::shared_ptr<std::atomic<uint32_t>> poolPins = std::make_shared<std::atomic<uint32_t>>(0);
     uint32_t heldSlot = 0;
     uint64_t heldArrival=0;
     uint64_t sequence = 0;
@@ -340,7 +345,7 @@ void acceptLoop(flChannel* ch, fl::Channel delegated) {
         {
             std::lock_guard<std::mutex> hold(ch->pendingMutex);
             ch->sync.advance(ch->retiredValue);
-            if(!ch->readers.empty() || ch->frameHeld || ch->retiredValue<ch->heldReady || !ch->pending.all([](const fl::PendingFrame& f){return fl::fenceReady(f.fence);})) {
+            if(ch->poolPins->load() || !ch->readers.empty() || ch->frameHeld || ch->retiredValue<ch->heldReady || !ch->pending.all([](const fl::PendingFrame& f){return fl::fenceReady(f.fence);})) {
                 link.send(fl::MsgType::Busy);
                 continue;
             }
@@ -379,7 +384,8 @@ void acceptLoop(flChannel* ch, fl::Channel delegated) {
                 const auto* g = msg->as<fl::GeometryMsg>();
                 std::lock_guard<std::mutex> geometryLock(ch->pendingMutex);
                 ch->sync.advance(ch->retiredValue);
-                if (ch->frameHeld || ch->retiredValue < ch->heldReady) { if (!handOverRing(ch, ch->peer)) break; continue; }
+                // A snapshot pins the pool: answer with the current ring, like a busy one.
+                if (ch->poolPins->load() || ch->frameHeld || ch->retiredValue < ch->heldReady) { if (!handOverRing(ch, ch->peer)) break; continue; }
                 if (!ch->externalPool && g && g->width && g->height && g->width <= 8192 && g->height <= 8192 &&
                     (g->format == (uint32_t)ch->info.format) &&
                     (ch->info.format != FL_FORMAT_NV12 || !((g->width | g->height) & 1)) &&
@@ -1086,6 +1092,51 @@ FL_API void flImageUnmap(flImage* img) {
     }
     img->mapped = nullptr;
 }
+
+// Owned consumer-pool export: the counterpart of flSnapshotD3D11ConsumerPool
+// and flSnapshotDmabufConsumerPool. Each slot holds its own reference to the
+// exact original AHardwareBuffer.
+struct flAHardwareBufferPoolSnapshot {
+    flChannelInfo info{};
+    std::vector<AHardwareBuffer*> buffers;
+    std::shared_ptr<std::atomic<uint32_t>> pins;
+    ~flAHardwareBufferPoolSnapshot() {
+        for(auto* b:buffers)if(b)AHardwareBuffer_release(b);
+        if(pins)--*pins;
+    }
+};
+
+FL_API flResult flSnapshotAHardwareBufferConsumerPool(flChannel* ch, flAHardwareBufferPoolSnapshot** out) {
+    fltrace::Scope trace("flSnapshotAHardwareBufferConsumerPool", fltrace::id(ch ? ch->name.c_str() : nullptr));
+    if(out)*out=nullptr;
+    if(!ch || !ch->isConsumer || !out)return trace.result(FL_INVALID);
+    // The listener thread changes the ring (attach, reallocation) under this lock.
+    std::lock_guard<std::mutex> hold(ch->pendingMutex);
+    if(ch->stop.load() || !ch->info.generation || ch->images.size()!=ch->info.poolSize)return trace.result(FL_DISCONNECTED);
+    auto snapshot=std::make_unique<flAHardwareBufferPoolSnapshot>();
+    snapshot->info=ch->info;
+    for(auto* image:ch->images) {
+        if(!image || !image->ahb)return trace.result(FL_INTERNAL);
+        AHardwareBuffer_acquire(image->ahb);snapshot->buffers.push_back(image->ahb);
+    }
+    snapshot->pins=ch->poolPins;
+    ++*snapshot->pins;
+    *out=snapshot.release();
+    return trace.result(FL_OK);
+}
+
+FL_API flResult flQueryAHardwareBufferPoolSnapshot(const flAHardwareBufferPoolSnapshot* snapshot, flChannelInfo* out) {
+    if(!snapshot || !out)return FL_INVALID;
+    *out=snapshot->info;
+    return FL_OK;
+}
+
+FL_API AHardwareBuffer* flAHardwareBufferPoolSnapshotBuffer(const flAHardwareBufferPoolSnapshot* snapshot, uint32_t slot) {
+    if(!snapshot || slot>=snapshot->buffers.size())return nullptr;
+    return snapshot->buffers[slot];
+}
+
+FL_API void flReleaseAHardwareBufferPoolSnapshot(flAHardwareBufferPoolSnapshot* snapshot) { delete snapshot; }
 
 } // extern "C"
 
