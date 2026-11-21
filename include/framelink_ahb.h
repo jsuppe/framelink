@@ -40,6 +40,30 @@ FL_API flResult flCreateChannelFromSocketFdWithHardwareBuffers(int connectedFd,
     uint32_t flags, uint32_t ioTimeoutMs, AHardwareBuffer* const* images,
     flChannel** out);
 
+// Owned, immutable consumer pool export; the counterpart of Windows'
+// flSnapshotD3D11ConsumerPool and Linux's flSnapshotDmabufConsumerPool. No
+// image acquisition, frame lease, copying or writer permission is implied.
+// Each slot holds its own reference (AHardwareBuffer_acquire) to the exact
+// original allocation. While a snapshot exists, geometry replacement is
+// refused (the current geometry is returned) and a newly attaching producer
+// receives FL_BUSY: the source pool/epoch is pinned. Existing media and read
+// leases continue normally. Retain the snapshot for the relay graph lifetime
+// to prohibit mid-graph pool changes; relay code must also preserve real
+// upstream read leases until downstream readers finish. Calls on the source
+// must be serialized against flClose as for other APIs. Snapshots can outlive
+// source close: their buffers stay valid, but source close does not imply GPU
+// completion or make old-generation frames reusable.
+// flAHardwareBufferPoolSnapshotBuffer returns a BORROWED reference, valid
+// until snapshot release (NULL for an invalid slot). Callers may acquire their
+// own reference, but such references no longer pin the source pool.
+// Authorized cross-process transfer is the caller's responsibility.
+// On failure *out=NULL; producer channels are rejected with FL_INVALID.
+typedef struct flAHardwareBufferPoolSnapshot flAHardwareBufferPoolSnapshot;
+FL_API flResult flSnapshotAHardwareBufferConsumerPool(flChannel*, flAHardwareBufferPoolSnapshot** out);
+FL_API flResult flQueryAHardwareBufferPoolSnapshot(const flAHardwareBufferPoolSnapshot*, flChannelInfo* out);
+FL_API AHardwareBuffer* flAHardwareBufferPoolSnapshotBuffer(const flAHardwareBufferPoolSnapshot*, uint32_t slot);
+FL_API void flReleaseAHardwareBufferPoolSnapshot(flAHardwareBufferPoolSnapshot*);
+
 // Android broker-owned native video transport. Each call CONSUMES connectedFd
 // on success and failure (use ParcelFileDescriptor.detachFd(), never getFd()).
 // It must be an authorized, connected AF_UNIX/SOCK_SEQPACKET endpoint, distinct
