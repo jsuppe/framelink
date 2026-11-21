@@ -31,7 +31,7 @@ def analyze(root):
     require(1<=seconds<=1800 and fps in (30,60),'invalid frozen duration/rate')
     require(c['pool']==2 and c['queue']==1 and c['offset_ns']==37000000,'profile changed')
     require(c['format'] in ('BGRA','NV12') and c['width']>=64 and c['height']>=32,'invalid geometry')
-    require(c['clock']=='QPC quotient-remainder nanoseconds','unexpected clock domain')
+    require(c['clock'] in ('QPC quotient-remainder nanoseconds','CLOCK_MONOTONIC nanoseconds'),'unexpected clock domain')
     budget=17000000 if fps==60 else 34000000;expected_bytes=c['width']*c['height']*(3 if c['format']=='NV12' else 8)//2
     videos={};audios={};result={'scope':'synthetic authenticated transport; explicit upload/verification copies; no physical playback or isolated-hop budget claim','budget_ns':budget,'roles':{}}
     for role in ('source','relay','receiver'):

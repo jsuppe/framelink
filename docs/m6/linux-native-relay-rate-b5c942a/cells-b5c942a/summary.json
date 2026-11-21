@@ -1,0 +1,98 @@
+{
+ "environment": {
+  "revision": "b5c942aa62411b91f88e052f732c6545e9478052",
+  "dirty": false,
+  "platform": "Linux-7.0.0-43-generic-x86_64-with-glibc2.43",
+  "exe_sha256": "d776c34ed5c701234c3d679fbd672a886f5012571986c67b623a539ee3950ba5",
+  "plugin_sha256": "feed49c072ebcc3adf7f0214aed8c445fb67c60598ed9c43b17adae32ac1bf14",
+  "duration": 1800,
+  "cells": [
+   "bgra1080p60",
+   "nv12-1080p60",
+   "bgra4k30",
+   "nv12-4k30"
+  ],
+  "nvidia-smi": "NVIDIA GeForce RTX 3090, 580.178.04",
+  "gst-inspect-1.0": "gst-inspect-1.0 version 1.28.2\nGStreamer 1.28.2\nhttps://launchpad.net/ubuntu/+source/gstreamer1.0"
+ },
+ "cells": [
+  {
+   "cell": "bgra1080p60",
+   "preflight": true,
+   "trace": true,
+   "duration": false,
+   "duration_error": "harness exit 1",
+   "slopes": {},
+   "arrival": null
+  },
+  {
+   "cell": "nv12-1080p60",
+   "preflight": true,
+   "trace": true,
+   "duration": true,
+   "duration_error": null,
+   "slopes": {
+    "source": {
+     "memory_kb": 0.0,
+     "handles": 0.0,
+     "threads": 0.0
+    },
+    "relay": {
+     "memory_kb": -0.028567892169475077,
+     "handles": 0.00027453828254103176,
+     "threads": 0.0
+    },
+    "receiver": {
+     "memory_kb": 0.0,
+     "handles": -0.002026796904427685,
+     "threads": 0.0
+    }
+   },
+   "arrival": {
+    "p50": 3.836184,
+    "p95": 5.300009,
+    "p99": 5.69691,
+    "max": 6.751506
+   }
+  },
+  {
+   "cell": "bgra4k30",
+   "preflight": true,
+   "trace": true,
+   "duration": false,
+   "duration_error": "harness exit 1",
+   "slopes": {},
+   "arrival": null
+  },
+  {
+   "cell": "nv12-4k30",
+   "preflight": true,
+   "trace": true,
+   "duration": true,
+   "duration_error": null,
+   "slopes": {
+    "source": {
+     "memory_kb": 0.0,
+     "handles": 0.0,
+     "threads": 0.0
+    },
+    "relay": {
+     "memory_kb": 0.03533920180412841,
+     "handles": -0.0009994704210590532,
+     "threads": 0.0
+    },
+    "receiver": {
+     "memory_kb": 1.0361020933338914,
+     "handles": -0.0003477962094338346,
+     "threads": 0.0
+    }
+   },
+   "arrival": {
+    "p50": 7.358412,
+    "p95": 8.842976,
+    "p99": 9.299679,
+    "max": 14.465123
+   }
+  }
+ ]
+}

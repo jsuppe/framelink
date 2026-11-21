@@ -1,0 +1,107 @@
+{
+ "scope": "synthetic authenticated transport; explicit upload/verification copies; no physical playback or isolated-hop budget claim",
+ "budget_ns": 17000000,
+ "roles": {
+  "source": {
+   "video": 300,
+   "pcm_frames": 240000,
+   "resource_slopes_per_min": {},
+   "cpu_percent": 22.32379633267827,
+   "trace_counts": {
+    "sent": 300,
+    "received": 0
+   }
+  },
+  "relay": {
+   "video": 300,
+   "pcm_frames": 240000,
+   "resource_slopes_per_min": {},
+   "cpu_percent": 7.172436727313391,
+   "trace_counts": {
+    "sent": 300,
+    "received": 300
+   }
+  },
+  "receiver": {
+   "video": 300,
+   "pcm_frames": 240000,
+   "resource_slopes_per_min": {},
+   "cpu_percent": 29.285360250725788,
+   "trace_counts": {
+    "sent": 0,
+    "received": 300
+   }
+  }
+ },
+ "timing_ms": {
+  "scheduled_to_final_arrival": {
+   "p50": 3.345043,
+   "p95": 4.759913,
+   "p99": 5.281662,
+   "max": 5.761947
+  },
+  "source_marker_to_relay": {
+   "p50": 1.881001,
+   "p95": 2.887902,
+   "p99": 3.143557,
+   "max": 3.44532
+  },
+  "source_marker_to_final": {
+   "p50": 3.065346,
+   "p95": 4.507279,
+   "p99": 4.923409,
+   "max": 5.405413
+  },
+  "source_acquire_call": {
+   "p50": 0.022897,
+   "p95": 0.038814,
+   "p99": 0.042299,
+   "max": 0.043173
+  },
+  "source_upload_call": {
+   "p50": 0.733895,
+   "p95": 1.230724,
+   "p99": 1.296971,
+   "max": 1.305196
+  },
+  "source_submit_call": {
+   "p50": 0.018221,
+   "p95": 0.034819,
+   "p99": 0.037989,
+   "max": 0.052201
+  },
+  "relay_acquire_to_record": {
+   "p50": 0.043834,
+   "p95": 0.062246,
+   "p99": 0.078873,
+   "max": 0.084376
+  },
+  "relay_forward_call": {
+   "p50": 0.042391,
+   "p95": 0.060648,
+   "p99": 0.077012,
+   "max": 0.082721
+  },
+  "final_acquire_to_completion": {
+   "p50": 1.308591,
+   "p95": 2.385875,
+   "p99": 2.468757,
+   "max": 2.648845
+  },
+  "audio_scheduled_to_final": {
+   "p50": 1.155128,
+   "p95": 1.274232,
+   "p99": 1.581387,
+   "max": 1.694739
+  }
+ },
+ "pass_all": true,
+ "video_arrival_misses": 0,
+ "audio_arrival_misses": 0,
+ "trace_checked": true,
+ "exit": 0,
+ "wall_seconds": 5.5,
+ "cell": "nv12-1080p60",
+ "seconds": 5,
+ "trace": true
+}

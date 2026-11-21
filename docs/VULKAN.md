@@ -118,6 +118,14 @@ Bugs the hardware found and this change fixes:
 
 ## Known limits
 
+- **Long-lived imports of linear rings on NVIDIA Linux.** In the three-process
+  relay rate harness, a Vulkan import of a linear (`FL_MAP_CPU`) DMA-BUF read
+  zeros after about 30–38 s at BGRA 1080p60. The storage itself was correct,
+  and a fresh import read it. A single-process reproduction did not show it, and
+  the trigger is not established. Until it is, re-import such rings rather than
+  caching imports for a whole generation
+  ([evidence](m6/linux-native-relay-rate-b5c942a/README.md)).
+
 - Windows NV12 is refused (`FL_FORMAT_UNSUPPORTED`): NVIDIA's D3D11 NV12
   import silently loses chroma. Use an RGB ring for Vulkan, or D3D11 for NV12.
 - Android native YUV (NV12) is an external format: Vulkan can only sample it

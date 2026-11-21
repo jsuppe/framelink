@@ -400,8 +400,11 @@ per-platform state. Windows readiness is the
   tests, and a hardware-decoder relay (NVDEC into the reservation's DMA-BUF), with
   functional two-hop PCM qualification, 40 of 40 runs
   ([plan](m6/linux-native-relay/README.md),
-  [evidence](m6/linux-native-relay-qualification-61375e7/README.md)). Rate,
-  duration and resource cells (as qualified on Windows) not done; 9e not started.
+  [evidence](m6/linux-native-relay-qualification-61375e7/README.md)). Rate cells
+  at `b5c942a` ([evidence](m6/linux-native-relay-rate-b5c942a/README.md)): NV12
+  1080p60 and NV12 4K30 pass 1800 s with resource slopes far inside the gates;
+  BGRA 1080p60 and BGRA 4K30 each fail zero-loss on one isolated stall (19–37 ms),
+  decision open. 9e not started.
   *Android (AHardwareBuffer):* 9a–9c done with focused checks (2026-11-18): the same
   profile with exact RGBA/RGB10A2_LE AHardwareBuffers
   ([evidence](m6/android-native-av-session/README.md)). 9d and 9e not started.

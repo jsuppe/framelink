@@ -1,0 +1,107 @@
+{
+ "scope": "synthetic authenticated transport; explicit upload/verification copies; no physical playback or isolated-hop budget claim",
+ "budget_ns": 34000000,
+ "roles": {
+  "source": {
+   "video": 150,
+   "pcm_frames": 240000,
+   "resource_slopes_per_min": {},
+   "cpu_percent": 29.523736509937265,
+   "trace_counts": {
+    "sent": 150,
+    "received": 0
+   }
+  },
+  "relay": {
+   "video": 150,
+   "pcm_frames": 240000,
+   "resource_slopes_per_min": {},
+   "cpu_percent": 1.7976599482944462,
+   "trace_counts": {
+    "sent": 150,
+    "received": 150
+   }
+  },
+  "receiver": {
+   "video": 150,
+   "pcm_frames": 240000,
+   "resource_slopes_per_min": {},
+   "cpu_percent": 48.469977616405416,
+   "trace_counts": {
+    "sent": 0,
+    "received": 150
+   }
+  }
+ },
+ "timing_ms": {
+  "scheduled_to_final_arrival": {
+   "p50": 8.543339,
+   "p95": 10.0093,
+   "p99": 10.360204,
+   "max": 15.202471
+  },
+  "source_marker_to_relay": {
+   "p50": 6.398234,
+   "p95": 7.700889,
+   "p99": 8.152685,
+   "max": 13.511149
+  },
+  "source_marker_to_final": {
+   "p50": 7.585817,
+   "p95": 9.054748,
+   "p99": 9.309183,
+   "max": 14.064051
+  },
+  "source_acquire_call": {
+   "p50": 0.004305,
+   "p95": 0.007544,
+   "p99": 0.008101,
+   "max": 0.01039
+  },
+  "source_upload_call": {
+   "p50": 4.911739,
+   "p95": 5.969077,
+   "p99": 5.990402,
+   "max": 12.930076
+  },
+  "source_submit_call": {
+   "p50": 0.004267,
+   "p95": 0.008362,
+   "p99": 0.009176,
+   "max": 0.012702
+  },
+  "relay_acquire_to_record": {
+   "p50": 0.008226,
+   "p95": 0.01172,
+   "p99": 0.015549,
+   "max": 0.016259
+  },
+  "relay_forward_call": {
+   "p50": 0.007965,
+   "p95": 0.011455,
+   "p99": 0.01526,
+   "max": 0.015952
+  },
+  "final_acquire_to_completion": {
+   "p50": 4.063246,
+   "p95": 7.272959,
+   "p99": 7.41383,
+   "max": 7.42149
+  },
+  "audio_scheduled_to_final": {
+   "p50": 0.348022,
+   "p95": 0.476712,
+   "p99": 0.521653,
+   "max": 1.576013
+  }
+ },
+ "pass_all": true,
+ "video_arrival_misses": 0,
+ "audio_arrival_misses": 0,
+ "trace_checked": true,
+ "exit": 0,
+ "wall_seconds": 5.5,
+ "cell": "bgra4k30",
+ "seconds": 5,
+ "trace": true
+}
