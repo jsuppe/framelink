@@ -204,6 +204,9 @@ static bool decoderAvailable(){
  void*cuda=dlopen("libcuda.so.1",RTLD_NOW|RTLD_LOCAL);
  if(!cuda){fprintf(stderr,"SKIP: libcuda.so.1 unavailable (the decoder relay uses NVDEC and CUDA-EGL interop)\n");return false;}
  dlclose(cuda);
+#elif defined(__ANDROID__)
+ fprintf(stderr,"SKIP: the Android hardware-decoder relay (MediaCodec into the reservation) is phase 5\n");return false;
+ const char* required[]={""};
 #else
  fprintf(stderr,"SKIP: built without GStreamer GL; the decoder relay needs it\n");return false;
  const char* required[]={""};
@@ -375,7 +378,7 @@ static std::string graphName(const char*kind,const std::string&suffix){
 #endif
  return std::string("gst-relay-")+kind+"-"+std::to_string(pid)+"-"+suffix;
 }
-static std::vector<relaytest::NativeHandle> inherit(const relaytest::SharedImages&images,const relaytest::Mailbox&notify){
+static std::vector<relaytest::NativeHandle> inherit(relaytest::SharedImages&images,const relaytest::Mailbox&notify){
  auto handles=images.inherited();handles.push_back(notify.inherited());return handles;
 }
 static void run(const std::string&plugin,bool empty,bool reserved=false,bool decoder=false,unsigned fault=0){

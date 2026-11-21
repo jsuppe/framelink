@@ -115,3 +115,27 @@ The adapter's Android branches:
   - leaking one fd per pool setup fails `pool_lifetime`.
 - Linux: the 36 shared relay tests passed 3 repeated rounds under `-j8`.
 - Windows: build and exports unchanged (88, 47, 2); the 36 relay tests and 10 repeated rounds pass; the full suite failed only `m4_source_drift` (a timing test; it passed 3 of 3 repeats); the unchanged 060c54e4 suite against the new DLLs 180 of 180.
+
+## Phase 4b (2026-11-22)
+
+**Broker-composed process relays on Android.** The eight process-relay modes run on Android under the shared names: `av`, `process`, `reservation`, `death`, `downstream_death`, `cancel`, `automatic_negative` and `decoder`. Android now runs the same 36 relay tests as Windows and Linux.
+
+**The decoder relay** (`gst_relay_decoder_android`) skips with 77. A MediaCodec decode into the source's reservation is phase 5.
+
+The Android parts in `test/fl_gst_native_relay_platform.h`:
+- **`SharedImages`:** the two broker allocations are RGBA8 AHardwareBuffers (GPU sampling plus CPU read and write).
+  - AHardwareBuffers cannot be inherited like file descriptors. Each child gets its own `SOCK_SEQPACKET` pair instead. Both buffers are sent into the pair with `AHardwareBuffer_sendHandleToUnixSocket` before the child starts, and the child inherits only its end. Queued messages stay readable after the parent closes its end.
+  - The child receives the buffers with `AHardwareBuffer_recvHandleFromUnixSocket` and adopts them with `flCreateChannelFromHardwareBuffers`.
+  - `indexOf` names the original allocation by allocation ID.
+- **`ReservationOwner`, `reservationOf` and `uploadReservation`:** they use the AHardwareBuffer producer's reservations. Identity is by allocation ID. The upload is a locked CPU write followed by a signalled ready fd.
+
+The automatic-relay negative checks pixels with `checkNativePixels`, like the bin relays, because AHardwareBuffer reader memory is not CPU-mappable. On Windows and Linux this is the same GStreamer map as before.
+
+**Checks:**
+- Tablet (API 35): the seven pass, and the decoder skips. The 36 Android relay tests passed 5 repeated rounds (175 of 175 plus the decoder skip). Full Android suite 137 of 139: the known EGL skip and the decoder skip. `gst_av_bench_smoke` and `gst_av_parity`, recorded as failing in phase 4a, passed in this run; `gst_av_parity` stays recorded as an open flake.
+- Negative controls (temporary edits, reverted), the same as on Linux:
+  - identity that always names the first allocation fails `process` (`seen==3`);
+  - a same-allocation check that always agrees fails `process` (the reversed down ring's timestamps no longer match);
+  - an AHardwareBuffer reservation that drops its buffer pin at submit fails `reservation` in the source (`!owner->acquire(0)`).
+- Linux: full suite 187 of 187 run serially (the known EGL skip). Under `-j8`, `m4_av_recovery`, `m5_startup`, `m5_preconnect`, `m5_consumer_drain` and `broker_producer_stream` failed under load; each passed 3 of 3 serial runs. The 36 shared relay tests passed 3 repeated rounds under `-j8`.
+- Windows: build and exports unchanged (88, 47, 2); the 36 relay tests pass, including `decoder`, and 10 repeated rounds; full suite 187 of 187; the unchanged 060c54e4 suite against the new DLLs 180 of 180.

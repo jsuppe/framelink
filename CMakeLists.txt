@@ -1414,9 +1414,9 @@ if(FRAMELINK_BUILD_TESTS AND TARGET framelink_gst_session AND UNIX)
             "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstgio.a"
             ${FL_ANDROID_SESSION_GIO_STATIC_LDFLAGS} ${FL_ANDROID_GST_STATIC_LDFLAGS})
         add_test(NAME gst_native_av_android COMMAND fl_gst_native_av_android)
-        # Shared relay tests on Android: FAR4, FAR5 and the portable controls so
-        # far (docs/m6/android-native-relay). argv[1] is a placeholder: the
-        # plugin is linked statically.
+        # Shared relay tests on Android (docs/m6/android-native-relay): the same
+        # list as Windows and Linux. argv[1] is a placeholder: the plugin is
+        # linked statically.
         add_executable(fl_gst_native_relay test/fl_gst_native_relay.cpp)
         target_link_libraries(fl_gst_native_relay PRIVATE framelink_gst_session gstframelink
             "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstapp.a"
@@ -1438,7 +1438,11 @@ if(FRAMELINK_BUILD_TESTS AND TARGET framelink_gst_session AND UNIX)
                       pool_lifetime|relay-pool-lifetime authenticated_pool|relay-authenticated-pool
                       local_pool|relay-local-pool local_cancel_downstream|relay-local-cancel-downstream
                       local_cancel_upstream|relay-local-cancel-upstream local_events|relay-local-events
-                      pool_controls|relay-pool-controls)
+                      pool_controls|relay-pool-controls
+                      av|relay-av-diagnostic process|relay-process-diagnostic
+                      reservation|relay-reservation-diagnostic death|relay-death-diagnostic
+                      downstream_death|relay-downstream-death-diagnostic cancel|relay-cancel-diagnostic
+                      automatic_negative|automatic-relay-negative decoder|relay-decoder-diagnostic)
             string(REPLACE "|" ";" _parts "${_pair}")
             list(GET _parts 0 _name)
             list(GET _parts 1 _flag)
