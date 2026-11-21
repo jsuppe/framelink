@@ -1414,6 +1414,24 @@ if(FRAMELINK_BUILD_TESTS AND TARGET framelink_gst_session AND UNIX)
             "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstgio.a"
             ${FL_ANDROID_SESSION_GIO_STATIC_LDFLAGS} ${FL_ANDROID_GST_STATIC_LDFLAGS})
         add_test(NAME gst_native_av_android COMMAND fl_gst_native_av_android)
+        # Shared relay tests on Android: FAR4 and the portable controls so far
+        # (docs/m6/android-native-relay). argv[1] is a placeholder: the plugin
+        # is linked statically.
+        add_executable(fl_gst_native_relay test/fl_gst_native_relay.cpp)
+        target_link_libraries(fl_gst_native_relay PRIVATE framelink_gst_session gstframelink
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstapp.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstcoreelements.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstgdp.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstgio.a"
+            ${FL_ANDROID_SESSION_GIO_STATIC_LDFLAGS} ${FL_ANDROID_GST_STATIC_LDFLAGS} dl)
+        foreach(_pair local_session|relay-local-session local_source_control|relay-local-source-control
+                      video_event_controls|video-relay-event-controls supervisor_controls|relay-supervisor-controls)
+            string(REPLACE "|" ";" _parts "${_pair}")
+            list(GET _parts 0 _name)
+            list(GET _parts 1 _flag)
+            add_test(NAME gst_relay_${_name}_android COMMAND fl_gst_native_relay static --${_flag})
+            set_tests_properties(gst_relay_${_name}_android PROPERTIES TIMEOUT 30 SKIP_RETURN_CODE 77 LABELS "gpu")
+        endforeach()
         set_tests_properties(gst_native_av_android PROPERTIES TIMEOUT 60 LABELS "gpu" SKIP_RETURN_CODE 77)
     else()
         add_executable(fl_gst_native_av_linux test/fl_gst_native_av_session.cpp)

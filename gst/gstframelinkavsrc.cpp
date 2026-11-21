@@ -138,7 +138,7 @@ static void startWorker(GstFrameLinkAvSrc*s){
   bool ok=false;
 #ifdef FL_GST_LOCAL_NATIVE_SESSION
   if(s->candidateSet){
-#ifdef FL_GST_LOCAL_NATIVE_RELAY
+#ifdef FL_GST_LOCAL_NATIVE_RELAY_POOL
    if(s->nativePoolReceiver)ok=fl_gst_session_open_local_native_pool_receiver(s->session,path.c_str(),&caps,s->videoQueue,s->videoPool,s->audioQueueMs,s->connectMs,s->idleMs,
     &s->nativeCandidate,&s->shared->bound,&channel,s->cancel,&error);
    else
@@ -328,7 +328,7 @@ static gboolean applyMemoryPolicy(GstFrameLinkAvSrc*s,GstFrameLinkMemoryPolicy*p
 // it while NULL; the worker authenticates BOTH peers before allocating a channel.
 static gboolean setLocalNativeProfile(GstFrameLinkAvSrc*s,GstFrameLinkMemoryPolicy*policy,bool poolReceiver){
 #ifdef FL_GST_LOCAL_NATIVE_SESSION
-#ifndef FL_GST_LOCAL_NATIVE_RELAY
+#ifndef FL_GST_LOCAL_NATIVE_RELAY_POOL
  // The FAR5 exact-pool receiver: Windows (D3D11) and desktop Linux (DMA-BUF).
  if(poolReceiver)return FALSE;
 #endif

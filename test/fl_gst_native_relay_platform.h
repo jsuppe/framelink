@@ -1,6 +1,7 @@
 #pragma once
 // Platform adapter for the shared native relay tests (fl_gst_native_relay.cpp):
-// D3D11 on Windows, DMA-BUF on desktop Linux. Everything platform-specific in
+// D3D11 on Windows, DMA-BUF on desktop Linux, AHardwareBuffer on Android (FAR4
+// so far: the FAR5 parts below are compiled only with FL_GST_LOCAL_NATIVE_RELAY_POOL). Everything platform-specific in
 // those tests lives here: the native memory policy, writing a producer frame,
 // one-way control gates between processes, and child processes. The test
 // cases themselves are the same on every platform.
@@ -22,6 +23,20 @@
 #include "../samples/native_gst_d3d11_relay.h"
 #include <dxgi1_3.h>
 #include <wrl/client.h>
+#elif defined(__ANDROID__)
+#include <android/hardware_buffer.h>
+#include "framelink_ahb.h"
+#include <cerrno>
+#include <chrono>
+#include <thread>
+#include <dlfcn.h>
+#include <fcntl.h>
+#include <poll.h>
+#include <signal.h>
+#include <sys/prctl.h>
+#include <sys/stat.h>
+#include <sys/wait.h>
+#include <unistd.h>
 #else
 #include <gst/allocators/gstdmabuf.h>
 #include <cerrno>
@@ -100,6 +115,7 @@ inline void fill(flChannel*channel,const flBuffer&buffer,unsigned char value){
 #endif
 }
 
+#ifdef FL_GST_LOCAL_NATIVE_RELAY_POOL
 // A FAR5 sender's borrowed pool on this platform: D3D11 shared handles plus
 // the adapter LUID on Windows, DMA-BUF images on Linux.
 struct PoolExport {
@@ -130,18 +146,25 @@ inline gboolean openRelayPool(FlGstSession*down,FlGstSession*up,const char*path,
   exports.images,bound,channel,cancel,error);
 #endif
 }
+#endif
 // Same allocation, by kernel object identity - never slot index or size.
 inline bool sameAllocation(flImage*a,flImage*b){
 #ifdef _WIN32
  using Compare=BOOL(WINAPI*)(HANDLE,HANDLE);
  static auto compare=reinterpret_cast<Compare>(GetProcAddress(GetModuleHandleW(L"KernelBase.dll"),"CompareObjectHandles"));
  CHECK(compare);return compare(flImageSharedHandle(a),flImageSharedHandle(b))!=FALSE;
+#elif defined(__ANDROID__)
+ // The AHardwareBuffer allocation ID (API 31+), unique per allocation.
+ using GetId=int(*)(const AHardwareBuffer*,uint64_t*);
+ static auto getId=reinterpret_cast<GetId>(dlsym(RTLD_DEFAULT,"AHardwareBuffer_getId"));CHECK(getId);
+ uint64_t x=0,y=0;CHECK(getId(flImageAHardwareBuffer(a),&x)==0&&getId(flImageAHardwareBuffer(b),&y)==0);return x==y;
 #else
  flDmabuf x{},y{};CHECK(flImageDmabuf(a,&x)==FL_OK&&flImageDmabuf(b,&y)==FL_OK);
  struct stat sx{},sy{};CHECK(fstat(x.fd[0],&sx)==0&&fstat(y.fd[0],&sy)==0);
  return sx.st_dev==sy.st_dev&&sx.st_ino==sy.st_ino;
 #endif
 }
+#ifdef FL_GST_LOCAL_NATIVE_RELAY_POOL
 // GstMemory of this platform's native resource (D3D11Memory or DMABuf).
 inline bool isNativeMemory(GstMemory*memory){
 #ifdef _WIN32
@@ -195,6 +218,7 @@ inline bool exportsAlive(const PoolExport&pool,unsigned count){
  return true;
 }
 
+#endif
 // One-way control signal between this process and a spawned child. Each
 // signal() is consumed by exactly one wait(), bounded at 10 s. A child gets
 // the gate from arg() on its command line; either side may signal or wait.
@@ -226,6 +250,7 @@ struct Gate {
  Gate(const Gate&)=delete;Gate&operator=(const Gate&)=delete;
 };
 
+#ifdef FL_GST_LOCAL_NATIVE_RELAY_POOL
 inline void corrupt(PoolExport&pool,BadExport kind,const Gate&foreign){
 #ifdef _WIN32
  if(kind==BadExport::Duplicate)pool.handles[1]=pool.handles[0];
@@ -240,6 +265,7 @@ inline void corrupt(PoolExport&pool,BadExport kind,const Gate&foreign){
 #endif
 }
 
+#endif
 #ifdef _WIN32
 using NativeHandle=HANDLE;
 #else
@@ -316,6 +342,7 @@ struct Child {
 };
 
 
+#ifdef FL_GST_LOCAL_NATIVE_RELAY_POOL
 // ---- In-process GStreamer bin relays ----
 
 // The native producer pool's caps feature, and the completion contract the
@@ -620,4 +647,5 @@ inline void uploadReservation(ReservationOwner&owner,GstBuffer*b,unsigned char v
  CHECK(owner.setReady(b,ready));close(ready); // the owner keeps its own duplicate
 #endif
 }
+#endif
 }
