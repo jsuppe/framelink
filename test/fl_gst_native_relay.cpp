@@ -766,16 +766,12 @@ static void relaySupervisorControls(){
 }
 
 
-#if defined(FL_GST_LOCAL_NATIVE_RELAY_POOL) && !defined(__ANDROID__) // Android: phase 4
+#ifdef FL_GST_LOCAL_NATIVE_RELAY_POOL
 // Bounded automatic FAR5 lifecycle controls. Only command/notice gates cross
 // into the reader process; source admission stops before every pause command.
 // No claim about overload behavior, physical playback, or lifecycle memory slope.
 static void pauseMemory(GstMemory*memory,gsize offset,gint stride,unsigned value){
- CHECK(memory&&relaytest::isNativeMemory(memory));GstMapInfo map{};
- CHECK(gst_memory_map(memory,&map,GST_MAP_READ));
- for(unsigned y=0;y<32;++y)for(unsigned x=0;x<256;++x)
-  CHECK(map.data[offset+y*stride+x]==value);
- gst_memory_unmap(memory,&map);
+ CHECK(memory&&relaytest::isNativeMemory(memory));relaytest::checkNativePixels(memory,offset,stride,guint8(value));
 }
 static void pauseState(GstElement*pipe,GstState state){
  const auto began=g_get_monotonic_time();
@@ -949,8 +945,10 @@ static void pauseControl(const char*plugin,bool cancelPaused){
 }
 #endif
 }
-#if defined(FL_GST_LOCAL_NATIVE_RELAY_POOL) && !defined(__ANDROID__) // Android: phase 4
+#ifdef FL_GST_LOCAL_NATIVE_RELAY_POOL
 #include "fl_gst_native_bin_relay.inc"
+#endif
+#if defined(FL_GST_LOCAL_NATIVE_RELAY_POOL) && !defined(__ANDROID__) // Android: phase 4b
 #include "fl_gst_native_relay_av.inc"
 #include "fl_gst_native_relay_process.inc"
 #include "fl_gst_native_relay_automatic.inc"
@@ -984,11 +982,11 @@ int main(int argc,char**argv){
   relaytest::Gate held(argv[4]),release(argv[5]),exit(argv[6]),read(argv[7]);
   return localpool::binReader(argv[3],held,release,exit,read);
  }
-#ifndef __ANDROID__ // Android: phase 4
  if(argc==8&&mode=="--relay-local-pause-reader"){
   relaytest::Gate notice(argv[4]),command(argv[5]),read(argv[6]);
   return controls::pauseReader(argv[3],notice,command,read,std::string(argv[7])=="1");
  }
+#ifndef __ANDROID__ // Android: phase 4b
  {int code=0;if(relayprocess::child(argc,argv,&code))return code;}
 #endif
 #endif
@@ -1011,7 +1009,6 @@ int main(int argc,char**argv){
  if(mode=="--relay-local-bin"){graph::threeProcess(argv[1],true,false,nullptr,false,true);return 0;}
  if(mode=="--relay-local-bin-negatives"){localpool::binNegatives();return 0;}
  if(mode=="--relay-setup-negatives"){graph::setupNegatives();return 0;}
-#ifndef __ANDROID__ // Android: phase 4
  if(mode=="--relay-local-bin-pause"){controls::pauseControl(argv[1],false);return 0;}
  if(mode=="--relay-local-bin-paused-cancel"){controls::pauseControl(argv[1],true);return 0;}
  if(mode=="--bin-relay"){binrelay::run(0);return 0;}
@@ -1027,6 +1024,7 @@ int main(int argc,char**argv){
  if(mode=="--relay-local-cancel-upstream"){binrelay::run(14);return 0;}
  if(mode=="--relay-local-events"){binrelay::run(15);return 0;}
  if(mode=="--relay-pool-controls"){binrelay::relayPoolControls();return 0;}
+#ifndef __ANDROID__ // Android: phase 4b
  if(mode=="--relay-av-diagnostic"){relayav::nativeRelayAv(false);relayav::nativeRelayAv(true);for(unsigned fault=1;fault<=18;++fault)relayav::nativeRelayAv(false,fault);relayav::nativeRelayAv(true,14);return 0;}
  if(mode=="--relay-process-diagnostic"){relayprocess::run(argv[1],false);relayprocess::run(argv[1],true);return 0;}
  if(mode=="--relay-reservation-diagnostic"){relayprocess::run(argv[1],false,true);return 0;}

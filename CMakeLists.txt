@@ -1430,7 +1430,15 @@ if(FRAMELINK_BUILD_TESTS AND TARGET framelink_gst_session AND UNIX)
                       local_three_process|relay-local-three-process local_three_process_av|relay-three-local-av
                       local_replacement|relay-local-replacement local_recovery|relay-local-recovery
                       local_bin|relay-local-bin local_bin_negatives|relay-local-bin-negatives
-                      setup_negatives|relay-setup-negatives)
+                      setup_negatives|relay-setup-negatives
+                      local_bin_pause|relay-local-bin-pause local_bin_paused_cancel|relay-local-bin-paused-cancel
+                      bin|bin-relay lease|lease-relay bin_cancel|bin-relay-cancel bin_events|bin-relay-events
+                      bin_supervised_downstream|bin-relay-supervised-downstream
+                      bin_supervised_upstream|bin-relay-supervised-upstream
+                      pool_lifetime|relay-pool-lifetime authenticated_pool|relay-authenticated-pool
+                      local_pool|relay-local-pool local_cancel_downstream|relay-local-cancel-downstream
+                      local_cancel_upstream|relay-local-cancel-upstream local_events|relay-local-events
+                      pool_controls|relay-pool-controls)
             string(REPLACE "|" ";" _parts "${_pair}")
             list(GET _parts 0 _name)
             list(GET _parts 1 _flag)
