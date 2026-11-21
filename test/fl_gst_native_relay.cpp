@@ -360,9 +360,7 @@ static int binReader(const char*path,relaytest::Gate&held,relaytest::Gate&releas
   CHECK(GST_BUFFER_PTS(vb)-GST_BUFFER_PTS(ab)==37000000&&GST_BUFFER_DTS(vb)==GST_BUFFER_PTS(vb));
   if(!n)first=GST_BUFFER_PTS(ab);
   CHECK(GST_BUFFER_PTS(ab)==first+n*1000000&&GST_BUFFER_DURATION(ab)==1000000&&GST_BUFFER_DURATION(vb)==1000000);
-  GstMapInfo map{};CHECK(meta&&gst_memory_map(memory,&map,GST_MAP_READ));
-  for(unsigned y=0;y<32;++y)for(unsigned x=0;x<256;++x)CHECK(map.data[meta->offset[0]+y*meta->stride[0]+x]==n+11);
-  gst_memory_unmap(memory,&map);guint8 bytes[192];CHECK(gst_buffer_get_size(ab)==sizeof bytes&&gst_buffer_extract(ab,0,bytes,sizeof bytes)==sizeof bytes);
+  CHECK(meta);relaytest::checkNativePixels(memory,meta->offset[0],meta->stride[0],guint8(n+11));guint8 bytes[192];CHECK(gst_buffer_get_size(ab)==sizeof bytes&&gst_buffer_extract(ab,0,bytes,sizeof bytes)==sizeof bytes);
   for(unsigned i=0;i<sizeof bytes;++i)CHECK(bytes[i]==guint8((n*29+i*7+31)&255));frames+=48;
   if(n==7){retained=gst_memory_ref(memory);finalOffset=meta->offset[0];finalStride=meta->stride[0];}
   gst_sample_unref(v);gst_sample_unref(a);
@@ -372,9 +370,7 @@ static int binReader(const char*path,relaytest::Gate&held,relaytest::Gate&releas
  // Keep the control session live until the sender accepts the real drain.
  release.wait();
  CHECK(gst_element_set_state(pipe,GST_STATE_NULL)!=GST_STATE_CHANGE_FAILURE);
- CHECK(retained);GstMapInfo stable{};CHECK(gst_memory_map(retained,&stable,GST_MAP_READ));
- for(unsigned y=0;y<32;++y)for(unsigned col=0;col<256;++col)CHECK(stable.data[finalOffset+y*finalStride+col]==18);
- gst_memory_unmap(retained,&stable);exit.signal();release.wait();gst_memory_unref(retained);exit.wait();
+ CHECK(retained);relaytest::checkNativePixels(retained,finalOffset,finalStride,18);exit.signal();release.wait();gst_memory_unref(retained);exit.wait();
  gst_object_unref(src);gst_object_unref(video);gst_object_unref(audio);gst_object_unref(pipe);
  puts("automatic FAR5 receiver bin: 8 native/384 PCM, exact bytes/37ms, held GstMemory and authenticated EOS");return 0;
 }
@@ -770,7 +766,7 @@ static void relaySupervisorControls(){
 }
 
 
-#ifdef FL_GST_LOCAL_NATIVE_RELAY_POOL
+#if defined(FL_GST_LOCAL_NATIVE_RELAY_POOL) && !defined(__ANDROID__) // Android: phase 4
 // Bounded automatic FAR5 lifecycle controls. Only command/notice gates cross
 // into the reader process; source admission stops before every pause command.
 // No claim about overload behavior, physical playback, or lifecycle memory slope.
@@ -953,7 +949,7 @@ static void pauseControl(const char*plugin,bool cancelPaused){
 }
 #endif
 }
-#ifdef FL_GST_LOCAL_NATIVE_RELAY_POOL
+#if defined(FL_GST_LOCAL_NATIVE_RELAY_POOL) && !defined(__ANDROID__) // Android: phase 4
 #include "fl_gst_native_bin_relay.inc"
 #include "fl_gst_native_relay_av.inc"
 #include "fl_gst_native_relay_process.inc"
@@ -988,11 +984,13 @@ int main(int argc,char**argv){
   relaytest::Gate held(argv[4]),release(argv[5]),exit(argv[6]),read(argv[7]);
   return localpool::binReader(argv[3],held,release,exit,read);
  }
+#ifndef __ANDROID__ // Android: phase 4
  if(argc==8&&mode=="--relay-local-pause-reader"){
   relaytest::Gate notice(argv[4]),command(argv[5]),read(argv[6]);
   return controls::pauseReader(argv[3],notice,command,read,std::string(argv[7])=="1");
  }
  {int code=0;if(relayprocess::child(argc,argv,&code))return code;}
+#endif
 #endif
  if(argc==7&&(mode=="--relay-local-source"||mode=="--relay-local-source-av")){
   relaytest::Gate advance(argv[4]),published(argv[5]),retired(argv[6]);
@@ -1013,6 +1011,7 @@ int main(int argc,char**argv){
  if(mode=="--relay-local-bin"){graph::threeProcess(argv[1],true,false,nullptr,false,true);return 0;}
  if(mode=="--relay-local-bin-negatives"){localpool::binNegatives();return 0;}
  if(mode=="--relay-setup-negatives"){graph::setupNegatives();return 0;}
+#ifndef __ANDROID__ // Android: phase 4
  if(mode=="--relay-local-bin-pause"){controls::pauseControl(argv[1],false);return 0;}
  if(mode=="--relay-local-bin-paused-cancel"){controls::pauseControl(argv[1],true);return 0;}
  if(mode=="--bin-relay"){binrelay::run(0);return 0;}
@@ -1036,6 +1035,7 @@ int main(int argc,char**argv){
  if(mode=="--relay-cancel-diagnostic"){relayprocess::run(argv[1],false,false,false,2);relayprocess::run(argv[1],false,true,false,2);return 0;}
  if(mode=="--relay-decoder-diagnostic"){if(!relayprocess::decoderAvailable())return 77;relayprocess::run(argv[1],false,true,true);return 0;}
  if(mode=="--automatic-relay-negative"){autorelay::negative();return 0;}
+#endif
 #endif
  fprintf(stderr,"unknown mode %s\n",mode.c_str());return 2;
 }

@@ -53,3 +53,33 @@ Windows and Linux compile exactly what they did before.
 - `gst_relay_supervisor_controls_android`
 
 The FAR5 modes and their helpers in `test/fl_gst_native_relay_platform.h` compile only with `FL_GST_LOCAL_NATIVE_RELAY_POOL`. The platform adapter gains the Android identity check: the AHardwareBuffer allocation ID, never a slot or pointer. `Gate` and `Child` use the POSIX path (pipes; `fork`/`exec` of `/proc/self/exe` with `PR_SET_PDEATHSIG`).
+
+## Phase 3 (2026-11-21)
+
+FAR5 on Android.
+
+- **Session:** `fl_gst_session_open_local_native_relay_pool_ahb` is the sender, taking AHardwareBuffers. `fl_gst_session_open_local_native_pool_receiver` is enabled on Android with its common signature. `FL_GST_LOCAL_NATIVE_RELAY_POOL` now covers every platform with a local native session. The `framelinkavsrc` pool-receiver profile (`set-local-native-pool-candidate`) works on Android; `gst_native_av_android` now expects it accepted, like every other platform.
+- **Transfer.** It shares `gst/fl_gst_native_relay_pool_linux.h` with desktop Linux:
+  - The same abstract SEQPACKET socket, `SO_PEERCRED` pinning and PID-bound mutual HMAC, under Android's own domains ("FrameLink authenticated Android native relay pool v1").
+  - The offer names each slot's allocation ID (`AHardwareBuffer_getId`), format and usage. The receiver accepts the offer before any buffer is sent.
+  - Each buffer then travels as its own message (`AHardwareBuffer_sendHandleToUnixSocket`), on the non-blocking socket within the transfer's deadline and cancellation.
+  - The receiver checks every received buffer against the offered ID, format, usage and geometry, then adopts the same allocations with `flCreateChannelFromHardwareBuffers` before acknowledging.
+  - There is no render-node check: Android has one GPU.
+- **Sample:** `samples/local_native_relay_setup.h` builds on Android (AHardwareBuffer snapshot plus the typed sender).
+- **Core fix (the one Linux phase 3 left for Android):** `flAcquireBuffer` now uses the Windows and Linux order. A slot freed by a release that arrived just before the consumer closed is returned first, and the disconnect is reported only when no slot is free.
+- **Transfer fix, shared with Linux:** when the peer closed with data unread, `recvmsg` failed with `ECONNRESET`, and the receive path still walked the control data using the unchanged input length. A zero-length header made that walk spin forever. Any `recvmsg` error now returns `FL_DISCONNECTED` first. It was found on Android: a receiver that rejects a buffer mid-transfer left the sender spinning.
+
+**Tests on Android** (`gst_relay_<name>_android`): `local_process`, `local_pool_failures`, `local_three_process`, `local_three_process_av`, `local_replacement`, `local_recovery`, `local_bin`, `local_bin_negatives` and `setup_negatives`, alongside the phase 2 four. The adapter gains the Android pool export, identity by allocation ID, and the malformed exports:
+- duplicate buffer;
+- null buffer;
+- a foreign 16×16 buffer;
+- a ring-sized buffer in another format (refused at adoption).
+
+AHardwareBuffer reader memory is deliberately not CPU-mappable, so the bin reader checks pixels by locking the buffer.
+
+**Checks:**
+- Tablet (API 35): the 13 shared relay tests pass. The nine FAR5 tests passed 5 repeated rounds (45 of 45), and the full set passed 5 rounds earlier (65 of 65). Full Android suite 114 of 116 pass; the others are the known EGL skip and the known `gst_av_bench_smoke` host-path failure. `gst_native_av_android` first failed here because it still expected Android to refuse the pool candidate; after the expectation was updated it passes.
+- Negative controls (temporary edits, reverted):
+  - a wrong role byte in the receiver's MAC check fails FAR5 setup;
+  - a sender that sends the buffers in a different order from its offer is refused by the allocation-ID check, and now fails promptly on both sides. Before the `recvmsg` fix, the sender spun.
+- Linux: the 36 shared relay tests passed 3 repeated rounds under `-j8`. Windows: see the pull request.

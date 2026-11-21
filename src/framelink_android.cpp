@@ -658,7 +658,10 @@ FL_API flResult flAcquireBuffer(flChannel* ch, flBuffer* out, uint32_t timeoutMs
     if (!ch->link.connected()) return trace.result(FL_DISCONNECTED);
     for (uint32_t waited = 0;; waited += 2) {
         drainProducerMessages(ch);
-        if(!ch->link.connected())return trace.result(FL_DISCONNECTED);
+        // Same order as Windows and Linux: a release the consumer sent before
+        // it went away still frees its slot (the relay's proof of final
+        // completion); the disconnect is reported only when no slot is free.
+        const bool gone=!ch->link.connected();
         ch->sync.advance(ch->consumedValue);
         for (size_t i = 0; i < ch->images.size(); ++i) {
             if (ch->slotSubmitValue[i] <= ch->consumedValue && !ch->bufferReferences.busy((uint32_t)i)) {
@@ -672,6 +675,7 @@ FL_API flResult flAcquireBuffer(flChannel* ch, flBuffer* out, uint32_t timeoutMs
                 return trace.result(FL_OK);
             }
         }
+        if (gone) return trace.result(FL_DISCONNECTED);
         if (waited >= timeoutMs) return trace.result(FL_TIMEOUT);
         usleep(2000);
     }

@@ -1414,9 +1414,9 @@ if(FRAMELINK_BUILD_TESTS AND TARGET framelink_gst_session AND UNIX)
             "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstgio.a"
             ${FL_ANDROID_SESSION_GIO_STATIC_LDFLAGS} ${FL_ANDROID_GST_STATIC_LDFLAGS})
         add_test(NAME gst_native_av_android COMMAND fl_gst_native_av_android)
-        # Shared relay tests on Android: FAR4 and the portable controls so far
-        # (docs/m6/android-native-relay). argv[1] is a placeholder: the plugin
-        # is linked statically.
+        # Shared relay tests on Android: FAR4, FAR5 and the portable controls so
+        # far (docs/m6/android-native-relay). argv[1] is a placeholder: the
+        # plugin is linked statically.
         add_executable(fl_gst_native_relay test/fl_gst_native_relay.cpp)
         target_link_libraries(fl_gst_native_relay PRIVATE framelink_gst_session gstframelink
             "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstapp.a"
@@ -1425,7 +1425,12 @@ if(FRAMELINK_BUILD_TESTS AND TARGET framelink_gst_session AND UNIX)
             "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstgio.a"
             ${FL_ANDROID_SESSION_GIO_STATIC_LDFLAGS} ${FL_ANDROID_GST_STATIC_LDFLAGS} dl)
         foreach(_pair local_session|relay-local-session local_source_control|relay-local-source-control
-                      video_event_controls|video-relay-event-controls supervisor_controls|relay-supervisor-controls)
+                      video_event_controls|video-relay-event-controls supervisor_controls|relay-supervisor-controls
+                      local_process|relay-local-process local_pool_failures|relay-local-pool-failures
+                      local_three_process|relay-local-three-process local_three_process_av|relay-three-local-av
+                      local_replacement|relay-local-replacement local_recovery|relay-local-recovery
+                      local_bin|relay-local-bin local_bin_negatives|relay-local-bin-negatives
+                      setup_negatives|relay-setup-negatives)
             string(REPLACE "|" ";" _parts "${_pair}")
             list(GET _parts 0 _name)
             list(GET _parts 1 _flag)
