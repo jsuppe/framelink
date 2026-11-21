@@ -1,6 +1,9 @@
 #pragma once
-// Internal explicit native relay bootstrap for desktop Linux; the counterpart
-// of fl_gst_native_relay_pool_win.h. No discovery/default/API changes.
+// Internal explicit native relay bootstrap for desktop Linux and Android; the
+// counterpart of fl_gst_native_relay_pool_win.h. No discovery/default/API
+// changes. Desktop Linux sends DMA-BUF fds (SCM_RIGHTS); Android sends each
+// AHardwareBuffer with AHardwareBuffer_sendHandleToUnixSocket after the offer,
+// and the offer names every buffer's allocation ID (AHardwareBuffer_getId).
 //
 // Transport: an abstract AF_UNIX SOCK_SEQPACKET socket whose name is derived
 // from the session secret. Abstract names carry no file permissions, so the
@@ -12,9 +15,15 @@
 // MAC; sender OFFER (layout payload, every plane fd as SCM_RIGHTS); receiver
 // imports the SAME allocations (no allocation or copy), validates the ring and
 // echoes READY; sender attaches as producer, validates and echoes ATTACHED.
-#include "framelink_dmabuf.h"
 #include "framelink_session.h"
+#ifdef __ANDROID__
+#include "framelink_ahb.h"
+#include <android/hardware_buffer.h>
+#include <dlfcn.h>
+#else
+#include "framelink_dmabuf.h"
 #include "../src/fl_render_node.h"
+#endif
 #include <gio/gio.h>
 #include <gst/gst.h>
 #include <algorithm>
@@ -34,6 +43,17 @@
 #include <unistd.h>
 
 namespace flnative {
+#ifdef __ANDROID__
+using RelayImage=AHardwareBuffer*;
+// Allocation ID (API 31+); 0 when unavailable or on error.
+inline uint64_t allocationId(const AHardwareBuffer*b){
+ using GetId=int(*)(const AHardwareBuffer*,uint64_t*);
+ static auto getId=reinterpret_cast<GetId>(dlsym(RTLD_DEFAULT,"AHardwareBuffer_getId"));
+ uint64_t id=0;return b&&getId&&!getId(b,&id)?id:0;
+}
+#else
+using RelayImage=flDmabuf;
+#endif
 struct Fd {
  int value=-1;
  ~Fd(){if(value>=0)::close(value);}
@@ -82,6 +102,10 @@ public:
    msg.msg_control=ancillary.data();msg.msg_controllen=ancillary.size();
    const ssize_t n=recvmsg(fd_,&msg,MSG_DONTWAIT|MSG_CMSG_CLOEXEC);
    if(n<0&&(errno==EINTR||errno==EAGAIN))continue;
+   // Any other error (ECONNRESET when the peer closed with data unread)
+   // returns before the control data is parsed: after a failed recvmsg the
+   // control length is the input size, and walking it never terminates.
+   if(n<0)return FL_DISCONNECTED;
    std::vector<int> received;bool valid=n==ssize_t(size)&&!(msg.msg_flags&(MSG_TRUNC|MSG_CTRUNC));
    for(auto*c=CMSG_FIRSTHDR(&msg);c;c=CMSG_NXTHDR(&msg,c)){
     if(c->cmsg_level!=SOL_SOCKET||c->cmsg_type!=SCM_RIGHTS||c->cmsg_len<CMSG_LEN(0)){valid=false;continue;}
@@ -101,7 +125,12 @@ private:
 inline std::string relayPoolAddress(GBytes*key,const flSessionConfig&config){
  gsize n=0;const auto*bytes=static_cast<const guint8*>(g_bytes_get_data(key,&n));
  auto*h=g_hmac_new(G_CHECKSUM_SHA256,bytes,n);
+ // Android keeps its own domains: its offer layout differs from desktop Linux.
+#ifdef __ANDROID__
+ static const char label[]="FrameLink Android native relay pool socket v1";
+#else
  static const char label[]="FrameLink Linux native relay pool socket v1";
+#endif
  g_hmac_update(h,reinterpret_cast<const guint8*>(label),sizeof label);
  g_hmac_update(h,config.sessionId.bytes,sizeof config.sessionId.bytes);
  guint8 digest[32];gsize size=sizeof digest;g_hmac_get_digest(h,digest,&size);g_hmac_unref(h);
@@ -149,9 +178,23 @@ inline flResult connectRelayPool(const std::string&address,GCancellable*cancel,g
 // secret-derived channel name. Output owned on success. This only creates the
 // ring: the caller MUST install the read-lease relay and cancellation
 // supervision before any source writes. No independent writers.
+#ifdef __ANDROID__
+// One AHardwareBuffer message, with the socket left non-blocking: wait for the
+// socket within the transfer's deadline and cancellation, then try the NDK
+// call, retrying while it would block. Never a blocking call past the deadline.
+inline flResult handleIo(RelayIo&io,int fd,bool sending,AHardwareBuffer**buffer){
+ for(;;){
+  auto r=io.wait(sending?POLLOUT:POLLIN);if(r!=FL_OK)return r;
+  const int result=sending?AHardwareBuffer_sendHandleToUnixSocket(*buffer,fd):AHardwareBuffer_recvHandleFromUnixSocket(fd,buffer);
+  if(result==0)return FL_OK;
+  if(result==-EAGAIN||result==-EWOULDBLOCK||result==-EINTR)continue;
+  return FL_DISCONNECTED;
+ }
+}
+#endif
 inline flResult transferRelayPool(int input,GCancellable*cancel,guint timeout,
  const flSessionConfig&config,bool producer,GBytes*key,const char*name,unsigned count,
- bool cpuAccess,const flDmabuf*images,flChannel**out){
+ bool cpuAccess,const RelayImage*images,flChannel**out){
  Fd socketFd;socketFd.value=input;if(out)*out=nullptr;
  gsize keySize=0;const auto*keyBytes=key?static_cast<const guint8*>(g_bytes_get_data(key,&keySize)):nullptr;
  if(!out||!name||!*name||strlen(name)>240||count<2||count>FL_MAX_POOL_SIZE||
@@ -170,7 +213,11 @@ inline flResult transferRelayPool(int input,GCancellable*cancel,guint timeout,
  const guint32 receiverPid=producer?guint32(peer.pid):guint32(getpid());
  auto mac=[&](char role,const guint8*receiverNonce,const guint8*senderNonce){
   auto*h=g_hmac_new(G_CHECKSUM_SHA256,keyBytes,keySize);
+#ifdef __ANDROID__
+  static const char label[]="FrameLink authenticated Android native relay pool v1";
+#else
   static const char label[]="FrameLink authenticated Linux native relay pool v1";
+#endif
   g_hmac_update(h,reinterpret_cast<const guint8*>(label),sizeof label);
   g_hmac_update(h,wire.data(),wire.size());g_hmac_update(h,reinterpret_cast<const guint8*>(&role),1);
   guint8 pids[8];for(unsigned b=0;b<4;b++){pids[b]=guint8(senderPid>>(8*b));pids[4+b]=guint8(receiverPid>>(8*b));}
@@ -208,7 +255,10 @@ inline flResult transferRelayPool(int input,GCancellable*cancel,guint timeout,
  auto*hash=g_checksum_new(G_CHECKSUM_SHA256);
  g_checksum_update(hash,reinterpret_cast<const guchar*>(name),strlen(name)+1);
  gsize hashSize=32;g_checksum_get_digest(hash,packet.data()+24,&hashSize);g_checksum_free(hash);
- guint8 device[8]{};if(!fl::currentRenderNodeId(device))return FL_INTERNAL;
+ guint8 device[8]{};
+#ifndef __ANDROID__
+ if(!fl::currentRenderNodeId(device))return FL_INTERNAL;
+#endif
  auto planesFor=[&](uint32_t format){return format==FL_FORMAT_NV12?2u:1u;};
  const uint32_t planes=planesFor(config.video.format);
  struct Channel {flChannel*value=nullptr;~Channel(){if(value)flClose(value);}} channel;
@@ -216,10 +266,35 @@ inline flResult transferRelayPool(int input,GCancellable*cancel,guint timeout,
   flChannelInfo info{};auto q=flQuery(channel.value,&info);if(q!=FL_OK)return q;
   // The receiver's ring must live on the device named in the offer.
   return info.width==config.video.width&&info.height==config.video.height&&
-   info.format==flFormat(config.video.format)&&info.poolSize==count&&
-   !memcmp(info.adapterLUID,packet.data()+16,8)?FL_OK:FL_FORMAT_UNSUPPORTED;
+   info.format==flFormat(config.video.format)&&info.poolSize==count
+#ifndef __ANDROID__
+   &&!memcmp(info.adapterLUID,packet.data()+16,8) // one GPU on Android
+#endif
+   ?FL_OK:FL_FORMAT_UNSUPPORTED;
  };
  if(producer){
+#ifdef __ANDROID__
+  memcpy(packet.data()+16,device,8);
+  // Per slot: allocation ID, AHardwareBuffer format and usage. The buffers
+  // follow the offer, one socket message each.
+  std::set<uint64_t> allocations;
+  for(unsigned n=0;n<count;++n){
+   auto*b=images[n];const uint64_t id=allocationId(b);
+   if(!id||!allocations.insert(id).second)return FL_INVALID; // distinct allocations
+   AHardwareBuffer_Desc d{};AHardwareBuffer_describe(b,&d);
+   if(d.width!=config.video.width||d.height!=config.video.height||d.layers!=1)return FL_INVALID;
+   guint8*slot=packet.data()+Header+Slot*n;
+   GST_WRITE_UINT64_LE(slot,id);GST_WRITE_UINT32_LE(slot+8,d.format);GST_WRITE_UINT64_LE(slot+16,d.usage);
+  }
+  if((r=io.send(packet.data(),packet.size()))!=FL_OK)return r;
+  // Buffers go only after the receiver accepts the offer: a rejected offer
+  // must leave no buffer messages in flight (unread AHardwareBuffer messages
+  // at the receiver's close were observed to hide the close from this end).
+  std::array<guint8,8> accepted{};
+  if((r=io.receive(accepted.data(),accepted.size()))!=FL_OK)return r;
+  if(memcmp(accepted.data(),"FLNRA\0\0\1",8))return FL_INVALID;
+  for(unsigned n=0;n<count;++n){auto*b=images[n];if((r=handleIo(io,input,true,&b))!=FL_OK)return r;}
+#else
   memcpy(packet.data()+16,device,8);
   std::vector<int> fds;std::set<std::pair<dev_t,ino_t>> allocations;
   for(unsigned n=0;n<count;++n){
@@ -234,6 +309,7 @@ inline flResult transferRelayPool(int input,GCancellable*cancel,guint timeout,
    }
   }
   if((r=io.send(packet.data(),packet.size(),fds.data(),fds.size()))!=FL_OK)return r;
+#endif
   std::array<guint8,Header+Slot*FL_MAX_POOL_SIZE> reply{};
   if((r=io.receive(reply.data(),reply.size()))!=FL_OK)return r;
   if(reply!=packet)return FL_INVALID;
@@ -248,6 +324,37 @@ inline flResult transferRelayPool(int input,GCancellable*cancel,guint timeout,
   if((r=validateRing())!=FL_OK)return r;
   if((r=io.send(packet.data(),packet.size()))!=FL_OK)return r;
  }else{
+#ifdef __ANDROID__
+  if((r=io.receive(packet.data(),packet.size()))!=FL_OK)return r;
+  guint8 expected[24];memcpy(expected,"FLNRL\0\0\1",8);
+  GST_WRITE_UINT32_LE(expected+8,count);GST_WRITE_UINT32_LE(expected+12,cpuAccess?1:0);
+  guint8 nameHash[32];hash=g_checksum_new(G_CHECKSUM_SHA256);
+  g_checksum_update(hash,reinterpret_cast<const guchar*>(name),strlen(name)+1);
+  hashSize=32;g_checksum_get_digest(hash,nameHash,&hashSize);g_checksum_free(hash);
+  if(memcmp(packet.data(),expected,16)||memcmp(packet.data()+16,device,8)||memcmp(packet.data()+24,nameHash,32))return FL_INVALID;
+  for(unsigned n=count;n<FL_MAX_POOL_SIZE;++n)
+   for(size_t i=0;i<Slot;++i)if(packet[Header+Slot*n+i])return FL_INVALID;
+  // Accept the offer; only now does the sender send the buffers.
+  if((r=io.send("FLNRA\0\0\1",8))!=FL_OK)return r;
+  // Each buffer must be exactly the allocation the offer named.
+  struct Held {std::vector<AHardwareBuffer*> buffers;~Held(){for(auto*b:buffers)AHardwareBuffer_release(b);}} held;
+  std::set<uint64_t> allocations;
+  for(unsigned n=0;n<count;++n){
+   const guint8*slot=packet.data()+Header+Slot*n;const uint64_t offered=GST_READ_UINT64_LE(slot);
+   if(!offered||!allocations.insert(offered).second)return FL_INVALID;
+   AHardwareBuffer*b=nullptr;if((r=handleIo(io,input,false,&b))!=FL_OK)return r;
+   held.buffers.push_back(b);
+   AHardwareBuffer_Desc d{};AHardwareBuffer_describe(b,&d);
+   if(allocationId(b)!=offered||d.format!=GST_READ_UINT32_LE(slot+8)||d.usage!=GST_READ_UINT64_LE(slot+16)||
+      d.width!=config.video.width||d.height!=config.video.height)return FL_INVALID;
+  }
+  if(cancel&&g_cancellable_is_cancelled(cancel))return FL_DISCONNECTED;
+  if(g_get_monotonic_time()>=end)return FL_TIMEOUT;
+  // Adoption takes its own references; ours are released by Held.
+  r=flCreateChannelFromHardwareBuffers(name,config.video.width,config.video.height,flFormat(config.video.format),count,
+   FL_DEFER_RELEASE|FL_REQUIRE_FRAME_METADATA|(cpuAccess?FL_MAP_CPU:0),held.buffers.data(),&channel.value);
+  if(r!=FL_OK)return r;
+#else
   std::vector<int> received;
   if((r=io.receive(packet.data(),packet.size(),&received))!=FL_OK)return r;
   struct Owned {std::vector<int>&fds;~Owned(){for(int f:fds)::close(f);}} owned{received};
@@ -279,6 +386,7 @@ inline flResult transferRelayPool(int input,GCancellable*cancel,guint timeout,
   r=flCreateChannelFromDmabufs(name,config.video.width,config.video.height,flFormat(config.video.format),count,
    FL_DEFER_RELEASE|FL_REQUIRE_FRAME_METADATA|(cpuAccess?FL_MAP_CPU:0),imports.data(),&channel.value);
   if(r!=FL_OK)return r;
+#endif
   if((r=validateRing())!=FL_OK)return r;
   if((r=io.send(packet.data(),packet.size()))!=FL_OK)return r;
   std::array<guint8,Header+Slot*FL_MAX_POOL_SIZE> attached{};

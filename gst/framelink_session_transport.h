@@ -21,17 +21,18 @@ typedef struct flD3D11DeviceOwner flD3D11DeviceOwner;
 #define FL_GST_LOCAL_NATIVE_RESOURCE FL_MEMORY_DMABUF
 #endif
 #endif
-// FAR4 relay setup (relay_input/relay): every platform with a local native
-// session. FAR5 (pool_receiver and the per-platform typed sender): Windows and
-// desktop Linux; Android follows in its relay parity work.
+// Relay setup on every platform with a local native session: FAR4
+// (relay_input/relay) and FAR5 (pool_receiver and the per-platform typed
+// sender: D3D11, DMA-BUF or AHardwareBuffer).
 #ifdef FL_GST_LOCAL_NATIVE_SESSION
 #define FL_GST_LOCAL_NATIVE_RELAY 1
-#endif
-#if defined(_WIN32) || (defined(__linux__) && !defined(__ANDROID__))
 #define FL_GST_LOCAL_NATIVE_RELAY_POOL 1
 #endif
 #if defined(__linux__) && !defined(__ANDROID__)
 #include "framelink_dmabuf.h"
+#endif
+#ifdef __ANDROID__
+#include "framelink_ahb.h"
 #endif
 G_BEGIN_DECLS
 #ifdef _WIN32
@@ -359,7 +360,23 @@ FL_GST_SESSION_API gboolean fl_gst_session_open_local_native_pool_receiver(FlGst
  guint audio_queue_ms,guint connect_timeout_ms,guint idle_timeout_ms,
  const GstFrameLinkMemoryPolicy* candidate,GstFrameLinkMemoryPolicy* bound,flChannel** channel,
  GCancellable*,GError**);
-#ifndef _WIN32
+#ifdef __ANDROID__
+// Android FAR5 sender, paired ONLY with pool_receiver; the counterpart of
+// open_local_native_relay_pool with the same timeline, serialization and
+// lifetime contract. Borrows exactly video_pool AHardwareBuffers from a fully
+// pinned upstream pool, e.g. flAHardwareBufferPoolSnapshotBuffer of a snapshot
+// retained for the ENTIRE relay graph lifetime. The buffers travel over a
+// separately authenticated Unix socket whose peer is pinned with SO_PEERCRED
+// (same user, PID bound into the authentication); the offer names each
+// buffer's allocation ID (API 31+), and the receiver adopts the same
+// allocations only after checking every received buffer against it.
+// No native/CPU fallback; all partial imports are released on failure.
+FL_GST_SESSION_API gboolean fl_gst_session_open_local_native_relay_pool_ahb(FlGstSession*,FlGstSession* upstream,
+ const gchar* session_path,const flSessionCapabilities*,guint video_queue_frames,guint video_pool,
+ guint audio_queue_ms,guint connect_timeout_ms,guint idle_timeout_ms,
+ const GstFrameLinkMemoryPolicy* candidate,AHardwareBuffer* const* buffers,
+ GstFrameLinkMemoryPolicy* bound,flChannel** channel,GCancellable*,GError**);
+#elif !defined(_WIN32)
 // Desktop Linux FAR5 sender, paired ONLY with pool_receiver; the counterpart
 // of open_local_native_relay_pool with the same timeline, serialization and
 // lifetime contract. Borrows exactly video_pool images (each slot's plane fds

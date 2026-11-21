@@ -348,6 +348,8 @@ gboolean fl_gst_session_open_local_av(FlGstSession*session,gboolean producer,con
 struct NativeRelayPool {
 #ifdef _WIN32
  const void* adapter=nullptr; void*const* handles=nullptr;
+#elif defined(__ANDROID__)
+ AHardwareBuffer*const* images=nullptr;
 #elif defined(FL_GST_LOCAL_NATIVE_RELAY_POOL)
  const flDmabuf* images=nullptr;
 #endif
@@ -581,8 +583,9 @@ static gboolean open_local_av_impl(FlGstSession*session,gboolean producer,const 
   }else
 #elif defined(FL_GST_LOCAL_NATIVE_RELAY_POOL)
   if(relayPool){
-   // FAR5 on Linux: a separately authenticated, kernel-peer-pinned Unix
-   // SEQPACKET transfer of the exact original DMA-BUF allocations.
+   // FAR5 on Linux and Android: a separately authenticated, kernel-peer-pinned
+   // Unix SEQPACKET transfer of the exact original DMA-BUF allocations, or
+   // AHardwareBuffers.
    const auto address=flnative::relayPoolAddress(secret,selected);
    const gint64 end=g_get_monotonic_time()+gint64(timeout)*1000;
    int peer=-1;
@@ -792,7 +795,22 @@ gboolean fl_gst_session_open_local_native_pool_receiver(FlGstSession*s,const gch
  }
  return open_local_native_impl(s,FALSE,path,local,queue,pool,audio,timeout,idle,candidate,bound,channel,nullptr,nullptr,cancel,error,nullptr,&native);
 }
-#ifndef _WIN32
+#ifdef __ANDROID__
+gboolean fl_gst_session_open_local_native_relay_pool_ahb(FlGstSession*s,FlGstSession*up,const gchar*path,
+ const flSessionCapabilities*local,guint queue,guint pool,guint audio,guint timeout,guint idle,
+ const GstFrameLinkMemoryPolicy*candidate,AHardwareBuffer*const*buffers,
+ GstFrameLinkMemoryPolicy*bound,flChannel**channel,GCancellable*cancel,GError**error){
+ if(!buffers||pool<2||pool>FL_MAX_POOL_SIZE){
+  if(bound)*bound={};if(channel)*channel=nullptr;
+  if(s&&s!=up)fl_gst_session_cancel(s);
+  g_set_error_literal(error,G_IO_ERROR,G_IO_ERROR_INVALID_ARGUMENT,"invalid borrowed relay pool");return FALSE;
+ }
+ // Each buffer (null, duplicate, foreign or mismatched) is validated inside the
+ // authenticated transfer, after peer authentication, as on Linux.
+ NativeRelayPool native{};native.images=buffers;
+ return open_local_native_relay_impl(s,up,path,local,queue,pool,audio,timeout,idle,candidate,bound,channel,cancel,error,&native);
+}
+#elif !defined(_WIN32)
 gboolean fl_gst_session_open_local_native_relay_pool_dmabuf(FlGstSession*s,FlGstSession*up,const gchar*path,
  const flSessionCapabilities*local,guint queue,guint pool,guint audio,guint timeout,guint idle,
  const GstFrameLinkMemoryPolicy*candidate,const flDmabuf*images,

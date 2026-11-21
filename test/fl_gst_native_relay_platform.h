@@ -121,6 +121,8 @@ inline void fill(flChannel*channel,const flBuffer&buffer,unsigned char value){
 struct PoolExport {
 #ifdef _WIN32
  guint8 adapter[8]{};void*handles[FL_MAX_POOL_SIZE]{};
+#elif defined(__ANDROID__)
+ AHardwareBuffer*buffers[FL_MAX_POOL_SIZE]{};
 #else
  flDmabuf images[FL_MAX_POOL_SIZE]{};
 #endif
@@ -130,6 +132,8 @@ inline void exportImage(flChannel*channel,flImage*image,PoolExport&pool,unsigned
 #ifdef _WIN32
  flChannelInfo info{};CHECK(flQuery(channel,&info)==FL_OK);memcpy(pool.adapter,info.adapterLUID,8);
  pool.handles[slot]=flImageSharedHandle(image);CHECK(pool.handles[slot]);
+#elif defined(__ANDROID__)
+ (void)channel;pool.buffers[slot]=flImageAHardwareBuffer(image);CHECK(pool.buffers[slot]);
 #else
  (void)channel;CHECK(flImageDmabuf(image,&pool.images[slot])==FL_OK);
 #endif
@@ -141,6 +145,9 @@ inline gboolean openRelayPool(FlGstSession*down,FlGstSession*up,const char*path,
 #ifdef _WIN32
  return fl_gst_session_open_local_native_relay_pool(down,up,path,caps,queue,pool,audio,timeout,idle,candidate,
   exports.adapter,exports.handles,bound,channel,cancel,error);
+#elif defined(__ANDROID__)
+ return fl_gst_session_open_local_native_relay_pool_ahb(down,up,path,caps,queue,pool,audio,timeout,idle,candidate,
+  exports.buffers,bound,channel,cancel,error);
 #else
  return fl_gst_session_open_local_native_relay_pool_dmabuf(down,up,path,caps,queue,pool,audio,timeout,idle,candidate,
   exports.images,bound,channel,cancel,error);
@@ -165,12 +172,31 @@ inline bool sameAllocation(flImage*a,flImage*b){
 #endif
 }
 #ifdef FL_GST_LOCAL_NATIVE_RELAY_POOL
-// GstMemory of this platform's native resource (D3D11Memory or DMABuf).
+// GstMemory of this platform's native resource (D3D11Memory, DMABuf, or the
+// FrameLink AHardwareBuffer reader memory).
 inline bool isNativeMemory(GstMemory*memory){
 #ifdef _WIN32
  return gst_is_d3d11_memory(memory);
+#elif defined(__ANDROID__)
+ return gst_framelink_memory_get_hardware_buffer(memory)!=nullptr;
 #else
  return gst_is_dmabuf_memory(memory);
+#endif
+}
+// Every byte of a 64x32 RGBA native frame equals value. The memory is mapped
+// through GStreamer; Android's AHardwareBuffer reader memory is deliberately
+// not CPU-mappable, so it is locked directly (offset/stride are unused there).
+inline void checkNativePixels(GstMemory*memory,gsize offset,gint stride,guint8 value){
+#ifdef __ANDROID__
+ (void)offset;(void)stride;auto*b=gst_framelink_memory_get_hardware_buffer(memory);CHECK(b);
+ AHardwareBuffer_Desc d{};AHardwareBuffer_describe(b,&d);void*data=nullptr;
+ CHECK(AHardwareBuffer_lock(b,AHARDWAREBUFFER_USAGE_CPU_READ_OFTEN,-1,nullptr,&data)==0&&data);
+ for(unsigned y=0;y<32;++y)for(unsigned x=0;x<256;++x)CHECK(static_cast<const guint8*>(data)[size_t(y)*d.stride*4+x]==value);
+ CHECK(AHardwareBuffer_unlock(b,nullptr)==0);
+#else
+ GstMapInfo map{};CHECK(gst_memory_map(memory,&map,GST_MAP_READ));
+ for(unsigned y=0;y<32;++y)for(unsigned x=0;x<256;++x)CHECK(map.data[offset+y*stride+x]==value);
+ gst_memory_unmap(memory,&map);
 #endif
 }
 // Identity of one snapshot slot's allocation, comparable across graphs while
@@ -178,6 +204,8 @@ inline bool isNativeMemory(GstMemory*memory){
 struct AllocationId {
 #ifdef _WIN32
  void*handle=nullptr;
+#elif defined(__ANDROID__)
+ uint64_t id=0;
 #else
  dev_t device=0;ino_t inode=0;
 #endif
@@ -186,6 +214,10 @@ inline AllocationId snapshotAllocation(const flsample::LocalPoolSnapshot*snapsho
  AllocationId id{};
 #ifdef _WIN32
  id.handle=flD3D11PoolSnapshotHandle(snapshot,slot);CHECK(id.handle);
+#elif defined(__ANDROID__)
+ using GetId=int(*)(const AHardwareBuffer*,uint64_t*);
+ static auto getId=reinterpret_cast<GetId>(dlsym(RTLD_DEFAULT,"AHardwareBuffer_getId"));CHECK(getId);
+ auto*b=flAHardwareBufferPoolSnapshotBuffer(snapshot,slot);CHECK(b&&getId(b,&id.id)==0&&id.id);
 #else
  flDmabuf d{};CHECK(flDmabufPoolSnapshotImage(snapshot,slot,&d)==FL_OK);
  struct stat st{};CHECK(fstat(d.fd[0],&st)==0);id.device=st.st_dev;id.inode=st.st_ino;
@@ -197,6 +229,8 @@ inline bool sameAllocation(const AllocationId&a,const AllocationId&b){
  using Compare=BOOL(WINAPI*)(HANDLE,HANDLE);
  static auto compare=reinterpret_cast<Compare>(GetProcAddress(GetModuleHandleW(L"KernelBase.dll"),"CompareObjectHandles"));
  CHECK(compare);return compare(a.handle,b.handle)!=FALSE;
+#elif defined(__ANDROID__)
+ return a.id==b.id;
 #else
  return a.device==b.device&&a.inode==b.inode;
 #endif
@@ -211,6 +245,9 @@ inline bool exportsAlive(const PoolExport&pool,unsigned count){
  for(unsigned n=0;n<count;++n){
 #ifdef _WIN32
   DWORD flags=0;if(!GetHandleInformation(pool.handles[n],&flags))return false;
+#elif defined(__ANDROID__)
+  // Borrowed references: the export must still name a live buffer.
+  if(!pool.buffers[n])return false;AHardwareBuffer_Desc d{};AHardwareBuffer_describe(pool.buffers[n],&d);if(!d.width)return false;
 #else
   for(uint32_t p=0;p<pool.images[n].planes;++p)if(fcntl(pool.images[n].fd[p],F_GETFD)==-1)return false;
 #endif
@@ -257,6 +294,19 @@ inline void corrupt(PoolExport&pool,BadExport kind,const Gate&foreign){
  if(kind==BadExport::Invalid)pool.handles[1]=reinterpret_cast<void*>(~uintptr_t(0));
  if(kind==BadExport::Foreign)pool.handles[1]=foreign.event;
  if(kind==BadExport::Mismatch)memset(pool.adapter,0xff,8);
+#elif defined(__ANDROID__)
+ // Foreign: a real AHardwareBuffer that is not one of the ring's (wrong size).
+ // Mismatch: a ring-sized buffer in another format, rejected at adoption.
+ (void)foreign;
+ auto make=[](uint32_t w,uint32_t h,uint32_t format){AHardwareBuffer_Desc d{};d.width=w;d.height=h;d.layers=1;d.format=format;
+  d.usage=AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE|AHARDWAREBUFFER_USAGE_CPU_READ_OFTEN|AHARDWAREBUFFER_USAGE_CPU_WRITE_OFTEN;
+  AHardwareBuffer*b=nullptr;CHECK(AHardwareBuffer_allocate(&d,&b)==0&&b);return b;};
+ static AHardwareBuffer*foreignBuffer=make(16,16,AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM);
+ static AHardwareBuffer*otherFormat=make(64,32,AHARDWAREBUFFER_FORMAT_R8G8B8X8_UNORM);
+ if(kind==BadExport::Duplicate)pool.buffers[1]=pool.buffers[0];
+ if(kind==BadExport::Invalid)pool.buffers[1]=nullptr;
+ if(kind==BadExport::Foreign)pool.buffers[1]=foreignBuffer;
+ if(kind==BadExport::Mismatch)pool.buffers[1]=otherFormat;
 #else
  if(kind==BadExport::Duplicate)pool.images[1]=pool.images[0];
  if(kind==BadExport::Invalid)pool.images[1].fd[0]=-1;
@@ -342,7 +392,8 @@ struct Child {
 };
 
 
-#ifdef FL_GST_LOCAL_NATIVE_RELAY_POOL
+// Android: phase 4 of its relay parity work.
+#if defined(FL_GST_LOCAL_NATIVE_RELAY_POOL) && !defined(__ANDROID__)
 // ---- In-process GStreamer bin relays ----
 
 // The native producer pool's caps feature, and the completion contract the
