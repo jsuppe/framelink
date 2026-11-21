@@ -26,6 +26,11 @@
 #elif defined(__ANDROID__)
 #include <android/hardware_buffer.h>
 #include "framelink_ahb.h"
+#include "../samples/native_ahb_relay_pool.h"
+#include "../samples/native_ahb_relay_transfer.h"
+#include "../samples/native_gst_ahb_relay.h"
+#include <dirent.h>
+#include <sys/eventfd.h>
 #include <cerrno>
 #include <chrono>
 #include <thread>
@@ -181,6 +186,16 @@ inline bool isNativeMemory(GstMemory*memory){
  return gst_framelink_memory_get_hardware_buffer(memory)!=nullptr;
 #else
  return gst_is_dmabuf_memory(memory);
+#endif
+}
+// The first byte of a native frame (a mapped read, or a locked AHardwareBuffer).
+inline guint8 nativeFirstByte(GstMemory*memory){
+#ifdef __ANDROID__
+ auto*b=gst_framelink_memory_get_hardware_buffer(memory);CHECK(b);void*data=nullptr;
+ CHECK(AHardwareBuffer_lock(b,AHARDWAREBUFFER_USAGE_CPU_READ_OFTEN,-1,nullptr,&data)==0&&data);
+ const guint8 value=*static_cast<const guint8*>(data);CHECK(AHardwareBuffer_unlock(b,nullptr)==0);return value;
+#else
+ GstMapInfo map{};CHECK(gst_memory_map(memory,&map,GST_MAP_READ));const guint8 value=map.data[0];gst_memory_unmap(memory,&map);return value;
 #endif
 }
 // Every byte of a 64x32 RGBA native frame equals value. The memory is mapped
@@ -393,7 +408,7 @@ struct Child {
 
 
 // Android: phase 4 of its relay parity work.
-#if defined(FL_GST_LOCAL_NATIVE_RELAY_POOL) && !defined(__ANDROID__)
+#ifdef FL_GST_LOCAL_NATIVE_RELAY_POOL
 // ---- In-process GStreamer bin relays ----
 
 // The native producer pool's caps feature, and the completion contract the
@@ -401,6 +416,8 @@ struct Child {
 inline const char*nativeFeature(){
 #ifdef _WIN32
  return "memory:D3D11Memory";
+#elif defined(__ANDROID__)
+ return "memory:FrameLinkAHardwareBuffer";
 #else
  return "memory:DMABuf";
 #endif
@@ -424,6 +441,18 @@ inline void fillPoolBuffer(GstElement*sink,GstBuffer*b,unsigned char value){
  ID3D11Device*d=nullptr;texture->GetDevice(&d);ID3D11DeviceContext*c=nullptr;d->GetImmediateContext(&c);
  std::vector<unsigned char>pixels(64*32*4,value);c->UpdateSubresource(texture,0,nullptr,pixels.data(),256,0);
  c->Release();d->Release();
+#elif defined(__ANDROID__)
+ // A locked AHardwareBuffer write, then a signalled ready fd for the sink.
+ auto*ahb=gst_framelink_memory_get_hardware_buffer(mem);CHECK(ahb);
+ CHECK(gst_mini_object_get_qdata(GST_MINI_OBJECT(mem),FrameLinkAhbProducer::key()));
+ AHardwareBuffer_Desc d{};AHardwareBuffer_describe(ahb,&d);void*data=nullptr;
+ CHECK(AHardwareBuffer_lock(ahb,AHARDWAREBUFFER_USAGE_CPU_WRITE_OFTEN,-1,nullptr,&data)==0&&data);
+ for(unsigned y=0;y<32;++y)memset(static_cast<char*>(data)+size_t(y)*d.stride*4,value,256);
+ CHECK(AHardwareBuffer_unlock(ahb,nullptr)==0); // CPU writes complete and visible
+ const int ready=eventfd(0,EFD_CLOEXEC|EFD_NONBLOCK);CHECK(ready>=0);
+ uint64_t one=1;CHECK(write(ready,&one,sizeof one)==sizeof one);
+ gboolean accepted=FALSE;g_signal_emit_by_name(sink,"set-native-ready-fd",b,ready,&accepted);CHECK(accepted);
+ close(ready);
 #else
  CHECK(gst_is_dmabuf_memory(mem));const int fd=gst_dmabuf_memory_get_fd(mem);
  auto*layout=gst_buffer_get_video_meta(b);CHECK(layout);
@@ -441,6 +470,9 @@ inline void fillPoolBuffer(GstElement*sink,GstBuffer*b,unsigned char value){
 inline bool isReaderMemory(GstMemory*m){
 #ifdef _WIN32
  return gst_framelink_memory_get_d3d11_shared_handle(m)!=nullptr;
+#elif defined(__ANDROID__)
+ // FrameLink AHardwareBuffer memory that is not a producer reservation.
+ return gst_framelink_memory_get_hardware_buffer(m)!=nullptr&&!gst_mini_object_get_qdata(GST_MINI_OBJECT(m),FrameLinkAhbProducer::key());
 #else
  return gst_framelink_memory_get_dmabuf_fd(m)>=0;
 #endif
@@ -452,6 +484,9 @@ inline bool sameMemory(GstMemory*a,GstMemory*b){
  static auto compare=reinterpret_cast<Compare>(GetProcAddress(GetModuleHandleW(L"KernelBase.dll"),"CompareObjectHandles"));
  CHECK(compare);auto x=gst_framelink_memory_get_d3d11_shared_handle(a),y=gst_framelink_memory_get_d3d11_shared_handle(b);
  CHECK(x&&y);return compare(x,y)!=FALSE;
+#elif defined(__ANDROID__)
+ const uint64_t x=flsample::ahbAllocationId(gst_framelink_memory_get_hardware_buffer(a)),y=flsample::ahbAllocationId(gst_framelink_memory_get_hardware_buffer(b));
+ CHECK(x&&y);return x==y;
 #else
  const int x=gst_framelink_memory_get_dmabuf_fd(a),y=gst_framelink_memory_get_dmabuf_fd(b);CHECK(x>=0&&y>=0);
  struct stat sx{},sy{};CHECK(fstat(x,&sx)==0&&fstat(y,&sy)==0);return sx.st_dev==sy.st_dev&&sx.st_ino==sy.st_ino;
@@ -461,6 +496,8 @@ inline bool sameMemory(GstMemory*a,GstMemory*b){
 inline uint64_t poolAllocation(GstMemory*m){
 #ifdef _WIN32
  CHECK(gst_is_d3d11_memory(m));return uint64_t(uintptr_t(gst_d3d11_memory_get_resource_handle(GST_D3D11_MEMORY_CAST(m))));
+#elif defined(__ANDROID__)
+ const uint64_t id=flsample::ahbAllocationId(gst_framelink_memory_get_hardware_buffer(m));CHECK(id);return id;
 #else
  CHECK(gst_is_dmabuf_memory(m));struct stat st{};CHECK(fstat(gst_dmabuf_memory_get_fd(m),&st)==0);return uint64_t(st.st_ino);
 #endif
@@ -471,6 +508,8 @@ inline void checkRetained(GstMemory*m){
 #ifdef _WIN32
  CHECK(gst_is_d3d11_memory(m));auto*resource=gst_d3d11_memory_get_resource_handle(GST_D3D11_MEMORY_CAST(m));CHECK(resource);
  ID3D11Device*device=nullptr;resource->GetDevice(&device);CHECK(device&&SUCCEEDED(device->GetDeviceRemovedReason()));device->Release();
+#elif defined(__ANDROID__)
+ auto*b=gst_framelink_memory_get_hardware_buffer(m);CHECK(b);AHardwareBuffer_Desc d{};AHardwareBuffer_describe(b,&d);CHECK(d.width==64&&d.height==32);
 #else
  CHECK(gst_is_dmabuf_memory(m));struct stat st{};CHECK(fstat(gst_dmabuf_memory_get_fd(m),&st)==0);
 #endif
@@ -492,6 +531,11 @@ using RelayPoolExport=flsample::NativeD3D11RelayPoolExport;
 using GstRelay=flsample::NativeGstD3D11Relay;
 inline flResult createRelayPool(GstBufferPool*pool,const char*name,const flSessionConfig&config,unsigned capacity,bool cpu,flChannel**reader,flChannel**writer){
  return flsample::createNativeD3D11RelayPool(pool,name,config,capacity,cpu,reader,writer);}
+#elif defined(__ANDROID__)
+using RelayPoolExport=flsample::NativeAhbRelayPoolExport;
+using GstRelay=flsample::NativeGstAhbRelay;
+inline flResult createRelayPool(GstBufferPool*pool,const char*name,const flSessionConfig&config,unsigned capacity,bool cpu,flChannel**reader,flChannel**writer){
+ return flsample::createNativeAhbRelayPool(pool,name,config,capacity,cpu,reader,writer);}
 #else
 using RelayPoolExport=flsample::NativeDmabufRelayPoolExport;
 using GstRelay=flsample::NativeGstDmabufRelay;
@@ -505,6 +549,9 @@ inline gboolean openRelayPool(FlGstSession*down,FlGstSession*up,const char*path,
 #ifdef _WIN32
  return fl_gst_session_open_local_native_relay_pool(down,up,path,caps,queue,pool,audio,timeout,idle,candidate,
   exported.first.adapterLUID,exported.handles.data(),bound,channel,cancel,error);
+#elif defined(__ANDROID__)
+ return fl_gst_session_open_local_native_relay_pool_ahb(down,up,path,caps,queue,pool,audio,timeout,idle,candidate,
+  exported.images.data(),bound,channel,cancel,error);
 #else
  return fl_gst_session_open_local_native_relay_pool_dmabuf(down,up,path,caps,queue,pool,audio,timeout,idle,candidate,
   exported.images.data(),bound,channel,cancel,error);
@@ -534,12 +581,17 @@ inline flResult createAuthenticatedRelayPool(bool producer,GstBufferPool*pool,co
 #ifdef _WIN32
  const std::wstring pipe=L"\\\\.\\pipe\\"+std::wstring(endpoint.begin(),endpoint.end());
  return flsample::createAuthenticatedNativeD3D11RelayPool(producer,pool,pipe,ring,config,capacity,cpu,key,cancel.event,timeout,out);
+#elif defined(__ANDROID__)
+ return flsample::createAuthenticatedNativeAhbRelayPool(producer,pool,std::string(1,'\0')+endpoint,ring,config,capacity,cpu,key,cancel.cancellable,timeout,out);
 #else
  return flsample::createAuthenticatedNativeDmabufRelayPool(producer,pool,std::string(1,'\0')+endpoint,ring,config,capacity,cpu,key,cancel.cancellable,timeout,out);
 #endif
 }
 
 
+#endif
+// Android: phase 4b of its relay parity work.
+#if defined(FL_GST_LOCAL_NATIVE_RELAY_POOL) && !defined(__ANDROID__)
 // ---- Broker-composed process relays ----
 
 // One value (a listening port) written by a child, read by its parent. The
