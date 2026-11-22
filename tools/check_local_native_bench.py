@@ -30,6 +30,9 @@ def analyze(root):
     root=pathlib.Path(root);c=json.loads((root/'config.json').read_text());seconds=c['seconds'];fps=c['fps'];n=seconds*fps;audio=seconds*100
     require(1<=seconds<=1800 and fps in (30,60),'invalid frozen duration/rate')
     require(c['pool']==2 and c['queue']==1 and c['offset_ns']==37000000,'profile changed')
+    # Pre-roll: marked frames below the measured timeline (PTS < 37 ms) before
+    # the paced epoch, never in the CSVs. 0 for captures made before it existed.
+    preroll=c.get('preroll',0);require(preroll in (0,8+fps//2),'profile changed (pre-roll)')
     require(c['format'] in ('BGRA','RGBA','NV12') and c['width']>=64 and c['height']>=32,'invalid geometry')
     require(c['clock'] in ('QPC quotient-remainder nanoseconds','CLOCK_MONOTONIC nanoseconds'),'unexpected clock domain')
     budget=17000000 if fps==60 else 34000000;expected_bytes=c['width']*c['height']*(3 if c['format']=='NV12' else 8)//2
@@ -42,7 +45,7 @@ def analyze(root):
         require(all(r['pts_ns']==i*10000000 and r['samples']==480 and r['bytes']==1920 for i,r in enumerate(a)),role+' PCM timeline/size')
         require(all(r['metadata_version']==1 and r['metadata_flags']==3 and r['generation']>0 and r['dts_ns']==r['pts_ns'] and r['duration_ns']==(i+1)*10**9//fps-i*10**9//fps for i,r in enumerate(v)),role+' metadata')
         if role=='receiver':
-            require(all(r['lease']>0 and r['completion_value']==i+1 for i,r in enumerate(v)), 'missing actual lease/fence completion evidence')
+            require(all(r['lease']>0 and r['completion_value']>0 for r in v) and all(b['completion_value']>a['completion_value'] for a,b in zip(v,v[1:])) and (preroll or all(r['completion_value']==i+1 for i,r in enumerate(v))), 'missing actual lease/fence completion evidence')
             require(len({r['lease'] for r in v})==n,'duplicate receiver lease')
         require(all(r['observed_pts_ns']==r['mapped_pts_ns'] for r in a),role+' actual PCM PTS differs from session mapping')
         offset=a[0]['observed_pts_ns']-a[0]['pts_ns']
@@ -98,20 +101,25 @@ def analyze(root):
             lines=paths[0].read_text().splitlines();foot=[x for x in lines if x.startswith('# dropped_events=')]
             require(len(foot)==1 and re.match(r'# dropped_events=0,rejected_threads=0,',foot[0]),role+' trace loss')
             records=list(csv.DictReader(x for x in lines if not x.startswith('#')))
+            boundary=lambda r:r['result']=='0' and r['operation'] in ('flEndSubmit','flAcquireFrame')
+            early=[r for r in records if boundary(r) and int(r['pts_ns'])<37000000]
+            pre_sent=sum(r['operation']=='flEndSubmit' for r in early);pre_received=sum(r['operation']=='flAcquireFrame' for r in early)
+            require({'source':pre_sent==preroll and pre_received==0,'relay':pre_sent==pre_received==preroll,'receiver':pre_sent==0 and pre_received<=preroll}[role],role+' trace pre-roll counts')
+            records=[r for r in records if not (boundary(r) and int(r['pts_ns'])<37000000)]
             maps=[r for r in records if r['operation'] in ('flImageMap','flImageMapPlanes')]
             require(role!='relay' or not maps,'relay payload map')
             if role=='relay':require(not any(int(r.get('payload_bytes',0))>0 or r['operation'] in ('image.gpu_readback_issued','image.gpu_upload_issued') for r in records),'relay payload copy')
             sent=sum(r['operation']=='flEndSubmit' and r['result']=='0' for r in records)
             received=sum(r['operation']=='flAcquireFrame' and r['result']=='0' for r in records)
             require((sent,received)=={'source':(n,0),'relay':(n,n),'receiver':(0,n)}[role],role+' trace role counts')
-            result['roles'][role]['trace_counts']={'sent':sent,'received':received}
+            result['roles'][role]['trace_counts']={'sent':sent,'received':received,'preroll_sent':pre_sent,'preroll_received':pre_received}
             for r in records:
                 if r['result']!='0' or r['operation'] not in ('flEndSubmit','flAcquireFrame'):continue
                 k=(r['channel_id'],int(r['fence']),int(r['pts_ns']));d=sends if r['operation']=='flEndSubmit' else receives
                 require(k not in d,'duplicate trace identity');d[k]=r;channels.setdefault(k[0],set()).add(k[2])
         require(sends.keys()==receives.keys() and len(sends)==2*n,'trace boundary identities')
         require(len(channels)==2 and all(v=={37000000+i*10**9//fps for i in range(n)} for v in channels.values()),'trace timeline')
-    result.update(pass_all=True,video_arrival_misses=0,audio_arrival_misses=0,trace_checked=c['trace']);return result
+    result.update(pass_all=True,video_arrival_misses=0,audio_arrival_misses=0,trace_checked=c['trace'],preroll=preroll);return result
 
 def main():
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('directory');a=p.parse_args()

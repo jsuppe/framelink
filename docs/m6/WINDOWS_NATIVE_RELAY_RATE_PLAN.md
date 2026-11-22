@@ -59,6 +59,26 @@ all existing regression modes and public contracts unchanged.
   handles≤1/min, threads≤0.5/min. Short tests do not establish these slopes.
 - Keep17ms(60fps)/34ms(30fps) whole-path arrival diagnostics. Report every miss
   and loss, including startup and drain. These are not isolated-hop budgets.
+- **Pre-roll (amendment, Jon 2026-11-22, every platform).** Before the measured
+  stream the source publishes `8 + fps/2` marked frames below the measured
+  timeline (PTS under 36 ms; recorded as `preroll` in `config.json`):
+  1. 8 frames 100 ms apart, cycling through every pool slot, so every process
+     has used every pool buffer once (a first map of a 1080p buffer costs up to
+     a frame interval on Android);
+  2. then half a second at the stream rate, straight into the epoch, so
+     measurement starts on a running stream rather than an idle system.
+
+  The relay forwards every pre-roll frame, and END and EOS count them. The final
+  reader verifies each one it receives and must have read every pool slot before
+  measured frame 0; latest-wins may skip some. Pre-roll frames are never in the
+  CSVs. The analyzer checks their trace counts separately: the source sends
+  exactly the pre-roll, the relay forwards exactly what it received, and the
+  reader receives at most the pre-roll. Startup misses are still reported: the
+  measured stream's first frame is frame 0, as before. Captures before the
+  amendment have no `preroll` (0) and are still analyzed as recorded. With the
+  amendment, the receiver's per-byte payload check became an exact vectorized
+  check (same bytes compared); it had cost about a frame interval per 1080p
+  RGBA frame on the tablet.
   Added-hop p95≤2ms remains **proposed**, not an approved acceptance threshold.
 - Trace-off performance and explicitly bounded trace-on identity/copy accounting
   are separate runs. Trace-on must have zero dropped events/rejected threads;
