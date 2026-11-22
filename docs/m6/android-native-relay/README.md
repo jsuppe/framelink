@@ -149,3 +149,27 @@ Result at `eb950cbf`: 30 of 30 runs (three graphs, ten runs each); the decoder g
 **Checks:**
 - Negative control: a relay that maps each frame fails the trace check (`relay: 8 CPU image maps` in `far5_av`, 16 in `broker_process`).
 - Linux, through the unchanged local path of the runner: 4 of 4 graphs, including `decoder`; `tools/test_relay_trace.py` passes.
+
+## Phase 5b (2026-11-22)
+
+**Decoder relay on Android.** `gst_relay_decoder_android` now runs instead of skipping:
+1. GStreamer produces the H.264 stream (`videotestsrc ! x264enc ! h264parse`), as on the other platforms.
+2. The platform's hardware decoder (NDK `AMediaCodec`, here `c2.mtk.avc.decoder`) decodes into an `AImageReader`. Each decoded frame is the decoder's own AHardwareBuffer.
+3. GLES samples that buffer through an EGLImage and renders it, converted and scaled to 64×32 RGBA, into the source reservation's own AHardwareBuffer as a framebuffer.
+4. The render's EGL native fence is the reservation's ready fd, so FrameLink waits on the GPU's own completion. The decoded image goes back to the decoder once that fence signals.
+
+No CPU copy. GStreamer's `androidmedia` plugin is not used: it enumerates codecs and creates its output surface through Java, and a native test process has no Java VM.
+
+Android renders, like Windows, so the decoder graph's ring and policy declare `GPU_RENDER`. The broker allocations now carry `GPU_COLOR_OUTPUT`. The test requires a hardware decoder: if the default H.264 decoder is a software codec (`c2.android.*`, `OMX.google.*`), or the fixture plugins are missing, it skips with 77 and says why.
+
+**Binder threads.** MediaCodec delivers its callbacks on binder threads. An app process has them, but a native executable does not until it starts them. Without them the codec never returns a frame. The fixture starts the pool (`ABinderProcess_startThreadPool`, resolved at run time from `libbinder_ndk.so`).
+
+**Timestamps.** MediaCodec carries microseconds, so decoded timestamps are the 1/30 s steps rounded down to whole microseconds. MediaCodec reports no duration, so only the timestamps are checked against the decoder. The frame metadata is the same as on the other platforms.
+
+The build links `videotestsrc`, `x264` and `videoparsersbad` statically when the SDK has them (`FL_RELAY_AMC_DECODER`), plus `mediandk`, `EGL` and `GLESv3`.
+
+**Checks:**
+- Tablet: `gst_relay_decoder_android` passes: 16 hardware-decoded frames rendered into the reservations, each frame's hash distinct and carried in its PCM, 25600 PCM frames, 37 ms offset, both reversed slots. Full Android suite 138 of 139 (the known EGL skip). The 36 Android relay tests passed 5 repeated rounds (180 of 180, decoder included).
+- Negative control (temporary edit, reverted): a decoder that skips its render fails the source's alpha check, and the graph fails.
+- Linux: full suite 187 of 187 run serially (the known EGL skip); the 36 shared relay tests passed 3 repeated rounds under `-j8`.
+- Windows: build and exports unchanged (88, 47, 2); the 36 relay tests pass, including `decoder`, and 10 repeated rounds; full suite 187 of 187; the unchanged 060c54e4 suite against the new DLLs 180 of 180.

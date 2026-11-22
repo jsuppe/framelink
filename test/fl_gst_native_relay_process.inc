@@ -6,6 +6,14 @@
 //
 // Platform parts are in fl_gst_native_relay_platform.h: Child (with inherited
 // allocation handles), Gate, Mailbox, SharedImages, and the reservation owner.
+#ifdef FL_RELAY_AMC_DECODER
+#include <media/NdkMediaCodec.h>
+#include <media/NdkImageReader.h>
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
+#include <GLES3/gl3.h>
+#include <GLES2/gl2ext.h>
+#endif
 namespace relayprocess {
 static constexpr unsigned Frames=16;
 static uint64_t frameTime(unsigned n,bool decoder){return decoder?gst_util_uint64_scale(n,GST_SECOND,30):n*1000000ULL;}
@@ -22,7 +30,9 @@ static bool same(flImage*a,flImage*b){return relaytest::sameAllocation(a,b);}
 // converter does (GPU_RENDER ring and policy). Linux: CUDA copies into the
 // reservation's EGLImage; NVIDIA refuses render usage for linear DMA-BUFs, so
 // the ring and policy honestly declare sampling only.
-#ifdef _WIN32
+// Android: GLES renders the decoded frame into the reservation's
+// AHardwareBuffer (GPU_COLOR_OUTPUT), like Windows.
+#if defined(_WIN32) || defined(FL_RELAY_AMC_DECODER)
 static constexpr bool DecoderRenders=true;
 #else
 static constexpr bool DecoderRenders=false;
@@ -193,6 +203,155 @@ struct Decoder {
  }
 };
 #undef FL_CU
+#elif defined(FL_RELAY_AMC_DECODER)
+// Android: the platform's hardware H.264 decoder (NDK MediaCodec) decodes into
+// an AImageReader; GLES samples the decoded AHardwareBuffer and renders it,
+// converted and scaled, into the reservation's own AHardwareBuffer. The GPU
+// fence of that render is the reservation's ready fd. No CPU copy. GStreamer
+// only produces the H.264 stream, as on the other platforms.
+// MediaCodec delivers its callbacks on binder threads, which a native
+// executable (unlike an app process) does not have until it starts them.
+static void startBinderThreadPool(){
+ static bool started=false;if(started)return;
+ void*binder=dlopen("libbinder_ndk.so",RTLD_NOW|RTLD_LOCAL);CHECK(binder);
+ auto setMax=reinterpret_cast<bool(*)(uint32_t)>(dlsym(binder,"ABinderProcess_setThreadPoolMaxThreadCount"));
+ auto start=reinterpret_cast<void(*)()>(dlsym(binder,"ABinderProcess_startThreadPool"));
+ CHECK(setMax&&start);setMax(4);start();started=true;
+}
+// The default H.264 decoder, which must be a hardware one (a software
+// decoder would make this a CPU decode). Returns nullptr with a reason.
+static AMediaCodec* hardwareAvcDecoder(std::string*name,std::string*why){
+ startBinderThreadPool();
+ AMediaCodec*codec=AMediaCodec_createDecoderByType("video/avc");if(!codec){*why="no H.264 MediaCodec decoder";return nullptr;}
+ char*n=nullptr;if(AMediaCodec_getName(codec,&n)!=AMEDIA_OK||!n){AMediaCodec_delete(codec);*why="MediaCodec decoder has no name";return nullptr;}
+ *name=n;AMediaCodec_releaseName(codec,n);
+ if(name->rfind("c2.android.",0)==0||name->rfind("OMX.google.",0)==0){AMediaCodec_delete(codec);*why="the default H.264 decoder "+*name+" is a software codec";return nullptr;}
+ return codec;
+}
+static GLuint compile(GLenum type,const char*source){
+ GLuint s=glCreateShader(type);glShaderSource(s,1,&source,nullptr);glCompileShader(s);GLint ok=0;glGetShaderiv(s,GL_COMPILE_STATUS,&ok);
+ if(!ok){char log[512]{};glGetShaderInfoLog(s,sizeof log,nullptr,log);fprintf(stderr,"shader: %s\n",log);}CHECK(ok);return s;
+}
+struct Decoder {
+ GstElement*pipeline=nullptr,*sink=nullptr;AMediaCodec*codec=nullptr;AImageReader*reader=nullptr;
+ EGLDisplay display=EGL_NO_DISPLAY;EGLContext context=EGL_NO_CONTEXT;GLuint program=0,vao=0,source=0,target=0,fbo=0;
+ // Extension entry points, resolved at run time (no prototype macros needed).
+ PFNEGLDUPNATIVEFENCEFDANDROIDPROC dupFence=nullptr;PFNEGLGETNATIVECLIENTBUFFERANDROIDPROC clientBuffer=nullptr;
+ PFNEGLCREATEIMAGEKHRPROC createImage=nullptr;PFNEGLDESTROYIMAGEKHRPROC destroyImage=nullptr;
+ PFNEGLCREATESYNCKHRPROC createSync=nullptr;PFNEGLDESTROYSYNCKHRPROC destroySync=nullptr;
+ PFNGLEGLIMAGETARGETTEXTURE2DOESPROC targetTexture=nullptr;
+ bool inputDone=false,outputDone=false;
+ int64_t origin=-1;std::vector<uint64_t> hashes;
+ void start(){
+  GError*error=nullptr;
+  pipeline=gst_parse_launch("videotestsrc num-buffers=16 pattern=snow ! video/x-raw,format=NV12,width=320,height=240,framerate=30/1 ! x264enc tune=zerolatency speed-preset=ultrafast key-int-max=30 ! h264parse ! video/x-h264,stream-format=byte-stream,alignment=au ! appsink name=encoded sync=false enable-last-sample=false",&error);
+  CHECK(pipeline&&!error);sink=gst_bin_get_by_name(GST_BIN(pipeline),"encoded");CHECK(sink);
+  CHECK(gst_element_set_state(pipeline,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
+  display=eglGetDisplay(EGL_DEFAULT_DISPLAY);CHECK(display!=EGL_NO_DISPLAY&&eglInitialize(display,nullptr,nullptr));
+  const EGLint config[]={EGL_RENDERABLE_TYPE,EGL_OPENGL_ES3_BIT,EGL_SURFACE_TYPE,EGL_PBUFFER_BIT,EGL_NONE};EGLConfig chosen{};EGLint count=0;
+  CHECK(eglChooseConfig(display,config,&chosen,1,&count)&&count==1);const EGLint attributes[]={EGL_CONTEXT_CLIENT_VERSION,3,EGL_NONE};
+  context=eglCreateContext(display,chosen,EGL_NO_CONTEXT,attributes);CHECK(context!=EGL_NO_CONTEXT);
+  CHECK(eglMakeCurrent(display,EGL_NO_SURFACE,EGL_NO_SURFACE,context));
+  auto proc=[](const char*name){auto*f=eglGetProcAddress(name);if(!f)fprintf(stderr,"missing %s\n",name);CHECK(f);return f;};
+  dupFence=reinterpret_cast<PFNEGLDUPNATIVEFENCEFDANDROIDPROC>(proc("eglDupNativeFenceFDANDROID"));
+  clientBuffer=reinterpret_cast<PFNEGLGETNATIVECLIENTBUFFERANDROIDPROC>(proc("eglGetNativeClientBufferANDROID"));
+  createImage=reinterpret_cast<PFNEGLCREATEIMAGEKHRPROC>(proc("eglCreateImageKHR"));destroyImage=reinterpret_cast<PFNEGLDESTROYIMAGEKHRPROC>(proc("eglDestroyImageKHR"));
+  createSync=reinterpret_cast<PFNEGLCREATESYNCKHRPROC>(proc("eglCreateSyncKHR"));destroySync=reinterpret_cast<PFNEGLDESTROYSYNCKHRPROC>(proc("eglDestroySyncKHR"));
+  targetTexture=reinterpret_cast<PFNGLEGLIMAGETARGETTEXTURE2DOESPROC>(proc("glEGLImageTargetTexture2DOES"));
+  const char*vs="#version 300 es\nout vec2 uv;void main(){vec2 p=vec2(float((gl_VertexID<<1)&2),float(gl_VertexID&2));uv=p;gl_Position=vec4(p*2.0-1.0,0.0,1.0);}";
+  const char*fs="#version 300 es\n#extension GL_OES_EGL_image_external_essl3 : require\nprecision mediump float;uniform samplerExternalOES decoded;in vec2 uv;out vec4 color;"
+                "void main(){color=vec4(texture(decoded,vec2(uv.x,1.0-uv.y)).rgb,1.0);}";
+  program=glCreateProgram();glAttachShader(program,compile(GL_VERTEX_SHADER,vs));glAttachShader(program,compile(GL_FRAGMENT_SHADER,fs));glLinkProgram(program);
+  GLint linked=0;glGetProgramiv(program,GL_LINK_STATUS,&linked);CHECK(linked);
+  glGenVertexArrays(1,&vao);glGenTextures(1,&source);glGenTextures(1,&target);glGenFramebuffers(1,&fbo);
+  CHECK(AImageReader_newWithUsage(320,240,AIMAGE_FORMAT_PRIVATE,AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE,4,&reader)==AMEDIA_OK);
+  ANativeWindow*window=nullptr;CHECK(AImageReader_getWindow(reader,&window)==AMEDIA_OK);
+  std::string name,why;codec=hardwareAvcDecoder(&name,&why);if(!codec)fprintf(stderr,"decoder: %s\n",why.c_str());CHECK(codec);
+  fprintf(stderr,"DECODER,%s\n",name.c_str());
+  auto*format=AMediaFormat_new();AMediaFormat_setString(format,AMEDIAFORMAT_KEY_MIME,"video/avc");
+  AMediaFormat_setInt32(format,AMEDIAFORMAT_KEY_WIDTH,320);AMediaFormat_setInt32(format,AMEDIAFORMAT_KEY_HEIGHT,240);
+  CHECK(AMediaCodec_configure(codec,format,window,nullptr,0)==AMEDIA_OK);AMediaFormat_delete(format);CHECK(AMediaCodec_start(codec)==AMEDIA_OK);
+ }
+ // Feeds access units until the decoder renders one frame; returns its image.
+ AImage* next(){
+  const auto deadline=g_get_monotonic_time()+5*G_TIME_SPAN_SECOND;
+  while(g_get_monotonic_time()<deadline){
+   if(!inputDone){const ssize_t i=AMediaCodec_dequeueInputBuffer(codec,1000);
+    if(i>=0){size_t capacity=0;auto*data=AMediaCodec_getInputBuffer(codec,i,&capacity);CHECK(data);
+     auto*sample=gst_app_sink_try_pull_sample(GST_APP_SINK(sink),5*GST_SECOND);
+     if(!sample){CHECK(gst_app_sink_is_eos(GST_APP_SINK(sink)));CHECK(AMediaCodec_queueInputBuffer(codec,i,0,0,0,AMEDIACODEC_BUFFER_FLAG_END_OF_STREAM)==AMEDIA_OK);inputDone=true;}
+     else{auto*au=gst_sample_get_buffer(sample);const gsize size=gst_buffer_get_size(au);CHECK(size<=capacity&&GST_CLOCK_TIME_IS_VALID(GST_BUFFER_PTS(au)));
+      CHECK(gst_buffer_extract(au,0,data,size)==size);
+      CHECK(AMediaCodec_queueInputBuffer(codec,i,0,size,GST_BUFFER_PTS(au)/1000,0)==AMEDIA_OK);gst_sample_unref(sample);}}}
+   AMediaCodecBufferInfo info{};const ssize_t o=AMediaCodec_dequeueOutputBuffer(codec,&info,1000);
+   if(o<0)continue;
+   const bool end=info.flags&AMEDIACODEC_BUFFER_FLAG_END_OF_STREAM;
+   CHECK(AMediaCodec_releaseOutputBuffer(codec,o,info.size>0)==AMEDIA_OK);
+   if(end)outputDone=true;
+   if(info.size<=0){CHECK(!end);continue;}
+   AImage*image=nullptr;media_status_t s;
+   while((s=AImageReader_acquireNextImage(reader,&image))==AMEDIA_IMGREADER_NO_BUFFER_AVAILABLE&&g_get_monotonic_time()<deadline)g_usleep(200);
+   CHECK(s==AMEDIA_OK&&image);return image;
+  }
+  CHECK(!"decoder produced no frame within 5 s");return nullptr;
+ }
+ uint64_t fill(relaytest::ReservationOwner&owner,GstBuffer*buffer,unsigned n){
+  if(!pipeline)start();
+  CHECK(eglMakeCurrent(display,EGL_NO_SURFACE,EGL_NO_SURFACE,context));
+  AImage*image=next();int64_t timestamp=0;CHECK(AImage_getTimestamp(image,&timestamp)==AMEDIA_OK);
+  if(origin<0)origin=timestamp;
+  fprintf(stderr,"DECODED,%u,pts=%lld,origin=%lld\n",n,(long long)timestamp,(long long)origin);
+  // MediaCodec carries microseconds: 1/30 s steps rounded down to whole us.
+  CHECK(uint64_t(timestamp-origin)==frameTime(n,true)/1000*1000);
+  AHardwareBuffer*decoded=nullptr;CHECK(AImage_getHardwareBuffer(image,&decoded)==AMEDIA_OK&&decoded);
+  auto*memory=gst_buffer_peek_memory(buffer,0);relaytest::reservationOf(buffer);
+  AHardwareBuffer*reserved=gst_framelink_memory_get_hardware_buffer(memory);CHECK(reserved&&reserved!=decoded);
+  AHardwareBuffer_Desc rd{};AHardwareBuffer_describe(reserved,&rd);
+  CHECK(rd.width==64&&rd.height==32&&rd.format==AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM&&(rd.usage&AHARDWAREBUFFER_USAGE_GPU_COLOR_OUTPUT));
+  const EGLint keep[]={EGL_IMAGE_PRESERVED_KHR,EGL_TRUE,EGL_NONE};
+  EGLImageKHR in=createImage(display,EGL_NO_CONTEXT,EGL_NATIVE_BUFFER_ANDROID,clientBuffer(decoded),keep);CHECK(in!=EGL_NO_IMAGE_KHR);
+  EGLImageKHR out=createImage(display,EGL_NO_CONTEXT,EGL_NATIVE_BUFFER_ANDROID,clientBuffer(reserved),keep);CHECK(out!=EGL_NO_IMAGE_KHR);
+  glBindTexture(GL_TEXTURE_EXTERNAL_OES,source);targetTexture(GL_TEXTURE_EXTERNAL_OES,in);
+  glTexParameteri(GL_TEXTURE_EXTERNAL_OES,GL_TEXTURE_MIN_FILTER,GL_LINEAR);glTexParameteri(GL_TEXTURE_EXTERNAL_OES,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+  glBindTexture(GL_TEXTURE_2D,target);targetTexture(GL_TEXTURE_2D,out);
+  glBindFramebuffer(GL_FRAMEBUFFER,fbo);glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,target,0);
+  CHECK(glCheckFramebufferStatus(GL_FRAMEBUFFER)==GL_FRAMEBUFFER_COMPLETE);
+  glViewport(0,0,64,32);glUseProgram(program);glBindVertexArray(vao);glDrawArrays(GL_TRIANGLES,0,3);
+  EGLSyncKHR rendered=createSync(display,EGL_SYNC_NATIVE_FENCE_ANDROID,nullptr);CHECK(rendered!=EGL_NO_SYNC_KHR);glFlush();
+  const int ready=dupFence(display,rendered);CHECK(ready>=0);destroySync(display,rendered);CHECK(glGetError()==GL_NO_ERROR);
+  glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,0,0);
+  CHECK(owner.setReady(buffer,ready)); // the GPU's own completion, not a pre-signalled fd
+  // The decoded image goes back to the decoder once the render has read it.
+  const int released=fcntl(ready,F_DUPFD_CLOEXEC,0);CHECK(released>=0);AImage_deleteAsync(image,released);
+  destroyImage(display,in);destroyImage(display,out);
+  // Source-side verification readback of the rendered reservation (not relay
+  // work); the lock waits on the render fence.
+  void*data=nullptr;CHECK(AHardwareBuffer_lock(reserved,AHARDWAREBUFFER_USAGE_CPU_READ_OFTEN,ready,nullptr,&data)==0&&data);
+  auto*pixels=static_cast<unsigned char*>(data);const size_t stride=size_t(rd.stride)*4;
+  for(unsigned y=0;y<32;++y)for(unsigned x=3;x<256;x+=4)CHECK(pixels[y*stride+x]==255);
+  const auto hash=pixelHash(pixels,stride);CHECK(AHardwareBuffer_unlock(reserved,nullptr)==0);
+  for(auto previous:hashes)CHECK(previous!=hash);hashes.push_back(hash);
+  fprintf(stderr,"DECODED_PIXELS,%u,%llu\n",n,(unsigned long long)hash);return hash;
+ }
+ ~Decoder(){
+  if(!pipeline)return;
+  // Exactly 16 frames: the decoder then reports end of stream with no frame.
+  const auto deadline=g_get_monotonic_time()+5*G_TIME_SPAN_SECOND;
+  while(!outputDone&&g_get_monotonic_time()<deadline){
+   if(!inputDone){const ssize_t i=AMediaCodec_dequeueInputBuffer(codec,1000);
+    if(i>=0){CHECK(!gst_app_sink_try_pull_sample(GST_APP_SINK(sink),5*GST_SECOND)&&gst_app_sink_is_eos(GST_APP_SINK(sink)));
+     CHECK(AMediaCodec_queueInputBuffer(codec,i,0,0,0,AMEDIACODEC_BUFFER_FLAG_END_OF_STREAM)==AMEDIA_OK);inputDone=true;}}
+   AMediaCodecBufferInfo info{};const ssize_t o=AMediaCodec_dequeueOutputBuffer(codec,&info,1000);
+   if(o>=0){CHECK(info.size<=0);CHECK(AMediaCodec_releaseOutputBuffer(codec,o,false)==AMEDIA_OK);outputDone=info.flags&AMEDIACODEC_BUFFER_FLAG_END_OF_STREAM;}
+  }
+  CHECK(outputDone);CHECK(gst_app_sink_is_eos(GST_APP_SINK(sink)));avTerminal(pipeline,GST_MESSAGE_EOS);
+  CHECK(AMediaCodec_stop(codec)==AMEDIA_OK);AMediaCodec_delete(codec);AImageReader_delete(reader);
+  CHECK(eglMakeCurrent(display,EGL_NO_SURFACE,EGL_NO_SURFACE,context));
+  glDeleteFramebuffers(1,&fbo);glDeleteTextures(1,&source);glDeleteTextures(1,&target);glDeleteVertexArrays(1,&vao);glDeleteProgram(program);
+  eglMakeCurrent(display,EGL_NO_SURFACE,EGL_NO_SURFACE,EGL_NO_CONTEXT);eglDestroyContext(display,context);eglTerminate(display);
+  CHECK(gst_element_set_state(pipeline,GST_STATE_NULL)!=GST_STATE_CHANGE_FAILURE);gst_object_unref(sink);gst_object_unref(pipeline);
+ }
+};
 #else
 struct Decoder {uint64_t fill(relaytest::ReservationOwner&,GstBuffer*,unsigned){CHECK(!"no GPU decoder relay in this build");return 0;}};
 #endif
@@ -204,8 +363,13 @@ static bool decoderAvailable(){
  void*cuda=dlopen("libcuda.so.1",RTLD_NOW|RTLD_LOCAL);
  if(!cuda){fprintf(stderr,"SKIP: libcuda.so.1 unavailable (the decoder relay uses NVDEC and CUDA-EGL interop)\n");return false;}
  dlclose(cuda);
+#elif defined(FL_RELAY_AMC_DECODER)
+ const char* required[]={"videotestsrc","x264enc","h264parse"};
+ {std::string name,why;auto*codec=hardwareAvcDecoder(&name,&why);
+  if(!codec){fprintf(stderr,"SKIP: %s (the decoder relay needs a hardware MediaCodec decoder)\n",why.c_str());return false;}
+  AMediaCodec_delete(codec);}
 #elif defined(__ANDROID__)
- fprintf(stderr,"SKIP: the Android hardware-decoder relay (MediaCodec into the reservation) is phase 5\n");return false;
+ fprintf(stderr,"SKIP: built without the decoder fixture plugins (videotestsrc, x264, videoparsersbad)\n");return false;
  const char* required[]={""};
 #else
  fprintf(stderr,"SKIP: built without GStreamer GL; the decoder relay needs it\n");return false;
