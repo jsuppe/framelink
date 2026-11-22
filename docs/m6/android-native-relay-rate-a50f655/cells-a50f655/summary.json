@@ -1,0 +1,96 @@
+{
+ "environment": {
+  "revision": "a50f6555181c8b07be9418c6367cd892753e5828",
+  "dirty": false,
+  "platform": "Android 15 (API 35)",
+  "exe_sha256": "d8fe2ed203019265b3c9ecf1e90d97176265ed4da9f08ea4d216a083f59c4b5d",
+  "plugin_sha256": "static (linked into the harness)",
+  "duration": 1800,
+  "cells": [
+   "rgba1080p30",
+   "nv12-1080p30",
+   "rgba1080p60",
+   "nv12-1080p60"
+  ],
+  "device": "8483A",
+  "build_fingerprint": "TCL/8483A_FCA/Lugh_FHD_WiFi:15/AP3A.240905.015.A2/BUBI:user/release-keys",
+  "gpu": "Mediatek MT8786V/N; ARM, Mali-G52 MC2, OpenGL ES 3.2 v1.r49p1-03bet0.19498e0ae1d5dac223383c39a2e58f04.Ifa5212ba194f2c4f4196a413ce1fd2464",
+  "gstreamer": "GStreamer 1.24.13 (static, Android)"
+ },
+ "cells": [
+  {
+   "cell": "rgba1080p30",
+   "preflight": true,
+   "trace": true,
+   "duration": true,
+   "duration_error": null,
+   "slopes": {
+    "source": {
+     "memory_kb": 1.1109852727479501,
+     "handles": 0.0,
+     "threads": 0.0
+    },
+    "relay": {
+     "memory_kb": 0.6185599779432168,
+     "handles": 0.0010791663575745209,
+     "threads": 0.0
+    },
+    "receiver": {
+     "memory_kb": 0.0,
+     "handles": -0.0012699800670324599,
+     "threads": 0.0
+    }
+   },
+   "arrival": {
+    "p50": 7.58132,
+    "p95": 9.114622,
+    "p99": 9.929204,
+    "max": 15.774467
+   }
+  },
+  {
+   "cell": "nv12-1080p30",
+   "preflight": true,
+   "trace": true,
+   "duration": true,
+   "duration_error": null,
+   "slopes": {
+    "source": {
+     "memory_kb": 0.0,
+     "handles": 0.0,
+     "threads": 0.0
+    },
+    "relay": {
+     "memory_kb": 0.9430825949709377,
+     "handles": -0.0005464240237440171,
+     "threads": 0.0
+    },
+    "receiver": {
+     "memory_kb": 0.7079859543461304,
+     "handles": 0.0012299355004147033,
+     "threads": 0.0
+    }
+   },
+   "arrival": {
+    "p50": 8.303506,
+    "p95": 10.188103,
+    "p99": 10.722016,
+    "max": 17.288724
+   }
+  },
+  {
+   "cell": "rgba1080p60",
+   "preflight": false,
+   "trace": false,
+   "duration": null,
+   "duration_error": "not run: an earlier gate failed"
+  },
+  {
+   "cell": "nv12-1080p60",
+   "preflight": false,
+   "trace": false,
+   "duration": null,
+   "duration_error": "not run: an earlier gate failed"
+  }
+ ]
+}

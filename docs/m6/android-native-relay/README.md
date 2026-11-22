@@ -175,3 +175,9 @@ The build links `videotestsrc`, `x264` and `videoparsersbad` statically when the
 - Windows: build and exports unchanged (88, 47, 2); the 36 relay tests pass, including `decoder`, and 10 repeated rounds; full suite 187 of 187; the unchanged 060c54e4 suite against the new DLLs 180 of 180.
 
 **Qualification with the decoder.** Result at `57c0100c`: 40 of 40 runs (four graphs, decoder included, ten runs each). See the [evidence](../android-native-relay-qualification-57c0100/README.md); it supersedes the phase 5a record. With this, every phase of the plan is done on Android. Android has no rate, duration or resource cells.
+
+## Rate cells (2026-11-22)
+
+The paced FAR4 → FAR5 harness and cell runner now run on Android (`fl_gst_local_native_bench_android`, `tools/run_local_native_rate_cells.py --adb`). The cells are RGBA and NV12 at 1080p30 and 1080p60. Result at `a50f6555` ([evidence](../android-native-relay-rate-a50f655/README.md)):
+- **1080p30 passes 1800 s in both formats.** Zero misses and zero lost frames; arrival p99 9.9 ms (RGBA) and 10.7 ms (NV12) against 34 ms; resource slopes near zero.
+- **1080p60 fails in both formats**, at startup only. The first use of each pool buffer delays the receiver, and frame 1 is replaced. Steady state fits the budget: the trace-on RGBA run has p99 11.3 ms after frame 2. A pre-roll would change the frozen profile and is left for a decision.
