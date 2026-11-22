@@ -10,7 +10,9 @@ Cell sets:
   baseline  the M6.1 baseline matrix (see docs/m6/QUALIFICATION_MATRIX.md)
   requirement  1080p60 and 4K30 cells (the project targets) and source-only references
   soak      the requirement cells as M6.2 soaks (use --seconds 1800 and --cells)
-  lifecycle M6.3: 100 restart cycles of 1080p60 native, producer and consumer restarts
+  lifecycle M6.3: 100 restart cycles of every native target cell (1080p60 and 4K30),
+            restarting the producer and the consumer; gated on the frozen
+            post-warm-up slopes (16 KB, 0.1 handles, 0.02 threads per cycle)
 
 Examples:
   tools/m6_bench_matrix.py --build build --set baseline --platform linux --out base.json
@@ -42,14 +44,32 @@ SETS = {
         for size, dims, fps in (("1080p60", "1920x1080", "60"), ("4k30", "3840x2160", "30")) for fmt in ("BGRA", "NV12")
     ],
 }
-# M6.3: >= 100 restart cycles of the 1080p60 native cell, restarting the
+# M6.3: >= 100 restart cycles of each native target cell, restarting the
 # producer process (long-lived consumer) and the consumer process (long-lived
-# producer). Android uses RGBA (native output is RGBA-only).
-def lifecycle_cells(fmt):
-    return [(f"lifecycle-{fmt.lower()}-restart-{side}", ["--size", "1920x1080", "--fps", "60", "--format", fmt, "--mode", "bin",
-                                                         "--native", "--cycles", "100", "--seconds", "5", "--restart", side])
-            for side in ("producer", "consumer")]
-SETS["lifecycle"] = lifecycle_cells("BGRA")
+# producer). Desktop formats are BGRA and NV12; Android native output is RGBA.
+TARGETS = (("1080p60", "1920x1080", "60"), ("4k30", "3840x2160", "30"))
+def lifecycle_cells(formats):
+    return [(f"lifecycle-{size}-{fmt.lower()}-restart-{side}", ["--size", dims, "--fps", fps, "--format", fmt, "--mode", "bin",
+                                                                  "--native", "--cycles", "100", "--seconds", "5", "--restart", side])
+            for size, dims, fps in TARGETS for fmt in formats for side in ("producer", "consumer")]
+SETS["lifecycle"] = lifecycle_cells(("BGRA", "NV12"))
+# Frozen lifecycle gates on the long-lived peer, slopes per cycle after the
+# bench's five-cycle warm-up (docs/m6/lifecycle/linux-pilot/README.md).
+LIFECYCLE_LIMITS = {"long.mem.slope.kb_per_cycle": 16.0, "long.handles.slope.per_cycle": 0.1, "long.threads.slope.per_cycle": 0.02}
+def lifecycle_gate(summary):
+    """Gate failures of a lifecycle summary: incomplete cycles or a slope over its limit."""
+    if summary.get("complete") != "yes":
+        return ["incomplete: " + summary.get("first_failure", summary.get("cycles.ok", "no summary"))]
+    bad = []
+    for key, limit in LIFECYCLE_LIMITS.items():
+        try:
+            value = float(summary[key])
+        except (KeyError, ValueError):
+            bad.append(f"{key} missing")
+            continue
+        if value > limit:
+            bad.append(f"{key}={value} > {limit}")
+    return bad
 # M6.2: every requirement cell as a soak (run with --seconds 1800 and --cells
 # limited to the cells supported on the platform); budgets map soak-X to X.
 SETS["soak"] = [(f"soak-{name}", opts) for name, opts in SETS["requirement"] if not name.startswith("src-")]
@@ -289,13 +309,20 @@ def record_cell(label, opts, rc, text, seconds, gpu):
     if rc != 0:
         record["output"] = text[-4000:]
     skipped = text.startswith("SKIP")
-    state = "SKIP" if skipped else ("PASS" if rc == 0 else "FAIL")
+    if "--cycles" in opts and not skipped:
+        record["gate_failures"] = lifecycle_gate(summary)
+    state = "SKIP" if skipped else ("PASS" if rc == 0 and not record.get("gate_failures") else "FAIL")
     print(state, label, summary.get("config", ""), f"{record['seconds']}s", flush=True)
     for key in ("consumer.video.arrival.ms", "consumer.video.render_jitter.p1_p99.ms", "consumer.av_offset.abs.ms",
                 "consumer.video.deadline_misses", "consumer.cpu.percent", "producer.cpu.percent", "source.cpu.percent",
                 "consumer.result", "producer.result"):
         if key in summary:
             print(f"  {key}={summary[key]}", flush=True)
+    for key in ("cycles.ok", "long.mem.slope.kb_per_cycle", "long.handles.slope.per_cycle", "long.threads.slope.per_cycle"):
+        if key in summary:
+            print(f"  {key}={summary[key]}", flush=True)
+    for failure in record.get("gate_failures", []):
+        print(f"  gate: {failure}", flush=True)
     for key in sorted(gpu):
         print(f"  {key}={gpu[key]}", flush=True)
     if rc != 0 and not skipped:
@@ -315,12 +342,15 @@ def main():
     ap.add_argument("--adb", help="Android device serial (Android build directory)")
     ap.add_argument("--remote-dir", default="/data/local/tmp/framelink-m6")
     ap.add_argument("--evidence", help="desktop: directory for per-cell summaries (default: a temporary one)")
+    ap.add_argument("--cycles", type=int, help="lifecycle: override the cycle count (pilots)")
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
     if args.set == "lifecycle" and args.adb:
-        cells = lifecycle_cells("RGBA")
+        cells = lifecycle_cells(("RGBA",))
     else:
         cells = list(SETS[args.set]) + (ANDROID_EXTRA.get(args.set, []) if args.adb else [])
+    if args.cycles:
+        cells = [(label, [str(args.cycles) if i and opts[i - 1] == "--cycles" else x for i, x in enumerate(opts)]) for label, opts in cells]
     if args.cells:
         wanted = args.cells.split(",")
         cells = [c for c in cells if c[0] in wanted]
@@ -333,7 +363,7 @@ def main():
            "started": started, "cells": results}
     with open(args.out, "w") as f:
         json.dump(doc, f, indent=1)
-    failed = [r["cell"] for r in results if r["exit"] != 0]
+    failed = [r["cell"] for r in results if r["exit"] != 0 or r.get("gate_failures")]
     print("cells", len(results), "failed", failed or "none", flush=True)
     return 1 if failed else 0
 
