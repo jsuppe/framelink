@@ -131,7 +131,7 @@ The Android parts in `test/fl_gst_native_relay_platform.h`:
 
 The automatic-relay negative checks pixels with `checkNativePixels`, like the bin relays, because AHardwareBuffer reader memory is not CPU-mappable. On Windows and Linux this is the same GStreamer map as before.
 
-**Checks:**
+**Checks** (device runs use `tools/run_android_ctest.py`, which runs the registered ctest suite on the device over adb):
 - Tablet (API 35): the seven pass, and the decoder skips. The 36 Android relay tests passed 5 repeated rounds (175 of 175 plus the decoder skip). Full Android suite 137 of 139: the known EGL skip and the decoder skip. `gst_av_bench_smoke` and `gst_av_parity`, recorded as failing in phase 4a, passed in this run; `gst_av_parity` stays recorded as an open flake.
 - Negative controls (temporary edits, reverted), the same as on Linux:
   - identity that always names the first allocation fails `process` (`seen==3`);
