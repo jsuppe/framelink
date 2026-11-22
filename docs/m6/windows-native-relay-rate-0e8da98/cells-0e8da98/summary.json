@@ -1,0 +1,98 @@
+{
+ "environment": {
+  "revision": "0e8da988353c69d6d456ed9b3d291192dad090bd",
+  "dirty": false,
+  "platform": "Windows-11-10.0.26300-SP0",
+  "exe_sha256": "a85e1bde8615c8eecac850ee4baab0f6f6b02b751e0de9588a92d80a93bc124e",
+  "plugin_sha256": "98feae57ba84fd21d9e5763bcc415123f2ee7feb4115947f256aaa17287a1359",
+  "duration": 1800,
+  "cells": [
+   "bgra1080p60",
+   "nv12-1080p60",
+   "bgra4k30",
+   "nv12-4k30"
+  ],
+  "nvidia-smi": "NVIDIA GeForce RTX 5090, 617.14",
+  "gst-inspect-1.0": null
+ },
+ "cells": [
+  {
+   "cell": "bgra1080p60",
+   "preflight": true,
+   "trace": true,
+   "duration": true,
+   "duration_error": null,
+   "slopes": {
+    "source": {
+     "memory_kb": -0.1562810644623161,
+     "handles": -0.009767566528894756,
+     "threads": -0.004883783264447378
+    },
+    "relay": {
+     "memory_kb": -0.18605716131278435,
+     "handles": -0.014062469545168288,
+     "threads": -0.006644898618313727
+    },
+    "receiver": {
+     "memory_kb": -0.22200044441910552,
+     "handles": -0.014127560625350285,
+     "threads": -0.0069375138880970475
+    }
+   },
+   "arrival": {
+    "p50": 4.826568,
+    "p95": 5.939334,
+    "p99": 6.512834,
+    "max": 8.065168
+   }
+  },
+  {
+   "cell": "nv12-1080p60",
+   "preflight": true,
+   "trace": true,
+   "duration": true,
+   "duration_error": null,
+   "slopes": {
+    "source": {
+     "memory_kb": 0.11363651598527917,
+     "handles": 0.012705649922392091,
+     "threads": 0.0063528249611960455
+    },
+    "relay": {
+     "memory_kb": 0.12441222491169042,
+     "handles": 0.007767094512567684,
+     "threads": 0.0038878820284903256
+    },
+    "receiver": {
+     "memory_kb": -0.37979718634247567,
+     "handles": -0.002901722758649736,
+     "threads": -0.0007428836092425489
+    }
+   },
+   "arrival": {
+    "p50": 4.289968,
+    "p95": 5.287034,
+    "p99": 5.541168,
+    "max": 6.397534
+   }
+  },
+  {
+   "cell": "bgra4k30",
+   "preflight": true,
+   "trace": true,
+   "duration": false,
+   "duration_error": "arrival diagnostic misses: video=[53437] audio=[155550, 155551]",
+   "slopes": {},
+   "arrival": null
+  },
+  {
+   "cell": "nv12-4k30",
+   "preflight": true,
+   "trace": true,
+   "duration": false,
+   "duration_error": "harness exit 1",
+   "slopes": {},
+   "arrival": null
+  }
+ ]
+}

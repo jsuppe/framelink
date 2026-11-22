@@ -1,0 +1,18 @@
+{
+ "revision": "0e8da988353c69d6d456ed9b3d291192dad090bd",
+ "dirty": false,
+ "platform": "Android 15 (API 35)",
+ "exe_sha256": "3cb8223f6722d9bd00eeb06e9b273d6647671f7d15056392c9bb3e6203d0899f",
+ "plugin_sha256": "static (linked into the harness)",
+ "duration": 1800,
+ "cells": [
+  "rgba1080p30",
+  "nv12-1080p30",
+  "rgba1080p60",
+  "nv12-1080p60"
+ ],
+ "device": "8483A",
+ "build_fingerprint": "TCL/8483A_FCA/Lugh_FHD_WiFi:15/AP3A.240905.015.A2/BUBI:user/release-keys",
+ "gpu": "Mediatek MT8786V/N; ARM, Mali-G52 MC2, OpenGL ES 3.2 v1.r49p1-03bet0.19498e0ae1d5dac223383c39a2e58f04.Ifa5212ba194f2c4f4196a413ce1fd2464",
+ "gstreamer": "GStreamer 1.24.13 (static, Android)"
+}

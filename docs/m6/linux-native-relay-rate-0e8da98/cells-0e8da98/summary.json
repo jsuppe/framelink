@@ -1,0 +1,140 @@
+{
+ "environment": {
+  "revision": "0e8da988353c69d6d456ed9b3d291192dad090bd",
+  "dirty": false,
+  "platform": "Linux-7.0.0-44-generic-x86_64-with-glibc2.43",
+  "exe_sha256": "4bc81be4e317f8d720e840a7c7b5d6cc09d927472b80b616949d8046af6fcb19",
+  "plugin_sha256": "f181428c4c97ce8b109116e240e18621ae7af85ae25f47ffd2ffa652ec56cea2",
+  "duration": 1800,
+  "cells": [
+   "bgra1080p60",
+   "nv12-1080p60",
+   "bgra4k30",
+   "nv12-4k30"
+  ],
+  "nvidia-smi": "NVIDIA GeForce RTX 3090, 580.178.04",
+  "gst-inspect-1.0": "gst-inspect-1.0 version 1.28.2\nGStreamer 1.28.2\nhttps://launchpad.net/ubuntu/+source/gstreamer1.0"
+ },
+ "cells": [
+  {
+   "cell": "bgra1080p60",
+   "preflight": true,
+   "trace": true,
+   "duration": true,
+   "duration_error": null,
+   "slopes": {
+    "source": {
+     "memory_kb": 0.0,
+     "handles": 0.0,
+     "threads": 0.0
+    },
+    "relay": {
+     "memory_kb": 0.0,
+     "handles": -0.0003281828362790895,
+     "threads": 0.0
+    },
+    "receiver": {
+     "memory_kb": 0.0,
+     "handles": 0.000581013089198114,
+     "threads": 0.0
+    }
+   },
+   "arrival": {
+    "p50": 6.167997,
+    "p95": 7.735158,
+    "p99": 8.177555,
+    "max": 9.079824
+   }
+  },
+  {
+   "cell": "nv12-1080p60",
+   "preflight": true,
+   "trace": true,
+   "duration": true,
+   "duration_error": null,
+   "slopes": {
+    "source": {
+     "memory_kb": 0.0,
+     "handles": 0.0,
+     "threads": 0.0
+    },
+    "relay": {
+     "memory_kb": 0.0,
+     "handles": 0.0016813027154696206,
+     "threads": 0.0
+    },
+    "receiver": {
+     "memory_kb": 0.0,
+     "handles": 0.0038651788932099578,
+     "threads": 0.0
+    }
+   },
+   "arrival": {
+    "p50": 3.921495,
+    "p95": 5.41951,
+    "p99": 5.817549,
+    "max": 6.591636
+   }
+  },
+  {
+   "cell": "bgra4k30",
+   "preflight": true,
+   "trace": true,
+   "duration": true,
+   "duration_error": null,
+   "slopes": {
+    "source": {
+     "memory_kb": 0.0,
+     "handles": 0.0,
+     "threads": 0.0
+    },
+    "relay": {
+     "memory_kb": 0.0,
+     "handles": 0.0005845592860706821,
+     "threads": 0.0
+    },
+    "receiver": {
+     "memory_kb": 0.0,
+     "handles": -0.002859520754933701,
+     "threads": 0.0
+    }
+   },
+   "arrival": {
+    "p50": 15.241957,
+    "p95": 16.885453,
+    "p99": 17.887797,
+    "max": 20.218624
+   }
+  },
+  {
+   "cell": "nv12-4k30",
+   "preflight": true,
+   "trace": true,
+   "duration": true,
+   "duration_error": null,
+   "slopes": {
+    "source": {
+     "memory_kb": 0.0,
+     "handles": 0.0,
+     "threads": 0.0
+    },
+    "relay": {
+     "memory_kb": 0.0,
+     "handles": -0.000792713174080297,
+     "threads": 0.0
+    },
+    "receiver": {
+     "memory_kb": 0.0,
+     "handles": -0.0006901734614279427,
+     "threads": 0.0
+    }
+   },
+   "arrival": {
+    "p50": 8.083463,
+    "p95": 9.686791,
+    "p99": 10.178919,
+    "max": 10.540371
+   }
+  }
+ ]
+}

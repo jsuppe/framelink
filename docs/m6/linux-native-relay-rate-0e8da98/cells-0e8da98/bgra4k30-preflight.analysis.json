@@ -1,0 +1,96 @@
+{
+ "scope": "synthetic authenticated transport; explicit upload/verification copies; no physical playback or isolated-hop budget claim",
+ "budget_ns": 34000000,
+ "roles": {
+  "source": {
+   "video": 150,
+   "pcm_frames": 240000,
+   "resource_slopes_per_min": {},
+   "cpu_percent": 42.58704331273929
+  },
+  "relay": {
+   "video": 150,
+   "pcm_frames": 240000,
+   "resource_slopes_per_min": {},
+   "cpu_percent": 4.98510453755242
+  },
+  "receiver": {
+   "video": 150,
+   "pcm_frames": 240000,
+   "resource_slopes_per_min": {},
+   "cpu_percent": 30.316866142844656
+  }
+ },
+ "timing_ms": {
+  "scheduled_to_final_arrival": {
+   "p50": 15.030257,
+   "p95": 17.040063,
+   "p99": 17.344285,
+   "max": 17.715109
+  },
+  "source_marker_to_relay": {
+   "p50": 10.629026,
+   "p95": 13.636143,
+   "p99": 14.032224,
+   "max": 14.06596
+  },
+  "source_marker_to_final": {
+   "p50": 11.994314,
+   "p95": 14.920026,
+   "p99": 15.775591,
+   "max": 15.950662
+  },
+  "source_acquire_call": {
+   "p50": 0.018138,
+   "p95": 0.023528,
+   "p99": 0.026893,
+   "max": 0.026941
+  },
+  "source_upload_call": {
+   "p50": 9.626584,
+   "p95": 11.902221,
+   "p99": 12.323512,
+   "max": 12.462102
+  },
+  "source_submit_call": {
+   "p50": 0.01592,
+   "p95": 0.020229,
+   "p99": 0.026301,
+   "max": 0.026819
+  },
+  "relay_acquire_to_record": {
+   "p50": 0.03594,
+   "p95": 0.0505,
+   "p99": 0.066024,
+   "max": 0.071667
+  },
+  "relay_forward_call": {
+   "p50": 0.034784,
+   "p95": 0.048785,
+   "p99": 0.065178,
+   "max": 0.069885
+  },
+  "final_acquire_to_completion": {
+   "p50": 6.465996,
+   "p95": 12.102527,
+   "p99": 13.8967,
+   "max": 13.934192
+  },
+  "audio_scheduled_to_final": {
+   "p50": 0.903678,
+   "p95": 1.170644,
+   "p99": 1.226396,
+   "max": 1.587768
+  }
+ },
+ "pass_all": true,
+ "video_arrival_misses": 0,
+ "audio_arrival_misses": 0,
+ "trace_checked": false,
+ "preroll": 23,
+ "exit": 0,
+ "wall_seconds": 6.7,
+ "cell": "bgra4k30",
+ "seconds": 5,
+ "trace": false
+}
