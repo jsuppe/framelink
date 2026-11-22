@@ -177,4 +177,4 @@ With the pre-roll amendment, the same harness revision ran every platform's cell
 | [Linux](linux-native-relay-rate-0e8da98/README.md) | all four: BGRA and NV12 1080p60 and 4K30 | none |
 | [Android](android-native-relay-rate-0e8da98/README.md) | RGBA and NV12 1080p30, NV12 1080p60 | RGBA 1080p60 (one audio block, 17.80 ms against 17 ms) |
 
-Every preflight and trace-on run passed on every platform. The pre-roll removed the Android 60 fps startup failure. The Windows receiver's PCM stalls occur only at 4K; no mechanism is established. No failure is replaced by a repeat.
+Every preflight and trace-on run passed on every platform. The pre-roll removed the Android 60 fps startup failure. The Windows 4K30 failures are a regression: both cells passed 1800 s on the frozen `060c54e4`. The receiver's PCM stalls occur only at 4K; no mechanism is established. No failure is replaced by a repeat.

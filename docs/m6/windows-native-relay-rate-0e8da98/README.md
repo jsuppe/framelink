@@ -48,7 +48,7 @@ At 530.6 s the source's video thread woke 474 ms late:
 - The source started acquiring frame 15 917 474 ms late. Between those points the thread does only a running-time lookup, a CSV row write and the pacing sleep.
 - The source then sent frames back to back. The one-frame queue replaced one at the relay's input, and the relay's check that every frame arrives in order failed (`fl_gst_local_native_bench.cpp:344`). The source's next acquire then failed (`:213`).
 
-That fail-fast is the design: a lost frame ends the run. No event in the System or Application log falls within 30 s of the abort.
+That fail-fast is the design: a lost frame ends the run. No event in the System or Application log falls within 30 s of the abort. This is the same signature as the native NV12 1080p60 failure on `060c54e4` (a late wake-up outside any FrameLink call, a catch-up burst, then a queue-1 replacement). Jon's working assumption for that failure is a host scheduling issue ([decision](../windows-final-duration-060c54e4/README.md#decision--jon-2026-11-17)); this one is far longer, 474 ms against 43 ms.
 
 ### The receiver audio stalls are 4K-only
 
@@ -61,11 +61,11 @@ Receiver PCM arrivals more than 15 ms late while the relay was on time:
 | BGRA 4K30 | 3 | 0 |
 | NV12 4K30 | 8 (in 530 s) | 0 |
 
-Linux 1080p cells were not counted here. Only the Windows 4K receiver shows these stalls. Its main thread maps a 4K staging texture every frame (12 MB NV12, 33 MB BGRA), while the stalled thread is its separate PCM thread. No mechanism is established.
+Linux 1080p cells were not counted here. Only the Windows 4K receiver shows these stalls. They are new: the `060c54e4` 4K30 cells had no arrival above 16.53 ms. Since then the receiver gained the pre-roll and the vectorized check; the host may also have changed. Its main thread maps a 4K staging texture every frame (12 MB NV12, 33 MB BGRA), while the stalled thread is its separate PCM thread. No mechanism is established.
 
 ## Open, for Jon
 
-- **Windows 4K30 is not qualified for duration.** Both 4K cells fail. BGRA fails on one receiver stall of about 50 ms. NV12 fails on receiver PCM stalls of up to 54 ms, and was then aborted by a 474 ms source stall. The 1080p60 cells pass. The earlier Windows records never qualified a 4K duration cell either.
+- **Windows 4K30 is not qualified for duration.** Both 4K cells fail. BGRA fails on one receiver stall of about 50 ms. NV12 fails on receiver PCM stalls of up to 54 ms, and was then aborted by a 474 ms source stall. The 1080p60 cells pass. This is a regression against the frozen revision: on `060c54e4` both native 4K30 cells passed 1800 s with zero misses, arrival max 9.94 ms (NV12) and 16.53 ms (BGRA) ([record](../windows-final-duration-060c54e4/README.md)).
 - **The receiver PCM stall at 4K needs a mechanism before another 4K attempt**, as the plan requires. A next step would be a bounded 4K diagnostic with per-phase stamps on the receiver's PCM thread (pull, map, verify, running-time lookup), to see whether it waits on the appsink, a session lock, or the scheduler.
 
 ## Files
