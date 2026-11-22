@@ -139,3 +139,13 @@ The automatic-relay negative checks pixels with `checkNativePixels`, like the bi
   - an AHardwareBuffer reservation that drops its buffer pin at submit fails `reservation` in the source (`!owner->acquire(0)`).
 - Linux: full suite 187 of 187 run serially (the known EGL skip). Under `-j8`, `m4_av_recovery`, `m5_startup`, `m5_preconnect`, `m5_consumer_drain` and `broker_producer_stream` failed under load; each passed 3 of 3 serial runs. The 36 shared relay tests passed 3 repeated rounds under `-j8`.
 - Windows: build and exports unchanged (88, 47, 2); the 36 relay tests pass, including `decoder`, and 10 repeated rounds; full suite 187 of 187; the unchanged 060c54e4 suite against the new DLLs 180 of 180.
+
+## Phase 5a (2026-11-22)
+
+**Qualification on the device.** `tools/run_relay_qualification.py --adb <device-dir>` runs the Linux qualification graphs on the tablet. Each run's traces are pulled back and checked on the host with the unchanged `tools/check_relay_trace.py`. The Android build links the plugin statically, so only the test binary is pushed and hashed.
+
+Result at `eb950cbf`: 30 of 30 runs (three graphs, ten runs each); the decoder graph skips until phase 5b. See the [evidence](../android-native-relay-qualification-eb950cb/README.md). This is functional qualification on small frames; Android has no rate, duration or resource cells.
+
+**Checks:**
+- Negative control: a relay that maps each frame fails the trace check (`relay: 8 CPU image maps` in `far5_av`, 16 in `broker_process`).
+- Linux, through the unchanged local path of the runner: 4 of 4 graphs, including `decoder`; `tools/test_relay_trace.py` passes.
