@@ -1,0 +1,71 @@
+{
+ "directory": "traces",
+ "frames": 16,
+ "relays": 1,
+ "forwarded": 16,
+ "final_reads": 16,
+ "processes": {
+  "24043": {
+   "role": "reader",
+   "files": [
+    "core.24043.csv"
+   ],
+   "payload_operations": {},
+   "cpu_maps": 32,
+   "acquired": 16,
+   "published": 0
+  },
+  "24045": {
+   "role": "relay",
+   "files": [
+    "core.24045.csv"
+   ],
+   "payload_operations": {},
+   "cpu_maps": 0,
+   "acquired": 16,
+   "published": 16
+  },
+  "24054": {
+   "role": "source",
+   "files": [
+    "core.24054.csv"
+   ],
+   "payload_operations": {},
+   "cpu_maps": 32,
+   "acquired": 0,
+   "published": 16
+  },
+  "24071": {
+   "role": "other",
+   "files": [
+    "core.24071.csv"
+   ],
+   "payload_operations": {},
+   "cpu_maps": 0,
+   "acquired": 0,
+   "published": 0
+  },
+  "24080": {
+   "role": "other",
+   "files": [
+    "core.24080.csv"
+   ],
+   "payload_operations": {},
+   "cpu_maps": 0,
+   "acquired": 0,
+   "published": 0
+  }
+ },
+ "problems": [],
+ "pass": true,
+ "graph": "broker_process",
+ "run": 9,
+ "mode": "--relay-process-diagnostic",
+ "what": "broker-composed rings, raw producer; an empty graph (no relay traffic) then 16 frames, PCM",
+ "exit": 0,
+ "seconds": 1.86,
+ "output": [
+  "three-process coordinated relay: 16 same-allocation video frames, 768 exact PCM frames; nonempty: both reversed slots / 37ms offset / held-reader exclusion; ordered GAP/barrier/END and authenticated terminal passed",
+  "three-process coordinated relay: 0 same-allocation video frames, 0 exact PCM frames; nonempty: both reversed slots / 37ms offset / held-reader exclusion; ordered GAP/barrier/END and authenticated terminal passed"
+ ]
+}

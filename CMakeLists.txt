@@ -787,6 +787,11 @@ if(ANDROID AND FRAMELINK_BUILD_GST AND FRAMELINK_GST_ANDROID_ROOT)
     if(FRAMELINK_BUILD_SAMPLES)
         pkg_check_modules(FL_ANDROID_AV REQUIRED gio-2.0 gstreamer-net-1.0)
     endif()
+    # The decoder relay's stream source (videotestsrc ! x264enc ! h264parse);
+    # the decode itself is NDK MediaCodec. Optional: without these plugins the
+    # decoder relay test skips.
+    set(ENV{PKG_CONFIG_LIBDIR} "${FRAMELINK_GST_ANDROID_ROOT}/lib/pkgconfig:${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/pkgconfig")
+    pkg_check_modules(FL_ANDROID_DECODER_FIXTURE QUIET gstvideotestsrc gstx264 gstvideoparsersbad)
     set(ENV{PKG_CONFIG_LIBDIR} "${_fl_saved_pc_libdir}")
     set(ENV{PKG_CONFIG_PATH} "${_fl_saved_pc_path}")
     add_library(gstframelink STATIC gst/gstframelink.cpp)
@@ -1424,6 +1429,13 @@ if(FRAMELINK_BUILD_TESTS AND TARGET framelink_gst_session AND UNIX)
             "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstgdp.a"
             "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstgio.a"
             ${FL_ANDROID_SESSION_GIO_STATIC_LDFLAGS} ${FL_ANDROID_GST_STATIC_LDFLAGS} dl)
+        # The decoder relay: NDK MediaCodec decodes into an AImageReader, and
+        # GLES renders the frame into the reservation's AHardwareBuffer.
+        if(FL_ANDROID_DECODER_FIXTURE_FOUND)
+            target_link_libraries(fl_gst_native_relay PRIVATE ${FL_ANDROID_DECODER_FIXTURE_STATIC_LDFLAGS}
+                mediandk android EGL GLESv3)
+            target_compile_definitions(fl_gst_native_relay PRIVATE FL_RELAY_AMC_DECODER)
+        endif()
         foreach(_pair local_session|relay-local-session local_source_control|relay-local-source-control
                       video_event_controls|video-relay-event-controls supervisor_controls|relay-supervisor-controls
                       local_process|relay-local-process local_pool_failures|relay-local-pool-failures

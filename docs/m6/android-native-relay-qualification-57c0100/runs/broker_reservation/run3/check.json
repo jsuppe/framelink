@@ -1,0 +1,50 @@
+{
+ "directory": "traces",
+ "frames": 16,
+ "relays": 1,
+ "forwarded": 16,
+ "final_reads": 16,
+ "processes": {
+  "17756": {
+   "role": "reader",
+   "files": [
+    "core.17756.csv"
+   ],
+   "payload_operations": {},
+   "cpu_maps": 32,
+   "acquired": 16,
+   "published": 0
+  },
+  "17758": {
+   "role": "relay",
+   "files": [
+    "core.17758.csv"
+   ],
+   "payload_operations": {},
+   "cpu_maps": 0,
+   "acquired": 16,
+   "published": 16
+  },
+  "17768": {
+   "role": "source",
+   "files": [
+    "core.17768.csv"
+   ],
+   "payload_operations": {},
+   "cpu_maps": 0,
+   "acquired": 0,
+   "published": 16
+  }
+ },
+ "problems": [],
+ "pass": true,
+ "graph": "broker_reservation",
+ "run": 3,
+ "mode": "--relay-reservation-diagnostic",
+ "what": "broker-composed rings, GstMemory reservations in the source, PCM",
+ "exit": 0,
+ "seconds": 1.255,
+ "output": [
+  "three-process coordinated relay: 16 same-allocation video frames, 768 exact PCM frames; nonempty: both reversed slots / 37ms offset / held-reader exclusion; ordered GAP/barrier/END and authenticated terminal passed"
+ ]
+}

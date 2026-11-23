@@ -663,7 +663,8 @@ struct SharedImages {
  AHardwareBuffer*buffers[2]{};int pending=-1;unsigned pendingUses=0;
  static AHardwareBuffer*allocate(){
   AHardwareBuffer_Desc d{};d.width=64;d.height=32;d.layers=1;d.format=AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM;
-  d.usage=AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE|AHARDWAREBUFFER_USAGE_CPU_READ_OFTEN|AHARDWAREBUFFER_USAGE_CPU_WRITE_OFTEN;
+  // GPU_COLOR_OUTPUT: the decoder graph renders into these (FL_GPU_RENDER rings).
+  d.usage=AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE|AHARDWAREBUFFER_USAGE_GPU_COLOR_OUTPUT|AHARDWAREBUFFER_USAGE_CPU_READ_OFTEN|AHARDWAREBUFFER_USAGE_CPU_WRITE_OFTEN;
   AHardwareBuffer*b=nullptr;CHECK(AHardwareBuffer_allocate(&d,&b)==0&&b);return b;
  }
  SharedImages(){for(auto&b:buffers)b=allocate();}

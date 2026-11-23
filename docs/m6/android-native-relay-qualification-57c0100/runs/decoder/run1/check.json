@@ -1,0 +1,50 @@
+{
+ "directory": "traces",
+ "frames": 16,
+ "relays": 1,
+ "forwarded": 16,
+ "final_reads": 16,
+ "processes": {
+  "18047": {
+   "role": "reader",
+   "files": [
+    "core.18047.csv"
+   ],
+   "payload_operations": {},
+   "cpu_maps": 32,
+   "acquired": 16,
+   "published": 0
+  },
+  "18069": {
+   "role": "relay",
+   "files": [
+    "core.18069.csv"
+   ],
+   "payload_operations": {},
+   "cpu_maps": 0,
+   "acquired": 16,
+   "published": 16
+  },
+  "18078": {
+   "role": "source",
+   "files": [
+    "core.18078.csv"
+   ],
+   "payload_operations": {},
+   "cpu_maps": 0,
+   "acquired": 0,
+   "published": 16
+  }
+ },
+ "problems": [],
+ "pass": true,
+ "graph": "decoder",
+ "run": 1,
+ "mode": "--relay-decoder-diagnostic",
+ "what": "hardware H.264 decode into the source reservations, frame hash carried in the PCM",
+ "exit": 0,
+ "seconds": 1.695,
+ "output": [
+  "three-process coordinated relay: 16 same-allocation video frames, 25600 exact PCM frames; nonempty: both reversed slots / 37ms offset / held-reader exclusion; ordered GAP/barrier/END and authenticated terminal passed"
+ ]
+}

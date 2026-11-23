@@ -955,7 +955,11 @@ static void pauseControl(const char*plugin,bool cancelPaused){
 
 #ifdef __ANDROID__
 extern "C" {GST_PLUGIN_STATIC_DECLARE(framelink);GST_PLUGIN_STATIC_DECLARE(app);GST_PLUGIN_STATIC_DECLARE(coreelements);
-GST_PLUGIN_STATIC_DECLARE(gdp);GST_PLUGIN_STATIC_DECLARE(gio);}
+GST_PLUGIN_STATIC_DECLARE(gdp);GST_PLUGIN_STATIC_DECLARE(gio);
+#ifdef FL_RELAY_AMC_DECODER
+GST_PLUGIN_STATIC_DECLARE(videotestsrc);GST_PLUGIN_STATIC_DECLARE(x264);GST_PLUGIN_STATIC_DECLARE(videoparsersbad);
+#endif
+}
 #endif
 int main(int argc,char**argv){
  gst_init(&argc,&argv);CHECK(argc>=3);
@@ -964,6 +968,9 @@ int main(int argc,char**argv){
  // kept so child command lines have the same shape on every platform.
  GST_PLUGIN_STATIC_REGISTER(framelink);GST_PLUGIN_STATIC_REGISTER(app);GST_PLUGIN_STATIC_REGISTER(coreelements);
  GST_PLUGIN_STATIC_REGISTER(gdp);GST_PLUGIN_STATIC_REGISTER(gio);
+#ifdef FL_RELAY_AMC_DECODER
+ GST_PLUGIN_STATIC_REGISTER(videotestsrc);GST_PLUGIN_STATIC_REGISTER(x264);GST_PLUGIN_STATIC_REGISTER(videoparsersbad);
+#endif
  if(!dlsym(RTLD_DEFAULT,"AHardwareBuffer_getId")){puts("SKIP: AHardwareBuffer_getId unavailable (API 31+)");return 77;}
 #else
  GError*e=nullptr;auto*plugin=gst_plugin_load_file(argv[1],&e);CHECK(plugin&&!e);gst_object_unref(plugin);

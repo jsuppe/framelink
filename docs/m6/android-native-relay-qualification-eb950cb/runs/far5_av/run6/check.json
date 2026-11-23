@@ -1,0 +1,51 @@
+{
+ "directory": "traces",
+ "frames": 8,
+ "relays": 1,
+ "forwarded": 8,
+ "final_reads": 8,
+ "processes": {
+  "23296": {
+   "role": "relay",
+   "files": [
+    "core.23296.csv"
+   ],
+   "payload_operations": {},
+   "cpu_maps": 0,
+   "acquired": 8,
+   "published": 8
+  },
+  "23298": {
+   "role": "source",
+   "files": [
+    "core.23298.csv"
+   ],
+   "payload_operations": {},
+   "cpu_maps": 16,
+   "acquired": 0,
+   "published": 8
+  },
+  "23299": {
+   "role": "reader",
+   "files": [
+    "core.23299.csv"
+   ],
+   "payload_operations": {},
+   "cpu_maps": 18,
+   "acquired": 8,
+   "published": 0
+  }
+ },
+ "problems": [],
+ "pass": true,
+ "graph": "far5_av",
+ "run": 6,
+ "mode": "--relay-three-local-av",
+ "what": "FAR4 source-time input and FAR5 authenticated pool transfer (no inherited native handles), PCM",
+ "exit": 0,
+ "seconds": 0.992,
+ "output": [
+  "three-process local authenticated A/V: 384 exact PCM frames/1536 bytes, 37ms offset, real END/EOS, final native lease held",
+  "three-process local native relay: FAR4 source-time input + FAR5 snapshot transfer, no inherited native resources, 8 exact final pixels/metadata, held final lease, real drain"
+ ]
+}
