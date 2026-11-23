@@ -1,0 +1,41 @@
+PASS shared-1080p60-bgra BGRA 1920x1080@60 bin shared-cpu 1800s 1802.4s
+  consumer.video.arrival.ms=n=107880 p50=8.05 p95=9.42 p99=10.33 max=14.38 min=3.93
+  consumer.video.render_jitter.p1_p99.ms=3.88
+  consumer.av_offset.abs.ms=n=1798 p50=7.05 p95=7.19 p99=7.26 max=7.38 min=5.60
+  consumer.video.deadline_misses=0/108000
+  consumer.cpu.percent=33.42
+  producer.cpu.percent=49.22
+  consumer.result=EOS
+  producer.result=EOS
+  gpu.uid2000.busy_pct=0.00
+PASS shared-1080p60-nv12 NV12 1920x1080@60 bin shared-cpu 1800s 1802.3s
+  consumer.video.arrival.ms=n=107880 p50=7.16 p95=7.83 p99=8.17 max=12.96 min=2.75
+  consumer.video.render_jitter.p1_p99.ms=3.94
+  consumer.av_offset.abs.ms=n=1798 p50=5.62 p95=5.84 p99=5.92 max=6.03 min=3.00
+  consumer.video.deadline_misses=0/108000
+  consumer.cpu.percent=30.63
+  producer.cpu.percent=42.73
+  consumer.result=EOS
+  producer.result=EOS
+  gpu.uid2000.busy_pct=0.00
+PASS shared-4k30-bgra BGRA 3840x2160@30 bin shared-cpu 1800s 1802.4s
+  consumer.video.arrival.ms=n=53940 p50=21.78 p95=22.68 p99=23.81 max=33.03 min=14.62
+  consumer.video.render_jitter.p1_p99.ms=4.58
+  consumer.av_offset.abs.ms=n=1798 p50=19.91 p95=20.11 p99=20.24 max=22.22 min=19.05
+  consumer.video.deadline_misses=0/54000
+  consumer.cpu.percent=51.29
+  producer.cpu.percent=72.11
+  consumer.result=EOS
+  producer.result=EOS
+  gpu.uid2000.busy_pct=0.00
+PASS shared-4k30-nv12 NV12 3840x2160@30 bin shared-cpu 1800s 1802.1s
+  consumer.video.arrival.ms=n=53940 p50=11.77 p95=13.43 p99=14.06 max=16.50 min=5.73
+  consumer.video.render_jitter.p1_p99.ms=7.23
+  consumer.av_offset.abs.ms=n=1798 p50=10.65 p95=11.24 p99=11.53 max=11.96 min=6.69
+  consumer.video.deadline_misses=0/54000
+  consumer.cpu.percent=27.33
+  producer.cpu.percent=37.54
+  consumer.result=EOS
+  producer.result=EOS
+  gpu.uid2000.busy_pct=0.00
+cells 4 failed none
