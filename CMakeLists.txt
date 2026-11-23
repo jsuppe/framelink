@@ -1431,6 +1431,15 @@ if(FRAMELINK_BUILD_TESTS AND TARGET framelink_gst_session AND UNIX)
             ${FL_ANDROID_SESSION_GIO_STATIC_LDFLAGS} ${FL_ANDROID_GST_STATIC_LDFLAGS} dl)
         # The decoder relay: NDK MediaCodec decodes into an AImageReader, and
         # GLES renders the frame into the reservation's AHardwareBuffer.
+        # Paced FAR4 -> FAR5 rate harness; the same source as the Windows and
+        # Linux ones. Run on the device by tools/run_local_native_rate_cells.py --adb.
+        add_executable(fl_gst_local_native_bench_android test/fl_gst_local_native_bench.cpp)
+        target_link_libraries(fl_gst_local_native_bench_android PRIVATE framelink_gst_session gstframelink
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstapp.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstcoreelements.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstgdp.a"
+            "${FRAMELINK_GST_ANDROID_ROOT}/lib/gstreamer-1.0/libgstgio.a"
+            ${FL_ANDROID_SESSION_GIO_STATIC_LDFLAGS} ${FL_ANDROID_GST_STATIC_LDFLAGS} dl)
         if(FL_ANDROID_DECODER_FIXTURE_FOUND)
             target_link_libraries(fl_gst_native_relay PRIVATE ${FL_ANDROID_DECODER_FIXTURE_STATIC_LDFLAGS}
                 mediandk android EGL GLESv3)

@@ -1,8 +1,9 @@
 // Test-only authenticated FAR4 -> FAR5 native/PCM measurement harness.
 // Source upload and receiver verification copy are explicit, NOT zero-copy claims.
 // One source for Windows (D3D11 upload, staging copy and shared-fence
-// completion) and Linux (mapped DMA-BUF upload and verification, then a
-// completion fd); everything else is common.
+// completion), Linux (mapped DMA-BUF upload, Vulkan verification copy, then a
+// completion fd) and Android (mapped AHardwareBuffer upload, mapped CPU
+// verification copy, then CPU completion); everything else is common.
 #ifdef _WIN32
 #define NOMINMAX
 #include <windows.h>
@@ -22,7 +23,12 @@
 #include <sys/wait.h>
 #include <time.h>
 #include <unistd.h>
+#ifdef __ANDROID__
+#include <dlfcn.h>
+#include "framelink_ahb.h"
+#else
 #include "framelink_dmabuf.h"
+#endif
 #include "framelink_sync_fd.h"
 #endif
 #include <algorithm>
@@ -52,10 +58,12 @@ static uint64_t now(){LARGE_INTEGER t,f;CHECK(QueryPerformanceCounter(&t)&&Query
 static const char*clockName="CLOCK_MONOTONIC nanoseconds";
 static uint64_t now(){timespec t{};CHECK(clock_gettime(CLOCK_MONOTONIC,&t)==0);return uint64_t(t.tv_sec)*1000000000ULL+uint64_t(t.tv_nsec);}
 static void Sleep(unsigned ms){std::this_thread::sleep_for(std::chrono::milliseconds(ms));}
+#ifndef __ANDROID__
 #include "fl_bench_vulkan_readback.hpp"
 #endif
+#endif
 namespace fs=std::filesystem;
-struct Options {unsigned seconds=2,width=64,height=32,fps=30;bool nv12=false,trace=false;std::string plugin,out,role="relay";} o;
+struct Options {unsigned seconds=2,width=64,height=32,fps=30;bool nv12=false,rgba=false,trace=false;std::string plugin,out,role="relay";} o;
 static uint64_t tick(unsigned n,unsigned rate){return uint64_t(n)*1000000000ULL/rate;}
 static unsigned frames(){return o.seconds*o.fps;}
 static uint64_t vpts(unsigned n){return 37000000+tick(n,o.fps);}
@@ -67,6 +75,19 @@ static HANDLE ev(const char* n){auto s="Local\\"+eventName(n);auto h=CreateEvent
 static void wait(HANDLE h,unsigned ms=10000){CHECK(WaitForSingleObject(h,ms)==WAIT_OBJECT_0);}
 static void signalEvent(HANDLE h){CHECK(SetEvent(h));}
 static void closeEvent(HANDLE h){CloseHandle(h);}
+#elif defined(__ANDROID__)
+static void pace(uint64_t due){for(;;){auto current=now();if(current>=due)break;auto left=due-current;
+ if(left>2000000){timespec t{time_t((left-1000000)/1000000000ULL),long((left-1000000)%1000000000ULL)};nanosleep(&t,nullptr);}else sched_yield();}}
+// Cross-process one-shot events. Bionic has no named POSIX semaphores, so an
+// event is a marker file in the run directory: created once, waited once.
+using HANDLE=const char*;
+static HANDLE ev(const char* n){return n;}
+static std::string eventPath(HANDLE h){return path(std::string(h)+".event");}
+static void wait(HANDLE h,unsigned ms=10000){const auto deadline=now()+uint64_t(ms)*1000000ULL;struct stat st{};
+ while(stat(eventPath(h).c_str(),&st)!=0){CHECK(now()<deadline);std::this_thread::sleep_for(std::chrono::microseconds(200));}}
+static void signalEvent(HANDLE h){const auto t=eventPath(h)+".tmp";int fd=open(t.c_str(),O_CREAT|O_WRONLY|O_CLOEXEC,0600);CHECK(fd>=0);close(fd);CHECK(rename(t.c_str(),eventPath(h).c_str())==0);}
+static void closeEvent(HANDLE){}
+static void unlinkEvents(){for(auto n:{"held","release"})unlink(eventPath(n).c_str());}
 #else
 static void pace(uint64_t due){for(;;){auto current=now();if(current>=due)break;auto left=due-current;
  if(left>2000000){timespec t{time_t((left-1000000)/1000000000ULL),long((left-1000000)%1000000000ULL)};nanosleep(&t,nullptr);}else sched_yield();}}
@@ -80,6 +101,8 @@ static void signalEvent(HANDLE h){CHECK(sem_post(h)==0);}
 static void closeEvent(HANDLE h){sem_close(h);}
 static void unlinkEvents(){for(auto n:{"held","release"})sem_unlink(("/"+eventName(n)).c_str());}
 #endif
+static flFormat videoFormat(){return o.nv12?FL_FORMAT_NV12:o.rgba?FL_FORMAT_RGBA8:FL_FORMAT_BGRA8;}
+static const char*formatName(){return o.nv12?"NV12":o.rgba?"RGBA":"BGRA";}
 static std::ofstream file(const std::string& n){std::ofstream f(path(n));CHECK(f.good());return f;}
 struct Resources {
  std::atomic<bool> done{false};std::thread worker;
@@ -105,16 +128,18 @@ struct Resources {
  ~Resources(){done=true;worker.join();}
 };
 struct Stamp {uint64_t magic=0x464c4e4154495645ULL,id,pts,scheduled,source;};
-static flSessionCapabilities caps(){flSessionCapabilities c{};c.version=2;c.videoCount=c.audioCount=1;c.video[0]={static_cast<uint32_t>(o.nv12?FL_FORMAT_NV12:FL_FORMAT_BGRA8),o.width,o.height,o.fps,1};c.audio[0]={FL_PCM_S16,48000,2};return c;}
+static flSessionCapabilities caps(){flSessionCapabilities c{};c.version=2;c.videoCount=c.audioCount=1;c.video[0]={static_cast<uint32_t>(videoFormat()),o.width,o.height,o.fps,1};c.audio[0]={FL_PCM_S16,48000,2};return c;}
 #ifdef _WIN32
 static constexpr uint32_t nativeResource=FL_MEMORY_D3D11;
+#elif defined(__ANDROID__)
+static constexpr uint32_t nativeResource=FL_MEMORY_AHB;
 #else
 static constexpr uint32_t nativeResource=FL_MEMORY_DMABUF;
 #endif
 static GstFrameLinkMemoryPolicy policy(){GstFrameLinkMemoryPolicy p{};p.version=1;for(int i=0;i<2;++i){flMemoryRequirementsInit(&p.requirements[i]);p.requirements[i].allowedResourceTypes=nativeResource;p.requirements[i].allowedOperations=0;p.requirements[i].requiredUsage=FL_MEMORY_GPU_SAMPLE;p.paths[i].version=1;p.paths[i].resourceType=nativeResource;p.paths[i].supportedUsage=FL_MEMORY_GPU_SAMPLE;}return p;}
-// Explicit source upload of the packed frame (BGRA rows, or NV12 luma then
-// chroma rows, width bytes each for NV12): a D3D11 UpdateSubresource, or a
-// mapped DMA-BUF write honoring each plane's stride.
+// Explicit source upload of the packed frame (BGRA or RGBA rows, or NV12 luma
+// then chroma rows, width bytes each for NV12): a D3D11 UpdateSubresource, or a
+// mapped DMA-BUF or AHardwareBuffer write honoring each plane's stride.
 #ifndef _WIN32
 static void uploadMapped(flImage*image,const std::vector<unsigned char>&pixels){
  flMappedImage m{};CHECK(flImageMapPlanes(image,&m)==FL_OK);const unsigned rowBytes=o.width*(o.nv12?1:4);size_t at=0;
@@ -165,11 +190,33 @@ static void receiver(){auto c=caps();auto p=policy();GstFrameLinkMemoryPolicy bo
  flClose(channel);g_object_unref(s);
 }
 #else
+#ifdef __ANDROID__
+// Android receiver verification: the held frame is read through FrameLink's
+// CPU mapping (AHardwareBuffer lock; CPU_READ_OFTEN storage is cached on these
+// unified-memory SoCs) into packed host memory, the counterpart of the Windows
+// staging copy and the Linux Vulkan copy. The read is complete when copy()
+// returns, so the lease completes on the CPU (no fence).
+struct CpuReadback {
+ std::vector<uint8_t> host;
+ void start(flChannel*,size_t bytes){host.assign(bytes,0);}
+ int copy(flChannel*,const flFrame&frame,bool nv12,uint32_t width,uint32_t height){
+  flMappedImage m{};CHECK(flImageMapPlanes(frame.image,&m)==FL_OK);const unsigned rowBytes=width*(nv12?1:4);size_t at=0;
+  for(unsigned p=0;p<(nv12?2u:1u);++p){CHECK(p<m.planes);const unsigned rows=p?height/2:height;
+   for(unsigned y=0;y<rows;++y,at+=rowBytes)memcpy(host.data()+at,static_cast<const unsigned char*>(m.plane[p].pixels)+size_t(y)*m.plane[p].stride,rowBytes);}
+  CHECK(at==host.size());flImageUnmap(frame.image);return -1;
+ }
+ void forget(){}
+ const uint8_t* data(){return host.data();}
+};
+using Readback=CpuReadback;
+#else
+using Readback=VulkanReadback;
+#endif
 static void receiver(){auto c=caps();auto p=policy();GstFrameLinkMemoryPolicy bound{};auto*s=fl_gst_session_new(3);flChannel*channel=nullptr;GError*e=nullptr;CHECK(fl_gst_session_open_local_native_pool_receiver(s,path("output").c_str(),&c,1,2,80,10000,10000,&p,&bound,&channel,nullptr,&e));flSessionConfig cfg{};CHECK(fl_gst_session_get_config(s,&cfg)==FL_GST_SESSION_READY);
  {Audio audio(s,false);audio.start();auto out=videoFile();auto af=audioFile();CHECK(fl_gst_session_local_ready(s,FALSE,10000,nullptr));
  std::thread pcm([&]{for(unsigned n=0;n<o.seconds*100;++n){auto*sample=gst_app_sink_try_pull_sample(GST_APP_SINK(audio.port),10*GST_SECOND);CHECK(sample);verifyAudio(gst_sample_get_buffer(sample),s,n,af);gst_sample_unref(sample);}CHECK(!gst_app_sink_try_pull_sample(GST_APP_SINK(audio.port),10*GST_SECOND));CHECK(gst_app_sink_is_eos(GST_APP_SINK(audio.port)));});
  auto held=ev("held"),release=ev("release");const unsigned rowBytes=o.width*(o.nv12?1:4),rows=o.nv12?o.height*3/2:o.height;
- VulkanReadback readback;readback.start(channel,VkDeviceSize(rowBytes)*rows);uint64_t lastArrival=now();const bool diagnose=getenv("FL_BENCH_DIAG")!=nullptr;
+ Readback readback;readback.start(channel,size_t(rowBytes)*rows);uint64_t lastArrival=now();const bool diagnose=getenv("FL_BENCH_DIAG")!=nullptr;
  for(unsigned n=0;n<frames();++n){flFrame f{};CHECK(flAcquireFrame(channel,&f,5000)==FL_OK);auto arrived=now();
   if(f.ptsNs!=int64_t(vpts(n)))fprintf(stderr,"frame replaced: expected frame %u (pts %llu), received pts %lld sequence %llu slot %u, %.3f ms after the previous acquisition\n",n,(unsigned long long)vpts(n),(long long)f.ptsNs,(unsigned long long)f.sequence,f.slot,(arrived-lastArrival)/1e6);
   lastArrival=arrived;CHECK(f.ptsNs==int64_t(vpts(n)));flFrameMetadata m{};CHECK(flGetFrameMetadata(channel,&f,&m)==FL_OK&&m.version==FL_FRAME_METADATA_VERSION&&m.flags==(FL_FRAME_HAS_DTS|FL_FRAME_HAS_DURATION)&&m.streamGeneration==cfg.generation&&m.dtsNs==f.ptsNs&&m.durationNs==tick(n+1,o.fps)-tick(n,o.fps));uint64_t lease=0;CHECK(flLeaseFrame(channel,&f,&lease)==FL_OK);
@@ -188,7 +235,8 @@ static void receiver(){auto c=caps();auto p=policy();GstFrameLinkMemoryPolicy bo
     fprintf(stderr,"held frame %u: copy after a fresh import magic=%llx id=%llu fill=%u\n",n,(unsigned long long)t.magic,(unsigned long long)t.id,third[sizeof t]);}}
   // The final control tests native ownership, never manufactures completion.
   if(n+1==frames()){signalEvent(held);wait(release);flFrame retained{};uint64_t generation=0;CHECK(flReadLeaseFrame(channel,lease,&retained,&generation)==FL_OK&&retained.ptsNs==f.ptsNs);}
-  CHECK(flCompleteReadLeaseSyncFd(channel,lease,done)==FL_OK);if(done>=0)close(done);
+  // A copy already complete (CPU verification) completes on the CPU.
+  CHECK((done>=0?flCompleteReadLeaseSyncFd(channel,lease,done):flCompleteReadLease(channel,lease))==FL_OK);if(done>=0)close(done);
   auto deadline=now()+5000000000ULL;flResult r=FL_BUSY;while(r==FL_BUSY){CHECK(now()<deadline);r=flCollectReadLeases(channel);if(r==FL_BUSY)Sleep(1);}CHECK(r==FL_OK);const auto completed=now();
   const uint8_t*copied=readback.data();Stamp st{};memcpy(&st,copied,sizeof st);
   if(!(st.magic==Stamp{}.magic&&st.id==n&&st.pts==vpts(n)))fprintf(stderr,"content mismatch: expected frame %u, copy holds magic=%llx id=%llu pts=%llu fill=%u last=%u; slot=%u sequence=%llu lease=%llu\n",n,
@@ -202,13 +250,13 @@ static void receiver(){auto c=caps();auto p=policy();GstFrameLinkMemoryPolicy bo
 #endif
 static std::string quote(const std::string&s){CHECK(s.find('"')==std::string::npos);return "\""+s+"\"";}
 #ifdef _WIN32
-static PROCESS_INFORMATION spawn(const char*role,HANDLE job){char exe[MAX_PATH];CHECK(GetModuleFileNameA(nullptr,exe,MAX_PATH));std::string command=quote(exe)+" "+quote(o.plugin)+" --out "+quote(o.out)+" --role "+role+" --seconds "+std::to_string(o.seconds)+" --width "+std::to_string(o.width)+" --height "+std::to_string(o.height)+" --fps "+std::to_string(o.fps)+" --format "+(o.nv12?"NV12":"BGRA")+(o.trace?" --trace":"");STARTUPINFOA si{};si.cb=sizeof si;PROCESS_INFORMATION pi{};CHECK(CreateProcessA(nullptr,command.data(),nullptr,nullptr,FALSE,CREATE_SUSPENDED,nullptr,nullptr,&si,&pi));if(!AssignProcessToJobObject(job,pi.hProcess)){CHECK(TerminateProcess(pi.hProcess,1));wait(pi.hProcess);CloseHandle(pi.hThread);CloseHandle(pi.hProcess);CHECK(false);}if(ResumeThread(pi.hThread)==DWORD(-1)){CHECK(TerminateProcess(pi.hProcess,1));wait(pi.hProcess);CloseHandle(pi.hThread);CloseHandle(pi.hProcess);CHECK(false);}return pi;}
+static PROCESS_INFORMATION spawn(const char*role,HANDLE job){char exe[MAX_PATH];CHECK(GetModuleFileNameA(nullptr,exe,MAX_PATH));std::string command=quote(exe)+" "+quote(o.plugin)+" --out "+quote(o.out)+" --role "+role+" --seconds "+std::to_string(o.seconds)+" --width "+std::to_string(o.width)+" --height "+std::to_string(o.height)+" --fps "+std::to_string(o.fps)+" --format "+formatName()+(o.trace?" --trace":"");STARTUPINFOA si{};si.cb=sizeof si;PROCESS_INFORMATION pi{};CHECK(CreateProcessA(nullptr,command.data(),nullptr,nullptr,FALSE,CREATE_SUSPENDED,nullptr,nullptr,&si,&pi));if(!AssignProcessToJobObject(job,pi.hProcess)){CHECK(TerminateProcess(pi.hProcess,1));wait(pi.hProcess);CloseHandle(pi.hThread);CloseHandle(pi.hProcess);CHECK(false);}if(ResumeThread(pi.hThread)==DWORD(-1)){CHECK(TerminateProcess(pi.hProcess,1));wait(pi.hProcess);CloseHandle(pi.hThread);CloseHandle(pi.hProcess);CHECK(false);}return pi;}
 static void join(PROCESS_INFORMATION&p){wait(p.hProcess,15000);DWORD rc=1;CHECK(GetExitCodeProcess(p.hProcess,&rc)&&rc==0);CloseHandle(p.hThread);CloseHandle(p.hProcess);}
 #else
 // A child running this executable; it dies with the relay (its owner).
 struct Proc{pid_t pid=-1;};
 static Proc spawn(const char*role,int){const pid_t parent=getpid();
- std::vector<std::string> args={"/proc/self/exe",o.plugin,"--out",o.out,"--role",role,"--seconds",std::to_string(o.seconds),"--width",std::to_string(o.width),"--height",std::to_string(o.height),"--fps",std::to_string(o.fps),"--format",o.nv12?"NV12":"BGRA"};if(o.trace)args.push_back("--trace");
+ std::vector<std::string> args={"/proc/self/exe",o.plugin,"--out",o.out,"--role",role,"--seconds",std::to_string(o.seconds),"--width",std::to_string(o.width),"--height",std::to_string(o.height),"--fps",std::to_string(o.fps),"--format",formatName()};if(o.trace)args.push_back("--trace");
  Proc p;p.pid=fork();CHECK(p.pid>=0);
  if(!p.pid){prctl(PR_SET_PDEATHSIG,SIGKILL);if(getppid()!=parent)_exit(70);std::vector<char*> argv;for(auto&a:args)argv.push_back(const_cast<char*>(a.c_str()));argv.push_back(nullptr);execv("/proc/self/exe",argv.data());_exit(72);}
  return p;}
@@ -218,6 +266,9 @@ static bool sameAllocation(flImage*a,flImage*b){
 #ifdef _WIN32
  using Compare=BOOL(WINAPI*)(HANDLE,HANDLE);static auto compare=reinterpret_cast<Compare>(GetProcAddress(GetModuleHandleW(L"KernelBase.dll"),"CompareObjectHandles"));CHECK(compare);
  return compare(flImageSharedHandle(a),flImageSharedHandle(b))!=FALSE;
+#elif defined(__ANDROID__)
+ using GetId=int(*)(const AHardwareBuffer*,uint64_t*);static auto getId=reinterpret_cast<GetId>(dlsym(RTLD_DEFAULT,"AHardwareBuffer_getId"));CHECK(getId);
+ uint64_t x=0,y=0;CHECK(!getId(flImageAHardwareBuffer(a),&x)&&!getId(flImageAHardwareBuffer(b),&y)&&x&&y);return x==y;
 #else
  flDmabuf x{},y{};CHECK(flImageDmabuf(a,&x)==FL_OK&&flImageDmabuf(b,&y)==FL_OK);struct stat sx{},sy{};CHECK(fstat(x.fd[0],&sx)==0&&fstat(y.fd[0],&sy)==0);
  return sx.st_dev==sy.st_dev&&sx.st_ino==sy.st_ino;
@@ -243,7 +294,11 @@ static void relay(){
  unlinkEvents();
 #endif
 }
-int main(int argc,char**argv){CHECK(argc>=2);o.plugin=argv[1];for(int i=2;i<argc;++i){std::string k=argv[i];if(k=="--trace"){o.trace=true;continue;}CHECK(i+1<argc);std::string v=argv[++i];if(k=="--out")o.out=v;else if(k=="--role")o.role=v;else if(k=="--format"){CHECK(v=="BGRA"||v=="NV12");o.nv12=v=="NV12";}else {char*end=nullptr;auto n=strtoul(v.c_str(),&end,10);CHECK(!v.empty()&&!*end&&n>0&&n<=100000);if(k=="--seconds")o.seconds=unsigned(n);else if(k=="--width")o.width=unsigned(n);else if(k=="--height")o.height=unsigned(n);else if(k=="--fps")o.fps=unsigned(n);else CHECK(false);}}CHECK(!o.out.empty()&&o.seconds<=1800&&(o.fps==30||o.fps==60)&&o.width>=64&&o.width<=3840&&o.height>=32&&o.height<=2160&&!(o.width%2)&&!(o.height%2));CHECK(o.role=="relay"||o.role=="source"||o.role=="receiver");o.out=fs::absolute(o.out).lexically_normal().string();if(o.role=="relay"){CHECK(fs::create_directory(o.out));auto f=file("config.json");f<<"{\"seconds\":"<<o.seconds<<",\"fps\":"<<o.fps<<",\"width\":"<<o.width<<",\"height\":"<<o.height<<",\"format\":\""<<(o.nv12?"NV12":"BGRA")<<"\",\"trace\":"<<(o.trace?"true":"false")<<",\"clock\":\""<<clockName<<"\",\"pool\":2,\"queue\":1,\"offset_ns\":37000000}\n";}
+#ifdef __ANDROID__
+extern "C" {GST_PLUGIN_STATIC_DECLARE(framelink);GST_PLUGIN_STATIC_DECLARE(app);GST_PLUGIN_STATIC_DECLARE(coreelements);
+GST_PLUGIN_STATIC_DECLARE(gdp);GST_PLUGIN_STATIC_DECLARE(gio);}
+#endif
+int main(int argc,char**argv){CHECK(argc>=2);o.plugin=argv[1];for(int i=2;i<argc;++i){std::string k=argv[i];if(k=="--trace"){o.trace=true;continue;}CHECK(i+1<argc);std::string v=argv[++i];if(k=="--out")o.out=v;else if(k=="--role")o.role=v;else if(k=="--format"){CHECK(v=="BGRA"||v=="RGBA"||v=="NV12");o.nv12=v=="NV12";o.rgba=v=="RGBA";}else {char*end=nullptr;auto n=strtoul(v.c_str(),&end,10);CHECK(!v.empty()&&!*end&&n>0&&n<=100000);if(k=="--seconds")o.seconds=unsigned(n);else if(k=="--width")o.width=unsigned(n);else if(k=="--height")o.height=unsigned(n);else if(k=="--fps")o.fps=unsigned(n);else CHECK(false);}}CHECK(!o.out.empty()&&o.seconds<=1800&&(o.fps==30||o.fps==60)&&o.width>=64&&o.width<=3840&&o.height>=32&&o.height<=2160&&!(o.width%2)&&!(o.height%2));CHECK(o.role=="relay"||o.role=="source"||o.role=="receiver");o.out=fs::absolute(o.out).lexically_normal().string();if(o.role=="relay"){CHECK(fs::create_directory(o.out));auto f=file("config.json");f<<"{\"seconds\":"<<o.seconds<<",\"fps\":"<<o.fps<<",\"width\":"<<o.width<<",\"height\":"<<o.height<<",\"format\":\""<<formatName()<<"\",\"trace\":"<<(o.trace?"true":"false")<<",\"clock\":\""<<clockName<<"\",\"pool\":2,\"queue\":1,\"offset_ns\":37000000}\n";}
  #ifdef _WIN32
  FILE* log=nullptr;CHECK(freopen_s(&log,path(o.role+".stderr.log").c_str(),"w",stderr)==0);
 #else
@@ -256,4 +311,12 @@ int main(int argc,char**argv){CHECK(argc>=2);o.plugin=argv[1];for(int i=2;i<argc
 #else
  if(o.trace)setenv("FRAMELINK_TRACE",path(o.role+".trace.csv").c_str(),1);else unsetenv("FRAMELINK_TRACE");setenv("FRAMELINK_TRACE_EVENTS",std::to_string(o.seconds*2500+frames()*32+1024).c_str(),1);std::thread([]{Sleep((o.seconds+60)*1000);fprintf(stderr,"owned benchmark watchdog expired\n");fflush(nullptr);_exit(2);}).detach();
 #endif
- gst_init(&argc,&argv);GError*e=nullptr;auto*plugin=gst_plugin_load_file(o.plugin.c_str(),&e);CHECK(plugin&&!e);{Resources resources;if(o.role=="source")source();else if(o.role=="receiver")receiver();else relay();}CHECK(flTraceFlush()==FL_OK);gst_object_unref(plugin);return 0;}
+ gst_init(&argc,&argv);
+#ifdef __ANDROID__
+ // GStreamer and the plugin are linked statically; argv[1] is a placeholder.
+ GST_PLUGIN_STATIC_REGISTER(framelink);GST_PLUGIN_STATIC_REGISTER(app);GST_PLUGIN_STATIC_REGISTER(coreelements);
+ GST_PLUGIN_STATIC_REGISTER(gdp);GST_PLUGIN_STATIC_REGISTER(gio);
+ {Resources resources;if(o.role=="source")source();else if(o.role=="receiver")receiver();else relay();}CHECK(flTraceFlush()==FL_OK);return 0;}
+#else
+ GError*e=nullptr;auto*plugin=gst_plugin_load_file(o.plugin.c_str(),&e);CHECK(plugin&&!e);{Resources resources;if(o.role=="source")source();else if(o.role=="receiver")receiver();else relay();}CHECK(flTraceFlush()==FL_OK);gst_object_unref(plugin);return 0;}
+#endif
