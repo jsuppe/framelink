@@ -43,19 +43,24 @@
 #include <thread>
 #include <set>
 #include <atomic>
+#include <chrono>
+#include <condition_variable>
+#include <mutex>
+#include <type_traits>
 #include <vector>
 #include <string>
 #include <cstring>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
+static void flushCsvs();
 #ifdef _WIN32
-#define CHECK(x) do { if(!(x)){fprintf(stderr,"%s:%d: %s\n",__FILE__,__LINE__,#x);fflush(nullptr);ExitProcess(1);} } while(0)
+#define CHECK(x) do { if(!(x)){fprintf(stderr,"%s:%d: %s\n",__FILE__,__LINE__,#x);fflush(nullptr);flushCsvs();ExitProcess(1);} } while(0)
 using Microsoft::WRL::ComPtr;
 static const char*clockName="QPC quotient-remainder nanoseconds";
 static uint64_t now(){LARGE_INTEGER t,f;CHECK(QueryPerformanceCounter(&t)&&QueryPerformanceFrequency(&f));CHECK(f.QuadPart>0&&uint64_t(f.QuadPart)<=UINT64_MAX/1000000000ULL);return uint64_t(t.QuadPart/f.QuadPart)*1000000000ULL+uint64_t(t.QuadPart%f.QuadPart)*1000000000ULL/f.QuadPart;}
 #else
-#define CHECK(x) do { if(!(x)){fprintf(stderr,"%s:%d: %s\n",__FILE__,__LINE__,#x);fflush(nullptr);_exit(1);} } while(0)
+#define CHECK(x) do { if(!(x)){fprintf(stderr,"%s:%d: %s\n",__FILE__,__LINE__,#x);fflush(nullptr);flushCsvs();_exit(1);} } while(0)
 static const char*clockName="CLOCK_MONOTONIC nanoseconds";
 static uint64_t now(){timespec t{};CHECK(clock_gettime(CLOCK_MONOTONIC,&t)==0);return uint64_t(t.tv_sec)*1000000000ULL+uint64_t(t.tv_nsec);}
 static void Sleep(unsigned ms){std::this_thread::sleep_for(std::chrono::milliseconds(ms));}
@@ -64,7 +69,9 @@ static void Sleep(unsigned ms){std::this_thread::sleep_for(std::chrono::millisec
 #endif
 #endif
 namespace fs=std::filesystem;
-struct Options {unsigned seconds=2,width=64,height=32,fps=30;bool nv12=false,rgba=false,trace=false;std::string plugin,out,role="relay";} o;
+// Pool and unread queue default to the primary profile (2 and 1); --pool and
+// --video-queue select another profile, recorded in config.json.
+struct Options {unsigned seconds=2,width=64,height=32,fps=30,pool=2,queue=1;bool nv12=false,rgba=false,trace=false;std::string plugin,out,role="relay";} o;
 static uint64_t tick(unsigned n,unsigned rate){return uint64_t(n)*1000000000ULL/rate;}
 static unsigned frames(){return o.seconds*o.fps;}
 static uint64_t vpts(unsigned n){return 37000000+tick(n,o.fps);}
@@ -79,7 +86,8 @@ static uint64_t vpts(unsigned n){return 37000000+tick(n,o.fps);}
 //     (on Android a task waking from idle is slow for its first frames).
 // The relay forwards every pre-roll frame (END counts them); the final reader
 // may skip some, but must have read every pool slot before measured frame 0.
-static constexpr unsigned PrerollSlow=8,PoolSlots=2;
+static constexpr unsigned PrerollSlow=8,MaxPool=PrerollSlow; // the slow phase visits every slot
+static unsigned poolSlots(){return o.pool;}
 static constexpr uint64_t PrerollId=1ULL<<32,PrerollIntervalNs=100000000;
 static unsigned prerollTotal(){return PrerollSlow+o.fps/2;}
 static uint64_t prerollStep(){return 36000000/prerollTotal();}
@@ -122,6 +130,30 @@ static void unlinkEvents(){for(auto n:{"held","release"})sem_unlink(("/"+eventNa
 static flFormat videoFormat(){return o.nv12?FL_FORMAT_NV12:o.rgba?FL_FORMAT_RGBA8:FL_FORMAT_BGRA8;}
 static const char*formatName(){return o.nv12?"NV12":o.rgba?"RGBA":"BGRA";}
 static std::ofstream file(const std::string& n){std::ofstream f(path(n));CHECK(f.good());return f;}
+// Per-frame and per-block CSVs. The measured threads only format a row into
+// memory; a writer thread per file does the disk writes. A file write can
+// stall for about 100 ms while Windows takes a shadow-copy snapshot (2026-11-23
+// investigation), and that stall must not land on a timed thread. A failing
+// CHECK flushes what is pending, so an abort keeps its last rows.
+struct Line {std::string s;
+ template<class T> Line& operator<<(const T& v){if constexpr(std::is_same_v<T,char>)s+=v;else if constexpr(std::is_convertible_v<T,const char*>)s+=static_cast<const char*>(v);else s+=std::to_string(v);return *this;}};
+class Csv;
+static std::mutex csvRegistry;static std::vector<Csv*> csvs;
+class Csv {
+ std::ofstream f;std::timed_mutex fileLock;std::mutex m;std::condition_variable cv;std::string pending;bool stop=false;std::thread writer;
+ void drain(std::string&batch){f<<batch;f.flush();batch.clear();}
+public:
+ Csv(const std::string&name,const char*header):f(path(name)){CHECK(f.good());f<<header;
+  {std::lock_guard<std::mutex> g(csvRegistry);csvs.push_back(this);}
+  writer=std::thread([this]{std::string batch;for(;;){bool last;{std::unique_lock<std::mutex> l(m);cv.wait_for(l,std::chrono::milliseconds(100),[this]{return stop;});batch.swap(pending);last=stop;}
+   {std::lock_guard<std::timed_mutex> g(fileLock);drain(batch);}if(last)return;}});}
+ Csv(const Csv&)=delete;Csv& operator=(const Csv&)=delete;
+ ~Csv(){{std::lock_guard<std::mutex> l(m);stop=true;}cv.notify_one();writer.join();{std::lock_guard<std::mutex> g(csvRegistry);csvs.erase(std::find(csvs.begin(),csvs.end(),this));}CHECK(f.good());}
+ void add(const Line&row){std::lock_guard<std::mutex> l(m);pending+=row.s;}
+ // Failure path only: bounded waits, never blocks the exit for long.
+ void emergencyFlush(){if(!fileLock.try_lock_for(std::chrono::milliseconds(500)))return;std::string batch;{std::unique_lock<std::mutex> l(m,std::try_to_lock);if(l)batch.swap(pending);}drain(batch);fileLock.unlock();}
+};
+static void flushCsvs(){static std::atomic<bool> once{false};if(once.exchange(true))return;std::unique_lock<std::mutex> g(csvRegistry,std::try_to_lock);if(!g)return;for(auto*c:csvs)c->emergencyFlush();}
 struct Resources {
  std::atomic<bool> done{false};std::thread worker;
 #ifdef _WIN32
@@ -182,14 +214,14 @@ struct Audio {
  void eos(){auto*b=gst_element_get_bus(pipe);auto*m=gst_bus_timed_pop_filtered(b,10*GST_SECOND,GstMessageType(GST_MESSAGE_EOS|GST_MESSAGE_ERROR));CHECK(m&&GST_MESSAGE_TYPE(m)==GST_MESSAGE_EOS);gst_message_unref(m);gst_object_unref(b);}
  ~Audio(){gst_element_set_state(pipe,GST_STATE_NULL);gst_object_unref(port);gst_object_unref(pipe);}
 };
-static void audioRow(std::ofstream&f,const Stamp&s,uint64_t arrival,uint64_t observed=UINT64_MAX,uint64_t mapped=UINT64_MAX){f<<s.id<<','<<s.pts<<','<<s.scheduled<<','<<s.source<<','<<arrival<<",480,1920,"<<(observed==UINT64_MAX?s.pts:observed)<<','<<(mapped==UINT64_MAX?s.pts:mapped)<<'\n';}
-static std::ofstream audioFile(){auto f=file(o.role+".audio.csv");f<<"identity,pts_ns,scheduled_ns,source_ns,arrival_ns,samples,bytes,observed_pts_ns,mapped_pts_ns\n";return f;}
-static void verifyAudio(GstBuffer*b,FlGstSession*s,unsigned n,std::ofstream&out){const auto arrival=now();GstMapInfo m{};CHECK(gst_buffer_map(b,&m,GST_MAP_READ)&&m.size==1920);Stamp stamp{};memcpy(&stamp,m.data,sizeof stamp);CHECK(stamp.magic==Stamp{}.magic&&stamp.id==n&&stamp.pts==tick(n,100));for(size_t i=sizeof stamp;i<m.size;++i)CHECK(m.data[i]==uint8_t(n+i));flSessionConfig cfg{};CHECK(fl_gst_session_get_config(s,&cfg)==FL_GST_SESSION_READY);gint64 mapped=0;CHECK(fl_gst_session_map_running_time(s,cfg.generation,stamp.pts,TRUE,&mapped)==FL_GST_SESSION_READY);CHECK(GST_BUFFER_PTS(b)==uint64_t(mapped)&&GST_BUFFER_DURATION(b)==10000000);audioRow(out,stamp,arrival,GST_BUFFER_PTS(b),uint64_t(mapped));gst_buffer_unmap(b,&m);}
+static void audioRow(Csv&f,const Stamp&s,uint64_t arrival,uint64_t observed=UINT64_MAX,uint64_t mapped=UINT64_MAX){Line l;l<<s.id<<','<<s.pts<<','<<s.scheduled<<','<<s.source<<','<<arrival<<",480,1920,"<<(observed==UINT64_MAX?s.pts:observed)<<','<<(mapped==UINT64_MAX?s.pts:mapped)<<'\n';f.add(l);}
+static Csv audioFile(){return Csv(o.role+".audio.csv","identity,pts_ns,scheduled_ns,source_ns,arrival_ns,samples,bytes,observed_pts_ns,mapped_pts_ns\n");}
+static void verifyAudio(GstBuffer*b,FlGstSession*s,unsigned n,Csv&out){const auto arrival=now();GstMapInfo m{};CHECK(gst_buffer_map(b,&m,GST_MAP_READ)&&m.size==1920);Stamp stamp{};memcpy(&stamp,m.data,sizeof stamp);CHECK(stamp.magic==Stamp{}.magic&&stamp.id==n&&stamp.pts==tick(n,100));for(size_t i=sizeof stamp;i<m.size;++i)CHECK(m.data[i]==uint8_t(n+i));flSessionConfig cfg{};CHECK(fl_gst_session_get_config(s,&cfg)==FL_GST_SESSION_READY);gint64 mapped=0;CHECK(fl_gst_session_map_running_time(s,cfg.generation,stamp.pts,TRUE,&mapped)==FL_GST_SESSION_READY);CHECK(GST_BUFFER_PTS(b)==uint64_t(mapped)&&GST_BUFFER_DURATION(b)==10000000);audioRow(out,stamp,arrival,GST_BUFFER_PTS(b),uint64_t(mapped));gst_buffer_unmap(b,&m);}
 static void summary(uint64_t count,bool held=false){auto f=file(o.role+".summary.json");f<<"{\"video\":"<<count<<",\"audio_blocks\":"<<o.seconds*100<<",\"pcm_frames\":"<<o.seconds*48000<<",\"terminal\":true,\"held_last_proof\":"<<(held?"true":"false")<<"}\n";}
-static std::ofstream videoFile(){auto f=file(o.role+".video.csv");f<<"identity,pts_ns,scheduled_ns,source_ns,arrival_ns,completed_ns,copy_bytes,sequence,slot,generation,dts_ns,duration_ns,lease,completion_value,mapped_pts_ns,acquire_begin_ns,acquired_ns,upload_begin_ns,uploaded_ns,submit_begin_ns,submitted_ns,forward_begin_ns,forwarded_ns,metadata_version,metadata_flags\n";return f;}
+static Csv videoFile(){return Csv(o.role+".video.csv","identity,pts_ns,scheduled_ns,source_ns,arrival_ns,completed_ns,copy_bytes,sequence,slot,generation,dts_ns,duration_ns,lease,completion_value,mapped_pts_ns,acquire_begin_ns,acquired_ns,upload_begin_ns,uploaded_ns,submit_begin_ns,submitted_ns,forward_begin_ns,forwarded_ns,metadata_version,metadata_flags\n");}
 struct Phases {uint64_t acquireBegin=0,acquired=0,uploadBegin=0,uploaded=0,submitBegin=0,submitted=0,forwardBegin=0,forwarded=0;};
-static void row(std::ofstream&f,const Stamp&s,uint64_t arrival,uint64_t completed,uint64_t bytes,const flFrame*frame=nullptr,const flFrameMetadata*meta=nullptr,uint64_t lease=0,uint64_t completion=0,uint64_t mapped=UINT64_MAX,Phases phases={}){f<<s.id<<','<<s.pts<<','<<s.scheduled<<','<<s.source<<','<<arrival<<','<<completed<<','<<bytes<<','<<(frame?frame->sequence:0)<<','<<(frame?frame->slot:0)<<','<<(meta?meta->streamGeneration:0)<<','<<(meta?meta->dtsNs:0)<<','<<(meta?meta->durationNs:0)<<','<<lease<<','<<completion<<','<<(mapped==UINT64_MAX?s.pts:mapped)<<','<<phases.acquireBegin<<','<<phases.acquired<<','<<phases.uploadBegin<<','<<phases.uploaded<<','<<phases.submitBegin<<','<<phases.submitted<<','<<phases.forwardBegin<<','<<phases.forwarded<<','<<(meta?meta->version:0)<<','<<(meta?meta->flags:0)<<'\n';}
-static void source(){auto c=caps();auto p=policy();GstFrameLinkMemoryPolicy bound{};auto*s=fl_gst_session_new(3);flChannel*channel=nullptr;GError*e=nullptr;CHECK(fl_gst_session_open_local_native(s,TRUE,path("input").c_str(),&c,1,2,80,10000,10000,&p,&bound,&channel,nullptr,&e));flSessionConfig cfg{};CHECK(fl_gst_session_get_config(s,&cfg)==FL_GST_SESSION_READY);
+static void row(Csv&f,const Stamp&s,uint64_t arrival,uint64_t completed,uint64_t bytes,const flFrame*frame=nullptr,const flFrameMetadata*meta=nullptr,uint64_t lease=0,uint64_t completion=0,uint64_t mapped=UINT64_MAX,Phases phases={}){Line l;l<<s.id<<','<<s.pts<<','<<s.scheduled<<','<<s.source<<','<<arrival<<','<<completed<<','<<bytes<<','<<(frame?frame->sequence:0)<<','<<(frame?frame->slot:0)<<','<<(meta?meta->streamGeneration:0)<<','<<(meta?meta->dtsNs:0)<<','<<(meta?meta->durationNs:0)<<','<<lease<<','<<completion<<','<<(mapped==UINT64_MAX?s.pts:mapped)<<','<<phases.acquireBegin<<','<<phases.acquired<<','<<phases.uploadBegin<<','<<phases.uploaded<<','<<phases.submitBegin<<','<<phases.submitted<<','<<phases.forwardBegin<<','<<phases.forwarded<<','<<(meta?meta->version:0)<<','<<(meta?meta->flags:0)<<'\n';f.add(l);}
+static void source(){auto c=caps();auto p=policy();GstFrameLinkMemoryPolicy bound{};auto*s=fl_gst_session_new(3);flChannel*channel=nullptr;GError*e=nullptr;CHECK(fl_gst_session_open_local_native(s,TRUE,path("input").c_str(),&c,o.queue,o.pool,80,10000,10000,&p,&bound,&channel,nullptr,&e));flSessionConfig cfg{};CHECK(fl_gst_session_get_config(s,&cfg)==FL_GST_SESSION_READY);
  {Audio audio(s,true);audio.start();std::vector<unsigned char> pixels(size_t(o.width)*o.height*(o.nv12?3:8)/2);auto out=videoFile();auto af=audioFile();CHECK(fl_gst_session_local_ready(s,TRUE,10000,nullptr));
 #ifdef _WIN32
  ComPtr<ID3D11DeviceContext> ctx;flChannelD3D11Device(channel)->GetImmediateContext(&ctx);
@@ -202,10 +234,11 @@ static void source(){auto c=caps();auto p=policy();GstFrameLinkMemoryPolicy boun
  // 100 ms apart, every buffer is free again, so the ring would hand back the
  // same slot each time: take another while a slot is still unused.
  {const auto start=now();std::set<uint32_t> used;for(unsigned k=0;k<PrerollSlow;++k){pace(start+k*PrerollIntervalNs);flBuffer b{};CHECK(flAcquireBuffer(channel,&b,2000)==FL_OK);
-   if(used.count(b.slot)&&used.size()<PoolSlots){flBuffer other{};CHECK(flAcquireBuffer(channel,&other,2000)==FL_OK&&!used.count(other.slot));CHECK(flCancelBuffer(channel,&b)==FL_OK);b=other;}
+   std::vector<flBuffer> spare;while(used.count(b.slot)&&used.size()<poolSlots()){spare.push_back(b);b=flBuffer{};CHECK(flAcquireBuffer(channel,&b,2000)==FL_OK);}
+   for(auto&x:spare)CHECK(flCancelBuffer(channel,&x)==FL_OK);
    used.insert(b.slot);
    prerollFrame(b,k);}
-  CHECK(used.size()==PoolSlots);}
+  CHECK(used.size()==poolSlots());}
  const unsigned fast=prerollTotal()-PrerollSlow;const auto fastStart=now()+tick(1,o.fps),epoch=fastStart+tick(fast,o.fps);
  std::thread pcm([&]{for(unsigned n=0;n<o.seconds*100;++n){pace(epoch+tick(n,100));auto*b=gst_buffer_new_allocate(nullptr,1920,nullptr);GstMapInfo m{};CHECK(gst_buffer_map(b,&m,GST_MAP_WRITE));for(size_t i=0;i<m.size;++i)m.data[i]=uint8_t(n+i);Stamp st{Stamp{}.magic,n,tick(n,100),epoch+tick(n,100),now()};memcpy(m.data,&st,sizeof st);gst_buffer_unmap(b,&m);GST_BUFFER_PTS(b)=st.pts;GST_BUFFER_DURATION(b)=10000000;CHECK(gst_app_src_push_buffer(GST_APP_SRC(audio.port),b)==GST_FLOW_OK);audioRow(af,st,now());}CHECK(gst_app_src_end_of_stream(GST_APP_SRC(audio.port))==GST_FLOW_OK);});
  // Pre-roll at the stream rate, straight into the epoch (PCM starts there).
@@ -215,7 +248,7 @@ static void source(){auto c=caps();auto p=policy();GstFrameLinkMemoryPolicy boun
  flClose(channel);g_object_unref(s);
 }
 #ifdef _WIN32
-static void receiver(){auto c=caps();auto p=policy();GstFrameLinkMemoryPolicy bound{};auto*s=fl_gst_session_new(3);flChannel*channel=nullptr;GError*e=nullptr;CHECK(fl_gst_session_open_local_native_pool_receiver(s,path("output").c_str(),&c,1,2,80,10000,10000,&p,&bound,&channel,nullptr,&e));flSessionConfig cfg{};CHECK(fl_gst_session_get_config(s,&cfg)==FL_GST_SESSION_READY);
+static void receiver(){auto c=caps();auto p=policy();GstFrameLinkMemoryPolicy bound{};auto*s=fl_gst_session_new(3);flChannel*channel=nullptr;GError*e=nullptr;CHECK(fl_gst_session_open_local_native_pool_receiver(s,path("output").c_str(),&c,o.queue,o.pool,80,10000,10000,&p,&bound,&channel,nullptr,&e));flSessionConfig cfg{};CHECK(fl_gst_session_get_config(s,&cfg)==FL_GST_SESSION_READY);
  {Audio audio(s,false);audio.start();auto out=videoFile();auto af=audioFile();ComPtr<ID3D11Device5> device;CHECK(SUCCEEDED(flChannelD3D11Device(channel)->QueryInterface(IID_PPV_ARGS(&device))));ComPtr<ID3D11DeviceContext> base;device->GetImmediateContext(&base);ComPtr<ID3D11DeviceContext4> ctx;CHECK(SUCCEEDED(base.As(&ctx)));ComPtr<ID3D11Fence> fence;CHECK(SUCCEEDED(device->CreateFence(0,D3D11_FENCE_FLAG_SHARED,IID_PPV_ARGS(&fence))));HANDLE fh=nullptr;CHECK(SUCCEEDED(fence->CreateSharedHandle(nullptr,GENERIC_ALL,nullptr,&fh)));D3D11_TEXTURE2D_DESC d{};d.Width=o.width;d.Height=o.height;d.MipLevels=d.ArraySize=d.SampleDesc.Count=1;d.Format=o.nv12?DXGI_FORMAT_NV12:DXGI_FORMAT_B8G8R8A8_UNORM;d.Usage=D3D11_USAGE_STAGING;d.CPUAccessFlags=D3D11_CPU_ACCESS_READ;ComPtr<ID3D11Texture2D> staging;CHECK(SUCCEEDED(device->CreateTexture2D(&d,nullptr,&staging)));CHECK(fl_gst_session_local_ready(s,FALSE,10000,nullptr));
  std::thread pcm([&]{for(unsigned n=0;n<o.seconds*100;++n){auto*sample=gst_app_sink_try_pull_sample(GST_APP_SINK(audio.port),10*GST_SECOND);CHECK(sample);verifyAudio(gst_sample_get_buffer(sample),s,n,af);gst_sample_unref(sample);}CHECK(!gst_app_sink_try_pull_sample(GST_APP_SINK(audio.port),10*GST_SECOND));CHECK(gst_app_sink_is_eos(GST_APP_SINK(audio.port)));});
  auto held=ev("held"),release=ev("release");uint64_t fenceValue=0;std::set<uint32_t> warmed;
@@ -226,7 +259,7 @@ static void receiver(){auto c=caps();auto p=policy();GstFrameLinkMemoryPolicy bo
   D3D11_MAPPED_SUBRESOURCE map{};CHECK(SUCCEEDED(ctx->Map(staging.Get(),0,D3D11_MAP_READ,0,&map)));Stamp st{};memcpy(&st,map.pData,sizeof st);ctx->Unmap(staging.Get(),0);
   CHECK(st.magic==Stamp{}.magic&&st.id>=PrerollId&&st.id<PrerollId+prerollTotal()&&st.pts==uint64_t(f.ptsNs));warmed.insert(f.slot);};
  auto acquireMeasured=[&](flFrame&f){for(;;){CHECK(flAcquireFrame(channel,&f,5000)==FL_OK);if(!isPreroll(f.ptsNs))break;warm(f);}
-  if(warmed.size()<PoolSlots)fprintf(stderr,"pre-roll read %zu of %u pool slots before the first measured frame\n",warmed.size(),PoolSlots);CHECK(warmed.size()==PoolSlots);};
+  if(warmed.size()<poolSlots())fprintf(stderr,"pre-roll read %zu of %u pool slots before the first measured frame\n",warmed.size(),poolSlots());CHECK(warmed.size()==poolSlots());};
  for(unsigned n=0;n<frames();++n){flFrame f{};acquireMeasured(f);auto arrived=now();CHECK(f.ptsNs==int64_t(vpts(n)));flFrameMetadata m{};CHECK(flGetFrameMetadata(channel,&f,&m)==FL_OK&&m.version==FL_FRAME_METADATA_VERSION&&m.flags==(FL_FRAME_HAS_DTS|FL_FRAME_HAS_DURATION)&&m.streamGeneration==cfg.generation&&m.dtsNs==f.ptsNs&&m.durationNs==tick(n+1,o.fps)-tick(n,o.fps));uint64_t lease=0;CHECK(flLeaseFrame(channel,&f,&lease)==FL_OK);ctx->CopyResource(staging.Get(),flImageD3D11(f.image));const uint64_t value=++fenceValue;CHECK(SUCCEEDED(ctx->Signal(fence.Get(),value)));ctx->Flush();
  // The final control tests native ownership, never manufactures completion.
  if(n+1==frames()){CHECK(SetEvent(held));wait(release);flFrame retained{};uint64_t generation=0;CHECK(flReadLeaseFrame(channel,lease,&retained,&generation)==FL_OK&&retained.ptsNs==f.ptsNs);}
@@ -257,7 +290,7 @@ using Readback=CpuReadback;
 #else
 using Readback=VulkanReadback;
 #endif
-static void receiver(){auto c=caps();auto p=policy();GstFrameLinkMemoryPolicy bound{};auto*s=fl_gst_session_new(3);flChannel*channel=nullptr;GError*e=nullptr;CHECK(fl_gst_session_open_local_native_pool_receiver(s,path("output").c_str(),&c,1,2,80,10000,10000,&p,&bound,&channel,nullptr,&e));flSessionConfig cfg{};CHECK(fl_gst_session_get_config(s,&cfg)==FL_GST_SESSION_READY);
+static void receiver(){auto c=caps();auto p=policy();GstFrameLinkMemoryPolicy bound{};auto*s=fl_gst_session_new(3);flChannel*channel=nullptr;GError*e=nullptr;CHECK(fl_gst_session_open_local_native_pool_receiver(s,path("output").c_str(),&c,o.queue,o.pool,80,10000,10000,&p,&bound,&channel,nullptr,&e));flSessionConfig cfg{};CHECK(fl_gst_session_get_config(s,&cfg)==FL_GST_SESSION_READY);
  {Audio audio(s,false);audio.start();auto out=videoFile();auto af=audioFile();CHECK(fl_gst_session_local_ready(s,FALSE,10000,nullptr));
  std::thread pcm([&]{for(unsigned n=0;n<o.seconds*100;++n){auto*sample=gst_app_sink_try_pull_sample(GST_APP_SINK(audio.port),10*GST_SECOND);CHECK(sample);verifyAudio(gst_sample_get_buffer(sample),s,n,af);gst_sample_unref(sample);}CHECK(!gst_app_sink_try_pull_sample(GST_APP_SINK(audio.port),10*GST_SECOND));CHECK(gst_app_sink_is_eos(GST_APP_SINK(audio.port)));});
  auto held=ev("held"),release=ev("release");const unsigned rowBytes=o.width*(o.nv12?1:4),rows=o.nv12?o.height*3/2:o.height;
@@ -269,7 +302,7 @@ static void receiver(){auto c=caps();auto p=policy();GstFrameLinkMemoryPolicy bo
   auto deadline=now()+5000000000ULL;flResult r=FL_BUSY;while(r==FL_BUSY){CHECK(now()<deadline);r=flCollectReadLeases(channel);if(r==FL_BUSY)Sleep(1);}CHECK(r==FL_OK);
   Stamp st{};memcpy(&st,readback.data(),sizeof st);CHECK(st.magic==Stamp{}.magic&&st.id>=PrerollId&&st.id<PrerollId+prerollTotal()&&st.pts==uint64_t(f.ptsNs));warmed.insert(f.slot);};
  auto acquireMeasured=[&](flFrame&f){for(;;){CHECK(flAcquireFrame(channel,&f,5000)==FL_OK);if(!isPreroll(f.ptsNs))break;warm(f);}
-  if(warmed.size()<PoolSlots)fprintf(stderr,"pre-roll read %zu of %u pool slots before the first measured frame\n",warmed.size(),PoolSlots);CHECK(warmed.size()==PoolSlots);};
+  if(warmed.size()<poolSlots())fprintf(stderr,"pre-roll read %zu of %u pool slots before the first measured frame\n",warmed.size(),poolSlots());CHECK(warmed.size()==poolSlots());};
  for(unsigned n=0;n<frames();++n){flFrame f{};acquireMeasured(f);auto arrived=now();
   if(f.ptsNs!=int64_t(vpts(n)))fprintf(stderr,"frame replaced: expected frame %u (pts %llu), received pts %lld sequence %llu slot %u, %.3f ms after the previous acquisition\n",n,(unsigned long long)vpts(n),(long long)f.ptsNs,(unsigned long long)f.sequence,f.slot,(arrived-lastArrival)/1e6);
   lastArrival=arrived;CHECK(f.ptsNs==int64_t(vpts(n)));flFrameMetadata m{};CHECK(flGetFrameMetadata(channel,&f,&m)==FL_OK&&m.version==FL_FRAME_METADATA_VERSION&&m.flags==(FL_FRAME_HAS_DTS|FL_FRAME_HAS_DURATION)&&m.streamGeneration==cfg.generation&&m.dtsNs==f.ptsNs&&m.durationNs==tick(n+1,o.fps)-tick(n,o.fps));uint64_t lease=0;CHECK(flLeaseFrame(channel,&f,&lease)==FL_OK);
@@ -303,13 +336,13 @@ static void receiver(){auto c=caps();auto p=policy();GstFrameLinkMemoryPolicy bo
 #endif
 static std::string quote(const std::string&s){CHECK(s.find('"')==std::string::npos);return "\""+s+"\"";}
 #ifdef _WIN32
-static PROCESS_INFORMATION spawn(const char*role,HANDLE job){char exe[MAX_PATH];CHECK(GetModuleFileNameA(nullptr,exe,MAX_PATH));std::string command=quote(exe)+" "+quote(o.plugin)+" --out "+quote(o.out)+" --role "+role+" --seconds "+std::to_string(o.seconds)+" --width "+std::to_string(o.width)+" --height "+std::to_string(o.height)+" --fps "+std::to_string(o.fps)+" --format "+formatName()+(o.trace?" --trace":"");STARTUPINFOA si{};si.cb=sizeof si;PROCESS_INFORMATION pi{};CHECK(CreateProcessA(nullptr,command.data(),nullptr,nullptr,FALSE,CREATE_SUSPENDED,nullptr,nullptr,&si,&pi));if(!AssignProcessToJobObject(job,pi.hProcess)){CHECK(TerminateProcess(pi.hProcess,1));wait(pi.hProcess);CloseHandle(pi.hThread);CloseHandle(pi.hProcess);CHECK(false);}if(ResumeThread(pi.hThread)==DWORD(-1)){CHECK(TerminateProcess(pi.hProcess,1));wait(pi.hProcess);CloseHandle(pi.hThread);CloseHandle(pi.hProcess);CHECK(false);}return pi;}
+static PROCESS_INFORMATION spawn(const char*role,HANDLE job){char exe[MAX_PATH];CHECK(GetModuleFileNameA(nullptr,exe,MAX_PATH));std::string command=quote(exe)+" "+quote(o.plugin)+" --out "+quote(o.out)+" --role "+role+" --seconds "+std::to_string(o.seconds)+" --width "+std::to_string(o.width)+" --height "+std::to_string(o.height)+" --fps "+std::to_string(o.fps)+" --format "+formatName()+" --pool "+std::to_string(o.pool)+" --video-queue "+std::to_string(o.queue)+(o.trace?" --trace":"");STARTUPINFOA si{};si.cb=sizeof si;PROCESS_INFORMATION pi{};CHECK(CreateProcessA(nullptr,command.data(),nullptr,nullptr,FALSE,CREATE_SUSPENDED,nullptr,nullptr,&si,&pi));if(!AssignProcessToJobObject(job,pi.hProcess)){CHECK(TerminateProcess(pi.hProcess,1));wait(pi.hProcess);CloseHandle(pi.hThread);CloseHandle(pi.hProcess);CHECK(false);}if(ResumeThread(pi.hThread)==DWORD(-1)){CHECK(TerminateProcess(pi.hProcess,1));wait(pi.hProcess);CloseHandle(pi.hThread);CloseHandle(pi.hProcess);CHECK(false);}return pi;}
 static void join(PROCESS_INFORMATION&p){wait(p.hProcess,15000);DWORD rc=1;CHECK(GetExitCodeProcess(p.hProcess,&rc)&&rc==0);CloseHandle(p.hThread);CloseHandle(p.hProcess);}
 #else
 // A child running this executable; it dies with the relay (its owner).
 struct Proc{pid_t pid=-1;};
 static Proc spawn(const char*role,int){const pid_t parent=getpid();
- std::vector<std::string> args={"/proc/self/exe",o.plugin,"--out",o.out,"--role",role,"--seconds",std::to_string(o.seconds),"--width",std::to_string(o.width),"--height",std::to_string(o.height),"--fps",std::to_string(o.fps),"--format",formatName()};if(o.trace)args.push_back("--trace");
+ std::vector<std::string> args={"/proc/self/exe",o.plugin,"--out",o.out,"--role",role,"--seconds",std::to_string(o.seconds),"--width",std::to_string(o.width),"--height",std::to_string(o.height),"--fps",std::to_string(o.fps),"--format",formatName(),"--pool",std::to_string(o.pool),"--video-queue",std::to_string(o.queue)};if(o.trace)args.push_back("--trace");
  Proc p;p.pid=fork();CHECK(p.pid>=0);
  if(!p.pid){prctl(PR_SET_PDEATHSIG,SIGKILL);if(getppid()!=parent)_exit(70);std::vector<char*> argv;for(auto&a:args)argv.push_back(const_cast<char*>(a.c_str()));argv.push_back(nullptr);execv("/proc/self/exe",argv.data());_exit(72);}
  return p;}
@@ -333,10 +366,10 @@ static void relay(){
 #else
  const int job=0;unlinkEvents(); // no stale events from an earlier run of this directory
 #endif
- auto sourceProcess=spawn("source",job),receiverProcess=spawn("receiver",job);auto c=caps();auto p=policy();auto*up=fl_gst_session_new(3);auto*down=fl_gst_session_new(3);flsample::LocalNativeRelaySetup setup{};GError*e=nullptr;CHECK(flsample::setupLocalNativeRelay(up,down,path("input").c_str(),path("output").c_str(),&c,&p,1,2,80,10000,10000,nullptr,&setup,&e));
+ auto sourceProcess=spawn("source",job),receiverProcess=spawn("receiver",job);auto c=caps();auto p=policy();auto*up=fl_gst_session_new(3);auto*down=fl_gst_session_new(3);flsample::LocalNativeRelaySetup setup{};GError*e=nullptr;CHECK(flsample::setupLocalNativeRelay(up,down,path("input").c_str(),path("output").c_str(),&c,&p,o.queue,o.pool,80,10000,10000,nullptr,&setup,&e));
  {flsample::SessionNativeRelay video(up,down,setup.input,setup.output,sameAllocation);CHECK(video.initialize()==FL_OK);Audio in(up,false),out(down,true,true);flsample::SessionPcmRelay pcm(up,down,GST_APP_SINK(in.port),GST_APP_SRC(out.port));CHECK(pcm.initialize()==FL_GST_SESSION_READY);out.start();in.start();flsample::SessionRelaySupervisor supervisor(up,down);CHECK(supervisor.start()==FL_GST_SESSION_READY);auto vf=videoFile();auto af=audioFile();
  // Observe incoming PCM on its serialized streaming thread without stealing it.
- struct Probe{FlGstSession*s;std::ofstream*f;unsigned n=0;} probe{up,&af};auto*pad=gst_element_get_static_pad(in.port,"sink");auto probeId=gst_pad_add_probe(pad,GST_PAD_PROBE_TYPE_BUFFER,[](GstPad*,GstPadProbeInfo*i,gpointer data){auto*p=static_cast<Probe*>(data);verifyAudio(GST_PAD_PROBE_INFO_BUFFER(i),p->s,p->n++,*p->f);return GST_PAD_PROBE_OK;},&probe,nullptr);
+ struct Probe{FlGstSession*s;Csv*f;unsigned n=0;} probe{up,&af};auto*pad=gst_element_get_static_pad(in.port,"sink");auto probeId=gst_pad_add_probe(pad,GST_PAD_PROBE_TYPE_BUFFER,[](GstPad*,GstPadProbeInfo*i,gpointer data){auto*p=static_cast<Probe*>(data);verifyAudio(GST_PAD_PROBE_INFO_BUFFER(i),p->s,p->n++,*p->f);return GST_PAD_PROBE_OK;},&probe,nullptr);
  CHECK(fl_gst_session_local_ready(down,TRUE,10000,nullptr)&&fl_gst_session_local_ready(up,FALSE,10000,nullptr));std::thread audioWorker([&]{auto deadline=now()+uint64_t(o.seconds+20)*1000000000;while(pcm.blockCount()<o.seconds*100){CHECK(now()<deadline);auto r=pcm.forward(20);CHECK(r==FL_GST_SESSION_READY||r==FL_GST_SESSION_TIMEOUT);}});
  // Pre-roll: forwarded like any frame, unrecorded.
  for(unsigned k=0;k<prerollTotal();++k){auto deadline=now()+5000000000ULL;flFrame f{};for(;;){CHECK(now()<deadline&&supervisor.status()==FL_GST_SESSION_READY);CHECK(video.collect()==FL_OK);auto r=flAcquireFrame(setup.input,&f,1);if(r==FL_OK)break;CHECK(r==FL_TIMEOUT);}
@@ -354,7 +387,7 @@ static void relay(){
 extern "C" {GST_PLUGIN_STATIC_DECLARE(framelink);GST_PLUGIN_STATIC_DECLARE(app);GST_PLUGIN_STATIC_DECLARE(coreelements);
 GST_PLUGIN_STATIC_DECLARE(gdp);GST_PLUGIN_STATIC_DECLARE(gio);}
 #endif
-int main(int argc,char**argv){CHECK(argc>=2);o.plugin=argv[1];for(int i=2;i<argc;++i){std::string k=argv[i];if(k=="--trace"){o.trace=true;continue;}CHECK(i+1<argc);std::string v=argv[++i];if(k=="--out")o.out=v;else if(k=="--role")o.role=v;else if(k=="--format"){CHECK(v=="BGRA"||v=="RGBA"||v=="NV12");o.nv12=v=="NV12";o.rgba=v=="RGBA";}else {char*end=nullptr;auto n=strtoul(v.c_str(),&end,10);CHECK(!v.empty()&&!*end&&n>0&&n<=100000);if(k=="--seconds")o.seconds=unsigned(n);else if(k=="--width")o.width=unsigned(n);else if(k=="--height")o.height=unsigned(n);else if(k=="--fps")o.fps=unsigned(n);else CHECK(false);}}CHECK(!o.out.empty()&&o.seconds<=1800&&(o.fps==30||o.fps==60)&&o.width>=64&&o.width<=3840&&o.height>=32&&o.height<=2160&&!(o.width%2)&&!(o.height%2));CHECK(o.role=="relay"||o.role=="source"||o.role=="receiver");o.out=fs::absolute(o.out).lexically_normal().string();if(o.role=="relay"){CHECK(fs::create_directory(o.out));auto f=file("config.json");f<<"{\"seconds\":"<<o.seconds<<",\"fps\":"<<o.fps<<",\"width\":"<<o.width<<",\"height\":"<<o.height<<",\"format\":\""<<formatName()<<"\",\"trace\":"<<(o.trace?"true":"false")<<",\"clock\":\""<<clockName<<"\",\"pool\":2,\"queue\":1,\"offset_ns\":37000000,\"preroll\":"<<prerollTotal()<<"}\n";}
+int main(int argc,char**argv){CHECK(argc>=2);o.plugin=argv[1];for(int i=2;i<argc;++i){std::string k=argv[i];if(k=="--trace"){o.trace=true;continue;}CHECK(i+1<argc);std::string v=argv[++i];if(k=="--out")o.out=v;else if(k=="--role")o.role=v;else if(k=="--format"){CHECK(v=="BGRA"||v=="RGBA"||v=="NV12");o.nv12=v=="NV12";o.rgba=v=="RGBA";}else {char*end=nullptr;auto n=strtoul(v.c_str(),&end,10);CHECK(!v.empty()&&!*end&&n>0&&n<=100000);if(k=="--seconds")o.seconds=unsigned(n);else if(k=="--width")o.width=unsigned(n);else if(k=="--height")o.height=unsigned(n);else if(k=="--fps")o.fps=unsigned(n);else if(k=="--pool")o.pool=unsigned(n);else if(k=="--video-queue")o.queue=unsigned(n);else CHECK(false);}}CHECK(!o.out.empty()&&o.seconds<=1800&&(o.fps==30||o.fps==60)&&o.width>=64&&o.width<=3840&&o.height>=32&&o.height<=2160&&!(o.width%2)&&!(o.height%2)&&o.pool>=2&&o.pool<=MaxPool&&o.queue<o.pool);CHECK(o.role=="relay"||o.role=="source"||o.role=="receiver");o.out=fs::absolute(o.out).lexically_normal().string();if(o.role=="relay"){CHECK(fs::create_directory(o.out));auto f=file("config.json");f<<"{\"seconds\":"<<o.seconds<<",\"fps\":"<<o.fps<<",\"width\":"<<o.width<<",\"height\":"<<o.height<<",\"format\":\""<<formatName()<<"\",\"trace\":"<<(o.trace?"true":"false")<<",\"clock\":\""<<clockName<<"\",\"pool\":"<<o.pool<<",\"queue\":"<<o.queue<<",\"offset_ns\":37000000,\"preroll\":"<<prerollTotal()<<"}\n";}
  #ifdef _WIN32
  FILE* log=nullptr;CHECK(freopen_s(&log,path(o.role+".stderr.log").c_str(),"w",stderr)==0);
 #else
