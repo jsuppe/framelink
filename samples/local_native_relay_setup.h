@@ -3,6 +3,8 @@
 #ifdef FL_GST_LOCAL_NATIVE_RELAY_POOL
 #ifdef _WIN32
 #include "framelink_d3d11.h"
+#elif defined(__ANDROID__)
+#include "framelink_ahb.h"
 #else
 #include "framelink_dmabuf.h"
 #endif
@@ -11,12 +13,18 @@
 
 namespace flsample {
 // The platform's consumer-pool snapshot: D3D11 shared handles on Windows,
-// DMA-BUF fds on desktop Linux. Same pinning contract on both.
+// DMA-BUF fds on desktop Linux, AHardwareBuffers on Android. Same pinning
+// contract on every platform.
 #ifdef _WIN32
 using LocalPoolSnapshot=flD3D11PoolSnapshot;
 inline flResult snapshotLocalPool(flChannel*c,LocalPoolSnapshot**s){return flSnapshotD3D11ConsumerPool(c,s);}
 inline flResult queryLocalPoolSnapshot(const LocalPoolSnapshot*s,flChannelInfo*i){return flQueryD3D11PoolSnapshot(s,i);}
 inline void releaseLocalPoolSnapshot(LocalPoolSnapshot*s){flReleaseD3D11PoolSnapshot(s);}
+#elif defined(__ANDROID__)
+using LocalPoolSnapshot=flAHardwareBufferPoolSnapshot;
+inline flResult snapshotLocalPool(flChannel*c,LocalPoolSnapshot**s){return flSnapshotAHardwareBufferConsumerPool(c,s);}
+inline flResult queryLocalPoolSnapshot(const LocalPoolSnapshot*s,flChannelInfo*i){return flQueryAHardwareBufferPoolSnapshot(s,i);}
+inline void releaseLocalPoolSnapshot(LocalPoolSnapshot*s){flReleaseAHardwareBufferPoolSnapshot(s);}
 #else
 using LocalPoolSnapshot=flDmabufPoolSnapshot;
 inline flResult snapshotLocalPool(flChannel*c,LocalPoolSnapshot**s){return flSnapshotDmabufConsumerPool(c,s);}
@@ -115,6 +123,17 @@ inline gboolean setupLocalNativeRelay(FlGstSession* up,FlGstSession* down,
   if(!check())return FALSE;
   if(!fl_gst_session_open_local_native_relay_pool(down,up,outputPath,caps,videoQueue,videoPool,
       audioQueueMs,remaining(),idleTimeoutMs,candidate,info.adapterLUID,handles.data(),
+      &value.outputPolicy,&value.output,cancel,error))
+    return fail(G_IO_ERROR_FAILED,"local native relay output setup failed");
+#elif defined(__ANDROID__)
+  std::array<AHardwareBuffer*,FL_MAX_POOL_SIZE> buffers{};
+  for(guint n=0;n<videoPool;++n){
+    buffers[videoPool-1-n]=flAHardwareBufferPoolSnapshotBuffer(value.snapshot,n);
+    if(!buffers[videoPool-1-n])return fail(G_IO_ERROR_INVALID_DATA,"local native relay snapshot contains no buffer");
+  }
+  if(!check())return FALSE;
+  if(!fl_gst_session_open_local_native_relay_pool_ahb(down,up,outputPath,caps,videoQueue,videoPool,
+      audioQueueMs,remaining(),idleTimeoutMs,candidate,buffers.data(),
       &value.outputPolicy,&value.output,cancel,error))
     return fail(G_IO_ERROR_FAILED,"local native relay output setup failed");
 #else
