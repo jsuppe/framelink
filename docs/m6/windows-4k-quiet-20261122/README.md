@@ -36,7 +36,7 @@ In the same seconds, Windows Update was installing Store app updates (Windows Te
 
 These are the **only two** VSS snapshots on the host between 15:00 and 23:59 today. Both stalls fall inside a snapshot's window, about 1 s before the restore point was reported. The formal cells ran from 21:18 to 22:18, with no snapshot, and passed.
 
-This is a correlation, not an established mechanism, and it does not explain the noisy-host failures earlier today: no VSS snapshot happened then. A plausible path is the snapshot's write freeze. Both stalled threads write a CSV row per frame or block. The source's earlier 474 ms stall was also between its submit and its next acquire, where the thread writes its CSV row. Confirming it would need per-phase stamps around the CSV writes, or a run with System Restore disabled. Both are the owner's decision.
+**Follow-up (2026-11-23):** a shadow copy created on purpose reproduced this, without FrameLink, as a 99 ms file write on one thread; the noisy-host stalls have a separate cause, a GPU-driver lock ([investigation](../windows-stall-investigation-20261123/README.md)). Original text: This is a correlation, not an established mechanism, and it does not explain the noisy-host failures earlier today: no VSS snapshot happened then. A plausible path is the snapshot's write freeze. Both stalled threads write a CSV row per frame or block. The source's earlier 474 ms stall was also between its submit and its next acquire, where the thread writes its CSV row. Confirming it would need per-phase stamps around the CSV writes, or a run with System Restore disabled. Both are the owner's decision.
 
 ## Verdict, for Jon
 

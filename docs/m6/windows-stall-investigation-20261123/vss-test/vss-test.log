@@ -1,0 +1,18 @@
+wpr start 0
+2026-11-23T13:08:25.1967 start 300 s, trigger 50 ms
+2026-11-23T13:09:25.4084 video max 0.33/0.17 ms (wake/write) >5ms 0 | pcm max 0.06/0.21 >5ms 0 | tick max 2.65 >20ms 0
+2026-11-23T13:10:25.6229 video max 0.33/0.17 ms (wake/write) >5ms 0 | pcm max 0.19/0.21 >5ms 0 | tick max 2.65 >20ms 0
+2026-11-23T13:11:25.8682 video max 0.33/0.17 ms (wake/write) >5ms 0 | pcm max 0.19/0.21 >5ms 0 | tick max 2.65 >20ms 0
+2026-11-23T13:11:27.9665 pcm write #18257 99.208 ms
+2026-11-23T13:11:27.9677 pcm wake #18258 90.349 ms
+2026-11-23T13:11:27.9681 pcm wake #18259 80.821 ms
+2026-11-23T13:11:27.9686 pcm wake #18260 71.263 ms
+2026-11-23T13:11:27.9691 pcm wake #18261 61.835 ms
+2026-11-23T13:11:27.9696 pcm wake #18262 52.302 ms
+2026-11-23T13:11:27.9706 pcm wake #18263 43.272 ms
+2026-11-23T13:11:27.9708 pcm wake #18264 33.456 ms
+2026-11-23T13:11:27.9709 pcm wake #18265 23.636 ms
+2026-11-23T13:11:27.9711 pcm wake #18266 13.819 ms
+2026-11-23T13:12:26.0594 video max 0.33/0.17 ms (wake/write) >5ms 0 | pcm max 90.35/99.21 >5ms 9 | tick max 2.65 >20ms 0
+2026-11-23T13:11:29.9679 saved <win-home>\dev\apichk\stallprobe\vss-test\stall-1.etl (stop=0 restart=0)
+2026-11-23T13:13:25.8578 done: video n=9001 wake max 0.33 ms >5ms 0 >20ms 0 write max 0.17 | pcm n=30000 wake max 90.35 >5ms 9 >20ms 8 write max 99.21 | tick n=155193 max 3.12 >20ms 0 | saves 1
