@@ -1,4 +1,4 @@
-# FrameLink project status — 2026-11-19
+# FrameLink project status — 2026-11-23
 
 This is the authoritative current-status page. Other documents link here instead of repeating status. Dated evidence folders (`docs/m*/…/README.md`) are records of their own date and are not updated.
 
@@ -18,6 +18,12 @@ This is the authoritative current-status page. Other documents link here instead
 3. M6.8b/8c: CPU-consumer ring memory on Linux and Android. 8b in progress: on 2026-11-18, GPU staging was added to the Linux A/V source and Android CPU-mappable rings were made cached ([evidence](m6/cpu-path/cpu-consumer-20261118/README.md)), and ring readback on Linux and Android reuses its CPU output buffers ([evidence](m6/cpu-path/cpu-output-reuse-20261118/README.md)). Push-to-pull stage costs are now within the 1080p60 and 4K30 frame budgets on both platforms. 8c started on Android ([evidence](m6/cpu-path/android-cpu-receiver-20261118/README.md)): the CPU receiver's 1800 s 1080p60 cell completes (21 arrival misses over 17 ms, no drops); the 4K30 cell failed (4 ring-full drops, 283 misses over 34 ms), then completed after the receiver prepared its output buffers at start (54000/54000, no drops, 83 misses over 34 ms; one run) ([evidence](m6/cpu-path/android-output-prepare-20261118/README.md)). A same-device BufferQueue baseline is recorded ([evidence](m6/cpu-path/android-bufferqueue-20261118/README.md)). Linux 8c has not started.
 4. Check the Linux/Android integration against the frozen Windows API `060c54e4`; any breaking change goes to Jon first. Done on 2026-11-19 at `4a944ab9`: no breaking change; the Windows exports and element surface are identical, and the frozen revision's 180 tests pass against the new DLLs. Jon decided all five recorded observations on 2026-11-19 ([evidence](m6/api-check-linux-android-20261119/README.md)): full native relay parity on Linux, then Android, as part of 9d (in progress, [plan](m6/linux-native-relay/README.md)); Linux exports only API symbols; public epoch and cancellable session calls; `flReconfigure` removed; `gpu-readback` registered on `framelinkavsrc` everywhere.
 5. Final-revision qualification: budget acceptance (M6.2b/2e), lifecycle (M6.3), faults (M6.4), 9d/9e and the acceptance review (M6.7c).
+
+**Latest measurements (2026-11-22, not yet the final-revision campaign):**
+- Native relay rate cells with the pre-roll at `0e8da988`: Linux 4/4, Android all cells, Windows 1080p60 2/2 ([plan](m6/WINDOWS_NATIVE_RELAY_RATE_PLAN.md#pre-roll-cells-on-every-platform)).
+- Windows 4K30 failed on the noisy host; the frozen binaries failed there too ([A/B](m6/windows-4k-ab-20261122/README.md)). On a quieted host both 4K30 cells passed 1800 s, while two A/B runs just before failed on 196 ms stalls coinciding with Windows Update restore points ([record](m6/windows-4k-quiet-20261122/README.md)). Qualification of Windows 4K30 is Jon's decision.
+- Primary-profile lifecycle at `e1284833` ([record](m6/lifecycle/primary-e128483/README.md)): native Linux 7/8, Android 4/4; shared CPU Linux 6/8, Android 7/8; held leases and shared-CPU 1800 s cells pass on both. Open: Linux storage-sized memory steps against the lifecycle gate, and one Android drain-report timeout.
+- Still to do in M6: faults (M6.4) on Linux and Android, budget acceptance (M6.2b/2e), 9e on the final revision, and the acceptance review (M6.7c).
 
 ## Current revisions
 | Repository | Revision | Notes |
