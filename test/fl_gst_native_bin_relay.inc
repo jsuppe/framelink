@@ -1,4 +1,4 @@
-// In-process GStreamer bin relays, shared by Windows (D3D11) and desktop Linux
+// In-process GStreamer bin relays, shared by Windows (D3D11), desktop Linux and Android
 // (DMA-BUF); included by fl_gst_native_relay.cpp. A real native producer
 // (framelinkavsink with native-memory, writing into its own pool) feeds a
 // first framelinkavsrc; the relay republishes each native reader GstMemory into
@@ -172,9 +172,7 @@ struct BrokerNativeBinRelay {
   auto*metadata=gst_buffer_get_framelink_frame_meta(vb);CHECK(metadata&&metadata->frame.streamGeneration==config.generation);
   auto*memory=gst_buffer_peek_memory(vb,0);CHECK(relaytest::isNativeMemory(memory));
   CHECK(relaytest::sameMemory(memory,gst_buffer_peek_memory(v,0)));
-  auto*meta=gst_buffer_get_video_meta(vb);GstMapInfo map{};CHECK(meta&&gst_memory_map(memory,&map,GST_MAP_READ));
-  for(unsigned y=0;y<32;++y)for(unsigned x=0;x<256;++x)CHECK(map.data[meta->offset[0]+y*meta->stride[0]+x]==n+1);
-  gst_memory_unmap(memory,&map);
+  auto*meta=gst_buffer_get_video_meta(vb);CHECK(meta);relaytest::checkNativePixels(memory,meta->offset[0],meta->stride[0],guint8(n+1));
   guint8 pcm[192]{};CHECK(gst_buffer_get_size(ab)==sizeof pcm&&gst_buffer_extract(ab,0,pcm,sizeof pcm)==sizeof pcm);
   for(auto value:pcm)CHECK(value==n+31);
   if(n==7)held=gst_memory_ref(memory);
@@ -247,7 +245,7 @@ struct BrokerNativeBinRelay {
   CHECK(gst_element_set_state(rx,GST_STATE_NULL)!=GST_STATE_CHANGE_FAILURE);
   for(auto*o:{input,video,audio,tx,rx})gst_object_unref(o);
   CHECK(native.finish()==FL_BUSY);
-  GstMapInfo map{};CHECK(gst_memory_map(held,&map,GST_MAP_READ));CHECK(map.data[0]==8);gst_memory_unmap(held,&map);
+  CHECK(relaytest::nativeFirstByte(held)==8);
   gst_memory_unref(held);held=nullptr;
   auto deadline=g_get_monotonic_time()+1000000;
   while(native.pending()){CHECK(g_get_monotonic_time()<deadline);CHECK(native.collect()==FL_OK);g_usleep(100);}
@@ -513,9 +511,7 @@ static void run(unsigned mode,bool leaseRelay=false){
    CHECK(gst_caps_features_contains(gst_caps_get_features(gst_sample_get_caps(vs),0),relaytest::nativeFeature()));
    auto*meta=gst_buffer_get_video_meta(vb);CHECK(meta&&meta->n_planes==1);
    // Explicit test-oracle readback, not a transport fallback. Respect device pitch.
-   GstMapInfo map{};CHECK(gst_memory_map(memory,&map,GST_MAP_READ));
-   for(unsigned y=0;y<32;++y)for(unsigned x=0;x<256;++x)CHECK(map.data[meta->offset[0]+y*meta->stride[0]+x]==n+1);
-   gst_memory_unmap(memory,&map);
+   relaytest::checkNativePixels(memory,meta->offset[0],meta->stride[0],guint8(n+1));
    if(n+1==count)retainedReceiver=gst_memory_ref(memory);
   }
   if(binRelay){

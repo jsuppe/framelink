@@ -4,6 +4,11 @@
 typedef struct {GstAllocator parent;} GstFrameLinkAhbAllocator;
 typedef struct {GstAllocatorClass parent;} GstFrameLinkAhbAllocatorClass;
 struct FrameLinkAhbMemory {GstMemory memory;AHardwareBuffer* buffer;};
+// Code linked against the plugin (samples, tests) uses the plugin's type:
+// define FL_GST_AHB_MEMORY_EXTERN before including this header.
+#ifdef FL_GST_AHB_MEMORY_EXTERN
+extern "C++" GType gst_framelink_ahb_allocator_get_type(void);
+#else
 G_DEFINE_TYPE(GstFrameLinkAhbAllocator,gst_framelink_ahb_allocator,GST_TYPE_ALLOCATOR)
 static gpointer ahbMap(GstMemory*,gsize,GstMapFlags){return nullptr;}
 static void ahbUnmap(GstMemory*){}
@@ -19,3 +24,4 @@ static void gst_framelink_ahb_allocator_init(GstFrameLinkAhbAllocator* self){
     a->mem_map=ahbMap;a->mem_unmap=ahbUnmap;a->mem_copy=ahbCopy;a->mem_share=ahbShare;
     GST_OBJECT_FLAG_SET(a,GST_ALLOCATOR_FLAG_CUSTOM_ALLOC);
 }
+#endif

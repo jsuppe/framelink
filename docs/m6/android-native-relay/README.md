@@ -83,3 +83,35 @@ AHardwareBuffer reader memory is deliberately not CPU-mappable, so the bin reade
   - a wrong role byte in the receiver's MAC check fails FAR5 setup;
   - a sender that sends the buffers in a different order from its offer is refused by the allocation-ID check, and now fails promptly on both sides. Before the `recvmsg` fix, the sender spun.
 - Linux: the 36 shared relay tests passed 3 repeated rounds under `-j8`. Windows: see the pull request.
+
+## Phase 4a (2026-11-21)
+
+**Controls and in-process bin relays on Android.** The pause controls (`local_bin_pause`, `local_bin_paused_cancel`) and the 13 in-process GStreamer bin relays run on Android under the shared names:
+- `bin`, `lease`, `bin_cancel`, `bin_events`, `bin_supervised_downstream`, `bin_supervised_upstream`;
+- `pool_lifetime`, `authenticated_pool`, `local_pool`;
+- `local_cancel_downstream`, `local_cancel_upstream`, `local_events`, `pool_controls`.
+
+All 28 Android relay tests now pass.
+
+**New Android samples**, the counterparts of the D3D11 and DMA-BUF ones, with the same rules:
+- `samples/native_ahb_relay_pool.h`: the export guard over the native AHardwareBuffer producer pool. It pins every unpublished reservation and refuses busy, partial, foreign or stale pools. `createNativeAhbRelayPool` builds the in-process same-allocation ring through `flCreateChannelFromHardwareBuffers`.
+- `samples/native_gst_ahb_relay.h`: the GStreamer read-lease adapter. It accepts only FrameLink AHardwareBuffer *reader* memory (never a producer reservation) and forwards by allocation ID.
+- `samples/native_ahb_relay_transfer.h`: the broker-keyed transfer over the phase 3 Android FAR5 transfer.
+
+The adapter's Android branches:
+- the caps feature `memory:FrameLinkAHardwareBuffer`;
+- a locked AHardwareBuffer write plus a signalled ready fd for the sink;
+- reader-memory and allocation identity by ID;
+- pixel checks by locking, since AHardwareBuffer reader memory is not CPU-mappable. The shared bin-relay source now uses `checkNativePixels` and `nativeFirstByte` on every platform; on Windows and Linux these are the same GStreamer map as before.
+
+`gst/fl_gst_ahb_memory.hpp` gains a declaration-only mode (`FL_GST_AHB_MEMORY_EXTERN`). Code linked against the static plugin, such as these samples and tests, uses the plugin's allocator type instead of defining a second one.
+
+**Checks:**
+- Tablet: all 28 Android relay tests pass, and 3 repeated rounds (84 of 84). Full Android suite 128 of 131: the known EGL skip and the known `gst_av_bench_smoke` failure, plus one `gst_av_parity` failure.
+- `gst_av_parity` is intermittent in its consumer-pause and burst cases: 3 of 10 runs failed on this branch, and **2 of 10 on master**, which has neither phase 3 nor phase 4a. So it is a pre-existing Android timing flake, not a regression; it is recorded as open.
+- Negative controls (temporary edits, reverted):
+  - matching the first reserved slot instead of the allocation ID fails `lease` (unrelated ring accepted) and `bin` (allocation identity);
+  - accepting a partially available pool fails the `FL_BUSY` check in `bin_supervised_downstream`;
+  - leaking one fd per pool setup fails `pool_lifetime`.
+- Linux: the 36 shared relay tests passed 3 repeated rounds under `-j8`.
+- Windows: build and exports unchanged (88, 47, 2); the 36 relay tests and 10 repeated rounds pass; the full suite failed only `m4_source_drift` (a timing test; it passed 3 of 3 repeats); the unchanged 060c54e4 suite against the new DLLs 180 of 180.
