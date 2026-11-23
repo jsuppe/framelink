@@ -1,0 +1,7 @@
+Host state recorded on the test host. "before" = before the listed applications were closed; "after" = after closing them, just before the run.
+processes before: 371 processes, 123 distinct names
+processes after: 338 processes, 114 distinct names
+  closed: EOSOverlayRenderer-Win64-Shipping, EpicGamesLauncher, EpicOnlineServicesUserHelper, EpicWebHelper, LM Studio, NVIDIA Broadcast, nssm, ollama, steam, steamservice, steamwebhelper
+  appeared: SearchFilterHost, SearchProtocolHost
+GPU clients before (nvidia-smi --query-compute-apps): ApplicationFrameHost.exe, Code.exe, CrossDeviceResume.exe, Discord.exe, EOSOverlayRenderer-Win64-Shipping.exe, EpicGamesLauncher.exe, EpicWebHelper.exe, LM Studio.exe, NVIDIA Broadcast.exe, NZXT CAM.exe, PhoneExperienceHost.exe, SearchHost.exe, ShellExperienceHost.exe, ShellHost.exe, StartMenuExperienceHost.exe, SystemSettings.exe, TextInputHost.exe, WindowsTerminal.exe, XboxPcTray.exe, chrome.exe, claude.exe, copilotapp.exe, copilotapphost.exe, dwm.exe, explorer.exe, firefox.exe, msedge.exe, msedgewebview2.exe, ollama.exe, steam.exe, steamwebhelper.exe
+GPU clients after (nvidia-smi --query-compute-apps): ApplicationFrameHost.exe, Code.exe, CrossDeviceResume.exe, Discord.exe, NZXT CAM.exe, PhoneExperienceHost.exe, SearchHost.exe, ShellExperienceHost.exe, ShellHost.exe, StartMenuExperienceHost.exe, SystemSettings.exe, TextInputHost.exe, WindowsTerminal.exe, XboxPcTray.exe, chrome.exe, claude.exe, copilotapp.exe, copilotapphost.exe, dwm.exe, explorer.exe, firefox.exe, msedge.exe, msedgewebview2.exe

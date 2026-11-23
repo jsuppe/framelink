@@ -1,0 +1,25 @@
+20:48:05.828 System Microsoft-Windows-WindowsUpdateClient 19: Installation Successful: Windows successfully installed the following update: 9NZKPSTSNW4P-Microsoft.XboxGamingOverlay
+20:48:05.221 System Microsoft-Windows-Ntfs 98: Volume Windows (\Device\HarddiskVolumeShadowCopy14) is healthy.  No action is needed.
+20:48:04.810 System Microsoft-Windows-Kernel-General 16: The access history in hive \??\<win-home>\AppData\Local\Packages\Microsoft.XboxGamingOverlay_8wekyb3d8bbwe\Settings\settings.dat was cleared updating 5 keys and creating 1 modified pages.
+20:48:04.717 System Service Control Manager 7040: The start type of the IsolationSession service was changed from demand start to auto start.
+20:48:04.580 System Microsoft-Windows-WindowsUpdateClient 43: Installation Started: Windows has started installing the following update: 9NZKPSTSNW4P-Microsoft.XboxGamingOverlay
+20:47:58.643 System Microsoft-Windows-WindowsUpdateClient 19: Installation Successful: Windows successfully installed the following update: 9WZDNCRD1HKW-Microsoft.XboxIdentityProvider
+20:47:58.643 System Microsoft-Windows-WindowsUpdateClient 44: Windows Update started downloading an update.
+20:47:56.178 System Microsoft-Windows-WindowsUpdateClient 20: Installation Failure: Windows failed to install the following update with error 0x80073D02: 9N0DX20HK701-Microsoft.WindowsTerminal.
+20:47:55.995 System Microsoft-Windows-Ntfs 98: Volume Windows (\Device\HarddiskVolumeShadowCopy13) is healthy.  No action is needed.
+20:47:55.910 System Microsoft-Windows-WindowsUpdateClient 43: Installation Started: Windows has started installing the following update: 9N0DX20HK701-Microsoft.WindowsTerminal
+20:47:49.265 System Microsoft-Windows-WindowsUpdateClient 44: Windows Update started downloading an update.
+20:47:49.265 System Microsoft-Windows-WindowsUpdateClient 44: Windows Update started downloading an update.
+20:47:49.108 System Microsoft-Windows-Kernel-General 16: The access history in hive \??\C:\ProgramData\Microsoft\Windows\AppRepository\Packages\Microsoft.XboxGamingOverlay_7.326.11042.0_x64__8wekyb3d8bbwe\ActivationStore.dat was cleared updating 0 keys and creating 0 modified pages.
+20:48:06.147 Application Microsoft-Windows-System-Restore 8300: Scoping started for shadowcopy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy14.
+20:48:05.207 Application Microsoft-Windows-AppXDeploymentServer/Operational 2562: 
+20:48:05.207 Application Microsoft-Windows-AppXDeploymentServer/Operational 2562: 
+20:48:05.207 Application Microsoft-Windows-AppXDeploymentServer/Operational 2562: 
+20:48:04.480 Application System Restore 8194: Successfully created restore point (Process = C:\windows\system32\svchost.exe -k netsvcs -p -s wuauserv; Description = Windows Update).
+20:48:01.571 Application VSS 8231: Volume Shadow Copy Service information: Snapshot creation initiated for Snapshot Set {870fb0ac-9da3-40f4-b881-040e01f73963}.
+20:47:58.428 Application System Restore 8216: Skipping creation of restore point (Process = C:\windows\system32\svchost.exe -k netsvcs -p -s wuauserv; Description = Windows Update) as there is a restore point avaliable which is recent enough for System Restore.
+20:47:58.233 Application Windows Error Reporting 1001: Fault bucket 1526417553331201922, type 5
+20:47:57.658 Application Windows Error Reporting 1001: Fault bucket , type 0
+20:47:55.802 Application System Restore 8194: Successfully created restore point (Process = C:\windows\system32\svchost.exe -k netsvcs -p -s wuauserv; Description = Windows Update).
+20:47:51.770 Application VSS 8231: Volume Shadow Copy Service information: Snapshot creation initiated for Snapshot Set {b8d9b063-5c31-48f4-903a-e542abf571fb}.
+20:47:45.471 Application Microsoft-Windows-Security-SPP 16394: Offline downlevel migration succeeded.
