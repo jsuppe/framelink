@@ -11,8 +11,11 @@ Cell sets:
   requirement  1080p60 and 4K30 cells (the project targets) and source-only references
   soak      the requirement cells as M6.2 soaks (use --seconds 1800 and --cells)
   lifecycle M6.3: 100 restart cycles of every native target cell (1080p60 and 4K30),
+            in the primary profile,
             restarting the producer and the consumer; gated on the frozen
             post-warm-up slopes (16 KB, 0.1 handles, 0.02 threads per cycle)
+  lifecycle-shared  the same cycles on the shared-CPU path, BGRA and NV12
+  shared-primary    shared-CPU target cells in the primary profile (use --seconds 1800)
 
 Examples:
   tools/m6_bench_matrix.py --build build --set baseline --platform linux --out base.json
@@ -48,14 +51,44 @@ SETS = {
 # producer process (long-lived consumer) and the consumer process (long-lived
 # producer). Desktop formats are BGRA and NV12; Android native output is RGBA.
 TARGETS = (("1080p60", "1920x1080", "60"), ("4k30", "3840x2160", "30"))
-def lifecycle_cells(formats):
-    return [(f"lifecycle-{size}-{fmt.lower()}-restart-{side}", ["--size", dims, "--fps", fps, "--format", fmt, "--mode", "bin",
-                                                                  "--native", "--cycles", "100", "--seconds", "5", "--restart", side])
+# The M6 primary profile: two slots, one unread frame, one output buffer, zero
+# configured latency, unsynchronized measurement sinks. The bench defaults
+# differ (buffered pool and queue, 150 ms latency), so cells pass it explicitly
+# and the runner checks that the summary reports it.
+PRIMARY = ["--pool", "2", "--video-queue", "1", "--output-queue-buffers", "1", "--latency-ms", "0", "--transport-only", "--no-output-preroll"]
+PRIMARY_SUMMARY = {"video.pool": "2", "video.queue": "1", "output.queue_buffers": "1", "playback.latency_ms": "0",
+                   "output.sync": "false", "output.async": "false"}
+def lifecycle_cells(formats, path="native"):
+    flag = "--native" if path == "native" else "--shared-cpu"
+    prefix = "lifecycle" if path == "native" else "lifecycle-shared"
+    return [(f"{prefix}-{size}-{fmt.lower()}-restart-{side}", ["--size", dims, "--fps", fps, "--format", fmt, "--mode", "bin", flag]
+             + PRIMARY + ["--cycles", "100", "--seconds", "5", "--restart", side])
             for size, dims, fps in TARGETS for fmt in formats for side in ("producer", "consumer")]
 SETS["lifecycle"] = lifecycle_cells(("BGRA", "NV12"))
+# Shared CPU (CPU producer, CPU consumer) lifecycle and 1800 s cells, BGRA and
+# NV12 on every platform, in the primary profile (the Windows advertised path).
+SETS["lifecycle-shared"] = lifecycle_cells(("BGRA", "NV12"), "shared")
+SETS["shared-primary"] = [(f"shared-{size}-{fmt.lower()}", ["--size", dims, "--fps", fps, "--format", fmt, "--mode", "bin", "--shared-cpu",
+                                                            "--arrival-budget-ms", "17" if fps == "60" else "34", "--raw"] + PRIMARY)
+                          for size, dims, fps in TARGETS for fmt in ("BGRA", "NV12")]
 # Frozen lifecycle gates on the long-lived peer, slopes per cycle after the
 # bench's five-cycle warm-up (docs/m6/lifecycle/linux-pilot/README.md).
 LIFECYCLE_LIMITS = {"long.mem.slope.kb_per_cycle": 16.0, "long.handles.slope.per_cycle": 0.1, "long.threads.slope.per_cycle": 0.02}
+def profile_check(opts, summary):
+    """Failures if a cell that requests the primary profile did not run it."""
+    if "--latency-ms" not in opts:
+        return []
+    return [f"profile: {k}={summary.get(k)} (wanted {v})" for k, v in PRIMARY_SUMMARY.items() if summary.get(k) != v]
+def miss_check(opts, summary):
+    """Zero-miss rule for cells with an arrival budget: complete, and no late video or audio."""
+    if "--arrival-budget-ms" not in opts or "--cycles" in opts:
+        return []
+    bad = [] if summary.get("complete") == "yes" else ["incomplete"]
+    for key in ("consumer.video.deadline_misses", "consumer.audio.deadline_misses"):
+        value = summary.get(key, "missing")
+        if not value.startswith("0/"):
+            bad.append(f"{key}={value}")
+    return bad
 def lifecycle_gate(summary):
     """Gate failures of a lifecycle summary: incomplete cycles or a slope over its limit."""
     if summary.get("complete") != "yes":
@@ -309,8 +342,9 @@ def record_cell(label, opts, rc, text, seconds, gpu):
     if rc != 0:
         record["output"] = text[-4000:]
     skipped = text.startswith("SKIP")
-    if "--cycles" in opts and not skipped:
-        record["gate_failures"] = lifecycle_gate(summary)
+    if not skipped:
+        record["gate_failures"] = (profile_check(opts, summary) + miss_check(opts, summary)
+                                   + (lifecycle_gate(summary) if "--cycles" in opts else []))
     state = "SKIP" if skipped else ("PASS" if rc == 0 and not record.get("gate_failures") else "FAIL")
     print(state, label, summary.get("config", ""), f"{record['seconds']}s", flush=True)
     for key in ("consumer.video.arrival.ms", "consumer.video.render_jitter.p1_p99.ms", "consumer.av_offset.abs.ms",
@@ -347,6 +381,8 @@ def main():
     args = ap.parse_args()
     if args.set == "lifecycle" and args.adb:
         cells = lifecycle_cells(("RGBA",))
+    elif args.set == "lifecycle-shared" and args.adb:
+        cells = lifecycle_cells(("BGRA", "NV12"), "shared")
     else:
         cells = list(SETS[args.set]) + (ANDROID_EXTRA.get(args.set, []) if args.adb else [])
     if args.cycles:

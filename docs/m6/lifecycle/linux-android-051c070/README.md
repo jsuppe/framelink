@@ -1,4 +1,4 @@
-# Linux and Android native lifecycle (M6.3a) — 2026-11-22
+# Linux and Android native lifecycle, buffered bench defaults — 2026-11-22
 
 Revision `051c0701` (clean tree). Its library, plugin and test code are identical to `0e8da988`, the revision of the [rate cells](../../linux-native-relay-rate-0e8da98/README.md); `051c0701` only widens the runner. The Linux plugin is byte-identical to the one in the rate cells (SHA-256 `f181428c…`).
 
@@ -6,7 +6,7 @@ Revision `051c0701` (clean tree). Its library, plugin and test code are identica
 - restarting the producer process, while a long-lived consumer is measured;
 - restarting the consumer process, while a long-lived producer is measured.
 
-The profile is the primary one: pool 2, unread 1, output 1, latency 0, sync and async off.
+**Profile: NOT the primary profile.** These cells ran with the bench's buffered defaults, because the runner did not pass the primary flags. Each summary records the actual settings: pool 8 at 1080p60 and 11 at 4K30, unread queue 5 and 9, output queue 0, latency 150 ms, synchronized sinks. The earlier [Linux](../linux/README.md) and [Android](../android-eos-fixed/README.md) records used the primary profile: pool 2, unread 1, output 1, latency 0. These results therefore do not qualify the primary profile. They stand as a record of the buffered configuration. The runner now passes the primary profile and rejects a cell whose summary reports another; the primary-profile rerun is recorded separately.
 
 **Gates**, frozen and now applied by the runner. A cell passes only if:
 - every cycle delivers exactly the expected media (300 or 150 video frames and 240 000 PCM samples) and reaches EOS;
