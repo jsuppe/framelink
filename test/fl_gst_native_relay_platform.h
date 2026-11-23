@@ -589,9 +589,6 @@ inline flResult createAuthenticatedRelayPool(bool producer,GstBufferPool*pool,co
 }
 
 
-#endif
-// Android: phase 4b of its relay parity work.
-#if defined(FL_GST_LOCAL_NATIVE_RELAY_POOL) && !defined(__ANDROID__)
 // ---- Broker-composed process relays ----
 
 // One value (a listening port) written by a child, read by its parent. The
@@ -658,6 +655,42 @@ struct SharedImages {
   for(int i=0;i<2;++i)if(compare(flImageSharedHandle(image),handles[i]))return i;
   return -1;
  }
+#elif defined(__ANDROID__)
+ // AHardwareBuffers cannot be inherited like fds: each child gets its own
+ // socket pair, into which both buffers are sent before it starts (queued
+ // messages stay readable after this end closes). arg() and inherited() name
+ // the same pending child end; the next child gets a fresh pair.
+ AHardwareBuffer*buffers[2]{};int pending=-1;unsigned pendingUses=0;
+ static AHardwareBuffer*allocate(){
+  AHardwareBuffer_Desc d{};d.width=64;d.height=32;d.layers=1;d.format=AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM;
+  d.usage=AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE|AHARDWAREBUFFER_USAGE_CPU_READ_OFTEN|AHARDWAREBUFFER_USAGE_CPU_WRITE_OFTEN;
+  AHardwareBuffer*b=nullptr;CHECK(AHardwareBuffer_allocate(&d,&b)==0&&b);return b;
+ }
+ SharedImages(){for(auto&b:buffers)b=allocate();}
+ explicit SharedImages(const char*arg){
+  const int fd=atoi(arg);CHECK(fd>=0);CHECK(fcntl(fd,F_SETFD,FD_CLOEXEC)==0);
+  for(auto&b:buffers){pollfd p{fd,POLLIN,0};CHECK(poll(&p,1,10000)==1);CHECK(AHardwareBuffer_recvHandleFromUnixSocket(fd,&b)==0&&b);}
+  close(fd);
+ }
+ ~SharedImages(){for(auto*b:buffers)if(b)AHardwareBuffer_release(b);if(pending>=0)close(pending);}
+ void prepare(){
+  if(pending>=0&&pendingUses<2){++pendingUses;return;}
+  if(pending>=0)close(pending);
+  int pair[2];CHECK(socketpair(AF_UNIX,SOCK_SEQPACKET|SOCK_CLOEXEC,0,pair)==0);
+  for(auto*b:buffers)CHECK(AHardwareBuffer_sendHandleToUnixSocket(b,pair[0])==0);
+  close(pair[0]);pending=pair[1];pendingUses=1;
+ }
+ std::string arg(){prepare();return std::to_string(pending);}
+ std::vector<NativeHandle> inherited(){prepare();return {pending};}
+ flChannel* adopt(const std::string&name,bool reversed,uint32_t flags)const{
+  AHardwareBuffer*b[2]={buffers[reversed?1:0],buffers[reversed?0:1]};flChannel*ch=nullptr;
+  CHECK(flCreateChannelFromHardwareBuffers(name.c_str(),64,32,FL_FORMAT_RGBA8,2,flags,b,&ch)==FL_OK);return ch;
+ }
+ int indexOf(flImage*image)const{
+  const uint64_t id=flsample::ahbAllocationId(flImageAHardwareBuffer(image));CHECK(id);
+  for(int i=0;i<2;++i)if(flsample::ahbAllocationId(buffers[i])==id)return i;
+  return -1;
+ }
 #else
  gbm_device*gbm=nullptr;int node=-1;gbm_bo*bo[2]{};flDmabuf images[2]{};
  SharedImages(){
@@ -715,6 +748,9 @@ struct SharedImages {
 #ifdef _WIN32
 using ReservationOwner=FrameLinkD3DProducer;
 using Reservation=FrameLinkD3DReservation;
+#elif defined(__ANDROID__)
+using ReservationOwner=FrameLinkAhbProducer;
+using Reservation=FrameLinkAhbReservation;
 #else
 using ReservationOwner=FrameLinkDmabufProducer;
 using Reservation=FrameLinkDmabufReservation;
@@ -724,6 +760,8 @@ inline Reservation* reservationOf(GstBuffer*b){
  auto*r=static_cast<Reservation*>(gst_mini_object_get_qdata(GST_MINI_OBJECT(memory),ReservationOwner::key()));CHECK(r);
 #ifdef _WIN32
  CHECK(gst_d3d11_memory_get_resource_handle(GST_D3D11_MEMORY_CAST(memory))==(ID3D11Resource*)flImageD3D11(r->buffer.image));
+#elif defined(__ANDROID__)
+ CHECK(flsample::ahbAllocationId(gst_framelink_memory_get_hardware_buffer(memory))==flsample::ahbAllocationId(flImageAHardwareBuffer(r->buffer.image)));
 #else
  flDmabuf d{};CHECK(flImageDmabuf(r->buffer.image,&d)==FL_OK);struct stat a{},b2{};
  CHECK(fstat(gst_dmabuf_memory_get_fd(memory),&a)==0&&fstat(d.fd[0],&b2)==0&&a.st_ino==b2.st_ino&&a.st_dev==b2.st_dev);
@@ -738,6 +776,14 @@ inline void uploadReservation(ReservationOwner&owner,GstBuffer*b,unsigned char v
  flChannelD3D11Device(owner.channel)->GetImmediateContext(&context);gst_d3d11_device_lock(owner.device);
  context->UpdateSubresource(flImageD3D11(image),0,nullptr,pixels.data(),256,0);
  gst_d3d11_device_unlock(owner.device);context->Release();
+#elif defined(__ANDROID__)
+ auto*ahb=flImageAHardwareBuffer(image);CHECK(ahb);AHardwareBuffer_Desc d{};AHardwareBuffer_describe(ahb,&d);void*data=nullptr;
+ CHECK(AHardwareBuffer_lock(ahb,AHARDWAREBUFFER_USAGE_CPU_WRITE_OFTEN,-1,nullptr,&data)==0&&data);
+ for(unsigned y=0;y<32;++y)memset(static_cast<char*>(data)+size_t(y)*d.stride*4,value,256);
+ CHECK(AHardwareBuffer_unlock(ahb,nullptr)==0);(void)b;
+ const int ready=eventfd(0,EFD_CLOEXEC|EFD_NONBLOCK);CHECK(ready>=0);
+ uint64_t one=1;CHECK(write(ready,&one,sizeof one)==sizeof one); // CPU writes are complete
+ CHECK(owner.setReady(b,ready));close(ready);
 #else
  (void)image;auto*mem=gst_buffer_peek_memory(b,0);const int fd=gst_dmabuf_memory_get_fd(mem);
  auto*layout=gst_buffer_get_video_meta(b);CHECK(layout);

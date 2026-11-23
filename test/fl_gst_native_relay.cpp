@@ -1,7 +1,6 @@
 // Shared local native relay tests: one source for every platform with the
 // relay (D3D11 on Windows, DMA-BUF on desktop Linux, AHardwareBuffer on
-// Android), selected by mode. Android runs the FAR4 and portable control modes
-// until its FAR5 parity work; the FAR5 modes need FL_GST_LOCAL_NATIVE_RELAY_POOL.
+// Android), selected by mode.
 // Platform-specific parts are in fl_gst_native_relay_platform.h; CMake
 // registers the same modes per platform under the platform suffix.
 //   --relay-local-session         FAR4 relay setup: exact upstream media/clock/
@@ -948,7 +947,7 @@ static void pauseControl(const char*plugin,bool cancelPaused){
 #ifdef FL_GST_LOCAL_NATIVE_RELAY_POOL
 #include "fl_gst_native_bin_relay.inc"
 #endif
-#if defined(FL_GST_LOCAL_NATIVE_RELAY_POOL) && !defined(__ANDROID__) // Android: phase 4b
+#ifdef FL_GST_LOCAL_NATIVE_RELAY_POOL
 #include "fl_gst_native_relay_av.inc"
 #include "fl_gst_native_relay_process.inc"
 #include "fl_gst_native_relay_automatic.inc"
@@ -986,9 +985,7 @@ int main(int argc,char**argv){
   relaytest::Gate notice(argv[4]),command(argv[5]),read(argv[6]);
   return controls::pauseReader(argv[3],notice,command,read,std::string(argv[7])=="1");
  }
-#ifndef __ANDROID__ // Android: phase 4b
  {int code=0;if(relayprocess::child(argc,argv,&code))return code;}
-#endif
 #endif
  if(argc==7&&(mode=="--relay-local-source"||mode=="--relay-local-source-av")){
   relaytest::Gate advance(argv[4]),published(argv[5]),retired(argv[6]);
@@ -1024,7 +1021,6 @@ int main(int argc,char**argv){
  if(mode=="--relay-local-cancel-upstream"){binrelay::run(14);return 0;}
  if(mode=="--relay-local-events"){binrelay::run(15);return 0;}
  if(mode=="--relay-pool-controls"){binrelay::relayPoolControls();return 0;}
-#ifndef __ANDROID__ // Android: phase 4b
  if(mode=="--relay-av-diagnostic"){relayav::nativeRelayAv(false);relayav::nativeRelayAv(true);for(unsigned fault=1;fault<=18;++fault)relayav::nativeRelayAv(false,fault);relayav::nativeRelayAv(true,14);return 0;}
  if(mode=="--relay-process-diagnostic"){relayprocess::run(argv[1],false);relayprocess::run(argv[1],true);return 0;}
  if(mode=="--relay-reservation-diagnostic"){relayprocess::run(argv[1],false,true);return 0;}
@@ -1033,7 +1029,6 @@ int main(int argc,char**argv){
  if(mode=="--relay-cancel-diagnostic"){relayprocess::run(argv[1],false,false,false,2);relayprocess::run(argv[1],false,true,false,2);return 0;}
  if(mode=="--relay-decoder-diagnostic"){if(!relayprocess::decoderAvailable())return 77;relayprocess::run(argv[1],false,true,true);return 0;}
  if(mode=="--automatic-relay-negative"){autorelay::negative();return 0;}
-#endif
 #endif
  fprintf(stderr,"unknown mode %s\n",mode.c_str());return 2;
 }

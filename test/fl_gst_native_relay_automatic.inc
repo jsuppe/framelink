@@ -57,9 +57,7 @@ struct Hop {
   CHECK(GST_BUFFER_DURATION(vb)==1000000&&GST_BUFFER_DURATION(ab)==1000000);
   CHECK(relaytest::isReaderMemory(gst_buffer_peek_memory(vb,0)));
   auto*meta=gst_buffer_get_video_meta(vb);CHECK(meta&&meta->n_planes==1);
-  GstMapInfo map{};auto*outmem=gst_buffer_peek_memory(vb,0);CHECK(gst_memory_map(outmem,&map,GST_MAP_READ));
-  for(unsigned y=0;y<32;++y)for(unsigned x=0;x<256;++x)CHECK(map.data[meta->offset[0]+y*meta->stride[0]+x]==value);
-  gst_memory_unmap(outmem,&map);guint8 bytes[192];CHECK(gst_buffer_get_size(ab)==192&&gst_buffer_extract(ab,0,bytes,192)==192);
+  relaytest::checkNativePixels(gst_buffer_peek_memory(vb,0),meta->offset[0],meta->stride[0],value);guint8 bytes[192];CHECK(gst_buffer_get_size(ab)==192&&gst_buffer_extract(ab,0,bytes,192)==192);
   for(auto b:bytes)CHECK(b==value+1);
   gst_sample_unref(as);return vs;
  }
@@ -91,10 +89,8 @@ static void negative(){
   CHECK(!gst_app_sink_try_pull_sample(GST_APP_SINK(second.vo),0));second.rejected=true;
   // The rejected shallow copy must not mutate the original metadata or pixels.
   CHECK(GST_BUFFER_PTS(source)==pts&&GST_BUFFER_DTS(source)==pts-100&&GST_BUFFER_DURATION(source)==1000000);
-  auto*meta=gst_buffer_get_video_meta(source);auto*memory=gst_buffer_peek_memory(source,0);GstMapInfo map{};
-  CHECK(meta&&gst_memory_map(memory,&map,GST_MAP_READ));
-  for(unsigned y=0;y<32;++y)for(unsigned x=0;x<256;++x)CHECK(map.data[meta->offset[0]+y*meta->stride[0]+x]==92);
-  gst_memory_unmap(memory,&map);
+  auto*meta=gst_buffer_get_video_meta(source);CHECK(meta);
+  relaytest::checkNativePixels(gst_buffer_peek_memory(source,0),meta->offset[0],meta->stride[0],92);
  }
  gst_sample_unref(incoming);
 }
