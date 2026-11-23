@@ -41,6 +41,7 @@
 #include <filesystem>
 #include <fstream>
 #include <thread>
+#include <set>
 #include <atomic>
 #include <vector>
 #include <string>
@@ -67,6 +68,23 @@ struct Options {unsigned seconds=2,width=64,height=32,fps=30;bool nv12=false,rgb
 static uint64_t tick(unsigned n,unsigned rate){return uint64_t(n)*1000000000ULL/rate;}
 static unsigned frames(){return o.seconds*o.fps;}
 static uint64_t vpts(unsigned n){return 37000000+tick(n,o.fps);}
+// Normalized pre-roll, every platform: before measurement the source
+// publishes marked frames below the measured timeline (PTS under 36 ms), never
+// recorded in the CSVs; the analyzer checks them separately.
+//  1. PrerollSlow frames 100 ms apart, cycling through every pool slot, so
+//     every process has used every pool buffer once (a first map can cost
+//     more than a frame interval on its own). At that spacing no hop skips one.
+//  2. Half a second at the stream's own rate, ending one interval before the
+//     epoch, so measurement starts on a running stream, not an idle system
+//     (on Android a task waking from idle is slow for its first frames).
+// The relay forwards every pre-roll frame (END counts them); the final reader
+// may skip some, but must have read every pool slot before measured frame 0.
+static constexpr unsigned PrerollSlow=8,PoolSlots=2;
+static constexpr uint64_t PrerollId=1ULL<<32,PrerollIntervalNs=100000000;
+static unsigned prerollTotal(){return PrerollSlow+o.fps/2;}
+static uint64_t prerollStep(){return 36000000/prerollTotal();}
+static uint64_t prerollPts(unsigned k){return uint64_t(k)*prerollStep();}
+static bool isPreroll(int64_t pts){return pts>=0&&pts<int64_t(vpts(0));}
 static std::string path(const std::string& n){return (fs::path(o.out)/n).string();}
 static std::string eventName(const char*n){uint64_t hash=14695981039346656037ULL;for(unsigned char c:o.out){hash^=c;hash*=1099511628211ULL;}return "FLNativeBench-"+std::to_string(hash)+"-"+n;}
 #ifdef _WIN32
@@ -128,6 +146,15 @@ struct Resources {
  ~Resources(){done=true;worker.join();}
 };
 struct Stamp {uint64_t magic=0x464c4e4154495645ULL,id,pts,scheduled,source;};
+// Exact check that every byte of [p, p+n) is v, vectorizable: OR of the XOR of
+// each 64-bit word with the repeated pattern (a CHECK per byte cannot be
+// vectorized and costs a frame interval at 1080p60 on a tablet).
+static bool filledWith(const unsigned char*p,size_t n,uint8_t v){
+ size_t i=0;for(;i<n&&(reinterpret_cast<uintptr_t>(p+i)&7);++i)if(p[i]!=v)return false;
+ const uint64_t pattern=0x0101010101010101ULL*v;uint64_t diff=0;
+ for(;i+8<=n;i+=8){uint64_t w;memcpy(&w,p+i,8);diff|=w^pattern;}
+ for(;i<n;++i)diff|=uint64_t(p[i]^v);return diff==0;
+}
 static flSessionCapabilities caps(){flSessionCapabilities c{};c.version=2;c.videoCount=c.audioCount=1;c.video[0]={static_cast<uint32_t>(videoFormat()),o.width,o.height,o.fps,1};c.audio[0]={FL_PCM_S16,48000,2};return c;}
 #ifdef _WIN32
 static constexpr uint32_t nativeResource=FL_MEMORY_D3D11;
@@ -163,30 +190,48 @@ static std::ofstream videoFile(){auto f=file(o.role+".video.csv");f<<"identity,p
 struct Phases {uint64_t acquireBegin=0,acquired=0,uploadBegin=0,uploaded=0,submitBegin=0,submitted=0,forwardBegin=0,forwarded=0;};
 static void row(std::ofstream&f,const Stamp&s,uint64_t arrival,uint64_t completed,uint64_t bytes,const flFrame*frame=nullptr,const flFrameMetadata*meta=nullptr,uint64_t lease=0,uint64_t completion=0,uint64_t mapped=UINT64_MAX,Phases phases={}){f<<s.id<<','<<s.pts<<','<<s.scheduled<<','<<s.source<<','<<arrival<<','<<completed<<','<<bytes<<','<<(frame?frame->sequence:0)<<','<<(frame?frame->slot:0)<<','<<(meta?meta->streamGeneration:0)<<','<<(meta?meta->dtsNs:0)<<','<<(meta?meta->durationNs:0)<<','<<lease<<','<<completion<<','<<(mapped==UINT64_MAX?s.pts:mapped)<<','<<phases.acquireBegin<<','<<phases.acquired<<','<<phases.uploadBegin<<','<<phases.uploaded<<','<<phases.submitBegin<<','<<phases.submitted<<','<<phases.forwardBegin<<','<<phases.forwarded<<','<<(meta?meta->version:0)<<','<<(meta?meta->flags:0)<<'\n';}
 static void source(){auto c=caps();auto p=policy();GstFrameLinkMemoryPolicy bound{};auto*s=fl_gst_session_new(3);flChannel*channel=nullptr;GError*e=nullptr;CHECK(fl_gst_session_open_local_native(s,TRUE,path("input").c_str(),&c,1,2,80,10000,10000,&p,&bound,&channel,nullptr,&e));flSessionConfig cfg{};CHECK(fl_gst_session_get_config(s,&cfg)==FL_GST_SESSION_READY);
- {Audio audio(s,true);audio.start();std::vector<unsigned char> pixels(size_t(o.width)*o.height*(o.nv12?3:8)/2);auto out=videoFile();auto af=audioFile();CHECK(fl_gst_session_local_ready(s,TRUE,10000,nullptr));const auto epoch=now()+200000000;
- std::thread pcm([&]{for(unsigned n=0;n<o.seconds*100;++n){pace(epoch+tick(n,100));auto*b=gst_buffer_new_allocate(nullptr,1920,nullptr);GstMapInfo m{};CHECK(gst_buffer_map(b,&m,GST_MAP_WRITE));for(size_t i=0;i<m.size;++i)m.data[i]=uint8_t(n+i);Stamp st{Stamp{}.magic,n,tick(n,100),epoch+tick(n,100),now()};memcpy(m.data,&st,sizeof st);gst_buffer_unmap(b,&m);GST_BUFFER_PTS(b)=st.pts;GST_BUFFER_DURATION(b)=10000000;CHECK(gst_app_src_push_buffer(GST_APP_SRC(audio.port),b)==GST_FLOW_OK);audioRow(af,st,now());}CHECK(gst_app_src_end_of_stream(GST_APP_SRC(audio.port))==GST_FLOW_OK);});
+ {Audio audio(s,true);audio.start();std::vector<unsigned char> pixels(size_t(o.width)*o.height*(o.nv12?3:8)/2);auto out=videoFile();auto af=audioFile();CHECK(fl_gst_session_local_ready(s,TRUE,10000,nullptr));
 #ifdef _WIN32
  ComPtr<ID3D11DeviceContext> ctx;flChannelD3D11Device(channel)->GetImmediateContext(&ctx);
-#endif
- for(unsigned n=0;n<frames();++n){pace(epoch+tick(n,o.fps));flBuffer b{};Phases phases{};phases.acquireBegin=now();auto acquireResult=flAcquireBuffer(channel,&b,2000);phases.acquired=now();CHECK(acquireResult==FL_OK);std::fill(pixels.begin(),pixels.end(),uint8_t(n));Stamp st{Stamp{}.magic,n,vpts(n),epoch+tick(n,o.fps),now()};memcpy(pixels.data(),&st,sizeof st);phases.uploadBegin=now();
-#ifdef _WIN32
- ctx->UpdateSubresource(flImageD3D11(b.image),0,nullptr,pixels.data(),o.width*(o.nv12?1:4),0);
+ auto upload=[&](flBuffer&b){ctx->UpdateSubresource(flImageD3D11(b.image),0,nullptr,pixels.data(),o.width*(o.nv12?1:4),0);};
 #else
- uploadMapped(b.image,pixels);
+ auto upload=[&](flBuffer&b){uploadMapped(b.image,pixels);};
 #endif
- phases.uploaded=now();flFrameMetadata meta{1,FL_FRAME_HAS_DTS|FL_FRAME_HAS_DURATION,int64_t(st.pts),tick(n+1,o.fps)-tick(n,o.fps),cfg.generation,{}};CHECK(flSetFrameMetadata(channel,&b,&meta)==FL_OK);phases.submitBegin=now();auto submitResult=flSubmit(channel,&b,st.pts);phases.submitted=now();CHECK(submitResult==FL_OK);gint64 mappedPts=0;CHECK(fl_gst_session_map_running_time(s,cfg.generation,st.pts,FALSE,&mappedPts)==FL_GST_SESSION_READY);row(out,st,now(),0,pixels.size(),nullptr,&meta,0,0,uint64_t(mappedPts),phases);}
- pcm.join();FlGstVideoEvent end{FL_GST_VIDEO_END,frames(),vpts(frames()-1),0};CHECK(fl_gst_session_send_video_event(s,cfg.generation,&end)==FL_GST_SESSION_READY);CHECK(fl_gst_session_video_eos(s,cfg.generation,frames(),vpts(frames()-1))==FL_GST_SESSION_READY);audio.eos();CHECK(fl_gst_session_finish_local(s,TRUE,10000,nullptr));summary(frames());}
+ auto prerollFrame=[&](flBuffer&b,unsigned k){std::fill(pixels.begin(),pixels.end(),uint8_t(0xA5));Stamp st{Stamp{}.magic,PrerollId+k,prerollPts(k),0,0};memcpy(pixels.data(),&st,sizeof st);upload(b);
+  flFrameMetadata meta{1,FL_FRAME_HAS_DTS|FL_FRAME_HAS_DURATION,int64_t(st.pts),prerollStep(),cfg.generation,{}};CHECK(flSetFrameMetadata(channel,&b,&meta)==FL_OK);CHECK(flSubmit(channel,&b,st.pts)==FL_OK);};
+ // 100 ms apart, every buffer is free again, so the ring would hand back the
+ // same slot each time: take another while a slot is still unused.
+ {const auto start=now();std::set<uint32_t> used;for(unsigned k=0;k<PrerollSlow;++k){pace(start+k*PrerollIntervalNs);flBuffer b{};CHECK(flAcquireBuffer(channel,&b,2000)==FL_OK);
+   if(used.count(b.slot)&&used.size()<PoolSlots){flBuffer other{};CHECK(flAcquireBuffer(channel,&other,2000)==FL_OK&&!used.count(other.slot));CHECK(flCancelBuffer(channel,&b)==FL_OK);b=other;}
+   used.insert(b.slot);
+   prerollFrame(b,k);}
+  CHECK(used.size()==PoolSlots);}
+ const unsigned fast=prerollTotal()-PrerollSlow;const auto fastStart=now()+tick(1,o.fps),epoch=fastStart+tick(fast,o.fps);
+ std::thread pcm([&]{for(unsigned n=0;n<o.seconds*100;++n){pace(epoch+tick(n,100));auto*b=gst_buffer_new_allocate(nullptr,1920,nullptr);GstMapInfo m{};CHECK(gst_buffer_map(b,&m,GST_MAP_WRITE));for(size_t i=0;i<m.size;++i)m.data[i]=uint8_t(n+i);Stamp st{Stamp{}.magic,n,tick(n,100),epoch+tick(n,100),now()};memcpy(m.data,&st,sizeof st);gst_buffer_unmap(b,&m);GST_BUFFER_PTS(b)=st.pts;GST_BUFFER_DURATION(b)=10000000;CHECK(gst_app_src_push_buffer(GST_APP_SRC(audio.port),b)==GST_FLOW_OK);audioRow(af,st,now());}CHECK(gst_app_src_end_of_stream(GST_APP_SRC(audio.port))==GST_FLOW_OK);});
+ // Pre-roll at the stream rate, straight into the epoch (PCM starts there).
+ for(unsigned j=0;j<fast;++j){pace(fastStart+tick(j,o.fps));flBuffer b{};CHECK(flAcquireBuffer(channel,&b,2000)==FL_OK);prerollFrame(b,PrerollSlow+j);}
+ for(unsigned n=0;n<frames();++n){pace(epoch+tick(n,o.fps));flBuffer b{};Phases phases{};phases.acquireBegin=now();auto acquireResult=flAcquireBuffer(channel,&b,2000);phases.acquired=now();CHECK(acquireResult==FL_OK);std::fill(pixels.begin(),pixels.end(),uint8_t(n));Stamp st{Stamp{}.magic,n,vpts(n),epoch+tick(n,o.fps),now()};memcpy(pixels.data(),&st,sizeof st);phases.uploadBegin=now();upload(b);phases.uploaded=now();flFrameMetadata meta{1,FL_FRAME_HAS_DTS|FL_FRAME_HAS_DURATION,int64_t(st.pts),tick(n+1,o.fps)-tick(n,o.fps),cfg.generation,{}};CHECK(flSetFrameMetadata(channel,&b,&meta)==FL_OK);phases.submitBegin=now();auto submitResult=flSubmit(channel,&b,st.pts);phases.submitted=now();CHECK(submitResult==FL_OK);gint64 mappedPts=0;CHECK(fl_gst_session_map_running_time(s,cfg.generation,st.pts,FALSE,&mappedPts)==FL_GST_SESSION_READY);row(out,st,now(),0,pixels.size(),nullptr,&meta,0,0,uint64_t(mappedPts),phases);}
+ pcm.join();FlGstVideoEvent end{FL_GST_VIDEO_END,prerollTotal()+frames(),vpts(frames()-1),0};CHECK(fl_gst_session_send_video_event(s,cfg.generation,&end)==FL_GST_SESSION_READY);CHECK(fl_gst_session_video_eos(s,cfg.generation,prerollTotal()+frames(),vpts(frames()-1))==FL_GST_SESSION_READY);audio.eos();CHECK(fl_gst_session_finish_local(s,TRUE,10000,nullptr));summary(frames());}
  flClose(channel);g_object_unref(s);
 }
 #ifdef _WIN32
 static void receiver(){auto c=caps();auto p=policy();GstFrameLinkMemoryPolicy bound{};auto*s=fl_gst_session_new(3);flChannel*channel=nullptr;GError*e=nullptr;CHECK(fl_gst_session_open_local_native_pool_receiver(s,path("output").c_str(),&c,1,2,80,10000,10000,&p,&bound,&channel,nullptr,&e));flSessionConfig cfg{};CHECK(fl_gst_session_get_config(s,&cfg)==FL_GST_SESSION_READY);
  {Audio audio(s,false);audio.start();auto out=videoFile();auto af=audioFile();ComPtr<ID3D11Device5> device;CHECK(SUCCEEDED(flChannelD3D11Device(channel)->QueryInterface(IID_PPV_ARGS(&device))));ComPtr<ID3D11DeviceContext> base;device->GetImmediateContext(&base);ComPtr<ID3D11DeviceContext4> ctx;CHECK(SUCCEEDED(base.As(&ctx)));ComPtr<ID3D11Fence> fence;CHECK(SUCCEEDED(device->CreateFence(0,D3D11_FENCE_FLAG_SHARED,IID_PPV_ARGS(&fence))));HANDLE fh=nullptr;CHECK(SUCCEEDED(fence->CreateSharedHandle(nullptr,GENERIC_ALL,nullptr,&fh)));D3D11_TEXTURE2D_DESC d{};d.Width=o.width;d.Height=o.height;d.MipLevels=d.ArraySize=d.SampleDesc.Count=1;d.Format=o.nv12?DXGI_FORMAT_NV12:DXGI_FORMAT_B8G8R8A8_UNORM;d.Usage=D3D11_USAGE_STAGING;d.CPUAccessFlags=D3D11_CPU_ACCESS_READ;ComPtr<ID3D11Texture2D> staging;CHECK(SUCCEEDED(device->CreateTexture2D(&d,nullptr,&staging)));CHECK(fl_gst_session_local_ready(s,FALSE,10000,nullptr));
  std::thread pcm([&]{for(unsigned n=0;n<o.seconds*100;++n){auto*sample=gst_app_sink_try_pull_sample(GST_APP_SINK(audio.port),10*GST_SECOND);CHECK(sample);verifyAudio(gst_sample_get_buffer(sample),s,n,af);gst_sample_unref(sample);}CHECK(!gst_app_sink_try_pull_sample(GST_APP_SINK(audio.port),10*GST_SECOND));CHECK(gst_app_sink_is_eos(GST_APP_SINK(audio.port)));});
- auto held=ev("held"),release=ev("release");for(unsigned n=0;n<frames();++n){flFrame f{};CHECK(flAcquireFrame(channel,&f,5000)==FL_OK);auto arrived=now();CHECK(f.ptsNs==int64_t(vpts(n)));flFrameMetadata m{};CHECK(flGetFrameMetadata(channel,&f,&m)==FL_OK&&m.version==FL_FRAME_METADATA_VERSION&&m.flags==(FL_FRAME_HAS_DTS|FL_FRAME_HAS_DURATION)&&m.streamGeneration==cfg.generation&&m.dtsNs==f.ptsNs&&m.durationNs==tick(n+1,o.fps)-tick(n,o.fps));uint64_t lease=0;CHECK(flLeaseFrame(channel,&f,&lease)==FL_OK);ctx->CopyResource(staging.Get(),flImageD3D11(f.image));CHECK(SUCCEEDED(ctx->Signal(fence.Get(),n+1)));ctx->Flush();
+ auto held=ev("held"),release=ev("release");uint64_t fenceValue=0;std::set<uint32_t> warmed;
+ // Pre-roll: verify each marked frame like a measured one (staging copy and
+ // shared-fence completion), unrecorded; then require every pool slot read.
+ auto warm=[&](flFrame&f){uint64_t lease=0;CHECK(flLeaseFrame(channel,&f,&lease)==FL_OK);ctx->CopyResource(staging.Get(),flImageD3D11(f.image));const uint64_t value=++fenceValue;CHECK(SUCCEEDED(ctx->Signal(fence.Get(),value)));ctx->Flush();
+  CHECK(flCompleteReadLeaseD3D11Fence(channel,lease,fh,value)==FL_OK);auto deadline=now()+5000000000ULL;flResult r=FL_BUSY;while(r==FL_BUSY){CHECK(now()<deadline);r=flCollectReadLeases(channel);if(r==FL_BUSY)Sleep(1);}CHECK(r==FL_OK);
+  D3D11_MAPPED_SUBRESOURCE map{};CHECK(SUCCEEDED(ctx->Map(staging.Get(),0,D3D11_MAP_READ,0,&map)));Stamp st{};memcpy(&st,map.pData,sizeof st);ctx->Unmap(staging.Get(),0);
+  CHECK(st.magic==Stamp{}.magic&&st.id>=PrerollId&&st.id<PrerollId+prerollTotal()&&st.pts==uint64_t(f.ptsNs));warmed.insert(f.slot);};
+ auto acquireMeasured=[&](flFrame&f){for(;;){CHECK(flAcquireFrame(channel,&f,5000)==FL_OK);if(!isPreroll(f.ptsNs))break;warm(f);}
+  if(warmed.size()<PoolSlots)fprintf(stderr,"pre-roll read %zu of %u pool slots before the first measured frame\n",warmed.size(),PoolSlots);CHECK(warmed.size()==PoolSlots);};
+ for(unsigned n=0;n<frames();++n){flFrame f{};acquireMeasured(f);auto arrived=now();CHECK(f.ptsNs==int64_t(vpts(n)));flFrameMetadata m{};CHECK(flGetFrameMetadata(channel,&f,&m)==FL_OK&&m.version==FL_FRAME_METADATA_VERSION&&m.flags==(FL_FRAME_HAS_DTS|FL_FRAME_HAS_DURATION)&&m.streamGeneration==cfg.generation&&m.dtsNs==f.ptsNs&&m.durationNs==tick(n+1,o.fps)-tick(n,o.fps));uint64_t lease=0;CHECK(flLeaseFrame(channel,&f,&lease)==FL_OK);ctx->CopyResource(staging.Get(),flImageD3D11(f.image));const uint64_t value=++fenceValue;CHECK(SUCCEEDED(ctx->Signal(fence.Get(),value)));ctx->Flush();
  // The final control tests native ownership, never manufactures completion.
  if(n+1==frames()){CHECK(SetEvent(held));wait(release);flFrame retained{};uint64_t generation=0;CHECK(flReadLeaseFrame(channel,lease,&retained,&generation)==FL_OK&&retained.ptsNs==f.ptsNs);}
- CHECK(flCompleteReadLeaseD3D11Fence(channel,lease,fh,n+1)==FL_OK);auto deadline=now()+5000000000ULL;flResult r=FL_BUSY;while(r==FL_BUSY){CHECK(now()<deadline);r=flCollectReadLeases(channel);if(r==FL_BUSY)Sleep(1);}CHECK(r==FL_OK);const auto completed=now();D3D11_MAPPED_SUBRESOURCE map{};CHECK(SUCCEEDED(ctx->Map(staging.Get(),0,D3D11_MAP_READ,0,&map)));Stamp st{};memcpy(&st,map.pData,sizeof st);CHECK(st.magic==Stamp{}.magic&&st.id==n&&st.pts==vpts(n));const unsigned rowBytes=o.width*(o.nv12?1:4),rows=o.nv12?o.height*3/2:o.height;for(unsigned y=0;y<rows;++y)for(unsigned x=0;x<rowBytes;++x)if(y||x>=sizeof st)CHECK(static_cast<unsigned char*>(map.pData)[size_t(y)*map.RowPitch+x]==uint8_t(n));ctx->Unmap(staging.Get(),0);gint64 mappedPts=0;CHECK(fl_gst_session_map_running_time(s,cfg.generation,st.pts,TRUE,&mappedPts)==FL_GST_SESSION_READY);row(out,st,arrived,completed,uint64_t(rowBytes)*rows,&f,&m,lease,n+1,uint64_t(mappedPts));}
- pcm.join();audio.eos();FlGstVideoEvent end{};CHECK(fl_gst_session_receive_video_event(s,cfg.generation,10000,&end)==FL_GST_SESSION_READY&&end.kind==FL_GST_VIDEO_END&&end.afterFrames==frames()&&end.ptsNs==vpts(frames()-1));guint64 count=0;gint64 last=0;CHECK(fl_gst_session_wait_video_eos(s,cfg.generation,10000,&count,&last)==FL_GST_SESSION_READY&&count==frames()&&last==int64_t(vpts(frames()-1)));CHECK(fl_gst_session_finish_local(s,FALSE,10000,nullptr));CloseHandle(held);CloseHandle(release);CloseHandle(fh);summary(count,true);}
+ CHECK(flCompleteReadLeaseD3D11Fence(channel,lease,fh,value)==FL_OK);auto deadline=now()+5000000000ULL;flResult r=FL_BUSY;while(r==FL_BUSY){CHECK(now()<deadline);r=flCollectReadLeases(channel);if(r==FL_BUSY)Sleep(1);}CHECK(r==FL_OK);const auto completed=now();D3D11_MAPPED_SUBRESOURCE map{};CHECK(SUCCEEDED(ctx->Map(staging.Get(),0,D3D11_MAP_READ,0,&map)));Stamp st{};memcpy(&st,map.pData,sizeof st);CHECK(st.magic==Stamp{}.magic&&st.id==n&&st.pts==vpts(n));const unsigned rowBytes=o.width*(o.nv12?1:4),rows=o.nv12?o.height*3/2:o.height;for(unsigned y=0;y<rows;++y){const size_t skip=y?0:sizeof st;CHECK(filledWith(static_cast<unsigned char*>(map.pData)+size_t(y)*map.RowPitch+skip,rowBytes-skip,uint8_t(n)));}ctx->Unmap(staging.Get(),0);gint64 mappedPts=0;CHECK(fl_gst_session_map_running_time(s,cfg.generation,st.pts,TRUE,&mappedPts)==FL_GST_SESSION_READY);row(out,st,arrived,completed,uint64_t(rowBytes)*rows,&f,&m,lease,value,uint64_t(mappedPts));}
+ pcm.join();audio.eos();FlGstVideoEvent end{};CHECK(fl_gst_session_receive_video_event(s,cfg.generation,10000,&end)==FL_GST_SESSION_READY&&end.kind==FL_GST_VIDEO_END&&end.afterFrames==prerollTotal()+frames()&&end.ptsNs==vpts(frames()-1));guint64 count=0;gint64 last=0;CHECK(fl_gst_session_wait_video_eos(s,cfg.generation,10000,&count,&last)==FL_GST_SESSION_READY&&count==prerollTotal()+frames()&&last==int64_t(vpts(frames()-1)));CHECK(fl_gst_session_finish_local(s,FALSE,10000,nullptr));CloseHandle(held);CloseHandle(release);CloseHandle(fh);summary(count-prerollTotal(),true);}
  flClose(channel);g_object_unref(s);
 }
 #else
@@ -216,8 +261,16 @@ static void receiver(){auto c=caps();auto p=policy();GstFrameLinkMemoryPolicy bo
  {Audio audio(s,false);audio.start();auto out=videoFile();auto af=audioFile();CHECK(fl_gst_session_local_ready(s,FALSE,10000,nullptr));
  std::thread pcm([&]{for(unsigned n=0;n<o.seconds*100;++n){auto*sample=gst_app_sink_try_pull_sample(GST_APP_SINK(audio.port),10*GST_SECOND);CHECK(sample);verifyAudio(gst_sample_get_buffer(sample),s,n,af);gst_sample_unref(sample);}CHECK(!gst_app_sink_try_pull_sample(GST_APP_SINK(audio.port),10*GST_SECOND));CHECK(gst_app_sink_is_eos(GST_APP_SINK(audio.port)));});
  auto held=ev("held"),release=ev("release");const unsigned rowBytes=o.width*(o.nv12?1:4),rows=o.nv12?o.height*3/2:o.height;
- Readback readback;readback.start(channel,size_t(rowBytes)*rows);uint64_t lastArrival=now();const bool diagnose=getenv("FL_BENCH_DIAG")!=nullptr;
- for(unsigned n=0;n<frames();++n){flFrame f{};CHECK(flAcquireFrame(channel,&f,5000)==FL_OK);auto arrived=now();
+ Readback readback;readback.start(channel,size_t(rowBytes)*rows);uint64_t lastArrival=now();const bool diagnose=getenv("FL_BENCH_DIAG")!=nullptr;std::set<uint32_t> warmed;
+ // Pre-roll: verify each marked frame like a measured one, unrecorded; then
+ // require every pool slot read before measured frame 0.
+ auto warm=[&](flFrame&f){uint64_t lease=0;CHECK(flLeaseFrame(channel,&f,&lease)==FL_OK);const int done=readback.copy(channel,f,o.nv12,o.width,o.height);
+  CHECK((done>=0?flCompleteReadLeaseSyncFd(channel,lease,done):flCompleteReadLease(channel,lease))==FL_OK);if(done>=0)close(done);
+  auto deadline=now()+5000000000ULL;flResult r=FL_BUSY;while(r==FL_BUSY){CHECK(now()<deadline);r=flCollectReadLeases(channel);if(r==FL_BUSY)Sleep(1);}CHECK(r==FL_OK);
+  Stamp st{};memcpy(&st,readback.data(),sizeof st);CHECK(st.magic==Stamp{}.magic&&st.id>=PrerollId&&st.id<PrerollId+prerollTotal()&&st.pts==uint64_t(f.ptsNs));warmed.insert(f.slot);};
+ auto acquireMeasured=[&](flFrame&f){for(;;){CHECK(flAcquireFrame(channel,&f,5000)==FL_OK);if(!isPreroll(f.ptsNs))break;warm(f);}
+  if(warmed.size()<PoolSlots)fprintf(stderr,"pre-roll read %zu of %u pool slots before the first measured frame\n",warmed.size(),PoolSlots);CHECK(warmed.size()==PoolSlots);};
+ for(unsigned n=0;n<frames();++n){flFrame f{};acquireMeasured(f);auto arrived=now();
   if(f.ptsNs!=int64_t(vpts(n)))fprintf(stderr,"frame replaced: expected frame %u (pts %llu), received pts %lld sequence %llu slot %u, %.3f ms after the previous acquisition\n",n,(unsigned long long)vpts(n),(long long)f.ptsNs,(unsigned long long)f.sequence,f.slot,(arrived-lastArrival)/1e6);
   lastArrival=arrived;CHECK(f.ptsNs==int64_t(vpts(n)));flFrameMetadata m{};CHECK(flGetFrameMetadata(channel,&f,&m)==FL_OK&&m.version==FL_FRAME_METADATA_VERSION&&m.flags==(FL_FRAME_HAS_DTS|FL_FRAME_HAS_DURATION)&&m.streamGeneration==cfg.generation&&m.dtsNs==f.ptsNs&&m.durationNs==tick(n+1,o.fps)-tick(n,o.fps));uint64_t lease=0;CHECK(flLeaseFrame(channel,&f,&lease)==FL_OK);
   // Explicit GPU verification copy into host memory (the Windows staging
@@ -242,9 +295,9 @@ static void receiver(){auto c=caps();auto p=policy();GstFrameLinkMemoryPolicy bo
   if(!(st.magic==Stamp{}.magic&&st.id==n&&st.pts==vpts(n)))fprintf(stderr,"content mismatch: expected frame %u, copy holds magic=%llx id=%llu pts=%llu fill=%u last=%u; slot=%u sequence=%llu lease=%llu\n",n,
    (unsigned long long)st.magic,(unsigned long long)st.id,(unsigned long long)st.pts,copied[sizeof st],copied[size_t(rowBytes)*rows-1],f.slot,(unsigned long long)f.sequence,(unsigned long long)lease);
   CHECK(st.magic==Stamp{}.magic&&st.id==n&&st.pts==vpts(n));
-  for(size_t i=sizeof st;i<size_t(rowBytes)*rows;++i)CHECK(copied[i]==uint8_t(n));
+  CHECK(filledWith(copied+sizeof st,size_t(rowBytes)*rows-sizeof st,uint8_t(n)));
   gint64 mappedPts=0;CHECK(fl_gst_session_map_running_time(s,cfg.generation,st.pts,TRUE,&mappedPts)==FL_GST_SESSION_READY);row(out,st,arrived,completed,uint64_t(rowBytes)*rows,&f,&m,lease,n+1,uint64_t(mappedPts));}
- pcm.join();audio.eos();FlGstVideoEvent end{};CHECK(fl_gst_session_receive_video_event(s,cfg.generation,10000,&end)==FL_GST_SESSION_READY&&end.kind==FL_GST_VIDEO_END&&end.afterFrames==frames()&&end.ptsNs==vpts(frames()-1));guint64 count=0;gint64 last=0;CHECK(fl_gst_session_wait_video_eos(s,cfg.generation,10000,&count,&last)==FL_GST_SESSION_READY&&count==frames()&&last==int64_t(vpts(frames()-1)));CHECK(fl_gst_session_finish_local(s,FALSE,10000,nullptr));closeEvent(held);closeEvent(release);summary(count,true);}
+ pcm.join();audio.eos();FlGstVideoEvent end{};CHECK(fl_gst_session_receive_video_event(s,cfg.generation,10000,&end)==FL_GST_SESSION_READY&&end.kind==FL_GST_VIDEO_END&&end.afterFrames==prerollTotal()+frames()&&end.ptsNs==vpts(frames()-1));guint64 count=0;gint64 last=0;CHECK(fl_gst_session_wait_video_eos(s,cfg.generation,10000,&count,&last)==FL_GST_SESSION_READY&&count==prerollTotal()+frames()&&last==int64_t(vpts(frames()-1)));CHECK(fl_gst_session_finish_local(s,FALSE,10000,nullptr));closeEvent(held);closeEvent(release);summary(count-prerollTotal(),true);}
  flClose(channel);g_object_unref(s);
 }
 #endif
@@ -285,6 +338,9 @@ static void relay(){
  // Observe incoming PCM on its serialized streaming thread without stealing it.
  struct Probe{FlGstSession*s;std::ofstream*f;unsigned n=0;} probe{up,&af};auto*pad=gst_element_get_static_pad(in.port,"sink");auto probeId=gst_pad_add_probe(pad,GST_PAD_PROBE_TYPE_BUFFER,[](GstPad*,GstPadProbeInfo*i,gpointer data){auto*p=static_cast<Probe*>(data);verifyAudio(GST_PAD_PROBE_INFO_BUFFER(i),p->s,p->n++,*p->f);return GST_PAD_PROBE_OK;},&probe,nullptr);
  CHECK(fl_gst_session_local_ready(down,TRUE,10000,nullptr)&&fl_gst_session_local_ready(up,FALSE,10000,nullptr));std::thread audioWorker([&]{auto deadline=now()+uint64_t(o.seconds+20)*1000000000;while(pcm.blockCount()<o.seconds*100){CHECK(now()<deadline);auto r=pcm.forward(20);CHECK(r==FL_GST_SESSION_READY||r==FL_GST_SESSION_TIMEOUT);}});
+ // Pre-roll: forwarded like any frame, unrecorded.
+ for(unsigned k=0;k<prerollTotal();++k){auto deadline=now()+5000000000ULL;flFrame f{};for(;;){CHECK(now()<deadline&&supervisor.status()==FL_GST_SESSION_READY);CHECK(video.collect()==FL_OK);auto r=flAcquireFrame(setup.input,&f,1);if(r==FL_OK)break;CHECK(r==FL_TIMEOUT);}
+  if(f.ptsNs!=int64_t(prerollPts(k)))fprintf(stderr,"pre-roll frame %u skipped: received pts %lld sequence %llu\n",k,(long long)f.ptsNs,(unsigned long long)f.sequence);CHECK(f.ptsNs==int64_t(prerollPts(k)));CHECK(video.forward(f)==FL_OK);}
  for(unsigned n=0;n<frames();++n){auto deadline=now()+5000000000ULL;flFrame f{};for(;;){CHECK(now()<deadline&&supervisor.status()==FL_GST_SESSION_READY);CHECK(video.collect()==FL_OK);auto r=flAcquireFrame(setup.input,&f,1);if(r==FL_OK)break;CHECK(r==FL_TIMEOUT);}auto arrival=now();CHECK(f.ptsNs==int64_t(vpts(n)));flFrameMetadata meta{};CHECK(flGetFrameMetadata(setup.input,&f,&meta)==FL_OK);CHECK(meta.version==FL_FRAME_METADATA_VERSION&&meta.flags==(FL_FRAME_HAS_DTS|FL_FRAME_HAS_DURATION)&&meta.dtsNs==f.ptsNs&&meta.durationNs==tick(n+1,o.fps)-tick(n,o.fps));Phases phases{};phases.forwardBegin=now();auto forwardResult=video.forward(f);phases.forwarded=now();CHECK(forwardResult==FL_OK);Stamp st{Stamp{}.magic,n,vpts(n),0,0};gint64 mappedUp=0,mappedDown=0;CHECK(fl_gst_session_map_running_time(up,meta.streamGeneration,st.pts,TRUE,&mappedUp)==FL_GST_SESSION_READY);CHECK(fl_gst_session_map_running_time(down,meta.streamGeneration,st.pts,FALSE,&mappedDown)==FL_GST_SESSION_READY&&mappedUp==mappedDown);row(vf,st,arrival,now(),0,&f,&meta,0,0,uint64_t(mappedUp),phases);}
  auto held=ev("held"),release=ev("release");wait(held);CHECK(video.collect()==FL_OK&&video.pending()>=1);CHECK(video.collect()==FL_OK&&video.pending()>=1);signalEvent(release);auto deadline=now()+10000000000ULL;while(video.pending()){CHECK(now()<deadline);CHECK(video.collect()==FL_OK);Sleep(1);}audioWorker.join();CHECK(video.forwardEvent(10000)==FL_GST_SESSION_READY&&video.videoEnded());in.eos();CHECK(pcm.blockCount()==o.seconds*100&&pcm.frameCount()==uint64_t(o.seconds)*48000&&pcm.byteCount()==uint64_t(o.seconds)*192000);CHECK(pcm.finish(video,10000)==FL_GST_SESSION_READY);out.eos();CHECK(video.finish()==FL_OK);supervisor.stop();CHECK(supervisor.status()==FL_GST_SESSION_READY);CHECK(fl_gst_session_finish_local(down,TRUE,10000,nullptr)&&fl_gst_session_finish_local(up,FALSE,10000,nullptr));gst_pad_remove_probe(pad,probeId);gst_object_unref(pad);CHECK(probe.n==o.seconds*100);closeEvent(held);closeEvent(release);summary(frames(),true);}
  join(receiverProcess);join(sourceProcess);flsample::releaseLocalPoolSnapshot(setup.snapshot);flClose(setup.output);flClose(setup.input);g_object_unref(down);g_object_unref(up);
@@ -298,7 +354,7 @@ static void relay(){
 extern "C" {GST_PLUGIN_STATIC_DECLARE(framelink);GST_PLUGIN_STATIC_DECLARE(app);GST_PLUGIN_STATIC_DECLARE(coreelements);
 GST_PLUGIN_STATIC_DECLARE(gdp);GST_PLUGIN_STATIC_DECLARE(gio);}
 #endif
-int main(int argc,char**argv){CHECK(argc>=2);o.plugin=argv[1];for(int i=2;i<argc;++i){std::string k=argv[i];if(k=="--trace"){o.trace=true;continue;}CHECK(i+1<argc);std::string v=argv[++i];if(k=="--out")o.out=v;else if(k=="--role")o.role=v;else if(k=="--format"){CHECK(v=="BGRA"||v=="RGBA"||v=="NV12");o.nv12=v=="NV12";o.rgba=v=="RGBA";}else {char*end=nullptr;auto n=strtoul(v.c_str(),&end,10);CHECK(!v.empty()&&!*end&&n>0&&n<=100000);if(k=="--seconds")o.seconds=unsigned(n);else if(k=="--width")o.width=unsigned(n);else if(k=="--height")o.height=unsigned(n);else if(k=="--fps")o.fps=unsigned(n);else CHECK(false);}}CHECK(!o.out.empty()&&o.seconds<=1800&&(o.fps==30||o.fps==60)&&o.width>=64&&o.width<=3840&&o.height>=32&&o.height<=2160&&!(o.width%2)&&!(o.height%2));CHECK(o.role=="relay"||o.role=="source"||o.role=="receiver");o.out=fs::absolute(o.out).lexically_normal().string();if(o.role=="relay"){CHECK(fs::create_directory(o.out));auto f=file("config.json");f<<"{\"seconds\":"<<o.seconds<<",\"fps\":"<<o.fps<<",\"width\":"<<o.width<<",\"height\":"<<o.height<<",\"format\":\""<<formatName()<<"\",\"trace\":"<<(o.trace?"true":"false")<<",\"clock\":\""<<clockName<<"\",\"pool\":2,\"queue\":1,\"offset_ns\":37000000}\n";}
+int main(int argc,char**argv){CHECK(argc>=2);o.plugin=argv[1];for(int i=2;i<argc;++i){std::string k=argv[i];if(k=="--trace"){o.trace=true;continue;}CHECK(i+1<argc);std::string v=argv[++i];if(k=="--out")o.out=v;else if(k=="--role")o.role=v;else if(k=="--format"){CHECK(v=="BGRA"||v=="RGBA"||v=="NV12");o.nv12=v=="NV12";o.rgba=v=="RGBA";}else {char*end=nullptr;auto n=strtoul(v.c_str(),&end,10);CHECK(!v.empty()&&!*end&&n>0&&n<=100000);if(k=="--seconds")o.seconds=unsigned(n);else if(k=="--width")o.width=unsigned(n);else if(k=="--height")o.height=unsigned(n);else if(k=="--fps")o.fps=unsigned(n);else CHECK(false);}}CHECK(!o.out.empty()&&o.seconds<=1800&&(o.fps==30||o.fps==60)&&o.width>=64&&o.width<=3840&&o.height>=32&&o.height<=2160&&!(o.width%2)&&!(o.height%2));CHECK(o.role=="relay"||o.role=="source"||o.role=="receiver");o.out=fs::absolute(o.out).lexically_normal().string();if(o.role=="relay"){CHECK(fs::create_directory(o.out));auto f=file("config.json");f<<"{\"seconds\":"<<o.seconds<<",\"fps\":"<<o.fps<<",\"width\":"<<o.width<<",\"height\":"<<o.height<<",\"format\":\""<<formatName()<<"\",\"trace\":"<<(o.trace?"true":"false")<<",\"clock\":\""<<clockName<<"\",\"pool\":2,\"queue\":1,\"offset_ns\":37000000,\"preroll\":"<<prerollTotal()<<"}\n";}
  #ifdef _WIN32
  FILE* log=nullptr;CHECK(freopen_s(&log,path(o.role+".stderr.log").c_str(),"w",stderr)==0);
 #else

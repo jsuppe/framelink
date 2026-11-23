@@ -1,0 +1,121 @@
+{
+ "environment": {
+  "revision": "0e8da988353c69d6d456ed9b3d291192dad090bd",
+  "dirty": false,
+  "platform": "Android 15 (API 35)",
+  "exe_sha256": "3cb8223f6722d9bd00eeb06e9b273d6647671f7d15056392c9bb3e6203d0899f",
+  "plugin_sha256": "static (linked into the harness)",
+  "duration": 1800,
+  "cells": [
+   "rgba1080p30",
+   "nv12-1080p30",
+   "rgba1080p60",
+   "nv12-1080p60"
+  ],
+  "device": "8483A",
+  "build_fingerprint": "TCL/8483A_FCA/Lugh_FHD_WiFi:15/AP3A.240905.015.A2/BUBI:user/release-keys",
+  "gpu": "Mediatek MT8786V/N; ARM, Mali-G52 MC2, OpenGL ES 3.2 v1.r49p1-03bet0.19498e0ae1d5dac223383c39a2e58f04.Ifa5212ba194f2c4f4196a413ce1fd2464",
+  "gstreamer": "GStreamer 1.24.13 (static, Android)"
+ },
+ "cells": [
+  {
+   "cell": "rgba1080p30",
+   "preflight": true,
+   "trace": true,
+   "duration": true,
+   "duration_error": null,
+   "slopes": {
+    "source": {
+     "memory_kb": 0.3278266945632935,
+     "handles": 0.0,
+     "threads": 0.0
+    },
+    "relay": {
+     "memory_kb": 0.27573393837312316,
+     "handles": -0.0022547613508771772,
+     "threads": 0.0
+    },
+    "receiver": {
+     "memory_kb": 0.0,
+     "handles": 0.001802998441290682,
+     "threads": 0.0
+    }
+   },
+   "arrival": {
+    "p50": 8.661617,
+    "p95": 11.059221,
+    "p99": 11.749605,
+    "max": 17.319863
+   }
+  },
+  {
+   "cell": "nv12-1080p30",
+   "preflight": true,
+   "trace": true,
+   "duration": true,
+   "duration_error": null,
+   "slopes": {
+    "source": {
+     "memory_kb": 0.6001048503393415,
+     "handles": 0.0,
+     "threads": 0.0
+    },
+    "relay": {
+     "memory_kb": 0.6598221623175119,
+     "handles": 0.00037824434254716985,
+     "threads": 0.0
+    },
+    "receiver": {
+     "memory_kb": 0.015765473101436733,
+     "handles": 0.0023348871274024253,
+     "threads": 0.0
+    }
+   },
+   "arrival": {
+    "p50": 9.822481,
+    "p95": 12.511044,
+    "p99": 13.237652,
+    "max": 17.02425
+   }
+  },
+  {
+   "cell": "rgba1080p60",
+   "preflight": true,
+   "trace": true,
+   "duration": false,
+   "duration_error": "arrival diagnostic misses: video=[] audio=[51848]",
+   "slopes": {},
+   "arrival": null
+  },
+  {
+   "cell": "nv12-1080p60",
+   "preflight": true,
+   "trace": true,
+   "duration": true,
+   "duration_error": null,
+   "slopes": {
+    "source": {
+     "memory_kb": 0.7384785827391491,
+     "handles": 0.0,
+     "threads": 0.0
+    },
+    "relay": {
+     "memory_kb": 0.20080238331666034,
+     "handles": -6.691922521295275e-05,
+     "threads": 0.0
+    },
+    "receiver": {
+     "memory_kb": 0.48828948518556914,
+     "handles": 0.0028081729484497886,
+     "threads": 0.0
+    }
+   },
+   "arrival": {
+    "p50": 8.716002,
+    "p95": 10.492388,
+    "p99": 11.030334,
+    "max": 15.870598
+   }
+  }
+ ]
+}

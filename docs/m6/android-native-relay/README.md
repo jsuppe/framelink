@@ -181,3 +181,8 @@ The build links `videotestsrc`, `x264` and `videoparsersbad` statically when the
 The paced FAR4 → FAR5 harness and cell runner now run on Android (`fl_gst_local_native_bench_android`, `tools/run_local_native_rate_cells.py --adb`). The cells are RGBA and NV12 at 1080p30 and 1080p60. Result at `a50f6555` ([evidence](../android-native-relay-rate-a50f655/README.md)):
 - **1080p30 passes 1800 s in both formats.** Zero misses and zero lost frames; arrival p99 9.9 ms (RGBA) and 10.7 ms (NV12) against 34 ms; resource slopes near zero.
 - **1080p60 fails in both formats**, at startup only. The first use of each pool buffer delays the receiver, and frame 1 is replaced. Steady state fits the budget: the trace-on RGBA run has p99 11.3 ms after frame 2. A pre-roll would change the frozen profile and is left for a decision.
+
+**With the pre-roll.** Jon approved a pre-roll on every platform. It is now part of the frozen profile ([amendment](../WINDOWS_NATIVE_RELAY_RATE_PLAN.md#frozen-observable-requirements)). Result at `0e8da988` ([evidence](../android-native-relay-rate-0e8da98/README.md)):
+- **Three of four cells pass 1800 s:** RGBA and NV12 1080p30, and NV12 1080p60. Arrival p99 is 11.75, 13.24 and 11.03 ms; resource slopes are near zero.
+- **The startup failure is gone.** All four 60 fps short runs pass, and frame 1 arrives within budget in every 60 fps run.
+- **RGBA 1080p60 fails** on one audio block, 17.80 ms against 17 ms, at 518 s. The relay's PCM path stalled about 12 ms while its video path was normal. The cause is not established.

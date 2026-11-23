@@ -59,6 +59,26 @@ all existing regression modes and public contracts unchanged.
   handles≤1/min, threads≤0.5/min. Short tests do not establish these slopes.
 - Keep17ms(60fps)/34ms(30fps) whole-path arrival diagnostics. Report every miss
   and loss, including startup and drain. These are not isolated-hop budgets.
+- **Pre-roll (amendment, Jon 2026-11-22, every platform).** Before the measured
+  stream the source publishes `8 + fps/2` marked frames below the measured
+  timeline (PTS under 36 ms; recorded as `preroll` in `config.json`):
+  1. 8 frames 100 ms apart, cycling through every pool slot, so every process
+     has used every pool buffer once (a first map of a 1080p buffer costs up to
+     a frame interval on Android);
+  2. then half a second at the stream rate, straight into the epoch, so
+     measurement starts on a running stream rather than an idle system.
+
+  The relay forwards every pre-roll frame, and END and EOS count them. The final
+  reader verifies each one it receives and must have read every pool slot before
+  measured frame 0; latest-wins may skip some. Pre-roll frames are never in the
+  CSVs. The analyzer checks their trace counts separately: the source sends
+  exactly the pre-roll, the relay forwards exactly what it received, and the
+  reader receives at most the pre-roll. Startup misses are still reported: the
+  measured stream's first frame is frame 0, as before. Captures before the
+  amendment have no `preroll` (0) and are still analyzed as recorded. With the
+  amendment, the receiver's per-byte payload check became an exact vectorized
+  check (same bytes compared); it had cost about a frame interval per 1080p
+  RGBA frame on the tablet.
   Added-hop p95≤2ms remains **proposed**, not an approved acceptance threshold.
 - Trace-off performance and explicitly bounded trace-on identity/copy accounting
   are separate runs. Trace-on must have zero dropped events/rejected threads;
@@ -146,3 +166,15 @@ The immutable synthetic11d1b65 [BGRA1080p60 duration](windows-native-relay-durat
 passed1800s,108000 video frames/86400000PCM frames, zero17ms misses and resource
 gates. This does not qualify the newer checked helper, remaining native duration
 cells, decoder performance, or physical presentation.
+
+## Pre-roll cells on every platform (`0e8da988`, 2026-11-22)
+
+With the pre-roll amendment, the same harness revision ran every platform's cells in the validation order: 5 s preflight, 5 s trace-on, then 1800 s trace-off.
+
+| Platform | Passes 1800 s | Fails |
+|---|---|---|
+| [Windows](windows-native-relay-rate-0e8da98/README.md) | BGRA and NV12 1080p60 | BGRA 4K30 (one receiver stall, about 50 ms); NV12 4K30 (receiver PCM stalls to 54 ms, then a 474 ms source stall aborted it at 530 s) |
+| [Linux](linux-native-relay-rate-0e8da98/README.md) | all four: BGRA and NV12 1080p60 and 4K30 | none |
+| [Android](android-native-relay-rate-0e8da98/README.md) | RGBA and NV12 1080p30, NV12 1080p60 | RGBA 1080p60 (one audio block, 17.80 ms against 17 ms) |
+
+Every preflight and trace-on run passed on every platform. The pre-roll removed the Android 60 fps startup failure. The Windows 4K30 failures are a regression: both cells passed 1800 s on the frozen `060c54e4`. The receiver's PCM stalls occur only at 4K; no mechanism is established. No failure is replaced by a repeat.
