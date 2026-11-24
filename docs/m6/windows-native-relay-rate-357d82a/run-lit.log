@@ -1,0 +1,30 @@
+timeout:     Current AC Power Setting Index: 0x0000012c
+desktop session 1
+06:51:30 display requests: [PROCESS] \Device\HarddiskVolume3\Users\<win-user>\dev\apichk\rate0e8\build\fl_gst_local_native_bench_win.exe | [PROCESS] \Device\HarddiskVolume3\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+06:56:30 display requests: [PROCESS] \Device\HarddiskVolume3\Users\<win-user>\dev\apichk\rate0e8\build\fl_gst_local_native_bench_win.exe | [PROCESS] \Device\HarddiskVolume3\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+07:01:30 display requests: [PROCESS] \Device\HarddiskVolume3\Users\<win-user>\dev\apichk\rate0e8\build\fl_gst_local_native_bench_win.exe | [PROCESS] \Device\HarddiskVolume3\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+07:06:30 display requests: [PROCESS] \Device\HarddiskVolume3\Users\<win-user>\dev\apichk\rate0e8\build\fl_gst_local_native_bench_win.exe | [PROCESS] \Device\HarddiskVolume3\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+07:11:30 display requests: [PROCESS] \Device\HarddiskVolume3\Users\<win-user>\dev\apichk\rate0e8\build\fl_gst_local_native_bench_win.exe | [PROCESS] \Device\HarddiskVolume3\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+07:16:30 display requests: [PROCESS] \Device\HarddiskVolume3\Users\<win-user>\dev\apichk\rate0e8\build\fl_gst_local_native_bench_win.exe | [PROCESS] \Device\HarddiskVolume3\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+07:21:30 display requests: [PROCESS] \Device\HarddiskVolume3\Windows\System32\WindowsPowerShell\v1.0\powershell.exe | [PROCESS] \Device\HarddiskVolume3\Users\<win-user>\dev\apichk\rate0e8\build\fl_gst_local_native_bench_win.exe
+07:26:30 display requests: [PROCESS] \Device\HarddiskVolume3\Windows\System32\WindowsPowerShell\v1.0\powershell.exe | [PROCESS] \Device\HarddiskVolume3\Users\<win-user>\dev\apichk\rate0e8\build\fl_gst_local_native_bench_win.exe
+07:31:30 display requests: [PROCESS] \Device\HarddiskVolume3\Windows\System32\WindowsPowerShell\v1.0\powershell.exe | [PROCESS] \Device\HarddiskVolume3\Users\<win-user>\dev\apichk\rate0e8\build\fl_gst_local_native_bench_win.exe
+07:36:30 display requests: [PROCESS] \Device\HarddiskVolume3\Windows\System32\WindowsPowerShell\v1.0\powershell.exe | [PROCESS] \Device\HarddiskVolume3\Users\<win-user>\dev\apichk\rate0e8\build\fl_gst_local_native_bench_win.exe
+07:41:30 display requests: [PROCESS] \Device\HarddiskVolume3\Windows\System32\WindowsPowerShell\v1.0\powershell.exe | [PROCESS] \Device\HarddiskVolume3\Users\<win-user>\dev\apichk\rate0e8\build\fl_gst_local_native_bench_win.exe
+07:46:30 display requests: [PROCESS] \Device\HarddiskVolume3\Windows\System32\WindowsPowerShell\v1.0\powershell.exe | [PROCESS] \Device\HarddiskVolume3\Users\<win-user>\dev\apichk\rate0e8\build\fl_gst_local_native_bench_win.exe
+07:51:30 display requests: None.
+task: 06:46:30.511 display wake (zero-delta mouse move)
+task: 06:46:30.634 session hold (ES_CONTINUOUS|ES_SYSTEM_REQUIRED|ES_DISPLAY_REQUIRED) returned 
+task: 06:47:00.643 cells start
+task: 06:47:08.317 cells: PASS bgra4k30 5s off arrival p99/max 11.21/12.52 ms
+task: 06:47:15.697 cells: PASS bgra4k30 5s trace arrival p99/max 11.17/11.27 ms
+task: 07:17:21.942 cells: PASS bgra4k30 1800s off arrival p99/max 11.50/20.77 ms
+task: 07:17:29.271 cells: PASS nv12-4k30 5s off arrival p99/max 7.16/7.22 ms
+task: 07:17:36.650 cells: PASS nv12-4k30 5s trace arrival p99/max 7.01/7.03 ms
+task: 07:47:42.838 cells: PASS nv12-4k30 1800s off arrival p99/max 7.19/16.93 ms
+task: 07:47:42.840 cells: ALL PASS
+task: 07:47:42.853 cells exit 0
+task: 07:47:42.858 session hold released
+task: 07:47:42.858 done
+566 06:46:30.653 reason 32
+finished

@@ -1,0 +1,109 @@
+PASS shared-1080p60-bgra BGRA 1920x1080@60 bin shared-cpu 1800s 1800.7s
+  consumer.video.arrival.ms=n=107880 p50=5.07 p95=5.31 p99=5.66 max=7.31 min=1.83
+  consumer.video.render_jitter.p1_p99.ms=3.76
+  consumer.av_offset.abs.ms=n=1798 p50=4.63 p95=4.76 p99=4.83 max=6.42 min=1.75
+  consumer.video.deadline_misses=0/108000
+  consumer.cpu.percent=18.92
+  producer.cpu.percent=27.29
+  consumer.result=EOS
+  producer.result=EOS
+  gpu.device.active.core_mhz=210.0
+  gpu.device.active.fb_mb=4051.0
+  gpu.device.active.mem_mhz=405.0
+  gpu.device.active.memctl_pct=0.1
+  gpu.device.active.pcie_rx_mb_s=0.4
+  gpu.device.active.pcie_tx_mb_s=1.0
+  gpu.device.active.power_w=8.2
+  gpu.device.active.samples=1710
+  gpu.device.active.sm_pct=0.0
+  gpu.device.idle.core_mhz=210.0
+  gpu.device.idle.fb_mb=4051.0
+  gpu.device.idle.mem_mhz=405.0
+  gpu.device.idle.memctl_pct=0.3
+  gpu.device.idle.pcie_rx_mb_s=0.4
+  gpu.device.idle.pcie_tx_mb_s=1.0
+  gpu.device.idle.power_w=10.4
+  gpu.device.idle.samples=7
+  gpu.device.idle.sm_pct=0.0
+PASS shared-1080p60-nv12 NV12 1920x1080@60 bin shared-cpu 1800s 1800.7s
+  consumer.video.arrival.ms=n=107880 p50=1.99 p95=2.14 p99=2.27 max=3.22 min=0.53
+  consumer.video.render_jitter.p1_p99.ms=1.68
+  consumer.av_offset.abs.ms=n=1798 p50=1.55 p95=1.63 p99=1.66 max=2.10 min=0.47
+  consumer.video.deadline_misses=0/108000
+  consumer.cpu.percent=8.88
+  producer.cpu.percent=10.73
+  consumer.result=EOS
+  producer.result=EOS
+  gpu.device.active.core_mhz=210.0
+  gpu.device.active.fb_mb=4051.0
+  gpu.device.active.mem_mhz=405.0
+  gpu.device.active.memctl_pct=0.1
+  gpu.device.active.pcie_rx_mb_s=0.4
+  gpu.device.active.pcie_tx_mb_s=1.0
+  gpu.device.active.power_w=8.1
+  gpu.device.active.samples=1710
+  gpu.device.active.sm_pct=0.0
+  gpu.device.idle.core_mhz=210.0
+  gpu.device.idle.fb_mb=4051.0
+  gpu.device.idle.mem_mhz=405.0
+  gpu.device.idle.memctl_pct=0.0
+  gpu.device.idle.pcie_rx_mb_s=0.3
+  gpu.device.idle.pcie_tx_mb_s=1.0
+  gpu.device.idle.power_w=8.3
+  gpu.device.idle.samples=7
+  gpu.device.idle.sm_pct=0.0
+PASS shared-4k30-bgra BGRA 3840x2160@30 bin shared-cpu 1800s 1800.7s
+  consumer.video.arrival.ms=n=53940 p50=17.81 p95=20.98 p99=21.39 max=22.62 min=8.25
+  consumer.video.render_jitter.p1_p99.ms=12.84
+  consumer.av_offset.abs.ms=n=1798 p50=17.42 p95=19.80 p99=20.19 max=20.41 min=8.57
+  consumer.video.deadline_misses=0/54000
+  consumer.cpu.percent=29.38
+  producer.cpu.percent=45.77
+  consumer.result=EOS
+  producer.result=EOS
+  gpu.device.active.core_mhz=210.0
+  gpu.device.active.fb_mb=4051.0
+  gpu.device.active.mem_mhz=405.0
+  gpu.device.active.memctl_pct=0.1
+  gpu.device.active.pcie_rx_mb_s=0.9
+  gpu.device.active.pcie_tx_mb_s=1.0
+  gpu.device.active.power_w=8.3
+  gpu.device.active.samples=1710
+  gpu.device.active.sm_pct=0.0
+  gpu.device.idle.core_mhz=210.0
+  gpu.device.idle.fb_mb=4051.0
+  gpu.device.idle.mem_mhz=405.0
+  gpu.device.idle.memctl_pct=0.0
+  gpu.device.idle.pcie_rx_mb_s=0.6
+  gpu.device.idle.pcie_tx_mb_s=1.0
+  gpu.device.idle.power_w=8.0
+  gpu.device.idle.samples=7
+  gpu.device.idle.sm_pct=0.0
+PASS shared-4k30-nv12 NV12 3840x2160@30 bin shared-cpu 1800s 1800.7s
+  consumer.video.arrival.ms=n=53940 p50=8.05 p95=8.40 p99=8.76 max=11.88 min=3.10
+  consumer.video.render_jitter.p1_p99.ms=5.55
+  consumer.av_offset.abs.ms=n=1798 p50=7.64 p95=7.83 p99=7.89 max=10.72 min=3.08
+  consumer.video.deadline_misses=0/54000
+  consumer.cpu.percent=15.52
+  producer.cpu.percent=21.84
+  consumer.result=EOS
+  producer.result=EOS
+  gpu.device.active.core_mhz=210.0
+  gpu.device.active.fb_mb=4051.0
+  gpu.device.active.mem_mhz=405.0
+  gpu.device.active.memctl_pct=0.1
+  gpu.device.active.pcie_rx_mb_s=0.4
+  gpu.device.active.pcie_tx_mb_s=1.0
+  gpu.device.active.power_w=8.5
+  gpu.device.active.samples=1709
+  gpu.device.active.sm_pct=0.0
+  gpu.device.idle.core_mhz=210.0
+  gpu.device.idle.fb_mb=4051.0
+  gpu.device.idle.mem_mhz=405.0
+  gpu.device.idle.memctl_pct=0.3
+  gpu.device.idle.pcie_rx_mb_s=0.3
+  gpu.device.idle.pcie_tx_mb_s=1.0
+  gpu.device.idle.power_w=8.3
+  gpu.device.idle.samples=7
+  gpu.device.idle.sm_pct=0.0
+cells 4 failed none

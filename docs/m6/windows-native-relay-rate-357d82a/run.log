@@ -1,0 +1,29 @@
+timeout:     Current AC Power Setting Index: 0x0000012c
+desktop session 1
+04:54:27 display requests: None.
+04:59:27 display requests: [PROCESS] \Device\HarddiskVolume3\Users\<win-user>\dev\apichk\rate0e8\build\fl_gst_local_native_bench_win.exe
+05:04:27 display requests: [PROCESS] \Device\HarddiskVolume3\Users\<win-user>\dev\apichk\rate0e8\build\fl_gst_local_native_bench_win.exe
+05:09:27 display requests: [PROCESS] \Device\HarddiskVolume3\Users\<win-user>\dev\apichk\rate0e8\build\fl_gst_local_native_bench_win.exe
+05:14:27 display requests: [PROCESS] \Device\HarddiskVolume3\Users\<win-user>\dev\apichk\rate0e8\build\fl_gst_local_native_bench_win.exe
+05:19:27 display requests: [PROCESS] \Device\HarddiskVolume3\Users\<win-user>\dev\apichk\rate0e8\build\fl_gst_local_native_bench_win.exe
+05:24:27 display requests: [PROCESS] \Device\HarddiskVolume3\Users\<win-user>\dev\apichk\rate0e8\build\fl_gst_local_native_bench_win.exe
+05:29:27 display requests: [PROCESS] \Device\HarddiskVolume3\Users\<win-user>\dev\apichk\rate0e8\build\fl_gst_local_native_bench_win.exe
+05:34:27 display requests: [PROCESS] \Device\HarddiskVolume3\Users\<win-user>\dev\apichk\rate0e8\build\fl_gst_local_native_bench_win.exe
+05:39:27 display requests: [PROCESS] \Device\HarddiskVolume3\Users\<win-user>\dev\apichk\rate0e8\build\fl_gst_local_native_bench_win.exe
+05:44:27 display requests: [PROCESS] \Device\HarddiskVolume3\Users\<win-user>\dev\apichk\rate0e8\build\fl_gst_local_native_bench_win.exe
+05:49:27 display requests: [PROCESS] \Device\HarddiskVolume3\Users\<win-user>\dev\apichk\rate0e8\build\fl_gst_local_native_bench_win.exe
+05:54:27 display requests: [PROCESS] \Device\HarddiskVolume3\Users\<win-user>\dev\apichk\rate0e8\build\fl_gst_local_native_bench_win.exe
+05:59:27 display requests: None.
+task: 04:49:27.794 display wake (zero-delta mouse move); settling 300 s
+task: 04:54:27.826 cells start
+task: 04:54:35.889 cells: PASS bgra4k30 5s off arrival p99/max 11.46/12.07 ms
+task: 04:54:43.309 cells: PASS bgra4k30 5s trace arrival p99/max 11.92/11.93 ms
+task: 05:24:49.716 cells: PASS bgra4k30 1800s off arrival p99/max 11.63/31.63 ms
+task: 05:24:56.946 cells: PASS nv12-4k30 5s off arrival p99/max 8.85/9.00 ms
+task: 05:25:04.305 cells: PASS nv12-4k30 5s trace arrival p99/max 8.57/9.13 ms
+task: 05:55:10.705 cells: PASS nv12-4k30 1800s off arrival p99/max 9.03/16.95 ms
+task: 05:55:10.707 cells: ALL PASS
+task: 05:55:10.721 cells exit 0
+task: 05:55:10.722 done
+566 04:54:27.975 reason 12
+finished

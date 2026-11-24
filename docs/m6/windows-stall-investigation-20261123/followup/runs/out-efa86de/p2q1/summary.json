@@ -1,0 +1,56 @@
+{
+ "environment": {
+  "revision": "efa86dec58784af88d82b24be4f3d6ac5ccab35d",
+  "dirty": false,
+  "platform": "Windows-11-10.0.26300-SP0",
+  "exe_sha256": "3014565cae5b0010b31806ba09aa14508577f507ac2b85c967e96535bd9f6f69",
+  "plugin_sha256": "b123bca3531684302b655df8001383848580992cad823ec8fa9e6efab38135b1",
+  "duration": 30,
+  "cells": [
+   "nv12-4k30",
+   "bgra1080p60"
+  ],
+  "pool": 2,
+  "video_queue": 1,
+  "nvidia-smi": "NVIDIA GeForce RTX 5090, 617.14",
+  "gst-inspect-1.0": null
+ },
+ "cells": [
+  {
+   "cell": "nv12-4k30",
+   "preflight": true,
+   "trace": true,
+   "duration": true,
+   "duration_error": null,
+   "slopes": {
+    "source": {},
+    "relay": {},
+    "receiver": {}
+   },
+   "arrival": {
+    "p50": 6.186134,
+    "p95": 8.279501,
+    "p99": 9.103134,
+    "max": 10.186267
+   }
+  },
+  {
+   "cell": "bgra1080p60",
+   "preflight": true,
+   "trace": true,
+   "duration": true,
+   "duration_error": null,
+   "slopes": {
+    "source": {},
+    "relay": {},
+    "receiver": {}
+   },
+   "arrival": {
+    "p50": 4.839668,
+    "p95": 5.971001,
+    "p99": 6.613501,
+    "max": 7.647534
+   }
+  }
+ ]
+}

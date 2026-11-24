@@ -1,0 +1,193 @@
+== heap: 26 outstanding, 455.8 KB
+     451.6 KB      14 allocs  first/last 13.0/258.3 s
+               at (s, bytes): 13.0 33031, 31.9 33031, 50.8 33031, 69.6 33031, 88.5 33031, 107.4 33031, 126.2 33031, 145.1 33031, 164.0 33031, 182.8 33031, 201.7 33031, 220.6 33031, 239.4 33031, 258.3 33031
+               nvwgf2umx.dll!0x00007ffba7ab153c
+               nvwgf2umx.dll!0x00007ffba7a92c71
+               nvwgf2umx.dll!0x00007ffba6cd01f1
+               nvwgf2umx.dll!0x00007ffba719261b
+               nvwgf2umx.dll!0x00007ffba7192761
+               nvwgf2umx.dll!0x00007ffba718a24b
+               d3d11.dll!CResource<ID3D11Resource>::CopyResource<0;0>
+               d3d11.dll!CContext::TID3D11DeviceContext_CopyResource_<1>
+               d3d11.dll!CContext::TID3D11DeviceContext_CopyResource_Amortized<0>
+               fl_gst_local_native_bench_win.exe!0x00007ff6ba135e78
+               fl_gst_local_native_bench_win.exe!0x00007ff6ba1434f4
+               fl_gst_local_native_bench_win.exe!0x00007ff6ba147994
+               fl_gst_local_native_bench_win.exe!0x00007ff6ba1490fc
+               kernel32.dll!BaseThreadInitThunk
+       0.4 KB       1 allocs  first/last 199.3/199.3 s
+               ntdll.dll!TpAllocTimer
+               KernelBase.dll!CreateThreadpoolTimer
+               windows.storage.dll!wil::details::WilApiImpl_RecordFeatureUsage
+               windows.storage.dll!wil::details::WilApi_RecordFeatureUsage
+               windows.storage.dll!wil::details::WilApi_RecordFeatureUsageReports
+               windows.storage.dll!wil_details_RecordCachedUsage
+               windows.storage.dll!wil::details::EnabledStateManager::RecordCachedUsageUnderLock
+               windows.storage.dll!wil::details::EnabledStateManager::OnTimer
+               windows.storage.dll!wil::details_abi::SubscriptionList::OnSignaled
+               windows.storage.dll!<lambda_152aa9d2a3a0648fa2fa7fcef514b376>::<lambda_invoker_cdecl>
+               KernelBase.dll!wil::details_abi::SubscriptionList::OnSignaled
+               KernelBase.dll!wil::details::FeatureStateManager::FlushUsage
+               KernelBase.dll!<lambda_2dc8c16b065ff3f125398c2fa221b2b5>::<lambda_invoker_cdecl>
+               ntdll.dll!TppTimerpExecuteCallback
+       0.4 KB       1 allocs  first/last 199.3/199.3 s
+       0.4 KB       1 allocs  first/last 199.3/199.3 s
+               glib-2.0-0.dll!0x00007ffb939ffac4
+               gstreamer-1.0-0.dll!0x00007ffb967b0f95
+               gstreamer-1.0-0.dll!0x00007ffb967b1156
+               gstreamer-1.0-0.dll!0x00007ffb967bb7e2
+               gstreamer-1.0-0.dll!0x00007ffb967bf1d5
+               gstreamer-1.0-0.dll!0x00007ffb967bf029
+               gstgio.dll!0x00007ffb9b222518
+               gstbase-1.0-0.dll!0x00007ffb97ec5f19
+               gstbase-1.0-0.dll!0x00007ffb97ec507b
+               gstreamer-1.0-0.dll!0x00007ffb968080a3
+               gstreamer-1.0-0.dll!0x00007ffb9680de17
+               gstreamer-1.0-0.dll!0x00007ffb9680d83f
+               gstgdp.dll!0x00007ffba68b31ea
+               gstreamer-1.0-0.dll!0x00007ffb968080a3
+       0.4 KB       1 allocs  first/last 199.3/199.3 s
+               ntdll.dll!TpAllocTimer
+               KernelBase.dll!CreateThreadpoolTimer
+               directxdatabasehelper.dll!wil::details::EnsureCoalescedTimer<wil::details::FeatureStateManager>
+               directxdatabasehelper.dll!wil::details::FeatureStateManager::RecordFeatureUsage
+               directxdatabasehelper.dll!wil::details::WilApi_RecordFeatureUsage
+               directxdatabasehelper.dll!wil::details::WilApi_RecordFeatureUsageReports
+               directxdatabasehelper.dll!wil_details_RecordCachedUsage
+               directxdatabasehelper.dll!wil::details::EnabledStateManager::RecordCachedUsageUnderLock
+               directxdatabasehelper.dll!wil::details::EnabledStateManager::OnTimer
+               directxdatabasehelper.dll!wil::details_abi::SubscriptionList::OnSignaled
+               directxdatabasehelper.dll!<lambda_152aa9d2a3a0648fa2fa7fcef514b376>::<lambda_invoker_cdecl>
+               KernelBase.dll!wil::details_abi::SubscriptionList::OnSignaled
+               KernelBase.dll!wil::details::FeatureStateManager::FlushUsage
+               KernelBase.dll!<lambda_2dc8c16b065ff3f125398c2fa221b2b5>::<lambda_invoker_cdecl>
+       0.4 KB       1 allocs  first/last 199.3/199.3 s
+               ntdll.dll!TpAllocTimer
+               KernelBase.dll!CreateThreadpoolTimer
+               d3d11.dll!wil::details::EnsureCoalescedTimer<wil::details::FeatureStateManager>
+               d3d11.dll!wil::details::FeatureStateManager::RecordFeatureUsage
+               d3d11.dll!wil::details::WilApi_RecordFeatureUsage
+               d3d11.dll!wil::details::WilApi_RecordFeatureUsageReports
+               d3d11.dll!wil_details_RecordCachedUsage
+               d3d11.dll!wil::details::EnabledStateManager::RecordCachedUsageUnderLock
+               d3d11.dll!wil::details::EnabledStateManager::OnTimer
+               d3d11.dll!wil::details_abi::SubscriptionList::OnSignaled
+               d3d11.dll!<lambda_152aa9d2a3a0648fa2fa7fcef514b376>::<lambda_invoker_cdecl>
+               KernelBase.dll!wil::details_abi::SubscriptionList::OnSignaled
+               KernelBase.dll!wil::details::FeatureStateManager::FlushUsage
+               KernelBase.dll!<lambda_2dc8c16b065ff3f125398c2fa221b2b5>::<lambda_invoker_cdecl>
+       0.4 KB       1 allocs  first/last 199.3/199.3 s
+               ntdll.dll!TpAllocTimer
+               KernelBase.dll!CreateThreadpoolTimer
+               wldp.dll!wil::details::WilApiImpl_RecordFeatureUsage
+               wldp.dll!wil::details::WilApi_RecordFeatureUsage
+               wldp.dll!wil::details::WilApi_RecordFeatureUsageReports
+               wldp.dll!wil_details_RecordCachedUsage
+               wldp.dll!wil::details::EnabledStateManager::RecordCachedUsageUnderLock
+               wldp.dll!wil::details::EnabledStateManager::OnTimer
+               wldp.dll!<lambda_152aa9d2a3a0648fa2fa7fcef514b376>::<lambda_invoker_cdecl>
+               KernelBase.dll!wil::details_abi::SubscriptionList::OnSignaled
+               KernelBase.dll!wil::details::FeatureStateManager::FlushUsage
+               KernelBase.dll!<lambda_2dc8c16b065ff3f125398c2fa221b2b5>::<lambda_invoker_cdecl>
+               ntdll.dll!TppTimerpExecuteCallback
+               ntdll.dll!TppWorkerThread
+       0.4 KB       1 allocs  first/last 199.3/199.3 s
+               ntdll.dll!TpAllocTimer
+               KernelBase.dll!CreateThreadpoolTimer
+               combase.dll!wil::details::EnsureCoalescedTimer<wil::details::FeatureStateManager>
+               combase.dll!wil::details::FeatureStateManager::RecordFeatureUsage
+               combase.dll!wil::details::WilApi_RecordFeatureUsage
+               combase.dll!wil::details::WilApi_RecordFeatureUsageReports
+               combase.dll!wil_details_RecordCachedUsage
+               combase.dll!wil::details::EnabledStateManager::RecordCachedUsageUnderLock
+               combase.dll!wil::details::EnabledStateManager::OnTimer
+               combase.dll!wil::details_abi::SubscriptionList::OnSignaled
+               combase.dll!<lambda_152aa9d2a3a0648fa2fa7fcef514b376>::<lambda_invoker_cdecl>
+               KernelBase.dll!wil::details_abi::SubscriptionList::OnSignaled
+               KernelBase.dll!wil::details::FeatureStateManager::FlushUsage
+               KernelBase.dll!<lambda_2dc8c16b065ff3f125398c2fa221b2b5>::<lambda_invoker_cdecl>
+       0.4 KB       1 allocs  first/last 199.3/199.3 s
+               ntdll.dll!TpAllocTimer
+               KernelBase.dll!CreateThreadpoolTimer
+               clbcatq.dll!wil::details::FeatureStateManager::RecordFeatureUsage
+               clbcatq.dll!wil::details::WilApi_RecordFeatureUsage
+               clbcatq.dll!wil::details::WilApi_RecordFeatureUsageReports
+               clbcatq.dll!wil_details_RecordCachedUsage
+               clbcatq.dll!wil::details::EnabledStateManager::RecordCachedUsageUnderLock
+               clbcatq.dll!wil::details::EnabledStateManager::OnTimer
+               clbcatq.dll!wil::details_abi::SubscriptionList::OnSignaled
+               clbcatq.dll!<lambda_152aa9d2a3a0648fa2fa7fcef514b376>::<lambda_invoker_cdecl>
+               KernelBase.dll!wil::details_abi::SubscriptionList::OnSignaled
+               KernelBase.dll!wil::details::FeatureStateManager::FlushUsage
+               KernelBase.dll!<lambda_2dc8c16b065ff3f125398c2fa221b2b5>::<lambda_invoker_cdecl>
+               ntdll.dll!TppTimerpExecuteCallback
+       0.4 KB       1 allocs  first/last 199.3/199.3 s
+               ntdll.dll!TpAllocTimer
+               KernelBase.dll!CreateThreadpoolTimer
+               iertutil.dll!wil::details::EnsureCoalescedTimer<wil::details::FeatureStateManager>
+               iertutil.dll!wil::details::FeatureStateManager::RecordFeatureUsage
+               iertutil.dll!wil::details::WilApi_RecordFeatureUsage
+               iertutil.dll!wil::details::WilApi_RecordFeatureUsageReports
+               iertutil.dll!wil_details_RecordCachedUsage
+               iertutil.dll!wil::details::EnabledStateManager::RecordCachedUsageUnderLock
+               iertutil.dll!wil::details::EnabledStateManager::OnTimer
+               iertutil.dll!wil::details_abi::SubscriptionList::OnSignaled
+               iertutil.dll!<lambda_152aa9d2a3a0648fa2fa7fcef514b376>::<lambda_invoker_cdecl>
+               KernelBase.dll!wil::details_abi::SubscriptionList::OnSignaled
+               KernelBase.dll!wil::details::FeatureStateManager::FlushUsage
+               KernelBase.dll!<lambda_2dc8c16b065ff3f125398c2fa221b2b5>::<lambda_invoker_cdecl>
+       0.4 KB       1 allocs  first/last 199.3/199.3 s
+               ntdll.dll!TpAllocTimer
+               KernelBase.dll!CreateThreadpoolTimer
+               shell32.dll!wil::details::FeatureStateManager::RecordFeatureUsage
+               shell32.dll!wil::details::WilApiImpl_RecordFeatureUsage
+               shell32.dll!wil::details::WilApi_RecordFeatureUsage
+               shell32.dll!wil::details::WilApi_RecordFeatureUsageReports
+               shell32.dll!wil_details_RecordCachedUsage
+               shell32.dll!wil::details::EnabledStateManager::RecordCachedUsageUnderLock
+               shell32.dll!wil::details::EnabledStateManager::OnTimer
+               shell32.dll!wil::details::FeatureStateManager::OnUsageFlushed
+               KernelBase.dll!wil::details_abi::SubscriptionList::OnSignaled
+               KernelBase.dll!wil::details::FeatureStateManager::FlushUsage
+               KernelBase.dll!<lambda_2dc8c16b065ff3f125398c2fa221b2b5>::<lambda_invoker_cdecl>
+               ntdll.dll!TppTimerpExecuteCallback
+       0.4 KB       1 allocs  first/last 199.3/199.3 s
+               ntdll.dll!TpAllocTimer
+               KernelBase.dll!CreateThreadpoolTimer
+               SHCore.dll!wil::details::WilApiImpl_RecordFeatureUsage
+               SHCore.dll!wil::details::WilApi_RecordFeatureUsage
+               SHCore.dll!wil::details::WilApi_RecordFeatureUsageReports
+               SHCore.dll!wil_details_RecordCachedUsage
+               SHCore.dll!wil::details::EnabledStateManager::RecordCachedUsageUnderLock
+               SHCore.dll!wil::details::EnabledStateManager::OnTimer
+               SHCore.dll!wil::details_abi::SubscriptionList::OnSignaled
+               SHCore.dll!<lambda_152aa9d2a3a0648fa2fa7fcef514b376>::<lambda_invoker_cdecl>
+               KernelBase.dll!wil::details_abi::SubscriptionList::OnSignaled
+               KernelBase.dll!wil::details::FeatureStateManager::FlushUsage
+               KernelBase.dll!<lambda_2dc8c16b065ff3f125398c2fa221b2b5>::<lambda_invoker_cdecl>
+               ntdll.dll!TppTimerpExecuteCallback
+== VirtualAlloc commits: 16 outstanding, 492.0 KB
+     452.0 KB      12 allocs  first/last 13.0/239.4 s
+               at (s, bytes): 13.0 36864, 31.9 36864, 50.8 36864, 69.6 53248, 107.4 40960, 126.2 36864, 145.1 36864, 164.0 36864, 182.8 36864, 201.7 36864, 220.6 36864, 239.4 36864
+               nvwgf2umx.dll!0x00007ffba7ab153c
+               nvwgf2umx.dll!0x00007ffba7a92c71
+               nvwgf2umx.dll!0x00007ffba6cd01f1
+               nvwgf2umx.dll!0x00007ffba719261b
+               nvwgf2umx.dll!0x00007ffba7192761
+               nvwgf2umx.dll!0x00007ffba718a24b
+               d3d11.dll!CResource<ID3D11Resource>::CopyResource<0;0>
+               d3d11.dll!CContext::TID3D11DeviceContext_CopyResource_<1>
+               d3d11.dll!CContext::TID3D11DeviceContext_CopyResource_Amortized<0>
+               fl_gst_local_native_bench_win.exe!0x00007ff6ba135e78
+               fl_gst_local_native_bench_win.exe!0x00007ff6ba1434f4
+               fl_gst_local_native_bench_win.exe!0x00007ff6ba147994
+               fl_gst_local_native_bench_win.exe!0x00007ff6ba1490fc
+               kernel32.dll!BaseThreadInitThunk
+      28.0 KB       3 allocs  first/last 0.1/23.0 s
+               at (s, bytes): 0.1 4096, 0.1 12288, 23.0 12288
+      12.0 KB       1 allocs  first/last 0.1/0.1 s
+               ntdll.dll!LdrpAcquireSchedulerSharedDataSlot
+               ntdll.dll!LdrpInitializeThread
+               ntdll.dll!_LdrpInitialize
+               ntdll.dll!LdrpInitializeInternal
+               ntdll.dll!LdrInitializeThunk

@@ -1,0 +1,25 @@
+PASS lifecycle-1080p60-rgba-restart-producer RGBA 1920x1080@60 bin native fresh-device lifecycle restart-producer 100x5s 547.5s
+  cycles.ok=100/100
+  long.mem.slope.kb_per_cycle=3.11
+  long.handles.slope.per_cycle=0.000
+  long.threads.slope.per_cycle=0.000
+  gpu.uid2000.busy_pct=unavailable
+PASS lifecycle-1080p60-rgba-restart-consumer RGBA 1920x1080@60 bin native fresh-device lifecycle restart-consumer 100x5s 559.1s
+  cycles.ok=100/100
+  long.mem.slope.kb_per_cycle=-10.82
+  long.handles.slope.per_cycle=0.000
+  long.threads.slope.per_cycle=0.000
+  gpu.uid2000.busy_pct=unavailable
+PASS lifecycle-4k30-rgba-restart-producer RGBA 3840x2160@30 bin native fresh-device lifecycle restart-producer 100x5s 556.7s
+  cycles.ok=100/100
+  long.mem.slope.kb_per_cycle=1.55
+  long.handles.slope.per_cycle=0.000
+  long.threads.slope.per_cycle=0.000
+  gpu.uid2000.busy_pct=unavailable
+PASS lifecycle-4k30-rgba-restart-consumer RGBA 3840x2160@30 bin native fresh-device lifecycle restart-consumer 100x5s 564.2s
+  cycles.ok=100/100
+  long.mem.slope.kb_per_cycle=1.39
+  long.handles.slope.per_cycle=0.000
+  long.threads.slope.per_cycle=0.000
+  gpu.uid2000.busy_pct=unavailable
+cells 4 failed none

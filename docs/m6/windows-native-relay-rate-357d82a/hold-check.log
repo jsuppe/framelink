@@ -1,0 +1,21 @@
+revision 357d82a5c54de7194b3f1bc85c62609908dd2971
+build exit 0
+bench sha256 6C284DF66FC11248A8D9470162B2044C6F643225F2600F09A043275A0F71BC1E
+unit: OK
+requests: DISPLAY:
+requests: None.
+requests: SYSTEM:
+requests: [PROCESS] \Device\HarddiskVolume3\Users\<win-user>\dev\apichk\rate0e8\build\fl_gst_local_native_bench_win.exe
+requests: AWAYMODE:
+requests: None.
+requests: EXECUTION:
+requests: None.
+requests: PERFBOOST:
+requests: None.
+requests: ACTIVELOCKSCREEN:
+requests: None.
+bench exit
+config: {"seconds":150,"fps":30,"width":3840,"height":2160,"format":"NV12","trace":false,"clock":"QPC quotient-remainder nanoseconds","pool":2,"queue":1,"offset_ns":37000000,"preroll":23,"display_hold":true}
+analysis pass_all True arrival max 9.57
+checked 04:44:33-04:47:06; waiting 90 s with no bench
+restored:     Current AC Power Setting Index: 0x0000012c

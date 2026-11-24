@@ -26,10 +26,11 @@ def resource_analysis(resources,seconds,role):
             ys=[r[key] for r in tail];my=statistics.mean(ys);slope=sum((x-mx)*(y-my) for x,y in zip(xs,ys))/den*60
             require(math.isfinite(slope) and slope<=limit,role+' '+key+' slope gate');slopes[key]=slope
     return slopes,(resources[-1]['cpu_ns']-resources[0]['cpu_ns'])/(resources[-1]['t_ns']-resources[0]['t_ns'])*100
-def analyze(root):
+def analyze(root,pool=2,queue=1):
+    """pool/queue: the profile the capture must have been run with (default: the primary profile)."""
     root=pathlib.Path(root);c=json.loads((root/'config.json').read_text());seconds=c['seconds'];fps=c['fps'];n=seconds*fps;audio=seconds*100
     require(1<=seconds<=1800 and fps in (30,60),'invalid frozen duration/rate')
-    require(c['pool']==2 and c['queue']==1 and c['offset_ns']==37000000,'profile changed')
+    require(c['pool']==pool and c['queue']==queue and c['offset_ns']==37000000,'profile changed')
     # Pre-roll: marked frames below the measured timeline (PTS < 37 ms) before
     # the paced epoch, never in the CSVs. 0 for captures made before it existed.
     preroll=c.get('preroll',0);require(preroll in (0,8+fps//2),'profile changed (pre-roll)')
@@ -122,8 +123,9 @@ def analyze(root):
     result.update(pass_all=True,video_arrival_misses=0,audio_arrival_misses=0,trace_checked=c['trace'],preroll=preroll);return result
 
 def main():
-    p=argparse.ArgumentParser(description=__doc__);p.add_argument('directory');a=p.parse_args()
-    try:r=analyze(a.directory)
+    p=argparse.ArgumentParser(description=__doc__);p.add_argument('directory')
+    p.add_argument('--pool',type=int,default=2);p.add_argument('--video-queue',type=int,default=1);a=p.parse_args()
+    try:r=analyze(a.directory,a.pool,a.video_queue)
     except (ValueError,KeyError,OSError,TypeError,ZeroDivisionError) as e:print(json.dumps({'pass_all':False,'error':str(e)}));return 1
     print(json.dumps(r,indent=2));return 0
 if __name__=='__main__':raise SystemExit(main())

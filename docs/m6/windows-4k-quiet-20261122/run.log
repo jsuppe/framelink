@@ -1,0 +1,17 @@
+frozen pins match
+host quiet
+new exe A85E1BDE8615C8EECAC850EE4BAAB0F6F6B02B751E0DE9588A92D80A93BC124E
+arm frozen-060c54e4 exit 1 start 2026-11-22T20:46:34.1615696-05:00 end 2026-11-22T20:47:55.8419243-05:00
+arm current-0e8da98 exit 0 start 2026-11-22T20:47:55.8447045-05:00 end 2026-11-22T21:17:58.3446766-05:00
+closed apps still closed
+revision 0e8da988353c69d6d456ed9b3d291192dad090bd
+cells: PASS bgra4k30 5s off arrival p99/max 11.50/11.56 ms
+cells: PASS bgra4k30 5s trace arrival p99/max 11.81/11.94 ms
+cells: PASS bgra4k30 1800s off arrival p99/max 11.71/15.61 ms
+cells: PASS nv12-4k30 5s off arrival p99/max 8.52/8.63 ms
+cells: PASS nv12-4k30 5s trace arrival p99/max 8.84/9.09 ms
+cells: PASS nv12-4k30 1800s off arrival p99/max 9.08/10.24 ms
+cells: ALL PASS
+closed apps still closed
+done
+

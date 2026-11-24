@@ -28,6 +28,11 @@ class Checks(unittest.TestCase):
   with (self.root/name).open() as f:rows=list(csv.DictReader(f))
   rows[index][key]=value;self.write(name,rows)
  def test_valid(self):self.assertTrue(analyze(self.root)['pass_all'])
+ def test_profile_must_match_request(self):
+  (self.root/'config.json').write_text(json.dumps(dict(self.config,pool=4,queue=2)))
+  with self.assertRaisesRegex(ValueError,'profile changed'):analyze(self.root)
+  self.assertTrue(analyze(self.root,4,2)['pass_all'])
+  with self.assertRaisesRegex(ValueError,'profile changed'):analyze(self.root,4,1)
  def test_dropped_identity(self):
   self.mutate('receiver.video.csv',3,'identity',4)
   with self.assertRaises(ValueError):analyze(self.root)

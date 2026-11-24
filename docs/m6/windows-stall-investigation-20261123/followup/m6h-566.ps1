@@ -1,0 +1,1 @@
+Get-WinEvent -FilterHashtable @{LogName='System'; ProviderName='Microsoft-Windows-Kernel-Power'; Id=566; StartTime=(Get-Date).Date} -ErrorAction SilentlyContinue | Sort-Object TimeCreated | ForEach-Object { $_.TimeCreated.ToString('HH:mm:ss.fff') + ' ' + (($_.Message -split "`n")[0]) + ' ' + (($_.Properties | ForEach-Object { $_.Value }) -join ',') }

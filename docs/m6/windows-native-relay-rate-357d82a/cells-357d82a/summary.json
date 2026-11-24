@@ -1,0 +1,80 @@
+{
+ "environment": {
+  "revision": "357d82a5c54de7194b3f1bc85c62609908dd2971",
+  "dirty": false,
+  "platform": "Windows-11-10.0.26300-SP0",
+  "exe_sha256": "6c284df66fc11248a8d9470162b2044c6f643225f2600f09a043275a0f71bc1e",
+  "plugin_sha256": "fcb9e0d02ea65a44bf6e26714a412d4734fb87a177f0d0b14f6e472e6671fe4f",
+  "duration": 1800,
+  "cells": [
+   "bgra4k30",
+   "nv12-4k30"
+  ],
+  "pool": 2,
+  "video_queue": 1,
+  "nvidia-smi": "NVIDIA GeForce RTX 5090, 617.14",
+  "gst-inspect-1.0": null
+ },
+ "cells": [
+  {
+   "cell": "bgra4k30",
+   "preflight": true,
+   "trace": true,
+   "duration": true,
+   "duration_error": null,
+   "slopes": {
+    "source": {
+     "memory_kb": 40.718620968939504,
+     "handles": -2.3964284022395317e-05,
+     "threads": -1.1982142011197657e-05
+    },
+    "relay": {
+     "memory_kb": 0.19787518408571542,
+     "handles": -0.000434871563506866,
+     "threads": 7.542439497731106e-06
+    },
+    "receiver": {
+     "memory_kb": -0.0003830845434326878,
+     "handles": -2.3942783964542842e-05,
+     "threads": -1.1971391982271451e-05
+    }
+   },
+   "arrival": {
+    "p50": 9.885701,
+    "p95": 11.226567,
+    "p99": 11.625901,
+    "max": 31.634467
+   }
+  },
+  {
+   "cell": "nv12-4k30",
+   "preflight": true,
+   "trace": true,
+   "duration": true,
+   "duration_error": null,
+   "slopes": {
+    "source": {
+     "memory_kb": 41.73858684691036,
+     "handles": 0.011887754100301618,
+     "threads": 0.005943877050150809
+    },
+    "relay": {
+     "memory_kb": 0.29434100020423287,
+     "handles": 0.010330399912269887,
+     "threads": 0.005943876540495244
+    },
+    "receiver": {
+     "memory_kb": 0.03358239304865679,
+     "handles": 0.01182857095758069,
+     "threads": 0.005943875703576677
+    }
+   },
+   "arrival": {
+    "p50": 6.207901,
+    "p95": 8.288234,
+    "p99": 9.034834,
+    "max": 16.946034
+   }
+  }
+ ]
+}

@@ -66,6 +66,8 @@ Linux 1080p cells were not counted here. Only the Windows 4K receiver shows thes
 ## Open, for Jon
 
 - **Windows 4K30 is not qualified for duration.** Both 4K cells fail. BGRA fails on one receiver stall of about 50 ms. NV12 fails on receiver PCM stalls of up to 54 ms, and was then aborted by a 474 ms source stall. The 1080p60 cells pass. This is a regression against the frozen revision: on `060c54e4` both native 4K30 cells passed 1800 s with zero misses, arrival max 9.94 ms (NV12) and 16.53 ms (BGRA) ([record](../windows-final-duration-060c54e4/README.md)).
+- **Follow-up A/B (same day):** the frozen `060c54e4` binaries fail the same NV12 4K30 cell on the same host now, with a 120 ms stall in the source's submit at 986 s; the current binaries failed within 2 s. The host's behavior changed since 2026-11-17, so these failures are not attributable to the harness ([A/B](../windows-4k-ab-20261122/README.md)).
+- **Quieted host (same evening):** with the other GPU applications closed, both 4K30 cells passed 1800 s with zero misses (arrival max 15.61 ms BGRA, 10.24 ms NV12). The A/B arms run just before failed again, each on one 196 ms stall coinciding with a Windows Update restore point. This is a new host configuration and does not replace the failures here ([record](../windows-4k-quiet-20261122/README.md)).
 - **The receiver PCM stall at 4K needs a mechanism before another 4K attempt**, as the plan requires. A next step would be a bounded 4K diagnostic with per-phase stamps on the receiver's PCM thread (pull, map, verify, running-time lookup), to see whether it waits on the appsink, a session lock, or the scheduler.
 
 ## Files

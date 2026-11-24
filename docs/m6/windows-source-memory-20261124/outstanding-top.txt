@@ -1,0 +1,28 @@
+== heap: 73 outstanding, 405.0 KB
+     387.1 KB      12 allocs  first/last 6.1/240.1 s
+               nvwgf2umx.dll!0x00007ffba7ab153c
+               nvwgf2umx.dll!0x00007ffba7a92c71
+               nvwgf2umx.dll!0x00007ffba6cd01f1
+               nvwgf2umx.dll!0x00007ffba719261b
+               nvwgf2umx.dll!0x00007ffba7192761
+               nvwgf2umx.dll!0x00007ffba7199f9b
+               nvwgf2umx.dll!0x00007ffba7189e77
+               d3d11.dll!CContext::TID3D11DeviceContext_UpdateSubresource_<1>
+               d3d11.dll!CContext::TID3D11DeviceContext_UpdateSubresource_Amortized<0>
+               fl_gst_local_native_bench_win.exe!0x00007ff743673184
+               fl_gst_local_native_bench_win.exe!0x00007ff7436774e4
+               fl_gst_local_native_bench_win.exe!0x00007ff743678b0c
+               kernel32.dll!BaseThreadInitThunk
+               ntdll.dll!RtlUserThreadStart
+== VirtualAlloc commits: 13 outstanding, 364.0 KB
+     324.0 KB       9 allocs  first/last 48.7/240.1 s
+               nvwgf2umx.dll!0x00007ffba7ab153c
+               nvwgf2umx.dll!0x00007ffba7a92c71
+               nvwgf2umx.dll!0x00007ffba6cd01f1
+               nvwgf2umx.dll!0x00007ffba719261b
+               nvwgf2umx.dll!0x00007ffba7192761
+               nvwgf2umx.dll!0x00007ffba7199f9b
+               nvwgf2umx.dll!0x00007ffba7189e77
+               d3d11.dll!CContext::TID3D11DeviceContext_UpdateSubresource_<1>
+               d3d11.dll!CContext::TID3D11DeviceContext_UpdateSubresource_Amortized<0>
+               fl_gst_local_native_bench_win.exe!0x00007ff743673184

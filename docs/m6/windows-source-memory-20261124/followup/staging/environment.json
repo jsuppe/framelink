@@ -1,0 +1,17 @@
+{
+ "revision": "648fe9dedb63f2276fce182887debf3d5e0c9f33",
+ "dirty": false,
+ "platform": "Windows-11-10.0.26300-SP0",
+ "exe_sha256": "f89e503de5463de499c1e9398116e52d08bc393bd19f37920e6349dfb46cb25f",
+ "plugin_sha256": "ee7b6c70bf01f62fc06c272ca7f54d1dde30b520c888fe380203b9a2953f839e",
+ "duration": 1800,
+ "cells": [
+  "bgra4k30",
+  "nv12-4k30"
+ ],
+ "pool": 2,
+ "video_queue": 1,
+ "upload": "staging",
+ "nvidia-smi": "NVIDIA GeForce RTX 5090, 617.14",
+ "gst-inspect-1.0": null
+}

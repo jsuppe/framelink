@@ -1,0 +1,8 @@
+revision 648fe9dedb63f2276fce182887debf3d5e0c9f33
+build exit 0
+bench sha256 F89E503DE5463DE499C1E9398116E52D08BC393BD19F37920E6349DFB46CB25F
+plugin sha256 EE7B6C70BF01F62FC06C272CA7F54D1DDE30B520C888FE380203B9A2953F839E
+unit: OK
+bench exit 
+config: {"seconds":20,"fps":30,"width":3840,"height":2160,"format":"NV12","trace":false,"clock":"QPC quotient-remainder nanoseconds","pool":2,"queue":1,"offset_ns":37000000,"preroll":23,"display_hold":true,"upload":"staging"}
+analysis pass_all True arrival p99/max 9.12 9.3 upload p99/max (0.78, 0.9)

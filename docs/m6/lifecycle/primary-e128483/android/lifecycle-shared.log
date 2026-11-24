@@ -1,0 +1,62 @@
+PASS lifecycle-shared-1080p60-bgra-restart-producer BGRA 1920x1080@60 bin shared-cpu fresh-device lifecycle restart-producer 100x5s 545.1s
+  cycles.ok=100/100
+  long.mem.slope.kb_per_cycle=2.45
+  long.handles.slope.per_cycle=0.000
+  long.threads.slope.per_cycle=0.000
+  gpu.uid2000.busy_pct=unavailable
+PASS lifecycle-shared-1080p60-bgra-restart-consumer BGRA 1920x1080@60 bin shared-cpu fresh-device lifecycle restart-consumer 100x5s 542.4s
+  cycles.ok=100/100
+  long.mem.slope.kb_per_cycle=0.10
+  long.handles.slope.per_cycle=0.000
+  long.threads.slope.per_cycle=0.000
+  gpu.uid2000.busy_pct=unavailable
+PASS lifecycle-shared-1080p60-nv12-restart-producer NV12 1920x1080@60 bin shared-cpu fresh-device lifecycle restart-producer 100x5s 540.6s
+  cycles.ok=100/100
+  long.mem.slope.kb_per_cycle=3.46
+  long.handles.slope.per_cycle=0.000
+  long.threads.slope.per_cycle=0.000
+  gpu.uid2000.busy_pct=unavailable
+PASS lifecycle-shared-1080p60-nv12-restart-consumer NV12 1920x1080@60 bin shared-cpu fresh-device lifecycle restart-consumer 100x5s 538.7s
+  cycles.ok=100/100
+  long.mem.slope.kb_per_cycle=-36.03
+  long.handles.slope.per_cycle=0.000
+  long.threads.slope.per_cycle=0.000
+  gpu.uid2000.busy_pct=unavailable
+PASS lifecycle-shared-4k30-bgra-restart-producer BGRA 3840x2160@30 bin shared-cpu fresh-device lifecycle restart-producer 100x5s 564.1s
+  cycles.ok=100/100
+  long.mem.slope.kb_per_cycle=0.99
+  long.handles.slope.per_cycle=0.000
+  long.threads.slope.per_cycle=0.000
+  gpu.uid2000.busy_pct=unavailable
+PASS lifecycle-shared-4k30-bgra-restart-consumer BGRA 3840x2160@30 bin shared-cpu fresh-device lifecycle restart-consumer 100x5s 562.3s
+  cycles.ok=100/100
+  long.mem.slope.kb_per_cycle=-1.81
+  long.handles.slope.per_cycle=0.000
+  long.threads.slope.per_cycle=0.000
+  gpu.uid2000.busy_pct=unavailable
+FAIL lifecycle-shared-4k30-nv12-restart-producer NV12 3840x2160@30 bin shared-cpu fresh-device lifecycle restart-producer 100x5s 548.6s
+  cycles.ok=99/100
+  long.mem.slope.kb_per_cycle=-1.54
+  long.handles.slope.per_cycle=0.000
+  long.threads.slope.per_cycle=0.000
+  gate: incomplete: cycle 82: long=EOS fresh=error: consumer did not report drain before the deadline exit=0
+  gpu.uid2000.busy_pct=unavailable
+000|34016|7|6;EOS|150|240000|34208|7|6;EOS|150|240000|34208|7|6;EOS|150|240000|33880|7|6;EOS|150|240000|33944|7|6;EOS|150|240000|33580|7|6;EOS|150|240000|33584|7|6;EOS|150|240000|33704|7|6;EOS|150|240000|33852|7|6;EOS|150|240000|33948|7|6;EOS|150|240000|33972|7|6;EOS|150|240000|34076|7|6;EOS|150|240000|34000|7|6;EOS|150|240000|33804|7|6;EOS|150|240000|33840|7|6;EOS|150|240000|33732|7|6;EOS|150|240000|33884|7|6;EOS|150|240000|33764|7|6;EOS|150|240000|33992|7|6;EOS|150|240000|33768|7|6;EOS|150|240000|33588|7|6;EOS|150|240000|33720|7|6;EOS|150|240000|33844|7|6;EOS|150|240000|33904|7|6;EOS|150|240000|33924|7|6;EOS|150|240000|33628|7|6;EOS|150|240000|33792|7|6;EOS|150|240000|33880|7|6;EOS|150|240000|33528|7|6;EOS|150|240000|33644|7|6;EOS|150|240000|33664|7|6;EOS|150|240000|33424|7|6;EOS|150|240000|33696|7|6;EOS|150|240000|33912|7|6;EOS|150|240000|33868|7|6;EOS|150|240000|34060|7|6;EOS|150|240000|34164|7|6;EOS|150|240000|34220|7|6;EOS|150|240000|34048|7|6;EOS|150|240000|33980|7|6;EOS|150|240000|34036|7|6;EOS|150|240000|33972|7|6;EOS|150|240000|33736|7|6;EOS|150|240000|33656|7|6;EOS|150|240000|33748|7|6;EOS|150|240000|33732|7|6;EOS|150|240000|33808|7|6;EOS|150|240000|33904|7|6;EOS|150|240000|33636|7|6;EOS|150|240000|33816|7|6;EOS|150|240000|33928|7|6;EOS|150|240000|34140|7|6;EOS|150|240000|33788|7|6;EOS|150|240000|33860|7|6;EOS|150|240000|33728|7|6;EOS|150|240000|33592|7|6;EOS|150|240000|33536|7|6;EOS|150|240000|33596|7|6;EOS|150|240000|33624|7|6;EOS|150|240000|33792|7|6;EOS|150|240000|33944|7|6;EOS|150|240000|33936|7|6;EOS|150|240000|33932|7|6;EOS|150|240000|33964|7|6;EOS|150|240000|33452|7|6;EOS|150|240000|33612|7|6;EOS|150|240000|33644|7|6;EOS|150|240000|33424|7|6;EOS|150|240000|33720|7|6;EOS|150|240000|33836|7|6;EOS|150|240000|33908|7|6;EOS|150|240000|34056|7|6;EOS|150|240000|33816|7|6;
+long.threads=6..6
+long.threads.slope.per_cycle=0.000
+output.async=false
+output.queue_buffers=1
+output.sync=false
+playback.latency_ms=0
+seconds=5
+video.pool=2
+video.queue=1
+wall.s=548.1
+
+PASS lifecycle-shared-4k30-nv12-restart-consumer NV12 3840x2160@30 bin shared-cpu fresh-device lifecycle restart-consumer 100x5s 547.8s
+  cycles.ok=100/100
+  long.mem.slope.kb_per_cycle=3.24
+  long.handles.slope.per_cycle=0.000
+  long.threads.slope.per_cycle=0.000
+  gpu.uid2000.busy_pct=unavailable
+cells 8 failed ['lifecycle-shared-4k30-nv12-restart-producer']
