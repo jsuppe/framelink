@@ -1,0 +1,96 @@
+{
+ "scope": "synthetic authenticated transport; explicit upload/verification copies; no physical playback or isolated-hop budget claim",
+ "budget_ns": 34000000,
+ "roles": {
+  "source": {
+   "video": 150,
+   "pcm_frames": 240000,
+   "resource_slopes_per_min": {},
+   "cpu_percent": 45.28481957938679
+  },
+  "relay": {
+   "video": 150,
+   "pcm_frames": 240000,
+   "resource_slopes_per_min": {},
+   "cpu_percent": 36.06696505744074
+  },
+  "receiver": {
+   "video": 150,
+   "pcm_frames": 240000,
+   "resource_slopes_per_min": {},
+   "cpu_percent": 37.35231373259747
+  }
+ },
+ "timing_ms": {
+  "scheduled_to_final_arrival": {
+   "p50": 4.763667,
+   "p95": 6.825067,
+   "p99": 7.157067,
+   "max": 7.215967
+  },
+  "source_marker_to_relay": {
+   "p50": 2.4104,
+   "p95": 4.331,
+   "p99": 4.6979,
+   "max": 4.7561
+  },
+  "source_marker_to_final": {
+   "p50": 4.3018,
+   "p95": 6.3338,
+   "p99": 6.6975,
+   "max": 6.7529
+  },
+  "source_acquire_call": {
+   "p50": 0.0007,
+   "p95": 0.0008,
+   "p99": 0.001,
+   "max": 0.0017
+  },
+  "source_upload_call": {
+   "p50": 0.5742,
+   "p95": 0.6431,
+   "p99": 0.6917,
+   "max": 0.712
+  },
+  "source_submit_call": {
+   "p50": 0.0626,
+   "p95": 0.0756,
+   "p99": 0.0902,
+   "max": 0.0946
+  },
+  "relay_acquire_to_record": {
+   "p50": 0.0357,
+   "p95": 0.0448,
+   "p99": 0.0481,
+   "max": 0.0524
+  },
+  "relay_forward_call": {
+   "p50": 0.0352,
+   "p95": 0.0443,
+   "p99": 0.0476,
+   "max": 0.0518
+  },
+  "final_acquire_to_completion": {
+   "p50": 2.0307,
+   "p95": 4.0334,
+   "p99": 4.0409,
+   "max": 4.0807
+  },
+  "audio_scheduled_to_final": {
+   "p50": 0.148567,
+   "p95": 0.190867,
+   "p99": 0.286367,
+   "max": 2.198767
+  }
+ },
+ "pass_all": true,
+ "video_arrival_misses": 0,
+ "audio_arrival_misses": 0,
+ "trace_checked": false,
+ "preroll": 23,
+ "exit": 0,
+ "wall_seconds": 7.3,
+ "cell": "nv12-4k30",
+ "seconds": 5,
+ "trace": false
+}
