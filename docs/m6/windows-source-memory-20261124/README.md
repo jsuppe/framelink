@@ -12,7 +12,7 @@ The relay and the receiver don't grow. The source doesn't grow at Windows 1080p6
 
 Each block extends the process heap's committed memory by one 36 KB step, which is the step size the resource sampler records. **The growth is bounded**: in all four 1800 s runs at `357d82a5` it stops at about 1300–1320 s. A 3600 s run confirmed it: memory stays flat from 1298 s to the end, for 2303 s ([follow-up](#follow-up-at-648fe9de-staging-upload-and-3600-s)). That is about 50 blocks, under 2 MB in total.
 
-**It is not specific to `UpdateSubresource`.** When the source writes through a mapped staging texture and `CopyResource` instead, the same 36 KB steps appear, about 50 of them, every 18.9 s instead of 21.0 s, and they stop by 1171 s ([follow-up](#follow-up-at-648fe9de-staging-upload-and-3600-s)). Which driver call allocates them in that mode is not traced.
+**It is not specific to `UpdateSubresource`.** When the source writes through a mapped staging texture and `CopyResource` instead, the same 36 KB steps appear, about 50 of them, every 18.9 s instead of 21.0 s, and they stop by 1171 s. A heap trace of that mode shows **the same 33 031-byte block from the same driver routine, reached through `CopyResource_Amortized`** ([follow-up](#follow-up-at-648fe9de-staging-upload-and-3600-s)). The driver keeps it in a code path shared by large 4K updates and copies.
 
 ## Shape of the growth (the 1800 s cells at `357d82a5`)
 
@@ -50,7 +50,7 @@ Each block extends the process heap's committed memory by one 36 KB step, which 
 - **Bounded:** the growth stops by about 1320 s in every run, which is consistent with a fixed-size table in the driver. The 3600 s run shows it stays stopped for at least 2303 s.
 - **Not established:**
   - **What the block is:** it is in NVIDIA's closed driver, which has no symbols.
-  - **Which call allocates it with a staging upload:** not traced. The interval changes with the upload method (21.0 s with `UpdateSubresource`, 18.9 s with staging), so the trigger is not a plain frame count shared by both.
+  - **What sets the interval:** one block per 639 frames with `UpdateSubresource`, one per 566 with a staging upload and `CopyResource`. Both make one large D3D11 call per frame, so the trigger is not a plain count of those calls.
   - **Why 1080p doesn't trigger it:** not verified. (The earlier guess, that 1080p uploads don't take the amortized path, does not explain why a staging upload also grows.)
 
 ## Follow-up at `648fe9de`: staging upload and 3600 s
@@ -79,10 +79,22 @@ At the owner's request, two runs on the same host and driver tested this record'
 - **Checker for 3600 s:** the 3600 s capture was analyzed with a scratch copy of `check_local_native_bench.py` with the duration limit raised from 1800 to 3600, the only change. Its analysis is `followup/nv12-4k30-3600s.analysis.json`. This is not a qualification cell.
 - **Staging-upload cost:** the upload call is a CPU write into mapped memory plus a GPU copy. Its p99 is 2.01 ms for BGRA and 0.80 ms for NV12. Arrival timing is the same as with the default upload.
 
+### Heap trace with the staging upload
+
+`m6m-heap.ps1` is `m6k-heap.ps1` with `--upload staging` at `648fe9de`: NV12 4K30 600 s, heap and VirtualAlloc tracing with stacks from 101 to 377 s (`heap-run.log`). `outstanding.py` (new opt-in `--times`, which lists each allocation; the default output is unchanged) gives `outstanding-staging.txt`:
+- **Heap:** 26 allocations still live at the end, 455.8 KB. Of those, **451.6 KB is 14 blocks of exactly 33 031 bytes**, all with one stack:
+
+  `bench source upload` → `d3d11!CopyResource_Amortized` → `d3d11!CopyResource` → `nvwgf2umx.dll` (6 frames) → `ntdll!RtlAllocateHeap`
+
+  The first five driver frames are the same addresses as in the `UpdateSubresource` trace (`…7ab153c`, `…7a92c71`, `…6cd01f1`, `…719261b`, `…7192761`). Only the frame below them differs (`…718a24b` here, `…7199f9b` and `…7189e77` there).
+- **Timing:** one block every 18.87 s (566 frames at 30 fps), at run times 114.0 to 359.3 s.
+- **VirtualAlloc:** 12 commits from the same stack, 452 KB. Each one matches a memory increase in the run's samples within 0.6 s (`heap-staging-source.resources.csv`), including a 52 KB commit at 170.6 s and a 40 KB one at 208.4 s, which match +52 and +40 KB steps. The blocks at 189.5 and 359.3 s fitted into memory already committed.
+- **Everything else** is under 5 KB: thread-pool timers, GStreamer and thread start at 199 s.
+
 ## Files
 
 - `m6k-heap.ps1`: the run and trace script. `run.log`: its output.
 - `outstanding.py`: the analysis. `outstanding-top.txt`: its top groups.
 - `config.json` and `source.resources.csv`: the traced run's config and source memory samples.
 - Outside the repository: `dump.tgz` (107 MB), the symbolized trace dump, with its SHA-256 in `dump.sha256`.
-- `followup/`: the `648fe9de` scripts and logs, `steps.py`, each run's environment, config, summaries and analyses (`staging/`, `3600/`), and `steps.txt` (the step counts). Outside the repository: `followup-648fe9d.tgz` (69 MB, all captures with their CSVs and the task log), with its SHA-256 in `followup/captures.sha256`.
+- `followup/`: the `648fe9de` scripts and logs, `steps.py`, the staging heap trace (`m6m-heap.ps1`, `heap-run.log`, `outstanding-staging.txt`, `heap-staging-config.json`, `heap-staging-source.resources.csv`), each run's environment, config, summaries and analyses (`staging/`, `3600/`), and `steps.txt` (the step counts). Outside the repository: `followup-648fe9d.tgz` (69 MB, all captures with their CSVs and the task log) and `dump-staging.tgz` (the staging trace's symbolized dump with the run's config, memory samples and video CSV), with their SHA-256 in `followup/captures.sha256`.

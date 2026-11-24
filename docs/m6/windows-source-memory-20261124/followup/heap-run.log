@@ -1,0 +1,14 @@
+source pid 41860 at 0 s
+trace on at 101 s, 15:05:16.206
+xperf stop: Merged Etl: <win-home>\dev\apichk\m6m-heap\merged.etl
+xperf stop: The trace you have just captured "<win-home>\dev\apichk\m6m-heap\merged.etl" may contain personally identifiable information, including but not necessarily limited to paths to files accessed, paths to registry accessed and process names. Exact information depends on the events that were logged. Please be aware of this when sharing out this trace with other people.
+trace off at 377 s, 15:09:52.194
+bench exit 
+dump:          ClassicEventDescriptor: 0x25  0x00 0x0002
+dump:          MofLength: 12
+             1 run
+ 2,102,062,297 dump.txt
+   135,266,304 heap.etl
+   122,683,392 kernel.etl
+   257,949,696 merged.etl
+done

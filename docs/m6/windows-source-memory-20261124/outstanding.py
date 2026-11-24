@@ -1,8 +1,9 @@
 """Outstanding (never freed) heap allocations and VirtualAlloc commits of one
 process in a symbolized xperf dumper file, grouped by allocation stack.
-Usage: outstanding.py dump.txt pid"""
+Usage: outstanding.py dump.txt pid [--times]
+--times also lists each allocation's size and trace time for groups of 3 or more."""
 import sys,collections
-f,pid=sys.argv[1],sys.argv[2];tag=f'({pid})'
+f,pid=sys.argv[1],sys.argv[2];times='--times' in sys.argv[3:];tag=f'({pid})'
 live={}           # (heap,addr) -> (size, stackkey, ts)
 vlive={}          # base -> (size, stackkey, ts)
 stacks={};cur=None;frames=[]
@@ -36,9 +37,10 @@ close()
 def report(name,d):
   g=collections.defaultdict(lambda:[0,0,[]])
   for size,k,ts in d.values():
-    st=stacks.get(k,('<no stack>',));e=g[st];e[0]+=size;e[1]+=1;e[2].append(ts)
+    st=stacks.get(k,('<no stack>',));e=g[st];e[0]+=size;e[1]+=1;e[2].append((ts,size))
   tot=sum(v[0] for v in g.values());print(f'== {name}: {sum(v[1] for v in g.values())} outstanding, {tot/1024:.1f} KB')
   for st,(size,n,ts) in sorted(g.items(),key=lambda kv:-kv[1][0])[:12]:
-    print(f'{size/1024:10.1f} KB {n:7d} allocs  first/last {min(ts)/1e6:.1f}/{max(ts)/1e6:.1f} s')
+    print(f'{size/1024:10.1f} KB {n:7d} allocs  first/last {min(ts)[0]/1e6:.1f}/{max(ts)[0]/1e6:.1f} s')
+    if times and n>=3: print('               at (s, bytes):',', '.join(f'{t/1e6:.1f} {b}' for t,b in sorted(ts)))
     for x in st: print('              ',x)
 report('heap',live);report('VirtualAlloc commits',vlive)
