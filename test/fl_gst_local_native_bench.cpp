@@ -387,7 +387,12 @@ static void relay(){
 extern "C" {GST_PLUGIN_STATIC_DECLARE(framelink);GST_PLUGIN_STATIC_DECLARE(app);GST_PLUGIN_STATIC_DECLARE(coreelements);
 GST_PLUGIN_STATIC_DECLARE(gdp);GST_PLUGIN_STATIC_DECLARE(gio);}
 #endif
-int main(int argc,char**argv){CHECK(argc>=2);o.plugin=argv[1];for(int i=2;i<argc;++i){std::string k=argv[i];if(k=="--trace"){o.trace=true;continue;}CHECK(i+1<argc);std::string v=argv[++i];if(k=="--out")o.out=v;else if(k=="--role")o.role=v;else if(k=="--format"){CHECK(v=="BGRA"||v=="RGBA"||v=="NV12");o.nv12=v=="NV12";o.rgba=v=="RGBA";}else {char*end=nullptr;auto n=strtoul(v.c_str(),&end,10);CHECK(!v.empty()&&!*end&&n>0&&n<=100000);if(k=="--seconds")o.seconds=unsigned(n);else if(k=="--width")o.width=unsigned(n);else if(k=="--height")o.height=unsigned(n);else if(k=="--fps")o.fps=unsigned(n);else if(k=="--pool")o.pool=unsigned(n);else if(k=="--video-queue")o.queue=unsigned(n);else CHECK(false);}}CHECK(!o.out.empty()&&o.seconds<=1800&&(o.fps==30||o.fps==60)&&o.width>=64&&o.width<=3840&&o.height>=32&&o.height<=2160&&!(o.width%2)&&!(o.height%2)&&o.pool>=2&&o.pool<=MaxPool&&o.queue<o.pool);CHECK(o.role=="relay"||o.role=="source"||o.role=="receiver");o.out=fs::absolute(o.out).lexically_normal().string();if(o.role=="relay"){CHECK(fs::create_directory(o.out));auto f=file("config.json");f<<"{\"seconds\":"<<o.seconds<<",\"fps\":"<<o.fps<<",\"width\":"<<o.width<<",\"height\":"<<o.height<<",\"format\":\""<<formatName()<<"\",\"trace\":"<<(o.trace?"true":"false")<<",\"clock\":\""<<clockName<<"\",\"pool\":"<<o.pool<<",\"queue\":"<<o.queue<<",\"offset_ns\":37000000,\"preroll\":"<<prerollTotal()<<"}\n";}
+#ifdef _WIN32
+static constexpr bool displayHold=true;
+#else
+static constexpr bool displayHold=false;
+#endif
+int main(int argc,char**argv){CHECK(argc>=2);o.plugin=argv[1];for(int i=2;i<argc;++i){std::string k=argv[i];if(k=="--trace"){o.trace=true;continue;}CHECK(i+1<argc);std::string v=argv[++i];if(k=="--out")o.out=v;else if(k=="--role")o.role=v;else if(k=="--format"){CHECK(v=="BGRA"||v=="RGBA"||v=="NV12");o.nv12=v=="NV12";o.rgba=v=="RGBA";}else {char*end=nullptr;auto n=strtoul(v.c_str(),&end,10);CHECK(!v.empty()&&!*end&&n>0&&n<=100000);if(k=="--seconds")o.seconds=unsigned(n);else if(k=="--width")o.width=unsigned(n);else if(k=="--height")o.height=unsigned(n);else if(k=="--fps")o.fps=unsigned(n);else if(k=="--pool")o.pool=unsigned(n);else if(k=="--video-queue")o.queue=unsigned(n);else CHECK(false);}}CHECK(!o.out.empty()&&o.seconds<=1800&&(o.fps==30||o.fps==60)&&o.width>=64&&o.width<=3840&&o.height>=32&&o.height<=2160&&!(o.width%2)&&!(o.height%2)&&o.pool>=2&&o.pool<=MaxPool&&o.queue<o.pool);CHECK(o.role=="relay"||o.role=="source"||o.role=="receiver");o.out=fs::absolute(o.out).lexically_normal().string();if(o.role=="relay"){CHECK(fs::create_directory(o.out));auto f=file("config.json");f<<"{\"seconds\":"<<o.seconds<<",\"fps\":"<<o.fps<<",\"width\":"<<o.width<<",\"height\":"<<o.height<<",\"format\":\""<<formatName()<<"\",\"trace\":"<<(o.trace?"true":"false")<<",\"clock\":\""<<clockName<<"\",\"pool\":"<<o.pool<<",\"queue\":"<<o.queue<<",\"offset_ns\":37000000,\"preroll\":"<<prerollTotal()<<",\"display_hold\":"<<(displayHold?"true":"false")<<"}\n";}
  #ifdef _WIN32
  FILE* log=nullptr;CHECK(freopen_s(&log,path(o.role+".stderr.log").c_str(),"w",stderr)==0);
 #else
@@ -397,6 +402,10 @@ int main(int argc,char**argv){CHECK(argc>=2);o.plugin=argv[1];for(int i=2;i<argc
  CHECK(!o.trace||o.seconds<=5);
 #ifdef _WIN32
  _putenv_s("FRAMELINK_TRACE",o.trace?path(o.role+".trace.csv").c_str():"");_putenv_s("FRAMELINK_TRACE_EVENTS",std::to_string(o.seconds*2500+frames()*32+1024).c_str());std::thread([]{Sleep((o.seconds+60)*1000);fprintf(stderr,"owned benchmark watchdog expired\n");ExitProcess(2);}).detach();
+ // Like a presenting renderer, the relay keeps the system and display awake for
+ // the run (held by this thread until the process exits): a display power change
+ // stalls the GPU driver for 50-180 ms on Windows.
+ if(o.role=="relay")CHECK(SetThreadExecutionState(ES_CONTINUOUS|ES_SYSTEM_REQUIRED|ES_DISPLAY_REQUIRED)!=0);
 #else
  if(o.trace)setenv("FRAMELINK_TRACE",path(o.role+".trace.csv").c_str(),1);else unsetenv("FRAMELINK_TRACE");setenv("FRAMELINK_TRACE_EVENTS",std::to_string(o.seconds*2500+frames()*32+1024).c_str(),1);std::thread([]{Sleep((o.seconds+60)*1000);fprintf(stderr,"owned benchmark watchdog expired\n");fflush(nullptr);_exit(2);}).detach();
 #endif
