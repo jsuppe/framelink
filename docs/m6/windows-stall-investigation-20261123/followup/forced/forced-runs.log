@@ -1,0 +1,22 @@
+desktop session 1
+
+    Current AC Power Setting Index: 0x00000000
+p4q2 20:44:07: PASS nv12-4k30 5s off arrival p99/max 8.91/9.09 ms
+p4q2 20:44:15: PASS nv12-4k30 5s trace arrival p99/max 8.86/9.17 ms
+p4q2 20:45:45: FAIL nv12-4k30 600s off harness exit 1
+p4q2 20:45:45: NOT ALL PASS
+p4q2 display: 20:44:00.866 waiting for <win-home>\dev\apichk\out-forced-display\p4q2\nv12-4k30-600s
+p4q2 display: 20:44:15.306 capture started
+p4q2 display: 20:45:15.371 cycle 0 monitor off
+p4q2 display: 20:45:45.395 cycle 0 monitor on (input)
+p4q2 566 20:45:45.524 reason 32
+p2q1 20:45:58: PASS nv12-4k30 5s off arrival p99/max 7.13/7.17 ms
+p2q1 20:46:05: PASS nv12-4k30 5s trace arrival p99/max 7.12/7.15 ms
+p2q1 20:47:06: FAIL nv12-4k30 600s off harness exit 1
+p2q1 20:47:06: NOT ALL PASS
+p2q1 display: 20:45:51.393 waiting for <win-home>\dev\apichk\out-forced-display\p2q1\nv12-4k30-600s
+p2q1 display: 20:46:06.042 capture started
+p2q1 display: 20:47:06.106 cycle 0 monitor off
+done
+
+

@@ -1,0 +1,28 @@
+{
+ "environment": {
+  "revision": "efa86dec58784af88d82b24be4f3d6ac5ccab35d",
+  "dirty": false,
+  "platform": "Windows-11-10.0.26300-SP0",
+  "exe_sha256": "3014565cae5b0010b31806ba09aa14508577f507ac2b85c967e96535bd9f6f69",
+  "plugin_sha256": "b123bca3531684302b655df8001383848580992cad823ec8fa9e6efab38135b1",
+  "duration": 600,
+  "cells": [
+   "nv12-4k30"
+  ],
+  "pool": 4,
+  "video_queue": 2,
+  "nvidia-smi": "NVIDIA GeForce RTX 5090, 617.14",
+  "gst-inspect-1.0": null
+ },
+ "cells": [
+  {
+   "cell": "nv12-4k30",
+   "preflight": true,
+   "trace": true,
+   "duration": false,
+   "duration_error": "harness exit 1",
+   "slopes": {},
+   "arrival": null
+  }
+ ]
+}

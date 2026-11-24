@@ -114,9 +114,35 @@ The default-profile failure shows the desktop stall with no file I/O on the time
 - A deeper queue can stop the frame loss, but not the lateness. Frames behind a 50–180 ms stall at the source arrive past the 34 ms budget whatever the queue depth: in the failed run they were 213–237 ms late. A profile with headroom would turn an abort into counted misses.
 - Whether pool 4 / queue 2 actually absorbs a stall is not yet measured. It needs a run in which a display power change happens. That can be forced (turning the monitor off and on during a run), but that is the owner's call, since it is their screen.
 
+## 5. Forced display power changes: pool 4 / queue 2 does not absorb the stall
+
+With the owner's approval, the same evening, NV12 4K30 600 s at harness `efa86dec` (`followup/forced/`):
+- **Host change first:** the display idle timeout on AC was set from 300 s to 0 (never), so that only forced changes occur. To restore it: `powercfg /change monitor-timeout-ac 5`.
+- **Forcing the changes:** a task in the owner's interactive session (`m6h-blink.ps1`, run by `m6h-forced.ps1`) waited for the long capture to start. Then, at 60 s and every 120 s after, it turned the monitor off (`SC_MONITORPOWER` 2, broadcast) and, 30 s later, back on (a one-pixel mouse move). It logged each step.
+- **Order:** pool 4 / queue 2 first, then the default 2/1 as the control. Each had the usual 5 s preflight and trace-on runs first, and all four passed.
+
+| Profile | Result | Stall |
+|---|---|---|
+| pool 4, queue 2 | **FAIL** at frame 2648, about 88 s: the relay received the wrong frame (`:377`). The first forced off, at 60 s, caused no stall | at the first forced **on** (20:45:45.395; 566 reason 32 at 20:45:45.524). Source `flSubmit` **155.1 ms**, and at the same time the relay's forward of the previous frame took **184.4 ms**. After it, the source published 3 frames within 3.9 ms; a queue of 2 cannot hold them |
+| pool 2, queue 1 | **FAIL** at frame 1747, about 58 s: the same check | at the first forced **off** (20:47:06.106). Source `flSubmit` **63.6 ms**; the next frame followed 1 ms later and replaced it in the one-deep queue |
+
+- The frame times are converted to wall time from the capture start (directory creation plus the 23-frame pre-roll). Both stalls fall within about 0.5 s of a forced change.
+- Audio was unaffected in both runs: the worst block was at most 2.6 ms late at any role.
+- The source's later `acquireResult==FL_OK` failure (`:246`) follows from the relay's abort.
+- A forced off logs no 566 event; the forced on logged reason 32, as on input.
+
+So:
+- **On demand:** the stall reproduces on demand, in 2 of 2 runs, at the first change that hit a submit.
+- **Not just the source:** at the on transition, the relay's forward was blocked in the same window as the source's submit. The whole GPU path stops, not one call.
+- **Headroom doesn't fix it:** pool 4 / queue 2 does not absorb a 155 ms stall at 30 fps. A queue deep enough to hold the catch-up burst (about 5 frames or more) would stop the loss. But those frames would still arrive more than 120 ms past the 34 ms budget, so no buffering profile passes the zero-miss gate through a display power change.
+- **What remains for qualification:** for the 4K30 qualification cells, the remaining question is a host condition: no display power changes during the run. The display timeout is now disabled on the test host.
+
 ## Possible next steps (decisions for Jon)
 
-Status after section 4: step 1 is done (`efa86dec`); step 2 is answered by the symbols, without application elimination; step 3 has the profile selectable in the harness, with pool 4 / queue 2 not yet shown to absorb a stall.
+Status after section 5:
+- Step 1 is done (`efa86dec`).
+- Step 2 is answered by the symbols, without application elimination.
+- Step 3: the profile is selectable in the harness. Forced display changes show that a deeper queue does not absorb the stall within the budget.
 
 1. **Quiet-host stalls (harness).** Move CSV writing off the timed threads, to a writer thread with an in-memory queue. This is a test-harness change only. It removes the snapshot effect from the measurement but not from the host.
 2. **Desktop stalls, identify the trigger.** Resolve the csrss stack with Microsoft public symbols, and/or remove candidate applications one at a time (NZXT CAM, NVIDIA Broadcast, Steam and Epic overlays, monitor or lighting utilities) while the same trace runs.
@@ -129,5 +155,6 @@ Status after section 4: step 1 is done (`efa86dec`); step 2 is answered by the s
 - Outside the repository, SHA-256 in `archives.sha256`:
   - `captures.tar.xz` (7.5 MB): all probe and bench CSVs, process lists, and the probe-filtered window of the shadow-copy trace;
   - `trace-windows.tgz` (67 MB): the text dumps of the three 450 ms trace windows around the bench aborts.
-- The full traces (`run.etl`, 21.7 GB; `stall-1.etl` files) are on the test host only.
+- The full traces (`run.etl`, 21.7 GB; the `vss-test` `stall-1.etl`) and the symbol cache were deleted from the test host with the owner's approval, after the archives above were checked against their SHA-256.
+- `followup/forced/` (section 5): the scripts, `forced-runs.log`, and under `runs/` each capture's analysis, config, summaries and non-empty stderr. Outside the repository: `forced-display.tgz` (1.7 MB, all captures with their CSVs), with its SHA-256 in `archives.sha256`.
 - `followup/` (section 4): the scripts (`m6h-*.ps1`), the logs, `stacks/`, the event and display queries, and under `runs/` each capture's analysis, config, summaries and non-empty stderr. Outside the repository, SHA-256 in `archives.sha256`: `sym-windows.tgz` (79 MB, the three symbolized windows) and `runs-efa86de.tgz` (28 MB, all captures from section 4 with their CSVs).
