@@ -29,7 +29,7 @@ This is a new harness revision and a new host condition. It does not replace any
 | `nv12-4k30` 1800 s (preflight and trace pass) | **pass**, zero video and audio misses | 6.21 / 9.03 / 16.95 | 0.19 / 24.92 | 0.09 / 0.23 | 23 % / 4 % / 7 % |
 
 - **Relay forward:** p99 ≤ 0.06 ms in both cells, max ≤ 0.50 ms.
-- **Resource slopes:** relay and receiver memory within 0.3 KB/min; handles and threads ≤ 0.012/min. The source memory slope is 40.7 KB/min (BGRA) and 41.7 KB/min (NV12). That is under the 64 KB/min gate, and the same as on the quieted host of 2026-11-22 (42.0 and 43.9). Its cause is still not established. Cause, found later the same day: a bounded allocation in NVIDIA's D3D11 driver under the bench's `UpdateSubresource` upload ([record](../windows-source-memory-20261124/README.md)).
+- **Resource slopes:** relay and receiver memory within 0.3 KB/min; handles and threads ≤ 0.012/min. The source memory slope is 40.7 KB/min (BGRA) and 41.7 KB/min (NV12). That is under the 64 KB/min gate, and the same as on the quieted host of 2026-11-22 (42.0 and 43.9). Its cause is still not established. Cause, found later the same day: a bounded allocation in NVIDIA's D3D11 driver under the source's 4K upload, which stops by about 1300 s ([record](../windows-source-memory-20261124/README.md)).
 - **Margin:** BGRA's worst frame, at 31.63 ms, is within 2.4 ms of the 34 ms budget. The p99 is 11.63 ms, so this is one outlier, not a shifted distribution.
 
 ## Caveat: the display was off during the cells
@@ -55,7 +55,7 @@ At the owner's request, the same two cells ran again the same morning, with the 
 | `nv12-4k30` 1800 s (preflight and trace pass) | **pass**, zero video and audio misses | 6.02 / 7.19 / 16.93 | 0.20 / 16.44 | 0.09 / 0.96 | 22 % / 7 % / 8 % |
 
 - **Relay forward:** p99 ≤ 0.06 ms, max ≤ 1.23 ms.
-- **Resource slopes:** relay and receiver memory within 0.6 KB/min; handles and threads within ±0.004/min. Source memory is 40.7 and 43.5 KB/min, the same as every 4K30 source and under the 64 KB/min gate. Cause, found later the same day: a bounded allocation in NVIDIA's D3D11 driver under the bench's `UpdateSubresource` upload ([record](../windows-source-memory-20261124/README.md)).
+- **Resource slopes:** relay and receiver memory within 0.6 KB/min; handles and threads within ±0.004/min. Source memory is 40.7 and 43.5 KB/min, the same as every 4K30 source and under the 64 KB/min gate. Cause, found later the same day: a bounded allocation in NVIDIA's D3D11 driver under the source's 4K upload, which stops by about 1300 s ([record](../windows-source-memory-20261124/README.md)).
 - **No capture wrote to stderr.**
 
 ## Verdict, for Jon

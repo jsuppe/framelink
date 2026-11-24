@@ -8,9 +8,11 @@ The relay and the receiver don't grow. The source doesn't grow at Windows 1080p6
 
 ## Answer
 
-**It is NVIDIA's D3D11 user-mode driver, not FrameLink code.** The bench's source uploads each frame from CPU memory with `ID3D11DeviceContext::UpdateSubresource`. At 4K, the D3D11 runtime takes its amortized path for large updates (`UpdateSubresource_Amortized`). Inside it, the driver (`nvwgf2umx.dll`, 617.14) allocates **one 33 031-byte heap block about every 21.3 s and never frees it**.
+**It is NVIDIA's D3D11 user-mode driver, not FrameLink code.** The bench's source uploads each frame from CPU memory with `ID3D11DeviceContext::UpdateSubresource`. At 4K, the D3D11 runtime takes its amortized path for large updates (`UpdateSubresource_Amortized`). In the traced run, the driver (`nvwgf2umx.dll`, 617.14) allocated **one 33 031-byte heap block about every 21.3 s under that call and never freed it**.
 
-Each block extends the process heap's committed memory by one 36 KB step, which is the step size the resource sampler records. **The growth is bounded**: in all four 1800 s runs at `357d82a5` it stops at about 1300–1320 s and stays flat for the last 480 s. That is roughly 50–60 blocks, about 2 MB in total.
+Each block extends the process heap's committed memory by one 36 KB step, which is the step size the resource sampler records. **The growth is bounded**: in all four 1800 s runs at `357d82a5` it stops at about 1300–1320 s. A 3600 s run confirmed it: memory stays flat from 1298 s to the end, for 2303 s ([follow-up](#follow-up-at-648fe9de-staging-upload-and-3600-s)). That is about 50 blocks, under 2 MB in total.
+
+**It is not specific to `UpdateSubresource`.** When the source writes through a mapped staging texture and `CopyResource` instead, the same 36 KB steps appear, about 50 of them, every 18.9 s instead of 21.0 s, and they stop by 1171 s ([follow-up](#follow-up-at-648fe9de-staging-upload-and-3600-s)). Which driver call allocates them in that mode is not traced.
 
 ## Shape of the growth (the 1800 s cells at `357d82a5`)
 
@@ -44,11 +46,38 @@ Each block extends the process heap's committed memory by one 36 KB step, which 
 ## What this means
 
 - **Not a FrameLink leak.** No outstanding allocation comes from `framelink.dll`, the GStreamer plugin or the bench's own code, other than the call into D3D11.
-- **Limited to the harness's upload path.** The relay and receiver never call `UpdateSubresource`, and they don't grow. A producer that writes frames on the GPU, or through a mapped staging texture, would not take this path. A producer that uploads 4K frames with `UpdateSubresource` on this driver would see the same bounded growth.
-- **Bounded, so far:** the growth stops by about 1320 s in every run, which is consistent with a fixed-size table in the driver. The stop is observed over 480–500 s; growth beyond 1800 s is not measured.
+- **Tied to the producer's CPU-to-GPU 4K upload, by either method.** The relay and receiver don't upload, and they don't grow. A producer that uploads 4K frames from CPU memory on this driver, with `UpdateSubresource` or through a mapped staging texture, should expect the same bounded growth. A producer that renders its frames on the GPU is not measured.
+- **Bounded:** the growth stops by about 1320 s in every run, which is consistent with a fixed-size table in the driver. The 3600 s run shows it stays stopped for at least 2303 s.
 - **Not established:**
   - **What the block is:** it is in NVIDIA's closed driver, which has no symbols.
-  - **Why 1080p doesn't trigger it:** presumably 1080p uploads (8 MB) don't take the amortized path, but that is not verified.
+  - **Which call allocates it with a staging upload:** not traced. The interval changes with the upload method (21.0 s with `UpdateSubresource`, 18.9 s with staging), so the trigger is not a plain frame count shared by both.
+  - **Why 1080p doesn't trigger it:** not verified. (The earlier guess, that 1080p uploads don't take the amortized path, does not explain why a staging upload also grows.)
+
+## Follow-up at `648fe9de`: staging upload and 3600 s
+
+At the owner's request, two runs on the same host and driver tested this record's conclusions. Bench `648fe9de` adds two diagnostic options, with the defaults unchanged:
+- `--upload staging` (Windows only): the source writes each frame into a CPU-writable staging texture (two, alternating), then `CopyResource`s it to the pool image;
+- `--seconds` up to 3600. The checker still freezes qualification at 1800 s.
+
+**Runs** (`followup/`; bench SHA-256 `f89e503d…`, plugin `ee7b6c70…`). The plugin hash differs from `357d82a5`'s `fcb9e0d0…` with no plugin source change, so the build is not byte-reproducible.
+- **Build and smoke** (`m6l-build.ps1`, `build.log`): unit tests OK. A 20 s NV12 4K30 staging capture passes the analyzer (arrival max 9.30 ms) and records `"upload":"staging"`.
+- **Run** (`m6l-formal.ps1`, `m6l-task.ps1`, `run.log`): in the desktop session, as for the lit re-run. The task woke the display at 11:42:18 and set the session hold correctly (`[Convert]::ToUInt32`). It then ran:
+  1. the formal 4K30 cells with `--upload staging`, 1800 s each;
+  2. a 3600 s NV12 4K30 capture with the default upload.
+- **Display:** every 5-min `powercfg /requests` check from 11:47 to 13:42 listed the task and the bench under DISPLAY. The wake (566 reason 32) was the only display event. The script's application list came out empty, because window titles aren't visible from the ssh session; the owner's normal desktop was in use.
+
+`steps.py` counts the 36 KB steps in each source's memory samples. On the lit `357d82a5` captures it reproduces the step table above (51 and 51).
+
+| Run | Result | Arrival p50 / p99 / max (ms) | Upload call p99 / max (ms) | 36 KB steps | First / last step | Interval (median) | After the last step | Gate memory slope |
+|---|---|---|---|---|---|---|---|---|
+| staging, BGRA 4K30 1800 s | **pass**, zero misses | 10.03 / 11.54 / 20.87 | 2.01 / 2.58 | 51 | 76 / 1171 s | 18.9 s | flat for 630 s | 24.1 KB/min |
+| staging, NV12 4K30 1800 s | **pass**, zero misses | 6.02 / 7.29 / 8.42 | 0.80 / 1.35 | 49 | 133 / 1171 s | 18.8 s | flat for 630 s | 24.2 KB/min |
+| default upload, NV12 4K30 3600 s | zero misses (analyzer with the cap at 3600 s) | 5.98 / 7.18 / 12.84 | 0.69 / 4.16 | 52 | 65 / 1298 s | 20.9 s | flat for 2303 s | −0.02 KB/min |
+
+- **Staging upload:** the growth is still there. The count of steps and the total are about the same; the steps come faster and end earlier. So the staging run disproves the earlier statement that a mapped-staging producer would not take this path.
+- **3600 s:** the steps end at 1298 s, as at 1800 s, and memory is flat for the remaining 38 minutes. The gate's regression covers the second half of the run, which is entirely flat here, so its slope is −0.02 KB/min. At 1800 s, the same window includes the last ~400 s of growth, which is where the ~41 KB/min comes from.
+- **Checker for 3600 s:** the 3600 s capture was analyzed with a scratch copy of `check_local_native_bench.py` with the duration limit raised from 1800 to 3600, the only change. Its analysis is `followup/nv12-4k30-3600s.analysis.json`. This is not a qualification cell.
+- **Staging-upload cost:** the upload call is a CPU write into mapped memory plus a GPU copy. Its p99 is 2.01 ms for BGRA and 0.80 ms for NV12. Arrival timing is the same as with the default upload.
 
 ## Files
 
@@ -56,3 +85,4 @@ Each block extends the process heap's committed memory by one 36 KB step, which 
 - `outstanding.py`: the analysis. `outstanding-top.txt`: its top groups.
 - `config.json` and `source.resources.csv`: the traced run's config and source memory samples.
 - Outside the repository: `dump.tgz` (107 MB), the symbolized trace dump, with its SHA-256 in `dump.sha256`.
+- `followup/`: the `648fe9de` scripts and logs, `steps.py`, each run's environment, config, summaries and analyses (`staging/`, `3600/`), and `steps.txt` (the step counts). Outside the repository: `followup-648fe9d.tgz` (69 MB, all captures with their CSVs and the task log), with its SHA-256 in `followup/captures.sha256`.
