@@ -1,0 +1,48 @@
+samples 131
+  108 ntoskrnl.exe!ExpWorkerThread
+  108 ntoskrnl.exe!PspSystemThreadStartup
+  108 ntoskrnl.exe!KiStartSystemThread
+  107 ntoskrnl.exe!IopProcessWorkItem
+  106 dxgkrnl.sys!DxgkQueryConnectionChanges
+  106 dxgkrnl.sys!DpiIndicateConnectorChangeWorkItem
+   77 dxgkrnl.sys!VIDPN_MGR::SetTimingsFromVidPn
+   77 dxgkrnl.sys!DmmPowerOnOffTargetsFromSourceIfNecessary
+   76 nvlddmkm.sys!0xfffff8059a236690
+   76 nvlddmkm.sys!0xfffff8059a2376d7
+   76 nvlddmkm.sys!0xfffff8059a43c113
+   76 dxgkrnl.sys!ADAPTER_DISPLAY::DdiSetTimingsFromVidPn
+   72 nvlddmkm.sys!0xfffff8059a28c8a9
+   72 nvlddmkm.sys!0xfffff8059a10a103
+   72 nvlddmkm.sys!0xfffff8059a22ed05
+   55 nvlddmkm.sys!0xfffff80598e62500
+   55 nvlddmkm.sys!0xfffff80598e62883
+   55 nvlddmkm.sys!0xfffff80598ce517d
+   55 nvlddmkm.sys!0xfffff805999d9607
+   55 nvlddmkm.sys!0xfffff805999d8e6f
+   53 nvlddmkm.sys!0xfffff80598e663b8
+   51 nvlddmkm.sys!0xfffff80598ff6a70
+   50 ntoskrnl.exe!HalpTimerStallExecutionProcessor
+   50 ntoskrnl.exe!KeStallExecutionProcessor
+   50 nvlddmkm.sys!0xfffff80599992e75
+   50 nvlddmkm.sys!0xfffff8059a1f0b1d
+   29 nvlddmkm.sys!0xfffff805999be499
+   29 nvlddmkm.sys!0xfffff805999bf12e
+   29 dxgmms2.sys!VidSchiSuspendResumeHwContext
+   29 dxgmms2.sys!VidSchiSuspendResumeHwContexts
+   29 dxgmms2.sys!VidSchSuspendResumeDevice
+   29 dxgmms2.sys!VidSchiSuspendResumeDevicesForPowerTransition
+   29 dxgkrnl.sys!ADAPTER_RENDER::FlushScheduler
+   27 nvlddmkm.sys!0xfffff80598ffd0cf
+   26 nvlddmkm.sys!0xfffff8059912f122
+   26 nvlddmkm.sys!0xfffff805991a76d5
+   26 nvlddmkm.sys!0xfffff8059918643c
+   26 nvlddmkm.sys!0xfffff80598c0f6e1
+   26 nvlddmkm.sys!0xfffff80598c3ab29
+   26 nvlddmkm.sys!0xfffff80598c496f2
+paths:
+   24 ntoskrnl.exe!KiStartSystemThread > ntoskrnl.exe!PspSystemThreadStartup > ntoskrnl.exe!ExpWorkerThread > ntoskrnl.exe!IopProcessWorkItem > dxgkrnl.sys!DpiIndicateConnectorChangeWorkItem > dxgkrnl.sys!DxgkQueryConnectionChanges > dxgkrnl.sys!DmmPowerOnOffTargetsFromSourceIfNecessary > dxgkrnl.sys!VIDPN_MGR::SetTimingsFromVidPn > dxgkrnl.sys!ADAPTER_DISPLAY::DdiSetTimingsFromVidPn > nvlddmkm.sys!0xfffff8059a43c113 > nvlddmkm.sys!0xfffff8059a2376d7 > nvlddmkm.sys!0xfffff8059a236690 > nvlddmkm.sys!0xfffff8059a22ed05 > nvlddmkm.sys!0xfffff8059a10a103 > nvlddmkm.sys!0xfffff8059a28c8a9 > nvlddmkm.sys!0xfffff8059a28ceb9 > nvlddmkm.sys!0xfffff8059a0efe9f > nvlddmkm.sys!0xfffff8059a0f0add > nvlddmkm.sys!0xfffff8059a0f0c79 > nvlddmkm.sys!0xfffff8059a1dc9aa > nvlddmkm.sys!0xfffff8059a2063dd > nvlddmkm.sys!0xfffff8059a1f0b1d > nvlddmkm.sys!0xfffff80599992e75 > ntoskrnl.exe!KeStallExecutionProcessor > ntoskrnl.exe!HalpTimerStallExecutionProcessor
+   12 ntoskrnl.exe!KiStartSystemThread > ntoskrnl.exe!PspSystemThreadStartup > ntoskrnl.exe!ExpWorkerThread > ntoskrnl.exe!IopProcessWorkItem > dxgkrnl.sys!DpiIndicateConnectorChangeWorkItem > dxgkrnl.sys!DxgkQueryConnectionChanges > dxgkrnl.sys!DmmPowerOnOffTargetsFromSourceIfNecessary > dxgkrnl.sys!VIDPN_MGR::SetTimingsFromVidPn > dxgkrnl.sys!ADAPTER_DISPLAY::DdiSetTimingsFromVidPn > nvlddmkm.sys!0xfffff8059a43c113 > nvlddmkm.sys!0xfffff8059a2376d7 > nvlddmkm.sys!0xfffff8059a236690 > nvlddmkm.sys!0xfffff8059a22ed05 > nvlddmkm.sys!0xfffff8059a10a103 > nvlddmkm.sys!0xfffff8059a28c8a9 > nvlddmkm.sys!0xfffff8059a28cef2 > nvlddmkm.sys!0xfffff8059a204c8f > nvlddmkm.sys!0xfffff8059a1f0b1d > nvlddmkm.sys!0xfffff80599992e75 > ntoskrnl.exe!KeStallExecutionProcessor > ntoskrnl.exe!HalpTimerStallExecutionProcessor
+    8 ntoskrnl.exe!KiStartSystemThread > ntoskrnl.exe!PspSystemThreadStartup > ntoskrnl.exe!ExpWorkerThread > ntoskrnl.exe!IopProcessWorkItem > dxgkrnl.sys!DpiIndicateConnectorChangeWorkItem > dxgkrnl.sys!DxgkQueryConnectionChanges > dxgkrnl.sys!DmmPowerOnOffTargetsFromSourceIfNecessary > dxgkrnl.sys!VIDPN_MGR::SetTimingsFromVidPn > dxgkrnl.sys!ADAPTER_DISPLAY::DdiSetTimingsFromVidPn > nvlddmkm.sys!0xfffff8059a43c113 > nvlddmkm.sys!0xfffff8059a2376d7 > nvlddmkm.sys!0xfffff8059a236690 > nvlddmkm.sys!0xfffff8059a22ed05 > nvlddmkm.sys!0xfffff8059a10a103 > nvlddmkm.sys!0xfffff8059a28c8a9 > nvlddmkm.sys!0xfffff8059a28cfc1 > nvlddmkm.sys!0xfffff8059a2a37b7 > nvlddmkm.sys!0xfffff8059a176c28 > nvlddmkm.sys!0xfffff80598c496f2 > nvlddmkm.sys!0xfffff80598c3ab29 > nvlddmkm.sys!0xfffff80598c3f59f > nvlddmkm.sys!0xfffff80598c49d13 > nvlddmkm.sys!0xfffff80598c4225b > nvlddmkm.sys!0xfffff80598c408a7 > nvlddmkm.sys!0xfffff80598c5e39f > nvlddmkm.sys!0xfffff80598c5bbfe > nvlddmkm.sys!0xfffff80598c0f6e1 > nvlddmkm.sys!0xfffff805999d8e6f > nvlddmkm.sys!0xfffff805999d9607 > nvlddmkm.sys!0xfffff80598ce517d > nvlddmkm.sys!0xfffff80598e62883 > nvlddmkm.sys!0xfffff80598e62500 > nvlddmkm.sys!0xfffff80598e663b8 > nvlddmkm.sys!0xfffff8059918643c > nvlddmkm.sys!0xfffff80598ff6a70 > nvlddmkm.sys!0xfffff805991111e7 > nvlddmkm.sys!0xfffff80598f2f9ed > nvlddmkm.sys!0xfffff80598f268bc > nvlddmkm.sys!0xfffff80598f5861f > nvlddmkm.sys!0xfffff8059938d2d6 > nvlddmkm.sys!0xfffff80599349eba > nvlddmkm.sys!0xfffff80598dc26e6
+    5 ntoskrnl.exe!KiStartSystemThread > ntoskrnl.exe!PspSystemThreadStartup > ntoskrnl.exe!ExpWorkerThread > ntoskrnl.exe!IopProcessWorkItem > dxgkrnl.sys!DpiIndicateConnectorChangeWorkItem > dxgkrnl.sys!DxgkQueryConnectionChanges > dxgkrnl.sys!DmmPowerOnOffTargetsFromSourceIfNecessary > dxgkrnl.sys!VIDPN_MGR::SetTimingsFromVidPn > dxgkrnl.sys!ADAPTER_DISPLAY::DdiSetTimingsFromVidPn > nvlddmkm.sys!0xfffff8059a43c113 > nvlddmkm.sys!0xfffff8059a2376d7 > nvlddmkm.sys!0xfffff8059a236690 > nvlddmkm.sys!0xfffff8059a22ed05 > nvlddmkm.sys!0xfffff8059a10a103 > nvlddmkm.sys!0xfffff8059a28c8a9 > nvlddmkm.sys!0xfffff8059a28ce60 > nvlddmkm.sys!0xfffff8059a218333 > nvlddmkm.sys!0xfffff8059a20bee4 > nvlddmkm.sys!0xfffff8059a1f0b1d > nvlddmkm.sys!0xfffff80599992e75 > ntoskrnl.exe!KeStallExecutionProcessor > ntoskrnl.exe!HalpTimerStallExecutionProcessor
+    4 ntoskrnl.exe!KiStartSystemThread > ntoskrnl.exe!PspSystemThreadStartup > ntoskrnl.exe!ExpWorkerThread > ntoskrnl.exe!IopProcessWorkItem > dxgkrnl.sys!DpiIndicateConnectorChangeWorkItem > dxgkrnl.sys!DxgkQueryConnectionChanges > dxgkrnl.sys!DmmPowerOnOffTargetsFromSourceIfNecessary > dxgkrnl.sys!VIDPN_MGR::SetTimingsFromVidPn > dxgkrnl.sys!ADAPTER_DISPLAY::DdiSetTimingsFromVidPn > nvlddmkm.sys!0xfffff8059a43c113 > nvlddmkm.sys!0xfffff8059a2376d7 > nvlddmkm.sys!0xfffff8059a236690 > nvlddmkm.sys!0xfffff8059a22ed05 > nvlddmkm.sys!0xfffff8059a10a103 > nvlddmkm.sys!0xfffff8059a28c8a9 > nvlddmkm.sys!0xfffff8059a28cef2 > nvlddmkm.sys!0xfffff8059a204c8f > nvlddmkm.sys!0xfffff8059a1f0b1d > nvlddmkm.sys!0xfffff80599992e75 > ntoskrnl.exe!KeStallExecutionProcessor > ntoskrnl.exe!HalpTimerStallExecutionProcessor > ntoskrnl.exe!HalpTimerGetInternalData
+    4 ntoskrnl.exe!KiStartSystemThread > ntoskrnl.exe!PspSystemThreadStartup > ntoskrnl.exe!ExpWorkerThread > ntoskrnl.exe!IopProcessWorkItem > dxgkrnl.sys!DpiIndicateConnectorChangeWorkItem > dxgkrnl.sys!DxgkQueryConnectionChanges > dxgkrnl.sys!DmmPowerOnOffTargetsFromSourceIfNecessary > dxgkrnl.sys!VIDPN_MGR::SetTimingsFromVidPn > dxgkrnl.sys!ADAPTER_DISPLAY::DdiSetTimingsFromVidPn > nvlddmkm.sys!0xfffff8059a43c113 > nvlddmkm.sys!0xfffff8059a2376d7 > nvlddmkm.sys!0xfffff8059a236690 > nvlddmkm.sys!0xfffff8059a22ed05 > nvlddmkm.sys!0xfffff8059a10a103 > nvlddmkm.sys!0xfffff8059a28c8a9 > nvlddmkm.sys!0xfffff8059a28cfc1 > nvlddmkm.sys!0xfffff8059a2a37b7 > nvlddmkm.sys!0xfffff8059a176c28 > nvlddmkm.sys!0xfffff80598c496f2 > nvlddmkm.sys!0xfffff80598c3ab29 > nvlddmkm.sys!0xfffff80598c3f59f > nvlddmkm.sys!0xfffff80598c49d13 > nvlddmkm.sys!0xfffff80598c4225b > nvlddmkm.sys!0xfffff80598c408a7 > nvlddmkm.sys!0xfffff80598c5e39f > nvlddmkm.sys!0xfffff80598c5bbfe > nvlddmkm.sys!0xfffff80598c0f6e1 > nvlddmkm.sys!0xfffff805999d8e6f > nvlddmkm.sys!0xfffff805999d9607 > nvlddmkm.sys!0xfffff80598ce517d > nvlddmkm.sys!0xfffff80598e62883 > nvlddmkm.sys!0xfffff80598e62500 > nvlddmkm.sys!0xfffff80598e663b8 > nvlddmkm.sys!0xfffff8059918643c > nvlddmkm.sys!0xfffff80598ff6a70 > nvlddmkm.sys!0xfffff805991111e7 > nvlddmkm.sys!0xfffff80598f2f9ed > nvlddmkm.sys!0xfffff80598f268bc > nvlddmkm.sys!0xfffff80598f5861f > nvlddmkm.sys!0xfffff8059938d2d6 > nvlddmkm.sys!0xfffff80599349ec5 > nvlddmkm.sys!0xfffff8059934a21b > nvlddmkm.sys!0xfffff80598f231b8 > nvlddmkm.sys!0xfffff80598d26755 > nvlddmkm.sys!0xfffff80598d2547b > ntoskrnl.exe!__guard_retpoline_indirect_rax

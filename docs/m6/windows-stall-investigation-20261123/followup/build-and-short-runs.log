@@ -1,0 +1,22 @@
+revision efa86dec58784af88d82b24be4f3d6ac5ccab35d
+build exit 0
+bench sha256 3014565CAE5B0010B31806BA09AA14508577F507AC2B85C967E96535BD9F6F69
+unit: System.Management.Automation.RemoteException
+unit: OK
+p2q1: PASS nv12-4k30 5s off arrival p99/max 8.12/8.52 ms
+p2q1: PASS nv12-4k30 5s trace arrival p99/max 8.82/9.17 ms
+p2q1: PASS nv12-4k30 30s off arrival p99/max 9.10/10.19 ms
+p2q1: PASS bgra1080p60 5s off arrival p99/max 6.46/6.89 ms
+p2q1: PASS bgra1080p60 5s trace arrival p99/max 6.49/6.79 ms
+p2q1: PASS bgra1080p60 30s off arrival p99/max 6.61/7.65 ms
+p2q1: ALL PASS
+p4q2: PASS nv12-4k30 5s off arrival p99/max 8.77/9.14 ms
+p4q2: PASS nv12-4k30 5s trace arrival p99/max 9.06/9.69 ms
+p4q2: PASS nv12-4k30 30s off arrival p99/max 9.15/9.71 ms
+p4q2: PASS bgra1080p60 5s off arrival p99/max 6.32/6.71 ms
+p4q2: PASS bgra1080p60 5s trace arrival p99/max 6.47/6.93 ms
+p4q2: PASS bgra1080p60 30s off arrival p99/max 6.52/8.05 ms
+p4q2: ALL PASS
+done
+
+[exited with code 0]

@@ -9,7 +9,7 @@ Host: the same test host (Ryzen 7 9800X3D, 8 cores / 16 threads, 64 GB; RTX 5090
 There are **two independent mechanisms**, and neither is in FrameLink's own code.
 
 1. **Quiet host: a file write blocked by a Volume Shadow Copy snapshot.** The harness writes a CSV row per frame or block on its timed threads. The first write after a snapshot spent about 100 ms of kernel CPU time in NTFS. Reproduced without FrameLink.
-2. **Normal desktop: a GPU-driver lock held for 50–140 ms by another component.** `flSubmit`'s `ID3D11DeviceContext4::Signal` waits in the NVIDIA user-mode driver. The driver's worker thread waits on a kernel lock, and that lock is held by csrss's display-configuration path, or a `dxgkrnl` worker, running in `nvlddmkm.sys` for the whole stall. Other GPU clients (Chrome, NVIDIA Broadcast) queue on the same lock.
+2. **Normal desktop: a GPU-driver lock held for 50–140 ms by another component.** `flSubmit`'s `ID3D11DeviceContext4::Signal` waits in the NVIDIA user-mode driver. The driver's worker thread waits on a kernel lock, and that lock is held by csrss's display-configuration path, or a `dxgkrnl` worker, running in `nvlddmkm.sys` for the whole stall. Other GPU clients (Chrome, NVIDIA Broadcast) queue on the same lock. With Windows symbols ([section 4](#4-follow-up-the-trigger-is-display-power-management)), the lock holder is a **monitor power change**: the display turning off after the 5 min idle timeout, turning back on, or the monitor being re-detected on its connector. The driver re-sets the display timings, busy-waiting, while it holds the lock.
 
 In every captured stall exactly one thread stopped. All other threads in the three bench processes stayed on time, so this is not a machine-wide freeze.
 
@@ -78,7 +78,45 @@ At 250 ms resolution the GPU was in P5 at all three stalls, as it was for most o
 - The primary profile (pool 2, queue 1, zero added latency) cannot absorb a 50–140 ms stall at 30 fps: the catch-up burst replaces a frame in the one-deep queue, and the harness fails fast. That is the design of the test, and the gate is unchanged.
 - Linux and Android do not share this driver stack, which is consistent with Windows being the only platform with such stalls.
 
+## 4. Follow-up: the trigger is display power management
+
+With the owner's approval of all three next steps below, on the same day:
+
+**Harness (step 1), commit `efa86dec`.** The native bench's timed threads now only format each CSV row into memory; a writer thread per file does the disk writes. A failing `CHECK` flushes the pending rows first. `--pool` and `--video-queue` select the profile (default 2 and 1, unchanged); `config.json` records it, and the checker and the rate runner fail a capture whose profile differs from the one requested. Linux: 31 checker unit tests and both `local_native_bench` ctests pass, and 5 s NV12 1080p30 captures pass at 2/1 and 4/2. Windows (bench SHA-256 `3014565c…`): NV12 4K30 and BGRA 1080p60, each preflight, trace and 30 s, pass at both 2/1 and 4/2, 12 of 12 (`build-and-short-runs.log`).
+
+**Symbols (step 2).** The three noisy-host windows were dumped again from the same `run.etl` with Microsoft's public symbol server (`m6h-syms.ps1`; 2.5 GB symbol cache on the test host). Function-level stacks of the lock holders (`stacks/`, from `probe/stkf.py`):
+
+| Stall | Lock holder | Path (outermost first) |
+|---|---|---|
+| bench-1, 52 ms | csrss thread 1536, 64 samples | `winsrvext!PowerNotificationThread` → `win32kbase!xxxUserPowerEventCalloutWorker` → **`PowerOffMonitor`** → `DrvSetMonitorPowerState` → `dxgkrnl!DxgkPowerOnOffMonitor` → `MONITOR_MGR::_EnableDisableMonitor` → `VIDPN_MGR::PowerOnOffVidPnTarget` → `SetTimingsFromVidPn` → `nvlddmkm` |
+| bench-2, 142 ms | the same thread, 153 samples | the same, with **`PowerOnMonitor`** |
+| bench-3, 105 ms | System worker 47572, 131 samples | `IopProcessWorkItem` → `dxgkrnl!DpiIndicateConnectorChangeWorkItem` → **`DxgkQueryConnectionChanges`** → `DmmPowerOnOffTargetsFromSourceIfNecessary` → `SetTimingsFromVidPn` → `nvlddmkm`; 29 samples also in `dxgmms2!VidSchiSuspendResumeDevicesForPowerTransition` |
+
+In each, 25–67 samples are in `ntoskrnl!KeStallExecutionProcessor` under `nvlddmkm`: the driver busy-waits during the timing change, and holds the lock that `Signal` waits for. `nvlddmkm.sys` frames stay unnamed (no public symbols).
+
+**The event log matches.** The host turns the display off after 300 s idle (`display-state.txt`: one LG UltraWide monitor). Kernel-Power event 566 records each display transition, reason 12 for the idle timeout and 31/32 for the display coming back on input (`kernel-power-566-today.txt`). The noisy trace began at 13:19:18.16, so:
+- bench-1 (`PowerOffMonitor`) at 13:23:21.7; display off (reason 12) logged at 13:23:26.8;
+- bench-2 (`PowerOnMonitor`) at 13:23:42.9; display on (reason 32) logged at 13:23:43.1;
+- bench-3 (connector change) at 13:26:13.4, 2.5 min after the display came back; no 566 event. The monitor was re-detected on its connector.
+
+So the trigger is not one of the owner's applications. No application-elimination runs were needed, and none were done.
+
+**Normal desktop again, harness `efa86dec`, NV12 4K30 1800 s** (`m6h-noisy.ps1`, same applications running before and after, `symbols-and-desktop-runs.log`):
+
+| Profile | Result | Notes |
+|---|---|---|
+| pool 2, queue 1 (default) | **FAIL** at frame 27358, 912 s: the relay lost a frame (`fl_gst_local_native_bench.cpp:377`) | source `flSubmit` 9.6, 47.3 and **178.2 ms** on frames 27353–27356, at 18:41:14.6; the source acquire also waited up to 53.8 ms. The display had come back on at 18:40:39.95 (566, reason 32), 35 s earlier. Not traced, so the lock holder is not established for this one. Every role's CSV ends at the last frame before the abort: the failure flush worked |
+| pool 4, queue 2 | **pass**, zero misses | arrival p50 / p99 / max 4.54 / 6.61 / 17.95 ms; source `flSubmit` max 9.18 ms. **No driver stall happened in this run**, so it does not show that this profile absorbs one |
+
+The default-profile failure shows the desktop stall with no file I/O on the timed threads. So it is separate from the shadow-copy mechanism, as found from the trace.
+
+**Profile (step 3).** The pool and unread queue are already configuration in the product: the GStreamer elements' `video-pool` and `video-queue-frames` properties, and the session API's `video_pool` and `video_queue_frames`. The harness can now run any profile, and the primary profile stays the default. Two points for choosing a Windows profile:
+- A deeper queue can stop the frame loss, but not the lateness. Frames behind a 50–180 ms stall at the source arrive past the 34 ms budget whatever the queue depth: in the failed run they were 213–237 ms late. A profile with headroom would turn an abort into counted misses.
+- Whether pool 4 / queue 2 actually absorbs a stall is not yet measured. It needs a run in which a display power change happens. That can be forced (turning the monitor off and on during a run), but that is the owner's call, since it is their screen.
+
 ## Possible next steps (decisions for Jon)
+
+Status after section 4: step 1 is done (`efa86dec`); step 2 is answered by the symbols, without application elimination; step 3 has the profile selectable in the harness, with pool 4 / queue 2 not yet shown to absorb a stall.
 
 1. **Quiet-host stalls (harness).** Move CSV writing off the timed threads, to a writer thread with an in-memory queue. This is a test-harness change only. It removes the snapshot effect from the measurement but not from the host.
 2. **Desktop stalls, identify the trigger.** Resolve the csrss stack with Microsoft public symbols, and/or remove candidate applications one at a time (NZXT CAM, NVIDIA Broadcast, Steam and Epic overlays, monitor or lighting utilities) while the same trace runs.
@@ -92,3 +130,4 @@ At 250 ms resolution the GPU was in P5 at all three stalls, as it was for most o
   - `captures.tar.xz` (7.5 MB): all probe and bench CSVs, process lists, and the probe-filtered window of the shadow-copy trace;
   - `trace-windows.tgz` (67 MB): the text dumps of the three 450 ms trace windows around the bench aborts.
 - The full traces (`run.etl`, 21.7 GB; `stall-1.etl` files) are on the test host only.
+- `followup/` (section 4): the scripts (`m6h-*.ps1`), the logs, `stacks/`, the event and display queries, and under `runs/` each capture's analysis, config, summaries and non-empty stderr. Outside the repository, SHA-256 in `archives.sha256`: `sym-windows.tgz` (79 MB, the three symbolized windows) and `runs-efa86de.tgz` (28 MB, all captures from section 4 with their CSVs).
