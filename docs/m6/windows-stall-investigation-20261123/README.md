@@ -117,7 +117,7 @@ The default-profile failure shows the desktop stall with no file I/O on the time
 ## 5. Forced display power changes: pool 4 / queue 2 does not absorb the stall
 
 With the owner's approval, the same evening, NV12 4K30 600 s at harness `efa86dec` (`followup/forced/`):
-- **Host change first:** the display idle timeout on AC was set from 300 s to 0 (never), so that only forced changes occur. To restore it: `powercfg /change monitor-timeout-ac 5`.
+- **Host change first:** the display idle timeout on AC was set from 300 s to 0 (never), so that only forced changes occur. It was restored to 300 s on 2026-11-24 ([next record](../windows-native-relay-rate-357d82a/README.md)).
 - **Forcing the changes:** a task in the owner's interactive session (`m6h-blink.ps1`, run by `m6h-forced.ps1`) waited for the long capture to start. Then, at 60 s and every 120 s after, it turned the monitor off (`SC_MONITORPOWER` 2, broadcast) and, 30 s later, back on (a one-pixel mouse move). It logged each step.
 - **Order:** pool 4 / queue 2 first, then the default 2/1 as the control. Each had the usual 5 s preflight and trace-on runs first, and all four passed.
 

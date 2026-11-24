@@ -1,0 +1,108 @@
+{
+ "scope": "synthetic authenticated transport; explicit upload/verification copies; no physical playback or isolated-hop budget claim",
+ "budget_ns": 34000000,
+ "roles": {
+  "source": {
+   "video": 54000,
+   "pcm_frames": 86400000,
+   "resource_slopes_per_min": {
+    "memory_kb": 40.718620968939504,
+    "handles": -2.3964284022395317e-05,
+    "threads": -1.1982142011197657e-05
+   },
+   "cpu_percent": 32.39719259742892
+  },
+  "relay": {
+   "video": 54000,
+   "pcm_frames": 86400000,
+   "resource_slopes_per_min": {
+    "memory_kb": 0.19787518408571542,
+    "handles": -0.000434871563506866,
+    "threads": 7.542439497731106e-06
+   },
+   "cpu_percent": 4.768604417164384
+  },
+  "receiver": {
+   "video": 54000,
+   "pcm_frames": 86400000,
+   "resource_slopes_per_min": {
+    "memory_kb": -0.0003830845434326878,
+    "handles": -2.3942783964542842e-05,
+    "threads": -1.1971391982271451e-05
+   },
+   "cpu_percent": 8.754539544701625
+  }
+ },
+ "timing_ms": {
+  "scheduled_to_final_arrival": {
+   "p50": 9.885701,
+   "p95": 11.226567,
+   "p99": 11.625901,
+   "max": 31.634467
+  },
+  "source_marker_to_relay": {
+   "p50": 7.1435,
+   "p95": 8.0727,
+   "p99": 8.488,
+   "max": 28.8962
+  },
+  "source_marker_to_final": {
+   "p50": 8.6644,
+   "p95": 10.0003,
+   "p99": 10.3652,
+   "max": 30.3975
+  },
+  "source_acquire_call": {
+   "p50": 0.0006,
+   "p95": 0.0007,
+   "p99": 0.001,
+   "max": 0.0229
+  },
+  "source_upload_call": {
+   "p50": 1.3952,
+   "p95": 1.6801,
+   "p99": 2.7183,
+   "max": 3.906
+  },
+  "source_submit_call": {
+   "p50": 0.0568,
+   "p95": 0.0739,
+   "p99": 0.0899,
+   "max": 0.6084
+  },
+  "relay_acquire_to_record": {
+   "p50": 0.0352,
+   "p95": 0.0494,
+   "p99": 0.0596,
+   "max": 0.5034
+  },
+  "relay_forward_call": {
+   "p50": 0.0348,
+   "p95": 0.0488,
+   "p99": 0.059,
+   "max": 0.5027
+  },
+  "final_acquire_to_completion": {
+   "p50": 6.0232,
+   "p95": 6.0434,
+   "p99": 6.5372,
+   "max": 9.4476
+  },
+  "audio_scheduled_to_final": {
+   "p50": 0.113267,
+   "p95": 0.155767,
+   "p99": 0.191767,
+   "max": 20.537367
+  }
+ },
+ "pass_all": true,
+ "video_arrival_misses": 0,
+ "audio_arrival_misses": 0,
+ "trace_checked": false,
+ "preroll": 23,
+ "exit": 0,
+ "wall_seconds": 1802.3,
+ "cell": "bgra4k30",
+ "seconds": 1800,
+ "trace": false
+}
