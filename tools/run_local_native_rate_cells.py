@@ -40,9 +40,11 @@ def adb(*args, check=True, timeout=120):
     return p
 
 
-def capture(exe, plugin, out, cell, seconds, trace, remote=None, pool=2, queue=1):
+def capture(exe, plugin, out, cell, seconds, trace, remote=None, pool=2, queue=1, upload='default'):
     fmt, w, h, fps = CELLS[cell]
     profile = [] if (pool, queue) == (2, 1) else ['--pool', str(pool), '--video-queue', str(queue)]
+    if upload != 'default':
+        profile += ['--upload', upload]
     began = time.monotonic()
     if remote:
         target = f'{remote}/{os.path.basename(out)}'
@@ -81,6 +83,7 @@ def main():
     a.add_argument('--duration', type=int, default=1800)
     a.add_argument('--pool', type=int, default=2, help='video pool (default 2, the primary profile)')
     a.add_argument('--video-queue', type=int, default=1, help='unread video queue (default 1, the primary profile)')
+    a.add_argument('--upload', choices=('default', 'staging'), default='default', help='source upload (staging: Windows diagnostic)')
     a.add_argument('--allow-dirty', action='store_true', help='development only')
     args = a.parse_args()
     args.cells = args.cells or (ANDROID_CELLS if args.adb else DESKTOP_CELLS)
@@ -103,7 +106,7 @@ def main():
     env = {'revision': git('rev-parse', 'HEAD'), 'dirty': bool(status), 'platform': platform.platform(),
            'exe_sha256': hashlib.sha256(open(exe, 'rb').read()).hexdigest(),
            'plugin_sha256': hashlib.sha256(open(plugin, 'rb').read()).hexdigest() if plugin else 'static (linked into the harness)',
-           'duration': args.duration, 'cells': args.cells, 'pool': args.pool, 'video_queue': args.video_queue}
+           'duration': args.duration, 'cells': args.cells, 'pool': args.pool, 'video_queue': args.video_queue, 'upload': args.upload}
     if remote:
         import run_relay_qualification as rq
         env.update(platform='Android ' + rq.prop('ro.build.version.release') + ' (API ' + rq.prop('ro.build.version.sdk') + ')',
@@ -120,11 +123,11 @@ def main():
     json.dump(env, open(os.path.join(args.out, 'environment.json'), 'w'), indent=1)
     summary = []
     for cell in args.cells:
-        pre = capture(exe, plugin, os.path.join(args.out, f'{cell}-preflight'), cell, 5, False, remote, args.pool, args.video_queue)
-        traced = capture(exe, plugin, os.path.join(args.out, f'{cell}-trace'), cell, 5, True, remote, args.pool, args.video_queue)
+        pre = capture(exe, plugin, os.path.join(args.out, f'{cell}-preflight'), cell, 5, False, remote, args.pool, args.video_queue, args.upload)
+        traced = capture(exe, plugin, os.path.join(args.out, f'{cell}-trace'), cell, 5, True, remote, args.pool, args.video_queue, args.upload)
         entry = {'cell': cell, 'preflight': pre['pass_all'], 'trace': traced['pass_all']}
         if pre['pass_all'] and traced['pass_all']:
-            long = capture(exe, plugin, os.path.join(args.out, f'{cell}-{args.duration}s'), cell, args.duration, False, remote, args.pool, args.video_queue)
+            long = capture(exe, plugin, os.path.join(args.out, f'{cell}-{args.duration}s'), cell, args.duration, False, remote, args.pool, args.video_queue, args.upload)
             entry.update(duration=long['pass_all'], duration_error=long.get('error'),
                          slopes={r: v.get('resource_slopes_per_min') for r, v in long.get('roles', {}).items()},
                          arrival=long.get('timing_ms', {}).get('scheduled_to_final_arrival'))

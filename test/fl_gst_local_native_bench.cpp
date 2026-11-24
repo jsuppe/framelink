@@ -70,8 +70,10 @@ static void Sleep(unsigned ms){std::this_thread::sleep_for(std::chrono::millisec
 #endif
 namespace fs=std::filesystem;
 // Pool and unread queue default to the primary profile (2 and 1); --pool and
-// --video-queue select another profile, recorded in config.json.
-struct Options {unsigned seconds=2,width=64,height=32,fps=30,pool=2,queue=1;bool nv12=false,rgba=false,trace=false;std::string plugin,out,role="relay";} o;
+// --video-queue select another profile, recorded in config.json. --upload
+// staging (Windows only, diagnostic) replaces the source's UpdateSubresource
+// upload; --seconds above 1800 is for diagnostics (the checker freezes 1800).
+struct Options {unsigned seconds=2,width=64,height=32,fps=30,pool=2,queue=1;bool nv12=false,rgba=false,trace=false;std::string plugin,out,role="relay",upload="default";} o;
 static uint64_t tick(unsigned n,unsigned rate){return uint64_t(n)*1000000000ULL/rate;}
 static unsigned frames(){return o.seconds*o.fps;}
 static uint64_t vpts(unsigned n){return 37000000+tick(n,o.fps);}
@@ -225,7 +227,14 @@ static void source(){auto c=caps();auto p=policy();GstFrameLinkMemoryPolicy boun
  {Audio audio(s,true);audio.start();std::vector<unsigned char> pixels(size_t(o.width)*o.height*(o.nv12?3:8)/2);auto out=videoFile();auto af=audioFile();CHECK(fl_gst_session_local_ready(s,TRUE,10000,nullptr));
 #ifdef _WIN32
  ComPtr<ID3D11DeviceContext> ctx;flChannelD3D11Device(channel)->GetImmediateContext(&ctx);
- auto upload=[&](flBuffer&b){ctx->UpdateSubresource(flImageD3D11(b.image),0,nullptr,pixels.data(),o.width*(o.nv12?1:4),0);};
+ // --upload staging (diagnostic, not the default): write the frame into a
+ // CPU-writable staging texture, alternating two, and copy it to the pool image
+ // on the GPU instead of calling UpdateSubresource.
+ ComPtr<ID3D11Texture2D> stage[2];unsigned staged=0;
+ auto upload=[&](flBuffer&b){auto*image=flImageD3D11(b.image);if(o.upload!="staging"){ctx->UpdateSubresource(image,0,nullptr,pixels.data(),o.width*(o.nv12?1:4),0);return;}
+  if(!stage[0]){D3D11_TEXTURE2D_DESC d{};image->GetDesc(&d);d.Usage=D3D11_USAGE_STAGING;d.BindFlags=0;d.MiscFlags=0;d.CPUAccessFlags=D3D11_CPU_ACCESS_WRITE;for(auto&t:stage)CHECK(SUCCEEDED(flChannelD3D11Device(channel)->CreateTexture2D(&d,nullptr,&t)));}
+  auto&t=stage[staged++%2];D3D11_MAPPED_SUBRESOURCE m{};CHECK(SUCCEEDED(ctx->Map(t.Get(),0,D3D11_MAP_WRITE,0,&m)));const unsigned rowBytes=o.width*(o.nv12?1:4),rows=o.nv12?o.height*3/2:o.height;CHECK(m.RowPitch>=rowBytes);
+  for(unsigned y=0;y<rows;++y)memcpy(static_cast<unsigned char*>(m.pData)+size_t(y)*m.RowPitch,pixels.data()+size_t(y)*rowBytes,rowBytes);ctx->Unmap(t.Get(),0);ctx->CopyResource(image,t.Get());};
 #else
  auto upload=[&](flBuffer&b){uploadMapped(b.image,pixels);};
 #endif
@@ -336,13 +345,13 @@ static void receiver(){auto c=caps();auto p=policy();GstFrameLinkMemoryPolicy bo
 #endif
 static std::string quote(const std::string&s){CHECK(s.find('"')==std::string::npos);return "\""+s+"\"";}
 #ifdef _WIN32
-static PROCESS_INFORMATION spawn(const char*role,HANDLE job){char exe[MAX_PATH];CHECK(GetModuleFileNameA(nullptr,exe,MAX_PATH));std::string command=quote(exe)+" "+quote(o.plugin)+" --out "+quote(o.out)+" --role "+role+" --seconds "+std::to_string(o.seconds)+" --width "+std::to_string(o.width)+" --height "+std::to_string(o.height)+" --fps "+std::to_string(o.fps)+" --format "+formatName()+" --pool "+std::to_string(o.pool)+" --video-queue "+std::to_string(o.queue)+(o.trace?" --trace":"");STARTUPINFOA si{};si.cb=sizeof si;PROCESS_INFORMATION pi{};CHECK(CreateProcessA(nullptr,command.data(),nullptr,nullptr,FALSE,CREATE_SUSPENDED,nullptr,nullptr,&si,&pi));if(!AssignProcessToJobObject(job,pi.hProcess)){CHECK(TerminateProcess(pi.hProcess,1));wait(pi.hProcess);CloseHandle(pi.hThread);CloseHandle(pi.hProcess);CHECK(false);}if(ResumeThread(pi.hThread)==DWORD(-1)){CHECK(TerminateProcess(pi.hProcess,1));wait(pi.hProcess);CloseHandle(pi.hThread);CloseHandle(pi.hProcess);CHECK(false);}return pi;}
+static PROCESS_INFORMATION spawn(const char*role,HANDLE job){char exe[MAX_PATH];CHECK(GetModuleFileNameA(nullptr,exe,MAX_PATH));std::string command=quote(exe)+" "+quote(o.plugin)+" --out "+quote(o.out)+" --role "+role+" --seconds "+std::to_string(o.seconds)+" --width "+std::to_string(o.width)+" --height "+std::to_string(o.height)+" --fps "+std::to_string(o.fps)+" --format "+formatName()+" --pool "+std::to_string(o.pool)+" --video-queue "+std::to_string(o.queue)+" --upload "+o.upload+(o.trace?" --trace":"");STARTUPINFOA si{};si.cb=sizeof si;PROCESS_INFORMATION pi{};CHECK(CreateProcessA(nullptr,command.data(),nullptr,nullptr,FALSE,CREATE_SUSPENDED,nullptr,nullptr,&si,&pi));if(!AssignProcessToJobObject(job,pi.hProcess)){CHECK(TerminateProcess(pi.hProcess,1));wait(pi.hProcess);CloseHandle(pi.hThread);CloseHandle(pi.hProcess);CHECK(false);}if(ResumeThread(pi.hThread)==DWORD(-1)){CHECK(TerminateProcess(pi.hProcess,1));wait(pi.hProcess);CloseHandle(pi.hThread);CloseHandle(pi.hProcess);CHECK(false);}return pi;}
 static void join(PROCESS_INFORMATION&p){wait(p.hProcess,15000);DWORD rc=1;CHECK(GetExitCodeProcess(p.hProcess,&rc)&&rc==0);CloseHandle(p.hThread);CloseHandle(p.hProcess);}
 #else
 // A child running this executable; it dies with the relay (its owner).
 struct Proc{pid_t pid=-1;};
 static Proc spawn(const char*role,int){const pid_t parent=getpid();
- std::vector<std::string> args={"/proc/self/exe",o.plugin,"--out",o.out,"--role",role,"--seconds",std::to_string(o.seconds),"--width",std::to_string(o.width),"--height",std::to_string(o.height),"--fps",std::to_string(o.fps),"--format",formatName(),"--pool",std::to_string(o.pool),"--video-queue",std::to_string(o.queue)};if(o.trace)args.push_back("--trace");
+ std::vector<std::string> args={"/proc/self/exe",o.plugin,"--out",o.out,"--role",role,"--seconds",std::to_string(o.seconds),"--width",std::to_string(o.width),"--height",std::to_string(o.height),"--fps",std::to_string(o.fps),"--format",formatName(),"--pool",std::to_string(o.pool),"--video-queue",std::to_string(o.queue),"--upload",o.upload};if(o.trace)args.push_back("--trace");
  Proc p;p.pid=fork();CHECK(p.pid>=0);
  if(!p.pid){prctl(PR_SET_PDEATHSIG,SIGKILL);if(getppid()!=parent)_exit(70);std::vector<char*> argv;for(auto&a:args)argv.push_back(const_cast<char*>(a.c_str()));argv.push_back(nullptr);execv("/proc/self/exe",argv.data());_exit(72);}
  return p;}
@@ -392,7 +401,7 @@ static constexpr bool displayHold=true;
 #else
 static constexpr bool displayHold=false;
 #endif
-int main(int argc,char**argv){CHECK(argc>=2);o.plugin=argv[1];for(int i=2;i<argc;++i){std::string k=argv[i];if(k=="--trace"){o.trace=true;continue;}CHECK(i+1<argc);std::string v=argv[++i];if(k=="--out")o.out=v;else if(k=="--role")o.role=v;else if(k=="--format"){CHECK(v=="BGRA"||v=="RGBA"||v=="NV12");o.nv12=v=="NV12";o.rgba=v=="RGBA";}else {char*end=nullptr;auto n=strtoul(v.c_str(),&end,10);CHECK(!v.empty()&&!*end&&n>0&&n<=100000);if(k=="--seconds")o.seconds=unsigned(n);else if(k=="--width")o.width=unsigned(n);else if(k=="--height")o.height=unsigned(n);else if(k=="--fps")o.fps=unsigned(n);else if(k=="--pool")o.pool=unsigned(n);else if(k=="--video-queue")o.queue=unsigned(n);else CHECK(false);}}CHECK(!o.out.empty()&&o.seconds<=1800&&(o.fps==30||o.fps==60)&&o.width>=64&&o.width<=3840&&o.height>=32&&o.height<=2160&&!(o.width%2)&&!(o.height%2)&&o.pool>=2&&o.pool<=MaxPool&&o.queue<o.pool);CHECK(o.role=="relay"||o.role=="source"||o.role=="receiver");o.out=fs::absolute(o.out).lexically_normal().string();if(o.role=="relay"){CHECK(fs::create_directory(o.out));auto f=file("config.json");f<<"{\"seconds\":"<<o.seconds<<",\"fps\":"<<o.fps<<",\"width\":"<<o.width<<",\"height\":"<<o.height<<",\"format\":\""<<formatName()<<"\",\"trace\":"<<(o.trace?"true":"false")<<",\"clock\":\""<<clockName<<"\",\"pool\":"<<o.pool<<",\"queue\":"<<o.queue<<",\"offset_ns\":37000000,\"preroll\":"<<prerollTotal()<<",\"display_hold\":"<<(displayHold?"true":"false")<<"}\n";}
+int main(int argc,char**argv){CHECK(argc>=2);o.plugin=argv[1];for(int i=2;i<argc;++i){std::string k=argv[i];if(k=="--trace"){o.trace=true;continue;}CHECK(i+1<argc);std::string v=argv[++i];if(k=="--out")o.out=v;else if(k=="--role")o.role=v;else if(k=="--format"){CHECK(v=="BGRA"||v=="RGBA"||v=="NV12");o.nv12=v=="NV12";o.rgba=v=="RGBA";}else if(k=="--upload"){CHECK(v=="default"||v=="staging");o.upload=v;}else {char*end=nullptr;auto n=strtoul(v.c_str(),&end,10);CHECK(!v.empty()&&!*end&&n>0&&n<=100000);if(k=="--seconds")o.seconds=unsigned(n);else if(k=="--width")o.width=unsigned(n);else if(k=="--height")o.height=unsigned(n);else if(k=="--fps")o.fps=unsigned(n);else if(k=="--pool")o.pool=unsigned(n);else if(k=="--video-queue")o.queue=unsigned(n);else CHECK(false);}}CHECK(!o.out.empty()&&o.seconds<=3600&&(o.fps==30||o.fps==60)&&o.width>=64&&o.width<=3840&&o.height>=32&&o.height<=2160&&!(o.width%2)&&!(o.height%2)&&o.pool>=2&&o.pool<=MaxPool&&o.queue<o.pool);CHECK(o.role=="relay"||o.role=="source"||o.role=="receiver");o.out=fs::absolute(o.out).lexically_normal().string();if(o.role=="relay"){CHECK(fs::create_directory(o.out));auto f=file("config.json");f<<"{\"seconds\":"<<o.seconds<<",\"fps\":"<<o.fps<<",\"width\":"<<o.width<<",\"height\":"<<o.height<<",\"format\":\""<<formatName()<<"\",\"trace\":"<<(o.trace?"true":"false")<<",\"clock\":\""<<clockName<<"\",\"pool\":"<<o.pool<<",\"queue\":"<<o.queue<<",\"offset_ns\":37000000,\"preroll\":"<<prerollTotal()<<",\"display_hold\":"<<(displayHold?"true":"false")<<",\"upload\":\""<<o.upload<<"\"}\n";}
  #ifdef _WIN32
  FILE* log=nullptr;CHECK(freopen_s(&log,path(o.role+".stderr.log").c_str(),"w",stderr)==0);
 #else
@@ -400,6 +409,9 @@ int main(int argc,char**argv){CHECK(argc>=2);o.plugin=argv[1];for(int i=2;i<argc
 #endif
  // Trace is bounded to a short run; capacity derived from expected operations.
  CHECK(!o.trace||o.seconds<=5);
+#ifndef _WIN32
+ CHECK(o.upload=="default");
+#endif
 #ifdef _WIN32
  _putenv_s("FRAMELINK_TRACE",o.trace?path(o.role+".trace.csv").c_str():"");_putenv_s("FRAMELINK_TRACE_EVENTS",std::to_string(o.seconds*2500+frames()*32+1024).c_str());std::thread([]{Sleep((o.seconds+60)*1000);fprintf(stderr,"owned benchmark watchdog expired\n");ExitProcess(2);}).detach();
  // Like a presenting renderer, the relay keeps the system and display awake for
