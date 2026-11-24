@@ -70,7 +70,7 @@ At the owner's request, the same two cells ran again the same morning, with the 
   - a connector re-detection, which followed a wake by 2.5 min once in the investigation.
 
   Both come from the display driver, not FrameLink code.
-- Whether Windows 4K30 counts as qualified on these cells is Jon's call.
+- **Decision (Jon, 2026-11-24): Windows native 4K30 is qualified on these cells.**
 
 ## Files
 
