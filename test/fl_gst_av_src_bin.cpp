@@ -149,6 +149,31 @@ static void standaloneProducer(){
  report("",pr,co,rx);CHECK(co=="EOS");checkReceived(rx,true,true);
 }
 
+// Consumer teardown at EOS: the application stops the consumer the moment EOS
+// reaches its bus. The producer must still receive the bin's drain report and
+// reach EOS; a teardown that cancelled the pending report left it to time out
+// (docs/m6/lifecycle/android-drain-timeout-20261125). A test fault delays the
+// report by 100 ms, so the teardown always comes first.
+static void teardownAtEos(){
+ fprintf(stderr,"CASE consumer teardown at EOS, drain report delayed\n");
+ g_setenv("FRAMELINK_TEST_DRAIN_REPORT_DELAY_MS","100",TRUE);
+ constexpr int ROUNDS=3;int ok=0;
+ for(int round=0;round<ROUNDS;round++){
+  auto path=sessionPath();
+  auto*c=parse("framelinkavsrc name=c tracks=av video-format=RGBA width=64 height=32 connect-timeout-ms=5000 idle-timeout-ms=3000 latency-ms=0 "
+   "c.video_src ! fakesink sync=false c.audio_src ! fakesink sync=false");setSession(c,"c",path);
+  auto*p=producer(path,"av");
+  CHECK(gst_element_set_state(c,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);CHECK(gst_element_set_state(p,GST_STATE_PLAYING)!=GST_STATE_CHANGE_FAILURE);
+  const std::string co=outcome(c,20*GST_SECOND,"consumer EOS");gst_element_set_state(c,GST_STATE_NULL);
+  const std::string pr=outcome(p,20*GST_SECOND,"producer EOS");
+  gst_element_set_state(p,GST_STATE_NULL);gst_object_unref(p);gst_object_unref(c);
+  if(co!="EOS"||pr!="EOS")fprintf(stderr,"  round %d: consumer %s, producer %s\n",round,co.c_str(),pr.c_str());
+  ok+=co=="EOS"&&pr=="EOS";
+ }
+ g_unsetenv("FRAMELINK_TEST_DRAIN_REPORT_DELAY_MS");
+ fprintf(stderr,"  %d/%d rounds: producer received the drain report\n",ok,ROUNDS);CHECK(ok==ROUNDS);
+}
+
 // Reconnect: one consumer pipeline, a fresh session per NULL cycle.
 static void reconnect(){
  fprintf(stderr,"CASE reconnect through NULL\n");
@@ -258,7 +283,7 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
  pair("av",true,0);pair("av",false,800);pair("video",false,300);pair("audio",true,0);
  pair("av",true,0,"",nullptr,true);
  if(const char*f=nativeFeature())pair("av",true,0,"native-memory=true",f);else fprintf(stderr,"CASE native memory: not offered by this build\n");
- thin();standaloneProducer();reconnect();producerDeath();teardownDuringSetup();
+ thin();standaloneProducer();teardownAtEos();reconnect();producerDeath();teardownDuringSetup();
  negative("no-producer","av","","",false,1000,"");
  negative("track-mismatch","av","audio","",false,2000,"");
  negative("caps-mismatch","av","av","width=128 height=64",false,2000,"");

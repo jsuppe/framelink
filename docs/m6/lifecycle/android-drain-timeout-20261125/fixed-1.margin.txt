@@ -1,0 +1,4 @@
+long-lived consumer pid 24952: 100 cycles; outcomes {'drain report sent': 100}
+fresh producers: drain report received 100, not received 0
+EOS to outcome (ms): min 0.97, median 1.61, max 2.85
+report-to-teardown margin (ms): min 0.23, median 0.87, max 2.11; under 1 ms: 68, under 0.5 ms: 12, negative: 0

@@ -94,6 +94,7 @@ static bool monotonicSystemClock(GstElement*element){
 static constexpr const char* kClockError="framelinkavsrc with session= requires the pipeline system clock (mapped PTS are system-clock times); do not fix another pipeline clock";
 
 static void stopSession(GstFrameLinkAvSrc*s){
+ GST_INFO_OBJECT(s,"stopping session");
  if(s->cancel)g_cancellable_cancel(s->cancel);
  {std::lock_guard<std::mutex> lock(s->shared->mutex);s->shared->cancelled=true;s->shared->changed.notify_all();}
  if(s->session)fl_gst_session_cancel(s->session);
@@ -179,14 +180,35 @@ static GstPadProbeReturn eosProbe(GstPad*pad,GstPadProbeInfo*info,gpointer data)
  std::lock_guard<std::mutex> lock(sh->mutex);sh->eos[pad==s->videoPad?0:1]=true;
  if(sh->failed||(s->videoPad&&!sh->eos[0])||(s->audioPad&&!sh->eos[1])||s->drainer)return GST_PAD_PROBE_OK;
  g_object_ref(s->session);
+ GST_INFO_OBJECT(s,"all tracks EOS: drain report pending");
  s->drainer=new std::thread([s,sh]{
   {std::unique_lock<std::mutex> lock(sh->mutex);sh->changed.wait(lock,[&]{return sh->readySent||sh->cancelled;});
-   if(sh->failed||sh->cancelled){g_object_unref(s->session);return;}}
+   if(sh->failed||sh->cancelled){GST_WARNING_OBJECT(s,"drain report not sent: session stopped first");g_object_unref(s->session);return;}}
+  // Deterministic test fault: a late drain report (at most 1 s), so that the
+  // application's teardown at EOS comes first.
+  if(const char*delay=g_getenv("FRAMELINK_TEST_DRAIN_REPORT_DELAY_MS"))g_usleep(std::min<guint64>(g_ascii_strtoull(delay,nullptr,10),1000)*1000);
   GError*error=nullptr;const bool ok=fl_gst_session_finish_local_cancellable(s->session,FALSE,s->connectMs,s->cancel,&error);
+  if(ok)GST_INFO_OBJECT(s,"drain report sent");
+  else if(g_cancellable_is_cancelled(s->cancel))GST_WARNING_OBJECT(s,"drain report cancelled: session stopped first");
   if(!ok&&!g_cancellable_is_cancelled(s->cancel))GST_ELEMENT_ERROR(s,RESOURCE,READ,("%s",error?error->message:"drain report failed"),(nullptr));
   g_clear_error(&error);g_object_unref(s->session);
  });
  return GST_PAD_PROBE_OK;
+}
+
+// Stopping at EOS is the normal application response, and the producer may
+// close only after this bin's drain report. A teardown that cancelled a report
+// not yet written left the producer to time out although every buffer had
+// arrived (docs/m6/lifecycle/android-drain-timeout-20261125). So once every
+// track reached EOS and ready was reported, stopping first lets the report
+// finish: one byte on the local control connection, bounded by
+// connect-timeout-ms. A failed or never-ready session is cancelled as before.
+static void awaitDrainReport(GstFrameLinkAvSrc*s){
+ std::thread*drainer=nullptr;
+ {std::lock_guard<std::mutex> lock(s->shared->mutex);if(s->shared->readySent&&!s->shared->failed)drainer=s->drainer;}
+ if(!drainer||drainer->get_id()==std::this_thread::get_id())return;
+ drainer->join();delete drainer;
+ std::lock_guard<std::mutex> lock(s->shared->mutex);s->drainer=nullptr;
 }
 
 static void joinThreads(GstFrameLinkAvSrc*s){
@@ -284,7 +306,7 @@ static GstStateChangeReturn changeState(GstElement*element,GstStateChange transi
  case GST_STATE_CHANGE_PLAYING_TO_PAUSED:
   if(s->local){std::lock_guard<std::mutex> lock(s->shared->mutex);s->shared->playing=false;}
   break;
- case GST_STATE_CHANGE_PAUSED_TO_READY:if(s->local)stopSession(s);break;
+ case GST_STATE_CHANGE_PAUSED_TO_READY:if(s->local){awaitDrainReport(s);stopSession(s);}break;
  default:break;
  }
  auto result=GST_ELEMENT_CLASS(gst_framelink_av_src_parent_class)->change_state(element,transition);
