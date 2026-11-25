@@ -1,0 +1,64 @@
+arrival.budget_ms=17
+complete=yes
+config=NV12 1920x1080@60 bin shared-cpu 12s
+consumer.audio.arrival.all.ms=n=595 p50=0.43 p95=0.45 p99=0.46 max=0.49 min=0.10
+consumer.audio.arrival.ms=n=395 p50=0.43 p95=0.45 p99=0.46 max=0.49 min=0.10
+consumer.audio.contiguous=yes
+consumer.audio.deadline_misses=0/595
+consumer.audio.output_queue.admission_residence.ms=n=595 p50=0.09 p95=0.10 p99=0.10 max=0.11 min=0.01
+consumer.audio.output_queue.pending=0
+consumer.audio.output_queue.sampled_max_buffers=0
+consumer.audio.output_queue.unmatched=0
+consumer.audio.render.all.ms=n=595 p50=0.54 p95=0.57 p99=0.58 max=0.60 min=0.14
+consumer.audio.render.ms=n=395 p50=0.54 p95=0.57 p99=0.58 max=0.60 min=0.14
+consumer.audio.render_interval.ms=n=394 p50=10.00 p95=10.09 p99=10.15 max=10.36 min=9.67
+consumer.audio.render_jitter.p1_p99.ms=0.40
+consumer.av_offset.abs.ms=n=4 p50=1.53 p95=1.57 p99=1.57 max=1.57 min=1.48
+consumer.av_offset.ms=n=4 p50=1.53 p95=1.57 p99=1.57 max=1.57 min=1.48
+consumer.cpu.percent=8.50
+consumer.ended_monotonic_us=414729121529
+consumer.frames=357
+consumer.handles=17..17 min=17 max=17
+consumer.handles.slope.per_min=0.00
+consumer.mem.kb=28024..28024 min=28024 max=28024
+consumer.mem.kind=rss
+consumer.mem.slope.kb_per_min=0.00
+consumer.memory=memory:SystemMemory
+consumer.pid=2418767
+consumer.queue.accounting=complete
+consumer.result=error: Internal data stream error.
+consumer.samples=285600
+consumer.scope=transport-consumer
+consumer.series.t_cpums_memkb_handles_threads=0.0:9:13800:6:2;1.0:76:28024:17:10;2.0:162:28024:17:10;3.0:249:28024:17:10;4.0:330:28024:17:10;5.0:418:28024:17:10;6.0:503:28024:17:10;6.2:519:15868:11:7;
+consumer.threads=10..10 min=10 max=10
+consumer.threads.slope.per_min=0.00
+consumer.video.arrival.all.ms=n=357 p50=1.95 p95=2.14 p99=2.20 max=2.27 min=0.57
+consumer.video.arrival.ms=n=237 p50=1.95 p95=2.14 p99=2.20 max=2.27 min=0.57
+consumer.video.deadline_misses=0/357
+consumer.video.output_queue.admission_residence.ms=n=357 p50=0.09 p95=0.10 p99=0.11 max=0.13 min=0.01
+consumer.video.output_queue.pending=0
+consumer.video.output_queue.sampled_max_buffers=0
+consumer.video.output_queue.unmatched=0
+consumer.video.render.all.ms=n=357 p50=2.06 p95=2.25 p99=2.33 max=2.38 min=0.62
+consumer.video.render.ms=n=237 p50=2.06 p95=2.25 p99=2.33 max=2.38 min=0.62
+consumer.video.render_interval.ms=n=236 p50=16.67 p95=17.07 p99=17.62 max=17.69 min=15.11
+consumer.video.render_jitter.p1_p99.ms=1.70
+exit=137/0
+expected.frames=720
+expected.samples=576000
+fault=producer-kill
+fault.at_s=6
+fault.bound_ms=2000
+fault.detection_ms=5.2
+fault.pass=yes
+fault.survivor_result=error: Internal data stream error.
+harness.malloc=producer-side mmap_threshold=8388608
+label=linux-shared-cpu-producer-kill-3
+output.async=false
+output.queue_buffers=1
+output.sync=false
+playback.latency_ms=0
+producer.pid=2418775
+seconds=12
+video.pool=2
+video.queue=1

@@ -1,0 +1,64 @@
+arrival.budget_ms=17
+complete=yes
+config=RGBA 1920x1080@60 bin native 12s
+consumer.audio.arrival.all.ms=n=570 p50=1.71 p95=2.39 p99=2.71 max=3.13 min=0.92
+consumer.audio.arrival.ms=n=370 p50=1.67 p95=2.17 p99=2.60 max=2.81 min=0.92
+consumer.audio.contiguous=yes
+consumer.audio.deadline_misses=0/570
+consumer.audio.output_queue.admission_residence.ms=n=570 p50=0.25 p95=0.42 p99=0.56 max=0.76 min=0.05
+consumer.audio.output_queue.pending=0
+consumer.audio.output_queue.sampled_max_buffers=0
+consumer.audio.output_queue.unmatched=0
+consumer.audio.render.all.ms=n=570 p50=2.04 p95=2.74 p99=3.22 max=3.60 min=1.04
+consumer.audio.render.ms=n=370 p50=1.99 p95=2.54 p99=2.94 max=3.23 min=1.04
+consumer.audio.render_interval.ms=n=369 p50=10.01 p95=10.56 p99=10.92 max=11.15 min=8.44
+consumer.audio.render_jitter.p1_p99.ms=1.70
+consumer.av_offset.abs.ms=n=4 p50=4.55 p95=4.64 p99=4.64 max=4.64 min=4.31
+consumer.av_offset.ms=n=4 p50=4.55 p95=4.64 p99=4.64 max=4.64 min=4.31
+consumer.cpu.percent=14.34
+consumer.ended_monotonic_us=5362149653540
+consumer.frames=340
+consumer.handles=24..24 min=24 max=24
+consumer.handles.slope.per_min=0.00
+consumer.mem.kb=44624..44624 min=44624 max=44624
+consumer.mem.kind=rss
+consumer.mem.slope.kb_per_min=0.00
+consumer.memory=memory:FrameLinkAHardwareBuffer
+consumer.pid=9326
+consumer.queue.accounting=complete
+consumer.result=error: framelink acquire failed
+consumer.samples=273600
+consumer.scope=transport-consumer
+consumer.series.t_cpums_memkb_handles_threads=0.0:197:41688:6:2;1.0:353:44624:23:10;2.0:515:44624:24:10;3.0:663:44624:24:10;4.0:802:44624:24:10;5.0:947:44624:24:10;6.0:1088:44752:14:6;
+consumer.threads=10..10 min=10 max=10
+consumer.threads.slope.per_min=0.00
+consumer.video.arrival.all.ms=n=340 p50=6.08 p95=7.48 p99=8.57 max=9.04 min=3.54
+consumer.video.arrival.ms=n=220 p50=6.04 p95=7.32 p99=8.05 max=8.89 min=3.73
+consumer.video.deadline_misses=0/340
+consumer.video.output_queue.admission_residence.ms=n=340 p50=0.31 p95=0.50 p99=0.55 max=0.68 min=0.03
+consumer.video.output_queue.pending=0
+consumer.video.output_queue.sampled_max_buffers=0
+consumer.video.output_queue.unmatched=0
+consumer.video.render.all.ms=n=340 p50=6.60 p95=8.05 p99=9.00 max=9.52 min=3.99
+consumer.video.render.ms=n=220 p50=6.56 p95=7.89 p99=8.57 max=9.52 min=3.99
+consumer.video.render_interval.ms=n=219 p50=16.01 p95=18.42 p99=18.78 max=19.09 min=13.49
+consumer.video.render_jitter.p1_p99.ms=3.84
+exit=137/0
+expected.frames=720
+expected.samples=576000
+fault=producer-kill
+fault.at_s=6
+fault.bound_ms=2000
+fault.detection_ms=25.9
+fault.pass=yes
+fault.survivor_result=error: framelink acquire failed
+harness.malloc=default
+label=android-native-producer-kill-4
+output.async=false
+output.queue_buffers=1
+output.sync=false
+playback.latency_ms=0
+producer.pid=9327
+seconds=12
+video.pool=2
+video.queue=1

@@ -1,0 +1,48 @@
+arrival.budget_ms=17
+complete=yes
+config=RGBA 1920x1080@60 bin native 12s
+consumer.pid=9365
+exit=0/137
+expected.frames=720
+expected.samples=576000
+fault=consumer-kill
+fault.at_s=6
+fault.bound_ms=2000
+fault.detection_ms=24.3
+fault.pass=yes
+fault.survivor_result=error: required session tracks not ready or cancelled
+harness.malloc=default
+label=android-native-consumer-kill-4
+output.async=false
+output.queue_buffers=1
+output.sync=false
+playback.latency_ms=0
+producer.audio.push_burst.max=0
+producer.audio.push_interval.ms=n=368 p50=10.00 p95=10.24 p99=10.37 max=10.57 min=9.40
+producer.audio.push_lateness.ms=n=368 p50=0.29 p95=0.47 p99=0.74 max=0.79 min=0.14
+producer.cpu.percent=56.12
+producer.ended_monotonic_us=5362156278939
+producer.handles=28..28 min=28 max=28
+producer.handles.slope.per_min=0.00
+producer.injection.elapsed_us=0
+producer.injection.executed=0
+producer.injection.frame=0
+producer.injection.requested_ms=0
+producer.injection.stage=none
+producer.injection.start_monotonic_us=0
+producer.mem.kb=69444..69444 min=69444 max=69444
+producer.mem.kind=rss
+producer.mem.slope.kb_per_min=0.00
+producer.pid=9373
+producer.pushed.frames=339
+producer.pushed.samples=272640
+producer.result=error: required session tracks not ready or cancelled
+producer.series.t_cpums_memkb_handles_threads=0.0:199:41164:6:2;1.0:733:69444:28:7;2.0:1272:69444:28:7;3.0:1843:69444:28:7;4.0:2413:69444:28:7;5.0:2964:69444:28:7;5.8:3406:45172:19:5;
+producer.threads=7..7 min=7 max=7
+producer.threads.slope.per_min=0.00
+producer.video.push_burst.max=0
+producer.video.push_interval.ms=n=219 p50=16.67 p95=16.81 p99=16.89 max=16.99 min=16.35
+producer.video.push_lateness.ms=n=219 p50=0.32 p95=0.45 p99=0.55 max=0.63 min=0.15
+seconds=12
+video.pool=2
+video.queue=1

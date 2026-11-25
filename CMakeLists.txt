@@ -102,6 +102,8 @@ if(FRAMELINK_BUILD_TESTS)
         add_test(NAME read_lease_egl_delayed_completion COMMAND fl_read_lease_egl --delayed-completion)
         add_test(NAME read_lease_egl_gpu_busy_completion COMMAND fl_read_lease_egl --gpu-busy-completion)
         set_tests_properties(read_lease_egl read_lease_egl_producer_death read_lease_egl_delayed_completion read_lease_egl_gpu_busy_completion PROPERTIES TIMEOUT 20 SKIP_RETURN_CODE 77)
+        # It saturates the GPU for about 0.7 s: never alongside timing-sensitive GPU tests.
+        set_tests_properties(read_lease_egl_gpu_busy_completion PROPERTIES RUN_SERIAL TRUE)
     endif()
     add_executable(fl_read_leases test/fl_read_leases.cpp)
     target_link_libraries(fl_read_leases PRIVATE framelink)

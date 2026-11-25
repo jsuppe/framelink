@@ -1,0 +1,48 @@
+arrival.budget_ms=17
+complete=yes
+config=RGBA 1920x1080@60 bin native 12s
+consumer.pid=8653
+exit=0/137
+expected.frames=720
+expected.samples=576000
+fault=consumer-kill
+fault.at_s=6
+fault.bound_ms=2000
+fault.detection_ms=24.4
+fault.pass=yes
+fault.survivor_result=error: Internal data stream error.
+harness.malloc=default
+label=android-native-consumer-kill-1
+output.async=false
+output.queue_buffers=1
+output.sync=false
+playback.latency_ms=0
+producer.audio.push_burst.max=0
+producer.audio.push_interval.ms=n=368 p50=10.00 p95=10.23 p99=10.33 max=10.47 min=9.56
+producer.audio.push_lateness.ms=n=368 p50=0.32 p95=0.47 p99=0.60 max=0.78 min=0.13
+producer.cpu.percent=56.81
+producer.ended_monotonic_us=5362016947605
+producer.handles=28..28 min=28 max=28
+producer.handles.slope.per_min=-0.00
+producer.injection.elapsed_us=0
+producer.injection.executed=0
+producer.injection.frame=0
+producer.injection.requested_ms=0
+producer.injection.stage=none
+producer.injection.start_monotonic_us=0
+producer.mem.kb=68936..68936 min=68936 max=68936
+producer.mem.kind=rss
+producer.mem.slope.kb_per_min=-0.00
+producer.pid=8655
+producer.pushed.frames=339
+producer.pushed.samples=272640
+producer.result=error: Internal data stream error.
+producer.series.t_cpums_memkb_handles_threads=0.0:198:41176:6:2;1.0:731:68936:28:7;2.0:1289:68936:28:7;3.0:1845:68936:28:7;4.0:2435:68936:28:7;5.0:3003:68936:28:7;5.8:3454:44588:19:5;
+producer.threads=7..7 min=7 max=7
+producer.threads.slope.per_min=-0.00
+producer.video.push_burst.max=0
+producer.video.push_interval.ms=n=219 p50=16.67 p95=16.83 p99=16.93 max=17.01 min=16.29
+producer.video.push_lateness.ms=n=219 p50=0.32 p95=0.47 p99=0.55 max=0.65 min=0.13
+seconds=12
+video.pool=2
+video.queue=1
