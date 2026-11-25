@@ -13,6 +13,7 @@ runner runs it (G_DEBUG=fatal-warnings).
 import json, os, re, subprocess, sys, time
 
 out, exe, plugin, rest = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4:]
+exe = os.path.realpath(exe)  # children's argv[0] is the bench's absolute path
 os.makedirs(out)
 env = dict(os.environ, G_DEBUG='fatal-warnings')
 os.makedirs(os.path.join(out, 'bench'))

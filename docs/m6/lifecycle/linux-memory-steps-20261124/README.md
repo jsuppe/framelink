@@ -49,13 +49,35 @@ Diagnostic runs, not qualification runs. No repeat replaces a recorded failure. 
   - why the arena trims in some cycles and not others;
   - whether the retention is bounded over longer runs. Here it was at most 126.6 MB (BGRA) and 82.8 MB (NV12) above B's level at any cycle end.
 
-## For Jon: options
+## Options
 
 1. **Harness:** run the Linux bench processes with a fixed mmap threshold (B's setting), through the runner or a `mallopt` in the bench. The gate is unchanged, and the cells' memory becomes deterministic. It also changes how FrameLink's own CPU output pool behaves under test, so the consumer-side steps would be hidden rather than removed.
 2. **Product, consumer side:** give `framelinkavsrc`'s CPU output pool an allocator whose memory goes back to the OS when freed, for example one mapping per buffer. That removes the consumer-side steps for applications too. On its own it does not change the producer-side steps, which come from the harness's `videotestsrc`.
 3. **Gate:** sample the long-lived peer after `malloc_trim(0)`, or exclude freed arena memory. That would be a gate change.
 
 Options 1 and 2 can be combined: fix the product pool (2), and apply the harness setting (1) only to the test source's side, or document it.
+
+**Decision (Jon, 2026-11-24): 2, plus 1 for the producer-side processes only.** FrameLink's own pool is fixed. The harness setting covers only processes whose frame-sized allocations are the test source's, so FrameLink's consumer-side code stays measured with glibc's defaults, and the gate is unchanged.
+
+## Fix at `91053ff9`
+
+- **Product (`gst/gstframelink.cpp`):** on glibc, `framelinkavsrc`'s CPU output pool uses an allocator that gives each of its two cached buffers its own anonymous mapping, unmapped when the memory is freed. The memory is ordinary wrapped system memory. Windows and Android are unchanged. The uncached fallback, used only when downstream holds both cached buffers, keeps the default allocator. It made no allocations in these cells.
+- **Harness (`test/fl_gst_av_bench.cpp`):** on glibc, the roles that run the harness's `videotestsrc` (`producer`, `lifecycle-producer`, `source`) fix `M_MMAP_THRESHOLD` at 8 MiB with `mallopt`. Consumer roles keep glibc's default. Every summary records the setting as `harness.malloc`.
+- **Tests:** 187/187 on the Linux host (`read_lease_egl_delayed_completion` skipped, as before).
+
+**Rerun (C), diagnostic, not qualification:** the three failing cells, 100 cycles each, exactly as A, with no `GLIBC_TUNABLES` (`run_fixed.sh`). Binaries: `fl_gst_av_bench` `bcfe4e26…`, `libgstframelink.so` `8122c637…`.
+
+| Cell (4K30, 100 cycles) | Gate slope (KB/cycle) | Steps | Median after teardown | A / B median | Frame-sized `malloc` calls in the long-lived peer |
+|---|---|---|---|---|---|
+| native BGRA, restart consumer | 2.42 (pass) | 0 | 18.0 MB | 81.2 / 17.9 MB | 300, all freed (`vsrc:src`, own mappings) |
+| shared NV12, restart producer | 1.78 (pass) | 0 | 15.7 MB | 51.3 / 15.8 MB | **none**: the pool maps its buffers directly (the 200 counted are the 100 fresh producers', 2 each) |
+| shared NV12, restart consumer | 2.29 (pass) | 0 | 18.2 MB | 77.2 / 18.2 MB | 200, all freed (`vsrc:src`, own mappings) |
+
+- All three cells complete 100/100 and match B, the tunable run: medians within 0.1 MB, and no steps.
+- The restart-producer cell is the product fix's test: there the long-lived peer is the consumer, and its frame-sized buffers come only from FrameLink's pool.
+- **Sampler:** in the first two C runs the sampler found no long-lived peer, because it was given a relative bench path and matches children by their absolute one. Fixed (`realpath`) before the third run. The per-cycle values come from the bench summary in every run.
+- **Not established:** the cells at the final revision (M6.3 qualification). The recorded `e1284833` failures stand.
+- Files: `runs/*-C.summary.txt`, `analysis-fixed.txt`; raw runs in `fixed-91053ff9.tar.xz` outside the repository (SHA-256 in `fixed-91053ff9.tar.xz.sha256`).
 
 ## Files
 

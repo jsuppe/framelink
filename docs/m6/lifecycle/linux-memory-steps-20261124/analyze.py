@@ -39,9 +39,12 @@ for line in open(os.path.join(run, 'samples.jsonl')):
         continue
     b = sum(m.get('Anonymous', 0) for m in r['maps'] if m['perms'].endswith('p'))
     t.append(r['t']); big.append(b); other.append(r['rollup']['Rss'] - b)
-print(f"  samples after 30 s: {len(t)}; large anonymous resident {min(big) / 1024:.1f}-{max(big) / 1024:.1f} MB "
-      f"(range {(max(big) - min(big)) / 1024:.1f} MB); everything else {min(other) / 1024:.1f}-{max(other) / 1024:.1f} MB "
-      f"(range {(max(other) - min(other)) / 1024:.1f} MB, first {other[0] / 1024:.1f}, last {other[-1] / 1024:.1f})")
+if not t:
+    print('  samples after 30 s: none (the sampler did not find the long-lived peer)')
+else:
+  print(f"  samples after 30 s: {len(t)}; large anonymous resident {min(big) / 1024:.1f}-{max(big) / 1024:.1f} MB "
+        f"(range {(max(big) - min(big)) / 1024:.1f} MB); everything else {min(other) / 1024:.1f}-{max(other) / 1024:.1f} MB "
+        f"(range {(max(other) - min(other)) / 1024:.1f} MB, first {other[0] / 1024:.1f}, last {other[-1] / 1024:.1f})")
 
 if len(sys.argv) > 2:
     allocs, frees = collections.Counter(), 0
