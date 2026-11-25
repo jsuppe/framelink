@@ -1,0 +1,30 @@
+== run 1
+busy calibration: 0.120 ms/draw, 2509 draws, raw fence ready after 297.9 ms
+line 162: ready==0 EGL=3000 GL=0
+EGL vendor=NVIDIA GL vendor=NVIDIA Corporation renderer=NVIDIA GeForce RTX 3090/PCIe/SSE2
+rc=1
+== run 2
+line 34: flAcquireBuffer(p,&returned,5000)==FL_OK EGL=3000 GL=0
+busy calibration: 0.118 ms/draw, 2552 draws, raw fence ready after 304.5 ms
+line 162: ready==0 EGL=3000 GL=0
+EGL vendor=NVIDIA GL vendor=NVIDIA Corporation renderer=NVIDIA GeForce RTX 3090/PCIe/SSE2
+rc=1
+== run 3
+line 34: flAcquireBuffer(p,&returned,5000)==FL_OK EGL=3000 GL=0
+busy calibration: 0.118 ms/draw, 2546 draws, raw fence ready after 304.1 ms
+line 162: ready==0 EGL=3000 GL=0
+EGL vendor=NVIDIA GL vendor=NVIDIA Corporation renderer=NVIDIA GeForce RTX 3090/PCIe/SSE2
+rc=1
+== run 4
+line 34: flAcquireBuffer(p,&returned,5000)==FL_OK EGL=3000 GL=0
+busy calibration: 0.122 ms/draw, 2450 draws, raw fence ready after 292.3 ms
+line 162: ready==0 EGL=3000 GL=0
+EGL vendor=NVIDIA GL vendor=NVIDIA Corporation renderer=NVIDIA GeForce RTX 3090/PCIe/SSE2
+rc=1
+== run 5
+line 34: flAcquireBuffer(p,&returned,5000)==FL_OK EGL=3000 GL=0
+busy calibration: 0.130 ms/draw, 2308 draws, raw fence ready after 283.3 ms
+line 162: ready==0 EGL=3000 GL=0
+EGL vendor=NVIDIA GL vendor=NVIDIA Corporation renderer=NVIDIA GeForce RTX 3090/PCIe/SSE2
+rc=1
+line 34: flAcquireBuffer(p,&returned,5000)==FL_OK EGL=3000 GL=0

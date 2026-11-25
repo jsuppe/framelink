@@ -1,0 +1,14 @@
+--- test/fl_read_lease_egl.cpp
++++ negative-control.cpp
+@@ -145,9 +145,10 @@
+  }
+  if(delayed){gate=createSync(display,EGL_SYNC_REUSABLE_KHR,nullptr);CHECK(gate!=EGL_NO_SYNC_KHR);CHECK(waitSync(display,gate,0));}
+  // Sample the imported allocation into a test-only verification surface.
+- double busyStart=0;if(busy){busyStart=now();busyWork(busyDraws);}
++ double busyStart=0;
+  glDrawArrays(GL_TRIANGLE_STRIP,0,4);CHECK(glGetError()==GL_NO_ERROR);
+  auto sync=createSync(display,EGL_SYNC_NATIVE_FENCE_ANDROID,nullptr);CHECK(sync!=EGL_NO_SYNC_KHR);glFlush();
++ if(busy){glFinish();busyStart=now();busyWork(busyDraws);glFlush();} // NEGATIVE: fence precedes the workload
+  int fd=exportFence(display,sync);CHECK(fd>=0);
+  if(delayed){auto getSync=(PFNEGLGETSYNCATTRIBKHRPROC)eglGetProcAddress("eglGetSyncAttribKHR");CHECK(getSync);EGLint gateState=0,fenceState=0;
+   CHECK(getSync(display,gate,EGL_SYNC_STATUS_KHR,&gateState));CHECK(getSync(display,sync,EGL_SYNC_STATUS_KHR,&fenceState));

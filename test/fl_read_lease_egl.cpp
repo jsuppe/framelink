@@ -19,6 +19,7 @@
 #include <spawn.h>
 #include <poll.h>
 #include <sys/wait.h>
+#include <signal.h>
 extern char** environ;
 #define CHECK(x) do {if(!(x)){std::fprintf(stderr,"line %d: %s EGL=%x GL=%x\n",__LINE__,#x,eglGetError(),glGetError());std::exit(1);}}while(0)
 static int producer(const char* name,bool crash) {
@@ -38,6 +39,11 @@ int main(int argc,char** argv) {
  if(argc==3)return producer(argv[2],!std::strcmp(argv[1],"--producer-crash"));
  bool crash=argc==2 && !std::strcmp(argv[1],"--producer-death");
  bool delayed=argc==2 && !std::strcmp(argv[1],"--delayed-completion");
+ // --gpu-busy-completion: the lease's sampling draw queues behind a real GPU
+ // workload (calibrated draws of a long fragment loop), so its exported native
+ // fence signals late because the GPU is busy, not because of a host gate. A raw
+ // check (no FrameLink) first proves the fence stays unready for the hold.
+ bool busy=argc==2 && !std::strcmp(argv[1],"--gpu-busy-completion");
  EGLDisplay display=EGL_NO_DISPLAY;
 #ifndef __ANDROID__
  auto platform=(PFNEGLGETPLATFORMDISPLAYEXTPROC)eglGetProcAddress("eglGetPlatformDisplayEXT");
@@ -111,8 +117,35 @@ int main(int argc,char** argv) {
  GLuint program=glCreateProgram();glAttachShader(program,vs);glAttachShader(program,fs);glBindAttribLocation(program,0,"position");glLinkProgram(program);GLint linked=0;glGetProgramiv(program,GL_LINK_STATUS,&linked);CHECK(linked);glUseProgram(program);
  glUniform1i(glGetUniformLocation(program,"source"),0);glActiveTexture(GL_TEXTURE0);glBindTexture(GL_TEXTURE_EXTERNAL_OES,texture);
  GLfloat vertices[]={-1,-1,1,-1,-1,1,1,1};glEnableVertexAttribArray(0);glVertexAttribPointer(0,2,GL_FLOAT,GL_FALSE,0,vertices);glViewport(0,0,64,32);
+ // GPU workload for --gpu-busy-completion: BUSY_SIZE^2 fragments of a
+ // 2048-step loop per draw; the draw count is calibrated to hold the queue for
+ // about BUSY_MS. Each draw stays short (well under GPU watchdog limits).
+ constexpr int BUSY_SIZE=256;constexpr double BUSY_MS=300,HOLD_MS=100;
+ GLuint busyProgram=0,busyTarget=0,busyFbo=0;unsigned busyDraws=0;
+ auto now=[]{return std::chrono::duration<double,std::milli>(std::chrono::steady_clock::now().time_since_epoch()).count();};
+ auto busyWork=[&](unsigned draws){glBindFramebuffer(GL_FRAMEBUFFER,busyFbo);glUseProgram(busyProgram);glViewport(0,0,BUSY_SIZE,BUSY_SIZE);
+  glEnable(GL_BLEND);glBlendFunc(GL_ONE,GL_ONE); // not opaque: tilers (Mali FPK) must not discard overdrawn draws
+  for(unsigned i=0;i<draws;++i){glUniform1f(glGetUniformLocation(busyProgram,"seed"),float(i));glDrawArrays(GL_TRIANGLE_STRIP,0,4);}
+  glDisable(GL_BLEND);glBindFramebuffer(GL_FRAMEBUFFER,fbo);glUseProgram(program);glViewport(0,0,64,32);CHECK(glGetError()==GL_NO_ERROR);};
+ if(busy){
+  GLuint bfs=shader(GL_FRAGMENT_SHADER,"precision highp float;varying vec2 uv;uniform float seed;void main(){float v=uv.x+uv.y*0.37+seed;for(int i=0;i<2048;i++){v=fract(sin(v*12.9898+float(i)*0.001)*43758.5453);}gl_FragColor=vec4(v,v,v,1.0);}");
+  busyProgram=glCreateProgram();glAttachShader(busyProgram,vs);glAttachShader(busyProgram,bfs);glBindAttribLocation(busyProgram,0,"position");glLinkProgram(busyProgram);GLint ok=0;glGetProgramiv(busyProgram,GL_LINK_STATUS,&ok);CHECK(ok);glDeleteShader(bfs);
+  glGenTextures(1,&busyTarget);glBindTexture(GL_TEXTURE_2D,busyTarget);glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,BUSY_SIZE,BUSY_SIZE,0,GL_RGBA,GL_UNSIGNED_BYTE,nullptr);
+  glGenFramebuffers(1,&busyFbo);glBindFramebuffer(GL_FRAMEBUFFER,busyFbo);glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,busyTarget,0);CHECK(glCheckFramebufferStatus(GL_FRAMEBUFFER)==GL_FRAMEBUFFER_COMPLETE);
+  glBindFramebuffer(GL_FRAMEBUFFER,fbo);glActiveTexture(GL_TEXTURE0);glBindTexture(GL_TEXTURE_EXTERNAL_OES,texture);
+  busyWork(1);glFinish(); // warm-up (compile, clocks)
+  double per=0;for(unsigned n=1;n<=4096;n*=2){double t=now();busyWork(n);glFinish();double e=now()-t;if(e>=20){per=e/n;break;}}
+  CHECK(per>0);busyDraws=unsigned(BUSY_MS/per)+1;
+  // Raw control without FrameLink: the fence after the workload stays unready.
+  double t=now();busyWork(busyDraws);auto probe=createSync(display,EGL_SYNC_NATIVE_FENCE_ANDROID,nullptr);CHECK(probe!=EGL_NO_SYNC_KHR);glFlush();
+  int probeFd=exportFence(display,probe);CHECK(probeFd>=0);pollfd pending{probeFd,POLLIN,0};int ready=poll(&pending,1,int(HOLD_MS));CHECK(ready>=0);
+  if(ready!=0){kill(child,SIGKILL);waitpid(child,nullptr,0);std::printf("SKIP: GPU workload did not hold the native fence for %.0f ms (draws=%u, %.3f ms each)\n",HOLD_MS,busyDraws,per);return 77;}
+  CHECK(poll(&pending,1,5000)==1);std::fprintf(stderr,"busy calibration: %.3f ms/draw, %u draws, raw fence ready after %.1f ms\n",per,busyDraws,now()-t);
+  close(probeFd);destroySync(display,probe);
+ }
  if(delayed){gate=createSync(display,EGL_SYNC_REUSABLE_KHR,nullptr);CHECK(gate!=EGL_NO_SYNC_KHR);CHECK(waitSync(display,gate,0));}
  // Sample the imported allocation into a test-only verification surface.
+ double busyStart=0;if(busy){busyStart=now();busyWork(busyDraws);}
  glDrawArrays(GL_TRIANGLE_STRIP,0,4);CHECK(glGetError()==GL_NO_ERROR);
  auto sync=createSync(display,EGL_SYNC_NATIVE_FENCE_ANDROID,nullptr);CHECK(sync!=EGL_NO_SYNC_KHR);glFlush();
  int fd=exportFence(display,sync);CHECK(fd>=0);
@@ -122,6 +155,17 @@ int main(int argc,char** argv) {
   std::fprintf(stderr,"injection: gate_status=%x fence_status=%x fd_ready=%d revents=%x\n",gateState,fenceState,ready,check.revents);
  }
  CHECK(flCompleteReadLeaseSyncFd(c,lease,fd)==FL_OK);destroySync(display,sync);
+ if(busy){
+  // While the fence is unready the lease stays BUSY and the producer (waiting
+  // to reacquire the leased slot) stays blocked; checked over HOLD_MS.
+  unsigned checks=0;while(now()-busyStart<HOLD_MS){pollfd state{fd,POLLIN,0};int ready=poll(&state,1,0);CHECK(ready==0);
+   CHECK(flCollectReadLeases(c)==FL_BUSY);int status=0;CHECK(waitpid(child,&status,WNOHANG)==0);++checks;std::this_thread::sleep_for(std::chrono::milliseconds(1));}
+  CHECK(checks>=20);
+  double t=now();bool done=false;while(now()-t<5000){auto r=flCollectReadLeases(c);pollfd state{fd,POLLIN,0};const int ready=poll(&state,1,0);
+   if(r==FL_OK){CHECK(ready==1);done=true;break;} // never retired before its fence
+   CHECK(r==FL_BUSY);std::this_thread::sleep_for(std::chrono::milliseconds(1));}
+  CHECK(done);std::fprintf(stderr,"busy lease: BUSY for %u checks over %.0f ms; retired %.1f ms after the workload was queued\n",checks,HOLD_MS,now()-busyStart);
+ }
  if(delayed){
   for(unsigned i=0;i<20;++i){auto result=flCollectReadLeases(c);if(result!=FL_BUSY){pollfd state{fd,POLLIN,0};int ready=poll(&state,1,0);std::fprintf(stderr,"collect iteration=%u result=%d fence_ready=%d revents=%x\n",i,int(result),ready,state.revents);}CHECK(result==FL_BUSY);int status=0;CHECK(waitpid(child,&status,WNOHANG)==0);std::this_thread::sleep_for(std::chrono::milliseconds(1));}
   CHECK(signalSync(display,gate,EGL_SIGNALED_KHR));destroySync(display,gate);
@@ -130,8 +174,9 @@ int main(int argc,char** argv) {
  bool collected=false;for(int i=0;i<2000;++i){auto r=flCollectReadLeases(c);if(r==FL_OK){collected=true;break;}CHECK(r==FL_BUSY || (crash && r==FL_DISCONNECTED));std::this_thread::sleep_for(std::chrono::milliseconds(1));}CHECK(collected);
  glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,output,0);unsigned char pixel[4]{};glReadPixels(0,0,1,1,GL_RGBA,GL_UNSIGNED_BYTE,pixel);CHECK(glGetError()==GL_NO_ERROR);
  CHECK(pixel[0]==17&&pixel[1]==91&&pixel[2]==203&&pixel[3]==255);
+ if(busy){glDeleteProgram(busyProgram);glDeleteFramebuffers(1,&busyFbo);glDeleteTextures(1,&busyTarget);}
  glDeleteProgram(program);glDeleteShader(vs);glDeleteShader(fs);glDeleteFramebuffers(1,&fbo);glDeleteTextures(1,&texture);glDeleteTextures(1,&output);destroyImage(display,image);
  int status=0;CHECK(waitpid(child,&status,0)==child && WIFEXITED(status) && WEXITSTATUS(status)==(crash?99:0));
  flClose(c);eglMakeCurrent(display,EGL_NO_SURFACE,EGL_NO_SURFACE,EGL_NO_CONTEXT);eglDestroyContext(display,context);eglDestroySurface(display,surface);eglTerminate(display);
- puts("separate-process EGL imported-allocation GPU read, native sync-file lease retirement and pixel verification passed");
+ puts(busy?"GPU-busy delayed completion: lease BUSY until the native fence signalled, then retired with exact pixels":"separate-process EGL imported-allocation GPU read, native sync-file lease retirement and pixel verification passed");
 }

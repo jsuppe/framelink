@@ -50,6 +50,7 @@ These are transport arrival/accounting/resource results, not physical playback, 
 - Windows repeated lifecycle growth exceeds16KB/cycle despite steady-state64KB/min passes. Device-lifetime integration/measurement: Evelyn; product acceptance: Jon. See lifecycle/WINDOWS_DEVICE_LIFETIME.md.
 - Original Windows native NV124K30 stall remains unresolved. Source/post-push controls localize its first delay after measured source push, not to a specific GPU/driver/queue component. Evelyn resumes causal attribution with M6.6 joined evidence.
 - Linux/Android controlled native GPU-delay injection unavailable (skip77); ordinary completion/death checks are not equivalent. M6.4 retains this gap.
+  2026-11-25: a real GPU workload ahead of the read now holds the native fence about 300 ms on both hosts, and the lease stays BUSY until it signals ([record](fault-coverage/egl-gpu-busy/README.md)). The delay is calibrated GPU work, not a host-controlled gate; closing the gap is Jon's decision.
 - Legacy Windows renderer evidence uses100ms scheduling and hidden/no-active-display fixture.300 unique presentation submissions and zero-loss traces are not physical presentation or current primary renderer qualification. M6.9d remains open.
 - CPU/GPU/isolated-hop product budgets and public overload default remain unresolved. No retrospective threshold adjustment. M6.6 must measure trace overhead and per-boundary identities; M6.7/9 require exact final integrated revision validation.
 

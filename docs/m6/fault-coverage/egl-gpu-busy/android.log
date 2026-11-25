@@ -1,0 +1,37 @@
+8483A
+15
+== run 1
+Could not open module param file '/sys/module/mali_kbase/parameters/large_page_conf'
+busy calibration: 48.296 ms/draw, 7 draws, raw fence ready after 327.8 ms
+busy lease: BUSY for 81 checks over 100 ms; retired 329.1 ms after the workload was queued
+EGL vendor=Android GL vendor=ARM renderer=Mali-G52 MC2
+GPU-busy delayed completion: lease BUSY until the native fence signalled, then retired with exact pixels
+rc=0
+== run 2
+Could not open module param file '/sys/module/mali_kbase/parameters/large_page_conf'
+busy calibration: 48.781 ms/draw, 7 draws, raw fence ready after 329.2 ms
+busy lease: BUSY for 81 checks over 100 ms; retired 329.3 ms after the workload was queued
+EGL vendor=Android GL vendor=ARM renderer=Mali-G52 MC2
+GPU-busy delayed completion: lease BUSY until the native fence signalled, then retired with exact pixels
+rc=0
+== run 3
+Could not open module param file '/sys/module/mali_kbase/parameters/large_page_conf'
+busy calibration: 49.210 ms/draw, 7 draws, raw fence ready after 328.3 ms
+busy lease: BUSY for 82 checks over 100 ms; retired 330.7 ms after the workload was queued
+EGL vendor=Android GL vendor=ARM renderer=Mali-G52 MC2
+GPU-busy delayed completion: lease BUSY until the native fence signalled, then retired with exact pixels
+rc=0
+== run 4
+Could not open module param file '/sys/module/mali_kbase/parameters/large_page_conf'
+busy calibration: 48.993 ms/draw, 7 draws, raw fence ready after 328.5 ms
+busy lease: BUSY for 82 checks over 100 ms; retired 328.9 ms after the workload was queued
+EGL vendor=Android GL vendor=ARM renderer=Mali-G52 MC2
+GPU-busy delayed completion: lease BUSY until the native fence signalled, then retired with exact pixels
+rc=0
+== run 5
+Could not open module param file '/sys/module/mali_kbase/parameters/large_page_conf'
+busy calibration: 48.928 ms/draw, 7 draws, raw fence ready after 328.2 ms
+busy lease: BUSY for 81 checks over 100 ms; retired 329.2 ms after the workload was queued
+EGL vendor=Android GL vendor=ARM renderer=Mali-G52 MC2
+GPU-busy delayed completion: lease BUSY until the native fence signalled, then retired with exact pixels
+rc=0

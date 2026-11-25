@@ -1,0 +1,30 @@
+== run 1
+busy calibration: 0.130 ms/draw, 2307 draws, raw fence ready after 270.1 ms
+busy lease: BUSY for 89 checks over 100 ms; retired 263.9 ms after the workload was queued
+EGL vendor=NVIDIA GL vendor=NVIDIA Corporation renderer=NVIDIA GeForce RTX 3090/PCIe/SSE2
+GPU-busy delayed completion: lease BUSY until the native fence signalled, then retired with exact pixels
+rc=0
+== run 2
+busy calibration: 0.114 ms/draw, 2631 draws, raw fence ready after 302.4 ms
+busy lease: BUSY for 88 checks over 100 ms; retired 306.1 ms after the workload was queued
+EGL vendor=NVIDIA GL vendor=NVIDIA Corporation renderer=NVIDIA GeForce RTX 3090/PCIe/SSE2
+GPU-busy delayed completion: lease BUSY until the native fence signalled, then retired with exact pixels
+rc=0
+== run 3
+busy calibration: 0.116 ms/draw, 2591 draws, raw fence ready after 301.5 ms
+busy lease: BUSY for 87 checks over 100 ms; retired 305.1 ms after the workload was queued
+EGL vendor=NVIDIA GL vendor=NVIDIA Corporation renderer=NVIDIA GeForce RTX 3090/PCIe/SSE2
+GPU-busy delayed completion: lease BUSY until the native fence signalled, then retired with exact pixels
+rc=0
+== run 4
+busy calibration: 0.117 ms/draw, 2569 draws, raw fence ready after 301.4 ms
+busy lease: BUSY for 87 checks over 100 ms; retired 303.3 ms after the workload was queued
+EGL vendor=NVIDIA GL vendor=NVIDIA Corporation renderer=NVIDIA GeForce RTX 3090/PCIe/SSE2
+GPU-busy delayed completion: lease BUSY until the native fence signalled, then retired with exact pixels
+rc=0
+== run 5
+busy calibration: 0.118 ms/draw, 2550 draws, raw fence ready after 301.6 ms
+busy lease: BUSY for 87 checks over 100 ms; retired 302.7 ms after the workload was queued
+EGL vendor=NVIDIA GL vendor=NVIDIA Corporation renderer=NVIDIA GeForce RTX 3090/PCIe/SSE2
+GPU-busy delayed completion: lease BUSY until the native fence signalled, then retired with exact pixels
+rc=0

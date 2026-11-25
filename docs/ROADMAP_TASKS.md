@@ -358,6 +358,9 @@ per-platform state. Windows readiness is the
   ([fault coverage](m6/fault-coverage/README.md)). *Windows:* owner fault tests and
   relay/bin cancellation and death evidence. D2 (overload default) is deferred, so
   new overload policy is out of scope; the owner device-removal path is untested.
+  *Linux/Android:* delayed GPU completion with a real GPU workload passes on both
+  (2026-11-25, [evidence](m6/fault-coverage/egl-gpu-busy/README.md)); the reusable-gate
+  injection remains unavailable (77). Whether this closes the delayed-GPU subset is Jon's decision.
 - [ ] **M6.5 Performance/resource evidence:** distributions, queue depth,
   CPU/GPU/memory/handles, clock behavior and bounded growth.
   Stage costs, Android NV12 cost isolation and platform limits are published
