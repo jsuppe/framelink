@@ -1,0 +1,24 @@
+native-bgra-consumer A: cycles.ok 100/100, complete yes, bench memory slope 139.27 KB/cycle (gate 16)
+  cycles 5-99: median 81.2 MB, steps 14 (cycles 5, 19, 20, 21, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86; +63 to +63 MB), slope without steps 1.35 KB/cycle
+  samples after 30 s: 473; large anonymous resident 64.3-222.3 MB (range 158.0 MB); everything else 16.9-86.5 MB (range 69.5 MB, first 16.9, last 17.1)
+  allocations of 8 MiB or more: 300 (300 x 33177743 B by vsrc:src); frees 300
+native-bgra-consumer B: cycles.ok 100/100, complete yes, bench memory slope 1.97 KB/cycle (gate 16)
+  cycles 5-99: median 17.9 MB, steps 0, slope without steps 1.97 KB/cycle
+  samples after 30 s: 469; large anonymous resident 0.3-95.5 MB (range 95.2 MB); everything else 12.2-17.7 MB (range 5.5 MB, first 17.3, last 17.4)
+  allocations of 8 MiB or more: 300 (300 x 33177743 B by vsrc:src); frees 300
+shared-nv12-producer A: cycles.ok 100/100, complete yes, bench memory slope 17.19 KB/cycle (gate 16)
+  cycles 5-99: median 51.3 MB, steps 2 (cycles 5, 6; -12 to -12 MB), slope without steps 1.31 KB/cycle
+  samples after 30 s: 471; large anonymous resident 24.0-35.9 MB (range 11.9 MB); everything else 15.5-39.2 MB (range 23.7 MB, first 39.1, last 39.2)
+  allocations of 8 MiB or more: 400 (200 x 12441743 B by vsrc:src, 200 x 12441743 B by pool-2); frees 400
+shared-nv12-producer B: cycles.ok 100/100, complete yes, bench memory slope 1.61 KB/cycle (gate 16)
+  cycles 5-99: median 15.8 MB, steps 0, slope without steps 1.61 KB/cycle
+  samples after 30 s: 470; large anonymous resident 0.3-24.1 MB (range 23.8 MB); everything else 15.5-39.3 MB (range 23.9 MB, first 15.5, last 39.3)
+  allocations of 8 MiB or more: 400 (200 x 12441743 B by vsrc:src, 200 x 12441743 B by pool-2); frees 400
+shared-nv12-consumer A: cycles.ok 100/100, complete yes, bench memory slope 19.62 KB/cycle (gate 16)
+  cycles 5-99: median 77.2 MB, steps 11 (cycles 6, 16, 39, 40, 41, 76, 77, 78, 83, 84, 85; +24 to +24 MB), slope without steps 1.60 KB/cycle
+  samples after 30 s: 470; large anonymous resident 60.2-84.0 MB (range 23.8 MB); everything else 16.9-40.8 MB (range 23.9 MB, first 40.7, last 40.8)
+  allocations of 8 MiB or more: 400 (200 x 12441743 B by pool-2, 200 x 12441743 B by vsrc:src); frees 400
+shared-nv12-consumer B: cycles.ok 100/100, complete yes, bench memory slope 2.34 KB/cycle (gate 16)
+  cycles 5-99: median 18.2 MB, steps 0, slope without steps 2.34 KB/cycle
+  samples after 30 s: 471; large anonymous resident 0.3-24.0 MB (range 23.7 MB); everything else 17.7-41.7 MB (range 24.0 MB, first 41.4, last 41.7)
+  allocations of 8 MiB or more: 400 (200 x 12441743 B by pool-2, 200 x 12441743 B by vsrc:src); frees 400

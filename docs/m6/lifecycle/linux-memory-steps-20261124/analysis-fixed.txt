@@ -1,0 +1,12 @@
+native-bgra-restart-consumer C: cycles.ok 100/100, complete yes, bench memory slope 2.42 KB/cycle (gate 16)
+  cycles 5-99: median 18.0 MB, steps 0, slope without steps 2.42 KB/cycle
+  samples after 30 s: none (the sampler did not find the long-lived peer)
+  allocations of 8 MiB or more: 300 (300 x 33177743 B by vsrc:src); frees 300
+shared-nv12-restart-consumer C: cycles.ok 100/100, complete yes, bench memory slope 2.29 KB/cycle (gate 16)
+  cycles 5-99: median 18.2 MB, steps 0, slope without steps 2.29 KB/cycle
+  samples after 30 s: 470; large anonymous resident 0.3-24.1 MB (range 23.8 MB); everything else 17.7-41.6 MB (range 23.9 MB, first 17.7, last 41.6)
+  allocations of 8 MiB or more: 200 (200 x 12441743 B by vsrc:src); frees 200
+shared-nv12-restart-producer C: cycles.ok 100/100, complete yes, bench memory slope 1.78 KB/cycle (gate 16)
+  cycles 5-99: median 15.7 MB, steps 0, slope without steps 1.78 KB/cycle
+  samples after 30 s: none (the sampler did not find the long-lived peer)
+  allocations of 8 MiB or more: 200 (200 x 12441743 B by vsrc:src); frees 200
