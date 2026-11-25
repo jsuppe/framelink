@@ -7,7 +7,10 @@
 // prints one summary (key=value) used for the M6 baselines and budgets.
 //
 //   fl_gst_av_bench <plugin|static> [--seconds N] [--size WxH] [--fps F]
-//     [--format RGBA|NV12|BGRA] [--mode bin|element] [--native | --shared-cpu] [--trace]
+//     [--format RGBA|NV12|BGRA] [--mode bin|element] [--native | --shared-cpu | --gpu-readback] [--trace]
+//   --gpu-readback (Linux EGL builds; M6.8c): native DMA-BUF producer into a
+//   CPU receiver through GPU staging, both bins on the local native readback
+//   candidate; exact BGRA/RGBA, bins, one-shot runs only.
 //     [--latency-ms N] [--arrival-budget-ms N] [--transport-only]
 //     [--output-queue-buffers N] (0 retains the legacy time-only limit)
 //     [--no-output-preroll] (measurement appsinks async=false)
@@ -39,6 +42,15 @@
 #include <sys/resource.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#endif
+#ifdef FL_BENCH_GPU_READBACK
+#include <gst/allocators/gstdmabuf.h>
+#include <gst/app/gstappsrc.h>
+#include <gst/video/video.h>
+#include <linux/dma-buf.h>
+#include <sys/eventfd.h>
+#include <sys/ioctl.h>
+#include <sys/mman.h>
 #endif
 
 struct Options {guint stallFrame=0,stallMs=0;std::string stallStage;guint seconds=60,cycles=0;std::string mode="bin",label="run",out=".",restart="producer";bool native=false,trace=false,raw=false,sourceOnly=false,localConsumer=false;};
@@ -144,12 +156,98 @@ static GstPadProbeReturn pushed(GstPad*pad,GstPadProbeInfo*info,gpointer d){
  stall("post-push");
  return GST_PAD_PROBE_OK;}
 
+#ifdef FL_BENCH_GPU_READBACK
+// ---- GPU-staged readback (M6.8c, Linux) ------------------------------------------
+// Frame identity: row 0 starts with the frame index (8 bytes, little endian);
+// the rest of the first CONTENT_ROWS rows is per-byte positional content, so a
+// stale, repeated, shifted or swizzled frame fails. Only those rows are written
+// and checked: the producer stands for a GPU producer, whose rendering is not
+// measured here, and the staging copy moves the whole frame regardless.
+// Full-frame pixels are checked by test/fl_gst_native_av_session.cpp.
+static constexpr unsigned CONTENT_ROWS=4;
+static guint8 contentByte(guint64 frame,unsigned x,unsigned y){return guint8(guint8(frame)*29+x*7+y*13);}
+static void writeContent(GstBuffer*b,guint64 frame){
+ auto*mem=gst_buffer_peek_memory(b,0);CHECK(gst_is_dmabuf_memory(mem));const int fd=gst_dmabuf_memory_get_fd(mem);
+ auto*meta=gst_buffer_get_video_meta(b);CHECK(meta);
+ dma_buf_sync sync{};sync.flags=DMA_BUF_SYNC_START|DMA_BUF_SYNC_WRITE;CHECK(ioctl(fd,DMA_BUF_IOCTL_SYNC,&sync)==0);
+ const gsize bytes=meta->offset[0]+gsize(meta->stride[0])*CONTENT_ROWS;
+ void*data=mmap(nullptr,bytes,PROT_READ|PROT_WRITE,MAP_SHARED,fd,0);CHECK(data!=MAP_FAILED);
+ std::vector<guint8> rows(gsize(gWidth)*4);
+ for(unsigned y=0;y<CONTENT_ROWS;++y){for(unsigned x=0;x<rows.size();++x)rows[x]=contentByte(frame,x,y);
+  if(!y)for(unsigned i=0;i<8;++i)rows[i]=guint8(frame>>(8*i));
+  memcpy((guint8*)data+meta->offset[0]+gsize(meta->stride[0])*y,rows.data(),rows.size());}
+ CHECK(munmap(data,bytes)==0);sync.flags=DMA_BUF_SYNC_END|DMA_BUF_SYNC_WRITE;CHECK(ioctl(fd,DMA_BUF_IOCTL_SYNC,&sync)==0);
+}
+// The application side of a native producer: the sink's pool through the
+// FrameLink allocation contract, one ready eventfd per frame (CPU writes are
+// complete when it is set), and live timestamps: frame n is due at t0 + n/fps
+// on the pipeline clock and carries that running time as its PTS.
+// A frame whose slot is not free within the sink's buffer-wait-ms is dropped,
+// as the CPU-copy sink drops on a full ring; the run continues and counts it.
+struct NativeFeed {std::thread th;std::string error;GstBufferPool*pool=nullptr;guint acquired=0,drops=0;std::string dropFrames;};
+static void feedNative(Producer&p,guint frames,NativeFeed&feed){
+ auto*bin=gst_bin_get_by_name(GST_BIN(p.p),"s");auto*src=gst_bin_get_by_name(GST_BIN(p.p),"vsrc");CHECK(bin&&src);
+ auto fail=[&](const std::string&what){feed.error=what;gst_app_src_end_of_stream(GST_APP_SRC(src));};
+ [&]{
+  // The pool exists once the inner sink has its session.
+  auto*inner=gst_bin_get_by_name(GST_BIN(bin),"video");CHECK(inner);GstState state=GST_STATE_NULL;const gint64 until=g_get_monotonic_time()+15*G_USEC_PER_SEC;
+  do{gst_element_get_state(inner,&state,nullptr,0);if(state==GST_STATE_PLAYING)break;g_usleep(1000);}while(g_get_monotonic_time()<until);gst_object_unref(inner);
+  if(state!=GST_STATE_PLAYING)return fail("native sink not playing");
+  const std::string caps="video/x-raw(memory:DMABuf),format="+gFormat+",width="+std::to_string(gWidth)+",height="+std::to_string(gHeight)+",framerate="+std::to_string(gFps)+"/1";
+  auto*c=gst_caps_from_string(caps.c_str());auto*q=gst_query_new_allocation(c,TRUE);gst_caps_unref(c);
+  auto policy=readbackPolicy();guint8 wire[FL_MEMORY_REQUIREMENTS_WIRE_SIZE];CHECK(flMemoryRequirementsEncode(&policy.requirements[0],wire,sizeof wire)==FL_MEMORY_OK);
+  auto*bytes=g_bytes_new(wire,sizeof wire);
+  gst_structure_set(gst_query_writable_structure(q),"framelink-memory-requirements",G_TYPE_BYTES,bytes,"framelink-completion-contract",G_TYPE_STRING,"external-sync-fd-before-submit-v1",nullptr);g_bytes_unref(bytes);
+  auto*pad=gst_element_get_static_pad(bin,"video_sink");const bool answered=gst_pad_query(pad,q);gst_object_unref(pad);
+  guint size=0,min=0,max=0;if(answered&&gst_query_get_n_allocation_pools(q))gst_query_parse_nth_allocation_pool(q,0,&feed.pool,&size,&min,&max);gst_query_unref(q);
+  if(!feed.pool||!gst_buffer_pool_set_active(feed.pool,TRUE))return fail("native pool not offered");
+  auto*clock=gst_element_get_clock(p.p);CHECK(clock);const GstClockTime base=gst_element_get_base_time(p.p),period=gst_util_uint64_scale(GST_SECOND,1,gFps);
+  const GstClockTime t0=gst_clock_get_time(clock)-base;
+  for(guint n=0;n<frames;++n){const GstClockTime due=t0+gst_util_uint64_scale(n,GST_SECOND,gFps);
+   auto id=gst_clock_new_single_shot_id(clock,base+due);gst_clock_id_wait(id,nullptr);gst_clock_id_unref(id);
+   GstBuffer*b=nullptr;if(gst_buffer_pool_acquire_buffer(feed.pool,&b,nullptr)!=GST_FLOW_OK){++feed.drops;if(feed.drops<=32)feed.dropFrames+=std::to_string(n)+" ";continue;}
+   ++feed.acquired;writeContent(b,n);
+   const int ready=eventfd(1,EFD_CLOEXEC);CHECK(ready>=0);gboolean accepted=FALSE;g_signal_emit_by_name(bin,"set-native-ready-fd",b,ready,&accepted);close(ready); // the sink keeps its own duplicate
+   if(!accepted){gst_buffer_unref(b);gst_object_unref(clock);return fail("ready fd refused at frame "+std::to_string(n));}
+   GST_BUFFER_PTS(b)=due;GST_BUFFER_DURATION(b)=period;
+   if(gst_app_src_push_buffer(GST_APP_SRC(src),b)!=GST_FLOW_OK){gst_object_unref(clock);return fail("push failed at frame "+std::to_string(n));}}
+  gst_object_unref(clock);gst_app_src_end_of_stream(GST_APP_SRC(src));
+ }();
+ gst_object_unref(src);gst_object_unref(bin);
+}
+// Consumer: every frame's identity and content rows, in order.
+struct ContentCheck {guint64 next=0,checked=0,mismatches=0,gaps=0,missing=0;std::string first;std::string layout;};
+static GstPadProbeReturn checkContent(GstPad*pad,GstPadProbeInfo*info,gpointer d){
+ auto*c=static_cast<ContentCheck*>(d);auto*b=GST_PAD_PROBE_INFO_BUFFER(info);
+ GstVideoInfo vi;auto*caps=gst_pad_get_current_caps(pad);CHECK(caps&&gst_video_info_from_caps(&vi,caps));gst_caps_unref(caps);
+ gsize offset=GST_VIDEO_INFO_PLANE_OFFSET(&vi,0);gint stride=GST_VIDEO_INFO_PLANE_STRIDE(&vi,0);
+ if(auto*meta=gst_buffer_get_video_meta(b)){offset=meta->offset[0];stride=meta->stride[0];}
+ if(c->layout.empty())c->layout="offset="+std::to_string(offset)+" stride="+std::to_string(stride)+" size="+std::to_string(gst_buffer_get_size(b));
+ GstMapInfo m{};CHECK(gst_buffer_map(b,&m,GST_MAP_READ));guint64 index=0;std::string bad;
+ if(m.size<offset+gsize(stride)*CONTENT_ROWS)bad="short buffer";
+ else{for(unsigned i=0;i<8;++i)index|=guint64(m.data[offset+i])<<(8*i);
+  // A later index is a frame lost on the way (counted); an earlier one is stale.
+  if(index>c->next){++c->gaps;c->missing+=index-c->next;}else if(index<c->next)bad="index "+std::to_string(index)+" expected "+std::to_string(c->next);
+  for(unsigned y=0;y<CONTENT_ROWS&&bad.empty();++y)for(unsigned x=y?0:8;x<gWidth*4;++x)if(m.data[offset+gsize(stride)*y+x]!=contentByte(index,x,y)){bad="frame "+std::to_string(index)+" byte "+std::to_string(x)+" row "+std::to_string(y);break;}}
+ gst_buffer_unmap(b,&m);
+ ++c->checked;if(!bad.empty()){++c->mismatches;if(c->first.empty())c->first=bad;}
+ c->next=index+1;return GST_PAD_PROBE_OK;}
+#endif
+
 static int producerChild(const Options&o,const std::string&session,const std::string&out){
  Sampler sampler;std::map<std::string,std::string> r;Pushes pushes;pushes.options=&o;
  {Producer p(modeOf(o.mode),session,"av",o.seconds*gFps,80,false,o.seconds*100);pushes.pipeline=p.p;
   for(int track=0;track<2;++track){pushes.v[track].resize(size_t(o.seconds+10)*(track?100:gFps));pushes.v[track].clear();
    auto*src=gst_bin_get_by_name(GST_BIN(p.p),track?"asrc":"vsrc");CHECK(src);auto*pad=gst_element_get_static_pad(src,"src");g_object_set_data(G_OBJECT(pad),"m6-track",GINT_TO_POINTER(track));gst_pad_add_probe(pad,GST_PAD_PROBE_TYPE_BUFFER,pushed,&pushes,nullptr);gst_object_unref(pad);gst_object_unref(src);}
+#ifdef FL_BENCH_GPU_READBACK
+  NativeFeed feed;
+  p.start();if(gGpuReadback)feed.th=std::thread([&]{feedNative(p,o.seconds*gFps,feed);});
+  if(feed.th.joinable())feed.th.join();p.finish();sampler.stop();
+  if(feed.pool){gst_buffer_pool_set_active(feed.pool,FALSE);gst_object_unref(feed.pool);}
+  if(gGpuReadback){r["native.acquired"]=std::to_string(feed.acquired);r["native.slot_drops"]=std::to_string(feed.drops);if(!feed.dropFrames.empty())r["native.slot_drop_frames"]=feed.dropFrames;if(!feed.error.empty()){r["native.error"]=feed.error;if(p.result=="EOS")p.result="error: "+feed.error;}}
+#else
   p.start();p.finish();sampler.stop();
+#endif
   r["result"]=p.result;r["pushed.frames"]=std::to_string(p.pushedFrames.load());r["pushed.samples"]=std::to_string(p.pushedSamples.load());
   {std::lock_guard<std::mutex> lock(pushes.m);for(int track=0;track<2;++track){auto&v=pushes.v[track];std::vector<double> late,gaps;guint burst=0,maxBurst=0;const double period=1e9/(track?100:gFps);const std::string name=track?"audio":"video";
    for(size_t i=0;i<v.size();i++){if(v[i].first-v.front().first<gint64(WARMUP_S*GST_SECOND))continue;late.push_back(v[i].second/1e6);
@@ -191,7 +289,16 @@ static int consumerChild(const Options&o,const std::string&session,const std::st
    g_object_set_data(G_OBJECT(peer),"track",GINT_TO_POINTER(track));gst_pad_add_probe(peer,GST_PAD_PROBE_TYPE_BUFFER,departed,&arrivals,nullptr);for(auto*x:{(GstObject*)qs,(GstObject*)queue,(GstObject*)peer,(GstObject*)sp,(GstObject*)sink})gst_object_unref(x);}
   // Pre-fault the per-buffer records so they do not show as consumer growth.
   for(int track=0;track<2;track++){const size_t n=size_t(o.seconds+10)*(track?100:gFps);for(auto*v:{&c.lateness[track]}){v->resize(n);v->clear();}arrivals.v[track].resize(n);arrivals.v[track].clear();arrivals.residence[track].resize(n);arrivals.residence[track].clear();}
+#ifdef FL_BENCH_GPU_READBACK
+  // After arrival is recorded: on the appsink's pad.
+  ContentCheck content;
+  if(gGpuReadback){auto*sink=gst_bin_get_by_name(GST_BIN(c.p),"vout");auto*pad=gst_element_get_static_pad(sink,"sink");gst_pad_add_probe(pad,GST_PAD_PROBE_TYPE_BUFFER,checkContent,&content,nullptr);gst_object_unref(pad);gst_object_unref(sink);}
+#endif
   c.start();c.finish();sampler.stop();
+#ifdef FL_BENCH_GPU_READBACK
+  if(gGpuReadback){r["content.checked"]=std::to_string(content.checked);r["content.mismatches"]=std::to_string(content.mismatches);r["content.index_gaps"]=std::to_string(content.gaps);r["content.missing_frames"]=std::to_string(content.missing);r["content.layout"]=content.layout;r["content.rows"]=std::to_string(CONTENT_ROWS);
+   if(!content.first.empty())r["content.first_mismatch"]=content.first;}
+#endif
   r["result"]=c.result;r["frames"]=std::to_string(c.frames.load());r["samples"]=std::to_string(c.samples.load());r["memory"]=c.features;
   r["audio.contiguous"]=c.contiguous?"yes":"no";
   std::lock_guard<std::mutex> lock(c.mutex);std::lock_guard<std::mutex> alock(arrivals.m);
@@ -287,7 +394,7 @@ static std::vector<std::string> optionArgs(const Options&o){
  std::vector<std::string> a{"--seconds",std::to_string(o.seconds),"--size",std::to_string(gWidth)+"x"+std::to_string(gHeight),"--fps",std::to_string(gFps),"--format",gFormat,"--mode",o.mode,"--pool",std::to_string(gVideoPool),"--video-queue",std::to_string(gVideoQueue)};
  a.insert(a.end(),{"--output-queue-buffers",std::to_string(gOutputQueueBuffers),"--arrival-budget-ms",std::to_string(gArrivalBudget/GST_MSECOND),"--latency-ms",std::to_string(gPlaybackLatency/GST_MSECOND)});if(!gOutputSync)a.push_back("--transport-only");if(!gOutputAsync)a.push_back("--no-output-preroll");
  if(!o.stallStage.empty())a.insert(a.end(),{"--video-stall-stage",o.stallStage,"--video-stall-frame",std::to_string(o.stallFrame),"--video-stall-ms",std::to_string(o.stallMs)});
- if(gRetainedDevice)a.push_back("--device-owner");if(gSharedCpu)a.push_back("--shared-cpu");if(o.native)a.push_back("--native");if(o.raw)a.push_back("--raw");return a;}
+ if(gRetainedDevice)a.push_back("--device-owner");if(gSharedCpu)a.push_back("--shared-cpu");if(gGpuReadback)a.push_back("--gpu-readback");if(o.native)a.push_back("--native");if(o.raw)a.push_back("--raw");return a;}
 
 // Least-squares slope of y over x.
 static double slope(const std::vector<std::pair<double,double>>&v){double sx=0,sy=0,sxx=0,sxy=0;const double n=double(v.size());
@@ -355,7 +462,7 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
   else if(a=="--no-output-preroll")gOutputAsync=false;
   else if(a=="--pool")gVideoPool=guint(std::stoul(next()));else if(a=="--video-queue")gVideoQueue=guint(std::stoul(next()));else if(a=="--source-only")o.sourceOnly=true;
   else if(a=="--cycles")o.cycles=guint(std::stoul(next()));else if(a=="--restart")o.restart=next();else if(a=="--session-base")sessionBase=next();
-  else if(a=="--local-consumer")o.localConsumer=true;else if(a=="--shared-cpu")gSharedCpu=true;else if(a=="--device-owner")gRetainedDevice=true;else if(a=="--native")o.native=true;else if(a=="--trace")o.trace=true;else if(a=="--raw")o.raw=true;else if(a=="--out")o.out=next();else if(a=="--label")o.label=next();
+  else if(a=="--local-consumer")o.localConsumer=true;else if(a=="--shared-cpu")gSharedCpu=true;else if(a=="--gpu-readback")gGpuReadback=true;else if(a=="--device-owner")gRetainedDevice=true;else if(a=="--native")o.native=true;else if(a=="--trace")o.trace=true;else if(a=="--raw")o.raw=true;else if(a=="--out")o.out=next();else if(a=="--label")o.label=next();
   else if(a=="--role")role=next();else if(a=="--session")session=next();else if(a=="--result")result=next();else{fprintf(stderr,"unknown option %s\n",a.c_str());return 2;}}
  CHECK(o.stallStage.empty()?(o.stallFrame==0&&o.stallMs==0):
    ((o.stallStage=="source"||o.stallStage=="post-push")&&o.stallFrame>0&&o.stallFrame<guint64(o.seconds)*gFps&&o.stallMs>0&&o.stallMs<=1000&&!o.cycles&&!o.sourceOnly&&!o.localConsumer));
@@ -363,6 +470,11 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
  // runs. Permit repeated sessions without changing the production lifetime.
  CHECK(!gSharedCpu||(o.mode=="bin"&&!o.native&&!o.sourceOnly&&!o.localConsumer));
  CHECK(!gRetainedDevice||(o.mode=="bin"&&!gSharedCpu&&!o.sourceOnly&&!o.localConsumer));
+ // GPU-staged readback: one-shot bin sessions, exact BGRA/RGBA only.
+ CHECK(!gGpuReadback||(o.mode=="bin"&&!gSharedCpu&&!o.native&&!o.sourceOnly&&!o.localConsumer&&!o.cycles&&o.stallStage.empty()&&gFormat!="NV12"));
+#ifndef FL_BENCH_GPU_READBACK
+ if(gGpuReadback){printf("SKIP gpu-readback (EGL staging) is not in this build\n");return 77;}
+#endif
 #ifdef _WIN32
  struct OwnerRelease {~OwnerRelease(){flReleaseD3D11DeviceOwner(gDeviceOwner);gDeviceOwner=nullptr;}} ownerRelease;
  if(gRetainedDevice&&!role.empty())CHECK(flCreateD3D11DeviceOwner(nullptr,&gDeviceOwner)==FL_OK);
@@ -406,13 +518,14 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
  const gint64 deadline=g_get_monotonic_time()+gint64(o.seconds+90)*G_USEC_PER_SEC;
  const int pc=await(producer,deadline),cc=await(consumer,deadline);
  auto pr=readResult(base+"-producer.txt"),cr=readResult(base+"-consumer.txt");
- std::map<std::string,std::string> s{{"label",o.label},{"config",gFormat+" "+std::to_string(gWidth)+"x"+std::to_string(gHeight)+"@"+std::to_string(gFps)+" "+o.mode+(gSharedCpu?" shared-cpu":(o.native?" native":" cpu"))+(o.trace?" traced":"")+" "+std::to_string(o.seconds)+"s"},
+ std::map<std::string,std::string> s{{"label",o.label},{"config",gFormat+" "+std::to_string(gWidth)+"x"+std::to_string(gHeight)+"@"+std::to_string(gFps)+" "+o.mode+(gSharedCpu?" shared-cpu":gGpuReadback?" gpu-readback":(o.native?" native":" cpu"))+(o.trace?" traced":"")+" "+std::to_string(o.seconds)+"s"},
   {"exit",std::to_string(pc)+"/"+std::to_string(cc)},{"arrival.budget_ms",std::to_string(gArrivalBudget/GST_MSECOND)},{"playback.latency_ms",std::to_string(gPlaybackLatency/GST_MSECOND)},{"output.queue_buffers",std::to_string(gOutputQueueBuffers)},{"output.sync",gOutputSync?"true":"false"},{"video.pool",std::to_string(gVideoPool)},{"video.queue",std::to_string(gVideoQueue)},{"seconds",std::to_string(o.seconds)},{"producer.pid",std::to_string(producer.pid)},{"consumer.pid",std::to_string(consumer.pid)}};
  for(auto&kv:pr)s["producer."+kv.first]=kv.second;for(auto&kv:cr)s["consumer."+kv.first]=kv.second;
  s["expected.frames"]=std::to_string(guint64(o.seconds)*gFps);
  s["output.async"]=gOutputAsync?"true":"false";s["harness.malloc"]=gSourceMalloc;
  s["expected.samples"]=std::to_string(guint64(o.seconds)*48000);
- const bool ok=pc==0&&cc==0&&cr["queue.accounting"]=="complete"&&cr["audio.contiguous"]=="yes"&&pr["result"]=="EOS"&&cr["result"]=="EOS"&&cr["frames"]==s["expected.frames"]&&cr["frames"]==pr["pushed.frames"]&&cr["samples"]==s["expected.samples"]&&cr["samples"]==pr["pushed.samples"];
+ const bool ok=pc==0&&cc==0&&cr["queue.accounting"]=="complete"&&cr["audio.contiguous"]=="yes"&&pr["result"]=="EOS"&&cr["result"]=="EOS"&&cr["frames"]==s["expected.frames"]&&cr["frames"]==pr["pushed.frames"]&&cr["samples"]==s["expected.samples"]&&cr["samples"]==pr["pushed.samples"]
+  &&(!gGpuReadback||(cr["content.mismatches"]=="0"&&cr["content.checked"]==s["expected.frames"]&&cr["memory"]=="memory:SystemMemory"));
  s["complete"]=ok?"yes":"no";
  writeResult(base+".summary.txt",s);for(auto&kv:s)printf("%s=%s\n",kv.first.c_str(),kv.second.c_str());
  return ok?0:1;

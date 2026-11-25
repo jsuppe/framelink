@@ -247,7 +247,7 @@ static void nativeAvBins(const BinRun&run){
   }
   checkPixels(memory,vs,nativeReceiver,nv12,value,extent);
   std::vector<guint8>pcm(pcmBytes);CHECK(gst_buffer_get_size(ab)==pcmBytes&&gst_buffer_extract(ab,0,pcm.data(),pcmBytes)==pcmBytes);
-  for(auto v:pcm)CHECK(v==n+31);
+  for(auto v:pcm)CHECK(v==guint8(n+31)); // memset stores the low byte
   gst_sample_unref(vs);gst_sample_unref(as);
  }
  // A two-slot ring cycles; more distinct allocations would mean copies.

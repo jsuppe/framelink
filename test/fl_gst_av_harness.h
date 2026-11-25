@@ -37,6 +37,27 @@ static guint gWidth=64,gHeight=32,gFps=30;static std::string gFormat="RGBA";stat
 static GstClockTime gPlaybackLatency=LATENCY;static bool gOutputSync=true,gOutputAsync=true;
 static bool gSharedCpu=false;
 static bool gRetainedDevice=false;
+// M6.8c (Linux EGL builds): a native producer writes into the sink's DMA-BUF
+// ring and the consumer bin reads it back through GPU staging (gpu-readback).
+// Both bins take the local native readback candidate; set by fl_gst_av_bench.
+static bool gGpuReadback=false;
+#ifdef FL_BENCH_GPU_READBACK
+// The M6.9 local native readback profile (as test/fl_gst_native_av_session.cpp):
+// the producer samples on the GPU, the receiver reads on the CPU through
+// COPY|READBACK.
+static GstFrameLinkMemoryPolicy readbackPolicy(){
+ GstFrameLinkMemoryPolicy policy{};policy.version=1;
+ for(unsigned i=0;i<2;++i){flMemoryRequirementsInit(&policy.requirements[i]);
+  policy.requirements[i].allowedResourceTypes=FL_MEMORY_DMABUF;policy.requirements[i].allowedOperations=FL_MEMORY_COPY|FL_MEMORY_READBACK;
+  policy.paths[i].version=1;policy.paths[i].resourceType=FL_MEMORY_DMABUF;}
+ policy.paths[0].supportedUsage=policy.requirements[0].requiredUsage=FL_MEMORY_GPU_SAMPLE;
+ policy.paths[1].supportedUsage=policy.requirements[1].requiredUsage=FL_MEMORY_CPU_READ;
+ policy.paths[1].operations=FL_MEMORY_COPY|FL_MEMORY_READBACK;
+ return policy;
+}
+static void selectReadbackCandidate(GstElement*bin){auto candidate=readbackPolicy();gboolean accepted=FALSE;
+ g_signal_emit_by_name(bin,"set-local-native-candidate",&candidate,&accepted);CHECK(accepted);}
+#endif
 #ifdef _WIN32
 static flD3D11DeviceOwner* gDeviceOwner=nullptr;
 #endif
@@ -110,13 +131,24 @@ struct Producer:Side {
  Producer(Mode m,const std::string&path_,const std::string&tracks_,guint frames,guint queueMs=80,bool fileLike=false,guint audioBlocks=0){mode=m;producer=true;path=path_;tracks=tracks_;audioQueueMs=queueMs;
   const std::string vn=frames?" num-buffers="+std::to_string(frames):"",an=frames?" num-buffers="+std::to_string(audioBlocks?audioBlocks:frames*BLOCKS/FRAMES):"";
   const std::string live=fileLike?"false":"true",sync=fileLike?" ! clocksync":"";
-  const std::string vs="videotestsrc name=vsrc is-live="+live+" pattern=red"+vn+" ! video/x-raw,format="+gFormat+",width="+std::to_string(gWidth)+",height="+std::to_string(gHeight)+",framerate="+std::to_string(gFps)+"/1"+sync+" ! ",
+  std::string vs="videotestsrc name=vsrc is-live="+live+" pattern=red"+vn+" ! video/x-raw,format="+gFormat+",width="+std::to_string(gWidth)+",height="+std::to_string(gHeight)+",framerate="+std::to_string(gFps)+"/1"+sync+" ! ",
    as="audiotestsrc name=asrc is-live="+live+" samplesperbuffer="+std::to_string(BLOCK)+an+" ! audio/x-raw,format=S16LE,layout=interleaved,rate=48000,channels=2"+sync+" ! ";
   std::string t;
+#ifdef FL_BENCH_GPU_READBACK
+  // The bench feeds this appsrc from the sink's own pool (feedNative).
+  if(gGpuReadback){CHECK(m==Mode::Bin&&tracks=="av"&&!fileLike);
+   vs="appsrc name=vsrc is-live=true format=time caps=video/x-raw(memory:DMABuf),format="+gFormat+",width="+std::to_string(gWidth)+",height="+std::to_string(gHeight)+",framerate="+std::to_string(gFps)+"/1 ! ";}
+#else
+  CHECK(!gGpuReadback);
+#endif
   if(m==Mode::Bin){t="framelinkavsink name=s tracks="+tracks+" video-queue-frames="+std::to_string(gVideoQueue)+" video-format="+gFormat+" "+geometry()+" framerate="+std::to_string(gFps)+"/1 connect-timeout-ms=5000 idle-timeout-ms=3000 audio-queue-ms="+std::to_string(queueMs)+" ";
    if(video())t+=vs+"s.video_sink ";if(audio())t+=as+"s.audio_sink";}
   else{if(video())t+=vs+"framelinksink name=video ";if(audio())t+=as+"framelinkaudiosink tracks="+tracks+" audio-queue-ms="+std::to_string(queueMs);}
-  p=parse(t);if(m==Mode::Bin){auto*s=gst_bin_get_by_name(GST_BIN(p),"s");g_object_set(s,"session",path.c_str(),"shared-cpu",gSharedCpu,nullptr);selectDeviceOwner(s);gst_object_unref(s);}
+  p=parse(t);if(m==Mode::Bin){auto*s=gst_bin_get_by_name(GST_BIN(p),"s");g_object_set(s,"session",path.c_str(),"shared-cpu",gSharedCpu,nullptr);selectDeviceOwner(s);
+#ifdef FL_BENCH_GPU_READBACK
+   if(gGpuReadback){g_object_set(s,"native-memory",TRUE,"video-pool",gVideoPool,nullptr);selectReadbackCandidate(s);}
+#endif
+   gst_object_unref(s);}
   for(const char*n:{"vsrc","asrc"}){auto*e=gst_bin_get_by_name(GST_BIN(p),n);if(!e)continue;auto*pad=gst_element_get_static_pad(e,"src");
    gst_pad_add_probe(pad,GST_PAD_PROBE_TYPE_BUFFER,[](GstPad*pad,GstPadProbeInfo*info,gpointer d)->GstPadProbeReturn{auto*self=static_cast<Producer*>(d);
     if(!strcmp(GST_OBJECT_NAME(GST_OBJECT_PARENT(pad)),"vsrc"))self->pushedFrames++;else self->pushedSamples+=gst_buffer_get_size(GST_PAD_PROBE_INFO_BUFFER(info))/4;return GST_PAD_PROBE_OK;},this,nullptr);
@@ -138,7 +170,12 @@ struct Consumer:Side {
    if(video())t+="c.video_src ! "+sinkV;if(audio())t+="c.audio_src ! "+sinkA;}
   else{if(video())t+="framelinksrc name=video "+geometry()+" format="+gFormat+(native?" native-memory=true":"")+" ! "+sinkV;
    if(audio())t+="framelinkaudiosrc tracks="+tracks+" ! "+sinkA;}
-  p=parse(t);if(m==Mode::Bin&&!localSeconds){auto*c=gst_bin_get_by_name(GST_BIN(p),"c");g_object_set(c,"session",path.c_str(),"shared-cpu",gSharedCpu,"latency-ms",guint(gPlaybackLatency/GST_MSECOND),nullptr);selectDeviceOwner(c);gst_object_unref(c);}
+  p=parse(t);if(m==Mode::Bin&&!localSeconds){auto*c=gst_bin_get_by_name(GST_BIN(p),"c");g_object_set(c,"session",path.c_str(),"shared-cpu",gSharedCpu,"latency-ms",guint(gPlaybackLatency/GST_MSECOND),nullptr);selectDeviceOwner(c);
+#ifdef FL_BENCH_GPU_READBACK
+   // gpu-readback first: the candidate freezes the bin's properties.
+   if(gGpuReadback){CHECK(!native&&tracks=="av");g_object_set(c,"gpu-readback",TRUE,nullptr);selectReadbackCandidate(c);}
+#endif
+   gst_object_unref(c);}
   for(const char*n:{"vout","aout"}){auto*sink=gst_bin_get_by_name(GST_BIN(p),n);if(!sink)continue;
    GstAppSinkCallbacks cb{};cb.new_sample=[](GstAppSink*s,gpointer d)->GstFlowReturn{auto*self=static_cast<Consumer*>(d);auto*sample=gst_app_sink_pull_sample(s);auto*b=gst_sample_get_buffer(sample);
      const int track=strcmp(GST_OBJECT_NAME(s),"vout")?1:0;std::lock_guard<std::mutex> lock(self->mutex);

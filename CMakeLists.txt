@@ -1662,6 +1662,18 @@ if(FRAMELINK_BUILD_TESTS AND TARGET framelink_gst_session)
         target_link_libraries(fl_gst_av_bench PRIVATE gstapp-1.0.lib)
     else()
         target_link_libraries(fl_gst_av_bench PRIVATE PkgConfig::FL_GST_APP)
+        # M6.8c: the GPU-staged readback receiver (--gpu-readback) needs the
+        # plugin's EGL staging and a DMA-BUF native producer.
+        if(FL_READBACK_EGL_FOUND AND TARGET PkgConfig::FL_GST_ALLOCATORS)
+            target_link_libraries(fl_gst_av_bench PRIVATE PkgConfig::FL_GST_ALLOCATORS)
+            target_compile_definitions(fl_gst_av_bench PRIVATE FL_BENCH_GPU_READBACK=1)
+            add_test(NAME gst_av_bench_gpu_readback
+                COMMAND fl_gst_av_bench $<TARGET_FILE:gstframelink>
+                --gpu-readback --seconds 6 --size 160x90 --fps 30 --format BGRA
+                --latency-ms 0 --transport-only --no-output-preroll --pool 2 --video-queue 1
+                --out ${CMAKE_CURRENT_BINARY_DIR} --label bench-gpu-readback)
+            set_tests_properties(gst_av_bench_gpu_readback PROPERTIES TIMEOUT 120 LABELS "gpu" SKIP_RETURN_CODE 77)
+        endif()
     endif()
     add_dependencies(fl_gst_av_bench gstframelink)
     add_test(NAME gst_av_bench_smoke COMMAND fl_gst_av_bench $<TARGET_FILE:gstframelink> --seconds 6 --size 160x90 --out ${CMAKE_CURRENT_BINARY_DIR} --label bench-smoke)
