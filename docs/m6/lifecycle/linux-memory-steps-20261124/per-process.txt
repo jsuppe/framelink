@@ -1,0 +1,6 @@
+native-bgra-consumer A long-lived peer (largest log): {'thread=vsrc:src': 300} ; other processes: 0 logging 0 allocations
+native-bgra-consumer B long-lived peer (largest log): {'thread=vsrc:src': 300} ; other processes: 0 logging 0 allocations
+shared-nv12-producer A long-lived peer (largest log): {'thread=pool-2': 200} ; other processes: 100 logging 200 allocations
+shared-nv12-producer B long-lived peer (largest log): {'thread=pool-2': 200} ; other processes: 100 logging 200 allocations
+shared-nv12-consumer A long-lived peer (largest log): {'thread=vsrc:src': 200} ; other processes: 100 logging 200 allocations
+shared-nv12-consumer B long-lived peer (largest log): {'thread=vsrc:src': 200} ; other processes: 100 logging 200 allocations

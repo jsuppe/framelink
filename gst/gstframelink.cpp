@@ -43,6 +43,10 @@
 #include <fcntl.h>
 #include <unistd.h>
 #endif
+#if defined(__linux__) && !defined(__ANDROID__)
+#include <sys/mman.h>
+#include <unistd.h>
+#endif
 #include <gst/base/gstbasesink.h>
 #include <gst/base/gstpushsrc.h>
 #include <gst/gst.h>
@@ -1148,6 +1152,51 @@ static void srcDropStaging(GstFrameLinkSrc* self) {
 }
 #endif
 
+#ifdef __GLIBC__
+// glibc serves blocks under its 32 MiB dynamic mmap cap (every 4K frame) from
+// per-thread arenas once its mmap threshold has risen, and may keep them
+// resident after free: lifecycle memory steps of one or two frames
+// (docs/m6/lifecycle/linux-memory-steps-20261124). The cached CPU output
+// buffers therefore each get their own anonymous mapping, unmapped when the
+// memory is freed. The memory itself is ordinary wrapped system memory.
+struct FlPageBlock {void* base; gsize bytes;};
+static void flPageBlockFree(gpointer p) {
+    auto* b = static_cast<FlPageBlock*>(p);
+    munmap(b->base, b->bytes);
+    g_free(b);
+}
+typedef struct {GstAllocator parent;} FlPageAllocator;
+typedef struct {GstAllocatorClass parent;} FlPageAllocatorClass;
+G_DEFINE_TYPE(FlPageAllocator, fl_page_allocator, GST_TYPE_ALLOCATOR)
+static GstMemory* flPageAlloc(GstAllocator*, gsize size, GstAllocationParams* params) {
+    const gsize prefix = params ? params->prefix : 0, padding = params ? params->padding : 0;
+    const gsize align = params ? params->align : 0;
+    if (align >= (gsize)sysconf(_SC_PAGESIZE) || size > G_MAXSIZE - prefix - padding) return nullptr;
+    const gsize bytes = prefix + size + padding;
+    void* p = mmap(nullptr, bytes, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    if (p == MAP_FAILED) return nullptr;
+    auto* b = g_new(FlPageBlock, 1);
+    b->base = p;
+    b->bytes = bytes;
+    return gst_memory_new_wrapped(params ? params->flags : (GstMemoryFlags)0, p, bytes, prefix, size, b, flPageBlockFree);
+}
+static void fl_page_allocator_class_init(FlPageAllocatorClass* klass) {
+    GST_ALLOCATOR_CLASS(klass)->alloc = flPageAlloc;
+}
+static void fl_page_allocator_init(FlPageAllocator* self) {
+    GST_ALLOCATOR(self)->mem_type = "FrameLinkPageMemory";
+}
+static GstAllocator* flPageAllocator() {
+    static GstAllocator* allocator = nullptr;
+    if (g_once_init_enter(&allocator)) {
+        auto* a = GST_ALLOCATOR(g_object_new(fl_page_allocator_get_type(), nullptr));
+        GST_OBJECT_FLAG_SET(a, GST_OBJECT_FLAG_MAY_BE_LEAKED);
+        g_once_init_leave(&allocator, a);
+    }
+    return allocator;
+}
+#endif
+
 static GstBuffer* srcCpuOutputBuffer(GstFrameLinkSrc* self, gsize size) {
     if (self->cpuOutputPool && self->cpuOutputSize != size) {
 #ifdef _WIN32
@@ -1160,6 +1209,9 @@ static GstBuffer* srcCpuOutputBuffer(GstFrameLinkSrc* self, gsize size) {
         auto* pool = gst_buffer_pool_new();
         auto* config = gst_buffer_pool_get_config(pool);
         gst_buffer_pool_config_set_params(config, nullptr, (guint)size, 0, 2);
+#ifdef __GLIBC__
+        gst_buffer_pool_config_set_allocator(config, flPageAllocator(), nullptr);
+#endif
         if (gst_buffer_pool_set_config(pool, config) && gst_buffer_pool_set_active(pool, TRUE)) {
             self->cpuOutputPool = pool;
             self->cpuOutputSize = size;
