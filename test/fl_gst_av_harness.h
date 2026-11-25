@@ -37,6 +37,8 @@ static guint gWidth=64,gHeight=32,gFps=30;static std::string gFormat="RGBA";stat
 static GstClockTime gPlaybackLatency=LATENCY;static bool gOutputSync=true,gOutputAsync=true;
 static bool gSharedCpu=false;
 static bool gRetainedDevice=false;
+// Producer bin error-on-ring-full (default false: drop and count).
+static bool gErrorOnRingFull=false;
 // M6.8c (Linux EGL builds): a native producer writes into the sink's DMA-BUF
 // ring and the consumer bin reads it back through GPU staging (gpu-readback).
 // Both bins take the local native readback candidate; set by fl_gst_av_bench.
@@ -144,7 +146,7 @@ struct Producer:Side {
   if(m==Mode::Bin){t="framelinkavsink name=s tracks="+tracks+" video-queue-frames="+std::to_string(gVideoQueue)+" video-format="+gFormat+" "+geometry()+" framerate="+std::to_string(gFps)+"/1 connect-timeout-ms=5000 idle-timeout-ms=3000 audio-queue-ms="+std::to_string(queueMs)+" ";
    if(video())t+=vs+"s.video_sink ";if(audio())t+=as+"s.audio_sink";}
   else{if(video())t+=vs+"framelinksink name=video ";if(audio())t+=as+"framelinkaudiosink tracks="+tracks+" audio-queue-ms="+std::to_string(queueMs);}
-  p=parse(t);if(m==Mode::Bin){auto*s=gst_bin_get_by_name(GST_BIN(p),"s");g_object_set(s,"session",path.c_str(),"shared-cpu",gSharedCpu,nullptr);selectDeviceOwner(s);
+  p=parse(t);if(m==Mode::Bin){auto*s=gst_bin_get_by_name(GST_BIN(p),"s");g_object_set(s,"session",path.c_str(),"shared-cpu",gSharedCpu,"error-on-ring-full",gErrorOnRingFull,nullptr);selectDeviceOwner(s);
 #ifdef FL_BENCH_GPU_READBACK
    if(gGpuReadback){g_object_set(s,"native-memory",TRUE,"video-pool",gVideoPool,nullptr);selectReadbackCandidate(s);}
 #endif

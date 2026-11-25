@@ -16,6 +16,28 @@
 //     [--no-output-preroll] (measurement appsinks async=false)
 //     [--pool N] [--video-queue N] [--raw] [--out DIR] [--label NAME]
 //
+// M6.4 faults at rate (one-shot sessions), each gated against an outcome
+// declared before the run:
+//   --fault producer-kill|consumer-kill --fault-at-s T: the driver kills that
+//     process T s after the producer starts (SIGKILL / TerminateProcess). The
+//     survivor must end with an error (never EOS) within --fault-bound-ms
+//     (default 2000) of the kill; its children must not hang.
+//   --fault consumer-stall --fault-frame N --fault-ms M: the consumer's video
+//     appsink blocks M ms on its Nth frame (1-based). --fault-expect, from the
+//     documented overload policy (docs/GST_AV_REFERENCE.md):
+//     absorbed: the session completes with every frame and arrival recovers
+//       within ceil(M/period)+2 frames;
+//     counted-drop (error-on-ring-full=false, the default): both sides reach
+//       EOS, the producer sink drops at least one frame as ring-full, and
+//       delivered + dropped == pushed exactly;
+//     replacement-failure: the consumer fails with the coordinated "replaced
+//       before it was read" error (a receiver that releases slots as it copies
+//       out lets the producer overwrite the unread queue) and the producer does
+//       not report EOS;
+//     explicit-failure (with --error-on-ring-full): the producer fails with
+//       the pool-exhausted error, the consumer does not report EOS, and both
+//       sides end within the run limit.
+//   Any loss not matched by the producer's drop count fails every expectation.
 // Diagnostic fault: --video-stall-stage source|post-push
 //   --video-stall-frame N (1-based) --video-stall-ms N (1..1000).
 // CPU source-thread delay only; not GPU injection or qualification.
@@ -53,7 +75,7 @@
 #include <sys/mman.h>
 #endif
 
-struct Options {guint stallFrame=0,stallMs=0;std::string stallStage;guint seconds=60,cycles=0;std::string mode="bin",label="run",out=".",restart="producer";bool native=false,trace=false,raw=false,sourceOnly=false,localConsumer=false;};
+struct Options {guint stallFrame=0,stallMs=0;std::string stallStage;std::string fault,faultExpect;guint faultAtS=0,faultFrame=0,faultMs=0,faultBoundMs=2000;guint seconds=60,cycles=0;std::string mode="bin",label="run",out=".",restart="producer";bool native=false,trace=false,raw=false,sourceOnly=false,localConsumer=false;};
 static guint gOutputQueueBuffers=0;
 static GstClockTime gArrivalBudget=LATENCY;
 // Producer-side processes (roles producer, lifecycle-producer, source) run the
@@ -248,6 +270,7 @@ static int producerChild(const Options&o,const std::string&session,const std::st
 #else
   p.start();p.finish();sampler.stop();
 #endif
+  r["ended_monotonic_us"]=std::to_string(p.endedAt);
   r["result"]=p.result;r["pushed.frames"]=std::to_string(p.pushedFrames.load());r["pushed.samples"]=std::to_string(p.pushedSamples.load());
   {std::lock_guard<std::mutex> lock(pushes.m);for(int track=0;track<2;++track){auto&v=pushes.v[track];std::vector<double> late,gaps;guint burst=0,maxBurst=0;const double period=1e9/(track?100:gFps);const std::string name=track?"audio":"video";
    for(size_t i=0;i<v.size();i++){if(v[i].first-v.front().first<gint64(WARMUP_S*GST_SECOND))continue;late.push_back(v[i].second/1e6);
@@ -294,7 +317,19 @@ static int consumerChild(const Options&o,const std::string&session,const std::st
   ContentCheck content;
   if(gGpuReadback){auto*sink=gst_bin_get_by_name(GST_BIN(c.p),"vout");auto*pad=gst_element_get_static_pad(sink,"sink");gst_pad_add_probe(pad,GST_PAD_PROBE_TYPE_BUFFER,checkContent,&content,nullptr);gst_object_unref(pad);gst_object_unref(sink);}
 #endif
+  struct Stall {guint frame=0,ms=0,seen=0,executed=0;gint64 startUs=0,elapsedUs=0;} stall{o.faultFrame,o.faultMs};
+  if(o.fault=="consumer-stall"){auto*sink=gst_bin_get_by_name(GST_BIN(c.p),"vout");auto*pad=gst_element_get_static_pad(sink,"sink");
+   gst_pad_add_probe(pad,GST_PAD_PROBE_TYPE_BUFFER,[](GstPad*,GstPadProbeInfo*,gpointer d)->GstPadProbeReturn{auto*st=static_cast<Stall*>(d);
+    if(++st->seen==st->frame){st->startUs=g_get_monotonic_time();g_usleep(gulong(st->ms)*1000);st->elapsedUs=g_get_monotonic_time()-st->startUs;st->executed=1;}return GST_PAD_PROBE_OK;},&stall,nullptr);
+   gst_object_unref(pad);gst_object_unref(sink);}
   c.start();c.finish();sampler.stop();
+  r["ended_monotonic_us"]=std::to_string(c.endedAt);
+  if(o.fault=="consumer-stall"){r["fault.executed"]=std::to_string(stall.executed);r["fault.start_monotonic_us"]=std::to_string(stall.startUs);r["fault.elapsed_us"]=std::to_string(stall.elapsedUs);
+   // Recovery: frames from the stalled one to the last arrival over budget.
+   std::lock_guard<std::mutex> alock(arrivals.m);auto&av=arrivals.v[0];guint last=0;bool any=false;
+   for(size_t i=o.faultFrame?o.faultFrame-1:0;i<av.size();i++)if(av[i].second>gint64(gArrivalBudget)){last=guint(i);any=true;}
+   r["fault.recovery_frames"]=std::to_string(any?last-(o.faultFrame-1)+1:0);}
+  {std::lock_guard<std::mutex> lock(c.statsMutex);for(auto*st:c.stats){gchar*t=gst_structure_to_string(st);r[std::string("stats.")+gst_structure_get_name(st)]=t;g_free(t);}}
 #ifdef FL_BENCH_GPU_READBACK
   if(gGpuReadback){r["content.checked"]=std::to_string(content.checked);r["content.mismatches"]=std::to_string(content.mismatches);r["content.index_gaps"]=std::to_string(content.gaps);r["content.missing_frames"]=std::to_string(content.missing);r["content.layout"]=content.layout;r["content.rows"]=std::to_string(CONTENT_ROWS);
    if(!content.first.empty())r["content.first_mismatch"]=content.first;}
@@ -376,6 +411,14 @@ static Child spawn(const std::string&exe,const std::vector<std::string>&args){Ch
 #endif
  return c;}
 // Exit code, or -1 after killing a child that outlived the deadline.
+// Kill a child now; await then returns its status (Linux 128+SIGKILL, Windows 99).
+static void killChild(Child&c){
+#ifdef _WIN32
+ TerminateProcess(c.h,99);
+#else
+ kill(pid_t(c.pid),SIGKILL);
+#endif
+}
 static int await(Child&c,gint64 deadline){
 #ifdef _WIN32
  const gint64 left=std::max<gint64>(0,deadline-g_get_monotonic_time())/1000;
@@ -394,7 +437,8 @@ static std::vector<std::string> optionArgs(const Options&o){
  std::vector<std::string> a{"--seconds",std::to_string(o.seconds),"--size",std::to_string(gWidth)+"x"+std::to_string(gHeight),"--fps",std::to_string(gFps),"--format",gFormat,"--mode",o.mode,"--pool",std::to_string(gVideoPool),"--video-queue",std::to_string(gVideoQueue)};
  a.insert(a.end(),{"--output-queue-buffers",std::to_string(gOutputQueueBuffers),"--arrival-budget-ms",std::to_string(gArrivalBudget/GST_MSECOND),"--latency-ms",std::to_string(gPlaybackLatency/GST_MSECOND)});if(!gOutputSync)a.push_back("--transport-only");if(!gOutputAsync)a.push_back("--no-output-preroll");
  if(!o.stallStage.empty())a.insert(a.end(),{"--video-stall-stage",o.stallStage,"--video-stall-frame",std::to_string(o.stallFrame),"--video-stall-ms",std::to_string(o.stallMs)});
- if(gRetainedDevice)a.push_back("--device-owner");if(gSharedCpu)a.push_back("--shared-cpu");if(gGpuReadback)a.push_back("--gpu-readback");if(o.native)a.push_back("--native");if(o.raw)a.push_back("--raw");return a;}
+ if(gRetainedDevice)a.push_back("--device-owner");if(gSharedCpu)a.push_back("--shared-cpu");if(gGpuReadback)a.push_back("--gpu-readback");if(o.native)a.push_back("--native");if(o.raw)a.push_back("--raw");if(gErrorOnRingFull)a.push_back("--error-on-ring-full");
+ if(o.fault=="consumer-stall")a.insert(a.end(),{"--fault",o.fault,"--fault-expect",o.faultExpect,"--fault-frame",std::to_string(o.faultFrame),"--fault-ms",std::to_string(o.faultMs)});return a;}
 
 // Least-squares slope of y over x.
 static double slope(const std::vector<std::pair<double,double>>&v){double sx=0,sy=0,sxx=0,sxy=0;const double n=double(v.size());
@@ -463,9 +507,16 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
   else if(a=="--pool")gVideoPool=guint(std::stoul(next()));else if(a=="--video-queue")gVideoQueue=guint(std::stoul(next()));else if(a=="--source-only")o.sourceOnly=true;
   else if(a=="--cycles")o.cycles=guint(std::stoul(next()));else if(a=="--restart")o.restart=next();else if(a=="--session-base")sessionBase=next();
   else if(a=="--local-consumer")o.localConsumer=true;else if(a=="--shared-cpu")gSharedCpu=true;else if(a=="--gpu-readback")gGpuReadback=true;else if(a=="--device-owner")gRetainedDevice=true;else if(a=="--native")o.native=true;else if(a=="--trace")o.trace=true;else if(a=="--raw")o.raw=true;else if(a=="--out")o.out=next();else if(a=="--label")o.label=next();
+  else if(a=="--fault")o.fault=next();else if(a=="--fault-expect")o.faultExpect=next();else if(a=="--fault-at-s")o.faultAtS=guint(std::stoul(next()));
+  else if(a=="--fault-frame")o.faultFrame=guint(std::stoul(next()));else if(a=="--fault-ms")o.faultMs=guint(std::stoul(next()));else if(a=="--error-on-ring-full")gErrorOnRingFull=true;else if(a=="--fault-bound-ms")o.faultBoundMs=guint(std::stoul(next()));
   else if(a=="--role")role=next();else if(a=="--session")session=next();else if(a=="--result")result=next();else{fprintf(stderr,"unknown option %s\n",a.c_str());return 2;}}
  CHECK(o.stallStage.empty()?(o.stallFrame==0&&o.stallMs==0):
    ((o.stallStage=="source"||o.stallStage=="post-push")&&o.stallFrame>0&&o.stallFrame<guint64(o.seconds)*gFps&&o.stallMs>0&&o.stallMs<=1000&&!o.cycles&&!o.sourceOnly&&!o.localConsumer));
+ {const bool kill=o.fault=="producer-kill"||o.fault=="consumer-kill",stall=o.fault=="consumer-stall";
+  CHECK(o.fault.empty()?(o.faultExpect.empty()&&!o.faultAtS&&!o.faultFrame&&!o.faultMs):((kill||stall)&&!o.cycles&&!o.sourceOnly&&!o.localConsumer&&o.stallStage.empty()));
+  CHECK(!kill||(o.faultAtS>=WARMUP_S+1&&o.faultAtS+2<=o.seconds&&!o.faultFrame&&!o.faultMs&&o.faultExpect.empty()));
+  CHECK(!stall||(o.faultFrame>0&&o.faultFrame<guint64(o.seconds)*gFps&&o.faultMs>0&&o.faultMs<=5000&&(o.faultExpect=="absorbed"||o.faultExpect=="counted-drop"||o.faultExpect=="replacement-failure"||o.faultExpect=="explicit-failure")));
+  CHECK(o.faultBoundMs>0&&o.faultBoundMs<=10000);}
  // Both lifecycle roles construct the same shared-CPU-enabled bins as one-shot
  // runs. Permit repeated sessions without changing the production lifetime.
  CHECK(!gSharedCpu||(o.mode=="bin"&&!o.native&&!o.sourceOnly&&!o.localConsumer));
@@ -515,7 +566,8 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
  auto consumer=launch("consumer");g_usleep(200000);auto producer=launch("producer");
  // Early pid line for external samplers (GPU counters per process).
  printf("pids producer=%ld consumer=%ld\n",producer.pid,consumer.pid);
- const gint64 deadline=g_get_monotonic_time()+gint64(o.seconds+90)*G_USEC_PER_SEC;
+ const gint64 started=g_get_monotonic_time(),deadline=started+gint64(o.seconds+90)*G_USEC_PER_SEC;gint64 killedAt=0;
+ if(o.fault=="producer-kill"||o.fault=="consumer-kill"){g_usleep(gulong(o.faultAtS)*G_USEC_PER_SEC);killedAt=g_get_monotonic_time();killChild(o.fault=="producer-kill"?producer:consumer);}
  const int pc=await(producer,deadline),cc=await(consumer,deadline);
  auto pr=readResult(base+"-producer.txt"),cr=readResult(base+"-consumer.txt");
  std::map<std::string,std::string> s{{"label",o.label},{"config",gFormat+" "+std::to_string(gWidth)+"x"+std::to_string(gHeight)+"@"+std::to_string(gFps)+" "+o.mode+(gSharedCpu?" shared-cpu":gGpuReadback?" gpu-readback":(o.native?" native":" cpu"))+(o.trace?" traced":"")+" "+std::to_string(o.seconds)+"s"},
@@ -524,6 +576,34 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
  s["expected.frames"]=std::to_string(guint64(o.seconds)*gFps);
  s["output.async"]=gOutputAsync?"true":"false";s["harness.malloc"]=gSourceMalloc;
  s["expected.samples"]=std::to_string(guint64(o.seconds)*48000);
+ if(!o.fault.empty()){s["fault"]=o.fault;s["fault.bound_ms"]=std::to_string(o.faultBoundMs);
+  const bool killed=o.fault!="consumer-stall";
+#ifdef _WIN32
+  const int killedStatus=99;
+#else
+  const int killedStatus=128+SIGKILL;
+#endif
+  bool pass=false;
+  if(killed){const bool producerKilled=o.fault=="producer-kill";auto&sr=producerKilled?cr:pr;const int victimRc=producerKilled?pc:cc,survivorRc=producerKilled?cc:pc;
+   const std::string result=sr["result"];const gint64 ended=sr.count("ended_monotonic_us")?std::stoll(sr["ended_monotonic_us"]):0;
+   const double detect=ended&&killedAt?(ended-killedAt)/1000.0:-1;char t[32];snprintf(t,sizeof t,"%.1f",detect);
+   s["fault.at_s"]=std::to_string(o.faultAtS);s["fault.detection_ms"]=t;s["fault.survivor_result"]=result;
+   pass=victimRc==killedStatus&&survivorRc==0&&result.rfind("error",0)==0&&detect>=0&&detect<=o.faultBoundMs;}
+  else{s["fault.expect"]=o.faultExpect;s["fault.frame"]=std::to_string(o.faultFrame);s["fault.ms"]=std::to_string(o.faultMs);
+   // Producer sink drop counters (framelink-sink-stats at EOS; absent on error).
+   auto counter=[&](const char*key)->long long{const std::string&t=pr["stats.framelink-sink-stats"];auto at=t.find(std::string(key)+"=(guint64)");return at==std::string::npos?-1:std::stoll(t.substr(at+strlen(key)+10));};
+   const long long dropped=counter("dropped"),ringFull=counter("ring-full-drops"),delivered=cr["frames"].empty()?-1:std::stoll(cr["frames"]),pushed=pr["pushed.frames"].empty()?-1:std::stoll(pr["pushed.frames"]);
+   s["fault.producer_dropped"]=std::to_string(dropped);s["fault.producer_ring_full_drops"]=std::to_string(ringFull);s["fault.error_on_ring_full"]=gErrorOnRingFull?"true":"false";
+   const bool accounted=dropped>=0&&delivered>=0&&delivered+dropped==pushed;
+   const bool silentLoss=cr["result"]=="EOS"&&delivered!=pushed&&!accounted;s["fault.silent_loss"]=silentLoss?"yes":"no";s["fault.loss_accounted"]=accounted?"yes":"no";
+   const bool complete=pc==0&&cc==0&&cr["queue.accounting"]=="complete"&&cr["audio.contiguous"]=="yes"&&pr["result"]=="EOS"&&cr["result"]=="EOS"&&cr["frames"]==s["expected.frames"]&&cr["frames"]==pr["pushed.frames"]&&cr["samples"]==s["expected.samples"];
+   const guint period=std::max<guint>(1,1000/gFps);const guint recoveryLimit=(o.faultMs+period-1)/period+2;s["fault.recovery_limit_frames"]=std::to_string(recoveryLimit);
+   if(o.faultExpect=="absorbed")pass=cr["fault.executed"]=="1"&&complete&&std::stoul(cr["fault.recovery_frames"])<=recoveryLimit;
+   else if(o.faultExpect=="counted-drop")pass=cr["fault.executed"]=="1"&&pc==0&&cc==0&&pr["result"]=="EOS"&&cr["result"]=="EOS"&&accounted&&dropped>0&&ringFull==dropped&&cr["audio.contiguous"]=="yes"&&cr["queue.accounting"]=="complete"&&cr["samples"]==s["expected.samples"];
+   else if(o.faultExpect=="replacement-failure")pass=cr["fault.executed"]=="1"&&!silentLoss&&pc==0&&cc==0&&cr["result"].find("replaced before it was read")!=std::string::npos&&pr["result"]!="EOS";
+   else pass=cr["fault.executed"]=="1"&&!silentLoss&&pc==0&&cc==0&&pr["result"].find("pool exhausted")!=std::string::npos&&cr["result"]!="EOS";}
+  s["fault.pass"]=pass?"yes":"no";s["complete"]=pass?"yes":"no";
+  writeResult(base+".summary.txt",s);for(auto&kv:s)printf("%s=%s\n",kv.first.c_str(),kv.second.c_str());return pass?0:1;}
  const bool ok=pc==0&&cc==0&&cr["queue.accounting"]=="complete"&&cr["audio.contiguous"]=="yes"&&pr["result"]=="EOS"&&cr["result"]=="EOS"&&cr["frames"]==s["expected.frames"]&&cr["frames"]==pr["pushed.frames"]&&cr["samples"]==s["expected.samples"]&&cr["samples"]==pr["pushed.samples"]
   &&(!gGpuReadback||(cr["content.mismatches"]=="0"&&cr["content.checked"]==s["expected.frames"]&&cr["memory"]=="memory:SystemMemory"));
  s["complete"]=ok?"yes":"no";

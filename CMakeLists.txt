@@ -1679,6 +1679,21 @@ if(FRAMELINK_BUILD_TESTS AND TARGET framelink_gst_session)
     add_dependencies(fl_gst_av_bench gstframelink)
     add_test(NAME gst_av_bench_smoke COMMAND fl_gst_av_bench $<TARGET_FILE:gstframelink> --seconds 6 --size 160x90 --out ${CMAKE_CURRENT_BINARY_DIR} --label bench-smoke)
     set_tests_properties(gst_av_bench_smoke PROPERTIES TIMEOUT 120)
+    # M6.4 at-rate fault harness (docs/m6/fault-coverage/at-rate): endpoint
+    # death and a consumer stall on the small CPU cell, each against its
+    # declared outcome.
+    set(FL_BENCH_FAULT_ARGS --seconds 6 --size 160x90 --fps 30 --format RGBA --latency-ms 0
+        --transport-only --no-output-preroll --pool 2 --video-queue 1 --output-queue-buffers 1
+        --out ${CMAKE_CURRENT_BINARY_DIR})
+    add_test(NAME gst_av_bench_fault_producer_kill COMMAND fl_gst_av_bench $<TARGET_FILE:gstframelink>
+        ${FL_BENCH_FAULT_ARGS} --fault producer-kill --fault-at-s 3 --label bench-fault-producer-kill)
+    add_test(NAME gst_av_bench_fault_consumer_kill COMMAND fl_gst_av_bench $<TARGET_FILE:gstframelink>
+        ${FL_BENCH_FAULT_ARGS} --fault consumer-kill --fault-at-s 3 --label bench-fault-consumer-kill)
+    add_test(NAME gst_av_bench_fault_consumer_stall COMMAND fl_gst_av_bench $<TARGET_FILE:gstframelink>
+        ${FL_BENCH_FAULT_ARGS} --fault consumer-stall --fault-frame 90 --fault-ms 300
+        --fault-expect replacement-failure --label bench-fault-consumer-stall)
+    set_tests_properties(gst_av_bench_fault_producer_kill gst_av_bench_fault_consumer_kill
+        gst_av_bench_fault_consumer_stall PROPERTIES TIMEOUT 120)
     if(WIN32)
         foreach(cpu_format BGRA NV12)
             add_test(NAME gst_av_bench_shared_cpu_${cpu_format}
