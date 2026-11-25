@@ -1,0 +1,75 @@
+arrival.budget_ms=34
+complete=no
+config=BGRA 3840x2160@30 bin gpu-readback 22s
+consumer.audio.arrival.all.ms=n=10 p50=0.21 p95=0.33 p99=0.33 max=0.33 min=0.20
+consumer.audio.arrival.ms=n=0 p50=nan p95=nan p99=nan max=nan min=nan
+consumer.audio.contiguous=yes
+consumer.audio.deadline_misses=0/10
+consumer.audio.output_queue.admission_residence.ms=n=10 p50=0.04 p95=0.09 p99=0.09 max=0.09 min=0.03
+consumer.audio.output_queue.pending=0
+consumer.audio.output_queue.sampled_max_buffers=0
+consumer.audio.output_queue.unmatched=0
+consumer.audio.render.all.ms=n=10 p50=0.27 p95=0.37 p99=0.37 max=0.37 min=0.24
+consumer.audio.render.ms=n=0 p50=nan p95=nan p99=nan max=nan min=nan
+consumer.audio.render_interval.ms=n=0 p50=nan p95=nan p99=nan max=nan min=nan
+consumer.audio.render_jitter.p1_p99.ms=nan
+consumer.av_offset.abs.ms=n=0 p50=nan p95=nan p99=nan max=nan min=nan
+consumer.av_offset.ms=n=0 p50=nan p95=nan p99=nan max=nan min=nan
+consumer.content.checked=0
+consumer.content.index_gaps=0
+consumer.content.layout=
+consumer.content.mismatches=0
+consumer.content.missing_frames=0
+consumer.content.rows=4
+consumer.frames=0
+consumer.memory=
+consumer.pid=2308342
+consumer.queue.accounting=complete
+consumer.resources=too short
+consumer.result=error: coordinated video frame replaced before it was read: the producer delivered faster than real time
+consumer.samples=4800
+consumer.scope=transport-consumer
+consumer.video.output_queue.admission_residence.ms=n=0 p50=nan p95=nan p99=nan max=nan min=nan
+consumer.video.output_queue.pending=0
+consumer.video.output_queue.sampled_max_buffers=0
+consumer.video.output_queue.unmatched=0
+exit=0/0
+expected.frames=660
+expected.samples=1056000
+harness.malloc=producer-side mmap_threshold=8388608
+label=strA
+output.async=false
+output.queue_buffers=1
+output.sync=false
+playback.latency_ms=0
+producer.audio.push_burst.max=0
+producer.audio.push_interval.ms=n=1997 p50=10.00 p95=10.04 p99=10.08 max=10.12 min=9.86
+producer.audio.push_lateness.ms=n=1997 p50=0.13 p95=0.15 p99=0.19 max=0.23 min=0.01
+producer.cpu.percent=1.57
+producer.handles=18..18 min=18 max=18
+producer.handles.slope.per_min=0.00
+producer.injection.elapsed_us=0
+producer.injection.executed=0
+producer.injection.frame=0
+producer.injection.requested_ms=0
+producer.injection.stage=none
+producer.injection.start_monotonic_us=0
+producer.mem.kb=16948..16948 min=16948 max=16948
+producer.mem.kind=rss
+producer.mem.slope.kb_per_min=0.00
+producer.native.acquired=4
+producer.native.slot_drop_frames=2 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 
+producer.native.slot_drops=656
+producer.pid=2308357
+producer.pushed.frames=3
+producer.pushed.samples=1054560
+producer.result=error: required session tracks not ready or cancelled
+producer.series.t_cpums_memkb_handles_threads=0.0:14:13660:6:2;1.0:33:16948:18:8;2.0:50:16948:18:8;3.0:65:16948:18:8;4.0:80:16948:18:8;5.0:97:16948:18:8;6.0:114:16948:18:8;7.0:130:16948:18:8;8.0:147:16948:18:8;9.0:164:16948:18:8;10.0:181:16948:18:8;11.0:198:16948:18:8;12.0:214:16948:18:8;13.0:229:16948:18:8;14.0:244:16948:18:8;15.0:257:16948:18:8;16.0:272:16948:18:7;17.0:288:16948:18:7;18.0:303:16948:18:7;19.0:320:16948:18:7;20.0:334:16948:18:7;21.0:348:16948:18:7;22.1:368:16900:14:5;
+producer.threads=8..7 min=7 max=8
+producer.threads.slope.per_min=-8.71
+producer.video.push_burst.max=0
+producer.video.push_interval.ms=n=0 p50=nan p95=nan p99=nan max=nan min=nan
+producer.video.push_lateness.ms=n=0 p50=nan p95=nan p99=nan max=nan min=nan
+seconds=22
+video.pool=2
+video.queue=1
