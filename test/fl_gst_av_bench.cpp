@@ -33,6 +33,9 @@
 #include <tlhelp32.h>
 #else
 #include <signal.h>
+#ifdef __GLIBC__
+#include <malloc.h>
+#endif
 #include <sys/resource.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -41,6 +44,22 @@
 struct Options {guint stallFrame=0,stallMs=0;std::string stallStage;guint seconds=60,cycles=0;std::string mode="bin",label="run",out=".",restart="producer";bool native=false,trace=false,raw=false,sourceOnly=false,localConsumer=false;};
 static guint gOutputQueueBuffers=0;
 static GstClockTime gArrivalBudget=LATENCY;
+// Producer-side processes (roles producer, lifecycle-producer, source) run the
+// harness's videotestsrc, whose default pool allocates frame-sized system
+// memory every session. On glibc those blocks come from per-thread arenas and
+// some stay resident after free, which the lifecycle gate would count against
+// the long-lived peer (docs/m6/lifecycle/linux-memory-steps-20261124). Those
+// processes give blocks of 8 MiB or more their own mapping. FrameLink's own
+// frame-sized CPU buffers are on the consumer side, which keeps glibc's default.
+static const char*gSourceMalloc="default";
+static void sourceMalloc(const std::string&role){
+#ifdef __GLIBC__
+ if(role=="producer"||role=="lifecycle-producer"||role=="source"){CHECK(mallopt(M_MMAP_THRESHOLD,8<<20)==1);}
+ gSourceMalloc="producer-side mmap_threshold=8388608";
+#else
+ (void)role;
+#endif
+}
 static constexpr guint WARMUP_S=2;  // excluded from steady-state distributions
 
 // ---- process resources -----------------------------------------------------
@@ -307,6 +326,7 @@ static int lifecycle(const Options&o,const std::string&exe,const char*plugin,con
  s["output.queue_buffers"]=std::to_string(gOutputQueueBuffers);
  s["playback.latency_ms"]=std::to_string(gPlaybackLatency/GST_MSECOND);
  s["output.sync"]=gOutputSync?"true":"false";s["output.async"]=gOutputAsync?"true":"false";
+ s["harness.malloc"]=gSourceMalloc;
  if(!firstBad.empty())s["first_failure"]=firstBad;
  snprintf(t,sizeof t,"%.1f",(g_get_monotonic_time()-t0)/1e6);s["wall.s"]=t;
  s["long.mem.kb"]=std::to_string(m0)+".."+std::to_string(m1);snprintf(t,sizeof t,"%.2f",slope(mem));s["long.mem.slope.kb_per_cycle"]=t;
@@ -361,6 +381,7 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
   // read and the one being drawn.
   if(!queueSet)gVideoQueue=std::min<guint>(FL_MAX_POOL_SIZE-2,std::max<guint>(2,guint(std::ceil(gPlaybackLatency/1e9*gFps))));
   if(!poolSet)gVideoPool=std::min<guint>(FL_MAX_POOL_SIZE,std::max<guint>(8,gVideoQueue+2));}
+ sourceMalloc(role);
  gQueue="queue max-size-bytes=0 max-size-buffers="+std::to_string(gOutputQueueBuffers)+" max-size-time=1000000000";
  if(role=="source")return sourceChild(o,result);
  if(role=="lifecycle-producer"||role=="lifecycle-consumer")return lifecycleChild(o,role=="lifecycle-producer",sessionBase,result);
@@ -375,7 +396,7 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
   auto c=spawn(exe,args);for(const char*k:{"FRAMELINK_GST_TRACE","FRAMELINK_TRACE","FRAMELINK_GST_TRACE_EVENTS","FRAMELINK_TRACE_EVENTS"})setEnv(k,"");return c;};
  if(o.sourceOnly){auto src=launch("source");printf("pids producer=%ld consumer=0\n",src.pid);
   const int rc=await(src,g_get_monotonic_time()+gint64(o.seconds+90)*G_USEC_PER_SEC);auto sr=readResult(base+"-source.txt");
-  std::map<std::string,std::string> s{{"label",o.label},{"config",gFormat+" "+std::to_string(gWidth)+"x"+std::to_string(gHeight)+"@"+std::to_string(gFps)+" source only "+std::to_string(o.seconds)+"s"},{"seconds",std::to_string(o.seconds)},{"exit",std::to_string(rc)}};
+  std::map<std::string,std::string> s{{"label",o.label},{"config",gFormat+" "+std::to_string(gWidth)+"x"+std::to_string(gHeight)+"@"+std::to_string(gFps)+" source only "+std::to_string(o.seconds)+"s"},{"seconds",std::to_string(o.seconds)},{"exit",std::to_string(rc)},{"harness.malloc",gSourceMalloc}};
   for(auto&kv:sr)s["source."+kv.first]=kv.second;const bool ok=rc==0&&sr["result"]=="EOS";s["complete"]=ok?"yes":"no";
   writeResult(base+".summary.txt",s);for(auto&kv:s)printf("%s=%s\n",kv.first.c_str(),kv.second.c_str());return ok?0:1;}
  if(o.cycles)return lifecycle(o,exe,argv[1],base);
@@ -389,7 +410,7 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
   {"exit",std::to_string(pc)+"/"+std::to_string(cc)},{"arrival.budget_ms",std::to_string(gArrivalBudget/GST_MSECOND)},{"playback.latency_ms",std::to_string(gPlaybackLatency/GST_MSECOND)},{"output.queue_buffers",std::to_string(gOutputQueueBuffers)},{"output.sync",gOutputSync?"true":"false"},{"video.pool",std::to_string(gVideoPool)},{"video.queue",std::to_string(gVideoQueue)},{"seconds",std::to_string(o.seconds)},{"producer.pid",std::to_string(producer.pid)},{"consumer.pid",std::to_string(consumer.pid)}};
  for(auto&kv:pr)s["producer."+kv.first]=kv.second;for(auto&kv:cr)s["consumer."+kv.first]=kv.second;
  s["expected.frames"]=std::to_string(guint64(o.seconds)*gFps);
- s["output.async"]=gOutputAsync?"true":"false";
+ s["output.async"]=gOutputAsync?"true":"false";s["harness.malloc"]=gSourceMalloc;
  s["expected.samples"]=std::to_string(guint64(o.seconds)*48000);
  const bool ok=pc==0&&cc==0&&cr["queue.accounting"]=="complete"&&cr["audio.contiguous"]=="yes"&&pr["result"]=="EOS"&&cr["result"]=="EOS"&&cr["frames"]==s["expected.frames"]&&cr["frames"]==pr["pushed.frames"]&&cr["samples"]==s["expected.samples"]&&cr["samples"]==pr["pushed.samples"];
  s["complete"]=ok?"yes":"no";
