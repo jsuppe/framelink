@@ -385,6 +385,8 @@ per-platform state. Windows readiness is the
   are within the frame budgets. 8c on Android: 1080p60 CPU receiver completes 1800 s,
   4K30 failed ([evidence](m6/cpu-path/android-cpu-receiver-20261118/README.md)), then completed
   with prepared output buffers ([evidence](m6/cpu-path/android-output-prepare-20261118/README.md)).
+  8c on Linux: GPU-staged receiver BGRA 4K30 and 1080p60 complete 1800 s
+  ([evidence](m6/cpu-path/linux-gpu-readback-rate/README.md)); NV12 not supported by staging.
 - [ ] **M6.9 Native producer in coordinated sessions (found in M5b.12):** the
   coordinated producer elements copy system-memory input into the ring; wire
   `framelinksink native-memory=true` (M5a policy binding, readiness fences)

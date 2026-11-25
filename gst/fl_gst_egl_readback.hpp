@@ -80,6 +80,23 @@ class FrameLinkEglReadback {
         glGenTextures(1,&output_);glGenFramebuffers(1,&fbo_);glDisable(GL_DITHER);
         major_=maj;minor_=min;return glGetError()==GL_NO_ERROR;
     }
+    // With the context current: open the display on this node if needed and
+    // size the output surface.
+    bool bind(uint32_t maj,uint32_t min,uint32_t width,uint32_t height){
+        if(display_!=EGL_NO_DISPLAY&&(maj!=major_||min!=minor_))reset();
+        if(display_==EGL_NO_DISPLAY&&!initialize(maj,min)){reset();return false;}
+        if(!eglBindAPI(EGL_OPENGL_ES_API)||!eglMakeCurrent(display_,surface_,surface_,context_))return false;
+        glBindTexture(GL_TEXTURE_2D,output_);
+        if(width_!=width||height_!=height){
+            glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,width,height,0,GL_RGBA,GL_UNSIGNED_BYTE,nullptr);
+            if(glGetError()!=GL_NO_ERROR)return false;
+            width_=width;height_=height;
+        }
+        return true;
+    }
+    static void nodeOf(const uint8_t id[8],uint32_t& maj,uint32_t& min){
+        maj=min=0;for(unsigned i=0;i<4;i++){maj|=uint32_t(id[i])<<(8*i);min|=uint32_t(id[4+i])<<(8*i);}
+    }
 public:
     FrameLinkEglReadback()=default;
     FrameLinkEglReadback(const FrameLinkEglReadback&)=delete;
@@ -107,6 +124,26 @@ public:
         return p.version==1&&!p.reserved&&p.sessionGeneration&&p.paths[0].resourceType==FL_MEMORY_DMABUF&&
             (p.paths[0].operations&ops)==ops&&flMemoryEvaluateBoundary(p.requirements,p.paths,2,decisions)==FL_MEMORY_OK;
     }
+    // Before the first frame: open the display, context and output surface on
+    // the ring's render node (on Linux, flChannelInfo.adapterLUID; see
+    // framelink_dmabuf.h), so the first read does not pay for them. A failure
+    // changes nothing: read() then initializes from the frame's own memory
+    // info, which stays authoritative.
+    //
+    // The calling thread need not be the one that reads. If it had no EGL
+    // context of its own, its per-thread EGL state is released here: otherwise
+    // the driver tears it down when the thread exits (a GLib pool thread, about
+    // 15 s later), and on NVIDIA that teardown stalled the reading thread's
+    // readback by about 40 ms (docs/m6/cpu-path/linux-gpu-readback-rate).
+    bool prepare(const uint8_t node[8],uint32_t width,uint32_t height){
+        if(!width||!height||width>uint32_t(std::numeric_limits<GLsizei>::max())||height>uint32_t(std::numeric_limits<GLsizei>::max()))return false;
+        uint32_t maj=0,min=0;nodeOf(node,maj,min);
+        const bool threadHadContext=eglGetCurrentContext()!=EGL_NO_CONTEXT;
+        bool ok=false;
+        {Restore restore;ok=bind(maj,min,width,height);}
+        if(!threadHadContext)eglReleaseThread();
+        return ok;
+    }
     uint64_t gpuCopyBytes()const{return gpuCopyBytes_;}
     uint64_t readbackBytes()const{return readbackBytes_;}
     bool read(flChannel* channel,const flFrame& frame,const GstFrameLinkMemoryPolicy& policy,void* output,size_t bytes){
@@ -122,17 +159,9 @@ public:
         if(flImageDmabuf(frame.image,&dma)!=FL_OK||dma.planes!=1||dma.modifier!=DRM_FORMAT_MOD_LINEAR||
            dma.fourcc!=(info.logicalFormat==FL_FORMAT_BGRA8?DRM_FORMAT_ARGB8888:DRM_FORMAT_ABGR8888)||
            dma.stride[0]>uint32_t(INT32_MAX)||dma.offset[0]>uint32_t(INT32_MAX))return false;
-        uint32_t maj=0,min=0;for(unsigned i=0;i<4;i++){maj|=uint32_t(info.deviceId[i])<<(8*i);min|=uint32_t(info.deviceId[4+i])<<(8*i);}
-        if(display_!=EGL_NO_DISPLAY&&(maj!=major_||min!=minor_))reset();
+        uint32_t maj=0,min=0;nodeOf(info.deviceId,maj,min);
         Restore restore;
-        if(display_==EGL_NO_DISPLAY&&!initialize(maj,min)){reset();return false;}
-        if(!eglBindAPI(EGL_OPENGL_ES_API)||!eglMakeCurrent(display_,surface_,surface_,context_))return false;
-        glBindTexture(GL_TEXTURE_2D,output_);
-        if(width_!=info.width||height_!=info.height){
-            glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,info.width,info.height,0,GL_RGBA,GL_UNSIGNED_BYTE,nullptr);
-            if(glGetError()!=GL_NO_ERROR)return false;
-            width_=info.width;height_=info.height;
-        }
+        if(!bind(maj,min,info.width,info.height))return false;
         glBindFramebuffer(GL_FRAMEBUFFER,fbo_);glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,output_,0);
         if(glCheckFramebufferStatus(GL_FRAMEBUFFER)!=GL_FRAMEBUFFER_COMPLETE)return false;
         EGLint attrs[]={EGL_WIDTH,(EGLint)info.width,EGL_HEIGHT,(EGLint)info.height,EGL_LINUX_DRM_FOURCC_EXT,(EGLint)dma.fourcc,

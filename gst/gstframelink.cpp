@@ -1349,6 +1349,15 @@ static gboolean srcStart(GstBaseSrc* base) {
     if(self->memoryPolicyApplied && self->cinfo.generation!=self->memoryPoolGeneration){
         GST_ELEMENT_ERROR(self,CORE,NEGOTIATION,("authenticated pool generation changed before start"),(NULL));return FALSE;
     }
+#ifdef FL_GST_EGL_READBACK
+    // Open the staging context now: on the first frame it costs about 100 ms,
+    // which a two-slot ring cannot absorb (docs/m6/cpu-path/linux-gpu-readback-rate).
+    if(self->gpuReadback){
+        if(!self->eglReadback)self->eglReadback=new FrameLinkEglReadback;
+        if(!self->eglReadback->prepare(self->cinfo.adapterLUID,self->cinfo.width,self->cinfo.height))
+            GST_WARNING_OBJECT(self,"GPU staging not prepared at start; the first frame initializes it");
+    }
+#endif
     // Every coordinated frame is accounted for, so the negotiated queue budget
     // is the slack a briefly late reader has before a frame is replaced. The
     // ring must also hold the frame being read and the one being drawn, so a
