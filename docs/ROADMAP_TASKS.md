@@ -363,7 +363,10 @@ per-platform state. Windows readiness is the
   injection remains unavailable (77). Whether this closes the delayed-GPU subset is Jon's decision.
   At rate (2026-11-25, [evidence](m6/fault-coverage/at-rate/README.md)): endpoint death and consumer
   stalls on the Linux native, Linux shared-CPU and Android native 1080p60 cells, 70/70 against declared
-  outcomes; default overload loss is counted only at the producer (D2). Bursts and audio underrun at rate open.
+  outcomes; default overload loss is counted only at the producer (D2). Producer bursts and audio underrun at rate (2026-11-25,
+  [evidence](m6/fault-coverage/producer-at-rate/README.md)): 85/90; every burst and underrun delivered or
+  explicitly refused/signalled, but the Android 200 ms burst missed its declared recovery limit 5/5 (source
+  catch-up, not transport). Malformed metadata at rate open.
 - [ ] **M6.5 Performance/resource evidence:** distributions, queue depth,
   CPU/GPU/memory/handles, clock behavior and bounded growth.
   Stage costs, Android NV12 cost isolation and platform limits are published
