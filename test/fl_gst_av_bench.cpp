@@ -346,7 +346,7 @@ static int consumerChild(const Options&o,const std::string&session,const std::st
    gst_pad_add_probe(qs,GST_PAD_PROBE_TYPE_BUFFER,arrival,&arrivals,nullptr);
    g_object_set_data(G_OBJECT(peer),"track",GINT_TO_POINTER(track));gst_pad_add_probe(peer,GST_PAD_PROBE_TYPE_BUFFER,departed,&arrivals,nullptr);for(auto*x:{(GstObject*)qs,(GstObject*)queue,(GstObject*)peer,(GstObject*)sp,(GstObject*)sink})gst_object_unref(x);}
   // Pre-fault the per-buffer records so they do not show as consumer growth.
-  for(int track=0;track<2;track++){const size_t n=size_t(o.seconds+10)*(track?100:gFps);for(auto*v:{&c.lateness[track]}){v->resize(n);v->clear();}arrivals.v[track].resize(n);arrivals.v[track].clear();arrivals.residence[track].resize(n);arrivals.residence[track].clear();}
+  c.bufferLife.reserve(size_t(o.seconds+10)*gFps);for(int track=0;track<2;track++){const size_t n=size_t(o.seconds+10)*(track?100:gFps);for(auto*v:{&c.lateness[track]}){v->resize(n);v->clear();}arrivals.v[track].resize(n);arrivals.v[track].clear();arrivals.residence[track].resize(n);arrivals.residence[track].clear();}
 #ifdef FL_BENCH_GPU_READBACK
   // After arrival is recorded: on the appsink's pad.
   ContentCheck content;
@@ -366,7 +366,7 @@ static int consumerChild(const Options&o,const std::string&session,const std::st
   c.start();c.finish();sampler.stop();
   r["ended_monotonic_us"]=std::to_string(c.endedAt);
   r["audio.gap_events"]=std::to_string(gaps.n);r["audio.gap_event_ns"]=std::to_string(gaps.ns);
-  {std::lock_guard<std::mutex> lock(c.mutex);r["audio.pts_jumps"]=std::to_string(c.audioJumps);r["audio.pts_jump_ns"]=std::to_string(c.audioJumpNs);}
+  {std::lock_guard<std::mutex> lock(c.mutex);{std::string h;for(int k=0;k<8;++k)h+=(k?",":"")+std::to_string(c.videoRefcounts[k]);r["video.callback_refcount_hist"]=h;}{std::vector<double> life;guint alive=0;for(auto&x:c.bufferLife){if(x.second)life.push_back((x.second-x.first)/1000.0);else ++alive;}r["video.buffer_life_after_callback.ms"]=dist(life);r["video.buffer_alive_at_end"]=std::to_string(alive);}r["audio.pts_jumps"]=std::to_string(c.audioJumps);r["audio.pts_jump_ns"]=std::to_string(c.audioJumpNs);}
   // Recovery: buffers from the faulted one to the last arrival over budget, on
   // the faulted track (video for consumer-stall and producer-burst).
   const bool late=o.fault=="consumer-stall"||o.fault=="producer-burst"||o.fault=="audio-stall";
@@ -482,7 +482,7 @@ static std::vector<std::string> optionArgs(const Options&o){
  std::vector<std::string> a{"--seconds",std::to_string(o.seconds),"--size",std::to_string(gWidth)+"x"+std::to_string(gHeight),"--fps",std::to_string(gFps),"--format",gFormat,"--mode",o.mode,"--pool",std::to_string(gVideoPool),"--video-queue",std::to_string(gVideoQueue)};
  a.insert(a.end(),{"--output-queue-buffers",std::to_string(gOutputQueueBuffers),"--arrival-budget-ms",std::to_string(gArrivalBudget/GST_MSECOND),"--latency-ms",std::to_string(gPlaybackLatency/GST_MSECOND)});if(!gOutputSync)a.push_back("--transport-only");if(!gOutputAsync)a.push_back("--no-output-preroll");
  if(!o.stallStage.empty())a.insert(a.end(),{"--video-stall-stage",o.stallStage,"--video-stall-frame",std::to_string(o.stallFrame),"--video-stall-ms",std::to_string(o.stallMs)});
- if(gRetainedDevice)a.push_back("--device-owner");if(gSharedCpu)a.push_back("--shared-cpu");if(gGpuReadback)a.push_back("--gpu-readback");if(o.native)a.push_back("--native");if(o.raw)a.push_back("--raw");if(gErrorOnRingFull)a.push_back("--error-on-ring-full");if(gBurstQueues)a.push_back("--burst-queue");
+ if(gRetainedDevice)a.push_back("--device-owner");if(gSharedCpu)a.push_back("--shared-cpu");if(gGpuReadback)a.push_back("--gpu-readback");if(o.native)a.push_back("--native");if(o.raw)a.push_back("--raw");if(gErrorOnRingFull)a.push_back("--error-on-ring-full");if(gBurstQueues)a.push_back("--burst-queue");if(gNoLastSample)a.push_back("--no-last-sample");
  if(o.fault=="consumer-stall"||producerFault(o.fault))a.insert(a.end(),{"--fault",o.fault,"--fault-expect",o.faultExpect,"--fault-frame",std::to_string(o.faultFrame),"--fault-ms",std::to_string(o.faultMs)});return a;}
 
 // Least-squares slope of y over x.
@@ -553,7 +553,7 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
   else if(a=="--cycles")o.cycles=guint(std::stoul(next()));else if(a=="--restart")o.restart=next();else if(a=="--session-base")sessionBase=next();
   else if(a=="--local-consumer")o.localConsumer=true;else if(a=="--shared-cpu")gSharedCpu=true;else if(a=="--gpu-readback")gGpuReadback=true;else if(a=="--device-owner")gRetainedDevice=true;else if(a=="--native")o.native=true;else if(a=="--trace")o.trace=true;else if(a=="--raw")o.raw=true;else if(a=="--out")o.out=next();else if(a=="--label")o.label=next();
   else if(a=="--fault")o.fault=next();else if(a=="--fault-expect")o.faultExpect=next();else if(a=="--fault-at-s")o.faultAtS=guint(std::stoul(next()));
-  else if(a=="--fault-frame")o.faultFrame=guint(std::stoul(next()));else if(a=="--fault-ms")o.faultMs=guint(std::stoul(next()));else if(a=="--error-on-ring-full")gErrorOnRingFull=true;else if(a=="--burst-queue")gBurstQueues=true;else if(a=="--fault-bound-ms")o.faultBoundMs=guint(std::stoul(next()));
+  else if(a=="--fault-frame")o.faultFrame=guint(std::stoul(next()));else if(a=="--fault-ms")o.faultMs=guint(std::stoul(next()));else if(a=="--error-on-ring-full")gErrorOnRingFull=true;else if(a=="--burst-queue")gBurstQueues=true;else if(a=="--no-last-sample")gNoLastSample=true;else if(a=="--fault-bound-ms")o.faultBoundMs=guint(std::stoul(next()));
   else if(a=="--role")role=next();else if(a=="--session")session=next();else if(a=="--result")result=next();else{fprintf(stderr,"unknown option %s\n",a.c_str());return 2;}}
  CHECK(o.stallStage.empty()?(o.stallFrame==0&&o.stallMs==0):
    ((o.stallStage=="source"||o.stallStage=="post-push")&&o.stallFrame>0&&o.stallFrame<guint64(o.seconds)*gFps&&o.stallMs>0&&o.stallMs<=1000&&!o.cycles&&!o.sourceOnly&&!o.localConsumer));

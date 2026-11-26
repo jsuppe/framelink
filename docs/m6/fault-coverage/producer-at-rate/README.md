@@ -1,6 +1,6 @@
 # M6.4 on Linux and Android: producer bursts and audio underruns at rate — 2026-11-25
 
-Revision `ca99ed0c`. `fl_gst_av_bench` SHA-256 prefixes: Linux `86d6c98fda3ba69e`, Android arm64 `f849e82a7998172a`; `libgstframelink.so` `f9d0d96cc0ea1f4b`. Hosts:
+Revision `ca99ed0c`. `fl_gst_av_bench` SHA-256 prefixes: Linux `f849e82a7998172a`, Android arm64 `86d6c98fda3ba69e`; `libgstframelink.so` `f9d0d96cc0ea1f4b`. Hosts:
 - Linux: Ubuntu 26.04, RTX 3090 (NVIDIA 580.178.04), GStreamer 1.28.2.
 - Android: TCL 8483A (Mali-G52), Android 15.
 

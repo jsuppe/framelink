@@ -40,6 +40,9 @@ static bool gRetainedDevice=false;
 // Producer bin error-on-ring-full (default false: drop and count).
 static bool gErrorOnRingFull=false;
 static bool gBurstQueues=false;
+// Diagnostic: the video appsink keeps no last-sample reference (basesink
+// default true holds the previous frame, and so its FrameLink slot).
+static bool gNoLastSample=false;
 // M6.8c (Linux EGL builds): a native producer writes into the sink's DMA-BUF
 // ring and the consumer bin reads it back through GPU staging (gpu-readback).
 // Both bins take the local native readback candidate; set by fl_gst_av_bench.
@@ -166,11 +169,16 @@ struct Consumer:Side {
  std::atomic<guint> frames{0};std::atomic<guint64> samples{0};gint64 trackBest[2]={G_MAXINT64,G_MAXINT64},trackWorst[2]={G_MININT64,G_MININT64};bool uniform=true,contiguous=true,checkContent=true;
  // Audio PTS discontinuities: count and summed signed size (ns).
  guint audioJumps=0;gint64 audioJumpNs=0;
+ // Video buffer refcount seen in the appsink callback (index 7: 7 or more).
+ guint64 videoRefcounts[8]={};
+ // Per video buffer: {callback us, buffer finalized us} (monotonic); reserved
+ // before PLAYING so element addresses stay valid for the weak references.
+ std::vector<std::pair<gint64,gint64>> bufferLife;
  // record: keep every render lateness (ns) per track for distributions.
  bool record=false;std::vector<gint64> lateness[2];
  std::string features;GstClockTime next=GST_CLOCK_TIME_NONE;std::mutex mutex;
  Consumer(Mode m,const std::string&path_,const std::string&tracks_,bool native_=false,guint localSeconds=0){mode=m;producer=false;path=path_;tracks=tracks_;native=native_;
-  const std::string sinkV=gQueue+" ! appsink name=vout sync="+(gOutputSync?"true":"false")+" async="+(gOutputAsync?"true":"false")+" max-buffers=0 ",sinkA=gQueue+" ! appsink name=aout sync="+(gOutputSync?"true":"false")+" async="+(gOutputAsync?"true":"false")+" max-buffers=0";std::string t;
+  const std::string sinkV=gQueue+" ! appsink name=vout sync="+(gOutputSync?"true":"false")+" async="+(gOutputAsync?"true":"false")+" max-buffers=0"+(gNoLastSample?" enable-last-sample=false":"")+" ",sinkA=gQueue+" ! appsink name=aout sync="+(gOutputSync?"true":"false")+" async="+(gOutputAsync?"true":"false")+" max-buffers=0";std::string t;
   // Benchmark-only control: identical queues/appsinks without FrameLink or IPC.
   if(localSeconds){CHECK(m==Mode::Bin&&!native&&tracks=="av");
    t="videotestsrc is-live=true pattern=red num-buffers="+std::to_string(localSeconds*gFps)+" ! video/x-raw,format="+gFormat+",width="+std::to_string(gWidth)+",height="+std::to_string(gHeight)+",framerate="+std::to_string(gFps)+"/1 ! "+sinkV+
@@ -190,7 +198,7 @@ struct Consumer:Side {
      const int track=strcmp(GST_OBJECT_NAME(s),"vout")?1:0;std::lock_guard<std::mutex> lock(self->mutex);
      if(auto*clock=gst_element_get_clock(GST_ELEMENT(s))){gint64 l=gint64(gst_clock_get_time(clock))-gint64(gst_element_get_base_time(GST_ELEMENT(s)))-gint64(GST_BUFFER_PTS(b));gst_object_unref(clock);
       if(self->record)self->lateness[track].push_back(l);self->trackBest[track]=std::min(self->trackBest[track],l);self->trackWorst[track]=std::max(self->trackWorst[track],l);}
-     if(track==0){if(self->features.empty()){auto*f=gst_caps_get_features(gst_sample_get_caps(sample),0);gchar*text=f?gst_caps_features_to_string(f):g_strdup("memory:SystemMemory");self->features=text;g_free(text);}
+     if(track==0){{const guint rc=GST_MINI_OBJECT_REFCOUNT_VALUE(b);self->videoRefcounts[std::min<guint>(rc,7)]++;}if(self->record&&self->bufferLife.size()<self->bufferLife.capacity()){self->bufferLife.push_back({g_get_monotonic_time(),0});gst_mini_object_weak_ref(GST_MINI_OBJECT(b),[](gpointer d,GstMiniObject*){auto*v=static_cast<std::pair<gint64,gint64>*>(d);v->second=g_get_monotonic_time();},&self->bufferLife.back());}if(self->features.empty()){auto*f=gst_caps_get_features(gst_sample_get_caps(sample),0);gchar*text=f?gst_caps_features_to_string(f):g_strdup("memory:SystemMemory");self->features=text;g_free(text);}
       GstMapInfo m{};if(self->checkContent&&gst_buffer_map(b,&m,GST_MAP_READ)){for(gsize i=4;i+3<m.size;i+=4)if(memcmp(m.data+i,m.data,4)){self->uniform=false;break;}gst_buffer_unmap(b,&m);}self->frames++;}
      else{if(GST_CLOCK_TIME_IS_VALID(self->next)){auto dd=gint64(GST_BUFFER_PTS(b))-gint64(self->next);if(dd<-1||dd>1){self->contiguous=false;++self->audioJumps;self->audioJumpNs+=dd;}}self->next=GST_BUFFER_PTS(b)+GST_BUFFER_DURATION(b);self->samples+=gst_buffer_get_size(b)/4;}
      gst_sample_unref(sample);return GST_FLOW_OK;};

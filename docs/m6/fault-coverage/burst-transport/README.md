@@ -1,6 +1,6 @@
 # M6.4 on Linux and Android: queued producer bursts, FrameLink's share — 2026-11-25
 
-Revision `063d6234`. `fl_gst_av_bench` SHA-256 prefixes: Linux `918d15cf4d8f2845`, Android arm64 `6cf8ebcd33682f2f`; `libgstframelink.so` `f9d0d96cc0ea1f4b`. Same hosts, profile and cells as the [first producer-fault record](../producer-at-rate/README.md). This record is dated; current status is in [STATUS.md](../../../STATUS.md).
+Revision `063d6234`. `fl_gst_av_bench` SHA-256 prefixes: Linux `6cf8ebcd33682f2f`, Android arm64 `918d15cf4d8f2845`; `libgstframelink.so` `f9d0d96cc0ea1f4b`. Same hosts, profile and cells as the [first producer-fault record](../producer-at-rate/README.md). This record is dated; current status is in [STATUS.md](../../../STATUS.md).
 
 ## Why a second run
 
@@ -33,7 +33,7 @@ Columns: FrameLink-share recovery (buffers over budget) / total recovery / drain
 
 During a burst on the Android native cell, FrameLink takes a 1080p RGBA frame (about 8.3 MB) in every 7.6–8.6 ms, about twice the frame rate. A 200 ms producer burst therefore takes 22–24 frames (about 370–400 ms) to drain, and the frames stay late until it has. On Linux the same intake is 3.5–3.8 ms per frame (native) and 2.0–2.1 ms (shared CPU), about 4–8x real time.
 
-What makes up the 8 ms (the producer's copy into the slot, waiting for a free slot with pool 2, or both) was not measured. A trace would separate them. Whether about 2x burst headroom is acceptable on the Android cell is a budget question for Jon.
+What makes up the 8 ms (the producer's copy into the slot, waiting for a free slot with pool 2, or both) was not measured. A trace would separate them. *Follow-up (2026-11-26): [diagnostic](android-intake/README.md): about 4.2 ms copy plus about 2.4 ms waiting for the consumer, whose `appsink` holds each frame's slot until the next frame.* Whether about 2x burst headroom is acceptable on the Android cell is a budget question for Jon.
 
 ## Pilots (kept, not part of the 60)
 
