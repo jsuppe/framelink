@@ -1,0 +1,29 @@
+complete=yes
+config=NV12 1920x1080@60 bin shared-cpu fresh-device lifecycle restart-consumer 100x5s
+cycle_fault=kill
+cycle_fault.at_ms=3000
+cycle_fault.bound_ms=2000
+cycle_fault.detection_ms=n=50 p50=6.16 p95=9.17 p99=9.39 max=9.39 min=4.38
+cycles=100
+cycles.ok=100/100
+expected.frames.per_cycle=300
+expected.samples.per_cycle=240000
+harness.malloc=producer-side mmap_threshold=8388608
+label=linux-shared-cpu-restart-consumer-kill
+long.exit=0
+long.handles=7..7
+long.handles.slope.per_cycle=0.000
+long.mem.kb=24196..24420
+long.mem.slope.kb_per_cycle=2.11
+long.role=lifecycle-producer
+long.series.result_frames_samples_memkb_handles_threads=EOS|300|240000|23704|7|6;error: coordinated session not ready or cancelled|180|143520|23904|7|6;EOS|300|240000|24160|7|6;error: coordinated session not ready or cancelled|180|143520|24164|7|6;EOS|300|240000|24184|7|6;error: coordinated session not ready or cancelled|180|143520|24196|7|6;EOS|300|240000|24196|7|6;error: Internal data stream error.|180|143520|24216|7|6;EOS|300|240000|24216|7|6;error: coordinated session not ready or cancelled|180|143520|24216|7|6;EOS|300|240000|24212|7|6;error: Internal data stream error.|180|143520|24216|7|6;EOS|300|240000|24220|7|6;error: coordinated session not ready or cancelled|180|143520|24240|7|6;EOS|300|240000|24244|7|6;error: coordinated session not ready or cancelled|180|143520|24252|7|6;EOS|300|240000|24252|7|6;error: required session tracks not ready or cancelled|180|144000|24252|7|6;EOS|300|240000|24252|7|6;error: coordinated session not ready or cancelled|180|143520|24252|7|6;EOS|300|240000|24260|7|6;error: Internal data stream error.|180|143520|24260|7|6;EOS|300|240000|24324|7|6;error: coordinated session not ready or cancelled|180|143520|24324|7|6;EOS|300|240000|24324|7|6;error: coordinated session not ready or cancelled|180|143520|24332|7|6;EOS|300|240000|24332|7|6;error: Internal data stream error.|180|143520|24332|7|6;EOS|300|240000|24332|7|6;error: required session tracks not ready or cancelled|180|144000|24332|7|6;EOS|300|240000|24336|7|6;error: Internal data stream error.|180|143520|24340|7|6;EOS|300|240000|24340|7|6;error: Internal data stream error.|180|143520|24340|7|6;EOS|300|240000|24340|7|6;error: coordinated session not ready or cancelled|180|143520|24348|7|6;EOS|300|240000|24348|7|6;error: coordinated session not ready or cancelled|180|143520|24348|7|6;EOS|300|240000|24348|7|6;error: required session tracks not ready or cancelled|177|142080|24348|7|6;EOS|300|240000|24356|7|6;error: coordinated session not ready or cancelled|180|143520|24356|7|6;EOS|300|240000|24356|7|6;error: coordinated session not ready or cancelled|180|143520|24356|7|6;EOS|300|240000|24356|7|6;error: coordinated session not ready or cancelled|180|143520|24364|7|6;EOS|300|240000|24364|7|6;error: required session tracks not ready or cancelled|180|144000|24364|7|6;EOS|300|240000|24364|7|6;error: Internal data stream error.|180|143520|24368|7|6;EOS|300|240000|24368|7|6;error: coordinated session not ready or cancelled|180|143520|24368|7|6;EOS|300|240000|24368|7|6;error: coordinated session not ready or cancelled|180|143520|24380|7|6;EOS|300|240000|24380|7|6;error: coordinated session not ready or cancelled|180|143520|24384|7|6;EOS|300|240000|24384|7|6;error: required session tracks not ready or cancelled|180|144000|24384|7|6;EOS|300|240000|24384|7|6;error: coordinated session not ready or cancelled|180|143520|24384|7|6;EOS|300|240000|24388|7|6;error: coordinated session not ready or cancelled|180|143520|24388|7|6;EOS|300|240000|24388|7|6;error: Internal data stream error.|180|143520|24388|7|6;EOS|300|240000|24388|7|6;error: coordinated session not ready or cancelled|180|143520|24396|7|6;EOS|300|240000|24396|7|6;error: coordinated session not ready or cancelled|180|143520|24396|7|6;EOS|300|240000|24396|7|6;error: required session tracks not ready or cancelled|180|144000|24396|7|6;EOS|300|240000|24400|7|6;error: coordinated session not ready or cancelled|180|143520|24400|7|6;EOS|300|240000|24400|7|6;error: coordinated session not ready or cancelled|180|143520|24400|7|6;EOS|300|240000|24400|7|6;error: coordinated session not ready or cancelled|180|143520|24400|7|6;EOS|300|240000|24404|7|6;error: coordinated session not ready or cancelled|180|143520|24404|7|6;EOS|300|240000|24404|7|6;error: coordinated session not ready or cancelled|180|143520|24404|7|6;EOS|300|240000|24404|7|6;error: required session tracks not ready or cancelled|180|144000|24408|7|6;EOS|300|240000|24408|7|6;error: required session tracks not ready or cancelled|180|144000|24408|7|6;EOS|300|240000|24408|7|6;error: coordinated session not ready or cancelled|180|143520|24408|7|6;EOS|300|240000|24412|7|6;error: Internal data stream error.|180|143520|24412|7|6;EOS|300|240000|24412|7|6;error: coordinated session not ready or cancelled|180|143520|24412|7|6;EOS|300|240000|24412|7|6;error: Internal data stream error.|180|143520|24416|7|6;EOS|300|240000|24416|7|6;error: coordinated session not ready or cancelled|178|142080|24416|7|6;EOS|300|240000|24416|7|6;error: required session tracks not ready or cancelled|180|144000|24416|7|6;EOS|300|240000|24420|7|6;error: coordinated session not ready or cancelled|180|143520|24420|7|6;EOS|300|240000|24420|7|6;error: coordinated session not ready or cancelled|180|143520|24420|7|6;
+long.threads=6..6
+long.threads.slope.per_cycle=0.000
+output.async=false
+output.queue_buffers=1
+output.sync=false
+playback.latency_ms=0
+seconds=5
+video.pool=2
+video.queue=1
+wall.s=402.8

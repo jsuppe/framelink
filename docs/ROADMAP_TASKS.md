@@ -371,6 +371,8 @@ per-platform state. Windows readiness is the
   Android intake about 8 ms per 1080p RGBA frame (about 2x real time), drain-rate check failed 3/5.
   Malformed metadata at rate (2026-11-26, [evidence](m6/fault-coverage/malformed-at-rate/README.md)):
   60/60; producer refuses with a specific error, bad buffer never delivered, consumer sees a peer failure.
+  Growth across repeated faults (2026-11-26, [evidence](m6/fault-coverage/cycle-faults/README.md)): 9/9 runs
+  of 100 cycles, odd cycles faulted; all cycles pass and slopes within the frozen M6.3 limits.
 - [ ] **M6.5 Performance/resource evidence:** distributions, queue depth,
   CPU/GPU/memory/handles, clock behavior and bounded growth.
   Stage costs, Android NV12 cost isolation and platform limits are published
