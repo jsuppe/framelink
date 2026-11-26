@@ -1705,6 +1705,20 @@ if(FRAMELINK_BUILD_TESTS AND TARGET framelink_gst_session)
     set_tests_properties(gst_av_bench_fault_producer_kill gst_av_bench_fault_consumer_kill
         gst_av_bench_fault_consumer_stall gst_av_bench_fault_audio_drop gst_av_bench_fault_audio_gap
         PROPERTIES TIMEOUT 120)
+    # D2 option B: a native receiver's stall makes the producer drop for a full
+    # ring; the consumer must see those drops as a GAP (mid-stream and just
+    # before EOS). Native receivers are Linux and Android here; Windows follows
+    # with its requalification.
+    if(NOT WIN32)
+        add_test(NAME gst_av_bench_fault_consumer_stall_native COMMAND fl_gst_av_bench $<TARGET_FILE:gstframelink>
+            ${FL_BENCH_FAULT_ARGS} --native --fault consumer-stall --fault-frame 90 --fault-ms 300
+            --fault-expect counted-drop --label bench-fault-consumer-stall-native)
+        add_test(NAME gst_av_bench_fault_consumer_stall_native_tail COMMAND fl_gst_av_bench $<TARGET_FILE:gstframelink>
+            ${FL_BENCH_FAULT_ARGS} --native --fault consumer-stall --fault-frame 175 --fault-ms 400
+            --fault-expect counted-drop --label bench-fault-consumer-stall-native-tail)
+        set_tests_properties(gst_av_bench_fault_consumer_stall_native gst_av_bench_fault_consumer_stall_native_tail
+            PROPERTIES TIMEOUT 120 SKIP_REGULAR_EXPRESSION "SKIP native consumer memory")
+    endif()
     # Malformed metadata on one producer buffer, each refused explicitly.
     foreach(case video-no-pts video-stale-meta audio-no-pts audio-misaligned)
         if(case MATCHES "^video")

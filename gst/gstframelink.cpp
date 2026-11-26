@@ -240,6 +240,10 @@ typedef struct _GstFrameLinkSink {
     GstBaseSink parent;
     FlGstSession* session; flSessionConfig sessionConfig; gboolean sessionRegistered;
     guint64 sessionFrames;gint64 sessionLastPts;gboolean sessionHaveSegment,sessionGapPending,sessionMarkDiscont;
+    // Coordinated ring-full drops not yet reported: one merged media interval
+    // (running time), sent as a GAP event before the next submitted frame's
+    // barrier, or before END (D2 option B).
+    gboolean dropGapPending;guint64 dropGapStart,dropGapEnd;
 
     // properties
     gchar* channel; // exact channel name, or the slot-set prefix when slots > 0
@@ -422,7 +426,7 @@ static gboolean sinkStart(GstBaseSink* base) {
             GST_ELEMENT_ERROR(self,RESOURCE,SETTINGS,("coordinated video requires an adopted channel and matching session generation"),(NULL));return FALSE;
         }
         if(!self->sessionRegistered){if(fl_gst_session_register_track(self->session,FL_GST_TRACK_VIDEO)!=FL_GST_SESSION_READY)return FALSE;self->sessionRegistered=TRUE;}
-        self->preserveTimestamps=TRUE;self->preserveFrameMetadata=TRUE;self->streamGeneration=self->sessionConfig.generation;self->sessionFrames=0;self->sessionLastPts=-1;self->sessionHaveSegment=FALSE;self->sessionGapPending=FALSE;
+        self->preserveTimestamps=TRUE;self->preserveFrameMetadata=TRUE;self->streamGeneration=self->sessionConfig.generation;self->sessionFrames=0;self->sessionLastPts=-1;self->sessionHaveSegment=FALSE;self->sessionGapPending=FALSE;self->dropGapPending=FALSE;self->dropGapStart=self->dropGapEnd=0;
         gst_base_sink_set_sync(base,FALSE);
     }
 #ifndef FL_GST_NATIVE_SINK
@@ -536,6 +540,25 @@ static gboolean sinkSetCaps(GstBaseSink* base, GstCaps* caps) {
     return TRUE;
 }
 
+// D2 option B: report coordinated ring-full drops to the consumer as one GAP
+// event over the dropped interval, then (for a frame about to be submitted,
+// whose DISCONT barrier was deferred) that frame's barrier, so the consumer
+// emits the GAP before the DISCONT frame. At EOS, buffer is null and only the
+// GAP is sent, ahead of END. Without an event stream the frame's DISCONT flag
+// alone marks the loss.
+static bool sinkSendDropGap(GstFrameLinkSink* self,const GstSegment* segment,GstBuffer* buffer,flBuffer* fb){
+    self->dropGapPending=FALSE;
+    const guint64 start=self->dropGapStart,end=self->dropGapEnd;self->dropGapStart=self->dropGapEnd=0;
+    if(!fl_gst_session_has_event_stream(self->session,self->sessionConfig.generation))return true;
+    auto fail=[&](const char* what){if(fb)flCancelBuffer(self->ch,fb);++self->dropped;GST_ELEMENT_ERROR(self,RESOURCE,WRITE,("%s",what),(NULL));return false;};
+    FlGstVideoEvent gap{FL_GST_VIDEO_GAP,self->sessionFrames,start,end>start?end-start:0};
+    if(fl_gst_session_send_video_event(self->session,self->sessionConfig.generation,&gap)!=FL_GST_SESSION_READY)return fail("authenticated video event stream required for GAP");
+    if(!buffer)return true;
+    guint64 pts=0;if(!fl_gst_segment_running_time(segment,GST_BUFFER_PTS(buffer),&pts))return fail("valid supported frame metadata and TIME mapping required");
+    FlGstVideoEvent barrier{FL_GST_VIDEO_BARRIER,self->sessionFrames,pts,0};
+    if(fl_gst_session_send_video_event(self->session,self->sessionConfig.generation,&barrier)!=FL_GST_SESSION_READY)return fail("video event barrier failed");
+    return true;
+}
 static GstFlowReturn sinkRenderImpl(GstBaseSink* base, GstBuffer* buffer) {
     GstFrameLinkSink* self = GST_FRAMELINK_SINK(base);
     gsttrace::Scope trace("gst.sinkRender",gsttrace::id(self->channel));
@@ -543,7 +566,8 @@ static GstFlowReturn sinkRenderImpl(GstBaseSink* base, GstBuffer* buffer) {
     if(self->session){auto*meta=gst_buffer_get_framelink_frame_meta(buffer);if(meta&&meta->frame.streamGeneration!=self->sessionConfig.generation){GST_ELEMENT_ERROR(self,STREAM,FORMAT,("stale producer video metadata generation"),(NULL));return GST_FLOW_ERROR;}}
     if(self->session){
         self->sessionMarkDiscont=self->sessionGapPending||!self->sessionFrames||GST_BUFFER_FLAG_IS_SET(buffer,GST_BUFFER_FLAG_DISCONT);
-        if(self->sessionMarkDiscont&&fl_gst_session_has_event_stream(self->session,self->sessionConfig.generation)){
+        // After ring-full drops the barrier follows the GAP, once a slot is acquired.
+        if(self->sessionMarkDiscont&&!self->dropGapPending&&fl_gst_session_has_event_stream(self->session,self->sessionConfig.generation)){
             guint64 pts=0;if(!fl_gst_segment_running_time(&base->segment,GST_BUFFER_PTS(buffer),&pts))return GST_FLOW_ERROR;
             FlGstVideoEvent event{FL_GST_VIDEO_BARRIER,self->sessionFrames,pts,0};
             if(fl_gst_session_send_video_event(self->session,self->sessionConfig.generation,&event)!=FL_GST_SESSION_READY){GST_ELEMENT_ERROR(self,RESOURCE,WRITE,("video event barrier failed"),(NULL));return GST_FLOW_ERROR;}
@@ -629,6 +653,19 @@ static GstFlowReturn sinkRenderImpl(GstBaseSink* base, GstBuffer* buffer) {
                 ("buffer-wait-ms=%u; frame was not submitted",self->bufferWaitMs));
             return trace.result(GST_FLOW_ERROR);
         }
+        // Coordinated sessions: the consumer must see the loss. Merge consecutive
+        // drops into one interval: the frame's own duration, else one frame period.
+        if(self->session){
+            guint64 start=0;
+            if(!fl_gst_segment_running_time(&base->segment,GST_BUFFER_PTS(buffer),&start)){
+                GST_ELEMENT_ERROR(self,STREAM,FORMAT,("valid supported frame metadata and TIME mapping required"),(NULL));return trace.result(GST_FLOW_ERROR);}
+            guint64 duration=GST_BUFFER_DURATION_IS_VALID(buffer)?GST_BUFFER_DURATION(buffer):
+                (GST_VIDEO_INFO_FPS_N(&self->vinfo)>0?gst_util_uint64_scale(GST_SECOND,GST_VIDEO_INFO_FPS_D(&self->vinfo),GST_VIDEO_INFO_FPS_N(&self->vinfo)):0);
+            if(duration>G_MAXINT64-start)duration=0;
+            if(!self->dropGapPending){self->dropGapStart=start;self->dropGapPending=TRUE;}
+            self->dropGapEnd=std::max<guint64>(self->dropGapEnd,start+duration);
+            self->sessionGapPending=TRUE;
+        }
         return trace.result(GST_FLOW_OK);
     }
     if (r != FL_OK) {
@@ -641,6 +678,7 @@ static GstFlowReturn sinkRenderImpl(GstBaseSink* base, GstBuffer* buffer) {
     }
 
     account("gst.frame_acquired");
+    if(self->session&&self->dropGapPending&&!sinkSendDropGap(self,&base->segment,buffer,&fb))return trace.result(GST_FLOW_ERROR);
     guint64 metadataPts=0;
     if(self->preserveFrameMetadata){
         flFrameMetadata metadata{};
@@ -829,6 +867,7 @@ static gboolean sinkEventImpl(GstBaseSink* base, GstEvent* event) {
     if (GST_EVENT_TYPE(event) == GST_EVENT_EOS) {
         auto* self = GST_FRAMELINK_SINK(base);
         if(self->sharedCpu&&!sinkSharedCpuEos(self))return FALSE;
+        if(self->session&&self->dropGapPending&&!sinkSendDropGap(self,nullptr,nullptr,nullptr))return FALSE;
         if(self->session&&fl_gst_session_video_eos(self->session,self->sessionConfig.generation,self->sessionFrames,self->sessionLastPts)!=FL_GST_SESSION_READY){GST_ELEMENT_ERROR(self,STREAM,FAILED,("invalid coordinated video EOS"),(NULL));return FALSE;}
         if(self->session&&fl_gst_session_has_event_stream(self->session,self->sessionConfig.generation)){FlGstVideoEvent record{FL_GST_VIDEO_END,self->sessionFrames,self->sessionLastPts<0?0:guint64(self->sessionLastPts),0};if(fl_gst_session_send_video_event(self->session,self->sessionConfig.generation,&record)!=FL_GST_SESSION_READY)return FALSE;}
         auto* stats = gst_structure_new("framelink-sink-stats",

@@ -377,8 +377,18 @@ static int consumerChild(const Options&o,const std::string&session,const std::st
    gst_pad_add_probe(pad,GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM,[](GstPad*,GstPadProbeInfo*info,gpointer d)->GstPadProbeReturn{auto*e=GST_PAD_PROBE_INFO_EVENT(info);
     if(GST_EVENT_TYPE(e)==GST_EVENT_GAP){GstClockTime pts=0,duration=0;gst_event_parse_gap(e,&pts,&duration);auto*g=static_cast<Gaps*>(d);++g->n;if(GST_CLOCK_TIME_IS_VALID(duration))g->ns+=duration;}return GST_PAD_PROBE_OK;},&gaps,nullptr);
    gst_object_unref(pad);gst_object_unref(sink);}
+  // Video: GAP events and DISCONT buffers after the first (D2 option B marks
+  // ring-full drops to the consumer this way).
+  struct VideoMarks {guint gaps=0,disconts=0;guint64 gapNs=0;bool first=true;} vmarks;
+  {auto*sink=gst_bin_get_by_name(GST_BIN(c.p),"vout");auto*pad=gst_element_get_static_pad(sink,"sink");
+   gst_pad_add_probe(pad,GstPadProbeType(GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM|GST_PAD_PROBE_TYPE_BUFFER),[](GstPad*,GstPadProbeInfo*info,gpointer d)->GstPadProbeReturn{auto*m=static_cast<VideoMarks*>(d);
+    if(GST_PAD_PROBE_INFO_TYPE(info)&GST_PAD_PROBE_TYPE_BUFFER){auto*b=GST_PAD_PROBE_INFO_BUFFER(info);if(!m->first&&GST_BUFFER_FLAG_IS_SET(b,GST_BUFFER_FLAG_DISCONT))++m->disconts;m->first=false;}
+    else if(GST_EVENT_TYPE(GST_PAD_PROBE_INFO_EVENT(info))==GST_EVENT_GAP){GstClockTime pts=0,duration=0;gst_event_parse_gap(GST_PAD_PROBE_INFO_EVENT(info),&pts,&duration);++m->gaps;if(GST_CLOCK_TIME_IS_VALID(duration))m->gapNs+=duration;}
+    return GST_PAD_PROBE_OK;},&vmarks,nullptr);
+   gst_object_unref(pad);gst_object_unref(sink);}
   c.start();c.finish();sampler.stop();
   r["ended_monotonic_us"]=std::to_string(c.endedAt);
+  r["video.gap_events"]=std::to_string(vmarks.gaps);r["video.gap_event_ns"]=std::to_string(vmarks.gapNs);r["video.discont_after_first"]=std::to_string(vmarks.disconts);
   r["audio.gap_events"]=std::to_string(gaps.n);r["audio.gap_event_ns"]=std::to_string(gaps.ns);
   {std::lock_guard<std::mutex> lock(c.mutex);{std::string h;for(int k=0;k<8;++k)h+=(k?",":"")+std::to_string(c.videoRefcounts[k]);r["video.callback_refcount_hist"]=h;}{std::vector<double> life;guint alive=0;for(auto&x:c.bufferLife){if(x.second)life.push_back((x.second-x.first)/1000.0);else ++alive;}r["video.buffer_life_after_callback.ms"]=dist(life);r["video.buffer_alive_at_end"]=std::to_string(alive);}r["audio.pts_jumps"]=std::to_string(c.audioJumps);r["audio.pts_jump_ns"]=std::to_string(c.audioJumpNs);}
   // Recovery: buffers from the faulted one to the last arrival over budget, on
@@ -768,8 +778,14 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
    const bool silentLoss=cr["result"]=="EOS"&&delivered!=pushed&&!accounted;s["fault.silent_loss"]=silentLoss?"yes":"no";s["fault.loss_accounted"]=accounted?"yes":"no";
    const bool complete=pc==0&&cc==0&&cr["queue.accounting"]=="complete"&&cr["audio.contiguous"]=="yes"&&pr["result"]=="EOS"&&cr["result"]=="EOS"&&cr["frames"]==s["expected.frames"]&&cr["frames"]==pr["pushed.frames"]&&cr["samples"]==s["expected.samples"];
    const guint period=std::max<guint>(1,1000/gFps);const guint recoveryLimit=(o.faultMs+period-1)/period+2;s["fault.recovery_limit_frames"]=std::to_string(recoveryLimit);
+   // D2 option B: the drops are also marked to the consumer: video GAP events
+   // covering exactly the dropped frames' periods, and a DISCONT frame after them.
+   const long long gapNs=cr["video.gap_events"].empty()?-1:std::stoll(cr["video.gap_event_ns"]),gapEvents=cr["video.gap_events"].empty()?-1:std::stoll(cr["video.gap_events"]),disconts=cr["video.discont_after_first"].empty()?-1:std::stoll(cr["video.discont_after_first"]);
+   const long long framePeriodNs=(long long)gst_util_uint64_scale(GST_SECOND,1,gFps);
+   const bool marked=dropped>0&&gapEvents>=1&&gapEvents<=dropped&&std::llabs(gapNs-dropped*framePeriodNs)<=dropped*2&&disconts>=gapEvents-1; // a GAP just before EOS has no following frame
+   s["fault.consumer_gap_events"]=std::to_string(gapEvents);s["fault.consumer_gap_ns"]=std::to_string(gapNs);s["fault.consumer_disconts"]=std::to_string(disconts);s["fault.loss_marked"]=marked?"yes":"no";
    if(o.faultExpect=="absorbed")pass=cr["fault.executed"]=="1"&&complete&&std::stoul(cr["fault.recovery_frames"])<=recoveryLimit;
-   else if(o.faultExpect=="counted-drop")pass=cr["fault.executed"]=="1"&&pc==0&&cc==0&&pr["result"]=="EOS"&&cr["result"]=="EOS"&&accounted&&dropped>0&&ringFull==dropped&&cr["audio.contiguous"]=="yes"&&cr["queue.accounting"]=="complete"&&cr["samples"]==s["expected.samples"];
+   else if(o.faultExpect=="counted-drop")pass=cr["fault.executed"]=="1"&&pc==0&&cc==0&&pr["result"]=="EOS"&&cr["result"]=="EOS"&&accounted&&dropped>0&&ringFull==dropped&&cr["audio.contiguous"]=="yes"&&cr["queue.accounting"]=="complete"&&cr["samples"]==s["expected.samples"]&&marked;
    else if(o.faultExpect=="replacement-failure")pass=cr["fault.executed"]=="1"&&!silentLoss&&pc==0&&cc==0&&cr["result"].find("replaced before it was read")!=std::string::npos&&pr["result"]!="EOS";
    else pass=cr["fault.executed"]=="1"&&!silentLoss&&pc==0&&cc==0&&pr["result"].find("pool exhausted")!=std::string::npos&&cr["result"]!="EOS";}
   s["fault.pass"]=pass?"yes":"no";s["complete"]=pass?"yes":"no";

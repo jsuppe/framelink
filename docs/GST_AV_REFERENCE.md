@@ -62,6 +62,12 @@ These hold for the individual elements attached to a session and for the bins.
 - **Video accounting.** Every frame is accounted for. A frame replaced in the
   ring before the consumer read it fails the consumer at once ("coordinated
   video frame replaced before it was read"); a stream never silently drops.
+  When no slot frees within `buffer-wait-ms`, the producer drops the frame and
+  counts it (`framelink-sink-stats` `dropped`, `ring-full-drops`), or fails
+  with `error-on-ring-full=true`. A drop is also reported to the consumer:
+  consecutive drops become one GAP event over their media interval, and the
+  next delivered frame carries DISCONT (drops just before EOS: the GAP alone,
+  ahead of EOS).
 - **Audio.** PCM blocks need valid PTS and duration in a TIME segment; a block
   larger than `audio-queue-ms` fails; a timestamp gap without DISCONT, a
   segment replacement, rate changes and non-forward segments are refused.
