@@ -20,4 +20,21 @@ Three smaller questions, decided the same way:
 | 8 | Tell the consumer why the producer failed | **D** | Both: the producer sends a final reason code over the session event stream before an explicit failure (the consumer error names it; a crash still shows as peer death), and every consumer peer-failure path reports one stable message and error code. A protocol change on all three platforms, Windows included; its requalification goes back to Jon before merge. |
 | 9 | `gst_av_parity` `consumer-pause` and "Could not write to resource." | **C** | Keep the test as it is, and investigate the race: whether the producer should report the session's cancellation before the GIO writer error can surface. |
 
+### Decision 9 follow-up: the race traced (same day)
+
+Jon chose D (trace first), then **C** and **E1**.
+
+**What was traced.** The trace was a temporary in-memory timeline on Android; it was not committed. Logs are retained outside the repository.
+- **The mechanism.** The producer's audio sink checks the session for each 10 ms block, and its internal queue writes the block about 0.3–0.6 ms later. When the consumer cancels inside that gap, the write fails on the shut socket: "Could not write to resource."
+- **Not bin-specific.** With the gap widened by 2 ms (test-only), the write failed in 7 of 80 results, with element and bin producers. It was the producer's first error in 2 of them. Which error came first was a second race, between the writer thread and the audio and video threads.
+- **Rate without the widened gap:** 0 in 480 traced results.
+- **Side finding.** Decision 8's consumer path waited up to 100 ms for a producer reason before posting any error. For the consumer's own failure no reason ever comes, so the cancel always reached the producer 101 ms late (every trace).
+
+**What was chosen.**
+- **C:** every producer error posted after the consumer closed the session becomes "FrameLink peer closed or failed" (reason `closed`). This covers a socket write into the closed stream and a session found cancelled. The producer's own failures keep their errors.
+  - The audio sink's session-ended refusals moved from `STREAM_FORMAT` to `RESOURCE_WRITE`, so they are no longer recorded as invalid input.
+- **E1:** the consumer posts its own "frame replaced before it was read" at once, without the wait. Its validation errors keep the wait, because a truncated packet can come from a producer that is failing.
+
+Windows requalification of decisions 8 and 9 goes back to Jon before merge.
+
 Windows items (3, 4 and the Windows side of 5) are changes to test code or test settings on the frozen platform, approved here. Any Windows product change still needs Jon's approval with its evidence.

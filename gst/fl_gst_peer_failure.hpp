@@ -1,10 +1,13 @@
 #pragma once
-// Why a coordinated session failed, carried producer -> consumer (M6 decision 8).
+// Why a coordinated session failed, carried producer -> consumer (M6 decision 8),
+// and one stable error for a peer that went away, on both sides (decision 9).
 //
 // Producer: an error a FrameLink producer element raises itself records a reason
 // on the session (invalid input: stream format errors; overload: the pool
-// exhausted under error-on-ring-full). Errors caused by the peer going away carry
-// none. fl_gst_session_cancel then sends the reason as an ABORT record.
+// exhausted under error-on-ring-full). fl_gst_session_cancel then sends the
+// reason as an ABORT record. Any other producer error posted after the consumer
+// closed the session (a socket write into the closed stream, a session found
+// cancelled) becomes "FrameLink peer closed or failed", reason "closed".
 //
 // Consumer: before a FrameLink consumer element posts an error, it waits briefly
 // for the producer's end of stream. If the producer failed or closed, the error
@@ -12,7 +15,9 @@
 // GST_RESOURCE_ERROR_READ, with a "framelink-peer-failure" details structure
 // (field "reason": "invalid-input", "overload" or "closed"; field "original":
 // the error the element would have posted). A local consumer failure keeps its
-// own error. Sessions without an event stream (audio-only) are left unchanged.
+// own error; one the consumer knows is its own (details field
+// "framelink-local-failure") is posted without the wait. Sessions without an
+// event stream (audio-only) are left unchanged.
 #include "framelink_session_transport.h"
 #include <gst/gst.h>
 
@@ -32,14 +37,8 @@ static inline void flGstNoteProducerFailure(FlGstSession* session,GstMessage* me
 static inline const char* flGstPeerReasonName(guint reason){
     return reason==FL_GST_PEER_INVALID_INPUT?"invalid-input":reason==FL_GST_PEER_OVERLOAD?"overload":"closed";
 }
-// Returns the message to post: the stable peer-failure error (taking ownership
-// of message) or message itself.
-static inline GstMessage* flGstConsumerPeerFailure(FlGstSession* session,GstMessage* message){
-    if(!session||GST_MESSAGE_TYPE(message)!=GST_MESSAGE_ERROR)return message;
-    const GstStructure* existing=nullptr;gst_message_parse_error_details(message,&existing);
-    if(existing&&gst_structure_has_name(existing,"framelink-peer-failure"))return message;
-    guint reason=0;
-    if(fl_gst_session_peer_failure(session,FL_GST_PEER_FAILURE_WAIT_MS,&reason)!=FL_GST_SESSION_READY)return message;
+// The stable peer-failure error replacing message (taking ownership of it).
+static inline GstMessage* flGstStablePeerError(GstMessage* message,guint reason){
     GError* original=nullptr;gchar* debug=nullptr;gst_message_parse_error(message,&original,&debug);
     const char* text=reason==FL_GST_PEER_INVALID_INPUT?"FrameLink producer failed: invalid input":
                      reason==FL_GST_PEER_OVERLOAD?"FrameLink producer failed: overload":"FrameLink peer closed or failed";
@@ -51,4 +50,32 @@ static inline GstMessage* flGstConsumerPeerFailure(FlGstSession* session,GstMess
     gst_message_set_seqnum(replaced,gst_message_get_seqnum(message));
     g_error_free(stable);g_free(detail);g_free(debug);g_clear_error(&original);gst_message_unref(message);
     return replaced;
+}
+static inline bool flGstPeerFailureDetails(GstMessage* message,const GstStructure** out){
+    const GstStructure* existing=nullptr;gst_message_parse_error_details(message,&existing);*out=existing;
+    return existing&&gst_structure_has_name(existing,"framelink-peer-failure");
+}
+// Consumer: returns the message to post, the stable peer-failure error (taking
+// ownership of message) or message itself.
+static inline GstMessage* flGstConsumerPeerFailure(FlGstSession* session,GstMessage* message){
+    if(!session||GST_MESSAGE_TYPE(message)!=GST_MESSAGE_ERROR)return message;
+    const GstStructure* existing=nullptr;if(flGstPeerFailureDetails(message,&existing))return message;
+    // Decision 9 E1: a failure the consumer knows is its own needs no producer reason.
+    if(existing&&gst_structure_has_field(existing,"framelink-local-failure"))return message;
+    guint reason=0;
+    if(fl_gst_session_peer_failure(session,FL_GST_PEER_FAILURE_WAIT_MS,&reason)!=FL_GST_SESSION_READY)return message;
+    return flGstStablePeerError(message,reason);
+}
+// Producer: returns the message to post. Errors that may come from the closed
+// transport (resource errors, failed event delivery) wait up to the same bound
+// for the consumer's shutdown to arrive; others are only checked.
+static inline GstMessage* flGstProducerPeerFailure(FlGstSession* session,GstMessage* message){
+    if(!session||GST_MESSAGE_TYPE(message)!=GST_MESSAGE_ERROR)return message;
+    const GstStructure* existing=nullptr;if(flGstPeerFailureDetails(message,&existing))return message;
+    if(flGstProducerFailureReason(message))return message;
+    GError* error=nullptr;gst_message_parse_error(message,&error,nullptr);
+    const bool transport=error&&(error->domain==GST_RESOURCE_ERROR||(error->domain==GST_STREAM_ERROR&&error->code==GST_STREAM_ERROR_FAILED));
+    g_clear_error(&error);
+    if(!fl_gst_session_peer_closed(session,transport?FL_GST_PEER_FAILURE_WAIT_MS:0))return message;
+    return flGstStablePeerError(message,0);
 }

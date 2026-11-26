@@ -88,9 +88,15 @@ These hold for the individual elements attached to a session and for the bins.
   crashed or lost, or a producer error FrameLink cannot attribute). Its details
   structure `framelink-peer-failure` has `reason` (`invalid-input`,
   `overload`, `closed`) and `original`, the error the element would otherwise
-  have posted. The consumer's own failures keep their specific errors. The
-  reason travels on the session's event stream; audio-only sessions, which
-  have none, keep the per-element errors. Reconnect requires NULL and a fresh session; there is no
+  have posted. The consumer's own failures keep their specific errors; one
+  known to be its own (a frame replaced before it was read) is posted at once,
+  the others after waiting at most 100 ms for the producer's reason. When the
+  consumer fails or closes, the producer posts the same stable error, "FrameLink
+  peer closed or failed" with reason `closed`, whichever of its tracks or
+  socket writes notices first; the producer's own failures keep their
+  specific errors. The reason travels on the session's event stream;
+  audio-only sessions, which have none, keep the per-element errors on both
+  sides. Reconnect requires NULL and a fresh session; there is no
   automatic in-element reconnect.
 - **Latency queries.** FrameLink sources answer live with no added latency,
   so the consumer pipeline's latency is its sinks' plus `latency-ms`. The

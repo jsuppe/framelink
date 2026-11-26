@@ -18,7 +18,9 @@ class FlGstEventChannel {
  std::deque<FlGstVideoEvent> events_;std::atomic<bool> failed_{false};guint64 sent_=0;
  // Consumer: the producer ended the stream (ABORT, or EOF/error not caused locally).
  std::atomic<bool> remoteEnded_{false};std::atomic<guint> abortReason_{0};
- void fail(){failed_=true;g_cancellable_cancel(cancel_);changed_.notify_all();}
+ // Producer: the consumer closed the stream (failure not caused by a local cancel).
+ std::atomic<bool> localCancel_{false},peerGone_{false};
+ void fail(){if(!localCancel_)peerGone_=true;failed_=true;g_cancellable_cancel(cancel_);changed_.notify_all();}
  void readLoop(){
   guint64 serial=0;auto*socket=g_socket_connection_get_socket(stream_);
   while(!g_cancellable_is_cancelled(cancel_)){
@@ -44,7 +46,7 @@ public:
  }
  ~FlGstEventChannel(){cancel();if(reader_.joinable())reader_.join();g_object_unref(cancel_);g_object_unref(stream_);}
  void cancel(){
-  g_cancellable_cancel(cancel_);
+  localCancel_=true;g_cancellable_cancel(cancel_);
   // Interrupt the peer as well as local waiters. Cancellation does not transfer
   // ownership of any native allocation or manufacture a successful terminal.
   g_socket_shutdown(g_socket_connection_get_socket(stream_),TRUE,TRUE,nullptr);
@@ -59,6 +61,17 @@ public:
   return failed_.load();
  }
  bool producer()const{return producer_;}
+ // Producer: whether the consumer closed the stream, waiting up to timeout for
+ // its shutdown to arrive. False after a local cancel that came first.
+ bool peerClosed(guint timeout){
+  if(!producer_)return false;
+  if(!failed_&&!g_cancellable_is_cancelled(cancel_)){
+   auto*socket=g_socket_connection_get_socket(stream_);const auto condition=GIOCondition(G_IO_IN|G_IO_HUP|G_IO_ERR);GError*error=nullptr;
+   const bool ready=timeout?bool(g_socket_condition_timed_wait(socket,condition,gint64(timeout)*1000,cancel_,&error)):g_socket_condition_check(socket,condition)!=0;
+   g_clear_error(&error);if(ready&&!g_cancellable_is_cancelled(cancel_))fail();
+  }
+  return peerGone_.load();
+ }
  // Consumer: wait up to timeout for the producer's end of stream. True with the
  // ABORT reason (0: closed without one); false if none was seen.
  bool peerEnded(guint timeout,guint*reason){

@@ -140,6 +140,10 @@ FL_GST_SESSION_API void fl_gst_session_set_failure_reason(FlGstSession*,guint re
 // closed without one (stopped, crashed or lost). TIMEOUT: no producer failure
 // seen (a local failure). INVALID: no event stream, so it cannot be told.
 FL_GST_SESSION_API FlGstSessionResult fl_gst_session_peer_failure(FlGstSession*,guint timeout_ms,guint* reason);
+// Producer: whether the consumer closed the session, waiting up to timeout_ms
+// for its shutdown to arrive (decision 9). FALSE after an explicit producer
+// failure or a local cancel that came first, or without an event stream.
+FL_GST_SESSION_API gboolean fl_gst_session_peer_closed(FlGstSession*,guint timeout_ms);
 G_END_DECLS
 
 G_BEGIN_DECLS

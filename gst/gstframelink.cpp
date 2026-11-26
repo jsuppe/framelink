@@ -993,7 +993,7 @@ static gboolean sinkUnlockStop(GstBaseSink*base){g_atomic_int_set(&GST_FRAMELINK
 // Decision 8: an error this producer raises itself tells the consumer why.
 static gboolean sinkPostMessage(GstElement* element,GstMessage* message){
     auto* self=GST_FRAMELINK_SINK(element);
-    if(self->session)flGstNoteProducerFailure(self->session,message);
+    if(self->session){message=flGstProducerPeerFailure(self->session,message);flGstNoteProducerFailure(self->session,message);}
     return GST_ELEMENT_CLASS(gst_framelink_sink_parent_class)->post_message(element,message);
 }
 static void gst_framelink_sink_class_init(GstFrameLinkSinkClass* klass) {
@@ -1686,8 +1686,10 @@ static GstFlowReturn srcCreateImpl(GstPushSrc* push, GstBuffer** outbuf) {
     // session frame is accounted for, so a replaced one can never be recovered:
     // fail now with the cause instead of at the idle deadline.
     if(self->session&&frame.sequence!=self->sessionSequence+1){const guint64 previous=self->sessionSequence;srcReleaseFrame(self,&frame);
-        GST_ELEMENT_ERROR(self,STREAM,FAILED,("coordinated video frame replaced before it was read: the producer delivered faster than real time"),
-            ("ring sequence %" G_GUINT64_FORMAT " after %" G_GUINT64_FORMAT " with a receive queue of %u; coordinated video must be paced in real time (live or clock-synchronized sources) and read within the queue budget",frame.sequence,previous,self->receiveQueue));
+        // The consumer's own failure (decision 9 E1): posted without waiting for a producer reason.
+        GST_ELEMENT_ERROR_WITH_DETAILS(self,STREAM,FAILED,("coordinated video frame replaced before it was read: the producer delivered faster than real time"),
+            ("ring sequence %" G_GUINT64_FORMAT " after %" G_GUINT64_FORMAT " with a receive queue of %u; coordinated video must be paced in real time (live or clock-synchronized sources) and read within the queue budget",frame.sequence,previous,self->receiveQueue),
+            ("framelink-local-failure",G_TYPE_BOOLEAN,TRUE,nullptr));
         return GST_FLOW_ERROR;}
     if(self->session)self->sessionSequence=frame.sequence;
     if(self->session&&(metadata.flags&FL_FRAME_DISCONT)&&!srcVideoEvents(self,FL_GST_VIDEO_BARRIER,frame.ptsNs)){srcReleaseFrame(self,&frame);GST_ELEMENT_ERROR(self,STREAM,FAILED,("video discontinuity event barrier failed"),(NULL));return GST_FLOW_ERROR;}

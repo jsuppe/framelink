@@ -703,8 +703,8 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
    const std::string result=sr["result"];const gint64 ended=sr.count("ended_monotonic_us")?std::stoll(sr["ended_monotonic_us"]):0;
    const double detect=ended&&killedAt?(ended-killedAt)/1000.0:-1;char t[32];snprintf(t,sizeof t,"%.1f",detect);
    s["fault.at_s"]=std::to_string(o.faultAtS);s["fault.detection_ms"]=t;s["fault.survivor_result"]=result;
-   // Decision 8: a consumer that loses its producer reports the stable peer-failure error.
-   const bool stable=!producerKilled||result=="error: FrameLink peer closed or failed";s["fault.consumer_error_stable"]=stable?"yes":"no";
+   // Decisions 8 and 9: the side that loses its peer reports the stable peer-failure error.
+   const bool stable=result=="error: FrameLink peer closed or failed";s["fault.survivor_error_stable"]=stable?"yes":"no";
    pass=victimRc==killedStatus&&survivorRc==0&&result.rfind("error",0)==0&&detect>=0&&detect<=o.faultBoundMs&&stable;}
   else if(producerFault(o.fault)){s["fault.expect"]=o.faultExpect;s["fault.frame"]=std::to_string(o.faultFrame);s["fault.ms"]=std::to_string(o.faultMs);
    const bool audio=o.fault!="producer-burst";const guint period=audio?10:std::max<guint>(1,1000/gFps);

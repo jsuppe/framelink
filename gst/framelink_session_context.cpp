@@ -47,6 +47,8 @@ struct _FlGstSession {
  flSessionConfig config;
  // Producer: why this side is failing (FL_GST_PEER_*), sent once as ABORT.
  std::atomic<guint> failureReason;std::atomic<bool> abortSent;
+ // Producer: the consumer closed the session (decision 9).
+ std::atomic<bool> peerClosed;
 };
 typedef struct { GObjectClass parent; } FlGstSessionClass;
 G_DEFINE_TYPE(FlGstSession,fl_gst_session,G_TYPE_OBJECT)
@@ -81,7 +83,7 @@ static void finalize(GObject* object) {
  G_OBJECT_CLASS(fl_gst_session_parent_class)->finalize(object);
 }
 static void fl_gst_session_class_init(FlGstSessionClass* c){G_OBJECT_CLASS(c)->finalize=finalize;}
-static void fl_gst_session_init(FlGstSession* s){g_mutex_init(&s->mutex);g_cond_init(&s->changed);s->events=new std::shared_ptr<FlGstEventChannel>();s->failureReason=0;s->abortSent=false;
+static void fl_gst_session_init(FlGstSession* s){g_mutex_init(&s->mutex);g_cond_init(&s->changed);s->events=new std::shared_ptr<FlGstEventChannel>();s->failureReason=0;s->abortSent=false;s->peerClosed=false;
 #ifndef _WIN32
  s->cpuShutdownFd=-1;
 #endif
@@ -164,6 +166,15 @@ FlGstSessionResult fl_gst_session_wait(FlGstSession* s,guint64 generation,guint 
 void fl_gst_session_set_failure_reason(FlGstSession* s,guint reason){
  if(!valid(s)||reason<FL_GST_PEER_INVALID_INPUT||reason>FL_GST_PEER_OVERLOAD)return;
  guint none=0;s->failureReason.compare_exchange_strong(none,reason);
+}
+gboolean fl_gst_session_peer_closed(FlGstSession* s,guint timeout_ms){
+ if(!valid(s)||timeout_ms>60000)return FALSE;
+ if(s->peerClosed.load())return TRUE;
+ std::shared_ptr<FlGstEventChannel> channel;{Lock lock(&s->mutex);if(*s->events&&(*s->events)->producer())channel=*s->events;}
+ if(!channel||s->failureReason.load())return FALSE;
+ // After a local cancel, only a close already seen counts; otherwise wait.
+ if(!channel->peerClosed(timeout_ms)||s->failureReason.load())return FALSE;
+ s->peerClosed=true;return TRUE;
 }
 FlGstSessionResult fl_gst_session_peer_failure(FlGstSession* s,guint timeout_ms,guint* reason){
  if(!valid(s)||!reason||timeout_ms>60000)return FL_GST_SESSION_INVALID;
