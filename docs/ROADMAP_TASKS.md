@@ -369,7 +369,8 @@ per-platform state. Windows readiness is the
   attributed to the test source; corrected below). Queued bursts at FrameLink's input (2026-11-25,
   [evidence](m6/fault-coverage/burst-transport/README.md)): 57/60; FrameLink's delay share never over budget;
   Android intake about 8 ms per 1080p RGBA frame (about 2x real time), drain-rate check failed 3/5.
-  Malformed metadata at rate open.
+  Malformed metadata at rate (2026-11-26, [evidence](m6/fault-coverage/malformed-at-rate/README.md)):
+  60/60; producer refuses with a specific error, bad buffer never delivered, consumer sees a peer failure.
 - [ ] **M6.5 Performance/resource evidence:** distributions, queue depth,
   CPU/GPU/memory/handles, clock behavior and bounded growth.
   Stage costs, Android NV12 cost isolation and platform limits are published

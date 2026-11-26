@@ -1,0 +1,105 @@
+arrival.budget_ms=17
+complete=yes
+config=NV12 1920x1080@60 bin native 12s
+consumer.audio.arrival.all.ms=n=599 p50=0.50 p95=0.52 p99=0.53 max=0.55 min=0.19
+consumer.audio.arrival.ms=n=399 p50=0.50 p95=0.52 p99=0.53 max=0.55 min=0.19
+consumer.audio.contiguous=yes
+consumer.audio.deadline_misses=0/599
+consumer.audio.gap_event_ns=0
+consumer.audio.gap_events=0
+consumer.audio.output_queue.admission_residence.ms=n=599 p50=0.09 p95=0.10 p99=0.10 max=0.18 min=0.01
+consumer.audio.output_queue.pending=0
+consumer.audio.output_queue.sampled_max_buffers=0
+consumer.audio.output_queue.unmatched=0
+consumer.audio.pts_jump_ns=0
+consumer.audio.pts_jumps=0
+consumer.audio.render.all.ms=n=599 p50=0.60 p95=0.63 p99=0.64 max=0.71 min=0.23
+consumer.audio.render.ms=n=399 p50=0.61 p95=0.63 p99=0.65 max=0.71 min=0.23
+consumer.audio.render_interval.ms=n=398 p50=10.00 p95=10.10 p99=10.16 max=10.22 min=9.60
+consumer.audio.render_jitter.p1_p99.ms=0.40
+consumer.av_offset.abs.ms=n=4 p50=2.20 p95=2.29 p99=2.29 max=2.29 min=2.15
+consumer.av_offset.ms=n=4 p50=2.20 p95=2.29 p99=2.29 max=2.29 min=2.15
+consumer.cpu.percent=4.98
+consumer.ended_monotonic_us=467500138101
+consumer.frames=360
+consumer.handles=22..22 min=22 max=22
+consumer.handles.slope.per_min=0.00
+consumer.mem.kb=16420..16424 min=16420 max=16424
+consumer.mem.kind=rss
+consumer.mem.slope.kb_per_min=119.67
+consumer.memory=memory:DMABuf
+consumer.pid=2782359
+consumer.queue.accounting=complete
+consumer.result=error: audio peer closed before GDP EOS
+consumer.samples=287520
+consumer.scope=transport-consumer
+consumer.series.t_cpums_memkb_handles_threads=0.0:9:13808:6:2;1.0:46:16420:22:11;2.0:92:16420:22:11;3.0:141:16420:22:11;4.0:191:16420:22:11;5.0:238:16420:22:11;6.0:292:16424:22:11;6.3:306:16240:12:7;
+consumer.threads=11..11 min=11 max=11
+consumer.threads.slope.per_min=0.00
+consumer.video.arrival.all.ms=n=360 p50=2.68 p95=3.61 p99=3.76 max=3.97 min=1.45
+consumer.video.arrival.ms=n=240 p50=2.69 p95=3.61 p99=3.74 max=3.79 min=1.59
+consumer.video.buffer_alive_at_end=0
+consumer.video.buffer_life_after_callback.ms=n=360 p50=16.98 p95=17.12 p99=17.24 max=18.97 min=4.47
+consumer.video.callback_refcount_hist=0,0,0,360,0,0,0,0
+consumer.video.deadline_misses=0/360
+consumer.video.output_queue.admission_residence.ms=n=360 p50=0.08 p95=0.10 p99=0.11 max=0.12 min=0.01
+consumer.video.output_queue.pending=0
+consumer.video.output_queue.sampled_max_buffers=0
+consumer.video.output_queue.unmatched=0
+consumer.video.render.all.ms=n=360 p50=2.82 p95=3.73 p99=3.89 max=4.05 min=1.50
+consumer.video.render.ms=n=240 p50=2.82 p95=3.73 p99=3.88 max=3.93 min=1.66
+consumer.video.render_interval.ms=n=239 p50=17.01 p95=17.12 p99=17.20 max=17.25 min=14.78
+consumer.video.render_jitter.p1_p99.ms=2.17
+exit=0/0
+expected.frames=720
+expected.samples=576000
+fault=audio-no-pts
+fault.bound_ms=2000
+fault.detection_ms=0.7
+fault.expect=explicit-failure
+fault.expected_message=PCM requires valid PTS, duration and TIME segment
+fault.frame=600
+fault.ms=0
+fault.pass=yes
+fault.recovery_limit_frames=2
+harness.malloc=producer-side mmap_threshold=8388608
+label=linux-native-audio-no-pts-2
+output.async=false
+output.queue_buffers=1
+output.sync=false
+playback.latency_ms=0
+producer.audio.push_burst.max=0
+producer.audio.push_interval.ms=n=399 p50=10.00 p95=10.06 p99=10.07 max=10.09 min=9.92
+producer.audio.push_lateness.ms=n=399 p50=0.13 p95=0.14 p99=0.15 max=0.16 min=0.06
+producer.cpu.percent=14.98
+producer.ended_monotonic_us=467500137644
+producer.fault.dropped_blocks=0
+producer.fault.dropped_samples=0
+producer.fault.elapsed_us=0
+producer.fault.executed=1
+producer.fault.gap_ns=-1
+producer.fault.start_monotonic_us=467500137408
+producer.handles=16..16 min=16 max=16
+producer.handles.slope.per_min=0.00
+producer.injection.elapsed_us=0
+producer.injection.executed=0
+producer.injection.frame=0
+producer.injection.requested_ms=0
+producer.injection.stage=none
+producer.injection.start_monotonic_us=0
+producer.mem.kb=26888..26888 min=26888 max=26888
+producer.mem.kind=rss
+producer.mem.slope.kb_per_min=0.00
+producer.pid=2782367
+producer.pushed.frames=360
+producer.pushed.samples=288000
+producer.result=error: PCM requires valid PTS, duration and TIME segment
+producer.series.t_cpums_memkb_handles_threads=0.0:28:13572:6:2;1.0:170:26888:16:8;2.0:316:26888:16:8;3.0:465:26888:16:8;4.0:618:26888:16:8;5.0:765:26888:16:8;6.0:917:26888:16:8;6.1:922:24048:11:6;
+producer.threads=8..8 min=8 max=8
+producer.threads.slope.per_min=0.00
+producer.video.push_burst.max=0
+producer.video.push_interval.ms=n=240 p50=16.67 p95=16.73 p99=16.75 max=16.76 min=16.53
+producer.video.push_lateness.ms=n=240 p50=0.13 p95=0.14 p99=0.15 max=0.19 min=0.05
+seconds=12
+video.pool=2
+video.queue=1

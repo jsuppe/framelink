@@ -1,0 +1,105 @@
+arrival.budget_ms=17
+complete=yes
+config=NV12 1920x1080@60 bin shared-cpu 12s
+consumer.audio.arrival.all.ms=n=599 p50=0.44 p95=0.46 p99=0.47 max=0.48 min=0.09
+consumer.audio.arrival.ms=n=399 p50=0.44 p95=0.46 p99=0.47 max=0.48 min=0.15
+consumer.audio.contiguous=yes
+consumer.audio.deadline_misses=0/599
+consumer.audio.gap_event_ns=0
+consumer.audio.gap_events=0
+consumer.audio.output_queue.admission_residence.ms=n=599 p50=0.09 p95=0.10 p99=0.10 max=0.10 min=0.01
+consumer.audio.output_queue.pending=0
+consumer.audio.output_queue.sampled_max_buffers=0
+consumer.audio.output_queue.unmatched=0
+consumer.audio.pts_jump_ns=0
+consumer.audio.pts_jumps=0
+consumer.audio.render.all.ms=n=599 p50=0.55 p95=0.57 p99=0.58 max=0.58 min=0.13
+consumer.audio.render.ms=n=399 p50=0.55 p95=0.57 p99=0.58 max=0.58 min=0.20
+consumer.audio.render_interval.ms=n=398 p50=10.00 p95=10.07 p99=10.15 max=10.19 min=9.66
+consumer.audio.render_jitter.p1_p99.ms=0.33
+consumer.av_offset.abs.ms=n=4 p50=1.56 p95=1.63 p99=1.63 max=1.63 min=1.49
+consumer.av_offset.ms=n=4 p50=1.56 p95=1.63 p99=1.63 max=1.63 min=1.49
+consumer.cpu.percent=8.66
+consumer.ended_monotonic_us=467682479579
+consumer.frames=360
+consumer.handles=17..17 min=17 max=17
+consumer.handles.slope.per_min=0.00
+consumer.mem.kb=28064..28084 min=28064 max=28084
+consumer.mem.kind=rss
+consumer.mem.slope.kb_per_min=478.68
+consumer.memory=memory:SystemMemory
+consumer.pid=2784318
+consumer.queue.accounting=complete
+consumer.result=error: audio peer closed before GDP EOS
+consumer.samples=287520
+consumer.scope=transport-consumer
+consumer.series.t_cpums_memkb_handles_threads=0.0:9:13768:6:2;1.0:78:28056:17:10;2.0:159:28064:17:10;3.0:242:28068:17:10;4.0:325:28068:17:10;5.0:418:28080:17:10;6.0:506:28084:17:10;6.3:530:15928:11:7;
+consumer.threads=10..10 min=10 max=10
+consumer.threads.slope.per_min=0.00
+consumer.video.arrival.all.ms=n=360 p50=1.99 p95=2.22 p99=2.46 max=2.63 min=0.62
+consumer.video.arrival.ms=n=240 p50=2.01 p95=2.30 p99=2.52 max=2.63 min=0.67
+consumer.video.buffer_alive_at_end=0
+consumer.video.buffer_life_after_callback.ms=n=360 p50=2970.72 p95=5670.64 p99=5920.91 max=5971.98 min=4.07
+consumer.video.callback_refcount_hist=0,0,0,360,0,0,0,0
+consumer.video.deadline_misses=0/360
+consumer.video.output_queue.admission_residence.ms=n=360 p50=0.08 p95=0.10 p99=0.11 max=0.12 min=0.01
+consumer.video.output_queue.pending=0
+consumer.video.output_queue.sampled_max_buffers=0
+consumer.video.output_queue.unmatched=0
+consumer.video.render.all.ms=n=360 p50=2.09 p95=2.33 p99=2.58 max=2.75 min=0.67
+consumer.video.render.ms=n=240 p50=2.12 p95=2.41 p99=2.62 max=2.75 min=0.72
+consumer.video.render_interval.ms=n=239 p50=16.66 p95=17.19 p99=17.46 max=17.77 min=15.05
+consumer.video.render_jitter.p1_p99.ms=1.87
+exit=0/0
+expected.frames=720
+expected.samples=576000
+fault=audio-misaligned
+fault.bound_ms=2000
+fault.detection_ms=0.5
+fault.expect=explicit-failure
+fault.expected_message=PCM block is misaligned, empty or exceeds bounded queue budget
+fault.frame=600
+fault.ms=0
+fault.pass=yes
+fault.recovery_limit_frames=2
+harness.malloc=producer-side mmap_threshold=8388608
+label=linux-shared-cpu-audio-misaligned-4
+output.async=false
+output.queue_buffers=1
+output.sync=false
+playback.latency_ms=0
+producer.audio.push_burst.max=0
+producer.audio.push_interval.ms=n=400 p50=10.00 p95=10.03 p99=10.06 max=10.09 min=9.89
+producer.audio.push_lateness.ms=n=400 p50=0.13 p95=0.14 p99=0.16 max=0.17 min=0.04
+producer.cpu.percent=10.64
+producer.ended_monotonic_us=467682479335
+producer.fault.dropped_blocks=0
+producer.fault.dropped_samples=0
+producer.fault.elapsed_us=0
+producer.fault.executed=1
+producer.fault.gap_ns=-1
+producer.fault.start_monotonic_us=467682479089
+producer.handles=15..15 min=15 max=15
+producer.handles.slope.per_min=0.00
+producer.injection.elapsed_us=0
+producer.injection.executed=0
+producer.injection.frame=0
+producer.injection.requested_ms=0
+producer.injection.stage=none
+producer.injection.start_monotonic_us=0
+producer.mem.kb=29944..29944 min=29944 max=29944
+producer.mem.kind=rss
+producer.mem.slope.kb_per_min=0.00
+producer.pid=2784326
+producer.pushed.frames=360
+producer.pushed.samples=288000
+producer.result=error: PCM block is misaligned, empty or exceeds bounded queue budget
+producer.series.t_cpums_memkb_handles_threads=0.0:32:13480:6:2;1.0:139:29944:15:8;2.0:226:29944:15:8;3.0:325:29944:15:8;4.0:434:29944:15:8;5.0:546:29944:15:8;6.0:666:23876:11:6;
+producer.threads=8..8 min=8 max=8
+producer.threads.slope.per_min=0.00
+producer.video.push_burst.max=0
+producer.video.push_interval.ms=n=240 p50=16.67 p95=16.73 p99=16.74 max=16.77 min=16.55
+producer.video.push_lateness.ms=n=240 p50=0.13 p95=0.15 p99=0.17 max=0.18 min=0.05
+seconds=12
+video.pool=2
+video.queue=1
