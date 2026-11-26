@@ -39,6 +39,7 @@ static bool gSharedCpu=false;
 static bool gRetainedDevice=false;
 // Producer bin error-on-ring-full (default false: drop and count).
 static bool gErrorOnRingFull=false;
+static bool gBurstQueues=false;
 // M6.8c (Linux EGL builds): a native producer writes into the sink's DMA-BUF
 // ring and the consumer bin reads it back through GPU staging (gpu-readback).
 // Both bins take the local native readback candidate; set by fl_gst_av_bench.
@@ -133,8 +134,12 @@ struct Producer:Side {
  Producer(Mode m,const std::string&path_,const std::string&tracks_,guint frames,guint queueMs=80,bool fileLike=false,guint audioBlocks=0){mode=m;producer=true;path=path_;tracks=tracks_;audioQueueMs=queueMs;
   const std::string vn=frames?" num-buffers="+std::to_string(frames):"",an=frames?" num-buffers="+std::to_string(audioBlocks?audioBlocks:frames*BLOCKS/FRAMES):"";
   const std::string live=fileLike?"false":"true",sync=fileLike?" ! clocksync":"";
-  std::string vs="videotestsrc name=vsrc is-live="+live+" pattern=red"+vn+" ! video/x-raw,format="+gFormat+",width="+std::to_string(gWidth)+",height="+std::to_string(gHeight)+",framerate="+std::to_string(gFps)+"/1"+sync+" ! ",
-   as="audiotestsrc name=asrc is-live="+live+" samplesperbuffer="+std::to_string(BLOCK)+an+" ! audio/x-raw,format=S16LE,layout=interleaved,rate=48000,channels=2"+sync+" ! ";
+  // gBurstQueues (bench faults): a queue after each source, so a stall injected
+  // on its output lets the source keep producing in real time and the backlog
+  // then leaves back to back, independent of the source's own frame cost.
+  const std::string vq=gBurstQueues?"queue name=vburst max-size-buffers=128 max-size-bytes=0 max-size-time=0 ! ":"",aq=gBurstQueues?"queue name=aburst max-size-buffers=256 max-size-bytes=0 max-size-time=0 ! ":"";
+  std::string vs="videotestsrc name=vsrc is-live="+live+" pattern=red"+vn+" ! video/x-raw,format="+gFormat+",width="+std::to_string(gWidth)+",height="+std::to_string(gHeight)+",framerate="+std::to_string(gFps)+"/1"+sync+" ! "+vq,
+   as="audiotestsrc name=asrc is-live="+live+" samplesperbuffer="+std::to_string(BLOCK)+an+" ! audio/x-raw,format=S16LE,layout=interleaved,rate=48000,channels=2"+sync+" ! "+aq;
   std::string t;
 #ifdef FL_BENCH_GPU_READBACK
   // The bench feeds this appsrc from the sink's own pool (feedNative).

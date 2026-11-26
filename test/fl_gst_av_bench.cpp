@@ -291,7 +291,9 @@ static int producerChild(const Options&o,const std::string&session,const std::st
  Sampler sampler;std::map<std::string,std::string> r;Pushes pushes;pushes.options=&o;
  {Producer p(modeOf(o.mode),session,"av",o.seconds*gFps,80,false,o.seconds*100);pushes.pipeline=p.p;
   for(int track=0;track<2;++track){pushes.v[track].resize(size_t(o.seconds+10)*(track?100:gFps));pushes.v[track].clear();
-   auto*src=gst_bin_get_by_name(GST_BIN(p.p),track?"asrc":"vsrc");CHECK(src);auto*pad=gst_element_get_static_pad(src,"src");g_object_set_data(G_OBJECT(pad),"m6-track",GINT_TO_POINTER(track));gst_pad_add_probe(pad,GST_PAD_PROBE_TYPE_BUFFER,pushed,&pushes,nullptr);gst_object_unref(pad);gst_object_unref(src);}
+   // With --burst-queue, push time (and any stall) is at the queue's output:
+   // where FrameLink receives the buffer.
+   auto*src=gst_bin_get_by_name(GST_BIN(p.p),gBurstQueues?(track?"aburst":"vburst"):(track?"asrc":"vsrc"));CHECK(src);auto*pad=gst_element_get_static_pad(src,"src");g_object_set_data(G_OBJECT(pad),"m6-track",GINT_TO_POINTER(track));gst_pad_add_probe(pad,GST_PAD_PROBE_TYPE_BUFFER,pushed,&pushes,nullptr);gst_object_unref(pad);gst_object_unref(src);}
 #ifdef FL_BENCH_GPU_READBACK
   NativeFeed feed;
   p.start();if(gGpuReadback)feed.th=std::thread([&]{feedNative(p,o.seconds*gFps,feed);});
@@ -480,7 +482,7 @@ static std::vector<std::string> optionArgs(const Options&o){
  std::vector<std::string> a{"--seconds",std::to_string(o.seconds),"--size",std::to_string(gWidth)+"x"+std::to_string(gHeight),"--fps",std::to_string(gFps),"--format",gFormat,"--mode",o.mode,"--pool",std::to_string(gVideoPool),"--video-queue",std::to_string(gVideoQueue)};
  a.insert(a.end(),{"--output-queue-buffers",std::to_string(gOutputQueueBuffers),"--arrival-budget-ms",std::to_string(gArrivalBudget/GST_MSECOND),"--latency-ms",std::to_string(gPlaybackLatency/GST_MSECOND)});if(!gOutputSync)a.push_back("--transport-only");if(!gOutputAsync)a.push_back("--no-output-preroll");
  if(!o.stallStage.empty())a.insert(a.end(),{"--video-stall-stage",o.stallStage,"--video-stall-frame",std::to_string(o.stallFrame),"--video-stall-ms",std::to_string(o.stallMs)});
- if(gRetainedDevice)a.push_back("--device-owner");if(gSharedCpu)a.push_back("--shared-cpu");if(gGpuReadback)a.push_back("--gpu-readback");if(o.native)a.push_back("--native");if(o.raw)a.push_back("--raw");if(gErrorOnRingFull)a.push_back("--error-on-ring-full");
+ if(gRetainedDevice)a.push_back("--device-owner");if(gSharedCpu)a.push_back("--shared-cpu");if(gGpuReadback)a.push_back("--gpu-readback");if(o.native)a.push_back("--native");if(o.raw)a.push_back("--raw");if(gErrorOnRingFull)a.push_back("--error-on-ring-full");if(gBurstQueues)a.push_back("--burst-queue");
  if(o.fault=="consumer-stall"||producerFault(o.fault))a.insert(a.end(),{"--fault",o.fault,"--fault-expect",o.faultExpect,"--fault-frame",std::to_string(o.faultFrame),"--fault-ms",std::to_string(o.faultMs)});return a;}
 
 // Least-squares slope of y over x.
@@ -551,7 +553,7 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
   else if(a=="--cycles")o.cycles=guint(std::stoul(next()));else if(a=="--restart")o.restart=next();else if(a=="--session-base")sessionBase=next();
   else if(a=="--local-consumer")o.localConsumer=true;else if(a=="--shared-cpu")gSharedCpu=true;else if(a=="--gpu-readback")gGpuReadback=true;else if(a=="--device-owner")gRetainedDevice=true;else if(a=="--native")o.native=true;else if(a=="--trace")o.trace=true;else if(a=="--raw")o.raw=true;else if(a=="--out")o.out=next();else if(a=="--label")o.label=next();
   else if(a=="--fault")o.fault=next();else if(a=="--fault-expect")o.faultExpect=next();else if(a=="--fault-at-s")o.faultAtS=guint(std::stoul(next()));
-  else if(a=="--fault-frame")o.faultFrame=guint(std::stoul(next()));else if(a=="--fault-ms")o.faultMs=guint(std::stoul(next()));else if(a=="--error-on-ring-full")gErrorOnRingFull=true;else if(a=="--fault-bound-ms")o.faultBoundMs=guint(std::stoul(next()));
+  else if(a=="--fault-frame")o.faultFrame=guint(std::stoul(next()));else if(a=="--fault-ms")o.faultMs=guint(std::stoul(next()));else if(a=="--error-on-ring-full")gErrorOnRingFull=true;else if(a=="--burst-queue")gBurstQueues=true;else if(a=="--fault-bound-ms")o.faultBoundMs=guint(std::stoul(next()));
   else if(a=="--role")role=next();else if(a=="--session")session=next();else if(a=="--result")result=next();else{fprintf(stderr,"unknown option %s\n",a.c_str());return 2;}}
  CHECK(o.stallStage.empty()?(o.stallFrame==0&&o.stallMs==0):
    ((o.stallStage=="source"||o.stallStage=="post-push")&&o.stallFrame>0&&o.stallFrame<guint64(o.seconds)*gFps&&o.stallMs>0&&o.stallMs<=1000&&!o.cycles&&!o.sourceOnly&&!o.localConsumer));
@@ -565,7 +567,10 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
     (o.fault=="audio-drop"&&o.faultExpect=="explicit-failure")||(o.fault=="audio-gap"&&o.faultExpect=="gap-visible"))));
   CHECK(!kill||(o.faultAtS>=WARMUP_S+1&&o.faultAtS+2<=o.seconds&&!o.faultFrame&&!o.faultMs&&o.faultExpect.empty()));
   CHECK(!stall||(o.faultFrame>0&&o.faultFrame<guint64(o.seconds)*gFps&&o.faultMs>0&&o.faultMs<=5000&&(o.faultExpect=="absorbed"||o.faultExpect=="counted-drop"||o.faultExpect=="replacement-failure"||o.faultExpect=="explicit-failure")));
-  CHECK(o.faultBoundMs>0&&o.faultBoundMs<=10000);}
+  CHECK(o.faultBoundMs>0&&o.faultBoundMs<=10000);
+  // --burst-queue: burst faults only, with raw per-buffer records for the
+  // transport-share measure.
+  CHECK(!gBurstQueues||((o.fault=="producer-burst"||o.fault=="audio-stall")&&o.raw&&o.faultExpect=="absorbed"));}
  // Both lifecycle roles construct the same shared-CPU-enabled bins as one-shot
  // runs. Permit repeated sessions without changing the production lifetime.
  CHECK(!gSharedCpu||(o.mode=="bin"&&!o.native&&!o.sourceOnly&&!o.localConsumer));
@@ -661,7 +666,32 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
    else{
     const bool complete=ended&&bothEos&&videoComplete&&cr["queue.accounting"]=="complete"&&cr["audio.contiguous"]=="yes"&&cr["samples"]==s["expected.samples"]&&cr["samples"]==pr["pushed.samples"];
     const unsigned long recovery=cr["fault.recovery_frames"].empty()?~0ul:std::stoul(cr["fault.recovery_frames"]);
-    if(o.faultExpect=="absorbed")pass=executed&&complete&&recovery<=recoveryLimit;
+    if(o.faultExpect=="absorbed"&&gBurstQueues){
+     // Transport share: per buffer, consumer arrival lateness minus producer
+     // push lateness at FrameLink's input (both on the session timeline), by
+     // index. Recovery: buffers from the faulted one to the last over budget.
+     // The burst must have happened: the buffer after the faulted one reached
+     // FrameLink's input at least M - 2 periods late (a backlog formed), and the
+     // backlog drained (push lateness back under budget) at least twice as fast
+     // as real time. A push returns only after FrameLink takes the buffer in, so
+     // the drain rate is FrameLink's intake rate under the burst; reported.
+     auto column=[](const std::string&path,int col){std::vector<gint64> v;std::ifstream in(path);std::string line;std::getline(in,line);
+      while(std::getline(in,line)){std::stringstream ss(line);std::string f;for(int c=0;c<=col&&std::getline(ss,f,',');++c)if(c==col)v.push_back(std::stoll(f));}return v;};
+     const auto push=column(base+(audio?"-producer.txt.audio-push.csv":"-producer.txt.push.csv"),1),arrive=column(base+(audio?"-consumer.txt.audio.csv":"-consumer.txt.video.csv"),1);
+     const bool matched=!push.empty()&&push.size()==arrive.size();guint last=0;bool any=false;std::vector<double> share;
+     if(matched)for(size_t i=o.faultFrame-1;i<push.size();++i){const gint64 d=arrive[i]-push[i];share.push_back(d/1e6);if(d>gint64(gArrivalBudget)){last=guint(i);any=true;}}
+     const guint transportRecovery=any?last-(o.faultFrame-1)+1:0;
+     const auto pts=column(base+(audio?"-producer.txt.audio-push.csv":"-producer.txt.push.csv"),0);
+     bool burst=false;double drainGap=NAN;guint drain=0;const size_t n0=o.faultFrame-1;
+     if(matched&&n0+1<push.size()){const gint64 backlog=gint64(o.faultMs)*GST_MSECOND-2*gint64(period)*GST_MSECOND;
+      size_t j=n0+1;while(j<push.size()&&push[j]>gint64(gArrivalBudget))++j;drain=guint(j-n0);
+      if(j<push.size()&&j>n0+1){drainGap=double((pts[j]+push[j])-(pts[n0+1]+push[n0+1]))/double(j-n0-1)/1e6;}
+      burst=o.faultMs<3*period||(push[n0+1]>=backlog&&j<push.size()&&drainGap<=period/2.0);}
+     char g[32];snprintf(g,sizeof g,"%.2f",drainGap);
+     s["fault.transport_matched"]=matched?"yes":"no";s["fault.transport_recovery_frames"]=std::to_string(transportRecovery);s["fault.transport_share_after_fault.ms"]=dist(share);
+     s["fault.burst"]=burst?"yes":"no";s["fault.drain_frames"]=std::to_string(drain);s["fault.drain_mean_gap_ms"]=g;s["fault.total_recovery_frames"]=cr["fault.recovery_frames"];
+     pass=executed&&complete&&matched&&burst&&transportRecovery<=recoveryLimit;}
+    else if(o.faultExpect=="absorbed")pass=executed&&complete&&recovery<=recoveryLimit;
     else{// counted-drop (producer-burst): every video loss counted by the producer sink.
      auto counter=[&](const char*key)->long long{const std::string&t=pr["stats.framelink-sink-stats"];auto at=t.find(std::string(key)+"=(guint64)");return at==std::string::npos?-1:std::stoll(t.substr(at+strlen(key)+10));};
      const long long dropped=counter("dropped"),delivered=cr["frames"].empty()?-1:std::stoll(cr["frames"]),pushed=std::stoll(pr["pushed.frames"]);
