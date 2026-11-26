@@ -80,7 +80,17 @@ These hold for the individual elements attached to a session and for the bins.
   enabled track; the consumer reports the drain after EOS left each source.
 - **Failures.** Peer death, a missing peer, track-set or format mismatch,
   authentication failure and idle deadlines post errors within bounded time on
-  both sides. Reconnect requires NULL and a fresh session; there is no
+  both sides. When the producer fails or closes, the consumer posts one
+  stable error, domain `GST_RESOURCE_ERROR`, code `GST_RESOURCE_ERROR_READ`:
+  "FrameLink producer failed: invalid input" (the producer refused malformed
+  media or metadata), "FrameLink producer failed: overload" (pool exhausted
+  with `error-on-ring-full=true`) or "FrameLink peer closed or failed" (stopped,
+  crashed or lost, or a producer error FrameLink cannot attribute). Its details
+  structure `framelink-peer-failure` has `reason` (`invalid-input`,
+  `overload`, `closed`) and `original`, the error the element would otherwise
+  have posted. The consumer's own failures keep their specific errors. The
+  reason travels on the session's event stream; audio-only sessions, which
+  have none, keep the per-element errors. Reconnect requires NULL and a fresh session; there is no
   automatic in-element reconnect.
 - **Latency queries.** FrameLink sources answer live with no added latency,
   so the consumer pipeline's latency is its sinks' plus `latency-ms`. The

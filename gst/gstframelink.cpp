@@ -29,6 +29,7 @@
 
 #include <algorithm>
 #include "framelink_session_transport.h"
+#include "fl_gst_peer_failure.hpp"
 #include "fl_gst_session_internal.h"
 #if defined(FL_GST_DMABUF) || defined(FL_GST_D3D11) || defined(__ANDROID__)
 #define FL_GST_NATIVE 1
@@ -989,11 +990,17 @@ static gboolean sinkSendEvent(GstElement* element,GstEvent* event){
 }
 static gboolean sinkUnlock(GstBaseSink*base){auto*self=GST_FRAMELINK_SINK(base);g_atomic_int_set(&self->cpuFlushing,1);if(self->sharedCpu&&self->session)fl_gst_session_cancel(self->session);return TRUE;}
 static gboolean sinkUnlockStop(GstBaseSink*base){g_atomic_int_set(&GST_FRAMELINK_SINK(base)->cpuFlushing,0);return TRUE;}
+// Decision 8: an error this producer raises itself tells the consumer why.
+static gboolean sinkPostMessage(GstElement* element,GstMessage* message){
+    auto* self=GST_FRAMELINK_SINK(element);
+    if(self->session)flGstNoteProducerFailure(self->session,message);
+    return GST_ELEMENT_CLASS(gst_framelink_sink_parent_class)->post_message(element,message);
+}
 static void gst_framelink_sink_class_init(GstFrameLinkSinkClass* klass) {
     GObjectClass* gobject = G_OBJECT_CLASS(klass);
     GstElementClass* element = GST_ELEMENT_CLASS(klass);
     GstBaseSinkClass* basesink = GST_BASE_SINK_CLASS(klass);
-    element->set_context=sinkSessionContext;element->send_event=sinkSendEvent;
+    element->set_context=sinkSessionContext;element->send_event=sinkSendEvent;element->post_message=sinkPostMessage;
 
     gobject->set_property = sinkSetProperty;
     gobject->get_property = sinkGetProperty;
@@ -2024,10 +2031,17 @@ static void srcSessionContext(GstElement*element,GstContext*context){
   if(self->session!=session){if(self->session)g_object_unref(self->session);self->session=session;self->sessionRegistered=FALSE;}else g_object_unref(session);
  }}GST_ELEMENT_CLASS(gst_framelink_src_parent_class)->set_context(element,context);
 }
+// Decision 8: a consumer error caused by the producer failing or closing is
+// posted as the stable peer-failure error.
+static gboolean srcPostMessage(GstElement* element,GstMessage* message){
+    auto* self=GST_FRAMELINK_SRC(element);
+    if(self->session)message=flGstConsumerPeerFailure(self->session,message);
+    return GST_ELEMENT_CLASS(gst_framelink_src_parent_class)->post_message(element,message);
+}
 static void gst_framelink_src_class_init(GstFrameLinkSrcClass* klass) {
     GObjectClass* gobject = G_OBJECT_CLASS(klass);
     GstElementClass* element = GST_ELEMENT_CLASS(klass);
-    element->set_context=srcSessionContext;
+    element->set_context=srcSessionContext;element->post_message=srcPostMessage;
     GstBaseSrcClass* basesrc = GST_BASE_SRC_CLASS(klass);
     GstPushSrcClass* pushsrc = GST_PUSH_SRC_CLASS(klass);
 

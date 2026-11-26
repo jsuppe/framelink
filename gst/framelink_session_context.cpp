@@ -45,6 +45,8 @@ struct _FlGstSession {
  GSocketConnection* audioConnection;
  gboolean audioProducer,audioClaimed;
  flSessionConfig config;
+ // Producer: why this side is failing (FL_GST_PEER_*), sent once as ABORT.
+ std::atomic<guint> failureReason;std::atomic<bool> abortSent;
 };
 typedef struct { GObjectClass parent; } FlGstSessionClass;
 G_DEFINE_TYPE(FlGstSession,fl_gst_session,G_TYPE_OBJECT)
@@ -79,7 +81,7 @@ static void finalize(GObject* object) {
  G_OBJECT_CLASS(fl_gst_session_parent_class)->finalize(object);
 }
 static void fl_gst_session_class_init(FlGstSessionClass* c){G_OBJECT_CLASS(c)->finalize=finalize;}
-static void fl_gst_session_init(FlGstSession* s){g_mutex_init(&s->mutex);g_cond_init(&s->changed);s->events=new std::shared_ptr<FlGstEventChannel>();
+static void fl_gst_session_init(FlGstSession* s){g_mutex_init(&s->mutex);g_cond_init(&s->changed);s->events=new std::shared_ptr<FlGstEventChannel>();s->failureReason=0;s->abortSent=false;
 #ifndef _WIN32
  s->cpuShutdownFd=-1;
 #endif
@@ -159,8 +161,24 @@ FlGstSessionResult fl_gst_session_wait(FlGstSession* s,guint64 generation,guint 
   g_cond_wait_until(&s->changed,&s->mutex,wake);
  }
 }
+void fl_gst_session_set_failure_reason(FlGstSession* s,guint reason){
+ if(!valid(s)||reason<FL_GST_PEER_INVALID_INPUT||reason>FL_GST_PEER_OVERLOAD)return;
+ guint none=0;s->failureReason.compare_exchange_strong(none,reason);
+}
+FlGstSessionResult fl_gst_session_peer_failure(FlGstSession* s,guint timeout_ms,guint* reason){
+ if(!valid(s)||!reason||timeout_ms>60000)return FL_GST_SESSION_INVALID;
+ std::shared_ptr<FlGstEventChannel> channel;{Lock lock(&s->mutex);if(*s->events)channel=*s->events;}
+ if(!channel||channel->producer())return FL_GST_SESSION_INVALID;
+ return channel->peerEnded(timeout_ms,reason)?FL_GST_SESSION_READY:FL_GST_SESSION_TIMEOUT;
+}
 void fl_gst_session_cancel(FlGstSession* s) {
  if(!valid(s))return;
+ // An explicit producer failure tells the consumer why, ahead of the close.
+ if(const guint reason=s->failureReason.load()){
+  std::shared_ptr<FlGstEventChannel> channel;{Lock lock(&s->mutex);if(!s->cancelled&&*s->events&&(*s->events)->producer())channel=*s->events;}
+  bool expected=false;
+  if(channel&&s->abortSent.compare_exchange_strong(expected,true)){FlGstVideoEvent abort{FL_GST_VIDEO_ABORT,0,reason,0};channel->send(abort);}
+ }
  Lock lock(&s->mutex);s->cancelled=TRUE;s->ready=0;
  resetCpu(s);
  if(*s->events)(*s->events)->cancel();

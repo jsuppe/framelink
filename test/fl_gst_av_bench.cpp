@@ -703,7 +703,9 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
    const std::string result=sr["result"];const gint64 ended=sr.count("ended_monotonic_us")?std::stoll(sr["ended_monotonic_us"]):0;
    const double detect=ended&&killedAt?(ended-killedAt)/1000.0:-1;char t[32];snprintf(t,sizeof t,"%.1f",detect);
    s["fault.at_s"]=std::to_string(o.faultAtS);s["fault.detection_ms"]=t;s["fault.survivor_result"]=result;
-   pass=victimRc==killedStatus&&survivorRc==0&&result.rfind("error",0)==0&&detect>=0&&detect<=o.faultBoundMs;}
+   // Decision 8: a consumer that loses its producer reports the stable peer-failure error.
+   const bool stable=!producerKilled||result=="error: FrameLink peer closed or failed";s["fault.consumer_error_stable"]=stable?"yes":"no";
+   pass=victimRc==killedStatus&&survivorRc==0&&result.rfind("error",0)==0&&detect>=0&&detect<=o.faultBoundMs&&stable;}
   else if(producerFault(o.fault)){s["fault.expect"]=o.faultExpect;s["fault.frame"]=std::to_string(o.faultFrame);s["fault.ms"]=std::to_string(o.faultMs);
    const bool audio=o.fault!="producer-burst";const guint period=audio?10:std::max<guint>(1,1000/gFps);
    const guint recoveryLimit=(o.faultMs+period-1)/period+2;s["fault.recovery_limit_frames"]=std::to_string(recoveryLimit);
@@ -721,12 +723,15 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
      o.fault=="audio-misaligned"?"PCM block is misaligned, empty or exceeds bounded queue budget":gSharedCpu?"Internal data stream error":"valid supported frame metadata and TIME mapping required";
     const gint64 at=pr["fault.start_monotonic_us"].empty()?0:std::stoll(pr["fault.start_monotonic_us"]),end=cr["ended_monotonic_us"].empty()?0:std::stoll(cr["ended_monotonic_us"]);
     const double detect=at&&end?(end-at)/1000.0:-1;char t[32];snprintf(t,sizeof t,"%.1f",detect);s["fault.detection_ms"]=t;s["fault.bound_ms"]=std::to_string(o.faultBoundMs);s["fault.expected_message"]=want;
-    pass=executed&&ended&&pr["result"].find(want)!=std::string::npos&&cr["result"]!="EOS"&&detect>=0&&detect<=o.faultBoundMs;}
+    // Decision 8: the consumer is told why. The shared-CPU sink's generic flow
+    // error carries no reason, so there the consumer reports a closed peer.
+    const std::string consumerWant=(gSharedCpu&&o.fault=="video-no-pts")?"error: FrameLink peer closed or failed":"error: FrameLink producer failed: invalid input";s["fault.expected_consumer_error"]=consumerWant;
+    pass=executed&&ended&&pr["result"].find(want)!=std::string::npos&&cr["result"]==consumerWant&&detect>=0&&detect<=o.faultBoundMs;}
    else if(o.fault=="audio-drop"){
     // Detection: the consumer's end after the first missing block was due.
     const gint64 at=pr["fault.start_monotonic_us"].empty()?0:std::stoll(pr["fault.start_monotonic_us"]),end=cr["ended_monotonic_us"].empty()?0:std::stoll(cr["ended_monotonic_us"]);
     const double detect=at&&end?(end-at)/1000.0:-1;char t[32];snprintf(t,sizeof t,"%.1f",detect);s["fault.detection_ms"]=t;s["fault.bound_ms"]=std::to_string(o.faultBoundMs);
-    pass=executed&&ended&&pr["result"].find("continuity mismatch")!=std::string::npos&&cr["result"]!="EOS"&&detect>=0&&detect<=o.faultBoundMs;}
+    pass=executed&&ended&&pr["result"].find("continuity mismatch")!=std::string::npos&&cr["result"]=="error: FrameLink producer failed: invalid input"&&detect>=0&&detect<=o.faultBoundMs;}
    else if(o.fault=="audio-gap"){
     // Loss is explicit: exactly the dropped samples are missing, the consumer
     // sees one PTS jump of the dropped duration and receives the GAP event.
@@ -787,7 +792,7 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
    if(o.faultExpect=="absorbed")pass=cr["fault.executed"]=="1"&&complete&&std::stoul(cr["fault.recovery_frames"])<=recoveryLimit;
    else if(o.faultExpect=="counted-drop")pass=cr["fault.executed"]=="1"&&pc==0&&cc==0&&pr["result"]=="EOS"&&cr["result"]=="EOS"&&accounted&&dropped>0&&ringFull==dropped&&cr["audio.contiguous"]=="yes"&&cr["queue.accounting"]=="complete"&&cr["samples"]==s["expected.samples"]&&marked;
    else if(o.faultExpect=="replacement-failure")pass=cr["fault.executed"]=="1"&&!silentLoss&&pc==0&&cc==0&&cr["result"].find("replaced before it was read")!=std::string::npos&&pr["result"]!="EOS";
-   else pass=cr["fault.executed"]=="1"&&!silentLoss&&pc==0&&cc==0&&pr["result"].find("pool exhausted")!=std::string::npos&&cr["result"]!="EOS";}
+   else pass=cr["fault.executed"]=="1"&&!silentLoss&&pc==0&&cc==0&&pr["result"].find("pool exhausted")!=std::string::npos&&cr["result"]=="error: FrameLink producer failed: overload";}
   s["fault.pass"]=pass?"yes":"no";s["complete"]=pass?"yes":"no";
   writeResult(base+".summary.txt",s);for(auto&kv:s)printf("%s=%s\n",kv.first.c_str(),kv.second.c_str());return pass?0:1;}
  const bool ok=pc==0&&cc==0&&cr["queue.accounting"]=="complete"&&cr["audio.contiguous"]=="yes"&&pr["result"]=="EOS"&&cr["result"]=="EOS"&&cr["frames"]==s["expected.frames"]&&cr["frames"]==pr["pushed.frames"]&&cr["samples"]==s["expected.samples"]&&cr["samples"]==pr["pushed.samples"]

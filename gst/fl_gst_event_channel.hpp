@@ -16,23 +16,27 @@ class FlGstEventChannel {
  const bool producer_;const guint64 generation_;std::thread reader_;
  std::mutex mutex_,writeMutex_;std::condition_variable changed_;
  std::deque<FlGstVideoEvent> events_;std::atomic<bool> failed_{false};guint64 sent_=0;
+ // Consumer: the producer ended the stream (ABORT, or EOF/error not caused locally).
+ std::atomic<bool> remoteEnded_{false};std::atomic<guint> abortReason_{0};
  void fail(){failed_=true;g_cancellable_cancel(cancel_);changed_.notify_all();}
  void readLoop(){
   guint64 serial=0;auto*socket=g_socket_connection_get_socket(stream_);
   while(!g_cancellable_is_cancelled(cancel_)){
    GError*error=nullptr;
    if(!g_socket_condition_timed_wait(socket,G_IO_IN,100000,cancel_,&error)){
-    bool timeout=g_error_matches(error,G_IO_ERROR,G_IO_ERROR_TIMED_OUT);g_clear_error(&error);if(timeout)continue;if(!g_cancellable_is_cancelled(cancel_))fail();return;
+    bool timeout=g_error_matches(error,G_IO_ERROR,G_IO_ERROR_TIMED_OUT);g_clear_error(&error);if(timeout)continue;if(!g_cancellable_is_cancelled(cancel_)){remoteEnded_=true;fail();}return;
    }
    std::array<guint8,64> wire{};gsize size=0;
-   if(!g_input_stream_read_all(g_io_stream_get_input_stream(G_IO_STREAM(stream_)),wire.data(),wire.size(),&size,cancel_,&error)||size!=wire.size()){g_clear_error(&error);if(!g_cancellable_is_cancelled(cancel_))fail();return;}
+   if(!g_input_stream_read_all(g_io_stream_get_input_stream(G_IO_STREAM(stream_)),wire.data(),wire.size(),&size,cancel_,&error)||size!=wire.size()){g_clear_error(&error);if(!g_cancellable_is_cancelled(cancel_)){remoteEnded_=true;fail();}return;}
    FlGstVideoEvent event{};event.kind=GST_READ_UINT32_BE(wire.data()+16);event.afterFrames=GST_READ_UINT64_BE(wire.data()+24);event.ptsNs=GST_READ_UINT64_BE(wire.data()+32);event.durationNs=GST_READ_UINT64_BE(wire.data()+40);
    if(memcmp(wire.data(),"FLEVT001",8)||GST_READ_UINT64_BE(wire.data()+8)!=generation_||GST_READ_UINT32_BE(wire.data()+20)||GST_READ_UINT64_BE(wire.data()+56)||serial==G_MAXUINT64||GST_READ_UINT64_BE(wire.data()+48)!=++serial||!valid(event)){fail();return;}
    if(event.kind==FL_GST_VIDEO_FLUSH){fail();return;}
+   if(event.kind==FL_GST_VIDEO_ABORT){abortReason_=guint(event.ptsNs);remoteEnded_=true;fail();return;}
    {std::lock_guard<std::mutex> lock(mutex_);if(events_.size()>=32){fail();return;}events_.push_back(event);}changed_.notify_all();
   }
  }
- static bool valid(const FlGstVideoEvent&e){return e.kind>=FL_GST_VIDEO_GAP&&e.kind<=FL_GST_VIDEO_END&&e.ptsNs<=G_MAXINT64&&e.durationNs<=G_MAXINT64-e.ptsNs&&(e.kind==FL_GST_VIDEO_GAP?e.durationNs>0:e.durationNs==0);}
+ static bool valid(const FlGstVideoEvent&e){if(e.kind==FL_GST_VIDEO_ABORT)return e.ptsNs>=FL_GST_PEER_INVALID_INPUT&&e.ptsNs<=FL_GST_PEER_OVERLOAD&&!e.durationNs;
+  return e.kind>=FL_GST_VIDEO_GAP&&e.kind<=FL_GST_VIDEO_END&&e.ptsNs<=G_MAXINT64&&e.durationNs<=G_MAXINT64-e.ptsNs&&(e.kind==FL_GST_VIDEO_GAP?e.durationNs>0:e.durationNs==0);}
 public:
  FlGstEventChannel(GSocketConnection*s,bool producer,guint64 generation,guint idle):stream_(G_SOCKET_CONNECTION(g_object_ref(s))),producer_(producer),generation_(generation){
   g_socket_set_timeout(g_socket_connection_get_socket(stream_),(idle+999)/1000);
@@ -55,6 +59,13 @@ public:
   return failed_.load();
  }
  bool producer()const{return producer_;}
+ // Consumer: wait up to timeout for the producer's end of stream. True with the
+ // ABORT reason (0: closed without one); false if none was seen.
+ bool peerEnded(guint timeout,guint*reason){
+  if(producer_||!reason)return false;std::unique_lock<std::mutex> lock(mutex_);
+  changed_.wait_for(lock,std::chrono::milliseconds(timeout),[&]{return remoteEnded_.load();});
+  if(!remoteEnded_)return false;*reason=abortReason_;return true;
+ }
  FlGstSessionResult send(const FlGstVideoEvent&e){
   if(!producer_||!valid(e))return FL_GST_SESSION_INVALID;
   std::lock_guard<std::mutex> lock(writeMutex_);

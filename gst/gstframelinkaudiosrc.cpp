@@ -1,4 +1,5 @@
 #include "fl_gst_audio_startup.hpp"
+#include "fl_gst_peer_failure.hpp"
 #include <gst/base/gstpushsrc.h>
 #include <cstring>
 #include <algorithm>
@@ -159,10 +160,15 @@ static gboolean querySrc(GstElement*e,GstQuery*q){
 // it so the video track does not wait for its own idle deadline.
 static void handleSrcMessage(GstBin*bin,GstMessage*message){
  auto*s=reinterpret_cast<GstFrameLinkAudioSrc*>(bin);
- if(GST_MESSAGE_TYPE(message)==GST_MESSAGE_ERROR&&GST_MESSAGE_SRC(message)!=GST_OBJECT(bin)&&s->session){s->failed=TRUE;fl_gst_session_cancel(s->session);}
+ // Decision 8: rewrite a producer-caused error before this side cancels.
+ if(GST_MESSAGE_TYPE(message)==GST_MESSAGE_ERROR&&GST_MESSAGE_SRC(message)!=GST_OBJECT(bin)&&s->session){message=flGstConsumerPeerFailure(s->session,message);s->failed=TRUE;fl_gst_session_cancel(s->session);}
  GST_BIN_CLASS(gst_framelink_audio_src_parent_class)->handle_message(bin,message);
 }
-static void gst_framelink_audio_src_class_init(GstFrameLinkAudioSrcClass*c){auto*o=G_OBJECT_CLASS(c);GST_BIN_CLASS(c)->handle_message=handleSrcMessage;o->set_property=setSrc;o->get_property=getSrc;o->finalize=finalizeSrc;auto*e=GST_ELEMENT_CLASS(c);e->set_context=contextSrc;e->change_state=stateSrc;e->query=querySrc;gst_element_class_set_static_metadata(e,"FrameLink audio consumer","Source/Audio","Authenticated incremental serialized PCM (not shared memory)","FrameLink");gst_element_class_add_static_pad_template(e,&pcmTemplate);
+static gboolean srcPostMessage(GstElement*element,GstMessage*message){
+ auto*s=reinterpret_cast<GstFrameLinkAudioSrc*>(element);if(s->session)message=flGstConsumerPeerFailure(s->session,message);
+ return GST_ELEMENT_CLASS(gst_framelink_audio_src_parent_class)->post_message(element,message);
+}
+static void gst_framelink_audio_src_class_init(GstFrameLinkAudioSrcClass*c){auto*o=G_OBJECT_CLASS(c);GST_BIN_CLASS(c)->handle_message=handleSrcMessage;GST_ELEMENT_CLASS(c)->post_message=srcPostMessage;o->set_property=setSrc;o->get_property=getSrc;o->finalize=finalizeSrc;auto*e=GST_ELEMENT_CLASS(c);e->set_context=contextSrc;e->change_state=stateSrc;e->query=querySrc;gst_element_class_set_static_metadata(e,"FrameLink audio consumer","Source/Audio","Authenticated incremental serialized PCM (not shared memory)","FrameLink");gst_element_class_add_static_pad_template(e,&pcmTemplate);
  auto rw=GParamFlags(G_PARAM_READWRITE|G_PARAM_STATIC_STRINGS);auto ro=GParamFlags(G_PARAM_READABLE|G_PARAM_STATIC_STRINGS);
  g_object_class_install_property(o,P_PATH,g_param_spec_string("session","Session","Protected local rendezvous path",nullptr,rw));g_object_class_install_property(o,P_FORMAT,g_param_spec_string("format","Format","Exact S16LE or F32LE","S16LE",rw));g_object_class_install_property(o,P_TRACKS,g_param_spec_string("tracks","Tracks","audio standalone or av with context","audio",rw));
  g_object_class_install_property(o,P_RATE,g_param_spec_uint("rate","Rate","Exact sample rate",8000,192000,48000,rw));g_object_class_install_property(o,P_CHANNELS,g_param_spec_uint("channels","Channels","Exact channel count",1,2,2,rw));g_object_class_install_property(o,P_QUEUE,g_param_spec_uint("audio-queue-ms","Audio bound","Maximum negotiated PCM block/queue budget",1,2000,80,rw));g_object_class_install_property(o,P_CONNECT,g_param_spec_uint("connect-timeout-ms","Connect deadline","Whole startup deadline",1,60000,15000,rw));g_object_class_install_property(o,P_IDLE,g_param_spec_uint("idle-timeout-ms","Idle deadline","Socket timeout rounded up to seconds",1,60000,15000,rw));
