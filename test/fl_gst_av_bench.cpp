@@ -88,7 +88,7 @@
 #include <sys/mman.h>
 #endif
 
-struct Options {guint stallFrame=0,stallMs=0;std::string stallStage;std::string fault,faultExpect;guint faultAtS=0,faultFrame=0,faultMs=0,faultBoundMs=2000;guint seconds=60,cycles=0;std::string mode="bin",label="run",out=".",restart="producer";bool native=false,trace=false,raw=false,sourceOnly=false,localConsumer=false;};
+struct Options {guint stallFrame=0,stallMs=0;std::string stallStage;std::string fault,faultExpect;guint faultAtS=0,faultFrame=0,faultMs=0,faultBoundMs=2000;std::string cycleFault;guint cycleFaultAtMs=0,cycleFaultFrame=0;guint seconds=60,cycles=0;std::string mode="bin",label="run",out=".",restart="producer";bool native=false,trace=false,raw=false,sourceOnly=false,localConsumer=false;};
 static guint gOutputQueueBuffers=0;
 static GstClockTime gArrivalBudget=LATENCY;
 // Producer-side processes (roles producer, lifecycle-producer, source) run the
@@ -433,9 +433,13 @@ static int lifecycleChild(const Options&o,bool producer,const std::string&base,c
  FILE*f=fopen(out.c_str(),"w");CHECK(f);bool complete=true;
  fprintf(f,"scope=%s\n",o.localConsumer?"local-consumer-lifecycle-no-transport":"transport-lifecycle");
  for(guint i=0;i<o.cycles;i++){const std::string path=base+"/c"+std::to_string(i)+"/session";std::string result;guint64 frames=0,samples=0;
-  if(producer){Producer p(modeOf(o.mode),path,"av",o.seconds*gFps,80,false,o.seconds*100);p.start();p.finish();result=p.result;frames=p.pushedFrames;samples=p.pushedSamples;}
-  else{Consumer c(modeOf(o.mode),path,"av",o.native,o.localConsumer?o.seconds:0);c.checkContent=false;c.start();c.finish();result=c.result;frames=c.frames;samples=c.samples;if(!c.contiguous)result="error: audio discontinuity";}
-  complete=complete&&result=="EOS"&&frames==guint64(o.seconds)*gFps&&samples==guint64(o.seconds)*48000;
+  gint64 ended=0;
+  if(producer){Producer p(modeOf(o.mode),path,"av",o.seconds*gFps,80,false,o.seconds*100);p.start();p.finish();result=p.result;frames=p.pushedFrames;samples=p.pushedSamples;ended=p.endedAt;}
+  else{Consumer c(modeOf(o.mode),path,"av",o.native,o.localConsumer?o.seconds:0);c.checkContent=false;c.start();c.finish();result=c.result;frames=c.frames;samples=c.samples;ended=c.endedAt;if(!c.contiguous)result="error: audio discontinuity";}
+  // With --cycle-fault, odd cycles are faulted by the driver and must end in error.
+  const bool faulted=!o.cycleFault.empty()&&i%2==1;
+  complete=complete&&(faulted?result.rfind("error",0)==0:(result=="EOS"&&frames==guint64(o.seconds)*gFps&&samples==guint64(o.seconds)*48000));
+  fprintf(f,"ended.%u=%lld\n",i,(long long)ended);
   const Resources r=resources();
   fprintf(f,"cycle.%u=%s|%llu|%llu|%llu|%u|%u\n",i,result.c_str(),(unsigned long long)frames,(unsigned long long)samples,(unsigned long long)r.memKb,r.handles,r.threads);fflush(f);}
  fprintf(f,"complete=%s\n",complete?"yes":"no");fclose(f);return complete?0:1;}
@@ -510,18 +514,44 @@ static int lifecycle(const Options&o,const std::string&exe,const char*plugin,con
  auto opts=optionArgs(o);opts.push_back("--cycles");opts.push_back(std::to_string(o.cycles));
  auto args=[&](std::vector<std::string> a){a.insert(a.begin(),plugin);a.insert(a.end(),opts.begin(),opts.end());return a;};
  const char*longRole=restartProducer?"lifecycle-consumer":"lifecycle-producer",*freshRole=restartProducer?"producer":"consumer";
- auto longChild=spawn(exe,args({"--role",longRole,"--session-base",dir,"--result",base+"-long.txt"}));
+ // The long-lived child needs the cycle-fault schedule; fresh children get only their own fault.
+ std::vector<std::string> longArgs{"--role",longRole,"--session-base",dir,"--result",base+"-long.txt"};
+ if(!o.cycleFault.empty())longArgs.insert(longArgs.end(),{"--cycle-fault",o.cycleFault,"--cycle-fault-at-ms",std::to_string(o.cycleFaultAtMs),"--cycle-fault-frame",std::to_string(o.cycleFaultFrame),"--restart",o.restart});
+ auto longChild=spawn(exe,args(longArgs));
  std::vector<std::map<std::string,std::string>> fresh;std::vector<int> freshExit;const gint64 t0=g_get_monotonic_time();
- for(guint i=0;i<o.cycles;i++){auto c=spawn(exe,args({"--role",freshRole,"--session",dir+"/c"+std::to_string(i)+"/session","--result",base+"-fresh-"+std::to_string(i)+".txt"}));
+ // --cycle-fault (M6.4 growth across repeats): every odd cycle the fresh peer is
+ // killed (kill: SIGKILL/TerminateProcess at --cycle-fault-at-ms after its start)
+ // or, as producer, refused for stale frame metadata (malformed: frame
+ // --cycle-fault-frame); even cycles stay clean and must deliver exact media.
+ std::vector<gint64> killedAt(o.cycles,0);
+ for(guint i=0;i<o.cycles;i++){const bool faulted=!o.cycleFault.empty()&&i%2==1;
+  std::vector<std::string> a{"--role",freshRole,"--session",dir+"/c"+std::to_string(i)+"/session","--result",base+"-fresh-"+std::to_string(i)+".txt"};
+  if(faulted&&o.cycleFault=="malformed")a.insert(a.end(),{"--fault","video-stale-meta","--fault-frame",std::to_string(o.cycleFaultFrame),"--fault-expect","explicit-failure"});
+  auto c=spawn(exe,args(a));
+  if(faulted&&o.cycleFault=="kill"){g_usleep(gulong(o.cycleFaultAtMs)*1000);killedAt[i]=g_get_monotonic_time();killChild(c);}
   freshExit.push_back(await(c,g_get_monotonic_time()+gint64(o.seconds+60)*G_USEC_PER_SEC));fresh.push_back(readResult(base+"-fresh-"+std::to_string(i)+".txt"));
   // Retain per-cycle evidence, including failures and independent PCM counts.
  }
  const int longExit=await(longChild,g_get_monotonic_time()+gint64(o.seconds+120)*G_USEC_PER_SEC);
- auto lr=readResult(base+"-long.txt");guint ok=0;std::string firstBad;std::vector<std::pair<double,double>> mem,hnd,thr;guint64 m0=0,m1=0;guint h0=0,h1=0,t0c=0,t1c=0;
+ auto lr=readResult(base+"-long.txt");guint ok=0;std::vector<double> faultDetect;std::string firstBad;std::vector<std::pair<double,double>> mem,hnd,thr;guint64 m0=0,m1=0;guint h0=0,h1=0,t0c=0,t1c=0;
  for(guint i=0;i<o.cycles;i++){auto it=lr.find("cycle."+std::to_string(i));std::vector<std::string> f;
   if(it!=lr.end()){std::string cell;std::istringstream in(it->second);while(std::getline(in,cell,'|'))f.push_back(cell);}
+  const bool faulted=!o.cycleFault.empty()&&i%2==1;
   bool good=f.size()==6&&f[0]=="EOS"&&freshExit[i]==0&&fresh[i]["result"]=="EOS";
-  if(good){const std::string pf=restartProducer?fresh[i]["pushed.frames"]:f[1],ps=restartProducer?fresh[i]["pushed.samples"]:f[2],cf=restartProducer?f[1]:fresh[i]["frames"],cs=restartProducer?f[2]:fresh[i]["samples"];
+  if(faulted){
+#ifdef _WIN32
+   const int killedStatus=99;
+#else
+   const int killedStatus=128+SIGKILL;
+#endif
+   // The long-lived peer ends this cycle in error (never EOS) within the bound
+   // of the fault; the fresh peer was killed, or refused the stale metadata.
+   const gint64 at=o.cycleFault=="kill"?killedAt[i]:(fresh[i]["fault.start_monotonic_us"].empty()?0:std::stoll(fresh[i]["fault.start_monotonic_us"]));
+   auto e=lr.find("ended."+std::to_string(i));const gint64 end=e==lr.end()?0:std::stoll(e->second);const double detect=at&&end?(end-at)/1000.0:-1;
+   faultDetect.push_back(detect);
+   const bool fresh_ok=o.cycleFault=="kill"?freshExit[i]==killedStatus:(freshExit[i]==0&&fresh[i]["result"].find("stale producer video metadata generation")!=std::string::npos);
+   good=f.size()==6&&f[0].rfind("error",0)==0&&fresh_ok&&detect>=0&&detect<=o.faultBoundMs;}
+  else if(good){const std::string pf=restartProducer?fresh[i]["pushed.frames"]:f[1],ps=restartProducer?fresh[i]["pushed.samples"]:f[2],cf=restartProducer?f[1]:fresh[i]["frames"],cs=restartProducer?f[2]:fresh[i]["samples"];
    good=pf==cf&&ps==cs&&pf==std::to_string(guint64(o.seconds)*gFps)&&ps==std::to_string(guint64(o.seconds)*48000);}
   if(good)ok++;else if(firstBad.empty())firstBad="cycle "+std::to_string(i)+": long="+(f.empty()?std::string("missing"):f[0])+" fresh="+fresh[i]["result"]+" exit="+std::to_string(freshExit[i]);
   if(f.size()==6&&i>=LIFECYCLE_WARMUP){const double x=i;const guint64 mk=std::stoull(f[3]);const guint h=guint(std::stoul(f[4])),t=guint(std::stoul(f[5]));
@@ -538,6 +568,8 @@ static int lifecycle(const Options&o,const std::string&exe,const char*plugin,con
  s["output.sync"]=gOutputSync?"true":"false";s["output.async"]=gOutputAsync?"true":"false";
  s["harness.malloc"]=gSourceMalloc;
  if(!firstBad.empty())s["first_failure"]=firstBad;
+ if(!o.cycleFault.empty()){s["cycle_fault"]=o.cycleFault;s["cycle_fault.bound_ms"]=std::to_string(o.faultBoundMs);s["cycle_fault.detection_ms"]=dist(faultDetect);
+  if(o.cycleFault=="kill")s["cycle_fault.at_ms"]=std::to_string(o.cycleFaultAtMs);else s["cycle_fault.frame"]=std::to_string(o.cycleFaultFrame);}
  snprintf(t,sizeof t,"%.1f",(g_get_monotonic_time()-t0)/1e6);s["wall.s"]=t;
  s["long.mem.kb"]=std::to_string(m0)+".."+std::to_string(m1);snprintf(t,sizeof t,"%.2f",slope(mem));s["long.mem.slope.kb_per_cycle"]=t;
  s["long.handles"]=std::to_string(h0)+".."+std::to_string(h1);snprintf(t,sizeof t,"%.3f",slope(hnd));s["long.handles.slope.per_cycle"]=t;
@@ -567,12 +599,12 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
   else if(a=="--cycles")o.cycles=guint(std::stoul(next()));else if(a=="--restart")o.restart=next();else if(a=="--session-base")sessionBase=next();
   else if(a=="--local-consumer")o.localConsumer=true;else if(a=="--shared-cpu")gSharedCpu=true;else if(a=="--gpu-readback")gGpuReadback=true;else if(a=="--device-owner")gRetainedDevice=true;else if(a=="--native")o.native=true;else if(a=="--trace")o.trace=true;else if(a=="--raw")o.raw=true;else if(a=="--out")o.out=next();else if(a=="--label")o.label=next();
   else if(a=="--fault")o.fault=next();else if(a=="--fault-expect")o.faultExpect=next();else if(a=="--fault-at-s")o.faultAtS=guint(std::stoul(next()));
-  else if(a=="--fault-frame")o.faultFrame=guint(std::stoul(next()));else if(a=="--fault-ms")o.faultMs=guint(std::stoul(next()));else if(a=="--error-on-ring-full")gErrorOnRingFull=true;else if(a=="--burst-queue")gBurstQueues=true;else if(a=="--no-last-sample")gNoLastSample=true;else if(a=="--fault-bound-ms")o.faultBoundMs=guint(std::stoul(next()));
+  else if(a=="--fault-frame")o.faultFrame=guint(std::stoul(next()));else if(a=="--fault-ms")o.faultMs=guint(std::stoul(next()));else if(a=="--error-on-ring-full")gErrorOnRingFull=true;else if(a=="--burst-queue")gBurstQueues=true;else if(a=="--cycle-fault")o.cycleFault=next();else if(a=="--cycle-fault-at-ms")o.cycleFaultAtMs=guint(std::stoul(next()));else if(a=="--cycle-fault-frame")o.cycleFaultFrame=guint(std::stoul(next()));else if(a=="--no-last-sample")gNoLastSample=true;else if(a=="--fault-bound-ms")o.faultBoundMs=guint(std::stoul(next()));
   else if(a=="--role")role=next();else if(a=="--session")session=next();else if(a=="--result")result=next();else{fprintf(stderr,"unknown option %s\n",a.c_str());return 2;}}
  CHECK(o.stallStage.empty()?(o.stallFrame==0&&o.stallMs==0):
    ((o.stallStage=="source"||o.stallStage=="post-push")&&o.stallFrame>0&&o.stallFrame<guint64(o.seconds)*gFps&&o.stallMs>0&&o.stallMs<=1000&&!o.cycles&&!o.sourceOnly&&!o.localConsumer));
  {const bool kill=o.fault=="producer-kill"||o.fault=="consumer-kill",stall=o.fault=="consumer-stall",prod=producerFault(o.fault);
-  CHECK(o.fault.empty()?(o.faultExpect.empty()&&!o.faultAtS&&!o.faultFrame&&!o.faultMs):((kill||stall||prod)&&!o.cycles&&!o.sourceOnly&&!o.localConsumer&&o.stallStage.empty()&&!gGpuReadback));
+  CHECK(o.fault.empty()?(o.faultExpect.empty()&&!o.faultAtS&&!o.faultFrame&&!o.faultMs):((kill||stall||prod)&&(!o.cycles||(role=="producer"&&o.fault=="video-stale-meta"))&&!o.sourceOnly&&!o.localConsumer&&o.stallStage.empty()&&!gGpuReadback));
   // Producer faults: N within the run (frames, or 10 ms audio blocks), and the
   // declared outcome that the documented policy gives each.
   CHECK(!malformedFault(o.fault)||(o.faultFrame>0&&!o.faultMs&&!o.faultAtS&&o.faultExpect=="explicit-failure"&&
@@ -584,6 +616,9 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
   CHECK(!kill||(o.faultAtS>=WARMUP_S+1&&o.faultAtS+2<=o.seconds&&!o.faultFrame&&!o.faultMs&&o.faultExpect.empty()));
   CHECK(!stall||(o.faultFrame>0&&o.faultFrame<guint64(o.seconds)*gFps&&o.faultMs>0&&o.faultMs<=5000&&(o.faultExpect=="absorbed"||o.faultExpect=="counted-drop"||o.faultExpect=="replacement-failure"||o.faultExpect=="explicit-failure")));
   CHECK(o.faultBoundMs>0&&o.faultBoundMs<=10000);
+  CHECK(o.cycleFault.empty()?(!o.cycleFaultAtMs&&!o.cycleFaultFrame):(o.cycles>=2&&o.fault.empty()&&
+   ((o.cycleFault=="kill"&&o.cycleFaultAtMs>=1000&&o.cycleFaultAtMs+1000<=o.seconds*1000&&!o.cycleFaultFrame)||
+    (o.cycleFault=="malformed"&&o.restart=="producer"&&o.cycleFaultFrame>0&&o.cycleFaultFrame<guint64(o.seconds)*gFps&&!o.cycleFaultAtMs))));
   // --burst-queue: burst faults only, with raw per-buffer records for the
   // transport-share measure.
   CHECK(!gBurstQueues||((o.fault=="producer-burst"||o.fault=="audio-stall")&&o.raw&&o.faultExpect=="absorbed"));}
