@@ -1694,8 +1694,17 @@ if(FRAMELINK_BUILD_TESTS AND TARGET framelink_gst_session)
     add_test(NAME gst_av_bench_fault_consumer_stall COMMAND fl_gst_av_bench $<TARGET_FILE:gstframelink>
         ${FL_BENCH_FAULT_ARGS} --fault consumer-stall --fault-frame 90 --fault-ms 300
         --fault-expect replacement-failure --label bench-fault-consumer-stall)
+    # Audio underrun at the producer: unsignalled (refused) and signalled with
+    # GAP + DISCONT (explicit, exact loss). Timing-bound cases stay out of CTest.
+    add_test(NAME gst_av_bench_fault_audio_drop COMMAND fl_gst_av_bench $<TARGET_FILE:gstframelink>
+        ${FL_BENCH_FAULT_ARGS} --fault audio-drop --fault-frame 300 --fault-ms 50
+        --fault-expect explicit-failure --label bench-fault-audio-drop)
+    add_test(NAME gst_av_bench_fault_audio_gap COMMAND fl_gst_av_bench $<TARGET_FILE:gstframelink>
+        ${FL_BENCH_FAULT_ARGS} --fault audio-gap --fault-frame 300 --fault-ms 50
+        --fault-expect gap-visible --label bench-fault-audio-gap)
     set_tests_properties(gst_av_bench_fault_producer_kill gst_av_bench_fault_consumer_kill
-        gst_av_bench_fault_consumer_stall PROPERTIES TIMEOUT 120)
+        gst_av_bench_fault_consumer_stall gst_av_bench_fault_audio_drop gst_av_bench_fault_audio_gap
+        PROPERTIES TIMEOUT 120)
     if(WIN32)
         foreach(cpu_format BGRA NV12)
             add_test(NAME gst_av_bench_shared_cpu_${cpu_format}

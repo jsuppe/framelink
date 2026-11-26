@@ -38,6 +38,17 @@
 //       the pool-exhausted error, the consumer does not report EOS, and both
 //       sides end within the run limit.
 //   Any loss not matched by the producer's drop count fails every expectation.
+// Producer faults: --fault producer-burst|audio-stall|audio-drop|audio-gap
+//   --fault-frame N (video frame, or 10 ms audio block, 1-based) --fault-ms M
+//   (1..1000), injected at the source's push (see pushed()). Expectations:
+//     producer-burst: absorbed (as above, on video) or counted-drop;
+//     audio-stall: absorbed (on audio; recovery within ceil(M/10)+2 blocks);
+//     audio-drop: explicit-failure (the producer refuses the timestamp gap,
+//       "continuity mismatch"; the consumer does not report EOS and ends within
+//       --fault-bound-ms of the first missing block);
+//     audio-gap: gap-visible (both EOS, video complete, exactly the dropped
+//       samples missing, one consumer PTS jump and one GAP event, each of the
+//       dropped duration within 2 ns).
 // Diagnostic fault: --video-stall-stage source|post-push
 //   --video-stall-frame N (1-based) --video-stall-ms N (1..1000).
 // CPU source-thread delay only; not GPU injection or qualification.
@@ -163,11 +174,31 @@ static int sourceChild(const Options&o,const std::string&out){
 // Producer push: running time when the video source pushes each frame, minus
 // its PTS (on the session timeline shared with the consumer). A live source
 // that stalls catches up with back-to-back pushes; bursts show here.
-struct Pushes {const Options* options=nullptr;guint videoIndex=0,stallCount=0;gint64 stallStartUs=0,stallElapsedUs=0;std::mutex m;std::vector<std::pair<gint64,gint64>> v[2];GstElement*pipeline=nullptr;};  // {pts, lateness}
+struct Pushes {const Options* options=nullptr;guint videoIndex=0,audioIndex=0,stallCount=0;gint64 stallStartUs=0,stallElapsedUs=0;
+ guint faultExecuted=0,faultDroppedBlocks=0;guint64 faultDroppedSamples=0;gint64 faultStartUs=0,faultElapsedUs=0,faultGapNs=-1;
+ std::mutex m;std::vector<std::pair<gint64,gint64>> v[2];GstElement*pipeline=nullptr;};  // {pts, lateness}
+static bool producerFault(const std::string&f){return f=="producer-burst"||f=="audio-stall"||f=="audio-drop"||f=="audio-gap";}
 static GstPadProbeReturn pushed(GstPad*pad,GstPadProbeInfo*info,gpointer d){
  auto*a=static_cast<Pushes*>(d);auto*b=GST_PAD_PROBE_INFO_BUFFER(info);
  const int track=GPOINTER_TO_INT(g_object_get_data(G_OBJECT(pad),"m6-track"));
- if(track==0)++a->videoIndex;
+ if(track==0)++a->videoIndex;else ++a->audioIndex;
+ // Producer faults (M6.4), at the source's push, before FrameLink sees the buffer:
+ //  producer-burst: the video source blocks M ms on frame N; the live source then
+ //   catches up with back-to-back frames;
+ //  audio-stall: the same for audio block N (10 ms blocks);
+ //  audio-drop: ceil(M/10) blocks from N never reach the sink (an unsignalled
+ //   underrun: a timestamp gap without DISCONT);
+ //  audio-gap: the same blocks, signalled as GStreamer does: a GAP event for the
+ //   missing interval and DISCONT on the next block.
+ if(a->options&&producerFault(a->options->fault)){const auto&o=*a->options;const bool video=o.fault=="producer-burst";
+  if((track==0)==video){const guint index=track?a->audioIndex:a->videoIndex;
+   if(o.fault=="producer-burst"||o.fault=="audio-stall"){if(index==o.faultFrame){a->faultStartUs=g_get_monotonic_time();g_usleep(gulong(o.faultMs)*1000);a->faultElapsedUs=g_get_monotonic_time()-a->faultStartUs;a->faultExecuted=1;}}
+   else{const guint blocks=(o.faultMs+9)/10;
+    if(index>=o.faultFrame&&index<o.faultFrame+blocks){
+     if(index==o.faultFrame){a->faultStartUs=g_get_monotonic_time();a->faultExecuted=1;
+      if(o.fault=="audio-gap"){const GstClockTime duration=GST_BUFFER_DURATION(b)*blocks;a->faultGapNs=gint64(duration);gst_pad_push_event(pad,gst_event_new_gap(GST_BUFFER_PTS(b),duration));}}
+     ++a->faultDroppedBlocks;a->faultDroppedSamples+=gst_buffer_get_size(b)/4;return GST_PAD_PROBE_DROP;}
+    if(o.fault=="audio-gap"&&index==o.faultFrame+blocks){b=gst_buffer_make_writable(b);GST_BUFFER_FLAG_SET(b,GST_BUFFER_FLAG_DISCONT);GST_PAD_PROBE_INFO_DATA(info)=b;}}}}
  auto stall=[&](const char*stage){if(track==0&&a->options&&a->options->stallStage==stage&&a->videoIndex==a->options->stallFrame){
   a->stallStartUs=g_get_monotonic_time();g_usleep(gulong(a->options->stallMs)*1000);a->stallElapsedUs=g_get_monotonic_time()-a->stallStartUs;++a->stallCount;}};
  // Test-only controls: before measuring source push versus after that boundary.
@@ -282,6 +313,8 @@ static int producerChild(const Options&o,const std::string&session,const std::st
  r["injection.stage"]=o.stallStage.empty()?"none":o.stallStage;r["injection.frame"]=std::to_string(o.stallFrame);
  r["injection.requested_ms"]=std::to_string(o.stallMs);r["injection.executed"]=std::to_string(pushes.stallCount);
  r["injection.start_monotonic_us"]=std::to_string(pushes.stallStartUs);r["injection.elapsed_us"]=std::to_string(pushes.stallElapsedUs);
+ if(producerFault(o.fault)){r["fault.executed"]=std::to_string(pushes.faultExecuted);r["fault.start_monotonic_us"]=std::to_string(pushes.faultStartUs);r["fault.elapsed_us"]=std::to_string(pushes.faultElapsedUs);
+  r["fault.dropped_blocks"]=std::to_string(pushes.faultDroppedBlocks);r["fault.dropped_samples"]=std::to_string(pushes.faultDroppedSamples);r["fault.gap_ns"]=std::to_string(pushes.faultGapNs);}
  sampler.report(r);writeResult(out,r);return 0;}
 
 struct Arrivals {std::map<GstBuffer*,gint64> pending[2];std::vector<double> residence[2];guint sampledLevel[2]={0,0};guint unmatched[2]={0,0};std::mutex m;std::vector<std::pair<gint64,gint64>> v[2];GstElement*pipeline=nullptr;};  // {pts, lateness}
@@ -322,13 +355,23 @@ static int consumerChild(const Options&o,const std::string&session,const std::st
    gst_pad_add_probe(pad,GST_PAD_PROBE_TYPE_BUFFER,[](GstPad*,GstPadProbeInfo*,gpointer d)->GstPadProbeReturn{auto*st=static_cast<Stall*>(d);
     if(++st->seen==st->frame){st->startUs=g_get_monotonic_time();g_usleep(gulong(st->ms)*1000);st->elapsedUs=g_get_monotonic_time()-st->startUs;st->executed=1;}return GST_PAD_PROBE_OK;},&stall,nullptr);
    gst_object_unref(pad);gst_object_unref(sink);}
+  // GAP events reaching the audio appsink: count and summed duration.
+  struct Gaps {guint n=0;guint64 ns=0;} gaps;
+  {auto*sink=gst_bin_get_by_name(GST_BIN(c.p),"aout");auto*pad=gst_element_get_static_pad(sink,"sink");
+   gst_pad_add_probe(pad,GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM,[](GstPad*,GstPadProbeInfo*info,gpointer d)->GstPadProbeReturn{auto*e=GST_PAD_PROBE_INFO_EVENT(info);
+    if(GST_EVENT_TYPE(e)==GST_EVENT_GAP){GstClockTime pts=0,duration=0;gst_event_parse_gap(e,&pts,&duration);auto*g=static_cast<Gaps*>(d);++g->n;if(GST_CLOCK_TIME_IS_VALID(duration))g->ns+=duration;}return GST_PAD_PROBE_OK;},&gaps,nullptr);
+   gst_object_unref(pad);gst_object_unref(sink);}
   c.start();c.finish();sampler.stop();
   r["ended_monotonic_us"]=std::to_string(c.endedAt);
-  if(o.fault=="consumer-stall"){r["fault.executed"]=std::to_string(stall.executed);r["fault.start_monotonic_us"]=std::to_string(stall.startUs);r["fault.elapsed_us"]=std::to_string(stall.elapsedUs);
-   // Recovery: frames from the stalled one to the last arrival over budget.
-   std::lock_guard<std::mutex> alock(arrivals.m);auto&av=arrivals.v[0];guint last=0;bool any=false;
+  r["audio.gap_events"]=std::to_string(gaps.n);r["audio.gap_event_ns"]=std::to_string(gaps.ns);
+  {std::lock_guard<std::mutex> lock(c.mutex);r["audio.pts_jumps"]=std::to_string(c.audioJumps);r["audio.pts_jump_ns"]=std::to_string(c.audioJumpNs);}
+  // Recovery: buffers from the faulted one to the last arrival over budget, on
+  // the faulted track (video for consumer-stall and producer-burst).
+  const bool late=o.fault=="consumer-stall"||o.fault=="producer-burst"||o.fault=="audio-stall";
+  if(late){std::lock_guard<std::mutex> alock(arrivals.m);auto&av=arrivals.v[o.fault=="audio-stall"?1:0];guint last=0;bool any=false;
    for(size_t i=o.faultFrame?o.faultFrame-1:0;i<av.size();i++)if(av[i].second>gint64(gArrivalBudget)){last=guint(i);any=true;}
    r["fault.recovery_frames"]=std::to_string(any?last-(o.faultFrame-1)+1:0);}
+  if(o.fault=="consumer-stall"){r["fault.executed"]=std::to_string(stall.executed);r["fault.start_monotonic_us"]=std::to_string(stall.startUs);r["fault.elapsed_us"]=std::to_string(stall.elapsedUs);}
   {std::lock_guard<std::mutex> lock(c.statsMutex);for(auto*st:c.stats){gchar*t=gst_structure_to_string(st);r[std::string("stats.")+gst_structure_get_name(st)]=t;g_free(t);}}
 #ifdef FL_BENCH_GPU_READBACK
   if(gGpuReadback){r["content.checked"]=std::to_string(content.checked);r["content.mismatches"]=std::to_string(content.mismatches);r["content.index_gaps"]=std::to_string(content.gaps);r["content.missing_frames"]=std::to_string(content.missing);r["content.layout"]=content.layout;r["content.rows"]=std::to_string(CONTENT_ROWS);
@@ -438,7 +481,7 @@ static std::vector<std::string> optionArgs(const Options&o){
  a.insert(a.end(),{"--output-queue-buffers",std::to_string(gOutputQueueBuffers),"--arrival-budget-ms",std::to_string(gArrivalBudget/GST_MSECOND),"--latency-ms",std::to_string(gPlaybackLatency/GST_MSECOND)});if(!gOutputSync)a.push_back("--transport-only");if(!gOutputAsync)a.push_back("--no-output-preroll");
  if(!o.stallStage.empty())a.insert(a.end(),{"--video-stall-stage",o.stallStage,"--video-stall-frame",std::to_string(o.stallFrame),"--video-stall-ms",std::to_string(o.stallMs)});
  if(gRetainedDevice)a.push_back("--device-owner");if(gSharedCpu)a.push_back("--shared-cpu");if(gGpuReadback)a.push_back("--gpu-readback");if(o.native)a.push_back("--native");if(o.raw)a.push_back("--raw");if(gErrorOnRingFull)a.push_back("--error-on-ring-full");
- if(o.fault=="consumer-stall")a.insert(a.end(),{"--fault",o.fault,"--fault-expect",o.faultExpect,"--fault-frame",std::to_string(o.faultFrame),"--fault-ms",std::to_string(o.faultMs)});return a;}
+ if(o.fault=="consumer-stall"||producerFault(o.fault))a.insert(a.end(),{"--fault",o.fault,"--fault-expect",o.faultExpect,"--fault-frame",std::to_string(o.faultFrame),"--fault-ms",std::to_string(o.faultMs)});return a;}
 
 // Least-squares slope of y over x.
 static double slope(const std::vector<std::pair<double,double>>&v){double sx=0,sy=0,sxx=0,sxy=0;const double n=double(v.size());
@@ -512,8 +555,14 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
   else if(a=="--role")role=next();else if(a=="--session")session=next();else if(a=="--result")result=next();else{fprintf(stderr,"unknown option %s\n",a.c_str());return 2;}}
  CHECK(o.stallStage.empty()?(o.stallFrame==0&&o.stallMs==0):
    ((o.stallStage=="source"||o.stallStage=="post-push")&&o.stallFrame>0&&o.stallFrame<guint64(o.seconds)*gFps&&o.stallMs>0&&o.stallMs<=1000&&!o.cycles&&!o.sourceOnly&&!o.localConsumer));
- {const bool kill=o.fault=="producer-kill"||o.fault=="consumer-kill",stall=o.fault=="consumer-stall";
-  CHECK(o.fault.empty()?(o.faultExpect.empty()&&!o.faultAtS&&!o.faultFrame&&!o.faultMs):((kill||stall)&&!o.cycles&&!o.sourceOnly&&!o.localConsumer&&o.stallStage.empty()));
+ {const bool kill=o.fault=="producer-kill"||o.fault=="consumer-kill",stall=o.fault=="consumer-stall",prod=producerFault(o.fault);
+  CHECK(o.fault.empty()?(o.faultExpect.empty()&&!o.faultAtS&&!o.faultFrame&&!o.faultMs):((kill||stall||prod)&&!o.cycles&&!o.sourceOnly&&!o.localConsumer&&o.stallStage.empty()&&!gGpuReadback));
+  // Producer faults: N within the run (frames, or 10 ms audio blocks), and the
+  // declared outcome that the documented policy gives each.
+  CHECK(!prod||(o.faultFrame>0&&o.faultMs>0&&o.faultMs<=1000&&!o.faultAtS&&
+   (o.fault=="producer-burst"?o.faultFrame<guint64(o.seconds)*gFps:guint64(o.faultFrame)+(o.faultMs+9)/10<guint64(o.seconds)*100)&&
+   ((o.fault=="producer-burst"&&(o.faultExpect=="absorbed"||o.faultExpect=="counted-drop"))||(o.fault=="audio-stall"&&o.faultExpect=="absorbed")||
+    (o.fault=="audio-drop"&&o.faultExpect=="explicit-failure")||(o.fault=="audio-gap"&&o.faultExpect=="gap-visible"))));
   CHECK(!kill||(o.faultAtS>=WARMUP_S+1&&o.faultAtS+2<=o.seconds&&!o.faultFrame&&!o.faultMs&&o.faultExpect.empty()));
   CHECK(!stall||(o.faultFrame>0&&o.faultFrame<guint64(o.seconds)*gFps&&o.faultMs>0&&o.faultMs<=5000&&(o.faultExpect=="absorbed"||o.faultExpect=="counted-drop"||o.faultExpect=="replacement-failure"||o.faultExpect=="explicit-failure")));
   CHECK(o.faultBoundMs>0&&o.faultBoundMs<=10000);}
@@ -577,7 +626,7 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
  s["output.async"]=gOutputAsync?"true":"false";s["harness.malloc"]=gSourceMalloc;
  s["expected.samples"]=std::to_string(guint64(o.seconds)*48000);
  if(!o.fault.empty()){s["fault"]=o.fault;s["fault.bound_ms"]=std::to_string(o.faultBoundMs);
-  const bool killed=o.fault!="consumer-stall";
+  const bool killed=o.fault=="producer-kill"||o.fault=="consumer-kill";
 #ifdef _WIN32
   const int killedStatus=99;
 #else
@@ -589,6 +638,35 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
    const double detect=ended&&killedAt?(ended-killedAt)/1000.0:-1;char t[32];snprintf(t,sizeof t,"%.1f",detect);
    s["fault.at_s"]=std::to_string(o.faultAtS);s["fault.detection_ms"]=t;s["fault.survivor_result"]=result;
    pass=victimRc==killedStatus&&survivorRc==0&&result.rfind("error",0)==0&&detect>=0&&detect<=o.faultBoundMs;}
+  else if(producerFault(o.fault)){s["fault.expect"]=o.faultExpect;s["fault.frame"]=std::to_string(o.faultFrame);s["fault.ms"]=std::to_string(o.faultMs);
+   const bool audio=o.fault!="producer-burst";const guint period=audio?10:std::max<guint>(1,1000/gFps);
+   const guint recoveryLimit=(o.faultMs+period-1)/period+2;s["fault.recovery_limit_frames"]=std::to_string(recoveryLimit);
+   const bool executed=pr["fault.executed"]=="1",ended=pc==0&&cc==0;
+   const bool videoComplete=cr["frames"]==s["expected.frames"]&&cr["frames"]==pr["pushed.frames"];
+   const bool bothEos=pr["result"]=="EOS"&&cr["result"]=="EOS";
+   const long long droppedSamples=pr["fault.dropped_samples"].empty()?-1:std::stoll(pr["fault.dropped_samples"]);
+   if(o.fault=="audio-drop"){
+    // Detection: the consumer's end after the first missing block was due.
+    const gint64 at=pr["fault.start_monotonic_us"].empty()?0:std::stoll(pr["fault.start_monotonic_us"]),end=cr["ended_monotonic_us"].empty()?0:std::stoll(cr["ended_monotonic_us"]);
+    const double detect=at&&end?(end-at)/1000.0:-1;char t[32];snprintf(t,sizeof t,"%.1f",detect);s["fault.detection_ms"]=t;s["fault.bound_ms"]=std::to_string(o.faultBoundMs);
+    pass=executed&&ended&&pr["result"].find("continuity mismatch")!=std::string::npos&&cr["result"]!="EOS"&&detect>=0&&detect<=o.faultBoundMs;}
+   else if(o.fault=="audio-gap"){
+    // Loss is explicit: exactly the dropped samples are missing, the consumer
+    // sees one PTS jump of the dropped duration and receives the GAP event.
+    const long long samples=cr["samples"].empty()?-1:std::stoll(cr["samples"]),expected=std::stoll(s["expected.samples"]),gapNs=std::stoll(pr["fault.gap_ns"]);
+    const long long jump=std::stoll(cr["audio.pts_jump_ns"]),gapSeen=std::stoll(cr["audio.gap_event_ns"]);
+    s["fault.samples_missing"]=std::to_string(expected-samples);
+    pass=executed&&ended&&bothEos&&videoComplete&&cr["queue.accounting"]=="complete"&&droppedSamples>0&&samples==expected-droppedSamples&&
+     cr["audio.pts_jumps"]=="1"&&std::llabs(jump-gapNs)<=2&&cr["audio.gap_events"]=="1"&&std::llabs(gapSeen-gapNs)<=2;}
+   else{
+    const bool complete=ended&&bothEos&&videoComplete&&cr["queue.accounting"]=="complete"&&cr["audio.contiguous"]=="yes"&&cr["samples"]==s["expected.samples"]&&cr["samples"]==pr["pushed.samples"];
+    const unsigned long recovery=cr["fault.recovery_frames"].empty()?~0ul:std::stoul(cr["fault.recovery_frames"]);
+    if(o.faultExpect=="absorbed")pass=executed&&complete&&recovery<=recoveryLimit;
+    else{// counted-drop (producer-burst): every video loss counted by the producer sink.
+     auto counter=[&](const char*key)->long long{const std::string&t=pr["stats.framelink-sink-stats"];auto at=t.find(std::string(key)+"=(guint64)");return at==std::string::npos?-1:std::stoll(t.substr(at+strlen(key)+10));};
+     const long long dropped=counter("dropped"),delivered=cr["frames"].empty()?-1:std::stoll(cr["frames"]),pushed=std::stoll(pr["pushed.frames"]);
+     s["fault.producer_dropped"]=std::to_string(dropped);
+     pass=executed&&ended&&bothEos&&dropped>0&&delivered+dropped==pushed&&cr["audio.contiguous"]=="yes"&&cr["samples"]==s["expected.samples"]&&cr["queue.accounting"]=="complete";}}}
   else{s["fault.expect"]=o.faultExpect;s["fault.frame"]=std::to_string(o.faultFrame);s["fault.ms"]=std::to_string(o.faultMs);
    // Producer sink drop counters (framelink-sink-stats at EOS; absent on error).
    auto counter=[&](const char*key)->long long{const std::string&t=pr["stats.framelink-sink-stats"];auto at=t.find(std::string(key)+"=(guint64)");return at==std::string::npos?-1:std::stoll(t.substr(at+strlen(key)+10));};

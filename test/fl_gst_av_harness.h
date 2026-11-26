@@ -159,6 +159,8 @@ struct Producer:Side {
 };
 struct Consumer:Side {
  std::atomic<guint> frames{0};std::atomic<guint64> samples{0};gint64 trackBest[2]={G_MAXINT64,G_MAXINT64},trackWorst[2]={G_MININT64,G_MININT64};bool uniform=true,contiguous=true,checkContent=true;
+ // Audio PTS discontinuities: count and summed signed size (ns).
+ guint audioJumps=0;gint64 audioJumpNs=0;
  // record: keep every render lateness (ns) per track for distributions.
  bool record=false;std::vector<gint64> lateness[2];
  std::string features;GstClockTime next=GST_CLOCK_TIME_NONE;std::mutex mutex;
@@ -185,7 +187,7 @@ struct Consumer:Side {
       if(self->record)self->lateness[track].push_back(l);self->trackBest[track]=std::min(self->trackBest[track],l);self->trackWorst[track]=std::max(self->trackWorst[track],l);}
      if(track==0){if(self->features.empty()){auto*f=gst_caps_get_features(gst_sample_get_caps(sample),0);gchar*text=f?gst_caps_features_to_string(f):g_strdup("memory:SystemMemory");self->features=text;g_free(text);}
       GstMapInfo m{};if(self->checkContent&&gst_buffer_map(b,&m,GST_MAP_READ)){for(gsize i=4;i+3<m.size;i+=4)if(memcmp(m.data+i,m.data,4)){self->uniform=false;break;}gst_buffer_unmap(b,&m);}self->frames++;}
-     else{if(GST_CLOCK_TIME_IS_VALID(self->next)){auto dd=gint64(GST_BUFFER_PTS(b))-gint64(self->next);if(dd<-1||dd>1)self->contiguous=false;}self->next=GST_BUFFER_PTS(b)+GST_BUFFER_DURATION(b);self->samples+=gst_buffer_get_size(b)/4;}
+     else{if(GST_CLOCK_TIME_IS_VALID(self->next)){auto dd=gint64(GST_BUFFER_PTS(b))-gint64(self->next);if(dd<-1||dd>1){self->contiguous=false;++self->audioJumps;self->audioJumpNs+=dd;}}self->next=GST_BUFFER_PTS(b)+GST_BUFFER_DURATION(b);self->samples+=gst_buffer_get_size(b)/4;}
      gst_sample_unref(sample);return GST_FLOW_OK;};
    gst_app_sink_set_callbacks(GST_APP_SINK(sink),&cb,this,nullptr);gst_object_unref(sink);}
  }
