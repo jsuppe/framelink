@@ -365,8 +365,11 @@ per-platform state. Windows readiness is the
   stalls on the Linux native, Linux shared-CPU and Android native 1080p60 cells, 70/70 against declared
   outcomes; default overload loss is counted only at the producer (D2). Producer bursts and audio underrun at rate (2026-11-25,
   [evidence](m6/fault-coverage/producer-at-rate/README.md)): 85/90; every burst and underrun delivered or
-  explicitly refused/signalled, but the Android 200 ms burst missed its declared recovery limit 5/5 (source
-  catch-up, not transport). Malformed metadata at rate open.
+  explicitly refused/signalled, but the Android 200 ms burst missed its declared recovery limit 5/5 (first
+  attributed to the test source; corrected below). Queued bursts at FrameLink's input (2026-11-25,
+  [evidence](m6/fault-coverage/burst-transport/README.md)): 57/60; FrameLink's delay share never over budget;
+  Android intake about 8 ms per 1080p RGBA frame (about 2x real time), drain-rate check failed 3/5.
+  Malformed metadata at rate open.
 - [ ] **M6.5 Performance/resource evidence:** distributions, queue depth,
   CPU/GPU/memory/handles, clock behavior and bounded growth.
   Stage costs, Android NV12 cost isolation and platform limits are published
