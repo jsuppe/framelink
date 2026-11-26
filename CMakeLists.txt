@@ -1705,6 +1705,19 @@ if(FRAMELINK_BUILD_TESTS AND TARGET framelink_gst_session)
     set_tests_properties(gst_av_bench_fault_producer_kill gst_av_bench_fault_consumer_kill
         gst_av_bench_fault_consumer_stall gst_av_bench_fault_audio_drop gst_av_bench_fault_audio_gap
         PROPERTIES TIMEOUT 120)
+    # Malformed metadata on one producer buffer, each refused explicitly.
+    foreach(case video-no-pts video-stale-meta audio-no-pts audio-misaligned)
+        if(case MATCHES "^video")
+            set(frame 90)
+        else()
+            set(frame 300)
+        endif()
+        add_test(NAME gst_av_bench_fault_${case} COMMAND fl_gst_av_bench $<TARGET_FILE:gstframelink>
+            ${FL_BENCH_FAULT_ARGS} --fault ${case} --fault-frame ${frame}
+            --fault-expect explicit-failure --label bench-fault-${case})
+        set_tests_properties(gst_av_bench_fault_${case} PROPERTIES TIMEOUT 120)
+    endforeach()
+
     if(WIN32)
         foreach(cpu_format BGRA NV12)
             add_test(NAME gst_av_bench_shared_cpu_${cpu_format}

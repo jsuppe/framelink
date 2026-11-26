@@ -59,6 +59,8 @@
 // lateness (same-second windows), i.e. sink scheduling, given that the session
 // preserves relative PTS exactly (M5b timeline tests).
 #include "fl_gst_av_harness.h"
+#include "framelink_meta.h"
+#include "fl_gst_metadata.hpp"
 #include <glib/gstdio.h>
 #include <cmath>
 #include <fstream>
@@ -177,7 +179,8 @@ static int sourceChild(const Options&o,const std::string&out){
 struct Pushes {const Options* options=nullptr;guint videoIndex=0,audioIndex=0,stallCount=0;gint64 stallStartUs=0,stallElapsedUs=0;
  guint faultExecuted=0,faultDroppedBlocks=0;guint64 faultDroppedSamples=0;gint64 faultStartUs=0,faultElapsedUs=0,faultGapNs=-1;
  std::mutex m;std::vector<std::pair<gint64,gint64>> v[2];GstElement*pipeline=nullptr;};  // {pts, lateness}
-static bool producerFault(const std::string&f){return f=="producer-burst"||f=="audio-stall"||f=="audio-drop"||f=="audio-gap";}
+static bool malformedFault(const std::string&f){return f=="video-no-pts"||f=="video-stale-meta"||f=="audio-no-pts"||f=="audio-misaligned";}
+static bool producerFault(const std::string&f){return f=="producer-burst"||f=="audio-stall"||f=="audio-drop"||f=="audio-gap"||malformedFault(f);}
 static GstPadProbeReturn pushed(GstPad*pad,GstPadProbeInfo*info,gpointer d){
  auto*a=static_cast<Pushes*>(d);auto*b=GST_PAD_PROBE_INFO_BUFFER(info);
  const int track=GPOINTER_TO_INT(g_object_get_data(G_OBJECT(pad),"m6-track"));
@@ -190,9 +193,20 @@ static GstPadProbeReturn pushed(GstPad*pad,GstPadProbeInfo*info,gpointer d){
  //   underrun: a timestamp gap without DISCONT);
  //  audio-gap: the same blocks, signalled as GStreamer does: a GAP event for the
  //   missing interval and DISCONT on the next block.
- if(a->options&&producerFault(a->options->fault)){const auto&o=*a->options;const bool video=o.fault=="producer-burst";
+ // Malformed metadata on one buffer N (M6.4b), each refused explicitly by the sink:
+ //  video-no-pts / audio-no-pts: PTS invalid; video-stale-meta: FrameLink frame
+ //  metadata of another stream generation; audio-misaligned: one byte short.
+ if(a->options&&producerFault(a->options->fault)){const auto&o=*a->options;const bool video=o.fault=="producer-burst"||o.fault=="video-no-pts"||o.fault=="video-stale-meta";
   if((track==0)==video){const guint index=track?a->audioIndex:a->videoIndex;
-   if(o.fault=="producer-burst"||o.fault=="audio-stall"){if(index==o.faultFrame){a->faultStartUs=g_get_monotonic_time();g_usleep(gulong(o.faultMs)*1000);a->faultElapsedUs=g_get_monotonic_time()-a->faultStartUs;a->faultExecuted=1;}}
+   if(malformedFault(o.fault)){if(index==o.faultFrame){a->faultStartUs=g_get_monotonic_time();a->faultExecuted=1;b=gst_buffer_make_writable(b);
+     if(o.fault=="video-no-pts"||o.fault=="audio-no-pts")GST_BUFFER_PTS(b)=GST_CLOCK_TIME_NONE;
+     else if(o.fault=="audio-misaligned")gst_buffer_resize(b,0,gssize(gst_buffer_get_size(b))-1);
+     else{// As a relay's upstream FrameLink consumer would, register the meta type
+      // here; a producer process alone never does (only sources add the meta).
+      const GstMetaInfo*metaInfo=gst_meta_get_info("GstFrameLinkFrameMeta");if(!metaInfo)metaInfo=frameMetaInfo();CHECK(metaInfo);auto*m=reinterpret_cast<GstFrameLinkFrameMeta*>(gst_buffer_add_meta(b,metaInfo,nullptr));CHECK(m);
+      m->frame={};m->frame.version=FL_FRAME_METADATA_VERSION;m->frame.streamGeneration=G_MAXUINT64;}
+     GST_PAD_PROBE_INFO_DATA(info)=b;}}
+   else if(o.fault=="producer-burst"||o.fault=="audio-stall"){if(index==o.faultFrame){a->faultStartUs=g_get_monotonic_time();g_usleep(gulong(o.faultMs)*1000);a->faultElapsedUs=g_get_monotonic_time()-a->faultStartUs;a->faultExecuted=1;}}
    else{const guint blocks=(o.faultMs+9)/10;
     if(index>=o.faultFrame&&index<o.faultFrame+blocks){
      if(index==o.faultFrame){a->faultStartUs=g_get_monotonic_time();a->faultExecuted=1;
@@ -561,7 +575,9 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
   CHECK(o.fault.empty()?(o.faultExpect.empty()&&!o.faultAtS&&!o.faultFrame&&!o.faultMs):((kill||stall||prod)&&!o.cycles&&!o.sourceOnly&&!o.localConsumer&&o.stallStage.empty()&&!gGpuReadback));
   // Producer faults: N within the run (frames, or 10 ms audio blocks), and the
   // declared outcome that the documented policy gives each.
-  CHECK(!prod||(o.faultFrame>0&&o.faultMs>0&&o.faultMs<=1000&&!o.faultAtS&&
+  CHECK(!malformedFault(o.fault)||(o.faultFrame>0&&!o.faultMs&&!o.faultAtS&&o.faultExpect=="explicit-failure"&&
+   o.faultFrame<guint64(o.seconds)*(o.fault.rfind("video",0)==0?gFps:100)));
+  CHECK(!prod||malformedFault(o.fault)||(o.faultFrame>0&&o.faultMs>0&&o.faultMs<=1000&&!o.faultAtS&&
    (o.fault=="producer-burst"?o.faultFrame<guint64(o.seconds)*gFps:guint64(o.faultFrame)+(o.faultMs+9)/10<guint64(o.seconds)*100)&&
    ((o.fault=="producer-burst"&&(o.faultExpect=="absorbed"||o.faultExpect=="counted-drop"))||(o.fault=="audio-stall"&&o.faultExpect=="absorbed")||
     (o.fault=="audio-drop"&&o.faultExpect=="explicit-failure")||(o.fault=="audio-gap"&&o.faultExpect=="gap-visible"))));
@@ -650,7 +666,18 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
    const bool videoComplete=cr["frames"]==s["expected.frames"]&&cr["frames"]==pr["pushed.frames"];
    const bool bothEos=pr["result"]=="EOS"&&cr["result"]=="EOS";
    const long long droppedSamples=pr["fault.dropped_samples"].empty()?-1:std::stoll(pr["fault.dropped_samples"]);
-   if(o.fault=="audio-drop"){
+   if(malformedFault(o.fault)){
+    // Declared: the producer fails with the sink's message for that input, the
+    // consumer does not report EOS, both exit normally, and the consumer ends
+    // within the bound of the malformed buffer's push. The shared-CPU sink
+    // refuses invalid video metadata without its own message, so the
+    // source's generic flow error is expected there.
+    std::string want=o.fault=="video-stale-meta"?"stale producer video metadata generation":o.fault=="audio-no-pts"?"PCM requires valid PTS, duration and TIME segment":
+     o.fault=="audio-misaligned"?"PCM block is misaligned, empty or exceeds bounded queue budget":gSharedCpu?"Internal data stream error":"valid supported frame metadata and TIME mapping required";
+    const gint64 at=pr["fault.start_monotonic_us"].empty()?0:std::stoll(pr["fault.start_monotonic_us"]),end=cr["ended_monotonic_us"].empty()?0:std::stoll(cr["ended_monotonic_us"]);
+    const double detect=at&&end?(end-at)/1000.0:-1;char t[32];snprintf(t,sizeof t,"%.1f",detect);s["fault.detection_ms"]=t;s["fault.bound_ms"]=std::to_string(o.faultBoundMs);s["fault.expected_message"]=want;
+    pass=executed&&ended&&pr["result"].find(want)!=std::string::npos&&cr["result"]!="EOS"&&detect>=0&&detect<=o.faultBoundMs;}
+   else if(o.fault=="audio-drop"){
     // Detection: the consumer's end after the first missing block was due.
     const gint64 at=pr["fault.start_monotonic_us"].empty()?0:std::stoll(pr["fault.start_monotonic_us"]),end=cr["ended_monotonic_us"].empty()?0:std::stoll(cr["ended_monotonic_us"]);
     const double detect=at&&end?(end-at)/1000.0:-1;char t[32];snprintf(t,sizeof t,"%.1f",detect);s["fault.detection_ms"]=t;s["fault.bound_ms"]=std::to_string(o.faultBoundMs);
