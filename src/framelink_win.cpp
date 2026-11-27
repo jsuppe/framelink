@@ -959,6 +959,12 @@ FL_API flResult flAcquireBuffer(flChannel* ch, flBuffer* out, uint32_t timeoutMs
     if (!ch->link.connected()) return trace.result(FL_DISCONNECTED);
     const DWORD deadline = GetTickCount() + timeoutMs;
     for (;;) {
+        // Our own removed device is device loss even while the fences still
+        // read normally (measured: after an adapter removal the producer only
+        // timed out, its consumer having stopped releasing). Decision 13.
+        if (ch->deviceLost.load() || (ch->device && deviceRemoved(ch->device))) {
+            ch->deviceLost=true;return trace.result(FL_DEVICE_LOST);
+        }
         const uint64_t consumed = completedValue(ch->consumedFence);
         if(consumed==UINT64_MAX){ // a device holding the fence is gone; not all slots free
             const flResult lost=fenceLost(ch->device);if(lost==FL_DEVICE_LOST)ch->deviceLost=true;
@@ -1072,6 +1078,9 @@ FL_API flResult flBeginSubmit(flChannel* ch, const flBuffer* buf, uint64_t* sign
     if (!ch || ch->isConsumer || !buf || !signalValue ||
         buf->slot >= ch->images.size() || buf->image != ch->images[buf->slot] ||
         ch->slotReadyValue[buf->slot] != UINT64_MAX) return trace.result(FL_INVALID);
+    if (ch->deviceLost.load() || (ch->device && deviceRemoved(ch->device))) {
+        ch->deviceLost=true;return trace.result(FL_DEVICE_LOST);
+    }
     if (!ch->link.connected()) return trace.result(FL_DISCONNECTED);
     if (ch->submittingValue) return trace.result(FL_BUSY);
     if((ch->peerFeatures&(fl::FrameMetadataFeature<<16))&&!ch->slotMetadata[buf->slot].version)return trace.result(FL_FORMAT_UNSUPPORTED);
