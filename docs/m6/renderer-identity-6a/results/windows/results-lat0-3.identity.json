@@ -1,0 +1,44 @@
+{
+ "pass": true,
+ "frames": 300,
+ "fps": 60,
+ "seconds": 5,
+ "latency_ms": 0,
+ "matched_transport": 300,
+ "stages": {
+  "av.frame_adopt": {
+   "unique_frames": 300,
+   "events": 300
+  },
+  "av.frame_render_submit": {
+   "unique_frames": 300,
+   "events": 13732
+  },
+  "av.frame_gpu_complete": {
+   "unique_frames": 300,
+   "events": 13732
+  },
+  "av.frame_present_submit": {
+   "unique_frames": 300,
+   "events": 13732
+  }
+ },
+ "submissions": 13732,
+ "present_events_per_frame": 45.773,
+ "ring": "AV_RING_CONFIG ring_slots=13 pending_slots=6 common_latency_ns=0",
+ "pcm": {
+  "audio_blocks": 300,
+  "audio_samples": 240000,
+  "late_audio_blocks": 0,
+  "arrival_drift_ns": -389367
+ },
+ "av_offset_ms": {
+  "definition": "first present submission minus (playback_base_ns + latency + PTS), trace clock",
+  "p50": 5.287,
+  "p99": 7.775,
+  "min": 4.236,
+  "max": 8.325
+ },
+ "physical_scanout_qualified": false,
+ "scope": "finite scheduled playback: identity through FrameLink, GPU completion and presentation API submission; no scanout or acoustic timing"
+}

@@ -46,9 +46,24 @@ Each pass: 300 of 300 frames at every stage, 300 PCM blocks and 240,000 samples,
 
 **The failures are the test producer's throughput on this device.** At 1080p30 the in-APK synthetic producer delivered a frame every 35.7 ms against 33.3 ms. Its PCM fell 169 ms behind, and the playback renegotiated ("audio playout budget exhausted"). FrameLink's own producer calls were about 5 ms per frame of that; the rest is the GStreamer test source filling frames on the CPU. The renderer side adopted and presented every frame it received. 1080p on this tablet needs a faster producer (a decoder or GPU source), not a FrameLink or vkrender change.
 
-## Windows
+## Windows (RTX 5090)
 
-Pending: the `a6a1906` case (native NV12 1080p60 A/V into `vkrenderer --serve`, 5 s, latency 0 and 100 ms, three each), rerun with the PR #25 renderer (`windows/d12-vkr.ps1`).
+The `a6a1906` case rerun with the PR #25 renderer (`f76d1c6`, FrameLink `0d72a94b`, built on the test host; `windows/d12-vkr.ps1`): native NV12 1080p60 A/V into `vkrenderer --serve`, 5 s, latency 0 and 100 ms, three captures each, the same `probe.py`. Launched over ssh; the display was off, so FIFO presentation did not pace the loop (about 48 present submissions per frame).
+
+| Set | Trace capacity per thread | Result |
+|---|---|---|
+| 1 | renderer 524,288, transport 262,144 (the `a6a1906` probe's) | **1 of 6 pass.** The other five lost 492–33,682 trace events to capacity, so their evidence is incomplete and they fail. In each, the renderer decided 300 of 300 frames due with no late drop, and PCM was complete. |
+| 2 | 4,194,304 requested | **0 of 6, void.** Above the recorder's 1,048,576 limit, so it fell back to 4,096 events. My error. |
+| 3 | 1,048,576 (the limit) for both | **6 of 6 pass** |
+
+Set 3, every frame matched through present submission, PCM complete:
+
+| Latency | Submissions matched | A/V offset at present submission, p50 (max) |
+|---|---|---|
+| 0 ms | 14,307–14,415 | 5.08–5.16 ms (7.79–8.42) |
+| 100 ms | 14,167–14,400 | 3.69–3.84 ms (5.45–6.21) |
+
+The earlier `a6a1906` captures are in the same range, per-frame minimum to maximum: 4.2–7.6 ms at 0 ms, 3.4–6.2 ms at 100 ms. The set 1 pass gave 5.29 ms p50. This renderer's loop ran at about 48 present submissions per frame, against 36–37 in `a6a1906`; its trace no longer fits the old capacity over 5 s. Which events grew is not broken down here.
 
 ## Open finding: black video frames in vkrender on Linux (BGRA)
 
@@ -60,6 +75,6 @@ In BGRA captures with a colour pattern, a few scene previews show black cube fac
 
 ## Files
 
-- `capture_linux.py`, `capture_android.py`, `windows/d12-vkr.ps1`: the capture drivers.
-- `results/linux/`, `results/android/`: the checker's result for every capture above (trace footers omitted).
+- `capture_linux.py`, `capture_android.py`, `windows/d12-vkr.ps1` and `windows/d12-vkr2.ps1` (set 3): the capture drivers; `windows/build-and-first-set.log`.
+- `results/linux/`, `results/android/`, `results/windows/`: the checker's result for every capture above (trace footers omitted).
 - `raw-sha256.json`: hashes of the raw traces and logs, which are kept outside the repository.

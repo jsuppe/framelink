@@ -83,3 +83,16 @@ Windows items (3, 4 and the Windows side of 5) are changes to test code or test 
 - **NV12 into vkrender on Linux is blocked by the CPU read path (M6.8):** 1.2–2.8 s per 1080p frame from a linear GBM ring in video memory. **Chosen: a GPU NV12 import** in vkrender's Linux input (two planes imported into Vulkan, converted in a shader), so NV12 gets the same evidence as BGRA.
 - **Correction and follow-up (Jon, same day).** Draining alone did not stop the loss (3 of 8 runs passed): FrameLink's one-frame mailbox replaced the older frame before the render loop polled. With a 2-frame receive queue as well (test-only), the renderer acquired all 300 frames in 8 of 8 runs. In 3 of those, vkrender discarded the final frame because the session end arrived while it was still pending. **Chosen:** the A/V channel's receive queue becomes 2 and vkrender's A/V ring 13 slots (one more frame of memory per session), and vkrender presents frames still pending at a session end at their due times before ending the generation. Both apply on Windows too; its renderer evidence is rerun.
 - **Android A/V input (Jon, same day):** vkrender's Android renderer was deliberately GStreamer-free, while the desktop A/V input receives the session, PCM and clock through GStreamer. **Chosen:** link the GStreamer Android SDK and FrameLink's session statically into the renderer, used only by the A/V input, so the desktop `AvInput`, scheduler and tracing are shared unchanged; the test producer runs inside the renderer APK (same app UID).
+
+**Outcome (same day).**
+- **A2, done** ([record](windows-1080p60-wake-d12/README.md)). The Windows 1080p60 failures come from two host mechanisms, neither in FrameLink. In two diagnostic batches of 1800 s runs (12 runs, 5 passed):
+  - **Display power changes** stall the NVIDIA driver 50–150 ms behind `flSubmit`: 6 of the 7 failures.
+  - **CPU starvation:** a Defender scan burst with foreground load held all 16 logical CPUs above normal priority for about 30 ms, 1 failure. It is also the mechanism of the earlier `060c54e4` and `a50841a` failures.
+  - An MMCSS source thread tightened ordinary jitter (worst pacing lateness 0.18–1.47 ms against 2.5–5.0 ms) but met no burst, so it is untested against one.
+  - The requalification's host conditions are Jon's, in decision 14.
+- **B1, done on all three platforms** ([record](renderer-identity-6a/README.md); vkrender PR #25):
+  - **Linux:** BGRA and NV12 1080p60, 10/10 and 5/5.
+  - **Android:** NV12 720p60 3/3, BGRA 360p60 2/2. 1080p is limited by the in-APK test producer on that tablet.
+  - **Windows:** NV12 1080p60 6/6 at latencies 0 and 100 ms, after a first set lost trace events to capacity (1/6).
+  - Each pass covers identity through present submission, with PCM complete and the A/V offset reported.
+  - Open: occasional black BGRA frames in vkrender on Linux, cause not established.

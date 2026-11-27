@@ -379,13 +379,17 @@ per-platform state. Windows readiness is the
 - [ ] **M6.5 Performance/resource evidence:** distributions, queue depth,
   CPU/GPU/memory/handles, clock behavior and bounded growth.
   Stage costs, Android NV12 cost isolation and platform limits are published
-  (M6.5a/b/d). Separating Windows queue timing from producer/GPU scheduling (5c)
-  remains open; the native 1080p60 late wake-up is its open instance.
+  (M6.5a/b/d). 5c on Windows: the native 1080p60 late wake-up is host CPU starvation
+  (a Defender burst) and the other 1080p60 stalls are display power changes, neither in
+  FrameLink (2026-11-27, [evidence](m6/windows-1080p60-wake-d12/README.md)); the
+  requalification's host conditions are decision 14. Stage split in the rate runner on all platforms.
 - [ ] **M6.6 Tracing qualification:** disabled vs enabled cost, record-loss
   detection and reproducible frame/audio accounting.
   Overhead and loss detection are done on all platforms (6b; default 4096
-  events/thread). End-to-end identity joining through GPU completion and
-  presentation (6a) remains open.
+  events/thread). 6a: identity through GPU completion and present submission, with PCM
+  and A/V offset, on all three platforms (2026-11-27, [evidence](m6/renderer-identity-6a/README.md);
+  vkrender PR #25, not merged). Android limited to 720p60 by its in-APK test producer;
+  black BGRA frames in vkrender on Linux open.
 - [ ] **M6.7 Automate and close:** deterministic CI faults, reproducible benchmark
   commands and reviewed acceptance report with remaining unsupported modes.
   CI negatives and gate scripts are done (7a/7b). *Windows:* the final-revision
