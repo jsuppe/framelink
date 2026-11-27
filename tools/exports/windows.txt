@@ -87,7 +87,7 @@ flSharedReadyFence
 flSnapshotD3D11ConsumerPool
 flSubmit
 flTraceFlush
-## framelink_gst_session.dll (47)
+## framelink_gst_session.dll (50)
 fl_gst_segment_running_time
 fl_gst_session_apply_pipeline_clock
 fl_gst_session_authenticate_audio_stream
@@ -126,10 +126,13 @@ fl_gst_session_open_local_native_relay_input
 fl_gst_session_open_local_native_relay_pool
 fl_gst_session_open_named_cpu_pipe
 fl_gst_session_peek_video_end
+fl_gst_session_peer_closed
+fl_gst_session_peer_failure
 fl_gst_session_receive_video_event
 fl_gst_session_register_track
 fl_gst_session_send_video_event
 fl_gst_session_set_d3d11_device_owner
+fl_gst_session_set_failure_reason
 fl_gst_session_set_mapping
 fl_gst_session_track_ready
 fl_gst_session_video_eos
