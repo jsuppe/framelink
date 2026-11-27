@@ -26,13 +26,15 @@ static void report(const char* role,flChannel* ch,const char* call,flResult r,ui
     std::fflush(stdout);
 }
 static int produce(const char* name,double seconds) {
+    setvbuf(stdout,nullptr,_IONBF,0);
     flChannel* p=nullptr;flResult r=FL_NOT_FOUND;
     for(int i=0;i<200 && r!=FL_OK;++i){r=flOpenProducer(name,&p);if(r!=FL_OK)Sleep(10);}
     if(r!=FL_OK){std::printf("producer: open=%s\n",flResultString(r));return 1;}
-    uint64_t frames=0;
+    uint64_t frames=0;double lastNote=0;
     while(ms()<seconds*1000) {
-        flBuffer b{};r=flAcquireBuffer(p,&b,500);
-        if(r==FL_TIMEOUT)continue;
+        flBuffer b{};const double before=ms();r=flAcquireBuffer(p,&b,500);
+        if(ms()-before>2000){std::printf("producer: flAcquireBuffer took %.0f ms\n",ms()-before);std::fflush(stdout);}
+        if(r==FL_TIMEOUT){if(ms()-lastNote>2000){lastNote=ms();report("producer",p,"flAcquireBuffer (still)",r,frames);}continue;}
         if(r!=FL_OK){report("producer",p,"flAcquireBuffer",r,frames);break;}
         void* data=nullptr;uint64_t stride=0;
         if(flImageMap(b.image,&data,&stride)==FL_OK){memset(data,int(frames&255),size_t(stride)*32);flImageUnmap(b.image);}
@@ -65,8 +67,8 @@ int main(int argc,char** argv) {
         if(r!=FL_OK){report("consumer",c,"flRelease",r,frames);break;}
     }
     if(r==FL_OK || r==FL_TIMEOUT)std::printf("consumer: ran %llu frames without a failure\n",(unsigned long long)frames);
-    const DWORD waited=WaitForSingleObject(pi.hProcess,30000);CloseHandle(pi.hThread);CloseHandle(pi.hProcess);
+    const DWORD waited=WaitForSingleObject(pi.hProcess,DWORD(seconds*1000)+20000);CloseHandle(pi.hThread);CloseHandle(pi.hProcess);
     if(FILE* f=nullptr;fopen_s(&f,log.c_str(),"r")==0 && f){char line[512];while(fgets(line,sizeof line,f))std::fputs(line,stdout);fclose(f);}
-    if(waited!=WAIT_OBJECT_0)std::printf("producer: still running after 30 s\n");
+    if(waited!=WAIT_OBJECT_0)std::printf("producer: still running %.0f s after its run time\n",20.0);
     flClose(c);return 0;
 }
