@@ -19,6 +19,7 @@ NV12 at 1080p. Set ANDROID_SERIAL to pick a device.
 import argparse, hashlib, json, os, platform, shlex, subprocess, sys, time
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from check_local_native_bench import analyze
+import attribute_native_stages
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CELLS = {'bgra1080p60': ('BGRA', 1920, 1080, 60), 'nv12-1080p60': ('NV12', 1920, 1080, 60),
@@ -67,6 +68,16 @@ def capture(exe, plugin, out, cell, seconds, trace, remote=None, pool=2, queue=1
     result.update(exit=rc, wall_seconds=round(elapsed, 1), cell=cell, seconds=seconds, trace=trace)
     with open(out + '.analysis.json', 'w') as f:
         json.dump(result, f, indent=1)
+    # Stage split (decision 12): every capture, so a failure names its stage.
+    try:
+        stages = attribute_native_stages.analyze(out)
+        with open(out + '.stages.json', 'w') as f:
+            json.dump(stages, f, indent=1)
+        if not result['pass_all'] and stages['outliers']:
+            o = stages['outliers'][0]
+            print(f"  worst stage: {o['stage']} {o['ms']} ms at frame {o['frame']} (limit {o['limit_ms']} ms)", flush=True)
+    except (OSError, ValueError, KeyError, TypeError) as e:
+        print(f'  stage split failed: {e}', flush=True)
     t = result.get('timing_ms', {}).get('scheduled_to_final_arrival')
     print(('PASS' if result['pass_all'] else 'FAIL'), cell, f'{seconds}s', 'trace' if trace else 'off',
           f"arrival p99/max {t['p99']:.2f}/{t['max']:.2f} ms" if t else result.get('error', '')[:160], flush=True)

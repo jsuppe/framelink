@@ -131,4 +131,18 @@ class Checks(unittest.TestCase):
  def test_unfinished(self):
   p=self.root/'relay.summary.json';s=json.loads(p.read_text());s['terminal']=False;p.write_text(json.dumps(s))
   with self.assertRaisesRegex(ValueError,'terminal'):analyze(self.root)
+ def test_stage_split_names_the_stalled_stage(self):
+  import attribute_native_stages as stages
+  r=stages.analyze(self.root);self.assertEqual(r['rows']['receiver'],30);self.assertEqual(r['outliers'],[])
+  self.assertEqual(r['stages']['relay_to_receiver_pickup']['frames'],30)
+  with (self.root/'receiver.video.csv').open() as f:rows=list(csv.DictReader(f))
+  rows[7]['arrival_ns']=str(int(rows[7]['arrival_ns'])+20000000);self.write('receiver.video.csv',rows)
+  with (self.root/'source.video.csv').open() as f:rows=list(csv.DictReader(f))
+  rows[-1]={k:(v if k=='identity' else '') for k,v in rows[-1].items()};self.write('source.video.csv',rows)
+  r=stages.analyze(self.root);o=r['outliers'][0];self.assertEqual((o['frame'],o['stage']),(7,'relay_to_receiver_pickup'));self.assertGreater(o['ms'],19)
+  self.assertEqual(r['rows']['source'],30)
+  self.write('source.pace.csv',[dict(identity=n,due_ns=10**9+n,pace_enter_ns=10**9+n-10**7,pace_exit_ns=10**9+n+(4*10**7 if n==5 else 0),cpu_enter=0,cpu_exit=10**5,sleeps=1,sleep_ns=9*10**6,max_sleep_ns=9*10**6+(4*10**7 if n==5 else 0),max_sleep_request_ns=9*10**6,yields=3,prev_tail_begin_ns=0,prev_tail_end_ns=0,timer_resolution_100ns=5000) for n in range(30)])
+  (self.root/'source.pace.json').write_text(json.dumps(dict(cpu_unit='ns')))
+  r=stages.analyze(self.root);self.assertEqual(r['stages']['pace.late']['max_frame'],5);self.assertAlmostEqual(r['stages']['pace.oversleep']['max_ms'],40)
+  self.assertIn('pace.off_cpu',r['stages']);self.assertEqual(r['outlier_frames']['5']['pace.timer_resolution_100ns'],5000)
 if __name__=='__main__':unittest.main()
