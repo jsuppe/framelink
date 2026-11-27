@@ -1488,6 +1488,15 @@ static SrcUnlock srcCheckUnlock(GstFrameLinkSrc* self) {
     return SrcUnlock::Resumed;
 }
 
+// FL_DEVICE_LOST (decision 13): one stable error, the consumer's own failure,
+// so it is posted at once and never relabelled as a peer failure.
+static GstFlowReturn srcDeviceLost(GstFrameLinkSrc* self,const char* where) {
+    GST_ELEMENT_ERROR_WITH_DETAILS(self,RESOURCE,FAILED,("FrameLink GPU device lost"),
+        ("%s: a GPU fence completed with an error or the device was removed; recreate GPU objects before reconnecting",where),
+        ("framelink-local-failure",G_TYPE_BOOLEAN,TRUE,"framelink-device-lost",G_TYPE_BOOLEAN,TRUE,nullptr));
+    return GST_FLOW_ERROR;
+}
+
 static flResult srcReleaseFrame(GstFrameLinkSrc* self,const flFrame* frame) {
     if(!self->nativeMemory)return flRelease(self->ch,frame);
     uint64_t token=0;auto r=flLeaseFrame(self->ch,frame,&token);
@@ -1635,6 +1644,7 @@ static GstFlowReturn srcCreateImpl(GstPushSrc* push, GstBuffer** outbuf) {
         if(unlock==SrcUnlock::Resumed){idleDeadline=g_get_monotonic_time()+gint64(self->sessionConfig.idleTimeoutMs)*1000;continue;}
         if(self->nativeMemory){
             auto collected=flCollectReadLeases(self->ch);
+            if(collected==FL_DEVICE_LOST)return trace.result(srcDeviceLost(self,"flCollectReadLeases"));
             if(collected!=FL_OK&&collected!=FL_BUSY){
                 GST_ELEMENT_ERROR(self,RESOURCE,READ,("native reader retirement failed"),("%s",flResultString(collected)));
                 return trace.result(GST_FLOW_ERROR);
@@ -1666,6 +1676,7 @@ static GstFlowReturn srcCreateImpl(GstPushSrc* push, GstBuffer** outbuf) {
         // TIMEOUT = no producer yet; DISCONNECTED = producer left, the ring
         // (ours) lives on and the next producer just dials in. Both mean wait.
         if (r == FL_TIMEOUT || (r == FL_DISCONNECTED && !self->delegated)) continue;
+        if (r == FL_DEVICE_LOST) return trace.result(srcDeviceLost(self, "flAcquireFrame"));
         GST_ELEMENT_ERROR(self, RESOURCE, READ, ("framelink acquire failed"),
                           ("flAcquireFrame: %s", flResultString(r)));
         return trace.result(GST_FLOW_ERROR);

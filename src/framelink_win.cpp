@@ -128,6 +128,9 @@ struct flChannel {
     std::promise<bool> listenerReady;
     std::atomic<bool> stop{false};
     std::atomic<bool> peerGone{false};
+    // A fence completed with an error or the device reports removed (decision 13).
+    // Sticky: every later frame or lease call returns FL_DEVICE_LOST.
+    std::atomic<bool> deviceLost{false};
     std::mutex pendingMutex;
     fl::PendingFrames pending; // announced, not yet acquired
     fl::ReadLedger readers;
@@ -231,14 +234,15 @@ flResult attachDevice(flChannel* ch, flD3D11DeviceOwner* owner,
                       const uint8_t* luid, bool checkLuid) {
     auto attachment=std::make_shared<DeviceAttachment>();
     std::lock_guard<std::mutex> lock(owner->mutex);
-    if(owner->poisoned || deviceRemoved(owner->device)) {
-        owner->poisoned=true; return FL_DISCONNECTED;
-    }
+    // A removed device is device loss (decision 13); a pool poisoned for an
+    // unsafe retirement on a live device stays a disconnect.
+    if(deviceRemoved(owner->device)) {owner->poisoned=true;return FL_DEVICE_LOST;}
+    if(owner->poisoned)return FL_DISCONNECTED;
     if(checkLuid && (!luid || memcmp(luid,owner->luid,8)))return FL_ADAPTER_MISMATCH;
     if(owner->attached)return FL_BUSY;
     if(owner->retiringFence) {
         const auto completed=completedValue(owner->retiringFence);
-        if(completed==UINT64_MAX){owner->poisoned=true;return FL_DISCONNECTED;}
+        if(completed==UINT64_MAX){owner->poisoned=true;return FL_DEVICE_LOST;}
         if(completed<owner->retiringValue)return FL_BUSY;
         owner->retiringFence.Reset();owner->retiringValue=0;
     }
@@ -952,7 +956,7 @@ FL_API flResult flAcquireBuffer(flChannel* ch, flBuffer* out, uint32_t timeoutMs
     const DWORD deadline = GetTickCount() + timeoutMs;
     for (;;) {
         const uint64_t consumed = completedValue(ch->consumedFence);
-        if(consumed==UINT64_MAX)return trace.result(FL_DISCONNECTED); // device removed, not all slots free
+        if(consumed==UINT64_MAX){ch->deviceLost=true;return trace.result(FL_DEVICE_LOST);} // device removed, not all slots free
         bool localBlocked = false;
         for (size_t i = 0; i < ch->images.size(); ++i) {
             // Free once the consumer has promised never to read this slot's
@@ -1107,8 +1111,16 @@ FL_API flResult flAcquireFrame(flChannel* ch, flFrame* out, uint32_t timeoutMs) 
         bool got = false;
         {
             std::lock_guard<std::mutex> hold(ch->pendingMutex);
+            if (ch->deviceLost.load()) return trace.result(FL_DEVICE_LOST);
+            // A removed device reads every fence as UINT64_MAX: that is device
+            // loss, never readiness (decision 13). Nothing is delivered.
+            const uint64_t readyCompleted=completedValue(ch->readyFence);
+            if (readyCompleted==UINT64_MAX || deviceRemoved(ch->device)) {
+                ch->deviceLost=true;
+                return trace.result(FL_DEVICE_LOST);
+            }
             if (!ch->pending.empty() && !ch->frameHeld &&
-                ((ch->flags & FL_GPU_SYNC) || completedValue(ch->readyFence) >= ch->pending.front().ready)) {
+                ((ch->flags & FL_GPU_SYNC) || readyCompleted >= ch->pending.front().ready)) {
                 const fl::PendingFrame f=ch->pending.pop();
                 ch->frameHeld = true;ch->heldArrival=f.arrival;
                 ch->heldReady = f.ready;
@@ -1186,7 +1198,7 @@ static flResult retireReadLeases(flChannel* ch,uint64_t value) {
 static flResult pollLeaseCompletions(flChannel* ch) {
     for(auto& pending:ch->leaseCompletions) if(pending.token) {
         uint64_t value=completedValue(pending.fence);
-        if(value==UINT64_MAX)return FL_DISCONNECTED; // Device loss is not completion.
+        if(value==UINT64_MAX){ch->deviceLost=true;return FL_DEVICE_LOST;} // Device loss is not completion.
         if(value>=pending.value) {
             auto r=ch->readers.finishDeferred(pending.token);if(r!=FL_OK)return r;
             pending.fence.Reset();pending.token=0;pending.value=0;
@@ -1282,7 +1294,7 @@ FL_API flResult flSnapshotD3D11ConsumerPool(flChannel* ch, flD3D11PoolSnapshot**
     if(!ch || !ch->isConsumer || !out)return FL_INVALID;
     std::lock_guard<std::recursive_mutex> poolLock(ch->poolMutex);
     if(ch->stop.load() || !ch->info.generation || ch->images.size()!=ch->info.poolSize)return FL_DISCONNECTED;
-    if(deviceRemoved(ch->device))return FL_DISCONNECTED;
+    if(deviceRemoved(ch->device))return FL_DEVICE_LOST;
     auto snapshot=std::make_unique<flD3D11PoolSnapshot>();
     snapshot->info=ch->info;
     snapshot->handles.resize(ch->images.size(),nullptr);

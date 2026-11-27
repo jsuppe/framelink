@@ -26,7 +26,6 @@
 #include "fl_arrival.hpp"
 #include "framelink_sync_fd.h"
 #include "fl_sync_fd.hpp"
-#include <atomic>
 #include "fl_pending.hpp"
 #include "framelink_dmabuf.h"
 
@@ -107,6 +106,9 @@ struct flChannel {
     std::thread accept;
     std::atomic<bool> stop{false};
     std::atomic<bool> peerGone{false};
+    // A fence completed with an error or the device reports removed (decision 13).
+    // Sticky: every later frame or lease call returns FL_DEVICE_LOST.
+    std::atomic<bool> deviceLost{false};
     std::mutex pendingMutex;
     fl::PendingFrames pending; // announced, not yet acquired
     fl::ReadLedger readers;
@@ -780,10 +782,17 @@ FL_API flResult flAcquireFrame(flChannel* ch, flFrame* out, uint32_t timeoutMs) 
     for (uint32_t waited = 0;; waited += 2) {
         {
             std::lock_guard<std::mutex> hold(ch->pendingMutex);
+            if (ch->deviceLost.load()) return trace.result(FL_DEVICE_LOST);
+            // A ready fence completed with an error means the producer's GPU
+            // work was abandoned by a reset: never deliver that frame.
+            const fl::FenceState readyState=ch->pending.empty() ? fl::FenceState::Pending :
+                fl::fenceState(ch->pending.front().fence,ch->pending.front().ready,0);
+            if (!ch->frameHeld && readyState==fl::FenceState::Error) {
+                ch->deviceLost=true;
+                return trace.result(FL_DEVICE_LOST);
+            }
             if (!ch->pending.empty() && !ch->frameHeld &&
-                ((ch->flags & FL_GPU_SYNC) ||
-                 // DEVICE-LOST GAP (decision 13): an error completion counts as ready.
-                 fl::fenceState(ch->pending.front().fence,ch->pending.front().ready,0)!=fl::FenceState::Pending)) {
+                ((ch->flags & FL_GPU_SYNC) || readyState==fl::FenceState::Signaled)) {
                 const fl::PendingFrame f=ch->pending.pop();
                 ch->sync.held=f.fence;
                 ch->frameHeld=true;ch->heldArrival=f.arrival;
@@ -853,6 +862,9 @@ FL_API flResult flFrameReadySyncFd(flChannel* ch,const flFrame* frame,int* fd) {
     if(!ch || !ch->isConsumer || !frame || !fd)return FL_INVALID;
     std::lock_guard<std::mutex> hold(ch->pendingMutex);
     if(!ch->frameHeld || frame->_readyValue!=ch->heldReady || frame->slot!=ch->heldSlot)return FL_INVALID;
+    if(ch->deviceLost.load() || fl::fenceState(ch->sync.held,frame->_readyValue,0)==fl::FenceState::Error) {
+        ch->deviceLost=true;return FL_DEVICE_LOST;
+    }
     *fd=ch->sync.held;return FL_OK;
 }
 FL_API flResult flSubmitSyncFd(flChannel* ch,const flBuffer* buffer,int fd,int64_t pts) {
@@ -891,8 +903,9 @@ static flResult pollLeaseCompletions(flChannel* ch) {
         if(!result)continue;
         if(p.revents & (POLLERR|POLLHUP|POLLNVAL))return FL_INTERNAL;
         if(p.revents & POLLIN) {
-            // DEVICE-LOST GAP (decision 13): an error completion retires like success.
-            (void)fl::fenceState(pending.fd,0,pending.ordinal);
+            // Completed with an error (a GPU reset): the read is over, so the
+            // storage still retires, but the consumer is told the device was lost.
+            if(fl::fenceState(pending.fd,0,pending.ordinal)==fl::FenceState::Error)ch->deviceLost=true;
             auto r=ch->readers.finishDeferred(pending.token);if(r!=FL_OK)return r;
             close(pending.fd);pending.fd=-1;pending.token=0;
         }
