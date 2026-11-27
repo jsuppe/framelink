@@ -15,14 +15,17 @@
 #include <chrono>
 #include <thread>
 #include <string>
+#include <vector>
 #include <unistd.h>
 #include <spawn.h>
 #include <poll.h>
 #include <sys/wait.h>
 #include <signal.h>
+#include <sys/ioctl.h>
+#include <linux/sync_file.h>
 extern char** environ;
 #define CHECK(x) do {if(!(x)){std::fprintf(stderr,"line %d: %s EGL=%x GL=%x\n",__LINE__,#x,eglGetError(),glGetError());std::exit(1);}}while(0)
-static int producer(const char* name,bool crash) {
+static int producer(const char* name,bool crash,int reacquireMs=5000) {
  flChannel* p=nullptr;CHECK(flOpenProducer(name,&p)==FL_OK);
  flBuffer b{};CHECK(flAcquireBuffer(p,&b,1000)==FL_OK);void* data=nullptr;uint64_t stride=0;
  CHECK(flImageMap(b.image,&data,&stride)==FL_OK);
@@ -31,12 +34,13 @@ static int producer(const char* name,bool crash) {
  flBuffer spare{},returned{};CHECK(flAcquireBuffer(p,&spare,1000)==FL_OK);
  CHECK(flSubmit(p,&b,123456)==FL_OK);
  if(crash)_exit(99);
- CHECK(flAcquireBuffer(p,&returned,5000)==FL_OK); // waits for consumer's GPU lease
+ CHECK(flAcquireBuffer(p,&returned,reacquireMs)==FL_OK); // waits for consumer's GPU lease
  CHECK(flCancelBuffer(p,&spare)==FL_OK && flCancelBuffer(p,&returned)==FL_OK);
  flClose(p);return 0;
 }
 int main(int argc,char** argv) {
  if(argc==3)return producer(argv[2],!std::strcmp(argv[1],"--producer-crash"));
+ if(argc==4)return producer(argv[2],false,std::atoi(argv[3]));
  bool crash=argc==2 && !std::strcmp(argv[1],"--producer-death");
  bool delayed=argc==2 && !std::strcmp(argv[1],"--delayed-completion");
  // --gpu-busy-completion: the lease's sampling draw queues behind a real GPU
@@ -44,6 +48,14 @@ int main(int argc,char** argv) {
  // fence signals late because the GPU is busy, not because of a host gate. A raw
  // check (no FrameLink) first proves the fence stays unready for the hold.
  bool busy=argc==2 && !std::strcmp(argv[1],"--gpu-busy-completion");
+ // --gpu-hang-consumer (M6 decision 13, a REAL GPU reset; run only on a free
+ // host): the consumer's sampling draw queues behind a shader that does not
+ // finish, in a robust context, so the driver's watchdog must reset it. The
+ // lease's exported fence then completes - FrameLink must report
+ // FL_DEVICE_LOST (an error completion), never retire it as a good read, and
+ // still hand the producer its slot back. Afterwards a fresh normal run of
+ // this test must pass (recovery).
+ bool hang=argc==2 && !std::strcmp(argv[1],"--gpu-hang-consumer");
  EGLDisplay display=EGL_NO_DISPLAY;
 #ifndef __ANDROID__
  auto platform=(PFNEGLGETPLATFORMDISPLAYEXTPROC)eglGetProcAddress("eglGetPlatformDisplayEXT");
@@ -58,7 +70,11 @@ int main(int argc,char** argv) {
  EGLConfig config{};EGLint count=0;CHECK(eglChooseConfig(display,configAttrs,&config,1,&count)&&count);
  EGLint surfaceAttrs[]={EGL_WIDTH,64,EGL_HEIGHT,32,EGL_NONE};
  auto surface=eglCreatePbufferSurface(display,config,surfaceAttrs);CHECK(surface!=EGL_NO_SURFACE);
- EGLint contextAttrs[]={EGL_CONTEXT_CLIENT_VERSION,2,EGL_NONE};auto context=eglCreateContext(display,config,EGL_NO_CONTEXT,contextAttrs);CHECK(context!=EGL_NO_CONTEXT);
+ if(hang && !strstr(extensions,"EGL_EXT_create_context_robustness")){puts("SKIP: EGL_EXT_create_context_robustness unavailable");return 77;}
+ EGLint plainAttrs[]={EGL_CONTEXT_CLIENT_VERSION,2,EGL_NONE};
+ EGLint robustAttrs[]={EGL_CONTEXT_CLIENT_VERSION,3,EGL_CONTEXT_OPENGL_ROBUST_ACCESS_EXT,EGL_TRUE,
+     EGL_CONTEXT_OPENGL_RESET_NOTIFICATION_STRATEGY_EXT,EGL_LOSE_CONTEXT_ON_RESET_EXT,EGL_NONE};
+ auto context=eglCreateContext(display,config,EGL_NO_CONTEXT,hang?robustAttrs:plainAttrs);CHECK(context!=EGL_NO_CONTEXT);
  CHECK(eglMakeCurrent(display,surface,surface,context));
  std::printf("EGL vendor=%s GL vendor=%s renderer=%s\n",eglQueryString(display,EGL_VENDOR),glGetString(GL_VENDOR),glGetString(GL_RENDERER));
  auto createImage=(PFNEGLCREATEIMAGEKHRPROC)eglGetProcAddress("eglCreateImageKHR");
@@ -92,7 +108,8 @@ int main(int argc,char** argv) {
  }
  std::string name="egl-lease-"+std::to_string(getpid());flChannel *c=nullptr;
  CHECK(flCreateChannelEx(name.c_str(),64,32,FL_FORMAT_RGBA8,2,FL_MAP_CPU|FL_GPU_RENDER|FL_DEFER_RELEASE,&c)==FL_OK);
- pid_t child=0;char* args[]={argv[0],const_cast<char*>(crash?"--producer-crash":"--producer"),const_cast<char*>(name.c_str()),nullptr};
+ pid_t child=0;char reacquire[]="120000";
+ char* args[]={argv[0],const_cast<char*>(crash?"--producer-crash":"--producer"),const_cast<char*>(name.c_str()),hang?reacquire:nullptr,nullptr};
  CHECK(posix_spawn(&child,argv[0],nullptr,nullptr,args,environ)==0);
  flFrame frame{};uint64_t lease=0;CHECK(flAcquireFrame(c,&frame,1000)==FL_OK && flLeaseFrame(c,&frame,&lease)==FL_OK);
  EGLImageKHR image=EGL_NO_IMAGE_KHR;
@@ -144,6 +161,60 @@ int main(int argc,char** argv) {
   close(probeFd);destroySync(display,probe);
  }
  if(delayed){gate=createSync(display,EGL_SYNC_REUSABLE_KHR,nullptr);CHECK(gate!=EGL_NO_SYNC_KHR);CHECK(waitSync(display,gate,0));}
+ if(hang){
+  auto resetStatus=(GLenum(GL_APIENTRY*)())eglGetProcAddress("glGetGraphicsResetStatusEXT");
+  // FL_TEST_HANG_ITERATIONS (default 2e9) sets the loop; FL_TEST_HANG_PROBE=1
+  // only times one such draw with glFinish and exits (calibration, no FrameLink).
+  const char* iterEnv=getenv("FL_TEST_HANG_ITERATIONS");
+  // GLSL ES 3.00 with the bound in a uniform: the compiler cannot see the
+  // count (a constant bound was transformed: 2e9 iterations ran in 20 ms).
+  GLuint hvs=shader(GL_VERTEX_SHADER,"#version 300 es\nin vec2 position;out vec2 uv;void main(){uv=(position+1.0)*0.5;gl_Position=vec4(position,0.0,1.0);}");
+  GLuint hfs=shader(GL_FRAGMENT_SHADER,"#version 300 es\nprecision highp float;precision highp int;in vec2 uv;uniform int count;out vec4 color;void main(){uint x=uint(gl_FragCoord.x)*2654435761u+uint(gl_FragCoord.y);for(int i=0;i<count;i++){x=x*1664525u+1013904223u;}color=vec4(float(x&255u)/255.0,float((x>>8)&255u)/255.0,0.5,1.0);}");
+  GLuint hangProgram=glCreateProgram();glAttachShader(hangProgram,hvs);glAttachShader(hangProgram,hfs);glBindAttribLocation(hangProgram,0,"position");glLinkProgram(hangProgram);GLint ok=0;glGetProgramiv(hangProgram,GL_LINK_STATUS,&ok);CHECK(ok);
+  GLuint hangTarget=0,hangFbo=0;glGenTextures(1,&hangTarget);glBindTexture(GL_TEXTURE_2D,hangTarget);glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,256,256,0,GL_RGBA,GL_UNSIGNED_BYTE,nullptr);
+  glGenFramebuffers(1,&hangFbo);glBindFramebuffer(GL_FRAMEBUFFER,hangFbo);glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,hangTarget,0);
+  glUseProgram(hangProgram);glViewport(0,0,256,256);
+  glUniform1i(glGetUniformLocation(hangProgram,"count"),iterEnv?std::atoi(iterEnv):2000000000);
+  if(getenv("FL_TEST_HANG_PROBE")){glClearColor(0,0,0,0);glClear(GL_COLOR_BUFFER_BIT);glFinish();
+   glEnable(GL_BLEND);glBlendFunc(GL_ONE,GL_ONE);double t=now();glDrawArrays(GL_TRIANGLE_STRIP,0,4);glFinish();
+   std::vector<unsigned char> all(256*256*4);glReadPixels(0,0,256,256,GL_RGBA,GL_UNSIGNED_BYTE,all.data());
+   unsigned written=0;for(size_t i=0;i<all.size();i+=4)written+=all[i+3]!=0;
+   std::fprintf(stderr,"probe: %u of 65536 pixels written by the draw\n",written);
+   const GLenum rs=(GLenum)(eglGetProcAddress("glGetGraphicsResetStatusEXT")?((GLenum(GL_APIENTRY*)())eglGetProcAddress("glGetGraphicsResetStatusEXT"))():0);
+   std::fprintf(stderr,"probe: %s iterations, draw+finish %.1f ms, GL error 0x%x, reset 0x%x\n",iterEnv?iterEnv:"2e9",now()-t,glGetError(),rs);kill(child,SIGKILL);waitpid(child,nullptr,0);return 0;}
+  glEnable(GL_BLEND);glBlendFunc(GL_ONE,GL_ONE); // not opaque: tilers must not discard it
+  glDrawArrays(GL_TRIANGLE_STRIP,0,4); // does not finish
+  glDisable(GL_BLEND);
+  glBindFramebuffer(GL_FRAMEBUFFER,fbo);glUseProgram(program);glViewport(0,0,64,32);glActiveTexture(GL_TEXTURE0);glBindTexture(GL_TEXTURE_EXTERNAL_OES,texture);
+  glDrawArrays(GL_TRIANGLE_STRIP,0,4); // the lease's sampling read, behind the hang
+  auto hsync=createSync(display,EGL_SYNC_NATIVE_FENCE_ANDROID,nullptr);CHECK(hsync!=EGL_NO_SYNC_KHR);glFlush();
+  int hfd=exportFence(display,hsync);CHECK(hfd>=0);
+  const double start=now();
+  CHECK(flCompleteReadLeaseSyncFd(c,lease,hfd)==FL_OK);
+  flResult r=FL_BUSY;while(r==FL_BUSY && now()-start<90000){r=flCollectReadLeases(c);if(r==FL_BUSY)std::this_thread::sleep_for(std::chrono::milliseconds(10));}
+  sync_file_info info;memset(&info,0,sizeof(info));const int infoOk=ioctl(hfd,SYNC_IOC_FILE_INFO,&info);
+  const GLenum reset=resetStatus?resetStatus():0;
+  std::fprintf(stderr,"hang: collect=%s after %.0f ms; fence status=%d (ioctl %d); GL reset status=0x%x\n",flResultString(r),now()-start,info.status,infoOk,reset);
+  CHECK(r!=FL_BUSY);           // the watchdog ended the hang within 90 s
+  // Measured, not assumed (decision 13): does the driver expose the reset on
+  // the fence (error status -> FL_DEVICE_LOST), or complete it cleanly while
+  // only the GL context reports the reset (FrameLink then sees a normal read)?
+  const bool fenceShowsReset=r==FL_DEVICE_LOST;
+  std::fprintf(stderr,"outcome: %s\n",fenceShowsReset?"fence completed with an error; FrameLink reported FL_DEVICE_LOST":
+      "fence completed WITHOUT an error; FrameLink retired the lease as a normal read; only the GL context reported the reset");
+  CHECK(fenceShowsReset || (r==FL_OK && info.status==1 && reset!=0));
+  int status=0;CHECK(waitpid(child,&status,0)==child && WIFEXITED(status) && WEXITSTATUS(status)==0); // slot handed back
+  flFrame next{};const flResult after=flAcquireFrame(c,&next,10);
+  CHECK(fenceShowsReset ? after==FL_DEVICE_LOST : after==FL_TIMEOUT || after==FL_DISCONNECTED); // terminal only if seen
+  close(hfd);flClose(c);
+  eglMakeCurrent(display,EGL_NO_SURFACE,EGL_NO_SURFACE,EGL_NO_CONTEXT);eglDestroyContext(display,context);eglDestroySurface(display,surface);eglTerminate(display);
+  // Recovery: a fresh process runs the normal GPU lease test on the same device.
+  pid_t again=0;char* plain[]={argv[0],nullptr};CHECK(posix_spawn(&again,argv[0],nullptr,nullptr,plain,environ)==0);
+  CHECK(waitpid(again,&status,0)==again && WIFEXITED(status) && WEXITSTATUS(status)==0);
+  puts(fenceShowsReset?"GPU hang in the consumer's read: FL_DEVICE_LOST, slot handed back, terminal; a fresh run afterwards passed":
+                       "GPU hang in the consumer's read: NOT visible on the fence (driver); slot handed back; a fresh run afterwards passed");
+  return fenceShowsReset?0:2;
+ }
  // Sample the imported allocation into a test-only verification surface.
  double busyStart=0;if(busy){busyStart=now();busyWork(busyDraws);}
  glDrawArrays(GL_TRIANGLE_STRIP,0,4);CHECK(glGetError()==GL_NO_ERROR);
