@@ -110,3 +110,16 @@ Taken before decisions 13–16, because it decides which of them block the relea
 
 Options not chosen: Windows-only 1.0 (A1); Windows and Linux with Android as a preview (A3); advertising only what is qualified with the rest as documented limits (B2); blocking on correctness but not performance extensions (B3); prebuilt binaries (C2) or packages (C3); vkrender as part of the release (D2).
 
+### Decision 13: GPU hang and device-loss testing (2026-11-27)
+
+Decision 5 requires GPU hang (driver reset) and device-loss cases for M6.4's delayed-GPU subset; decision 17 (B1) makes them release-blocking on all three platforms. Jon chose **A3, B2, C2**:
+
+| Question | Choice | What it means |
+|---|---|---|
+| Real device loss | **A3** | A context reset (a shader that never finishes, reset by the driver's watchdog) on Windows, Linux and Android; a whole-device reset on all three where the driver allows it, and where it does not, that is recorded with evidence; and physical loss on Windows (adapter disabled and re-enabled). |
+| Injection | **B2** | A small set of real resets per case on free hosts qualifies the behaviour; test-only injection inside FrameLink (a fence that reports an error, a device that reports removed) covers the same code paths deterministically in ctest. |
+| What the application sees | **C2** | A new `FL_DEVICE_LOST` result, so an application can tell "recreate your GPU objects" from "the peer went away" (`FL_DISCONNECTED`). An API addition on every platform; it touches the frozen Windows API and returns to Jon with decision 14. |
+
+Cases, each with a declared outcome (bounded return, no frame delivered as valid after a failed GPU write, a stable error, resources released, a new session working after recovery): the producer's context reset mid-stream; the consumer's context reset while it holds a read lease; a whole-device reset; physical loss (Windows); recovery afterwards. Order: review each platform's fence and device paths and build the test-only injection first, without disturbing hosts; product changes come to Jon with evidence; real resets only when Jon says the hosts are free. Host risk as stated to Jon: a Windows reset blanks the display and may crash other GPU applications; on Linux the only NVIDIA host is the workstation, and whether the driver recovers without the desktop must be established; a Mali job timeout usually recovers.
+
+Options not chosen: context reset plus Windows-only device reset (A1); whole-device reset without physical loss (A2); real resets only (B1); injection only (B3); existing codes only (C1).
