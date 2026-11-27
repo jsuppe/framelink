@@ -44,9 +44,39 @@ Batch 1 was stopped after its first run: its watcher was stopped while it was st
 
 **So the 1080p60 late wake-up is host CPU starvation:** a Defender scan burst, together with other foreground load, saturated every logical CPU with threads above normal priority for about 30 ms, and every normal-priority thread on the host waited, the bench's and the probe's alike. FrameLink's calls are not involved. This is consistent with the `060c54e4` failure, 15 s after the only Defender scan start in that batch's window.
 
-## Not established yet
+## Batch 3: MMCSS (labelled experiment `FL_BENCH_MMCSS=1`)
 
-- Whether MMCSS registration (the labelled experiment `FL_BENCH_MMCSS=1`, batch 3, queued after batch 2) keeps the source on time through such a burst.
+The same batch, with the bench source's video thread registered with MMCSS ("Games"); the probe stays at normal priority as the control.
+
+| Run | Result | Worst stage | Display (566) |
+|---|---|---|---|
+| NV12 1 | FAIL at about 850 s | `flSubmit` 150.9 ms | display on (input), 16:43:39.22, failure 16:43:39.5 |
+| BGRA 1 | **pass**, 1800 s | | none |
+| NV12 2 | FAIL at about 712 s | `flSubmit` 57.4 ms | display off (idle), logged 17:29:36.39, 5 s after the failure |
+| BGRA 2 | **pass**, 1800 s | | none |
+| NV12 3 | **pass**, 1800 s | | none |
+| BGRA 3 | FAIL at about 1410 s | `flSubmit` 145.6 ms | display on (input), 18:57:08.71, failure 18:57:08.9 |
+
+- **All three failures are display power changes** (the known driver stall). Each run's large late wake-up (up to 134 ms) is the catch-up after its `flSubmit` stall, not a starvation event.
+- **No CPU-starvation burst occurred in this batch.** The probe's worst stall was 10.9 ms. So whether MMCSS keeps the source on time through a Defender burst is **not tested**.
+- **In the passing runs MMCSS tightened ordinary jitter.** The source's worst pacing lateness was 0.18–1.47 ms over 108,000 frames each, against 2.54 and 4.99 ms in batch 2's two passing NV12 runs without it. p99 was 0.004–0.007 ms against 0.011–0.024 ms.
+
+## Conclusion (A2)
+
+The deferred diagnosis is done. The Windows native 1080p60 failures come from two host mechanisms, neither in FrameLink:
+1. **Display power changes** (idle off, wake on input). The NVIDIA driver holds a lock for 50–150 ms, and `flSubmit`'s `Signal` waits behind it (the 2026-11-23 finding). This caused 6 of the 7 failures in the two batches.
+2. **CPU starvation.** A Defender scan burst with foreground load held every logical CPU with above-normal-priority threads for about 30 ms. This caused 1 failure, and it is the mechanism of the earlier `060c54e4` and `a50841a` failures, which had no display change.
+
+Both happened only because the host was in use during the batches: input woke the display, and a game and a chat client were running. 5 of the 12 runs passed 1800 s, all with the display off and steady and no burst.
+
+The qualification conditions for the Windows requalification (decision 14) follow from this and are Jon's to set:
+- a quiet host, with the display held on or left off and steady;
+- or the MMCSS source thread, shown here to tighten ordinary jitter but not yet tested against a burst;
+- or accepting the mechanism as a recorded host limit.
+
+## Not established
+
+- Whether MMCSS keeps the source on time through a starvation burst (none occurred in batch 3).
 - Summary of batch 2: NV12 passed 2 of 3 runs at 1800 s, BGRA 0 of 3. Of the four failures, three are display power changes and one is the CPU starvation above. All happened while the host was in use.
 - What triggered this Defender burst.
 
