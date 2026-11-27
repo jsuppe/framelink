@@ -1,0 +1,109 @@
+arrival.budget_ms=17
+complete=yes
+config=NV12 1920x1080@60 bin shared-cpu 12s
+consumer.audio.arrival.all.ms=n=599 p50=0.47 p95=0.49 p99=0.50 max=0.57 min=0.18
+consumer.audio.arrival.ms=n=399 p50=0.47 p95=0.49 p99=0.51 max=0.57 min=0.20
+consumer.audio.contiguous=yes
+consumer.audio.deadline_misses=0/599
+consumer.audio.gap_event_ns=0
+consumer.audio.gap_events=0
+consumer.audio.output_queue.admission_residence.ms=n=599 p50=0.09 p95=0.10 p99=0.10 max=0.11 min=0.02
+consumer.audio.output_queue.pending=0
+consumer.audio.output_queue.sampled_max_buffers=0
+consumer.audio.output_queue.unmatched=0
+consumer.audio.pts_jump_ns=0
+consumer.audio.pts_jumps=0
+consumer.audio.render.all.ms=n=599 p50=0.58 p95=0.60 p99=0.62 max=0.69 min=0.20
+consumer.audio.render.ms=n=399 p50=0.58 p95=0.60 p99=0.62 max=0.69 min=0.24
+consumer.audio.render_interval.ms=n=398 p50=10.00 p95=10.05 p99=10.12 max=10.18 min=9.67
+consumer.audio.render_jitter.p1_p99.ms=0.37
+consumer.av_offset.abs.ms=n=4 p50=1.56 p95=1.58 p99=1.58 max=1.58 min=1.56
+consumer.av_offset.ms=n=4 p50=1.56 p95=1.58 p99=1.58 max=1.58 min=1.56
+consumer.cpu.percent=9.35
+consumer.ended_monotonic_us=504523508607
+consumer.frames=360
+consumer.handles=17..17 min=17 max=17
+consumer.handles.slope.per_min=0.00
+consumer.mem.kb=28144..28164 min=28144 max=28164
+consumer.mem.kind=rss
+consumer.mem.slope.kb_per_min=478.76
+consumer.memory=memory:SystemMemory
+consumer.pid=3229162
+consumer.queue.accounting=complete
+consumer.result=error: FrameLink producer failed: invalid input
+consumer.samples=287520
+consumer.scope=transport-consumer
+consumer.series.t_cpums_memkb_handles_threads=0.0:9:13828:6:2;1.0:87:28136:16:10;2.0:184:28144:17:10;3.0:282:28148:17:10;4.0:375:28148:17:10;5.0:468:28160:17:10;6.0:559:28164:17:10;6.2:584:16064:11:7;
+consumer.threads=10..10 min=10 max=10
+consumer.threads.slope.per_min=-0.00
+consumer.video.arrival.all.ms=n=360 p50=2.03 p95=2.32 p99=2.64 max=2.69 min=0.61
+consumer.video.arrival.ms=n=240 p50=2.03 p95=2.32 p99=2.65 max=2.69 min=0.61
+consumer.video.buffer_alive_at_end=0
+consumer.video.buffer_life_after_callback.ms=n=360 p50=2971.20 p95=5670.99 p99=5920.77 max=5972.29 min=4.36
+consumer.video.callback_refcount_hist=0,0,0,360,0,0,0,0
+consumer.video.deadline_misses=0/360
+consumer.video.discont_after_first=0
+consumer.video.gap_event_ns=0
+consumer.video.gap_events=0
+consumer.video.output_queue.admission_residence.ms=n=360 p50=0.09 p95=0.11 p99=0.11 max=0.13 min=0.00
+consumer.video.output_queue.pending=0
+consumer.video.output_queue.sampled_max_buffers=0
+consumer.video.output_queue.unmatched=0
+consumer.video.render.all.ms=n=360 p50=2.15 p95=2.45 p99=2.77 max=2.82 min=0.65
+consumer.video.render.ms=n=240 p50=2.15 p95=2.44 p99=2.77 max=2.82 min=0.65
+consumer.video.render_interval.ms=n=239 p50=16.66 p95=17.06 p99=17.32 max=17.78 min=14.93
+consumer.video.render_jitter.p1_p99.ms=1.99
+exit=0/0
+expected.frames=720
+expected.samples=576000
+fault=audio-misaligned
+fault.bound_ms=2000
+fault.detection_ms=0.6
+fault.expect=explicit-failure
+fault.expected_consumer_error=error: FrameLink producer failed: invalid input
+fault.expected_message=PCM block is misaligned, empty or exceeds bounded queue budget
+fault.frame=600
+fault.ms=0
+fault.pass=yes
+fault.recovery_limit_frames=2
+harness.malloc=producer-side mmap_threshold=8388608
+label=linux-shared-cpu-audio-misaligned-4
+output.async=false
+output.queue_buffers=1
+output.sync=false
+playback.latency_ms=0
+producer.audio.push_burst.max=0
+producer.audio.push_interval.ms=n=400 p50=10.00 p95=10.02 p99=10.07 max=10.10 min=9.90
+producer.audio.push_lateness.ms=n=400 p50=0.16 p95=0.17 p99=0.17 max=0.25 min=0.06
+producer.cpu.percent=12.01
+producer.ended_monotonic_us=504523508273
+producer.fault.dropped_blocks=0
+producer.fault.dropped_samples=0
+producer.fault.elapsed_us=0
+producer.fault.executed=1
+producer.fault.gap_ns=-1
+producer.fault.start_monotonic_us=504523508022
+producer.handles=15..15 min=15 max=15
+producer.handles.slope.per_min=0.00
+producer.injection.elapsed_us=0
+producer.injection.executed=0
+producer.injection.frame=0
+producer.injection.requested_ms=0
+producer.injection.stage=none
+producer.injection.start_monotonic_us=0
+producer.mem.kb=29980..29980 min=29980 max=29980
+producer.mem.kind=rss
+producer.mem.slope.kb_per_min=0.00
+producer.pid=3229170
+producer.pushed.frames=360
+producer.pushed.samples=288000
+producer.result=error: PCM block is misaligned, empty or exceeds bounded queue budget
+producer.series.t_cpums_memkb_handles_threads=0.0:12:13572:6:2;1.0:135:29980:15:8;2.0:258:29980:15:8;3.0:380:29980:15:8;4.0:498:29980:15:8;5.0:619:29980:15:8;6.0:739:23912:11:6;
+producer.threads=8..8 min=8 max=8
+producer.threads.slope.per_min=0.00
+producer.video.push_burst.max=0
+producer.video.push_interval.ms=n=240 p50=16.66 p95=16.74 p99=16.75 max=16.76 min=16.57
+producer.video.push_lateness.ms=n=240 p50=0.14 p95=0.15 p99=0.15 max=0.15 min=0.05
+seconds=12
+video.pool=2
+video.queue=1

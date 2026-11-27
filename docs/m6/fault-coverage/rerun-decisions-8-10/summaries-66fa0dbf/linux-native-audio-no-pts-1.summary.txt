@@ -1,0 +1,109 @@
+arrival.budget_ms=17
+complete=yes
+config=NV12 1920x1080@60 bin native 12s
+consumer.audio.arrival.all.ms=n=599 p50=0.50 p95=0.74 p99=0.78 max=0.83 min=0.18
+consumer.audio.arrival.ms=n=399 p50=0.50 p95=0.74 p99=0.78 max=0.80 min=0.19
+consumer.audio.contiguous=yes
+consumer.audio.deadline_misses=0/599
+consumer.audio.gap_event_ns=0
+consumer.audio.gap_events=0
+consumer.audio.output_queue.admission_residence.ms=n=599 p50=0.09 p95=0.12 p99=0.12 max=0.14 min=0.01
+consumer.audio.output_queue.pending=0
+consumer.audio.output_queue.sampled_max_buffers=0
+consumer.audio.output_queue.unmatched=0
+consumer.audio.pts_jump_ns=0
+consumer.audio.pts_jumps=0
+consumer.audio.render.all.ms=n=599 p50=0.61 p95=0.86 p99=0.89 max=0.95 min=0.22
+consumer.audio.render.ms=n=399 p50=0.61 p95=0.86 p99=0.89 max=0.92 min=0.23
+consumer.audio.render_interval.ms=n=398 p50=10.00 p95=10.25 p99=10.31 max=10.39 min=9.36
+consumer.audio.render_jitter.p1_p99.ms=0.64
+consumer.av_offset.abs.ms=n=4 p50=2.22 p95=2.30 p99=2.30 max=2.30 min=2.20
+consumer.av_offset.ms=n=4 p50=2.22 p95=2.30 p99=2.30 max=2.30 min=2.20
+consumer.cpu.percent=5.40
+consumer.ended_monotonic_us=504129695053
+consumer.frames=359
+consumer.handles=22..21 min=21 max=22
+consumer.handles.slope.per_min=-29.92
+consumer.mem.kb=16444..16448 min=16444 max=16448
+consumer.mem.kind=rss
+consumer.mem.slope.kb_per_min=119.69
+consumer.memory=memory:DMABuf
+consumer.pid=3224911
+consumer.queue.accounting=complete
+consumer.result=error: FrameLink producer failed: invalid input
+consumer.samples=287520
+consumer.scope=transport-consumer
+consumer.series.t_cpums_memkb_handles_threads=0.0:10:13808:6:2;1.0:54:16444:22:11;2.0:108:16444:22:11;3.0:160:16444:22:11;4.0:216:16444:22:11;5.0:268:16444:22:11;6.0:325:16448:21:11;6.3:343:16260:12:7;
+consumer.threads=11..11 min=11 max=11
+consumer.threads.slope.per_min=-0.00
+consumer.video.arrival.all.ms=n=359 p50=2.70 p95=3.67 p99=3.80 max=5.28 min=1.46
+consumer.video.arrival.ms=n=239 p50=2.71 p95=3.66 p99=3.79 max=3.81 min=1.46
+consumer.video.buffer_alive_at_end=0
+consumer.video.buffer_life_after_callback.ms=n=359 p50=17.02 p95=17.16 p99=17.23 max=18.92 min=14.72
+consumer.video.callback_refcount_hist=0,0,0,359,0,0,0,0
+consumer.video.deadline_misses=0/359
+consumer.video.discont_after_first=0
+consumer.video.gap_event_ns=0
+consumer.video.gap_events=0
+consumer.video.output_queue.admission_residence.ms=n=359 p50=0.09 p95=0.10 p99=0.10 max=0.20 min=0.03
+consumer.video.output_queue.pending=0
+consumer.video.output_queue.sampled_max_buffers=0
+consumer.video.output_queue.unmatched=0
+consumer.video.render.all.ms=n=359 p50=2.83 p95=3.80 p99=3.94 max=5.46 min=1.51
+consumer.video.render.ms=n=239 p50=2.84 p95=3.80 p99=3.93 max=3.99 min=1.51
+consumer.video.render_interval.ms=n=238 p50=17.05 p95=17.19 p99=17.26 max=17.28 min=14.76
+consumer.video.render_jitter.p1_p99.ms=2.20
+exit=0/0
+expected.frames=720
+expected.samples=576000
+fault=audio-no-pts
+fault.bound_ms=2000
+fault.detection_ms=1.2
+fault.expect=explicit-failure
+fault.expected_consumer_error=error: FrameLink producer failed: invalid input
+fault.expected_message=PCM requires valid PTS, duration and TIME segment
+fault.frame=600
+fault.ms=0
+fault.pass=yes
+fault.recovery_limit_frames=2
+harness.malloc=producer-side mmap_threshold=8388608
+label=linux-native-audio-no-pts-1
+output.async=false
+output.queue_buffers=1
+output.sync=false
+playback.latency_ms=0
+producer.audio.push_burst.max=0
+producer.audio.push_interval.ms=n=399 p50=10.00 p95=10.19 p99=10.21 max=10.24 min=9.76
+producer.audio.push_lateness.ms=n=399 p50=0.13 p95=0.32 p99=0.33 max=0.37 min=0.06
+producer.cpu.percent=15.74
+producer.ended_monotonic_us=504129694296
+producer.fault.dropped_blocks=0
+producer.fault.dropped_samples=0
+producer.fault.elapsed_us=0
+producer.fault.executed=1
+producer.fault.gap_ns=-1
+producer.fault.start_monotonic_us=504129693823
+producer.handles=16..16 min=16 max=16
+producer.handles.slope.per_min=0.00
+producer.injection.elapsed_us=0
+producer.injection.executed=0
+producer.injection.frame=0
+producer.injection.requested_ms=0
+producer.injection.stage=none
+producer.injection.start_monotonic_us=0
+producer.mem.kb=27028..27028 min=27028 max=27028
+producer.mem.kind=rss
+producer.mem.slope.kb_per_min=-0.00
+producer.pid=3224921
+producer.pushed.frames=360
+producer.pushed.samples=288000
+producer.result=error: PCM requires valid PTS, duration and TIME segment
+producer.series.t_cpums_memkb_handles_threads=0.0:47:13692:6:2;1.0:215:27028:16:8;2.0:372:27028:16:8;3.0:527:27028:16:8;4.0:688:27028:16:8;5.0:844:27028:16:8;6.0:1003:27028:16:8;6.1:1011:24244:11:6;
+producer.threads=8..8 min=8 max=8
+producer.threads.slope.per_min=0.00
+producer.video.push_burst.max=0
+producer.video.push_interval.ms=n=240 p50=16.67 p95=16.71 p99=16.72 max=16.72 min=16.58
+producer.video.push_lateness.ms=n=240 p50=0.14 p95=0.14 p99=0.15 max=0.16 min=0.08
+seconds=12
+video.pool=2
+video.queue=1
