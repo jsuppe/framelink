@@ -1067,6 +1067,8 @@ endif()
 if(FRAMELINK_BUILD_TESTS AND Python3_Interpreter_FOUND)
     add_test(NAME frame_accounting_negative_controls COMMAND ${Python3_EXECUTABLE}
         ${CMAKE_CURRENT_SOURCE_DIR}/test/test_frame_accounting.py)
+    add_test(NAME renderer_identity_negative_controls COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/test_renderer_identity.py)
 endif()
 
 if(FRAMELINK_BUILD_TESTS AND TARGET framelink_av_playback AND UNIX AND NOT ANDROID)

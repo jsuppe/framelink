@@ -72,3 +72,8 @@ Windows items (3, 4 and the Windows side of 5) are changes to test code or test 
 **What was chosen (Jon).**
 - **A2:** run the deferred diagnosis now, before the Windows requalification: per-frame timing on the source's video thread, a rolling WPR kernel trace saved on a stall, and the standalone pacing probe at 60 Hz, with fixture experiments labelled separately. FrameLink code changes only if the trace points into it; a Windows product change returns to Jon with the evidence. The stage-split script goes into the rate runner on all platforms.
 - **B1:** the full 6a scope on all three platforms: identity joined through every FrameLink boundary, GPU completion and vkrender's presentation submission on Windows, Linux and Android, with PCM and the A/V offset tracked separately.
+
+**B1 scope, settled the same day (Jon).** vkrender's Android renderer has no A/V scheduling or audio output, and the Linux host has no desktop session (the RTX 3090 cannot present to a Vulkan headless surface).
+- **Linux presentation:** each capture starts its own headless GNOME Shell (Wayland, virtual 1920x1080 monitor) and vkrender presents into it on the RTX 3090. No host change; present submission is the API return, as on Windows.
+- **Android:** the desktop A/V scheduler and identity tracing are ported to the Android renderer, and PCM is received through FrameLink and counted and timed there. The A/V offset is measured at presentation against PCM arrival on the same clock. There is no audio device output, recorded as a limit.
+- **vkrender:** the renderer changes go on a new vkrender branch and PR, with FrameLink pinned per vkrender's CI convention; nothing merges without Jon.
