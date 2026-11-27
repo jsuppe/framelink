@@ -43,6 +43,20 @@ nothing for adopted external storage. Default allocation is unchanged.
 Without the flag, the header still works wherever the default layout is
 importable; where it is not, `flVkImportImage` returns `FL_FORMAT_UNSUPPORTED`.
 
+## Known limit: long-lived imports of CPU-written linear rings (Linux, NVIDIA)
+
+The sketch below keeps one import per slot and channel generation. On Linux
+with the NVIDIA driver, that import can go stale for a linear `FL_MAP_CPU` ring
+written on the CPU: from a slot's second use, the copy read zeros (the whole
+BGRA 1080p60 frame, or the NV12 4K30 chroma plane past its first 64 KiB), while
+a CPU read and a fresh import of the same storage held the frame, and
+`flVkImageCurrent` still returned 1. The cause is not established
+([decision 11 record](m6/linux-native-relay-d11/README.md)). For such rings,
+import each frame afresh and destroy the previous import once its work has
+completed; the relay rate harness does this with no measurable cost. It was not seen with
+GPU-written rings (the `fl_vulkan` tests keep one import per slot and pass).
+Windows and Android were not tested this way.
+
 ## Consumer sketch
 
 ```c

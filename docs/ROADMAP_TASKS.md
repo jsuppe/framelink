@@ -425,7 +425,7 @@ per-platform state. Windows readiness is the
   1080p60 and NV12 4K30 pass 1800 s with resource slopes far inside the gates;
   BGRA 1080p60 and BGRA 4K30 each fail zero-loss on one isolated stall (19–37 ms);
   cause established on 2026-11-27 as the test receiver's slow payload check, fixed in the harness at `0e8da988`
-  ([decision 11](m6/linux-native-relay-d11/README.md)). Stale long-lived Vulkan imports of linear rings reproduced; header guidance is Jon's decision. 9e not started.
+  ([decision 11](m6/linux-native-relay-d11/README.md)). Stale long-lived Vulkan imports of linear rings reproduced; the header now documents the limit (Jon, B1). 9e not started.
   *Android (AHardwareBuffer):* 9a–9c done with focused checks (2026-11-18): the same
   profile with exact RGBA/RGB10A2_LE AHardwareBuffers
   ([evidence](m6/android-native-av-session/README.md)). 9d and 9e not started.

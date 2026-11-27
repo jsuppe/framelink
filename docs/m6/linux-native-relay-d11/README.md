@@ -54,7 +54,7 @@ The trigger is the second slot's import, made in the first frames, at its first 
 ## For Jon
 
 - **The BGRA stall:** the cause is established as the test receiver's check. The `b5c942a` failures stand as recorded. The `0e8da988` passes are on a receiver with margin.
-- **The header guidance (B1 or B2):** B1 changes the comment only (re-import linear `FL_MAP_CPU` rings for each frame on NVIDIA Linux; cost not measurable here). B2 makes `flVkImageCurrent` report such imports as never current, a public-header behavior change that affects Windows.
+- **The header guidance (B1 or B2):** Jon chose B1 on the same day; the header and `VULKAN.md` now carry the limit. The options were: B1 changes the comment only (re-import linear `FL_MAP_CPU` rings for each frame on NVIDIA Linux; cost not measurable here). B2 makes `flVkImageCurrent` report such imports as never current, a public-header behavior change that affects Windows.
 - **Harness gap:** the CSV writer loses its last rows when a run aborts. Flushing before the abort would keep the failing frame.
 
 ## Not established here

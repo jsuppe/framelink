@@ -26,7 +26,8 @@
 // native handle plumbing:
 //
 //   both      flVkInitContext, flVkCheckAdapter, flVkCreateSync
-//             flVkImportImage (once per slot and channel generation)
+//             flVkImportImage (once per slot and channel generation; but see
+//             flVkImageCurrent for linear FL_MAP_CPU rings on NVIDIA Linux)
 //   consumer  flAcquireFrame -> flVkFrameReady (wait) -> your submit, which
 //             also signals flVkFrameConsumed -> vkQueueSubmit -> flVkFrameRelease
 //   producer  flAcquireBuffer -> flVkBeginSubmit (signal) -> vkQueueSubmit ->
@@ -330,6 +331,15 @@ typedef struct flVkImage {
 
 // Is the import still the channel's storage? Re-import when this returns 0:
 // the ring was reallocated (geometry change) and the old images are gone.
+//
+// Known limit (Linux, NVIDIA): a long-lived import of a linear FL_MAP_CPU ring
+// written on the CPU can go stale while this still returns 1. It was seen
+// reading zeros, whole or in part, from a slot's second use, while the
+// storage and a fresh import of it held the frame (M6 decision 11). Until
+// that is understood, import such a ring's frame afresh for each use and
+// destroy the previous import once its work has completed; no cost was
+// measurable in the relay rate cells. Not seen with GPU-written rings; other
+// platforms were not tested this way.
 FL_VK_INLINE int flVkImageCurrent(flChannel* ch, const flVkImage* image) {
     flChannelInfo info;
     if (!ch || !image || flQuery(ch, &info) != FL_OK) return 0;

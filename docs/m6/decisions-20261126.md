@@ -60,3 +60,5 @@ Windows items (3, 4 and the Windows side of 5) are changes to test code or test 
 **What was chosen (Jon).**
 - **A3:** find the stall's cause now, before the final-revision qualification (9e).
 - **B3:** first reproduce the stale import in a short test with a long-lived import, then decide between changing the header's guidance (comment only) and changing `flVkImageCurrent` (a public-header behavior change, which affects Windows and so returns to Jon).
+
+**Outcome (same day, [record](linux-native-relay-d11/README.md)).** A3: the stall is the `b5c942a` test receiver's byte-by-byte payload check (8–16 ms per BGRA 1080p60 frame), not FrameLink, the relay or the driver; `0e8da988`'s faster check leaves margin, and the recorded failures stand. B3: the stale import reproduces at the second slot's first reuse on CPU-written linear rings (BGRA 1080p60 every run, NV12 4K30); the cause is not established. **Jon chose B1:** `framelink_vulkan.h` and `VULKAN.md` now carry the limit and advise a fresh import per frame for such rings on NVIDIA Linux. Comment only; no API or behavior change.
