@@ -16,7 +16,7 @@ This record is dated; current status is in [STATUS.md](../../STATUS.md). Jon cho
 | Relay forward to receiver pickup | 2.18 ms | **16.49 ms** |
 | Receiver completion (copy and lease) | 5.11 ms | 7.15 ms |
 
-The source and relay were on time throughout. 57 frames were picked up more than 5 ms after the relay had delivered them: the receiver was still busy with the previous frame. In the passing `0e8da988` 1800 s runs, the same pickup delay never exceeded 2.38 ms (BGRA 1080p60) or 2.27 ms (BGRA 4K30). The CSVs of the failing run end about 35 frames before the failure (the abort loses rows not yet written), so the failing frame itself is not recorded.
+The source and relay were on time throughout. 57 frames were picked up more than 5 ms after the relay had delivered them: the receiver was still busy with the previous frame. In the passing `0e8da988` 1800 s runs, the same pickup delay never exceeded 2.38 ms (BGRA 1080p60) or 2.27 ms (BGRA 4K30). The CSVs of the failing run end about 35 frames before the failure (that harness loses rows not yet written when it aborts; fixed since `efa86dec`), so the failing frame itself is not recorded.
 
 **Step timers** (`stall/b5c942a-receiver-timers.patch`, test-only): the receiver logged each frame whose own work exceeded 12 ms. That run passed 1800 s. Of 108,000 frames, 12,769 exceeded 12 ms and 942 exceeded the 16.67 ms frame period:
 
@@ -55,7 +55,7 @@ The trigger is the second slot's import, made in the first frames, at its first 
 
 - **The BGRA stall:** the cause is established as the test receiver's check. The `b5c942a` failures stand as recorded. The `0e8da988` passes are on a receiver with margin.
 - **The header guidance (B1 or B2):** Jon chose B1 on the same day; the header and `VULKAN.md` now carry the limit. The options were: B1 changes the comment only (re-import linear `FL_MAP_CPU` rings for each frame on NVIDIA Linux; cost not measurable here). B2 makes `flVkImageCurrent` report such imports as never current, a public-header behavior change that affects Windows.
-- **Harness gap:** the CSV writer loses its last rows when a run aborts. Flushing before the abort would keep the failing frame.
+- **Harness gap at `b5c942a` only:** that harness loses its last CSV rows when a run aborts. The current harness already flushes pending rows before an abort (`efa86dec`).
 
 ## Not established here
 
