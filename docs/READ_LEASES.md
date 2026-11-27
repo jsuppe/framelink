@@ -17,6 +17,14 @@ its image or reuse its token afterward. Call `flCollectReadLeases` regularly to 
 completion and publish retirement. If collection fails, retry collection, not
 completion. A later completed frame cannot retire an earlier outstanding reader.
 
+**GPU device loss** (M6 decision 13). On Linux/Android, a completion fence that
+completes *with an error* (a GPU reset abandoned the read) still retires that
+reader, since the read is over and the producer gets its storage back; collection
+then returns `FL_DEVICE_LOST`, and the channel delivers no further frame. On
+Windows, a completion fence of a removed device returns `FL_DEVICE_LOST`; that
+device can no longer signal retirement. In both cases close the channel and
+recreate GPU objects.
+
 Bounded capacity: at most 16 acquired frames and 256 readers per channel. These are
 tracking limits, not an allocated image count or latency target. Existing configured
 pool size is unchanged. Exhaustion returns `FL_BUSY`; no silent growth or overwrite.

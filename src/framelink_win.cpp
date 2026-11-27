@@ -166,6 +166,10 @@ bool testDeviceRemoved() {const uint64_t n=testDeviceRemovedAfter();return n && 
 // Every fence read and device-removed check goes through these.
 template<class F> uint64_t completedValue(const F& fence) {return testDeviceRemoved()?UINT64_MAX:fence->GetCompletedValue();}
 template<class D> bool deviceRemoved(const D& device) {return testDeviceRemoved() || FAILED(device->GetDeviceRemovedReason());}
+// A shared fence reads UINT64_MAX when ANY device holding it goes away: our
+// own device's removal (device loss) or the peer process's death (measured:
+// the producer-kill fault test). Only our own removed device is device loss.
+template<class D> flResult fenceLost(const D& device) {return device && deviceRemoved(device)?FL_DEVICE_LOST:FL_DISCONNECTED;}
 
 constexpr uint32_t kMaxPool = fl::kMaxPool;
 // Windows-only optional capability. Requiring it selects pull duplication,
@@ -242,7 +246,7 @@ flResult attachDevice(flChannel* ch, flD3D11DeviceOwner* owner,
     if(owner->attached)return FL_BUSY;
     if(owner->retiringFence) {
         const auto completed=completedValue(owner->retiringFence);
-        if(completed==UINT64_MAX){owner->poisoned=true;return FL_DEVICE_LOST;}
+        if(completed==UINT64_MAX){owner->poisoned=true;return fenceLost(owner->device);}
         if(completed<owner->retiringValue)return FL_BUSY;
         owner->retiringFence.Reset();owner->retiringValue=0;
     }
@@ -956,7 +960,10 @@ FL_API flResult flAcquireBuffer(flChannel* ch, flBuffer* out, uint32_t timeoutMs
     const DWORD deadline = GetTickCount() + timeoutMs;
     for (;;) {
         const uint64_t consumed = completedValue(ch->consumedFence);
-        if(consumed==UINT64_MAX){ch->deviceLost=true;return trace.result(FL_DEVICE_LOST);} // device removed, not all slots free
+        if(consumed==UINT64_MAX){ // a device holding the fence is gone; not all slots free
+            const flResult lost=fenceLost(ch->device);if(lost==FL_DEVICE_LOST)ch->deviceLost=true;
+            return trace.result(lost);
+        }
         bool localBlocked = false;
         for (size_t i = 0; i < ch->images.size(); ++i) {
             // Free once the consumer has promised never to read this slot's
@@ -1112,14 +1119,17 @@ FL_API flResult flAcquireFrame(flChannel* ch, flFrame* out, uint32_t timeoutMs) 
         {
             std::lock_guard<std::mutex> hold(ch->pendingMutex);
             if (ch->deviceLost.load()) return trace.result(FL_DEVICE_LOST);
-            // A removed device reads every fence as UINT64_MAX: that is device
-            // loss, never readiness (decision 13). Nothing is delivered.
-            // The fence and device exist only once a ring is attached.
+            // Our removed device is device loss, never readiness (decision 13):
+            // nothing is delivered. The fence and device exist only once a ring
+            // is attached.
             const uint64_t readyCompleted=ch->readyFence?completedValue(ch->readyFence):0;
-            if ((ch->readyFence && readyCompleted==UINT64_MAX) || (ch->device && deviceRemoved(ch->device))) {
+            if (ch->device && deviceRemoved(ch->device)) {
                 ch->deviceLost=true;
                 return trace.result(FL_DEVICE_LOST);
             }
+            // UINT64_MAX with our device alive means the producer's process
+            // or device is gone; that path is unchanged here (decision 13
+            // changes device loss only).
             if (!ch->pending.empty() && !ch->frameHeld &&
                 ((ch->flags & FL_GPU_SYNC) || readyCompleted >= ch->pending.front().ready)) {
                 const fl::PendingFrame f=ch->pending.pop();
@@ -1199,7 +1209,10 @@ static flResult retireReadLeases(flChannel* ch,uint64_t value) {
 static flResult pollLeaseCompletions(flChannel* ch) {
     for(auto& pending:ch->leaseCompletions) if(pending.token) {
         uint64_t value=completedValue(pending.fence);
-        if(value==UINT64_MAX){ch->deviceLost=true;return FL_DEVICE_LOST;} // Device loss is not completion.
+        if(value==UINT64_MAX){ // Device loss is not completion.
+            const flResult lost=fenceLost(ch->device);if(lost==FL_DEVICE_LOST)ch->deviceLost=true;
+            return lost;
+        }
         if(value>=pending.value) {
             auto r=ch->readers.finishDeferred(pending.token);if(r!=FL_OK)return r;
             pending.fence.Reset();pending.token=0;pending.value=0;
