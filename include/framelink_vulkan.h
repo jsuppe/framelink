@@ -26,8 +26,7 @@
 // native handle plumbing:
 //
 //   both      flVkInitContext, flVkCheckAdapter, flVkCreateSync
-//             flVkImportImage (once per slot and channel generation; but see
-//             flVkImageCurrent for linear FL_MAP_CPU rings on NVIDIA Linux)
+//             flVkImportImage (once per slot and channel generation)
 //   consumer  flAcquireFrame -> flVkFrameReady (wait) -> your submit, which
 //             also signals flVkFrameConsumed -> vkQueueSubmit -> flVkFrameRelease
 //   producer  flAcquireBuffer -> flVkBeginSubmit (signal) -> vkQueueSubmit ->
@@ -332,14 +331,15 @@ typedef struct flVkImage {
 // Is the import still the channel's storage? Re-import when this returns 0:
 // the ring was reallocated (geometry change) and the old images are gone.
 //
-// Known limit (Linux, NVIDIA): a long-lived import of a linear FL_MAP_CPU ring
-// written on the CPU can go stale while this still returns 1. It was seen
-// reading zeros, whole or in part, from a slot's second use, while the
-// storage and a fresh import of it held the frame (M6 decision 11). Until
-// that is understood, import such a ring's frame afresh for each use and
-// destroy the previous import once its work has completed; no cost was
-// measurable in the relay rate cells. Not seen with GPU-written rings; other
-// platforms were not tested this way.
+// NVIDIA Linux: a long-lived import of a CPU-written linear ring once read
+// zeros from a slot's second use (M6 decision 11). For whole-image imports the
+// cause was the driver's non-dedicated DMA-BUF import; flVkImportImage now
+// imports those dedicated, and one import per slot and generation holds (M6
+// decision 12). Known limit: a per-plane NV12 import (FL_VK_IMPORT_PLANES, or
+// the fallback when the combined format is not importable) binds its chroma
+// image at an offset, which cannot be dedicated; kept imports read that chroma
+// as zeros (past its first 64 KiB) in the first frames at 4K30. Import such
+// frames afresh for each use until that is understood.
 FL_VK_INLINE int flVkImageCurrent(flChannel* ch, const flVkImage* image) {
     flChannelInfo info;
     if (!ch || !image || flQuery(ch, &info) != FL_OK) return 0;
@@ -693,6 +693,11 @@ FL_VK_INLINE flResult flVkBindFd_(const flVkContext* ctx, flVkImage* img, VkImag
     VkMemoryRequirements req;
     int dedicated = 0;
     flVkImageRequirements_(ctx, image, plane, &req, &dedicated);
+    // Dedicated whenever it is valid, whatever the driver prefers: NVIDIA
+    // Linux (580.x) reports no preference for a linear dma-buf image, yet the
+    // second non-dedicated such import in a device reads zeros on the GPU for
+    // its whole life (M6 decision 12; reproduced without FrameLink).
+    if (!plane) dedicated = 1;
     if (memoryOffset) dedicated = 0; // a dedicated allocation binds at offset 0
     off_t end = lseek(fd, 0, SEEK_END);
     if (end <= 0 || (VkDeviceSize)end < memoryOffset + req.size) return FL_FORMAT_UNSUPPORTED;

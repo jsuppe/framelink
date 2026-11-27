@@ -57,6 +57,8 @@ The trigger is the second slot's import, made in the first frames, at its first 
 - **The header guidance (B1 or B2):** Jon chose B1 on the same day; the header and `VULKAN.md` now carry the limit. The options were: B1 changes the comment only (re-import linear `FL_MAP_CPU` rings for each frame on NVIDIA Linux; cost not measurable here). B2 makes `flVkImageCurrent` report such imports as never current, a public-header behavior change that affects Windows.
 - **Harness gap at `b5c942a` only:** that harness loses its last CSV rows when a run aborts. The current harness already flushes pending rows before an abort (`efa86dec`).
 
+**Later (2026-11-27, decision 12).** The stale whole-image import is an NVIDIA driver bug in non-dedicated DMA-BUF imports; `flVkImportImage` now imports dedicated, and keep-one-import BGRA 1080p60 passes. Per-plane NV12 chroma is not covered ([record](../renderer-identity-6a/README.md#the-black-bgra-frames-resolved)).
+
 ## Not established here
 
 - Why the import goes stale, and whether other GPUs or drivers do the same.

@@ -43,19 +43,31 @@ nothing for adopted external storage. Default allocation is unchanged.
 Without the flag, the header still works wherever the default layout is
 importable; where it is not, `flVkImportImage` returns `FL_FORMAT_UNSUPPORTED`.
 
-## Known limit: long-lived imports of CPU-written linear rings (Linux, NVIDIA)
+## Dedicated DMA-BUF imports (Linux, NVIDIA)
 
-The sketch below keeps one import per slot and channel generation. On Linux
-with the NVIDIA driver, that import can go stale for a linear `FL_MAP_CPU` ring
-written on the CPU: from a slot's second use, the copy read zeros (the whole
-BGRA 1080p60 frame, or the NV12 4K30 chroma plane past its first 64 KiB), while
-a CPU read and a fresh import of the same storage held the frame, and
-`flVkImageCurrent` still returned 1. The cause is not established
-([decision 11 record](m6/linux-native-relay-d11/README.md)). For such rings,
-import each frame afresh and destroy the previous import once its work has
-completed; the relay rate harness does this with no measurable cost. It was not seen with
-GPU-written rings (the `fl_vulkan` tests keep one import per slot and pass).
-Windows and Android were not tested this way.
+`flVkImportImage` imports a DMA-BUF with a dedicated allocation whenever that
+is valid (a whole image bound at offset 0), whatever the driver prefers. On
+Linux with the NVIDIA driver (580.x), the driver reports no preference for a
+linear image, yet the second non-dedicated DMA-BUF image import in a device
+reads zeros on the GPU for its whole life while the buffer holds the frame.
+This was the "stale import" of decision 11 (zeros at the second slot's first
+reuse) and vkrender's black BGRA frames in 6a; a standalone GBM + Vulkan
+program reproduces it with no FrameLink code
+([record](m6/renderer-identity-6a/README.md#the-black-bgra-frames-resolved)).
+With dedicated imports, one import per slot and channel generation (the sketch
+below) holds: the relay harness's keep-one-import mode, which went stale in
+every decision 11 run, passed BGRA 1080p60 3 of 3 with no wrong read (a
+control built with the old rule read zeros again).
+Applications that import FrameLink's DMA-BUFs themselves should do the same.
+
+**Known limit: per-plane NV12 imports.** A per-plane NV12 import
+(`FL_VK_IMPORT_PLANES`, or the fallback when the combined format is not
+importable for the requested usage) binds its chroma image at an offset, which
+cannot be dedicated. In keep-one-import mode at NV12 4K30 the chroma read zeros
+past its first 64 KiB in the first one to three frames of each capture, then
+read correctly; a fresh import read it correctly every time. Decision 11 saw this
+fail every NV12 4K30 run. For per-plane NV12, import each frame afresh and
+destroy the previous import once its work has completed.
 
 ## Consumer sketch
 
@@ -132,13 +144,12 @@ Bugs the hardware found and this change fixes:
 
 ## Known limits
 
-- **Long-lived imports of linear rings on NVIDIA Linux.** In the three-process
-  relay rate harness, a Vulkan import of a linear (`FL_MAP_CPU`) DMA-BUF read
-  zeros after about 30–38 s at BGRA 1080p60. The storage itself was correct,
-  and a fresh import read it. A single-process reproduction did not show it, and
-  the trigger is not established. Until it is, re-import such rings rather than
-  caching imports for a whole generation
-  ([evidence](m6/linux-native-relay-rate-b5c942a/README.md)).
+- **Long-lived imports of linear rings on NVIDIA Linux.** Resolved for
+  whole-image imports on 2026-11-27: the zeros were the driver's non-dedicated
+  DMA-BUF import, and `flVkImportImage` now imports dedicated. Per-plane NV12
+  chroma, bound at an offset, still reads zeros in its first frames; re-import
+  it per frame (see Dedicated DMA-BUF imports above;
+  [first evidence](m6/linux-native-relay-rate-b5c942a/README.md)).
 
 - Windows NV12 is refused (`FL_FORMAT_UNSUPPORTED`): NVIDIA's D3D11 NV12
   import silently loses chroma. Use an RGB ring for Vulkan, or D3D11 for NV12.

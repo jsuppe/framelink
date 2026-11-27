@@ -1,0 +1,106 @@
+== import_repro 
+gbm: /dev/dri/renderD128 (nvidia)
+7 buffers, stride 7680 offset 0 size 8323072
+device: NVIDIA GeForce RTX 3090 driver 0x912c8100
+round 0: [0 ok] [1 ZERO] [2 ok] [3 ok] [4 ok] [5 ok] [6 ok]
+round 1: [0 ok] [1 ZERO] [2 ok] [3 ok] [4 ok] [5 ok] [6 ok]
+round 2: [0 ok] [1 ZERO] [2 ok] [3 ok] [4 ok] [5 ok] [6 ok]
+FAIL: 3 bad reads
+exit 3
+== import_repro --order import-fill
+gbm: /dev/dri/renderD128 (nvidia)
+7 buffers, stride 7680 offset 0 size 8323072
+device: NVIDIA GeForce RTX 3090 driver 0x912c8100
+round 0: [0 ok] [1 ZERO] [2 ok] [3 ok] [4 ok] [5 ok] [6 ok]
+round 1: [0 ok] [1 ZERO] [2 ok] [3 ok] [4 ok] [5 ok] [6 ok]
+round 2: [0 ok] [1 ZERO] [2 ok] [3 ok] [4 ok] [5 ok] [6 ok]
+FAIL: 3 bad reads
+exit 3
+== import_repro --separate-gbm
+gbm: /dev/dri/renderD128 (nvidia)
+gbm: /dev/dri/renderD128 (nvidia)
+gbm: /dev/dri/renderD128 (nvidia)
+gbm: /dev/dri/renderD128 (nvidia)
+gbm: /dev/dri/renderD128 (nvidia)
+gbm: /dev/dri/renderD128 (nvidia)
+gbm: /dev/dri/renderD128 (nvidia)
+7 buffers, stride 7680 offset 0 size 8323072
+device: NVIDIA GeForce RTX 3090 driver 0x912c8100
+round 0: [0 ok] [1 ZERO] [2 ok] [3 ok] [4 ok] [5 ok] [6 ok]
+round 1: [0 ok] [1 ZERO] [2 ok] [3 ok] [4 ok] [5 ok] [6 ok]
+round 2: [0 ok] [1 ZERO] [2 ok] [3 ok] [4 ok] [5 ok] [6 ok]
+FAIL: 3 bad reads
+exit 3
+== import_repro --pipeline-after-first
+gbm: /dev/dri/renderD128 (nvidia)
+7 buffers, stride 7680 offset 0 size 8323072
+device: NVIDIA GeForce RTX 3090 driver 0x912c8100
+round 0: [0 ok] [1 ZERO] [2 ok] [3 ok] [4 ok] [5 ok] [6 ok]
+round 1: [0 ok] [1 ZERO] [2 ok] [3 ok] [4 ok] [5 ok] [6 ok]
+round 2: [0 ok] [1 ZERO] [2 ok] [3 ok] [4 ok] [5 ok] [6 ok]
+FAIL: 3 bad reads
+exit 3
+== import_repro --buffers 2
+gbm: /dev/dri/renderD128 (nvidia)
+2 buffers, stride 7680 offset 0 size 8323072
+device: NVIDIA GeForce RTX 3090 driver 0x912c8100
+round 0: [0 ok] [1 ZERO]
+round 1: [0 ok] [1 ZERO]
+round 2: [0 ok] [1 ZERO]
+FAIL: 3 bad reads
+exit 3
+== import_repro --buffers 12
+gbm: /dev/dri/renderD128 (nvidia)
+12 buffers, stride 7680 offset 0 size 8323072
+device: NVIDIA GeForce RTX 3090 driver 0x912c8100
+round 0: [0 ok] [1 ZERO] [2 ok] [3 ok] [4 ok] [5 ok] [6 ok] [7 ok] [8 ok] [9 ok] [10 ok] [11 ok]
+round 1: [0 ok] [1 ZERO] [2 ok] [3 ok] [4 ok] [5 ok] [6 ok] [7 ok] [8 ok] [9 ok] [10 ok] [11 ok]
+round 2: [0 ok] [1 ZERO] [2 ok] [3 ok] [4 ok] [5 ok] [6 ok] [7 ok] [8 ok] [9 ok] [10 ok] [11 ok]
+FAIL: 3 bad reads
+exit 3
+== import_repro --reverse
+gbm: /dev/dri/renderD128 (nvidia)
+7 buffers, stride 7680 offset 0 size 8323072
+device: NVIDIA GeForce RTX 3090 driver 0x912c8100
+round 0: [0 ok] [1 ok] [2 ok] [3 ok] [4 ok] [5 ZERO] [6 ok]
+round 1: [0 ok] [1 ok] [2 ok] [3 ok] [4 ok] [5 ZERO] [6 ok]
+round 2: [0 ok] [1 ok] [2 ok] [3 ok] [4 ok] [5 ZERO] [6 ok]
+FAIL: 3 bad reads
+exit 3
+== import_repro --dup-first
+gbm: /dev/dri/renderD128 (nvidia)
+7 buffers, stride 7680 offset 0 size 8323072
+device: NVIDIA GeForce RTX 3090 driver 0x912c8100
+extra import of buffer 0 (never read)
+round 0: [0 ok] [1 ok] [2 ok] [3 ok] [4 ok] [5 ok] [6 ok]
+round 1: [0 ok] [1 ok] [2 ok] [3 ok] [4 ok] [5 ok] [6 ok]
+round 2: [0 ok] [1 ok] [2 ok] [3 ok] [4 ok] [5 ok] [6 ok]
+PASS: 0 bad reads
+exit 0
+== import_repro --alloc-req-size
+gbm: /dev/dri/renderD128 (nvidia)
+7 buffers, stride 7680 offset 0 size 8323072
+device: NVIDIA GeForce RTX 3090 driver 0x912c8100
+round 0: [0 ok] [1 ZERO] [2 ok] [3 ok] [4 ok] [5 ok] [6 ok]
+round 1: [0 ok] [1 ZERO] [2 ok] [3 ok] [4 ok] [5 ok] [6 ok]
+round 2: [0 ok] [1 ZERO] [2 ok] [3 ok] [4 ok] [5 ok] [6 ok]
+FAIL: 3 bad reads
+exit 3
+== import_repro --force-dedicated
+gbm: /dev/dri/renderD128 (nvidia)
+7 buffers, stride 7680 offset 0 size 8323072
+device: NVIDIA GeForce RTX 3090 driver 0x912c8100
+round 0: [0 ok] [1 ok] [2 ok] [3 ok] [4 ok] [5 ok] [6 ok]
+round 1: [0 ok] [1 ok] [2 ok] [3 ok] [4 ok] [5 ok] [6 ok]
+round 2: [0 ok] [1 ok] [2 ok] [3 ok] [4 ok] [5 ok] [6 ok]
+PASS: 0 bad reads
+exit 0
+== import_repro --force-dedicated --alloc-req-size
+gbm: /dev/dri/renderD128 (nvidia)
+7 buffers, stride 7680 offset 0 size 8323072
+device: NVIDIA GeForce RTX 3090 driver 0x912c8100
+round 0: [0 ok] [1 ok] [2 ok] [3 ok] [4 ok] [5 ok] [6 ok]
+round 1: [0 ok] [1 ok] [2 ok] [3 ok] [4 ok] [5 ok] [6 ok]
+round 2: [0 ok] [1 ok] [2 ok] [3 ok] [4 ok] [5 ok] [6 ok]
+PASS: 0 bad reads
+exit 0

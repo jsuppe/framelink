@@ -1,0 +1,54 @@
+{
+ "what": "decision 11 keep-one-import mode with the dedicated-import header (control: built with the old non-dedicated rule)",
+ "env": "FL_BENCH_KEEP_IMPORT=1 FL_BENCH_DIAG=1",
+ "runs": [
+  {
+   "run": "bgra1080p60-1",
+   "cell": "bgra1080p60",
+   "preflight_5s": true,
+   "trace_5s": true,
+   "run_60s": true,
+   "error": null
+  },
+  {
+   "run": "bgra1080p60-2",
+   "cell": "bgra1080p60",
+   "preflight_5s": true,
+   "trace_5s": true,
+   "run_60s": true,
+   "error": null
+  },
+  {
+   "run": "bgra1080p60-3",
+   "cell": "bgra1080p60",
+   "preflight_5s": true,
+   "trace_5s": true,
+   "run_60s": true,
+   "error": null
+  },
+  {
+   "run": "control-no-dedicated-bgra1080p60",
+   "cell": "bgra1080p60",
+   "preflight_5s": true,
+   "trace_5s": true,
+   "run_60s": false,
+   "error": "arrival diagnostic misses: video=[2157, 2158, 2159, 2160] audio=[]"
+  },
+  {
+   "run": "nv12-4k30-1",
+   "cell": "nv12-4k30",
+   "preflight_5s": true,
+   "trace_5s": true,
+   "run_60s": true,
+   "error": null
+  },
+  {
+   "run": "nv12-4k30-2",
+   "cell": "nv12-4k30",
+   "preflight_5s": true,
+   "trace_5s": true,
+   "run_60s": true,
+   "error": null
+  }
+ ]
+}
