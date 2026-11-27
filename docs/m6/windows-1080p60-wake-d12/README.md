@@ -16,7 +16,7 @@ Host: the Windows test host (Ryzen 7 9800X3D, 8 cores / 16 threads; RTX 5090; Wi
 
 The host's Kernel-Power 566 log shows the display off and steady through both earlier failures: from 11-16 14:03 to 11-17 12:30 UTC (the `060c54e4` NV12 failure was at about 06:32), and from 11-11 14:14 to 11-13 13:55 (the `a50841a` BGRA failure, 11-12). So the 1080p60 late wake-up is not the display-power driver stall found for 4K30 on 2026-11-23.
 
-## Results so far (batch 2, in progress)
+## Results (batch 2, complete)
 
 | Run | Result | Worst stage | Display (566) | Mechanism |
 |---|---|---|---|---|
@@ -25,6 +25,8 @@ The host's Kernel-Power 566 log shows the display off and steady through both ea
 | BGRA 1 | FAIL at about 577 s | `flSubmit` 146.5 ms | display on (input), 14:46:23.25 | display-power driver stall (known) |
 | NV12 2 | **pass**, 1800 s | | none, display off and steady | |
 | BGRA 2 | FAIL at about 332 s | **`source.late_wake` 21.5 ms** (frame 19920) | none, display off and steady | **the late wake-up** |
+| NV12 3 | **pass**, 1800 s | | none | |
+| BGRA 3 | completed, FAIL on deadlines: 7 video frames and 1 audio block late, about 587 s in | `receiver.complete` 79.0 ms, `flSubmit` 63.5 ms (frames 35218–35219) | display off (idle timeout), logged 16:08:46.79, within a few seconds of the stall | display-power driver stall (known); no check failed, so no trace was saved |
 
 Batch 1 was stopped after its first run: its watcher was stopped while it was still saving the trace, so no trace was kept. The script was fixed (the batch now waits for a save in progress) and restarted as batch 2. Someone was using the host during the batch (display woken by input twice).
 
@@ -44,7 +46,8 @@ Batch 1 was stopped after its first run: its watcher was stopped while it was st
 
 ## Not established yet
 
-- Whether MMCSS registration (the labelled experiment `FL_BENCH_MMCSS=1`), or another fixture change, keeps the source on time through such a burst.
+- Whether MMCSS registration (the labelled experiment `FL_BENCH_MMCSS=1`, batch 3, queued after batch 2) keeps the source on time through such a burst.
+- Summary of batch 2: NV12 passed 2 of 3 runs at 1800 s, BGRA 0 of 3. Of the four failures, three are display power changes and one is the CPU starvation above. All happened while the host was in use.
 - What triggered this Defender burst.
 
 ## Files
