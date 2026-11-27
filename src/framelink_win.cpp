@@ -144,6 +144,26 @@ struct flChannel {
 
 namespace {
 
+// Test-only fault injection (M6 decision 13, B2). FRAMELINK_TEST_FAULTS is
+// read once per process; unset (the normal case) it does nothing.
+// device-removed-after=N: once consumers in this process have acquired N
+// frames, every fence reads UINT64_MAX and every device reports removed, as
+// after a TDR or adapter removal.
+std::atomic<uint64_t> g_framesAcquired{0};
+uint64_t testDeviceRemovedAfter() {
+    static const uint64_t after=[]{
+        unsigned long long v=0;const char* env=getenv("FRAMELINK_TEST_FAULTS");
+        for(const char* p=env;p && *p;){const char* end=strchr(p,',');if(!end)end=p+strlen(p);
+            if(sscanf(p,"device-removed-after=%llu",&v)==1)return uint64_t(v);p=*end?end+1:end;}
+        return uint64_t(0);
+    }();
+    return after;
+}
+bool testDeviceRemoved() {const uint64_t n=testDeviceRemovedAfter();return n && g_framesAcquired.load()>=n;}
+// Every fence read and device-removed check goes through these.
+template<class F> uint64_t completedValue(const F& fence) {return testDeviceRemoved()?UINT64_MAX:fence->GetCompletedValue();}
+template<class D> bool deviceRemoved(const D& device) {return testDeviceRemoved() || FAILED(device->GetDeviceRemovedReason());}
+
 constexpr uint32_t kMaxPool = fl::kMaxPool;
 // Windows-only optional capability. Requiring it selects pull duplication,
 // so a cancelled setup cannot strand handles pushed into the caller process.
@@ -211,13 +231,13 @@ flResult attachDevice(flChannel* ch, flD3D11DeviceOwner* owner,
                       const uint8_t* luid, bool checkLuid) {
     auto attachment=std::make_shared<DeviceAttachment>();
     std::lock_guard<std::mutex> lock(owner->mutex);
-    if(owner->poisoned || FAILED(owner->device->GetDeviceRemovedReason())) {
+    if(owner->poisoned || deviceRemoved(owner->device)) {
         owner->poisoned=true; return FL_DISCONNECTED;
     }
     if(checkLuid && (!luid || memcmp(luid,owner->luid,8)))return FL_ADAPTER_MISMATCH;
     if(owner->attached)return FL_BUSY;
     if(owner->retiringFence) {
-        const auto completed=owner->retiringFence->GetCompletedValue();
+        const auto completed=completedValue(owner->retiringFence);
         if(completed==UINT64_MAX){owner->poisoned=true;return FL_DISCONNECTED;}
         if(completed<owner->retiringValue)return FL_BUSY;
         owner->retiringFence.Reset();owner->retiringValue=0;
@@ -447,8 +467,8 @@ void acceptLoop(flChannel* ch) {
             {
             std::lock_guard<std::mutex> hold(ch->pendingMutex);
             ch->peerFeatures=ph->_pad;
-            if(ch->poolPins->load() || !ch->readers.empty() || ch->frameHeld || ch->consumedFence->GetCompletedValue()<ch->heldReady ||
-               !ch->pending.all([ch](const fl::PendingFrame& f){return ch->readyFence->GetCompletedValue()>=f.ready;})) {
+            if(ch->poolPins->load() || !ch->readers.empty() || ch->frameHeld || completedValue(ch->consumedFence)<ch->heldReady ||
+               !ch->pending.all([ch](const fl::PendingFrame& f){return completedValue(ch->readyFence)>=f.ready;})) {
                 link.send(fl::MsgType::Busy);
                 continue;
             }
@@ -479,7 +499,7 @@ void acceptLoop(flChannel* ch) {
                     // between here and the new ring being live.
                     {
                         std::lock_guard<std::mutex> hold(ch->pendingMutex);
-                        if(!ch->readers.empty() || ch->frameHeld || ((ch->flags & (FL_GPU_SYNC|FL_DEFER_RELEASE)) && ch->consumedFence->GetCompletedValue()<ch->heldReady)){if(!handOverRing(ch,link,link.peerPid()))break;continue;}
+                        if(!ch->readers.empty() || ch->frameHeld || ((ch->flags & (FL_GPU_SYNC|FL_DEFER_RELEASE)) && completedValue(ch->consumedFence)<ch->heldReady)){if(!handOverRing(ch,link,link.peerPid()))break;continue;}
                         ch->pending.clear(); // stale: the old ring is going away
                     }
                     const uint32_t pool = (uint32_t)ch->images.size();
@@ -545,6 +565,7 @@ FL_API const char* flResultString(flResult r) {
         case FL_OOM: return "out of memory";
         case FL_INTERNAL: return "internal error";
         case FL_BUSY: return "channel already has a producer";
+        case FL_DEVICE_LOST: return "GPU device lost or reset";
     }
     return "unknown";
 }
@@ -930,7 +951,7 @@ FL_API flResult flAcquireBuffer(flChannel* ch, flBuffer* out, uint32_t timeoutMs
     if (!ch->link.connected()) return trace.result(FL_DISCONNECTED);
     const DWORD deadline = GetTickCount() + timeoutMs;
     for (;;) {
-        const uint64_t consumed = ch->consumedFence->GetCompletedValue();
+        const uint64_t consumed = completedValue(ch->consumedFence);
         if(consumed==UINT64_MAX)return trace.result(FL_DISCONNECTED); // device removed, not all slots free
         bool localBlocked = false;
         for (size_t i = 0; i < ch->images.size(); ++i) {
@@ -1087,7 +1108,7 @@ FL_API flResult flAcquireFrame(flChannel* ch, flFrame* out, uint32_t timeoutMs) 
         {
             std::lock_guard<std::mutex> hold(ch->pendingMutex);
             if (!ch->pending.empty() && !ch->frameHeld &&
-                ((ch->flags & FL_GPU_SYNC) || ch->readyFence->GetCompletedValue() >= ch->pending.front().ready)) {
+                ((ch->flags & FL_GPU_SYNC) || completedValue(ch->readyFence) >= ch->pending.front().ready)) {
                 const fl::PendingFrame f=ch->pending.pop();
                 ch->frameHeld = true;ch->heldArrival=f.arrival;
                 ch->heldReady = f.ready;
@@ -1100,6 +1121,7 @@ FL_API flResult flAcquireFrame(flChannel* ch, flFrame* out, uint32_t timeoutMs) 
             }
         }
         if (got) {
+            ++g_framesAcquired; // test fault injection's frame count only
             // The producer's GPU writes are not necessarily done yet; the fence
             // is what makes this zero-copy AND correct. An FL_GPU_SYNC consumer
             // waits on that fence inside its own submit, so blocking here would
@@ -1163,7 +1185,7 @@ static flResult retireReadLeases(flChannel* ch,uint64_t value) {
 }
 static flResult pollLeaseCompletions(flChannel* ch) {
     for(auto& pending:ch->leaseCompletions) if(pending.token) {
-        uint64_t value=pending.fence->GetCompletedValue();
+        uint64_t value=completedValue(pending.fence);
         if(value==UINT64_MAX)return FL_DISCONNECTED; // Device loss is not completion.
         if(value>=pending.value) {
             auto r=ch->readers.finishDeferred(pending.token);if(r!=FL_OK)return r;
@@ -1232,13 +1254,13 @@ FL_API void flClose(flChannel* ch) {
         const uint64_t required=ch->isConsumer?ch->heldReady:ch->readyValue;
         const bool incomplete=ch->frameHeld || !ch->readers.empty() || !ch->pending.empty() ||
             ch->submittingSlot!=UINT32_MAX ||
-            (ch->isConsumer && ch->consumedFence && ch->consumedFence->GetCompletedValue()<required) ||
-            FAILED(owner->device->GetDeviceRemovedReason());
+            (ch->isConsumer && ch->consumedFence && completedValue(ch->consumedFence)<required) ||
+            deviceRemoved(owner->device);
         { std::lock_guard<std::mutex> lock(owner->mutex); owner->poisoned|=incomplete;
           // A remote reader may legitimately outlive producer close. Pin its
           // actual consumed fence, not storage for reuse; the next attachment
           // stays BUSY until real completion, never treating close as drain.
-          if(!ch->isConsumer && ch->consumedFence && ch->consumedFence->GetCompletedValue()<required) {
+          if(!ch->isConsumer && ch->consumedFence && completedValue(ch->consumedFence)<required) {
               owner->retiringFence=ch->consumedFence;owner->retiringValue=required;
           }
         }
@@ -1260,7 +1282,7 @@ FL_API flResult flSnapshotD3D11ConsumerPool(flChannel* ch, flD3D11PoolSnapshot**
     if(!ch || !ch->isConsumer || !out)return FL_INVALID;
     std::lock_guard<std::recursive_mutex> poolLock(ch->poolMutex);
     if(ch->stop.load() || !ch->info.generation || ch->images.size()!=ch->info.poolSize)return FL_DISCONNECTED;
-    if(FAILED(ch->device->GetDeviceRemovedReason()))return FL_DISCONNECTED;
+    if(deviceRemoved(ch->device))return FL_DISCONNECTED;
     auto snapshot=std::make_unique<flD3D11PoolSnapshot>();
     snapshot->info=ch->info;
     snapshot->handles.resize(ch->images.size(),nullptr);

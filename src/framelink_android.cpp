@@ -44,6 +44,7 @@
 #include <dlfcn.h>
 #include "framelink_sync_fd.h"
 #include "fl_sync_fd.hpp"
+#include <atomic>
 #include "fl_pending.hpp"
 #include "framelink_ahb.h"
 
@@ -83,6 +84,7 @@ struct flImage {
 
 struct LeaseCompletion {
     uint64_t token=0;
+    uint64_t ordinal=0; // per-process completion count, for test fault injection
     int fd=-1;
     ~LeaseCompletion() { if(fd>=0)close(fd); }
 };
@@ -445,6 +447,7 @@ FL_API const char* flResultString(flResult r) {
         case FL_OOM: return "out of memory";
         case FL_INTERNAL: return "internal error";
         case FL_BUSY: return "channel already has a producer";
+        case FL_DEVICE_LOST: return "GPU device lost or reset";
     }
     return "unknown";
 }
@@ -760,7 +763,9 @@ FL_API flResult flAcquireFrame(flChannel* ch, flFrame* out, uint32_t timeoutMs) 
         {
             std::lock_guard<std::mutex> hold(ch->pendingMutex);
             if (!ch->pending.empty() && !ch->frameHeld &&
-                ((ch->flags & FL_GPU_SYNC) || fl::fenceReady(ch->pending.front().fence))) {
+                ((ch->flags & FL_GPU_SYNC) ||
+                 // DEVICE-LOST GAP (decision 13): an error completion counts as ready.
+                 fl::fenceState(ch->pending.front().fence,ch->pending.front().ready,0)!=fl::FenceState::Pending)) {
                 const fl::PendingFrame f=ch->pending.pop();
                 ch->sync.held=f.fence;
                 ch->frameHeld=true;ch->heldArrival=f.arrival;
@@ -869,6 +874,8 @@ static flResult pollLeaseCompletions(flChannel* ch) {
         if(!result)continue;
         if(p.revents & (POLLERR|POLLHUP|POLLNVAL))return FL_INTERNAL;
         if(p.revents & POLLIN) {
+            // DEVICE-LOST GAP (decision 13): an error completion retires like success.
+            (void)fl::fenceState(pending.fd,0,pending.ordinal);
             auto r=ch->readers.finishDeferred(pending.token);if(r!=FL_OK)return r;
             close(pending.fd);pending.fd=-1;pending.token=0;
         }
@@ -883,7 +890,8 @@ FL_API flResult flCompleteReadLeaseSyncFd(flChannel* ch,uint64_t token,int fd) {
     for(auto& pending:ch->leaseCompletions) if(!pending.token) {
         int owned=fcntl(fd,F_DUPFD_CLOEXEC,0);if(owned<0)return FL_INVALID;
         auto r=ch->readers.defer(token);if(r!=FL_OK){close(owned);return r;}
-        pending.fd=owned;pending.token=token;return FL_OK;
+        static std::atomic<uint64_t> completions{0};
+        pending.fd=owned;pending.token=token;pending.ordinal=++completions;return FL_OK;
     }
     return FL_BUSY;
 }

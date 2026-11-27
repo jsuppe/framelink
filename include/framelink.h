@@ -60,6 +60,12 @@ typedef enum flResult {
     FL_INVALID = 8,
     FL_OOM = 9,
     FL_INTERNAL = 10,
+    // The GPU device was lost or reset (a fence completed with an error, or
+    // the device reports removed). Terminal for this handle, like
+    // FL_DISCONNECTED: no further frames are delivered; the handle stays
+    // valid and must still be flClose'd. Recreate GPU objects before opening
+    // a new channel. Never returned for a frame whose GPU work completed.
+    FL_DEVICE_LOST = 12,
 } flResult;
 
 FL_API const char* flResultString(flResult r); // never NULL, never allocates

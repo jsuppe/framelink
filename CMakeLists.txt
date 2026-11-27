@@ -609,6 +609,12 @@ if(FRAMELINK_BUILD_TESTS AND WIN32)
         "-DPRODUCER_ARGS=produce;flci-nv12" "-DCONSUMER_ARGS=consume;flci-nv12"
         -P ${CMAKE_CURRENT_SOURCE_DIR}/test/run_roundtrip.cmake)
     set_tests_properties(nv12_windows_roundtrip PROPERTIES TIMEOUT 95)
+    # M6 decision 13: D3D11 device loss, by test-only injection.
+    add_executable(fl_device_lost_win test/fl_device_lost_win.cpp)
+    target_link_libraries(fl_device_lost_win PRIVATE framelink)
+    add_test(NAME device_lost_windows COMMAND fl_device_lost_win)
+    set_tests_properties(device_lost_windows PROPERTIES TIMEOUT 20 SKIP_RETURN_CODE 77
+        ENVIRONMENT FRAMELINK_TEST_FAULTS=device-removed-after=1)
 endif()
 
 if(FRAMELINK_BUILD_TESTS AND WIN32)
@@ -774,6 +780,13 @@ if(FRAMELINK_BUILD_TESTS AND UNIX)
     target_link_libraries(fl_sync_fd_test PRIVATE framelink)
     add_test(NAME sync_fd_contract COMMAND fl_sync_fd_test)
     set_tests_properties(sync_fd_contract PROPERTIES TIMEOUT 10)
+    # M6 decision 13: device loss through fences, by test-only injection.
+    add_executable(fl_device_lost_test test/fl_device_lost.cpp)
+    target_link_libraries(fl_device_lost_test PRIVATE framelink)
+    add_test(NAME device_lost_ready_fence COMMAND fl_device_lost_test ready)
+    add_test(NAME device_lost_lease_fence COMMAND fl_device_lost_test lease)
+    set_tests_properties(device_lost_ready_fence PROPERTIES TIMEOUT 10 ENVIRONMENT FRAMELINK_TEST_FAULTS=ready-error=2)
+    set_tests_properties(device_lost_lease_fence PROPERTIES TIMEOUT 10 ENVIRONMENT FRAMELINK_TEST_FAULTS=lease-error=1)
 endif()
 
 # Android GStreamer SDK ships static libraries. Register gstframelink in the
@@ -861,6 +874,22 @@ if(FRAMELINK_BUILD_TESTS AND TARGET fl_gst_nv12 AND NOT ANDROID)
     target_link_libraries(fl_gst_timestamps PRIVATE ${_fl_test_libs})
     add_test(NAME gst_timestamp_contract COMMAND fl_gst_timestamps $<TARGET_FILE:gstframelink>)
     set_tests_properties(gst_timestamp_contract PROPERTIES TIMEOUT 25)
+endif()
+
+# M6 decision 13: framelinksrc's stable device-lost error, by test-only fence
+# fault injection (POSIX fences; the Windows device paths are tested separately).
+if(FRAMELINK_BUILD_TESTS AND TARGET fl_gst_timestamps AND UNIX)
+    add_executable(fl_gst_device_lost test/fl_gst_device_lost.cpp)
+    target_include_directories(fl_gst_device_lost PRIVATE include)
+    if(_fl_test_includes)
+        target_include_directories(fl_gst_device_lost PRIVATE ${_fl_test_includes})
+    endif()
+    if(_fl_test_dirs)
+        target_link_directories(fl_gst_device_lost PRIVATE ${_fl_test_dirs})
+    endif()
+    target_link_libraries(fl_gst_device_lost PRIVATE ${_fl_test_libs})
+    add_test(NAME gst_device_lost COMMAND fl_gst_device_lost $<TARGET_FILE:gstframelink>)
+    set_tests_properties(gst_device_lost PROPERTIES TIMEOUT 20 ENVIRONMENT FRAMELINK_TEST_FAULTS=ready-error=3)
 endif()
 
 if(FRAMELINK_BUILD_TESTS AND NOT ANDROID)
