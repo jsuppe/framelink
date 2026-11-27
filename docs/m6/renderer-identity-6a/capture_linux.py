@@ -127,8 +127,9 @@ try:
                 if args.preview_ms and time.monotonic() >= next_preview:
                     next_preview += args.preview_ms / 1000
                     try:
+                        asked = time.monotonic_ns()  # CLOCK_MONOTONIC, the traces' clock
                         with urllib.request.urlopen(f'http://127.0.0.1:{port}/api/preview.jpg', timeout=1) as x:
-                            (d / f'preview-{int((time.monotonic() - t0) * 1000):06d}.jpg').write_bytes(x.read())
+                            (d / f'preview-{int((time.monotonic() - t0) * 1000):06d}-{asked}.jpg').write_bytes(x.read())
                     except Exception:
                         pass
                 time.sleep(0.05)
