@@ -610,6 +610,9 @@ if(FRAMELINK_BUILD_TESTS AND WIN32)
         -P ${CMAKE_CURRENT_SOURCE_DIR}/test/run_roundtrip.cmake)
     set_tests_properties(nv12_windows_roundtrip PROPERTIES TIMEOUT 95)
     # M6 decision 13: D3D11 device loss, by test-only injection.
+    # Physical device loss (decision 13 A3): driven by d13-adapter.ps1, not CTest.
+    add_executable(fl_device_loss_stream_win test/fl_device_loss_stream_win.cpp)
+    target_link_libraries(fl_device_loss_stream_win PRIVATE framelink d3d11)
     add_executable(fl_device_lost_win test/fl_device_lost_win.cpp)
     target_link_libraries(fl_device_lost_win PRIVATE framelink)
     add_test(NAME device_lost_windows COMMAND fl_device_lost_win)
