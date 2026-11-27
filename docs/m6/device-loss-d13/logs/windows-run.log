@@ -1,0 +1,38 @@
+before revision 14fca2ec8201303e995253a527cd2cb629b0d668
+before build exit 0
+before device_lost: Test project %USERPROFILE%/dev/apichk/d13/before/build
+before device_lost:     Start 88: device_lost_windows
+before device_lost: 1/1 Test #88: device_lost_windows ..............***Failed    0.27 sec
+before device_lost: producer flAcquireBuffer after removal: peer disconnected
+before device_lost: line 35: r==FL_DEVICE_LOST
+before device_lost: 
+before device_lost: 
+before device_lost: 0% tests passed, 1 tests failed out of 1
+before device_lost: 
+before device_lost: Total Test time (real) =   0.30 sec
+before device_lost: 
+before device_lost: The following tests FAILED:
+before device_lost: 	 88 - device_lost_windows (Failed)
+before device_lost: Errors while running CTest
+after revision b3cd877a896705e4072eda22b3bbd707c734ed57
+after build exit 0
+after device_lost: Test project %USERPROFILE%/dev/apichk/d13/after/build
+after device_lost:     Start 88: device_lost_windows
+after device_lost: 1/1 Test #88: device_lost_windows ..............   Passed    0.25 sec
+after device_lost: 
+after device_lost: 100% tests passed, 0 tests failed out of 1
+after device_lost: 
+after device_lost: Total Test time (real) =   0.27 sec
+after suite:  22/198 Test  #22: read_lease_d3d11_producer_death ...........***Failed    0.41 sec
+after suite:  78/198 Test  #78: gst_relay_downstream_death_win ............***Failed   11.07 sec
+after suite:  83/198 Test  #83: gst_native_source_win .....................***Exception: SegFault  2.56 sec
+after suite:         Start 112: ready_fence_timeout
+after suite: 112/198 Test #112: ready_fence_timeout .......................   Passed    0.26 sec
+after suite: 179/198 Test #179: gst_av_bench_fault_producer_kill ..........***Failed    3.49 sec
+after suite: 98% tests passed, 4 tests failed out of 198
+after suite: The following tests FAILED:
+after suite: 	 22 - read_lease_d3d11_producer_death (Failed)
+after suite: 	 78 - gst_relay_downstream_death_win (Failed)           gpu
+after suite: 	179 - gst_av_bench_fault_producer_kill (Failed)
+after suite: Use "--rerun-failed --output-on-failure" to re-run the failed cases verbosely.
+done

@@ -1,0 +1,4 @@
+consumer-kill-1.summary.txt fault.pass=yes producer.result=error: FrameLink peer closed or failed 
+consumer-kill-2.summary.txt fault.pass=yes producer.result=error: FrameLink peer closed or failed 
+producer-kill-1.summary.txt consumer.result=error: FrameLink peer closed or failed fault.pass=yes 
+producer-kill-2.summary.txt consumer.result=error: FrameLink peer closed or failed fault.pass=yes 
