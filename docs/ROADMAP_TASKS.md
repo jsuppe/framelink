@@ -436,6 +436,12 @@ per-platform state. Windows readiness is the
 
 ## M7 — Release and developer handoff
 
+**1.0 scope (decision 17, Jon, 2026-11-27):** all three platforms; every M6 item
+closes on every platform first (decisions 13–16 and the Windows requalification
+included); a source release (tag, notes, capability matrix, evidence; no prebuilt
+binaries), so M7.3 is a clean build and run from source; FrameLink alone, with
+vkrender a separate consumer.
+
 **State (2026-11-18): held until M6 Linux and Android.** M7.1 is done for Windows only (API frozen at
 `060c54e4`). Deliverable: reproducible versioned release, not merely source
 branches or a demo that depends on the developer's machine.

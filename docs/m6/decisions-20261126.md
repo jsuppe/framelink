@@ -96,3 +96,17 @@ Windows items (3, 4 and the Windows side of 5) are changes to test code or test 
   - **Windows:** NV12 1080p60 6/6 at latencies 0 and 100 ms, after a first set lost trace events to capacity (1/6).
   - Each pass covers identity through present submission, with PCM complete and the A/V offset reported.
   - The black BGRA frames, resolved the same day ([record](renderer-identity-6a/README.md#the-black-bgra-frames-resolved)), on Jon's go-ahead: not occasional but one ring slot in every frame (about one in five BGRA frames). Cause: an NVIDIA Linux driver bug, reproduced without FrameLink or vkrender: the second non-dedicated DMA-BUF image import in a Vulkan device reads zeros on the GPU. vkrender `7cf02c9` (PR #25) and FrameLink's `flVkImportImage` now import dedicated; Linux reruns BGRA 10/10 and NV12 5/5 with no black preview. This was also decision 11's stale import for whole-image imports (keep-one-import BGRA 1080p60 3/3). Per-plane NV12 chroma, bound at an offset, still reads zeros in its first frames, so the fresh-import advice stays for it. The earlier "different slots" and "fresh import did not help" statements came from mismatched previews and are corrected in the record.
+
+### Decision 17: what 1.0 includes and how it ships (2026-11-27)
+
+Taken before decisions 13–16, because it decides which of them block the release. Jon chose **A2, B1, C1, D1**:
+
+| Question | Choice | What it means |
+|---|---|---|
+| Platforms in 1.0 | **A2** | Windows, Linux and Android are all in 1.0. Each advertises only what it has qualified. This keeps the 2026-11-18 order: M6 on Linux and Android before M7. |
+| What blocks 1.0 | **B1** | Strict: every M6 item closes on every platform before release. That includes GPU reset and device loss (decision 13), fault coverage on the remaining cells (15), the Android burst headroom (16), M6.2 acceptance, M6.3 lifecycle cycles, M6.8 8c, M6.9 9d/9e and the final-revision qualification (M6.7), and the Windows requalification (14). |
+| Release form | **C1** | A source release: a tag, release notes, the capability matrix and the evidence. Users build FrameLink; no prebuilt binaries in 1.0. M7.3's clean-install validation is therefore a clean build and run from source on each platform. |
+| vkrender | **D1** | FrameLink alone is 1.0. vkrender stays a separate consumer that pins FrameLink; FrameLink ships its own examples (M7.2). |
+
+Options not chosen: Windows-only 1.0 (A1); Windows and Linux with Android as a preview (A3); advertising only what is qualified with the rest as documented limits (B2); blocking on correctness but not performance extensions (B3); prebuilt binaries (C2) or packages (C3); vkrender as part of the release (D2).
+
