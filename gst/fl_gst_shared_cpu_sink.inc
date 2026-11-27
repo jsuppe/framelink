@@ -37,23 +37,25 @@ static GstFlowReturn sinkSharedCpuRender(GstFrameLinkSink*self,GstBuffer*buffer)
  if(g_atomic_int_get(&self->cpuFlushing))return GST_FLOW_FLUSHING;
  if(!self->haveInfo)return GST_FLOW_NOT_NEGOTIATED;
  // A single memory block avoids hidden GStreamer merge copies during mapping.
- if(gst_buffer_n_memory(buffer)!=1)return GST_FLOW_ERROR;
+ if(gst_buffer_n_memory(buffer)!=1){GST_ELEMENT_ERROR(self,STREAM,FORMAT,("shared-CPU sink requires single-block system-memory video buffers"),(NULL));return GST_FLOW_ERROR;}
  // Only ordinary system-memory inputs: do not silently map native GPU memory.
- for(guint i=0;i<gst_buffer_n_memory(buffer);i++)if(!gst_memory_is_type(gst_buffer_peek_memory(buffer,i),GST_ALLOCATOR_SYSMEM))return GST_FLOW_ERROR;
+ for(guint i=0;i<gst_buffer_n_memory(buffer);i++)if(!gst_memory_is_type(gst_buffer_peek_memory(buffer,i),GST_ALLOCATOR_SYSMEM)){GST_ELEMENT_ERROR(self,STREAM,FORMAT,("shared-CPU sink requires single-block system-memory video buffers"),(NULL));return GST_FLOW_ERROR;}
  guint64 pts=0;flFrameMetadata metadata{};
  if(!frameMetadataFromBuffer(buffer,&GST_BASE_SINK(self)->segment,self->streamGeneration,pts,metadata)||
-    metadata.streamGeneration!=self->sessionConfig.generation||self->sessionFrames==G_MAXUINT64)return GST_FLOW_ERROR;
+    metadata.streamGeneration!=self->sessionConfig.generation||self->sessionFrames==G_MAXUINT64){
+  GST_ELEMENT_ERROR(self,STREAM,FORMAT,("valid supported frame metadata and TIME mapping required"),(NULL));return GST_FLOW_ERROR;}
  if(self->sessionMarkDiscont)metadata.flags|=FL_FRAME_DISCONT;
  // The explicit CPU mode never drops/overwrites. Respect negotiated unread
  // budget, wait only for already-submitted ownership, fail on socket deadline.
  while(self->cpuOutstanding>=self->sessionConfig.videoQueueFrames)
-  if(!sinkSharedCpuRelease(self))return g_atomic_int_get(&self->cpuFlushing)?GST_FLOW_FLUSHING:GST_FLOW_ERROR;
+  if(!sinkSharedCpuRelease(self)){if(g_atomic_int_get(&self->cpuFlushing))return GST_FLOW_FLUSHING;
+   GST_ELEMENT_ERROR(self,RESOURCE,WRITE,("shared-CPU video release not received"),(NULL));return GST_FLOW_ERROR;}
  flSharedCpuLease*lease=nullptr;flMappedImage view{};
  auto result=flSharedCpuAcquireWrite(self->cpuChannel,self->sessionFrames%self->cpuSlots,&lease,&view);
- while(result==FL_BUSY&&self->cpuOutstanding){if(!sinkSharedCpuRelease(self))return GST_FLOW_ERROR;result=flSharedCpuAcquireWrite(self->cpuChannel,self->sessionFrames%self->cpuSlots,&lease,&view);}
- if(result!=FL_OK)return GST_FLOW_ERROR;
+ while(result==FL_BUSY&&self->cpuOutstanding){if(!sinkSharedCpuRelease(self)){GST_ELEMENT_ERROR(self,RESOURCE,WRITE,("shared-CPU video release not received"),(NULL));return GST_FLOW_ERROR;}result=flSharedCpuAcquireWrite(self->cpuChannel,self->sessionFrames%self->cpuSlots,&lease,&view);}
+ if(result!=FL_OK){GST_ELEMENT_ERROR(self,RESOURCE,WRITE,("shared-CPU video slot not writable"),("%s",flResultString(result)));return GST_FLOW_ERROR;}
  struct Lease{flSharedCpuLease*p;~Lease(){if(p)flSharedCpuCancelWrite(p);}} held{lease};
- GstVideoFrame input{};if(!gst_video_frame_map(&input,&self->vinfo,buffer,GST_MAP_READ))return GST_FLOW_ERROR;
+ GstVideoFrame input{};if(!gst_video_frame_map(&input,&self->vinfo,buffer,GST_MAP_READ)){GST_ELEMENT_ERROR(self,STREAM,FORMAT,("cannot map video input for the shared-CPU copy"),(NULL));return GST_FLOW_ERROR;}
  bool valid=view.planes==GST_VIDEO_FRAME_N_PLANES(&input);guint64 bytes=0;
  for(guint p=0;p<view.planes&&valid;p++){
   guint rows=p?self->sessionConfig.video.height/2:self->sessionConfig.video.height;
@@ -66,8 +68,8 @@ static GstFlowReturn sinkSharedCpuRender(GstFrameLinkSink*self,GstBuffer*buffer)
  }
  gst_video_frame_unmap(&input);
  if(bytes)gsttrace::payload("gst.shared_cpu_copy_sink",gsttrace::id(self->channel),bytes,FL_MEMORY_COPY);
- if(!valid)return GST_FLOW_ERROR;
- result=flSharedCpuSubmitWithMetadata(lease,self->sessionFrames+1,pts,&metadata);held.p=nullptr;if(result!=FL_OK)return GST_FLOW_ERROR;
+ if(!valid){GST_ELEMENT_ERROR(self,STREAM,FORMAT,("video input layout does not match the shared-CPU slot"),(NULL));return GST_FLOW_ERROR;}
+ result=flSharedCpuSubmitWithMetadata(lease,self->sessionFrames+1,pts,&metadata);held.p=nullptr;if(result!=FL_OK){GST_ELEMENT_ERROR(self,RESOURCE,WRITE,("shared-CPU video submit failed"),("%s",flResultString(result)));return GST_FLOW_ERROR;}
  ++self->cpuOutstanding;++self->sessionFrames;++self->submitted;self->sessionLastPts=pts;self->sessionGapPending=FALSE;return GST_FLOW_OK;
 }
 static bool sinkSharedCpuEos(GstFrameLinkSink*self){

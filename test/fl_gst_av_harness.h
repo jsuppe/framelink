@@ -98,6 +98,8 @@ static flSessionCapabilities capabilities(bool video,bool audio){flSessionCapabi
 struct Side {
  Mode mode;bool producer;std::string path,tracks;GstElement*p=nullptr;FlGstSession*session=nullptr;std::thread th;
  std::atomic<bool> playing{false},stop{false};std::string result;gint64 endedAt=0;
+ // The first error's posting element and debug string (diagnostics).
+ std::string errorSource,errorDebug;
  // framelink-* element messages (EOS statistics) seen while waiting.
  std::mutex statsMutex;std::vector<GstStructure*> stats;
  guint audioQueueMs=80,lateMs=0;bool native=false;
@@ -106,7 +108,9 @@ struct Side {
  std::string wait(GstClockTime limit){auto*bus=gst_element_get_bus(p);const gint64 until=g_get_monotonic_time()+gint64(limit/1000);std::string r="timeout";
   while(g_get_monotonic_time()<until){if(stop){r="stopped";break;}auto*m=gst_bus_timed_pop_filtered(bus,50*GST_MSECOND,GstMessageType(GST_MESSAGE_EOS|GST_MESSAGE_ERROR|GST_MESSAGE_ELEMENT));
    if(!m)continue;
-   if(GST_MESSAGE_TYPE(m)==GST_MESSAGE_ELEMENT){const auto*s=gst_message_get_structure(m);if(s&&g_str_has_prefix(gst_structure_get_name(s),"framelink-")){std::lock_guard<std::mutex> lock(statsMutex);stats.push_back(gst_structure_copy(s));}gst_message_unref(m);continue;}r=GST_MESSAGE_TYPE(m)==GST_MESSAGE_EOS?"EOS":"error: "+errorText(m);gst_message_unref(m);break;}
+   if(GST_MESSAGE_TYPE(m)==GST_MESSAGE_ELEMENT){const auto*s=gst_message_get_structure(m);if(s&&g_str_has_prefix(gst_structure_get_name(s),"framelink-")){std::lock_guard<std::mutex> lock(statsMutex);stats.push_back(gst_structure_copy(s));}gst_message_unref(m);continue;}r=GST_MESSAGE_TYPE(m)==GST_MESSAGE_EOS?"EOS":"error: "+errorText(m);
+   if(GST_MESSAGE_TYPE(m)==GST_MESSAGE_ERROR){GError*e=nullptr;gchar*d=nullptr;gst_message_parse_error(m,&e,&d);gchar*path=gst_object_get_path_string(GST_MESSAGE_SRC(m));errorSource=path?path:"";errorDebug=d?d:"";for(auto&ch:errorDebug)if(ch=='\n'||ch=='\r')ch=' ';g_free(path);g_free(d);g_clear_error(&e);}
+   gst_message_unref(m);break;}
   gst_object_unref(bus);endedAt=g_get_monotonic_time();return r;}
  void runElement(){
   session=fl_gst_session_new((video()?1u:0u)|(audio()?2u:0u));auto caps=capabilities(video(),audio());GError*e=nullptr;flChannel*channel=nullptr;

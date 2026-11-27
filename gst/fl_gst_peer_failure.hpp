@@ -9,8 +9,9 @@
 // closed the session (a socket write into the closed stream, a session found
 // cancelled) becomes "FrameLink peer closed or failed", reason "closed".
 //
-// Consumer: before a FrameLink consumer element posts an error, it waits briefly
-// for the producer's end of stream. If the producer failed or closed, the error
+// Consumer: before a FrameLink consumer element posts an error, it takes any
+// producer end of stream already pending on the event socket (decision 10), and
+// only then waits briefly for one. If the producer failed or closed, the error
 // becomes one stable message, domain GST_RESOURCE_ERROR, code
 // GST_RESOURCE_ERROR_READ, with a "framelink-peer-failure" details structure
 // (field "reason": "invalid-input", "overload" or "closed"; field "original":

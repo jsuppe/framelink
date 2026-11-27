@@ -318,7 +318,7 @@ static int producerChild(const Options&o,const std::string&session,const std::st
   p.start();p.finish();sampler.stop();
 #endif
   r["ended_monotonic_us"]=std::to_string(p.endedAt);
-  r["result"]=p.result;r["pushed.frames"]=std::to_string(p.pushedFrames.load());r["pushed.samples"]=std::to_string(p.pushedSamples.load());
+  r["result"]=p.result;if(!p.errorSource.empty()){r["result.source"]=p.errorSource;r["result.debug"]=p.errorDebug;}r["pushed.frames"]=std::to_string(p.pushedFrames.load());r["pushed.samples"]=std::to_string(p.pushedSamples.load());
   {std::lock_guard<std::mutex> lock(pushes.m);for(int track=0;track<2;++track){auto&v=pushes.v[track];std::vector<double> late,gaps;guint burst=0,maxBurst=0;const double period=1e9/(track?100:gFps);const std::string name=track?"audio":"video";
    for(size_t i=0;i<v.size();i++){if(v[i].first-v.front().first<gint64(WARMUP_S*GST_SECOND))continue;late.push_back(v[i].second/1e6);
     if(i){const double gap=double((v[i].first+v[i].second)-(v[i-1].first+v[i-1].second));gaps.push_back(gap/1e6);burst=gap<period/4?burst+1:0;maxBurst=std::max(maxBurst,burst);}}
@@ -403,7 +403,7 @@ static int consumerChild(const Options&o,const std::string&session,const std::st
   if(gGpuReadback){r["content.checked"]=std::to_string(content.checked);r["content.mismatches"]=std::to_string(content.mismatches);r["content.index_gaps"]=std::to_string(content.gaps);r["content.missing_frames"]=std::to_string(content.missing);r["content.layout"]=content.layout;r["content.rows"]=std::to_string(CONTENT_ROWS);
    if(!content.first.empty())r["content.first_mismatch"]=content.first;}
 #endif
-  r["result"]=c.result;r["frames"]=std::to_string(c.frames.load());r["samples"]=std::to_string(c.samples.load());r["memory"]=c.features;
+  r["result"]=c.result;if(!c.errorSource.empty()){r["result.source"]=c.errorSource;r["result.debug"]=c.errorDebug;}r["frames"]=std::to_string(c.frames.load());r["samples"]=std::to_string(c.samples.load());r["memory"]=c.features;
   r["audio.contiguous"]=c.contiguous?"yes":"no";
   std::lock_guard<std::mutex> lock(c.mutex);std::lock_guard<std::mutex> alock(arrivals.m);
   for(int track=0;track<2;track++){const char*n=track?"audio":"video";auto&av=arrivals.v[track];auto&rv=c.lateness[track];
@@ -716,16 +716,13 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
    if(malformedFault(o.fault)){
     // Declared: the producer fails with the sink's message for that input, the
     // consumer does not report EOS, both exit normally, and the consumer ends
-    // within the bound of the malformed buffer's push. The shared-CPU sink
-    // refuses invalid video metadata without its own message, so the
-    // source's generic flow error is expected there.
+    // within the bound of the malformed buffer's push.
     std::string want=o.fault=="video-stale-meta"?"stale producer video metadata generation":o.fault=="audio-no-pts"?"PCM requires valid PTS, duration and TIME segment":
-     o.fault=="audio-misaligned"?"PCM block is misaligned, empty or exceeds bounded queue budget":gSharedCpu?"Internal data stream error":"valid supported frame metadata and TIME mapping required";
+     o.fault=="audio-misaligned"?"PCM block is misaligned, empty or exceeds bounded queue budget":"valid supported frame metadata and TIME mapping required";
     const gint64 at=pr["fault.start_monotonic_us"].empty()?0:std::stoll(pr["fault.start_monotonic_us"]),end=cr["ended_monotonic_us"].empty()?0:std::stoll(cr["ended_monotonic_us"]);
     const double detect=at&&end?(end-at)/1000.0:-1;char t[32];snprintf(t,sizeof t,"%.1f",detect);s["fault.detection_ms"]=t;s["fault.bound_ms"]=std::to_string(o.faultBoundMs);s["fault.expected_message"]=want;
-    // Decision 8: the consumer is told why. The shared-CPU sink's generic flow
-    // error carries no reason, so there the consumer reports a closed peer.
-    const std::string consumerWant=(gSharedCpu&&o.fault=="video-no-pts")?"error: FrameLink peer closed or failed":"error: FrameLink producer failed: invalid input";s["fault.expected_consumer_error"]=consumerWant;
+    // Decision 8: the consumer is told why.
+    const std::string consumerWant="error: FrameLink producer failed: invalid input";s["fault.expected_consumer_error"]=consumerWant;
     pass=executed&&ended&&pr["result"].find(want)!=std::string::npos&&cr["result"]==consumerWant&&detect>=0&&detect<=o.faultBoundMs;}
    else if(o.fault=="audio-drop"){
     // Detection: the consumer's end after the first missing block was due.

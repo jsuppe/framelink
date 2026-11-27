@@ -89,8 +89,12 @@ These hold for the individual elements attached to a session and for the bins.
   structure `framelink-peer-failure` has `reason` (`invalid-input`,
   `overload`, `closed`) and `original`, the error the element would otherwise
   have posted. The consumer's own failures keep their specific errors; one
-  known to be its own (a frame replaced before it was read) is posted at once,
-  the others after waiting at most 100 ms for the producer's reason. When the
+  known to be its own (a frame replaced before it was read) is posted at once.
+  For the others, the consumer first takes a producer end already pending on
+  the event stream, without waiting, and waits at most 100 ms only if none is
+  there. Every FrameLink element that stops its stream posts its own error
+  first, so the application never sees only GStreamer's generic "Internal data
+  stream error." for a FrameLink failure. When the
   consumer fails or closes, the producer posts the same stable error, "FrameLink
   peer closed or failed" with reason `closed`, whichever of its tracks or
   socket writes notices first; the producer's own failures keep their

@@ -38,3 +38,17 @@ Jon chose D (trace first), then **C** and **E1**.
 Windows requalification of decisions 8 and 9 goes back to Jon before merge.
 
 Windows items (3, 4 and the Windows side of 5) are changes to test code or test settings on the frozen platform, approved here. Any Windows product change still needs Jon's approval with its evidence.
+
+### Decision 10: the survivor's generic error (same day)
+
+**The problem.** The decision 8 and 9 reruns at `66fa0dbf` failed 8 of 130 runs: in each, the surviving side reported GStreamer's generic "Internal data stream error." instead of "FrameLink peer closed or failed". Linux shared CPU: producer kill 2/5 and consumer kill 1/5, video without a timestamp 4/5; Android native: consumer kill 1/5. The failures stand.
+
+**What a focused verification established** (temporary probes, not committed; evidence retained outside the repository):
+- **Silent stops.** Each failure was a FrameLink element returning a flow error without posting its own error, which GStreamer requires. The shared-CPU source and sink posted no error on any of their error returns, and the native sink had six more, among them "channel lost" inside the bin.
+- **The producer's end was already visible.** At the consumer's local cancel the producer's close was already pending on the event socket in 14 of 14 sampled runs, but the reader thread had recorded it in only 3. The cancel then stopped the reader, so decision 8's rewrite waited its 100 ms and let the generic error through.
+- **Partly verified.** The producer sends its reason before it shuts its event and audio sockets. Whether it always does so before the video ring closes was not established.
+
+**What was chosen (Jon).**
+1. Every FrameLink error return posts a FrameLink error first. The shared-CPU sink now refuses invalid video metadata with the native sink's error, "valid supported frame metadata and TIME mapping required", and so sends the invalid-input reason; this removes a recorded shared-CPU limit.
+2. Before a consumer element acts on a failure (its local cancel, or the decision 8 rewrite), it takes the records and end of stream already pending on the event socket, without waiting.
+3. Decision 8's 100 ms wait stays as a fallback. Whether to remove it is decided later, once the producer's order is verified on all three platforms (with the Windows requalification).

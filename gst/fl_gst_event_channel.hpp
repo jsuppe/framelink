@@ -21,20 +21,52 @@ class FlGstEventChannel {
  // Producer: the consumer closed the stream (failure not caused by a local cancel).
  std::atomic<bool> localCancel_{false},peerGone_{false};
  void fail(){if(!localCancel_)peerGone_=true;failed_=true;g_cancellable_cancel(cancel_);changed_.notify_all();}
+ // One record reader at a time: the reader thread, or a consumer element that
+ // collects what is already pending before it acts on a failure (decision 10).
+ std::timed_mutex readMutex_;guint64 serial_=0;
+ // False once the stream has ended (the record was the last one, or invalid).
+ bool handle(const std::array<guint8,64>&wire){
+  FlGstVideoEvent event{};event.kind=GST_READ_UINT32_BE(wire.data()+16);event.afterFrames=GST_READ_UINT64_BE(wire.data()+24);event.ptsNs=GST_READ_UINT64_BE(wire.data()+32);event.durationNs=GST_READ_UINT64_BE(wire.data()+40);
+  if(memcmp(wire.data(),"FLEVT001",8)||GST_READ_UINT64_BE(wire.data()+8)!=generation_||GST_READ_UINT32_BE(wire.data()+20)||GST_READ_UINT64_BE(wire.data()+56)||serial_==G_MAXUINT64||GST_READ_UINT64_BE(wire.data()+48)!=++serial_||!valid(event)){fail();return false;}
+  if(event.kind==FL_GST_VIDEO_FLUSH){fail();return false;}
+  if(event.kind==FL_GST_VIDEO_ABORT){abortReason_=guint(event.ptsNs);remoteEnded_=true;fail();return false;}
+  {std::lock_guard<std::mutex> lock(mutex_);if(events_.size()>=32){fail();return false;}events_.push_back(event);}changed_.notify_all();
+  return true;
+ }
  void readLoop(){
-  guint64 serial=0;auto*socket=g_socket_connection_get_socket(stream_);
+  auto*socket=g_socket_connection_get_socket(stream_);
   while(!g_cancellable_is_cancelled(cancel_)){
    GError*error=nullptr;
    if(!g_socket_condition_timed_wait(socket,G_IO_IN,100000,cancel_,&error)){
     bool timeout=g_error_matches(error,G_IO_ERROR,G_IO_ERROR_TIMED_OUT);g_clear_error(&error);if(timeout)continue;if(!g_cancellable_is_cancelled(cancel_)){remoteEnded_=true;fail();}return;
    }
+   std::lock_guard<std::timed_mutex> reading(readMutex_);
+   if(g_cancellable_is_cancelled(cancel_))return;
+   // A pending-record collection may have taken what woke this thread.
+   if(!g_socket_condition_check(socket,GIOCondition(G_IO_IN|G_IO_HUP|G_IO_ERR)))continue;
    std::array<guint8,64> wire{};gsize size=0;
    if(!g_input_stream_read_all(g_io_stream_get_input_stream(G_IO_STREAM(stream_)),wire.data(),wire.size(),&size,cancel_,&error)||size!=wire.size()){g_clear_error(&error);if(!g_cancellable_is_cancelled(cancel_)){remoteEnded_=true;fail();}return;}
-   FlGstVideoEvent event{};event.kind=GST_READ_UINT32_BE(wire.data()+16);event.afterFrames=GST_READ_UINT64_BE(wire.data()+24);event.ptsNs=GST_READ_UINT64_BE(wire.data()+32);event.durationNs=GST_READ_UINT64_BE(wire.data()+40);
-   if(memcmp(wire.data(),"FLEVT001",8)||GST_READ_UINT64_BE(wire.data()+8)!=generation_||GST_READ_UINT32_BE(wire.data()+20)||GST_READ_UINT64_BE(wire.data()+56)||serial==G_MAXUINT64||GST_READ_UINT64_BE(wire.data()+48)!=++serial||!valid(event)){fail();return;}
-   if(event.kind==FL_GST_VIDEO_FLUSH){fail();return;}
-   if(event.kind==FL_GST_VIDEO_ABORT){abortReason_=guint(event.ptsNs);remoteEnded_=true;fail();return;}
-   {std::lock_guard<std::mutex> lock(mutex_);if(events_.size()>=32){fail();return;}events_.push_back(event);}changed_.notify_all();
+   if(!handle(wire))return;
+  }
+ }
+ // Consumer: take every complete record and any end of stream already pending
+ // on the socket, without waiting for more. A failing producer sends its reason
+ // before it closes, and a dead one has closed, so a consumer failure caused by
+ // the producer finds the end here even before the reader thread has run.
+ void collectPending(){
+  if(producer_)return;
+  std::unique_lock<std::timed_mutex> reading(readMutex_,std::defer_lock);
+  // The reader holds the lock only while taking a record already arriving.
+  if(!reading.try_lock_for(std::chrono::milliseconds(5)))return;
+  auto*socket=g_socket_connection_get_socket(stream_);
+  while(!failed_&&!g_cancellable_is_cancelled(cancel_)&&
+        g_socket_condition_check(socket,GIOCondition(G_IO_IN|G_IO_HUP|G_IO_ERR))){
+   const gssize available=g_socket_get_available_bytes(socket);
+   if(available<=0){remoteEnded_=true;fail();return;}          // closed (or failed) by the producer
+   if(available<64)return;                                      // a record still arriving: the reader takes it
+   std::array<guint8,64> wire{};gsize size=0;GError*error=nullptr;
+   if(!g_input_stream_read_all(g_io_stream_get_input_stream(G_IO_STREAM(stream_)),wire.data(),wire.size(),&size,cancel_,&error)||size!=wire.size()){g_clear_error(&error);remoteEnded_=true;fail();return;}
+   if(!handle(wire))return;
   }
  }
  static bool valid(const FlGstVideoEvent&e){if(e.kind==FL_GST_VIDEO_ABORT)return e.ptsNs>=FL_GST_PEER_INVALID_INPUT&&e.ptsNs<=FL_GST_PEER_OVERLOAD&&!e.durationNs;
@@ -46,6 +78,9 @@ public:
  }
  ~FlGstEventChannel(){cancel();if(reader_.joinable())reader_.join();g_object_unref(cancel_);g_object_unref(stream_);}
  void cancel(){
+  // Consumer: record a producer end that is already pending before the local
+  // cancel stops the reader, so the failure is still attributed to the peer.
+  if(!localCancel_)collectPending();
   localCancel_=true;g_cancellable_cancel(cancel_);
   // Interrupt the peer as well as local waiters. Cancellation does not transfer
   // ownership of any native allocation or manufacture a successful terminal.
@@ -75,7 +110,7 @@ public:
  // Consumer: wait up to timeout for the producer's end of stream. True with the
  // ABORT reason (0: closed without one); false if none was seen.
  bool peerEnded(guint timeout,guint*reason){
-  if(producer_||!reason)return false;std::unique_lock<std::mutex> lock(mutex_);
+  if(producer_||!reason)return false;collectPending();std::unique_lock<std::mutex> lock(mutex_);
   changed_.wait_for(lock,std::chrono::milliseconds(timeout),[&]{return remoteEnded_.load();});
   if(!remoteEnded_)return false;*reason=abortReason_;return true;
  }

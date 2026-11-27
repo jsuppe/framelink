@@ -569,7 +569,7 @@ static GstFlowReturn sinkRenderImpl(GstBaseSink* base, GstBuffer* buffer) {
         self->sessionMarkDiscont=self->sessionGapPending||!self->sessionFrames||GST_BUFFER_FLAG_IS_SET(buffer,GST_BUFFER_FLAG_DISCONT);
         // After ring-full drops the barrier follows the GAP, once a slot is acquired.
         if(self->sessionMarkDiscont&&!self->dropGapPending&&fl_gst_session_has_event_stream(self->session,self->sessionConfig.generation)){
-            guint64 pts=0;if(!fl_gst_segment_running_time(&base->segment,GST_BUFFER_PTS(buffer),&pts))return GST_FLOW_ERROR;
+            guint64 pts=0;if(!fl_gst_segment_running_time(&base->segment,GST_BUFFER_PTS(buffer),&pts)){GST_ELEMENT_ERROR(self,STREAM,FORMAT,("valid supported frame metadata and TIME mapping required"),(NULL));return GST_FLOW_ERROR;}
             FlGstVideoEvent event{FL_GST_VIDEO_BARRIER,self->sessionFrames,pts,0};
             if(fl_gst_session_send_video_event(self->session,self->sessionConfig.generation,&event)!=FL_GST_SESSION_READY){GST_ELEMENT_ERROR(self,RESOURCE,WRITE,("video event barrier failed"),(NULL));return GST_FLOW_ERROR;}
             self->sessionGapPending=TRUE;
@@ -674,7 +674,7 @@ static GstFlowReturn sinkRenderImpl(GstBaseSink* base, GstBuffer* buffer) {
         account("gst.frame_drop.channel_lost");
         GST_WARNING_OBJECT(self, "channel lost (%s) - will redial", flResultString(r));
         sinkDisconnect(self);
-        if(self->delegated)return trace.result(GST_FLOW_ERROR);
+        if(self->delegated){GST_ELEMENT_ERROR(self,RESOURCE,WRITE,("FrameLink video channel lost"),("%s",flResultString(r)));return trace.result(GST_FLOW_ERROR);}
         return trace.result(GST_FLOW_OK);
     }
 
@@ -696,6 +696,7 @@ static GstFlowReturn sinkRenderImpl(GstBaseSink* base, GstBuffer* buffer) {
         ++self->dropped;
         account("gst.frame_drop.map_failed");
         sinkDisconnect(self); // do not publish uninitialized pixels
+        GST_ELEMENT_ERROR(self,STREAM,FORMAT,("cannot map video input"),(NULL));
         return trace.result(GST_FLOW_ERROR);
     }
     const guint8* src = (const guint8*)GST_VIDEO_FRAME_PLANE_DATA(&vframe, 0);
@@ -729,7 +730,8 @@ static GstFlowReturn sinkRenderImpl(GstBaseSink* base, GstBuffer* buffer) {
                 if(pitch<(gint)w) {
                     account("gst.frame_drop.invalid_pitch");
                     ctx->Release();
-                    gst_video_frame_unmap(&vframe);sinkDisconnect(self);return trace.result(GST_FLOW_ERROR);
+                    gst_video_frame_unmap(&vframe);sinkDisconnect(self);
+                    GST_ELEMENT_ERROR(self,STREAM,FORMAT,("video input row pitch smaller than its width"),(NULL));return trace.result(GST_FLOW_ERROR);
                 }
                 for(guint y=0;y<(p?h/2:h);y++)
                     memcpy(scratch->data+(p?w*h:0)+y*w,
@@ -831,6 +833,7 @@ static GstFlowReturn sinkRenderImpl(GstBaseSink* base, GstBuffer* buffer) {
         ++self->dropped;
         account("gst.frame_drop.copy_failed");
         sinkDisconnect(self); // Never publish a failed/partial copy.
+        GST_ELEMENT_ERROR(self,RESOURCE,WRITE,("video copy into the FrameLink slot failed"),(NULL));
         return trace.result(GST_FLOW_ERROR);
     }
     return trace.result(GST_FLOW_OK);
@@ -1749,7 +1752,7 @@ static GstFlowReturn srcCreateImpl(GstPushSrc* push, GstBuffer** outbuf) {
     // fault per page on first write (docs/m6/cpu-path/cpu-output-reuse-20261118).
     buf = srcCpuOutputBuffer(self, outputInfo.size);
     }
-    if (!buf) { srcReleaseFrame(self, &frame); return trace.result(GST_FLOW_ERROR); }
+    if (!buf) { srcReleaseFrame(self, &frame); GST_ELEMENT_ERROR(self,RESOURCE,FAILED,("cannot allocate a CPU output buffer"),(NULL)); return trace.result(GST_FLOW_ERROR); }
     GstMapInfo map;
     gboolean filled = FALSE;
     if (gst_buffer_map(buf, &map, GST_MAP_WRITE)) {
@@ -1880,7 +1883,7 @@ static GstFlowReturn srcCreateImpl(GstPushSrc* push, GstBuffer** outbuf) {
         if(GST_BUFFER_FLAG_IS_SET(buf,GST_BUFFER_FLAG_DISCONT))metadata.flags|=FL_FRAME_DISCONT;
         self->streamGeneration=metadata.streamGeneration;
         auto* meta=(GstFrameLinkFrameMeta*)gst_buffer_add_meta(buf,frameMetaInfo(),nullptr);
-        if(!meta){gst_buffer_unref(buf);return trace.result(GST_FLOW_ERROR);}
+        if(!meta){gst_buffer_unref(buf);GST_ELEMENT_ERROR(self,CORE,FAILED,("cannot attach FrameLink frame metadata"),(NULL));return trace.result(GST_FLOW_ERROR);}
         meta->frame=metadata;
     }
     if(self->session){
@@ -1889,7 +1892,7 @@ static GstFlowReturn srcCreateImpl(GstPushSrc* push, GstBuffer** outbuf) {
         if(fl_gst_session_map_running_time(self->session,self->sessionConfig.generation,GST_BUFFER_PTS(buf),TRUE,&mapped)!=FL_GST_SESSION_READY){gst_buffer_unref(buf);GST_ELEMENT_ERROR(self,STREAM,FORMAT,("shared receiver clock mapping required"),(NULL));return GST_FLOW_ERROR;}
         if(GST_CLOCK_TIME_IS_VALID(GST_BUFFER_DURATION(buf))&&GST_BUFFER_DURATION(buf)>guint64(G_MAXINT64-mapped)){gst_buffer_unref(buf);GST_ELEMENT_ERROR(self,STREAM,FORMAT,("mapped video interval exceeds timeline bounds"),(NULL));return GST_FLOW_ERROR;}
         GST_BUFFER_PTS(buf)=mapped;
-        if(GST_CLOCK_TIME_IS_VALID(GST_BUFFER_DTS(buf))){if(fl_gst_session_map_running_time(self->session,self->sessionConfig.generation,GST_BUFFER_DTS(buf),TRUE,&mapped)!=FL_GST_SESSION_READY){gst_buffer_unref(buf);return GST_FLOW_ERROR;}GST_BUFFER_DTS(buf)=mapped;auto*meta=gst_buffer_get_framelink_frame_meta(buf);if(meta)meta->frame.dtsNs=mapped;}
+        if(GST_CLOCK_TIME_IS_VALID(GST_BUFFER_DTS(buf))){if(fl_gst_session_map_running_time(self->session,self->sessionConfig.generation,GST_BUFFER_DTS(buf),TRUE,&mapped)!=FL_GST_SESSION_READY){gst_buffer_unref(buf);GST_ELEMENT_ERROR(self,STREAM,FORMAT,("shared receiver clock mapping required"),(NULL));return GST_FLOW_ERROR;}GST_BUFFER_DTS(buf)=mapped;auto*meta=gst_buffer_get_framelink_frame_meta(buf);if(meta)meta->frame.dtsNs=mapped;}
     }
     if(self->session)self->pendingDelivery=gst_buffer_ref(buf);
     *outbuf = buf; // default remains arrival-time timestamping
