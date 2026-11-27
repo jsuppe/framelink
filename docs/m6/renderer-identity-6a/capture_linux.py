@@ -26,6 +26,9 @@ a.add_argument('--latency-ms', type=int, default=0)
 a.add_argument('--trace-events', type=int, default=262144)
 a.add_argument('--present-mode', choices=('fifo', 'mailbox', 'immediate'), help='VKR_PRESENT_MODE (default: the renderer\'s FIFO)')
 a.add_argument('--monitor', default='1920x1080@60', help='headless shell virtual monitor')
+a.add_argument('--pattern', default='ball', help='videotestsrc pattern (ball, as the Windows proof; smpte to see stale or black faces)')
+a.add_argument('--preview-ms', type=int, default=0, help='save the scene preview (/api/preview.jpg) this often, to check presented pixels')
+a.add_argument('--renderer-env', action='append', default=[], metavar='KEY=VALUE', help='extra renderer environment, recorded (labelled experiments)')
 args = a.parse_args()
 
 b = pathlib.Path(args.renderer_build).resolve()
@@ -51,9 +54,26 @@ if os.path.exists(f'{user_runtime}/pulse/native'):
 
 started = time.time()
 shell_log = (out / 'gnome-shell.log').open('w')
-shell = subprocess.Popen(['dbus-run-session', '--', 'gnome-shell', '--headless', '--wayland', '--no-x11',
-                          '--virtual-monitor', args.monitor, f'--wayland-display={display}'],
-                         env=env, stdout=shell_log, stderr=subprocess.STDOUT, start_new_session=True)
+# The shell gets its own empty home, config, data and cache: no user
+# extensions, settings or session state (a user extension stalled frame
+# callbacks once for 16 s), and nothing it writes lands in the user's home.
+shell_home = runtime / 'home'
+for sub in ('', '.config', '.local/share', '.cache'):
+    (shell_home / sub).mkdir(parents=True, exist_ok=True)
+shell_env = dict(env, HOME=str(shell_home), XDG_CONFIG_HOME=str(shell_home / '.config'),
+                 XDG_DATA_HOME=str(shell_home / '.local/share'), XDG_CACHE_HOME=str(shell_home / '.cache'))
+# Settings in that private profile, written inside the shell's own D-Bus
+# session before it starts: no idle blanking, lock, animations or banners.
+# Measured 2026-11-27: also turning off start-in-overview and the welcome
+# dialog together throttled the renderer to about 10 Hz in 3 of 4 runs (each
+# alone, and this set, 60 Hz in every run), so the shell keeps those defaults.
+SETTINGS = [('org.gnome.desktop.session', 'idle-delay', 'uint32 0'), ('org.gnome.desktop.screensaver', 'lock-enabled', 'false'),
+            ('org.gnome.desktop.screensaver', 'idle-activation-enabled', 'false'), ('org.gnome.desktop.interface', 'enable-animations', 'false'),
+            ('org.gnome.desktop.notifications', 'show-banners', 'false')]
+prelude = '; '.join(f'gsettings set {schema} {key} "{value}"' for schema, key, value in SETTINGS)
+shell = subprocess.Popen(['dbus-run-session', '--', 'sh', '-c', prelude + f'; exec gnome-shell --headless --wayland --no-x11 '
+                          f'--virtual-monitor {args.monitor} --wayland-display={display}'],
+                         env=shell_env, stdout=shell_log, stderr=subprocess.STDOUT, start_new_session=True)
 row = {'case': d.name, 'seconds': args.seconds, 'latency_ms': args.latency_ms, 'display': f'private headless gnome-shell (Wayland, virtual {args.monitor})', 'present_mode': args.present_mode or 'fifo'}
 try:
     for _ in range(100):
@@ -73,21 +93,27 @@ try:
                VKR_TRACE_RETIRE='1', FRAMELINK_TRACE_RING='1')
     if args.present_mode:
         env['VKR_PRESENT_MODE'] = args.present_mode
+    renderer_env = dict(env)
+    for kv in args.renderer_env:
+        k, _, v = kv.partition('=')
+        renderer_env[k] = v
+    row['renderer_env'] = args.renderer_env
     rc = [str(renderer), '--wayland', f'vkr6a-{os.getpid()}', '--windowed', '--no-panel', '--control-port', str(port),
           '--av-exit-on-end', '--av-session', str(d / 'session'), '--av-plugin', str(plugin), '--av-format', args.format,
           '--av-width', str(args.width), '--av-height', str(args.height), '--av-fps', str(args.fps),
           '--av-audio-sink', 'autoaudiosink', '--av-clock', 'producer', '--av-latency-ms', str(args.latency_ms),
           '--av-timeout-ms', '15000', '--av-media-run-ms', str(args.seconds * 1000)]
     pipeline = d / 'source.pipeline'
-    pipeline.write_text(f'videotestsrc num-buffers={n} pattern=ball ! @VIDEO_SINK@ audiotestsrc num-buffers={n} '
+    pipeline.write_text(f'videotestsrc num-buffers={n} pattern={args.pattern} ! @VIDEO_SINK@ audiotestsrc num-buffers={n} '
                         f'samplesperbuffer={48000 // args.fps} volume=0.0 ! @AUDIO_SINK@')
     pc = [str(producer), str(plugin), '--session', str(d / 'session'), '--format', args.format, '--frames', str(n),
           '--width', str(args.width), '--height', str(args.height), '--fps', str(args.fps), '--input-pipeline', str(pipeline),
           '--timeout-ms', '15000', '--media-run-ms', str(args.seconds * 1000)]
     samples = []
     t0 = time.monotonic()
+    next_preview = t0 + 1.0
     with (d / 'producer.log').open('w') as po, (d / 'renderer.log').open('w') as ro:
-        r = subprocess.Popen(rc, stdout=ro, stderr=subprocess.STDOUT, env=env)
+        r = subprocess.Popen(rc, stdout=ro, stderr=subprocess.STDOUT, env=renderer_env)
         time.sleep(0.3)
         p = subprocess.Popen(pc, stdout=po, stderr=subprocess.STDOUT, env=env)
         try:
@@ -98,6 +124,13 @@ try:
                         samples.append({'t': time.monotonic() - t0, 'status': json.load(x)})
                 except Exception:
                     pass
+                if args.preview_ms and time.monotonic() >= next_preview:
+                    next_preview += args.preview_ms / 1000
+                    try:
+                        with urllib.request.urlopen(f'http://127.0.0.1:{port}/api/preview.jpg', timeout=1) as x:
+                            (d / f'preview-{int((time.monotonic() - t0) * 1000):06d}.jpg').write_bytes(x.read())
+                    except Exception:
+                        pass
                 time.sleep(0.05)
         finally:
             for q in (p, r):
