@@ -1,0 +1,31 @@
+diff --git a/test/fl_gst_local_native_bench.cpp b/test/fl_gst_local_native_bench.cpp
+index 1525c99..b811430 100644
+--- a/test/fl_gst_local_native_bench.cpp
++++ b/test/fl_gst_local_native_bench.cpp
+@@ -175,7 +175,7 @@ static void receiver(){auto c=caps();auto p=policy();GstFrameLinkMemoryPolicy bo
+   lastArrival=arrived;CHECK(f.ptsNs==int64_t(vpts(n)));flFrameMetadata m{};CHECK(flGetFrameMetadata(channel,&f,&m)==FL_OK&&m.version==FL_FRAME_METADATA_VERSION&&m.flags==(FL_FRAME_HAS_DTS|FL_FRAME_HAS_DURATION)&&m.streamGeneration==cfg.generation&&m.dtsNs==f.ptsNs&&m.durationNs==tick(n+1,o.fps)-tick(n,o.fps));uint64_t lease=0;CHECK(flLeaseFrame(channel,&f,&lease)==FL_OK);
+   // Explicit GPU verification copy into host memory (the Windows staging
+   // copy's counterpart); its real completion fence goes to FrameLink.
+-  const int done=readback.copy(channel,f,o.nv12,o.width,o.height);
++  const uint64_t tLeased=now();const int done=readback.copy(channel,f,o.nv12,o.width,o.height);const uint64_t tCopy=now();
+   // Diagnostic mode: settle the copy while the lease is still held, and on a
+   // mismatch read the same held frame through the (slow) CPU mapping.
+   if(diagnose){const uint8_t*early=readback.data();Stamp e{};memcpy(&e,early,sizeof e);
+@@ -190,12 +190,14 @@ static void receiver(){auto c=caps();auto p=policy();GstFrameLinkMemoryPolicy bo
+   if(n+1==frames()){signalEvent(held);wait(release);flFrame retained{};uint64_t generation=0;CHECK(flReadLeaseFrame(channel,lease,&retained,&generation)==FL_OK&&retained.ptsNs==f.ptsNs);}
+   CHECK(flCompleteReadLeaseSyncFd(channel,lease,done)==FL_OK);if(done>=0)close(done);
+   auto deadline=now()+5000000000ULL;flResult r=FL_BUSY;while(r==FL_BUSY){CHECK(now()<deadline);r=flCollectReadLeases(channel);if(r==FL_BUSY)Sleep(1);}CHECK(r==FL_OK);const auto completed=now();
+-  const uint8_t*copied=readback.data();Stamp st{};memcpy(&st,copied,sizeof st);
++  const uint8_t*copied=readback.data();const uint64_t tData=now();Stamp st{};memcpy(&st,copied,sizeof st);
+   if(!(st.magic==Stamp{}.magic&&st.id==n&&st.pts==vpts(n)))fprintf(stderr,"content mismatch: expected frame %u, copy holds magic=%llx id=%llu pts=%llu fill=%u last=%u; slot=%u sequence=%llu lease=%llu\n",n,
+    (unsigned long long)st.magic,(unsigned long long)st.id,(unsigned long long)st.pts,copied[sizeof st],copied[size_t(rowBytes)*rows-1],f.slot,(unsigned long long)f.sequence,(unsigned long long)lease);
+   CHECK(st.magic==Stamp{}.magic&&st.id==n&&st.pts==vpts(n));
+-  for(size_t i=sizeof st;i<size_t(rowBytes)*rows;++i)CHECK(copied[i]==uint8_t(n));
+-  gint64 mappedPts=0;CHECK(fl_gst_session_map_running_time(s,cfg.generation,st.pts,TRUE,&mappedPts)==FL_GST_SESSION_READY);row(out,st,arrived,completed,uint64_t(rowBytes)*rows,&f,&m,lease,n+1,uint64_t(mappedPts));}
++  for(size_t i=sizeof st;i<size_t(rowBytes)*rows;++i)CHECK(copied[i]==uint8_t(n));const uint64_t tCheck=now();
++  gint64 mappedPts=0;CHECK(fl_gst_session_map_running_time(s,cfg.generation,st.pts,TRUE,&mappedPts)==FL_GST_SESSION_READY);row(out,st,arrived,completed,uint64_t(rowBytes)*rows,&f,&m,lease,n+1,uint64_t(mappedPts));const uint64_t tRow=now();
++  // Decision 11 A3 diagnostic: the receiver's own steps for a slow frame.
++  if(tRow-arrived>12000000ULL)fprintf(stderr,"slow receiver frame %u: total %.2f ms = metadata+lease %.2f, copy submit %.2f, complete+collect %.2f, copy wait %.2f, check %.2f, csv row %.2f\n",n,(tRow-arrived)/1e6,(tLeased-arrived)/1e6,(tCopy-tLeased)/1e6,(completed-tCopy)/1e6,(tData-completed)/1e6,(tCheck-tData)/1e6,(tRow-tCheck)/1e6);}
+  pcm.join();audio.eos();FlGstVideoEvent end{};CHECK(fl_gst_session_receive_video_event(s,cfg.generation,10000,&end)==FL_GST_SESSION_READY&&end.kind==FL_GST_VIDEO_END&&end.afterFrames==frames()&&end.ptsNs==vpts(frames()-1));guint64 count=0;gint64 last=0;CHECK(fl_gst_session_wait_video_eos(s,cfg.generation,10000,&count,&last)==FL_GST_SESSION_READY&&count==frames()&&last==int64_t(vpts(frames()-1)));CHECK(fl_gst_session_finish_local(s,FALSE,10000,nullptr));closeEvent(held);closeEvent(release);summary(count,true);}
+  flClose(channel);g_object_unref(s);
+ }

@@ -1,0 +1,6 @@
+held frame 4294967295: slot 1 storage dev=12 ino=136753, at import dev=12 ino=136753; import current=1; imports so far 2
+pre-roll frame pts 1894736 slot 1 sequence 3: GPU copy magic=0 id=0 pts=0 (pre-roll ids from 4294967296)
+  stale copy: 0 nonzero bytes
+  CPU read: magic=464c4e4154495645 id=4294967298
+  same import again: magic=0 id=0
+  fresh import: magic=464c4e4154495645 id=4294967298

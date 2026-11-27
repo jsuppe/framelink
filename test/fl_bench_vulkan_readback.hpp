@@ -9,6 +9,8 @@
 #include <vulkan/vulkan.h>
 #include "framelink_vulkan.h"
 #include <dlfcn.h>
+#include <sys/stat.h>
+#include "framelink_dmabuf.h"
 #include <map>
 #include <vector>
 
@@ -27,7 +29,7 @@ struct VulkanReadback {
  VkDevice device=VK_NULL_HANDLE;VkQueue queue=VK_NULL_HANDLE;uint32_t family=0;flVkContext ctx{};flVkSync sync{};
  VkCommandPool pool=VK_NULL_HANDLE;VkCommandBuffer cmd=VK_NULL_HANDLE;VkFence fence=VK_NULL_HANDLE;
  VkBuffer buffer=VK_NULL_HANDLE;VkDeviceMemory memory=VK_NULL_HANDLE;uint8_t* host=nullptr;VkDeviceSize size=0;bool coherent=false;
- std::map<uint32_t,flVkImage> images;
+ std::map<uint32_t,flVkImage> images;std::map<uint32_t,std::pair<uint64_t,uint64_t>> identity;
 
  // Device on the ring's GPU with the interop extensions; FrameLink check.
  void start(flChannel*channel,VkDeviceSize bytes){
@@ -79,10 +81,14 @@ struct VulkanReadback {
   // three-process graph (zeros, while a CPU read and a fresh import of the
   // same held storage were correct). The previous import is retired once the
   // previous copy has completed (data() waits for it).
-  if(!images.empty()){for(auto&i:images)flVkDestroyImage(&ctx,&i.second);images.clear();}
+  // FL_BENCH_KEEP_IMPORT=1 (diagnostic, decision 11 B3): keep one import per
+  // slot and channel generation, as framelink_vulkan.h advises, to reproduce it.
   auto it=images.end();
+  if(keepImport){it=images.find(frame.slot);
+   if(it!=images.end()&&!flVkImageCurrent(channel,&it->second)){DeviceWaitIdle(device);for(auto&i:images)flVkDestroyImage(&ctx,&i.second);images.clear();identity.clear();it=images.end();}}
+  else if(!images.empty()){for(auto&i:images)flVkDestroyImage(&ctx,&i.second);images.clear();identity.clear();}
   if(it==images.end()){flVkImportDesc desc{};desc.usage=VK_IMAGE_USAGE_TRANSFER_SRC_BIT;desc.flags=FL_VK_IMPORT_NO_VIEW;flVkImage img{};
-   CHECK(flVkImportImage(&ctx,channel,frame.image,&desc,&img)==FL_OK);it=images.emplace(frame.slot,img).first;}
+   CHECK(flVkImportImage(&ctx,channel,frame.image,&desc,&img)==FL_OK);it=images.emplace(frame.slot,img).first;identity[frame.slot]=storage(frame.image);imports++;}
   const flVkImage&img=it->second;
   CHECK(ResetCommandBuffer(cmd,0)==VK_SUCCESS);VkCommandBufferBeginInfo begin{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};begin.flags=VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;CHECK(BeginCommandBuffer(cmd,&begin)==VK_SUCCESS);
   VkImageMemoryBarrier b[2];uint32_t n=flVkAcquireBarriers(&img,family,VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,VK_ACCESS_TRANSFER_READ_BIT,0,b);
@@ -103,7 +109,16 @@ struct VulkanReadback {
   int fd=-1;CHECK(ctx.GetSemaphoreFdKHR(device,&get,&fd)==VK_SUCCESS);return fd; // -1: already complete
  }
  // Drop every cached import (diagnostics: re-import the same buffers).
- void forget(){DeviceWaitIdle(device);for(auto&i:images)flVkDestroyImage(&ctx,&i.second);images.clear();}
+ void forget(){DeviceWaitIdle(device);for(auto&i:images)flVkDestroyImage(&ctx,&i.second);images.clear();identity.clear();}
+ // Diagnostics: the backing object of a frame's storage (device, inode of its
+ // first DMA-BUF fd), and the one recorded when its slot was imported.
+ static std::pair<uint64_t,uint64_t> storage(flImage*image){flDmabuf d{};struct stat st{};
+  if(flImageDmabuf(image,&d)!=FL_OK||!d.planes||fstat(d.fd[0],&st))return {0,0};return {uint64_t(st.st_dev),uint64_t(st.st_ino)};}
+ std::pair<uint64_t,uint64_t> imported(uint32_t slot)const{auto i=identity.find(slot);return i==identity.end()?std::pair<uint64_t,uint64_t>{0,0}:i->second;}
+ const bool keepImport=getenv("FL_BENCH_KEEP_IMPORT")!=nullptr;uint64_t imports=0;
+ void describe(flChannel*channel,const flFrame&frame,unsigned n){const auto now=storage(frame.image),then=imported(frame.slot);auto i=images.find(frame.slot);
+  fprintf(stderr,"held frame %u: slot %u storage dev=%llu ino=%llu, at import dev=%llu ino=%llu; import current=%d; imports so far %llu\n",n,frame.slot,
+   (unsigned long long)now.first,(unsigned long long)now.second,(unsigned long long)then.first,(unsigned long long)then.second,i==images.end()?-1:int(flVkImageCurrent(channel,&i->second)),(unsigned long long)imports);}
  // The copied bytes, once the GPU copy has completed.
  const uint8_t* data(){
   CHECK(WaitForFences(device,1,&fence,VK_TRUE,5000000000ULL)==VK_SUCCESS);

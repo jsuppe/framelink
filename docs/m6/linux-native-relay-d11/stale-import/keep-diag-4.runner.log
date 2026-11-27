@@ -1,0 +1,12 @@
+PASS bgra1080p60 5s off arrival p99/max 7.43/8.22 ms
+PASS bgra1080p60 5s trace arrival p99/max 7.58/8.29 ms
+PASS bgra1080p60 10s off arrival p99/max 8.19/8.45 ms
+PASS nv12-1080p60 5s off arrival p99/max 5.40/5.97 ms
+PASS nv12-1080p60 5s trace arrival p99/max 5.77/5.99 ms
+PASS nv12-1080p60 10s off arrival p99/max 5.67/6.05 ms
+PASS bgra4k30 5s off arrival p99/max 17.44/17.62 ms
+PASS bgra4k30 5s trace arrival p99/max 17.35/18.06 ms
+PASS bgra4k30 10s off arrival p99/max 17.07/17.47 ms
+FAIL nv12-4k30 5s off harness exit 1
+FAIL nv12-4k30 5s trace harness exit 1
+NOT ALL PASS

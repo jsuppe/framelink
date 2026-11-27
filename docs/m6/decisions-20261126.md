@@ -52,3 +52,11 @@ Windows items (3, 4 and the Windows side of 5) are changes to test code or test 
 1. Every FrameLink error return posts a FrameLink error first. The shared-CPU sink now refuses invalid video metadata with the native sink's error, "valid supported frame metadata and TIME mapping required", and so sends the invalid-input reason; this removes a recorded shared-CPU limit.
 2. Before a consumer element acts on a failure (its local cancel, or the decision 8 rewrite), it takes the records and end of stream already pending on the event socket, without waiting.
 3. Decision 8's 100 ms wait stays as a fallback. Whether to remove it is decided later, once the producer's order is verified on all three platforms (with the Windows requalification).
+
+### Decision 11: the Linux BGRA relay stalls and the Vulkan import guidance (2026-11-27)
+
+**The problem.** At `b5c942a` the Linux native relay's BGRA 1080p60 and BGRA 4K30 cells each failed zero-loss on one stall of 19 and 37 ms in 1800 s ([record](linux-native-relay-rate-b5c942a/README.md)). At `0e8da988`, with a cheaper receiver check, all four cells passed once ([record](linux-native-relay-rate-0e8da98/README.md)); the stall's cause was not established. NV12 never stalled. In the same 30–40 s window at BGRA 1080p60 a long-lived Vulkan import of a linear DMA-BUF read zeros while a CPU read and a fresh import were correct, contradicting `framelink_vulkan.h`'s advice to import each slot once per channel generation.
+
+**What was chosen (Jon).**
+- **A3:** find the stall's cause now, before the final-revision qualification (9e).
+- **B3:** first reproduce the stale import in a short test with a long-lived import, then decide between changing the header's guidance (comment only) and changing `flVkImageCurrent` (a public-header behavior change, which affects Windows and so returns to Jon).

@@ -293,6 +293,7 @@ struct CpuReadback {
   CHECK(at==host.size());flImageUnmap(frame.image);return -1;
  }
  void forget(){}
+ void describe(flChannel*,const flFrame&,unsigned){}
  const uint8_t* data(){return host.data();}
 };
 using Readback=CpuReadback;
@@ -309,7 +310,17 @@ static void receiver(){auto c=caps();auto p=policy();GstFrameLinkMemoryPolicy bo
  auto warm=[&](flFrame&f){uint64_t lease=0;CHECK(flLeaseFrame(channel,&f,&lease)==FL_OK);const int done=readback.copy(channel,f,o.nv12,o.width,o.height);
   CHECK((done>=0?flCompleteReadLeaseSyncFd(channel,lease,done):flCompleteReadLease(channel,lease))==FL_OK);if(done>=0)close(done);
   auto deadline=now()+5000000000ULL;flResult r=FL_BUSY;while(r==FL_BUSY){CHECK(now()<deadline);r=flCollectReadLeases(channel);if(r==FL_BUSY)Sleep(1);}CHECK(r==FL_OK);
-  Stamp st{};memcpy(&st,readback.data(),sizeof st);CHECK(st.magic==Stamp{}.magic&&st.id>=PrerollId&&st.id<PrerollId+prerollTotal()&&st.pts==uint64_t(f.ptsNs));warmed.insert(f.slot);};
+  Stamp st{};memcpy(&st,readback.data(),sizeof st);
+  if(diagnose&&!(st.magic==Stamp{}.magic&&st.id>=PrerollId&&st.id<PrerollId+prerollTotal()&&st.pts==uint64_t(f.ptsNs))){
+   readback.describe(channel,f,unsigned(-1));fprintf(stderr,"pre-roll frame pts %lld slot %u sequence %llu: GPU copy magic=%llx id=%llu pts=%llu (pre-roll ids from %llu)\n",(long long)f.ptsNs,f.slot,(unsigned long long)f.sequence,
+    (unsigned long long)st.magic,(unsigned long long)st.id,(unsigned long long)st.pts,(unsigned long long)PrerollId);
+   size_t nonzero=0;const uint8_t*d=readback.data();for(size_t i=0;i<size_t(o.width)*o.height*(o.nv12?1:4);++i)nonzero+=d[i]!=0;fprintf(stderr,"  stale copy: %zu nonzero bytes\n",nonzero);
+   flMappedImage mm{};CHECK(flImageMapPlanes(f.image,&mm)==FL_OK);Stamp cpu{};memcpy(&cpu,mm.plane[0].pixels,sizeof cpu);flImageUnmap(f.image);
+   fprintf(stderr,"  CPU read: magic=%llx id=%llu\n",(unsigned long long)cpu.magic,(unsigned long long)cpu.id);
+   int again=readback.copy(channel,f,o.nv12,o.width,o.height);if(again>=0)close(again);Stamp a{};memcpy(&a,readback.data(),sizeof a);fprintf(stderr,"  same import again: magic=%llx id=%llu\n",(unsigned long long)a.magic,(unsigned long long)a.id);
+   readback.forget();again=readback.copy(channel,f,o.nv12,o.width,o.height);if(again>=0)close(again);memcpy(&a,readback.data(),sizeof a);fprintf(stderr,"  fresh import: magic=%llx id=%llu\n",(unsigned long long)a.magic,(unsigned long long)a.id);
+   memcpy(&st,readback.data(),sizeof st);}
+  CHECK(st.magic==Stamp{}.magic&&st.id>=PrerollId&&st.id<PrerollId+prerollTotal()&&st.pts==uint64_t(f.ptsNs));warmed.insert(f.slot);};
  auto acquireMeasured=[&](flFrame&f){for(;;){CHECK(flAcquireFrame(channel,&f,5000)==FL_OK);if(!isPreroll(f.ptsNs))break;warm(f);}
   if(warmed.size()<poolSlots())fprintf(stderr,"pre-roll read %zu of %u pool slots before the first measured frame\n",warmed.size(),poolSlots());CHECK(warmed.size()==poolSlots());};
  for(unsigned n=0;n<frames();++n){flFrame f{};acquireMeasured(f);auto arrived=now();
@@ -321,8 +332,15 @@ static void receiver(){auto c=caps();auto p=policy();GstFrameLinkMemoryPolicy bo
   // Diagnostic mode: settle the copy while the lease is still held, and on a
   // mismatch read the same held frame through the (slow) CPU mapping.
   if(diagnose){const uint8_t*early=readback.data();Stamp e{};memcpy(&e,early,sizeof e);
+   // Payload: where a copy that holds the right stamp is wrong (lease still held).
+   if(e.magic==Stamp{}.magic&&e.id==n&&!filledWith(early+sizeof e,size_t(rowBytes)*rows-sizeof e,uint8_t(n))){
+    const size_t total=size_t(rowBytes)*rows,luma=size_t(o.width)*o.height;size_t first=total,last=0,bad=0;
+    for(size_t i=sizeof e;i<total;++i)if(early[i]!=uint8_t(n)){bad++;if(first==total)first=i;last=i;}
+    fprintf(stderr,"held frame %u slot %u: payload mismatch, %zu of %zu bytes wrong, offsets %zu..%zu (luma ends at %zu), value at first %u, expected %u\n",n,f.slot,bad,total,first,last,luma,early[first],unsigned(uint8_t(n)));
+    readback.describe(channel,f,n);readback.forget();const int fresh=readback.copy(channel,f,o.nv12,o.width,o.height);if(fresh>=0)close(fresh);const uint8_t*again=readback.data();
+    bad=0;for(size_t i=sizeof e;i<total;++i)bad+=again[i]!=uint8_t(n);fprintf(stderr,"held frame %u: after a fresh import, %zu bytes wrong\n",n,bad);}
    if(!(e.magic==Stamp{}.magic&&e.id==n)){flMappedImage mm{};CHECK(flImageMapPlanes(f.image,&mm)==FL_OK);Stamp cpu{};memcpy(&cpu,mm.plane[0].pixels,sizeof cpu);
-    const unsigned fill=static_cast<unsigned char*>(mm.plane[0].pixels)[sizeof cpu];flImageUnmap(f.image);
+    const unsigned fill=static_cast<unsigned char*>(mm.plane[0].pixels)[sizeof cpu];flImageUnmap(f.image);readback.describe(channel,f,n);
     fprintf(stderr,"held frame %u: GPU copy magic=%llx id=%llu; CPU read of the same held storage magic=%llx id=%llu fill=%u\n",n,(unsigned long long)e.magic,(unsigned long long)e.id,(unsigned long long)cpu.magic,(unsigned long long)cpu.id,fill);
     const int again=readback.copy(channel,f,o.nv12,o.width,o.height);if(again>=0)close(again);const uint8_t*second=readback.data();Stamp r{};memcpy(&r,second,sizeof r);
     fprintf(stderr,"held frame %u: second GPU copy magic=%llx id=%llu\n",n,(unsigned long long)r.magic,(unsigned long long)r.id);
