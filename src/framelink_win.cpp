@@ -1114,8 +1114,9 @@ FL_API flResult flAcquireFrame(flChannel* ch, flFrame* out, uint32_t timeoutMs) 
             if (ch->deviceLost.load()) return trace.result(FL_DEVICE_LOST);
             // A removed device reads every fence as UINT64_MAX: that is device
             // loss, never readiness (decision 13). Nothing is delivered.
-            const uint64_t readyCompleted=completedValue(ch->readyFence);
-            if (readyCompleted==UINT64_MAX || deviceRemoved(ch->device)) {
+            // The fence and device exist only once a ring is attached.
+            const uint64_t readyCompleted=ch->readyFence?completedValue(ch->readyFence):0;
+            if ((ch->readyFence && readyCompleted==UINT64_MAX) || (ch->device && deviceRemoved(ch->device))) {
                 ch->deviceLost=true;
                 return trace.result(FL_DEVICE_LOST);
             }
