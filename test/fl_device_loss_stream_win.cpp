@@ -44,13 +44,15 @@ static int produce(const char* name,double seconds) {
     flClose(p);return 0;
 }
 int main(int argc,char** argv) {
-    if(argc==4 && !strcmp(argv[1],"--producer"))return produce(argv[2],atof(argv[3]));
+    if(argc==5 && !strcmp(argv[1],"--producer")){FILE* f=nullptr;freopen_s(&f,argv[4],"w",stdout);return produce(argv[2],atof(argv[3]));}
     const double seconds=argc>=2?atof(argv[1]):30;
     const std::string name="loss-stream-"+std::to_string(GetCurrentProcessId());
     flChannel* c=nullptr;flResult r=flCreateChannelEx(name.c_str(),64,32,FL_FORMAT_RGBA8,3,FL_MAP_CPU,&c);
     if(r!=FL_OK){std::printf("consumer: create=%s\n",flResultString(r));return 1;}
     char exe[MAX_PATH]{};GetModuleFileNameA(nullptr,exe,MAX_PATH);
-    std::string command="\""+std::string(exe)+"\" --producer "+name+" "+std::to_string(seconds);
+    // The producer writes its own report next to the executable.
+    std::string log=std::string(exe);log=log.substr(0,log.find_last_of("\\")+1)+name+"-producer.log";
+    std::string command="\""+std::string(exe)+"\" --producer "+name+" "+std::to_string(seconds)+" \""+log+"\"";
     STARTUPINFOA si{};si.cb=sizeof(si);PROCESS_INFORMATION pi{};
     if(!CreateProcessA(nullptr,command.data(),nullptr,nullptr,TRUE,0,nullptr,nullptr,&si,&pi)){std::printf("consumer: spawn failed\n");return 1;}
     std::printf("consumer: streaming for up to %.0f s\n",seconds);std::fflush(stdout);
@@ -63,6 +65,8 @@ int main(int argc,char** argv) {
         if(r!=FL_OK){report("consumer",c,"flRelease",r,frames);break;}
     }
     if(r==FL_OK || r==FL_TIMEOUT)std::printf("consumer: ran %llu frames without a failure\n",(unsigned long long)frames);
-    WaitForSingleObject(pi.hProcess,30000);CloseHandle(pi.hThread);CloseHandle(pi.hProcess);
+    const DWORD waited=WaitForSingleObject(pi.hProcess,30000);CloseHandle(pi.hThread);CloseHandle(pi.hProcess);
+    if(FILE* f=nullptr;fopen_s(&f,log.c_str(),"r")==0 && f){char line[512];while(fgets(line,sizeof line,f))std::fputs(line,stdout);fclose(f);}
+    if(waited!=WAIT_OBJECT_0)std::printf("producer: still running after 30 s\n");
     flClose(c);return 0;
 }
