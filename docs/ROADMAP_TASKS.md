@@ -384,6 +384,10 @@ per-platform state. Windows readiness is the
   native-sink message fix and copy-out burst200 outcome go to Jon; full Windows campaign inside decision 14.
   Both approved (Jon, 2026-11-28) and rerun at `6c45029e`: Linux native 300/300, GPU-staged 138/140, Android native 147/150,
   Android CPU 125/140, Windows smoke 15/15; growth 4/6 (GPU-staged feed-thread frame loss in clean cycles).
+  Startup loss traced to the receiver's first context bind; option A (Jon) at `30c64032`, a reader thread per GPU-staged
+  receiver ([evidence](m6/fault-coverage/remaining-cells/feed-startup/README.md)): GPU-staged 140/140, 1800 s cells with no misses,
+  clean cycles all complete; growth memory gate 1/3 (per-thread malloc arenas at warm-up). Steady consumer RSS growth
+  (~330 kB/min at 1080p60) predates A and is not yet attributed.
 - [ ] **M6.5 Performance/resource evidence:** distributions, queue depth,
   CPU/GPU/memory/handles, clock behavior and bounded growth.
   Stage costs, Android NV12 cost isolation and platform limits are published

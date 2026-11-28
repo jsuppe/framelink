@@ -1,0 +1,129 @@
+arrival.budget_ms=17
+complete=yes
+config=BGRA 1920x1080@60 bin gpu-readback 12s
+consumer.audio.arrival.all.ms=n=620 p50=0.51 p95=0.58 p99=0.60 max=0.67 min=0.14
+consumer.audio.arrival.ms=n=420 p50=0.50 p95=0.58 p99=0.60 max=0.67 min=0.14
+consumer.audio.contiguous=yes
+consumer.audio.deadline_misses=0/620
+consumer.audio.gap_event_ns=0
+consumer.audio.gap_events=0
+consumer.audio.output_queue.admission_residence.ms=n=620 p50=0.08 p95=0.11 p99=0.12 max=0.16 min=0.01
+consumer.audio.output_queue.pending=0
+consumer.audio.output_queue.sampled_max_buffers=0
+consumer.audio.output_queue.unmatched=0
+consumer.audio.pts_jump_ns=0
+consumer.audio.pts_jumps=0
+consumer.audio.render.all.ms=n=620 p50=0.63 p95=0.69 p99=0.70 max=0.78 min=0.18
+consumer.audio.render.ms=n=420 p50=0.61 p95=0.69 p99=0.70 max=0.78 min=0.18
+consumer.audio.render_interval.ms=n=419 p50=10.00 p95=10.10 p99=10.19 max=10.25 min=9.55
+consumer.audio.render_jitter.p1_p99.ms=0.49
+consumer.av_offset.abs.ms=n=5 p50=5.27 p95=175.20 p99=175.20 max=175.20 min=4.48
+consumer.av_offset.ms=n=5 p50=5.27 p95=175.20 p99=175.20 max=175.20 min=4.48
+consumer.content.checked=362
+consumer.content.index_gaps=0
+consumer.content.layout=offset=0 stride=7680 size=8294400
+consumer.content.mismatches=0
+consumer.content.missing_frames=0
+consumer.content.rows=4
+consumer.cpu.percent=29.49
+consumer.ended_monotonic_us=652265828230
+consumer.fault.elapsed_us=200127
+consumer.fault.executed=1
+consumer.fault.recovery_frames=3
+consumer.fault.start_monotonic_us=652265627590
+consumer.frames=362
+consumer.handles=45..44 min=44 max=45
+consumer.handles.slope.per_min=-29.93
+consumer.mem.kb=127616..129156 min=127616 max=129156
+consumer.mem.kind=rss
+consumer.mem.slope.kb_per_min=478.93
+consumer.memory=memory:SystemMemory
+consumer.pid=306664
+consumer.queue.accounting=complete
+consumer.result=error: coordinated video frame replaced before it was read: the producer delivered faster than real time
+consumer.result.debug=gst/gstframelink.cpp(1722): srcCreateImpl (): /GstPipeline:pipeline0/GstFrameLinkAvSrc:c/GstFrameLinkSrc:video: ring sequence 364 after 362 with a receive queue of 1; coordinated video must be paced in real time (live or clock-synchronized sources) and read within the queue budget
+consumer.result.source=/GstPipeline:pipeline0/GstFrameLinkAvSrc:c/GstFrameLinkSrc:video
+consumer.samples=297600
+consumer.scope=transport-consumer
+consumer.series.t_cpums_memkb_handles_threads=0.0:9:13852:6:2;1.0:287:125944:45:12;2.0:562:127616:45:12;3.0:830:127620:45:12;4.0:1107:129140:45:12;5.0:1387:129152:44:12;6.0:1744:129156:44:12;6.8:1976:124032:29:7;
+consumer.threads=12..12 min=12 max=12
+consumer.threads.slope.per_min=0.00
+consumer.video.arrival.all.ms=n=362 p50=5.66 p95=8.77 p99=9.69 max=21.38 min=1.92
+consumer.video.arrival.ms=n=242 p50=5.78 p95=9.19 p99=9.84 max=21.38 min=1.95
+consumer.video.buffer_alive_at_end=0
+consumer.video.buffer_life_after_callback.ms=n=362 p50=3353.45 p95=6073.29 p99=6322.85 max=6375.39 min=0.15
+consumer.video.callback_refcount_hist=0,0,0,362,0,0,0,0
+consumer.video.deadline_misses=2/362
+consumer.video.discont_after_first=0
+consumer.video.gap_event_ns=0
+consumer.video.gap_events=0
+consumer.video.output_queue.admission_residence.ms=n=362 p50=0.05 p95=0.09 p99=0.10 max=170.57 min=0.01
+consumer.video.output_queue.pending=0
+consumer.video.output_queue.sampled_max_buffers=1
+consumer.video.output_queue.unmatched=0
+consumer.video.render.all.ms=n=362 p50=5.81 p95=8.96 p99=9.99 max=208.59 min=1.95
+consumer.video.render.ms=n=242 p50=5.93 p95=9.34 p99=175.56 max=208.59 min=2.02
+consumer.video.render_interval.ms=n=241 p50=16.62 p95=19.24 p99=20.55 max=218.14 min=0.14
+consumer.video.render_jitter.p1_p99.ms=173.14
+exit=0/0
+expected.frames=720
+expected.samples=576000
+fault=consumer-stall
+fault.app_slot_drops=354
+fault.bound_ms=2000
+fault.consumer_disconts=0
+fault.consumer_gap_events=0
+fault.consumer_gap_ns=0
+fault.content_ok=yes
+fault.error_on_ring_full=false
+fault.expect=replacement-failure
+fault.frame=360
+fault.loss_accounted=no
+fault.loss_marked=no
+fault.ms=200
+fault.pass=yes
+fault.producer_dropped=-1
+fault.producer_ring_full_drops=-1
+fault.recovery_limit_frames=15
+fault.silent_loss=no
+harness.malloc=producer-side mmap_threshold=8388608
+label=linux-gpu-readback-bgra-1080p60-stall200-4
+output.async=false
+output.queue_buffers=1
+output.sync=false
+playback.latency_ms=0
+producer.audio.push_burst.max=0
+producer.audio.push_interval.ms=n=999 p50=10.00 p95=10.05 p99=10.09 max=10.13 min=9.85
+producer.audio.push_lateness.ms=n=999 p50=0.13 p95=0.14 p99=0.17 max=0.21 min=0.06
+producer.cpu.percent=3.12
+producer.ended_monotonic_us=652265836075
+producer.handles=16..18 min=16 max=18
+producer.handles.slope.per_min=0.00
+producer.injection.elapsed_us=0
+producer.injection.executed=0
+producer.injection.frame=0
+producer.injection.requested_ms=0
+producer.injection.stage=none
+producer.injection.start_monotonic_us=0
+producer.mem.kb=17032..17104 min=17032 max=17104
+producer.mem.kind=rss
+producer.mem.slope.kb_per_min=0.00
+producer.native.acquire_wait.ms=n=720 p50=0.01 p95=0.10 p99=5.56 max=5.65 min=0.00
+producer.native.acquired=366
+producer.native.slot_drop_frames=364 365 366 367 368 369 370 371 374 375 376 377 378 379 380 381 382 383 384 385 386 387 388 389 390 391 392 393 394 395 396 397 
+producer.native.slot_drops=354
+producer.pid=306672
+producer.pushed.frames=365
+producer.pushed.samples=575520
+producer.result=error: FrameLink peer closed or failed
+producer.result.debug=required session tracks not ready or cancelled; gst/gstframelinkaudio.cpp(35): rejectSession (): /GstPipeline:pipeline0/GstFrameLinkAvSink:s/GstFrameLinkAudioSink:audio: FrameLink audio session ended
+producer.result.source=/GstPipeline:pipeline0/GstFrameLinkAvSink:s/GstFrameLinkAudioSink:audio
+producer.series.t_cpums_memkb_handles_threads=0.0:44:13756:6:2;1.0:105:17032:16:9;2.0:163:17032:16:9;3.0:223:17032:16:9;4.0:283:17032:16:9;5.0:332:17036:16:9;6.0:373:17036:16:9;7.0:399:17104:18:8;8.0:414:17104:18:8;9.0:429:17104:18:8;10.0:445:17104:18:8;11.0:461:17104:18:8;12.0:476:17104:18:8;12.1:479:17068:14:6;
+producer.threads=9..8 min=8 max=9
+producer.threads.slope.per_min=0.00
+producer.video.push_burst.max=0
+producer.video.push_interval.ms=n=245 p50=16.67 p95=16.85 p99=16.91 max=150.47 min=16.32
+producer.video.push_lateness.ms=n=245 p50=0.48 p95=0.56 p99=0.64 max=0.73 min=0.14
+seconds=12
+video.pool=2
+video.queue=1

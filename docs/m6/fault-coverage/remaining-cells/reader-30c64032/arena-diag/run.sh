@@ -1,0 +1,3 @@
+cd .
+build-gst/fl_gst_av_bench build-gst/libgstframelink.so --size 1920x1080 --fps 60 --pool 2 --video-queue 1 --output-queue-buffers 1 --latency-ms 0 --transport-only --no-output-preroll --seconds 5 --cycles 40 --gpu-readback --format BGRA --restart producer --cycle-fault kill --cycle-fault-at-ms 3000 --out $OUT --label control > $OUT/control.stdout 2>&1; echo control rc=$?
+MALLOC_ARENA_MAX=1 build-gst/fl_gst_av_bench build-gst/libgstframelink.so --size 1920x1080 --fps 60 --pool 2 --video-queue 1 --output-queue-buffers 1 --latency-ms 0 --transport-only --no-output-preroll --seconds 5 --cycles 40 --gpu-readback --format BGRA --restart producer --cycle-fault kill --cycle-fault-at-ms 3000 --out $OUT --label arena1 > $OUT/arena1.stdout 2>&1; echo arena1 rc=$?

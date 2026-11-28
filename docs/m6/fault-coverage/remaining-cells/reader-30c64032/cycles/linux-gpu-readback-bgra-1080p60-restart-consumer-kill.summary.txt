@@ -1,0 +1,31 @@
+complete=yes
+config=BGRA 1920x1080@60 bin cpu fresh-device lifecycle restart-consumer 100x5s
+cycle.slot_drops.series=0;126;0;126;0;126;0;127;0;125;0;125;0;126;0;126;0;126;0;126;0;125;0;127;0;126;0;127;0;125;0;125;0;126;0;127;0;126;0;126;0;125;0;126;0;125;0;126;0;127;0;126;0;126;0;125;0;127;0;125;0;126;0;127;0;125;0;126;0;126;0;124;0;126;0;125;0;126;0;125;0;126;0;127;0;127;0;125;0;126;0;125;0;126;0;125;0;126;0;126;
+cycle.slot_drops.total=6292
+cycle_fault=kill
+cycle_fault.at_ms=3000
+cycle_fault.bound_ms=2000
+cycle_fault.detection_ms=n=50 p50=12.01 p95=18.97 p99=22.37 max=22.37 min=4.98
+cycles=100
+cycles.ok=100/100
+expected.frames.per_cycle=300
+expected.samples.per_cycle=240000
+harness.malloc=producer-side mmap_threshold=8388608
+label=linux-gpu-readback-bgra-1080p60-restart-consumer-kill
+long.exit=0
+long.handles=7..7
+long.handles.slope.per_cycle=0.000
+long.mem.kb=17200..17388
+long.mem.slope.kb_per_cycle=1.70
+long.role=lifecycle-producer
+long.series.result_frames_samples_memkb_handles_threads=EOS|300|240000|16924|7|6;error: FrameLink peer closed or failed|174|239520|17072|7|6;EOS|300|240000|17184|7|6;error: FrameLink peer closed or failed|174|239520|17184|7|6;EOS|300|240000|17196|7|6;error: FrameLink peer closed or failed|174|239520|17200|7|6;EOS|300|240000|17208|7|6;error: FrameLink peer closed or failed|173|239520|17208|7|6;EOS|300|240000|17220|7|6;error: FrameLink peer closed or failed|175|239520|17224|7|6;EOS|300|240000|17232|7|6;error: FrameLink peer closed or failed|175|239520|17232|7|6;EOS|300|240000|17232|7|6;error: FrameLink peer closed or failed|174|239520|17244|7|6;EOS|300|240000|17248|7|6;error: FrameLink peer closed or failed|174|239520|17248|7|6;EOS|300|240000|17252|7|6;error: FrameLink peer closed or failed|174|239520|17252|7|6;EOS|300|240000|17252|7|6;error: FrameLink peer closed or failed|174|239520|17260|7|6;EOS|300|240000|17268|7|6;error: FrameLink peer closed or failed|175|239520|17268|7|6;EOS|300|240000|17272|7|6;error: FrameLink peer closed or failed|173|239520|17276|7|6;EOS|300|240000|17280|7|6;error: FrameLink peer closed or failed|174|239520|17280|7|6;EOS|300|240000|17280|7|6;error: FrameLink peer closed or failed|173|239520|17280|7|6;EOS|300|240000|17280|7|6;error: FrameLink peer closed or failed|175|239520|17280|7|6;EOS|300|240000|17284|7|6;error: FrameLink peer closed or failed|175|239520|17284|7|6;EOS|300|240000|17284|7|6;error: FrameLink peer closed or failed|174|239520|17284|7|6;EOS|300|240000|17284|7|6;error: FrameLink peer closed or failed|173|239520|17288|7|6;EOS|300|240000|17292|7|6;error: FrameLink peer closed or failed|174|239520|17292|7|6;EOS|300|240000|17292|7|6;error: FrameLink peer closed or failed|174|239520|17292|7|6;EOS|300|240000|17300|7|6;error: FrameLink peer closed or failed|175|239520|17304|7|6;EOS|300|240000|17308|7|6;error: FrameLink peer closed or failed|174|239520|17308|7|6;EOS|300|240000|17308|7|6;error: FrameLink peer closed or failed|175|239520|17308|7|6;EOS|300|240000|17308|7|6;error: FrameLink peer closed or failed|174|239520|17312|7|6;EOS|300|240000|17312|7|6;error: FrameLink peer closed or failed|173|239520|17320|7|6;EOS|300|240000|17320|7|6;error: FrameLink peer closed or failed|174|239520|17320|7|6;EOS|300|240000|17324|7|6;error: FrameLink peer closed or failed|174|239520|17324|7|6;EOS|300|240000|17324|7|6;error: FrameLink peer closed or failed|175|239520|17324|7|6;EOS|300|240000|17328|7|6;error: FrameLink peer closed or failed|173|239520|17332|7|6;EOS|300|240000|17332|7|6;error: FrameLink peer closed or failed|175|239520|17332|7|6;EOS|300|240000|17332|7|6;error: FrameLink peer closed or failed|174|239520|17332|7|6;EOS|300|240000|17332|7|6;error: FrameLink peer closed or failed|173|239520|17332|7|6;EOS|300|240000|17340|7|6;error: FrameLink peer closed or failed|175|239520|17340|7|6;EOS|300|240000|17344|7|6;error: FrameLink peer closed or failed|174|239520|17344|7|6;EOS|300|240000|17344|7|6;error: FrameLink peer closed or failed|174|239520|17348|7|6;EOS|300|240000|17348|7|6;error: FrameLink peer closed or failed|176|239520|17348|7|6;EOS|300|240000|17348|7|6;error: FrameLink peer closed or failed|174|239520|17348|7|6;EOS|300|240000|17352|7|6;error: FrameLink peer closed or failed|175|239520|17352|7|6;EOS|300|240000|17352|7|6;error: FrameLink peer closed or failed|174|239520|17352|7|6;EOS|300|240000|17352|7|6;error: FrameLink peer closed or failed|175|239520|17356|7|6;EOS|300|240000|17356|7|6;error: FrameLink peer closed or failed|174|239520|17356|7|6;EOS|300|240000|17356|7|6;error: FrameLink peer closed or failed|173|239520|17356|7|6;EOS|300|240000|17356|7|6;error: FrameLink peer closed or failed|173|239520|17360|7|6;EOS|300|240000|17364|7|6;error: FrameLink peer closed or failed|175|239520|17368|7|6;EOS|300|240000|17372|7|6;error: FrameLink peer closed or failed|174|239520|17372|7|6;EOS|300|240000|17380|7|6;error: FrameLink peer closed or failed|175|239520|17380|7|6;EOS|300|240000|17380|7|6;error: FrameLink peer closed or failed|174|239520|17380|7|6;EOS|300|240000|17380|7|6;error: FrameLink peer closed or failed|175|239520|17380|7|6;EOS|300|240000|17380|7|6;error: FrameLink peer closed or failed|174|239520|17388|7|6;EOS|300|240000|17388|7|6;error: FrameLink peer closed or failed|173|239520|17388|7|6;
+long.threads=6..6
+long.threads.slope.per_cycle=0.000
+output.async=false
+output.queue_buffers=1
+output.sync=false
+playback.latency_ms=0
+seconds=5
+video.pool=2
+video.queue=1
+wall.s=519.9
