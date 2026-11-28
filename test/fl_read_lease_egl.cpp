@@ -38,9 +38,88 @@ static int producer(const char* name,bool crash,int reacquireMs=5000) {
  CHECK(flCancelBuffer(p,&spare)==FL_OK && flCancelBuffer(p,&returned)==FL_OK);
  flClose(p);return 0;
 }
+// --gpu-hang-producer helper (decision 13, a REAL GPU reset): the producer
+// renders its frame on the GPU, in a robust GLES 3 context, behind a shader
+// that does not finish, and submits it with the exported native fence. It
+// reports its context's reset status after the watchdog.
+static int produceGpuHang(const char* name) {
+ EGLDisplay display=EGL_NO_DISPLAY;
+#ifndef __ANDROID__
+ auto platform=(PFNEGLGETPLATFORMDISPLAYEXTPROC)eglGetProcAddress("eglGetPlatformDisplayEXT");
+ if(platform)display=platform(EGL_PLATFORM_SURFACELESS_MESA,EGL_DEFAULT_DISPLAY,nullptr);
+#else
+ display=eglGetDisplay(EGL_DEFAULT_DISPLAY);
+#endif
+ CHECK(display!=EGL_NO_DISPLAY && eglInitialize(display,nullptr,nullptr));
+ EGLint configAttrs[]={EGL_SURFACE_TYPE,EGL_PBUFFER_BIT,EGL_RENDERABLE_TYPE,EGL_OPENGL_ES2_BIT,EGL_RED_SIZE,8,EGL_GREEN_SIZE,8,EGL_BLUE_SIZE,8,EGL_NONE};
+ EGLConfig config{};EGLint count=0;CHECK(eglChooseConfig(display,configAttrs,&config,1,&count)&&count);
+ EGLint surfaceAttrs[]={EGL_WIDTH,64,EGL_HEIGHT,32,EGL_NONE};auto surface=eglCreatePbufferSurface(display,config,surfaceAttrs);CHECK(surface!=EGL_NO_SURFACE);
+ EGLint robustAttrs[]={EGL_CONTEXT_CLIENT_VERSION,3,EGL_CONTEXT_OPENGL_ROBUST_ACCESS_EXT,EGL_TRUE,EGL_CONTEXT_OPENGL_RESET_NOTIFICATION_STRATEGY_EXT,EGL_LOSE_CONTEXT_ON_RESET_EXT,EGL_NONE};
+ auto context=eglCreateContext(display,config,EGL_NO_CONTEXT,robustAttrs);CHECK(context!=EGL_NO_CONTEXT);CHECK(eglMakeCurrent(display,surface,surface,context));
+ auto createImage=(PFNEGLCREATEIMAGEKHRPROC)eglGetProcAddress("eglCreateImageKHR");
+ auto bindImage=(PFNGLEGLIMAGETARGETTEXTURE2DOESPROC)eglGetProcAddress("glEGLImageTargetTexture2DOES");
+ auto createSync=(PFNEGLCREATESYNCKHRPROC)eglGetProcAddress("eglCreateSyncKHR");
+ auto exportFence=(PFNEGLDUPNATIVEFENCEFDANDROIDPROC)eglGetProcAddress("eglDupNativeFenceFDANDROID");
+ auto resetStatus=(GLenum(GL_APIENTRY*)())eglGetProcAddress("glGetGraphicsResetStatusEXT");
+ CHECK(createImage&&bindImage&&createSync&&exportFence);
+ flChannel* p=nullptr;CHECK(flOpenProducer(name,&p)==FL_OK);
+ flBuffer b{};CHECK(flAcquireBuffer(p,&b,1000)==FL_OK);
+ EGLImageKHR image=EGL_NO_IMAGE_KHR;
+#ifdef __ANDROID__
+ auto native=(PFNEGLGETNATIVECLIENTBUFFERANDROIDPROC)eglGetProcAddress("eglGetNativeClientBufferANDROID");CHECK(native);
+ EGLint attrs[]={EGL_IMAGE_PRESERVED_KHR,EGL_TRUE,EGL_NONE};
+ image=createImage(display,EGL_NO_CONTEXT,EGL_NATIVE_BUFFER_ANDROID,native(flImageAHardwareBuffer(b.image)),attrs);
+#else
+ flDmabuf dma{};CHECK(flImageDmabuf(b.image,&dma)==FL_OK && dma.planes==1);
+ EGLint attrs[]={EGL_WIDTH,64,EGL_HEIGHT,32,EGL_LINUX_DRM_FOURCC_EXT,(EGLint)dma.fourcc,EGL_DMA_BUF_PLANE0_FD_EXT,dma.fd[0],EGL_DMA_BUF_PLANE0_OFFSET_EXT,(EGLint)dma.offset[0],EGL_DMA_BUF_PLANE0_PITCH_EXT,(EGLint)dma.stride[0],EGL_NONE};
+ image=createImage(display,EGL_NO_CONTEXT,EGL_LINUX_DMA_BUF_EXT,nullptr,attrs);
+#endif
+ CHECK(image!=EGL_NO_IMAGE_KHR);
+ GLuint target=0,fbo=0;glGenTextures(1,&target);glBindTexture(GL_TEXTURE_2D,target);bindImage(GL_TEXTURE_2D,image);
+ glGenFramebuffers(1,&fbo);glBindFramebuffer(GL_FRAMEBUFFER,fbo);glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,target,0);
+ if(glCheckFramebufferStatus(GL_FRAMEBUFFER)!=GL_FRAMEBUFFER_COMPLETE){std::fprintf(stderr,"producer: the ring buffer is not renderable here (0x%x)\n",glCheckFramebufferStatus(GL_FRAMEBUFFER));return 77;}
+ auto compile=[](GLenum type,const char* source){GLuint sh=glCreateShader(type);glShaderSource(sh,1,&source,nullptr);glCompileShader(sh);GLint ok=0;glGetShaderiv(sh,GL_COMPILE_STATUS,&ok);CHECK(ok);return sh;};
+ GLuint vs=compile(GL_VERTEX_SHADER,"#version 300 es\nin vec2 position;void main(){gl_Position=vec4(position,0.0,1.0);}");
+ GLuint fs=compile(GL_FRAGMENT_SHADER,"#version 300 es\nprecision highp float;precision highp int;uniform int count;out vec4 color;void main(){uint x=uint(gl_FragCoord.x)*2654435761u+uint(gl_FragCoord.y);for(int i=0;i<count;i++){x=x*1664525u+1013904223u;}color=vec4(float(x&255u)/255.0,0.25,0.5,1.0);}");
+ GLuint program=glCreateProgram();glAttachShader(program,vs);glAttachShader(program,fs);glBindAttribLocation(program,0,"position");glLinkProgram(program);GLint linked=0;glGetProgramiv(program,GL_LINK_STATUS,&linked);CHECK(linked);
+ glUseProgram(program);const char* iterEnv=getenv("FL_TEST_HANG_ITERATIONS");glUniform1i(glGetUniformLocation(program,"count"),iterEnv?std::atoi(iterEnv):2000000000);
+ GLfloat vertices[]={-1,-1,1,-1,-1,1,1,1};glEnableVertexAttribArray(0);glVertexAttribPointer(0,2,GL_FLOAT,GL_FALSE,0,vertices);glViewport(0,0,64,32);
+ glDrawArrays(GL_TRIANGLE_STRIP,0,4); // the frame's GPU write; does not finish
+ auto sync=createSync(display,EGL_SYNC_NATIVE_FENCE_ANDROID,nullptr);CHECK(sync!=EGL_NO_SYNC_KHR);glFlush();
+ int fd=exportFence(display,sync);CHECK(fd>=0);
+ CHECK(flSubmitSyncFd(p,&b,fd,654321)==FL_OK);
+ // Wait for the watchdog, then report the context's view.
+ GLenum reset=0;for(int i=0;i<900 && !reset;++i){std::this_thread::sleep_for(std::chrono::milliseconds(100));reset=resetStatus?resetStatus():0;}
+ sync_file_info info;memset(&info,0,sizeof(info));ioctl(fd,SYNC_IOC_FILE_INFO,&info);
+ std::fprintf(stderr,"producer: GL reset status 0x%x; its frame's fence status %d\n",reset,info.status);
+ close(fd);flClose(p);return reset?0:3;
+}
 int main(int argc,char** argv) {
+ if(argc==3 && !std::strcmp(argv[1],"--producer-gpu-hang"))return produceGpuHang(argv[2]);
  if(argc==3)return producer(argv[2],!std::strcmp(argv[1],"--producer-crash"));
  if(argc==4)return producer(argv[2],false,std::atoi(argv[3]));
+ // --gpu-hang-producer (decision 13, a REAL GPU reset): the producer's frame is
+ // written on the GPU behind a hang. The consumer records whether that frame
+ // is delivered or reported as device loss, and the fence status.
+ if(argc==2 && !std::strcmp(argv[1],"--gpu-hang-producer")){
+  std::string name="egl-hang-producer-"+std::to_string(getpid());flChannel* c=nullptr;
+  CHECK(flCreateChannelEx(name.c_str(),64,32,FL_FORMAT_RGBA8,2,FL_MAP_CPU|FL_GPU_RENDER|FL_DEFER_RELEASE,&c)==FL_OK);
+  pid_t child=0;char mode[]="--producer-gpu-hang";char* args[]={argv[0],mode,const_cast<char*>(name.c_str()),nullptr};
+  CHECK(posix_spawn(&child,argv[0],nullptr,nullptr,args,environ)==0);
+  const auto start=std::chrono::steady_clock::now();auto ms=[&]{return std::chrono::duration<double,std::milli>(std::chrono::steady_clock::now()-start).count();};
+  flFrame f{};flResult r=FL_TIMEOUT;while(r==FL_TIMEOUT && ms()<90000)r=flAcquireFrame(c,&f,100);
+  std::fprintf(stderr,"consumer: flAcquireFrame=%s after %.0f ms%s\n",flResultString(r),ms(),r==FL_OK?" (the frame written behind the hang was DELIVERED)":"");
+  if(r==FL_OK){void* data=nullptr;uint64_t stride=0;if(flImageMap(f.image,&data,&stride)==FL_OK){auto* px=(unsigned char*)data;
+    std::fprintf(stderr,"consumer: delivered frame pixel 0 = %u,%u,%u,%u (a completed write has 64,128 in G,B)\n",px[0],px[1],px[2],px[3]);flImageUnmap(f.image);}
+   flRelease(c,&f);}
+  int status=0;CHECK(waitpid(child,&status,0)==child);
+  std::fprintf(stderr,"consumer: producer exit %d\n",WIFEXITED(status)?WEXITSTATUS(status):-1);
+  flClose(c);
+  pid_t again=0;char* plain[]={argv[0],nullptr};CHECK(posix_spawn(&again,argv[0],nullptr,nullptr,plain,environ)==0);
+  CHECK(waitpid(again,&status,0)==again);std::fprintf(stderr,"recovery: fresh run exit %d\n",WIFEXITED(status)?WEXITSTATUS(status):-1);
+  CHECK(WIFEXITED(status)&&WEXITSTATUS(status)==0);
+  return r==FL_DEVICE_LOST?0:2;
+ }
  bool crash=argc==2 && !std::strcmp(argv[1],"--producer-death");
  bool delayed=argc==2 && !std::strcmp(argv[1],"--delayed-completion");
  // --gpu-busy-completion: the lease's sampling draw queues behind a real GPU

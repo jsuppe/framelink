@@ -612,7 +612,7 @@ if(FRAMELINK_BUILD_TESTS AND WIN32)
     # M6 decision 13: D3D11 device loss, by test-only injection.
     # Physical device loss (decision 13 A3): driven by d13-adapter.ps1, not CTest.
     add_executable(fl_device_loss_stream_win test/fl_device_loss_stream_win.cpp)
-    target_link_libraries(fl_device_loss_stream_win PRIVATE framelink d3d11)
+    target_link_libraries(fl_device_loss_stream_win PRIVATE framelink d3d11 d3dcompiler)
     add_executable(fl_device_lost_win test/fl_device_lost_win.cpp)
     target_link_libraries(fl_device_lost_win PRIVATE framelink)
     add_test(NAME device_lost_windows COMMAND fl_device_lost_win)
