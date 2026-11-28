@@ -71,7 +71,9 @@ static int produceGpuHang(const char* name) {
  image=createImage(display,EGL_NO_CONTEXT,EGL_NATIVE_BUFFER_ANDROID,native(flImageAHardwareBuffer(b.image)),attrs);
 #else
  flDmabuf dma{};CHECK(flImageDmabuf(b.image,&dma)==FL_OK && dma.planes==1);
- EGLint attrs[]={EGL_WIDTH,64,EGL_HEIGHT,32,EGL_LINUX_DRM_FOURCC_EXT,(EGLint)dma.fourcc,EGL_DMA_BUF_PLANE0_FD_EXT,dma.fd[0],EGL_DMA_BUF_PLANE0_OFFSET_EXT,(EGLint)dma.offset[0],EGL_DMA_BUF_PLANE0_PITCH_EXT,(EGLint)dma.stride[0],EGL_NONE};
+ // The GPU ring is tiled: pass its modifier (a linear CPU ring is not renderable on NVIDIA).
+ EGLint attrs[]={EGL_WIDTH,64,EGL_HEIGHT,32,EGL_LINUX_DRM_FOURCC_EXT,(EGLint)dma.fourcc,EGL_DMA_BUF_PLANE0_FD_EXT,dma.fd[0],EGL_DMA_BUF_PLANE0_OFFSET_EXT,(EGLint)dma.offset[0],EGL_DMA_BUF_PLANE0_PITCH_EXT,(EGLint)dma.stride[0],
+     EGL_DMA_BUF_PLANE0_MODIFIER_LO_EXT,(EGLint)(dma.modifier&0xffffffffu),EGL_DMA_BUF_PLANE0_MODIFIER_HI_EXT,(EGLint)(dma.modifier>>32),EGL_NONE};
  image=createImage(display,EGL_NO_CONTEXT,EGL_LINUX_DMA_BUF_EXT,nullptr,attrs);
 #endif
  CHECK(image!=EGL_NO_IMAGE_KHR);
@@ -103,13 +105,18 @@ int main(int argc,char** argv) {
  // is delivered or reported as device loss, and the fence status.
  if(argc==2 && !std::strcmp(argv[1],"--gpu-hang-producer")){
   std::string name="egl-hang-producer-"+std::to_string(getpid());flChannel* c=nullptr;
-  CHECK(flCreateChannelEx(name.c_str(),64,32,FL_FORMAT_RGBA8,2,FL_MAP_CPU|FL_GPU_RENDER|FL_DEFER_RELEASE,&c)==FL_OK);
+#ifdef __ANDROID__
+  const unsigned ringFlags=FL_MAP_CPU|FL_GPU_RENDER|FL_DEFER_RELEASE;
+#else
+  const unsigned ringFlags=FL_GPU_RENDER|FL_DEFER_RELEASE; // the GPU ring: tiled, renderable, not CPU-mapped
+#endif
+  CHECK(flCreateChannelEx(name.c_str(),64,32,FL_FORMAT_RGBA8,2,ringFlags,&c)==FL_OK);
   pid_t child=0;char mode[]="--producer-gpu-hang";char* args[]={argv[0],mode,const_cast<char*>(name.c_str()),nullptr};
   CHECK(posix_spawn(&child,argv[0],nullptr,nullptr,args,environ)==0);
   const auto start=std::chrono::steady_clock::now();auto ms=[&]{return std::chrono::duration<double,std::milli>(std::chrono::steady_clock::now()-start).count();};
   flFrame f{};flResult r=FL_TIMEOUT;while(r==FL_TIMEOUT && ms()<90000)r=flAcquireFrame(c,&f,100);
   std::fprintf(stderr,"consumer: flAcquireFrame=%s after %.0f ms%s\n",flResultString(r),ms(),r==FL_OK?" (the frame written behind the hang was DELIVERED)":"");
-  if(r==FL_OK){void* data=nullptr;uint64_t stride=0;if(flImageMap(f.image,&data,&stride)==FL_OK){auto* px=(unsigned char*)data;
+  if(r==FL_OK){void* data=nullptr;uint64_t stride=0;if((ringFlags&FL_MAP_CPU) && flImageMap(f.image,&data,&stride)==FL_OK){auto* px=(unsigned char*)data;
     std::fprintf(stderr,"consumer: delivered frame pixel 0 = %u,%u,%u,%u (a completed write has 64,128 in G,B)\n",px[0],px[1],px[2],px[3]);flImageUnmap(f.image);}
    flRelease(c,&f);}
   int status=0;CHECK(waitpid(child,&status,0)==child);
