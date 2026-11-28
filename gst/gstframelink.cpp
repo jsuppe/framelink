@@ -1150,7 +1150,7 @@ typedef struct _GstFrameLinkSrc {
     gboolean sharedCpu;
     flSharedCpuChannel* cpuChannel;
 #ifdef FL_GST_EGL_READBACK
-    FrameLinkEglReadback* eglReadback;
+    FrameLinkEglReader* eglReadback;
 #endif
     gboolean memoryPolicyApplied;
     guint64 memoryPoolGeneration;
@@ -1415,11 +1415,13 @@ static gboolean srcStart(GstBaseSrc* base) {
         GST_ELEMENT_ERROR(self,CORE,NEGOTIATION,("authenticated pool generation changed before start"),(NULL));return FALSE;
     }
 #ifdef FL_GST_EGL_READBACK
-    // Open the staging context now: on the first frame it costs about 100 ms,
-    // which a two-slot ring cannot absorb (docs/m6/cpu-path/linux-gpu-readback-rate).
+    // Open the staging context now, on the thread that will read: on the first
+    // frame it costs about 100 ms, and a thread's first use of it about 30 ms,
+    // which a two-slot ring cannot absorb (docs/m6/cpu-path/linux-gpu-readback-rate,
+    // docs/m6/fault-coverage/remaining-cells/feed-startup).
     if(self->gpuReadback){
-        if(!self->eglReadback)self->eglReadback=new FrameLinkEglReadback;
-        if(!self->eglReadback->prepare(self->cinfo.adapterLUID,self->cinfo.width,self->cinfo.height))
+        if(!self->eglReadback)self->eglReadback=new FrameLinkEglReader;
+        if(!self->eglReadback->start(self->cinfo.adapterLUID,self->cinfo.width,self->cinfo.height))
             GST_WARNING_OBJECT(self,"GPU staging not prepared at start; the first frame initializes it");
     }
 #endif
@@ -1785,7 +1787,7 @@ static GstFlowReturn srcCreateImpl(GstPushSrc* push, GstBuffer** outbuf) {
     if (gst_buffer_map(buf, &map, GST_MAP_WRITE)) {
 #ifdef FL_GST_EGL_READBACK
         if(self->gpuReadback){
-            if(!self->eglReadback)self->eglReadback=new FrameLinkEglReadback;
+            if(!self->eglReadback)self->eglReadback=new FrameLinkEglReader;
             {
                 gsttrace::Scope readbackTrace("gst.egl_readback",gsttrace::id(self->channel));
                 filled=self->eglReadback->read(self->ch,frame,self->memoryPolicy,map.data,map.size);
