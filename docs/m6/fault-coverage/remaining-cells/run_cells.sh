@@ -6,7 +6,7 @@
 #         linux-gpu-readback-bgra-1080p60, android-cpu-rgba-4k30,
 #         linux-native-nv12-1080p60-element
 #   MEMORY: native (zero-copy receiver), gpu-readback (Linux GPU-staged CPU
-#   receiver), cpu (Android CPU receiver).
+#   receiver), cpu (Android CPU receiver), shared-cpu (Windows CPU cells).
 # On Android, PLUGIN is ignored (static build); pass x.
 # Declared outcomes, from the documented overload policy and the receiver:
 #  - native receivers hold the slot while downstream holds the buffer: a 200 ms
@@ -15,13 +15,15 @@
 #  - copy-out receivers (gpu-readback, cpu) free the slot as they copy, so a
 #    200 ms stall or burst overwrites the one-frame unread queue: the consumer's
 #    replacement failure (pilot: docs/m6/fault-coverage/remaining-cells/pilot).
+#  - shared CPU delivers late instead: a 200 ms stall or burst is absorbed
+#    (the Linux shared-CPU reference records).
 set -eu
 bench=$1 plugin=$2 out=$3 cell=$4 repeats=${5:-5}
 mkdir -p "$out"
 IFS=- read -r platform memory rest <<E
 $cell
 E
-case $memory in gpu) memory=gpu-readback; rest=${rest#readback-};; esac
+case $memory in gpu) memory=gpu-readback; rest=${rest#readback-};; shared) memory=shared-cpu; rest=${rest#cpu-};; esac
 format=$(echo "$rest" | cut -d- -f1); size=$(echo "$rest" | cut -d- -f2); form=$(echo "$rest" | cut -d- -f3)
 case $size in
  1080p60) geom="--size 1920x1080 --fps 60 --arrival-budget-ms 17"; vframe=360;;
@@ -33,6 +35,7 @@ case $memory in
  native) mem="--native --format $fmt"; stall200=counted-drop; burst200=absorbed; strict=yes;;
  gpu-readback) mem="--gpu-readback --format $fmt"; stall200=replacement-failure; burst200=replacement-failure; strict=no;;
  cpu) mem="--format $fmt"; stall200=replacement-failure; burst200=replacement-failure; strict=no;;
+ shared-cpu) mem="--shared-cpu --format $fmt"; stall200=absorbed; burst200=absorbed; strict=no;;
  *) echo "unknown memory $memory"; exit 2;;
 esac
 case $form in "") ;; element) mem="$mem --mode element";; *) echo "unknown form $form"; exit 2;; esac
