@@ -90,6 +90,11 @@ These hold for the individual elements attached to a session and for the bins.
   `overload`, `closed`) and `original`, the error the element would otherwise
   have posted. The consumer's own failures keep their specific errors; one
   known to be its own (a frame replaced before it was read) is posted at once.
+  GPU device loss is one of those: "FrameLink GPU device lost", code
+  `GST_RESOURCE_ERROR_FAILED`, details `framelink-device-lost`, posted at once
+  and never relabelled a peer failure (Windows and Linux; on Android a GPU reset
+  does not reach FrameLink, so the application must detect it, see
+  [READ_LEASES.md](READ_LEASES.md)).
   For the others, the consumer first takes a producer end already pending on
   the event stream, without waiting, and waits at most 100 ms only if none is
   there. Every FrameLink element that stops its stream posts its own error

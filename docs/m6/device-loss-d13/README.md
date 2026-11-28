@@ -71,7 +71,7 @@ Run on the Windows test host (RTX 5090, driver defaults for timeout detection), 
 ### What this means
 
 - **Windows and Linux:** a real reset reaches FrameLink and is reported as `FL_DEVICE_LOST` (or, on the side whose device survived, `FL_DISCONNECTED`); no frame written behind a hang is delivered. On Linux the fence is the *only* place the reset showed: NVIDIA's GL robustness query stayed silent.
-- **Android (Mali):** a reset never reaches the fence. FrameLink retires an abandoned read as a good one and delivers an unwritten frame as valid. Only the application's own GL context learns of the reset. What FrameLink should offer here is **Jon's decision**: (a) document that Android applications detect resets through GL/Vulkan robustness; (b) an API through which an application reports a reset to FrameLink, making the channel device-lost for both sides (it cannot stop a frame already submitted); (c) (a) now, (b) when a consumer needs it.
+- **Android (Mali):** a reset never reaches the fence. FrameLink retires an abandoned read as a good one and delivers an unwritten frame as valid. Only the application's own GL context learns of the reset. Jon chose **C**: documented now (Android applications detect resets through GL/Vulkan robustness; `framelink.h`, READ_LEASES.md, GST_AV_REFERENCE.md, PLATFORM_PARITY.md); an API through which an application reports a reset to FrameLink (`flReportDeviceLost`) is added only when a consumer needs it. It could not stop a frame already submitted.
 
 ### Not established
 

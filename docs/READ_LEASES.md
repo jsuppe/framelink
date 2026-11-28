@@ -25,6 +25,12 @@ Windows, a completion fence of a removed device returns `FL_DEVICE_LOST`; that
 device can no longer signal retirement. In both cases close the channel and
 recreate GPU objects.
 
+**Android:** measured on Mali, a GPU reset completes the fence *without* an error,
+so FrameLink retires the abandoned read as a good one and never reports
+`FL_DEVICE_LOST`. Android applications must detect resets themselves, through
+GL (`glGetGraphicsResetStatusEXT` in a robust context) or Vulkan
+(`VK_ERROR_DEVICE_LOST`), and close the channel.
+
 Bounded capacity: at most 16 acquired frames and 256 readers per channel. These are
 tracking limits, not an allocated image count or latency target. Existing configured
 pool size is unchanged. Exhaustion returns `FL_BUSY`; no silent growth or overwrite.
