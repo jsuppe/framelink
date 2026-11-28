@@ -644,7 +644,7 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
     (o.cycleFault=="malformed"&&o.restart=="producer"&&o.cycleFaultFrame>0&&o.cycleFaultFrame<guint64(o.seconds)*gFps&&!o.cycleFaultAtMs))));
   // --burst-queue: burst faults only, with raw per-buffer records for the
   // transport-share measure.
-  CHECK(!gBurstQueues||((o.fault=="producer-burst"||o.fault=="audio-stall")&&o.raw&&(o.faultExpect=="absorbed"||(o.fault=="producer-burst"&&o.faultExpect=="replacement-failure"))));}
+  CHECK(!gBurstQueues||((o.fault=="producer-burst"||o.fault=="audio-stall")&&o.raw&&(o.faultExpect=="absorbed"||(o.fault=="producer-burst"&&(o.faultExpect=="replacement-failure"||o.faultExpect=="counted-drop")))));}
  // Both lifecycle roles construct the same shared-CPU-enabled bins as one-shot
  // runs. Permit repeated sessions without changing the production lifetime.
  CHECK(!gSharedCpu||(o.mode=="bin"&&!o.native&&!o.sourceOnly&&!o.localConsumer));

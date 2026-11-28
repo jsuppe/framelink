@@ -15,6 +15,8 @@
 #  - copy-out receivers (gpu-readback, cpu) free the slot as they copy, so a
 #    200 ms stall or burst overwrites the one-frame unread queue: the consumer's
 #    replacement failure (pilot: docs/m6/fault-coverage/remaining-cells/pilot).
+#    The Android CPU receiver's 200 ms burst is a counted ring-full drop at the
+#    producer sink instead (one pilot per size).
 #  - shared CPU delivers late instead: a 200 ms stall or burst is absorbed
 #    (the Linux shared-CPU reference records).
 set -eu
@@ -34,7 +36,7 @@ fmt=$(echo "$format" | tr a-z A-Z)
 case $memory in
  native) mem="--native --format $fmt"; stall200=counted-drop; burst200=absorbed; strict=yes;;
  gpu-readback) mem="--gpu-readback --format $fmt"; stall200=replacement-failure; burst200=replacement-failure; strict=no;;
- cpu) mem="--format $fmt"; stall200=replacement-failure; burst200=replacement-failure; strict=no;;
+ cpu) mem="--format $fmt"; stall200=replacement-failure; burst200=counted-drop; strict=no;;
  shared-cpu) mem="--shared-cpu --format $fmt"; stall200=absorbed; burst200=absorbed; strict=no;;
  *) echo "unknown memory $memory"; exit 2;;
 esac
