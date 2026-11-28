@@ -726,7 +726,7 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
    s["fault.at_s"]=std::to_string(o.faultAtS);s["fault.detection_ms"]=t;s["fault.survivor_result"]=result;
    // Decisions 8 and 9: the side that loses its peer reports the stable peer-failure error.
    const bool stable=result=="error: FrameLink peer closed or failed";s["fault.survivor_error_stable"]=stable?"yes":"no";
-   pass=victimRc==killedStatus&&survivorRc==0&&result.rfind("error",0)==0&&detect>=0&&detect<=o.faultBoundMs&&stable&&contentOk(-1);}
+   pass=victimRc==killedStatus&&survivorRc==0&&result.rfind("error",0)==0&&detect>=0&&detect<=o.faultBoundMs&&stable&&(!producerKilled||contentOk(-1));} // a killed consumer leaves no content record
   else if(producerFault(o.fault)){s["fault.expect"]=o.faultExpect;s["fault.frame"]=std::to_string(o.faultFrame);s["fault.ms"]=std::to_string(o.faultMs);
    const bool audio=o.fault!="producer-burst";const guint period=audio?10:std::max<guint>(1,1000/gFps);
    const guint recoveryLimit=(o.faultMs+period-1)/period+2;s["fault.recovery_limit_frames"]=std::to_string(recoveryLimit);
