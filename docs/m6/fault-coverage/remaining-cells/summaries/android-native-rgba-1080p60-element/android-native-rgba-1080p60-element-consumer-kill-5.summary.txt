@@ -1,0 +1,51 @@
+arrival.budget_ms=17
+complete=yes
+config=RGBA 1920x1080@60 element native 12s
+consumer.pid=5911
+exit=0/137
+expected.frames=720
+expected.samples=576000
+fault=consumer-kill
+fault.at_s=6
+fault.bound_ms=2000
+fault.detection_ms=27.9
+fault.pass=yes
+fault.survivor_error_stable=yes
+fault.survivor_result=error: FrameLink peer closed or failed
+harness.malloc=default
+label=android-native-rgba-1080p60-element-consumer-kill-5
+output.async=false
+output.queue_buffers=1
+output.sync=false
+playback.latency_ms=0
+producer.audio.push_burst.max=0
+producer.audio.push_interval.ms=n=360 p50=10.00 p95=10.19 p99=10.32 max=10.35 min=9.46
+producer.audio.push_lateness.ms=n=360 p50=0.30 p95=0.43 p99=0.53 max=0.75 min=0.16
+producer.cpu.percent=55.91
+producer.ended_monotonic_us=5558707956676
+producer.handles=28..28 min=28 max=28
+producer.handles.slope.per_min=0.00
+producer.injection.elapsed_us=0
+producer.injection.executed=0
+producer.injection.frame=0
+producer.injection.requested_ms=0
+producer.injection.stage=none
+producer.injection.start_monotonic_us=0
+producer.mem.kb=69488..69488 min=69488 max=69488
+producer.mem.kind=rss
+producer.mem.slope.kb_per_min=0.00
+producer.pid=5912
+producer.pushed.frames=335
+producer.pushed.samples=268800
+producer.result=error: FrameLink peer closed or failed
+producer.result.debug=FrameLink video channel lost; gst/gstframelink.cpp(677): sinkRenderImpl (): /GstPipeline:pipeline0/GstFrameLinkSink:video: peer disconnected
+producer.result.source=/GstPipeline:pipeline0/GstFrameLinkSink:video
+producer.series.t_cpums_memkb_handles_threads=0.0:193:41200:6:2;1.0:666:69488:28:7;2.0:1233:69488:28:7;3.0:1798:69488:28:7;4.0:2350:69488:28:7;5.0:2919:69488:28:7;5.9:3374:45124:19:5;
+producer.threads=7..7 min=7 max=7
+producer.threads.slope.per_min=0.00
+producer.video.push_burst.max=0
+producer.video.push_interval.ms=n=215 p50=16.67 p95=16.79 p99=16.87 max=16.92 min=16.44
+producer.video.push_lateness.ms=n=215 p50=0.32 p95=0.45 p99=0.47 max=0.50 min=0.16
+seconds=12
+video.pool=2
+video.queue=1

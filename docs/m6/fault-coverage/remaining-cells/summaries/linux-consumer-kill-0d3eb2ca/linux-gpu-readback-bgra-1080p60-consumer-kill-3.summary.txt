@@ -1,0 +1,55 @@
+arrival.budget_ms=17
+complete=yes
+config=BGRA 1920x1080@60 bin gpu-readback 12s
+consumer.pid=4176267
+exit=0/137
+expected.frames=720
+expected.samples=576000
+fault=consumer-kill
+fault.app_slot_drops=368
+fault.at_s=6
+fault.bound_ms=2000
+fault.detection_ms=13.2
+fault.pass=yes
+fault.survivor_error_stable=yes
+fault.survivor_result=error: FrameLink peer closed or failed
+harness.malloc=producer-side mmap_threshold=8388608
+label=linux-gpu-readback-bgra-1080p60-consumer-kill-3
+output.async=false
+output.queue_buffers=1
+output.sync=false
+playback.latency_ms=0
+producer.audio.push_burst.max=0
+producer.audio.push_interval.ms=n=999 p50=10.00 p95=10.05 p99=10.08 max=10.13 min=9.85
+producer.audio.push_lateness.ms=n=999 p50=0.13 p95=0.15 p99=0.18 max=0.20 min=0.04
+producer.cpu.percent=2.97
+producer.ended_monotonic_us=606744018637
+producer.handles=16..16 min=16 max=16
+producer.handles.slope.per_min=0.00
+producer.injection.elapsed_us=0
+producer.injection.executed=0
+producer.injection.frame=0
+producer.injection.requested_ms=0
+producer.injection.stage=none
+producer.injection.start_monotonic_us=0
+producer.mem.kb=16836..16904 min=16836 max=16904
+producer.mem.kind=rss
+producer.mem.slope.kb_per_min=0.00
+producer.native.acquired=352
+producer.native.slot_drop_frames=352 353 354 355 356 357 358 359 360 361 362 363 364 365 366 367 368 369 370 371 372 373 374 375 376 377 378 379 380 381 382 383 
+producer.native.slot_drops=368
+producer.pid=4176296
+producer.pushed.frames=352
+producer.pushed.samples=575520
+producer.result=error: FrameLink peer closed or failed
+producer.result.debug=required session tracks not ready or cancelled; gst/gstframelinkaudio.cpp(35): rejectSession (): /GstPipeline:pipeline0/GstFrameLinkAvSink:s/GstFrameLinkAudioSink:audio: FrameLink audio session ended
+producer.result.source=/GstPipeline:pipeline0/GstFrameLinkAvSink:s/GstFrameLinkAudioSink:audio
+producer.series.t_cpums_memkb_handles_threads=0.0:14:13708:6:2;1.0:49:16836:16:9;2.0:109:16836:16:9;3.0:165:16836:16:9;4.0:222:16836:16:9;5.0:274:16836:16:9;6.0:317:16904:16:8;7.0:332:16904:16:8;8.0:348:16904:16:8;9.0:363:16904:16:8;10.0:378:16904:16:8;11.0:393:16904:16:8;12.0:407:16904:16:8;12.2:410:16868:14:6;
+producer.threads=9..8 min=8 max=9
+producer.threads.slope.per_min=0.00
+producer.video.push_burst.max=0
+producer.video.push_interval.ms=n=232 p50=16.67 p95=16.85 p99=16.91 max=16.94 min=16.22
+producer.video.push_lateness.ms=n=232 p50=0.48 p95=0.66 p99=0.70 max=0.71 min=0.12
+seconds=12
+video.pool=2
+video.queue=1

@@ -1,0 +1,85 @@
+arrival.budget_ms=34
+complete=yes
+config=BGRA 3840x2160@30 bin gpu-readback 12s
+consumer.audio.arrival.all.ms=n=586 p50=0.56 p95=0.59 p99=0.59 max=0.60 min=0.15
+consumer.audio.arrival.ms=n=386 p50=0.56 p95=0.59 p99=0.60 max=0.60 min=0.15
+consumer.audio.contiguous=yes
+consumer.audio.deadline_misses=0/586
+consumer.audio.gap_event_ns=0
+consumer.audio.gap_events=0
+consumer.audio.output_queue.admission_residence.ms=n=586 p50=0.09 p95=0.10 p99=0.10 max=0.10 min=0.01
+consumer.audio.output_queue.pending=0
+consumer.audio.output_queue.sampled_max_buffers=0
+consumer.audio.output_queue.unmatched=0
+consumer.audio.pts_jump_ns=0
+consumer.audio.pts_jumps=0
+consumer.audio.render.all.ms=n=586 p50=0.67 p95=0.70 p99=0.71 max=0.72 min=0.17
+consumer.audio.render.ms=n=386 p50=0.67 p95=0.70 p99=0.71 max=0.72 min=0.17
+consumer.audio.render_interval.ms=n=385 p50=10.00 p95=10.06 p99=10.18 max=10.33 min=9.50
+consumer.audio.render_jitter.p1_p99.ms=0.46
+consumer.av_offset.abs.ms=n=4 p50=12.26 p95=16.35 p99=16.35 max=16.35 min=10.84
+consumer.av_offset.ms=n=4 p50=12.26 p95=16.35 p99=16.35 max=16.35 min=10.84
+consumer.content.checked=176
+consumer.content.index_gaps=0
+consumer.content.layout=offset=0 stride=15360 size=33177600
+consumer.content.mismatches=0
+consumer.content.missing_frames=0
+consumer.content.rows=4
+consumer.cpu.percent=36.27
+consumer.ended_monotonic_us=605435983676
+consumer.frames=176
+consumer.handles=45..44 min=44 max=45
+consumer.handles.slope.per_min=0.00
+consumer.mem.kb=175084..177144 min=175084 max=177144
+consumer.mem.kind=rss
+consumer.mem.slope.kb_per_min=61396.58
+consumer.memory=memory:SystemMemory
+consumer.pid=4164564
+consumer.queue.accounting=complete
+consumer.result=error: FrameLink peer closed or failed
+consumer.result.debug=audio peer closed before GDP EOS; gst/gstframelinkaudiosrc.cpp(67): readChunkImpl (): /GstPipeline:pipeline0/GstFrameLinkAvSrc:c/GstFrameLinkAudioSrc:audio/FlAudioReader:flaudioreader1
+consumer.result.source=/GstPipeline:pipeline0/GstFrameLinkAvSrc:c/GstFrameLinkAudioSrc:audio/FlAudioReader:flaudioreader1
+consumer.samples=281280
+consumer.scope=transport-consumer
+consumer.series.t_cpums_memkb_handles_threads=0.0:10:13628:6:2;1.0:350:175080:45:11;2.0:672:175084:45:11;3.0:966:175092:45:11;4.0:1298:175092:44:11;5.0:1684:175096:44:11;6.0:2126:177144:44:11;6.3:2274:114812:43:7;
+consumer.threads=11..11 min=11 max=11
+consumer.threads.slope.per_min=0.00
+consumer.video.arrival.all.ms=n=176 p50=12.39 p95=16.97 p99=20.89 max=35.78 min=4.02
+consumer.video.arrival.ms=n=116 p50=13.03 p95=17.03 p99=18.59 max=20.89 min=4.27
+consumer.video.buffer_alive_at_end=0
+consumer.video.buffer_life_after_callback.ms=n=176 p50=2932.49 p95=5605.58 p99=5837.84 max=5870.81 min=3.94
+consumer.video.callback_refcount_hist=0,0,0,176,0,0,0,0
+consumer.video.deadline_misses=1/176
+consumer.video.discont_after_first=0
+consumer.video.gap_event_ns=0
+consumer.video.gap_events=0
+consumer.video.output_queue.admission_residence.ms=n=176 p50=0.09 p95=0.10 p99=0.11 max=0.11 min=0.00
+consumer.video.output_queue.pending=0
+consumer.video.output_queue.sampled_max_buffers=0
+consumer.video.output_queue.unmatched=0
+consumer.video.render.all.ms=n=176 p50=12.64 p95=17.21 p99=21.21 max=35.83 min=4.09
+consumer.video.render.ms=n=116 p50=13.28 p95=17.28 p99=18.83 max=21.21 min=4.34
+consumer.video.render_interval.ms=n=115 p50=33.16 p95=37.19 p99=38.02 max=38.81 min=25.03
+consumer.video.render_jitter.p1_p99.ms=14.24
+exit=137/0
+expected.frames=360
+expected.samples=576000
+fault=producer-kill
+fault.app_slot_drops=0
+fault.at_s=6
+fault.bound_ms=2000
+fault.content_ok=yes
+fault.detection_ms=3.3
+fault.pass=yes
+fault.survivor_error_stable=yes
+fault.survivor_result=error: FrameLink peer closed or failed
+harness.malloc=producer-side mmap_threshold=8388608
+label=linux-gpu-readback-bgra-4k30-producer-kill-3
+output.async=false
+output.queue_buffers=1
+output.sync=false
+playback.latency_ms=0
+producer.pid=4164574
+seconds=12
+video.pool=2
+video.queue=1

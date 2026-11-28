@@ -1,0 +1,77 @@
+arrival.budget_ms=17
+complete=yes
+config=NV12 1920x1080@60 element native 12s
+consumer.audio.arrival.all.ms=n=578 p50=0.51 p95=0.53 p99=0.54 max=1.33 min=0.16
+consumer.audio.arrival.ms=n=378 p50=0.51 p95=0.53 p99=0.54 max=0.55 min=0.19
+consumer.audio.contiguous=yes
+consumer.audio.deadline_misses=0/578
+consumer.audio.gap_event_ns=0
+consumer.audio.gap_events=0
+consumer.audio.output_queue.admission_residence.ms=n=578 p50=0.09 p95=0.09 p99=0.10 max=0.10 min=0.01
+consumer.audio.output_queue.pending=0
+consumer.audio.output_queue.sampled_max_buffers=0
+consumer.audio.output_queue.unmatched=0
+consumer.audio.pts_jump_ns=0
+consumer.audio.pts_jumps=0
+consumer.audio.render.all.ms=n=578 p50=0.62 p95=0.64 p99=0.65 max=1.40 min=0.20
+consumer.audio.render.ms=n=378 p50=0.62 p95=0.64 p99=0.65 max=0.66 min=0.24
+consumer.audio.render_interval.ms=n=377 p50=10.00 p95=10.05 p99=10.08 max=10.18 min=9.70
+consumer.audio.render_jitter.p1_p99.ms=0.34
+consumer.av_offset.abs.ms=n=4 p50=2.18 p95=2.18 p99=2.18 max=2.18 min=2.15
+consumer.av_offset.ms=n=4 p50=2.18 p95=2.18 p99=2.18 max=2.18 min=2.15
+consumer.cpu.percent=5.87
+consumer.ended_monotonic_us=606219618104
+consumer.frames=347
+consumer.handles=22..22 min=22 max=22
+consumer.handles.slope.per_min=-0.00
+consumer.mem.kb=16436..16440 min=16436 max=16440
+consumer.mem.kind=rss
+consumer.mem.slope.kb_per_min=-0.00
+consumer.memory=memory:DMABuf
+consumer.pid=4171685
+consumer.queue.accounting=complete
+consumer.result=error: FrameLink peer closed or failed
+consumer.result.debug=audio peer closed before GDP EOS; gst/gstframelinkaudiosrc.cpp(67): readChunkImpl (): /GstPipeline:pipeline0/GstFrameLinkAudioSrc:framelinkaudiosrc0/FlAudioReader:flaudioreader0
+consumer.result.source=/GstPipeline:pipeline0/GstFrameLinkAudioSrc:framelinkaudiosrc0/FlAudioReader:flaudioreader0
+consumer.samples=277440
+consumer.scope=transport-consumer
+consumer.series.t_cpums_memkb_handles_threads=0.0:9:13852:7:2;1.0:47:16436:22:10;2.0:105:16436:22:10;3.0:162:16440:22:10;4.0:222:16440:22:10;5.0:279:16440:22:10;6.0:340:16440:22:10;6.2:352:16208:12:6;
+consumer.threads=10..10 min=10 max=10
+consumer.threads.slope.per_min=-0.00
+consumer.video.arrival.all.ms=n=347 p50=2.65 p95=3.60 p99=3.80 max=3.90 min=1.49
+consumer.video.arrival.ms=n=227 p50=2.65 p95=3.67 p99=3.79 max=3.84 min=1.49
+consumer.video.buffer_alive_at_end=0
+consumer.video.buffer_life_after_callback.ms=n=347 p50=17.03 p95=17.15 p99=17.20 max=17.24 min=8.62
+consumer.video.callback_refcount_hist=0,0,0,347,0,0,0,0
+consumer.video.deadline_misses=0/347
+consumer.video.discont_after_first=0
+consumer.video.gap_event_ns=0
+consumer.video.gap_events=0
+consumer.video.output_queue.admission_residence.ms=n=347 p50=0.09 p95=0.10 p99=0.12 max=0.19 min=0.01
+consumer.video.output_queue.pending=0
+consumer.video.output_queue.sampled_max_buffers=0
+consumer.video.output_queue.unmatched=0
+consumer.video.render.all.ms=n=347 p50=2.80 p95=3.74 p99=3.94 max=3.98 min=1.54
+consumer.video.render.ms=n=227 p50=2.80 p95=3.81 p99=3.93 max=3.98 min=1.54
+consumer.video.render_interval.ms=n=226 p50=17.07 p95=17.19 p99=17.26 max=17.29 min=14.83
+consumer.video.render_jitter.p1_p99.ms=2.11
+exit=137/0
+expected.frames=720
+expected.samples=576000
+fault=producer-kill
+fault.at_s=6
+fault.bound_ms=2000
+fault.detection_ms=5.6
+fault.pass=yes
+fault.survivor_error_stable=yes
+fault.survivor_result=error: FrameLink peer closed or failed
+harness.malloc=producer-side mmap_threshold=8388608
+label=linux-native-nv12-1080p60-element-producer-kill-3
+output.async=false
+output.queue_buffers=1
+output.sync=false
+playback.latency_ms=0
+producer.pid=4171696
+seconds=12
+video.pool=2
+video.queue=1

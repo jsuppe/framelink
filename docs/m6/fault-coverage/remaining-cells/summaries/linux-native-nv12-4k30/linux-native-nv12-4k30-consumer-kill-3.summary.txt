@@ -1,0 +1,51 @@
+arrival.budget_ms=34
+complete=yes
+config=NV12 3840x2160@30 bin native 12s
+consumer.pid=4149931
+exit=0/137
+expected.frames=360
+expected.samples=576000
+fault=consumer-kill
+fault.at_s=6
+fault.bound_ms=2000
+fault.detection_ms=7.6
+fault.pass=yes
+fault.survivor_error_stable=yes
+fault.survivor_result=error: FrameLink peer closed or failed
+harness.malloc=producer-side mmap_threshold=8388608
+label=linux-native-nv12-4k30-consumer-kill-3
+output.async=false
+output.queue_buffers=1
+output.sync=false
+playback.latency_ms=0
+producer.audio.push_burst.max=0
+producer.audio.push_interval.ms=n=397 p50=10.00 p95=10.03 p99=10.06 max=10.13 min=9.92
+producer.audio.push_lateness.ms=n=397 p50=0.14 p95=0.16 p99=0.18 max=0.20 min=0.06
+producer.cpu.percent=28.14
+producer.ended_monotonic_us=603853359303
+producer.handles=16..16 min=16 max=16
+producer.handles.slope.per_min=0.00
+producer.injection.elapsed_us=0
+producer.injection.executed=0
+producer.injection.frame=0
+producer.injection.requested_ms=0
+producer.injection.stage=none
+producer.injection.start_monotonic_us=0
+producer.mem.kb=54536..54536 min=54536 max=54536
+producer.mem.kind=rss
+producer.mem.slope.kb_per_min=0.00
+producer.pid=4149941
+producer.pushed.frames=179
+producer.pushed.samples=286560
+producer.result=error: FrameLink peer closed or failed
+producer.result.debug=required session tracks not ready or cancelled; gst/gstframelinkaudio.cpp(35): rejectSession (): /GstPipeline:pipeline0/GstFrameLinkAvSink:s/GstFrameLinkAudioSink:audio: FrameLink audio session ended
+producer.result.source=/GstPipeline:pipeline0/GstFrameLinkAvSink:s/GstFrameLinkAudioSink:audio
+producer.series.t_cpums_memkb_handles_threads=0.0:15:13700:6:2;1.0:256:54536:16:8;2.0:532:54536:16:8;3.0:822:54536:16:8;4.0:1095:54536:16:8;5.0:1378:54536:16:8;6.0:1674:18208:11:6;
+producer.threads=8..8 min=8 max=8
+producer.threads.slope.per_min=0.00
+producer.video.push_burst.max=0
+producer.video.push_interval.ms=n=119 p50=33.33 p95=33.38 p99=33.41 max=33.42 min=33.24
+producer.video.push_lateness.ms=n=119 p50=0.14 p95=0.15 p99=0.15 max=0.20 min=0.06
+seconds=12
+video.pool=2
+video.queue=1
