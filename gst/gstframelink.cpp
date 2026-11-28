@@ -607,11 +607,27 @@ static GstFlowReturn sinkRenderImpl(GstBaseSink* base, GstBuffer* buffer) {
         if(self->preserveFrameMetadata)valid=frameMetadataFromBuffer(buffer,&base->segment,self->streamGeneration,pts,metadata);
         else if(self->preserveTimestamps)valid=frameRunningTime(&base->segment,GST_BUFFER_PTS(buffer),pts);
         if(self->session&&self->sessionMarkDiscont)metadata.flags|=FL_FRAME_DISCONT;
-        if(valid && self->haveInfo && self->nativeProducer && (*self->nativeProducer)->submit(buffer,pts,self->preserveFrameMetadata?&metadata:nullptr)==FL_OK){
+        flResult submitted=FL_INVALID;
+        if(valid && self->haveInfo && self->nativeProducer)submitted=(*self->nativeProducer)->submit(buffer,pts,self->preserveFrameMetadata?&metadata:nullptr);
+        if(submitted==FL_OK){
             ++self->submitted;if(self->session){++self->sessionFrames;self->sessionLastPts=pts;self->sessionGapPending=FALSE;}account("gst.native_frame_submitted");return trace.result(GST_FLOW_OK);
         }
-#endif
         ++self->dropped;account("gst.frame_drop.native_rejected");
+        // Decision 15: one error per cause. Bad metadata is the producer's
+        // invalid input; a closed channel is a transport error, which becomes
+        // "FrameLink peer closed or failed" once the consumer's close arrives;
+        // device loss keeps decision 13's stable error.
+        if(!valid){GST_ELEMENT_ERROR(self,STREAM,FORMAT,("valid supported frame metadata and TIME mapping required"),(NULL));return trace.result(GST_FLOW_ERROR);}
+        if(submitted==FL_DISCONNECTED){GST_ELEMENT_ERROR(self,RESOURCE,WRITE,("native frame submit failed: FrameLink channel closed"),(NULL));return trace.result(GST_FLOW_ERROR);}
+        if(submitted==FL_DEVICE_LOST){
+            GST_ELEMENT_ERROR_WITH_DETAILS(self,RESOURCE,FAILED,("FrameLink GPU device lost"),
+                ("native frame submit: a GPU fence completed with an error or the device was removed; recreate GPU objects before reconnecting"),
+                ("framelink-local-failure",G_TYPE_BOOLEAN,TRUE,"framelink-device-lost",G_TYPE_BOOLEAN,TRUE,nullptr));
+            return trace.result(GST_FLOW_ERROR);
+        }
+#else
+        ++self->dropped;account("gst.frame_drop.native_rejected");
+#endif
         GST_ELEMENT_ERROR(self,STREAM,FORMAT,("native sink requires its own reserved allocation and valid metadata; no copy fallback"),(NULL));
         return trace.result(GST_FLOW_ERROR);
     }

@@ -44,7 +44,9 @@
 //   --fault-frame N (video frame, or 10 ms audio block, 1-based) --fault-ms M
 //   (1..1000), injected at the source's push (see pushed()). Expectations:
 //     producer-burst: absorbed (as above, on video), counted-drop or
-//       replacement-failure (as for consumer-stall);
+//       replacement-failure (as for consumer-stall), or
+//       replaced-or-counted-drop: either of those two (decision 15: a copy-out
+//       receiver behind a one-frame unread queue may take either);
 //     audio-stall: absorbed (on audio; recovery within ceil(M/10)+2 blocks);
 //     audio-drop: explicit-failure (the producer refuses the timestamp gap,
 //       "continuity mismatch"; the consumer does not report EOS and ends within
@@ -634,7 +636,7 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
    o.faultFrame<guint64(o.seconds)*(o.fault.rfind("video",0)==0?gFps:100)));
   CHECK(!prod||malformedFault(o.fault)||(o.faultFrame>0&&o.faultMs>0&&o.faultMs<=1000&&!o.faultAtS&&
    (o.fault=="producer-burst"?o.faultFrame<guint64(o.seconds)*gFps:guint64(o.faultFrame)+(o.faultMs+9)/10<guint64(o.seconds)*100)&&
-   ((o.fault=="producer-burst"&&(o.faultExpect=="absorbed"||o.faultExpect=="counted-drop"||o.faultExpect=="replacement-failure"))||(o.fault=="audio-stall"&&o.faultExpect=="absorbed")||
+   ((o.fault=="producer-burst"&&(o.faultExpect=="absorbed"||o.faultExpect=="counted-drop"||o.faultExpect=="replacement-failure"||o.faultExpect=="replaced-or-counted-drop"))||(o.fault=="audio-stall"&&o.faultExpect=="absorbed")||
     (o.fault=="audio-drop"&&o.faultExpect=="explicit-failure")||(o.fault=="audio-gap"&&o.faultExpect=="gap-visible"))));
   CHECK(!kill||(o.faultAtS>=WARMUP_S+1&&o.faultAtS+2<=o.seconds&&!o.faultFrame&&!o.faultMs&&o.faultExpect.empty()));
   CHECK(!stall||(o.faultFrame>0&&o.faultFrame<guint64(o.seconds)*gFps&&o.faultMs>0&&o.faultMs<=5000&&(o.faultExpect=="absorbed"||o.faultExpect=="counted-drop"||o.faultExpect=="replacement-failure"||o.faultExpect=="explicit-failure")));
@@ -644,7 +646,7 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
     (o.cycleFault=="malformed"&&o.restart=="producer"&&o.cycleFaultFrame>0&&o.cycleFaultFrame<guint64(o.seconds)*gFps&&!o.cycleFaultAtMs))));
   // --burst-queue: burst faults only, with raw per-buffer records for the
   // transport-share measure.
-  CHECK(!gBurstQueues||((o.fault=="producer-burst"||o.fault=="audio-stall")&&o.raw&&(o.faultExpect=="absorbed"||(o.fault=="producer-burst"&&(o.faultExpect=="replacement-failure"||o.faultExpect=="counted-drop")))));}
+  CHECK(!gBurstQueues||((o.fault=="producer-burst"||o.fault=="audio-stall")&&o.raw&&(o.faultExpect=="absorbed"||(o.fault=="producer-burst"&&(o.faultExpect=="replacement-failure"||o.faultExpect=="counted-drop"||o.faultExpect=="replaced-or-counted-drop")))));}
  // Both lifecycle roles construct the same shared-CPU-enabled bins as one-shot
  // runs. Permit repeated sessions without changing the production lifetime.
  CHECK(!gSharedCpu||(o.mode=="bin"&&!o.native&&!o.sourceOnly&&!o.localConsumer));
@@ -792,11 +794,16 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
     // one-frame unread queue: the consumer fails with the replacement error.
     else if(o.faultExpect=="replacement-failure")pass=executed&&ended&&cr["result"].find("replaced before it was read")!=std::string::npos&&pr["result"]!="EOS"&&contentOk(-1);
     else{// counted-drop (producer-burst): every video loss counted by the producer sink.
+     // replaced-or-counted-drop (decision 15, Jon): a copy-out receiver behind a
+     // one-frame unread queue may take either outcome; neither may hide a loss.
+     const bool replaced=executed&&ended&&cr["result"].find("replaced before it was read")!=std::string::npos&&pr["result"]!="EOS"&&contentOk(-1);
      auto counter=[&](const char*key)->long long{const std::string&t=pr["stats.framelink-sink-stats"];auto at=t.find(std::string(key)+"=(guint64)");return at==std::string::npos?-1:std::stoll(t.substr(at+strlen(key)+10));};
      const long long dropped=counter("dropped"),delivered=cr["frames"].empty()?-1:std::stoll(cr["frames"]),pushed=std::stoll(pr["pushed.frames"]);
      s["fault.producer_dropped"]=std::to_string(dropped);
      const long long expectedFrames=std::stoll(s["expected.frames"]);
-     pass=executed&&ended&&bothEos&&dropped+slotDrops>0&&delivered+dropped==pushed&&pushed+slotDrops==expectedFrames&&contentOk(dropped+slotDrops)&&cr["audio.contiguous"]=="yes"&&cr["samples"]==s["expected.samples"]&&cr["queue.accounting"]=="complete";}}}
+     const bool counted=executed&&ended&&bothEos&&dropped+slotDrops>0&&delivered+dropped==pushed&&pushed+slotDrops==expectedFrames&&contentOk(dropped+slotDrops)&&cr["audio.contiguous"]=="yes"&&cr["samples"]==s["expected.samples"]&&cr["queue.accounting"]=="complete";
+     if(o.faultExpect=="replaced-or-counted-drop"){pass=replaced||counted;s["fault.outcome"]=counted?"counted-drop":replaced?"replacement-failure":"neither";}
+     else pass=counted;}}}
   else{s["fault.expect"]=o.faultExpect;s["fault.frame"]=std::to_string(o.faultFrame);s["fault.ms"]=std::to_string(o.faultMs);
    // Producer sink drop counters (framelink-sink-stats at EOS; absent on error).
    auto counter=[&](const char*key)->long long{const std::string&t=pr["stats.framelink-sink-stats"];auto at=t.find(std::string(key)+"=(guint64)");return at==std::string::npos?-1:std::stoll(t.substr(at+strlen(key)+10));};
