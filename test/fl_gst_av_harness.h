@@ -151,7 +151,7 @@ struct Producer:Side {
 #ifdef FL_BENCH_GPU_READBACK
   // The bench feeds this appsrc from the sink's own pool (feedNative).
   if(gGpuReadback){CHECK(m==Mode::Bin&&tracks=="av"&&!fileLike);
-   vs="appsrc name=vsrc is-live=true format=time caps=video/x-raw(memory:DMABuf),format="+gFormat+",width="+std::to_string(gWidth)+",height="+std::to_string(gHeight)+",framerate="+std::to_string(gFps)+"/1 ! ";}
+   vs="appsrc name=vsrc is-live=true format=time caps=video/x-raw(memory:DMABuf),format="+gFormat+",width="+std::to_string(gWidth)+",height="+std::to_string(gHeight)+",framerate="+std::to_string(gFps)+"/1 ! "+vq;}
 #else
   CHECK(!gGpuReadback);
 #endif
@@ -163,6 +163,8 @@ struct Producer:Side {
    if(gGpuReadback){g_object_set(s,"native-memory",TRUE,"video-pool",gVideoPool,nullptr);selectReadbackCandidate(s);}
 #endif
    gst_object_unref(s);}
+  // Element mode (decision 15 D1): the same overload policy on the video sink itself.
+  else if(gErrorOnRingFull){auto*v=gst_bin_get_by_name(GST_BIN(p),"video");CHECK(v);g_object_set(v,"error-on-ring-full",TRUE,nullptr);gst_object_unref(v);}
   for(const char*n:{"vsrc","asrc"}){auto*e=gst_bin_get_by_name(GST_BIN(p),n);if(!e)continue;auto*pad=gst_element_get_static_pad(e,"src");
    gst_pad_add_probe(pad,GST_PAD_PROBE_TYPE_BUFFER,[](GstPad*pad,GstPadProbeInfo*info,gpointer d)->GstPadProbeReturn{auto*self=static_cast<Producer*>(d);
     if(!strcmp(GST_OBJECT_NAME(GST_OBJECT_PARENT(pad)),"vsrc"))self->pushedFrames++;else self->pushedSamples+=gst_buffer_get_size(GST_PAD_PROBE_INFO_BUFFER(info))/4;return GST_PAD_PROBE_OK;},this,nullptr);

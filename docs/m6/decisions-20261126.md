@@ -128,3 +128,15 @@ Options not chosen: context reset plus Windows-only device reset (A1); whole-dev
 
 The real resets showed that on Android (Mali) a GPU reset completes fences without an error, so FrameLink cannot see it: an abandoned read retires as good and an unwritten frame is delivered as valid; only the application's GL context learns of the reset ([record](device-loss-d13/README.md#real-resets-jon-said-the-hosts-were-free)). Jon chose **C**: document now that Android applications detect resets through their own GL/Vulkan robustness query (`framelink.h`, [READ_LEASES.md](../READ_LEASES.md), [GST_AV_REFERENCE.md](../GST_AV_REFERENCE.md), [PLATFORM_PARITY.md](../PLATFORM_PARITY.md)); add an API for an application to report a reset to FrameLink (`flReportDeviceLost`, making the channel device-lost for both sides) only when a consumer needs it. Not chosen: documentation only, with no API planned (A); the API now (B).
 
+### Decision 15: fault coverage on the remaining cells (2026-11-27)
+
+The M6.4 at-rate fault records cover three 1080p60 cells (Linux native NV12, Linux shared-CPU NV12, Android native RGBA); decision 17 (B1) makes the rest release-blocking. Jon chose **A1, B2, C2, D1**:
+
+| Question | Choice | What it means |
+|---|---|---|
+| Cells | **A1** | Every supported requirement cell on every platform: Linux native BGRA 1080p60, native BGRA and NV12 4K30, the GPU-staged CPU receiver (BGRA 1080p60 and 4K30); Android native RGBA 4K30 and the CPU receiver (1080p60, 4K30); Windows native and CPU, BGRA and NV12, 1080p60 and 4K30. Unsupported cells stay recorded limits. |
+| Depth | **B2** | The full declared case set, 5 runs each, on every new cell (endpoint death, consumer stalls including strict, producer bursts, audio stall/drop/gap, malformed metadata). The 100-cycle growth runs on one cell per platform and memory path. |
+| Windows | **C2** | Build the Windows fault driver now and smoke it on one cell; the full Windows campaign runs once, inside decision 14's requalification, on the final revision. |
+| Element mode | **D1** | One cell per platform with the individual elements instead of the bins. |
+
+Options not chosen: one representative cell per platform, memory path and format (A2); growth runs on every new cell (B1); the full Windows campaign now and again at requalification (C1); element mode as a documented gap (D2). Declared outcomes per cell are set from the documented overload policy and receiver mechanism before the runs; a cell needing a new outcome gets it from one recorded pilot, and no rerun replaces a failure.
