@@ -1,0 +1,51 @@
+arrival.budget_ms=34
+complete=yes
+config=RGBA 3840x2160@30 bin native 12s
+consumer.pid=7572
+exit=0/137
+expected.frames=360
+expected.samples=576000
+fault=consumer-kill
+fault.at_s=6
+fault.bound_ms=2000
+fault.detection_ms=36.5
+fault.pass=yes
+fault.survivor_error_stable=yes
+fault.survivor_result=error: FrameLink peer closed or failed
+harness.malloc=default
+label=android-native-rgba-4k30-consumer-kill-4
+output.async=false
+output.queue_buffers=1
+output.sync=false
+playback.latency_ms=0
+producer.audio.push_burst.max=0
+producer.audio.push_interval.ms=n=369 p50=9.99 p95=10.30 p99=10.47 max=10.66 min=9.19
+producer.audio.push_lateness.ms=n=369 p50=0.36 p95=0.58 p99=0.78 max=1.05 min=0.18
+producer.cpu.percent=56.42
+producer.ended_monotonic_us=5586653940501
+producer.handles=28..28 min=28 max=28
+producer.handles.slope.per_min=0.00
+producer.injection.elapsed_us=0
+producer.injection.executed=0
+producer.injection.frame=0
+producer.injection.requested_ms=0
+producer.injection.stage=none
+producer.injection.start_monotonic_us=0
+producer.mem.kb=138096..138096 min=138096 max=138096
+producer.mem.kind=rss
+producer.mem.slope.kb_per_min=0.00
+producer.pid=7573
+producer.pushed.frames=168
+producer.pushed.samples=273120
+producer.result=error: FrameLink peer closed or failed
+producer.result.debug=required session tracks not ready or cancelled; gst/gstframelinkaudio.cpp(35): rejectSession (): /GstPipeline:pipeline0/GstFrameLinkAvSink:s/GstFrameLinkAudioSink:audio: FrameLink audio session ended
+producer.result.source=/GstPipeline:pipeline0/GstFrameLinkAvSink:s/GstFrameLinkAudioSink:audio
+producer.series.t_cpums_memkb_handles_threads=0.0:199:37500:6:2;1.0:823:138096:28:7;2.0:1395:138096:28:7;3.0:1966:138096:28:7;4.0:2528:138096:28:7;5.0:3099:138096:28:7;5.9:3574:40920:19:5;
+producer.threads=7..7 min=7 max=7
+producer.threads.slope.per_min=0.00
+producer.video.push_burst.max=0
+producer.video.push_interval.ms=n=108 p50=33.33 p95=33.44 p99=33.46 max=33.46 min=33.19
+producer.video.push_lateness.ms=n=108 p50=0.23 p95=0.33 p99=0.37 max=0.38 min=0.10
+seconds=12
+video.pool=2
+video.queue=1

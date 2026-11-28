@@ -140,3 +140,8 @@ The M6.4 at-rate fault records cover three 1080p60 cells (Linux native NV12, Lin
 | Element mode | **D1** | One cell per platform with the individual elements instead of the bins. |
 
 Options not chosen: one representative cell per platform, memory path and format (A2); growth runs on every new cell (B1); the full Windows campaign now and again at requalification (C1); element mode as a documented gap (D2). Declared outcomes per cell are set from the documented overload policy and receiver mechanism before the runs; a cell needing a new outcome gets it from one recorded pilot, and no rerun replaces a failure.
+
+**Follow-ups from the first campaign (Jon, 2026-11-28; [record](fault-coverage/remaining-cells/README.md)):**
+
+1. **Native sink errors, one per cause:** approved. Invalid metadata reports the specific metadata error. A closed channel becomes "FrameLink peer closed or failed". Device loss reports decision 13's error. This is a Windows product change; it is requalified with decision 14.
+2. **200 ms burst on the copy-out receivers** (Linux GPU-staged, Android CPU): either the replacement failure or counted drops is acceptable, provided each meets its full check, so no loss is hidden (`replaced-or-counted-drop`). Not chosen: a deeper unread queue on these paths that would require counted drops.

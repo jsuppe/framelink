@@ -1,0 +1,109 @@
+arrival.budget_ms=17
+complete=yes
+config=NV12 1920x1080@60 bin native 12s
+consumer.audio.arrival.all.ms=n=1195 p50=0.89 p95=1.91 p99=2.01 max=4.95 min=0.09
+consumer.audio.arrival.ms=n=995 p50=0.87 p95=1.90 p99=2.01 max=4.95 min=0.09
+consumer.audio.contiguous=no
+consumer.audio.deadline_misses=0/1195
+consumer.audio.gap_event_ns=50000000
+consumer.audio.gap_events=1
+consumer.audio.output_queue.admission_residence.ms=n=1195 p50=0.01 p95=0.01 p99=0.01 max=0.06 min=0.00
+consumer.audio.output_queue.pending=0
+consumer.audio.output_queue.sampled_max_buffers=0
+consumer.audio.output_queue.unmatched=0
+consumer.audio.pts_jump_ns=50000000
+consumer.audio.pts_jumps=1
+consumer.audio.render.all.ms=n=1195 p50=0.90 p95=1.92 p99=2.02 max=4.98 min=0.09
+consumer.audio.render.ms=n=995 p50=0.88 p95=1.91 p99=2.03 max=4.98 min=0.09
+consumer.audio.render_interval.ms=n=994 p50=10.00 p95=11.01 p99=11.02 max=59.99 min=5.40
+consumer.audio.render_jitter.p1_p99.ms=1.91
+consumer.av_offset.abs.ms=n=10 p50=2.39 p95=2.62 p99=2.62 max=2.62 min=1.20
+consumer.av_offset.ms=n=10 p50=2.39 p95=2.62 p99=2.62 max=2.62 min=1.20
+consumer.cpu.percent=4.33
+consumer.ended_monotonic_us=772432974398
+consumer.frames=720
+consumer.handles=1702..1701 min=1701 max=1702
+consumer.handles.slope.per_min=-8.20
+consumer.mem.kb=77792..71700 min=71700 max=77792
+consumer.mem.kind=private
+consumer.mem.slope.kb_per_min=0.00
+consumer.memory=memory:D3D11Memory
+consumer.pid=25956
+consumer.queue.accounting=complete
+consumer.result=EOS
+consumer.samples=573600
+consumer.scope=transport-consumer
+consumer.series.t_cpums_memkb_handles_threads=0.0:109:6648:270:12;1.1:1312:77100:2695:46;2.1:1750:77792:1702:46;3.2:1797:77792:1702:46;4.2:1828:71700:1702:46;5.3:1859:71700:1702:46;6.3:1922:71700:1702:46;7.3:1953:71700:1702:46;8.4:2000:71700:1702:46;9.4:2031:71700:1702:46;10.5:2062:71700:1702:46;11.5:2125:71700:1702:46;12.6:2203:71700:1701:46;12.7:2234:37872:1530:19;
+consumer.threads=46..46 min=46 max=46
+consumer.threads.slope.per_min=0.00
+consumer.video.arrival.all.ms=n=720 p50=2.93 p95=4.46 p99=4.87 max=4.98 min=0.94
+consumer.video.arrival.ms=n=600 p50=3.12 p95=4.55 p99=4.88 max=4.98 min=0.94
+consumer.video.buffer_alive_at_end=0
+consumer.video.buffer_life_after_callback.ms=n=720 p50=15.99 p95=17.99 p99=18.22 max=103.06 min=13.96
+consumer.video.callback_refcount_hist=0,0,0,720,0,0,0,0
+consumer.video.deadline_misses=0/720
+consumer.video.discont_after_first=0
+consumer.video.gap_event_ns=0
+consumer.video.gap_events=0
+consumer.video.output_queue.admission_residence.ms=n=720 p50=0.01 p95=0.01 p99=0.01 max=0.03 min=0.00
+consumer.video.output_queue.pending=0
+consumer.video.output_queue.sampled_max_buffers=0
+consumer.video.output_queue.unmatched=0
+consumer.video.render.all.ms=n=720 p50=2.98 p95=4.50 p99=4.91 max=5.02 min=0.96
+consumer.video.render.ms=n=600 p50=3.15 p95=4.60 p99=4.91 max=5.02 min=0.96
+consumer.video.render_interval.ms=n=599 p50=16.01 p95=18.02 p99=18.21 max=19.10 min=13.98
+consumer.video.render_jitter.p1_p99.ms=3.74
+exit=0/0
+expected.frames=720
+expected.samples=576000
+fault=audio-gap
+fault.bound_ms=2000
+fault.expect=gap-visible
+fault.frame=600
+fault.ms=50
+fault.pass=yes
+fault.recovery_limit_frames=7
+fault.samples_missing=2400
+harness.malloc=default
+label=windows-native-nv12-1080p60-agap50-1
+output.async=false
+output.queue_buffers=1
+output.sync=false
+playback.latency_ms=0
+producer.audio.push_burst.max=0
+producer.audio.push_interval.ms=n=995 p50=10.00 p95=11.00 p99=11.01 max=60.00 min=8.64
+producer.audio.push_lateness.ms=n=995 p50=0.81 p95=1.82 p99=1.94 max=1.97 min=0.02
+producer.cpu.percent=5.98
+producer.ended_monotonic_us=772432974745
+producer.fault.dropped_blocks=5
+producer.fault.dropped_samples=2400
+producer.fault.elapsed_us=0
+producer.fault.executed=1
+producer.fault.gap_ns=50000000
+producer.fault.start_monotonic_us=772426873916
+producer.handles=1673..1673 min=1673 max=1673
+producer.handles.slope.per_min=0.00
+producer.injection.elapsed_us=0
+producer.injection.executed=0
+producer.injection.frame=0
+producer.injection.requested_ms=0
+producer.injection.stage=none
+producer.injection.start_monotonic_us=0
+producer.mem.kb=93324..93324 min=93324 max=93324
+producer.mem.kind=private
+producer.mem.slope.kb_per_min=0.00
+producer.pid=15256
+producer.pushed.frames=720
+producer.pushed.samples=576000
+producer.result=EOS
+producer.series.t_cpums_memkb_handles_threads=0.0:94:6608:246:12;1.1:1281:92540:2667:40;2.1:1703:93324:1673:40;3.2:1750:93324:1673:40;4.2:1828:93324:1673:40;5.2:1891:93324:1673:40;6.3:1953:93324:1673:40;7.3:1984:93324:1673:40;8.4:2094:93324:1673:40;9.4:2156:93324:1673:40;10.5:2234:93324:1673:40;11.5:2266:93324:1673:40;12.5:2312:46780:1524:17;
+producer.stats.framelink-audio-sink-stats=framelink-audio-sink-stats, blocks=(guint64)1195, pcm-bytes=(guint64)2294400, sample-frames=(guint64)573600, generation=(guint64)1, shared-pcm=(boolean)false;
+producer.stats.framelink-sink-stats=framelink-sink-stats, received=(guint64)720, submitted=(guint64)720, dropped=(guint64)0, ring-full-drops=(guint64)0;
+producer.threads=40..40 min=40 max=40
+producer.threads.slope.per_min=0.00
+producer.video.push_burst.max=0
+producer.video.push_interval.ms=n=600 p50=17.00 p95=18.00 p99=18.00 max=18.04 min=14.99
+producer.video.push_lateness.ms=n=600 p50=0.69 p95=1.80 p99=1.97 max=1.99 min=0.01
+seconds=12
+video.pool=2
+video.queue=1

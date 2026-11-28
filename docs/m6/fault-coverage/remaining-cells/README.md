@@ -90,3 +90,66 @@ Growth is flat everywhere, including the failed run.
 
 - **Android native RGBA 1080p60 (non-element)** is the primary cell already covered by the earlier M6.4 records.
 - **The full Windows campaign** runs once, inside decision 14's requalification (C2).
+
+## Rerun at `6c45029e` after Jon's two follow-ups (2026-11-28)
+
+Jon approved both recommendations ([decision record](../../decisions-20261126.md#decision-15-fault-coverage-on-the-remaining-cells-2026-11-27)):
+- **Native sink error, one per cause** (`gst/gstframelink.cpp`):
+  - invalid metadata posts "valid supported frame metadata and TIME mapping required";
+  - a closed channel is a resource write error, which the producer's peer-failure mapping turns into "FrameLink peer closed or failed";
+  - device loss posts decision 13's "FrameLink GPU device lost";
+  - foreign storage keeps the existing message.
+- **Copy-out 200 ms burst:** `--fault-expect replaced-or-counted-drop`. Each outcome is held to its full check, and `fault.outcome` records which one happened.
+
+The whole campaign was run again on every cell, against the outcomes declared before the runs. Evidence: `rerun-6c45029e/` (summaries, `cycles-gate.txt`, `raw-sha256.json` for 2976 CSVs, `windows.log`). The first campaign's failures above still stand.
+
+**Binaries:**
+
+| Platform | Binary | SHA-256 prefix |
+|---|---|---|
+| Linux | `fl_gst_av_bench` | `709ac5794f9e3eb7` |
+| Linux | plugin | `c2ebae11f3d0dd18` |
+| Android | `fl_gst_av_bench` | `3d3bfcfb410865d6` |
+| Windows | `fl_gst_av_bench.exe` | `6c360359a5a2043a` |
+| Windows | `gstframelink.dll` | `ac00db85824d3058` |
+
+**Suites at `6c45029e`:**
+- Linux: 203 passed, 1 skipped (`read_lease_egl_delayed_completion`), 0 failed.
+- Android: 152 passed, 1 skipped, 0 failed.
+- Windows: 198/198.
+
+| Cell | First campaign | Rerun |
+|---|---|---|
+| Linux native, 4 cells | 300/300 | 300/300 |
+| Linux GPU-staged BGRA 1080p60 | 58/70 | **68/70** |
+| Linux GPU-staged BGRA 4K30 | 55/70 | 70/70 |
+| Android native RGBA 4K30 | 75/75 | 75/75 |
+| Android native RGBA 1080p60, element | 73/75 | **72/75** |
+| Android CPU RGBA 1080p60 | 64/70 | **65/70** |
+| Android CPU RGBA 4K30 | 62/70 | **60/70** |
+| Windows native NV12 1080p60, smoke | 15/15 | 15/15 |
+
+**What the fixes changed:**
+- **video-no-pts:** every GPU-staged producer now reports the specific metadata error (10/10), as Android and Windows do.
+- **Faulted growth cycles:** every faulted cycle ended with "FrameLink peer closed or failed" (100/100 across the two kill runs).
+- **Copy-out 200 ms bursts:** all 20 passed.
+  - Linux GPU-staged: 6 replacement failures and 4 counted drops.
+  - Android CPU: 10 counted drops.
+
+**Rerun failures (they stand):**
+1. **Linux GPU-staged audio stall, 1080p60, 2/10:**
+   - astall200-1 delivered 719/720 frames, and astall50-3 delivered 718/720.
+   - The app feed thread counted 1 and 2 slot drops. The content check showed the gaps, with no mismatch.
+   - The runs fail on completeness.
+2. **Linux GPU-staged growth:**
+   - restart-consumer-kill: 78/100. 22 clean cycles delivered 294–299 of 300 frames, mostly in cycles 0–24.
+   - restart-producer-kill: 97/100, with 3 short clean cycles.
+   - In every short cycle the consumer's content check showed the gap, with no mismatch. The run never delivered a wrong frame.
+   - Cycle mode does not record the producer's per-cycle slot-drop count, so the producer side of these losses is not matched.
+   - restart-producer-malformed passed 100/100. Growth stayed flat in all three runs: 1.85–4.66 KB/cycle; handles and threads 0.
+   - In the first campaign the same run lost 5 clean cycles, against 22 now.
+   - The losses are in the bench's GPU-staged feed thread: `feedNative` takes a buffer from the sink's two-buffer pool. The FrameLink transport is not involved. This is the same receiver-harness kind of issue as decision 11.
+3. **Android CPU, 5 ms faults:** burst5 failed 10/10, and stall5 at 4K30 failed 5/5. This is the same capacity margin as in the first campaign: the copy-out transport sits at the arrival budget.
+4. **Android native element burst200, 3/5 failed:** the burst was not observed as back-to-back, and the drain exceeded the 15-frame limit, as in the first campaign.
+
+**Growth on Android CPU:** 3/3 runs passed again, with every cycle passing.

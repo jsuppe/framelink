@@ -382,6 +382,8 @@ per-platform state. Windows readiness is the
   Remaining cells (decision 15, 2026-11-28, [evidence](m6/fault-coverage/remaining-cells/README.md)): Linux native 300/300,
   GPU-staged 113/140, Android native 148/150, Android CPU 126/140, Windows smoke 15/15; growth 5/6. Failures kept;
   native-sink message fix and copy-out burst200 outcome go to Jon; full Windows campaign inside decision 14.
+  Both approved (Jon, 2026-11-28) and rerun at `6c45029e`: Linux native 300/300, GPU-staged 138/140, Android native 147/150,
+  Android CPU 125/140, Windows smoke 15/15; growth 4/6 (GPU-staged feed-thread frame loss in clean cycles).
 - [ ] **M6.5 Performance/resource evidence:** distributions, queue depth,
   CPU/GPU/memory/handles, clock behavior and bounded growth.
   Stage costs, Android NV12 cost isolation and platform limits are published
