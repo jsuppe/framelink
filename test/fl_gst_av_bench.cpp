@@ -256,7 +256,7 @@ static void writeContent(GstBuffer*b,guint64 frame){
 // on the pipeline clock and carries that running time as its PTS.
 // A frame whose slot is not free within the sink's buffer-wait-ms is dropped,
 // as the CPU-copy sink drops on a full ring; the run continues and counts it.
-struct NativeFeed {std::thread th;std::string error;GstBufferPool*pool=nullptr;guint acquired=0,drops=0;std::string dropFrames;};
+struct NativeFeed {std::thread th;std::string error;GstBufferPool*pool=nullptr;guint acquired=0,drops=0;std::string dropFrames;std::vector<double> waitMs;};
 static void feedNative(Producer&p,guint frames,NativeFeed&feed){
  auto*bin=gst_bin_get_by_name(GST_BIN(p.p),"s");auto*src=gst_bin_get_by_name(GST_BIN(p.p),"vsrc");CHECK(bin&&src);
  auto fail=[&](const std::string&what){feed.error=what;gst_app_src_end_of_stream(GST_APP_SRC(src));};
@@ -277,7 +277,9 @@ static void feedNative(Producer&p,guint frames,NativeFeed&feed){
   const GstClockTime t0=gst_clock_get_time(clock)-base;
   for(guint n=0;n<frames;++n){const GstClockTime due=t0+gst_util_uint64_scale(n,GST_SECOND,gFps);
    auto id=gst_clock_new_single_shot_id(clock,base+due);gst_clock_id_wait(id,nullptr);gst_clock_id_unref(id);
-   GstBuffer*b=nullptr;if(gst_buffer_pool_acquire_buffer(feed.pool,&b,nullptr)!=GST_FLOW_OK){++feed.drops;if(feed.drops<=32)feed.dropFrames+=std::to_string(n)+" ";continue;}
+   // Decision 15: how long each slot took to free, so a drop can be attributed.
+   const gint64 asked=g_get_monotonic_time();GstBuffer*b=nullptr;const bool got=gst_buffer_pool_acquire_buffer(feed.pool,&b,nullptr)==GST_FLOW_OK;feed.waitMs.push_back((g_get_monotonic_time()-asked)/1000.0);
+   if(!got){++feed.drops;if(feed.drops<=32)feed.dropFrames+=std::to_string(n)+" ";continue;}
    ++feed.acquired;writeContent(b,n);
    const int ready=eventfd(1,EFD_CLOEXEC);CHECK(ready>=0);gboolean accepted=FALSE;g_signal_emit_by_name(bin,"set-native-ready-fd",b,ready,&accepted);close(ready); // the sink keeps its own duplicate
    if(!accepted){gst_buffer_unref(b);gst_object_unref(clock);return fail("ready fd refused at frame "+std::to_string(n));}
@@ -318,7 +320,7 @@ static int producerChild(const Options&o,const std::string&session,const std::st
   p.start();if(gGpuReadback)feed.th=std::thread([&]{feedNative(p,o.seconds*gFps,feed);});
   if(feed.th.joinable())feed.th.join();p.finish();sampler.stop();
   if(feed.pool){gst_buffer_pool_set_active(feed.pool,FALSE);gst_object_unref(feed.pool);}
-  if(gGpuReadback){r["native.acquired"]=std::to_string(feed.acquired);r["native.slot_drops"]=std::to_string(feed.drops);if(!feed.dropFrames.empty())r["native.slot_drop_frames"]=feed.dropFrames;if(!feed.error.empty()){r["native.error"]=feed.error;if(p.result=="EOS")p.result="error: "+feed.error;}}
+  if(gGpuReadback){r["native.acquired"]=std::to_string(feed.acquired);r["native.slot_drops"]=std::to_string(feed.drops);r["native.acquire_wait.ms"]=dist(feed.waitMs);if(!feed.dropFrames.empty())r["native.slot_drop_frames"]=feed.dropFrames;if(!feed.error.empty()){r["native.error"]=feed.error;if(p.result=="EOS")p.result="error: "+feed.error;}}
 #else
   p.start();p.finish();sampler.stop();
 #endif
@@ -458,6 +460,8 @@ static int lifecycleChild(const Options&o,bool producer,const std::string&base,c
 #ifdef FL_BENCH_GPU_READBACK
    if(feed.pool){gst_buffer_pool_set_active(feed.pool,FALSE);gst_object_unref(feed.pool);}
    if(!feed.error.empty()&&result=="EOS")result="error: "+feed.error;
+   // Decision 15: the feed's own drops per cycle, so a short clean cycle is matched.
+   if(gGpuReadback){fprintf(f,"cycle.%u.slot_drops=%u\n",i,feed.drops);if(!feed.dropFrames.empty())fprintf(f,"cycle.%u.slot_drop_frames=%s\n",i,feed.dropFrames.c_str());fprintf(f,"cycle.%u.acquire_wait.ms=%s\n",i,dist(feed.waitMs).c_str());}
 #endif
   }
   else{Consumer c(modeOf(o.mode),path,"av",o.native,o.localConsumer?o.seconds:0);c.checkContent=false;c.start();c.finish();result=c.result;frames=c.frames;samples=c.samples;ended=c.endedAt;if(!c.contiguous)result="error: audio discontinuity";}
@@ -600,6 +604,10 @@ static int lifecycle(const Options&o,const std::string&exe,const char*plugin,con
  s["long.handles"]=std::to_string(h0)+".."+std::to_string(h1);snprintf(t,sizeof t,"%.3f",slope(hnd));s["long.handles.slope.per_cycle"]=t;
  s["long.threads"]=std::to_string(t0c)+".."+std::to_string(t1c);snprintf(t,sizeof t,"%.3f",slope(thr));s["long.threads.slope.per_cycle"]=t;
  {std::string series;for(guint i=0;i<o.cycles;i++){auto it=lr.find("cycle."+std::to_string(i));if(it!=lr.end())series+=it->second+";";}s["long.series.result_frames_samples_memkb_handles_threads"]=series;}
+ // Decision 15: the GPU-staged feed's slot drops per cycle, from whichever side
+ // produced (the long-lived producer, or each fresh producer).
+ if(gGpuReadback){std::string drops;guint total=0;for(guint i=0;i<o.cycles;i++){std::string v;auto it=lr.find("cycle."+std::to_string(i)+".slot_drops");if(it!=lr.end())v=it->second;else if(i<fresh.size())v=fresh[i]["native.slot_drops"];drops+=(v.empty()?"?":v)+";";if(!v.empty())total+=std::stoul(v);}
+  s["cycle.slot_drops.series"]=drops;s["cycle.slot_drops.total"]=std::to_string(total);}
  const bool complete=longExit==0&&ok==o.cycles;s["complete"]=complete?"yes":"no";
  writeResult(base+".summary.txt",s);for(auto&kv:s)printf("%s=%s\n",kv.first.c_str(),kv.second.c_str());
  return complete?0:1;}
