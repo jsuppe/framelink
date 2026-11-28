@@ -377,7 +377,7 @@ per-platform state. Windows readiness is the
   Growth across repeated faults (2026-11-26, [evidence](m6/fault-coverage/cycle-faults/README.md)): 9/9 runs
   of 100 cycles, odd cycles faulted; all cycles pass and slopes within the frozen M6.3 limits.
   GPU device loss (decision 13, 2026-11-27, [evidence](m6/device-loss-d13/README.md)): `FL_DEVICE_LOST`, injection tests on
-  all three platforms; real context and device resets and Windows adapter removal pending free hosts.
+  all three platforms; real resets done on all three (Windows and Linux detected; Android resets invisible to fences, Jon to decide).
 - [ ] **M6.5 Performance/resource evidence:** distributions, queue depth,
   CPU/GPU/memory/handles, clock behavior and bounded growth.
   Stage costs, Android NV12 cost isolation and platform limits are published

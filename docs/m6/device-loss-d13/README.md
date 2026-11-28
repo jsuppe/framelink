@@ -1,6 +1,6 @@
-# GPU device loss: FL_DEVICE_LOST and test-only injection (decision 13, steps 1–3) — 2026-11-27
+# GPU device loss: FL_DEVICE_LOST, injection and real resets (decision 13) — 2026-11-27
 
-This record is dated; current status is in [STATUS.md](../../STATUS.md). Jon chose A3, B2 and C2 in [decision 13](../decisions-20261126.md#decision-13-gpu-hang-and-device-loss-testing-2026-11-27). This record covers the steps that do not disturb a host: the review, the test-only injection, the fix and its verification. Real context resets, whole-device resets and Windows adapter removal follow when Jon says the hosts are free.
+This record is dated; current status is in [STATUS.md](../../STATUS.md). Jon chose A3, B2 and C2 in [decision 13](../decisions-20261126.md#decision-13-gpu-hang-and-device-loss-testing-2026-11-27). It covers the review, the test-only injection, the fix and its verification, and then real resets on all three platforms, run after Jon said the hosts were free (same evening).
 
 ## Review: what a GPU reset reached before this change
 
@@ -52,12 +52,38 @@ Full suites at the fix: Linux 204/204 (one test skipped as always); Android 152/
 1. **`b3cd877a` read the ready fence and device on every `flAcquireFrame`**, before a ring was attached: a null dereference (`gst_native_source_win` crashed). `cfcd1283` guards both.
 2. **`b3cd877a` treated every `UINT64_MAX` fence as device loss.** On Windows a shared fence reads `UINT64_MAX` when the peer process dies, too. Three death tests (`read_lease_d3d11_producer_death`, `gst_relay_downstream_death_win`, `gst_av_bench_fault_producer_kill`) passed 3/3 at `14fca2ec` and failed 3/3 at `cfcd1283`; the full suite there had exactly those 3 failures. `12ef0bd8` limits device loss to our own removed device; all five targeted tests then passed 3/3 and the suite 198/198. One of the three had first been put down to the known flake of decision 3; the before/after runs show it was this regression.
 
-## Not established
+
+## Real resets (Jon said the hosts were free)
+
+Run on the Windows test host (RTX 5090, driver defaults for timeout detection), this Linux workstation (RTX 3090, NVIDIA 580.178.04, the desktop running on the same GPU) and the Android tablet (Mali-G52 MC2). Every case ran 3 times; every case then ran a fresh normal lease test on the same device (recovery), which passed every time. The desktop on Linux and the host on Windows survived every reset.
+
+**How a hang is made.** A shader whose loop bound the compiler cannot see: GLSL ES 3.00 with the count in a uniform, an integer LCG body; HLSL compute with the count in a constant buffer. Calibrated first: run time grows linearly with the count on Mali and NVIDIA. Two first attempts were not real hangs and are kept as lessons: with a constant bound, or a `sin`/`fract` body, the Mali compiler ran 2·10⁹ iterations in 20 ms.
+
+| Case | Windows | Linux (NVIDIA) | Android (Mali) |
+|---|---|---|---|
+| **Consumer's read hangs** (context reset by the watchdog) | `FL_DEVICE_LOST` after 5.3–6.3 s (`DXGI_ERROR_DEVICE_HUNG`); terminal; the producer, whose device survived, gets `FL_DISCONNECTED` | `FL_DEVICE_LOST` after 5.1–5.4 s: the fence completes with **−110 (`-ETIMEDOUT`)**; slot handed back; terminal. The GL context reports **no** reset | **Not visible to FrameLink.** The fence completes cleanly (status 1) after ~5.1 s; FrameLink retires the lease as a normal read; slot handed back. Only GL reports the reset (`GL_GUILTY_CONTEXT_RESET`) |
+| **Producer's frame write hangs** | The producer's next `flSubmit` returns `FL_DEVICE_LOST`, so the frame behind the hang is never published; the consumer gets `FL_DISCONNECTED` | The consumer gets `FL_DEVICE_LOST` after 5.3–5.5 s (fence −110); **the frame is not delivered**. The producer's GL context reports no reset | **An unwritten frame is delivered as valid**: the fence completes cleanly after ~5.5 s and the frame's pixels are all zero. The producer's GL context reports a guilty reset; the producer process then dies from a signal |
+| **Whole-device reset** | `DXCap -forcetdr` (run as an interactive highest-privilege task; it refuses from ssh): both sides `FL_DEVICE_LOST` (`DXGI_ERROR_DEVICE_RESET`) about 1.3 s after the reset | Not possible on this host: `nvidia-smi -r` refuses ("the primary GPU") | No interface without root |
+| **Physical loss** (adapter disabled while streaming, then re-enabled) | Both sides `FL_DEVICE_LOST` (`DXGI_ERROR_DEVICE_REMOVED`) within 0.40–0.43 s, after the fix below | — | — |
+
+**A fix the physical-loss test found (`d05b106c`).** Before it, the consumer reported `FL_DEVICE_LOST` within 0.5 s, but the producer, whose device reported removed, got `FL_TIMEOUT` from `flAcquireBuffer` for 34 s: the fences still read normally and the consumer had stopped releasing. `flAcquireBuffer` and `flBeginSubmit` now check the producer's own device. The Windows suite at `d05b106c`: 198/198. The same check is what refused the producer's submit after its own hang above.
+
+### What this means
+
+- **Windows and Linux:** a real reset reaches FrameLink and is reported as `FL_DEVICE_LOST` (or, on the side whose device survived, `FL_DISCONNECTED`); no frame written behind a hang is delivered. On Linux the fence is the *only* place the reset showed: NVIDIA's GL robustness query stayed silent.
+- **Android (Mali):** a reset never reaches the fence. FrameLink retires an abandoned read as a good one and delivers an unwritten frame as valid. Only the application's own GL context learns of the reset. What FrameLink should offer here is **Jon's decision**: (a) document that Android applications detect resets through GL/Vulkan robustness; (b) an API through which an application reports a reset to FrameLink, making the channel device-lost for both sides (it cannot stop a frame already submitted); (c) (a) now, (b) when a consumer needs it.
+
+### Not established
+
+- Whether the Mali producer's death from a signal after its reset comes from the driver or the test's teardown.
+- Real-reset cases run as manual tools, not CTest: they disturb the host. Their sources are `fl_read_lease_egl --gpu-hang-consumer|--gpu-hang-producer` (`FL_TEST_HANG_PROBE=1` calibrates), `fl_read_lease_d3d11 --gpu-hang-consumer`, and `fl_device_loss_stream_win`, driven by `d13-tdr.ps1`, `d13-producer-tdr.ps1`, `d13-forcetdr.ps1` and `d13-adapter.ps1`.
+
+## Not established (steps 1–3)
 
 - Whether a Windows shared fence also reads `UINT64_MAX` after a *normal* producer close. The live-device delivery path is left exactly as it was, because decision 12's end-of-stream drain depends on frames submitted just before a close.
-- Everything with a real GPU: steps 4 onward (context reset, whole-device reset, Windows adapter removal, recovery), only when Jon says the hosts are free.
 
 ## Files
 
 - `d13-win.ps1`, `d13-win2.ps1`, `d13-win3.ps1`: the Windows builds and runs (before and after; regression separation; the corrected build).
-- `logs/`: Linux before and after, the three Windows runs (scrubbed), suite summaries, and the native kill results.
+- `logs/`: Linux before and after, the three Windows runs (scrubbed), suite summaries, and the native kill results; `logs/real/`: every real-reset run on the three platforms (Windows logs scrubbed).
+- `d13-tdr.ps1`, `d13-producer-tdr.ps1`, `d13-forcetdr.ps1`, `d13-adapter.ps1`, `d13-suite.ps1`: the real-reset and suite runs on Windows.

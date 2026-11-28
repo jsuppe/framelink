@@ -1,0 +1,9 @@
+2026-11-28T00:15:57.708Z
+hang: collect=GPU device lost or reset after 5092 ms; fence status=-110 (ioctl 0); GL reset status=0x0
+outcome: fence completed with an error; FrameLink reported FL_DEVICE_LOST
+EGL vendor=NVIDIA GL vendor=NVIDIA Corporation renderer=NVIDIA GeForce RTX 3090/PCIe/SSE2
+separate-process EGL imported-allocation GPU read, native sync-file lease retirement and pixel verification passed
+EGL vendor=NVIDIA GL vendor=NVIDIA Corporation renderer=NVIDIA GeForce RTX 3090/PCIe/SSE2
+GPU hang in the consumer's read: FL_DEVICE_LOST, slot handed back, terminal; a fresh run afterwards passed
+exit 0
+2026-11-28T00:16:21.628Z

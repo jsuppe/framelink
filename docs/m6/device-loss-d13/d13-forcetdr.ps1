@@ -18,13 +18,17 @@ foreach ($i in 1..$repeats) {
   $p = Start-Process -FilePath "$d\build\fl_device_loss_stream_win.exe" -ArgumentList '30' -RedirectStandardOutput $out -NoNewWindow -PassThru
   Start-Sleep -Seconds 5
   Write-Host ("run $i forcetdr at {0:HH:mm:ss.fff} UTC" -f (Get-Date).ToUniversalTime())
-  & DXCap.exe -forcetdr 2>&1 | ForEach-Object { Write-Host "run $i dxcap: $_" }
+  # DXCap refuses from the ssh session ("run as administrator"): run it as an
+  # interactive, highest-privilege scheduled task instead.
+  schtasks /Create /TN FrameLinkD13ForceTdr /TR "C:\Windows\System32\DXCap.exe -forcetdr" /SC ONCE /ST 00:00 /RL HIGHEST /IT /F | Out-Null
+  schtasks /Run /TN FrameLinkD13ForceTdr | ForEach-Object { Write-Host "run $i schtasks: $_" }
   if (-not $p.WaitForExit(90000)) { Write-Host "run $i stream did not exit in 90 s"; $p.Kill() }
   Get-Content $out | Where-Object { $_ -notmatch '\(still\)' } | ForEach-Object { Write-Host "run $i : $_" }
   Start-Sleep -Seconds 15
   & "$d\build\fl_read_lease_d3d11.exe" 2>&1 | ForEach-Object { Write-Host "run $i recovery: $_" }
   Write-Host "run $i recovery exit $LASTEXITCODE"
 }
+schtasks /Delete /TN FrameLinkD13ForceTdr /F | Out-Null
 Get-WinEvent -FilterHashtable @{LogName='System'; StartTime=$since} -ErrorAction SilentlyContinue | Where-Object { $_.ProviderName -match 'Display|nvlddmkm' -or $_.Id -eq 4101 } | ForEach-Object { Write-Host ("event {0:o} {1} {2}" -f $_.TimeCreated.ToUniversalTime(), $_.ProviderName, $_.Id) }
 Write-Host done
 } finally { $m.ReleaseMutex() }

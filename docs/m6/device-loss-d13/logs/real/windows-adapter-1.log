@@ -1,0 +1,10 @@
+revision dc7526ddd1ca9093b8daa91c5fb5ad885e14a845
+adapter NVIDIA GeForce RTX 5090 status OK
+run 1 disable at 23:46:48.752 UTC
+run 1 adapter status after disable: Error
+run 1 : consumer: streaming for up to 40 s
+run 1 : consumer: flAcquireFrame=GPU device lost or reset after 294 frames; device removed reason 0x887a0005; 23:46:50.017 UTC
+run 1 adapter status after enable: OK
+run 1 recovery: separate-process D3D11 shared-allocation GPU read, fence lease retirement and all-pixel verification passed
+run 1 recovery exit 0
+done

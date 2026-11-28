@@ -1,0 +1,11 @@
+consumer: flAcquireFrame=ok after 5479 ms (the frame written behind the hang was DELIVERED)
+consumer: delivered frame pixel 0 = 0,0,0,0 (a completed write has 64,128 in G,B)
+producer: GL reset status 0x8253; its frame's fence status 1
+[5540323.362374] (fl_read_lease_e) EGL: eglp_unload_callback <unknown>
+==>[WARN] EGLDisplay (0xb4000073bbc6ff50) was not properly terminated by the application before unloading the driver.
+FORTIFY: pthread_mutex_lock called on a destroyed mutex (0x71e9171590)
+consumer: producer exit -1
+EGL vendor=Android GL vendor=ARM renderer=Mali-G52 MC2
+separate-process EGL imported-allocation GPU read, native sync-file lease retirement and pixel verification passed
+recovery: fresh run exit 0
+exit 2

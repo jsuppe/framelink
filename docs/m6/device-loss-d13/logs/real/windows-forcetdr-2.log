@@ -1,0 +1,13 @@
+revision fde470e573981f911fa6ca82f2dfe18a59c11b08
+run 1 forcetdr at 00:25:50.108 UTC
+WARNING: Task may not run because /ST is earlier than current time.
+run 1 schtasks: SUCCESS: Attempted to run the scheduled task "FrameLinkD13ForceTdr".
+run 1 : consumer: streaming for up to 30 s
+run 1 : consumer: flAcquireFrame=GPU device lost or reset after 283 frames; device removed reason 0x887a0007; 00:25:55.337 UTC
+run 1 : producer: flAcquireBuffer=GPU device lost or reset after 285 frames; device removed reason 0x887a0007; 00:25:55.389 UTC
+run 1 recovery: separate-process D3D11 shared-allocation GPU read, fence lease retirement and all-pixel verification passed
+run 1 recovery exit 0
+event 2026-11-28T00:25:54.0590420Z nvlddmkm 153
+event 2026-11-28T00:25:54.0530424Z nvlddmkm 153
+event 2026-11-28T00:25:52.3939440Z nvlddmkm 153
+done
