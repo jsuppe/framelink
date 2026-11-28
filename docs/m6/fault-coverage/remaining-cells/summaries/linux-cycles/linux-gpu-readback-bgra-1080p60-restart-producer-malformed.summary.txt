@@ -1,0 +1,29 @@
+complete=yes
+config=BGRA 1920x1080@60 bin cpu fresh-device lifecycle restart-producer 100x5s
+cycle_fault=malformed
+cycle_fault.bound_ms=2000
+cycle_fault.detection_ms=n=50 p50=0.88 p95=0.93 p99=0.95 max=0.95 min=0.20
+cycle_fault.frame=180
+cycles=100
+cycles.ok=100/100
+expected.frames.per_cycle=300
+expected.samples.per_cycle=240000
+harness.malloc=producer-side mmap_threshold=8388608
+label=linux-gpu-readback-bgra-1080p60-restart-producer-malformed
+long.exit=0
+long.handles=46..46
+long.handles.slope.per_cycle=0.000
+long.mem.kb=132548..132948
+long.mem.slope.kb_per_cycle=3.17
+long.role=lifecycle-consumer
+long.series.result_frames_samples_memkb_handles_threads=EOS|300|240000|123732|39|7;error: FrameLink producer failed: invalid input|179|143520|129164|46|7;EOS|300|240000|132464|46|7;error: FrameLink producer failed: invalid input|179|143520|132504|46|7;EOS|300|240000|132548|46|7;error: FrameLink producer failed: invalid input|179|143520|132548|46|7;EOS|300|240000|132580|46|7;error: FrameLink producer failed: invalid input|179|143520|132580|46|7;EOS|300|240000|132648|46|7;error: FrameLink producer failed: invalid input|179|143520|132652|46|7;EOS|300|240000|132688|46|7;error: FrameLink producer failed: invalid input|179|143520|132676|46|7;EOS|300|240000|132692|46|7;error: FrameLink producer failed: invalid input|179|143520|132696|46|7;EOS|300|240000|132712|46|7;error: FrameLink producer failed: invalid input|179|143520|132700|46|7;EOS|300|240000|132724|46|7;error: FrameLink producer failed: invalid input|179|143520|132712|46|7;EOS|300|240000|132724|46|7;error: FrameLink producer failed: invalid input|179|143520|132716|46|7;EOS|300|240000|132728|46|7;error: FrameLink producer failed: invalid input|179|143520|132744|46|7;EOS|300|240000|132764|46|7;error: FrameLink producer failed: invalid input|179|143520|132752|46|7;EOS|300|240000|132788|46|7;error: FrameLink producer failed: invalid input|179|143520|132776|46|7;EOS|300|240000|132788|46|7;error: FrameLink producer failed: invalid input|179|143520|132776|46|7;EOS|300|240000|132792|46|7;error: FrameLink producer failed: invalid input|179|143520|132780|46|7;EOS|300|240000|132792|46|7;error: FrameLink producer failed: invalid input|179|143520|132780|46|7;EOS|300|240000|132792|46|7;error: FrameLink producer failed: invalid input|179|143520|132784|46|7;EOS|300|240000|132796|46|7;error: FrameLink producer failed: invalid input|179|143520|132784|46|7;EOS|300|240000|132812|46|7;error: FrameLink producer failed: invalid input|179|143520|132812|46|7;EOS|300|240000|132836|46|7;error: FrameLink producer failed: invalid input|179|143520|132824|46|7;EOS|300|240000|132836|46|7;error: FrameLink producer failed: invalid input|179|143520|132824|46|7;EOS|300|240000|132864|46|7;error: FrameLink producer failed: invalid input|179|143520|132856|46|7;EOS|300|240000|132868|46|7;error: FrameLink producer failed: invalid input|179|143520|132856|46|7;EOS|300|240000|132868|46|7;error: FrameLink producer failed: invalid input|179|143520|132860|46|7;EOS|300|240000|132872|46|7;error: FrameLink producer failed: invalid input|179|143520|132864|46|7;EOS|300|240000|132876|46|7;error: FrameLink producer failed: invalid input|179|143520|132868|46|7;EOS|300|240000|132880|46|7;error: FrameLink producer failed: invalid input|179|143520|132872|46|7;EOS|300|240000|132884|46|7;error: FrameLink producer failed: invalid input|179|143520|132876|46|7;EOS|300|240000|132888|46|7;error: FrameLink producer failed: invalid input|179|143520|132876|46|7;EOS|300|240000|132900|46|7;error: FrameLink producer failed: invalid input|179|143520|132888|46|7;EOS|300|240000|132900|46|7;error: FrameLink producer failed: invalid input|179|143520|132888|46|7;EOS|300|240000|132900|46|7;error: FrameLink producer failed: invalid input|179|143520|132892|46|7;EOS|300|240000|132904|46|7;error: FrameLink producer failed: invalid input|179|143520|132892|46|7;EOS|300|240000|132904|46|7;error: FrameLink producer failed: invalid input|179|143520|132896|46|7;EOS|300|240000|132908|46|7;error: FrameLink producer failed: invalid input|179|143520|132896|46|7;EOS|300|240000|132908|46|7;error: FrameLink producer failed: invalid input|179|143520|132896|46|7;EOS|300|240000|132908|46|7;error: FrameLink producer failed: invalid input|179|143520|132900|46|7;EOS|300|240000|132912|46|7;error: FrameLink producer failed: invalid input|179|143520|132900|46|7;EOS|300|240000|132912|46|7;error: FrameLink producer failed: invalid input|179|143520|132904|46|7;EOS|300|240000|132916|46|7;error: FrameLink producer failed: invalid input|179|143520|132904|46|7;EOS|300|240000|132916|46|7;error: FrameLink producer failed: invalid input|179|143520|132908|46|7;EOS|300|240000|132928|46|7;error: FrameLink producer failed: invalid input|179|143520|132916|46|7;EOS|300|240000|132928|46|7;error: FrameLink producer failed: invalid input|179|143520|132920|46|7;EOS|300|240000|132936|46|7;error: FrameLink producer failed: invalid input|179|143520|132924|46|7;EOS|300|240000|132936|46|7;error: FrameLink producer failed: invalid input|179|143520|132924|46|7;EOS|300|240000|132940|46|7;error: FrameLink producer failed: invalid input|179|143520|132936|46|7;EOS|300|240000|132948|46|7;error: FrameLink producer failed: invalid input|179|143520|132936|46|7;EOS|300|240000|132948|46|7;error: FrameLink producer failed: invalid input|179|143520|132940|46|7;EOS|300|240000|132952|46|7;error: FrameLink producer failed: invalid input|179|143520|132940|46|7;EOS|300|240000|132952|46|7;error: FrameLink producer failed: invalid input|179|143520|132948|46|7;
+long.threads=7..7
+long.threads.slope.per_cycle=0.000
+output.async=false
+output.queue_buffers=1
+output.sync=false
+playback.latency_ms=0
+seconds=5
+video.pool=2
+video.queue=1
+wall.s=513.1

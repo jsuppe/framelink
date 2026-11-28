@@ -1,0 +1,31 @@
+complete=yes
+config=BGRA 1920x1080@60 bin cpu fresh-device lifecycle restart-producer 40x5s
+cycle.slot_drops.series=0;?;0;?;0;?;0;?;0;?;0;?;0;?;0;?;0;?;0;?;0;?;0;?;0;?;0;?;0;?;0;?;0;?;0;?;0;?;0;?;
+cycle.slot_drops.total=0
+cycle_fault=kill
+cycle_fault.at_ms=3000
+cycle_fault.bound_ms=2000
+cycle_fault.detection_ms=n=20 p50=3.35 p95=3.57 p99=3.87 max=3.87 min=1.01
+cycles=40
+cycles.ok=40/40
+expected.frames.per_cycle=300
+expected.samples.per_cycle=240000
+harness.malloc=producer-side mmap_threshold=8388608
+label=control
+long.exit=0
+long.handles=25..25
+long.handles.slope.per_cycle=0.000
+long.mem.kb=113988..118192
+long.mem.slope.kb_per_cycle=140.44
+long.role=lifecycle-consumer
+long.series.result_frames_samples_memkb_handles_threads=EOS|300|240000|107416|25|7;error: FrameLink peer closed or failed|175|139680|107704|25|7;EOS|300|240000|111552|25|7;error: FrameLink peer closed or failed|175|139680|110708|25|7;EOS|300|240000|112764|25|7;error: FrameLink peer closed or failed|176|140640|113988|25|7;EOS|300|240000|114004|25|7;error: FrameLink peer closed or failed|176|140640|113172|25|7;EOS|300|240000|115220|25|7;error: FrameLink peer closed or failed|175|139680|116480|25|7;EOS|300|240000|116488|25|7;error: FrameLink peer closed or failed|175|139680|115680|25|7;EOS|300|240000|117728|25|7;error: FrameLink peer closed or failed|175|139680|118920|25|7;EOS|300|240000|118924|25|7;error: FrameLink peer closed or failed|175|139680|118084|25|7;EOS|300|240000|120136|25|7;error: FrameLink peer closed or failed|175|139680|120136|25|7;EOS|300|240000|120144|25|7;error: FrameLink peer closed or failed|176|140640|118100|25|7;EOS|300|240000|120152|25|7;error: FrameLink peer closed or failed|175|139680|120164|25|7;EOS|300|240000|120172|25|7;error: FrameLink peer closed or failed|176|141120|118128|25|7;EOS|300|240000|120176|25|7;error: FrameLink peer closed or failed|176|140640|120176|25|7;EOS|300|240000|120180|25|7;error: FrameLink peer closed or failed|176|141120|118140|25|7;EOS|300|240000|120192|25|7;error: FrameLink peer closed or failed|176|141120|120196|25|7;EOS|300|240000|120204|25|7;error: FrameLink peer closed or failed|176|140640|118160|25|7;EOS|300|240000|120208|25|7;error: FrameLink peer closed or failed|176|140640|120208|25|7;EOS|300|240000|120216|25|7;error: FrameLink peer closed or failed|176|141120|118176|25|7;EOS|300|240000|120224|25|7;error: FrameLink peer closed or failed|176|141120|120232|25|7;EOS|300|240000|120232|25|7;error: FrameLink peer closed or failed|176|141120|118192|25|7;
+long.threads=7..7
+long.threads.slope.per_cycle=0.000
+output.async=false
+output.queue_buffers=1
+output.sync=false
+playback.latency_ms=0
+seconds=5
+video.pool=2
+video.queue=1
+wall.s=163.2

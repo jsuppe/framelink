@@ -1,0 +1,48 @@
+arrival.budget_ms=17
+complete=yes
+config=NV12 1920x1080@60 bin native 12s
+consumer.pid=2416039
+exit=0/137
+expected.frames=720
+expected.samples=576000
+fault=consumer-kill
+fault.at_s=6
+fault.bound_ms=2000
+fault.detection_ms=3.7
+fault.pass=yes
+fault.survivor_result=error: required session tracks not ready or cancelled
+harness.malloc=producer-side mmap_threshold=8388608
+label=linux-native-consumer-kill-1
+output.async=false
+output.queue_buffers=1
+output.sync=false
+playback.latency_ms=0
+producer.audio.push_burst.max=0
+producer.audio.push_interval.ms=n=396 p50=10.00 p95=10.06 p99=10.09 max=10.12 min=9.88
+producer.audio.push_lateness.ms=n=396 p50=0.13 p95=0.15 p99=0.19 max=0.21 min=0.06
+producer.cpu.percent=14.21
+producer.ended_monotonic_us=414441964328
+producer.handles=16..16 min=16 max=16
+producer.handles.slope.per_min=0.00
+producer.injection.elapsed_us=0
+producer.injection.executed=0
+producer.injection.frame=0
+producer.injection.requested_ms=0
+producer.injection.stage=none
+producer.injection.start_monotonic_us=0
+producer.mem.kb=27060..27060 min=27060 max=27060
+producer.mem.kind=rss
+producer.mem.slope.kb_per_min=0.00
+producer.pid=2416047
+producer.pushed.frames=357
+producer.pushed.samples=286080
+producer.result=error: required session tracks not ready or cancelled
+producer.series.t_cpums_memkb_handles_threads=0.0:42:13620:6:2;1.0:189:27060:16:8;2.0:330:27060:16:8;3.0:477:27060:16:8;4.0:627:27060:16:8;5.0:757:27060:16:8;6.0:882:24276:11:6;
+producer.threads=8..8 min=8 max=8
+producer.threads.slope.per_min=0.00
+producer.video.push_burst.max=0
+producer.video.push_interval.ms=n=237 p50=16.67 p95=16.72 p99=16.74 max=16.76 min=16.55
+producer.video.push_lateness.ms=n=237 p50=0.13 p95=0.16 p99=0.18 max=0.20 min=0.05
+seconds=12
+video.pool=2
+video.queue=1

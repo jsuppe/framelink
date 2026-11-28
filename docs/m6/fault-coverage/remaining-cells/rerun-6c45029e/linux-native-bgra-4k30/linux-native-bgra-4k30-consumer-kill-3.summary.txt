@@ -1,0 +1,51 @@
+arrival.budget_ms=34
+complete=yes
+config=BGRA 3840x2160@30 bin native 12s
+consumer.pid=201853
+exit=0/137
+expected.frames=360
+expected.samples=576000
+fault=consumer-kill
+fault.at_s=6
+fault.bound_ms=2000
+fault.detection_ms=2.1
+fault.pass=yes
+fault.survivor_error_stable=yes
+fault.survivor_result=error: FrameLink peer closed or failed
+harness.malloc=producer-side mmap_threshold=8388608
+label=linux-native-bgra-4k30-consumer-kill-3
+output.async=false
+output.queue_buffers=1
+output.sync=false
+playback.latency_ms=0
+producer.audio.push_burst.max=0
+producer.audio.push_interval.ms=n=396 p50=10.00 p95=10.08 p99=10.11 max=10.12 min=9.88
+producer.audio.push_lateness.ms=n=396 p50=0.10 p95=0.16 p99=0.19 max=0.20 min=0.06
+producer.cpu.percent=44.78
+producer.ended_monotonic_us=639935092240
+producer.handles=14..14 min=14 max=14
+producer.handles.slope.per_min=0.00
+producer.injection.elapsed_us=0
+producer.injection.executed=0
+producer.injection.frame=0
+producer.injection.requested_ms=0
+producer.injection.stage=none
+producer.injection.start_monotonic_us=0
+producer.mem.kb=115056..115056 min=115056 max=115056
+producer.mem.kind=rss
+producer.mem.slope.kb_per_min=0.00
+producer.pid=201861
+producer.pushed.frames=179
+producer.pushed.samples=286080
+producer.result=error: FrameLink peer closed or failed
+producer.result.debug=coordinated session not ready or cancelled; gst/gstframelink.cpp(566): sinkRenderImpl (): /GstPipeline:pipeline0/GstFrameLinkAvSink:s/GstFrameLinkSink:video
+producer.result.source=/GstPipeline:pipeline0/GstFrameLinkAvSink:s/GstFrameLinkSink:video
+producer.series.t_cpums_memkb_handles_threads=0.0:14:13752:6:2;1.0:485:115056:14:8;2.0:924:115056:14:8;3.0:1367:115056:14:8;4.0:1826:115056:14:8;5.0:2270:115056:14:8;6.0:2702:17968:11:6;
+producer.threads=8..8 min=8 max=8
+producer.threads.slope.per_min=0.00
+producer.video.push_burst.max=0
+producer.video.push_interval.ms=n=119 p50=33.33 p95=33.40 p99=33.44 max=33.45 min=33.24
+producer.video.push_lateness.ms=n=119 p50=0.13 p95=0.18 p99=0.21 max=0.21 min=0.06
+seconds=12
+video.pool=2
+video.queue=1

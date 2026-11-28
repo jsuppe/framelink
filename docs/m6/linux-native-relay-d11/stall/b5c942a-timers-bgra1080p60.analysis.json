@@ -1,0 +1,107 @@
+{
+ "scope": "synthetic authenticated transport; explicit upload/verification copies; no physical playback or isolated-hop budget claim",
+ "budget_ns": 17000000,
+ "roles": {
+  "source": {
+   "video": 108000,
+   "pcm_frames": 86400000,
+   "resource_slopes_per_min": {
+    "memory_kb": 0.0,
+    "handles": 0.0,
+    "threads": 0.0
+   },
+   "cpu_percent": 37.083616973383556
+  },
+  "relay": {
+   "video": 108000,
+   "pcm_frames": 86400000,
+   "resource_slopes_per_min": {
+    "memory_kb": 0.0,
+    "handles": -0.0008478687201478723,
+    "threads": 0.0
+   },
+   "cpu_percent": 4.11963987412837
+  },
+  "receiver": {
+   "video": 108000,
+   "pcm_frames": 86400000,
+   "resource_slopes_per_min": {
+    "memory_kb": 0.0,
+    "handles": 0.00018440203473294123,
+    "threads": 0.0
+   },
+   "cpu_percent": 40.80865613212598
+  }
+ },
+ "timing_ms": {
+  "scheduled_to_final_arrival": {
+   "p50": 5.726008,
+   "p95": 7.261585,
+   "p99": 7.796193,
+   "max": 13.65368
+  },
+  "source_marker_to_relay": {
+   "p50": 4.082273,
+   "p95": 5.16403,
+   "p99": 5.235628,
+   "max": 8.51857
+  },
+  "source_marker_to_final": {
+   "p50": 5.288631,
+   "p95": 6.824475,
+   "p99": 7.295414,
+   "max": 12.661875
+  },
+  "source_acquire_call": {
+   "p50": 0.010355,
+   "p95": 0.015705,
+   "p99": 0.020626,
+   "max": 0.050021
+  },
+  "source_upload_call": {
+   "p50": 3.07861,
+   "p95": 3.106392,
+   "p99": 3.164398,
+   "max": 7.219819
+  },
+  "source_submit_call": {
+   "p50": 0.008546,
+   "p95": 0.013558,
+   "p99": 0.018669,
+   "max": 0.056044
+  },
+  "relay_acquire_to_record": {
+   "p50": 0.01947,
+   "p95": 0.032016,
+   "p99": 0.042948,
+   "max": 0.090626
+  },
+  "relay_forward_call": {
+   "p50": 0.018804,
+   "p95": 0.030715,
+   "p99": 0.041381,
+   "max": 0.089598
+  },
+  "final_acquire_to_completion": {
+   "p50": 4.722475,
+   "p95": 5.162728,
+   "p99": 5.601015,
+   "max": 8.088289
+  },
+  "audio_scheduled_to_final": {
+   "p50": 0.61219,
+   "p95": 0.960769,
+   "p99": 1.163336,
+   "max": 1.931827
+  }
+ },
+ "pass_all": true,
+ "video_arrival_misses": 0,
+ "audio_arrival_misses": 0,
+ "trace_checked": false,
+ "exit": 0,
+ "wall_seconds": 1800.5,
+ "cell": "bgra1080p60",
+ "seconds": 1800,
+ "trace": false
+}

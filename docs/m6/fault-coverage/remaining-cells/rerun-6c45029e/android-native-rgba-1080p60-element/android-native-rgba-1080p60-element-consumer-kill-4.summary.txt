@@ -1,0 +1,51 @@
+arrival.budget_ms=17
+complete=yes
+config=RGBA 1920x1080@60 element native 12s
+consumer.pid=11166
+exit=0/137
+expected.frames=720
+expected.samples=576000
+fault=consumer-kill
+fault.at_s=6
+fault.bound_ms=2000
+fault.detection_ms=23.0
+fault.pass=yes
+fault.survivor_error_stable=yes
+fault.survivor_result=error: FrameLink peer closed or failed
+harness.malloc=default
+label=android-native-rgba-1080p60-element-consumer-kill-4
+output.async=false
+output.queue_buffers=1
+output.sync=false
+playback.latency_ms=0
+producer.audio.push_burst.max=0
+producer.audio.push_interval.ms=n=360 p50=9.99 p95=10.22 p99=10.38 max=10.97 min=8.59
+producer.audio.push_lateness.ms=n=360 p50=0.29 p95=0.46 p99=0.62 max=1.57 min=0.14
+producer.cpu.percent=55.29
+producer.ended_monotonic_us=5587392759965
+producer.handles=28..28 min=28 max=28
+producer.handles.slope.per_min=0.00
+producer.injection.elapsed_us=0
+producer.injection.executed=0
+producer.injection.frame=0
+producer.injection.requested_ms=0
+producer.injection.stage=none
+producer.injection.start_monotonic_us=0
+producer.mem.kb=64672..64672 min=64672 max=64672
+producer.mem.kind=rss
+producer.mem.slope.kb_per_min=0.00
+producer.pid=11171
+producer.pushed.frames=334
+producer.pushed.samples=268800
+producer.result=error: FrameLink peer closed or failed
+producer.result.debug=FrameLink video channel lost; gst/gstframelink.cpp(693): sinkRenderImpl (): /GstPipeline:pipeline0/GstFrameLinkSink:video: peer disconnected
+producer.result.source=/GstPipeline:pipeline0/GstFrameLinkSink:video
+producer.series.t_cpums_memkb_handles_threads=0.0:193:37024:6:2;1.0:692:64672:28:7;2.0:1229:64672:28:7;3.0:1781:64672:28:7;4.0:2333:64672:28:7;5.0:2897:64672:28:7;5.9:3318:40380:19:5;
+producer.threads=7..7 min=7 max=7
+producer.threads.slope.per_min=0.00
+producer.video.push_burst.max=0
+producer.video.push_interval.ms=n=214 p50=16.66 p95=16.85 p99=17.00 max=17.13 min=16.26
+producer.video.push_lateness.ms=n=214 p50=0.32 p95=0.48 p99=0.59 max=0.78 min=0.17
+seconds=12
+video.pool=2
+video.queue=1

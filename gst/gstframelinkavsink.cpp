@@ -189,10 +189,14 @@ static void startWorker(GstFrameLinkAvSink*s){
   // Do not release media until the consumer's sinks and devices exist.
   if(ok)ok=fl_gst_session_local_ready_cancellable(s->session,TRUE,s->connectMs,s->cancel,&error);
   const std::string why=error?error->message:"session setup failed";g_clear_error(&error);
+  // Post a setup failure before waking the held media: a woken streaming
+  // thread fails at once, and its source's generic flow error must not reach
+  // the application ahead of the cause. The hold stays bounded meanwhile.
   bool post=false;
-  {std::lock_guard<std::mutex> lock(s->shared->mutex);s->shared->setupDone=true;s->shared->setupOk=ok;s->shared->channel=channel;
-   if(!ok){s->shared->error=why;post=!s->shared->cancelled;}s->shared->changed.notify_all();}
+  if(!ok){std::lock_guard<std::mutex> lock(s->shared->mutex);post=!s->shared->cancelled;}
   if(post)GST_ELEMENT_ERROR(s,RESOURCE,OPEN_WRITE,("%s",why.c_str()),("framelinkavsink local session setup"));
+  {std::lock_guard<std::mutex> lock(s->shared->mutex);s->shared->setupDone=true;s->shared->setupOk=ok;s->shared->channel=channel;
+   if(!ok)s->shared->error=why;s->shared->changed.notify_all();}
   if(ok)gst_element_call_async(GST_ELEMENT(s),releaseMedia,nullptr,nullptr);
   g_object_unref(s->session);
  });

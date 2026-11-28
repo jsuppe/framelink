@@ -1,0 +1,51 @@
+arrival.budget_ms=17
+complete=yes
+config=RGBA 1920x1080@60 bin cpu 12s
+consumer.pid=27594
+exit=0/137
+expected.frames=720
+expected.samples=576000
+fault=consumer-kill
+fault.at_s=6
+fault.bound_ms=2000
+fault.detection_ms=18.6
+fault.pass=yes
+fault.survivor_error_stable=yes
+fault.survivor_result=error: FrameLink peer closed or failed
+harness.malloc=default
+label=android-cpu-rgba-1080p60-consumer-kill-2
+output.async=false
+output.queue_buffers=1
+output.sync=false
+playback.latency_ms=0
+producer.audio.push_burst.max=0
+producer.audio.push_interval.ms=n=366 p50=10.00 p95=10.35 p99=10.71 max=11.08 min=8.80
+producer.audio.push_lateness.ms=n=366 p50=0.34 p95=0.65 p99=0.88 max=1.36 min=0.13
+producer.cpu.percent=55.88
+producer.ended_monotonic_us=5556915921839
+producer.handles=28..28 min=28 max=28
+producer.handles.slope.per_min=0.00
+producer.injection.elapsed_us=0
+producer.injection.executed=0
+producer.injection.frame=0
+producer.injection.requested_ms=0
+producer.injection.stage=none
+producer.injection.start_monotonic_us=0
+producer.mem.kb=69440..69440 min=69440 max=69440
+producer.mem.kind=rss
+producer.mem.slope.kb_per_min=0.00
+producer.pid=27595
+producer.pushed.frames=338
+producer.pushed.samples=271680
+producer.result=error: FrameLink peer closed or failed
+producer.result.debug=Could not write to resource.; ../gst/gio/gstgiobasesink.c(361): gst_gio_base_sink_render (): /GstPipeline:pipeline0/GstFrameLinkAvSink:s/GstFrameLinkAudioSink:audio/GstGioStreamSink:giostreamsink1: Could not write to stream: Error sending data: Connection reset by peer
+producer.result.source=/GstPipeline:pipeline0/GstFrameLinkAvSink:s/GstFrameLinkAudioSink:audio/GstGioStreamSink:giostreamsink1
+producer.series.t_cpums_memkb_handles_threads=0.0:197:41284:6:2;1.0:738:69440:28:7;2.0:1302:69440:28:7;3.0:1872:69440:28:7;4.0:2425:69440:28:7;5.0:2988:69440:28:7;5.8:3443:45172:19:5;
+producer.threads=7..7 min=7 max=7
+producer.threads.slope.per_min=0.00
+producer.video.push_burst.max=0
+producer.video.push_interval.ms=n=218 p50=16.67 p95=16.85 p99=16.89 max=17.03 min=16.27
+producer.video.push_lateness.ms=n=218 p50=0.29 p95=0.44 p99=0.47 max=0.72 min=0.13
+seconds=12
+video.pool=2
+video.queue=1

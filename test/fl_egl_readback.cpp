@@ -3,6 +3,7 @@
 #include <string>
 #include <thread>
 #include <algorithm>
+#include <chrono>
 #define CHECK(x) do{if(!(x)){fprintf(stderr,"line %d: %s EGL=%x GL=%x\n",__LINE__,#x,eglGetError(),glGetError());exit(1);}}while(0)
 static GstFrameLinkMemoryPolicy policy(){
  GstFrameLinkMemoryPolicy p{};p.version=1;p.sessionGeneration=1;
@@ -63,7 +64,30 @@ int main(){
  flBuffer b{};CHECK(flAcquireBuffer(producer,&b,2000)==FL_OK);CHECK(flSubmit(producer,&b,0)==FL_OK);flFrame f{};CHECK(flAcquireFrame(c,&f,2000)==FL_OK);
  std::vector<unsigned char>pixels(130*66*4,99);CHECK(!reader.read(c,f,p,pixels.data(),pixels.size()));CHECK(std::all_of(pixels.begin(),pixels.end(),[](unsigned char v){return v==99;}));CHECK(reader.gpuCopyBytes()==0&&reader.readbackBytes()==0);
  CHECK(flRelease(c,&f)==FL_OK);flClose(producer);flClose(c);}
+ // Decision 15 (A): a dedicated reader thread prepared at start pays the
+ // driver's first-use cost there, so its first read costs what later reads do
+ // (the old design paid about 30 ms on the reading thread's first frame), and
+ // the caller's own EGL state is untouched.
+ {const unsigned w=1920,h=1080;auto name="egl-reader-"+std::to_string(getpid());flChannel*c=nullptr,*producer=nullptr;
+  CHECK(flCreateChannelEx(name.c_str(),w,h,FL_FORMAT_BGRA8,1,FL_MAP_CPU,&c)==FL_OK);CHECK(flOpenProducer(name.c_str(),&producer)==FL_OK);
+  flChannelInfo info{};CHECK(flQuery(c,&info)==FL_OK);
+  FrameLinkEglReader threaded;CHECK(threaded.start(info.adapterLUID,w,h));checkForeign();
+  std::thread::id id{};CHECK(threaded.threadId(id)&&id!=std::this_thread::get_id());
+  std::vector<unsigned char>expected(size_t(w)*h*4),result(expected.size());std::vector<double> ms;
+  for(unsigned n=0;n<8;n++){
+   for(size_t i=0;i<expected.size();i++)expected[i]=(i*7+n*13)%256;
+   flBuffer b{};CHECK(flAcquireBuffer(producer,&b,2000)==FL_OK);flMappedImage m{};CHECK(flImageMapPlanes(b.image,&m)==FL_OK);
+   for(unsigned y=0;y<h;y++)memcpy((char*)m.plane[0].pixels+y*m.plane[0].stride,expected.data()+size_t(y)*w*4,w*4);
+   flImageUnmap(b.image);CHECK(flSubmit(producer,&b,n)==FL_OK);flFrame f{};CHECK(flAcquireFrame(c,&f,2000)==FL_OK);
+   const auto t0=std::chrono::steady_clock::now();CHECK(threaded.read(c,f,p,result.data(),result.size()));
+   ms.push_back(std::chrono::duration<double,std::milli>(std::chrono::steady_clock::now()-t0).count());
+   CHECK(result==expected);CHECK(threaded.gpuCopyBytes()==expected.size()&&threaded.readbackBytes()==expected.size());checkForeign();
+   CHECK(flRelease(c,&f)==FL_OK);
+  }
+  printf("dedicated reader: first read %.2f ms, then max %.2f ms\n",ms[0],*std::max_element(ms.begin()+1,ms.end()));
+  CHECK(ms[0]<15.0);
+  flClose(producer);flClose(c);}
  reader.reset();checkForeign();reader.reset();checkForeign();
  eglMakeCurrent(foreignDisplay,EGL_NO_SURFACE,EGL_NO_SURFACE,EGL_NO_CONTEXT);eglDestroyContext(foreignDisplay,foreignContext);eglDestroySurface(foreignDisplay,foreignSurface);eglTerminate(foreignDisplay);
- puts("32 full spatial/channel/alpha frames, permission negatives, thread migration and resize passed");
+ puts("32 full spatial/channel/alpha frames, permission negatives, thread migration, resize and the dedicated reader passed");
 }

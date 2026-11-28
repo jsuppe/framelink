@@ -1,0 +1,124 @@
+arrival.budget_ms=34
+complete=yes
+config=BGRA 3840x2160@30 bin gpu-readback 12s
+consumer.audio.arrival.all.ms=n=597 p50=0.53 p95=0.56 p99=0.58 max=0.64 min=0.14
+consumer.audio.arrival.ms=n=397 p50=0.54 p95=0.56 p99=0.58 max=0.64 min=0.14
+consumer.audio.contiguous=yes
+consumer.audio.deadline_misses=0/597
+consumer.audio.gap_event_ns=0
+consumer.audio.gap_events=0
+consumer.audio.output_queue.admission_residence.ms=n=597 p50=0.09 p95=0.10 p99=0.10 max=0.39 min=0.01
+consumer.audio.output_queue.pending=0
+consumer.audio.output_queue.sampled_max_buffers=0
+consumer.audio.output_queue.unmatched=0
+consumer.audio.pts_jump_ns=0
+consumer.audio.pts_jumps=0
+consumer.audio.render.all.ms=n=597 p50=0.64 p95=0.67 p99=0.70 max=0.95 min=0.18
+consumer.audio.render.ms=n=397 p50=0.64 p95=0.67 p99=0.69 max=0.75 min=0.18
+consumer.audio.render_interval.ms=n=396 p50=10.00 p95=10.07 p99=10.18 max=10.20 min=9.54
+consumer.audio.render_jitter.p1_p99.ms=0.47
+consumer.av_offset.abs.ms=n=4 p50=11.80 p95=13.11 p99=13.11 max=13.11 min=10.71
+consumer.av_offset.ms=n=4 p50=11.80 p95=13.11 p99=13.11 max=13.11 min=10.71
+consumer.content.checked=179
+consumer.content.index_gaps=0
+consumer.content.layout=offset=0 stride=15360 size=33177600
+consumer.content.mismatches=0
+consumer.content.missing_frames=0
+consumer.content.rows=4
+consumer.cpu.percent=35.14
+consumer.ended_monotonic_us=638922522899
+consumer.frames=179
+consumer.handles=45..45 min=45 max=45
+consumer.handles.slope.per_min=-0.00
+consumer.mem.kb=175052..177092 min=175052 max=177092
+consumer.mem.kind=rss
+consumer.mem.slope.kb_per_min=60915.75
+consumer.memory=memory:SystemMemory
+consumer.pid=192157
+consumer.queue.accounting=complete
+consumer.result=error: FrameLink producer failed: invalid input
+consumer.result.debug=audio peer closed before GDP EOS; gst/gstframelinkaudiosrc.cpp(67): readChunkImpl (): /GstPipeline:pipeline0/GstFrameLinkAvSrc:c/GstFrameLinkAudioSrc:audio/FlAudioReader:flaudioreader1
+consumer.result.source=/GstPipeline:pipeline0/GstFrameLinkAvSrc:c/GstFrameLinkAudioSrc:audio/FlAudioReader:flaudioreader1
+consumer.samples=286560
+consumer.scope=transport-consumer
+consumer.series.t_cpums_memkb_handles_threads=0.0:9:13716:6:2;1.0:343:175044:44:11;2.0:662:175052:45:11;3.0:952:175056:45:11;4.0:1310:175056:45:11;5.0:1678:175060:45:11;6.0:2071:177092:45:11;6.5:2245:114780:43:7;
+consumer.threads=11..11 min=11 max=11
+consumer.threads.slope.per_min=-0.00
+consumer.video.arrival.all.ms=n=179 p50=12.22 p95=14.93 p99=17.19 max=36.98 min=4.45
+consumer.video.arrival.ms=n=119 p50=12.69 p95=15.21 p99=16.81 max=17.19 min=4.45
+consumer.video.buffer_alive_at_end=0
+consumer.video.buffer_life_after_callback.ms=n=179 p50=3094.82 p95=5794.61 p99=6036.15 max=6065.14 min=3.94
+consumer.video.callback_refcount_hist=0,0,0,179,0,0,0,0
+consumer.video.deadline_misses=1/179
+consumer.video.discont_after_first=0
+consumer.video.gap_event_ns=0
+consumer.video.gap_events=0
+consumer.video.output_queue.admission_residence.ms=n=179 p50=0.09 p95=0.10 p99=0.11 max=0.12 min=0.01
+consumer.video.output_queue.pending=0
+consumer.video.output_queue.sampled_max_buffers=0
+consumer.video.output_queue.unmatched=0
+consumer.video.render.all.ms=n=179 p50=12.48 p95=15.24 p99=17.43 max=37.07 min=4.52
+consumer.video.render.ms=n=119 p50=12.93 p95=15.47 p99=17.05 max=17.43 min=4.52
+consumer.video.render_interval.ms=n=118 p50=33.55 p95=36.98 p99=38.31 max=39.65 min=24.59
+consumer.video.render_jitter.p1_p99.ms=12.14
+exit=0/0
+expected.frames=360
+expected.samples=576000
+fault=video-no-pts
+fault.app_slot_drops=179
+fault.bound_ms=2000
+fault.content_ok=yes
+fault.detection_ms=0.9
+fault.expect=explicit-failure
+fault.expected_consumer_error=error: FrameLink producer failed: invalid input
+fault.expected_message=valid supported frame metadata and TIME mapping required
+fault.frame=180
+fault.ms=0
+fault.pass=yes
+fault.recovery_limit_frames=2
+harness.malloc=producer-side mmap_threshold=8388608
+label=linux-gpu-readback-bgra-4k30-video-no-pts-5
+output.async=false
+output.queue_buffers=1
+output.sync=false
+playback.latency_ms=0
+producer.audio.push_burst.max=0
+producer.audio.push_interval.ms=n=997 p50=10.00 p95=10.04 p99=10.06 max=10.12 min=9.90
+producer.audio.push_lateness.ms=n=997 p50=0.13 p95=0.14 p99=0.16 max=0.20 min=0.06
+producer.cpu.percent=2.84
+producer.ended_monotonic_us=638922522322
+producer.fault.dropped_blocks=0
+producer.fault.dropped_samples=0
+producer.fault.elapsed_us=0
+producer.fault.executed=1
+producer.fault.gap_ns=-1
+producer.fault.start_monotonic_us=638922522025
+producer.handles=16..18 min=16 max=18
+producer.handles.slope.per_min=0.00
+producer.injection.elapsed_us=0
+producer.injection.executed=0
+producer.injection.frame=0
+producer.injection.requested_ms=0
+producer.injection.stage=none
+producer.injection.start_monotonic_us=0
+producer.mem.kb=16872..16876 min=16872 max=16876
+producer.mem.kind=rss
+producer.mem.slope.kb_per_min=0.00
+producer.native.acquired=181
+producer.native.slot_drop_frames=181 182 183 184 185 186 187 188 189 190 191 192 193 194 195 196 197 198 199 200 201 202 203 204 205 206 207 208 209 210 211 212 
+producer.native.slot_drops=179
+producer.pid=192165
+producer.pushed.frames=180
+producer.pushed.samples=574560
+producer.result=error: valid supported frame metadata and TIME mapping required
+producer.result.debug=gst/gstframelink.cpp(620): sinkRenderImpl (): /GstPipeline:pipeline0/GstFrameLinkAvSink:s/GstFrameLinkSink:video
+producer.result.source=/GstPipeline:pipeline0/GstFrameLinkAvSink:s/GstFrameLinkSink:video
+producer.series.t_cpums_memkb_handles_threads=0.0:13:13680:6:2;1.0:55:16872:16:9;2.0:98:16872:16:9;3.0:140:16872:16:9;4.0:191:16872:16:9;5.0:241:16872:16:9;6.0:292:16872:16:9;7.0:308:16876:18:8;8.0:323:16876:18:8;9.0:338:16876:18:8;10.0:354:16876:18:8;11.0:369:16876:18:8;12.0:383:16876:18:8;12.1:384:16840:14:6;
+producer.threads=9..8 min=8 max=9
+producer.threads.slope.per_min=0.00
+producer.video.push_burst.max=0
+producer.video.push_interval.ms=n=119 p50=33.33 p95=33.51 p99=33.62 max=33.67 min=32.90
+producer.video.push_lateness.ms=n=119 p50=0.59 p95=0.76 p99=0.78 max=0.79 min=0.19
+seconds=12
+video.pool=2
+video.queue=1

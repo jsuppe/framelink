@@ -1,0 +1,49 @@
+arrival.budget_ms=17
+complete=yes
+config=RGBA 1920x1080@60 bin native 12s
+consumer.pid=8545
+exit=0/137
+expected.frames=720
+expected.samples=576000
+fault=consumer-kill
+fault.at_s=6
+fault.bound_ms=2000
+fault.detection_ms=29.0
+fault.pass=yes
+fault.survivor_error_stable=yes
+fault.survivor_result=error: FrameLink peer closed or failed
+harness.malloc=default
+label=android-native-consumer-kill-5
+output.async=false
+output.queue_buffers=1
+output.sync=false
+playback.latency_ms=0
+producer.audio.push_burst.max=0
+producer.audio.push_interval.ms=n=369 p50=9.99 p95=10.25 p99=10.34 max=10.59 min=9.45
+producer.audio.push_lateness.ms=n=369 p50=0.30 p95=0.49 p99=0.59 max=0.85 min=0.16
+producer.cpu.percent=55.92
+producer.ended_monotonic_us=5451657646079
+producer.handles=28..28 min=28 max=28
+producer.handles.slope.per_min=0.00
+producer.injection.elapsed_us=0
+producer.injection.executed=0
+producer.injection.frame=0
+producer.injection.requested_ms=0
+producer.injection.stage=none
+producer.injection.start_monotonic_us=0
+producer.mem.kb=62300..62300 min=62300 max=62300
+producer.mem.kind=rss
+producer.mem.slope.kb_per_min=0.00
+producer.pid=8552
+producer.pushed.frames=339
+producer.pushed.samples=273120
+producer.result=error: FrameLink peer closed or failed
+producer.series.t_cpums_memkb_handles_threads=0.0:198:34688:6:2;1.0:733:62300:28:7;2.0:1287:62300:28:7;3.0:1850:62300:28:7;4.0:2408:62300:28:7;5.0:2973:62300:28:7;5.9:3424:38020:19:5;
+producer.threads=7..7 min=7 max=7
+producer.threads.slope.per_min=0.00
+producer.video.push_burst.max=0
+producer.video.push_interval.ms=n=219 p50=16.66 p95=16.84 p99=16.89 max=17.28 min=16.01
+producer.video.push_lateness.ms=n=219 p50=0.32 p95=0.46 p99=0.55 max=0.86 min=0.16
+seconds=12
+video.pool=2
+video.queue=1

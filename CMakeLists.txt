@@ -100,7 +100,10 @@ if(FRAMELINK_BUILD_TESTS)
         add_test(NAME read_lease_egl COMMAND fl_read_lease_egl)
         add_test(NAME read_lease_egl_producer_death COMMAND fl_read_lease_egl --producer-death)
         add_test(NAME read_lease_egl_delayed_completion COMMAND fl_read_lease_egl --delayed-completion)
-        set_tests_properties(read_lease_egl read_lease_egl_producer_death read_lease_egl_delayed_completion PROPERTIES TIMEOUT 20 SKIP_RETURN_CODE 77)
+        add_test(NAME read_lease_egl_gpu_busy_completion COMMAND fl_read_lease_egl --gpu-busy-completion)
+        set_tests_properties(read_lease_egl read_lease_egl_producer_death read_lease_egl_delayed_completion read_lease_egl_gpu_busy_completion PROPERTIES TIMEOUT 20 SKIP_RETURN_CODE 77)
+        # It saturates the GPU for about 0.7 s: never alongside timing-sensitive GPU tests.
+        set_tests_properties(read_lease_egl_gpu_busy_completion PROPERTIES RUN_SERIAL TRUE)
     endif()
     add_executable(fl_read_leases test/fl_read_leases.cpp)
     target_link_libraries(fl_read_leases PRIVATE framelink)
@@ -224,7 +227,7 @@ if(FRAMELINK_BUILD_TESTS)
         add_test(NAME device_owner_faults_win COMMAND fl_device_owner_faults_win)
         set_tests_properties(device_owner_faults_win PROPERTIES TIMEOUT 30)
         add_executable(fl_read_lease_d3d11 test/fl_read_lease_d3d11.cpp)
-        target_link_libraries(fl_read_lease_d3d11 PRIVATE framelink d3d11 dxgi)
+        target_link_libraries(fl_read_lease_d3d11 PRIVATE framelink d3d11 dxgi d3dcompiler)
         add_test(NAME read_lease_d3d11 COMMAND fl_read_lease_d3d11)
         add_test(NAME read_lease_d3d11_producer_death COMMAND fl_read_lease_d3d11 --producer-death)
         add_test(NAME read_lease_d3d11_delayed_completion COMMAND fl_read_lease_d3d11 --delayed-completion)
@@ -606,6 +609,15 @@ if(FRAMELINK_BUILD_TESTS AND WIN32)
         "-DPRODUCER_ARGS=produce;flci-nv12" "-DCONSUMER_ARGS=consume;flci-nv12"
         -P ${CMAKE_CURRENT_SOURCE_DIR}/test/run_roundtrip.cmake)
     set_tests_properties(nv12_windows_roundtrip PROPERTIES TIMEOUT 95)
+    # M6 decision 13: D3D11 device loss, by test-only injection.
+    # Physical device loss (decision 13 A3): driven by d13-adapter.ps1, not CTest.
+    add_executable(fl_device_loss_stream_win test/fl_device_loss_stream_win.cpp)
+    target_link_libraries(fl_device_loss_stream_win PRIVATE framelink d3d11 d3dcompiler)
+    add_executable(fl_device_lost_win test/fl_device_lost_win.cpp)
+    target_link_libraries(fl_device_lost_win PRIVATE framelink)
+    add_test(NAME device_lost_windows COMMAND fl_device_lost_win)
+    set_tests_properties(device_lost_windows PROPERTIES TIMEOUT 20 SKIP_RETURN_CODE 77
+        ENVIRONMENT FRAMELINK_TEST_FAULTS=device-removed-after=1)
 endif()
 
 if(FRAMELINK_BUILD_TESTS AND WIN32)
@@ -771,6 +783,13 @@ if(FRAMELINK_BUILD_TESTS AND UNIX)
     target_link_libraries(fl_sync_fd_test PRIVATE framelink)
     add_test(NAME sync_fd_contract COMMAND fl_sync_fd_test)
     set_tests_properties(sync_fd_contract PROPERTIES TIMEOUT 10)
+    # M6 decision 13: device loss through fences, by test-only injection.
+    add_executable(fl_device_lost_test test/fl_device_lost.cpp)
+    target_link_libraries(fl_device_lost_test PRIVATE framelink)
+    add_test(NAME device_lost_ready_fence COMMAND fl_device_lost_test ready)
+    add_test(NAME device_lost_lease_fence COMMAND fl_device_lost_test lease)
+    set_tests_properties(device_lost_ready_fence PROPERTIES TIMEOUT 10 ENVIRONMENT FRAMELINK_TEST_FAULTS=ready-error=2)
+    set_tests_properties(device_lost_lease_fence PROPERTIES TIMEOUT 10 ENVIRONMENT FRAMELINK_TEST_FAULTS=lease-error=1)
 endif()
 
 # Android GStreamer SDK ships static libraries. Register gstframelink in the
@@ -858,6 +877,22 @@ if(FRAMELINK_BUILD_TESTS AND TARGET fl_gst_nv12 AND NOT ANDROID)
     target_link_libraries(fl_gst_timestamps PRIVATE ${_fl_test_libs})
     add_test(NAME gst_timestamp_contract COMMAND fl_gst_timestamps $<TARGET_FILE:gstframelink>)
     set_tests_properties(gst_timestamp_contract PROPERTIES TIMEOUT 25)
+endif()
+
+# M6 decision 13: framelinksrc's stable device-lost error, by test-only fence
+# fault injection (POSIX fences; the Windows device paths are tested separately).
+if(FRAMELINK_BUILD_TESTS AND TARGET fl_gst_timestamps AND UNIX)
+    add_executable(fl_gst_device_lost test/fl_gst_device_lost.cpp)
+    target_include_directories(fl_gst_device_lost PRIVATE include)
+    if(_fl_test_includes)
+        target_include_directories(fl_gst_device_lost PRIVATE ${_fl_test_includes})
+    endif()
+    if(_fl_test_dirs)
+        target_link_directories(fl_gst_device_lost PRIVATE ${_fl_test_dirs})
+    endif()
+    target_link_libraries(fl_gst_device_lost PRIVATE ${_fl_test_libs})
+    add_test(NAME gst_device_lost COMMAND fl_gst_device_lost $<TARGET_FILE:gstframelink>)
+    set_tests_properties(gst_device_lost PROPERTIES TIMEOUT 20 ENVIRONMENT FRAMELINK_TEST_FAULTS=ready-error=3)
 endif()
 
 if(FRAMELINK_BUILD_TESTS AND NOT ANDROID)
@@ -1064,6 +1099,8 @@ endif()
 if(FRAMELINK_BUILD_TESTS AND Python3_Interpreter_FOUND)
     add_test(NAME frame_accounting_negative_controls COMMAND ${Python3_EXECUTABLE}
         ${CMAKE_CURRENT_SOURCE_DIR}/test/test_frame_accounting.py)
+    add_test(NAME renderer_identity_negative_controls COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/test_renderer_identity.py)
 endif()
 
 if(FRAMELINK_BUILD_TESTS AND TARGET framelink_av_playback AND UNIX AND NOT ANDROID)
@@ -1678,6 +1715,57 @@ if(FRAMELINK_BUILD_TESTS AND TARGET framelink_gst_session)
     add_dependencies(fl_gst_av_bench gstframelink)
     add_test(NAME gst_av_bench_smoke COMMAND fl_gst_av_bench $<TARGET_FILE:gstframelink> --seconds 6 --size 160x90 --out ${CMAKE_CURRENT_BINARY_DIR} --label bench-smoke)
     set_tests_properties(gst_av_bench_smoke PROPERTIES TIMEOUT 120)
+    # M6.4 at-rate fault harness (docs/m6/fault-coverage/at-rate): endpoint
+    # death and a consumer stall on the small CPU cell, each against its
+    # declared outcome.
+    set(FL_BENCH_FAULT_ARGS --seconds 6 --size 160x90 --fps 30 --format RGBA --latency-ms 0
+        --transport-only --no-output-preroll --pool 2 --video-queue 1 --output-queue-buffers 1
+        --out ${CMAKE_CURRENT_BINARY_DIR})
+    add_test(NAME gst_av_bench_fault_producer_kill COMMAND fl_gst_av_bench $<TARGET_FILE:gstframelink>
+        ${FL_BENCH_FAULT_ARGS} --fault producer-kill --fault-at-s 3 --label bench-fault-producer-kill)
+    add_test(NAME gst_av_bench_fault_consumer_kill COMMAND fl_gst_av_bench $<TARGET_FILE:gstframelink>
+        ${FL_BENCH_FAULT_ARGS} --fault consumer-kill --fault-at-s 3 --label bench-fault-consumer-kill)
+    add_test(NAME gst_av_bench_fault_consumer_stall COMMAND fl_gst_av_bench $<TARGET_FILE:gstframelink>
+        ${FL_BENCH_FAULT_ARGS} --fault consumer-stall --fault-frame 90 --fault-ms 300
+        --fault-expect replacement-failure --label bench-fault-consumer-stall)
+    # Audio underrun at the producer: unsignalled (refused) and signalled with
+    # GAP + DISCONT (explicit, exact loss). Timing-bound cases stay out of CTest.
+    add_test(NAME gst_av_bench_fault_audio_drop COMMAND fl_gst_av_bench $<TARGET_FILE:gstframelink>
+        ${FL_BENCH_FAULT_ARGS} --fault audio-drop --fault-frame 300 --fault-ms 50
+        --fault-expect explicit-failure --label bench-fault-audio-drop)
+    add_test(NAME gst_av_bench_fault_audio_gap COMMAND fl_gst_av_bench $<TARGET_FILE:gstframelink>
+        ${FL_BENCH_FAULT_ARGS} --fault audio-gap --fault-frame 300 --fault-ms 50
+        --fault-expect gap-visible --label bench-fault-audio-gap)
+    set_tests_properties(gst_av_bench_fault_producer_kill gst_av_bench_fault_consumer_kill
+        gst_av_bench_fault_consumer_stall gst_av_bench_fault_audio_drop gst_av_bench_fault_audio_gap
+        PROPERTIES TIMEOUT 120)
+    # D2 option B: a native receiver's stall makes the producer drop for a full
+    # ring; the consumer must see those drops as a GAP (mid-stream and just
+    # before EOS). Native receivers are Linux and Android here; Windows follows
+    # with its requalification.
+    if(NOT WIN32)
+        add_test(NAME gst_av_bench_fault_consumer_stall_native COMMAND fl_gst_av_bench $<TARGET_FILE:gstframelink>
+            ${FL_BENCH_FAULT_ARGS} --native --fault consumer-stall --fault-frame 90 --fault-ms 300
+            --fault-expect counted-drop --label bench-fault-consumer-stall-native)
+        add_test(NAME gst_av_bench_fault_consumer_stall_native_tail COMMAND fl_gst_av_bench $<TARGET_FILE:gstframelink>
+            ${FL_BENCH_FAULT_ARGS} --native --fault consumer-stall --fault-frame 175 --fault-ms 400
+            --fault-expect counted-drop --label bench-fault-consumer-stall-native-tail)
+        set_tests_properties(gst_av_bench_fault_consumer_stall_native gst_av_bench_fault_consumer_stall_native_tail
+            PROPERTIES TIMEOUT 120 SKIP_REGULAR_EXPRESSION "SKIP native consumer memory")
+    endif()
+    # Malformed metadata on one producer buffer, each refused explicitly.
+    foreach(case video-no-pts video-stale-meta audio-no-pts audio-misaligned)
+        if(case MATCHES "^video")
+            set(frame 90)
+        else()
+            set(frame 300)
+        endif()
+        add_test(NAME gst_av_bench_fault_${case} COMMAND fl_gst_av_bench $<TARGET_FILE:gstframelink>
+            ${FL_BENCH_FAULT_ARGS} --fault ${case} --fault-frame ${frame}
+            --fault-expect explicit-failure --label bench-fault-${case})
+        set_tests_properties(gst_av_bench_fault_${case} PROPERTIES TIMEOUT 120)
+    endforeach()
+
     if(WIN32)
         foreach(cpu_format BGRA NV12)
             add_test(NAME gst_av_bench_shared_cpu_${cpu_format}

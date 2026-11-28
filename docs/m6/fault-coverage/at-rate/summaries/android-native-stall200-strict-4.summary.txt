@@ -1,0 +1,99 @@
+arrival.budget_ms=17
+complete=yes
+config=RGBA 1920x1080@60 bin native 12s
+consumer.audio.arrival.all.ms=n=605 p50=1.74 p95=2.41 p99=2.64 max=2.81 min=1.12
+consumer.audio.arrival.ms=n=405 p50=1.75 p95=2.47 p99=2.64 max=2.81 min=1.12
+consumer.audio.contiguous=yes
+consumer.audio.deadline_misses=0/605
+consumer.audio.output_queue.admission_residence.ms=n=605 p50=0.24 p95=0.43 p99=0.56 max=0.80 min=0.08
+consumer.audio.output_queue.pending=0
+consumer.audio.output_queue.sampled_max_buffers=0
+consumer.audio.output_queue.unmatched=0
+consumer.audio.render.all.ms=n=605 p50=2.02 p95=2.81 p99=3.04 max=3.40 min=1.28
+consumer.audio.render.ms=n=405 p50=2.04 p95=2.86 p99=3.15 max=3.40 min=1.28
+consumer.audio.render_interval.ms=n=404 p50=9.95 p95=11.01 p99=11.30 max=11.54 min=8.42
+consumer.audio.render_jitter.p1_p99.ms=1.59
+consumer.av_offset.abs.ms=n=5 p50=4.89 p95=4.97 p99=4.97 max=4.97 min=3.98
+consumer.av_offset.ms=n=5 p50=4.89 p95=4.97 p99=4.97 max=4.97 min=3.98
+consumer.cpu.percent=14.39
+consumer.ended_monotonic_us=5362189277875
+consumer.fault.elapsed_us=200685
+consumer.fault.executed=1
+consumer.fault.recovery_frames=0
+consumer.fault.start_monotonic_us=5362189256343
+consumer.frames=359
+consumer.handles=24..24 min=23 max=24
+consumer.handles.slope.per_min=0.00
+consumer.mem.kb=44560..44560 min=44560 max=44560
+consumer.mem.kind=rss
+consumer.mem.slope.kb_per_min=0.00
+consumer.memory=memory:FrameLinkAHardwareBuffer
+consumer.pid=9562
+consumer.queue.accounting=complete
+consumer.result=error: audio peer closed before GDP EOS
+consumer.samples=290400
+consumer.scope=transport-consumer
+consumer.series.t_cpums_memkb_handles_threads=0.0:200:41028:6:2;1.0:349:44560:24:10;2.0:485:44560:24:10;3.0:621:44560:23:10;4.0:760:44560:24:10;5.0:915:44560:24:10;6.0:1064:44560:24:10;6.6:1123:44560:14:6;
+consumer.threads=10..10 min=10 max=10
+consumer.threads.slope.per_min=0.00
+consumer.video.arrival.all.ms=n=360 p50=6.32 p95=7.96 p99=8.81 max=9.56 min=4.20
+consumer.video.arrival.ms=n=240 p50=6.43 p95=7.98 p99=8.77 max=9.35 min=4.64
+consumer.video.deadline_misses=0/360
+consumer.video.output_queue.admission_residence.ms=n=360 p50=0.31 p95=0.48 p99=0.55 max=0.62 min=0.03
+consumer.video.output_queue.pending=0
+consumer.video.output_queue.sampled_max_buffers=0
+consumer.video.output_queue.unmatched=0
+consumer.video.render.all.ms=n=359 p50=6.82 p95=8.42 p99=9.12 max=9.84 min=4.65
+consumer.video.render.ms=n=239 p50=6.99 p95=8.51 p99=9.10 max=9.71 min=5.11
+consumer.video.render_interval.ms=n=238 p50=16.18 p95=18.66 p99=20.09 max=20.46 min=13.16
+consumer.video.render_jitter.p1_p99.ms=3.89
+exit=0/0
+expected.frames=720
+expected.samples=576000
+fault=consumer-stall
+fault.bound_ms=2000
+fault.error_on_ring_full=true
+fault.expect=explicit-failure
+fault.frame=360
+fault.loss_accounted=no
+fault.ms=200
+fault.pass=yes
+fault.producer_dropped=-1
+fault.producer_ring_full_drops=-1
+fault.recovery_limit_frames=15
+fault.silent_loss=no
+harness.malloc=default
+label=android-native-stall200-strict-4
+output.async=false
+output.queue_buffers=1
+output.sync=false
+playback.latency_ms=0
+producer.audio.push_burst.max=0
+producer.audio.push_interval.ms=n=406 p50=9.99 p95=10.30 p99=10.49 max=10.60 min=9.49
+producer.audio.push_lateness.ms=n=406 p50=0.33 p95=0.53 p99=0.70 max=0.78 min=0.16
+producer.cpu.percent=55.61
+producer.ended_monotonic_us=5362189275974
+producer.handles=28..28 min=28 max=28
+producer.handles.slope.per_min=-0.00
+producer.injection.elapsed_us=0
+producer.injection.executed=0
+producer.injection.frame=0
+producer.injection.requested_ms=0
+producer.injection.stage=none
+producer.injection.start_monotonic_us=0
+producer.mem.kb=69576..69576 min=69576 max=69576
+producer.mem.kind=rss
+producer.mem.slope.kb_per_min=-0.00
+producer.pid=9563
+producer.pushed.frames=361
+producer.pushed.samples=290880
+producer.result=error: FrameLink pool exhausted within configured wait budget
+producer.series.t_cpums_memkb_handles_threads=0.0:185:41424:6:2;1.0:722:69576:28:7;2.0:1283:69576:28:7;3.0:1829:69576:28:7;4.0:2388:69576:28:7;5.0:2966:69576:28:7;6.0:3519:69576:28:7;6.2:3612:45236:19:5;
+producer.threads=7..7 min=7 max=7
+producer.threads.slope.per_min=-0.00
+producer.video.push_burst.max=0
+producer.video.push_interval.ms=n=241 p50=16.66 p95=16.82 p99=16.91 max=16.97 min=16.38
+producer.video.push_lateness.ms=n=241 p50=0.32 p95=0.45 p99=0.54 max=0.69 min=0.18
+seconds=12
+video.pool=2
+video.queue=1

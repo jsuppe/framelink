@@ -1,0 +1,6 @@
+linux-gpu-readback-bgra-1080p60-restart-consumer-kill.summary.txt: FAIL incomplete: cycle 0: long=EOS fresh=EOS exit=0 | cycles 78/100 | mem 1.85 KB/cycle | handles 0.000 | threads 0.000 | detect n=50 p50=10.57 p95=19.30 p99=26.25 max=26.25 min=4.84
+linux-gpu-readback-bgra-1080p60-restart-producer-kill.summary.txt: FAIL incomplete: cycle 54: long=EOS fresh=EOS exit=0 | cycles 97/100 | mem 3.15 KB/cycle | handles 0.000 | threads 0.000 | detect n=50 p50=1.14 p95=3.54 p99=3.60 max=3.60 min=0.85
+linux-gpu-readback-bgra-1080p60-restart-producer-malformed.summary.txt: PASS | cycles 100/100 | mem 4.66 KB/cycle | handles 0.000 | threads 0.000 | detect n=50 p50=0.88 p95=0.93 p99=0.96 max=0.96 min=0.21
+android-cpu-rgba-1080p60-restart-consumer-kill.summary.txt: PASS | cycles 100/100 | mem 1.57 KB/cycle | handles 0.000 | threads 0.000 | detect n=50 p50=30.84 p95=35.29 p99=37.18 max=37.18 min=25.87
+android-cpu-rgba-1080p60-restart-producer-kill.summary.txt: PASS | cycles 100/100 | mem 1.30 KB/cycle | handles 0.000 | threads 0.000 | detect n=50 p50=29.75 p95=35.29 p99=36.48 max=36.48 min=15.74
+android-cpu-rgba-1080p60-restart-producer-malformed.summary.txt: PASS | cycles 100/100 | mem 1.98 KB/cycle | handles 0.000 | threads 0.000 | detect n=50 p50=2.45 p95=2.82 p99=3.15 max=3.15 min=1.66

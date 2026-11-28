@@ -60,6 +60,16 @@ typedef enum flResult {
     FL_INVALID = 8,
     FL_OOM = 9,
     FL_INTERNAL = 10,
+    // The GPU device was lost or reset (a fence completed with an error, or
+    // the device reports removed). Terminal for this handle, like
+    // FL_DISCONNECTED: no further frames are delivered; the handle stays
+    // valid and must still be flClose'd. Recreate GPU objects before opening
+    // a new channel. Never returned for a frame whose GPU work completed.
+    // Android (Mali, measured): a GPU reset completes fences WITHOUT an error,
+    // so FrameLink cannot see it and never returns this there; an abandoned
+    // read retires as good and an unwritten frame can be delivered as valid.
+    // Detect resets with your own GL/Vulkan robustness query (M6 decision 13).
+    FL_DEVICE_LOST = 12,
 } flResult;
 
 FL_API const char* flResultString(flResult r); // never NULL, never allocates

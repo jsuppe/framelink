@@ -31,6 +31,15 @@ Native handle APIs are necessarily platform-specific, with equivalent ownership
 and completion contracts. Android abstract sockets remain subject to app UID /
 SELinux boundaries; renderer cross-app input uses its existing Binder Surface API.
 
+**GPU device loss is not at parity** (M6 decision 13, real resets). Windows and
+Linux report every measured reset as `FL_DEVICE_LOST` and deliver no frame
+written behind a hang. On Android (Mali) a reset completes fences without an
+error: FrameLink cannot see it, an abandoned read retires as good and an
+unwritten frame can be delivered as valid. Android applications detect resets
+with their own GL/Vulkan robustness query. An API for an application to report a
+reset to FrameLink (`flReportDeviceLost`) is deferred until a consumer needs it
+(Jon, option C).
+
 ## Renderer work
 
 - Shared CPU/GPU tracing helper and Android intent-based finite captures.

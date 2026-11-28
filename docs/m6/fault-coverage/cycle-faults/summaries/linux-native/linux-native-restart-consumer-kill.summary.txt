@@ -1,0 +1,29 @@
+complete=yes
+config=NV12 1920x1080@60 bin native fresh-device lifecycle restart-consumer 100x5s
+cycle_fault=kill
+cycle_fault.at_ms=3000
+cycle_fault.bound_ms=2000
+cycle_fault.detection_ms=n=50 p50=7.13 p95=12.14 p99=12.34 max=12.34 min=1.99
+cycles=100
+cycles.ok=100/100
+expected.frames.per_cycle=300
+expected.samples.per_cycle=240000
+harness.malloc=producer-side mmap_threshold=8388608
+label=linux-native-restart-consumer-kill
+long.exit=0
+long.handles=7..7
+long.handles.slope.per_cycle=0.000
+long.mem.kb=33884..34172
+long.mem.slope.kb_per_cycle=1.65
+long.role=lifecycle-producer
+long.series.result_frames_samples_memkb_handles_threads=EOS|300|240000|24276|7|6;error: coordinated session not ready or cancelled|179|143040|33592|7|6;EOS|300|240000|42836|7|6;error: metadata frame publication failed|180|143520|33856|7|6;EOS|300|240000|33872|7|6;error: required session tracks not ready or cancelled|178|142560|33884|7|6;EOS|300|240000|33884|7|6;error: coordinated session not ready or cancelled|179|142560|33892|7|6;EOS|300|240000|34036|7|6;error: coordinated session not ready or cancelled|179|143040|34040|7|6;EOS|300|240000|34048|7|6;error: required session tracks not ready or cancelled|180|144000|34052|7|6;EOS|300|240000|34052|7|6;error: coordinated session not ready or cancelled|180|143520|34056|7|6;EOS|300|240000|34056|7|6;error: required session tracks not ready or cancelled|179|143040|34080|7|6;EOS|300|240000|34080|7|6;error: coordinated session not ready or cancelled|179|142560|34080|7|6;EOS|300|240000|34080|7|6;error: coordinated session not ready or cancelled|179|142560|34080|7|6;EOS|300|240000|34080|7|6;error: coordinated session not ready or cancelled|180|143520|34080|7|6;EOS|300|240000|34088|7|6;error: metadata frame publication failed|180|143520|34088|7|6;EOS|300|240000|34088|7|6;error: coordinated session not ready or cancelled|179|142560|34088|7|6;EOS|300|240000|34088|7|6;error: required session tracks not ready or cancelled|179|143040|34088|7|6;EOS|300|240000|34088|7|6;error: coordinated session not ready or cancelled|179|142560|34088|7|6;EOS|300|240000|34088|7|6;error: required session tracks not ready or cancelled|180|144000|34096|7|6;EOS|300|240000|34096|7|6;error: coordinated session not ready or cancelled|179|143040|34096|7|6;EOS|300|240000|34096|7|6;error: coordinated session not ready or cancelled|179|142560|34096|7|6;EOS|300|240000|34096|7|6;error: required session tracks not ready or cancelled|178|142560|34104|7|6;EOS|300|240000|34104|7|6;error: coordinated session not ready or cancelled|179|142560|34104|7|6;EOS|300|240000|34104|7|6;error: required session tracks not ready or cancelled|180|144000|34104|7|6;EOS|300|240000|34104|7|6;error: required session tracks not ready or cancelled|178|142560|34112|7|6;EOS|300|240000|34112|7|6;error: required session tracks not ready or cancelled|178|142560|34112|7|6;EOS|300|240000|34116|7|6;error: required session tracks not ready or cancelled|180|144000|34120|7|6;EOS|300|240000|34120|7|6;error: coordinated session not ready or cancelled|179|142560|34120|7|6;EOS|300|240000|34120|7|6;error: required session tracks not ready or cancelled|179|143520|34120|7|6;EOS|300|240000|34124|7|6;error: required session tracks not ready or cancelled|180|144000|34124|7|6;EOS|300|240000|34124|7|6;error: required session tracks not ready or cancelled|180|144000|34124|7|6;EOS|300|240000|34128|7|6;error: required session tracks not ready or cancelled|180|144000|34128|7|6;EOS|300|240000|34128|7|6;error: coordinated session not ready or cancelled|179|142560|34136|7|6;EOS|300|240000|34136|7|6;error: required session tracks not ready or cancelled|178|142560|34140|7|6;EOS|300|240000|34140|7|6;error: coordinated session not ready or cancelled|179|142560|34140|7|6;EOS|300|240000|34140|7|6;error: required session tracks not ready or cancelled|180|144000|34140|7|6;EOS|300|240000|34144|7|6;error: coordinated session not ready or cancelled|179|142560|34144|7|6;EOS|300|240000|34144|7|6;error: required session tracks not ready or cancelled|179|143040|34144|7|6;EOS|300|240000|34144|7|6;error: metadata frame publication failed|180|143520|34148|7|6;EOS|300|240000|34152|7|6;error: coordinated session not ready or cancelled|180|143520|34152|7|6;EOS|300|240000|34152|7|6;error: required session tracks not ready or cancelled|178|142560|34152|7|6;EOS|300|240000|34152|7|6;error: required session tracks not ready or cancelled|180|144000|34156|7|6;EOS|300|240000|34156|7|6;error: coordinated session not ready or cancelled|179|142560|34156|7|6;EOS|300|240000|34156|7|6;error: required session tracks not ready or cancelled|180|144000|34160|7|6;EOS|300|240000|34160|7|6;error: required session tracks not ready or cancelled|178|142560|34160|7|6;EOS|300|240000|34160|7|6;error: required session tracks not ready or cancelled|179|143520|34160|7|6;EOS|300|240000|34164|7|6;error: coordinated session not ready or cancelled|179|142560|34164|7|6;EOS|300|240000|34164|7|6;error: coordinated session not ready or cancelled|180|143520|34164|7|6;EOS|300|240000|34164|7|6;error: coordinated session not ready or cancelled|179|142560|34164|7|6;EOS|300|240000|34164|7|6;error: required session tracks not ready or cancelled|180|144000|34168|7|6;EOS|300|240000|34168|7|6;error: required session tracks not ready or cancelled|180|144000|34168|7|6;EOS|300|240000|34168|7|6;error: required session tracks not ready or cancelled|178|143040|34172|7|6;EOS|300|240000|34172|7|6;error: coordinated session not ready or cancelled|179|142560|34172|7|6;
+long.threads=6..6
+long.threads.slope.per_cycle=0.000
+output.async=false
+output.queue_buffers=1
+output.sync=false
+playback.latency_ms=0
+seconds=5
+video.pool=2
+video.queue=1
+wall.s=409.5

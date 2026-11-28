@@ -1,0 +1,51 @@
+arrival.budget_ms=17
+complete=yes
+config=RGBA 1920x1080@60 bin native 12s
+consumer.pid=10181
+exit=0/137
+expected.frames=720
+expected.samples=576000
+fault=consumer-kill
+fault.at_s=6
+fault.bound_ms=2000
+fault.detection_ms=25.6
+fault.pass=yes
+fault.survivor_error_stable=yes
+fault.survivor_result=error: FrameLink peer closed or failed
+harness.malloc=default
+label=android-native-consumer-kill-1
+output.async=false
+output.queue_buffers=1
+output.sync=false
+playback.latency_ms=0
+producer.audio.push_burst.max=0
+producer.audio.push_interval.ms=n=370 p50=10.01 p95=10.25 p99=10.46 max=10.67 min=9.32
+producer.audio.push_lateness.ms=n=370 p50=0.29 p95=0.50 p99=0.69 max=0.90 min=0.14
+producer.cpu.percent=53.80
+producer.ended_monotonic_us=5468547475921
+producer.handles=28..28 min=28 max=28
+producer.handles.slope.per_min=0.00
+producer.injection.elapsed_us=0
+producer.injection.executed=0
+producer.injection.frame=0
+producer.injection.requested_ms=0
+producer.injection.stage=none
+producer.injection.start_monotonic_us=0
+producer.mem.kb=70052..70052 min=70052 max=70052
+producer.mem.kind=rss
+producer.mem.slope.kb_per_min=0.00
+producer.pid=10189
+producer.pushed.frames=340
+producer.pushed.samples=273600
+producer.result=error: FrameLink peer closed or failed
+producer.result.debug=FrameLink video channel lost; gst/gstframelink.cpp(677): sinkRenderImpl (): /GstPipeline:pipeline0/GstFrameLinkAvSink:s/GstFrameLinkSink:video: peer disconnected
+producer.result.source=/GstPipeline:pipeline0/GstFrameLinkAvSink:s/GstFrameLinkSink:video
+producer.series.t_cpums_memkb_handles_threads=0.0:181:41292:6:2;1.0:717:70052:28:7;2.0:1277:70052:28:7;3.0:1818:70052:28:7;4.0:2374:70052:28:7;5.0:2900:70052:28:7;5.9:3369:45708:19:5;
+producer.threads=7..7 min=7 max=7
+producer.threads.slope.per_min=0.00
+producer.video.push_burst.max=0
+producer.video.push_interval.ms=n=220 p50=16.66 p95=16.84 p99=16.90 max=16.99 min=16.39
+producer.video.push_lateness.ms=n=220 p50=0.33 p95=0.47 p99=0.53 max=0.64 min=0.17
+seconds=12
+video.pool=2
+video.queue=1

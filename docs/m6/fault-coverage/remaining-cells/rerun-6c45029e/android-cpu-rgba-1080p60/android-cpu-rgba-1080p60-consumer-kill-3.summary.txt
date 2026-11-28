@@ -1,0 +1,51 @@
+arrival.budget_ms=17
+complete=yes
+config=RGBA 1920x1080@60 bin cpu 12s
+consumer.pid=30565
+exit=0/137
+expected.frames=720
+expected.samples=576000
+fault=consumer-kill
+fault.at_s=6
+fault.bound_ms=2000
+fault.detection_ms=31.9
+fault.pass=yes
+fault.survivor_error_stable=yes
+fault.survivor_result=error: FrameLink peer closed or failed
+harness.malloc=default
+label=android-cpu-rgba-1080p60-consumer-kill-3
+output.async=false
+output.queue_buffers=1
+output.sync=false
+playback.latency_ms=0
+producer.audio.push_burst.max=0
+producer.audio.push_interval.ms=n=371 p50=9.99 p95=10.46 p99=10.66 max=10.74 min=9.28
+producer.audio.push_lateness.ms=n=371 p50=0.30 p95=0.70 p99=0.90 max=0.97 min=0.15
+producer.cpu.percent=55.76
+producer.ended_monotonic_us=5585135502693
+producer.handles=28..28 min=28 max=28
+producer.handles.slope.per_min=-0.00
+producer.injection.elapsed_us=0
+producer.injection.executed=0
+producer.injection.frame=0
+producer.injection.requested_ms=0
+producer.injection.stage=none
+producer.injection.start_monotonic_us=0
+producer.mem.kb=67204..67204 min=67204 max=67204
+producer.mem.kind=rss
+producer.mem.slope.kb_per_min=-0.00
+producer.pid=30569
+producer.pushed.frames=341
+producer.pushed.samples=274080
+producer.result=error: FrameLink peer closed or failed
+producer.result.debug=required session tracks not ready or cancelled; gst/gstframelinkaudio.cpp(35): rejectSession (): /GstPipeline:pipeline0/GstFrameLinkAvSink:s/GstFrameLinkAudioSink:audio: FrameLink audio session ended
+producer.result.source=/GstPipeline:pipeline0/GstFrameLinkAvSink:s/GstFrameLinkAudioSink:audio
+producer.series.t_cpums_memkb_handles_threads=0.0:194:39456:6:2;1.0:754:67204:28:7;2.0:1322:67204:28:7;3.0:1891:67204:28:7;4.0:2448:67204:28:7;5.0:3005:67204:28:7;5.9:3471:42964:19:5;
+producer.threads=7..7 min=7 max=7
+producer.threads.slope.per_min=-0.00
+producer.video.push_burst.max=0
+producer.video.push_interval.ms=n=221 p50=16.67 p95=16.83 p99=16.94 max=16.98 min=16.32
+producer.video.push_lateness.ms=n=221 p50=0.30 p95=0.44 p99=0.49 max=0.65 min=0.16
+seconds=12
+video.pool=2
+video.queue=1

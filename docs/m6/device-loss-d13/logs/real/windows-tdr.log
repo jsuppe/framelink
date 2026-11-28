@@ -1,0 +1,29 @@
+revision a29ca036b233e7f75fac77ddfc11e1bb84781e89
+build exit 0
+registry TdrLevel = (default)
+registry TdrDelay = (default)
+registry TdrDdiDelay = (default)
+registry TdrLimitCount = (default)
+registry TdrLimitTime = (default)
+run 1 : hang: collect=GPU device lost or reset after 5323 ms; fence completed value 0xffffffffffffffff; device removed reason 0x887a0006
+run 1 : hang: consumer acquire afterwards=GPU device lost or reset
+run 1 : hang: producer reacquire result=peer disconnected
+run 1 : hang: fresh run afterwards exit 0
+run 1 : GPU timeout reset in the consumer's read: FL_DEVICE_LOST, terminal; a fresh run afterwards passed
+run 1 exit 0, 6.2 s
+run 2 : hang: collect=GPU device lost or reset after 6296 ms; fence completed value 0xffffffffffffffff; device removed reason 0x887a0006
+run 2 : hang: consumer acquire afterwards=GPU device lost or reset
+run 2 : hang: producer reacquire result=peer disconnected
+run 2 : hang: fresh run afterwards exit 0
+run 2 : GPU timeout reset in the consumer's read: FL_DEVICE_LOST, terminal; a fresh run afterwards passed
+run 2 exit 0, 7.1 s
+run 3 : hang: collect=GPU device lost or reset after 6301 ms; fence completed value 0xffffffffffffffff; device removed reason 0x887a0006
+run 3 : hang: consumer acquire afterwards=GPU device lost or reset
+run 3 : hang: producer reacquire result=peer disconnected
+run 3 : hang: fresh run afterwards exit 0
+run 3 : GPU timeout reset in the consumer's read: FL_DEVICE_LOST, terminal; a fresh run afterwards passed
+run 3 exit 0, 7.1 s
+event 2026-11-27T23:44:42.2196821Z nvlddmkm 153: 
+event 2026-11-27T23:44:15.2885671Z nvlddmkm 153: 
+event 2026-11-27T23:43:48.3680693Z nvlddmkm 153: 
+done

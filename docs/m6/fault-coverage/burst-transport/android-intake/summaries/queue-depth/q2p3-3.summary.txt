@@ -1,0 +1,79 @@
+arrival.budget_ms=17
+complete=no
+config=RGBA 1920x1080@60 bin native 12s
+consumer.audio.contiguous=yes
+consumer.audio.gap_event_ns=0
+consumer.audio.gap_events=0
+consumer.audio.output_queue.admission_residence.ms=n=0 p50=nan p95=nan p99=nan max=nan min=nan
+consumer.audio.output_queue.pending=0
+consumer.audio.output_queue.sampled_max_buffers=0
+consumer.audio.output_queue.unmatched=0
+consumer.audio.pts_jump_ns=0
+consumer.audio.pts_jumps=0
+consumer.av_offset.abs.ms=n=0 p50=nan p95=nan p99=nan max=nan min=nan
+consumer.av_offset.ms=n=0 p50=nan p95=nan p99=nan max=nan min=nan
+consumer.ended_monotonic_us=5413501558048
+consumer.fault.recovery_frames=0
+consumer.frames=0
+consumer.memory=
+consumer.pid=19019
+consumer.queue.accounting=complete
+consumer.resources=too short
+consumer.result=error: negotiated video queue exceeds ring capacity
+consumer.samples=0
+consumer.scope=transport-consumer
+consumer.video.callback_refcount_hist=0,0,0,0,0,0,0,0
+consumer.video.output_queue.admission_residence.ms=n=0 p50=nan p95=nan p99=nan max=nan min=nan
+consumer.video.output_queue.pending=0
+consumer.video.output_queue.sampled_max_buffers=0
+consumer.video.output_queue.unmatched=0
+exit=0/0
+expected.frames=720
+expected.samples=576000
+fault=producer-burst
+fault.bound_ms=2000
+fault.burst=no
+fault.drain_frames=0
+fault.drain_mean_gap_ms=nan
+fault.expect=absorbed
+fault.frame=360
+fault.ms=200
+fault.pass=no
+fault.recovery_limit_frames=15
+fault.total_recovery_frames=0
+fault.transport_matched=no
+fault.transport_recovery_frames=0
+fault.transport_share_after_fault.ms=n=0 p50=nan p95=nan p99=nan max=nan min=nan
+harness.malloc=default
+label=q2p3-3
+output.async=false
+output.queue_buffers=1
+output.sync=false
+playback.latency_ms=0
+producer.audio.push_burst.max=0
+producer.audio.push_interval.ms=n=0 p50=nan p95=nan p99=nan max=nan min=nan
+producer.audio.push_lateness.ms=n=0 p50=nan p95=nan p99=nan max=nan min=nan
+producer.ended_monotonic_us=5413501558697
+producer.fault.dropped_blocks=0
+producer.fault.dropped_samples=0
+producer.fault.elapsed_us=0
+producer.fault.executed=0
+producer.fault.gap_ns=-1
+producer.fault.start_monotonic_us=0
+producer.injection.elapsed_us=0
+producer.injection.executed=0
+producer.injection.frame=0
+producer.injection.requested_ms=0
+producer.injection.stage=none
+producer.injection.start_monotonic_us=0
+producer.pid=19026
+producer.pushed.frames=0
+producer.pushed.samples=480
+producer.resources=too short
+producer.result=error: clock request deadline or failure
+producer.video.push_burst.max=0
+producer.video.push_interval.ms=n=0 p50=nan p95=nan p99=nan max=nan min=nan
+producer.video.push_lateness.ms=n=0 p50=nan p95=nan p99=nan max=nan min=nan
+seconds=12
+video.pool=3
+video.queue=2

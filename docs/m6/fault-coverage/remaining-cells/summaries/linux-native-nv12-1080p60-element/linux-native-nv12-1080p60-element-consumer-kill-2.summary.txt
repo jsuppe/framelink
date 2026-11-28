@@ -1,0 +1,51 @@
+arrival.budget_ms=17
+complete=yes
+config=NV12 1920x1080@60 element native 12s
+consumer.pid=4170516
+exit=0/137
+expected.frames=720
+expected.samples=576000
+fault=consumer-kill
+fault.at_s=6
+fault.bound_ms=2000
+fault.detection_ms=12.1
+fault.pass=yes
+fault.survivor_error_stable=yes
+fault.survivor_result=error: FrameLink peer closed or failed
+harness.malloc=producer-side mmap_threshold=8388608
+label=linux-native-nv12-1080p60-element-consumer-kill-2
+output.async=false
+output.queue_buffers=1
+output.sync=false
+playback.latency_ms=0
+producer.audio.push_burst.max=0
+producer.audio.push_interval.ms=n=380 p50=10.00 p95=10.04 p99=10.06 max=10.09 min=9.89
+producer.audio.push_lateness.ms=n=380 p50=0.14 p95=0.14 p99=0.15 max=0.19 min=0.06
+producer.cpu.percent=14.77
+producer.ended_monotonic_us=606086562601
+producer.handles=16..16 min=16 max=16
+producer.handles.slope.per_min=0.00
+producer.injection.elapsed_us=0
+producer.injection.executed=0
+producer.injection.frame=0
+producer.injection.requested_ms=0
+producer.injection.stage=none
+producer.injection.start_monotonic_us=0
+producer.mem.kb=26916..26916 min=26916 max=26916
+producer.mem.kind=rss
+producer.mem.slope.kb_per_min=0.00
+producer.pid=4170520
+producer.pushed.frames=347
+producer.pushed.samples=278400
+producer.result=error: FrameLink peer closed or failed
+producer.result.debug=required session tracks not ready or cancelled; gst/gstframelinkaudio.cpp(35): rejectSession (): /GstPipeline:pipeline0/GstFrameLinkAudioSink:framelinkaudiosink0: FrameLink audio session ended
+producer.result.source=/GstPipeline:pipeline0/GstFrameLinkAudioSink:framelinkaudiosink0
+producer.series.t_cpums_memkb_handles_threads=0.0:14:13688:6:2;1.0:149:26916:16:8;2.0:297:26916:16:8;3.0:447:26916:16:8;4.0:597:26916:16:8;5.0:742:26916:16:8;6.0:881:24076:11:6;
+producer.threads=8..8 min=8 max=8
+producer.threads.slope.per_min=0.00
+producer.video.push_burst.max=0
+producer.video.push_interval.ms=n=227 p50=16.67 p95=16.71 p99=16.74 max=16.75 min=16.58
+producer.video.push_lateness.ms=n=227 p50=0.13 p95=0.14 p99=0.19 max=0.19 min=0.06
+seconds=12
+video.pool=2
+video.queue=1

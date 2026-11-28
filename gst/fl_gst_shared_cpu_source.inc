@@ -53,28 +53,29 @@ static GstFlowReturn srcSharedCpuCreate(GstFrameLinkSrc*self,GstBuffer**out){
  for(;;){
   flSessionConfig cfg{};
   if(srcUnlockPending(self))return GST_FLOW_FLUSHING;
-  if(fl_gst_session_get_config(self->session,&cfg)!=FL_GST_SESSION_READY||cfg.generation!=self->sessionConfig.generation||g_get_monotonic_time()>=deadline)return GST_FLOW_ERROR;
-  const auto remaining=deadline-g_get_monotonic_time();if(remaining<=0)return GST_FLOW_ERROR;
+  if(fl_gst_session_get_config(self->session,&cfg)!=FL_GST_SESSION_READY||cfg.generation!=self->sessionConfig.generation||g_get_monotonic_time()>=deadline){GST_ELEMENT_ERROR(self,RESOURCE,READ,("coordinated video idle deadline, cancellation or stale generation"),(NULL));return GST_FLOW_ERROR;}
+  const auto remaining=deadline-g_get_monotonic_time();if(remaining<=0){GST_ELEMENT_ERROR(self,RESOURCE,READ,("coordinated video idle deadline, cancellation or stale generation"),(NULL));return GST_FLOW_ERROR;}
   auto ready=flSharedCpuWaitReadable(self->cpuChannel,guint(std::min<gint64>(50,(remaining+999)/1000)));
-  if(ready==FL_OK)break;if(ready!=FL_TIMEOUT)return GST_FLOW_ERROR;
+  if(ready==FL_OK)break;if(ready!=FL_TIMEOUT){GST_ELEMENT_ERROR(self,RESOURCE,READ,("shared-CPU video receive failed"),("%s",flResultString(ready)));return GST_FLOW_ERROR;}
  }
  flSharedCpuLease*lease=nullptr;flMappedImage view{};uint64_t seq=0;int64_t pts=0;int eos=0;
  auto result=flSharedCpuReceiveEvent(self->cpuChannel,&lease,&view,&seq,&pts,&eos);
- if(result!=FL_OK)return srcUnlockPending(self)?GST_FLOW_FLUSHING:GST_FLOW_ERROR;
+ if(result!=FL_OK){if(srcUnlockPending(self))return GST_FLOW_FLUSHING;
+  GST_ELEMENT_ERROR(self,RESOURCE,READ,("shared-CPU video receive failed"),("%s",flResultString(result)));return GST_FLOW_ERROR;}
  if(eos){
-  if(!srcSharedCpuEvents(self,FL_GST_VIDEO_END,self->sessionLastPts<0?0:guint64(self->sessionLastPts))||!srcEmitGaps(self))return GST_FLOW_ERROR;
-  if(fl_gst_session_video_eos(self->session,self->sessionConfig.generation,self->sessionFrames,self->sessionLastPts)!=FL_GST_SESSION_READY)return GST_FLOW_ERROR;
+  if(!srcSharedCpuEvents(self,FL_GST_VIDEO_END,self->sessionLastPts<0?0:guint64(self->sessionLastPts))||!srcEmitGaps(self)){GST_ELEMENT_ERROR(self,STREAM,FAILED,("video terminal event ordering failed"),(NULL));return GST_FLOW_ERROR;}
+  if(fl_gst_session_video_eos(self->session,self->sessionConfig.generation,self->sessionFrames,self->sessionLastPts)!=FL_GST_SESSION_READY){GST_ELEMENT_ERROR(self,STREAM,FAILED,("invalid coordinated video END record"),(NULL));return GST_FLOW_ERROR;}
   return GST_FLOW_EOS;
  }
  struct Lease{flSharedCpuLease*p;~Lease(){if(p)flSharedCpuReleaseRead(p);}} held{lease};
  flFrameMetadata metadata{};
  if(flSharedCpuReadMetadata(lease,&metadata)!=FL_OK||metadata.streamGeneration!=self->sessionConfig.generation||
-    seq!=self->sessionSequence+1)return GST_FLOW_ERROR;
+    seq!=self->sessionSequence+1){GST_ELEMENT_ERROR(self,STREAM,FORMAT,("shared-CPU frame metadata missing, stale or out of sequence"),(NULL));return GST_FLOW_ERROR;}
  GstVideoInfo info;gst_video_info_init(&info);
- if(!gst_video_info_set_format(&info,toGstFormat(flFormat(self->sessionConfig.video.format)),self->width,self->height))return GST_FLOW_ERROR;
- auto*buf=srcCpuOutputBuffer(self,info.size);if(!buf)return GST_FLOW_ERROR;
+ if(!gst_video_info_set_format(&info,toGstFormat(flFormat(self->sessionConfig.video.format)),self->width,self->height)){GST_ELEMENT_ERROR(self,CORE,NEGOTIATION,("unsupported shared-CPU video format"),(NULL));return GST_FLOW_ERROR;}
+ auto*buf=srcCpuOutputBuffer(self,info.size);if(!buf){GST_ELEMENT_ERROR(self,RESOURCE,FAILED,("cannot allocate a CPU output buffer"),(NULL));return GST_FLOW_ERROR;}
  struct Buffer{GstBuffer*p;~Buffer(){if(p)gst_buffer_unref(p);}} owned{buf};
- GstMapInfo map{};if(!gst_buffer_map(buf,&map,GST_MAP_WRITE))return GST_FLOW_ERROR;
+ GstMapInfo map{};if(!gst_buffer_map(buf,&map,GST_MAP_WRITE)){GST_ELEMENT_ERROR(self,RESOURCE,FAILED,("cannot map a CPU output buffer"),(NULL));return GST_FLOW_ERROR;}
  bool valid=view.planes==GST_VIDEO_INFO_N_PLANES(&info);guint64 bytes=0;
  // Skip initialization only when every output byte will be overwritten.
  // Padded/offset layouts retain full zeroing, including reused cache buffers.
@@ -99,19 +100,20 @@ static GstFlowReturn srcSharedCpuCreate(GstFrameLinkSrc*self,GstBuffer**out){
  if(bytes)gsttrace::payload("gst.shared_cpu_copy_source",gsttrace::id(self->channel),bytes,FL_MEMORY_COPY);
  // Finish all mapped reads and return the slot before downstream sees a buffer.
  result=flSharedCpuReleaseRead(lease);held.p=nullptr;
- if(!valid||result!=FL_OK)return GST_FLOW_ERROR;
- if((!self->sessionFrames||(metadata.flags&FL_FRAME_DISCONT))&&!srcSharedCpuEvents(self,FL_GST_VIDEO_BARRIER,pts))return GST_FLOW_ERROR;
+ if(!valid){GST_ELEMENT_ERROR(self,STREAM,FORMAT,("shared-CPU frame layout invalid"),(NULL));return GST_FLOW_ERROR;}
+ if(result!=FL_OK){GST_ELEMENT_ERROR(self,RESOURCE,READ,("shared-CPU slot release failed"),("%s",flResultString(result)));return GST_FLOW_ERROR;}
+ if((!self->sessionFrames||(metadata.flags&FL_FRAME_DISCONT))&&!srcSharedCpuEvents(self,FL_GST_VIDEO_BARRIER,pts)){GST_ELEMENT_ERROR(self,STREAM,FAILED,("video discontinuity event barrier failed"),(NULL));return GST_FLOW_ERROR;}
  gint64 mapped=0;
- if(fl_gst_session_map_running_time(self->session,self->sessionConfig.generation,pts,TRUE,&mapped)!=FL_GST_SESSION_READY)return GST_FLOW_ERROR;
+ if(fl_gst_session_map_running_time(self->session,self->sessionConfig.generation,pts,TRUE,&mapped)!=FL_GST_SESSION_READY){GST_ELEMENT_ERROR(self,STREAM,FORMAT,("shared receiver clock mapping required"),(NULL));return GST_FLOW_ERROR;}
  GST_BUFFER_PTS(buf)=mapped;
  GST_BUFFER_DTS(buf)=GST_CLOCK_TIME_NONE;GST_BUFFER_DURATION(buf)=GST_CLOCK_TIME_NONE;
- if(metadata.flags&FL_FRAME_HAS_DURATION){if(metadata.durationNs>guint64(G_MAXINT64-mapped))return GST_FLOW_ERROR;GST_BUFFER_DURATION(buf)=metadata.durationNs;}
+ if(metadata.flags&FL_FRAME_HAS_DURATION){if(metadata.durationNs>guint64(G_MAXINT64-mapped)){GST_ELEMENT_ERROR(self,STREAM,FORMAT,("mapped video interval exceeds timeline bounds"),(NULL));return GST_FLOW_ERROR;}GST_BUFFER_DURATION(buf)=metadata.durationNs;}
  if(metadata.flags&FL_FRAME_HAS_DTS){
-  if(fl_gst_session_map_running_time(self->session,self->sessionConfig.generation,metadata.dtsNs,TRUE,&mapped)!=FL_GST_SESSION_READY)return GST_FLOW_ERROR;
+  if(fl_gst_session_map_running_time(self->session,self->sessionConfig.generation,metadata.dtsNs,TRUE,&mapped)!=FL_GST_SESSION_READY){GST_ELEMENT_ERROR(self,STREAM,FORMAT,("shared receiver clock mapping required"),(NULL));return GST_FLOW_ERROR;}
   GST_BUFFER_DTS(buf)=mapped;metadata.dtsNs=mapped;
  }
  if(!self->sessionFrames||(metadata.flags&FL_FRAME_DISCONT)){GST_BUFFER_FLAG_SET(buf,GST_BUFFER_FLAG_DISCONT);metadata.flags|=FL_FRAME_DISCONT;}
- auto*meta=(GstFrameLinkFrameMeta*)gst_buffer_add_meta(buf,frameMetaInfo(),nullptr);if(!meta)return GST_FLOW_ERROR;meta->frame=metadata;
+ auto*meta=(GstFrameLinkFrameMeta*)gst_buffer_add_meta(buf,frameMetaInfo(),nullptr);if(!meta){GST_ELEMENT_ERROR(self,CORE,FAILED,("cannot attach FrameLink frame metadata"),(NULL));return GST_FLOW_ERROR;}meta->frame=metadata;
  self->sessionSequence=seq;++self->sessionFrames;self->sessionLastPts=pts;
  self->pendingDelivery=gst_buffer_ref(buf);owned.p=nullptr;*out=buf;return GST_FLOW_OK;
 }

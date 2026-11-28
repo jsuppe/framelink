@@ -1,0 +1,51 @@
+arrival.budget_ms=34
+complete=yes
+config=RGBA 3840x2160@30 bin native 12s
+consumer.pid=24274
+exit=0/137
+expected.frames=360
+expected.samples=576000
+fault=consumer-kill
+fault.at_s=6
+fault.bound_ms=2000
+fault.detection_ms=24.9
+fault.pass=yes
+fault.survivor_error_stable=yes
+fault.survivor_result=error: FrameLink peer closed or failed
+harness.malloc=default
+label=android-native-rgba-4k30-consumer-kill-3
+output.async=false
+output.queue_buffers=1
+output.sync=false
+playback.latency_ms=0
+producer.audio.push_burst.max=0
+producer.audio.push_interval.ms=n=373 p50=10.00 p95=10.37 p99=10.49 max=10.61 min=9.26
+producer.audio.push_lateness.ms=n=373 p50=0.40 p95=0.65 p99=0.81 max=0.99 min=0.18
+producer.cpu.percent=56.10
+producer.ended_monotonic_us=5556340672252
+producer.handles=28..28 min=28 max=28
+producer.handles.slope.per_min=0.00
+producer.injection.elapsed_us=0
+producer.injection.executed=0
+producer.injection.frame=0
+producer.injection.requested_ms=0
+producer.injection.stage=none
+producer.injection.start_monotonic_us=0
+producer.mem.kb=142404..142404 min=142404 max=142404
+producer.mem.kind=rss
+producer.mem.slope.kb_per_min=0.00
+producer.pid=24282
+producer.pushed.frames=169
+producer.pushed.samples=275040
+producer.result=error: FrameLink peer closed or failed
+producer.result.debug=required session tracks not ready or cancelled; gst/gstframelinkaudio.cpp(35): rejectSession (): /GstPipeline:pipeline0/GstFrameLinkAvSink:s/GstFrameLinkAudioSink:audio: FrameLink audio session ended
+producer.result.source=/GstPipeline:pipeline0/GstFrameLinkAvSink:s/GstFrameLinkAudioSink:audio
+producer.series.t_cpums_memkb_handles_threads=0.0:195:41308:6:2;1.0:852:142404:28:7;2.0:1421:142404:28:7;3.0:1982:142404:28:7;4.0:2555:142404:28:7;5.0:3114:142404:28:7;5.9:3592:45232:19:5;
+producer.threads=7..7 min=7 max=7
+producer.threads.slope.per_min=0.00
+producer.video.push_burst.max=0
+producer.video.push_interval.ms=n=109 p50=33.33 p95=33.42 p99=33.46 max=33.57 min=33.09
+producer.video.push_lateness.ms=n=109 p50=0.23 p95=0.31 p99=0.33 max=0.47 min=0.10
+seconds=12
+video.pool=2
+video.queue=1

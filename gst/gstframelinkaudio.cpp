@@ -1,4 +1,5 @@
 #include "framelink_session_transport.h"
+#include "fl_gst_peer_failure.hpp"
 #include "fl_gst_audio_startup.hpp"
 #include <gst/gst.h>
 #include <cstring>
@@ -26,6 +27,12 @@ static GstStaticPadTemplate sinkTemplate=GST_STATIC_PAD_TEMPLATE("sink",GST_PAD_
  GST_STATIC_CAPS("audio/x-raw,format=(string){S16LE,F32LE},layout=(string)interleaved,rate=(int)[8000,192000],channels=(int){1,2}"));
 static GstPadProbeReturn reject(GstFrameLinkAudioSink*s,const char*why){
  if(!s->failed){s->failed=TRUE;GST_ELEMENT_ERROR(s,STREAM,FORMAT,("%s",why),("FrameLink audio rejected before serialization"));fl_gst_session_cancel(s->session);}
+ return GST_PAD_PROBE_DROP;
+}
+// The session or its transport failed (not the PCM): not an invalid-input
+// failure, and the stable peer error when the consumer closed it (decision 9).
+static GstPadProbeReturn rejectSession(GstFrameLinkAudioSink*s,const char*why){
+ if(!s->failed){s->failed=TRUE;GST_ELEMENT_ERROR(s,RESOURCE,WRITE,("%s",why),("FrameLink audio session ended"));fl_gst_session_cancel(s->session);}
  return GST_PAD_PROBE_DROP;
 }
 static GstPadProbeReturn inspect(GstPad*,GstPadProbeInfo*info,gpointer data){
@@ -60,8 +67,8 @@ static GstPadProbeReturn inspect(GstPad*,GstPadProbeInfo*info,gpointer data){
  }
  auto*b=GST_PAD_PROBE_INFO_BUFFER(info);if(!b)return GST_PAD_PROBE_OK;
  if(*s->startup){GError*error=nullptr;bool ok=(*s->startup)->wait(nullptr,&error);
-  if(!ok){auto result=reject(s,error?error->message:"audio startup failed");g_clear_error(&error);return result;}
-  if(fl_gst_session_get_config(s->session,&s->config)!=FL_GST_SESSION_READY)return reject(s,"audio session cancelled");
+  if(!ok){auto result=rejectSession(s,error?error->message:"audio startup failed");g_clear_error(&error);return result;}
+  if(fl_gst_session_get_config(s->session,&s->config)!=FL_GST_SESSION_READY)return rejectSession(s,"audio session cancelled");
  }
  if(!s->session||!s->haveSegment||!GST_CLOCK_TIME_IS_VALID(GST_BUFFER_PTS(b))||!GST_CLOCK_TIME_IS_VALID(GST_BUFFER_DURATION(b)))return reject(s,"PCM requires valid PTS, duration and TIME segment");
  GstClockTime running=GST_CLOCK_TIME_NONE;fl_gst_segment_running_time(&s->segment,GST_BUFFER_PTS(b),&running);
@@ -75,7 +82,7 @@ static GstPadProbeReturn inspect(GstPad*,GstPadProbeInfo*info,gpointer data){
  gint64 first=0,end=0;
  if(count>G_MAXUINT64-s->samples||flSessionSampleOffset(s->samples,s->config.audio.rate,&first)!=FL_SESSION_OK||flSessionSampleOffset(s->samples+count,s->config.audio.rate,&end)!=FL_SESSION_OK||guint64(first)>GST_CLOCK_TIME_NONE-1-s->origin||(running>s->origin+guint64(first)?running-(s->origin+guint64(first)):(s->origin+guint64(first))-running)>1||(GST_BUFFER_DURATION(b)>guint64(end-first)?GST_BUFFER_DURATION(b)-guint64(end-first):guint64(end-first)-GST_BUFFER_DURATION(b))>1)return reject(s,"PCM sample duration/continuity mismatch");
  flSessionConfig ready{};
- if(fl_gst_session_wait(s->session,s->config.generation,s->config.connectTimeoutMs,&ready)!=FL_GST_SESSION_READY)return reject(s,"required session tracks not ready or cancelled");
+ if(fl_gst_session_wait(s->session,s->config.generation,s->config.connectTimeoutMs,&ready)!=FL_GST_SESSION_READY)return rejectSession(s,"required session tracks not ready or cancelled");
  GstClockTime dts=GST_CLOCK_TIME_NONE;
  if(GST_CLOCK_TIME_IS_VALID(GST_BUFFER_DTS(b))&&!fl_gst_segment_running_time(&s->segment,GST_BUFFER_DTS(b),&dts))return reject(s,"DTS outside TIME segment");
  b=gst_buffer_make_writable(b);GST_PAD_PROBE_INFO_DATA(info)=b;GST_BUFFER_PTS(b)=running;GST_BUFFER_DTS(b)=dts;
@@ -175,8 +182,14 @@ static void getProperty(GObject*object,guint property,GValue*value,GParamSpec*sp
 // waiting for their own idle deadline. The message still reaches the pipeline.
 static void handleSinkMessage(GstBin*bin,GstMessage*message){
  auto*s=reinterpret_cast<GstFrameLinkAudioSink*>(bin);
- if(GST_MESSAGE_TYPE(message)==GST_MESSAGE_ERROR&&GST_MESSAGE_SRC(message)!=GST_OBJECT(bin)&&s->session){s->failed=TRUE;fl_gst_session_cancel(s->session);}
+ // Decision 9: a writer error into the consumer's closed socket becomes the stable peer error.
+ if(GST_MESSAGE_TYPE(message)==GST_MESSAGE_ERROR&&GST_MESSAGE_SRC(message)!=GST_OBJECT(bin)&&s->session){message=flGstProducerPeerFailure(s->session,message);flGstNoteProducerFailure(s->session,message);s->failed=TRUE;fl_gst_session_cancel(s->session);}
  GST_BIN_CLASS(gst_framelink_audio_sink_parent_class)->handle_message(bin,message);
+}
+// Decision 8: errors the audio producer raises itself (PCM refusals) carry a reason.
+static gboolean sinkPostMessage(GstElement*element,GstMessage*message){
+ auto*s=reinterpret_cast<GstFrameLinkAudioSink*>(element);if(s->session){message=flGstProducerPeerFailure(s->session,message);flGstNoteProducerFailure(s->session,message);}
+ return GST_ELEMENT_CLASS(gst_framelink_audio_sink_parent_class)->post_message(element,message);
 }
 // The socket stream is forward-only; refuse seeks before the inner sink would
 // forward them upstream and flush the producer's sources.
@@ -186,7 +199,7 @@ static gboolean sinkSendEvent(GstElement*element,GstEvent*event){
  return GST_ELEMENT_CLASS(gst_framelink_audio_sink_parent_class)->send_event(element,event);
 }
 static void gst_framelink_audio_sink_class_init(GstFrameLinkAudioSinkClass*c){
- auto*object=G_OBJECT_CLASS(c);GST_BIN_CLASS(c)->handle_message=handleSinkMessage;GST_ELEMENT_CLASS(c)->send_event=sinkSendEvent;object->set_property=setProperty;object->get_property=getProperty;
+ auto*object=G_OBJECT_CLASS(c);GST_BIN_CLASS(c)->handle_message=handleSinkMessage;GST_ELEMENT_CLASS(c)->send_event=sinkSendEvent;GST_ELEMENT_CLASS(c)->post_message=sinkPostMessage;object->set_property=setProperty;object->get_property=getProperty;
  const auto flags=GParamFlags(G_PARAM_READWRITE|G_PARAM_STATIC_STRINGS);
  g_object_class_install_property(object,PROP_TRACKS,g_param_spec_string("tracks","Tracks","audio standalone or av with shared session context","audio",flags));
  const auto read=GParamFlags(G_PARAM_READABLE|G_PARAM_STATIC_STRINGS);
@@ -244,7 +257,7 @@ static void gst_framelink_audio_sink_init(GstFrameLinkAudioSink*s){
    auto*self=static_cast<GstFrameLinkAudioSink*>(data);
    if(GST_EVENT_TYPE(GST_PAD_PROBE_INFO_EVENT(info))==GST_EVENT_EOS&&!self->failed){
     guint64 videoFrames=0;gint64 videoLastPts=-1;
-    if(self->config.videoTrackId&&fl_gst_session_wait_video_eos(self->session,self->config.generation,self->config.idleTimeoutMs,&videoFrames,&videoLastPts)!=FL_GST_SESSION_READY)return reject(self,"required video EOS missing or cancelled");
+    if(self->config.videoTrackId&&fl_gst_session_wait_video_eos(self->session,self->config.generation,self->config.idleTimeoutMs,&videoFrames,&videoLastPts)!=FL_GST_SESSION_READY)return rejectSession(self,"required video EOS missing or cancelled");
     if(!self->blocks){
      auto*segment=gst_pad_get_sticky_event(pad,GST_EVENT_SEGMENT,0);
      if(segment)gst_event_unref(segment);
@@ -253,12 +266,12 @@ static void gst_framelink_audio_sink_init(GstFrameLinkAudioSink*s){
     auto*marker=gst_event_new_custom(GST_EVENT_CUSTOM_DOWNSTREAM,gst_structure_new("framelink-audio-eos",
      "version",G_TYPE_UINT,1u,"generation",G_TYPE_UINT64,self->config.generation,
      "blocks",G_TYPE_UINT64,self->blocks,"pcm-bytes",G_TYPE_UINT64,self->bytes,"video-frames",G_TYPE_UINT64,videoFrames,"video-last-pts",G_TYPE_INT64,videoLastPts,nullptr));
-    if(!gst_pad_send_event(pad,marker))return reject(self,"audio terminal record could not be sent");
+    if(!gst_pad_send_event(pad,marker))return rejectSession(self,"audio terminal record could not be sent");
     if(!self->blocks){
      self->drainEmptyHeader=TRUE;
      auto*trigger=gst_buffer_new();GST_BUFFER_PTS(trigger)=0;GST_BUFFER_DURATION(trigger)=0;
      auto flow=gst_pad_chain(pad,trigger);self->drainEmptyHeader=FALSE;
-     if(flow!=GST_FLOW_OK)return reject(self,"empty audio terminal headers could not be drained");
+     if(flow!=GST_FLOW_OK)return rejectSession(self,"empty audio terminal headers could not be drained");
     }
    }return GST_PAD_PROBE_OK;
   },s,nullptr);gst_object_unref(terminal);

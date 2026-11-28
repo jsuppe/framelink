@@ -10,12 +10,50 @@
 //     [--format RGBA|NV12|BGRA] [--mode bin|element] [--native | --shared-cpu | --gpu-readback] [--trace]
 //   --gpu-readback (Linux EGL builds; M6.8c): native DMA-BUF producer into a
 //   CPU receiver through GPU staging, both bins on the local native readback
-//   candidate; exact BGRA/RGBA, bins, one-shot runs only.
+//   candidate; exact BGRA/RGBA, bins. Faults and cycles apply (decision 15):
+//   the application's slot drops count as producer loss, and the consumer's
+//   content check must show exactly the lost frames missing and no stale frame.
 //     [--latency-ms N] [--arrival-budget-ms N] [--transport-only]
 //     [--output-queue-buffers N] (0 retains the legacy time-only limit)
 //     [--no-output-preroll] (measurement appsinks async=false)
 //     [--pool N] [--video-queue N] [--raw] [--out DIR] [--label NAME]
 //
+// M6.4 faults at rate (one-shot sessions), each gated against an outcome
+// declared before the run:
+//   --fault producer-kill|consumer-kill --fault-at-s T: the driver kills that
+//     process T s after the producer starts (SIGKILL / TerminateProcess). The
+//     survivor must end with an error (never EOS) within --fault-bound-ms
+//     (default 2000) of the kill; its children must not hang.
+//   --fault consumer-stall --fault-frame N --fault-ms M: the consumer's video
+//     appsink blocks M ms on its Nth frame (1-based). --fault-expect, from the
+//     documented overload policy (docs/GST_AV_REFERENCE.md):
+//     absorbed: the session completes with every frame and arrival recovers
+//       within ceil(M/period)+2 frames;
+//     counted-drop (error-on-ring-full=false, the default): both sides reach
+//       EOS, the producer sink drops at least one frame as ring-full, and
+//       delivered + dropped == pushed exactly;
+//     replacement-failure: the consumer fails with the coordinated "replaced
+//       before it was read" error (a receiver that releases slots as it copies
+//       out lets the producer overwrite the unread queue) and the producer does
+//       not report EOS;
+//     explicit-failure (with --error-on-ring-full): the producer fails with
+//       the pool-exhausted error, the consumer does not report EOS, and both
+//       sides end within the run limit.
+//   Any loss not matched by the producer's drop count fails every expectation.
+// Producer faults: --fault producer-burst|audio-stall|audio-drop|audio-gap
+//   --fault-frame N (video frame, or 10 ms audio block, 1-based) --fault-ms M
+//   (1..1000), injected at the source's push (see pushed()). Expectations:
+//     producer-burst: absorbed (as above, on video), counted-drop or
+//       replacement-failure (as for consumer-stall), or
+//       replaced-or-counted-drop: either of those two (decision 15: a copy-out
+//       receiver behind a one-frame unread queue may take either);
+//     audio-stall: absorbed (on audio; recovery within ceil(M/10)+2 blocks);
+//     audio-drop: explicit-failure (the producer refuses the timestamp gap,
+//       "continuity mismatch"; the consumer does not report EOS and ends within
+//       --fault-bound-ms of the first missing block);
+//     audio-gap: gap-visible (both EOS, video complete, exactly the dropped
+//       samples missing, one consumer PTS jump and one GAP event, each of the
+//       dropped duration within 2 ns).
 // Diagnostic fault: --video-stall-stage source|post-push
 //   --video-stall-frame N (1-based) --video-stall-ms N (1..1000).
 // CPU source-thread delay only; not GPU injection or qualification.
@@ -26,6 +64,8 @@
 // lateness (same-second windows), i.e. sink scheduling, given that the session
 // preserves relative PTS exactly (M5b timeline tests).
 #include "fl_gst_av_harness.h"
+#include "framelink_meta.h"
+#include "fl_gst_metadata.hpp"
 #include <glib/gstdio.h>
 #include <cmath>
 #include <fstream>
@@ -53,7 +93,7 @@
 #include <sys/mman.h>
 #endif
 
-struct Options {guint stallFrame=0,stallMs=0;std::string stallStage;guint seconds=60,cycles=0;std::string mode="bin",label="run",out=".",restart="producer";bool native=false,trace=false,raw=false,sourceOnly=false,localConsumer=false;};
+struct Options {guint stallFrame=0,stallMs=0;std::string stallStage;std::string fault,faultExpect;guint faultAtS=0,faultFrame=0,faultMs=0,faultBoundMs=2000;std::string cycleFault;guint cycleFaultAtMs=0,cycleFaultFrame=0;guint seconds=60,cycles=0;std::string mode="bin",label="run",out=".",restart="producer";bool native=false,trace=false,raw=false,sourceOnly=false,localConsumer=false;};
 static guint gOutputQueueBuffers=0;
 static GstClockTime gArrivalBudget=LATENCY;
 // Producer-side processes (roles producer, lifecycle-producer, source) run the
@@ -141,11 +181,43 @@ static int sourceChild(const Options&o,const std::string&out){
 // Producer push: running time when the video source pushes each frame, minus
 // its PTS (on the session timeline shared with the consumer). A live source
 // that stalls catches up with back-to-back pushes; bursts show here.
-struct Pushes {const Options* options=nullptr;guint videoIndex=0,stallCount=0;gint64 stallStartUs=0,stallElapsedUs=0;std::mutex m;std::vector<std::pair<gint64,gint64>> v[2];GstElement*pipeline=nullptr;};  // {pts, lateness}
+struct Pushes {const Options* options=nullptr;guint videoIndex=0,audioIndex=0,stallCount=0;gint64 stallStartUs=0,stallElapsedUs=0;
+ guint faultExecuted=0,faultDroppedBlocks=0;guint64 faultDroppedSamples=0;gint64 faultStartUs=0,faultElapsedUs=0,faultGapNs=-1;
+ std::mutex m;std::vector<std::pair<gint64,gint64>> v[2];GstElement*pipeline=nullptr;};  // {pts, lateness}
+static bool malformedFault(const std::string&f){return f=="video-no-pts"||f=="video-stale-meta"||f=="audio-no-pts"||f=="audio-misaligned";}
+static bool producerFault(const std::string&f){return f=="producer-burst"||f=="audio-stall"||f=="audio-drop"||f=="audio-gap"||malformedFault(f);}
 static GstPadProbeReturn pushed(GstPad*pad,GstPadProbeInfo*info,gpointer d){
  auto*a=static_cast<Pushes*>(d);auto*b=GST_PAD_PROBE_INFO_BUFFER(info);
  const int track=GPOINTER_TO_INT(g_object_get_data(G_OBJECT(pad),"m6-track"));
- if(track==0)++a->videoIndex;
+ if(track==0)++a->videoIndex;else ++a->audioIndex;
+ // Producer faults (M6.4), at the source's push, before FrameLink sees the buffer:
+ //  producer-burst: the video source blocks M ms on frame N; the live source then
+ //   catches up with back-to-back frames;
+ //  audio-stall: the same for audio block N (10 ms blocks);
+ //  audio-drop: ceil(M/10) blocks from N never reach the sink (an unsignalled
+ //   underrun: a timestamp gap without DISCONT);
+ //  audio-gap: the same blocks, signalled as GStreamer does: a GAP event for the
+ //   missing interval and DISCONT on the next block.
+ // Malformed metadata on one buffer N (M6.4b), each refused explicitly by the sink:
+ //  video-no-pts / audio-no-pts: PTS invalid; video-stale-meta: FrameLink frame
+ //  metadata of another stream generation; audio-misaligned: one byte short.
+ if(a->options&&producerFault(a->options->fault)){const auto&o=*a->options;const bool video=o.fault=="producer-burst"||o.fault=="video-no-pts"||o.fault=="video-stale-meta";
+  if((track==0)==video){const guint index=track?a->audioIndex:a->videoIndex;
+   if(malformedFault(o.fault)){if(index==o.faultFrame){a->faultStartUs=g_get_monotonic_time();a->faultExecuted=1;b=gst_buffer_make_writable(b);
+     if(o.fault=="video-no-pts"||o.fault=="audio-no-pts")GST_BUFFER_PTS(b)=GST_CLOCK_TIME_NONE;
+     else if(o.fault=="audio-misaligned")gst_buffer_resize(b,0,gssize(gst_buffer_get_size(b))-1);
+     else{// As a relay's upstream FrameLink consumer would, register the meta type
+      // here; a producer process alone never does (only sources add the meta).
+      const GstMetaInfo*metaInfo=gst_meta_get_info("GstFrameLinkFrameMeta");if(!metaInfo)metaInfo=frameMetaInfo();CHECK(metaInfo);auto*m=reinterpret_cast<GstFrameLinkFrameMeta*>(gst_buffer_add_meta(b,metaInfo,nullptr));CHECK(m);
+      m->frame={};m->frame.version=FL_FRAME_METADATA_VERSION;m->frame.streamGeneration=G_MAXUINT64;}
+     GST_PAD_PROBE_INFO_DATA(info)=b;}}
+   else if(o.fault=="producer-burst"||o.fault=="audio-stall"){if(index==o.faultFrame){a->faultStartUs=g_get_monotonic_time();g_usleep(gulong(o.faultMs)*1000);a->faultElapsedUs=g_get_monotonic_time()-a->faultStartUs;a->faultExecuted=1;}}
+   else{const guint blocks=(o.faultMs+9)/10;
+    if(index>=o.faultFrame&&index<o.faultFrame+blocks){
+     if(index==o.faultFrame){a->faultStartUs=g_get_monotonic_time();a->faultExecuted=1;
+      if(o.fault=="audio-gap"){const GstClockTime duration=GST_BUFFER_DURATION(b)*blocks;a->faultGapNs=gint64(duration);gst_pad_push_event(pad,gst_event_new_gap(GST_BUFFER_PTS(b),duration));}}
+     ++a->faultDroppedBlocks;a->faultDroppedSamples+=gst_buffer_get_size(b)/4;return GST_PAD_PROBE_DROP;}
+    if(o.fault=="audio-gap"&&index==o.faultFrame+blocks){b=gst_buffer_make_writable(b);GST_BUFFER_FLAG_SET(b,GST_BUFFER_FLAG_DISCONT);GST_PAD_PROBE_INFO_DATA(info)=b;}}}}
  auto stall=[&](const char*stage){if(track==0&&a->options&&a->options->stallStage==stage&&a->videoIndex==a->options->stallFrame){
   a->stallStartUs=g_get_monotonic_time();g_usleep(gulong(a->options->stallMs)*1000);a->stallElapsedUs=g_get_monotonic_time()-a->stallStartUs;++a->stallCount;}};
  // Test-only controls: before measuring source push versus after that boundary.
@@ -184,7 +256,7 @@ static void writeContent(GstBuffer*b,guint64 frame){
 // on the pipeline clock and carries that running time as its PTS.
 // A frame whose slot is not free within the sink's buffer-wait-ms is dropped,
 // as the CPU-copy sink drops on a full ring; the run continues and counts it.
-struct NativeFeed {std::thread th;std::string error;GstBufferPool*pool=nullptr;guint acquired=0,drops=0;std::string dropFrames;};
+struct NativeFeed {std::thread th;std::string error;GstBufferPool*pool=nullptr;guint acquired=0,drops=0;std::string dropFrames;std::vector<double> waitMs;};
 static void feedNative(Producer&p,guint frames,NativeFeed&feed){
  auto*bin=gst_bin_get_by_name(GST_BIN(p.p),"s");auto*src=gst_bin_get_by_name(GST_BIN(p.p),"vsrc");CHECK(bin&&src);
  auto fail=[&](const std::string&what){feed.error=what;gst_app_src_end_of_stream(GST_APP_SRC(src));};
@@ -205,7 +277,9 @@ static void feedNative(Producer&p,guint frames,NativeFeed&feed){
   const GstClockTime t0=gst_clock_get_time(clock)-base;
   for(guint n=0;n<frames;++n){const GstClockTime due=t0+gst_util_uint64_scale(n,GST_SECOND,gFps);
    auto id=gst_clock_new_single_shot_id(clock,base+due);gst_clock_id_wait(id,nullptr);gst_clock_id_unref(id);
-   GstBuffer*b=nullptr;if(gst_buffer_pool_acquire_buffer(feed.pool,&b,nullptr)!=GST_FLOW_OK){++feed.drops;if(feed.drops<=32)feed.dropFrames+=std::to_string(n)+" ";continue;}
+   // Decision 15: how long each slot took to free, so a drop can be attributed.
+   const gint64 asked=g_get_monotonic_time();GstBuffer*b=nullptr;const bool got=gst_buffer_pool_acquire_buffer(feed.pool,&b,nullptr)==GST_FLOW_OK;feed.waitMs.push_back((g_get_monotonic_time()-asked)/1000.0);
+   if(!got){++feed.drops;if(feed.drops<=32)feed.dropFrames+=std::to_string(n)+" ";continue;}
    ++feed.acquired;writeContent(b,n);
    const int ready=eventfd(1,EFD_CLOEXEC);CHECK(ready>=0);gboolean accepted=FALSE;g_signal_emit_by_name(bin,"set-native-ready-fd",b,ready,&accepted);close(ready); // the sink keeps its own duplicate
    if(!accepted){gst_buffer_unref(b);gst_object_unref(clock);return fail("ready fd refused at frame "+std::to_string(n));}
@@ -238,17 +312,20 @@ static int producerChild(const Options&o,const std::string&session,const std::st
  Sampler sampler;std::map<std::string,std::string> r;Pushes pushes;pushes.options=&o;
  {Producer p(modeOf(o.mode),session,"av",o.seconds*gFps,80,false,o.seconds*100);pushes.pipeline=p.p;
   for(int track=0;track<2;++track){pushes.v[track].resize(size_t(o.seconds+10)*(track?100:gFps));pushes.v[track].clear();
-   auto*src=gst_bin_get_by_name(GST_BIN(p.p),track?"asrc":"vsrc");CHECK(src);auto*pad=gst_element_get_static_pad(src,"src");g_object_set_data(G_OBJECT(pad),"m6-track",GINT_TO_POINTER(track));gst_pad_add_probe(pad,GST_PAD_PROBE_TYPE_BUFFER,pushed,&pushes,nullptr);gst_object_unref(pad);gst_object_unref(src);}
+   // With --burst-queue, push time (and any stall) is at the queue's output:
+   // where FrameLink receives the buffer.
+   auto*src=gst_bin_get_by_name(GST_BIN(p.p),gBurstQueues?(track?"aburst":"vburst"):(track?"asrc":"vsrc"));CHECK(src);auto*pad=gst_element_get_static_pad(src,"src");g_object_set_data(G_OBJECT(pad),"m6-track",GINT_TO_POINTER(track));gst_pad_add_probe(pad,GST_PAD_PROBE_TYPE_BUFFER,pushed,&pushes,nullptr);gst_object_unref(pad);gst_object_unref(src);}
 #ifdef FL_BENCH_GPU_READBACK
   NativeFeed feed;
   p.start();if(gGpuReadback)feed.th=std::thread([&]{feedNative(p,o.seconds*gFps,feed);});
   if(feed.th.joinable())feed.th.join();p.finish();sampler.stop();
   if(feed.pool){gst_buffer_pool_set_active(feed.pool,FALSE);gst_object_unref(feed.pool);}
-  if(gGpuReadback){r["native.acquired"]=std::to_string(feed.acquired);r["native.slot_drops"]=std::to_string(feed.drops);if(!feed.dropFrames.empty())r["native.slot_drop_frames"]=feed.dropFrames;if(!feed.error.empty()){r["native.error"]=feed.error;if(p.result=="EOS")p.result="error: "+feed.error;}}
+  if(gGpuReadback){r["native.acquired"]=std::to_string(feed.acquired);r["native.slot_drops"]=std::to_string(feed.drops);r["native.acquire_wait.ms"]=dist(feed.waitMs);if(!feed.dropFrames.empty())r["native.slot_drop_frames"]=feed.dropFrames;if(!feed.error.empty()){r["native.error"]=feed.error;if(p.result=="EOS")p.result="error: "+feed.error;}}
 #else
   p.start();p.finish();sampler.stop();
 #endif
-  r["result"]=p.result;r["pushed.frames"]=std::to_string(p.pushedFrames.load());r["pushed.samples"]=std::to_string(p.pushedSamples.load());
+  r["ended_monotonic_us"]=std::to_string(p.endedAt);
+  r["result"]=p.result;if(!p.errorSource.empty()){r["result.source"]=p.errorSource;r["result.debug"]=p.errorDebug;}r["pushed.frames"]=std::to_string(p.pushedFrames.load());r["pushed.samples"]=std::to_string(p.pushedSamples.load());
   {std::lock_guard<std::mutex> lock(pushes.m);for(int track=0;track<2;++track){auto&v=pushes.v[track];std::vector<double> late,gaps;guint burst=0,maxBurst=0;const double period=1e9/(track?100:gFps);const std::string name=track?"audio":"video";
    for(size_t i=0;i<v.size();i++){if(v[i].first-v.front().first<gint64(WARMUP_S*GST_SECOND))continue;late.push_back(v[i].second/1e6);
     if(i){const double gap=double((v[i].first+v[i].second)-(v[i-1].first+v[i-1].second));gaps.push_back(gap/1e6);burst=gap<period/4?burst+1:0;maxBurst=std::max(maxBurst,burst);}}
@@ -259,6 +336,8 @@ static int producerChild(const Options&o,const std::string&session,const std::st
  r["injection.stage"]=o.stallStage.empty()?"none":o.stallStage;r["injection.frame"]=std::to_string(o.stallFrame);
  r["injection.requested_ms"]=std::to_string(o.stallMs);r["injection.executed"]=std::to_string(pushes.stallCount);
  r["injection.start_monotonic_us"]=std::to_string(pushes.stallStartUs);r["injection.elapsed_us"]=std::to_string(pushes.stallElapsedUs);
+ if(producerFault(o.fault)){r["fault.executed"]=std::to_string(pushes.faultExecuted);r["fault.start_monotonic_us"]=std::to_string(pushes.faultStartUs);r["fault.elapsed_us"]=std::to_string(pushes.faultElapsedUs);
+  r["fault.dropped_blocks"]=std::to_string(pushes.faultDroppedBlocks);r["fault.dropped_samples"]=std::to_string(pushes.faultDroppedSamples);r["fault.gap_ns"]=std::to_string(pushes.faultGapNs);}
  sampler.report(r);writeResult(out,r);return 0;}
 
 struct Arrivals {std::map<GstBuffer*,gint64> pending[2];std::vector<double> residence[2];guint sampledLevel[2]={0,0};guint unmatched[2]={0,0};std::mutex m;std::vector<std::pair<gint64,gint64>> v[2];GstElement*pipeline=nullptr;};  // {pts, lateness}
@@ -288,18 +367,50 @@ static int consumerChild(const Options&o,const std::string&session,const std::st
    gst_pad_add_probe(qs,GST_PAD_PROBE_TYPE_BUFFER,arrival,&arrivals,nullptr);
    g_object_set_data(G_OBJECT(peer),"track",GINT_TO_POINTER(track));gst_pad_add_probe(peer,GST_PAD_PROBE_TYPE_BUFFER,departed,&arrivals,nullptr);for(auto*x:{(GstObject*)qs,(GstObject*)queue,(GstObject*)peer,(GstObject*)sp,(GstObject*)sink})gst_object_unref(x);}
   // Pre-fault the per-buffer records so they do not show as consumer growth.
-  for(int track=0;track<2;track++){const size_t n=size_t(o.seconds+10)*(track?100:gFps);for(auto*v:{&c.lateness[track]}){v->resize(n);v->clear();}arrivals.v[track].resize(n);arrivals.v[track].clear();arrivals.residence[track].resize(n);arrivals.residence[track].clear();}
+  c.bufferLife.reserve(size_t(o.seconds+10)*gFps);for(int track=0;track<2;track++){const size_t n=size_t(o.seconds+10)*(track?100:gFps);for(auto*v:{&c.lateness[track]}){v->resize(n);v->clear();}arrivals.v[track].resize(n);arrivals.v[track].clear();arrivals.residence[track].resize(n);arrivals.residence[track].clear();}
 #ifdef FL_BENCH_GPU_READBACK
   // After arrival is recorded: on the appsink's pad.
   ContentCheck content;
   if(gGpuReadback){auto*sink=gst_bin_get_by_name(GST_BIN(c.p),"vout");auto*pad=gst_element_get_static_pad(sink,"sink");gst_pad_add_probe(pad,GST_PAD_PROBE_TYPE_BUFFER,checkContent,&content,nullptr);gst_object_unref(pad);gst_object_unref(sink);}
 #endif
+  struct Stall {guint frame=0,ms=0,seen=0,executed=0;gint64 startUs=0,elapsedUs=0;} stall{o.faultFrame,o.faultMs};
+  if(o.fault=="consumer-stall"){auto*sink=gst_bin_get_by_name(GST_BIN(c.p),"vout");auto*pad=gst_element_get_static_pad(sink,"sink");
+   gst_pad_add_probe(pad,GST_PAD_PROBE_TYPE_BUFFER,[](GstPad*,GstPadProbeInfo*,gpointer d)->GstPadProbeReturn{auto*st=static_cast<Stall*>(d);
+    if(++st->seen==st->frame){st->startUs=g_get_monotonic_time();g_usleep(gulong(st->ms)*1000);st->elapsedUs=g_get_monotonic_time()-st->startUs;st->executed=1;}return GST_PAD_PROBE_OK;},&stall,nullptr);
+   gst_object_unref(pad);gst_object_unref(sink);}
+  // GAP events reaching the audio appsink: count and summed duration.
+  struct Gaps {guint n=0;guint64 ns=0;} gaps;
+  {auto*sink=gst_bin_get_by_name(GST_BIN(c.p),"aout");auto*pad=gst_element_get_static_pad(sink,"sink");
+   gst_pad_add_probe(pad,GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM,[](GstPad*,GstPadProbeInfo*info,gpointer d)->GstPadProbeReturn{auto*e=GST_PAD_PROBE_INFO_EVENT(info);
+    if(GST_EVENT_TYPE(e)==GST_EVENT_GAP){GstClockTime pts=0,duration=0;gst_event_parse_gap(e,&pts,&duration);auto*g=static_cast<Gaps*>(d);++g->n;if(GST_CLOCK_TIME_IS_VALID(duration))g->ns+=duration;}return GST_PAD_PROBE_OK;},&gaps,nullptr);
+   gst_object_unref(pad);gst_object_unref(sink);}
+  // Video: GAP events and DISCONT buffers after the first (D2 option B marks
+  // ring-full drops to the consumer this way).
+  struct VideoMarks {guint gaps=0,disconts=0;guint64 gapNs=0;bool first=true;} vmarks;
+  {auto*sink=gst_bin_get_by_name(GST_BIN(c.p),"vout");auto*pad=gst_element_get_static_pad(sink,"sink");
+   gst_pad_add_probe(pad,GstPadProbeType(GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM|GST_PAD_PROBE_TYPE_BUFFER),[](GstPad*,GstPadProbeInfo*info,gpointer d)->GstPadProbeReturn{auto*m=static_cast<VideoMarks*>(d);
+    if(GST_PAD_PROBE_INFO_TYPE(info)&GST_PAD_PROBE_TYPE_BUFFER){auto*b=GST_PAD_PROBE_INFO_BUFFER(info);if(!m->first&&GST_BUFFER_FLAG_IS_SET(b,GST_BUFFER_FLAG_DISCONT))++m->disconts;m->first=false;}
+    else if(GST_EVENT_TYPE(GST_PAD_PROBE_INFO_EVENT(info))==GST_EVENT_GAP){GstClockTime pts=0,duration=0;gst_event_parse_gap(GST_PAD_PROBE_INFO_EVENT(info),&pts,&duration);++m->gaps;if(GST_CLOCK_TIME_IS_VALID(duration))m->gapNs+=duration;}
+    return GST_PAD_PROBE_OK;},&vmarks,nullptr);
+   gst_object_unref(pad);gst_object_unref(sink);}
   c.start();c.finish();sampler.stop();
+  r["ended_monotonic_us"]=std::to_string(c.endedAt);
+  r["video.gap_events"]=std::to_string(vmarks.gaps);r["video.gap_event_ns"]=std::to_string(vmarks.gapNs);r["video.discont_after_first"]=std::to_string(vmarks.disconts);
+  r["audio.gap_events"]=std::to_string(gaps.n);r["audio.gap_event_ns"]=std::to_string(gaps.ns);
+  {std::lock_guard<std::mutex> lock(c.mutex);{std::string h;for(int k=0;k<8;++k)h+=(k?",":"")+std::to_string(c.videoRefcounts[k]);r["video.callback_refcount_hist"]=h;}{std::vector<double> life;guint alive=0;for(auto&x:c.bufferLife){if(x.second)life.push_back((x.second-x.first)/1000.0);else ++alive;}r["video.buffer_life_after_callback.ms"]=dist(life);r["video.buffer_alive_at_end"]=std::to_string(alive);}r["audio.pts_jumps"]=std::to_string(c.audioJumps);r["audio.pts_jump_ns"]=std::to_string(c.audioJumpNs);}
+  // Recovery: buffers from the faulted one to the last arrival over budget, on
+  // the faulted track (video for consumer-stall and producer-burst).
+  const bool late=o.fault=="consumer-stall"||o.fault=="producer-burst"||o.fault=="audio-stall";
+  if(late){std::lock_guard<std::mutex> alock(arrivals.m);auto&av=arrivals.v[o.fault=="audio-stall"?1:0];guint last=0;bool any=false;
+   for(size_t i=o.faultFrame?o.faultFrame-1:0;i<av.size();i++)if(av[i].second>gint64(gArrivalBudget)){last=guint(i);any=true;}
+   r["fault.recovery_frames"]=std::to_string(any?last-(o.faultFrame-1)+1:0);}
+  if(o.fault=="consumer-stall"){r["fault.executed"]=std::to_string(stall.executed);r["fault.start_monotonic_us"]=std::to_string(stall.startUs);r["fault.elapsed_us"]=std::to_string(stall.elapsedUs);}
+  {std::lock_guard<std::mutex> lock(c.statsMutex);for(auto*st:c.stats){gchar*t=gst_structure_to_string(st);r[std::string("stats.")+gst_structure_get_name(st)]=t;g_free(t);}}
 #ifdef FL_BENCH_GPU_READBACK
   if(gGpuReadback){r["content.checked"]=std::to_string(content.checked);r["content.mismatches"]=std::to_string(content.mismatches);r["content.index_gaps"]=std::to_string(content.gaps);r["content.missing_frames"]=std::to_string(content.missing);r["content.layout"]=content.layout;r["content.rows"]=std::to_string(CONTENT_ROWS);
    if(!content.first.empty())r["content.first_mismatch"]=content.first;}
 #endif
-  r["result"]=c.result;r["frames"]=std::to_string(c.frames.load());r["samples"]=std::to_string(c.samples.load());r["memory"]=c.features;
+  r["result"]=c.result;if(!c.errorSource.empty()){r["result.source"]=c.errorSource;r["result.debug"]=c.errorDebug;}r["frames"]=std::to_string(c.frames.load());r["samples"]=std::to_string(c.samples.load());r["memory"]=c.features;
   r["audio.contiguous"]=c.contiguous?"yes":"no";
   std::lock_guard<std::mutex> lock(c.mutex);std::lock_guard<std::mutex> alock(arrivals.m);
   for(int track=0;track<2;track++){const char*n=track?"audio":"video";auto&av=arrivals.v[track];auto&rv=c.lateness[track];
@@ -339,9 +450,25 @@ static int lifecycleChild(const Options&o,bool producer,const std::string&base,c
  FILE*f=fopen(out.c_str(),"w");CHECK(f);bool complete=true;
  fprintf(f,"scope=%s\n",o.localConsumer?"local-consumer-lifecycle-no-transport":"transport-lifecycle");
  for(guint i=0;i<o.cycles;i++){const std::string path=base+"/c"+std::to_string(i)+"/session";std::string result;guint64 frames=0,samples=0;
-  if(producer){Producer p(modeOf(o.mode),path,"av",o.seconds*gFps,80,false,o.seconds*100);p.start();p.finish();result=p.result;frames=p.pushedFrames;samples=p.pushedSamples;}
-  else{Consumer c(modeOf(o.mode),path,"av",o.native,o.localConsumer?o.seconds:0);c.checkContent=false;c.start();c.finish();result=c.result;frames=c.frames;samples=c.samples;if(!c.contiguous)result="error: audio discontinuity";}
-  complete=complete&&result=="EOS"&&frames==guint64(o.seconds)*gFps&&samples==guint64(o.seconds)*48000;
+  gint64 ended=0;
+  if(producer){Producer p(modeOf(o.mode),path,"av",o.seconds*gFps,80,false,o.seconds*100);p.start();
+#ifdef FL_BENCH_GPU_READBACK
+   // GPU-staged cells: the application feed per cycle, as in one-shot runs.
+   NativeFeed feed;if(gGpuReadback)feed.th=std::thread([&]{feedNative(p,o.seconds*gFps,feed);});if(feed.th.joinable())feed.th.join();
+#endif
+   p.finish();result=p.result;frames=p.pushedFrames;samples=p.pushedSamples;ended=p.endedAt;
+#ifdef FL_BENCH_GPU_READBACK
+   if(feed.pool){gst_buffer_pool_set_active(feed.pool,FALSE);gst_object_unref(feed.pool);}
+   if(!feed.error.empty()&&result=="EOS")result="error: "+feed.error;
+   // Decision 15: the feed's own drops per cycle, so a short clean cycle is matched.
+   if(gGpuReadback){fprintf(f,"cycle.%u.slot_drops=%u\n",i,feed.drops);if(!feed.dropFrames.empty())fprintf(f,"cycle.%u.slot_drop_frames=%s\n",i,feed.dropFrames.c_str());fprintf(f,"cycle.%u.acquire_wait.ms=%s\n",i,dist(feed.waitMs).c_str());}
+#endif
+  }
+  else{Consumer c(modeOf(o.mode),path,"av",o.native,o.localConsumer?o.seconds:0);c.checkContent=false;c.start();c.finish();result=c.result;frames=c.frames;samples=c.samples;ended=c.endedAt;if(!c.contiguous)result="error: audio discontinuity";}
+  // With --cycle-fault, odd cycles are faulted by the driver and must end in error.
+  const bool faulted=!o.cycleFault.empty()&&i%2==1;
+  complete=complete&&(faulted?result.rfind("error",0)==0:(result=="EOS"&&frames==guint64(o.seconds)*gFps&&samples==guint64(o.seconds)*48000));
+  fprintf(f,"ended.%u=%lld\n",i,(long long)ended);
   const Resources r=resources();
   fprintf(f,"cycle.%u=%s|%llu|%llu|%llu|%u|%u\n",i,result.c_str(),(unsigned long long)frames,(unsigned long long)samples,(unsigned long long)r.memKb,r.handles,r.threads);fflush(f);}
  fprintf(f,"complete=%s\n",complete?"yes":"no");fclose(f);return complete?0:1;}
@@ -376,6 +503,14 @@ static Child spawn(const std::string&exe,const std::vector<std::string>&args){Ch
 #endif
  return c;}
 // Exit code, or -1 after killing a child that outlived the deadline.
+// Kill a child now; await then returns its status (Linux 128+SIGKILL, Windows 99).
+static void killChild(Child&c){
+#ifdef _WIN32
+ TerminateProcess(c.h,99);
+#else
+ kill(pid_t(c.pid),SIGKILL);
+#endif
+}
 static int await(Child&c,gint64 deadline){
 #ifdef _WIN32
  const gint64 left=std::max<gint64>(0,deadline-g_get_monotonic_time())/1000;
@@ -394,7 +529,8 @@ static std::vector<std::string> optionArgs(const Options&o){
  std::vector<std::string> a{"--seconds",std::to_string(o.seconds),"--size",std::to_string(gWidth)+"x"+std::to_string(gHeight),"--fps",std::to_string(gFps),"--format",gFormat,"--mode",o.mode,"--pool",std::to_string(gVideoPool),"--video-queue",std::to_string(gVideoQueue)};
  a.insert(a.end(),{"--output-queue-buffers",std::to_string(gOutputQueueBuffers),"--arrival-budget-ms",std::to_string(gArrivalBudget/GST_MSECOND),"--latency-ms",std::to_string(gPlaybackLatency/GST_MSECOND)});if(!gOutputSync)a.push_back("--transport-only");if(!gOutputAsync)a.push_back("--no-output-preroll");
  if(!o.stallStage.empty())a.insert(a.end(),{"--video-stall-stage",o.stallStage,"--video-stall-frame",std::to_string(o.stallFrame),"--video-stall-ms",std::to_string(o.stallMs)});
- if(gRetainedDevice)a.push_back("--device-owner");if(gSharedCpu)a.push_back("--shared-cpu");if(gGpuReadback)a.push_back("--gpu-readback");if(o.native)a.push_back("--native");if(o.raw)a.push_back("--raw");return a;}
+ if(gRetainedDevice)a.push_back("--device-owner");if(gSharedCpu)a.push_back("--shared-cpu");if(gGpuReadback)a.push_back("--gpu-readback");if(o.native)a.push_back("--native");if(o.raw)a.push_back("--raw");if(gErrorOnRingFull)a.push_back("--error-on-ring-full");if(gBurstQueues)a.push_back("--burst-queue");if(gNoLastSample)a.push_back("--no-last-sample");
+ if(o.fault=="consumer-stall"||producerFault(o.fault))a.insert(a.end(),{"--fault",o.fault,"--fault-expect",o.faultExpect,"--fault-frame",std::to_string(o.faultFrame),"--fault-ms",std::to_string(o.faultMs)});return a;}
 
 // Least-squares slope of y over x.
 static double slope(const std::vector<std::pair<double,double>>&v){double sx=0,sy=0,sxx=0,sxy=0;const double n=double(v.size());
@@ -407,18 +543,44 @@ static int lifecycle(const Options&o,const std::string&exe,const char*plugin,con
  auto opts=optionArgs(o);opts.push_back("--cycles");opts.push_back(std::to_string(o.cycles));
  auto args=[&](std::vector<std::string> a){a.insert(a.begin(),plugin);a.insert(a.end(),opts.begin(),opts.end());return a;};
  const char*longRole=restartProducer?"lifecycle-consumer":"lifecycle-producer",*freshRole=restartProducer?"producer":"consumer";
- auto longChild=spawn(exe,args({"--role",longRole,"--session-base",dir,"--result",base+"-long.txt"}));
+ // The long-lived child needs the cycle-fault schedule; fresh children get only their own fault.
+ std::vector<std::string> longArgs{"--role",longRole,"--session-base",dir,"--result",base+"-long.txt"};
+ if(!o.cycleFault.empty())longArgs.insert(longArgs.end(),{"--cycle-fault",o.cycleFault,"--cycle-fault-at-ms",std::to_string(o.cycleFaultAtMs),"--cycle-fault-frame",std::to_string(o.cycleFaultFrame),"--restart",o.restart});
+ auto longChild=spawn(exe,args(longArgs));
  std::vector<std::map<std::string,std::string>> fresh;std::vector<int> freshExit;const gint64 t0=g_get_monotonic_time();
- for(guint i=0;i<o.cycles;i++){auto c=spawn(exe,args({"--role",freshRole,"--session",dir+"/c"+std::to_string(i)+"/session","--result",base+"-fresh-"+std::to_string(i)+".txt"}));
+ // --cycle-fault (M6.4 growth across repeats): every odd cycle the fresh peer is
+ // killed (kill: SIGKILL/TerminateProcess at --cycle-fault-at-ms after its start)
+ // or, as producer, refused for stale frame metadata (malformed: frame
+ // --cycle-fault-frame); even cycles stay clean and must deliver exact media.
+ std::vector<gint64> killedAt(o.cycles,0);
+ for(guint i=0;i<o.cycles;i++){const bool faulted=!o.cycleFault.empty()&&i%2==1;
+  std::vector<std::string> a{"--role",freshRole,"--session",dir+"/c"+std::to_string(i)+"/session","--result",base+"-fresh-"+std::to_string(i)+".txt"};
+  if(faulted&&o.cycleFault=="malformed")a.insert(a.end(),{"--fault","video-stale-meta","--fault-frame",std::to_string(o.cycleFaultFrame),"--fault-expect","explicit-failure"});
+  auto c=spawn(exe,args(a));
+  if(faulted&&o.cycleFault=="kill"){g_usleep(gulong(o.cycleFaultAtMs)*1000);killedAt[i]=g_get_monotonic_time();killChild(c);}
   freshExit.push_back(await(c,g_get_monotonic_time()+gint64(o.seconds+60)*G_USEC_PER_SEC));fresh.push_back(readResult(base+"-fresh-"+std::to_string(i)+".txt"));
   // Retain per-cycle evidence, including failures and independent PCM counts.
  }
  const int longExit=await(longChild,g_get_monotonic_time()+gint64(o.seconds+120)*G_USEC_PER_SEC);
- auto lr=readResult(base+"-long.txt");guint ok=0;std::string firstBad;std::vector<std::pair<double,double>> mem,hnd,thr;guint64 m0=0,m1=0;guint h0=0,h1=0,t0c=0,t1c=0;
+ auto lr=readResult(base+"-long.txt");guint ok=0;std::vector<double> faultDetect;std::string firstBad;std::vector<std::pair<double,double>> mem,hnd,thr;guint64 m0=0,m1=0;guint h0=0,h1=0,t0c=0,t1c=0;
  for(guint i=0;i<o.cycles;i++){auto it=lr.find("cycle."+std::to_string(i));std::vector<std::string> f;
   if(it!=lr.end()){std::string cell;std::istringstream in(it->second);while(std::getline(in,cell,'|'))f.push_back(cell);}
+  const bool faulted=!o.cycleFault.empty()&&i%2==1;
   bool good=f.size()==6&&f[0]=="EOS"&&freshExit[i]==0&&fresh[i]["result"]=="EOS";
-  if(good){const std::string pf=restartProducer?fresh[i]["pushed.frames"]:f[1],ps=restartProducer?fresh[i]["pushed.samples"]:f[2],cf=restartProducer?f[1]:fresh[i]["frames"],cs=restartProducer?f[2]:fresh[i]["samples"];
+  if(faulted){
+#ifdef _WIN32
+   const int killedStatus=99;
+#else
+   const int killedStatus=128+SIGKILL;
+#endif
+   // The long-lived peer ends this cycle in error (never EOS) within the bound
+   // of the fault; the fresh peer was killed, or refused the stale metadata.
+   const gint64 at=o.cycleFault=="kill"?killedAt[i]:(fresh[i]["fault.start_monotonic_us"].empty()?0:std::stoll(fresh[i]["fault.start_monotonic_us"]));
+   auto e=lr.find("ended."+std::to_string(i));const gint64 end=e==lr.end()?0:std::stoll(e->second);const double detect=at&&end?(end-at)/1000.0:-1;
+   faultDetect.push_back(detect);
+   const bool fresh_ok=o.cycleFault=="kill"?freshExit[i]==killedStatus:(freshExit[i]==0&&fresh[i]["result"].find("stale producer video metadata generation")!=std::string::npos);
+   good=f.size()==6&&f[0].rfind("error",0)==0&&fresh_ok&&detect>=0&&detect<=o.faultBoundMs;}
+  else if(good){const std::string pf=restartProducer?fresh[i]["pushed.frames"]:f[1],ps=restartProducer?fresh[i]["pushed.samples"]:f[2],cf=restartProducer?f[1]:fresh[i]["frames"],cs=restartProducer?f[2]:fresh[i]["samples"];
    good=pf==cf&&ps==cs&&pf==std::to_string(guint64(o.seconds)*gFps)&&ps==std::to_string(guint64(o.seconds)*48000);}
   if(good)ok++;else if(firstBad.empty())firstBad="cycle "+std::to_string(i)+": long="+(f.empty()?std::string("missing"):f[0])+" fresh="+fresh[i]["result"]+" exit="+std::to_string(freshExit[i]);
   if(f.size()==6&&i>=LIFECYCLE_WARMUP){const double x=i;const guint64 mk=std::stoull(f[3]);const guint h=guint(std::stoul(f[4])),t=guint(std::stoul(f[5]));
@@ -435,11 +597,17 @@ static int lifecycle(const Options&o,const std::string&exe,const char*plugin,con
  s["output.sync"]=gOutputSync?"true":"false";s["output.async"]=gOutputAsync?"true":"false";
  s["harness.malloc"]=gSourceMalloc;
  if(!firstBad.empty())s["first_failure"]=firstBad;
+ if(!o.cycleFault.empty()){s["cycle_fault"]=o.cycleFault;s["cycle_fault.bound_ms"]=std::to_string(o.faultBoundMs);s["cycle_fault.detection_ms"]=dist(faultDetect);
+  if(o.cycleFault=="kill")s["cycle_fault.at_ms"]=std::to_string(o.cycleFaultAtMs);else s["cycle_fault.frame"]=std::to_string(o.cycleFaultFrame);}
  snprintf(t,sizeof t,"%.1f",(g_get_monotonic_time()-t0)/1e6);s["wall.s"]=t;
  s["long.mem.kb"]=std::to_string(m0)+".."+std::to_string(m1);snprintf(t,sizeof t,"%.2f",slope(mem));s["long.mem.slope.kb_per_cycle"]=t;
  s["long.handles"]=std::to_string(h0)+".."+std::to_string(h1);snprintf(t,sizeof t,"%.3f",slope(hnd));s["long.handles.slope.per_cycle"]=t;
  s["long.threads"]=std::to_string(t0c)+".."+std::to_string(t1c);snprintf(t,sizeof t,"%.3f",slope(thr));s["long.threads.slope.per_cycle"]=t;
  {std::string series;for(guint i=0;i<o.cycles;i++){auto it=lr.find("cycle."+std::to_string(i));if(it!=lr.end())series+=it->second+";";}s["long.series.result_frames_samples_memkb_handles_threads"]=series;}
+ // Decision 15: the GPU-staged feed's slot drops per cycle, from whichever side
+ // produced (the long-lived producer, or each fresh producer).
+ if(gGpuReadback){std::string drops;guint total=0;for(guint i=0;i<o.cycles;i++){std::string v;auto it=lr.find("cycle."+std::to_string(i)+".slot_drops");if(it!=lr.end())v=it->second;else if(i<fresh.size())v=fresh[i]["native.slot_drops"];drops+=(v.empty()?"?":v)+";";if(!v.empty())total+=std::stoul(v);}
+  s["cycle.slot_drops.series"]=drops;s["cycle.slot_drops.total"]=std::to_string(total);}
  const bool complete=longExit==0&&ok==o.cycles;s["complete"]=complete?"yes":"no";
  writeResult(base+".summary.txt",s);for(auto&kv:s)printf("%s=%s\n",kv.first.c_str(),kv.second.c_str());
  return complete?0:1;}
@@ -463,15 +631,36 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
   else if(a=="--pool")gVideoPool=guint(std::stoul(next()));else if(a=="--video-queue")gVideoQueue=guint(std::stoul(next()));else if(a=="--source-only")o.sourceOnly=true;
   else if(a=="--cycles")o.cycles=guint(std::stoul(next()));else if(a=="--restart")o.restart=next();else if(a=="--session-base")sessionBase=next();
   else if(a=="--local-consumer")o.localConsumer=true;else if(a=="--shared-cpu")gSharedCpu=true;else if(a=="--gpu-readback")gGpuReadback=true;else if(a=="--device-owner")gRetainedDevice=true;else if(a=="--native")o.native=true;else if(a=="--trace")o.trace=true;else if(a=="--raw")o.raw=true;else if(a=="--out")o.out=next();else if(a=="--label")o.label=next();
+  else if(a=="--fault")o.fault=next();else if(a=="--fault-expect")o.faultExpect=next();else if(a=="--fault-at-s")o.faultAtS=guint(std::stoul(next()));
+  else if(a=="--fault-frame")o.faultFrame=guint(std::stoul(next()));else if(a=="--fault-ms")o.faultMs=guint(std::stoul(next()));else if(a=="--error-on-ring-full")gErrorOnRingFull=true;else if(a=="--burst-queue")gBurstQueues=true;else if(a=="--cycle-fault")o.cycleFault=next();else if(a=="--cycle-fault-at-ms")o.cycleFaultAtMs=guint(std::stoul(next()));else if(a=="--cycle-fault-frame")o.cycleFaultFrame=guint(std::stoul(next()));else if(a=="--no-last-sample")gNoLastSample=true;else if(a=="--fault-bound-ms")o.faultBoundMs=guint(std::stoul(next()));
   else if(a=="--role")role=next();else if(a=="--session")session=next();else if(a=="--result")result=next();else{fprintf(stderr,"unknown option %s\n",a.c_str());return 2;}}
  CHECK(o.stallStage.empty()?(o.stallFrame==0&&o.stallMs==0):
    ((o.stallStage=="source"||o.stallStage=="post-push")&&o.stallFrame>0&&o.stallFrame<guint64(o.seconds)*gFps&&o.stallMs>0&&o.stallMs<=1000&&!o.cycles&&!o.sourceOnly&&!o.localConsumer));
+ {const bool kill=o.fault=="producer-kill"||o.fault=="consumer-kill",stall=o.fault=="consumer-stall",prod=producerFault(o.fault);
+  CHECK(o.fault.empty()?(o.faultExpect.empty()&&!o.faultAtS&&!o.faultFrame&&!o.faultMs):((kill||stall||prod)&&(!o.cycles||(role=="producer"&&o.fault=="video-stale-meta"))&&!o.sourceOnly&&!o.localConsumer&&o.stallStage.empty()));
+  // Producer faults: N within the run (frames, or 10 ms audio blocks), and the
+  // declared outcome that the documented policy gives each.
+  CHECK(!malformedFault(o.fault)||(o.faultFrame>0&&!o.faultMs&&!o.faultAtS&&o.faultExpect=="explicit-failure"&&
+   o.faultFrame<guint64(o.seconds)*(o.fault.rfind("video",0)==0?gFps:100)));
+  CHECK(!prod||malformedFault(o.fault)||(o.faultFrame>0&&o.faultMs>0&&o.faultMs<=1000&&!o.faultAtS&&
+   (o.fault=="producer-burst"?o.faultFrame<guint64(o.seconds)*gFps:guint64(o.faultFrame)+(o.faultMs+9)/10<guint64(o.seconds)*100)&&
+   ((o.fault=="producer-burst"&&(o.faultExpect=="absorbed"||o.faultExpect=="counted-drop"||o.faultExpect=="replacement-failure"||o.faultExpect=="replaced-or-counted-drop"))||(o.fault=="audio-stall"&&o.faultExpect=="absorbed")||
+    (o.fault=="audio-drop"&&o.faultExpect=="explicit-failure")||(o.fault=="audio-gap"&&o.faultExpect=="gap-visible"))));
+  CHECK(!kill||(o.faultAtS>=WARMUP_S+1&&o.faultAtS+2<=o.seconds&&!o.faultFrame&&!o.faultMs&&o.faultExpect.empty()));
+  CHECK(!stall||(o.faultFrame>0&&o.faultFrame<guint64(o.seconds)*gFps&&o.faultMs>0&&o.faultMs<=5000&&(o.faultExpect=="absorbed"||o.faultExpect=="counted-drop"||o.faultExpect=="replacement-failure"||o.faultExpect=="explicit-failure")));
+  CHECK(o.faultBoundMs>0&&o.faultBoundMs<=10000);
+  CHECK(o.cycleFault.empty()?(!o.cycleFaultAtMs&&!o.cycleFaultFrame):(o.cycles>=2&&o.fault.empty()&&
+   ((o.cycleFault=="kill"&&o.cycleFaultAtMs>=1000&&o.cycleFaultAtMs+1000<=o.seconds*1000&&!o.cycleFaultFrame)||
+    (o.cycleFault=="malformed"&&o.restart=="producer"&&o.cycleFaultFrame>0&&o.cycleFaultFrame<guint64(o.seconds)*gFps&&!o.cycleFaultAtMs))));
+  // --burst-queue: burst faults only, with raw per-buffer records for the
+  // transport-share measure.
+  CHECK(!gBurstQueues||((o.fault=="producer-burst"||o.fault=="audio-stall")&&o.raw&&(o.faultExpect=="absorbed"||(o.fault=="producer-burst"&&(o.faultExpect=="replacement-failure"||o.faultExpect=="counted-drop"||o.faultExpect=="replaced-or-counted-drop")))));}
  // Both lifecycle roles construct the same shared-CPU-enabled bins as one-shot
  // runs. Permit repeated sessions without changing the production lifetime.
  CHECK(!gSharedCpu||(o.mode=="bin"&&!o.native&&!o.sourceOnly&&!o.localConsumer));
  CHECK(!gRetainedDevice||(o.mode=="bin"&&!gSharedCpu&&!o.sourceOnly&&!o.localConsumer));
- // GPU-staged readback: one-shot bin sessions, exact BGRA/RGBA only.
- CHECK(!gGpuReadback||(o.mode=="bin"&&!gSharedCpu&&!o.native&&!o.sourceOnly&&!o.localConsumer&&!o.cycles&&o.stallStage.empty()&&gFormat!="NV12"));
+ // GPU-staged readback: bin sessions, exact BGRA/RGBA only.
+ CHECK(!gGpuReadback||(o.mode=="bin"&&!gSharedCpu&&!o.native&&!o.sourceOnly&&!o.localConsumer&&o.stallStage.empty()&&gFormat!="NV12"));
 #ifndef FL_BENCH_GPU_READBACK
  if(gGpuReadback){printf("SKIP gpu-readback (EGL staging) is not in this build\n");return 77;}
 #endif
@@ -515,7 +704,8 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
  auto consumer=launch("consumer");g_usleep(200000);auto producer=launch("producer");
  // Early pid line for external samplers (GPU counters per process).
  printf("pids producer=%ld consumer=%ld\n",producer.pid,consumer.pid);
- const gint64 deadline=g_get_monotonic_time()+gint64(o.seconds+90)*G_USEC_PER_SEC;
+ const gint64 started=g_get_monotonic_time(),deadline=started+gint64(o.seconds+90)*G_USEC_PER_SEC;gint64 killedAt=0;
+ if(o.fault=="producer-kill"||o.fault=="consumer-kill"){g_usleep(gulong(o.faultAtS)*G_USEC_PER_SEC);killedAt=g_get_monotonic_time();killChild(o.fault=="producer-kill"?producer:consumer);}
  const int pc=await(producer,deadline),cc=await(consumer,deadline);
  auto pr=readResult(base+"-producer.txt"),cr=readResult(base+"-consumer.txt");
  std::map<std::string,std::string> s{{"label",o.label},{"config",gFormat+" "+std::to_string(gWidth)+"x"+std::to_string(gHeight)+"@"+std::to_string(gFps)+" "+o.mode+(gSharedCpu?" shared-cpu":gGpuReadback?" gpu-readback":(o.native?" native":" cpu"))+(o.trace?" traced":"")+" "+std::to_string(o.seconds)+"s"},
@@ -524,6 +714,125 @@ int main(int argc,char**argv){gst_init(&argc,&argv);
  s["expected.frames"]=std::to_string(guint64(o.seconds)*gFps);
  s["output.async"]=gOutputAsync?"true":"false";s["harness.malloc"]=gSourceMalloc;
  s["expected.samples"]=std::to_string(guint64(o.seconds)*48000);
+ if(!o.fault.empty()){s["fault"]=o.fault;s["fault.bound_ms"]=std::to_string(o.faultBoundMs);
+  const bool killed=o.fault=="producer-kill"||o.fault=="consumer-kill";
+#ifdef _WIN32
+  const int killedStatus=99;
+#else
+  const int killedStatus=128+SIGKILL;
+#endif
+  bool pass=false;
+  // GPU-staged cells (M6.8c receiver): the application's own slot drops (its
+  // pool acquire timed out, so the frame was never submitted) count as
+  // producer loss, and every delivered frame must carry its own content: no
+  // stale, repeated or torn frame, and exactly the lost frames missing.
+  const long long slotDrops=pr["native.slot_drops"].empty()?0:std::stoll(pr["native.slot_drops"]);
+  auto contentOk=[&](long long missing)->bool{if(!gGpuReadback)return true;const bool ok=cr["content.mismatches"]=="0"&&cr["content.checked"]==cr["frames"]&&(missing<0||cr["content.missing_frames"]==std::to_string(missing));
+   s["fault.content_ok"]=ok?"yes":"no";return ok;};
+  if(gGpuReadback)s["fault.app_slot_drops"]=std::to_string(slotDrops);
+  if(killed){const bool producerKilled=o.fault=="producer-kill";auto&sr=producerKilled?cr:pr;const int victimRc=producerKilled?pc:cc,survivorRc=producerKilled?cc:pc;
+   const std::string result=sr["result"];const gint64 ended=sr.count("ended_monotonic_us")?std::stoll(sr["ended_monotonic_us"]):0;
+   const double detect=ended&&killedAt?(ended-killedAt)/1000.0:-1;char t[32];snprintf(t,sizeof t,"%.1f",detect);
+   s["fault.at_s"]=std::to_string(o.faultAtS);s["fault.detection_ms"]=t;s["fault.survivor_result"]=result;
+   // Decisions 8 and 9: the side that loses its peer reports the stable peer-failure error.
+   const bool stable=result=="error: FrameLink peer closed or failed";s["fault.survivor_error_stable"]=stable?"yes":"no";
+   pass=victimRc==killedStatus&&survivorRc==0&&result.rfind("error",0)==0&&detect>=0&&detect<=o.faultBoundMs&&stable&&(!producerKilled||contentOk(-1));} // a killed consumer leaves no content record
+  else if(producerFault(o.fault)){s["fault.expect"]=o.faultExpect;s["fault.frame"]=std::to_string(o.faultFrame);s["fault.ms"]=std::to_string(o.faultMs);
+   const bool audio=o.fault!="producer-burst";const guint period=audio?10:std::max<guint>(1,1000/gFps);
+   const guint recoveryLimit=(o.faultMs+period-1)/period+2;s["fault.recovery_limit_frames"]=std::to_string(recoveryLimit);
+   const bool executed=pr["fault.executed"]=="1",ended=pc==0&&cc==0;
+   const bool videoComplete=cr["frames"]==s["expected.frames"]&&cr["frames"]==pr["pushed.frames"];
+   const bool bothEos=pr["result"]=="EOS"&&cr["result"]=="EOS";
+   const long long droppedSamples=pr["fault.dropped_samples"].empty()?-1:std::stoll(pr["fault.dropped_samples"]);
+   if(malformedFault(o.fault)){
+    // Declared: the producer fails with the sink's message for that input, the
+    // consumer does not report EOS, both exit normally, and the consumer ends
+    // within the bound of the malformed buffer's push.
+    std::string want=o.fault=="video-stale-meta"?"stale producer video metadata generation":o.fault=="audio-no-pts"?"PCM requires valid PTS, duration and TIME segment":
+     o.fault=="audio-misaligned"?"PCM block is misaligned, empty or exceeds bounded queue budget":"valid supported frame metadata and TIME mapping required";
+    const gint64 at=pr["fault.start_monotonic_us"].empty()?0:std::stoll(pr["fault.start_monotonic_us"]),end=cr["ended_monotonic_us"].empty()?0:std::stoll(cr["ended_monotonic_us"]);
+    const double detect=at&&end?(end-at)/1000.0:-1;char t[32];snprintf(t,sizeof t,"%.1f",detect);s["fault.detection_ms"]=t;s["fault.bound_ms"]=std::to_string(o.faultBoundMs);s["fault.expected_message"]=want;
+    // Decision 8: the consumer is told why.
+    const std::string consumerWant="error: FrameLink producer failed: invalid input";s["fault.expected_consumer_error"]=consumerWant;
+    pass=executed&&ended&&pr["result"].find(want)!=std::string::npos&&cr["result"]==consumerWant&&detect>=0&&detect<=o.faultBoundMs&&contentOk(-1);}
+   else if(o.fault=="audio-drop"){
+    // Detection: the consumer's end after the first missing block was due.
+    const gint64 at=pr["fault.start_monotonic_us"].empty()?0:std::stoll(pr["fault.start_monotonic_us"]),end=cr["ended_monotonic_us"].empty()?0:std::stoll(cr["ended_monotonic_us"]);
+    const double detect=at&&end?(end-at)/1000.0:-1;char t[32];snprintf(t,sizeof t,"%.1f",detect);s["fault.detection_ms"]=t;s["fault.bound_ms"]=std::to_string(o.faultBoundMs);
+    pass=executed&&ended&&pr["result"].find("continuity mismatch")!=std::string::npos&&cr["result"]=="error: FrameLink producer failed: invalid input"&&detect>=0&&detect<=o.faultBoundMs&&contentOk(-1);}
+   else if(o.fault=="audio-gap"){
+    // Loss is explicit: exactly the dropped samples are missing, the consumer
+    // sees one PTS jump of the dropped duration and receives the GAP event.
+    const long long samples=cr["samples"].empty()?-1:std::stoll(cr["samples"]),expected=std::stoll(s["expected.samples"]),gapNs=std::stoll(pr["fault.gap_ns"]);
+    const long long jump=std::stoll(cr["audio.pts_jump_ns"]),gapSeen=std::stoll(cr["audio.gap_event_ns"]);
+    s["fault.samples_missing"]=std::to_string(expected-samples);
+    pass=executed&&ended&&bothEos&&videoComplete&&cr["queue.accounting"]=="complete"&&droppedSamples>0&&samples==expected-droppedSamples&&
+     cr["audio.pts_jumps"]=="1"&&std::llabs(jump-gapNs)<=2&&cr["audio.gap_events"]=="1"&&std::llabs(gapSeen-gapNs)<=2&&contentOk(0);}
+   else{
+    const bool complete=ended&&bothEos&&videoComplete&&cr["queue.accounting"]=="complete"&&cr["audio.contiguous"]=="yes"&&cr["samples"]==s["expected.samples"]&&cr["samples"]==pr["pushed.samples"];
+    const unsigned long recovery=cr["fault.recovery_frames"].empty()?~0ul:std::stoul(cr["fault.recovery_frames"]);
+    if(o.faultExpect=="absorbed"&&gBurstQueues){
+     // Transport share: per buffer, consumer arrival lateness minus producer
+     // push lateness at FrameLink's input (both on the session timeline), by
+     // index. Recovery: buffers from the faulted one to the last over budget.
+     // The burst must have happened: the buffer after the faulted one reached
+     // FrameLink's input at least M - 2 periods late (a backlog formed), and the
+     // backlog drained (push lateness back under budget) at least twice as fast
+     // as real time. A push returns only after FrameLink takes the buffer in, so
+     // the drain rate is FrameLink's intake rate under the burst; reported.
+     auto column=[](const std::string&path,int col){std::vector<gint64> v;std::ifstream in(path);std::string line;std::getline(in,line);
+      while(std::getline(in,line)){std::stringstream ss(line);std::string f;for(int c=0;c<=col&&std::getline(ss,f,',');++c)if(c==col)v.push_back(std::stoll(f));}return v;};
+     const auto push=column(base+(audio?"-producer.txt.audio-push.csv":"-producer.txt.push.csv"),1),arrive=column(base+(audio?"-consumer.txt.audio.csv":"-consumer.txt.video.csv"),1);
+     const bool matched=!push.empty()&&push.size()==arrive.size();guint last=0;bool any=false;std::vector<double> share;
+     if(matched)for(size_t i=o.faultFrame-1;i<push.size();++i){const gint64 d=arrive[i]-push[i];share.push_back(d/1e6);if(d>gint64(gArrivalBudget)){last=guint(i);any=true;}}
+     const guint transportRecovery=any?last-(o.faultFrame-1)+1:0;
+     const auto pts=column(base+(audio?"-producer.txt.audio-push.csv":"-producer.txt.push.csv"),0);
+     bool burst=false;double drainGap=NAN;guint drain=0;const size_t n0=o.faultFrame-1;
+     if(matched&&n0+1<push.size()){const gint64 backlog=gint64(o.faultMs)*GST_MSECOND-2*gint64(period)*GST_MSECOND;
+      size_t j=n0+1;while(j<push.size()&&push[j]>gint64(gArrivalBudget))++j;drain=guint(j-n0);
+      if(j<push.size()&&j>n0+1){drainGap=double((pts[j]+push[j])-(pts[n0+1]+push[n0+1]))/double(j-n0-1)/1e6;}
+      burst=o.faultMs<3*period||(push[n0+1]>=backlog&&j<push.size()&&drainGap<=period/2.0);}
+     char g[32];snprintf(g,sizeof g,"%.2f",drainGap);
+     s["fault.transport_matched"]=matched?"yes":"no";s["fault.transport_recovery_frames"]=std::to_string(transportRecovery);s["fault.transport_share_after_fault.ms"]=dist(share);
+     s["fault.burst"]=burst?"yes":"no";s["fault.drain_frames"]=std::to_string(drain);s["fault.drain_mean_gap_ms"]=g;s["fault.total_recovery_frames"]=cr["fault.recovery_frames"];
+     pass=executed&&complete&&matched&&burst&&transportRecovery<=recoveryLimit&&contentOk(0);}
+    else if(o.faultExpect=="absorbed")pass=executed&&complete&&recovery<=recoveryLimit&&contentOk(0);
+    // A receiver that releases slots as it copies out (decision 15: the
+    // GPU-staged receiver) cannot take a backlog faster than real time through a
+    // one-frame unread queue: the consumer fails with the replacement error.
+    else if(o.faultExpect=="replacement-failure")pass=executed&&ended&&cr["result"].find("replaced before it was read")!=std::string::npos&&pr["result"]!="EOS"&&contentOk(-1);
+    else{// counted-drop (producer-burst): every video loss counted by the producer sink.
+     // replaced-or-counted-drop (decision 15, Jon): a copy-out receiver behind a
+     // one-frame unread queue may take either outcome; neither may hide a loss.
+     const bool replaced=executed&&ended&&cr["result"].find("replaced before it was read")!=std::string::npos&&pr["result"]!="EOS"&&contentOk(-1);
+     auto counter=[&](const char*key)->long long{const std::string&t=pr["stats.framelink-sink-stats"];auto at=t.find(std::string(key)+"=(guint64)");return at==std::string::npos?-1:std::stoll(t.substr(at+strlen(key)+10));};
+     const long long dropped=counter("dropped"),delivered=cr["frames"].empty()?-1:std::stoll(cr["frames"]),pushed=std::stoll(pr["pushed.frames"]);
+     s["fault.producer_dropped"]=std::to_string(dropped);
+     const long long expectedFrames=std::stoll(s["expected.frames"]);
+     const bool counted=executed&&ended&&bothEos&&dropped+slotDrops>0&&delivered+dropped==pushed&&pushed+slotDrops==expectedFrames&&contentOk(dropped+slotDrops)&&cr["audio.contiguous"]=="yes"&&cr["samples"]==s["expected.samples"]&&cr["queue.accounting"]=="complete";
+     if(o.faultExpect=="replaced-or-counted-drop"){pass=replaced||counted;s["fault.outcome"]=counted?"counted-drop":replaced?"replacement-failure":"neither";}
+     else pass=counted;}}}
+  else{s["fault.expect"]=o.faultExpect;s["fault.frame"]=std::to_string(o.faultFrame);s["fault.ms"]=std::to_string(o.faultMs);
+   // Producer sink drop counters (framelink-sink-stats at EOS; absent on error).
+   auto counter=[&](const char*key)->long long{const std::string&t=pr["stats.framelink-sink-stats"];auto at=t.find(std::string(key)+"=(guint64)");return at==std::string::npos?-1:std::stoll(t.substr(at+strlen(key)+10));};
+   const long long dropped=counter("dropped"),ringFull=counter("ring-full-drops"),delivered=cr["frames"].empty()?-1:std::stoll(cr["frames"]),pushed=pr["pushed.frames"].empty()?-1:std::stoll(pr["pushed.frames"]);
+   s["fault.producer_dropped"]=std::to_string(dropped);s["fault.producer_ring_full_drops"]=std::to_string(ringFull);s["fault.error_on_ring_full"]=gErrorOnRingFull?"true":"false";
+   const bool accounted=dropped>=0&&delivered>=0&&delivered+dropped==pushed&&pushed+slotDrops==std::stoll(s["expected.frames"]);
+   const bool silentLoss=cr["result"]=="EOS"&&delivered!=pushed&&!accounted;s["fault.silent_loss"]=silentLoss?"yes":"no";s["fault.loss_accounted"]=accounted?"yes":"no";
+   const bool complete=pc==0&&cc==0&&cr["queue.accounting"]=="complete"&&cr["audio.contiguous"]=="yes"&&pr["result"]=="EOS"&&cr["result"]=="EOS"&&cr["frames"]==s["expected.frames"]&&cr["frames"]==pr["pushed.frames"]&&cr["samples"]==s["expected.samples"];
+   const guint period=std::max<guint>(1,1000/gFps);const guint recoveryLimit=(o.faultMs+period-1)/period+2;s["fault.recovery_limit_frames"]=std::to_string(recoveryLimit);
+   // D2 option B: the drops are also marked to the consumer: video GAP events
+   // covering exactly the dropped frames' periods, and a DISCONT frame after them.
+   const long long gapNs=cr["video.gap_events"].empty()?-1:std::stoll(cr["video.gap_event_ns"]),gapEvents=cr["video.gap_events"].empty()?-1:std::stoll(cr["video.gap_events"]),disconts=cr["video.discont_after_first"].empty()?-1:std::stoll(cr["video.discont_after_first"]);
+   const long long framePeriodNs=(long long)gst_util_uint64_scale(GST_SECOND,1,gFps);
+   const bool marked=gGpuReadback&&dropped==0?gapEvents==0:dropped>0&&gapEvents>=1&&gapEvents<=dropped&&std::llabs(gapNs-dropped*framePeriodNs)<=dropped*2&&disconts>=gapEvents-1; // a GAP just before EOS has no following frame
+   s["fault.consumer_gap_events"]=std::to_string(gapEvents);s["fault.consumer_gap_ns"]=std::to_string(gapNs);s["fault.consumer_disconts"]=std::to_string(disconts);s["fault.loss_marked"]=marked?"yes":"no";
+   if(o.faultExpect=="absorbed")pass=cr["fault.executed"]=="1"&&complete&&std::stoul(cr["fault.recovery_frames"])<=recoveryLimit&&contentOk(0);
+   else if(o.faultExpect=="counted-drop")pass=cr["fault.executed"]=="1"&&pc==0&&cc==0&&pr["result"]=="EOS"&&cr["result"]=="EOS"&&accounted&&dropped+slotDrops>0&&ringFull==dropped&&contentOk(dropped+slotDrops)&&cr["audio.contiguous"]=="yes"&&cr["queue.accounting"]=="complete"&&cr["samples"]==s["expected.samples"]&&marked;
+   else if(o.faultExpect=="replacement-failure")pass=cr["fault.executed"]=="1"&&!silentLoss&&pc==0&&cc==0&&cr["result"].find("replaced before it was read")!=std::string::npos&&pr["result"]!="EOS"&&contentOk(-1);
+   else pass=cr["fault.executed"]=="1"&&!silentLoss&&pc==0&&cc==0&&pr["result"].find("pool exhausted")!=std::string::npos&&cr["result"]=="error: FrameLink producer failed: overload"&&contentOk(-1);}
+  s["fault.pass"]=pass?"yes":"no";s["complete"]=pass?"yes":"no";
+  writeResult(base+".summary.txt",s);for(auto&kv:s)printf("%s=%s\n",kv.first.c_str(),kv.second.c_str());return pass?0:1;}
  const bool ok=pc==0&&cc==0&&cr["queue.accounting"]=="complete"&&cr["audio.contiguous"]=="yes"&&pr["result"]=="EOS"&&cr["result"]=="EOS"&&cr["frames"]==s["expected.frames"]&&cr["frames"]==pr["pushed.frames"]&&cr["samples"]==s["expected.samples"]&&cr["samples"]==pr["pushed.samples"]
   &&(!gGpuReadback||(cr["content.mismatches"]=="0"&&cr["content.checked"]==s["expected.frames"]&&cr["memory"]=="memory:SystemMemory"));
  s["complete"]=ok?"yes":"no";

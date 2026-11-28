@@ -53,14 +53,17 @@ FL_API flResult flCollectReadLeases(flChannel* ch) {
     std::lock_guard<std::mutex> lock(ch->pendingMutex);
     auto polled=pollLeaseCompletions(ch);
     if(polled!=FL_OK)return polled;
+    // After a device loss (decision 13) completed reads still retire, so the
+    // producer gets its storage back, and then the loss is reported.
+    const flResult lost=ch->deviceLost.load()?FL_DEVICE_LOST:FL_OK;
     auto r=ch->readers.retirement();
-    if(!r.value)return ch->readers.empty()?FL_OK:FL_BUSY;
+    if(!r.value)return lost!=FL_OK?lost:ch->readers.empty()?FL_OK:FL_BUSY;
     auto result=retireReadLeases(ch,r.value);
     if(result!=FL_OK)return result;
     fltrace::Scope trace("reader.retire",fltrace::id(ch->name.c_str()));
     auto retired=ch->readers.retired(r);traceReadState(trace,ch);
     if(trace.active)trace.event.fence=r.value;
-    return trace.result(retired);
+    return trace.result(retired!=FL_OK?retired:lost);
 }
 
 FL_API flResult flFrameAgeNs(flChannel* ch,const flFrame* frame,uint64_t* ageNs) {

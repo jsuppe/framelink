@@ -1,0 +1,108 @@
+arrival.budget_ms=17
+complete=no
+config=RGBA 1920x1080@60 bin native traced 12s
+consumer.audio.arrival.all.ms=n=627 p50=1.96 p95=3.82 p99=4.26 max=6.84 min=0.92
+consumer.audio.arrival.ms=n=427 p50=1.98 p95=3.83 p99=4.30 max=6.84 min=0.92
+consumer.audio.contiguous=yes
+consumer.audio.deadline_misses=0/627
+consumer.audio.gap_event_ns=0
+consumer.audio.gap_events=0
+consumer.audio.output_queue.admission_residence.ms=n=627 p50=0.26 p95=0.56 p99=0.65 max=0.82 min=0.05
+consumer.audio.output_queue.pending=0
+consumer.audio.output_queue.sampled_max_buffers=0
+consumer.audio.output_queue.unmatched=0
+consumer.audio.pts_jump_ns=0
+consumer.audio.pts_jumps=0
+consumer.audio.render.all.ms=n=627 p50=2.26 p95=4.36 p99=4.68 max=7.37 min=1.09
+consumer.audio.render.ms=n=427 p50=2.28 p95=4.34 p99=4.77 max=7.37 min=1.09
+consumer.audio.render_interval.ms=n=426 p50=10.00 p95=12.42 p99=12.74 max=15.19 min=4.32
+consumer.audio.render_jitter.p1_p99.ms=3.51
+consumer.av_offset.abs.ms=n=5 p50=5.53 p95=166.96 p99=166.96 max=166.96 min=5.34
+consumer.av_offset.ms=n=5 p50=5.53 p95=166.96 p99=166.96 max=166.96 min=5.34
+consumer.cpu.percent=13.84
+consumer.ended_monotonic_us=5413253096240
+consumer.fault.recovery_frames=7
+consumer.frames=366
+consumer.handles=27..27 min=27 max=27
+consumer.handles.slope.per_min=0.00
+consumer.mem.kb=45356..45740 min=45356 max=45740
+consumer.mem.kind=rss
+consumer.mem.slope.kb_per_min=3816.94
+consumer.memory=memory:FrameLinkAHardwareBuffer
+consumer.pid=18317
+consumer.queue.accounting=complete
+consumer.result=error: coordinated video frame replaced before it was read: the producer delivered faster than real time
+consumer.samples=300960
+consumer.scope=transport-consumer
+consumer.series.t_cpums_memkb_handles_threads=0.0:200:42200:6:2;1.0:350:45356:27:10;2.0:490:45356:27:10;3.0:635:45612:27:10;4.0:773:45612:27:10;5.0:911:45612:27:10;6.0:1047:45740:27:10;6.6:1138:45868:14:6;
+consumer.threads=10..10 min=10 max=10
+consumer.threads.slope.per_min=-0.00
+consumer.video.arrival.all.ms=n=366 p50=7.42 p95=8.68 p99=180.68 max=209.74 min=4.69
+consumer.video.arrival.ms=n=246 p50=7.44 p95=8.73 p99=194.98 max=209.74 min=4.69
+consumer.video.deadline_misses=7/366
+consumer.video.output_queue.admission_residence.ms=n=366 p50=0.22 p95=0.33 p99=0.46 max=0.55 min=0.04
+consumer.video.output_queue.pending=0
+consumer.video.output_queue.sampled_max_buffers=0
+consumer.video.output_queue.unmatched=0
+consumer.video.render.all.ms=n=366 p50=7.82 p95=9.08 p99=181.00 max=210.13 min=5.02
+consumer.video.render.ms=n=246 p50=7.82 p95=9.12 p99=195.34 max=210.13 min=5.02
+consumer.video.render_interval.ms=n=245 p50=16.35 p95=18.46 p99=18.94 max=218.13 min=2.33
+consumer.video.render_jitter.p1_p99.ms=189.86
+exit=0/0
+expected.frames=720
+expected.samples=576000
+fault=producer-burst
+fault.bound_ms=2000
+fault.burst=no
+fault.drain_frames=0
+fault.drain_mean_gap_ms=nan
+fault.expect=absorbed
+fault.frame=360
+fault.ms=200
+fault.pass=no
+fault.recovery_limit_frames=15
+fault.total_recovery_frames=7
+fault.transport_matched=no
+fault.transport_recovery_frames=0
+fault.transport_share_after_fault.ms=n=0 p50=nan p95=nan p99=nan max=nan min=nan
+harness.malloc=default
+label=tr-1
+output.async=false
+output.queue_buffers=1
+output.sync=false
+playback.latency_ms=0
+producer.audio.push_burst.max=0
+producer.audio.push_interval.ms=n=428 p50=9.97 p95=10.88 p99=11.25 max=14.48 min=5.20
+producer.audio.push_lateness.ms=n=428 p50=0.66 p95=1.38 p99=1.75 max=5.22 min=0.28
+producer.cpu.percent=75.51
+producer.ended_monotonic_us=5413253099776
+producer.fault.dropped_blocks=0
+producer.fault.dropped_samples=0
+producer.fault.elapsed_us=200207
+producer.fault.executed=1
+producer.fault.gap_ns=-1
+producer.fault.start_monotonic_us=5413252850571
+producer.handles=31..31 min=31 max=31
+producer.handles.slope.per_min=0.00
+producer.injection.elapsed_us=0
+producer.injection.executed=0
+producer.injection.frame=0
+producer.injection.requested_ms=0
+producer.injection.stage=none
+producer.injection.start_monotonic_us=0
+producer.mem.kb=78016..78656 min=78016 max=78656
+producer.mem.kind=rss
+producer.mem.slope.kb_per_min=7636.69
+producer.pid=18318
+producer.pushed.frames=375
+producer.pushed.samples=301440
+producer.result=error: required session tracks not ready or cancelled
+producer.series.t_cpums_memkb_handles_threads=0.0:190:41548:6:2;1.0:916:78016:31:9;2.0:1685:78016:31:9;3.0:2458:78400:31:9;4.0:3206:78400:31:9;5.0:3970:78400:31:9;6.0:4724:78656:31:9;6.5:5101:46604:19:7;
+producer.threads=9..9 min=9 max=9
+producer.threads.slope.per_min=0.00
+producer.video.push_burst.max=5
+producer.video.push_interval.ms=n=249 p50=16.66 p95=16.86 p99=16.99 max=216.93 min=1.81
+producer.video.push_lateness.ms=n=249 p50=0.66 p95=0.92 p99=190.16 max=201.02 min=0.31
+seconds=12
+video.pool=3
+video.queue=1

@@ -18,6 +18,10 @@
 #include <cstdio>
 #include <cstring>
 #include <limits>
+#include <condition_variable>
+#include <mutex>
+#include <thread>
+#include <pthread.h>
 
 class FrameLinkEglReadback {
     int fd_=-1;
@@ -135,13 +139,16 @@ public:
     // the driver tears it down when the thread exits (a GLib pool thread, about
     // 15 s later), and on NVIDIA that teardown stalled the reading thread's
     // readback by about 40 ms (docs/m6/cpu-path/linux-gpu-readback-rate).
-    bool prepare(const uint8_t node[8],uint32_t width,uint32_t height){
+    //
+    // keepThread: the caller is the thread that will read (FrameLinkEglReader),
+    // so its per-thread EGL state is kept for those reads.
+    bool prepare(const uint8_t node[8],uint32_t width,uint32_t height,bool keepThread=false){
         if(!width||!height||width>uint32_t(std::numeric_limits<GLsizei>::max())||height>uint32_t(std::numeric_limits<GLsizei>::max()))return false;
         uint32_t maj=0,min=0;nodeOf(node,maj,min);
         const bool threadHadContext=eglGetCurrentContext()!=EGL_NO_CONTEXT;
         bool ok=false;
         {Restore restore;ok=bind(maj,min,width,height);}
-        if(!threadHadContext)eglReleaseThread();
+        if(!threadHadContext&&!keepThread)eglReleaseThread();
         return ok;
     }
     uint64_t gpuCopyBytes()const{return gpuCopyBytes_;}
@@ -178,5 +185,77 @@ public:
         // Finish even on failure before the caller may release the source.
         glFinish();ok=glGetError()==GL_NO_ERROR&&ok;
         glDeleteTextures(1,&texture);destroy_(display_,image);return ok;
+    }
+};
+
+// One thread owns the staging context for the receiver's life (decision 15,
+// Jon chose A; docs/m6/fault-coverage/remaining-cells/feed-startup). The
+// first time a thread makes an EGL context current, the NVIDIA driver spends
+// about 30 ms; when that thread exits, its teardown stalls other readers by
+// about 40 ms (docs/m6/cpu-path/linux-gpu-readback-rate). Here both happen on
+// this thread: the first at start(), before any frame, the second when the
+// reader is destroyed, after the last frame. read() is synchronous: the caller
+// keeps the frame, and its slot, until the GPU read has finished.
+class FrameLinkEglReader {
+    std::mutex mutex_;
+    std::condition_variable wake_,done_;
+    std::thread thread_;
+    bool started_=false,prepared_=false,stop_=false,pending_=false,finished_=false;
+    flChannel* channel_=nullptr;const flFrame* frame_=nullptr;const GstFrameLinkMemoryPolicy* policy_=nullptr;
+    void* output_=nullptr;size_t bytes_=0;bool ok_=false;
+    uint64_t gpuCopyBytes_=0,readbackBytes_=0;
+    void run(uint8_t node[8],uint32_t width,uint32_t height){
+        pthread_setname_np(pthread_self(),"fl-egl-reader");
+        {
+            FrameLinkEglReadback readback;
+            const bool prepared=width&&height&&readback.prepare(node,width,height,true);
+            {std::lock_guard<std::mutex> lock(mutex_);started_=true;prepared_=prepared;}
+            done_.notify_all();
+            for(;;){
+                std::unique_lock<std::mutex> lock(mutex_);
+                wake_.wait(lock,[&]{return pending_||stop_;});
+                if(!pending_)break;
+                lock.unlock();
+                // A failed prepare leaves read() to initialize, still here.
+                const bool ok=readback.read(channel_,*frame_,*policy_,output_,bytes_);
+                lock.lock();
+                ok_=ok;gpuCopyBytes_=readback.gpuCopyBytes();readbackBytes_=readback.readbackBytes();
+                pending_=false;finished_=true;
+                lock.unlock();done_.notify_all();
+            }
+        }   // readback releases its context and display on this thread
+        eglReleaseThread();
+    }
+public:
+    FrameLinkEglReader()=default;
+    FrameLinkEglReader(const FrameLinkEglReader&)=delete;
+    FrameLinkEglReader& operator=(const FrameLinkEglReader&)=delete;
+    // Starts the thread and opens the staging context on it (node and geometry
+    // as for FrameLinkEglReadback::prepare; zero geometry skips preparation).
+    // Returns whether the context is ready; on false the first read initializes.
+    bool start(const uint8_t node[8],uint32_t width,uint32_t height){
+        if(thread_.joinable())return prepared_;
+        uint8_t copy[8];memcpy(copy,node,8);
+        thread_=std::thread([this,copy,width,height]()mutable{run(copy,width,height);});
+        std::unique_lock<std::mutex> lock(mutex_);done_.wait(lock,[&]{return started_;});
+        return prepared_;
+    }
+    // FrameLinkEglReadback::read on the reader thread; waits for it to finish.
+    bool read(flChannel* channel,const flFrame& frame,const GstFrameLinkMemoryPolicy& policy,void* output,size_t bytes){
+        if(!thread_.joinable()){static const uint8_t none[8]{};start(none,0,0);}
+        std::unique_lock<std::mutex> lock(mutex_);
+        channel_=channel;frame_=&frame;policy_=&policy;output_=output;bytes_=bytes;
+        gpuCopyBytes_=readbackBytes_=0;finished_=false;pending_=true;
+        wake_.notify_one();
+        done_.wait(lock,[&]{return finished_;});
+        return ok_;
+    }
+    uint64_t gpuCopyBytes()const{return gpuCopyBytes_;}
+    uint64_t readbackBytes()const{return readbackBytes_;}
+    bool threadId(std::thread::id& id)const{if(!thread_.joinable())return false;id=thread_.get_id();return true;}
+    ~FrameLinkEglReader(){
+        if(!thread_.joinable())return;
+        {std::lock_guard<std::mutex> lock(mutex_);stop_=true;}
+        wake_.notify_one();thread_.join();
     }
 };

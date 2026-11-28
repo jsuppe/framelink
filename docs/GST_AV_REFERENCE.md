@@ -62,6 +62,12 @@ These hold for the individual elements attached to a session and for the bins.
 - **Video accounting.** Every frame is accounted for. A frame replaced in the
   ring before the consumer read it fails the consumer at once ("coordinated
   video frame replaced before it was read"); a stream never silently drops.
+  When no slot frees within `buffer-wait-ms`, the producer drops the frame and
+  counts it (`framelink-sink-stats` `dropped`, `ring-full-drops`), or fails
+  with `error-on-ring-full=true`. A drop is also reported to the consumer:
+  consecutive drops become one GAP event over their media interval, and the
+  next delivered frame carries DISCONT (drops just before EOS: the GAP alone,
+  ahead of EOS).
 - **Audio.** PCM blocks need valid PTS and duration in a TIME segment; a block
   larger than `audio-queue-ms` fails; a timestamp gap without DISCONT, a
   segment replacement, rate changes and non-forward segments are refused.
@@ -74,7 +80,32 @@ These hold for the individual elements attached to a session and for the bins.
   enabled track; the consumer reports the drain after EOS left each source.
 - **Failures.** Peer death, a missing peer, track-set or format mismatch,
   authentication failure and idle deadlines post errors within bounded time on
-  both sides. Reconnect requires NULL and a fresh session; there is no
+  both sides. When the producer fails or closes, the consumer posts one
+  stable error, domain `GST_RESOURCE_ERROR`, code `GST_RESOURCE_ERROR_READ`:
+  "FrameLink producer failed: invalid input" (the producer refused malformed
+  media or metadata), "FrameLink producer failed: overload" (pool exhausted
+  with `error-on-ring-full=true`) or "FrameLink peer closed or failed" (stopped,
+  crashed or lost, or a producer error FrameLink cannot attribute). Its details
+  structure `framelink-peer-failure` has `reason` (`invalid-input`,
+  `overload`, `closed`) and `original`, the error the element would otherwise
+  have posted. The consumer's own failures keep their specific errors; one
+  known to be its own (a frame replaced before it was read) is posted at once.
+  GPU device loss is one of those: "FrameLink GPU device lost", code
+  `GST_RESOURCE_ERROR_FAILED`, details `framelink-device-lost`, posted at once
+  and never relabelled a peer failure (Windows and Linux; on Android a GPU reset
+  does not reach FrameLink, so the application must detect it, see
+  [READ_LEASES.md](READ_LEASES.md)).
+  For the others, the consumer first takes a producer end already pending on
+  the event stream, without waiting, and waits at most 100 ms only if none is
+  there. Every FrameLink element that stops its stream posts its own error
+  first, so the application never sees only GStreamer's generic "Internal data
+  stream error." for a FrameLink failure. When the
+  consumer fails or closes, the producer posts the same stable error, "FrameLink
+  peer closed or failed" with reason `closed`, whichever of its tracks or
+  socket writes notices first; the producer's own failures keep their
+  specific errors. The reason travels on the session's event stream;
+  audio-only sessions, which have none, keep the per-element errors on both
+  sides. Reconnect requires NULL and a fresh session; there is no
   automatic in-element reconnect.
 - **Latency queries.** FrameLink sources answer live with no added latency,
   so the consumer pipeline's latency is its sinks' plus `latency-ms`. The

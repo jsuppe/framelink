@@ -1,0 +1,125 @@
+{
+ "note": "SMPTE pattern, scene preview every 150 ms; black = more than 15% of the centre region below 6/255. Identity fails here because each preview read stalls the render loop (see README).",
+ "runs": [
+  {
+   "run": "BGRA-1",
+   "previews": 33,
+   "distinct_previews": 11,
+   "black_previews": 0,
+   "identity_pass": false,
+   "identity_error": "Fail: renderer acquired 291, expected 300"
+  },
+  {
+   "run": "BGRA-10",
+   "previews": 33,
+   "distinct_previews": 11,
+   "black_previews": 0,
+   "identity_pass": false,
+   "identity_error": "Fail: renderer acquired 296, expected 300"
+  },
+  {
+   "run": "BGRA-2",
+   "previews": 33,
+   "distinct_previews": 11,
+   "black_previews": 0,
+   "identity_pass": false,
+   "identity_error": "Fail: renderer acquired 294, expected 300"
+  },
+  {
+   "run": "BGRA-3",
+   "previews": 33,
+   "distinct_previews": 11,
+   "black_previews": 0,
+   "identity_pass": false,
+   "identity_error": "Fail: renderer acquired 299, expected 300"
+  },
+  {
+   "run": "BGRA-4",
+   "previews": 33,
+   "distinct_previews": 11,
+   "black_previews": 0,
+   "identity_pass": false,
+   "identity_error": "Fail: renderer acquired 295, expected 300"
+  },
+  {
+   "run": "BGRA-5",
+   "previews": 33,
+   "distinct_previews": 11,
+   "black_previews": 0,
+   "identity_pass": false,
+   "identity_error": "Fail: renderer acquired 297, expected 300"
+  },
+  {
+   "run": "BGRA-6",
+   "previews": 33,
+   "distinct_previews": 12,
+   "black_previews": 0,
+   "identity_pass": false,
+   "identity_error": "Fail: renderer acquired 293, expected 300"
+  },
+  {
+   "run": "BGRA-7",
+   "previews": 33,
+   "distinct_previews": 11,
+   "black_previews": 0,
+   "identity_pass": false,
+   "identity_error": "Fail: renderer acquired 294, expected 300"
+  },
+  {
+   "run": "BGRA-8",
+   "previews": 33,
+   "distinct_previews": 11,
+   "black_previews": 0,
+   "identity_pass": false,
+   "identity_error": "Fail: renderer acquired 294, expected 300"
+  },
+  {
+   "run": "BGRA-9",
+   "previews": 33,
+   "distinct_previews": 11,
+   "black_previews": 0,
+   "identity_pass": false,
+   "identity_error": "Fail: renderer acquired 290, expected 300"
+  },
+  {
+   "run": "NV12-1",
+   "previews": 33,
+   "distinct_previews": 12,
+   "black_previews": 0,
+   "identity_pass": false,
+   "identity_error": "Fail: renderer acquired 294, expected 300"
+  },
+  {
+   "run": "NV12-2",
+   "previews": 33,
+   "distinct_previews": 11,
+   "black_previews": 0,
+   "identity_pass": false,
+   "identity_error": "Fail: renderer acquired 292, expected 300"
+  },
+  {
+   "run": "NV12-3",
+   "previews": 33,
+   "distinct_previews": 11,
+   "black_previews": 0,
+   "identity_pass": false,
+   "identity_error": "Fail: renderer acquired 298, expected 300"
+  },
+  {
+   "run": "NV12-4",
+   "previews": 33,
+   "distinct_previews": 11,
+   "black_previews": 0,
+   "identity_pass": false,
+   "identity_error": "Fail: renderer acquired 291, expected 300"
+  },
+  {
+   "run": "NV12-5",
+   "previews": 33,
+   "distinct_previews": 12,
+   "black_previews": 0,
+   "identity_pass": false,
+   "identity_error": "Fail: renderer acquired 295, expected 300"
+  }
+ ]
+}

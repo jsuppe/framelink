@@ -37,6 +37,12 @@ static guint gWidth=64,gHeight=32,gFps=30;static std::string gFormat="RGBA";stat
 static GstClockTime gPlaybackLatency=LATENCY;static bool gOutputSync=true,gOutputAsync=true;
 static bool gSharedCpu=false;
 static bool gRetainedDevice=false;
+// Producer bin error-on-ring-full (default false: drop and count).
+static bool gErrorOnRingFull=false;
+static bool gBurstQueues=false;
+// Diagnostic: the video appsink keeps no last-sample reference (basesink
+// default true holds the previous frame, and so its FrameLink slot).
+static bool gNoLastSample=false;
 // M6.8c (Linux EGL builds): a native producer writes into the sink's DMA-BUF
 // ring and the consumer bin reads it back through GPU staging (gpu-readback).
 // Both bins take the local native readback candidate; set by fl_gst_av_bench.
@@ -92,6 +98,8 @@ static flSessionCapabilities capabilities(bool video,bool audio){flSessionCapabi
 struct Side {
  Mode mode;bool producer;std::string path,tracks;GstElement*p=nullptr;FlGstSession*session=nullptr;std::thread th;
  std::atomic<bool> playing{false},stop{false};std::string result;gint64 endedAt=0;
+ // The first error's posting element and debug string (diagnostics).
+ std::string errorSource,errorDebug;
  // framelink-* element messages (EOS statistics) seen while waiting.
  std::mutex statsMutex;std::vector<GstStructure*> stats;
  guint audioQueueMs=80,lateMs=0;bool native=false;
@@ -100,7 +108,9 @@ struct Side {
  std::string wait(GstClockTime limit){auto*bus=gst_element_get_bus(p);const gint64 until=g_get_monotonic_time()+gint64(limit/1000);std::string r="timeout";
   while(g_get_monotonic_time()<until){if(stop){r="stopped";break;}auto*m=gst_bus_timed_pop_filtered(bus,50*GST_MSECOND,GstMessageType(GST_MESSAGE_EOS|GST_MESSAGE_ERROR|GST_MESSAGE_ELEMENT));
    if(!m)continue;
-   if(GST_MESSAGE_TYPE(m)==GST_MESSAGE_ELEMENT){const auto*s=gst_message_get_structure(m);if(s&&g_str_has_prefix(gst_structure_get_name(s),"framelink-")){std::lock_guard<std::mutex> lock(statsMutex);stats.push_back(gst_structure_copy(s));}gst_message_unref(m);continue;}r=GST_MESSAGE_TYPE(m)==GST_MESSAGE_EOS?"EOS":"error: "+errorText(m);gst_message_unref(m);break;}
+   if(GST_MESSAGE_TYPE(m)==GST_MESSAGE_ELEMENT){const auto*s=gst_message_get_structure(m);if(s&&g_str_has_prefix(gst_structure_get_name(s),"framelink-")){std::lock_guard<std::mutex> lock(statsMutex);stats.push_back(gst_structure_copy(s));}gst_message_unref(m);continue;}r=GST_MESSAGE_TYPE(m)==GST_MESSAGE_EOS?"EOS":"error: "+errorText(m);
+   if(GST_MESSAGE_TYPE(m)==GST_MESSAGE_ERROR){GError*e=nullptr;gchar*d=nullptr;gst_message_parse_error(m,&e,&d);gchar*path=gst_object_get_path_string(GST_MESSAGE_SRC(m));errorSource=path?path:"";errorDebug=d?d:"";for(auto&ch:errorDebug)if(ch=='\n'||ch=='\r')ch=' ';g_free(path);g_free(d);g_clear_error(&e);}
+   gst_message_unref(m);break;}
   gst_object_unref(bus);endedAt=g_get_monotonic_time();return r;}
  void runElement(){
   session=fl_gst_session_new((video()?1u:0u)|(audio()?2u:0u));auto caps=capabilities(video(),audio());GError*e=nullptr;flChannel*channel=nullptr;
@@ -131,24 +141,30 @@ struct Producer:Side {
  Producer(Mode m,const std::string&path_,const std::string&tracks_,guint frames,guint queueMs=80,bool fileLike=false,guint audioBlocks=0){mode=m;producer=true;path=path_;tracks=tracks_;audioQueueMs=queueMs;
   const std::string vn=frames?" num-buffers="+std::to_string(frames):"",an=frames?" num-buffers="+std::to_string(audioBlocks?audioBlocks:frames*BLOCKS/FRAMES):"";
   const std::string live=fileLike?"false":"true",sync=fileLike?" ! clocksync":"";
-  std::string vs="videotestsrc name=vsrc is-live="+live+" pattern=red"+vn+" ! video/x-raw,format="+gFormat+",width="+std::to_string(gWidth)+",height="+std::to_string(gHeight)+",framerate="+std::to_string(gFps)+"/1"+sync+" ! ",
-   as="audiotestsrc name=asrc is-live="+live+" samplesperbuffer="+std::to_string(BLOCK)+an+" ! audio/x-raw,format=S16LE,layout=interleaved,rate=48000,channels=2"+sync+" ! ";
+  // gBurstQueues (bench faults): a queue after each source, so a stall injected
+  // on its output lets the source keep producing in real time and the backlog
+  // then leaves back to back, independent of the source's own frame cost.
+  const std::string vq=gBurstQueues?"queue name=vburst max-size-buffers=128 max-size-bytes=0 max-size-time=0 ! ":"",aq=gBurstQueues?"queue name=aburst max-size-buffers=256 max-size-bytes=0 max-size-time=0 ! ":"";
+  std::string vs="videotestsrc name=vsrc is-live="+live+" pattern=red"+vn+" ! video/x-raw,format="+gFormat+",width="+std::to_string(gWidth)+",height="+std::to_string(gHeight)+",framerate="+std::to_string(gFps)+"/1"+sync+" ! "+vq,
+   as="audiotestsrc name=asrc is-live="+live+" samplesperbuffer="+std::to_string(BLOCK)+an+" ! audio/x-raw,format=S16LE,layout=interleaved,rate=48000,channels=2"+sync+" ! "+aq;
   std::string t;
 #ifdef FL_BENCH_GPU_READBACK
   // The bench feeds this appsrc from the sink's own pool (feedNative).
   if(gGpuReadback){CHECK(m==Mode::Bin&&tracks=="av"&&!fileLike);
-   vs="appsrc name=vsrc is-live=true format=time caps=video/x-raw(memory:DMABuf),format="+gFormat+",width="+std::to_string(gWidth)+",height="+std::to_string(gHeight)+",framerate="+std::to_string(gFps)+"/1 ! ";}
+   vs="appsrc name=vsrc is-live=true format=time caps=video/x-raw(memory:DMABuf),format="+gFormat+",width="+std::to_string(gWidth)+",height="+std::to_string(gHeight)+",framerate="+std::to_string(gFps)+"/1 ! "+vq;}
 #else
   CHECK(!gGpuReadback);
 #endif
   if(m==Mode::Bin){t="framelinkavsink name=s tracks="+tracks+" video-queue-frames="+std::to_string(gVideoQueue)+" video-format="+gFormat+" "+geometry()+" framerate="+std::to_string(gFps)+"/1 connect-timeout-ms=5000 idle-timeout-ms=3000 audio-queue-ms="+std::to_string(queueMs)+" ";
    if(video())t+=vs+"s.video_sink ";if(audio())t+=as+"s.audio_sink";}
   else{if(video())t+=vs+"framelinksink name=video ";if(audio())t+=as+"framelinkaudiosink tracks="+tracks+" audio-queue-ms="+std::to_string(queueMs);}
-  p=parse(t);if(m==Mode::Bin){auto*s=gst_bin_get_by_name(GST_BIN(p),"s");g_object_set(s,"session",path.c_str(),"shared-cpu",gSharedCpu,nullptr);selectDeviceOwner(s);
+  p=parse(t);if(m==Mode::Bin){auto*s=gst_bin_get_by_name(GST_BIN(p),"s");g_object_set(s,"session",path.c_str(),"shared-cpu",gSharedCpu,"error-on-ring-full",gErrorOnRingFull,nullptr);selectDeviceOwner(s);
 #ifdef FL_BENCH_GPU_READBACK
    if(gGpuReadback){g_object_set(s,"native-memory",TRUE,"video-pool",gVideoPool,nullptr);selectReadbackCandidate(s);}
 #endif
    gst_object_unref(s);}
+  // Element mode (decision 15 D1): the same overload policy on the video sink itself.
+  else if(gErrorOnRingFull){auto*v=gst_bin_get_by_name(GST_BIN(p),"video");CHECK(v);g_object_set(v,"error-on-ring-full",TRUE,nullptr);gst_object_unref(v);}
   for(const char*n:{"vsrc","asrc"}){auto*e=gst_bin_get_by_name(GST_BIN(p),n);if(!e)continue;auto*pad=gst_element_get_static_pad(e,"src");
    gst_pad_add_probe(pad,GST_PAD_PROBE_TYPE_BUFFER,[](GstPad*pad,GstPadProbeInfo*info,gpointer d)->GstPadProbeReturn{auto*self=static_cast<Producer*>(d);
     if(!strcmp(GST_OBJECT_NAME(GST_OBJECT_PARENT(pad)),"vsrc"))self->pushedFrames++;else self->pushedSamples+=gst_buffer_get_size(GST_PAD_PROBE_INFO_BUFFER(info))/4;return GST_PAD_PROBE_OK;},this,nullptr);
@@ -157,11 +173,18 @@ struct Producer:Side {
 };
 struct Consumer:Side {
  std::atomic<guint> frames{0};std::atomic<guint64> samples{0};gint64 trackBest[2]={G_MAXINT64,G_MAXINT64},trackWorst[2]={G_MININT64,G_MININT64};bool uniform=true,contiguous=true,checkContent=true;
+ // Audio PTS discontinuities: count and summed signed size (ns).
+ guint audioJumps=0;gint64 audioJumpNs=0;
+ // Video buffer refcount seen in the appsink callback (index 7: 7 or more).
+ guint64 videoRefcounts[8]={};
+ // Per video buffer: {callback us, buffer finalized us} (monotonic); reserved
+ // before PLAYING so element addresses stay valid for the weak references.
+ std::vector<std::pair<gint64,gint64>> bufferLife;
  // record: keep every render lateness (ns) per track for distributions.
  bool record=false;std::vector<gint64> lateness[2];
  std::string features;GstClockTime next=GST_CLOCK_TIME_NONE;std::mutex mutex;
  Consumer(Mode m,const std::string&path_,const std::string&tracks_,bool native_=false,guint localSeconds=0){mode=m;producer=false;path=path_;tracks=tracks_;native=native_;
-  const std::string sinkV=gQueue+" ! appsink name=vout sync="+(gOutputSync?"true":"false")+" async="+(gOutputAsync?"true":"false")+" max-buffers=0 ",sinkA=gQueue+" ! appsink name=aout sync="+(gOutputSync?"true":"false")+" async="+(gOutputAsync?"true":"false")+" max-buffers=0";std::string t;
+  const std::string sinkV=gQueue+" ! appsink name=vout sync="+(gOutputSync?"true":"false")+" async="+(gOutputAsync?"true":"false")+" max-buffers=0"+(gNoLastSample?" enable-last-sample=false":"")+" ",sinkA=gQueue+" ! appsink name=aout sync="+(gOutputSync?"true":"false")+" async="+(gOutputAsync?"true":"false")+" max-buffers=0";std::string t;
   // Benchmark-only control: identical queues/appsinks without FrameLink or IPC.
   if(localSeconds){CHECK(m==Mode::Bin&&!native&&tracks=="av");
    t="videotestsrc is-live=true pattern=red num-buffers="+std::to_string(localSeconds*gFps)+" ! video/x-raw,format="+gFormat+",width="+std::to_string(gWidth)+",height="+std::to_string(gHeight)+",framerate="+std::to_string(gFps)+"/1 ! "+sinkV+
@@ -181,9 +204,9 @@ struct Consumer:Side {
      const int track=strcmp(GST_OBJECT_NAME(s),"vout")?1:0;std::lock_guard<std::mutex> lock(self->mutex);
      if(auto*clock=gst_element_get_clock(GST_ELEMENT(s))){gint64 l=gint64(gst_clock_get_time(clock))-gint64(gst_element_get_base_time(GST_ELEMENT(s)))-gint64(GST_BUFFER_PTS(b));gst_object_unref(clock);
       if(self->record)self->lateness[track].push_back(l);self->trackBest[track]=std::min(self->trackBest[track],l);self->trackWorst[track]=std::max(self->trackWorst[track],l);}
-     if(track==0){if(self->features.empty()){auto*f=gst_caps_get_features(gst_sample_get_caps(sample),0);gchar*text=f?gst_caps_features_to_string(f):g_strdup("memory:SystemMemory");self->features=text;g_free(text);}
+     if(track==0){{const guint rc=GST_MINI_OBJECT_REFCOUNT_VALUE(b);self->videoRefcounts[std::min<guint>(rc,7)]++;}if(self->record&&self->bufferLife.size()<self->bufferLife.capacity()){self->bufferLife.push_back({g_get_monotonic_time(),0});gst_mini_object_weak_ref(GST_MINI_OBJECT(b),[](gpointer d,GstMiniObject*){auto*v=static_cast<std::pair<gint64,gint64>*>(d);v->second=g_get_monotonic_time();},&self->bufferLife.back());}if(self->features.empty()){auto*f=gst_caps_get_features(gst_sample_get_caps(sample),0);gchar*text=f?gst_caps_features_to_string(f):g_strdup("memory:SystemMemory");self->features=text;g_free(text);}
       GstMapInfo m{};if(self->checkContent&&gst_buffer_map(b,&m,GST_MAP_READ)){for(gsize i=4;i+3<m.size;i+=4)if(memcmp(m.data+i,m.data,4)){self->uniform=false;break;}gst_buffer_unmap(b,&m);}self->frames++;}
-     else{if(GST_CLOCK_TIME_IS_VALID(self->next)){auto dd=gint64(GST_BUFFER_PTS(b))-gint64(self->next);if(dd<-1||dd>1)self->contiguous=false;}self->next=GST_BUFFER_PTS(b)+GST_BUFFER_DURATION(b);self->samples+=gst_buffer_get_size(b)/4;}
+     else{if(GST_CLOCK_TIME_IS_VALID(self->next)){auto dd=gint64(GST_BUFFER_PTS(b))-gint64(self->next);if(dd<-1||dd>1){self->contiguous=false;++self->audioJumps;self->audioJumpNs+=dd;}}self->next=GST_BUFFER_PTS(b)+GST_BUFFER_DURATION(b);self->samples+=gst_buffer_get_size(b)/4;}
      gst_sample_unref(sample);return GST_FLOW_OK;};
    gst_app_sink_set_callbacks(GST_APP_SINK(sink),&cb,this,nullptr);gst_object_unref(sink);}
  }

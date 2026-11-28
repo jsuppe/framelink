@@ -1,0 +1,64 @@
+arrival.budget_ms=17
+complete=yes
+config=NV12 1920x1080@60 bin native 12s
+consumer.audio.arrival.all.ms=n=598 p50=0.48 p95=0.50 p99=0.51 max=0.66 min=0.16
+consumer.audio.arrival.ms=n=398 p50=0.48 p95=0.50 p99=0.51 max=0.66 min=0.16
+consumer.audio.contiguous=yes
+consumer.audio.deadline_misses=0/598
+consumer.audio.output_queue.admission_residence.ms=n=598 p50=0.09 p95=0.30 p99=0.31 max=0.32 min=0.01
+consumer.audio.output_queue.pending=0
+consumer.audio.output_queue.sampled_max_buffers=0
+consumer.audio.output_queue.unmatched=0
+consumer.audio.render.all.ms=n=598 p50=0.59 p95=0.81 p99=0.82 max=0.83 min=0.20
+consumer.audio.render.ms=n=398 p50=0.58 p95=0.81 p99=0.82 max=0.83 min=0.21
+consumer.audio.render_interval.ms=n=397 p50=10.00 p95=10.22 p99=10.26 max=10.30 min=9.56
+consumer.audio.render_jitter.p1_p99.ms=0.56
+consumer.av_offset.abs.ms=n=4 p50=2.23 p95=2.23 p99=2.23 max=2.23 min=2.21
+consumer.av_offset.ms=n=4 p50=2.23 p95=2.23 p99=2.23 max=2.23 min=2.21
+consumer.cpu.percent=5.47
+consumer.ended_monotonic_us=414567228995
+consumer.frames=359
+consumer.handles=22..22 min=22 max=22
+consumer.handles.slope.per_min=0.00
+consumer.mem.kb=16324..16324 min=16324 max=16324
+consumer.mem.kind=rss
+consumer.mem.slope.kb_per_min=0.00
+consumer.memory=memory:DMABuf
+consumer.pid=2417229
+consumer.queue.accounting=complete
+consumer.result=error: audio peer closed before GDP EOS
+consumer.samples=287040
+consumer.scope=transport-consumer
+consumer.series.t_cpums_memkb_handles_threads=0.0:9:13700:6:2;1.0:57:16324:22:11;2.0:111:16324:22:11;3.0:164:16324:22:11;4.0:221:16324:22:11;5.0:275:16324:22:11;6.0:330:16324:22:11;6.2:342:16144:12:7;
+consumer.threads=11..11 min=11 max=11
+consumer.threads.slope.per_min=0.00
+consumer.video.arrival.all.ms=n=359 p50=2.68 p95=3.64 p99=3.79 max=3.80 min=1.50
+consumer.video.arrival.ms=n=239 p50=2.68 p95=3.63 p99=3.75 max=3.79 min=1.68
+consumer.video.deadline_misses=0/359
+consumer.video.output_queue.admission_residence.ms=n=359 p50=0.09 p95=0.10 p99=0.11 max=0.12 min=0.01
+consumer.video.output_queue.pending=0
+consumer.video.output_queue.sampled_max_buffers=0
+consumer.video.output_queue.unmatched=0
+consumer.video.render.all.ms=n=359 p50=2.82 p95=3.78 p99=3.92 max=3.94 min=1.54
+consumer.video.render.ms=n=239 p50=2.82 p95=3.77 p99=3.89 max=3.93 min=1.83
+consumer.video.render_interval.ms=n=238 p50=17.06 p95=17.18 p99=17.24 max=17.26 min=14.85
+consumer.video.render_jitter.p1_p99.ms=2.05
+exit=137/0
+expected.frames=720
+expected.samples=576000
+fault=producer-kill
+fault.at_s=6
+fault.bound_ms=2000
+fault.detection_ms=5.5
+fault.pass=yes
+fault.survivor_result=error: audio peer closed before GDP EOS
+harness.malloc=producer-side mmap_threshold=8388608
+label=linux-native-producer-kill-4
+output.async=false
+output.queue_buffers=1
+output.sync=false
+playback.latency_ms=0
+producer.pid=2417237
+seconds=12
+video.pool=2
+video.queue=1

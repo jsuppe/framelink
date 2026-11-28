@@ -1,0 +1,23 @@
+build exit 0
+revision 6c45029e25d28924ef86a84f5d4a2c67959a7db7
+sha256 6c360359a5a2043a fl_gst_av_bench.exe
+sha256 ac00db85824d3058 gstframelink.dll
+windows-native-nv12-1080p60-producer-kill-1 rc=0 fault.pass=yes
+windows-native-nv12-1080p60-consumer-kill-1 rc=0 fault.pass=yes
+windows-native-nv12-1080p60-stall5-1 rc=0 fault.pass=yes
+windows-native-nv12-1080p60-stall200-1 rc=0 fault.pass=yes
+windows-native-nv12-1080p60-stall200-strict-1 rc=0 fault.pass=yes
+windows-native-nv12-1080p60-burst5-1 rc=0 fault.pass=yes
+windows-native-nv12-1080p60-burst200-1 rc=0 fault.pass=yes
+windows-native-nv12-1080p60-astall50-1 rc=0 fault.pass=yes
+windows-native-nv12-1080p60-astall200-1 rc=0 fault.pass=yes
+windows-native-nv12-1080p60-adrop50-1 rc=0 fault.pass=yes
+windows-native-nv12-1080p60-agap50-1 rc=0 fault.pass=yes
+windows-native-nv12-1080p60-video-no-pts-1 rc=0 fault.pass=yes
+windows-native-nv12-1080p60-video-stale-meta-1 rc=0 fault.pass=yes
+windows-native-nv12-1080p60-audio-no-pts-1 rc=0 fault.pass=yes
+windows-native-nv12-1080p60-audio-misaligned-1 rc=0 fault.pass=yes
+done
+revision 6c45029e25d28924ef86a84f5d4a2c67959a7db7
+suite: 100% tests passed, 0 tests failed out of 198
+done

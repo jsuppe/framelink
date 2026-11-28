@@ -61,13 +61,12 @@ static Outcome consumerPause(Mode pm,Mode cm){
  CHECK(waitFor([&]{return c.frames.load()>=8;}));gst_element_set_state(c.p,GST_STATE_PAUSED);g_usleep(300000);gst_element_set_state(c.p,GST_STATE_PLAYING);
  const gint64 resumed=g_get_monotonic_time();
  c.finish();p.finish();Outcome o{p.result,c.result};log("consumer-pause",pm,cm,p,c,o);
- // A 300ms pause overflows the two-frame receive queue. Audio and video
- // independently observe the resulting session cancellation; which reports
- // first is a race, not a bin/element behavioral difference. Keep the exact
- // consumer cause, bounded failure and incomplete delivery as acceptance gates.
+ // A 300ms pause overflows the two-frame receive queue. The consumer fails
+ // with its own cause and closes the session; the producer reports the one
+ // stable peer error whichever of its tracks or writers notices first
+ // (decision 9). Exact causes, bounded failure and incomplete delivery gate it.
  CHECK(o.consumer=="error: coordinated video frame replaced before it was read: the producer delivered faster than real time");
- CHECK(o.producer=="error: required session tracks not ready or cancelled"||
-       o.producer=="error: coordinated session not ready or cancelled");
+ CHECK(o.producer=="error: FrameLink peer closed or failed");
  CHECK(c.frames<FRAMES*2&&std::max(p.endedAt,c.endedAt)-resumed<6000000);
  return {"error: session cancelled",o.consumer};
 }
@@ -97,9 +96,9 @@ static Outcome death(Mode pm,Mode cm,bool killProducer){
  const gint64 begin=g_get_monotonic_time();dead.kill();peer.finish();const gint64 took=peer.endedAt-begin;
  Outcome o{killProducer?"killed":p.result,killProducer?c.result:"killed"};log(killProducer?"producer-death":"consumer-death",pm,cm,p,c,o);
  fprintf(stderr,"    peer reported %.0fms after death\n",took/1e3);
- CHECK(peer.result.rfind("error: ",0)==0&&took<6000000);
- // Peer-death errors are classed, not compared verbatim: which stream notices
- // first (audio socket, video ring, control connection) is a race.
+ CHECK(peer.result=="error: FrameLink peer closed or failed"&&took<6000000);
+ // Either side reports the one stable peer error (decisions 8 and 9), whichever
+ // stream notices first (audio socket, video ring, event stream).
  return {killProducer?"killed":"error",killProducer?"error":"killed"};
 }
 static Outcome mismatch(Mode pm,Mode cm,const std::string&pt,const std::string&ct){

@@ -1,0 +1,111 @@
+arrival.budget_ms=17
+complete=yes
+config=RGBA 1920x1080@60 bin cpu 12s
+consumer.audio.arrival.all.ms=n=599 p50=1.79 p95=3.26 p99=3.59 max=4.21 min=1.04
+consumer.audio.arrival.ms=n=399 p50=1.77 p95=3.19 p99=3.56 max=3.68 min=1.04
+consumer.audio.contiguous=yes
+consumer.audio.deadline_misses=0/599
+consumer.audio.gap_event_ns=0
+consumer.audio.gap_events=0
+consumer.audio.output_queue.admission_residence.ms=n=599 p50=0.24 p95=0.52 p99=0.74 max=0.84 min=0.09
+consumer.audio.output_queue.pending=0
+consumer.audio.output_queue.sampled_max_buffers=0
+consumer.audio.output_queue.unmatched=0
+consumer.audio.pts_jump_ns=0
+consumer.audio.pts_jumps=0
+consumer.audio.render.all.ms=n=599 p50=2.11 p95=3.78 p99=4.12 max=4.48 min=1.23
+consumer.audio.render.ms=n=399 p50=2.09 p95=3.68 p99=4.06 max=4.27 min=1.23
+consumer.audio.render_interval.ms=n=398 p50=9.92 p95=11.99 p99=12.46 max=12.65 min=7.45
+consumer.audio.render_jitter.p1_p99.ms=2.73
+consumer.av_offset.abs.ms=n=4 p50=8.27 p95=8.59 p99=8.59 max=8.59 min=8.23
+consumer.av_offset.ms=n=4 p50=8.27 p95=8.59 p99=8.59 max=8.59 min=8.23
+consumer.cpu.percent=37.62
+consumer.ended_monotonic_us=5585214959839
+consumer.frames=360
+consumer.handles=32..32 min=32 max=32
+consumer.handles.slope.per_min=0.00
+consumer.mem.kb=58676..58676 min=58676 max=58676
+consumer.mem.kind=rss
+consumer.mem.slope.kb_per_min=-0.00
+consumer.memory=memory:SystemMemory
+consumer.pid=31023
+consumer.queue.accounting=complete
+consumer.result=error: FrameLink producer failed: invalid input
+consumer.result.debug=audio peer closed before GDP EOS; gst/gstframelinkaudiosrc.cpp(67): readChunkImpl (): /GstPipeline:pipeline0/GstFrameLinkAvSrc:c/GstFrameLinkAudioSrc:audio/FlAudioReader:flaudioreader1
+consumer.result.source=/GstPipeline:pipeline0/GstFrameLinkAvSrc:c/GstFrameLinkAudioSrc:audio/FlAudioReader:flaudioreader1
+consumer.samples=287520
+consumer.scope=transport-consumer
+consumer.series.t_cpums_memkb_handles_threads=0.0:197:39408:6:2;1.0:543:58676:32:10;2.0:918:58676:32:10;3.0:1288:58676:32:10;4.0:1667:58676:32:10;5.0:2048:58676:32:10;6.0:2433:58676:32:10;6.4:2583:42476:20:6;
+consumer.threads=10..10 min=10 max=10
+consumer.threads.slope.per_min=-0.00
+consumer.video.arrival.all.ms=n=360 p50=10.21 p95=12.34 p99=13.76 max=20.30 min=8.43
+consumer.video.arrival.ms=n=240 p50=10.17 p95=12.23 p99=13.60 max=13.98 min=8.60
+consumer.video.buffer_alive_at_end=0
+consumer.video.buffer_life_after_callback.ms=n=360 p50=2992.08 p95=5693.99 p99=5936.75 max=5992.20 min=7.47
+consumer.video.callback_refcount_hist=0,0,0,360,0,0,0,0
+consumer.video.deadline_misses=1/360
+consumer.video.discont_after_first=0
+consumer.video.gap_event_ns=0
+consumer.video.gap_events=0
+consumer.video.output_queue.admission_residence.ms=n=360 p50=0.25 p95=0.39 p99=0.49 max=0.73 min=0.04
+consumer.video.output_queue.pending=0
+consumer.video.output_queue.sampled_max_buffers=0
+consumer.video.output_queue.unmatched=0
+consumer.video.render.all.ms=n=360 p50=10.53 p95=12.70 p99=14.23 max=20.50 min=8.68
+consumer.video.render.ms=n=240 p50=10.48 p95=12.54 p99=13.88 max=14.38 min=8.89
+consumer.video.render_interval.ms=n=239 p50=16.22 p95=18.89 p99=20.12 max=21.44 min=13.23
+consumer.video.render_jitter.p1_p99.ms=4.95
+exit=0/0
+expected.frames=720
+expected.samples=576000
+fault=audio-drop
+fault.bound_ms=2000
+fault.detection_ms=55.1
+fault.expect=explicit-failure
+fault.frame=600
+fault.ms=50
+fault.pass=yes
+fault.recovery_limit_frames=7
+harness.malloc=default
+label=android-cpu-rgba-1080p60-adrop50-3
+output.async=false
+output.queue_buffers=1
+output.sync=false
+playback.latency_ms=0
+producer.audio.push_burst.max=0
+producer.audio.push_interval.ms=n=400 p50=10.00 p95=10.33 p99=10.54 max=60.58 min=9.28
+producer.audio.push_lateness.ms=n=400 p50=0.32 p95=0.60 p99=0.79 max=0.96 min=0.16
+producer.cpu.percent=56.45
+producer.ended_monotonic_us=5585214956651
+producer.fault.dropped_blocks=5
+producer.fault.dropped_samples=2400
+producer.fault.elapsed_us=0
+producer.fault.executed=1
+producer.fault.gap_ns=-1
+producer.fault.start_monotonic_us=5585214904749
+producer.handles=28..28 min=28 max=28
+producer.handles.slope.per_min=0.00
+producer.injection.elapsed_us=0
+producer.injection.executed=0
+producer.injection.frame=0
+producer.injection.requested_ms=0
+producer.injection.stage=none
+producer.injection.start_monotonic_us=0
+producer.mem.kb=67060..67060 min=67060 max=67060
+producer.mem.kind=rss
+producer.mem.slope.kb_per_min=-0.00
+producer.pid=31024
+producer.pushed.frames=361
+producer.pushed.samples=290400
+producer.result=error: PCM sample duration/continuity mismatch
+producer.result.debug=gst/gstframelinkaudio.cpp(29): reject (): /GstPipeline:pipeline0/GstFrameLinkAvSink:s/GstFrameLinkAudioSink:audio: FrameLink audio rejected before serialization
+producer.result.source=/GstPipeline:pipeline0/GstFrameLinkAvSink:s/GstFrameLinkAudioSink:audio
+producer.series.t_cpums_memkb_handles_threads=0.0:193:39044:6:2;1.0:743:67060:28:7;2.0:1309:67060:28:7;3.0:1875:67060:28:7;4.0:2438:67060:28:7;5.0:3008:67060:28:7;6.0:3582:67060:28:7;6.2:3679:42760:19:5;
+producer.threads=7..7 min=7 max=7
+producer.threads.slope.per_min=0.00
+producer.video.push_burst.max=0
+producer.video.push_interval.ms=n=241 p50=16.67 p95=16.81 p99=16.86 max=16.88 min=16.38
+producer.video.push_lateness.ms=n=241 p50=0.31 p95=0.44 p99=0.50 max=0.57 min=0.16
+seconds=12
+video.pool=2
+video.queue=1

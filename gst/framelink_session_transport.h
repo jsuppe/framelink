@@ -122,10 +122,28 @@ FL_GST_SESSION_API gboolean fl_gst_session_authenticate_event_stream(FlGstSessio
 #define FL_GST_VIDEO_BARRIER 2u
 #define FL_GST_VIDEO_FLUSH 3u
 #define FL_GST_VIDEO_END 4u
+// Producer -> consumer, last record before an explicit producer failure: ptsNs
+// carries the reason (FL_GST_PEER_*), durationNs is 0. An older consumer treats
+// the unknown kind as a stream fault, as it treats any producer loss.
+#define FL_GST_VIDEO_ABORT 5u
+#define FL_GST_PEER_INVALID_INPUT 1u
+#define FL_GST_PEER_OVERLOAD 2u
 typedef struct {guint kind;guint64 afterFrames,ptsNs,durationNs;} FlGstVideoEvent;
 FL_GST_SESSION_API gboolean fl_gst_session_has_event_stream(FlGstSession*,guint64 generation);
 FL_GST_SESSION_API FlGstSessionResult fl_gst_session_send_video_event(FlGstSession*,guint64 generation,const FlGstVideoEvent*);
 FL_GST_SESSION_API FlGstSessionResult fl_gst_session_receive_video_event(FlGstSession*,guint64 generation,guint timeout_ms,FlGstVideoEvent*);
+// Producer: record why this side is failing (FL_GST_PEER_*; the first reason
+// wins). fl_gst_session_cancel then sends it as an ABORT record before closing.
+FL_GST_SESSION_API void fl_gst_session_set_failure_reason(FlGstSession*,guint reason);
+// Consumer: whether the producer has failed or closed, waiting up to timeout_ms.
+// READY: *reason is the producer's FL_GST_PEER_* reason, or 0 when the producer
+// closed without one (stopped, crashed or lost). TIMEOUT: no producer failure
+// seen (a local failure). INVALID: no event stream, so it cannot be told.
+FL_GST_SESSION_API FlGstSessionResult fl_gst_session_peer_failure(FlGstSession*,guint timeout_ms,guint* reason);
+// Producer: whether the consumer closed the session, waiting up to timeout_ms
+// for its shutdown to arrive (decision 9). FALSE after an explicit producer
+// failure or a local cancel that came first, or without an event stream.
+FL_GST_SESSION_API gboolean fl_gst_session_peer_closed(FlGstSession*,guint timeout_ms);
 G_END_DECLS
 
 G_BEGIN_DECLS

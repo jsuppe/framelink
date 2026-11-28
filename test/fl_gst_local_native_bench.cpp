@@ -45,6 +45,7 @@
 #include <atomic>
 #include <chrono>
 #include <condition_variable>
+#include <memory>
 #include <mutex>
 #include <type_traits>
 #include <vector>
@@ -98,14 +99,24 @@ static bool isPreroll(int64_t pts){return pts>=0&&pts<int64_t(vpts(0));}
 static std::string path(const std::string& n){return (fs::path(o.out)/n).string();}
 static std::string eventName(const char*n){uint64_t hash=14695981039346656037ULL;for(unsigned char c:o.out){hash^=c;hash*=1099511628211ULL;}return "FLNativeBench-"+std::to_string(hash)+"-"+n;}
 #ifdef _WIN32
-static void pace(uint64_t due){for(;;){auto current=now();if(current>=due)break;auto left=due-current;if(left>2000000)Sleep(DWORD(left/1000000-1));else SwitchToThread();}}
+// Pacing primitives (each returns the requested sleep in ns). Diagnostic
+// experiments (decision 12 A2, test-only, labelled in source.pace.json):
+// FL_BENCH_PACE_TIMER=highres sleeps on a high-resolution waitable timer
+// instead of Sleep.
+static uint64_t paceSleep(uint64_t left){const DWORD ms=DWORD(left/1000000-1);
+ static const bool highres=[]{auto v=getenv("FL_BENCH_PACE_TIMER");return v&&!strcmp(v,"highres");}();
+ if(highres){thread_local HANDLE t=CreateWaitableTimerExW(nullptr,nullptr,0x00000002/*CREATE_WAITABLE_TIMER_HIGH_RESOLUTION*/,TIMER_ALL_ACCESS);CHECK(t);
+  LARGE_INTEGER due{};due.QuadPart=-LONGLONG(ms)*10000;CHECK(SetWaitableTimer(t,&due,0,nullptr,nullptr,FALSE));CHECK(WaitForSingleObject(t,INFINITE)==WAIT_OBJECT_0);}
+ else Sleep(ms);
+ return uint64_t(ms)*1000000ULL;}
+static void paceYield(){SwitchToThread();}
 static HANDLE ev(const char* n){auto s="Local\\"+eventName(n);auto h=CreateEventA(nullptr,TRUE,FALSE,s.c_str());CHECK(h);return h;}
 static void wait(HANDLE h,unsigned ms=10000){CHECK(WaitForSingleObject(h,ms)==WAIT_OBJECT_0);}
 static void signalEvent(HANDLE h){CHECK(SetEvent(h));}
 static void closeEvent(HANDLE h){CloseHandle(h);}
 #elif defined(__ANDROID__)
-static void pace(uint64_t due){for(;;){auto current=now();if(current>=due)break;auto left=due-current;
- if(left>2000000){timespec t{time_t((left-1000000)/1000000000ULL),long((left-1000000)%1000000000ULL)};nanosleep(&t,nullptr);}else sched_yield();}}
+static uint64_t paceSleep(uint64_t left){timespec t{time_t((left-1000000)/1000000000ULL),long((left-1000000)%1000000000ULL)};nanosleep(&t,nullptr);return left-1000000;}
+static void paceYield(){sched_yield();}
 // Cross-process one-shot events. Bionic has no named POSIX semaphores, so an
 // event is a marker file in the run directory: created once, waited once.
 using HANDLE=const char*;
@@ -117,8 +128,8 @@ static void signalEvent(HANDLE h){const auto t=eventPath(h)+".tmp";int fd=open(t
 static void closeEvent(HANDLE){}
 static void unlinkEvents(){for(auto n:{"held","release"})unlink(eventPath(n).c_str());}
 #else
-static void pace(uint64_t due){for(;;){auto current=now();if(current>=due)break;auto left=due-current;
- if(left>2000000){timespec t{time_t((left-1000000)/1000000000ULL),long((left-1000000)%1000000000ULL)};nanosleep(&t,nullptr);}else sched_yield();}}
+static uint64_t paceSleep(uint64_t left){timespec t{time_t((left-1000000)/1000000000ULL),long((left-1000000)%1000000000ULL)};nanosleep(&t,nullptr);return left-1000000;}
+static void paceYield(){sched_yield();}
 // Cross-process one-shot events: POSIX named semaphores, unlinked by the relay
 // (the directory owner) at the end. Each is signalled once and waited once.
 using HANDLE=sem_t*;
@@ -129,6 +140,35 @@ static void signalEvent(HANDLE h){CHECK(sem_post(h)==0);}
 static void closeEvent(HANDLE h){sem_close(h);}
 static void unlinkEvents(){for(auto n:{"held","release"})sem_unlink(("/"+eventName(n)).c_str());}
 #endif
+// Pacing diagnostic (decision 12 A2, test-only, off by default). With
+// FL_BENCH_PACE_DIAG=1 the source's video thread records, per measured frame,
+// how its pacing wait was spent: the sleeps (count, actual total, the longest
+// with its request), the yields, its own CPU across the wait (Windows: cycles,
+// QueryThreadCycleTime; elsewhere ns), the system timer resolution (Windows,
+// 100 ns units), and the loop tail after the submit (time mapping and CSV
+// row). The writer thread writes source.pace.csv. It separates oversleep,
+// off-CPU time and work on the thread.
+struct PaceRecord {uint64_t enter=0,exit=0,cpuEnter=0,cpuExit=0,sleepNs=0,maxSleepNs=0,maxSleepRequestNs=0;unsigned sleeps=0,yields=0;};
+static uint64_t threadCpu(){
+#ifdef _WIN32
+ ULONG64 c=0;CHECK(QueryThreadCycleTime(GetCurrentThread(),&c));return c;
+#else
+ timespec t{};CHECK(clock_gettime(CLOCK_THREAD_CPUTIME_ID,&t)==0);return uint64_t(t.tv_sec)*1000000000ULL+uint64_t(t.tv_nsec);
+#endif
+}
+static unsigned long timerResolution100ns(unsigned long*minimum=nullptr,unsigned long*maximum=nullptr){
+#ifdef _WIN32
+ using Query=LONG(WINAPI*)(PULONG,PULONG,PULONG);static const auto q=reinterpret_cast<Query>(GetProcAddress(GetModuleHandleW(L"ntdll.dll"),"NtQueryTimerResolution"));
+ ULONG mn=0,mx=0,cur=0;if(!q||q(&mn,&mx,&cur)!=0)return 0;if(minimum)*minimum=mn;if(maximum)*maximum=mx;return cur;
+#else
+ (void)minimum;(void)maximum;return 0;
+#endif
+}
+static void pace(uint64_t due,PaceRecord*r=nullptr){if(r){r->enter=now();r->cpuEnter=threadCpu();}
+ for(;;){auto current=now();if(current>=due)break;auto left=due-current;
+  if(left>2000000){const auto requested=paceSleep(left);if(r){const auto slept=now()-current;++r->sleeps;r->sleepNs+=slept;if(slept>r->maxSleepNs){r->maxSleepNs=slept;r->maxSleepRequestNs=requested;}}}
+  else{paceYield();if(r)++r->yields;}}
+ if(r){r->exit=now();r->cpuExit=threadCpu();}}
 static flFormat videoFormat(){return o.nv12?FL_FORMAT_NV12:o.rgba?FL_FORMAT_RGBA8:FL_FORMAT_BGRA8;}
 static const char*formatName(){return o.nv12?"NV12":o.rgba?"RGBA":"BGRA";}
 static std::ofstream file(const std::string& n){std::ofstream f(path(n));CHECK(f.good());return f;}
@@ -223,8 +263,23 @@ static void summary(uint64_t count,bool held=false){auto f=file(o.role+".summary
 static Csv videoFile(){return Csv(o.role+".video.csv","identity,pts_ns,scheduled_ns,source_ns,arrival_ns,completed_ns,copy_bytes,sequence,slot,generation,dts_ns,duration_ns,lease,completion_value,mapped_pts_ns,acquire_begin_ns,acquired_ns,upload_begin_ns,uploaded_ns,submit_begin_ns,submitted_ns,forward_begin_ns,forwarded_ns,metadata_version,metadata_flags\n");}
 struct Phases {uint64_t acquireBegin=0,acquired=0,uploadBegin=0,uploaded=0,submitBegin=0,submitted=0,forwardBegin=0,forwarded=0;};
 static void row(Csv&f,const Stamp&s,uint64_t arrival,uint64_t completed,uint64_t bytes,const flFrame*frame=nullptr,const flFrameMetadata*meta=nullptr,uint64_t lease=0,uint64_t completion=0,uint64_t mapped=UINT64_MAX,Phases phases={}){Line l;l<<s.id<<','<<s.pts<<','<<s.scheduled<<','<<s.source<<','<<arrival<<','<<completed<<','<<bytes<<','<<(frame?frame->sequence:0)<<','<<(frame?frame->slot:0)<<','<<(meta?meta->streamGeneration:0)<<','<<(meta?meta->dtsNs:0)<<','<<(meta?meta->durationNs:0)<<','<<lease<<','<<completion<<','<<(mapped==UINT64_MAX?s.pts:mapped)<<','<<phases.acquireBegin<<','<<phases.acquired<<','<<phases.uploadBegin<<','<<phases.uploaded<<','<<phases.submitBegin<<','<<phases.submitted<<','<<phases.forwardBegin<<','<<phases.forwarded<<','<<(meta?meta->version:0)<<','<<(meta?meta->flags:0)<<'\n';f.add(l);}
+// The pace diagnostic's file and its labelled experiments (Windows only):
+// FL_BENCH_MMCSS=1 registers the video thread with MMCSS ("Games");
+// FL_BENCH_NO_THROTTLE=1 opts the process out of power throttling (execution
+// speed and timer-resolution throttling). Each is recorded in source.pace.json.
+static std::unique_ptr<Csv> paceDiagStart(){const char*timer=getenv("FL_BENCH_PACE_TIMER");bool mmcss=false,noThrottle=false;
+#ifdef _WIN32
+ if(getenv("FL_BENCH_MMCSS")){using Av=HANDLE(WINAPI*)(LPCWSTR,LPDWORD);auto lib=LoadLibraryW(L"avrt.dll");CHECK(lib);auto f=reinterpret_cast<Av>(GetProcAddress(lib,"AvSetMmThreadCharacteristicsW"));CHECK(f);DWORD index=0;CHECK(f(L"Games",&index));mmcss=true;}
+ if(getenv("FL_BENCH_NO_THROTTLE")){PROCESS_POWER_THROTTLING_STATE st{};st.Version=PROCESS_POWER_THROTTLING_CURRENT_VERSION;st.ControlMask=0x1|0x4;st.StateMask=0;CHECK(SetProcessInformation(GetCurrentProcess(),ProcessPowerThrottling,&st,sizeof st));noThrottle=true;}
+ const char*cpuUnit="cycles";
+#else
+ const char*cpuUnit="ns";
+#endif
+ unsigned long mn=0,mx=0;const auto cur=timerResolution100ns(&mn,&mx);
+ {auto f=file("source.pace.json");f<<"{\"timer\":\""<<(timer&&!strcmp(timer,"highres")?"highres":"default")<<"\",\"mmcss\":"<<(mmcss?"true":"false")<<",\"no_throttle\":"<<(noThrottle?"true":"false")<<",\"cpu_unit\":\""<<cpuUnit<<"\",\"timer_resolution_100ns\":{\"min\":"<<mn<<",\"max\":"<<mx<<",\"current\":"<<cur<<"}}\n";}
+ return std::make_unique<Csv>("source.pace.csv","identity,due_ns,pace_enter_ns,pace_exit_ns,cpu_enter,cpu_exit,sleeps,sleep_ns,max_sleep_ns,max_sleep_request_ns,yields,prev_tail_begin_ns,prev_tail_end_ns,timer_resolution_100ns\n");}
 static void source(){auto c=caps();auto p=policy();GstFrameLinkMemoryPolicy bound{};auto*s=fl_gst_session_new(3);flChannel*channel=nullptr;GError*e=nullptr;CHECK(fl_gst_session_open_local_native(s,TRUE,path("input").c_str(),&c,o.queue,o.pool,80,10000,10000,&p,&bound,&channel,nullptr,&e));flSessionConfig cfg{};CHECK(fl_gst_session_get_config(s,&cfg)==FL_GST_SESSION_READY);
- {Audio audio(s,true);audio.start();std::vector<unsigned char> pixels(size_t(o.width)*o.height*(o.nv12?3:8)/2);auto out=videoFile();auto af=audioFile();CHECK(fl_gst_session_local_ready(s,TRUE,10000,nullptr));
+ {Audio audio(s,true);audio.start();std::vector<unsigned char> pixels(size_t(o.width)*o.height*(o.nv12?3:8)/2);auto out=videoFile();auto af=audioFile();std::unique_ptr<Csv> paceFile;if(getenv("FL_BENCH_PACE_DIAG"))paceFile=paceDiagStart();CHECK(fl_gst_session_local_ready(s,TRUE,10000,nullptr));
 #ifdef _WIN32
  ComPtr<ID3D11DeviceContext> ctx;flChannelD3D11Device(channel)->GetImmediateContext(&ctx);
  // --upload staging (diagnostic, not the default): write the frame into a
@@ -252,7 +307,8 @@ static void source(){auto c=caps();auto p=policy();GstFrameLinkMemoryPolicy boun
  std::thread pcm([&]{for(unsigned n=0;n<o.seconds*100;++n){pace(epoch+tick(n,100));auto*b=gst_buffer_new_allocate(nullptr,1920,nullptr);GstMapInfo m{};CHECK(gst_buffer_map(b,&m,GST_MAP_WRITE));for(size_t i=0;i<m.size;++i)m.data[i]=uint8_t(n+i);Stamp st{Stamp{}.magic,n,tick(n,100),epoch+tick(n,100),now()};memcpy(m.data,&st,sizeof st);gst_buffer_unmap(b,&m);GST_BUFFER_PTS(b)=st.pts;GST_BUFFER_DURATION(b)=10000000;CHECK(gst_app_src_push_buffer(GST_APP_SRC(audio.port),b)==GST_FLOW_OK);audioRow(af,st,now());}CHECK(gst_app_src_end_of_stream(GST_APP_SRC(audio.port))==GST_FLOW_OK);});
  // Pre-roll at the stream rate, straight into the epoch (PCM starts there).
  for(unsigned j=0;j<fast;++j){pace(fastStart+tick(j,o.fps));flBuffer b{};CHECK(flAcquireBuffer(channel,&b,2000)==FL_OK);prerollFrame(b,PrerollSlow+j);}
- for(unsigned n=0;n<frames();++n){pace(epoch+tick(n,o.fps));flBuffer b{};Phases phases{};phases.acquireBegin=now();auto acquireResult=flAcquireBuffer(channel,&b,2000);phases.acquired=now();CHECK(acquireResult==FL_OK);std::fill(pixels.begin(),pixels.end(),uint8_t(n));Stamp st{Stamp{}.magic,n,vpts(n),epoch+tick(n,o.fps),now()};memcpy(pixels.data(),&st,sizeof st);phases.uploadBegin=now();upload(b);phases.uploaded=now();flFrameMetadata meta{1,FL_FRAME_HAS_DTS|FL_FRAME_HAS_DURATION,int64_t(st.pts),tick(n+1,o.fps)-tick(n,o.fps),cfg.generation,{}};CHECK(flSetFrameMetadata(channel,&b,&meta)==FL_OK);phases.submitBegin=now();auto submitResult=flSubmit(channel,&b,st.pts);phases.submitted=now();CHECK(submitResult==FL_OK);gint64 mappedPts=0;CHECK(fl_gst_session_map_running_time(s,cfg.generation,st.pts,FALSE,&mappedPts)==FL_GST_SESSION_READY);row(out,st,now(),0,pixels.size(),nullptr,&meta,0,0,uint64_t(mappedPts),phases);}
+ PaceRecord pr{};uint64_t tailBegin=0,tailEnd=0;
+ for(unsigned n=0;n<frames();++n){pace(epoch+tick(n,o.fps),paceFile?&pr:nullptr);if(paceFile){Line l;l<<n<<','<<epoch+tick(n,o.fps)<<','<<pr.enter<<','<<pr.exit<<','<<pr.cpuEnter<<','<<pr.cpuExit<<','<<pr.sleeps<<','<<pr.sleepNs<<','<<pr.maxSleepNs<<','<<pr.maxSleepRequestNs<<','<<pr.yields<<','<<tailBegin<<','<<tailEnd<<','<<uint64_t(timerResolution100ns())<<'\n';paceFile->add(l);pr=PaceRecord{};}flBuffer b{};Phases phases{};phases.acquireBegin=now();auto acquireResult=flAcquireBuffer(channel,&b,2000);phases.acquired=now();CHECK(acquireResult==FL_OK);std::fill(pixels.begin(),pixels.end(),uint8_t(n));Stamp st{Stamp{}.magic,n,vpts(n),epoch+tick(n,o.fps),now()};memcpy(pixels.data(),&st,sizeof st);phases.uploadBegin=now();upload(b);phases.uploaded=now();flFrameMetadata meta{1,FL_FRAME_HAS_DTS|FL_FRAME_HAS_DURATION,int64_t(st.pts),tick(n+1,o.fps)-tick(n,o.fps),cfg.generation,{}};CHECK(flSetFrameMetadata(channel,&b,&meta)==FL_OK);phases.submitBegin=now();auto submitResult=flSubmit(channel,&b,st.pts);phases.submitted=now();CHECK(submitResult==FL_OK);tailBegin=now();gint64 mappedPts=0;CHECK(fl_gst_session_map_running_time(s,cfg.generation,st.pts,FALSE,&mappedPts)==FL_GST_SESSION_READY);row(out,st,now(),0,pixels.size(),nullptr,&meta,0,0,uint64_t(mappedPts),phases);tailEnd=now();}
  pcm.join();FlGstVideoEvent end{FL_GST_VIDEO_END,prerollTotal()+frames(),vpts(frames()-1),0};CHECK(fl_gst_session_send_video_event(s,cfg.generation,&end)==FL_GST_SESSION_READY);CHECK(fl_gst_session_video_eos(s,cfg.generation,prerollTotal()+frames(),vpts(frames()-1))==FL_GST_SESSION_READY);audio.eos();CHECK(fl_gst_session_finish_local(s,TRUE,10000,nullptr));summary(frames());}
  flClose(channel);g_object_unref(s);
 }
@@ -293,6 +349,7 @@ struct CpuReadback {
   CHECK(at==host.size());flImageUnmap(frame.image);return -1;
  }
  void forget(){}
+ void describe(flChannel*,const flFrame&,unsigned){}
  const uint8_t* data(){return host.data();}
 };
 using Readback=CpuReadback;
@@ -309,7 +366,17 @@ static void receiver(){auto c=caps();auto p=policy();GstFrameLinkMemoryPolicy bo
  auto warm=[&](flFrame&f){uint64_t lease=0;CHECK(flLeaseFrame(channel,&f,&lease)==FL_OK);const int done=readback.copy(channel,f,o.nv12,o.width,o.height);
   CHECK((done>=0?flCompleteReadLeaseSyncFd(channel,lease,done):flCompleteReadLease(channel,lease))==FL_OK);if(done>=0)close(done);
   auto deadline=now()+5000000000ULL;flResult r=FL_BUSY;while(r==FL_BUSY){CHECK(now()<deadline);r=flCollectReadLeases(channel);if(r==FL_BUSY)Sleep(1);}CHECK(r==FL_OK);
-  Stamp st{};memcpy(&st,readback.data(),sizeof st);CHECK(st.magic==Stamp{}.magic&&st.id>=PrerollId&&st.id<PrerollId+prerollTotal()&&st.pts==uint64_t(f.ptsNs));warmed.insert(f.slot);};
+  Stamp st{};memcpy(&st,readback.data(),sizeof st);
+  if(diagnose&&!(st.magic==Stamp{}.magic&&st.id>=PrerollId&&st.id<PrerollId+prerollTotal()&&st.pts==uint64_t(f.ptsNs))){
+   readback.describe(channel,f,unsigned(-1));fprintf(stderr,"pre-roll frame pts %lld slot %u sequence %llu: GPU copy magic=%llx id=%llu pts=%llu (pre-roll ids from %llu)\n",(long long)f.ptsNs,f.slot,(unsigned long long)f.sequence,
+    (unsigned long long)st.magic,(unsigned long long)st.id,(unsigned long long)st.pts,(unsigned long long)PrerollId);
+   size_t nonzero=0;const uint8_t*d=readback.data();for(size_t i=0;i<size_t(o.width)*o.height*(o.nv12?1:4);++i)nonzero+=d[i]!=0;fprintf(stderr,"  stale copy: %zu nonzero bytes\n",nonzero);
+   flMappedImage mm{};CHECK(flImageMapPlanes(f.image,&mm)==FL_OK);Stamp cpu{};memcpy(&cpu,mm.plane[0].pixels,sizeof cpu);flImageUnmap(f.image);
+   fprintf(stderr,"  CPU read: magic=%llx id=%llu\n",(unsigned long long)cpu.magic,(unsigned long long)cpu.id);
+   int again=readback.copy(channel,f,o.nv12,o.width,o.height);if(again>=0)close(again);Stamp a{};memcpy(&a,readback.data(),sizeof a);fprintf(stderr,"  same import again: magic=%llx id=%llu\n",(unsigned long long)a.magic,(unsigned long long)a.id);
+   readback.forget();again=readback.copy(channel,f,o.nv12,o.width,o.height);if(again>=0)close(again);memcpy(&a,readback.data(),sizeof a);fprintf(stderr,"  fresh import: magic=%llx id=%llu\n",(unsigned long long)a.magic,(unsigned long long)a.id);
+   memcpy(&st,readback.data(),sizeof st);}
+  CHECK(st.magic==Stamp{}.magic&&st.id>=PrerollId&&st.id<PrerollId+prerollTotal()&&st.pts==uint64_t(f.ptsNs));warmed.insert(f.slot);};
  auto acquireMeasured=[&](flFrame&f){for(;;){CHECK(flAcquireFrame(channel,&f,5000)==FL_OK);if(!isPreroll(f.ptsNs))break;warm(f);}
   if(warmed.size()<poolSlots())fprintf(stderr,"pre-roll read %zu of %u pool slots before the first measured frame\n",warmed.size(),poolSlots());CHECK(warmed.size()==poolSlots());};
  for(unsigned n=0;n<frames();++n){flFrame f{};acquireMeasured(f);auto arrived=now();
@@ -321,8 +388,15 @@ static void receiver(){auto c=caps();auto p=policy();GstFrameLinkMemoryPolicy bo
   // Diagnostic mode: settle the copy while the lease is still held, and on a
   // mismatch read the same held frame through the (slow) CPU mapping.
   if(diagnose){const uint8_t*early=readback.data();Stamp e{};memcpy(&e,early,sizeof e);
+   // Payload: where a copy that holds the right stamp is wrong (lease still held).
+   if(e.magic==Stamp{}.magic&&e.id==n&&!filledWith(early+sizeof e,size_t(rowBytes)*rows-sizeof e,uint8_t(n))){
+    const size_t total=size_t(rowBytes)*rows,luma=size_t(o.width)*o.height;size_t first=total,last=0,bad=0;
+    for(size_t i=sizeof e;i<total;++i)if(early[i]!=uint8_t(n)){bad++;if(first==total)first=i;last=i;}
+    fprintf(stderr,"held frame %u slot %u: payload mismatch, %zu of %zu bytes wrong, offsets %zu..%zu (luma ends at %zu), value at first %u, expected %u\n",n,f.slot,bad,total,first,last,luma,early[first],unsigned(uint8_t(n)));
+    readback.describe(channel,f,n);readback.forget();const int fresh=readback.copy(channel,f,o.nv12,o.width,o.height);if(fresh>=0)close(fresh);const uint8_t*again=readback.data();
+    bad=0;for(size_t i=sizeof e;i<total;++i)bad+=again[i]!=uint8_t(n);fprintf(stderr,"held frame %u: after a fresh import, %zu bytes wrong\n",n,bad);}
    if(!(e.magic==Stamp{}.magic&&e.id==n)){flMappedImage mm{};CHECK(flImageMapPlanes(f.image,&mm)==FL_OK);Stamp cpu{};memcpy(&cpu,mm.plane[0].pixels,sizeof cpu);
-    const unsigned fill=static_cast<unsigned char*>(mm.plane[0].pixels)[sizeof cpu];flImageUnmap(f.image);
+    const unsigned fill=static_cast<unsigned char*>(mm.plane[0].pixels)[sizeof cpu];flImageUnmap(f.image);readback.describe(channel,f,n);
     fprintf(stderr,"held frame %u: GPU copy magic=%llx id=%llu; CPU read of the same held storage magic=%llx id=%llu fill=%u\n",n,(unsigned long long)e.magic,(unsigned long long)e.id,(unsigned long long)cpu.magic,(unsigned long long)cpu.id,fill);
     const int again=readback.copy(channel,f,o.nv12,o.width,o.height);if(again>=0)close(again);const uint8_t*second=readback.data();Stamp r{};memcpy(&r,second,sizeof r);
     fprintf(stderr,"held frame %u: second GPU copy magic=%llx id=%llu\n",n,(unsigned long long)r.magic,(unsigned long long)r.id);

@@ -1,0 +1,5 @@
+PASS read_lease_egl 0.9s
+PASS read_lease_egl_producer_death 0.8s
+SKIP read_lease_egl_delayed_completion 0.5s rc=77
+PASS read_lease_egl_gpu_busy_completion 1.6s
+TOTAL pass=3 fail=0 skip=1 of 4

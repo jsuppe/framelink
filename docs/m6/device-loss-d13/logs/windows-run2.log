@@ -1,0 +1,70 @@
+fix2 revision cfcd1283f4f98fae4aab383c7d7773ea1fe422de
+fix2 build exit 0
+before run 1 : 1/4 Test  #22: read_lease_d3d11_producer_death ....   Passed    0.44 sec
+before run 1 : 2/4 Test  #78: gst_relay_downstream_death_win .....   Passed    2.12 sec
+before run 1 : 3/4 Test  #83: gst_native_source_win ..............   Passed    2.81 sec
+before run 1 : 4/4 Test #179: gst_av_bench_fault_producer_kill ...   Passed    3.38 sec
+before run 1 : 100% tests passed, 0 tests failed out of 4
+before run 2 : 1/4 Test  #22: read_lease_d3d11_producer_death ....   Passed    0.40 sec
+before run 2 : 2/4 Test  #78: gst_relay_downstream_death_win .....   Passed    2.08 sec
+before run 2 : 3/4 Test  #83: gst_native_source_win ..............   Passed    2.96 sec
+before run 2 : 4/4 Test #179: gst_av_bench_fault_producer_kill ...   Passed    3.48 sec
+before run 2 : 100% tests passed, 0 tests failed out of 4
+before run 3 : 1/4 Test  #22: read_lease_d3d11_producer_death ....   Passed    0.39 sec
+before run 3 : 2/4 Test  #78: gst_relay_downstream_death_win .....   Passed    2.10 sec
+before run 3 : 3/4 Test  #83: gst_native_source_win ..............   Passed    3.91 sec
+before run 3 : 4/4 Test #179: gst_av_bench_fault_producer_kill ...   Passed    3.38 sec
+before run 3 : 100% tests passed, 0 tests failed out of 4
+fix2 run 1 : 1/4 Test  #22: read_lease_d3d11_producer_death ....***Failed    0.43 sec
+fix2 run 1 : line 31: flAcquireFrame(c,&f,5000)==FL_OK && f.ptsNs==123456 && flLeaseFrame(c,&f,&lease)==FL_OK
+fix2 run 1 : 2/4 Test  #78: gst_relay_downstream_death_win .....***Failed   11.12 sec
+fix2 run 1 : line 284: WaitForSingleObject(event,10000)==WAIT_OBJECT_0
+fix2 run 1 : 3/4 Test  #83: gst_native_source_win ..............   Passed    2.90 sec
+fix2 run 1 : 4/4 Test #179: gst_av_bench_fault_producer_kill ...***Failed    3.49 sec
+fix2 run 1 : consumer.result=error: FrameLink GPU device lost
+fix2 run 1 : consumer.result.debug=%USERPROFILE%\dev\apichk\d13\fix2\gst\gstframelink.cpp(1496): srcDeviceLost (): /GstPipeline:pipeline0/GstFrameLinkAvSrc:c/GstFrameLinkSrc:video: flAcquireFrame: a GPU fence completed with an error or the device was removed; recreate GPU objects before reconnecting
+fix2 run 1 : fault.survivor_error_stable=no
+fix2 run 1 : fault.survivor_result=error: FrameLink GPU device lost
+fix2 run 1 : 25% tests passed, 3 tests failed out of 4
+fix2 run 1 : The following tests FAILED:
+fix2 run 1 : 	 22 - read_lease_d3d11_producer_death (Failed)
+fix2 run 1 : 	 78 - gst_relay_downstream_death_win (Failed)           gpu
+fix2 run 1 : 	179 - gst_av_bench_fault_producer_kill (Failed)
+fix2 run 1 : Errors while running CTest
+fix2 run 2 : 1/4 Test  #22: read_lease_d3d11_producer_death ....***Failed    0.38 sec
+fix2 run 2 : line 31: flAcquireFrame(c,&f,5000)==FL_OK && f.ptsNs==123456 && flLeaseFrame(c,&f,&lease)==FL_OK
+fix2 run 2 : 2/4 Test  #78: gst_relay_downstream_death_win .....***Failed   11.07 sec
+fix2 run 2 : line 284: WaitForSingleObject(event,10000)==WAIT_OBJECT_0
+fix2 run 2 : 3/4 Test  #83: gst_native_source_win ..............   Passed    2.86 sec
+fix2 run 2 : 4/4 Test #179: gst_av_bench_fault_producer_kill ...***Failed    3.46 sec
+fix2 run 2 : consumer.result=error: FrameLink GPU device lost
+fix2 run 2 : consumer.result.debug=%USERPROFILE%\dev\apichk\d13\fix2\gst\gstframelink.cpp(1496): srcDeviceLost (): /GstPipeline:pipeline0/GstFrameLinkAvSrc:c/GstFrameLinkSrc:video: flAcquireFrame: a GPU fence completed with an error or the device was removed; recreate GPU objects before reconnecting
+fix2 run 2 : fault.survivor_error_stable=no
+fix2 run 2 : fault.survivor_result=error: FrameLink GPU device lost
+fix2 run 2 : 25% tests passed, 3 tests failed out of 4
+fix2 run 2 : The following tests FAILED:
+fix2 run 2 : 	 22 - read_lease_d3d11_producer_death (Failed)
+fix2 run 2 : 	 78 - gst_relay_downstream_death_win (Failed)           gpu
+fix2 run 2 : 	179 - gst_av_bench_fault_producer_kill (Failed)
+fix2 run 2 : Errors while running CTest
+fix2 run 3 : 1/4 Test  #22: read_lease_d3d11_producer_death ....***Failed    0.38 sec
+fix2 run 3 : line 31: flAcquireFrame(c,&f,5000)==FL_OK && f.ptsNs==123456 && flLeaseFrame(c,&f,&lease)==FL_OK
+fix2 run 3 : 2/4 Test  #78: gst_relay_downstream_death_win .....***Failed   11.08 sec
+fix2 run 3 : line 284: WaitForSingleObject(event,10000)==WAIT_OBJECT_0
+fix2 run 3 : 3/4 Test  #83: gst_native_source_win ..............   Passed    2.91 sec
+fix2 run 3 : 4/4 Test #179: gst_av_bench_fault_producer_kill ...***Failed    3.45 sec
+fix2 run 3 : consumer.result=error: FrameLink GPU device lost
+fix2 run 3 : consumer.result.debug=%USERPROFILE%\dev\apichk\d13\fix2\gst\gstframelink.cpp(1496): srcDeviceLost (): /GstPipeline:pipeline0/GstFrameLinkAvSrc:c/GstFrameLinkSrc:video: flAcquireFrame: a GPU fence completed with an error or the device was removed; recreate GPU objects before reconnecting
+fix2 run 3 : fault.survivor_error_stable=no
+fix2 run 3 : fault.survivor_result=error: FrameLink GPU device lost
+fix2 run 3 : 25% tests passed, 3 tests failed out of 4
+fix2 run 3 : The following tests FAILED:
+fix2 run 3 : 	 22 - read_lease_d3d11_producer_death (Failed)
+fix2 run 3 : 	 78 - gst_relay_downstream_death_win (Failed)           gpu
+fix2 run 3 : 	179 - gst_av_bench_fault_producer_kill (Failed)
+fix2 run 3 : Errors while running CTest
+fix2 suite:  22/198 Test  #22: read_lease_d3d11_producer_death ...........***Failed    0.36 sec
+fix2 suite:  78/198 Test  #78: gst_relay_downstream_death_win ............***Failed   11.04 sec
+fix2 suite: 179/198 Test #179: gst_av_bench_fault_producer_kill ..........***Failed    3.48 sec
+fix2 suite: 98% tests passed, 3 tests failed out of 198
+done

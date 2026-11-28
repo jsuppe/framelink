@@ -1,0 +1,51 @@
+arrival.budget_ms=34
+complete=yes
+config=BGRA 3840x2160@30 bin native 12s
+consumer.pid=203152
+exit=0/137
+expected.frames=360
+expected.samples=576000
+fault=consumer-kill
+fault.at_s=6
+fault.bound_ms=2000
+fault.detection_ms=2.2
+fault.pass=yes
+fault.survivor_error_stable=yes
+fault.survivor_result=error: FrameLink peer closed or failed
+harness.malloc=producer-side mmap_threshold=8388608
+label=linux-native-bgra-4k30-consumer-kill-4
+output.async=false
+output.queue_buffers=1
+output.sync=false
+playback.latency_ms=0
+producer.audio.push_burst.max=0
+producer.audio.push_interval.ms=n=399 p50=10.00 p95=10.06 p99=10.10 max=10.11 min=9.88
+producer.audio.push_lateness.ms=n=399 p50=0.11 p95=0.16 p99=0.19 max=0.19 min=0.06
+producer.cpu.percent=48.99
+producer.ended_monotonic_us=640071993940
+producer.handles=14..14 min=14 max=14
+producer.handles.slope.per_min=0.00
+producer.injection.elapsed_us=0
+producer.injection.executed=0
+producer.injection.frame=0
+producer.injection.requested_ms=0
+producer.injection.stage=none
+producer.injection.start_monotonic_us=0
+producer.mem.kb=115340..115340 min=115340 max=115340
+producer.mem.kind=rss
+producer.mem.slope.kb_per_min=0.00
+producer.pid=203160
+producer.pushed.frames=179
+producer.pushed.samples=287520
+producer.result=error: FrameLink peer closed or failed
+producer.result.debug=required session tracks not ready or cancelled; gst/gstframelinkaudio.cpp(35): rejectSession (): /GstPipeline:pipeline0/GstFrameLinkAvSink:s/GstFrameLinkAudioSink:audio: FrameLink audio session ended
+producer.result.source=/GstPipeline:pipeline0/GstFrameLinkAvSink:s/GstFrameLinkAudioSink:audio
+producer.series.t_cpums_memkb_handles_threads=0.0:14:13788:6:2;1.0:493:115340:14:8;2.0:971:115340:14:8;3.0:1433:115340:14:8;4.0:1933:115340:14:8;5.0:2444:115340:14:8;6.0:2894:18196:11:6;
+producer.threads=8..8 min=8 max=8
+producer.threads.slope.per_min=0.00
+producer.video.push_burst.max=0
+producer.video.push_interval.ms=n=119 p50=33.33 p95=33.38 p99=33.41 max=33.41 min=33.22
+producer.video.push_lateness.ms=n=119 p50=0.13 p95=0.17 p99=0.19 max=0.21 min=0.07
+seconds=12
+video.pool=2
+video.queue=1

@@ -1,0 +1,113 @@
+arrival.budget_ms=17
+complete=yes
+config=RGBA 1920x1080@60 element native 12s
+consumer.audio.arrival.all.ms=n=599 p50=1.74 p95=2.38 p99=2.59 max=3.26 min=0.96
+consumer.audio.arrival.ms=n=399 p50=1.80 p95=2.42 p99=2.76 max=2.94 min=1.03
+consumer.audio.contiguous=yes
+consumer.audio.deadline_misses=0/599
+consumer.audio.gap_event_ns=0
+consumer.audio.gap_events=0
+consumer.audio.output_queue.admission_residence.ms=n=599 p50=0.25 p95=0.46 p99=0.57 max=0.73 min=0.12
+consumer.audio.output_queue.pending=0
+consumer.audio.output_queue.sampled_max_buffers=0
+consumer.audio.output_queue.unmatched=0
+consumer.audio.pts_jump_ns=0
+consumer.audio.pts_jumps=0
+consumer.audio.render.all.ms=n=599 p50=2.04 p95=2.81 p99=3.06 max=3.69 min=1.14
+consumer.audio.render.ms=n=399 p50=2.09 p95=2.85 p99=3.14 max=3.42 min=1.24
+consumer.audio.render_interval.ms=n=398 p50=9.93 p95=11.07 p99=11.31 max=11.69 min=8.17
+consumer.audio.render_jitter.p1_p99.ms=1.67
+consumer.av_offset.abs.ms=n=4 p50=4.75 p95=4.86 p99=4.86 max=4.86 min=4.55
+consumer.av_offset.ms=n=4 p50=4.75 p95=4.86 p99=4.86 max=4.86 min=4.55
+consumer.cpu.percent=14.85
+consumer.ended_monotonic_us=5587520358242
+consumer.frames=358
+consumer.handles=24..24 min=23 max=24
+consumer.handles.slope.per_min=-0.03
+consumer.mem.kb=40320..40320 min=40320 max=40320
+consumer.mem.kind=rss
+consumer.mem.slope.kb_per_min=-0.00
+consumer.memory=memory:FrameLinkAHardwareBuffer
+consumer.pid=11739
+consumer.queue.accounting=complete
+consumer.result=error: FrameLink producer failed: invalid input
+consumer.result.debug=audio peer closed before GDP EOS; gst/gstframelinkaudiosrc.cpp(67): readChunkImpl (): /GstPipeline:pipeline0/GstFrameLinkAudioSrc:framelinkaudiosrc0/FlAudioReader:flaudioreader0
+consumer.result.source=/GstPipeline:pipeline0/GstFrameLinkAudioSrc:framelinkaudiosrc0/FlAudioReader:flaudioreader0
+consumer.samples=287520
+consumer.scope=transport-consumer
+consumer.series.t_cpums_memkb_handles_threads=0.0:196:37508:8:2;1.0:327:40320:24:9;2.0:464:40320:24:9;3.0:608:40320:24:9;4.0:760:40320:24:9;5.0:910:40320:23:9;6.0:1061:40320:24:9;6.5:1126:40320:14:5;
+consumer.threads=9..9 min=9 max=9
+consumer.threads.slope.per_min=0.00
+consumer.video.arrival.all.ms=n=358 p50=6.25 p95=7.54 p99=8.47 max=8.96 min=3.30
+consumer.video.arrival.ms=n=238 p50=6.31 p95=7.71 p99=8.55 max=8.96 min=3.75
+consumer.video.buffer_alive_at_end=0
+consumer.video.buffer_life_after_callback.ms=n=358 p50=16.01 p95=18.37 p99=18.67 max=20.12 min=11.40
+consumer.video.callback_refcount_hist=0,0,0,358,0,0,0,0
+consumer.video.deadline_misses=0/358
+consumer.video.discont_after_first=0
+consumer.video.gap_event_ns=0
+consumer.video.gap_events=0
+consumer.video.output_queue.admission_residence.ms=n=358 p50=0.32 p95=0.52 p99=0.60 max=0.72 min=0.12
+consumer.video.output_queue.pending=0
+consumer.video.output_queue.sampled_max_buffers=0
+consumer.video.output_queue.unmatched=0
+consumer.video.render.all.ms=n=358 p50=6.78 p95=8.20 p99=8.79 max=9.37 min=3.99
+consumer.video.render.ms=n=238 p50=6.84 p95=8.28 p99=8.88 max=9.37 min=4.29
+consumer.video.render_interval.ms=n=237 p50=16.19 p95=18.62 p99=18.80 max=20.22 min=12.91
+consumer.video.render_jitter.p1_p99.ms=3.67
+exit=0/0
+expected.frames=720
+expected.samples=576000
+fault=audio-no-pts
+fault.bound_ms=2000
+fault.detection_ms=2.3
+fault.expect=explicit-failure
+fault.expected_consumer_error=error: FrameLink producer failed: invalid input
+fault.expected_message=PCM requires valid PTS, duration and TIME segment
+fault.frame=600
+fault.ms=0
+fault.pass=yes
+fault.recovery_limit_frames=2
+harness.malloc=default
+label=android-native-rgba-1080p60-element-audio-no-pts-4
+output.async=false
+output.queue_buffers=1
+output.sync=false
+playback.latency_ms=0
+producer.audio.push_burst.max=0
+producer.audio.push_interval.ms=n=399 p50=10.01 p95=10.32 p99=10.46 max=10.61 min=9.37
+producer.audio.push_lateness.ms=n=399 p50=0.31 p95=0.62 p99=0.73 max=0.82 min=0.16
+producer.cpu.percent=55.51
+producer.ended_monotonic_us=5587520356829
+producer.fault.dropped_blocks=0
+producer.fault.dropped_samples=0
+producer.fault.elapsed_us=0
+producer.fault.executed=1
+producer.fault.gap_ns=-1
+producer.fault.start_monotonic_us=5587520355964
+producer.handles=28..28 min=28 max=28
+producer.handles.slope.per_min=0.00
+producer.injection.elapsed_us=0
+producer.injection.executed=0
+producer.injection.frame=0
+producer.injection.requested_ms=0
+producer.injection.stage=none
+producer.injection.start_monotonic_us=0
+producer.mem.kb=65596..65596 min=65596 max=65596
+producer.mem.kind=rss
+producer.mem.slope.kb_per_min=0.00
+producer.pid=11743
+producer.pushed.frames=358
+producer.pushed.samples=288000
+producer.result=error: PCM requires valid PTS, duration and TIME segment
+producer.result.debug=gst/gstframelinkaudio.cpp(29): reject (): /GstPipeline:pipeline0/GstFrameLinkAudioSink:framelinkaudiosink0: FrameLink audio rejected before serialization
+producer.result.source=/GstPipeline:pipeline0/GstFrameLinkAudioSink:framelinkaudiosink0
+producer.series.t_cpums_memkb_handles_threads=0.0:202:37604:6:2;1.0:697:65596:28:7;2.0:1260:65596:28:7;3.0:1820:65596:28:7;4.0:2381:65596:28:7;5.0:2923:65596:28:7;6.0:3492:65596:28:7;6.2:3605:41316:19:5;
+producer.threads=7..7 min=7 max=7
+producer.threads.slope.per_min=0.00
+producer.video.push_burst.max=0
+producer.video.push_interval.ms=n=238 p50=16.67 p95=16.83 p99=16.90 max=17.07 min=16.21
+producer.video.push_lateness.ms=n=238 p50=0.32 p95=0.45 p99=0.50 max=0.70 min=0.14
+seconds=12
+video.pool=2
+video.queue=1

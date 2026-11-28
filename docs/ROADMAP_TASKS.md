@@ -358,16 +358,50 @@ per-platform state. Windows readiness is the
   ([fault coverage](m6/fault-coverage/README.md)). *Windows:* owner fault tests and
   relay/bin cancellation and death evidence. D2 (overload default) is deferred, so
   new overload policy is out of scope; the owner device-removal path is untested.
+  *Linux/Android:* delayed GPU completion with a real GPU workload passes on both
+  (2026-11-25, [evidence](m6/fault-coverage/egl-gpu-busy/README.md)); the reusable-gate
+  injection remains unavailable (77). Whether this closes the delayed-GPU subset is Jon's decision.
+  At rate (2026-11-25, [evidence](m6/fault-coverage/at-rate/README.md)): endpoint death and consumer
+  stalls on the Linux native, Linux shared-CPU and Android native 1080p60 cells, 70/70 against declared
+  outcomes; default overload loss is counted only at the producer (D2). Producer bursts and audio underrun at rate (2026-11-25,
+  [evidence](m6/fault-coverage/producer-at-rate/README.md)): 85/90; every burst and underrun delivered or
+  explicitly refused/signalled, but the Android 200 ms burst missed its declared recovery limit 5/5 (first
+  attributed to the test source; corrected below). Queued bursts at FrameLink's input (2026-11-25,
+  [evidence](m6/fault-coverage/burst-transport/README.md)): 57/60; FrameLink's delay share never over budget;
+  Android intake about 8 ms per 1080p RGBA frame (about 2x real time), drain-rate check failed 3/5.
+  Malformed metadata at rate (2026-11-26, [evidence](m6/fault-coverage/malformed-at-rate/README.md)):
+  60/60; producer refuses with a specific error, bad buffer never delivered, consumer sees a peer failure.
+  Reruns after decisions 8–10 (2026-11-27, [evidence](m6/fault-coverage/rerun-decisions-8-10/README.md)):
+  122/130 at `66fa0dbf` (8 generic "Internal data stream error." survivors, kept); 130/130 at `263c32e4`,
+  every survivor with its declared stable error, including the producer's reason. Windows requalification pending (Jon).
+  Growth across repeated faults (2026-11-26, [evidence](m6/fault-coverage/cycle-faults/README.md)): 9/9 runs
+  of 100 cycles, odd cycles faulted; all cycles pass and slopes within the frozen M6.3 limits.
+  GPU device loss (decision 13, 2026-11-27, [evidence](m6/device-loss-d13/README.md)): `FL_DEVICE_LOST`, injection tests on
+  all three platforms; real resets done on all three (Windows and Linux detected; Android resets invisible to fences: documented, Jon C;
+  `flReportDeviceLost` deferred until a consumer needs it).
+  Remaining cells (decision 15, 2026-11-28, [evidence](m6/fault-coverage/remaining-cells/README.md)): Linux native 300/300,
+  GPU-staged 113/140, Android native 148/150, Android CPU 126/140, Windows smoke 15/15; growth 5/6. Failures kept;
+  native-sink message fix and copy-out burst200 outcome go to Jon; full Windows campaign inside decision 14.
+  Both approved (Jon, 2026-11-28) and rerun at `6c45029e`: Linux native 300/300, GPU-staged 138/140, Android native 147/150,
+  Android CPU 125/140, Windows smoke 15/15; growth 4/6 (GPU-staged feed-thread frame loss in clean cycles).
+  Startup loss traced to the receiver's first context bind; option A (Jon) at `30c64032`, a reader thread per GPU-staged
+  receiver ([evidence](m6/fault-coverage/remaining-cells/feed-startup/README.md)): GPU-staged 140/140, 1800 s cells with no misses,
+  clean cycles all complete; growth memory gate 1/3 (per-thread malloc arenas at warm-up). Steady consumer RSS growth
+  (~330 kB/min at 1080p60) predates A and is not yet attributed.
 - [ ] **M6.5 Performance/resource evidence:** distributions, queue depth,
   CPU/GPU/memory/handles, clock behavior and bounded growth.
   Stage costs, Android NV12 cost isolation and platform limits are published
-  (M6.5a/b/d). Separating Windows queue timing from producer/GPU scheduling (5c)
-  remains open; the native 1080p60 late wake-up is its open instance.
+  (M6.5a/b/d). 5c on Windows: the native 1080p60 late wake-up is host CPU starvation
+  (a Defender burst) and the other 1080p60 stalls are display power changes, neither in
+  FrameLink (2026-11-27, [evidence](m6/windows-1080p60-wake-d12/README.md)); the
+  requalification's host conditions are decision 14. Stage split in the rate runner on all platforms.
 - [ ] **M6.6 Tracing qualification:** disabled vs enabled cost, record-loss
   detection and reproducible frame/audio accounting.
   Overhead and loss detection are done on all platforms (6b; default 4096
-  events/thread). End-to-end identity joining through GPU completion and
-  presentation (6a) remains open.
+  events/thread). 6a: identity through GPU completion and present submission, with PCM
+  and A/V offset, on all three platforms (2026-11-27, [evidence](m6/renderer-identity-6a/README.md);
+  vkrender PR #25, not merged). Android limited to 720p60 by its in-APK test producer;
+  black BGRA frames in vkrender on Linux open.
 - [ ] **M6.7 Automate and close:** deterministic CI faults, reproducible benchmark
   commands and reviewed acceptance report with remaining unsupported modes.
   CI negatives and gate scripts are done (7a/7b). *Windows:* the final-revision
@@ -405,13 +439,20 @@ per-platform state. Windows readiness is the
   [evidence](m6/linux-native-relay-qualification-61375e7/README.md)). Rate cells
   at `b5c942a` ([evidence](m6/linux-native-relay-rate-b5c942a/README.md)): NV12
   1080p60 and NV12 4K30 pass 1800 s with resource slopes far inside the gates;
-  BGRA 1080p60 and BGRA 4K30 each fail zero-loss on one isolated stall (19–37 ms),
-  decision open. 9e not started.
+  BGRA 1080p60 and BGRA 4K30 each fail zero-loss on one isolated stall (19–37 ms);
+  cause established on 2026-11-27 as the test receiver's slow payload check, fixed in the harness at `0e8da988`
+  ([decision 11](m6/linux-native-relay-d11/README.md)). Stale long-lived Vulkan imports of linear rings reproduced; the header now documents the limit (Jon, B1). 9e not started.
   *Android (AHardwareBuffer):* 9a–9c done with focused checks (2026-11-18): the same
   profile with exact RGBA/RGB10A2_LE AHardwareBuffers
   ([evidence](m6/android-native-av-session/README.md)). 9d and 9e not started.
 
 ## M7 — Release and developer handoff
+
+**1.0 scope (decision 17, Jon, 2026-11-27):** all three platforms; every M6 item
+closes on every platform first (decisions 13–16 and the Windows requalification
+included); a source release (tag, notes, capability matrix, evidence; no prebuilt
+binaries), so M7.3 is a clean build and run from source; FrameLink alone, with
+vkrender a separate consumer.
 
 **State (2026-11-18): held until M6 Linux and Android.** M7.1 is done for Windows only (API frozen at
 `060c54e4`). Deliverable: reproducible versioned release, not merely source

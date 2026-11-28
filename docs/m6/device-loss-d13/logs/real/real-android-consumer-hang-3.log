@@ -1,0 +1,6 @@
+hang: collect=ok after 5109 ms; fence status=1 (ioctl 0); GL reset status=0x8253
+line 199: r==FL_DEVICE_LOST EGL=3000 GL=0
+[5538492.275983] (fl_read_lease_e) EGL: eglp_unload_callback <unknown>
+==>[WARN] EGLDisplay (0xb400007b45310550) was not properly terminated by the application before unloading the driver.
+EGL vendor=Android GL vendor=ARM renderer=Mali-G52 MC2
+exit 1

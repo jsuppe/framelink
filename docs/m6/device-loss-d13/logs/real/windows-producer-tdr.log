@@ -1,0 +1,23 @@
+revision fde470e573981f911fa6ca82f2dfe18a59c11b08
+run 1 : consumer: streaming for up to 20 s
+run 1 : consumer: delivered frame sequence 120 after the hang; first byte 119 (written value 120)
+run 1 : consumer: flAcquireFrame=peer disconnected after 120 frames; device removed reason 0x00000000; 00:13:18.394 UTC
+run 1 : producer: queueing the hang before frame 120
+run 1 : producer: flSubmit=GPU device lost or reset after 120 frames; device removed reason 0x887a0006; 00:13:18.391 UTC
+run 1 recovery: separate-process D3D11 shared-allocation GPU read, fence lease retirement and all-pixel verification passed
+run 1 recovery exit 0
+run 2 : consumer: streaming for up to 20 s
+run 2 : consumer: delivered frame sequence 120 after the hang; first byte 119 (written value 120)
+run 2 : consumer: flAcquireFrame=peer disconnected after 120 frames; device removed reason 0x00000000; 00:13:42.358 UTC
+run 2 : producer: queueing the hang before frame 120
+run 2 : producer: flSubmit=GPU device lost or reset after 120 frames; device removed reason 0x887a0006; 00:13:42.355 UTC
+run 2 recovery: separate-process D3D11 shared-allocation GPU read, fence lease retirement and all-pixel verification passed
+run 2 recovery exit 0
+run 3 : consumer: streaming for up to 20 s
+run 3 : consumer: delivered frame sequence 120 after the hang; first byte 119 (written value 120)
+run 3 : consumer: flAcquireFrame=peer disconnected after 120 frames; device removed reason 0x00000000; 00:14:05.441 UTC
+run 3 : producer: queueing the hang before frame 120
+run 3 : producer: flSubmit=GPU device lost or reset after 120 frames; device removed reason 0x887a0006; 00:14:05.438 UTC
+run 3 recovery: separate-process D3D11 shared-allocation GPU read, fence lease retirement and all-pixel verification passed
+run 3 recovery exit 0
+done
